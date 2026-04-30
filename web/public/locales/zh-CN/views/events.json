@@ -26,7 +26,9 @@
   },
   "documentTitle": "核查 - Frigate",
   "recordings": {
-    "documentTitle": "回放 - Frigate"
+    "documentTitle": "回放 - Frigate",
+    "invalidSharedLink": "由于解析错误，无法打开带时间戳的录制链接。",
+    "invalidSharedCamera": "由于摄像头未知或未获授权，无法打开带时间戳的录制链接。"
   },
   "calendarFilter": {
     "last24Hours": "过去24小时"

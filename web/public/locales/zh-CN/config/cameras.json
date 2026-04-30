@@ -127,7 +127,7 @@
             },
             "classifier": {
                 "label": "开启视觉分类器",
-                "description": "使用视觉分类器，即使检测框有轻微抖动，也能准确判断物体是真的静止。"
+                "description": "使用视觉分类器，即使检测框有轻微抖动，也能准确判断物体是否为静止。"
             }
         },
         "annotation_offset": {
@@ -268,20 +268,20 @@
         "description": "为此摄像头启用和控制通知的设置。"
     },
     "live": {
-        "label": "实时回放",
+        "label": "实时监控观看",
         "streams": {
             "label": "实时监控流名称",
             "description": "配置的流名称到用于实时监控播放的 restream/go2rtc 名称的映射。"
         },
         "height": {
             "label": "实时监控高度",
-            "description": "在 Web UI 中渲染 jsmpeg 实时监控流的高度（像素）；必须小于等于检测流高度。"
+            "description": "在网页页面中渲染 jsmpeg 实时监控流的高度（像素）；必须小于等于检测流高度。"
         },
         "quality": {
             "label": "实时监控质量",
             "description": "jsmpeg 流的编码质量（1 最高，31 最低）。"
         },
-        "description": "用于控制实时流选择、分辨率和质量的 Web UI 设置。"
+        "description": "用于控制实时流选择、分辨率和质量的网页页面设置。"
     },
     "motion": {
         "label": "画面变动检测",
@@ -388,51 +388,51 @@
             "label": "原始遮罩"
         },
         "genai": {
-            "label": "GenAI 目标配置",
-            "description": "用于描述追踪目标和发送帧进行生成的 GenAI 选项。",
+            "label": "生成式 AI 目标配置",
+            "description": "用于发送画面给生成式 AI 进行生成和描述追踪目标的选项。",
             "enabled": {
-                "label": "开启 GenAI",
-                "description": "默认启用 GenAI 生成追踪目标的描述。"
+                "label": "开启生成式 AI",
+                "description": "默认开启生成式 AI 生成追踪目标的描述。"
             },
             "use_snapshot": {
                 "label": "使用快照",
-                "description": "使用目标快照而不是缩略图进行 GenAI 描述生成。"
+                "description": "使用目标快照而不是缩略图给生成式 AI 进行描述生成。"
             },
             "prompt": {
                 "label": "字幕提示",
-                "description": "使用 GenAI 生成描述时使用的默认提示模板。"
+                "description": "使用生成式 AI 生成描述时使用的默认提示模板。"
             },
             "object_prompts": {
                 "label": "目标提示",
-                "description": "用于自定义特定标签的 GenAI 输出的按目标提示。"
+                "description": "按目标设置提示词，让生成式 AI 对不同标签的输出进行定制。"
             },
             "objects": {
-                "label": "GenAI 目标",
-                "description": "默认发送给 GenAI 的目标标签列表。"
+                "label": "生成式 AI 目标",
+                "description": "默认发送给生成式 AI 的目标标签列表。"
             },
             "required_zones": {
                 "label": "必需区域",
-                "description": "目标必须进入才能符合 GenAI 描述生成条件的区域。"
+                "description": "目标必须进入这些区域，才会触发生成式 AI 描述生成。"
             },
             "debug_save_thumbnails": {
                 "label": "保存缩略图",
-                "description": "保存发送给 GenAI 的缩略图用于调试和核查。"
+                "description": "保存发送给生成式 AI 的缩略图用于调试和核查。"
             },
             "send_triggers": {
-                "label": "GenAI 触发器",
-                "description": "定义何时应将帧发送给 GenAI（结束时、更新后等）。",
+                "label": "生成式 AI 触发器",
+                "description": "定义画面帧应在何时发送给生成式 AI（如检测结束时、更新后等）。",
                 "tracked_object_end": {
                     "label": "结束时发送",
-                    "description": "当追踪目标结束时向 GenAI 发送请求。"
+                    "description": "目标追踪结束时向生成式 AI 发送请求。"
                 },
                 "after_significant_updates": {
-                    "label": "早期 GenAI 触发器",
-                    "description": "在追踪目标进行指定次数的重大更新后向 GenAI 发送请求。"
+                    "label": "生成式 AI 提前触发",
+                    "description": "在追踪目标发生指定次数的重要变化后，向生成式 AI 发送请求。"
                 }
             },
             "enabled_in_config": {
-                "label": "原始 GenAI 状态",
-                "description": "指示原始静态配置中是否启用了 GenAI。"
+                "label": "原配置生成式 AI 状态",
+                "description": "表示在原始静态配置中是否已启用生成式 AI。"
             }
         }
     },
@@ -520,7 +520,7 @@
         },
         "preview": {
             "label": "预览配置",
-            "description": "控制 UI 中显示的录像预览质量的设置。",
+            "description": "控制界面中显示的录像预览质量的设置。",
             "quality": {
                 "label": "预览质量",
                 "description": "预览质量级别（very_low、low、medium、high、very_high）。"
@@ -583,46 +583,46 @@
             }
         },
         "genai": {
-            "label": "GenAI 配置",
+            "label": "生成式 AI 配置",
             "description": "控制使用生成式 AI 为核查项生成描述和摘要。",
             "enabled": {
-                "label": "开启 GenAI 描述",
-                "description": "为核查项启用或禁用 GenAI 生成的描述和摘要。"
+                "label": "开启生成式 AI 描述",
+                "description": "为核查项开启或关闭使用生成式 AI 生成描述和摘要。"
             },
             "alerts": {
-                "label": "为警报开启 GenAI",
-                "description": "使用 GenAI 为警报项生成描述。"
+                "label": "为警报开启生成式 AI",
+                "description": "使用生成式 AI 为警报项生成描述。"
             },
             "detections": {
-                "label": "为检测开启 GenAI",
-                "description": "使用 GenAI 为检测项生成描述。"
+                "label": "为检测开启生成式 AI",
+                "description": "使用生成式 AI 为检测项生成描述。"
             },
             "image_source": {
                 "label": "核查图像来源",
-                "description": "发送给 GenAI 的图像来源（'preview' 或 'recordings'）；'recordings' 使用更高质量的帧但消耗更多 token。"
+                "description": "发送给生成式 AI 的画面来源（'preview' 或 'recordings'）；'recordings' 使用更高质量的画面帧，但会消耗更多的 token。"
             },
             "additional_concerns": {
                 "label": "额外关注事项",
-                "description": "GenAI 在评估此摄像头活动时应考虑的额外关注事项或备注列表。"
+                "description": "生成式 AI 在分析此摄像头的监控行为时，需要额外注意的事项或说明列表。"
             },
             "debug_save_thumbnails": {
                 "label": "保存缩略图",
-                "description": "保存发送给 GenAI 提供商的缩略图用于调试和核查。"
+                "description": "保存发送给生成式 AI 提供商的缩略图用于调试和核查。"
             },
             "enabled_in_config": {
-                "label": "原始 GenAI 状态",
-                "description": "追踪原始静态配置中是否启用了 GenAI 核查。"
+                "label": "原配置生成式 AI 状态",
+                "description": "记录在静态配置中最初是否已启用生成式 AI 核查功能。"
             },
             "preferred_language": {
                 "label": "首选语言",
-                "description": "向 GenAI 提供商请求生成响应的首选语言。"
+                "description": "向生成式 AI 提供商请求生成响应的首选语言。"
             },
             "activity_context_prompt": {
                 "label": "活动上下文提示",
-                "description": "描述什么是和什么不是可疑活动的自定义提示，为 GenAI 摘要提供上下文。"
+                "description": "自定义提示词，用于说明可疑行为与非可疑行为的界定，为生成式 AI 生成摘要提供上下文依据。"
             }
         },
-        "description": "控制此摄像头的警报、检测和 GenAI 核查摘要的设置，用于 UI 和存储。"
+        "description": "控制此摄像头的警报、检测和生成式 AI 核查总结的设置，这些设置会被界面与存储功能使用。"
     },
     "snapshots": {
         "label": "快照",
@@ -841,15 +841,15 @@
         }
     },
     "ui": {
-        "label": "摄像头 UI",
-        "description": "此摄像头在 UI 中的显示顺序和可见性。顺序影响默认仪表板。如需更精细的控制，请使用摄像头组。",
+        "label": "摄像头页面",
+        "description": "此摄像头在页面中的显示顺序和可见性。显示顺序仅影响默认仪表板。如需更精细的控制，请使用“摄像头组”。",
         "order": {
             "label": "UI 顺序",
-            "description": "用于在 UI 中排序摄像头的数值顺序（默认仪表板和列表）；数值越大出现越晚。"
+            "description": "用于在页面中排序摄像头的顺序（只会影响默认仪表板和列表）；数值越大则在越后面。"
         },
         "dashboard": {
             "label": "在 UI 中显示",
-            "description": "切换此摄像头在 Frigate UI 的所有位置是否可见。禁用此项将需要手动编辑配置才能在 UI 中再次查看此摄像头。"
+            "description": "切换此摄像头在 Frigate 页面的所有位置是否可见。禁用此项将需要手动编辑配置才能在页面中再次查看此摄像头。"
         }
     },
     "best_image_timeout": {
@@ -862,7 +862,7 @@
     },
     "webui_url": {
         "label": "摄像头 URL",
-        "description": "从系统页面直接访问摄像头的 URL"
+        "description": "从系统页面直接访问摄像头管理后台的 URL"
     },
     "zones": {
         "label": "区域",

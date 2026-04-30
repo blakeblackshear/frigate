@@ -46,7 +46,7 @@
     "globalObjects": "目标",
     "globalReview": "核查",
     "globalAudioEvents": "音频事件",
-    "globalLivePlayback": "实时回放",
+    "globalLivePlayback": "实时监控观看",
     "globalTimestampStyle": "时间戳样式",
     "systemDatabase": "数据库",
     "systemTls": "TLS加密链接",
@@ -78,13 +78,13 @@
     "cameraAudioEvents": "音频事件",
     "cameraAudioTranscription": "音频转录",
     "cameraNotifications": "通知",
-    "cameraLivePlayback": "实时回放",
+    "cameraLivePlayback": "实时监控观看",
     "cameraBirdseye": "鸟瞰图",
     "cameraFaceRecognition": "人脸识别",
     "cameraLpr": "车牌识别",
     "cameraMqttConfig": "MQTT",
     "cameraOnvif": "ONVIF",
-    "cameraUi": "摄像头管理页面",
+    "cameraUi": "摄像头页面",
     "cameraTimestampStyle": "时间戳样式",
     "cameraMqtt": "摄像头 MQTT",
     "mediaSync": "媒体同步",
@@ -358,7 +358,8 @@
           "object_mask": "目标遮罩"
         },
         "revertOverride": {
-          "title": "恢复为默认配置"
+          "title": "恢复为默认配置",
+          "desc": "这将移除针对 {{type}} <em>{{name}}</em> 的配置覆盖，并恢复为基础配置。"
         }
       },
       "speed": {
@@ -1113,7 +1114,7 @@
         "noSnapshot": "无法从配置的视频流中获取快照。"
       },
       "errors": {
-        "brandOrCustomUrlRequired": "请选择摄像头品牌并配置主机/IP地址，或选择“其他”后手动配置视频流地址",
+        "brandOrCustomUrlRequired": "请选择摄像头品牌并配置主机/ IP 地址，或选择“其他”后手动配置视频流地址",
         "nameRequired": "摄像头名称为必填项",
         "nameLength": "摄像头名称要少于64个字符",
         "invalidCharacters": "摄像头名称内有不允许使用的字符",
@@ -1121,7 +1122,7 @@
         "brands": {
           "reolink-rtsp": "不建议使用萤石 RTSP 协议。建议在摄像头设置中启用 HTTP 协议，并重新运行摄像头添加向导。"
         },
-        "customUrlRtspRequired": "自定义URL必须以“rtsp://”开头；对于非 RTSP 协议的摄像头流，需手动添加至配置文件。"
+        "customUrlRtspRequired": "自定义 URL 必须以“rtsp://”开头；对于非 RTSP 协议的摄像头流，需手动添加至配置文件。"
       },
       "docs": {
         "reolink": "https://docs.frigate-cn.video/configuration/camera_specific.html#reolink-cameras"
@@ -1138,7 +1139,7 @@
       "detectionMethodDescription": "如果摄像头支持 ONVIF 协议，将使用该协议探测摄像头，以自动获取摄像头视频流地址；若不支持，也可手动选择摄像头品牌来使用预设地址。如需输入自定义RTSP地址，请选择“手动选择”并选择“其他”选项。",
       "onvifPortDescription": "对于支持ONVIF协议的摄像头，该端口通常为80或8080。",
       "useDigestAuth": "使用摘要认证",
-      "useDigestAuthDescription": "为ONVIF协议启用HTTP摘要认证。部分摄像头可能需要专用的 ONVIF 用户名/密码，而非默认的admin账户。"
+      "useDigestAuthDescription": "为 ONVIF 协议启用 HTTP 摘要认证。部分摄像头可能需要专用的 ONVIF 用户名/密码，而非默认的 admin 账户。"
     },
     "step2": {
       "description": "将根据你选择的检测方式，将会自动查找摄像头可用流配置，或进行手动配置。",
@@ -1161,7 +1162,7 @@
       },
       "testStream": "测试连接",
       "testSuccess": "视频流测试成功！",
-      "testFailed": "视频流测试失败",
+      "testFailed": "连接测试失败，请检查您的输入后重试。",
       "testFailedTitle": "测试失败",
       "connected": "已连接",
       "notConnected": "未连接",
@@ -1337,7 +1338,8 @@
         },
         "hikvision": {
           "substreamWarning": "子码流1当前被锁定为低分辨率。多数海康威视的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动启用。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
-        }
+        },
+        "resolutionUnknown": "无法检测此视频流的分辨率。你需要在设置或配置文件中手动指定检测分辨率。"
       }
     }
   },
@@ -1354,7 +1356,13 @@
       "enableDesc": "暂时禁用已开启的摄像头，直到 Frigate 重启。禁用摄像头会完全停止 Frigate 对该摄像头视频流的处理。检测、录像和调试功能将不可用。<br /> <em>注意：这不会禁用 go2rtc 的转推流。</em>",
       "disableLabel": "关闭摄像头",
       "disableDesc": "开启在当前在界面中不可见且在配置中被禁用的摄像头。启用后需要重启 Frigate 才能生效。",
-      "enableSuccess": "已在配置中启用 {{cameraName}}。请重启 Frigate 以应用更改。"
+      "enableSuccess": "已在配置中启用 {{cameraName}}。请重启 Frigate 以应用更改。",
+      "friendlyName": {
+        "edit": "修改摄像头显示名称",
+        "title": "修改显示名称",
+        "description": "设置该摄像机在 Frigate 用户界面中显示的名称。若留空，则使用摄像机 ID。",
+        "rename": "重命名"
+      }
     },
     "cameraConfig": {
       "add": "添加摄像头",
@@ -1493,7 +1501,7 @@
       "tls": "TLS",
       "proxy": "代理",
       "go2rtc": "go2rtc",
-      "ffmpeg": "FFmpeg",
+      "ffmpeg": "FFmpeg 编解码",
       "detectors": "检测器",
       "genai": "生成式 AI",
       "face_recognition": "人脸识别",
@@ -1519,7 +1527,7 @@
       "remove": "移除"
     },
     "roleMap": {
-      "empty": "未配置角色映射。",
+      "empty": "未配置权限组映射",
       "addMapping": "添加角色映射",
       "roleLabel": "角色",
       "groupsLabel": "用户组",
@@ -1655,7 +1663,16 @@
       "summary": "已选择 {{count}} 个标签",
       "empty": "暂无可用标签"
     },
-    "addCustomLabel": "添加自定义标签…"
+    "addCustomLabel": "添加自定义标签…",
+    "genaiModel": {
+      "placeholder": "选择模型…",
+      "search": "搜索模型…",
+      "noModels": "暂无模型"
+    },
+    "knownPlates": {
+      "namePlaceholder": "例如：老婆的车",
+      "platePlaceholder": "车牌号或正则表达式"
+    }
   },
   "cameraConfig": {
     "title": "摄像头配置",
@@ -1721,7 +1738,7 @@
       "desc": "区域网格是一种优化功能，它会学习不同大小的目标通常出现在每个摄像头视野中的位置。Frigate 利用这些数据来高效地确定检测区域的大小。该网格会根据追踪目标数据自动构建。",
       "clear": "清除区域网格",
       "clearConfirmTitle": "清除区域网格",
-      "clearConfirmDesc": "除非您最近更改了检测器模型大小或摄像头的物理位置，并且遇到了目标追踪问题，否则不建议清除区域网格。网格会随着目标的追踪自动重建。更改需要重启 Frigate 才能生效。",
+      "clearConfirmDesc": "除非你最近更改了检测器模型大小或摄像头的物理位置，并且遇到了目标追踪问题，否则不建议清除区域网格。网格会随着目标的追踪自动重建。更改需要重启 Frigate 才能生效。",
       "clearSuccess": "区域网格清除成功",
       "clearError": "清除区域网格失败",
       "restartRequired": "需要重启以使区域网格更改生效"
@@ -1795,7 +1812,7 @@
     "deleteSection": "删除节点覆盖",
     "deleteSectionConfirm": "是否要移除摄像机 {{camera}} 上针对配置文件 {{profile}} 的 {{section}} 覆盖设置？",
     "deleteSectionSuccess": "已移除 {{profile}} 的 {{section}} 覆盖设置",
-    "enableSwitch": "开启配置文件",
+    "enableSwitch": "开启配置模板",
     "enabledDescription": "配置文件功能已启用。请在下方创建新的配置文件，进入摄像头配置页面进行修改并保存，修改即可生效。",
     "disabledDescription": "配置文件功能可以让你创建一组带名称的摄像头自定义参数（比如布防、离家、夜间模式），并随时切换启用。"
   },
@@ -1884,7 +1901,8 @@
       "detectDisabled": "目标检测已禁用。快照是根据追踪到的目标生成的，因此将不会创建快照。"
     },
     "detectors": {
-      "mixedTypes": "所有检测器必须为同一类型。若要更换为其他类型，请先移除现有的检测器。"
+      "mixedTypes": "所有检测器必须为同一类型。若要更换为其他类型，请先移除现有的检测器。",
+      "mixedTypesSuggestion": "所有检测器必须使用相同类型。请移除现有检测器，或选择 {{type}}。"
     }
   }
 }

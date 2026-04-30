@@ -273,7 +273,8 @@
     "classification": "目标分类",
     "actions": "操作",
     "chat": "聊天",
-    "profiles": "配置模板"
+    "profiles": "配置模板",
+    "features": "功能"
   },
   "toast": {
     "copyUrlToClipboard": "已复制链接到剪贴板。",
@@ -290,7 +291,7 @@
     "title": "权限组",
     "admin": "管理员",
     "viewer": "成员",
-    "desc": "管理员可以完全访问Frigate界面上所有功能。成员则仅能查看摄像头、核查项和历史录像。"
+    "desc": "管理员可以完全访问 Frigate 界面上所有功能。成员则仅能查看摄像头、核查项和历史录像。"
   },
   "accessDenied": {
     "documentTitle": "没有权限 - Frigate",
