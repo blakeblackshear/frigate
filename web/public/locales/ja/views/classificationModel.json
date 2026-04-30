@@ -12,14 +12,15 @@
   },
   "toast": {
     "success": {
-      "deletedImage_other": "削除された画像",
+      "deletedImage_other": "{{count}} 件の削除された画像",
       "categorizedImage": "画像の分類に成功しました",
       "trainedModel": "モデルを正常に学習させました。",
       "trainingModel": "モデルのトレーニングを正常に開始しました。",
-      "deletedCategory_other": "クラスを削除しました",
+      "deletedCategory_other": "{{count}} 件のクラスを削除しました",
       "deletedModel_other": "{{count}} 件のモデルを削除しました",
       "updatedModel": "モデル設定を更新しました",
-      "renamedCategory": "クラス名を {{name}} に変更しました"
+      "renamedCategory": "クラス名を {{name}} に変更しました",
+      "reclassifiedImage": "画像の再分類に成功しました"
     },
     "error": {
       "deleteImageFailed": "削除に失敗しました: {{errorMessage}}",
@@ -29,7 +30,8 @@
       "trainingFailed": "モデルの学習に失敗しました。Frigate のログを確認してください。",
       "trainingFailedToStart": "モデルの学習を開始できませんでした: {{errorMessage}}",
       "updateModelFailed": "モデルの更新に失敗しました: {{errorMessage}}",
-      "renameCategoryFailed": "クラス名の変更に失敗しました: {{errorMessage}}"
+      "renameCategoryFailed": "クラス名の変更に失敗しました: {{errorMessage}}",
+      "reclassifyFailed": "画像の再分類に失敗しました：{{errorMessage}}"
     }
   },
   "train": {

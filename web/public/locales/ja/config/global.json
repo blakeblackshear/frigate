@@ -4,7 +4,8 @@
         "description": "有効にすると、トラブルシューティングのため機能を制限したセーフモードでFrigateを起動します。"
     },
     "environment_vars": {
-        "label": "環境変数"
+        "label": "環境変数",
+        "description": "Home Assistant OS の Frigate プロセスに設定する環境変数のキー/値ペア。HAOS をご利用でない場合は、代わりに Docker の環境変数設定を使用してください。"
     },
     "audio": {
         "label": "音声イベント",
@@ -12,30 +13,155 @@
             "label": "音声検知を有効化"
         },
         "min_volume": {
-            "label": "最小ボリューム"
+            "label": "最小ボリューム",
+            "description": "オーディオ検出を実行するために必要な最小RMS音量閾値。値を小さくすると感度が高くなります（例：200=高、500=中、1000=低）。"
         },
         "filters": {
-            "label": "音声フィルタ"
+            "label": "音声フィルタ",
+            "description": "誤検出を減らすために使用される信頼度閾値などのフィルタ設定（オーディオタイプごと）。"
+        },
+        "max_not_heard": {
+            "label": "タイムアウト終了",
+            "description": "オーディオイベントが終了するまでの残り秒数（設定されたオーディオタイプを除く）。"
+        },
+        "listen": {
+            "label": "リスニングタイプ",
+            "description": "検出対象の音声イベントの種類一覧（例：吠え声、火災報知器、悲鳴、会話、叫び声）。"
+        },
+        "enabled_in_config": {
+            "label": "元の音声状態",
+            "description": "静的設定ファイルで、音声検出が当初有効にされていたかどうかを示します。"
+        },
+        "num_threads": {
+            "label": "検出スレッド",
+            "description": "音声検出処理に使用するスレッド数。"
         }
     },
     "logger": {
         "default": {
-            "label": "ログレベル"
+            "label": "ログレベル",
+            "description": "デフォルトのグローバルログの詳細度 (debug, info, warning, error)。"
         },
         "logs": {
-            "label": "プロセス毎のログレベル"
-        }
+            "label": "プロセス毎のログレベル",
+            "description": "コンポーネントごとのログレベルの上書きにより、特定のモジュールのログ詳細度を増減できます。"
+        },
+        "label": "ログ記録",
+        "description": "デフォルトのログ詳細度とコンポーネントごとのログレベルの上書きを制御します。"
     },
     "auth": {
         "label": "認証",
         "enabled": {
-            "label": "認証を有効化"
+            "label": "認証を有効化",
+            "description": "Frigate UI でネイティブ認証を有効にする。"
         },
         "reset_admin_password": {
-            "label": "adminパスワードをリセット"
+            "label": "adminパスワードをリセット",
+            "description": "もし本当なら、起動時に管理者ユーザーのパスワードをリセットし、新しいパスワードをログに出力します。"
+        },
+        "description": "認証およびセッション関連の設定（Cookieやレート制限オプションを含む）。",
+        "cookie_name": {
+            "label": "JWT Cookie名",
+            "description": "ネイティブ認証用のJWTトークンを保存するために使用されるCookie名。"
+        },
+        "cookie_secure": {
+            "label": "Cookie のセキュリティフラグ",
+            "description": "認証Cookieにセキュアフラグを設定します。TLSを使用する場合はtrueにする必要があります。"
+        },
+        "session_length": {
+            "label": "セッションの期間",
+            "description": "JWTベースのセッション継続時間（秒単位）。"
+        },
+        "refresh_time": {
+            "label": "セッション更新ウィンドウ",
+            "description": "セッションの有効期限が切れるまで残り数秒になったら、セッションを元の期間に更新します。"
+        },
+        "failed_login_rate_limit": {
+            "label": "ログイン失敗回数の上限",
+            "description": "ログイン失敗時の試行回数を制限するルールを設けることで、総当たり攻撃を軽減する。"
+        },
+        "trusted_proxies": {
+            "label": "信頼できるプロキシ",
+            "description": "レート制限のためクライアントIPアドレスを特定する際に使用される、信頼できるプロキシIPのリスト。"
+        },
+        "hash_iterations": {
+            "label": "ハッシュ反復処理",
+            "description": "ユーザーパスワードのハッシュ化に使用するPBKDF2-SHA256の反復回数。"
+        },
+        "roles": {
+            "label": "ロールのマッピング",
+            "description": "ロールをカメラリストに割り当てます。リストが空の場合、そのロールのユーザーは全てのカメラにアクセスできます。"
+        },
+        "admin_first_time_login": {
+            "label": "初回管理者フラグ",
+            "description": "この設定が「true」の場合、ログインページにヘルプリンクが表示され、管理者パスワードのリセット後にログインする方法がユーザーに案内されることがあります。 "
         }
     },
     "version": {
-        "label": "現在の設定バージョン"
+        "label": "現在の設定バージョン",
+        "description": "移行やフォーマット変更の検出に役立つ、アクティブな設定の数値または文字列バージョン。"
+    },
+    "audio_transcription": {
+        "label": "音声文字起こし",
+        "description": "イベントやリアルタイム字幕に使用される、ライブ音声およびスピーチ音声の文字起こし設定。",
+        "live_enabled": {
+            "label": "ライブ文字起こし",
+            "description": "音声を受信した時点で、リアルタイム文字起こしを有効にします。"
+        },
+        "enabled": {
+            "label": "音声文字起こしを有効にする"
+        }
+    },
+    "birdseye": {
+        "label": "バードアイ",
+        "description": "複数のカメラ映像を1つのレイアウトに合成する「バードアイ」合成ビューの設定。",
+        "enabled": {
+            "label": "バードアイを有効にする",
+            "description": "バードアイビュー機能を有効または無効にします。"
+        },
+        "mode": {
+            "label": "トラッキングモード",
+            "description": "バードアイにカメラを含めるモード：「オブジェクト」「モーション」または「連続」。"
+        },
+        "order": {
+            "label": "位置",
+            "description": "バードアイレイアウトにおけるカメラの並び順を決定する数値。"
+        }
+    },
+    "database": {
+        "label": "データベース",
+        "description": "Frigateが追跡対象や録画メタデータを保存するために使用するSQLiteデータベースの設定。",
+        "path": {
+            "label": "データベースパス",
+            "description": "FrigateのSQLiteデータベースファイルが保存されるファイルシステムパス。"
+        }
+    },
+    "detect": {
+        "label": "物体検出",
+        "description": "物体検出の実行やトラッカーの初期化に使用される、検出や検出ロールの設定。",
+        "enabled": {
+            "label": "物体検知を有効にする"
+        },
+        "height": {
+            "label": "高さを検出",
+            "description": "検出ストリームに使用するフレーム高さ（ピクセル）。ネイティブストリーム解像度を使用する場合は、空欄のままにしてください。"
+        },
+        "width": {
+            "label": "幅を検出"
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "ライブストリーム中継および変換に利用される、統合型go2rtcリストリーミングサービスの設定。"
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "テレメトリー、スナップショット、およびイベントの詳細をMQTTブローカーに接続して公開するための設定。",
+        "enabled": {
+            "label": "MQTTを有効にする"
+        }
+    },
+    "telemetry": {
+        "label": "テレメトリー"
     }
 }

@@ -12,12 +12,19 @@
     "timestamp_style": {
         "cameras": {
             "appearance": "外観"
+        },
+        "global": {
+            "appearance": "全体の外観"
         }
     },
     "motion": {
         "cameras": {
             "sensitivity": "感度",
             "algorithm": "アルゴリズム"
+        },
+        "global": {
+            "sensitivity": "グローバル感度",
+            "algorithm": "グローバルアルゴリズム"
         }
     },
     "detect": {
@@ -42,7 +49,25 @@
     },
     "record": {
         "global": {
-            "events": "グローバルイベント"
+            "events": "グローバルイベント",
+            "retention": "グローバルリテンション"
+        },
+        "cameras": {
+            "retention": "リテンション",
+            "events": "イベント"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "グローバル表示"
+        },
+        "cameras": {
+            "display": "表示"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "カメラ固有のFFmpeg引数"
         }
     }
 }

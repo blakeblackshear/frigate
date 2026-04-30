@@ -46,23 +46,54 @@
       }
     },
     "name": {
-      "placeholder": "書き出しに名前を付ける"
+      "placeholder": "エクスポートに名前を付ける"
     },
     "select": "選択",
-    "export": "書き出し",
-    "selectOrExport": "選択または書き出し",
+    "export": "エクスポート",
+    "selectOrExport": "選択またはエクスポート",
     "toast": {
-      "success": "書き出しを開始しました。出力ページでファイルを確認できます。",
+      "success": "エクスポートを開始しました。エクスポートページでファイルを確認できます。",
       "error": {
-        "failed": "書き出しの開始に失敗しました: {{error}}",
+        "failed": "エクスポートキューの開始に失敗しました: {{error}}",
         "endTimeMustAfterStartTime": "終了時間は開始時間より後である必要があります",
         "noVaildTimeSelected": "有効な時間範囲が選択されていません"
       },
-      "view": "表示"
+      "view": "表示",
+      "queued": "エクスポートがキューに追加されました。進捗状況はエクスポートページで確認できます。",
+      "batchQueuedSuccess_other": "{{count}} 件のエクスポートがキューに登録されました。現在ケースをオープンしています。",
+      "batchQueuedPartial": "{{total}} 件中 {{successful}} 件のエクスポートがキューに追加されました。失敗したカメラ: {{failedCameras}}",
+      "batchQueueFailed": "{{total}} 件のエクスポートをキューに追加できませんでした。失敗したカメラ: {{failedCameras}}"
     },
     "fromTimeline": {
-      "saveExport": "書き出しを保存",
-      "previewExport": "書き出しをプレビュー"
+      "saveExport": "エクスポートを保存",
+      "previewExport": "エクスポートをプレビュー",
+      "queueingExport": "エクスポートをキューイングしています..."
+    },
+    "queueing": "エクスポートをキューイングしています...",
+    "multiCamera": {
+      "queueingButton": "エクスポートをキューイングしています...",
+      "timeRange": "期間",
+      "selectFromTimeline": "タイムラインから選択",
+      "cameraSelection": "カメラ",
+      "cameraSelectionHelp": "この期間に追跡対象が含まれるカメラは、あらかじめ選択されています",
+      "checkingActivity": "カメラの動作を確認中...",
+      "noCameras": "利用可能なカメラがありません",
+      "detectionCount_other": "{{count}} 追跡対象",
+      "nameLabel": "エクスポート名",
+      "namePlaceholder": "これらのエクスポート用オプションのベース名",
+      "exportButton_other": "{{count}} 台のカメラをエクスポート"
+    },
+    "case": {
+      "newCaseOption": "新しいケースを作成する",
+      "newCaseNamePlaceholder": "新しいケース名",
+      "newCaseDescriptionPlaceholder": "ケースの説明",
+      "label": "ケース",
+      "nonAdminHelp": "これらのエクスポートに対して新しいケースが作成されます。",
+      "placeholder": "ケースを選択"
+    },
+    "tabs": {
+      "export": "シングルカメラ",
+      "multiCamera": "マルチカメラ"
     }
   },
   "streaming": {
@@ -105,7 +136,7 @@
       }
     },
     "button": {
-      "export": "書き出し",
+      "export": "エクスポート",
       "markAsReviewed": "レビュー済みにする",
       "deleteNow": "今すぐ削除",
       "markAsUnreviewed": "未レビューに戻す"
