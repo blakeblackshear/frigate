@@ -27,7 +27,9 @@
   },
   "documentTitle": "Revisió - Frigate",
   "recordings": {
-    "documentTitle": "Enregistraments - Frigate"
+    "documentTitle": "Enregistraments - Frigate",
+    "invalidSharedLink": "No s'ha pogut obrir l'enllaç d'enregistrament amb marques de temps a causa d'un error d'anàlisi.",
+    "invalidSharedCamera": "No s'ha pogut obrir l'enllaç d'enregistrament amb marques de temps a causa d'una càmera desconeguda o no autoritzada."
   },
   "calendarFilter": {
     "last24Hours": "Últimes 24 hores"

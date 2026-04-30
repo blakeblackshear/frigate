@@ -38,7 +38,7 @@
     "uploadFace": "Puja una imatge del rostre",
     "nextSteps": "Següents passos",
     "description": {
-      "uploadFace": "Puja una imatge de {{name}} que mostri el seu rostre de cares. No cal que la imatge estigui retallada només al rostre."
+      "uploadFace": "Pugeu una imatge de {{name}} que mostra la seva cara des d'un angle frontal. La imatge no necessita ser retallada a la seva cara."
     }
   },
   "selectFace": "Seleccionar rostre",

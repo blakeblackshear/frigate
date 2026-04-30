@@ -1280,7 +1280,8 @@
         },
         "hikvision": {
           "substreamWarning": "El substream 1 està bloquejat a una resolució baixa. Moltes càmeres Hikvision suporten subfluxos addicionals que han d'estar habilitats a la configuració de la càmera. Es recomana comprovar i utilitzar aquests corrents si estan disponibles."
-        }
+        },
+        "resolutionUnknown": "La resolució d'aquest flux no s'ha pogut investigar. Heu d'establir manualment la resolució de detecció a Configuració o a la configuració."
       }
     }
   },
@@ -1297,7 +1298,13 @@
       "enableDesc": "Inhabilita temporalment una càmera habilitada fins que es reiniciï Frigate. La inhabilitació d'una càmera atura completament el processament de Frigate dels fluxos d'aquesta càmera. La detecció, l'enregistrament i la depuració no estaran disponibles.<br /> <em>Nota: això no desactiva les retransmissions de go2rtc.</em>",
       "disableLabel": "Càmeres inhabilitades",
       "disableDesc": "Habilita una càmera que actualment no és visible a la interfície d'usuari i està desactivada a la configuració. Es requereix un reinici de Frigate després d'activar-la.",
-      "enableSuccess": "{{cameraName}} activat a la configuració. Reinicia Frigate per aplicar els canvis."
+      "enableSuccess": "{{cameraName}} activat a la configuració. Reinicia Frigate per aplicar els canvis.",
+      "friendlyName": {
+        "edit": "Edita el nom de la pantalla de la càmera",
+        "title": "Edita el nom de la pantalla",
+        "description": "Estableix el nom amigable que es mostra per a aquesta càmera a tota la interfície d'usuari de la Fragata. Deixeu-ho en blanc per utilitzar l'ID de la càmera.",
+        "rename": "Canvia el nom"
+      }
     },
     "cameraConfig": {
       "add": "Afegeix una càmera",
@@ -1659,7 +1666,16 @@
       "empty": "No hi ha etiquetes disponibles",
       "allNonAlertDetections": "Totes les activitats no alertes s'inclouran com a deteccions."
     },
-    "addCustomLabel": "Afegeix una etiqueta personalitzada..."
+    "addCustomLabel": "Afegeix una etiqueta personalitzada...",
+    "genaiModel": {
+      "placeholder": "Selecciona el model…",
+      "search": "Cerca models…",
+      "noModels": "No hi ha models disponibles"
+    },
+    "knownPlates": {
+      "namePlaceholder": "per exemple. Cotxe de la parella",
+      "platePlaceholder": "Matricula o regex"
+    }
   },
   "globalConfig": {
     "title": "Configuració global",
