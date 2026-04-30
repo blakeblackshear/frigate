@@ -5,7 +5,24 @@
     "clear": "검색 초기화",
     "save": "검색 저장",
     "filterInformation": "필터 정보",
-    "delete": "저장된 검색 삭제"
+    "delete": "저장된 검색 삭제",
+    "filterActive": "필터 활성화됨"
   },
-  "searchFor": "{{inputValue}} 검색"
+  "searchFor": "{{inputValue}} 검색",
+  "trackedObjectId": "추적 객체 ID",
+  "filter": {
+    "label": {
+      "cameras": "카메라",
+      "labels": "레이블",
+      "zones": "구역",
+      "sub_labels": "하위 레이블",
+      "attributes": "속성",
+      "search_type": "검색 유형",
+      "time_range": "시간 범위",
+      "before": "이전",
+      "after": "이후",
+      "min_score": "최소 점수",
+      "max_score": "최대 점수"
+    }
+  }
 }

@@ -5,7 +5,53 @@
             "sensitivity": "전체 민감도"
         },
         "cameras": {
-            "detection": "감지"
+            "detection": "감지",
+            "sensitivity": "민감도"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "전역 외관"
+        },
+        "cameras": {
+            "appearance": "외관"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "전역 민감도",
+            "algorithm": "전역 알고리즘"
+        },
+        "cameras": {
+            "sensitivity": "민감도",
+            "algorithm": "알고리즘"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "전역 표시"
+        },
+        "cameras": {
+            "display": "표시"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "전역 해상도",
+            "tracking": "전역 추적"
+        },
+        "cameras": {
+            "resolution": "해상도",
+            "tracking": "추적"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "전역 추적",
+            "filtering": "전역 필터링"
+        },
+        "cameras": {
+            "tracking": "추적"
         }
     }
 }

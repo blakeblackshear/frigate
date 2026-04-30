@@ -9,9 +9,15 @@
   "empty": {
     "alert": "다시 볼 '경보' 영상이 없습니다",
     "detection": "다시 볼 '대상 감지' 영상이 없습니다",
-    "motion": "움직임 감지 데이터가 없습니다"
+    "motion": "움직임 감지 데이터가 없습니다",
+    "recordingsDisabled": {
+      "title": "녹화가 활성화되어야 합니다",
+      "description": "다시 보기 항목은 해당 카메라에서 녹화가 활성화된 경우에만 카메라에 대해 생성할 수 있습니다."
+    }
   },
-  "timeline": "타임라인",
+  "timeline": {
+    "label": "타임라인"
+  },
   "timeline.aria": "타임라인 선택",
   "events": {
     "label": "이벤트",
@@ -23,7 +29,8 @@
     "aria": "상세 보기",
     "trackedObject_one": "추적 대상",
     "trackedObject_other": "추적 대상",
-    "noObjectDetailData": "상세 보기 데이터가 없습니다."
+    "noObjectDetailData": "상세 보기 데이터가 없습니다.",
+    "label": "세부 정보"
   },
   "objectTrack": {
     "trackedPoint": "추적 포인트",
@@ -47,5 +54,7 @@
   "camera": "카메라",
   "detected": "감지됨",
   "suspiciousActivity": "수상한 행동",
-  "threateningActivity": "위협적인 행동"
+  "threateningActivity": "위협적인 행동",
+  "zoomIn": "확대",
+  "zoomOut": "축소"
 }
