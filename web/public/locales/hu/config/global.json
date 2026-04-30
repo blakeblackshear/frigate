@@ -40,5 +40,65 @@
     "environment_vars": {
         "label": "Környezeti változók",
         "description": "A Home Assistant OS rendszerben a Frigate folyamat számára beállítandó környezeti változói. A nem HAOS-felhasználóknak helyette a Docker konfigurációját kell használniuk."
+    },
+    "logger": {
+        "label": "Naplózás",
+        "description": "Az alapértelmezett naplózási részletességet és a komponensenkénti naplózási szintek felülírását vezérli.",
+        "default": {
+            "label": "Naplózási részletesség",
+            "description": "Alapértelmezett globális naplórészletesség (debug, info, warning, error)."
+        },
+        "logs": {
+            "label": "Folyamatonkénti naplózási szint",
+            "description": "Összetevőnkénti naplózási szint felülbírálások az egyes modulok részletességének növeléséhez vagy csökkentéséhez."
+        }
+    },
+    "audio": {
+        "label": "Hangesemények",
+        "enabled": {
+            "label": "Hangalapú eseményérzékelés engedélyezése"
+        },
+        "max_not_heard": {
+            "description": "Ennyi másodperc után fejeződik be a hangesemény, ha a beállított hangtípus nem észlelhető.",
+            "label": "Időtúllépés befejezése"
+        },
+        "min_volume": {
+            "label": "Minimális hangerő",
+            "description": "Minimum RMS hangerő a hangérzékelés futtatásához; az alacsonyabb értékek növelik az érzékenységet (pl: 200 magas, 500 közepes, 1000 alacsony érzékenységet jelent)."
+        },
+        "listen": {
+            "label": "Hallgatási típúsok",
+            "description": "Lista a hangalapú eseményekről amit érzékelni szeretnél (angolul) (például: bark, fire_alarm, scream, speech, yell)."
+        },
+        "filters": {
+            "label": "Audio szűrők (filters)",
+            "description": "Hangtípusonkénti szűrőbeállítások (filter), mint például a téves találatok számát mérsékelő konfidencia-küszöbök."
+        },
+        "enabled_in_config": {
+            "label": "Eredeti audio állapot"
+        }
+    },
+    "auth": {
+        "label": "Azonosítás",
+        "description": "Bejelentkezési és munkamenet-beállítások, többek között süti- és lekérdezési korlátok (rate limit) megadásához.",
+        "enabled": {
+            "label": "Bejelentkezés engedélyezése",
+            "description": "Natív bejelentkezés (azonosítás) engedélyezése a Frigate felületén."
+        },
+        "reset_admin_password": {
+            "label": "Admin jelszó visszaállítása",
+            "description": "Ha igaz, akkor visszaállítja az admin felhasználó jelszavát, és induláskor a naplóba írja ki az új jelszót."
+        },
+        "cookie_name": {
+            "label": "JWT süti neve",
+            "description": "A süti neve ami a JWT tokent tárolja a natív bejelentkezéshez."
+        }
+    },
+    "audio_transcription": {
+        "label": "Hang Feliratozás",
+        "description": "„Beállítások élő hang és beszéd automatikus szöveggé alakításához, eseményekhez és élő feliratozáshoz.",
+        "enabled": {
+            "label": "Hangról szövegre alakítás engedélyezése"
+        }
     }
 }

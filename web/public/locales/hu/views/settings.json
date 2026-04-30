@@ -12,7 +12,11 @@
     "motionTuner": "Mozgás Hangoló - Frigate",
     "enrichments": "Kiegészítés Beállítások - Frigate",
     "cameraManagement": "Kamerák kezelése - Frigate",
-    "cameraReview": "Kamera beállítások áttekintése – Frigate"
+    "cameraReview": "Kamera beállítások áttekintése – Frigate",
+    "globalConfig": "Globális Konfiguráció - Frigate",
+    "cameraConfig": "Kamera Konfiguráció - Frigate",
+    "maintenance": "Karbantartás - Fregatt",
+    "profiles": "Profilok - Fregatt"
   },
   "menu": {
     "ui": "UI",
@@ -28,7 +32,24 @@
     "triggers": "Triggerek",
     "roles": "Szerepkörök",
     "cameraManagement": "Menedzsment",
-    "cameraReview": "Vizsgálat"
+    "cameraReview": "Vizsgálat",
+    "general": "Általános",
+    "globalConfig": "Globális konfiguráció",
+    "system": "Rendszer",
+    "integrations": "Integrációk",
+    "uiSettings": "UI beállítások",
+    "profiles": "Profilok",
+    "globalDetect": "Tárgy felismerés",
+    "globalRecording": "Felvétel",
+    "globalSnapshots": "Pillanatképek",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Mozgásérzékelés",
+    "globalObjects": "Tárgyak",
+    "globalReview": "Áttekintés",
+    "globalAudioEvents": "Hangesemények",
+    "cameraAudioEvents": "Hangesemények",
+    "cameraAudioTranscription": "Hang Feliratozás",
+    "integrationAudioTranscription": "Hang Feliratozás"
   },
   "dialog": {
     "unsavedChanges": {
@@ -861,5 +882,11 @@
       "streamConfiguration": "Stream beállítások",
       "validationAndTesting": "Validálás és tesztelés"
     }
+  },
+  "button": {
+    "overriddenGlobal": "Felülírt (Globális)",
+    "overriddenGlobalTooltip": "Ez a kamera felülírja a globális konfigurációs beállításokat ebben a részben",
+    "overriddenBaseConfig": "Felülírt (Alapbeállítás)",
+    "overriddenBaseConfigTooltip": "A {{profile}} profil felülírja a konfigurációs beállításokat ebben a részben"
   }
 }

@@ -6,7 +6,8 @@
     "logs": {
       "frigate": "Frigate naplók - Frigate",
       "go2rtc": "Go2RTC naplók - Frigate",
-      "nginx": "Nginx naplók - Frigate"
+      "nginx": "Nginx naplók - Frigate",
+      "websocket": "Üzenet naplók - Frigate"
     },
     "enrichments": "Kiegészítés statisztikák - Frigate"
   },
@@ -78,7 +79,19 @@
     "download": {
       "label": "Naplók letöltése"
     },
-    "tips": "A naplók a szerverről érkeznek"
+    "tips": "A naplók a szerverről érkeznek",
+    "websocket": {
+      "label": "Üzenetek",
+      "pause": "Szüneteltetés",
+      "resume": "Folytatás",
+      "filter": {
+        "all": "Összes téma (topic)",
+        "topics": "Témák (topics)",
+        "events": "Események",
+        "reviews": "Értékelések (reviews)",
+        "face_recognition": "Arcfelismerés"
+      }
+    }
   },
   "general": {
     "title": "Általános",
