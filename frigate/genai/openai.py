@@ -73,8 +73,17 @@ class OpenAIClient(GenAIClient):
                 **self.genai_config.runtime_options,
             }
             if response_format:
+                # OpenAI strict mode requires additionalProperties: false on the schema
+                if response_format.get("type") == "json_schema" and response_format.get(
+                    "json_schema", {}
+                ).get("strict"):
+                    schema = response_format.get("json_schema", {}).get("schema")
+                    if isinstance(schema, dict):
+                        schema["additionalProperties"] = False
                 request_params["response_format"] = response_format
+
             result = self.provider.chat.completions.create(**request_params)
+
             if (
                 result is not None
                 and hasattr(result, "choices")

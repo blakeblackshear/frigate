@@ -728,10 +728,8 @@ export function RecordingView({
                   setShareTimestampOpen(true);
                 }}
                 onDebugReplayClick={() => {
-                  const now = new Date(timeRange.before * 1000);
-                  now.setHours(now.getHours() - 1);
                   setDebugReplayRange({
-                    after: now.getTime() / 1000,
+                    after: timeRange.before - 60,
                     before: timeRange.before,
                   });
                   setDebugReplayMode("select");

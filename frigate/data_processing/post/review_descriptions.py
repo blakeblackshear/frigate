@@ -366,12 +366,17 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         file_start = f"preview_{camera}-"
         start_file = f"{file_start}{start_time}.webp"
         end_file = f"{file_start}{end_time}.webp"
+
+        camera_files = [
+            entry.name
+            for entry in os.scandir(preview_dir)
+            if entry.name.startswith(file_start)
+        ]
+        camera_files.sort()
+
         all_frames: list[str] = []
 
-        for file in sorted(os.listdir(preview_dir)):
-            if not file.startswith(file_start):
-                continue
-
+        for file in camera_files:
             if file < start_file:
                 if len(all_frames):
                     all_frames[0] = os.path.join(preview_dir, file)
