@@ -391,10 +391,8 @@ export default function MobileReviewSettingsDrawer({
             className="flex w-full items-center justify-center gap-2"
             aria-label={t("title", { ns: "views/replay" })}
             onClick={() => {
-              const now = new Date(latestTime * 1000);
-              now.setHours(now.getHours() - 1);
               setDebugReplayRange({
-                after: now.getTime() / 1000,
+                after: latestTime - 60,
                 before: latestTime,
               });
               setSelectedReplayOption("1");
@@ -541,11 +539,9 @@ export default function MobileReviewSettingsDrawer({
         return;
       }
 
-      const hours = parseInt(option);
+      const minutes = parseInt(option, 10);
       const end = latestTime;
-      const now = new Date(end * 1000);
-      now.setHours(now.getHours() - hours);
-      setDebugReplayRange({ after: now.getTime() / 1000, before: end });
+      setDebugReplayRange({ after: end - minutes * 60, before: end });
     };
 
     content = (
