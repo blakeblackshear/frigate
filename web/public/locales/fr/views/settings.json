@@ -89,7 +89,8 @@
     "cameraMqtt": "MQTT de la caméra",
     "maintenance": "Maintenance",
     "uiSettings": "Paramètres IU",
-    "profiles": "Profils"
+    "profiles": "Profils",
+    "systemGo2rtcStreams": "Streams go2rtc"
   },
   "dialog": {
     "unsavedChanges": {
@@ -448,6 +449,17 @@
         "error": {
           "mustBeGreaterOrEqualTo": "Le seuil de vitesse doit être supérieur ou égal à 0.1."
         }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "L'ID ne doit pas être vide.",
+          "alreadyExists": "Un masque avec cet ID existe déjà pour cette caméra."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Le nom ne doit pas être vide."
+        }
       }
     },
     "zones": {
@@ -572,7 +584,11 @@
     },
     "restart_required": "Redémarrage requis (masques/zones changés)",
     "objectMaskLabel": "Masque d'objet {{number}}",
-    "motionMaskLabel": "Masque de mouvement {{number}}"
+    "motionMaskLabel": "Masque de mouvement {{number}}",
+    "disabledInConfig": "Cet objet est désactivé dans le fichier de configuration",
+    "addDisabledProfile": "Ajouter dans la configuration de base d’abord puis remplacez le dans le profil",
+    "profileBase": "(base)",
+    "profileOverride": "(remplacer)"
   },
   "motionDetectionTuner": {
     "title": "Réglage de la détection de mouvement",
@@ -1308,7 +1324,11 @@
     "backToSettings": "Retour aux paramètres de la caméra",
     "streams": {
       "title": "Activer / désactiver les caméras",
-      "desc": "Désactive temporairement une caméra jusqu'au redémarrage de Frigate. La désactivation d'une caméra interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l'enregistrement et le débogage deviennent alors indisponibles.<br /><em>Remarque : cela n'affecte pas les rediffusions des flux go2rtc.</em>"
+      "desc": "Désactive temporairement une caméra jusqu'au redémarrage de Frigate. La désactivation d'une caméra interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l'enregistrement et le débogage deviennent alors indisponibles.<br /><em>Remarque : cela n'affecte pas les rediffusions des flux go2rtc.</em>",
+      "enableLabel": "Caméras activées",
+      "disableLabel": "Caméra désactivées",
+      "disableDesc": "Activer une caméra qui n'est pas visible dans l'interface et désactivée dans la configuration. Un redémarrage de Frigate est nécessaire après l'activation.",
+      "enableSuccess": "Activer {{cameraName}} dans la configuration. Redémarrer Frigate pour appliquer les changements."
     },
     "cameraConfig": {
       "add": "Ajouter une caméra",
@@ -1338,6 +1358,25 @@
       "toast": {
         "success": "La caméra {{cameraName}} a été enregistrée avec succès"
       }
+    },
+    "deleteCamera": "Supprimer la caméra",
+    "deleteCameraDialog": {
+      "title": "Supprimer la caméra",
+      "description": "Supprimer la caméra va supprimer de façon permanente les enregistrements, les objets suivis, et la configuration de la caméra. Tous les streams go2rtc associés à la caméra devront être supprimés manuellement.",
+      "selectPlaceholder": "Choisir une caméra...",
+      "confirmTitle": "Êtes-vous sûr?",
+      "confirmWarning": "Supprimer <strong>\n{{cameraName}}\n</strong> ne peut être annulé.",
+      "deleteExports": "Supprimer aussi les exports de cette caméra",
+      "confirmButton": "Suppression permanente",
+      "success": "Caméra {{cameraName}} supprimée avec succès",
+      "error": "Impossible de supprimer la caméra {{cameraName}}"
+    },
+    "profiles": {
+      "selectLabel": "Choisir un profil",
+      "description": "Configurer quelles caméras sont activées ou désactivées quand un profil est activé. Les caméras activées avec \"Inherit\" conservent leur statut de base.",
+      "inherit": "Hériter",
+      "enabled": "Activé",
+      "disabled": "Désactivé"
     }
   },
   "cameraReview": {
@@ -1392,6 +1431,9 @@
     "value": {
       "label": "Nouvelle valeur",
       "reset": "Réinitialiser"
+    },
+    "profile": {
+      "label": "Profil"
     }
   },
   "button": {
