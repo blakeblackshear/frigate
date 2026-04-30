@@ -26,19 +26,16 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useUserPersistence } from "@/hooks/use-user-persistence";
 import usePlaybackCapabilities from "@/hooks/use-playback-capabilities";
-import { chooseRecordingPlayback } from "@/utils/recordingPlayback";
+import {
+  chooseRecordingPlayback,
+  getRecordingsForPlaybackVariant,
+} from "@/utils/recordingPlayback";
 import {
   calculateInpointOffset,
   calculateSeekPosition,
 } from "@/utils/videoUtil";
 import { isFirefox } from "react-device-detect";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import RecordingPlaybackPreferenceSelect from "../RecordingPlaybackPreferenceSelect";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -212,17 +209,6 @@ export default function DynamicVideoPlayer({
     [`${camera}/recordings`, { ...recordingParams, variant: "all" }],
     { revalidateOnFocus: false },
   );
-  const recordings = useMemo(() => {
-    if (!allRecordings?.length) {
-      return allRecordings;
-    }
-
-    const mainRecordings = allRecordings.filter(
-      (recording) => (recording.variant || "main") === "main",
-    );
-
-    return mainRecordings.length > 0 ? mainRecordings : allRecordings;
-  }, [allRecordings]);
   const codecNames = useMemo(
     () =>
       Array.from(
@@ -231,13 +217,60 @@ export default function DynamicVideoPlayer({
     [allRecordings],
   );
   const playbackCapabilities = usePlaybackCapabilities(codecNames);
+  const playbackDecision = useMemo(() => {
+    if (!allRecordings?.length) {
+      return undefined;
+    }
+
+    const vodPath = `/vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`;
+
+    return chooseRecordingPlayback({
+      apiHost,
+      recordings: allRecordings,
+      preference: playbackPreference ?? "sub",
+      vodPath,
+      capabilities: playbackCapabilities,
+    });
+  }, [
+    allRecordings,
+    apiHost,
+    camera,
+    playbackPreference,
+    playbackCapabilities,
+    recordingParams.after,
+    recordingParams.before,
+  ]);
+  const recordings = useMemo(() => {
+    if (!allRecordings?.length) {
+      return allRecordings;
+    }
+
+    if (!playbackDecision || playbackDecision.variant === "main") {
+      return getRecordingsForPlaybackVariant(allRecordings, "main");
+    }
+
+    const selectedRecordings = getRecordingsForPlaybackVariant(allRecordings, "sub");
+
+    return selectedRecordings.length > 0 ? selectedRecordings : allRecordings;
+  }, [allRecordings, playbackDecision]);
 
   useEffect(() => {
-    if (!recordings?.length) {
-      if (recordings?.length == 0) {
+    if (!allRecordings?.length) {
+      if (allRecordings?.length == 0) {
+        if (loadingTimeout) {
+          clearTimeout(loadingTimeout);
+        }
+
+        setIsLoading(false);
+        setIsBuffering(false);
         setNoRecording(true);
+        setSource(undefined);
       }
 
+      return;
+    }
+
+    if (!recordings?.length || !playbackDecision) {
       return;
     }
 
@@ -246,7 +279,7 @@ export default function DynamicVideoPlayer({
     if (startTimestamp) {
       const inpointOffset = calculateInpointOffset(
         recordingParams.after,
-        (recordings || [])[0],
+        recordings[0],
       );
 
       startPosition = calculateSeekPosition(
@@ -256,33 +289,19 @@ export default function DynamicVideoPlayer({
       );
     }
 
-    const vodPath = `/vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`;
-    const decision = chooseRecordingPlayback({
-      apiHost,
-      config,
-      recordings: allRecordings ?? recordings,
-      preference: playbackPreference ?? "sub",
-      vodPath,
-      capabilities: playbackCapabilities,
-    });
     setSource({
-      playlist: decision.url,
+      playlist: playbackDecision.url,
       startPosition,
     });
+    setNoRecording(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    apiHost,
-    camera,
-    recordingParams.after,
-    recordingParams.before,
     allRecordings,
     recordings,
     startTimestamp,
-    playbackPreference,
-    playbackCapabilities,
-    config?.transcode_proxy?.enabled,
-    config?.transcode_proxy?.vod_proxy_url,
+    playbackDecision,
+    recordingParams.after,
   ]);
 
   useEffect(() => {
@@ -384,22 +403,13 @@ export default function DynamicVideoPlayer({
       )}
       {!isScrubbing && source && (
         <div className="absolute right-3 top-3 z-50">
-          <Select
+          <RecordingPlaybackPreferenceSelect
+            className="h-8 w-32 bg-background/90 text-xs backdrop-blur"
             value={playbackPreference ?? "sub"}
             onValueChange={(value) =>
               setPlaybackPreference(value as RecordingPlaybackPreference)
             }
-          >
-            <SelectTrigger className="h-8 w-32 bg-background/90 text-xs backdrop-blur">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="auto">Auto</SelectItem>
-              <SelectItem value="main">Main</SelectItem>
-              <SelectItem value="sub">Sub</SelectItem>
-              <SelectItem value="transcoded">Transcoded</SelectItem>
-            </SelectContent>
-          </Select>
+          />
         </div>
       )}
       <PreviewPlayer

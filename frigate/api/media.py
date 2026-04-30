@@ -44,6 +44,7 @@ from frigate.const import (
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
+from frigate.record.subvariant import ensure_subvariant_for_recording
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import get_image_from_recording
@@ -51,6 +52,73 @@ from frigate.util.image import get_image_from_recording
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.media])
+
+
+def _resolve_vod_variant(path_variant: str | None, variant: str) -> str:
+    return path_variant or variant
+
+
+async def _resolve_sub_vod_recordings(
+    config: FrigateConfig, recordings_query
+) -> list[Recordings]:
+    native_sub_recordings = list(
+        recordings_query.where(Recordings.variant == "sub")
+        .order_by(Recordings.start_time.asc())
+        .iterator()
+    )
+    main_recordings = list(
+        recordings_query.where(Recordings.variant == "main")
+        .order_by(Recordings.start_time.asc())
+        .iterator()
+    )
+
+    if not main_recordings:
+        return native_sub_recordings
+
+    def overlaps(left: Recordings, right: Recordings) -> bool:
+        return left.start_time < right.end_time and left.end_time > right.start_time
+
+    main_windows = {(recording.start_time, recording.end_time) for recording in main_recordings}
+
+    filtered_native_sub_recordings = []
+    for recording in native_sub_recordings:
+        has_exact_main_window = (recording.start_time, recording.end_time) in main_windows
+        has_overlapping_sub_neighbor = any(
+            other.path != recording.path and overlaps(recording, other)
+            for other in native_sub_recordings
+        )
+
+        # If a sub row exactly mirrors a main segment while another overlapping
+        # sub row already exists, prefer the native sub timeline and ignore the
+        # exact-match segment that was likely synthesized from main.
+        if has_exact_main_window and has_overlapping_sub_neighbor:
+            continue
+
+        filtered_native_sub_recordings.append(recording)
+
+    resolved_recordings = list(filtered_native_sub_recordings)
+
+    for main_recording in main_recordings:
+        if any(
+            overlaps(main_recording, sub_recording)
+            for sub_recording in filtered_native_sub_recordings
+        ):
+            continue
+
+        recording = await ensure_subvariant_for_recording(config, main_recording)
+        if recording is not None:
+            resolved_recordings.append(recording)
+
+    deduped_recordings = {}
+    for recording in resolved_recordings:
+        deduped_recordings[(recording.path, recording.start_time, recording.end_time)] = (
+            recording
+        )
+
+    return sorted(
+        deduped_recordings.values(),
+        key=lambda recording: (recording.start_time, recording.end_time, recording.path),
+    )
 
 
 @router.get("/{camera_name}", dependencies=[Depends(require_camera_access)])
@@ -527,42 +595,49 @@ async def recording_clip(
 
 
 @router.get(
+    "/vod/variant/{path_variant}/{camera_name}/start/{start_ts}/end/{end_ts}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns an HLS playlist for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
+@router.get(
     "/vod/{camera_name}/start/{start_ts}/end/{end_ts}",
     dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 async def vod_ts(
+    request: Request,
     camera_name: str,
     start_ts: float,
     end_ts: float,
     force_discontinuity: bool = False,
-    variant: str = "main",
+    path_variant: str | None = None,
+    variant: str = Query("main", description="Recording variant to use for playback."),
 ):
+    selected_variant = _resolve_vod_variant(path_variant, variant)
     logger.debug(
         "VOD: Generating VOD for %s from %s to %s with force_discontinuity=%s variant=%s",
         camera_name,
         start_ts,
         end_ts,
         force_discontinuity,
-        variant,
+        selected_variant,
     )
-    recordings = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.duration,
-            Recordings.end_time,
-            Recordings.start_time,
+    recordings_query = Recordings.select().where(
+        Recordings.start_time.between(start_ts, end_ts)
+        | Recordings.end_time.between(start_ts, end_ts)
+        | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
+    ).where(Recordings.camera == camera_name)
+
+    if selected_variant == "sub":
+        recordings = await _resolve_sub_vod_recordings(
+            request.app.frigate_config, recordings_query
         )
-        .where(
-            Recordings.start_time.between(start_ts, end_ts)
-            | Recordings.end_time.between(start_ts, end_ts)
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
+    else:
+        recordings = (
+            recordings_query.where(Recordings.variant == selected_variant)
+            .order_by(Recordings.start_time.asc())
+            .iterator()
         )
-        .where(Recordings.camera == camera_name)
-        .where(Recordings.variant == variant)
-        .order_by(Recordings.start_time.asc())
-        .iterator()
-    )
 
     clips = []
     durations = []
@@ -571,14 +646,6 @@ async def vod_ts(
 
     recording: Recordings
     for recording in recordings:
-        logger.debug(
-            "VOD: processing recording: %s start=%s end=%s duration=%s",
-            recording.path,
-            recording.start_time,
-            recording.end_time,
-            recording.duration,
-        )
-
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
 
@@ -587,11 +654,6 @@ async def vod_ts(
             inpoint = int((start_ts - recording.start_time) * 1000)
             clip["clipFrom"] = inpoint
             duration -= inpoint
-            logger.debug(
-                "VOD: applied clipFrom %sms to %s",
-                inpoint,
-                recording.path,
-            )
 
         # adjust end if recording.end_time is after end_ts
         if recording.end_time > end_ts:
@@ -599,23 +661,12 @@ async def vod_ts(
 
         if duration < min_duration_ms:
             # skip if the clip has no valid duration (too short to contain frames)
-            logger.debug(
-                "VOD: skipping recording %s - resulting duration %sms too short",
-                recording.path,
-                duration,
-            )
             continue
 
         if min_duration_ms <= duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)
-            logger.debug(
-                "VOD: added clip %s duration_ms=%s clipFrom=%s",
-                recording.path,
-                duration,
-                clip.get("clipFrom"),
-            )
         else:
             logger.warning(f"Recording clip is missing or empty: {recording.path}")
 
@@ -645,36 +696,56 @@ async def vod_ts(
 
 
 @router.get(
+    "/vod/variant/{path_variant}/{year_month}/{day}/{hour}/{camera_name}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns an HLS playlist for the specified date-time on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
+@router.get(
     "/vod/{year_month}/{day}/{hour}/{camera_name}",
     dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified date-time on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 async def vod_hour_no_timezone(
-    year_month: str, day: int, hour: int, camera_name: str, variant: str = "main"
+    request: Request,
+    year_month: str,
+    day: int,
+    hour: int,
+    camera_name: str,
+    path_variant: str | None = None,
+    variant: str = Query("main", description="Recording variant to use for playback."),
 ):
     """VOD for specific hour. Uses the default timezone (UTC)."""
     return await vod_hour(
+        request,
         year_month,
         day,
         hour,
         camera_name,
         get_localzone_name().replace("/", ","),
+        path_variant,
         variant,
     )
 
 
+@router.get(
+    "/vod/variant/{path_variant}/{year_month}/{day}/{hour}/{camera_name}/{tz_name}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns an HLS playlist for the specified date-time (with timezone) on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 @router.get(
     "/vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}",
     dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified date-time (with timezone) on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 async def vod_hour(
+    request: Request,
     year_month: str,
     day: int,
     hour: int,
     camera_name: str,
     tz_name: str,
-    variant: str = "main",
+    path_variant: str | None = None,
+    variant: str = Query("main", description="Recording variant to use for playback."),
 ):
     parts = year_month.split("-")
     start_date = (
@@ -685,9 +756,21 @@ async def vod_hour(
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
 
-    return await vod_ts(camera_name, start_ts, end_ts, variant=variant)
+    return await vod_ts(
+        request,
+        camera_name,
+        start_ts,
+        end_ts,
+        path_variant=path_variant,
+        variant=variant,
+    )
 
 
+@router.get(
+    "/vod/variant/{path_variant}/event/{event_id}",
+    dependencies=[Depends(allow_any_authenticated())],
+    description="Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
 @router.get(
     "/vod/event/{event_id}",
     dependencies=[Depends(allow_any_authenticated())],
@@ -697,6 +780,7 @@ async def vod_event(
     request: Request,
     event_id: str,
     padding: int = Query(0, description="Padding to apply to the vod."),
+    path_variant: str | None = None,
     variant: str = Query("main", description="Recording variant to use for playback."),
 ):
     try:
@@ -719,7 +803,12 @@ async def vod_event(
         else (event.end_time + padding)
     )
     vod_response = await vod_ts(
-        event.camera, event.start_time - padding, end_ts, variant=variant
+        request,
+        event.camera,
+        event.start_time - padding,
+        end_ts,
+        path_variant=path_variant,
+        variant=variant,
     )
 
     # If the recordings are not found and the event started more than 5 minutes ago, set has_clip to false
@@ -735,18 +824,31 @@ async def vod_event(
 
 
 @router.get(
+    "/vod/variant/{path_variant}/clip/{camera_name}/start/{start_ts}/end/{end_ts}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns an HLS playlist for a timestamp range with HLS discontinuity enabled. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
+@router.get(
     "/vod/clip/{camera_name}/start/{start_ts}/end/{end_ts}",
     dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for a timestamp range with HLS discontinuity enabled. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 async def vod_clip(
+    request: Request,
     camera_name: str,
     start_ts: float,
     end_ts: float,
+    path_variant: str | None = None,
     variant: str = Query("main", description="Recording variant to use for playback."),
 ):
     return await vod_ts(
-        camera_name, start_ts, end_ts, force_discontinuity=True, variant=variant
+        request,
+        camera_name,
+        start_ts,
+        end_ts,
+        force_discontinuity=True,
+        path_variant=path_variant,
+        variant=variant,
     )
 
 

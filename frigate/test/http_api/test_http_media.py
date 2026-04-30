@@ -1,6 +1,7 @@
 """Unit tests for recordings/media API endpoints."""
 
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock, patch
 
 import pytz
 from fastapi import Request
@@ -88,14 +89,309 @@ class TestHttpMedia(BaseTestHttp):
             default_recordings = default_response.json()
             assert len(default_recordings) == 1
             assert default_recordings[0]["variant"] == "main"
+            assert default_recordings[0]["transcoded_from_main"] is False
 
             all_response = client.get(
                 "/front_door/recordings",
                 params={"after": start_ts, "before": end_ts, "variant": "all"},
             )
             assert all_response.status_code == 200
-            variants = {recording["variant"] for recording in all_response.json()}
+            all_recordings = all_response.json()
+            variants = {recording["variant"] for recording in all_recordings}
             assert variants == {"main", "sub"}
+            assert all(recording["transcoded_from_main"] is False for recording in all_recordings)
+
+    def test_camera_recordings_exposes_transcoded_from_main(self):
+        start_ts = datetime(2024, 3, 9, 12, 0, 0, tzinfo=timezone.utc).timestamp()
+        end_ts = start_ts + 10
+
+        with AuthTestClient(self.app) as client:
+            Recordings.insert(
+                id="generated_sub_recording",
+                path="/media/recordings/front/generated-sub.mp4",
+                camera="front_door",
+                variant="sub",
+                transcoded_from_main=True,
+                start_time=start_ts,
+                end_time=end_ts,
+                duration=10,
+                motion=100,
+                objects=5,
+                codec_name="hevc",
+                width=640,
+                height=360,
+            ).execute()
+
+            response = client.get(
+                "/front_door/recordings",
+                params={"after": start_ts, "before": end_ts, "variant": "all"},
+            )
+            assert response.status_code == 200
+            recordings = response.json()
+            assert len(recordings) == 1
+            assert recordings[0]["variant"] == "sub"
+            assert recordings[0]["transcoded_from_main"] is True
+
+    def test_vod_variant_path_uses_requested_variant(self):
+        start_ts = datetime(2024, 3, 9, 12, 0, 0, tzinfo=timezone.utc).timestamp()
+        end_ts = start_ts + 10
+
+        with AuthTestClient(self.app) as client:
+            Recordings.insert(
+                id="vod_recording_main",
+                path="/media/recordings/front_door/main.mp4",
+                camera="front_door",
+                variant="main",
+                start_time=start_ts,
+                end_time=end_ts,
+                duration=10,
+                motion=100,
+                objects=5,
+            ).execute()
+            Recordings.insert(
+                id="vod_recording_sub",
+                path="/media/recordings/front_door/sub.mp4",
+                camera="front_door",
+                variant="sub",
+                start_time=start_ts,
+                end_time=end_ts,
+                duration=10,
+                motion=100,
+                objects=5,
+            ).execute()
+
+            response = client.get(
+                f"/vod/variant/sub/front_door/start/{start_ts}/end/{end_ts}"
+            )
+            assert response.status_code == 200
+            clips = response.json()["sequences"][0]["clips"]
+            assert [clip["path"] for clip in clips] == [
+                "/media/recordings/front_door/sub.mp4"
+            ]
+
+    def test_vod_variant_path_uses_overlapping_native_sub_without_generation(self):
+        main_start_ts = datetime(
+            2024, 3, 9, 12, 0, 9, tzinfo=timezone.utc
+        ).timestamp()
+        main_end_ts = main_start_ts + 9
+        native_sub_start_ts = main_start_ts - 1
+        native_sub_end_ts = main_end_ts - 1
+
+        with AuthTestClient(self.app) as client:
+            Recordings.insert(
+                id="vod_recording_main_offset",
+                path="/media/recordings/front_door/main-offset.mp4",
+                camera="front_door",
+                variant="main",
+                start_time=main_start_ts,
+                end_time=main_end_ts,
+                duration=9,
+                motion=100,
+                objects=5,
+                codec_name="hevc",
+                width=1920,
+                height=1080,
+            ).execute()
+            Recordings.insert(
+                id="vod_recording_sub_offset",
+                path="/media/recordings/front_door/sub-offset.mp4",
+                camera="front_door",
+                variant="sub",
+                start_time=native_sub_start_ts,
+                end_time=native_sub_end_ts,
+                duration=9,
+                motion=100,
+                objects=5,
+                codec_name="hevc",
+                width=640,
+                height=480,
+            ).execute()
+
+            with patch(
+                "frigate.api.media.ensure_subvariant_for_recording",
+                new=AsyncMock(),
+            ) as ensure_subvariant:
+                response = client.get(
+                    f"/vod/variant/sub/front_door/start/{main_start_ts}/end/{main_end_ts}"
+                )
+
+            assert response.status_code == 200
+            clips = response.json()["sequences"][0]["clips"]
+            assert [clip["path"] for clip in clips] == [
+                "/media/recordings/front_door/sub-offset.mp4"
+            ]
+            ensure_subvariant.assert_not_awaited()
+
+    def test_vod_variant_path_generates_standard_sub_when_missing(self):
+        start_ts = datetime(2024, 3, 9, 12, 0, 0, tzinfo=timezone.utc).timestamp()
+        end_ts = start_ts + 10
+
+        generated_sub = Recordings(
+            id="generated_standard_sub",
+            path="/media/recordings/front_door/sub.mp4",
+            camera="front_door",
+            variant="sub",
+            start_time=start_ts,
+            end_time=end_ts,
+            duration=10,
+            motion=100,
+            objects=5,
+            codec_name="h264",
+        )
+
+        with AuthTestClient(self.app) as client:
+            Recordings.insert(
+                id="vod_recording_main_missing_sub",
+                path="/media/recordings/front_door/main.mp4",
+                camera="front_door",
+                variant="main",
+                start_time=start_ts,
+                end_time=end_ts,
+                duration=10,
+                motion=100,
+                objects=5,
+                codec_name="h264",
+            ).execute()
+
+            with patch(
+                "frigate.api.media.ensure_subvariant_for_recording",
+                new=AsyncMock(return_value=generated_sub),
+            ) as ensure_subvariant:
+                response = client.get(
+                    f"/vod/variant/sub/front_door/start/{start_ts}/end/{end_ts}"
+                )
+
+            assert response.status_code == 200
+            clips = response.json()["sequences"][0]["clips"]
+            assert [clip["path"] for clip in clips] == [
+                "/media/recordings/front_door/sub.mp4"
+            ]
+            ensure_subvariant.assert_awaited_once()
+
+    def test_vod_variant_path_filters_exact_match_generated_sub_when_native_overlap_exists(self):
+        main_start_ts = datetime(
+            2024, 3, 9, 12, 0, 9, tzinfo=timezone.utc
+        ).timestamp()
+        main_end_ts = main_start_ts + 9
+        native_sub_start_ts = main_start_ts - 1
+        native_sub_end_ts = main_end_ts - 1
+
+        with AuthTestClient(self.app) as client:
+            Recordings.insert(
+                id="vod_recording_main_generated_conflict",
+                path="/media/recordings/front_door/main-generated-conflict.mp4",
+                camera="front_door",
+                variant="main",
+                start_time=main_start_ts,
+                end_time=main_end_ts,
+                duration=9,
+                motion=100,
+                objects=5,
+                codec_name="hevc",
+                width=1920,
+                height=1080,
+            ).execute()
+            Recordings.insert(
+                id="vod_recording_sub_native_overlap",
+                path="/media/recordings/front_door/sub-native-overlap.mp4",
+                camera="front_door",
+                variant="sub",
+                start_time=native_sub_start_ts,
+                end_time=native_sub_end_ts,
+                duration=9,
+                motion=100,
+                objects=5,
+                codec_name="hevc",
+                width=640,
+                height=480,
+            ).execute()
+            Recordings.insert(
+                id="vod_recording_sub_generated_like",
+                path="/media/recordings/front_door/sub-generated-like.mp4",
+                camera="front_door",
+                variant="sub",
+                start_time=main_start_ts,
+                end_time=main_end_ts,
+                duration=9,
+                motion=100,
+                objects=5,
+                codec_name="hevc",
+                width=640,
+                height=360,
+            ).execute()
+
+            with patch(
+                "frigate.api.media.ensure_subvariant_for_recording",
+                new=AsyncMock(),
+            ) as ensure_subvariant:
+                response = client.get(
+                    f"/vod/variant/sub/front_door/start/{main_start_ts}/end/{main_end_ts}"
+                )
+
+            assert response.status_code == 200
+            clips = response.json()["sequences"][0]["clips"]
+            assert [clip["path"] for clip in clips] == [
+                "/media/recordings/front_door/sub-native-overlap.mp4"
+            ]
+            ensure_subvariant.assert_not_awaited()
+
+    def test_vod_variant_path_ignores_legacy_sub_h264_rows(self):
+        start_ts = datetime(2024, 3, 9, 12, 0, 0, tzinfo=timezone.utc).timestamp()
+        end_ts = start_ts + 10
+
+        generated_sub = Recordings(
+            id="standard_sub_fallback",
+            path="/media/recordings/front_door/sub.mp4",
+            camera="front_door",
+            variant="sub",
+            start_time=start_ts,
+            end_time=end_ts,
+            duration=10,
+            motion=100,
+            objects=5,
+            codec_name="h264",
+        )
+
+        with AuthTestClient(self.app) as client:
+            Recordings.insert(
+                id="vod_recording_main_with_legacy",
+                path="/media/recordings/front_door/main.mp4",
+                camera="front_door",
+                variant="main",
+                start_time=start_ts,
+                end_time=end_ts,
+                duration=10,
+                motion=100,
+                objects=5,
+                codec_name="h264",
+            ).execute()
+            Recordings.insert(
+                id="legacy_sub_h264_row",
+                path="/media/recordings/front_door/sub_h264.mp4",
+                camera="front_door",
+                variant="sub_h264",
+                start_time=start_ts,
+                end_time=end_ts,
+                duration=10,
+                motion=100,
+                objects=5,
+                codec_name="h264",
+            ).execute()
+
+            with patch(
+                "frigate.api.media.ensure_subvariant_for_recording",
+                new=AsyncMock(return_value=generated_sub),
+            ) as ensure_subvariant:
+                response = client.get(
+                    f"/vod/variant/sub/front_door/start/{start_ts}/end/{end_ts}"
+                )
+
+            assert response.status_code == 200
+            clips = response.json()["sequences"][0]["clips"]
+            assert [clip["path"] for clip in clips] == [
+                "/media/recordings/front_door/sub.mp4"
+            ]
+            ensure_subvariant.assert_awaited_once()
 
     def test_recordings_summary_across_dst_spring_forward(self):
         """

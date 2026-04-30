@@ -8,6 +8,7 @@ export type Recording = {
   end_time: number;
   path: string;
   variant?: string;
+  transcoded_from_main?: boolean;
   segment_size: number;
   duration: number;
   motion: number;
@@ -52,8 +53,7 @@ export type RecordingPlayerError = "stalled" | "startup";
 export type RecordingPlaybackPreference =
   | "auto"
   | "main"
-  | "sub"
-  | "transcoded";
+  | "sub";
 
 export const ASPECT_VERTICAL_LAYOUT = 1.5;
 export const ASPECT_PORTRAIT_LAYOUT = 1.333;

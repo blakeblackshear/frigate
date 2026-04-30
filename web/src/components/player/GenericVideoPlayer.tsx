@@ -133,7 +133,7 @@ export function GenericVideoPlayer({
                 }}
                 setFullResolution={setVideoResolution}
               />
-              {!isLoading && children}
+              {children}
             </div>
           </>
         )}

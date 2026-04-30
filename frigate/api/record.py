@@ -240,6 +240,7 @@ async def recordings(
             Recordings.end_time,
             Recordings.path,
             Recordings.variant,
+            Recordings.transcoded_from_main,
             Recordings.segment_size,
             Recordings.motion,
             Recordings.objects,

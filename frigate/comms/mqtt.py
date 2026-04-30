@@ -297,7 +297,9 @@ class MqttClient(Communicator):
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
         )
 
-        if self.mqtt_config.tls_ca_certs is not None:
+        tls_configured = self.mqtt_config.tls_ca_certs is not None
+
+        if tls_configured:
             if (
                 self.mqtt_config.tls_client_cert is not None
                 and self.mqtt_config.tls_client_key is not None
@@ -309,7 +311,7 @@ class MqttClient(Communicator):
                 )
             else:
                 self.client.tls_set(self.mqtt_config.tls_ca_certs)
-        if self.mqtt_config.tls_insecure is not None:
+        if self.mqtt_config.tls_insecure is not None and tls_configured:
             self.client.tls_insecure_set(self.mqtt_config.tls_insecure)
         if self.mqtt_config.user is not None:
             self.client.username_pw_set(

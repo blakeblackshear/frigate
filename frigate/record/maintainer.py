@@ -670,6 +670,7 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.camera.name: camera,
                     Recordings.path.name: file_path,
                     Recordings.variant.name: variant,
+                    Recordings.transcoded_from_main.name: False,
                     Recordings.start_time.name: start_time.timestamp(),
                     Recordings.end_time.name: end_time.timestamp(),
                     Recordings.duration.name: duration,

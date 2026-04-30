@@ -16,6 +16,8 @@ models
 frigate/version.py
 web/build
 web/node_modules
+node_modules
+**/.vite
 web/coverage
 web/.env
 core

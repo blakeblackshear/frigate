@@ -29,13 +29,14 @@ import {
 import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import SaveExportOverlay from "./SaveExportOverlay";
-import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { GenericVideoPlayer } from "../player/GenericVideoPlayer";
 import { useTranslation } from "react-i18next";
 import { ExportCase } from "@/types/export";
 import { CustomTimeSelector } from "./CustomTimeSelector";
 import useRecordingPlaybackSource from "@/hooks/use-recording-playback-source";
+import RecordingPlaybackPreferenceSelect from "../player/RecordingPlaybackPreferenceSelect";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -444,8 +445,6 @@ export function ExportPreviewDialog({
     return null;
   }
 
-  const source = playbackSource ?? `${baseUrl}${vodPath}`;
-
   return (
     <Dialog open={showPreview} onOpenChange={setShowPreview}>
       <DialogContent
@@ -462,7 +461,21 @@ export function ExportPreviewDialog({
             {t("export.fromTimeline.previewExport")}
           </DialogDescription>
         </DialogHeader>
-        <GenericVideoPlayer source={source} />
+        {playbackSource ? (
+          <GenericVideoPlayer source={playbackSource.url}>
+            <div className="absolute right-3 top-3 z-50">
+              <RecordingPlaybackPreferenceSelect
+                className="h-8 w-32 bg-background/90 text-xs backdrop-blur"
+                value={playbackSource.preference}
+                onValueChange={playbackSource.setPreference}
+              />
+            </div>
+          </GenericVideoPlayer>
+        ) : (
+          <div className="flex aspect-video items-center justify-center">
+            <ActivityIndicator />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

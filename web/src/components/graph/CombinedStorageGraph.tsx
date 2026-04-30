@@ -1,7 +1,8 @@
 import { useTheme } from "@/context/theme-provider";
 import { generateColors } from "@/utils/colorUtil";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Chart from "react-apexcharts";
+import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -39,6 +40,24 @@ type CombinedStorageGraphProps = {
   cameraStorage: CameraStorage;
   totalStorage: TotalStorage;
 };
+
+type StorageSeries = {
+  name: string;
+  data: number[];
+  usage: number;
+  bandwidth: number;
+  color: string;
+};
+
+type SortKey = "camera" | "usage" | "bandwidth";
+type SortDirection = "asc" | "desc";
+
+const defaultSortDirections: Record<SortKey, SortDirection> = {
+  camera: "asc",
+  usage: "desc",
+  bandwidth: "desc",
+};
+
 export function CombinedStorageGraph({
   graphId,
   cameraStorage,
@@ -47,37 +66,106 @@ export function CombinedStorageGraph({
   const { t } = useTranslation(["views/system"]);
 
   const { theme, systemTheme } = useTheme();
-
-  const entities = Object.keys(cameraStorage);
-  const colors = generateColors(entities.length);
-
-  const series = entities.map((entity, index) => ({
-    name: entity,
-    data: [(cameraStorage[entity].usage / totalStorage.total) * 100],
-    usage: cameraStorage[entity].usage,
-    bandwidth: cameraStorage[entity].bandwidth,
-    color: colors[index], // Assign the corresponding color
-  }));
-
-  // Add the unused percentage to the series
-  series.push({
-    name: "Other",
-    data: [
-      ((totalStorage.used - totalStorage.camera) / totalStorage.total) * 100,
-    ],
-    usage: totalStorage.used - totalStorage.camera,
-    bandwidth: 0,
-    color: (systemTheme || theme) == "dark" ? "#606060" : "#D5D5D5",
+  const [sortConfig, setSortConfig] = useState<{
+    key: SortKey;
+    direction: SortDirection;
+  }>({
+    key: "camera",
+    direction: defaultSortDirections.camera,
   });
-  series.push({
-    name: "Unused",
-    data: [
-      ((totalStorage.total - totalStorage.used) / totalStorage.total) * 100,
-    ],
-    usage: totalStorage.total - totalStorage.used,
-    bandwidth: 0,
-    color: (systemTheme || theme) == "dark" ? "#404040" : "#E5E5E5",
-  });
+
+  const entities = useMemo(() => Object.keys(cameraStorage), [cameraStorage]);
+
+  const handleSort = useCallback((key: SortKey) => {
+    setSortConfig((currentSort) => {
+      if (currentSort.key == key) {
+        return {
+          key,
+          direction: currentSort.direction == "asc" ? "desc" : "asc",
+        };
+      }
+
+      return { key, direction: defaultSortDirections[key] };
+    });
+  }, []);
+
+  const getAriaSort = useCallback(
+    (key: SortKey) => {
+      if (sortConfig.key != key) {
+        return "none";
+      }
+
+      return sortConfig.direction == "asc" ? "ascending" : "descending";
+    },
+    [sortConfig],
+  );
+
+  const getSortIcon = useCallback(
+    (key: SortKey) => {
+      if (sortConfig.key != key) {
+        return <ChevronsUpDown className="size-3.5 opacity-50" />;
+      }
+
+      return sortConfig.direction == "asc" ? (
+        <ArrowUp className="size-3.5" />
+      ) : (
+        <ArrowDown className="size-3.5" />
+      );
+    },
+    [sortConfig],
+  );
+
+  const series = useMemo<StorageSeries[]>(() => {
+    const colors = generateColors(entities.length);
+
+    const cameraSeries = entities.map((entity, index) => ({
+      name: entity,
+      data: [(cameraStorage[entity].usage / totalStorage.total) * 100],
+      usage: cameraStorage[entity].usage,
+      bandwidth: cameraStorage[entity].bandwidth,
+      color: colors[index],
+    }));
+
+    cameraSeries.sort((left, right) => {
+      let comparison = 0;
+
+      if (sortConfig.key == "camera") {
+        comparison = left.name
+          .replaceAll("_", " ")
+          .localeCompare(right.name.replaceAll("_", " "), undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+      } else {
+        comparison = left[sortConfig.key] - right[sortConfig.key];
+      }
+
+      return sortConfig.direction == "asc" ? comparison : -comparison;
+    });
+
+    return [
+      ...cameraSeries,
+      {
+        name: "Other",
+        data: [
+          ((totalStorage.used - totalStorage.camera) / totalStorage.total) *
+            100,
+        ],
+        usage: totalStorage.used - totalStorage.camera,
+        bandwidth: 0,
+        color: (systemTheme || theme) == "dark" ? "#606060" : "#D5D5D5",
+      },
+      {
+        name: "Unused",
+        data: [
+          ((totalStorage.total - totalStorage.used) / totalStorage.total) * 100,
+        ],
+        usage: totalStorage.total - totalStorage.used,
+        bandwidth: 0,
+        color: (systemTheme || theme) == "dark" ? "#404040" : "#E5E5E5",
+      },
+    ];
+  }, [cameraStorage, entities, sortConfig, systemTheme, theme, totalStorage]);
 
   const options = useMemo(() => {
     return {
@@ -185,6 +273,21 @@ export function CombinedStorageGraph({
     [t],
   );
 
+  const getSortHeader = useCallback(
+    (key: SortKey, label: string, ariaLabel: string) => (
+      <button
+        type="button"
+        className="flex items-center gap-1 text-left hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-selected"
+        aria-label={ariaLabel}
+        onClick={() => handleSort(key)}
+      >
+        <span>{label}</span>
+        {getSortIcon(key)}
+      </button>
+    ),
+    [getSortIcon, handleSort],
+  );
+
   return (
     <div className="flex w-full flex-col gap-2.5">
       <div className="flex w-full items-center justify-between gap-1">
@@ -205,12 +308,30 @@ export function CombinedStorageGraph({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("storage.cameraStorage.camera")}</TableHead>
-              <TableHead>{t("storage.cameraStorage.storageUsed")}</TableHead>
+              <TableHead aria-sort={getAriaSort("camera")}>
+                {getSortHeader(
+                  "camera",
+                  t("storage.cameraStorage.camera"),
+                  t("storage.cameraStorage.sort.camera"),
+                )}
+              </TableHead>
+              <TableHead aria-sort={getAriaSort("usage")}>
+                {getSortHeader(
+                  "usage",
+                  t("storage.cameraStorage.storageUsed"),
+                  t("storage.cameraStorage.sort.storage"),
+                )}
+              </TableHead>
               <TableHead>
                 {t("storage.cameraStorage.percentageOfTotalUsed")}
               </TableHead>
-              <TableHead>{t("storage.cameraStorage.bandwidth")}</TableHead>
+              <TableHead aria-sort={getAriaSort("bandwidth")}>
+                {getSortHeader(
+                  "bandwidth",
+                  t("storage.cameraStorage.bandwidth"),
+                  t("storage.cameraStorage.sort.bandwidth"),
+                )}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

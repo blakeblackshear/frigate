@@ -8,6 +8,7 @@ import {
 } from "@/utils/videoUtil";
 
 type PlayerMode = "playback" | "scrubbing";
+const RECORDING_SEEK_CLAMP_GAP_SECONDS = 45;
 
 export class DynamicVideoController {
   // main state
@@ -79,8 +80,14 @@ export class DynamicVideoController {
       this.playerMode = "playback";
     }
 
+    const playableTime = this.getPlayableTimestamp(time);
+    if (playableTime === undefined) {
+      this.setNoRecording(true);
+      return;
+    }
+
     const seekSeconds = calculateSeekPosition(
-      time,
+      playableTime,
       this.recordings,
       this.inpointOffset,
     );
@@ -101,6 +108,29 @@ export class DynamicVideoController {
     } else {
       // no op
     }
+  }
+
+  private getPlayableTimestamp(time: number): number | undefined {
+    if (!this.recordings.length) {
+      return undefined;
+    }
+
+    const directSeek = calculateSeekPosition(time, this.recordings, this.inpointOffset);
+    if (directSeek !== undefined) {
+      return time;
+    }
+
+    // Some review items start a few seconds before the first saved segment.
+    // Clamp short gaps to the next recording so playback still opens.
+    const nextRecording = this.recordings.find((segment) => segment.start_time > time);
+    if (
+      nextRecording &&
+      nextRecording.start_time - time <= RECORDING_SEEK_CLAMP_GAP_SECONDS
+    ) {
+      return nextRecording.start_time;
+    }
+
+    return undefined;
   }
 
   waitAndPlay() {
@@ -166,5 +196,3 @@ export class DynamicVideoController {
     );
   }
 }
-
-export default typeof DynamicVideoController;

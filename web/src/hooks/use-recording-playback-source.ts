@@ -1,14 +1,18 @@
 import { useApiHost } from "@/api";
 import useSWR from "swr";
-import { FrigateConfig } from "@/types/frigateConfig";
 import {
   Recording,
   RecordingPlaybackPreference,
 } from "@/types/record";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useUserPersistence } from "@/hooks/use-user-persistence";
 import usePlaybackCapabilities from "@/hooks/use-playback-capabilities";
-import { chooseRecordingPlayback } from "@/utils/recordingPlayback";
+import {
+  buildDirectUrl,
+  chooseRecordingPlayback,
+  getFallbackVariantForPreference,
+  RecordingPlaybackDecision,
+} from "@/utils/recordingPlayback";
 
 type RecordingPlaybackSourceOptions = {
   camera: string;
@@ -17,6 +21,14 @@ type RecordingPlaybackSourceOptions = {
   vodPath: string;
   preference?: RecordingPlaybackPreference;
   enabled?: boolean;
+};
+
+export type RecordingPlaybackSource = {
+  decision?: RecordingPlaybackDecision;
+  preference: RecordingPlaybackPreference;
+  setPreference: (value: RecordingPlaybackPreference) => void;
+  url: string;
+  variant: string;
 };
 
 export default function useRecordingPlaybackSource({
@@ -28,11 +40,11 @@ export default function useRecordingPlaybackSource({
   enabled = true,
 }: RecordingPlaybackSourceOptions) {
   const apiHost = useApiHost();
-  const { data: config } = useSWR<FrigateConfig>("config");
-  const [storedPreference] = useUserPersistence<RecordingPlaybackPreference>(
+  const [storedPreference, setStoredPreference, preferenceLoaded] =
+    useUserPersistence<RecordingPlaybackPreference>(
     `${camera}-recording-playback-v2`,
     "sub",
-  );
+    );
   const { data: recordings } = useSWR<Recording[]>(
     enabled ? [`${camera}/recordings`, { after, before, variant: "all" }] : null,
     { revalidateOnFocus: false },
@@ -46,27 +58,56 @@ export default function useRecordingPlaybackSource({
     [recordings],
   );
   const capabilities = usePlaybackCapabilities(codecNames);
+  const activePreference = preference ?? storedPreference ?? "sub";
+  const setPreferenceValue = useCallback(
+    (value: RecordingPlaybackPreference) => {
+      if (preference !== undefined) {
+        return;
+      }
+
+      setStoredPreference(value);
+    },
+    [preference, setStoredPreference],
+  );
 
   return useMemo(() => {
-    if (!recordings?.length) {
+    if (!preferenceLoaded) {
       return undefined;
     }
 
-    return chooseRecordingPlayback({
+    if (!recordings?.length) {
+      const fallbackVariant = getFallbackVariantForPreference(activePreference);
+
+      return {
+        preference: activePreference,
+        setPreference: setPreferenceValue,
+        url: buildDirectUrl(apiHost, vodPath, fallbackVariant),
+        variant: fallbackVariant,
+      };
+    }
+
+    const decision = chooseRecordingPlayback({
       apiHost,
-      config,
       recordings,
-      preference: preference ?? storedPreference ?? "sub",
+      preference: activePreference,
       vodPath,
       capabilities,
-    }).url;
+    });
+
+    return {
+      decision,
+      preference: activePreference,
+      setPreference: setPreferenceValue,
+      url: decision.url,
+      variant: decision.variant,
+    };
   }, [
+    activePreference,
     apiHost,
     capabilities,
-    config,
-    preference,
+    preferenceLoaded,
     recordings,
-    storedPreference,
+    setPreferenceValue,
     vodPath,
   ]);
 }

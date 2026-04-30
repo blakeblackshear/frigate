@@ -8,10 +8,9 @@ import { TrackingDetailsSequence } from "@/types/timeline";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
-import { LuCircle, LuFolderX } from "react-icons/lu";
+import { LuCircle } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
-import { baseUrl } from "@/api/baseUrl";
 import { REVIEW_PADDING } from "@/types/review";
 import {
   ASPECT_PORTRAIT_LAYOUT,
@@ -35,13 +34,11 @@ import { HiDotsHorizontal } from "react-icons/hi";
 import axios from "axios";
 import { toast } from "sonner";
 import { useDetailStream } from "@/context/detail-stream-context";
-import { isDesktop, isIOS, isMobileOnly, isSafari } from "react-device-detect";
-import { useApiHost } from "@/api";
-import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
-import ObjectTrackOverlay from "../ObjectTrackOverlay";
+import { isDesktop, isMobileOnly } from "react-device-detect";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { VideoResolutionType } from "@/types/live";
 import useRecordingPlaybackSource from "@/hooks/use-recording-playback-source";
+import RecordingPlaybackPreferenceSelect from "@/components/player/RecordingPlaybackPreferenceSelect";
 
 type TrackingDetailsProps = {
   className?: string;
@@ -59,18 +56,8 @@ export function TrackingDetails({
 }: TrackingDetailsProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useTranslation(["views/explore"]);
-  const apiHost = useApiHost();
-  const imgRef = useRef<HTMLImageElement | null>(null);
-  const [imgLoaded, setImgLoaded] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(true);
-  const [displaySource, _setDisplaySource] = useState<"video" | "image">(
-    "video",
-  );
   const { setSelectedObjectIds, annotationOffset } = useDetailStream();
-
-  // manualOverride holds a record-stream timestamp explicitly chosen by the
-  // user (eg, clicking a lifecycle row). When null we display `currentTime`.
-  const [manualOverride, setManualOverride] = useState<number | null>(null);
 
   // Capture the annotation offset used for building the video source URL.
   // This only updates when the event changes, NOT on every slider drag,
@@ -251,13 +238,9 @@ export function TrackingDetails({
     });
   });
 
-  // Use manualOverride (set when seeking in image mode) if present so
-  // lifecycle rows and overlays follow image-mode seeks. Otherwise fall
-  // back to currentTime used for video mode.
   const effectiveTime = useMemo(() => {
-    const displayedRecordTime = manualOverride ?? currentTime;
-    return displayedRecordTime - annotationOffset / 1000;
-  }, [manualOverride, currentTime, annotationOffset]);
+    return currentTime - annotationOffset / 1000;
+  }, [currentTime, annotationOffset]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { fullscreen, toggleFullscreen, supportsFullScreen } =
@@ -326,7 +309,7 @@ export function TrackingDetails({
   // On popover open: pause, pin first lifecycle item, and seek.
   useEffect(() => {
     if (isAnnotationSettingsOpen && !wasAnnotationOpenRef.current) {
-      if (videoRef.current && displaySource === "video") {
+      if (videoRef.current) {
         videoRef.current.pause();
       }
       if (eventSequence && eventSequence.length > 0) {
@@ -337,14 +320,14 @@ export function TrackingDetails({
       pinnedDetectTimestampRef.current = null;
     }
     wasAnnotationOpenRef.current = isAnnotationSettingsOpen;
-  }, [isAnnotationSettingsOpen, displaySource, eventSequence]);
+  }, [isAnnotationSettingsOpen, eventSequence]);
 
   // When the pinned timestamp or offset changes, re-seek the video and
   // explicitly update currentTime so the overlay shows the pinned event's box.
   useEffect(() => {
     const pinned = pinnedDetectTimestampRef.current;
     if (!isAnnotationSettingsOpen || pinned == null) return;
-    if (!videoRef.current || displaySource !== "video") return;
+    if (!videoRef.current) return;
 
     const targetTimeRecord = pinned + annotationOffset / 1000;
     const relativeTime = timestampToVideoTime(targetTimeRecord);
@@ -354,36 +337,21 @@ export function TrackingDetails({
     // resolves back to the pinned detect timestamp:
     //   effectiveCurrentTime = targetTimeRecord - annotationOffset/1000 = pinned
     setCurrentTime(targetTimeRecord);
-  }, [
-    isAnnotationSettingsOpen,
-    annotationOffset,
-    displaySource,
-    timestampToVideoTime,
-  ]);
+  }, [isAnnotationSettingsOpen, annotationOffset, timestampToVideoTime]);
 
   const handleLifecycleClick = useCallback(
     (item: TrackingDetailsSequence) => {
-      if (!videoRef.current && !imgRef.current) return;
+      if (!videoRef.current) return;
 
       // Convert lifecycle timestamp (detect stream) to record stream time
       const targetTimeRecord = item.timestamp + annotationOffset / 1000;
 
-      if (displaySource === "image") {
-        // For image mode: set a manual override timestamp and update
-        // currentTime so overlays render correctly.
-        setManualOverride(targetTimeRecord);
-        setCurrentTime(targetTimeRecord);
-        return;
-      }
-
-      // For video mode: convert to video-relative time (accounting for motion-only gaps)
+      // Convert to video-relative time (accounting for motion-only gaps)
       const relativeTime = timestampToVideoTime(targetTimeRecord);
 
-      if (videoRef.current) {
-        videoRef.current.currentTime = relativeTime;
-      }
+      videoRef.current.currentTime = relativeTime;
     },
-    [annotationOffset, displaySource, timestampToVideoTime],
+    [annotationOffset, timestampToVideoTime],
   );
 
   const formattedStart = config
@@ -427,14 +395,6 @@ export function TrackingDetails({
   useEffect(() => {
     if (seekToTimestamp === null) return;
 
-    if (displaySource === "image") {
-      // For image mode, set the manual override so the snapshot updates to
-      // the exact record timestamp.
-      setManualOverride(seekToTimestamp);
-      setSeekToTimestamp(null);
-      return;
-    }
-
     // seekToTimestamp is a record stream timestamp
     // Convert to video position (accounting for motion-only recording gaps)
     if (!videoRef.current) return;
@@ -443,7 +403,7 @@ export function TrackingDetails({
       videoRef.current.currentTime = relativeTime;
     }
     setSeekToTimestamp(null);
-  }, [seekToTimestamp, displaySource, timestampToVideoTime]);
+  }, [seekToTimestamp, timestampToVideoTime]);
 
   const isWithinEventRange = useMemo(() => {
     if (effectiveTime === undefined || event.start_time === undefined) {
@@ -535,15 +495,22 @@ export function TrackingDetails({
     before: videoWindow.endTime,
     vodPath: videoWindow.vodPath,
   });
+  useEffect(() => {
+    if (playbackSource?.url) {
+      setIsVideoLoading(true);
+    }
+  }, [playbackSource?.url]);
   const videoSource = useMemo(() => {
-    const playlist = playbackSource ?? `${baseUrl}${videoWindow.vodPath}`;
+    if (!playbackSource) {
+      return undefined;
+    }
 
     return {
-      playlist,
+      playlist: playbackSource.url,
       startPosition: 0,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playbackSource, videoWindow]);
+  }, [playbackSource]);
 
   // Determine camera aspect ratio category
   const cameraAspect = useMemo(() => {
@@ -573,27 +540,6 @@ export function TrackingDetails({
     },
     [videoTimeToTimestamp],
   );
-
-  const [src, setSrc] = useState(
-    `${apiHost}api/${event.camera}/recordings/${currentTime + REVIEW_PADDING}/snapshot.jpg?height=500`,
-  );
-  const [hasError, setHasError] = useState(false);
-
-  // Derive the record timestamp to display: manualOverride if present,
-  // otherwise use currentTime.
-  const displayedRecordTime = manualOverride ?? currentTime;
-
-  useEffect(() => {
-    if (displayedRecordTime) {
-      const newSrc = `${apiHost}api/${event.camera}/recordings/${displayedRecordTime}/snapshot.jpg?height=500`;
-      setSrc(newSrc);
-    }
-    setImgLoaded(false);
-    setHasError(false);
-
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displayedRecordTime]);
 
   const onUploadFrameToPlus = useCallback(() => {
     return axios.post(`/${event.camera}/plus/${currentTime}`);
@@ -632,83 +578,40 @@ export function TrackingDetails({
             cameraAspect === "tall" ? "h-full" : "w-full",
           )}
         >
-          {displaySource == "video" && (
-            <>
-              <HlsVideoPlayer
-                videoRef={videoRef}
-                containerRef={containerRef}
-                visible={true}
-                currentSource={videoSource}
-                hotKeys={false}
-                supportsFullscreen={supportsFullScreen}
-                fullscreen={fullscreen}
-                frigateControls={true}
-                onTimeUpdate={handleTimeUpdate}
-                onSeekToTime={handleSeekToTime}
-                onUploadFrame={onUploadFrameToPlus}
-                onPlaying={() => setIsVideoLoading(false)}
-                setFullResolution={setFullResolution}
-                toggleFullscreen={toggleFullscreen}
-                isDetailMode={true}
-                camera={event.camera}
-                currentTimeOverride={currentTime}
-              />
-              {isVideoLoading && (
-                <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-              )}
-            </>
+          {videoSource ? (
+            <HlsVideoPlayer
+              videoRef={videoRef}
+              containerRef={containerRef}
+              visible={true}
+              currentSource={videoSource}
+              hotKeys={false}
+              supportsFullscreen={supportsFullScreen}
+              fullscreen={fullscreen}
+              frigateControls={true}
+              onTimeUpdate={handleTimeUpdate}
+              onSeekToTime={handleSeekToTime}
+              onUploadFrame={onUploadFrameToPlus}
+              onPlaying={() => setIsVideoLoading(false)}
+              setFullResolution={setFullResolution}
+              toggleFullscreen={toggleFullscreen}
+              isDetailMode={true}
+              camera={event.camera}
+              currentTimeOverride={currentTime}
+            />
+          ) : (
+            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
           )}
-          {displaySource == "image" && (
-            <>
-              <ImageLoadingIndicator
-                className="absolute inset-0"
-                imgLoaded={imgLoaded}
+          {playbackSource && (
+            <div className="absolute right-3 top-3 z-50">
+              <RecordingPlaybackPreferenceSelect
+                className="h-8 w-32 bg-background/90 text-xs backdrop-blur"
+                value={playbackSource.preference}
+                onValueChange={playbackSource.setPreference}
               />
-              {hasError && (
-                <div className="relative aspect-video">
-                  <div className="flex flex-col items-center justify-center p-20 text-center">
-                    <LuFolderX className="size-16" />
-                    {t("objectLifecycle.noImageFound")}
-                  </div>
-                </div>
-              )}
-              <div
-                className={cn("relative", imgLoaded ? "visible" : "invisible")}
-              >
-                <div className="absolute z-50 size-full">
-                  <ObjectTrackOverlay
-                    key={`overlay-${displayedRecordTime}`}
-                    camera={event.camera}
-                    showBoundingBoxes={true}
-                    currentTime={displayedRecordTime}
-                    videoWidth={imgRef?.current?.naturalWidth ?? 0}
-                    videoHeight={imgRef?.current?.naturalHeight ?? 0}
-                    className="absolute inset-0 z-10"
-                    onSeekToTime={handleSeekToTime}
-                  />
-                </div>
-                <img
-                  key={event.id}
-                  ref={imgRef}
-                  className={cn(
-                    "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
-                  )}
-                  loading={isSafari ? "eager" : "lazy"}
-                  style={
-                    isIOS
-                      ? {
-                          WebkitUserSelect: "none",
-                          WebkitTouchCallout: "none",
-                        }
-                      : undefined
-                  }
-                  draggable={false}
-                  src={src}
-                  onLoad={() => setImgLoaded(true)}
-                  onError={() => setHasError(true)}
-                />
-              </div>
-            </>
+            </div>
+          )}
+          {isVideoLoading && (
+            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
           )}
         </div>
       </div>

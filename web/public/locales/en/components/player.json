@@ -2,6 +2,11 @@
   "noRecordingsFoundForThisTime": "No recordings found for this time",
   "noPreviewFound": "No Preview Found",
   "noPreviewFoundFor": "No Preview Found for {{cameraName}}",
+  "playbackPreference": {
+    "auto": "Auto",
+    "main": "Main",
+    "sub": "Sub"
+  },
   "submitFrigatePlus": {
     "title": "Submit this frame to Frigate+?",
     "submit": "Submit"

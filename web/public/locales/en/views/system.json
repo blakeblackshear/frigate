@@ -148,6 +148,11 @@
       "storageUsed": "Storage",
       "percentageOfTotalUsed": "Percentage of Total",
       "bandwidth": "Bandwidth",
+      "sort": {
+        "camera": "Sort by camera",
+        "storage": "Sort by storage",
+        "bandwidth": "Sort by bandwidth"
+      },
       "unused": {
         "title": "Unused",
         "tips": "This value may not accurately represent the free space available to Frigate if you have other files stored on your drive beyond Frigate's recordings. Frigate does not track storage usage outside of its recordings."

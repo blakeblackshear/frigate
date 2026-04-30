@@ -71,6 +71,7 @@ class Recordings(Model):
     camera = CharField(index=True, max_length=20)
     path = CharField(unique=True)
     variant = CharField(default="main", index=True, max_length=20)
+    transcoded_from_main = BooleanField(default=False)
     start_time = DateTimeField()
     end_time = DateTimeField()
     duration = FloatField()

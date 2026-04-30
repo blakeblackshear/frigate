@@ -1,4 +1,3 @@
-import { FrigateConfig } from "@/types/frigateConfig";
 import {
   Recording,
   RecordingPlaybackPreference,
@@ -11,15 +10,16 @@ export type PlaybackCapabilities = {
 };
 
 export type RecordingPlaybackDecision = {
-  mode: "direct" | "transcoded";
+  mode: "direct";
   variant: string;
   url: string;
   reason: string;
 };
 
+export type PlaybackVariant = "main" | "sub";
+
 type DecisionOptions = {
   apiHost: string;
-  config?: FrigateConfig;
   recordings: Recording[];
   preference: RecordingPlaybackPreference;
   vodPath: string;
@@ -61,16 +61,6 @@ const CODEC_SAMPLES: Record<string, string[]> = {
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/$/, "");
-}
-
-function appendQuery(url: string, params: Record<string, string | undefined>): string {
-  const entries = Object.entries(params).filter(([, value]) => value);
-  if (entries.length === 0) {
-    return url;
-  }
-
-  const search = new URLSearchParams(entries as [string, string][]);
-  return `${url}${url.includes("?") ? "&" : "?"}${search.toString()}`;
 }
 
 function average(values: number[]): number | undefined {
@@ -119,14 +109,70 @@ export function estimateRecordingBitrate(recordings: Recording[]): number | unde
 export function groupRecordingsByVariant(
   recordings: Recording[],
 ): Record<string, Recording[]> {
-  return recordings.reduce<Record<string, Recording[]>>((acc, recording) => {
-    const variant = recording.variant || "main";
-    if (!acc[variant]) {
-      acc[variant] = [];
+  return {
+    main: getRecordingsForPlaybackVariant(recordings, "main"),
+    sub: getRecordingsForPlaybackVariant(recordings, "sub"),
+  };
+}
+
+export function normalizePlaybackVariantFamily(
+  variant?: string | null,
+): PlaybackVariant | undefined {
+  const normalized = variant?.toLowerCase().trim() || "main";
+
+  if (normalized === "main") {
+    return "main";
+  }
+
+  if (normalized === "sub") {
+    return "sub";
+  }
+
+  return undefined;
+}
+
+function getVariantPriority(recording: Recording): number {
+  const normalized = recording.variant?.toLowerCase().trim();
+
+  if (normalized === "sub") {
+    return 1;
+  }
+
+  if (normalized === "main") {
+    return 0;
+  }
+
+  return -1;
+}
+
+export function getRecordingsForPlaybackVariant(
+  recordings: Recording[],
+  variant: PlaybackVariant,
+): Recording[] {
+  const selected = recordings
+    .filter((recording) => normalizePlaybackVariantFamily(recording.variant) === variant)
+    .sort((left, right) => {
+      if (left.start_time !== right.start_time) {
+        return left.start_time - right.start_time;
+      }
+
+      return getVariantPriority(right) - getVariantPriority(left);
+    });
+
+  const deduped = new Map<string, Recording>();
+
+  for (const recording of selected) {
+    const key = `${recording.start_time}:${recording.end_time}`;
+    const existing = deduped.get(key);
+
+    if (!existing || getVariantPriority(recording) > getVariantPriority(existing)) {
+      deduped.set(key, recording);
     }
-    acc[variant].push(recording);
-    return acc;
-  }, {});
+  }
+
+  return Array.from(deduped.values()).sort(
+    (left, right) => left.start_time - right.start_time,
+  );
 }
 
 function canDirectPlayVariant(
@@ -145,65 +191,34 @@ function getDirectBaseUrl(apiHost: string): string {
   return trimTrailingSlash(apiHost);
 }
 
-function getTranscodeBaseUrl(apiHost: string, config?: FrigateConfig): string | undefined {
-  if (!config?.transcode_proxy?.enabled) {
-    return undefined;
+export function buildVariantVodPath(vodPath: string, variant: string): string {
+  if (variant === "main") {
+    return vodPath;
   }
 
-  if (config.transcode_proxy.vod_proxy_url?.trim()) {
-    return trimTrailingSlash(config.transcode_proxy.vod_proxy_url);
-  }
-
-  return `${trimTrailingSlash(apiHost)}/vod-transcoded`;
+  return vodPath.replace(/^\/vod\//, `/vod/variant/${variant}/`);
 }
 
-function getTranscodeProfile(estimatedBandwidthBps?: number, saveData = false) {
-  if (saveData || (estimatedBandwidthBps && estimatedBandwidthBps <= 1_500_000)) {
-    return { bitrate: "512k", maxWidth: "640", maxHeight: "360" };
-  }
-
-  if (estimatedBandwidthBps && estimatedBandwidthBps <= 3_000_000) {
-    return { bitrate: "1200k", maxWidth: "960", maxHeight: "540" };
-  }
-
-  return { bitrate: "2500k", maxWidth: "1280", maxHeight: "720" };
-}
-
-function buildDirectUrl(apiHost: string, vodPath: string, variant: string): string {
-  const baseUrl = `${getDirectBaseUrl(apiHost)}${vodPath}`;
-  return appendQuery(baseUrl, {
-    variant: variant !== "main" ? variant : undefined,
-  });
-}
-
-function buildTranscodeUrl(
+export function buildDirectUrl(
   apiHost: string,
-  config: FrigateConfig | undefined,
   vodPath: string,
   variant: string,
-  capabilities: PlaybackCapabilities,
 ): string {
-  const transcodeBase = getTranscodeBaseUrl(apiHost, config);
-  if (!transcodeBase) {
-    return buildDirectUrl(apiHost, vodPath, variant);
+  return `${getDirectBaseUrl(apiHost)}${buildVariantVodPath(vodPath, variant)}`;
+}
+
+export function getFallbackVariantForPreference(
+  preference: RecordingPlaybackPreference,
+): "main" | "sub" {
+  if (preference === "sub") {
+    return "sub";
   }
 
-  const profile = getTranscodeProfile(
-    capabilities.estimatedBandwidthBps,
-    capabilities.saveData,
-  );
-
-  return appendQuery(`${transcodeBase}${vodPath}`, {
-    variant,
-    bitrate: profile.bitrate,
-    max_width: profile.maxWidth,
-    max_height: profile.maxHeight,
-  });
+  return "main";
 }
 
 export function chooseRecordingPlayback({
   apiHost,
-  config,
   recordings,
   preference,
   vodPath,
@@ -212,7 +227,6 @@ export function chooseRecordingPlayback({
   const recordingsByVariant = groupRecordingsByVariant(recordings);
   const mainRecordings = recordingsByVariant.main ?? [];
   const subRecordings = recordingsByVariant.sub ?? [];
-  const transcodeAvailable = !!getTranscodeBaseUrl(apiHost, config);
   const estimatedBandwidthBps =
     capabilities.estimatedBandwidthBps ?? (capabilities.saveData ? 1_000_000 : 6_000_000);
 
@@ -251,39 +265,11 @@ export function chooseRecordingPlayback({
   }
 
   if (preference === "sub" && candidates.sub.recordings.length > 0) {
-    if (candidates.sub.playable) {
-      return {
-        mode: "direct",
-        variant: "sub",
-        url: buildDirectUrl(apiHost, vodPath, "sub"),
-        reason: "manual-sub",
-      };
-    }
-
     return {
-      mode: "transcoded",
+      mode: "direct",
       variant: "sub",
-      url: buildTranscodeUrl(apiHost, config, vodPath, "sub", capabilities),
-      reason: "manual-sub-transcoded",
-    };
-  }
-
-  if (preference === "transcoded") {
-    const targetVariant = candidates.sub.recordings.length > 0 ? "sub" : "main";
-    if (!transcodeAvailable) {
-      return {
-        mode: "direct",
-        variant: targetVariant,
-        url: buildDirectUrl(apiHost, vodPath, targetVariant),
-        reason: "manual-transcoded-unavailable",
-      };
-    }
-
-    return {
-      mode: "transcoded",
-      variant: targetVariant,
-      url: buildTranscodeUrl(apiHost, config, vodPath, targetVariant, capabilities),
-      reason: "manual-transcoded",
+      url: buildDirectUrl(apiHost, vodPath, "sub"),
+      reason: "manual-sub",
     };
   }
 
@@ -305,20 +291,10 @@ export function chooseRecordingPlayback({
     };
   }
 
-  const transcodeVariant = candidates.sub.recordings.length > 0 ? "sub" : "main";
-  if (!transcodeAvailable) {
-    return {
-      mode: "direct",
-      variant: transcodeVariant,
-      url: buildDirectUrl(apiHost, vodPath, transcodeVariant),
-      reason: "direct-fallback",
-    };
-  }
-
   return {
-    mode: "transcoded",
-    variant: transcodeVariant,
-    url: buildTranscodeUrl(apiHost, config, vodPath, transcodeVariant, capabilities),
-    reason: "transcode-fallback",
+    mode: "direct",
+    variant: "main",
+    url: buildDirectUrl(apiHost, vodPath, "main"),
+    reason: "direct-fallback",
   };
 }
