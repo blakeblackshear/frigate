@@ -396,7 +396,6 @@ export default function HlsVideoPlayer({
                 }}
               >
                 <ObjectTrackOverlay
-                  key={`overlay-${currentTime}`}
                   camera={camera}
                   showBoundingBoxes={!isPlaying}
                   currentTime={currentTime}
