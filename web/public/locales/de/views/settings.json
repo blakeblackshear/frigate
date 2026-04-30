@@ -345,6 +345,10 @@
           "zone": "Zone",
           "motion_mask": "Bewegungsmaske",
           "object_mask": "Objektmaske"
+        },
+        "revertOverride": {
+          "title": "Basis Konfiguration wiederherstellen",
+          "desc": "Dadurch wird die Profilüberschreibung für {{type}}<em>{{name}}</em> aufgehoben und die Grundkonfiguration wiederhergestellt."
         }
       },
       "speed": {
@@ -507,7 +511,8 @@
         "title": "Aktiviert",
         "description": "Ob diese Maske in der Konfigurationsdatei aktiviert ist. Ist sie deaktiviert, kann sie nicht über MQTT aktiviert werden. Deaktivierte Masken werden zur Laufzeit ignoriert."
       }
-    }
+    },
+    "addDisabledProfile": "Fügen Sie es zuerst der Basiskonfiguration hinzu und überschreiben Sie es dann im Profil"
   },
   "debug": {
     "objectShapeFilterDrawing": {
@@ -1647,7 +1652,8 @@
       "keyDuplicate": "Der Name des Detektors ist bereits vorhanden.",
       "noSchema": "Es sind keine Detektorschemata verfügbar.",
       "none": "Es sind keine Detektorinstanzen konfiguriert.",
-      "add": "Detektor hinzufügen"
+      "add": "Detektor hinzufügen",
+      "addCustomKey": "Benutzerdefinierten Schlüssel hinzufügen"
     },
     "record": {
       "title": "Aufnahmeeinstellungen"
@@ -1718,7 +1724,16 @@
       "title": "Einstellungen für Zeitstempel"
     },
     "searchPlaceholder": "Suche...",
-    "addCustomLabel": "Benutzerdefiniertes Etikett hinzufügen..."
+    "addCustomLabel": "Benutzerdefiniertes Etikett hinzufügen...",
+    "knownPlates": {
+      "namePlaceholder": "z.B. das Auto der Frau",
+      "platePlaceholder": "Kennzeichen oder regulärer Ausdruck"
+    },
+    "genaiModel": {
+      "placeholder": "Modell auswählen…",
+      "search": "Modell suchen…",
+      "noModels": "Keine Modelle verfügbar"
+    }
   },
   "globalConfig": {
     "title": "Globale Konfiguration",
@@ -1876,6 +1891,10 @@
     },
     "snapshots": {
       "detectDisabled": "Die Objekterkennung ist deaktiviert. Es werden keine Momentaufnahmen von verfolgten Objekten erstellt."
+    },
+    "detectors": {
+      "mixedTypes": "Alle Detektoren müssen von gleichem Typ sein, Entferne bestehende Detektoren um einen anderen Typ zu benutzen.",
+      "mixedTypesSuggestion": "Alle Detektoren müssen vom gleichem Typ sein. Entferne bestehende oder wähle {{type}}."
     }
   }
 }

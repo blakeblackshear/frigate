@@ -64,20 +64,73 @@
     "toast": {
       "error": {
         "endTimeMustAfterStartTime": "Die Endzeit darf nicht vor der Startzeit liegen",
-        "failed": "Fehler beim Starten des Exports: {{error}}",
+        "failed": "Fehler beim Export in die Warteschlange: {{error}}",
         "noVaildTimeSelected": "Kein gültiger Zeitraum ausgewählt"
       },
       "success": "Export erfolgreich gestartet. Die Datei befindet sich auf der Exportseite.",
-      "view": "Ansicht"
+      "view": "Ansicht",
+      "queued": "Export in Warteschlange gestellt. Fortschritt auf der Exportseite verfolgen.",
+      "batchSuccess_one": "1 Export gestartet. Öffne den Fall jetzt.",
+      "batchSuccess_other": "{{count}} Exports gestartet. Öffne den Fall jetzt.",
+      "batchPartial": "{{successful}} von {{total}} Exporten gestartet. Fehlgeschlagene Kameras: {{failedCameras}}",
+      "batchFailed": "Fehler beim Starten der {{total}} Exporte. Fehlgeschlagene Kameras: {{failedCameras}}",
+      "batchQueuedSuccess_one": "1 Export in die Warteschlange gestellt. Fall wird jetzt geöffnet.",
+      "batchQueuedSuccess_other": "{{count}} Exporte in der Warteschlange. Fall wird jetzt geöffnet.",
+      "batchQueuedPartial": "{{successful}} von {{total}} Exporten in die Warteschlange gestellt. Fehlerhafte Kameras: {{failedCameras}}",
+      "batchQueueFailed": "Fehler beim Einreihen von {{total}} Exporten in die Warteschlange. Fehlerhafte Kameras: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Export speichern",
-      "previewExport": "Exportvorschau"
+      "previewExport": "Exportvorschau",
+      "queueingExport": "Export wird in die Warteschlange gestellt...",
+      "useThisRange": "Nutzen Sie diesen Bereich"
     },
     "export": "Exportieren",
     "case": {
       "label": "Fall",
-      "placeholder": "Einen Fall auswählen"
+      "placeholder": "Einen Fall auswählen",
+      "newCaseOption": "Einen neuen Fall erstellen",
+      "newCaseNamePlaceholder": "Neuer Fallname",
+      "newCaseDescriptionPlaceholder": "Fall Beschreibung",
+      "nonAdminHelp": "Für diese Exporte wird ein neuer Fall angelegt."
+    },
+    "queueing": "Export wird in die Warteschlange gestellt...",
+    "tabs": {
+      "export": "Einzelne Kamera",
+      "multiCamera": "Mehrere-Kameras"
+    },
+    "multiCamera": {
+      "timeRange": "Zeitbereich",
+      "selectFromTimeline": "Wählen Sie aus der Zeitleiste aus",
+      "cameraSelection": "Kameras",
+      "cameraSelectionHelp": "Kameras, die in diesem Zeitbereich Objekte verfolgen, sind vorausgewählt",
+      "checkingActivity": "Kameraaktivität wird überprüft...",
+      "noCameras": "keine kamaeras verfügbar",
+      "detectionCount_one": "1 verfolgtes Objekt",
+      "detectionCount_other": "{{count}} verfolgtesObjekte",
+      "nameLabel": "Export Name",
+      "namePlaceholder": "Optionaler Basisname für diese Exporte",
+      "queueingButton": "Exporte werden in die Warteschlange gestellt...",
+      "exportButton_one": "Export 1 Kamera",
+      "exportButton_other": "xport {{count}} Kameras"
+    },
+    "multi": {
+      "title_one": "1 Bewertung exportieren",
+      "title_other": "{{count}} Bewertung exportieren",
+      "description": "Exportieren Sie jede ausgewählte Rezension. Alle Exporte werden in einem einzigen Fall zusammengefasst.",
+      "descriptionNoCase": "Jede ausgewählte Bewertung exportieren.",
+      "caseNamePlaceholder": "Export prüfen - {{date}}",
+      "exportButton_one": "1 Bewertung exportieren",
+      "exportButton_other": "{{count}} Bewertung exportieren",
+      "exportingButton": "Exportieren...",
+      "toast": {
+        "started_one": "1 Export gestartet. Fall wird jetzt geöffnet.",
+        "started_other": "{{count}} Exporte gestartet. Fall wird jetzt geöffnet.",
+        "startedNoCase_one": "1 Export gestartet.",
+        "startedNoCase_other": "{{count}} Exports gestartet.",
+        "partial": "{{successful}} von {{total}} Exporten gestartet. Fehlgeschlagen: {{failedItems}}",
+        "failed": "Fehler beim Starten der {{total}} Exporte. Fehler: {{failedItems}}"
+      }
     }
   },
   "streaming": {
