@@ -22,7 +22,8 @@
       "deletedModel_one": "{{count}} model succesvol verwijderd",
       "deletedModel_other": "{{count}} modellen succesvol verwijderd",
       "updatedModel": "Modelconfiguratie succesvol bijgewerkt",
-      "renamedCategory": "Klasse succesvol hernoemd naar {{name}}"
+      "renamedCategory": "Klasse succesvol hernoemd naar {{name}}",
+      "reclassifiedImage": "Afbeelding succesvol opnieuw geclassificeerd"
     },
     "error": {
       "deleteImageFailed": "Verwijderen mislukt: {{errorMessage}}",

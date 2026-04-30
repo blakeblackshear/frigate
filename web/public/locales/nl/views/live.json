@@ -13,7 +13,8 @@
       "clickMove": {
         "label": "Klik in het frame om de camera te centreren",
         "enable": "Klikken om te bewegen inschakelen",
-        "disable": "Klikken om te bewegen uitschakelen"
+        "disable": "Klikken om te bewegen uitschakelen",
+        "enableWithZoom": "Schakel klikken om te verplaatsen / slepen om te zoomen in"
       },
       "right": {
         "label": "Beweeg de PTZ-camera naar rechts"
