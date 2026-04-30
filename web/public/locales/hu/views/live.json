@@ -3,7 +3,9 @@
     "enable": "Kétirányú kommunikáció engedélyezése",
     "disable": "Kétirányú kommunikáció tiltása"
   },
-  "documentTitle": "Élő - Frigate",
+  "documentTitle": {
+    "default": "Élő - Frigate"
+  },
   "lowBandwidthMode": "Alacsony felbontású mód",
   "documentTitle.withCamera": "{{camera}} - Élő - Frigate",
   "cameraAudio": {
@@ -15,7 +17,8 @@
       "clickMove": {
         "label": "Kattintson a képre a kamera középre igazításához",
         "enable": "Engedélyezze a kattintást a mozgatáshoz",
-        "disable": "Kattintással húzás kikapcsolása"
+        "disable": "Kattintással húzás kikapcsolása",
+        "enableWithZoom": "Kattintással történő mozgatás és húzással való nagyítás engedélyezése"
       },
       "left": {
         "label": "PTZ kamera balra mozgatása"

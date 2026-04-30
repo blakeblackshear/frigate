@@ -3,7 +3,8 @@
   "noPreviewFound": "Nincs elérhető előkép",
   "submitFrigatePlus": {
     "title": "Elküldi ezt a képet a Frigate+-nak?",
-    "submit": "Küldés"
+    "submit": "Küldés",
+    "previewError": "Nem sikerült betölteni a pillanatkép előnézetét. Előfordulhat, hogy a felvétel jelenleg nem elérhető."
   },
   "noPreviewFoundFor": "Nem található előnézet {{cameraName}}-hoz/-hez/-höz",
   "livePlayerRequiredIOSVersion": "iOS 17.1 vagy újabb szükséges ehhez az élő adás típushoz.",

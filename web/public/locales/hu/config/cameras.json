@@ -39,6 +39,41 @@
         "description": "A Frigate felhasználói felületén használt, könnyen megjegyezhető kamera név"
     },
     "enabled": {
-        "label": "Engedélyezve"
+        "label": "Engedélyezve",
+        "description": "Engedélyezve"
+    },
+    "audio": {
+        "label": "Hangesemények",
+        "description": "Hangalapú eseményérzékelés beállításai ennél a kameránál.",
+        "enabled": {
+            "label": "Hangalapú eseményérzékelés engedélyezése",
+            "description": "A hangalapú eseményérzékelés engedélyezése vagy letiltása ennél a kameránál."
+        },
+        "max_not_heard": {
+            "description": "Ennyi másodperc után fejeződik be a hangesemény, ha a beállított hangtípus nem észlelhető.",
+            "label": "Időtúllépés befejezése"
+        },
+        "min_volume": {
+            "label": "Minimális hangerő",
+            "description": "Minimum RMS hangerő a hangérzékelés futtatásához; az alacsonyabb értékek növelik az érzékenységet (pl: 200 magas, 500 közepes, 1000 alacsony érzékenységet jelent)."
+        },
+        "listen": {
+            "label": "Hallgatási típúsok",
+            "description": "Lista a hangalapú eseményekről amit érzékelni szeretnél (angolul) (például: bark, fire_alarm, scream, speech, yell)."
+        },
+        "filters": {
+            "label": "Audio szűrők (filters)",
+            "description": "Hangtípusonkénti szűrőbeállítások (filter), mint például a téves találatok számát mérsékelő konfidencia-küszöbök."
+        },
+        "enabled_in_config": {
+            "label": "Eredeti audio állapot"
+        }
+    },
+    "audio_transcription": {
+        "label": "Hang Feliratozás",
+        "description": "„Beállítások élő hang és beszéd automatikus szöveggé alakításához, eseményekhez és élő feliratozáshoz.",
+        "enabled": {
+            "label": "Hangról szövegre alakítás engedélyezése"
+        }
     }
 }

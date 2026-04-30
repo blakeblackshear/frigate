@@ -178,7 +178,8 @@
     "configuration": "Konfiguráció",
     "systemLogs": "Rendszer naplók",
     "settings": "Beállítások",
-    "classification": "Osztályozás"
+    "classification": "Osztályozás",
+    "profiles": "Profilok"
   },
   "role": {
     "viewer": "Néző",

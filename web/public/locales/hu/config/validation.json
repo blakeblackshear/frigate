@@ -4,5 +4,22 @@
     "exclusiveMinimum": "Nagyobbnak kell lennie, mint {{limit}}",
     "exclusiveMaximum": "Kevesebbnek kell lennie, mint {{limit}}",
     "minLength": "Legalább {{limit}} karaktert kell megadni",
-    "maxLength": "Legfeljebb {{limit}} karakter lehet"
+    "maxLength": "Legfeljebb {{limit}} karakter lehet",
+    "minItems": "Legalább {{limit}} elemnek kell lennie",
+    "maxItems": "Legfeljebb {{limit}} elem lehet",
+    "pattern": "Érvénytelen formátum",
+    "required": "Ezt a mezőt kötelező kitölteni",
+    "type": "Érvénytelen értéktípus",
+    "enum": "Az engedélyezett értékek közül legalább egy kell legyen",
+    "const": "Az érték nem egyezik a várt állandóval",
+    "uniqueItems": "Minden elemnek egyedinek kell lennie",
+    "format": "Érvénytelen formátum",
+    "additionalProperties": "Ismeretlen tulajdonság nem engedélyezett",
+    "oneOf": "Pontosan az egyik engedélyezett sémának kell megfelelnie",
+    "anyOf": "Legalább az egyik engedélyezett sémának kell megfelelnie",
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Mindegyik szerepkör (role) csak egy bemeneti (input) streamhez rendelhető hozzá."
+        }
+    }
 }
