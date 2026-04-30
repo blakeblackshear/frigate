@@ -1,1 +1,22 @@
-{}
+{
+    "label": "Kamerakonfiguraatio",
+    "name": {
+        "label": "Kameran nimi",
+        "description": "Kameran nimi vaaditaan"
+    },
+    "friendly_name": {
+        "label": "Kutsumanimi",
+        "description": "Kameran kutsumanimeä käytetään Frigaten käyttöliittymässä"
+    },
+    "enabled": {
+        "description": "Käytössä"
+    },
+    "audio": {
+        "label": "Ääni tapahtumat",
+        "description": "Äänipohjaisen havaitsemisen asetukset tälle kameralle.",
+        "enabled": {
+            "label": "Ota ääni havainnointi käyttöön",
+            "description": "Ota tai poista käytöstä ääni tapahtuman havaiseminen tälle kameralle."
+        }
+    }
+}

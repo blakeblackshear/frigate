@@ -42,7 +42,8 @@
     "second_other": "{{time}}sekunttia",
     "formattedTimestampHourMinute": {
       "24hour": "HH:mm"
-    }
+    },
+    "never": "Ei koskaan"
   },
   "pagination": {
     "next": {

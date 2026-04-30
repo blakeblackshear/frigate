@@ -1,1 +1,21 @@
-{}
+{
+    "version": {
+        "label": "Nykyinen konfigurointiversio"
+    },
+    "safe_mode": {
+        "label": "Vikasietotila",
+        "description": "Kun käytössä, käynnistä Frigate vikasietotilassa rajoitetuilla ominaisuuksilla vianselvitystä varten."
+    },
+    "logger": {
+        "label": "Lokitus",
+        "default": {
+            "label": "Lokituksen taso"
+        }
+    },
+    "audio": {
+        "label": "Ääni tapahtumat",
+        "enabled": {
+            "label": "Ota ääni havainnointi käyttöön"
+        }
+    }
+}

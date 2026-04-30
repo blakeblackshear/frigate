@@ -4,7 +4,8 @@
   "noRecordingsFoundForThisTime": "Ei tallenteita valitulta ajalta",
   "submitFrigatePlus": {
     "title": "Lähetä tämä kuva Frigate+:aan?",
-    "submit": "Lähetä"
+    "submit": "Lähetä",
+    "previewError": "Pysäytyskuvan esikatselua ei voi ladata. Tallenne ei ole ehkä saatavissa tällä hetkellä."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 tai uudempi vaaditaan tälle suoratoistotyypille.",
   "streamOffline": {

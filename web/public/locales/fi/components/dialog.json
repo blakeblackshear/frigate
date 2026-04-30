@@ -6,7 +6,8 @@
       "title": "Fregatti käynnistyy uudelleen",
       "content": "Tämä sivu latautuu uudelleen {{countdown}} sekunnin kuluttua.",
       "button": "Pakota uudelleenlataus nyt"
-    }
+    },
+    "description": "Tämä sammuttaa Frigaten lyhyeksi aikaa uudelleenkäynnistyksen ajaksi."
   },
   "explore": {
     "plus": {
