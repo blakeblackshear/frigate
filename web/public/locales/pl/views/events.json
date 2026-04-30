@@ -16,7 +16,9 @@
       "description": "Elementy przeglądu można tworzyć dla kamery tylko wtedy, gdy dla tej kamery włączono nagrywanie."
     }
   },
-  "timeline": "Oś czasu",
+  "timeline": {
+    "label": "Oś czasu"
+  },
   "timeline.aria": "Wybierz oś czasu",
   "events": {
     "label": "Zdarzenia",

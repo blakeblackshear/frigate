@@ -1,1 +1,18 @@
-{}
+{
+    "minimum": "Musi wynosić przynajmniej {{limit}}",
+    "maximum": "Może wynosić najwyżej {{limit}}",
+    "exclusiveMinimum": "Musi być większe niż {{limit}}",
+    "exclusiveMaximum": "Musi być mniejsze niż {{limit}}",
+    "minLength": "Musi być co najmniej {{limit}} znaków",
+    "maxLength": "Maksymalnie może być {{limit}} znaków",
+    "minItems": "Musi zawierać co najmniej {{limit}} pozycji",
+    "maxItems": "Maksymalnie {{limit}} pozycji",
+    "pattern": "Nieprawidłowy format",
+    "required": "To pole jest obowiązkowe",
+    "type": "Nieprawidłowy typ wartości",
+    "enum": "Musi to być jedna z dozwolonych wartości",
+    "const": "Wartość niezgodna z oczekiwaną stałą",
+    "uniqueItems": "Wszystkie pozycje muszą być unikalne",
+    "format": "Nieprawidłowy format",
+    "additionalProperties": "Nieznana właściwość jest niedozwolona"
+}
