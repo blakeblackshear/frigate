@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "Nu există previzualizari pentru {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Trimiteti acest cadru catre Frigate+?",
-    "submit": "Trimite"
+    "submit": "Trimite",
+    "previewError": "Nu s-a putut încărca previzualizarea snapshot-ului. S-ar putea ca înregistrarea să nu fie disponibilă în acest moment."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 sau mai recent este necesar pentru acest tip de stream live.",
   "streamOffline": {

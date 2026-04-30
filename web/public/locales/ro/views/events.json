@@ -25,7 +25,9 @@
   },
   "documentTitle": "Revizuieste - Frigate",
   "recordings": {
-    "documentTitle": "Inregistrari - frigate"
+    "documentTitle": "Inregistrari - frigate",
+    "invalidSharedLink": "Nu s-a putut deschide linkul înregistrării cu timestamp din cauza unei erori de parsare.",
+    "invalidSharedCamera": "Nu s-a putut deschide linkul înregistrării cu timestamp din cauza unei camere necunoscute sau neautorizate."
   },
   "calendarFilter": {
     "last24Hours": "Ultimele 24 de ore"
@@ -39,7 +41,7 @@
   "camera": "Camera foto",
   "detections": "Detecții",
   "detected": "detectat",
-  "selected_one": "{{count}} selectate",
+  "selected_one": "{{count}} selectat",
   "selected_other": "{{count}} selectate",
   "suspiciousActivity": "Activitate suspectă",
   "threateningActivity": "Activitate amenințătoare",

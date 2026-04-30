@@ -1282,7 +1282,8 @@
         },
         "hikvision": {
           "substreamWarning": "Substream 1 este limitat la o rezoluție mică. Multe camere Hikvision suportă substream-uri adiționale care trebuie activate din setările camerei. Se recomandă verificarea și utilizarea acestora."
-        }
+        },
+        "resolutionUnknown": "Rezoluția acestui stream nu a putut fi sondată. Ar trebui să setezi manual rezoluția de detecție în Setări sau în configurația ta."
       }
     }
   },
@@ -1299,7 +1300,13 @@
       "enableDesc": "Dezactivează temporar o cameră până la repornirea Frigate. Dezactivarea oprește procesarea stream-urilor pentru această cameră. Detecția, înregistrarea și depanarea vor fi indisponibile.<br /> <em>Notă: Acest lucru nu dezactivează restream-urile go2rtc.</em>",
       "disableLabel": "Camere dezactivate",
       "disableDesc": "Activează o cameră care este ascunsă în interfață și dezactivată în configurație. Este necesară repornirea Frigate după activare.",
-      "enableSuccess": "Am activat {{cameraName}} în configurație. Repornește Frigate pentru a aplica modificările."
+      "enableSuccess": "Am activat {{cameraName}} în configurație. Repornește Frigate pentru a aplica modificările.",
+      "friendlyName": {
+        "edit": "Editează numele afișat al camerei",
+        "title": "Editează numele afișat",
+        "description": "Setează numele afișat pentru această cameră în întreaga interfață Frigate. Lasă necompletat pentru a folosi ID-ul camerei.",
+        "rename": "Redenumește"
+      }
     },
     "cameraConfig": {
       "add": "Adaugă Cameră",
@@ -1661,7 +1668,16 @@
       "empty": "Nicio etichetă disponibilă",
       "allNonAlertDetections": "Toată activitatea fără alertă va fi inclusă ca detecții."
     },
-    "addCustomLabel": "Adaugă etichetă personalizată..."
+    "addCustomLabel": "Adaugă etichetă personalizată...",
+    "genaiModel": {
+      "placeholder": "Selectează modelul…",
+      "search": "Caută modele…",
+      "noModels": "Niciun model disponibil"
+    },
+    "knownPlates": {
+      "namePlaceholder": "ex. Mașina soției",
+      "platePlaceholder": "Număr plăcuță sau regex"
+    }
   },
   "globalConfig": {
     "title": "Configurare Globală",

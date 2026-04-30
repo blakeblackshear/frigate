@@ -2161,7 +2161,7 @@
         },
         "roles": {
             "label": "Roluri",
-            "description": "Roluri GenAI (unelte, viziune, înglobări); un furnizor per rol."
+            "description": "Roluri GenAI (chat, descrieri, înglobări); un furnizor per rol."
         },
         "provider_options": {
             "label": "Opțiuni furnizor",
