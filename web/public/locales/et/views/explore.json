@@ -36,7 +36,10 @@
         "ratio": "Suhtarv",
         "area": "Ala",
         "score": "Punktiskoor"
-      }
+      },
+      "external": "{{label}} on tuvastatud",
+      "heard": "{{label}} on kuuldud",
+      "gone": "{{label}} on jäänud"
     },
     "title": "Jälgimise üksikasjad",
     "noImageFound": "Selle ajatempli kohta ei leidu pilti.",
@@ -44,7 +47,8 @@
     "carousel": {
       "previous": "Eelmine slaid",
       "next": "Järgmine slaid"
-    }
+    },
+    "count": "{{first}} / {{second}}"
   },
   "documentTitle": "Avasta - Frigate",
   "generativeAI": "Generatiivne tehisaru",

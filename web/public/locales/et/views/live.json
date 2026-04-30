@@ -14,7 +14,9 @@
     "autotracking": "Automaatne jälgimine",
     "recording": "Salvestus"
   },
-  "documentTitle": "Otseülekanne - Frigate",
+  "documentTitle": {
+    "default": "Frigate reaalajas"
+  },
   "documentTitle.withCamera": "{{camera}} - Otseülekanne - Frigate",
   "lowBandwidthMode": "Väikese ribalaiusega režiim",
   "twoWayTalk": {
@@ -30,7 +32,8 @@
       "clickMove": {
         "label": "Kaamerapildi joondamiseks keskele klõpsa kaadris",
         "enable": "Kasuta klõpsamisega teisaldamist",
-        "disable": "Ära kasuta klõpsamisega teisaldamist"
+        "disable": "Ära kasuta klõpsamisega teisaldamist",
+        "enableWithZoom": "Luba liigutamine klõpsuga / suumimine lohistamisega"
       },
       "left": {
         "label": "Pööra liigutatavat kaamerat vasakule"
@@ -100,11 +103,18 @@
     },
     "audio": {
       "available": "Selles voogedastuses on heliriba saadaval",
-      "unavailable": "Selles voogedastuses pole heliriba saadaval"
+      "unavailable": "Selles voogedastuses pole heliriba saadaval",
+      "tips": {
+        "title": "Heli peab tulema sinu kaamerast ja selle voogedastuse jaoks peab see go2rtc-s olema seadistatud."
+      }
     },
     "title": "Voogedastus",
     "lowBandwidth": {
-      "resetStream": "Lähtesta voogedastus"
+      "resetStream": "Lähtesta voogedastus",
+      "tips": "Reaalaja pilt on puhverdamise või voogedastuse vigade tõttu madala ribalaiusega režiimis."
+    },
+    "debug": {
+      "picker": "Voogedastuse osa valik pole silumisrežiimis saadaval. Silumisvaade kasutab alati voogedastust, millele on määratud tuvastamisroll."
     }
   },
   "notifications": "Teavitused",
@@ -137,7 +147,15 @@
     "showStats": {
       "label": "Näita statistikat",
       "desc": "Selle eelistuse puhul näidatakse voogedastuse statistikat kaamerapildi peal."
-    }
+    },
+    "tips": "Laadi alla hetktõmmis või käivita käsitsi sündmus vastavalt selle kaamera salvestiste säilitamise seadistustele.",
+    "start": "Alusta tellimuspõhist salvestamist",
+    "started": "Alustasin käsitsi tellitavat salvestamist.",
+    "failedToStart": "Käsitsi tellitava salvestamise alustamine ei õnnestunud.",
+    "recordDisabledTips": "Kuna selle kaamera seadistustes on salvestamine keelatud või piiratud, siis salvestatakse ainult pilt.",
+    "end": "Lõpeta tellimuspõhine salvestamine",
+    "ended": "Lõpetasin käsitsi tellitava salvestamise.",
+    "failedToEnd": "Käsitsi tellitava salvestamise lõpetamine ei õnnestunud."
   },
   "noCameras": {
     "buttonText": "Lisa kaamera",
@@ -174,5 +192,8 @@
   },
   "history": {
     "label": "Näita varasemat sisu"
+  },
+  "suspend": {
+    "forTime": "Peatamise aeg: "
   }
 }
