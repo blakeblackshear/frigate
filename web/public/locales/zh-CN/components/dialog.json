@@ -62,19 +62,64 @@
     "toast": {
       "success": "导出成功。进入 导出 页面查看文件。",
       "error": {
-        "failed": "导出失败：{{error}}",
+        "failed": "未能加入导出队列：{{error}}",
         "endTimeMustAfterStartTime": "结束时间必须在开始时间之后",
         "noVaildTimeSelected": "未选择有效的时间范围"
       },
-      "view": "查看"
+      "view": "查看",
+      "queued": "导出已加入队列。请在导出页面查看进度。",
+      "batchSuccess_other": "已开始 {{count}} 个导出，正在打开合集。",
+      "batchPartial": "已开始 {{total}} 个导出中的 {{successful}} 个。失败的摄像头：{{failedCameras}}",
+      "batchFailed": "启动导出失败（共 {{total}} 个）。失败的摄像头：{{failedCameras}}",
+      "batchQueuedSuccess_other": "已排队 {{count}} 个导出，正在打开合集。",
+      "batchQueuedPartial": "已将 {{total}} 个导出中的 {{successful}} 个加入队列。失败的摄像头：{{failedCameras}}",
+      "batchQueueFailed": "未能将 {{total}} 个导出加入队列。失败的摄像头：{{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "保存导出",
-      "previewExport": "预览导出"
+      "previewExport": "预览导出",
+      "queueingExport": "正在加入导出队列…",
+      "useThisRange": "使用此范围"
     },
     "case": {
       "label": "合集",
-      "placeholder": "选择合集"
+      "placeholder": "选择合集",
+      "newCaseOption": "创建新合集",
+      "newCaseNamePlaceholder": "新合集名称",
+      "newCaseDescriptionPlaceholder": "合集描述",
+      "nonAdminHelp": "将为这些导出文件创建一个新的合集。"
+    },
+    "queueing": "正在加入导出队列…",
+    "tabs": {
+      "export": "单个摄像头",
+      "multiCamera": "多个摄像头"
+    },
+    "multiCamera": {
+      "timeRange": "时间范围",
+      "selectFromTimeline": "从时间线选择",
+      "cameraSelection": "摄像头",
+      "cameraSelectionHelp": "在此时间范围内具有追踪目标的摄像头会被预先选中",
+      "checkingActivity": "正在检查摄像头活动…",
+      "noCameras": "没有可用的摄像头",
+      "detectionCount_other": "{{count}} 个追踪目标",
+      "nameLabel": "导出名称",
+      "namePlaceholder": "这些导出文件的可选基础名称",
+      "queueingButton": "正在加入导出队列…",
+      "exportButton_other": "导出 {{count}} 个摄像头"
+    },
+    "multi": {
+      "title_other": "导出 {{count}} 个核查",
+      "description": "导出每个选定的核查项。所有导出文件将归入同一个合集。",
+      "descriptionNoCase": "导出每个选定的核查项。",
+      "caseNamePlaceholder": "核查导出 - {{date}}",
+      "exportButton_other": "导出 {{count}} 个核查",
+      "exportingButton": "导出中…",
+      "toast": {
+        "started_other": "已开始 {{count}} 个导出。正在打开合集。",
+        "startedNoCase_other": "已开始 {{count}} 个导出。",
+        "partial": "已启动 {{total}} 个导出，其中 {{successful}} 个成功。失败项：{{failedItems}}",
+        "failed": "启动导出失败（共 {{total}} 个）。失败项：{{failedItems}}"
+      }
     }
   },
   "streaming": {
@@ -122,6 +167,14 @@
       "markAsReviewed": "标记为已核查",
       "deleteNow": "立即删除",
       "markAsUnreviewed": "标记为未核查"
+    },
+    "shareTimestamp": {
+      "label": "分享该时间片段",
+      "title": "分享该时间片段",
+      "description": "分享带当前录制的播放时间的地址，或选择自定义时间。请注意，这不是公开的分享链接，只有具有 Frigate 和此摄像头访问权限的用户才能访问。",
+      "custom": "自定义时间",
+      "button": "分享时间片段地址",
+      "shareTitle": "Frigate 核查时间：{{camera}}"
     }
   },
   "imagePicker": {

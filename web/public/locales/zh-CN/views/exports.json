@@ -14,7 +14,9 @@
   "toast": {
     "error": {
       "renameExportFailed": "重命名导出失败：{{errorMessage}}",
-      "assignCaseFailed": "更新合集分配失败：{{errorMessage}}"
+      "assignCaseFailed": "更新合集分配失败：{{errorMessage}}",
+      "caseSaveFailed": "保存合集失败：{{errorMessage}}",
+      "caseDeleteFailed": "删除合集失败：{{errorMessage}}"
     }
   },
   "tooltip": {
@@ -22,7 +24,8 @@
     "downloadVideo": "下载视频",
     "editName": "编辑名称",
     "deleteExport": "删除导出",
-    "assignToCase": "加入合集"
+    "assignToCase": "加入合集",
+    "removeFromCase": "从合集中移除"
   },
   "headings": {
     "uncategorizedExports": "未分类导出项",
@@ -35,5 +38,91 @@
     "selectLabel": "合集",
     "newCaseOption": "创建新合集",
     "descriptionLabel": "描述"
+  },
+  "toolbar": {
+    "newCase": "新合集",
+    "addExport": "新导出",
+    "editCase": "编辑合集",
+    "deleteCase": "删除合集"
+  },
+  "deleteCase": {
+    "label": "删除合集",
+    "desc": "你确定要删除 {{caseName}} 吗？",
+    "descKeepExports": "导出文件将继续保留为未分类导出。",
+    "descDeleteExports": "此合集中的所有导出项都将被永久删除。",
+    "deleteExports": "同时删除导出文件"
+  },
+  "caseCard": {
+    "emptyCase": "暂无导出文件"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} 导出",
+    "queued": "队列中",
+    "running": "运行中",
+    "preparing": "准备中",
+    "copying": "复制中",
+    "encoding": "编码中",
+    "encodingRetry": "重试编码中",
+    "finalizing": "正在完成"
+  },
+  "caseView": {
+    "noDescription": "没有描述",
+    "createdAt": "已创建 {{value}}",
+    "exportCount_one": "1 个导出",
+    "exportCount_other": "{{count}} 个导出",
+    "cameraCount_one": "1 个摄像头",
+    "cameraCount_other": "{{count}} 个摄像头",
+    "showMore": "显示更多",
+    "showLess": "显示更少",
+    "emptyTitle": "该合集为空",
+    "emptyDescription": "将现有未分类的导出添加进来，以便整理该条目。",
+    "emptyDescriptionNoExports": "目前没有可添加的未分类导出项。"
+  },
+  "caseEditor": {
+    "createTitle": "创建合集",
+    "editTitle": "编辑合集",
+    "namePlaceholder": "合集名称",
+    "descriptionPlaceholder": "为该合集添加备注或相关说明"
+  },
+  "addExportDialog": {
+    "title": "将导出添加到 {{caseName}}",
+    "searchPlaceholder": "搜索未分类的导出项",
+    "empty": "未找到匹配的未分类导出。",
+    "addButton_one": "添加 1 个导出",
+    "addButton_other": "添加 {{count}} 个导出",
+    "adding": "添加中…"
+  },
+  "selected_one": "已选择 {{count}} 个",
+  "selected_other": "已选择 {{count}} 个",
+  "bulkActions": {
+    "addToCase": "添加至合集",
+    "moveToCase": "移动至合集",
+    "removeFromCase": "从合集中移除",
+    "delete": "删除",
+    "deleteNow": "立即删除"
+  },
+  "bulkDelete": {
+    "title": "删除导出",
+    "desc_one": "你确定要删除 {{count}} 个导出吗？",
+    "desc_other": "确定要删除 {{count}} 个导出吗？"
+  },
+  "bulkRemoveFromCase": {
+    "title": "从合集中移除",
+    "desc_one": "你确定要从该合集中移除这 {{count}} 个导出吗？",
+    "desc_other": "你确定要从该合集中移除这 {{count}} 个导出吗？",
+    "descKeepExports": "导出将被移至未分类。",
+    "descDeleteExports": "导出将被永久删除。",
+    "deleteExports": "选择删除导出"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "已删除导出",
+      "reassign": "已更新合集分配",
+      "remove": "已从合集中移除导出"
+    },
+    "error": {
+      "deleteFailed": "删除导出失败：{{errorMessage}}",
+      "reassignFailed": "更新合集分配失败：{{errorMessage}}"
+    }
   }
 }
