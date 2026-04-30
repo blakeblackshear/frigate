@@ -77,5 +77,15 @@
         "path": {
             "label": "Chemin vers la base de donnée"
         }
+    },
+    "genai": {
+        "provider": {
+            "label": "Fournisseur"
+        }
+    },
+    "birdseye": {
+        "quality": {
+            "label": "Qualité d'encodage"
+        }
     }
 }
