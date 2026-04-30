@@ -22,7 +22,9 @@
   "markAsReviewed": "Segna come visto",
   "documentTitle": "Rivedi - Frigate",
   "allCameras": "Tutte le camere",
-  "timeline": "Cronologia",
+  "timeline": {
+    "label": "Linea temporale"
+  },
   "timeline.aria": "Seleziona la cronologia",
   "events": {
     "label": "Eventi",
@@ -30,7 +32,9 @@
     "noFoundForTimePeriod": "Nessun evento trovato per questo intervallo."
   },
   "recordings": {
-    "documentTitle": "Registrazioni - Frigate"
+    "documentTitle": "Registrazioni - Frigate",
+    "invalidSharedLink": "Impossibile aprire il collegamento alla registrazione con orario a causa di un errore di analisi.",
+    "invalidSharedCamera": "Impossibile aprire il collegamento alla registrazione con orario a causa di una telecamera sconosciuta o non autorizzata."
   },
   "calendarFilter": {
     "last24Hours": "Ultime 24 ore"
@@ -44,7 +48,7 @@
   "threateningActivity": "Attività minacciosa",
   "detail": {
     "noDataFound": "Nessun dato dettagliato da rivedere",
-    "aria": "Attiva/disattiva la visualizzazione dettagliata",
+    "aria": "Abilita/disabilita la visualizzazione dettagliata",
     "trackedObject_one": "{{count}} oggetto",
     "trackedObject_other": "{{count}} oggetti",
     "noObjectDetailData": "Non sono disponibili dati dettagliati sull'oggetto.",
@@ -64,5 +68,28 @@
   "normalActivity": "Normale",
   "needsReview": "Necessita revisione",
   "securityConcern": "Rischio per la sicurezza",
-  "select_all": "Tutti"
+  "select_all": "Tutti",
+  "motionSearch": {
+    "menuItem": "Ricerca movimento",
+    "openMenu": "Opzioni telecamera"
+  },
+  "motionPreviews": {
+    "title": "Anteprime di movimento: {{camera}}",
+    "mobileSettingsTitle": "Impostazioni di anteprima del movimento",
+    "mobileSettingsDesc": "Regola la velocità di riproduzione e la luminosità, poi scegli una data per rivedere i filmati che mostrano solo il movimento.",
+    "dim": "Attenua",
+    "dimAria": "Regola l'intensità della luce",
+    "dimDesc": "Aumenta l'attenuazione per migliorare la visibilità delle aree in movimento.",
+    "speed": "Velocità",
+    "speedAria": "Seleziona la velocità di riproduzione dell'anteprima",
+    "speedDesc": "Scegli la velocità di riproduzione dei video di anteprima.",
+    "back": "Indietro",
+    "empty": "Nessuna anteprima disponibile",
+    "noPreview": "Anteprima non disponibile",
+    "seekAria": "Cerca il riproduttore {{camera}} a {{time}}",
+    "filter": "Filtro",
+    "filterDesc": "Seleziona le aree per visualizzare solo i video con movimento in quelle regioni.",
+    "filterClear": "Pulisci",
+    "menuItem": "Visualizza le anteprime del movimento"
+  }
 }

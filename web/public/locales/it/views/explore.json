@@ -289,7 +289,10 @@
         "zones": "Zone",
         "ratio": "Rapporto",
         "area": "Area",
-        "score": "Punteggio"
+        "score": "Punteggio",
+        "computedScore": "Punteggio calcolato",
+        "topScore": "Punteggio massimo",
+        "toggleAdvancedScores": "Attiva/disattiva i punteggi avanzati"
       }
     },
     "annotationSettings": {

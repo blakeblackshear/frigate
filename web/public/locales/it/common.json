@@ -279,7 +279,7 @@
   },
   "pagination": {
     "next": {
-      "title": "Successiva",
+      "title": "Successivo",
       "label": "Vai alla pagina successiva"
     },
     "previous": {
