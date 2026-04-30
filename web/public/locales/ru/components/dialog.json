@@ -6,7 +6,8 @@
       "title": "Frigate перезапускается",
       "content": "Эта страница перезагрузится через {{countdown}} сек.",
       "button": "Принудительная перезагрузка"
-    }
+    },
+    "description": "Это перезагрузки перезагрузит Frigate."
   },
   "explore": {
     "plus": {
@@ -76,6 +77,10 @@
     "fromTimeline": {
       "saveExport": "Сохранить экспорт",
       "previewExport": "Предпросмотр экспорта"
+    },
+    "case": {
+      "label": "Случай",
+      "placeholder": "Выберите случай"
     }
   },
   "streaming": {

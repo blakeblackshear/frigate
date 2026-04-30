@@ -2,7 +2,9 @@
   "documentTitle": "Экспорт - Frigate",
   "search": "Поиск",
   "noExports": "Не найдено файлов экспорта",
-  "deleteExport": "Удалить экспорт",
+  "deleteExport": {
+    "label": "Удалить экспорт"
+  },
   "deleteExport.desc": "Вы уверены, что хотите удалить {{exportName}}?",
   "editExport": {
     "title": "Переименовать экспорт",
@@ -11,13 +13,27 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Не удалось переименовать экспорт: {{errorMessage}}"
+      "renameExportFailed": "Не удалось переименовать экспорт: {{errorMessage}}",
+      "assignCaseFailed": "Не удалось обновить назначение случая: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Поделиться экспортом",
     "downloadVideo": "Скачать видео",
     "editName": "Изменить название",
-    "deleteExport": "Удалить экспорт"
+    "deleteExport": "Удалить экспорт",
+    "assignToCase": "Добавить в случай"
+  },
+  "headings": {
+    "cases": "Случаи",
+    "uncategorizedExports": "Некатегоризированные экспорты"
+  },
+  "caseDialog": {
+    "title": "Добавить в случай",
+    "description": "Выберите существующий случай или создайте новый.",
+    "selectLabel": "Случай",
+    "newCaseOption": "Создать новый случай",
+    "nameLabel": "Название случая",
+    "descriptionLabel": "Описание"
   }
 }
