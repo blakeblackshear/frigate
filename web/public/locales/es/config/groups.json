@@ -59,6 +59,15 @@
         "global": {
             "retention": "Retención global",
             "events": "Eventos globales"
+        },
+        "cameras": {
+            "events": "Evento",
+            "retention": "Retención"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Argumentos de FFmpeg específicos de la cámara"
         }
     }
 }

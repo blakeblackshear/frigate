@@ -195,7 +195,8 @@
     "explore": "Explorar",
     "uiPlayground": "Zona de pruebas de la interfaz de usuario",
     "faceLibrary": "Biblioteca de rostros",
-    "classification": "Clasificación"
+    "classification": "Clasificación",
+    "profiles": "Perfiles"
   },
   "unit": {
     "speed": {

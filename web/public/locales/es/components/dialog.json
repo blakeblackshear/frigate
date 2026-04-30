@@ -77,7 +77,11 @@
       "saveExport": "Guardar exportación",
       "previewExport": "Vista previa de la exportación"
     },
-    "selectOrExport": "Seleccionar o exportar"
+    "selectOrExport": "Seleccionar o exportar",
+    "case": {
+      "label": "Caso",
+      "newCaseDescriptionPlaceholder": "Descripción de caso"
+    }
   },
   "streaming": {
     "restreaming": {
@@ -124,6 +128,9 @@
       "markAsReviewed": "Marcar como revisado",
       "deleteNow": "Eliminar ahora",
       "markAsUnreviewed": "Marcar como no revisado"
+    },
+    "shareTimestamp": {
+      "description": "Comparta una URL con marca de tiempo de la posición actual del reproductor o elija una marca de tiempo personalizada. Tenga en cuenta que esta no es una URL pública para compartir y solo es accesible para los usuarios que tienen acceso a Frigate y a esta cámara."
     }
   },
   "imagePicker": {
