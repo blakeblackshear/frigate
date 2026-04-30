@@ -1,1 +1,10 @@
-{}
+{
+    "audio": {
+        "label": "Helisündmused"
+    },
+    "birdseye": {
+        "mode": {
+            "label": "Jälgimisrežiim"
+        }
+    }
+}

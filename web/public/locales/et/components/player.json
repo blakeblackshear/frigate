@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "{{cameraName}} kaamera eelvaadet ei leidu",
   "submitFrigatePlus": {
     "submit": "Saada",
-    "title": "Kas saadad selle kaadri Frigate+ teenusesse?"
+    "title": "Kas saadad selle kaadri Frigate+ teenusesse?",
+    "previewError": "Hetktõmmise eelvaate laadimine ei õnnestu. Salvestus ei pruugi olla hetkel saadaval."
   },
   "cameraDisabled": "Kaamera on kasutuselt eemaldatud",
   "stats": {

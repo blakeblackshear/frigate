@@ -1,1 +1,32 @@
-{}
+{
+    "minimum": "Peab olema vähemalt {{limit}}",
+    "maximum": "Võib olla kuni {{limit}}",
+    "exclusiveMinimum": "Peab olema suurem, kui {{limit}}",
+    "exclusiveMaximum": "Peab olema väiksem, kui {{limit}}",
+    "minLength": "Peab olema vähemalt {{limit}} tähemärk(i) pikk",
+    "maxLength": "Võib olla kuni {{limit}} tähemärk(i) pikk",
+    "minItems": "Peab sisaldama vähemalt {{limit}} objekti",
+    "maxItems": "Võib sisaldada kuni {{limit}} objekti",
+    "pattern": "Vigane vorming",
+    "required": "See väli on kohustuslik",
+    "type": "Vigane väärtuse tüüp",
+    "enum": "Peab olema üks lubatud väärtustest",
+    "const": "Väärtus ei vasta eeldatud konstandile",
+    "uniqueItems": "Kõik väärtused peavad olema unikaalsed",
+    "format": "Vigane vorming",
+    "additionalProperties": "Tundmatu omadus pole lubatud",
+    "oneOf": "Peab vastama täpselt ühele lubatud skeemile",
+    "anyOf": "Peab vastama vähemalt ühele lubatud skeemile",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Kui rollide vastendused on seadistatud, siis rollide päis on nõutav."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Iga rolli saad määrata ühele sisendvoole.",
+            "detectRequired": "„Tuvasta“ rollile pead määrama vähemalt ühe sisendvoo.",
+            "hwaccelDetectOnly": "Vaid „Tuvasta“ rolliga sisendvoog võib määratleda raudvaralise kiirenduse argumente."
+        }
+    }
+}
