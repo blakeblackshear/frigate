@@ -28,7 +28,7 @@ from frigate.ffmpeg_presets import (
     EncodeTypeEnum,
     parse_preset_hardware_acceleration_encode,
 )
-from frigate.models import Export, Previews, Recordings
+from frigate.models import Export, Previews, Recordings, ReviewSegment
 from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
@@ -347,6 +347,122 @@ class RecordingExporter(threading.Thread):
         # return in iso format
         return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
+    def _chapter_metadata_path(self) -> str:
+        return os.path.join(CACHE_DIR, f"export_chapters_{self.export_id}.txt")
+
+    def _build_chapter_metadata_file(self, recordings: list) -> Optional[str]:
+        """Write an FFmpeg metadata file with chapters for review items in range.
+
+        Chapter offsets are computed in *output time*: the VOD endpoint
+        concatenates recording clips back-to-back, so wall-clock gaps
+        between recordings collapse in the produced video. We walk the
+        same recording rows that feed the playlist and convert each
+        review item's wall-clock boundaries into output-time offsets.
+        Returns ``None`` when there are no recordings, no review items,
+        or any chapter would have zero output duration.
+        """
+        if not recordings:
+            return None
+
+        windows: list[tuple[float, float, float]] = []
+        output_offset = 0.0
+        for rec in recordings:
+            clipped_start = max(float(rec.start_time), float(self.start_time))
+            clipped_end = min(float(rec.end_time), float(self.end_time))
+            if clipped_end <= clipped_start:
+                continue
+            windows.append((clipped_start, clipped_end, output_offset))
+            output_offset += clipped_end - clipped_start
+
+        if not windows:
+            return None
+
+        try:
+            review_rows = list(
+                ReviewSegment.select(
+                    ReviewSegment.start_time,
+                    ReviewSegment.end_time,
+                    ReviewSegment.severity,
+                    ReviewSegment.data,
+                )
+                .where(
+                    ReviewSegment.start_time.between(self.start_time, self.end_time)
+                    | ReviewSegment.end_time.between(self.start_time, self.end_time)
+                    | (
+                        (self.start_time > ReviewSegment.start_time)
+                        & (self.end_time < ReviewSegment.end_time)
+                    )
+                )
+                .where(ReviewSegment.camera == self.camera)
+                .order_by(ReviewSegment.start_time.asc())
+                .iterator()
+            )
+        except Exception:
+            logger.exception(
+                "Failed to query review segments for export %s", self.export_id
+            )
+            return None
+
+        if not review_rows:
+            return None
+
+        total_output = windows[-1][2] + (windows[-1][1] - windows[-1][0])
+
+        def wall_to_output(t: float) -> float:
+            t = max(float(self.start_time), min(float(self.end_time), t))
+            for w_start, w_end, w_offset in windows:
+                if t < w_start:
+                    return w_offset
+                if t <= w_end:
+                    return w_offset + (t - w_start)
+            return total_output
+
+        chapter_blocks: list[str] = []
+        for review in review_rows:
+            start_out = wall_to_output(float(review.start_time))
+            end_out = wall_to_output(float(review.end_time))
+
+            # Drop chapters that fall entirely in a recording gap, or are
+            # too short to be navigable in a player.
+            if end_out - start_out < 1.0:
+                continue
+
+            data = review.data or {}
+            labels: list[str] = []
+            for obj in data.get("objects") or []:
+                label = str(obj).split("-")[0]
+                if label and label not in labels:
+                    labels.append(label)
+
+            title = str(review.severity).capitalize()
+            if labels:
+                title = f"{title}: {', '.join(labels)}"
+
+            chapter_blocks.append(
+                "[CHAPTER]\n"
+                "TIMEBASE=1/1000\n"
+                f"START={int(start_out * 1000)}\n"
+                f"END={int(end_out * 1000)}\n"
+                f"title={title}"
+            )
+
+        if not chapter_blocks:
+            return None
+
+        meta_path = self._chapter_metadata_path()
+        try:
+            with open(meta_path, "w", encoding="utf-8") as f:
+                f.write(";FFMETADATA1\n")
+                f.write("\n".join(chapter_blocks))
+                f.write("\n")
+        except OSError:
+            logger.exception(
+                "Failed to write chapter metadata file for export %s", self.export_id
+            )
+            return None
+
+        return meta_path
+
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
 
@@ -451,6 +567,24 @@ class RecordingExporter(threading.Thread):
         if type(internal_port) is str:
             internal_port = int(internal_port.split(":")[-1])
 
+        recordings = list(
+            Recordings.select(
+                Recordings.start_time,
+                Recordings.end_time,
+            )
+            .where(
+                Recordings.start_time.between(self.start_time, self.end_time)
+                | Recordings.end_time.between(self.start_time, self.end_time)
+                | (
+                    (self.start_time > Recordings.start_time)
+                    & (self.end_time < Recordings.end_time)
+                )
+            )
+            .where(Recordings.camera == self.camera)
+            .order_by(Recordings.start_time.asc())
+            .iterator()
+        )
+
         playlist_lines: list[str] = []
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
             playlist_url = f"http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
@@ -458,32 +592,13 @@ class RecordingExporter(threading.Thread):
                 f"-y -protocol_whitelist pipe,file,http,tcp -i {playlist_url}"
             )
         else:
-            # get full set of recordings
-            export_recordings = (
-                Recordings.select(
-                    Recordings.start_time,
-                    Recordings.end_time,
-                )
-                .where(
-                    Recordings.start_time.between(self.start_time, self.end_time)
-                    | Recordings.end_time.between(self.start_time, self.end_time)
-                    | (
-                        (self.start_time > Recordings.start_time)
-                        & (self.end_time < Recordings.end_time)
-                    )
-                )
-                .where(Recordings.camera == self.camera)
-                .order_by(Recordings.start_time.asc())
-            )
-
-            # Use pagination to process records in chunks
+            # Chunk the recording rows into pages so each playlist line
+            # references a bounded sub-range rather than the full export.
             page_size = 1000
-            num_pages = (export_recordings.count() + page_size - 1) // page_size
-
-            for page in range(1, num_pages + 1):
-                playlist = export_recordings.paginate(page, page_size)
+            for i in range(0, len(recordings), page_size):
+                chunk = recordings[i : i + page_size]
                 playlist_lines.append(
-                    f"file 'http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{float(playlist[0].start_time)}/end/{float(playlist[-1].end_time)}/index.m3u8'"
+                    f"file 'http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{float(chunk[0].start_time)}/end/{float(chunk[-1].end_time)}/index.m3u8'"
                 )
 
             ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"
@@ -504,8 +619,12 @@ class RecordingExporter(threading.Thread):
                 )
             ).split(" ")
         else:
+            chapters_path = self._build_chapter_metadata_file(recordings)
+            chapter_args = (
+                f" -i {chapters_path} -map 0 -map_metadata 1" if chapters_path else ""
+            )
             ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} -c copy -movflags +faststart"
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input}{chapter_args} -c copy -movflags +faststart"
             ).split(" ")
 
         # add metadata
@@ -690,6 +809,8 @@ class RecordingExporter(threading.Thread):
             returncode, stderr = self._run_ffmpeg_with_progress(
                 ffmpeg_cmd, playlist_lines, step="encoding_retry"
             )
+
+        Path(self._chapter_metadata_path()).unlink(missing_ok=True)
 
         if returncode != 0:
             logger.error(
