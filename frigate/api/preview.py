@@ -148,12 +148,17 @@ def get_preview_frames_from_cache(camera_name: str, start_ts: float, end_ts: flo
     file_start = f"preview_{camera_name}-"
     start_file = f"{file_start}{start_ts}.{PREVIEW_FRAME_TYPE}"
     end_file = f"{file_start}{end_ts}.{PREVIEW_FRAME_TYPE}"
+
+    camera_files = [
+        entry.name
+        for entry in os.scandir(preview_dir)
+        if entry.name.startswith(file_start)
+    ]
+    camera_files.sort()
+
     selected_previews = []
 
-    for file in sorted(os.listdir(preview_dir)):
-        if not file.startswith(file_start):
-            continue
-
+    for file in camera_files:
         if file < start_file:
             continue
 
