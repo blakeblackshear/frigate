@@ -85,7 +85,7 @@ export default function ReviewCard({
         { playback: "realtime" },
       )
       .then((response) => {
-        if (response.status == 200) {
+        if (response.status < 300) {
           toast.success(t("export.toast.success"), {
             position: "top-center",
             action: (
