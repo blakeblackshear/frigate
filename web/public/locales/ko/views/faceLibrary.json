@@ -16,22 +16,28 @@
   "selectItem": "{{item}} 선택",
   "documentTitle": "얼굴 라이브러리 - Frigate",
   "uploadFaceImage": {
-    "title": "얼굴 사진 올리기"
+    "title": "얼굴 사진 올리기",
+    "desc": "얼굴을 스캔하고 {{pageToggle}}에 포함하기 위해 이미지를 업로드하세요"
   },
   "collections": "모음집",
   "createFaceLibrary": {
     "title": "모음집 만들기",
     "desc": "새로운 모음집 만들기",
-    "new": "새 얼굴 만들기"
+    "new": "새 얼굴 만들기",
+    "nextSteps": "강력한 기반을 구축하려면:<li>최근 인식 탭을 사용하여 감지된 각 사람의 이미지를 선택하고 학습하세요.</li><li>최상의 결과를 위해 정면 이미지에 집중하고, 각도가 있는 얼굴이 촬영된 이미지는 학습에 사용하지 마세요.</li></ul>"
   },
   "steps": {
     "faceName": "얼굴 이름 입력",
     "uploadFace": "얼굴 사진 올리기",
-    "nextSteps": "다음 단계"
+    "nextSteps": "다음 단계",
+    "description": {
+      "uploadFace": "정면을 향한 {{name}}의 얼굴이 보이는 이미지를 업로드하세요. 이미지를 얼굴만 자를 필요는 없습니다."
+    }
   },
   "train": {
-    "title": "학습",
-    "aria": "학습 선택"
+    "title": "최근 인식",
+    "aria": "최근 인식 선택",
+    "titleShort": "최근"
   },
   "selectFace": "얼굴 선택",
   "deleteFaceLibrary": {

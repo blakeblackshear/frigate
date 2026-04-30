@@ -3,5 +3,40 @@
     "name": {
         "label": "카메라 이름",
         "description": "카메라 이름은 필수 항목입니다"
+    },
+    "friendly_name": {
+        "label": "별칭",
+        "description": "Frigate UI에서 사용되는 카메라 별칭"
+    },
+    "enabled": {
+        "label": "활성화됨",
+        "description": "활성화됨"
+    },
+    "audio": {
+        "label": "오디오 이벤트",
+        "description": "이 카메라의 오디오 기반 이벤트 감지 설정입니다.",
+        "enabled": {
+            "label": "오디오 감지 활성화",
+            "description": "이 카메라의 오디오 이벤트 감지를 활성화하거나 비활성화합니다."
+        },
+        "max_not_heard": {
+            "label": "종료 타임아웃",
+            "description": "오디오 이벤트가 종료되기 전, 설정된 오디오 유형이 감지되지 않는 시간(초)입니다."
+        },
+        "min_volume": {
+            "label": "최소 볼륨",
+            "description": "오디오 감지를 실행하는 데 필요한 최소 RMS 볼륨 임계값으로, 낮을수록 민감도가 높아집니다(예: 200 높음, 500 보통, 1000 낮음)."
+        },
+        "listen": {
+            "label": "청취 유형",
+            "description": "감지할 오디오 이벤트 유형 목록입니다(예: bark, fire_alarm, scream, speech, yell)."
+        },
+        "filters": {
+            "label": "오디오 필터",
+            "description": "오탐지를 줄이기 위해 사용되는 신뢰도 임계값과 같은 오디오 유형별 필터 설정입니다."
+        },
+        "enabled_in_config": {
+            "label": "원래 오디오 상태"
+        }
     }
 }

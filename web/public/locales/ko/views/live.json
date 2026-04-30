@@ -15,7 +15,8 @@
       "clickMove": {
         "label": "클릭해서 카메라 중앙 배치",
         "enable": "클릭해서 움직이기 기능 활성화",
-        "disable": "클릭해서 움직이기 기능 비활성화"
+        "disable": "클릭해서 움직이기 기능 비활성화",
+        "enableWithZoom": "클릭하여 이동 / 드래그하여 확대 활성화"
       },
       "left": {
         "label": "PTZ 카메라 왼쪽으로 이동"

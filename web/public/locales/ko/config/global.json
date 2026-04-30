@@ -4,6 +4,63 @@
         "description": "마이그레이션 및 데이터 형식 변경 확인을 위한 현재 설정의 버전 정보(숫자 또는 문자열)입니다."
     },
     "safe_mode": {
-        "label": "안전 모드"
+        "label": "안전 모드",
+        "description": "활성화하면 문제 해결을 위해 기능이 제한된 안전 모드로 Frigate를 시작합니다."
+    },
+    "environment_vars": {
+        "label": "환경 변수",
+        "description": "Home Assistant OS에서 Frigate 프로세스에 설정할 환경 변수의 키/값 쌍입니다. HAOS가 아닌 사용자는 대신 Docker 환경 변수 설정을 사용해야 합니다."
+    },
+    "logger": {
+        "label": "로깅",
+        "description": "기본 로그 상세 수준 및 구성 요소별 로그 수준 재정의를 제어합니다.",
+        "default": {
+            "label": "로그 수준",
+            "description": "기본 전역 로그 상세 수준(debug, info, warning, error)입니다."
+        },
+        "logs": {
+            "label": "프로세스별 로그 수준",
+            "description": "특정 모듈의 상세 수준을 높이거나 낮추기 위한 구성 요소별 로그 수준 재정의입니다."
+        }
+    },
+    "audio": {
+        "label": "오디오 이벤트",
+        "enabled": {
+            "label": "오디오 감지 활성화"
+        },
+        "max_not_heard": {
+            "label": "종료 타임아웃",
+            "description": "오디오 이벤트가 종료되기 전, 설정된 오디오 유형이 감지되지 않는 시간(초)입니다."
+        },
+        "min_volume": {
+            "label": "최소 볼륨",
+            "description": "오디오 감지를 실행하는 데 필요한 최소 RMS 볼륨 임계값으로, 낮을수록 민감도가 높아집니다(예: 200 높음, 500 보통, 1000 낮음)."
+        },
+        "listen": {
+            "label": "청취 유형",
+            "description": "감지할 오디오 이벤트 유형 목록입니다(예: bark, fire_alarm, scream, speech, yell)."
+        },
+        "filters": {
+            "label": "오디오 필터",
+            "description": "오탐지를 줄이기 위해 사용되는 신뢰도 임계값과 같은 오디오 유형별 필터 설정입니다."
+        },
+        "enabled_in_config": {
+            "label": "원래 오디오 상태"
+        }
+    },
+    "auth": {
+        "label": "인증",
+        "description": "쿠키 및 속도 제한 옵션을 포함한 인증 및 세션 관련 설정입니다.",
+        "enabled": {
+            "label": "인증 활성화",
+            "description": "Frigate UI에 대한 기본 인증을 활성화합니다."
+        },
+        "reset_admin_password": {
+            "label": "관리자 비밀번호 재설정",
+            "description": "true로 설정하면 시작 시 관리자 비밀번호를 재설정하고 새 비밀번호를 로그에 출력합니다."
+        },
+        "cookie_name": {
+            "label": "JWT 쿠키 이름"
+        }
     }
 }

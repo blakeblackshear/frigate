@@ -8,6 +8,28 @@
   "button": {
     "deleteClassificationAttempts": "분류 이미지 삭제",
     "renameCategory": "클래스 이름 변경",
-    "deleteCategory": "클래스 삭제"
+    "deleteCategory": "클래스 삭제",
+    "deleteImages": "이미지 삭제",
+    "trainModel": "모델 훈련",
+    "addClassification": "분류 추가",
+    "deleteModels": "모델 삭제",
+    "editModel": "모델 편집"
+  },
+  "tooltip": {
+    "trainingInProgress": "모델이 현재 학습 중입니다",
+    "noNewImages": "훈련할 새 이미지가 없습니다. 먼저 데이터셋에서 더 많은 이미지를 분류하세요.",
+    "noChanges": "마지막 훈련 이후 데이터셋에 변경 사항이 없습니다.",
+    "modelNotReady": "모델이 훈련 준비가 되지 않았습니다"
+  },
+  "toast": {
+    "success": {
+      "deletedModel_other": "{{count}}개 모델을 성공적으로 삭제했습니다",
+      "categorizedImage": "이미지 분류 성공",
+      "reclassifiedImage": "이미지 재분류 성공",
+      "trainedModel": "모델 훈련 완료."
+    }
+  },
+  "train": {
+    "titleShort": "최근"
   }
 }

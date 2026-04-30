@@ -2,7 +2,9 @@
   "documentTitle": "내보내기 - Frigate",
   "search": "검색",
   "noExports": "내보내기가 없습니다",
-  "deleteExport": "내보내기 삭제",
+  "deleteExport": {
+    "label": "내보내기 삭제"
+  },
   "deleteExport.desc": "{{exportName}}을 지우시겠습니까?",
   "editExport": {
     "title": "내보내기 이름 변경",
@@ -11,10 +13,24 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "내보내기 이름 변경에 실패했습니다: {{errorMessage}}"
+      "renameExportFailed": "내보내기 이름 변경에 실패했습니다: {{errorMessage}}",
+      "assignCaseFailed": "케이스 할당 업데이트 실패: {{errorMessage}}"
     }
   },
   "headings": {
-    "uncategorizedExports": "분류되지 않은 내보내기"
+    "uncategorizedExports": "분류되지 않은 내보내기",
+    "cases": "케이스"
+  },
+  "tooltip": {
+    "shareExport": "내보내기 공유",
+    "downloadVideo": "동영상 다운로드",
+    "editName": "이름 편집",
+    "deleteExport": "내보내기 삭제",
+    "assignToCase": "케이스에 추가"
+  },
+  "caseDialog": {
+    "title": "케이스에 추가",
+    "description": "기존 케이스를 선택하거나 새 케이스를 만드세요.",
+    "selectLabel": "케이스"
   }
 }
