@@ -3,7 +3,10 @@
   "empty": {
     "detection": "Ei havaintoja tarkastettavaksi",
     "motion": "Ei liiketietoja",
-    "alert": "Ei hälyytyksiä tarkastettavaksi"
+    "alert": "Ei hälyytyksiä tarkastettavaksi",
+    "recordingsDisabled": {
+      "title": "Tallenteet täytyy ottaa käyttöön"
+    }
   },
   "detections": "Havainnot",
   "motion": {
@@ -11,7 +14,9 @@
     "only": "Vain liike"
   },
   "allCameras": "Kaikki kamerat",
-  "timeline": "Aikajana",
+  "timeline": {
+    "label": "Aikajana"
+  },
   "timeline.aria": "Valitse aikajana",
   "events": {
     "label": "Tapahtumat",

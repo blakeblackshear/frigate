@@ -1,1 +1,30 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Globaali tunnistus",
+            "sensitivity": "Globaali herkkyys"
+        },
+        "cameras": {
+            "detection": "Havaitseminen",
+            "sensitivity": "Herkkyys"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Globaali vaikutelma"
+        },
+        "cameras": {
+            "appearance": "Vaikutelma"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Globaali herkkyys",
+            "algorithm": "Globaali algoritmi"
+        },
+        "cameras": {
+            "sensitivity": "Herkkyys",
+            "algorithm": "Algoritmi"
+        }
+    }
+}
