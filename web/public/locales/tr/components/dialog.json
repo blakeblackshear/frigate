@@ -6,7 +6,8 @@
       "content": "Bu sayfa {{countdown}} saniye sonra yeniden yüklenecektir.",
       "title": "Frigate Yeniden Başlatılıyor",
       "button": "Şimdi Yeniden Yükle"
-    }
+    },
+    "description": "Bu Frigate'i kısa süreliğine yeniden başlayana kadar durduracak."
   },
   "explore": {
     "plus": {
@@ -65,7 +66,11 @@
         "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",
         "noVaildTimeSelected": "Geçerli bir zaman aralığı seçilmedi"
       },
-      "view": "Görüntüle"
+      "view": "Görüntüle",
+      "queued": "Dışa aktarımlar kuyruğa alındı. İlerlemeyi dışa aktarım sayfasından görebilirsiniz.",
+      "batchSuccess_one": "1 Adet dışa aktarım başlatıldı. Durum açılıyor.",
+      "batchSuccess_other": "{{count}} Adet dışa aktarım başlatıldı. Durum açılıyor.",
+      "batchPartial": "{{total}} üzerinden {{successful}} adet dışa aktarım başlatıldı. Başarısız: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Dışa Aktarımı Kaydet",
@@ -73,6 +78,52 @@
     },
     "name": {
       "placeholder": "Dışa Aktarımı Adlandırın"
+    },
+    "case": {
+      "newCaseOption": "Yeni durum oluştur",
+      "newCaseNamePlaceholder": "Yeni durum ismi",
+      "newCaseDescriptionPlaceholder": "Durum açıklaması",
+      "label": "Durum",
+      "nonAdminHelp": "Bu dışa aktarımlar için yeni durumlar oluşturulacak.",
+      "placeholder": "Durum seç"
+    },
+    "queueing": "Dışa aktarımlar kuyruğa alınıyor...",
+    "tabs": {
+      "export": "Tek Kamera",
+      "multiCamera": "Çoklu Kamera"
+    },
+    "multiCamera": {
+      "timeRange": "Zaman Aralığı",
+      "selectFromTimeline": "Zaman çizelgesinden seç",
+      "cameraSelection": "Kameralar",
+      "cameraSelectionHelp": "Bu zaman aralığında ki obje takibi olan kameralar önceden seçildi",
+      "checkingActivity": "Kamera faliyeti kontrol ediliyor...",
+      "noCameras": "Kamera mevcut değil",
+      "detectionCount_one": "1 adet takip edilen obje",
+      "detectionCount_other": "{{count}} adet takip edilen obje",
+      "nameLabel": "Dışa aktarım ismi",
+      "namePlaceholder": "Dışa aktarım için opsiyonel temel isim",
+      "queueingButton": "Dışa aktarımlar kuyruğa alınıyor...",
+      "exportButton_one": "1 Adet Kamera Dışarı Aktarıldı",
+      "exportButton_other": "{{count}} Adet Kamera Dışarı Aktarıldı"
+    },
+    "multi": {
+      "title_one": "1 Adet Değerlendirme Dışarı Aktarıldı",
+      "title_other": "{{count}} Adet Değerlendirme Dışarı Aktarıldı",
+      "description": "Seçilmiş değerlendirmeleri tek tek dışa aktarın. Bütün dışa aktarımlar tek bir durum altında toplanacak.",
+      "descriptionNoCase": "Seçilmiş değerlendirmeleri tek tek dışa aktar.",
+      "caseNamePlaceholder": "Değerlendirme dışa aktarımı - {{date}}",
+      "exportButton_one": "1 Adet Değerlendirme'yi dışa akatar",
+      "exportButton_other": "{{count}} Adet Değerlendirme'yi dışa akatar",
+      "exportingButton": "Dışa aktarılıyor...",
+      "toast": {
+        "started_one": "1 Adet dışa aktarın başladı. Durum açılıyor.",
+        "started_other": "{{count}} Adet dışa aktarın başladı. Durum açılıyor.",
+        "startedNoCase_one": "1 Adet dışa aktarım başladı.",
+        "startedNoCase_other": "{{count}} Adet dışa aktarım başladı.",
+        "partial": "{{total}} üzerinden {{successful}} dışa aktarıldı. Başarısız: {{failedItems}}",
+        "failed": "{{total}} Adet dışa aktarım başarısız oldu. Başarısız: {{failedItems}}"
+      }
     }
   },
   "streaming": {

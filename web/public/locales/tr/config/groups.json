@@ -1,1 +1,71 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Genel Tespit",
+            "sensitivity": "Genel Hassasiyet"
+        },
+        "cameras": {
+            "detection": "Tespit",
+            "sensitivity": "Hassasiyet"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Genel Görünüm"
+        },
+        "cameras": {
+            "appearance": "Görünüm"
+        }
+    },
+    "detect": {
+        "cameras": {
+            "resolution": "Çözünürlük",
+            "tracking": "Takip"
+        },
+        "global": {
+            "resolution": "Genel Çözünürlük",
+            "tracking": "Genel Takip"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Genel Takip",
+            "filtering": "Genel Filtreleme"
+        },
+        "cameras": {
+            "tracking": "Takip",
+            "filtering": "Filtreleme"
+        }
+    },
+    "record": {
+        "global": {
+            "events": "Genel Etkinlikler"
+        },
+        "cameras": {
+            "events": "Etkinlikler"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Kamera özel FFmpeg argümanları"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Genel Hassasiyet",
+            "algorithm": "Genel Algoritma"
+        },
+        "cameras": {
+            "sensitivity": "Hassasiyet",
+            "algorithm": "Algoritma"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Genel Görüntü"
+        },
+        "cameras": {
+            "display": "Görüntü"
+        }
+    }
+}
