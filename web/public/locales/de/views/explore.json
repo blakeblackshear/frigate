@@ -282,7 +282,10 @@
         "zones": "Zonen",
         "ratio": "Verhältnis",
         "area": "Bereich",
-        "score": "Bewertung"
+        "score": "Bewertung",
+        "computedScore": "Berechnetes Ergebnis",
+        "topScore": "Bester Treffer",
+        "toggleAdvancedScores": "Erweiterte Ergebnisse umschalten"
       }
     },
     "annotationSettings": {

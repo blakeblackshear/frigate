@@ -1710,7 +1710,7 @@
         },
         "roles": {
             "label": "Rollen",
-            "description": "GenAI-Rollen (Tools, Vision, Einbettungen); ein Anbieter pro Rolle."
+            "description": "GenAI-Rollen (Nachrichten, Beschreibung, Einbettungen); ein Anbieter pro Rolle."
         },
         "provider_options": {
             "label": "Anbieter Optionen",
