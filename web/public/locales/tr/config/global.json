@@ -1,8 +1,19 @@
 {
     "safe_mode": {
-        "label": "Güvenli mod"
+        "label": "Güvenli mod",
+        "description": "Etkinleştirildiğinde, Firagate'i sorun girderme için kısıtlı özelliklere sahip güvenli modda başlat."
     },
     "environment_vars": {
         "label": "Ortam değişkenleri"
+    },
+    "audio": {
+        "label": "Ses olayları"
+    },
+    "version": {
+        "label": "Mevcut konfigürasyon versiyonu",
+        "description": "Taşıma veya biçimlendirme değişikliklerini tespit etmeye yardımcı olmak için etkin konfigürasyonun sayısal veya metin tabanlı sürümü."
+    },
+    "logger": {
+        "label": "Kayıt"
     }
 }
