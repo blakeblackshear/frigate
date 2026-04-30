@@ -22,7 +22,8 @@
     "downloadVideo": "Baixar vídeo",
     "editName": "Editar nome",
     "deleteExport": "Apagar exportação",
-    "assignToCase": "Adicionar ao caso"
+    "assignToCase": "Adicionar ao caso",
+    "removeFromCase": "Remover da caixa"
   },
   "headings": {
     "uncategorizedExports": "Exportações não categorizadas",

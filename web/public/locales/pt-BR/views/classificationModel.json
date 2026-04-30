@@ -15,8 +15,8 @@
       "deletedCategory_one": "Classe Apagada",
       "deletedCategory_many": "",
       "deletedCategory_other": "",
-      "deletedImage_one": "Imagens Apagadas",
-      "deletedImage_many": "",
+      "deletedImage_one": "Imagen Apagada",
+      "deletedImage_many": "Imagens Apagadas",
       "deletedImage_other": "",
       "categorizedImage": "Imagem Classificada com Sucesso",
       "trainedModel": "Modelo treinado com sucesso.",
@@ -29,14 +29,15 @@
       "reclassifiedImage": "Imagem reclassificada com sucesso"
     },
     "error": {
-      "deleteImageFailed": "Falha ao deletar:{{errorMessage}}",
-      "deleteCategoryFailed": "Falha ao deletar classe:{{errorMessage}}",
+      "deleteImageFailed": "Falha ao excluir:{{errorMessage}}",
+      "deleteCategoryFailed": "Falha ao excluir classe:{{errorMessage}}",
       "categorizeFailed": "Falha ao categorizar imagem:{{errorMessage}}",
       "deleteModelFailed": "Falha ao excluir o modelo: {{errorMessage}}",
       "trainingFailed": "Treinamento do modelo falhou. Verifique os logs do Frigate para mais detalhes.",
       "trainingFailedToStart": "Falha ao iniciar o treinamento do modelo: {{errorMessage}}",
       "updateModelFailed": "Falha ao atualizar modelo: {{errorMessage}}",
-      "renameCategoryFailed": "Falha ao renomear classe: {{errorMessage}}"
+      "renameCategoryFailed": "Falha ao renomear classe: {{errorMessage}}",
+      "reclassifyFailed": "Falha ao reclassificar imagem: {{errorMessage}}"
     }
   },
   "deleteCategory": {
