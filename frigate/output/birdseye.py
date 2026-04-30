@@ -8,7 +8,6 @@ import os
 import queue
 import subprocess as sp
 import threading
-import time
 import traceback
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Optional

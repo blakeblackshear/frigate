@@ -18,7 +18,7 @@ jobs:
           close-issue-message: ""
           days-before-stale: 30
           days-before-close: 3
-          exempt-draft-pr: true
+          exempt-draft-pr: false
           exempt-issue-labels: "planned,security"
           exempt-pr-labels: "planned,security,dependencies"
           operations-per-run: 120
