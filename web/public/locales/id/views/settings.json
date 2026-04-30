@@ -47,5 +47,21 @@
         "desc": "Secara otomatis beralih ke tampilan langsung kamera saat aktivitas terdeteksi. Menonaktifkan opsi ini menyebabkan gambar statis kamera di dasbor langsung hanya diperbarui sekali per menit."
       }
     }
+  },
+  "configMessages": {
+    "audioTranscription": {
+      "audioDetectionDisabled": "Pendeteksi suara tidak dinyalakan untuk kamera ini. Transkripsi suara memerlukan pendeteksi suara untuk dinyalakan."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Pengaturan FPS untuk pendeteksian lebih dari 5 tidak disarankan."
+    },
+    "faceRecognition": {
+      "globalDisabled": "Pendeteksi muka tidak dinyalakan dalam level global. Nyalakan pendeteksi muka dalam pengaturan global agar per-kamera deteksi muka dapat bekerja.",
+      "personNotTracked": "Pendeteksi muka memerlukan 'orang' sebagai objek deteksi. Pastikan 'orang' berada dalam hal yang dideteksi."
+    },
+    "lpr": {
+      "globalDisabled": "Pendeteksian plat nomor tidak dinyalakan dalam pengaturan global. Nyalakan deteksi plat nomor dalam pengaturan global agar fungsi ini dapat bekerja.",
+      "vehicleNotTracked": "Pendeteksian plat nomor memerlukan 'mobil' atau 'motor' untuk dideteksi."
+    }
   }
 }
