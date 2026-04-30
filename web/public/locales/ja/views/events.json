@@ -16,7 +16,9 @@
   },
   "camera": "カメラ",
   "allCameras": "全カメラ",
-  "timeline": "タイムライン",
+  "timeline": {
+    "label": "タイムライン"
+  },
   "timeline.aria": "タイムラインを選択",
   "events": {
     "label": "イベント",
@@ -25,7 +27,9 @@
   },
   "documentTitle": "レビュー - Frigate",
   "recordings": {
-    "documentTitle": "録画 - Frigate"
+    "documentTitle": "録画 - Frigate",
+    "invalidSharedLink": "解析エラーのため、タイムスタンプ付きの録画リンクを開くことができません。",
+    "invalidSharedCamera": "不明または未承認のカメラのため、タイムスタンプ付き録画のリンクを開くことができません。"
   },
   "calendarFilter": {
     "last24Hours": "直近24時間"
@@ -36,8 +40,8 @@
     "label": "新しいレビュー項目を表示",
     "button": "レビューすべき新規項目"
   },
-  "selected_one": "{{count}} 件選択",
-  "selected_other": "{{count}} 件選択",
+  "selected_one": "{{count}} 選択済み",
+  "selected_other": "{{count}} 選択済み",
   "detected": "検出",
   "suspiciousActivity": "不審なアクティビティ",
   "threateningActivity": "脅威となるアクティビティ",

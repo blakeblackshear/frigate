@@ -8,7 +8,8 @@
   },
   "submitFrigatePlus": {
     "title": "このフレームを Frigate+ に送信しますか？",
-    "submit": "送信"
+    "submit": "送信",
+    "previewError": "スナップショットのプレビューを読み込めませんでした。現在、この録画は利用できない可能性があります。"
   },
   "livePlayerRequiredIOSVersion": "このライブストリームタイプには iOS 17.1 以上が必要です。",
   "cameraDisabled": "カメラは無効です",

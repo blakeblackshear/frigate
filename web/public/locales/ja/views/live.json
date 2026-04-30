@@ -1,5 +1,7 @@
 {
-  "documentTitle": "ライブ - Frigate",
+  "documentTitle": {
+    "default": "ライブ - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - ライブ - Frigate",
   "lowBandwidthMode": "低帯域モード",
   "twoWayTalk": {
@@ -15,7 +17,8 @@
       "clickMove": {
         "label": "フレーム内をクリックしてカメラを中央に移動",
         "enable": "クリック移動を有効化",
-        "disable": "クリック移動を無効化"
+        "disable": "クリック移動を無効化",
+        "enableWithZoom": "クリックで移動、ドラッグでズームを有効にする"
       },
       "left": {
         "label": "PTZ カメラを左へ移動"

@@ -13,7 +13,9 @@
     "cameraManagement": "カメラ設定 - Frigate",
     "cameraReview": "カメラレビュー設定 - Frigate",
     "maintenance": "メンテナンス - Frigate",
-    "profiles": "プロファイル - Frigate"
+    "profiles": "プロファイル - Frigate",
+    "globalConfig": "グローバル設定 - Frigate",
+    "cameraConfig": "カメラ設定 - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -31,7 +33,29 @@
     "roles": "区分",
     "general": "一般",
     "globalConfig": "グローバル設定",
-    "system": "システム"
+    "system": "システム",
+    "integrations": "統合",
+    "uiSettings": "UI設定",
+    "profiles": "プロファイル",
+    "globalDetect": "物体検出",
+    "globalRecording": "録画",
+    "globalSnapshots": "スナップショット",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "動体検出",
+    "globalObjects": "オブジェクト",
+    "globalReview": "レビュー",
+    "globalAudioEvents": "オーディオイベント",
+    "globalLivePlayback": "ライブ再生",
+    "globalTimestampStyle": "タイムスタンプ形式",
+    "systemDatabase": "データベース",
+    "systemTls": "TLS",
+    "systemAuthentication": "認証",
+    "systemNetworking": "ネットワーキング",
+    "systemProxy": "プロキシ",
+    "systemUi": "UI",
+    "systemLogging": "ロギング",
+    "systemEnvironmentVariables": "環境変数",
+    "systemTelemetry": "テレメトリー"
   },
   "dialog": {
     "unsavedChanges": {
@@ -113,7 +137,7 @@
       "desc": "Frigate のセマンティック検索では、画像そのもの、ユーザー定義のテキスト説明、または自動生成された説明を用いて、レビュー項目内の追跡オブジェクトを検索できます。",
       "reindexNow": {
         "label": "今すぐ再インデックス",
-        "desc": "再インデックスは、すべての追跡オブジェクトの埋め込みを再生成します。バックグラウンドで実行され、追跡オブジェクト数によっては CPU を使い切り、相応の時間がかかる場合があります。",
+        "desc": "インデックスの再構築を行うと、追跡対象のすべてのオブジェクトの埋め込みが再生成されます。この処理はバックグラウンドで実行され、追跡対象のオブジェクトの数によってはCPU使用率が最大になり、かなりの時間がかかる場合があります。",
         "confirmTitle": "再インデックスの確認",
         "confirmDesc": "すべての追跡オブジェクトの埋め込みを再インデックスしますか？この処理はバックグラウンドで実行されますが、CPU を使い切り、時間がかかる場合があります。進行状況は［探索］ページで確認できます。",
         "confirmButton": "再インデックス",
@@ -244,7 +268,7 @@
       }
     },
     "motionMaskLabel": "モーションマスク {{number}}",
-    "objectMaskLabel": "オブジェクトマスク {{number}}（{{label}}）",
+    "objectMaskLabel": "オブジェクトマスク {{number}}",
     "form": {
       "zoneName": {
         "error": {
@@ -594,7 +618,7 @@
           "admin": "管理者",
           "adminDesc": "すべての機能にフルアクセス。",
           "viewer": "閲覧者",
-          "viewerDesc": "ライブ、レビュー、探索、書き出しに限定。",
+          "viewerDesc": "ライブ、レビュー、探索、エクスポートに限定。",
           "customDesc": "特定のカメラアクセスを持つカスタムロール。"
         }
       }
@@ -725,7 +749,7 @@
     "snapshotConfig": {
       "title": "スナップショット設定",
       "desc": "Frigate+ への送信には、設定でスナップショットと <code>clean_copy</code> スナップショットの両方を有効にする必要があります。",
-      "cleanCopyWarning": "一部のカメラではスナップショットは有効ですが、クリーンコピーが無効です。これらのカメラから Frigate+ へ画像を送信するには、スナップショット設定で <code>clean_copy</code> を有効にしてください。",
+      "cleanCopyWarning": "一部のカメラではスナップショット機能が無効になっています",
       "table": {
         "camera": "カメラ",
         "snapshots": "スナップショット",
@@ -937,7 +961,7 @@
       "quality": "品質",
       "selectQuality": "品質を選択",
       "roleLabels": {
-        "detect": "オブジェクト検出",
+        "detect": "物体検出",
         "record": "録画",
         "audio": "音声"
       },
@@ -952,7 +976,7 @@
       "detectRoleWarning": "続行するには、少なくとも 1 つのストリームに「検出」ロールが必要です。",
       "rolesPopover": {
         "title": "ストリーム ロール",
-        "detect": "オブジェクト検出用のメイン フィードです。",
+        "detect": "物体検出用のメイン フィードです。",
         "record": "設定に基づいて映像フィードのセグメントを保存します。",
         "audio": "音声ベース検出用のフィードです。"
       },
@@ -1227,5 +1251,18 @@
         "success": "レビュー分類の設定を保存しました。変更を適用するには Frigate を再起動してください。"
       }
     }
+  },
+  "maintenance": {
+    "sync": {
+      "status": {
+        "queued": "キューに追加済み"
+      }
+    }
+  },
+  "button": {
+    "overriddenGlobal": "上書き済み（グローバル）",
+    "overriddenGlobalTooltip": "このカメラは、このセクションのグローバル設定を上書きします",
+    "overriddenBaseConfig": "上書き済み（基本設定）",
+    "overriddenBaseConfigTooltip": "{{profile}} プロファイルは、このセクションの設定を上書きします"
   }
 }

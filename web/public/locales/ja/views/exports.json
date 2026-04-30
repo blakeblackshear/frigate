@@ -1,23 +1,127 @@
 {
   "documentTitle": "エクスポート - Frigate",
-  "noExports": "書き出しは見つかりません",
+  "noExports": "エクスポートが見つかりません",
   "search": "検索",
-  "deleteExport": "書き出しを削除",
+  "deleteExport": {
+    "label": "エクスポートを削除"
+  },
   "deleteExport.desc": "{{exportName}} を削除してもよろしいですか？",
   "editExport": {
-    "title": "書き出し名を変更",
-    "desc": "この書き出しの新しい名前を入力してください。",
-    "saveExport": "書き出しを保存"
+    "title": "エクスポート名を変更",
+    "desc": "このエクスポートの新しい名前を入力してください。",
+    "saveExport": "エクスポートを保存"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "書き出し名の変更に失敗しました: {{errorMessage}}"
+      "renameExportFailed": "エクスポート名の変更に失敗しました: {{errorMessage}}",
+      "assignCaseFailed": "ケース割り当ての更新に失敗しました: {{errorMessage}}",
+      "caseSaveFailed": "ケースの保存に失敗しました: {{errorMessage}}",
+      "caseDeleteFailed": "ケースの削除に失敗しました: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "エクスポートを共有",
     "downloadVideo": "動画をダウンロード",
     "editName": "名前を編集",
-    "deleteExport": "エクスポートを削除"
+    "deleteExport": "エクスポートを削除",
+    "assignToCase": "ケースに追加",
+    "removeFromCase": "ケースから削除"
+  },
+  "headings": {
+    "cases": "ケース",
+    "uncategorizedExports": "未分類のエクスポート"
+  },
+  "toolbar": {
+    "newCase": "新しいケース",
+    "addExport": "エクスポートに追加",
+    "editCase": "ケースを編集",
+    "deleteCase": "ケースを削除"
+  },
+  "deleteCase": {
+    "label": "ケースを削除",
+    "desc": "本当に {{caseName}} を削除しますか ？",
+    "descKeepExports": "エクスポートは、分類されていないエクスポートとして引き続き利用可能です。",
+    "descDeleteExports": "この場合、すべてのエクスポートは完全に削除されます。",
+    "deleteExports": "エクスポートも削除する"
+  },
+  "caseDialog": {
+    "title": "ケースに追加",
+    "description": "既存のケースを選択するか、新しいケースを作成してください。",
+    "selectLabel": "ケース",
+    "newCaseOption": "新しいケースを作成",
+    "nameLabel": "ケース名",
+    "descriptionLabel": "説明"
+  },
+  "caseCard": {
+    "emptyCase": "まだエクスポートされていません"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} エクスポート",
+    "queued": "キューに追加しました",
+    "running": "実行中",
+    "preparing": "準備中",
+    "copying": "コピー中",
+    "encoding": "エンコード中",
+    "encodingRetry": "エンコード中 (再試行)",
+    "finalizing": "終了処理中"
+  },
+  "caseView": {
+    "noDescription": "説明がありません",
+    "exportCount_one": "1 件のエクスポート",
+    "exportCount_other": "{{count}} エクスポート",
+    "cameraCount_other": "{{count}} カメラ",
+    "showMore": "さらに表示",
+    "showLess": "表示を減らす",
+    "emptyTitle": "このケースは空です",
+    "emptyDescription": "既存の分類されていないエクスポートを追加して、ケースを整理しましょう。",
+    "emptyDescriptionNoExports": "まだ追加可能な未分類のエクスポートはありません。",
+    "createdAt": "作成日 {{value}}"
+  },
+  "caseEditor": {
+    "createTitle": "ケースを作成",
+    "editTitle": "ケースを編集",
+    "namePlaceholder": "ケース名",
+    "descriptionPlaceholder": "このケースに関するメモや背景情報を追加する"
+  },
+  "addExportDialog": {
+    "title": "{{caseName}} にエクスポートを追加",
+    "searchPlaceholder": "未分類のエクスポートを検索",
+    "empty": "この検索条件に一致する未分類のエクスポートはありません。",
+    "addButton_one": "1 件のエクスポートを追加",
+    "addButton_other": "{{count}} 件のエクスポートを追加",
+    "adding": "追加中..."
+  },
+  "selected_one": "{{count}} 選択済み",
+  "selected_other": "{{count}} 選択済み",
+  "bulkActions": {
+    "addToCase": "ケースに追加",
+    "moveToCase": "ケースに移動",
+    "removeFromCase": "ケースから削除",
+    "delete": "削除",
+    "deleteNow": "今すぐ削除"
+  },
+  "bulkDelete": {
+    "title": "エクスポートを削除",
+    "desc_one": "{{count}} 件のエクスポートを削除してもよろしいですか？",
+    "desc_other": "{{count}} 件のエクスポートを削除してもよろしいですか？"
+  },
+  "bulkRemoveFromCase": {
+    "title": "ケースから削除",
+    "desc_one": "このケースから {{count}} 件のエクスポートを削除しますか？",
+    "desc_other": "このケースから {{count}} 件のエクスポートを削除しますか？",
+    "descKeepExports": "エクスポートは未分類に移動されます。",
+    "descDeleteExports": "エクスポートは完全に削除されます。",
+    "deleteExports": "代わりにエクスポートを削除する"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "エクスポートの削除に成功しました",
+      "reassign": "ケース割り当ての更新に成功しました",
+      "remove": "ケースからエクスポートを正常に削除しました"
+    },
+    "error": {
+      "deleteFailed": "エクスポートの削除に失敗しました: {{errorMessage}}",
+      "reassignFailed": "ケース割り当ての更新に失敗しました: {{errorMessage}}"
+    }
   }
 }
