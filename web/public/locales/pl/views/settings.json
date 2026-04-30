@@ -96,7 +96,11 @@
     "notifications": "Ustawienia powiadomień - Frigate",
     "enrichments": "Ustawienia wzbogacania - Frigate",
     "cameraManagement": "Zarządzanie kamerami – Frigate",
-    "cameraReview": "Ustawienia przeglądu kamer - Frigate"
+    "cameraReview": "Ustawienia przeglądu kamer - Frigate",
+    "globalConfig": "Konfiguracja globalna - Frigate",
+    "cameraConfig": "Konfiguracja kamery - Frigate",
+    "maintenance": "Konserwacja – Frigate",
+    "profiles": "Profile - Frigate"
   },
   "classification": {
     "title": "Ustawienia Klasyfikacji",

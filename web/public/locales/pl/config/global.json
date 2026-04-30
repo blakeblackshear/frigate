@@ -38,6 +38,35 @@
         }
     },
     "version": {
-        "label": "Aktualna wersja"
+        "label": "Bieżąca wersja konfiguracji",
+        "description": "Liczbowa lub znakowa wersja aktywnej konfiguracji w celu wykrywania migracji lub zmiany formatu."
+    },
+    "safe_mode": {
+        "label": "Tryb bezpieczny",
+        "description": "Po włączeniu Frigate uruchomi się w trybie awaryjnym z ograniczonymi funkcjami, co ułatwi rozwiązywanie problemów."
+    },
+    "environment_vars": {
+        "label": "Zmienne środowiskowe",
+        "description": "Pary klucz-wartość zmiennych środowiskowych, które należy ustawić dla procesu Frigate w systemie Home Assistant. Użytkownicy niekorzystający z Home Assistant powinni zamiast tego skorzystać z konfiguracji zmiennych środowiskowych w Dockerze."
+    },
+    "logger": {
+        "label": "Rejestrowanie",
+        "description": "Konfiguracja domyślnej szczegółowości logów oraz indywidualnych ustawień dla komponentów.",
+        "default": {
+            "label": "Poziom szczegółowości logów",
+            "description": "Domyślny poziom szczegółowości logów globalnych (debug, info, warning, error)."
+        },
+        "logs": {
+            "label": "Poziom logowania dla poszczególnych procesów",
+            "description": "Zmiana poziomu logowania dla poszczególnych komponentów w celu zwiększenia lub zmniejszenia szczegółowości logów dla określonych modułów."
+        }
+    },
+    "auth": {
+        "label": "Uwierzytelnianie",
+        "description": "Ustawienia związane z uwierzytelnianiem i sesjami, w tym opcje dotyczące plików cookie i ograniczeń częstotliwości.",
+        "enabled": {
+            "label": "Włącz uwierzytelnianie",
+            "description": "Włącz natywne uwierzytelnianie dla interfejsu Frigate."
+        }
     }
 }

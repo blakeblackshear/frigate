@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "Logi Frigate - Frigate",
       "go2rtc": "Logi Go2RTC - Frigate",
-      "nginx": "Logi Nginx - Frigate"
+      "nginx": "Logi Nginx - Frigate",
+      "websocket": "Logi Websocket - Frigate"
     }
   },
   "general": {
@@ -162,6 +163,16 @@
       "error": {
         "fetchingLogsFailed": "Błąd pobierania logów: {{errorMessage}}",
         "whileStreamingLogs": "Błąd podczas strumieniowania logów: {{errorMessage}}"
+      }
+    },
+    "websocket": {
+      "label": "Wiadomości",
+      "pause": "Pauza",
+      "resume": "Wznów",
+      "clear": "Wyczyść",
+      "filter": {
+        "all": "Wszystkie tematy",
+        "topics": "Tematy"
       }
     }
   },

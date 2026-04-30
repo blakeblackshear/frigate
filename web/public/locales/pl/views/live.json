@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Na żywo - Frigate",
+  "documentTitle": {
+    "default": "Transmisja - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}}- Na żywo - Frigate",
   "lowBandwidthMode": "Tryb niskiej przepustowości",
   "twoWayTalk": {
@@ -15,7 +17,8 @@
       "clickMove": {
         "label": "Kliknij w ramce, aby wyśrodkować kamerę",
         "enable": "Włącz kliknięcie do przesuwania",
-        "disable": "Wyłącz kliknięcie do przesuwania"
+        "disable": "Wyłącz kliknięcie do przesuwania",
+        "enableWithZoom": "Włącz kliknij, aby przesunąć / przeciągnij, aby przybliżyć"
       },
       "left": {
         "label": "Przesuń kamerę PTZ w lewo"
