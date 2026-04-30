@@ -45,6 +45,13 @@
     },
     "label": "Configuração da Câmera",
     "audio_transcription": {
-        "label": "Transcrição de áudio"
+        "label": "Transcrição de áudio",
+        "enabled": {
+            "label": "Habilitar transcrição"
+        },
+        "live_enabled": {
+            "label": "Transcrição em tempo real"
+        },
+        "description": "Configurações de transcrição de áudio e voz ao vivo para eventos e legendas em tempo real."
     }
 }
