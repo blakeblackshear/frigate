@@ -32,7 +32,8 @@
   "noPreviewFoundFor": "Ingen forhåndsvisning funnet for {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Send dette bildet til Frigate+?",
-    "submit": "Send"
+    "submit": "Send",
+    "previewError": "Kunne ikke laste forhåndsvisning av stillbilde. Opptaket er kanskje ikke tilgjengelig for øyeblikket."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 eller høyere kreves for denne typen direkte-strømming.",
   "streamOffline": {

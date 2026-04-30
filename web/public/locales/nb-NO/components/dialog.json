@@ -59,15 +59,26 @@
     "toast": {
       "success": "Eksport startet. Se filen på eksportsiden.",
       "error": {
-        "failed": "Klarte ikke å starte eksport: {{error}}",
+        "failed": "Kune ikke legge eksport i kø: {{error}}",
         "noVaildTimeSelected": "Ingen gyldig tidsperiode valgt",
         "endTimeMustAfterStartTime": "Sluttid må være etter starttid"
       },
-      "view": "Vis"
+      "view": "Vis",
+      "queued": "Eksport lagt i kø. Se fremdrift på eksportsiden.",
+      "batchPartial": "Startet {{successful}} av {{total}} eksporter. Kameraer som feilet: {{failedCameras}}",
+      "batchFailed": "Kunne ikke starte {{total}} eksporter. Kameraer som feilet: {{failedCameras}}",
+      "batchQueuedPartial": "La {{successful}} av {{total}} eksporter i kø. Kameraer som feilet: {{failedCameras}}",
+      "batchQueueFailed": "Kunne ikke legge {{total}} eksporter i kø. Kameraer som feilet: {{failedCameras}}",
+      "batchSuccess_one": "Startet 1 eksport. Åpner saken nå.",
+      "batchSuccess_other": "Startet {{count}} eksporter. Åpner saken nå.",
+      "batchQueuedSuccess_one": "La 1 eksport i kø. Åpner saken nå.",
+      "batchQueuedSuccess_other": "La {{count}} eksporter i kø. Åpner saken nå."
     },
     "fromTimeline": {
       "previewExport": "Forhåndsvis eksport",
-      "saveExport": "Lagre eksport"
+      "saveExport": "Lagre eksport",
+      "queueingExport": "Legger eksport i kø...",
+      "useThisRange": "Bruk dette tidsrommet"
     },
     "name": {
       "placeholder": "Gi eksporten et navn"
@@ -77,7 +88,49 @@
     "selectOrExport": "Velg eller eksporter",
     "case": {
       "label": "Sak",
-      "placeholder": "Velg en sak"
+      "placeholder": "Velg en sak",
+      "newCaseOption": "Opprett ny sak",
+      "newCaseNamePlaceholder": "Navn på ny sak",
+      "newCaseDescriptionPlaceholder": "Saksbeskrivelse",
+      "nonAdminHelp": "En ny sak vil bli opprettet for disse eksportene."
+    },
+    "queueing": "Legger eksport i kø...",
+    "tabs": {
+      "export": "Enkeltkamera",
+      "multiCamera": "Multikamera"
+    },
+    "multiCamera": {
+      "timeRange": "Tidsrom",
+      "selectFromTimeline": "Velg fra tidslinje",
+      "cameraSelection": "Kameraer",
+      "cameraSelectionHelp": "Kameraer med sporede objekter i dette tidsrommet er forhåndsvalgt",
+      "checkingActivity": "Sjekker kameraaktivitet...",
+      "noCameras": "Ingen kameraer tilgjengelig",
+      "nameLabel": "Eksportnavn",
+      "namePlaceholder": "Valgfritt navneprefiks for disse eksportene",
+      "queueingButton": "Legger eksporter i kø...",
+      "detectionCount_one": "1 sporet objekt",
+      "detectionCount_other": "{{count}} sporede objekter",
+      "exportButton_one": "Eksporter 1 kamera",
+      "exportButton_other": "Eksporter {{count}} kameraer"
+    },
+    "multi": {
+      "description": "Eksporter hver valgte inspeksjon. Alle eksporter vil bli gruppert under én sak.",
+      "descriptionNoCase": "Eksporter hver valgte inspeksjon.",
+      "caseNamePlaceholder": "Eksport av inspeksjon - {{date}}",
+      "exportingButton": "Eksporterer...",
+      "toast": {
+        "partial": "Startet {{successful}} av {{total}} eksporter. Feilet: {{failedItems}}",
+        "failed": "Kunne ikke starte {{total}} eksporter. Feilet: {{failedItems}}",
+        "started_one": "Startet 1 eksport. Åpner saken nå.",
+        "started_other": "Startet {{count}} eksporter. Åpner saken nå.",
+        "startedNoCase_one": "Startet 1 eksport.",
+        "startedNoCase_other": "Startet {{count}} eksporter."
+      },
+      "title_one": "Eksporter 1 inspeksjon",
+      "title_other": "Eksporter {{count}} inspeksjon",
+      "exportButton_one": "Eksporter 1 inspeksjon",
+      "exportButton_other": "Eksporter {{count}} inspeksjon"
     }
   },
   "streaming": {
@@ -125,6 +178,14 @@
       "markAsReviewed": "Merk som inspisert",
       "deleteNow": "Slett nå",
       "markAsUnreviewed": "Merk som ikke inspisert"
+    },
+    "shareTimestamp": {
+      "description": "Del en tidsstemplet URL fra avspillerens nåværende posisjon, eller velg et egendefinert tidsstempel. Merk at dette ikke er en offentlig delingslenke, og at den kun er tilgjengelig for brukere med tilgang til Frigate og dette kameraet.",
+      "custom": "Egendefinert tidsstempel",
+      "title": "Del tidsstempel",
+      "label": "Del tidsstempel",
+      "button": "Del URL med tidsstempel",
+      "shareTitle": "Tidsstempel for Frigate-inspeksjon: {{camera}}"
     }
   },
   "imagePicker": {

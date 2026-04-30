@@ -840,7 +840,7 @@
         "label": "Opprinnelig kamerastatus"
     },
     "friendly_name": {
-        "description": "Kamerats visningsnavn i Frigate-grensesnittet",
+        "description": "Kameraets visningsnavn i Frigate-grensesnittet",
         "label": "Visningsnavn"
     },
     "label": "Kamerakonfigurasjon",
