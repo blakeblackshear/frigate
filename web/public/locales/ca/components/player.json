@@ -32,7 +32,8 @@
   "noPreviewFoundFor": "No s'ha trobat cap previsualització per a {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Enviar aquesta imatge a Frigate+?",
-    "submit": "Enviar"
+    "submit": "Enviar",
+    "previewError": "No s'ha pogut carregar la vista prèvia de la instantània. És possible que l'enregistrament no estigui disponible en aquest moment."
   },
   "livePlayerRequiredIOSVersion": "Es requereix iOS 17.1 o superior per a aquest tipus de reproducció en directe.",
   "streamOffline": {

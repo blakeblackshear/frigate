@@ -60,15 +60,76 @@
         "noVaildTimeSelected": "No s'ha seleccionat un rang de temps vàlid",
         "failed": "No s'ha pogut inciar l'exportació: {{error}}"
       },
-      "view": "Vista"
+      "view": "Vista",
+      "queued": "Exporta a la cua. Mostra el progrés a la pàgina d'exportacions.",
+      "batchSuccess_one": "S'ha iniciat l'exportació 1. Obrint el cas ara.",
+      "batchSuccess_many": "S'han iniciat {{count}} exportacions. Obrint el cas ara.",
+      "batchSuccess_other": "S'han iniciat {{count}} exportacions. Obrint el cas ara.",
+      "batchPartial": "S'han iniciat {{successful}} de {{total}} exportacions. Càmeres fallides: {{failedCameras}}",
+      "batchFailed": "No s'han pogut iniciar {{total}} exportacions. Càmeres fallides: {{failedCameras}}",
+      "batchQueuedSuccess_one": "Exporta a la cua 1. Obrint el cas ara.",
+      "batchQueuedSuccess_many": "{{count}} exportacions a la cua. Obrint el cas ara.",
+      "batchQueuedSuccess_other": "{{count}} exportacions a la cua. Obrint el cas ara.",
+      "batchQueuedPartial": "{{successful}} de {{total}} exportacions a la cua. Càmeres fallides: {{failedCameras}}",
+      "batchQueueFailed": "No s'han pogut posar a la cua {{total}} exportacions. Càmeres fallides: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Guardar exportació",
-      "previewExport": "Previsualitzar exportació"
+      "previewExport": "Previsualitzar exportació",
+      "queueingExport": "S'està fent la cua de l'exportació...",
+      "useThisRange": "Utilitza aquest interval"
     },
     "case": {
       "label": "Cas",
-      "placeholder": "Selecciona un cas"
+      "placeholder": "Selecciona un cas",
+      "newCaseOption": "Crea un cas no",
+      "newCaseNamePlaceholder": "Nom de cas nou",
+      "newCaseDescriptionPlaceholder": "Descripció del cas",
+      "nonAdminHelp": "Es crearà un nou cas per a aquestes exportacions."
+    },
+    "queueing": "S'està fent la cua de l'exportació...",
+    "tabs": {
+      "export": "Càmera única",
+      "multiCamera": "Multicàmera"
+    },
+    "multiCamera": {
+      "timeRange": "Interval de temps",
+      "selectFromTimeline": "Selecciona des de la línia de temps",
+      "cameraSelection": "Càmeres",
+      "cameraSelectionHelp": "Les càmeres amb objectes rastrejats en aquest interval de temps estan preseleccionades",
+      "checkingActivity": "Comprovant l'activitat de la càmera...",
+      "noCameras": "No hi ha càmeres disponibles",
+      "detectionCount_one": "1 objecte rastrejat",
+      "detectionCount_many": "{{count}} objectes rastrejats",
+      "detectionCount_other": "{{count}} objectes rastrejats",
+      "nameLabel": "Nom de l'exportació",
+      "namePlaceholder": "Nom base opcional per a aquestes exportacions",
+      "queueingButton": "S'estan posant a la cua les exportacions...",
+      "exportButton_one": "Exporta 1 càmera",
+      "exportButton_many": "Exporta {{count}} càmeres",
+      "exportButton_other": "Exporta {{count}} càmeres"
+    },
+    "multi": {
+      "title_one": "Exporta {{count}} ressenyes",
+      "title_many": "Exporta {{count}} ressenyes",
+      "title_other": "Exporta {{count}} ressenyes",
+      "description": "Exporta cada revisió seleccionada. Totes les exportacions s'agruparan en un sol cas.",
+      "descriptionNoCase": "Exporta cada revisió seleccionada.",
+      "caseNamePlaceholder": "Exporta la revisió - {{date}}",
+      "exportButton_one": "Exporta {{count}} ressenyes",
+      "exportButton_many": "Exporta {{count}} ressenyes",
+      "exportButton_other": "Exporta {{count}} ressenyes",
+      "exportingButton": "S'està exportant...",
+      "toast": {
+        "started_one": "S'ha iniciat l'exportació 1. Obrint el cas ara.",
+        "started_many": "S'han iniciat {{count}} exportacions. Obrint el cas ara.",
+        "started_other": "S'han iniciat {{count}} exportacions. Obrint el cas ara.",
+        "startedNoCase_one": "S'ha iniciat l'exportació 1.",
+        "startedNoCase_many": "S'han iniciat {{count}} exportacions.",
+        "startedNoCase_other": "S'han iniciat {{count}} exportacions.",
+        "partial": "S'han iniciat {{successful}} de {{total}} exportacions. Ha fallat: {{failedItems}}",
+        "failed": "No s'han pogut iniciar {{total}} exportacions. Ha fallat: {{failedItems}}"
+      }
     }
   },
   "streaming": {
@@ -116,6 +177,14 @@
         "success": "Els enregistraments de vídeo associats als elements de revisió seleccionats s’han suprimit correctament.",
         "error": "No s'ha pogut suprimir: {{error}}"
       }
+    },
+    "shareTimestamp": {
+      "label": "Comparteix la marca horària",
+      "title": "Comparteix la marca horària",
+      "description": "Comparteix un URL amb marca horària de la posició actual del jugador o tria una marca horària personalitzada. Tingueu en compte que aquest no és un URL de compartició pública i només és accessible per als usuaris amb accés a Frigate i aquesta càmera.",
+      "custom": "Marca horària personalitzada",
+      "button": "Comparteix l'URL de la marca horària",
+      "shareTitle": "Marca de temps de revisió de Frigate: {{camera}}"
     }
   },
   "imagePicker": {
