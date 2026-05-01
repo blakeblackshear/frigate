@@ -33,7 +33,7 @@ export function useConfigGenerator() {
   const [nvidiaGpuDeviceId, setNvidiaGpuDeviceId] = useState("");
   const [configPath, setConfigPath] = useState("");
   const [mediaPath, setMediaPath] = useState("");
-  const [rtspPassword, setRtspPassword] = useState("password");
+  const [rtspPassword, setRtspPassword] = useState("");
   const [timezone, setTimezone] = useState("");
   const [shmSize, setShmSize] = useState("512mb");
   const [shmSizeError, setShmSizeError] = useState(false);
@@ -166,7 +166,7 @@ export function useConfigGenerator() {
       enabledPorts: enabledPortLines,
       configPath: configPath || "/path/to/your/config",
       mediaPath: mediaPath || "/path/to/your/storage",
-      rtspPassword: rtspPassword || "password",
+      rtspPassword,
       timezone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Etc/UTC",
       shmSize: shmSize || "512mb",
       nvidiaGpuCount,

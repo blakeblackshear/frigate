@@ -15,7 +15,7 @@ export interface GeneratorInput {
   enabledPorts: string[];
   configPath: string;
   mediaPath: string;
-  rtspPassword: string;
+  rtspPassword?: string;
   timezone: string;
   shmSize: string;
   nvidiaGpuCount?: string;
@@ -99,7 +99,7 @@ function buildPorts(enabledPorts: string[]): string[] {
 function buildEnvironment(
   device: DeviceConfig,
   hwEnv: Record<string, string>,
-  rtspPassword: string,
+  rtspPassword: string | undefined,
   timezone: string
 ): string[] {
   const allEnv: Record<string, string> = {
@@ -107,11 +107,15 @@ function buildEnvironment(
     ...(device.env ?? {}),
   };
 
-  const lines: string[] = [
-    "    environment:",
-    `      FRIGATE_RTSP_PASSWORD: "${rtspPassword}" # RTSP password — change to your own`,
-    `      TZ: "${timezone}" # Timezone`,
-  ];
+  const lines: string[] = ["    environment:"];
+
+  if (rtspPassword) {
+    lines.push(
+      `      FRIGATE_RTSP_PASSWORD: "${rtspPassword}" # RTSP password — change to your own`
+    );
+  }
+
+  lines.push(`      TZ: "${timezone}" # Timezone`);
 
   for (const [key, value] of Object.entries(allEnv)) {
     lines.push(`      ${key}: "${value}"`);
