@@ -10,11 +10,14 @@ If you've found a bug and want to fix it, go for it. Link to the relevant issue 
 
 ### New features
 
-Every new feature adds scope that the maintainers must test, maintain, and support long-term. Before writing code for a new feature:
+A pull request is more than just code — it's a request for the maintainers to review, integrate, and support the change long-term. We're selective about what we take on, and prioritize changes that align with the project's direction and can be responsibly maintained in the long term.
+
+This goes double for **large or highly-requested features**. Popularity signals demand, but it doesn't pre-approve a particular implementation. The bigger the change, the higher the long-term cost, and the more important it is that we're aligned on scope and approach before any code is written. A large PR that lands without prior discussion is unlikely to be merged as-is, no matter how well it's implemented.
+
+Before writing code for a new feature:
 
 1. **Check for existing discussion.** Search [feature requests](https://github.com/blakeblackshear/frigate/issues) and [discussions](https://github.com/blakeblackshear/frigate/discussions) to see if it's been proposed or discussed. Feature requests tagged with "planned" are on our radar — we plan to get to them, but we don't maintain a public roadmap or timeline. Check in with us first if you have interest in contributing to one.
 2. **Start a discussion or feature request first.** This helps ensure your idea aligns with Frigate's direction before you invest time building it. Community interest in a feature request helps us gauge demand, though a great idea is a great idea even without a crowd behind it.
-3. **Be open to "no".** We try to be thoughtful about what we take on, and sometimes that means saying no to good code if the feature isn't the right fit for the project. These calls are sometimes subjective, and we won't always get them right. We're happy to discuss and reconsider.
 
 ## AI usage policy
 
@@ -38,6 +41,8 @@ Contributors with a long history of thoughtful, quality contributions to Frigate
 We're not trying to gatekeep how you write code. Use whatever tools make you productive. But there's a difference between using AI as a tool to implement something you understand and handing a feature request to an AI and submitting whatever comes back. The former is fine. The latter creates maintenance risk for the project.
 
 Some honest context: when we review a PR, we're not just evaluating whether the code works today. We're evaluating whether we can maintain it, debug it, and extend it long-term — often without the original author's involvement. Code that the author doesn't deeply understand is code that nobody understands, and that's a liability.
+
+One more thing worth saying directly: most maintainers already have access to the same AI tools you do. A PR that's entirely AI-generated — where the author can't explain the design, debug issues independently, or engage substantively in design discussions — doesn't offer something we couldn't produce ourselves. What makes a contribution genuinely valuable is the human judgment, domain understanding, and ongoing commitment to maintain the code that come with it.
 
 ## Pull request guidelines
 
