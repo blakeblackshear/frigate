@@ -172,7 +172,7 @@ hardware:
         comment: "PCIe Coral — follow driver instructions at https://github.com/jnicolson/gasket-builder"
 
   - id: "gpu"
-    label: "GPU Acceleration (/dev/dri)"
+    label: "Intel/AMD GPU (/dev/dri)"
     description: "Pass through /dev/dri for GPU hardware acceleration (Intel/AMD)."
     disabledWhen:
       - "stable-tensorrt-jp6"
