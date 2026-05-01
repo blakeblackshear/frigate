@@ -293,5 +293,5 @@ ports:
     host: 1984
     container: 1984
     protocol: "tcp"
-    description: "Go2RTC Web UIport"
+    description: "Go2RTC Web UI"
     defaultEnabled: false
