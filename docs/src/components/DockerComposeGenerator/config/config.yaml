@@ -198,7 +198,7 @@ hardware:
 
   - id: "hailo"
     label: "Hailo NPU (/dev/hailo0)"
-    description: "Pass through /dev/hailo0 for Hailo-8 / Hailo-8L NPU acceleration."
+    description: "Pass through /dev/hailo0 for Hailo-8 / Hailo-8L NPU acceleration. You also need to [install the driver](#hailo-8)."
     disabledWhen:
       - "apple-silicon"
       - "stable-synaptics"
@@ -208,7 +208,7 @@ hardware:
 
   - id: "memryx"
     label: "MemryX MX3 (/dev/memx0)"
-    description: "Pass through /dev/memx0 for MemryX MX3 NPU acceleration."
+    description: "Pass through /dev/memx0 for MemryX MX3 NPU acceleration. You also need to [install the driver](#memryx-mx3)."
     disabledWhen:
       - "apple-silicon"
       - "stable-synaptics"
