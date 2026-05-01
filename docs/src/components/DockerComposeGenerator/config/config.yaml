@@ -242,7 +242,7 @@ hardware:
         comment: "AXERA libraries"
 
   - id: "video11"
-    label: "Raspberry Pi video11"
+    label: "Raspberry Pi (/dev/video11)"
     description: "Pass through /dev/video11 for Raspberry Pi 4B hardware acceleration."
     disabledWhen:
       - "stable-tensorrt"
