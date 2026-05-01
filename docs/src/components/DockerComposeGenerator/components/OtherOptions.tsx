@@ -26,25 +26,6 @@ export default function OtherOptions({
       <h4>Other Options</h4>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
-          <label htmlFor="dcg-rtsp-password" className={styles.label}>
-            RTSP password:
-          </label>
-          <input
-            id="dcg-rtsp-password"
-            type="text"
-            className={styles.input}
-            value={rtspPassword}
-            placeholder="password"
-            onChange={(e) => onRtspPasswordChange(e.target.value)}
-          />
-          <p className={styles.helpText}>
-            Optional. You can specify{" "}
-            <CodeInline>{"{FRIGATE_RTSP_PASSWORD}"}</CodeInline>{" "}
-            in the config file to reference camera stream passwords. This is NOT
-            the Frigate login password.
-          </p>
-        </div>
-        <div className={styles.formGroup}>
           <label htmlFor="dcg-timezone" className={styles.label}>
             Timezone:
           </label>
@@ -82,6 +63,25 @@ export default function OtherOptions({
               for the correct value.
             </p>
           )}
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="dcg-rtsp-password" className={styles.label}>
+            RTSP password:
+          </label>
+          <input
+            id="dcg-rtsp-password"
+            type="text"
+            className={styles.input}
+            value={rtspPassword}
+            placeholder="password"
+            onChange={(e) => onRtspPasswordChange(e.target.value)}
+          />
+          <p className={styles.helpText}>
+            Optional. You can specify{" "}
+            <CodeInline>{"{FRIGATE_RTSP_PASSWORD}"}</CodeInline>{" "}
+            in the config file to reference camera stream passwords. This is NOT
+            the Frigate login password.
+          </p>
         </div>
       </div>
     </div>
