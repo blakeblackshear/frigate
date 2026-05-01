@@ -24,7 +24,7 @@ export default function StoragePaths({
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
           <label htmlFor="dcg-config-path" className={styles.label}>
-            Config / DB / model cache directory:
+            Config / DB / model cache directory (on your host):
           </label>
           <input
             id="dcg-config-path"
