@@ -349,6 +349,13 @@ def move_preview_frames(loc: str) -> None:
             if not os.path.exists(preview_holdover):
                 return
 
+            if not os.access(preview_holdover, os.R_OK | os.W_OK):
+                logger.error(
+                    "Insufficient permissions on preview restart cache at %s",
+                    preview_holdover,
+                )
+                return
+
             shutil.move(preview_holdover, preview_cache)
     except shutil.Error:
         logger.error("Failed to restore preview cache.")
