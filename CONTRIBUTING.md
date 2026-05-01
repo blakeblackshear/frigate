@@ -42,7 +42,7 @@ We're not trying to gatekeep how you write code. Use whatever tools make you pro
 
 Some honest context: when we review a PR, we're not just evaluating whether the code works today. We're evaluating whether we can maintain it, debug it, and extend it long-term — often without the original author's involvement. Code that the author doesn't deeply understand is code that nobody understands, and that's a liability.
 
-One more thing worth saying directly: most maintainers already have access to the same AI tools you do. A PR that's entirely AI-generated — where the author can't explain the design, debug issues independently, or engage substantively in design discussions — doesn't offer something we couldn't produce ourselves. What makes a contribution genuinely valuable is the human judgment and domain understanding behind it, and the engagement during review that shapes it into something we can confidently take on long-term.
+One more thing worth saying directly: most maintainers already have access to the same AI tools you do. A PR that's entirely AI-generated — where the author can't explain the design, debug issues independently, or engage substantively in design discussions — doesn't offer something we couldn't produce ourselves. What makes a contribution genuinely valuable is the human judgment and domain understanding behind it, as well as the engagement during review that shapes it into something we can confidently take on long-term.
 
 ## Pull request guidelines
 
