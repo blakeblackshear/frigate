@@ -272,7 +272,7 @@ ports:
     host: 8554
     container: 8554
     protocol: "tcp"
-    description: "RTSP feeds"
+    description: "Access RTSP feeds from go2rtc"
     defaultEnabled: true
 
   - id: "8555-tcp"
