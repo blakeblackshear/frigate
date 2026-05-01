@@ -1,4 +1,4 @@
 ruff
 
 # types
-types-peewee == 3.17.*
+types-peewee == 4.0.*
