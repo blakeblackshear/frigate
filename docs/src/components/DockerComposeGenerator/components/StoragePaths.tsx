@@ -43,7 +43,7 @@ export default function StoragePaths({
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="dcg-media-path" className={styles.label}>
-            Recording storage directory:
+            Recording storage directory (on your host):
           </label>
           <input
             id="dcg-media-path"
