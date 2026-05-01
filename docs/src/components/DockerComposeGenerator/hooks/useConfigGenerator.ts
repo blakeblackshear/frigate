@@ -34,9 +34,7 @@ export function useConfigGenerator() {
   const [configPath, setConfigPath] = useState("");
   const [mediaPath, setMediaPath] = useState("");
   const [rtspPassword, setRtspPassword] = useState("password");
-  const [timezone, setTimezone] = useState(
-    () => Intl.DateTimeFormat().resolvedOptions().timeZone || "Etc/UTC"
-  );
+  const [timezone, setTimezone] = useState("");
   const [shmSize, setShmSize] = useState("512mb");
   const [shmSizeError, setShmSizeError] = useState(false);
   const [gpuDeviceIdError, setGpuDeviceIdError] = useState(false);

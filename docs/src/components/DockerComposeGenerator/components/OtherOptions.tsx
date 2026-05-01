@@ -1,6 +1,23 @@
-import React from "react";
+import React, { useMemo } from "react";
 import CodeInline from "@theme/CodeInline";
 import styles from "../styles.module.css";
+
+const AUTO_TIMEZONE_VALUE = "__auto__";
+
+function getTimezoneList(): string[] {
+  if (typeof Intl !== "undefined") {
+    const intl = Intl as typeof Intl & {
+      supportedValuesOf?: (key: string) => string[];
+    };
+    const supported = intl.supportedValuesOf?.("timeZone");
+    if (supported && supported.length > 0) {
+      return [...supported].sort();
+    }
+  }
+
+  const fallback = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return fallback ? [fallback] : ["UTC"];
+}
 
 interface Props {
   rtspPassword: string;
@@ -21,6 +38,11 @@ export default function OtherOptions({
   onTimezoneChange,
   onShmSizeChange,
 }: Props) {
+  const timezones = useMemo(() => getTimezoneList(), []);
+  const systemTimezone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || "Etc/UTC";
+  const selectedValue = timezone || AUTO_TIMEZONE_VALUE;
+
   return (
     <div className={styles.formSection}>
       <h4>Other Options</h4>
@@ -29,14 +51,25 @@ export default function OtherOptions({
           <label htmlFor="dcg-timezone" className={styles.label}>
             Timezone:
           </label>
-          <input
+          <select
             id="dcg-timezone"
-            type="text"
-            className={styles.input}
-            value={timezone}
-            placeholder={Intl.DateTimeFormat().resolvedOptions().timeZone || "Etc/UTC"}
-            onChange={(e) => onTimezoneChange(e.target.value)}
-          />
+            className={`${styles.input} ${styles.select}`}
+            value={selectedValue}
+            onChange={(e) =>
+              onTimezoneChange(
+                e.target.value === AUTO_TIMEZONE_VALUE ? "" : e.target.value
+              )
+            }
+          >
+            <option value={AUTO_TIMEZONE_VALUE}>
+              Use browser timezone ({systemTimezone})
+            </option>
+            {timezones.map((tz) => (
+              <option key={tz} value={tz}>
+                {tz}
+              </option>
+            ))}
+          </select>
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="dcg-shm-size" className={styles.label}>
