@@ -65,6 +65,11 @@ function set_worker_processes() {
 
 set_worker_processes
 
+# NGINX cannot switch users if running rootless; strip the directive
+if [ "$(id -u)" != "0" ]; then
+    sed -i '/^user root;/d' /usr/local/nginx/conf/nginx.conf || true
+fi
+
 # ensure the directory for ACME challenges exists
 mkdir -p /etc/letsencrypt/www
 

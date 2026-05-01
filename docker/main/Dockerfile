@@ -287,6 +287,9 @@ RUN --mount=type=bind,source=docker/main/install_memryx.sh,target=/deps/install_
 
 COPY --from=deps-rootfs / /
 
+RUN mkdir -p /etc/letsencrypt/www /etc/letsencrypt/live/frigate /usr/local/nginx/logs /config /run /tmp/cache /media/frigate \
+    && chmod -R a+rwX /etc/letsencrypt /usr/local/nginx /config /run /tmp/cache /media/frigate
+
 RUN ldconfig
 
 EXPOSE 5000
@@ -297,6 +300,8 @@ EXPOSE 8555/tcp 8555/udp
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
 # Do not fail on long-running download scripts
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+# Set HOME to cache directory so rootless users can cache downloaded models
+ENV HOME=/tmp/cache
 
 ENTRYPOINT ["/init"]
 CMD []

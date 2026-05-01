@@ -7,5 +7,7 @@ set -o errexit -o nounset -o pipefail
 dirs=(/dev/shm/logs/frigate /dev/shm/logs/go2rtc /dev/shm/logs/nginx /dev/shm/logs/certsync)
 
 mkdir -p "${dirs[@]}"
-chown nobody:nogroup "${dirs[@]}"
+if [ "$(id -u)" = "0" ]; then
+    chown nobody:nogroup "${dirs[@]}"
+fi
 chmod 02755 "${dirs[@]}"
