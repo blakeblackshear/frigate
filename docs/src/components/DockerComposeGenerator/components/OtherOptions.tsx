@@ -38,7 +38,7 @@ export default function OtherOptions({
             onChange={(e) => onRtspPasswordChange(e.target.value)}
           />
           <p className={styles.helpText}>
-            Used as{" "}
+            Optional. You can specify{" "}
             <CodeInline>{"{FRIGATE_RTSP_PASSWORD}"}</CodeInline>{" "}
             in the config file to reference camera stream passwords. This is NOT
             the Frigate login password.
