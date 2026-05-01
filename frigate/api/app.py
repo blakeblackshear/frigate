@@ -146,8 +146,13 @@ def config(request: Request):
         for name, detector in config_obj.detectors.items()
     }
 
-    # remove the mqtt password
+    # remove environment_vars for non-admin users
+    if request.headers.get("remote-role") != "admin":
+        config.pop("environment_vars", None)
+
+    # remove mqtt credentials
     config["mqtt"].pop("password", None)
+    config["mqtt"].pop("user", None)
 
     # remove the proxy secret
     config["proxy"].pop("auth_secret", None)
