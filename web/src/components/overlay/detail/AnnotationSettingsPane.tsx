@@ -1,7 +1,9 @@
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
+import { throttle } from "lodash";
 import { LuExternalLink, LuMinus, LuPlus } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -18,6 +20,8 @@ import {
   ANNOTATION_OFFSET_MIN,
   ANNOTATION_OFFSET_STEP,
 } from "@/lib/const";
+
+const SLIDER_DRAG_THROTTLE_MS = 80;
 
 type AnnotationSettingsPaneProps = {
   event: Event;
@@ -38,30 +42,64 @@ export function AnnotationSettingsPane({
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSliderChange = useCallback(
-    (values: number[]) => {
-      if (!values || values.length === 0) return;
-      setAnnotationOffset(values[0]);
-    },
-    [setAnnotationOffset],
-  );
-
-  const stepOffset = useCallback(
-    (delta: number) => {
-      setAnnotationOffset((prev) => {
-        const next = prev + delta;
-        return Math.max(
-          ANNOTATION_OFFSET_MIN,
-          Math.min(ANNOTATION_OFFSET_MAX, next),
-        );
+  // flushSync ensures setAnnotationOffset commits synchronously so the
+  // useLayoutEffect in TrackingDetails (which seeks the video and sets
+  // currentTime in response) runs before the browser paints — preventing a
+  // one-frame overlay mismatch where annotationOffset has changed but
+  // currentTime has not.
+  const applyOffset = useCallback(
+    (newOffset: number) => {
+      flushSync(() => {
+        setAnnotationOffset(newOffset);
       });
     },
     [setAnnotationOffset],
   );
 
+  const throttledApplyOffset = useMemo(
+    () =>
+      throttle(applyOffset, SLIDER_DRAG_THROTTLE_MS, {
+        leading: true,
+        trailing: true,
+      }),
+    [applyOffset],
+  );
+
+  useEffect(() => () => throttledApplyOffset.cancel(), [throttledApplyOffset]);
+
+  const handleSliderChange = useCallback(
+    (values: number[]) => {
+      if (!values || values.length === 0) return;
+      throttledApplyOffset(values[0]);
+    },
+    [throttledApplyOffset],
+  );
+
+  const handleSliderCommit = useCallback(
+    (values: number[]) => {
+      if (!values || values.length === 0) return;
+      throttledApplyOffset.cancel();
+      applyOffset(values[0]);
+    },
+    [throttledApplyOffset, applyOffset],
+  );
+
+  const stepOffset = useCallback(
+    (delta: number) => {
+      const next = Math.max(
+        ANNOTATION_OFFSET_MIN,
+        Math.min(ANNOTATION_OFFSET_MAX, annotationOffset + delta),
+      );
+      throttledApplyOffset.cancel();
+      applyOffset(next);
+    },
+    [annotationOffset, applyOffset, throttledApplyOffset],
+  );
+
   const reset = useCallback(() => {
-    setAnnotationOffset(0);
-  }, [setAnnotationOffset]);
+    throttledApplyOffset.cancel();
+    applyOffset(0);
+  }, [applyOffset, throttledApplyOffset]);
 
   const saveToConfig = useCallback(async () => {
     if (!config || !event) return;
@@ -143,6 +181,7 @@ export function AnnotationSettingsPane({
             max={ANNOTATION_OFFSET_MAX}
             step={ANNOTATION_OFFSET_STEP}
             onValueChange={handleSliderChange}
+            onValueCommit={handleSliderCommit}
             className="flex-1"
           />
           <Button
