@@ -1073,10 +1073,6 @@ class LicensePlateProcessingMixin:
                     top_score = score
                     top_box = bbox
 
-                if score > top_score:
-                    top_score = score
-                    top_box = bbox
-
         # Return the top scoring bounding box if found
         if top_box is not None:
             # expand box by 5% to help with OCR
@@ -1092,9 +1088,6 @@ class LicensePlateProcessingMixin:
                 ]
             ).clip(0, [input.shape[1], input.shape[0]] * 2)
 
-            logger.debug(
-                f"{camera}: Found license plate. Bounding box: {expanded_box.astype(int)}"
-            )
             return tuple(int(x) for x in expanded_box)  # type: ignore[return-value]
         else:
             return None  # No detection above the threshold
@@ -1360,8 +1353,8 @@ class LicensePlateProcessingMixin:
                 )
 
                 # check that license plate is valid
-                # double the value because we've doubled the size of the car
-                if license_plate_area < self.config.cameras[camera].lpr.min_area * 2:
+                # quadruple the value because we've doubled both dimensions of the car
+                if license_plate_area < self.config.cameras[camera].lpr.min_area * 4:
                     logger.debug(f"{camera}: License plate is less than min_area")
                     return
 
@@ -1465,6 +1458,7 @@ class LicensePlateProcessingMixin:
                     license_plate_frame,
                 )
 
+        logger.debug(f"{camera}: Found license plate. Bounding box: {list(plate_box)}")
         logger.debug(f"{camera}: Running plate recognition for id: {id}.")
 
         # run detection, returns results sorted by confidence, best first
