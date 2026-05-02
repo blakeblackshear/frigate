@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import onnxruntime as ort
 
-from frigate.util.model import get_ort_providers
+from frigate.util.model import compute_cuda_mem_limit, get_ort_providers
 from frigate.util.rknn_converter import auto_convert_model, is_rknn_compatible
 
 logger = logging.getLogger(__name__)
@@ -24,23 +24,36 @@ def is_arm64_platform() -> bool:
 
 def get_ort_session_options(
     is_complex_model: bool = False,
-) -> ort.SessionOptions | None:
+    variable_length_inputs: bool = False,
+) -> ort.SessionOptions:
     """Get ONNX Runtime session options with appropriate settings.
 
     Args:
         is_complex_model: Whether the model needs basic optimization to avoid graph fusion issues.
+        variable_length_inputs: Whether the model receives variable-length inputs (e.g. text
+            embeddings).  When True, disables memory-pattern caching, which otherwise builds
+            a plan per unique input shape and holds onto mmap regions indefinitely — a major
+            source of RSS growth in the embeddings_manager process.
 
     Returns:
-        SessionOptions with appropriate optimization level, or None for default settings.
+        SessionOptions with appropriate settings.
     """
+    sess_options = ort.SessionOptions()
+    # Disable the CPU BFC arena for all sessions.  With the arena enabled ORT pools
+    # host-side staging buffers for GPU↔CPU transfers and never releases them back to
+    # the OS, causing RSS to grow without bound in long-running embedding processes.
+    sess_options.enable_cpu_mem_arena = False
+    if variable_length_inputs:
+        # Disable per-shape memory-layout plan caching for models with variable-length
+        # inputs (Jina CLIP text, PaddleOCR).  Each unique sequence length creates a
+        # new mmap-backed plan that is never freed, leading to unbounded anon-mmap growth.
+        # Fixed-size models (YOLO at 640×640) should keep this enabled for buffer aliasing.
+        sess_options.enable_mem_pattern = False
     if is_complex_model:
-        sess_options = ort.SessionOptions()
         sess_options.graph_optimization_level = (
             ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
         )
-        return sess_options
-
-    return None
+    return sess_options
 
 
 # Import OpenVINO only when needed to avoid circular dependencies
@@ -135,6 +148,25 @@ class ONNXModelRunner(BaseModelRunner):
             EnrichmentModelTypeEnum.arcface.value,
             ModelTypeEnum.rfdetr.value,
             ModelTypeEnum.dfine.value,
+        ]
+
+    @staticmethod
+    def has_variable_length_inputs(model_type: str | None) -> bool:
+        """Return True for models whose input length varies between inferences.
+
+        ORT builds a memory-layout plan per unique input shape and caches it
+        indefinitely (enable_mem_pattern).  For fixed-size models (YOLO) this
+        is a single plan; for variable-length text embeddings it grows without
+        bound and must be disabled.
+        """
+        if not model_type:
+            return False
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        return model_type in [
+            EnrichmentModelTypeEnum.jina_v1.value,
+            EnrichmentModelTypeEnum.jina_v2.value,
+            EnrichmentModelTypeEnum.paddleocr.value,
         ]
 
     @staticmethod
@@ -582,18 +614,22 @@ def get_optimized_runner(
         CudaGraphRunner.is_model_supported(model_type)
         and providers[0] == "CUDAExecutionProvider"
     ):
-        options[0] = {
-            **options[0],
-            "enable_cuda_graph": True,
-        }
-        return CudaGraphRunner(
-            ort.InferenceSession(
+        try:
+            cuda_graph_options = {**options[0], "enable_cuda_graph": True}
+            return CudaGraphRunner(
+                ort.InferenceSession(
+                    model_path,
+                    sess_options=get_ort_session_options(),
+                    providers=providers,
+                    provider_options=[cuda_graph_options, *options[1:]],
+                ),
+                cuda_graph_options["device_id"],
+            )
+        except Exception:
+            logger.warning(
+                "CUDA graph capture failed for %s, falling back to standard ONNX runner",
                 model_path,
-                providers=providers,
-                provider_options=options,
-            ),
-            options[0]["device_id"],
-        )
+            )
 
     if (
         providers
@@ -604,11 +640,20 @@ def get_optimized_runner(
         providers.pop(0)
         options.pop(0)
 
+    if providers and providers[0] == "CUDAExecutionProvider":
+        options[0] = {
+            **options[0],
+            "gpu_mem_limit": compute_cuda_mem_limit(model_path, cuda_graph=False),
+        }
+
     return ONNXModelRunner(
         ort.InferenceSession(
             model_path,
             sess_options=get_ort_session_options(
-                ONNXModelRunner.is_cpu_complex_model(model_type)
+                is_complex_model=ONNXModelRunner.is_cpu_complex_model(model_type),
+                variable_length_inputs=ONNXModelRunner.has_variable_length_inputs(
+                    model_type
+                ),
             ),
             providers=providers,
             provider_options=options,

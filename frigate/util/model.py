@@ -1,5 +1,6 @@
 """Model Utils"""
 
+import ctypes
 import logging
 import os
 from typing import Any
@@ -281,6 +282,35 @@ def post_process_yolox(
 
 
 ### ONNX Utilities
+
+
+def compute_cuda_mem_limit(model_path: str, cuda_graph: bool = False) -> int:
+    """Compute a per-session GPU memory limit for the ORT CUDA EP BFC arena.
+
+    For CudaGraphRunner (YOLO detection) do NOT call this — CUDA graph capture
+    requires all intermediate tensors to be live simultaneously, so peak GPU memory
+    is 15-20× the model file size and cannot be safely capped.  This function is
+    intended for embedding ONNXModelRunner sessions only.
+
+    Returns a limit derived from:
+    - Floor: model file size × peak_multiplier (≥ 2 GB)
+    - Ceiling: 80% of total GPU VRAM
+    Falls back to 4 GB if the CUDA runtime query fails.
+    """
+    try:
+        libcudart = ctypes.CDLL("libcudart.so")
+        free_bytes = ctypes.c_size_t()
+        total_bytes = ctypes.c_size_t()
+        libcudart.cudaMemGetInfo(ctypes.byref(free_bytes), ctypes.byref(total_bytes))
+        total = total_bytes.value
+    except Exception:
+        logger.debug("cudaMemGetInfo unavailable; using 4 GB gpu_mem_limit fallback")
+        return 4 * 1024**3
+
+    peak_multiplier = 14 if cuda_graph else 7
+    floor = max(os.path.getsize(model_path) * peak_multiplier, 2 * 1024**3)
+    ceiling = int(total * 0.80)
+    return min(floor, ceiling)
 
 
 def get_ort_providers(

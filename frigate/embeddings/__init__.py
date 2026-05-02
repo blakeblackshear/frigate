@@ -1,6 +1,7 @@
 """SQLite-vec embeddings database."""
 
 import base64
+import ctypes
 import json
 import logging
 import os
@@ -46,6 +47,16 @@ class EmbeddingProcess(FrigateProcess):
         self.metrics = metrics
 
     def run(self) -> None:
+        # Forkserver spawn exec's a fresh Python interpreter that does not
+        # inherit Docker env vars, so MALLOC_ARENA_MAX set in docker-compose
+        # never reaches this process.  Set it here via mallopt so glibc caps
+        # the number of malloc arenas to N_CPU instead of the default 8×N_CPU,
+        # preventing heap fragmentation under the embeddings workload.
+        try:
+            ctypes.CDLL("libc.so.6").mallopt(-8, os.cpu_count())  # M_ARENA_MAX
+        except Exception:
+            pass
+
         self.pre_run_setup(self.config.logger)
         maintainer = EmbeddingMaintainer(
             self.config,
