@@ -17,8 +17,89 @@ from ws4py.websocket import WebSocket as WebSocket_
 
 from frigate.comms.base_communicator import Communicator
 from frigate.config import FrigateConfig
+from frigate.const import (
+    CLEAR_ONGOING_REVIEW_SEGMENTS,
+    EXPIRE_AUDIO_ACTIVITY,
+    INSERT_MANY_RECORDINGS,
+    INSERT_PREVIEW,
+    NOTIFICATION_TEST,
+    REQUEST_REGION_GRID,
+    UPDATE_AUDIO_ACTIVITY,
+    UPDATE_AUDIO_TRANSCRIPTION_STATE,
+    UPDATE_BIRDSEYE_LAYOUT,
+    UPDATE_CAMERA_ACTIVITY,
+    UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
+    UPDATE_EVENT_DESCRIPTION,
+    UPDATE_MODEL_STATE,
+    UPDATE_REVIEW_DESCRIPTION,
+    UPSERT_REVIEW_SEGMENT,
+)
 
 logger = logging.getLogger(__name__)
+
+# Internal IPC topics — NEVER allowed from WebSocket, regardless of role
+_WS_BLOCKED_TOPICS = frozenset(
+    {
+        INSERT_MANY_RECORDINGS,
+        INSERT_PREVIEW,
+        REQUEST_REGION_GRID,
+        UPSERT_REVIEW_SEGMENT,
+        CLEAR_ONGOING_REVIEW_SEGMENTS,
+        UPDATE_CAMERA_ACTIVITY,
+        UPDATE_AUDIO_ACTIVITY,
+        EXPIRE_AUDIO_ACTIVITY,
+        UPDATE_EVENT_DESCRIPTION,
+        UPDATE_REVIEW_DESCRIPTION,
+        UPDATE_MODEL_STATE,
+        UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
+        UPDATE_BIRDSEYE_LAYOUT,
+        UPDATE_AUDIO_TRANSCRIPTION_STATE,
+        NOTIFICATION_TEST,
+    }
+)
+
+# Read-only topics any authenticated user (including viewer) can send
+_WS_VIEWER_TOPICS = frozenset(
+    {
+        "onConnect",
+        "modelState",
+        "audioTranscriptionState",
+        "birdseyeLayout",
+        "embeddingsReindexProgress",
+    }
+)
+
+
+def _check_ws_authorization(
+    topic: str,
+    role_header: str | None,
+    separator: str,
+) -> bool:
+    """Check if a WebSocket message is authorized.
+
+    Args:
+        topic: The message topic.
+        role_header: The HTTP_REMOTE_ROLE header value, or None.
+        separator: The role separator character from proxy config.
+
+    Returns:
+        True if authorized, False if blocked.
+    """
+    # Block IPC-only topics unconditionally
+    if topic in _WS_BLOCKED_TOPICS:
+        return False
+
+    # No role header: default to viewer (fail-closed)
+    if role_header is None:
+        return topic in _WS_VIEWER_TOPICS
+
+    # Check if any role is admin
+    roles = [r.strip() for r in role_header.split(separator)]
+    if "admin" in roles:
+        return True
+
+    # Non-admin: only viewer topics allowed
+    return topic in _WS_VIEWER_TOPICS
 
 
 class WebSocket(WebSocket_):  # type: ignore[misc]
@@ -49,6 +130,7 @@ class WebSocketClient(Communicator):
 
         class _WebSocketHandler(WebSocket):
             receiver = self._dispatcher
+            role_separator = self.config.proxy.separator or ","
 
             def received_message(self, message: WebSocket.received_message) -> None:  # type: ignore[name-defined]
                 try:
@@ -63,11 +145,25 @@ class WebSocketClient(Communicator):
                     )
                     return
 
-                logger.debug(
-                    f"Publishing mqtt message from websockets at {json_message['topic']}."
+                topic = json_message["topic"]
+
+                # Authorization check (skip when environ is None — direct internal connection)
+                role_header = (
+                    self.environ.get("HTTP_REMOTE_ROLE") if self.environ else None
                 )
+                if self.environ is not None and not _check_ws_authorization(
+                    topic, role_header, self.role_separator
+                ):
+                    logger.warning(
+                        "Blocked unauthorized WebSocket message: topic=%s, role=%s",
+                        topic,
+                        role_header,
+                    )
+                    return
+
+                logger.debug(f"Publishing mqtt message from websockets at {topic}.")
                 self.receiver(
-                    json_message["topic"],
+                    topic,
                     json_message["payload"],
                 )
 
