@@ -1,6 +1,9 @@
 """Tests for export progress tracking, broadcast, and FFmpeg parsing."""
 
 import io
+import os
+import shutil
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -385,6 +388,97 @@ class TestGetDatetimeFromTimestamp(unittest.TestCase):
         exporter = _make_exporter()
         exporter.config.ui.timezone = "Not/A_Real_Zone"
         assert isinstance(exporter.get_datetime_from_timestamp(1736942400), str)
+
+
+class TestSaveThumbnailFromPreviewFrames(unittest.TestCase):
+    """Short exports in the current hour can fall between preview frame
+    writes (1-2 fps during activity, every 30s otherwise). When no frame
+    falls inside the export window, save_thumbnail should fall back to
+    the most recent prior frame instead of returning no thumbnail."""
+
+    def setUp(self) -> None:
+        self.tmp_root = tempfile.mkdtemp(prefix="frigate_thumb_test_")
+        self.preview_dir = os.path.join(self.tmp_root, "cache", "preview_frames")
+        self.export_clips = os.path.join(self.tmp_root, "clips", "export")
+        os.makedirs(self.preview_dir, exist_ok=True)
+        os.makedirs(self.export_clips, exist_ok=True)
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmp_root, ignore_errors=True)
+
+    def _write_frame(self, camera: str, frame_time: float) -> str:
+        path = os.path.join(self.preview_dir, f"preview_{camera}-{frame_time}.webp")
+        with open(path, "wb") as f:
+            f.write(b"fake-webp-bytes")
+        return path
+
+    def _make_short_current_hour_exporter(self) -> RecordingExporter:
+        # Use a "now-ish" timestamp so save_thumbnail's start-of-hour
+        # comparison takes the current-hour branch (preview frames).
+        import datetime
+
+        now = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        exporter = _make_exporter()
+        exporter.export_id = "thumb_short"
+        exporter.start_time = now
+        exporter.end_time = now + 3
+        return exporter
+
+    def test_short_export_falls_back_to_prior_preview_frame(self) -> None:
+        exporter = self._make_short_current_hour_exporter()
+        # Most recent preview frame is 10s before the export window
+        prior = self._write_frame(exporter.camera, exporter.start_time - 10.0)
+        thumb_target = os.path.join(self.export_clips, f"{exporter.export_id}.webp")
+
+        with (
+            patch(
+                "frigate.record.export.CACHE_DIR", os.path.join(self.tmp_root, "cache")
+            ),
+            patch(
+                "frigate.record.export.CLIPS_DIR", os.path.join(self.tmp_root, "clips")
+            ),
+        ):
+            result = exporter.save_thumbnail(exporter.export_id)
+
+        assert result == thumb_target
+        assert os.path.isfile(thumb_target)
+        with open(thumb_target, "rb") as f, open(prior, "rb") as src:
+            assert f.read() == src.read()
+
+    def test_returns_empty_when_no_preview_frames_exist(self) -> None:
+        exporter = self._make_short_current_hour_exporter()
+
+        with (
+            patch(
+                "frigate.record.export.CACHE_DIR", os.path.join(self.tmp_root, "cache")
+            ),
+            patch(
+                "frigate.record.export.CLIPS_DIR", os.path.join(self.tmp_root, "clips")
+            ),
+        ):
+            result = exporter.save_thumbnail(exporter.export_id)
+
+        assert result == ""
+
+    def test_prefers_in_window_frame_over_prior_frame(self) -> None:
+        exporter = self._make_short_current_hour_exporter()
+        self._write_frame(exporter.camera, exporter.start_time - 10.0)
+        in_window = self._write_frame(exporter.camera, exporter.start_time + 1.0)
+        thumb_target = os.path.join(self.export_clips, f"{exporter.export_id}.webp")
+
+        with (
+            patch(
+                "frigate.record.export.CACHE_DIR", os.path.join(self.tmp_root, "cache")
+            ),
+            patch(
+                "frigate.record.export.CLIPS_DIR", os.path.join(self.tmp_root, "clips")
+            ),
+        ):
+            result = exporter.save_thumbnail(exporter.export_id)
+
+        assert result == thumb_target
+        with open(thumb_target, "rb") as f, open(in_window, "rb") as src:
+            assert f.read() == src.read()
 
 
 class TestSchedulesCleanup(unittest.TestCase):

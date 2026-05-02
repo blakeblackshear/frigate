@@ -551,12 +551,18 @@ class RecordingExporter(threading.Thread):
             start_file = f"{file_start}{self.start_time}.{PREVIEW_FRAME_TYPE}"
             end_file = f"{file_start}{self.end_time}.{PREVIEW_FRAME_TYPE}"
             selected_preview = None
+            # Preview frames are written at most 1-2 fps during activity
+            # and as little as one every 30s during quiet periods, so a
+            # short export window can contain zero frames. Track the most
+            # recent frame before the window as a fallback.
+            fallback_preview = None
 
             for file in sorted(os.listdir(preview_dir)):
                 if not file.startswith(file_start):
                     continue
 
                 if file < start_file:
+                    fallback_preview = os.path.join(preview_dir, file)
                     continue
 
                 if file > end_file:
@@ -564,6 +570,9 @@ class RecordingExporter(threading.Thread):
 
                 selected_preview = os.path.join(preview_dir, file)
                 break
+
+            if not selected_preview:
+                selected_preview = fallback_preview
 
             if not selected_preview:
                 return ""
