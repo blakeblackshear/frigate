@@ -13,7 +13,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional
 
-import pytz
+import pytz  # type: ignore[import-untyped]
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
