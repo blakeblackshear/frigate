@@ -53,6 +53,10 @@ export default function EventMenu({
   const handleDebugReplay = useCallback(
     (event: Event) => {
       setIsStarting(true);
+      const toastId = toast.loading(
+        t("dialog.starting", { ns: "views/replay" }),
+        { position: "top-center" },
+      );
 
       axios
         .post("debug_replay/start", {
@@ -63,6 +67,7 @@ export default function EventMenu({
         .then((response) => {
           if (response.status === 200) {
             toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
+              id: toastId,
               position: "top-center",
             });
             navigate("/replay");
@@ -78,6 +83,7 @@ export default function EventMenu({
             toast.error(
               t("dialog.toast.alreadyActive", { ns: "views/replay" }),
               {
+                id: toastId,
                 position: "top-center",
                 closeButton: true,
                 dismissible: false,
@@ -92,6 +98,7 @@ export default function EventMenu({
             );
           } else {
             toast.error(t("dialog.toast.error", { error: errorMessage }), {
+              id: toastId,
               position: "top-center",
             });
           }
