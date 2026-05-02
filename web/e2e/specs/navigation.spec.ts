@@ -69,17 +69,18 @@ test.describe("Navigation — conditional items @critical", () => {
     ).toBeVisible();
   });
 
-  test("/chat is hidden when genai.model is none (desktop)", async ({
+  test("/chat is hidden when no agent has the chat role (desktop)", async ({
     frigateApp,
   }) => {
     test.skip(frigateApp.isMobile, "Desktop sidebar");
     await frigateApp.installDefaults({
       config: {
         genai: {
-          enabled: false,
-          provider: "ollama",
-          model: "none",
-          base_url: "",
+          descriptions_only: {
+            provider: "ollama",
+            model: "llava",
+            roles: ["descriptions"],
+          },
         },
       },
     });
@@ -89,12 +90,20 @@ test.describe("Navigation — conditional items @critical", () => {
     ).toHaveCount(0);
   });
 
-  test("/chat is visible when genai.model is set (desktop)", async ({
+  test("/chat is visible when an agent has the chat role (desktop)", async ({
     frigateApp,
   }) => {
     test.skip(frigateApp.isMobile, "Desktop sidebar");
     await frigateApp.installDefaults({
-      config: { genai: { enabled: true, model: "llava" } },
+      config: {
+        genai: {
+          chat_agent: {
+            provider: "ollama",
+            model: "llava",
+            roles: ["chat"],
+          },
+        },
+      },
     });
     await frigateApp.goto("/");
     await expect(

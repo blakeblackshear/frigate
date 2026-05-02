@@ -957,8 +957,9 @@ function ObjectDetailsTab({
             toast.success(
               t("details.item.toast.success.regenerate", {
                 provider: capitalizeAll(
-                  config?.genai.provider.replaceAll("_", " ") ??
-                    t("generativeAI"),
+                  Object.values(config?.genai ?? {})
+                    .find((agent) => agent?.roles?.includes("descriptions"))
+                    ?.provider?.replaceAll("_", " ") ?? t("generativeAI"),
                 ),
               }),
               {
@@ -976,8 +977,9 @@ function ObjectDetailsTab({
           toast.error(
             t("details.item.toast.error.regenerate", {
               provider: capitalizeAll(
-                config?.genai.provider.replaceAll("_", " ") ??
-                  t("generativeAI"),
+                Object.values(config?.genai ?? {})
+                  .find((agent) => agent?.roles?.includes("descriptions"))
+                  ?.provider?.replaceAll("_", " ") ?? t("generativeAI"),
               ),
               errorMessage,
             }),

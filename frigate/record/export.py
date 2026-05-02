@@ -13,6 +13,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional
 
+import pytz  # type: ignore[import-untyped]
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
@@ -344,7 +345,19 @@ class RecordingExporter(threading.Thread):
         return proc.returncode, "".join(captured)
 
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
-        # return in iso format
+        # return in iso format using the configured ui.timezone when set,
+        # so the auto-generated export name reflects local time rather
+        # than the container's UTC clock
+        tz_name = self.config.ui.timezone
+        if tz_name:
+            try:
+                tz = pytz.timezone(tz_name)
+            except pytz.UnknownTimeZoneError:
+                tz = None
+            if tz is not None:
+                return datetime.datetime.fromtimestamp(timestamp, tz=tz).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
         return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
     def _chapter_metadata_path(self) -> str:
@@ -538,12 +551,18 @@ class RecordingExporter(threading.Thread):
             start_file = f"{file_start}{self.start_time}.{PREVIEW_FRAME_TYPE}"
             end_file = f"{file_start}{self.end_time}.{PREVIEW_FRAME_TYPE}"
             selected_preview = None
+            # Preview frames are written at most 1-2 fps during activity
+            # and as little as one every 30s during quiet periods, so a
+            # short export window can contain zero frames. Track the most
+            # recent frame before the window as a fallback.
+            fallback_preview = None
 
             for file in sorted(os.listdir(preview_dir)):
                 if not file.startswith(file_start):
                     continue
 
                 if file < start_file:
+                    fallback_preview = os.path.join(preview_dir, file)
                     continue
 
                 if file > end_file:
@@ -551,6 +570,9 @@ class RecordingExporter(threading.Thread):
 
                 selected_preview = os.path.join(preview_dir, file)
                 break
+
+            if not selected_preview:
+                selected_preview = fallback_preview
 
             if not selected_preview:
                 return ""

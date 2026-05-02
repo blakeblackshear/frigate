@@ -382,6 +382,18 @@ export type AllGroupsStreamingSettings = {
   [groupName: string]: GroupStreamingSettings;
 };
 
+export type GenAIRole = "chat" | "descriptions" | "embeddings";
+
+export type GenAIAgentConfig = {
+  api_key?: string;
+  base_url?: string;
+  model: string;
+  provider?: string;
+  roles: GenAIRole[];
+  provider_options?: Record<string, unknown>;
+  runtime_options?: Record<string, unknown>;
+};
+
 export interface FrigateConfig {
   version: string;
   safe_mode: boolean;
@@ -478,12 +490,7 @@ export interface FrigateConfig {
     retry_interval: number;
   };
 
-  genai: {
-    provider: string;
-    base_url?: string;
-    api_key?: string;
-    model: string;
-  };
+  genai: Record<string, GenAIAgentConfig>;
 
   go2rtc: {
     streams: Record<string, string | string[]>;

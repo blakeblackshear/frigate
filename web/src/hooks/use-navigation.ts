@@ -28,6 +28,14 @@ export default function useNavigation(
   });
   const isAdmin = useIsAdmin();
 
+  const hasChatAgent = useMemo(
+    () =>
+      Object.values(config?.genai ?? {}).some((agent) =>
+        agent?.roles?.includes("chat"),
+      ),
+    [config?.genai],
+  );
+
   return useMemo(
     () =>
       [
@@ -89,9 +97,9 @@ export default function useNavigation(
           icon: MdChat,
           title: "menu.chat",
           url: "/chat",
-          enabled: isDesktop && isAdmin && config?.genai?.model !== "none",
+          enabled: isDesktop && isAdmin && hasChatAgent,
         },
       ] as NavData[],
-    [config?.face_recognition?.enabled, config?.genai?.model, variant, isAdmin],
+    [config?.face_recognition?.enabled, hasChatAgent, variant, isAdmin],
   );
 }
