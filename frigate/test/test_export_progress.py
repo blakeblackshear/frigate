@@ -372,10 +372,7 @@ class TestGetDatetimeFromTimestamp(unittest.TestCase):
         exporter = _make_exporter()
         exporter.config.ui.timezone = "America/New_York"
         # 2025-01-15 12:00:00 UTC is 07:00:00 EST
-        assert (
-            exporter.get_datetime_from_timestamp(1736942400)
-            == "2025-01-15 07:00:00"
-        )
+        assert exporter.get_datetime_from_timestamp(1736942400) == "2025-01-15 07:00:00"
 
     def test_falls_back_to_local_when_timezone_unset(self) -> None:
         exporter = _make_exporter()
