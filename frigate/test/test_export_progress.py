@@ -363,6 +363,33 @@ class TestBroadcastAggregation(unittest.TestCase):
         assert job.progress_percent == 33.0
 
 
+class TestGetDatetimeFromTimestamp(unittest.TestCase):
+    """Auto-generated export name should honor config.ui.timezone, not
+    fall back to the container's UTC clock when a timezone is configured.
+    """
+
+    def test_uses_configured_ui_timezone(self) -> None:
+        exporter = _make_exporter()
+        exporter.config.ui.timezone = "America/New_York"
+        # 2025-01-15 12:00:00 UTC is 07:00:00 EST
+        assert (
+            exporter.get_datetime_from_timestamp(1736942400)
+            == "2025-01-15 07:00:00"
+        )
+
+    def test_falls_back_to_local_when_timezone_unset(self) -> None:
+        exporter = _make_exporter()
+        exporter.config.ui.timezone = None
+        # No assertion on the exact wall-clock value — just confirm no
+        # exception and that pytz isn't required when the field is unset.
+        assert isinstance(exporter.get_datetime_from_timestamp(1736942400), str)
+
+    def test_invalid_timezone_falls_back_to_local(self) -> None:
+        exporter = _make_exporter()
+        exporter.config.ui.timezone = "Not/A_Real_Zone"
+        assert isinstance(exporter.get_datetime_from_timestamp(1736942400), str)
+
+
 class TestSchedulesCleanup(unittest.TestCase):
     def test_schedule_job_cleanup_removes_after_delay(self) -> None:
         config = MagicMock()

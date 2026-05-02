@@ -13,6 +13,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional
 
+import pytz
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
@@ -344,7 +345,19 @@ class RecordingExporter(threading.Thread):
         return proc.returncode, "".join(captured)
 
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
-        # return in iso format
+        # return in iso format using the configured ui.timezone when set,
+        # so the auto-generated export name reflects local time rather
+        # than the container's UTC clock
+        tz_name = self.config.ui.timezone
+        if tz_name:
+            try:
+                tz = pytz.timezone(tz_name)
+            except pytz.UnknownTimeZoneError:
+                tz = None
+            if tz is not None:
+                return datetime.datetime.fromtimestamp(timestamp, tz=tz).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
         return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
     def _chapter_metadata_path(self) -> str:
