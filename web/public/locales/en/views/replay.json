@@ -19,13 +19,11 @@
     "startLabel": "Start",
     "endLabel": "End",
     "toast": {
-      "success": "Debug replay started successfully",
       "error": "Failed to start debug replay: {{error}}",
       "alreadyActive": "A replay session is already active",
       "stopped": "Debug replay stopped",
       "stopError": "Failed to stop debug replay: {{error}}",
-      "goToReplay": "Go to Replay",
-      "preparingClip": "Preparing replay clip…"
+      "goToReplay": "Go to Replay"
     }
   },
   "page": {

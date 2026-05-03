@@ -262,10 +262,7 @@ export default function MobileReviewSettingsDrawer({
         end_time: debugReplayRange.before,
       });
 
-      if (response.status === 200) {
-        toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
-          position: "top-center",
-        });
+      if (response.status === 202 || response.status === 200) {
         setDebugReplayMode("none");
         setDebugReplayRange(undefined);
         setDrawerMode("none");
