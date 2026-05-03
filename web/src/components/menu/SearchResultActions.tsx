@@ -90,10 +90,6 @@ export default function SearchResultActions({
   const handleDebugReplay = useCallback(
     (event: SearchResult) => {
       setIsStarting(true);
-      const toastId = toast.loading(
-        t("dialog.starting", { ns: "views/replay" }),
-        { position: "top-center" },
-      );
 
       axios
         .post("debug_replay/start", {
@@ -102,11 +98,7 @@ export default function SearchResultActions({
           end_time: event.end_time,
         })
         .then((response) => {
-          if (response.status === 200) {
-            toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
-              id: toastId,
-              position: "top-center",
-            });
+          if (response.status === 202 || response.status === 200) {
             navigate("/replay");
           }
         })
@@ -120,7 +112,6 @@ export default function SearchResultActions({
             toast.error(
               t("dialog.toast.alreadyActive", { ns: "views/replay" }),
               {
-                id: toastId,
                 position: "top-center",
                 closeButton: true,
                 dismissible: false,
@@ -135,7 +126,6 @@ export default function SearchResultActions({
             );
           } else {
             toast.error(t("dialog.toast.error", { error: errorMessage }), {
-              id: toastId,
               position: "top-center",
             });
           }

@@ -174,12 +174,10 @@ async def latest_frame(
     }
     quality_params = get_image_quality_params(extension.value, params.quality)
 
-    if camera_name in request.app.frigate_config.cameras:
+    camera_config = request.app.frigate_config.cameras.get(camera_name)
+    if camera_config is not None:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
-        retry_interval = float(
-            request.app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
-            or 10
-        )
+        retry_interval = float(camera_config.ffmpeg.retry_interval or 10)
 
         is_offline = False
         if frame is None or datetime.now().timestamp() > (
