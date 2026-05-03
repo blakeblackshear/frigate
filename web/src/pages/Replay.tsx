@@ -117,8 +117,6 @@ const DEBUG_OPTION_I18N_KEY: Record<keyof DebugOptions, string> = {
   paths: "paths",
 };
 
-const REPLAY_INIT_SKELETON_TIMEOUT_MS = 8000;
-
 export default function Replay() {
   const { t } = useTranslation(["views/replay", "views/settings", "common"]);
   const navigate = useNavigate();
@@ -144,12 +142,6 @@ export default function Replay() {
     };
     initializeStatus();
   }, [refreshStatus]);
-
-  useEffect(() => {
-    if (status?.live_ready) {
-      setShowReplayInitSkeleton(false);
-    }
-  }, [status?.live_ready]);
 
   const [options, setOptions] = useState<DebugOptions>(DEFAULT_OPTIONS);
   const [isStopping, setIsStopping] = useState(false);
@@ -205,34 +197,9 @@ export default function Replay() {
 
   const { objects } = useCameraActivity(replayCameraConfig);
 
-  const [showReplayInitSkeleton, setShowReplayInitSkeleton] = useState(false);
-
   // debug draw
   const containerRef = useRef<HTMLDivElement>(null);
   const [debugDraw, setDebugDraw] = useState(false);
-
-  useEffect(() => {
-    if (!status?.active || !status.replay_camera) {
-      setShowReplayInitSkeleton(false);
-      return;
-    }
-
-    setShowReplayInitSkeleton(true);
-
-    const timeout = window.setTimeout(() => {
-      setShowReplayInitSkeleton(false);
-    }, REPLAY_INIT_SKELETON_TIMEOUT_MS);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [status?.active, status?.replay_camera]);
-
-  useEffect(() => {
-    if (status?.live_ready) {
-      setShowReplayInitSkeleton(false);
-    }
-  }, [status?.live_ready]);
 
   // Format time range for display
   const timeRangeDisplay = useMemo(() => {
@@ -436,29 +403,30 @@ export default function Replay() {
           ) : (
             status.replay_camera && (
               <div className="relative size-full min-h-10" ref={containerRef}>
-                {status.live_ready && (
-                  <AutoUpdatingCameraImage
-                    className="size-full"
-                    cameraClasses="relative w-full h-full flex flex-col justify-start"
-                    searchParams={searchParams}
-                    camera={status.replay_camera}
-                    showFps={false}
-                  />
-                )}
-                {debugDraw && (
-                  <DebugDrawingLayer
-                    containerRef={containerRef}
-                    cameraWidth={
-                      config?.cameras?.[status.source_camera ?? ""]?.detect
-                        .width ?? 1280
-                    }
-                    cameraHeight={
-                      config?.cameras?.[status.source_camera ?? ""]?.detect
-                        .height ?? 720
-                    }
-                  />
-                )}
-                {showReplayInitSkeleton && (
+                {status.live_ready ? (
+                  <>
+                    <AutoUpdatingCameraImage
+                      className="size-full"
+                      cameraClasses="relative w-full h-full flex flex-col justify-start"
+                      searchParams={searchParams}
+                      camera={status.replay_camera}
+                      showFps={false}
+                    />
+                    {debugDraw && (
+                      <DebugDrawingLayer
+                        containerRef={containerRef}
+                        cameraWidth={
+                          config?.cameras?.[status.source_camera ?? ""]?.detect
+                            .width ?? 1280
+                        }
+                        cameraHeight={
+                          config?.cameras?.[status.source_camera ?? ""]?.detect
+                            .height ?? 720
+                        }
+                      />
+                    )}
+                  </>
+                ) : (
                   <div className="pointer-events-none absolute inset-0 z-10 size-full rounded-lg bg-background">
                     <Skeleton className="size-full rounded-lg" />
                     <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-2">
