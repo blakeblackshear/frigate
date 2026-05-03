@@ -284,18 +284,33 @@ def post_process_yolox(
 ### ONNX Utilities
 
 
-def compute_cuda_mem_limit(model_path: str, cuda_graph: bool = False) -> int:
+def compute_cuda_mem_limit(model_path: str, cuda_graph: bool = False) -> int | None:
     """Compute a per-session GPU memory limit for the ORT CUDA EP BFC arena.
 
-    For CudaGraphRunner (YOLO detection) do NOT call this — CUDA graph capture
+    For CudaGraphRunner (YOLO detection) do NOT call this - CUDA graph capture
     requires all intermediate tensors to be live simultaneously, so peak GPU memory
-    is 15-20× the model file size and cannot be safely capped.  This function is
+    is 15-20x the model file size and cannot be safely capped.  This function is
     intended for embedding ONNXModelRunner sessions only.
 
     Returns a limit derived from:
-    - Floor: model file size × peak_multiplier (≥ 2 GB)
-    - Ceiling: min(80% of total VRAM, 90% of currently free VRAM)
-    Falls back to 4 GB if the CUDA runtime query fails.
+    - min(model file size x peak_multiplier, 80% of total VRAM, 90% of free VRAM)
+
+    Returns None if the CUDA runtime query fails. The caller MUST then omit
+    gpu_mem_limit from provider_options so ORT falls back to its own default
+    (grow-as-needed up to device capacity).
+
+    Tradeoff: a hardcoded fallback (e.g. 4 GB) was previously returned here,
+    but that number is wrong for both ends of the spectrum:
+      - On Jetson Nano (4 GB shared), Quadro K620 (2 GB), GT 1030 (2 GB), and
+        any container where /dev/nvidia* passthrough is broken, asking for 4 GB
+        causes ORT session init to fail with cudaErrorMemoryAllocation.
+      - On a 24 GB RTX 3090 with 20 GB free, capping at 4 GB needlessly
+        starves the session and forces extra arena reallocations.
+    Returning None and letting ORT manage the arena itself is the
+    least-surprising behavior when we cannot actually measure VRAM. The
+    leak vectors this PR addresses (mem_pattern, mallopt) are independent
+    of the BFC arena cap, so dropping the cap on the failure path does
+    not reintroduce the leak.
     """
     try:
         libcudart = ctypes.CDLL("libcudart.so")
@@ -309,14 +324,14 @@ def compute_cuda_mem_limit(model_path: str, cuda_graph: bool = False) -> int:
         total = total_bytes.value
         free = free_bytes.value
     except Exception as e:
-        logger.debug("cudaMemGetInfo unavailable (%s); using 4 GB gpu_mem_limit fallback", e)
-        return 4 * 1024**3
+        logger.debug("cudaMemGetInfo unavailable (%s); omitting gpu_mem_limit", e)
+        return None
 
     peak_multiplier = 14 if cuda_graph else 7
-    floor = max(os.path.getsize(model_path) * peak_multiplier, 2 * 1024**3)
+    desired = max(os.path.getsize(model_path) * peak_multiplier, 2 * 1024**3)
     # Honor free VRAM so co-resident embedding sessions (jina text + vision,
     # paddleocr det + rec, arcface) don't OOM each other on shared GPUs.
-    return min(floor, int(total * 0.80), int(free * 0.90))
+    return min(desired, int(total * 0.80), int(free * 0.90))
 
 
 def get_ort_providers(

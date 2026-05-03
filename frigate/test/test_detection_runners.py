@@ -125,11 +125,12 @@ class TestComputeCudaMemLimit(unittest.TestCase):
         self.assertLessEqual(limit, int(total_vram * 0.80))
 
     @patch("frigate.util.model.ctypes.CDLL", side_effect=OSError("no cuda"))
-    def test_fallback_on_cuda_unavailable(self, _mock_cdll):
+    def test_returns_none_when_cuda_unavailable(self, _mock_cdll):
+        # See compute_cuda_mem_limit docstring for the tradeoff: returning a
+        # hardcoded fallback was wrong for low-VRAM devices (Jetson Nano, K620).
         from frigate.util.model import compute_cuda_mem_limit
 
-        limit = compute_cuda_mem_limit("/fake/model.onnx")
-        self.assertEqual(limit, 4 * 1024**3)
+        self.assertIsNone(compute_cuda_mem_limit("/fake/model.onnx"))
 
     @patch("frigate.util.model.ctypes.CDLL")
     @patch("os.path.getsize", return_value=50 * 1024 * 1024)
@@ -148,17 +149,17 @@ class TestComputeCudaMemLimit(unittest.TestCase):
 
     @patch("frigate.util.model.ctypes.CDLL")
     @patch("os.path.getsize", return_value=200 * 1024 * 1024)
-    def test_fallback_when_cuda_returns_error_code(self, _mock_getsize, mock_cdll):
+    def test_returns_none_when_cuda_returns_error_code(self, _mock_getsize, mock_cdll):
         # Bug #1: cudaMemGetInfo returning non-zero left both ptrs at 0,
-        # producing gpu_mem_limit=0 and immediate session OOM.
+        # producing gpu_mem_limit=0 and immediate session OOM. We now return
+        # None so the caller omits gpu_mem_limit and ORT manages the arena.
         from frigate.util.model import compute_cuda_mem_limit
 
         mock_lib = MagicMock()
         mock_cdll.return_value = mock_lib
         mock_lib.cudaMemGetInfo.return_value = 2  # cudaErrorMemoryAllocation
 
-        limit = compute_cuda_mem_limit("/fake/model.onnx", cuda_graph=False)
-        self.assertEqual(limit, 4 * 1024**3)
+        self.assertIsNone(compute_cuda_mem_limit("/fake/model.onnx", cuda_graph=False))
 
     @patch("frigate.util.model.ctypes.CDLL")
     @patch("os.path.getsize", return_value=200 * 1024 * 1024)
@@ -339,6 +340,44 @@ class TestOrtLeakFixRegression(unittest.TestCase):
                 -8,  # M_ARENA_MAX
                 "mallopt must be called with M_ARENA_MAX (-8)",
             )
+
+
+class TestRunnerOmitsGpuMemLimitOnCudaQueryFailure(unittest.TestCase):
+    """When compute_cuda_mem_limit returns None, get_optimized_runner must NOT
+    inject gpu_mem_limit at all, leaving ORT's grow-as-needed default in place."""
+
+    @patch("frigate.detectors.detection_runners.ort.InferenceSession")
+    @patch(
+        "frigate.detectors.detection_runners.get_ort_providers",
+        return_value=(["CUDAExecutionProvider"], [{"device_id": 0}]),
+    )
+    @patch(
+        "frigate.detectors.detection_runners.is_rknn_compatible",
+        return_value=False,
+    )
+    @patch("frigate.util.model.ctypes.CDLL", side_effect=OSError("no cuda"))
+    @patch("os.path.getsize", return_value=200 * 1024 * 1024)
+    def test_no_gpu_mem_limit_key_when_cuda_query_fails(
+        self, _gs, _cdll, _rknn, _gp, mock_session
+    ):
+        from frigate.detectors.detection_runners import get_optimized_runner
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        mock_session.return_value.get_inputs.return_value = []
+        mock_session.return_value.get_outputs.return_value = []
+
+        get_optimized_runner(
+            "/fake/jina.onnx",
+            device="GPU",
+            model_type=EnrichmentModelTypeEnum.jina_v2.value,
+        )
+
+        provider_opts = mock_session.call_args.kwargs["provider_options"]
+        self.assertNotIn(
+            "gpu_mem_limit",
+            provider_opts[0],
+            "Must omit (not set to 0, not set to a guess) when query fails",
+        )
 
 
 class TestCudaGraphFallbackLogsException(unittest.TestCase):

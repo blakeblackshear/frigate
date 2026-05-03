@@ -636,8 +636,12 @@ def get_optimized_runner(
             )
         except Exception as e:
             logger.warning(
-                "CUDA graph capture failed for %s, falling back to standard ONNX runner: %s",
+                "CUDA graph capture failed for model_type=%s path=%s "
+                "device_id=%s providers=%s; falling back to standard ONNX runner: %s",
+                model_type,
                 model_path,
+                cuda_graph_options.get("device_id"),
+                providers,
                 e,
             )
 
@@ -651,10 +655,9 @@ def get_optimized_runner(
         options.pop(0)
 
     if providers and providers[0] == "CUDAExecutionProvider":
-        options[0] = {
-            **options[0],
-            "gpu_mem_limit": compute_cuda_mem_limit(model_path, cuda_graph=False),
-        }
+        gpu_mem_limit = compute_cuda_mem_limit(model_path, cuda_graph=False)
+        if gpu_mem_limit is not None:
+            options[0] = {**options[0], "gpu_mem_limit": gpu_mem_limit}
 
     return ONNXModelRunner(
         ort.InferenceSession(
