@@ -177,7 +177,6 @@ export default function Replay() {
           position: "top-center",
         });
         refreshStatus();
-        navigate("/review");
       })
       .catch((error) => {
         const errorMessage =
@@ -191,7 +190,7 @@ export default function Replay() {
       .finally(() => {
         setIsStopping(false);
       });
-  }, [navigate, refreshStatus, t]);
+  }, [refreshStatus, t]);
 
   // Camera activity for the replay camera
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -278,8 +277,11 @@ export default function Replay() {
     );
   }
 
-  // No active session.
-  if (!status?.active) {
+  // No active session. Also covers the brief window between the runner
+  // pushing job.status = "cancelled" via WS and the next SWR refresh
+  // flipping status.active to false — without this, render falls through
+  // to the full replay UI and you see a flash of it before stop completes.
+  if (!status?.active || replayJob?.status === "cancelled") {
     return (
       <div className="flex size-full flex-col items-center justify-center gap-4 p-8">
         <MdReplay className="size-12" />
@@ -320,7 +322,7 @@ export default function Replay() {
             </div>
           </div>
         ) : (
-          <ActivityIndicator className="size-3.5" />
+          <ActivityIndicator className="size-8" />
         )}
         <Heading as="h3" className="text-center">
           {phaseTitle}

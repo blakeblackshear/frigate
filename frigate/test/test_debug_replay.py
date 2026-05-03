@@ -204,6 +204,43 @@ class TestDebugReplayManagerPublishCamera(unittest.TestCase):
         topic_arg = publisher.publish_update.call_args.args[0]
         self.assertEqual(topic_arg.update_type, CameraConfigUpdateEnum.add)
 
+    def test_publish_camera_wraps_parse_failure_in_runtime_error(self) -> None:
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        frigate_config = MagicMock()
+        frigate_config.cameras = {"front": MagicMock()}
+        publisher = MagicMock()
+
+        with (
+            patch.object(
+                manager,
+                "_build_camera_config_dict",
+                return_value={"enabled": True},
+            ),
+            patch("frigate.debug_replay.find_config_file", return_value="/cfg.yml"),
+            patch("frigate.debug_replay.YAML") as yaml_cls,
+            patch(
+                "frigate.debug_replay.FrigateConfig.parse_object",
+                side_effect=ValueError("zone foo has invalid coordinates"),
+            ),
+            patch("builtins.open", unittest.mock.mock_open(read_data="cameras:\n")),
+        ):
+            yaml_cls.return_value.load.return_value = {"cameras": {}}
+
+            with self.assertRaises(RuntimeError) as ctx:
+                manager.publish_camera(
+                    source_camera="front",
+                    replay_name="_replay_front",
+                    clip_path="/tmp/clip.mp4",
+                    frigate_config=frigate_config,
+                    config_publisher=publisher,
+                )
+
+        self.assertIn("replay camera config", str(ctx.exception))
+        self.assertIn("invalid coordinates", str(ctx.exception))
+        publisher.publish_update.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

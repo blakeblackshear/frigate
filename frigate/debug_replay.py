@@ -1,8 +1,8 @@
 """Debug replay camera management for replaying recordings with detection overlays.
 
 The startup work (ffmpeg concat + camera config publish) lives in
-``frigate.jobs.debug_replay``. This module owns only session presence
-(``active``), session metadata, and post-session cleanup.
+frigate.jobs.debug_replay. This module owns only session presence
+(active), session metadata, and post-session cleanup.
 """
 
 import logging
@@ -35,9 +35,9 @@ logger = logging.getLogger(__name__)
 class DebugReplayManager:
     """Owns the lifecycle pointers for a single debug replay session.
 
-    A session exists from the moment ``mark_starting`` is called (synchronously,
-    inside the API handler) until ``clear_session`` runs (on success cleanup,
-    failure, or stop). The ``active`` property is the source of truth that the
+    A session exists from the moment mark_starting is called (synchronously,
+    inside the API handler) until clear_session runs (on success cleanup,
+    failure, or stop). The active property is the source of truth that the
     status bar consumes — broader than the startup job, which only covers the
     preparing_clip / starting_camera window.
     """
@@ -52,7 +52,7 @@ class DebugReplayManager:
 
     @property
     def active(self) -> bool:
-        """True from ``mark_starting`` until ``clear_session``."""
+        """True from mark_starting until clear_session."""
         return self.replay_camera_name is not None
 
     def mark_starting(
@@ -64,7 +64,7 @@ class DebugReplayManager:
     ) -> None:
         """Synchronously claim the session before the job runner starts.
 
-        Called inside the API handler so the status bar sees ``active=True``
+        Called inside the API handler so the status bar sees active=True
         immediately, before the worker thread does any ffmpeg work.
         """
         with self._lock:
@@ -82,7 +82,7 @@ class DebugReplayManager:
     def clear_session(self) -> None:
         """Reset session pointers without publishing camera removal.
 
-        Used by the job runner on failure paths. ``stop()`` does the camera
+        Used by the job runner on failure paths. stop() does the camera
         teardown plus this clear in one step.
         """
         with self._lock:
@@ -105,7 +105,7 @@ class DebugReplayManager:
     ) -> None:
         """Build the in-memory replay camera config and publish the add event.
 
-        Called by the job runner during the ``starting_camera`` phase.
+        Called by the job runner during the starting_camera phase.
         """
         source_config = frigate_config.cameras[source_camera]
         camera_dict = self._build_camera_config_dict(
@@ -121,7 +121,12 @@ class DebugReplayManager:
             config_data["cameras"] = {}
         config_data["cameras"][replay_name] = camera_dict
 
-        new_config = FrigateConfig.parse_object(config_data)
+        try:
+            new_config = FrigateConfig.parse_object(config_data)
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to validate replay camera config: {e}"
+            ) from e
         frigate_config.cameras[replay_name] = new_config.cameras[replay_name]
 
         config_publisher.publish_update(

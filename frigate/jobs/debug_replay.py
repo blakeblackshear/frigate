@@ -1,10 +1,10 @@
 """Debug replay startup job: ffmpeg concat + camera config publish.
 
 The runner orchestrates the async portion of starting a debug replay
-session. The :class:`DebugReplayManager` (in :mod:`frigate.debug_replay`)
-owns session presence so the status bar can keep reading a single
-``active`` flag from ``/debug_replay/status`` for the entire session
-window — which is broader than this job's lifetime.
+session. The DebugReplayManager (in frigate.debug_replay) owns session
+presence so the status bar can keep reading a single `active` flag from
+/debug_replay/status for the entire session window — which is broader
+than this job's lifetime.
 """
 
 import logging
@@ -69,8 +69,8 @@ class DebugReplayJob(Job):
     def to_dict(self) -> dict[str, Any]:
         """Whitelisted payload for the job_state WS topic.
 
-        Replay-specific fields land in ``results`` so the frontend's
-        generic ``Job<TResults>`` type can be parameterised cleanly.
+        Replay-specific fields land in results so the frontend's
+        generic Job<TResults> type can be parameterised cleanly.
         """
         return {
             "id": self.id,
@@ -114,8 +114,8 @@ def query_recordings(source_camera: str, start_ts: float, end_ts: float):
 class DebugReplayJobRunner(threading.Thread):
     """Worker thread that drives the startup job to completion.
 
-    Owns the live ffmpeg ``Popen`` reference for cancellation. Cancellation
-    is two-step (``threading.Event`` + ``proc.terminate()``) so the runner
+    Owns the live ffmpeg Popen reference for cancellation. Cancellation
+    is two-step (threading.Event + proc.terminate()) so the runner
     both knows it should stop and is unblocked from its blocking subprocess
     wait.
     """
@@ -290,10 +290,9 @@ class DebugReplayJobRunner(threading.Thread):
         self.job.status = JobStatusTypesEnum.cancelled
         self.job.end_time = time.time()
         self._broadcast(force=True)
-        # Manager session pointers are cleared by stop() on the API side
-        # (it already holds the cleanup contract). On any other cancellation
-        # path, also clear so /start can run again.
-        self.replay_manager.clear_session()
+        # The caller of cancel_debug_replay_job (DebugReplayManager.stop) owns
+        # session cleanup — db rows, filesystem artifacts, clear_session. We
+        # only clean up the partial concat output we created.
         _remove_silent(clip_path)
 
 
@@ -316,8 +315,8 @@ def start_debug_replay_job(
 ) -> str:
     """Validate, create job, start runner. Returns the job id.
 
-    Raises ``ValueError`` for bad params (camera missing, time range
-    invalid, no recordings) and ``RuntimeError`` if a session is already
+    Raises ValueError for bad params (camera missing, time range
+    invalid, no recordings) and RuntimeError if a session is already
     active.
     """
     if job_is_running(JOB_TYPE) or replay_manager.active:

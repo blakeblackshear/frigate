@@ -38,8 +38,8 @@ class DebugReplayStatusResponse(BaseModel):
 
     Returns only session-presence fields. Startup progress and error
     details flow through the job_state WebSocket topic via the
-    ``debug_replay`` job (see :mod:`frigate.jobs.debug_replay`); the
-    Replay page subscribes there with ``useJobStatus("debug_replay")``.
+    debug_replay job (see frigate.jobs.debug_replay); the
+    Replay page subscribes there with useJobStatus("debug_replay").
     """
 
     active: bool

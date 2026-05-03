@@ -449,6 +449,11 @@ class TestRunnerCancellation(unittest.TestCase):
 
         job = get_current_job("debug_replay")
         self.assertEqual(job.status, JobStatusTypesEnum.cancelled)
+        # Runner must not clear the manager session on cancellation —
+        # that belongs to the caller of cancel_debug_replay_job (stop()).
+        # If the runner cleared it, stop() would log "no active session"
+        # and skip its cleanup_db / cleanup_files calls.
+        self.assertTrue(self.manager.active)
 
 
 if __name__ == "__main__":
