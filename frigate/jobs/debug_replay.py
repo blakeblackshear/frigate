@@ -92,9 +92,7 @@ class DebugReplayJob(Job):
         }
 
 
-def query_recordings(
-    source_camera: str, start_ts: float, end_ts: float
-) -> ModelSelect:
+def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> ModelSelect:
     """Return the Recordings query for the time range.
 
     Module-level so tests can patch it without instantiating a runner.
