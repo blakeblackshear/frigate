@@ -31,7 +31,7 @@ test.describe("Replay — no active session @medium", () => {
     await expect(
       frigateApp.page.getByRole("heading", {
         level: 2,
-        name: /No Active Replay Session/i,
+        name: /No Active Debug Replay Session/i,
       }),
     ).toBeVisible({ timeout: 10_000 });
     const goButton = frigateApp.page.getByRole("button", {
@@ -48,7 +48,7 @@ test.describe("Replay — no active session @medium", () => {
     await expect(
       frigateApp.page.getByRole("heading", {
         level: 2,
-        name: /No Active Replay Session/i,
+        name: /No Active Debug Replay Session/i,
       }),
     ).toBeVisible({ timeout: 10_000 });
     await frigateApp.page
@@ -297,7 +297,7 @@ test.describe("Replay — mobile @medium @mobile", () => {
     await expect(
       frigateApp.page.getByRole("heading", {
         level: 2,
-        name: /No Active Replay Session/i,
+        name: /No Active Debug Replay Session/i,
       }),
     ).toBeVisible({ timeout: 10_000 });
   });
