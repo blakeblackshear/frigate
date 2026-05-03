@@ -42,6 +42,7 @@ import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { ObjectType } from "@/types/ws";
 import WsMessageFeed from "@/components/ws/WsMessageFeed";
 import { ConfigSectionTemplate } from "@/components/config-form/sections/ConfigSectionTemplate";
@@ -56,8 +57,18 @@ import { useDocDomain } from "@/hooks/use-doc-domain";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
+type ReplayState =
+  | "idle"
+  | "preparing_clip"
+  | "starting_camera"
+  | "active"
+  | "error";
+
 type DebugReplayStatus = {
   active: boolean;
+  state: ReplayState;
+  progress_percent: number | null;
+  error_message: string | null;
   replay_camera: string | null;
   source_camera: string | null;
   start_time: number | null;
@@ -238,7 +249,7 @@ export default function Replay() {
   }
 
   // No active session
-  if (!status?.active) {
+  if (!status?.active && status?.state !== "error") {
     return (
       <div className="flex size-full flex-col items-center justify-center gap-4 p-8">
         <MdReplay className="size-12" />
@@ -250,6 +261,76 @@ export default function Replay() {
         </p>
         <Button variant="default" onClick={() => navigate("/review")}>
           {t("page.goToRecordings")}
+        </Button>
+      </div>
+    );
+  }
+
+  // Startup error
+  if (status?.state === "error") {
+    return (
+      <div className="flex size-full flex-col items-center justify-center gap-4 p-8">
+        <Heading as="h2" className="text-center">
+          {t("page.startError.title")}
+        </Heading>
+        {status.error_message && (
+          <p className="max-w-xl text-center text-sm text-muted-foreground">
+            {status.error_message}
+          </p>
+        )}
+        <Button
+          variant="default"
+          onClick={() => {
+            axios
+              .post("debug_replay/stop")
+              .catch(() => {})
+              .finally(() => navigate("/review"));
+          }}
+        >
+          {t("page.startError.back")}
+        </Button>
+      </div>
+    );
+  }
+
+  // Preparing or starting
+  if (
+    status?.state === "preparing_clip" ||
+    status?.state === "starting_camera"
+  ) {
+    const phaseTitle =
+      status.state === "preparing_clip"
+        ? t("page.preparingClip")
+        : t("page.startingCamera");
+    const showProgressBar =
+      status.state === "preparing_clip" && status.progress_percent != null;
+    return (
+      <div className="flex size-full flex-col items-center justify-center gap-4 p-8">
+        {showProgressBar ? (
+          <div className="flex w-64 flex-col items-center gap-2">
+            <Progress value={status.progress_percent ?? 0} />
+            <div className="text-xs text-muted-foreground">
+              {Math.round(status.progress_percent ?? 0)}%
+            </div>
+          </div>
+        ) : (
+          <ActivityIndicator className="size-3.5" />
+        )}
+        <Heading as="h3" className="text-center">
+          {phaseTitle}
+        </Heading>
+        {status.state === "preparing_clip" && (
+          <p className="max-w-md text-center text-sm text-muted-foreground">
+            {t("page.preparingClipDesc")}
+          </p>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isStopping}
+          onClick={handleStop}
+        >
+          {t("button.cancel", { ns: "common" })}
         </Button>
       </div>
     );
