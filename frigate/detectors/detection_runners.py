@@ -56,6 +56,12 @@ def get_ort_session_options(
         sess_options.graph_optimization_level = (
             ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
         )
+    else:
+        # Most models tolerate aggressive fusions; set explicitly to be robust
+        # against ORT default changes.
+        sess_options.graph_optimization_level = (
+            ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        )
     return sess_options
 
 
