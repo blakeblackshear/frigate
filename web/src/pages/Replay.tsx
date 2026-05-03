@@ -55,6 +55,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import Logo from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { useConfigSchema } from "@/hooks/use-config-schema";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
@@ -132,6 +133,7 @@ export default function Replay() {
   });
   const { payload: replayJob } =
     useJobStatus<DebugReplayJobResults>("debug_replay");
+  const configSchema = useConfigSchema();
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Refresh status immediately on mount to avoid showing "no session" briefly
@@ -684,32 +686,38 @@ export default function Replay() {
               {t("page.configurationDesc")}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-6">
-            <ConfigSectionTemplate
-              sectionKey="motion"
-              level="replay"
-              cameraName={status.replay_camera ?? undefined}
-              skipSave
-              noStickyButtons
-              requiresRestart={false}
-              collapsible
-              defaultCollapsed={false}
-              showTitle
-              showOverrideIndicator={false}
-            />
-            <ConfigSectionTemplate
-              sectionKey="objects"
-              level="replay"
-              cameraName={status.replay_camera ?? undefined}
-              skipSave
-              noStickyButtons
-              requiresRestart={false}
-              collapsible
-              defaultCollapsed={false}
-              showTitle
-              showOverrideIndicator={false}
-            />
-          </div>
+          {configSchema == null ? (
+            <div className="flex h-40 items-center justify-center">
+              <ActivityIndicator />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <ConfigSectionTemplate
+                sectionKey="motion"
+                level="replay"
+                cameraName={status.replay_camera ?? undefined}
+                skipSave
+                noStickyButtons
+                requiresRestart={false}
+                collapsible
+                defaultCollapsed={false}
+                showTitle
+                showOverrideIndicator={false}
+              />
+              <ConfigSectionTemplate
+                sectionKey="objects"
+                level="replay"
+                cameraName={status.replay_camera ?? undefined}
+                skipSave
+                noStickyButtons
+                requiresRestart={false}
+                collapsible
+                defaultCollapsed={false}
+                showTitle
+                showOverrideIndicator={false}
+              />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
