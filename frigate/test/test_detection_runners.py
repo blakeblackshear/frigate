@@ -100,51 +100,81 @@ class TestHasVariableLengthInputs(unittest.TestCase):
 
 
 class TestComputeCudaMemLimit(unittest.TestCase):
+    @staticmethod
+    def _fake_mem_get_info(free_value: int, total_value: int):
+        def _impl(free_ptr, total_ptr):
+            free_ptr._obj.value = free_value
+            total_ptr._obj.value = total_value
+            return 0  # cudaSuccess
+
+        return _impl
+
     @patch("frigate.util.model.ctypes.CDLL")
-    @patch("os.path.getsize", return_value=200 * 1024 * 1024)  # 200 MB model
-    def test_respects_ceiling(self, mock_getsize, mock_cdll):
-        """gpu_mem_limit must not exceed 80% of total VRAM."""
+    @patch("os.path.getsize", return_value=200 * 1024 * 1024)
+    def test_respects_ceiling(self, _mock_getsize, mock_cdll):
         from frigate.util.model import compute_cuda_mem_limit
 
-        total_vram = 24 * 1024**3  # 24 GB
+        total_vram = 24 * 1024**3
         mock_lib = MagicMock()
         mock_cdll.return_value = mock_lib
-
-        def fake_mem_get_info(free_ptr, total_ptr):
-            total_ptr._obj.value = total_vram
-            free_ptr._obj.value = total_vram
-
-        mock_lib.cudaMemGetInfo.side_effect = fake_mem_get_info
+        mock_lib.cudaMemGetInfo.side_effect = self._fake_mem_get_info(
+            total_vram, total_vram
+        )
 
         limit = compute_cuda_mem_limit("/fake/model.onnx", cuda_graph=False)
         self.assertLessEqual(limit, int(total_vram * 0.80))
 
     @patch("frigate.util.model.ctypes.CDLL", side_effect=OSError("no cuda"))
     def test_fallback_on_cuda_unavailable(self, _mock_cdll):
-        """Falls back to 4 GB when CUDA runtime is not available."""
         from frigate.util.model import compute_cuda_mem_limit
 
         limit = compute_cuda_mem_limit("/fake/model.onnx")
         self.assertEqual(limit, 4 * 1024**3)
 
     @patch("frigate.util.model.ctypes.CDLL")
-    @patch("os.path.getsize", return_value=50 * 1024 * 1024)  # 50 MB model
-    def test_floor_is_at_least_2gb(self, mock_getsize, mock_cdll):
-        """Floor must be at least 2 GB regardless of model size."""
+    @patch("os.path.getsize", return_value=50 * 1024 * 1024)
+    def test_floor_is_at_least_2gb(self, _mock_getsize, mock_cdll):
         from frigate.util.model import compute_cuda_mem_limit
 
         total_vram = 24 * 1024**3
         mock_lib = MagicMock()
         mock_cdll.return_value = mock_lib
-
-        def fake_mem_get_info(free_ptr, total_ptr):
-            total_ptr._obj.value = total_vram
-            free_ptr._obj.value = total_vram
-
-        mock_lib.cudaMemGetInfo.side_effect = fake_mem_get_info
+        mock_lib.cudaMemGetInfo.side_effect = self._fake_mem_get_info(
+            total_vram, total_vram
+        )
 
         limit = compute_cuda_mem_limit("/fake/model.onnx", cuda_graph=False)
         self.assertGreaterEqual(limit, 2 * 1024**3)
+
+    @patch("frigate.util.model.ctypes.CDLL")
+    @patch("os.path.getsize", return_value=200 * 1024 * 1024)
+    def test_fallback_when_cuda_returns_error_code(self, _mock_getsize, mock_cdll):
+        # Bug #1: cudaMemGetInfo returning non-zero left both ptrs at 0,
+        # producing gpu_mem_limit=0 and immediate session OOM.
+        from frigate.util.model import compute_cuda_mem_limit
+
+        mock_lib = MagicMock()
+        mock_cdll.return_value = mock_lib
+        mock_lib.cudaMemGetInfo.return_value = 2  # cudaErrorMemoryAllocation
+
+        limit = compute_cuda_mem_limit("/fake/model.onnx", cuda_graph=False)
+        self.assertEqual(limit, 4 * 1024**3)
+
+    @patch("frigate.util.model.ctypes.CDLL")
+    @patch("os.path.getsize", return_value=200 * 1024 * 1024)
+    def test_capped_by_free_vram_when_constrained(self, _mock_getsize, mock_cdll):
+        # Bug #2: with 3 GB free of 24 GB, the limit must respect free × 0.9,
+        # not 80% of total — co-resident embedding sessions would OOM otherwise.
+        from frigate.util.model import compute_cuda_mem_limit
+
+        mock_lib = MagicMock()
+        mock_cdll.return_value = mock_lib
+        mock_lib.cudaMemGetInfo.side_effect = self._fake_mem_get_info(
+            3 * 1024**3, 24 * 1024**3
+        )
+
+        limit = compute_cuda_mem_limit("/fake/model.onnx", cuda_graph=False)
+        self.assertLessEqual(limit, int(3 * 1024**3 * 0.90))
 
 
 class TestOrtLeakFixRegression(unittest.TestCase):
@@ -309,6 +339,44 @@ class TestOrtLeakFixRegression(unittest.TestCase):
                 -8,  # M_ARENA_MAX
                 "mallopt must be called with M_ARENA_MAX (-8)",
             )
+
+
+class TestCudaGraphFallbackLogsException(unittest.TestCase):
+    @patch("frigate.detectors.detection_runners.ort.InferenceSession")
+    @patch(
+        "frigate.detectors.detection_runners.get_ort_providers",
+        return_value=(["CUDAExecutionProvider"], [{"device_id": 0}]),
+    )
+    @patch(
+        "frigate.detectors.detection_runners.is_rknn_compatible",
+        return_value=False,
+    )
+    @patch("frigate.util.model.ctypes.CDLL", side_effect=OSError("no cuda"))
+    @patch("os.path.getsize", return_value=200 * 1024 * 1024)
+    def test_fallback_warning_includes_exception_text(
+        self, _gs, _cdll, _rknn, _gp, mock_session
+    ):
+        # Concern #1: the bare `except Exception:` swallowed the underlying
+        # ORT error (cudaErrorStreamCaptureUnsupported, missing libnvrtc, etc.),
+        # turning a debuggable failure into an opaque "fell back to ONNX runner".
+        from frigate.detectors.detection_runners import get_optimized_runner
+        from frigate.detectors.detector_config import ModelTypeEnum
+
+        mock_session.side_effect = [
+            RuntimeError("cudaErrorStreamCaptureUnsupported"),
+            MagicMock(get_inputs=lambda: [], get_outputs=lambda: []),
+        ]
+
+        with self.assertLogs(
+            "frigate.detectors.detection_runners", level="WARNING"
+        ) as captured:
+            get_optimized_runner(
+                "/m/yolo.onnx", "GPU", ModelTypeEnum.yologeneric.value
+            )
+
+        joined = "\n".join(captured.output)
+        self.assertIn("CUDA graph capture failed", joined)
+        self.assertIn("cudaErrorStreamCaptureUnsupported", joined)
 
 
 if __name__ == "__main__":

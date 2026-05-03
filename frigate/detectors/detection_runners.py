@@ -625,10 +625,11 @@ def get_optimized_runner(
                 ),
                 cuda_graph_options["device_id"],
             )
-        except Exception:
+        except Exception as e:
             logger.warning(
-                "CUDA graph capture failed for %s, falling back to standard ONNX runner",
+                "CUDA graph capture failed for %s, falling back to standard ONNX runner: %s",
                 model_path,
+                e,
             )
 
     if (

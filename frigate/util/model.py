@@ -294,23 +294,29 @@ def compute_cuda_mem_limit(model_path: str, cuda_graph: bool = False) -> int:
 
     Returns a limit derived from:
     - Floor: model file size × peak_multiplier (≥ 2 GB)
-    - Ceiling: 80% of total GPU VRAM
+    - Ceiling: min(80% of total VRAM, 90% of currently free VRAM)
     Falls back to 4 GB if the CUDA runtime query fails.
     """
     try:
         libcudart = ctypes.CDLL("libcudart.so")
         free_bytes = ctypes.c_size_t()
         total_bytes = ctypes.c_size_t()
-        libcudart.cudaMemGetInfo(ctypes.byref(free_bytes), ctypes.byref(total_bytes))
+        rc = libcudart.cudaMemGetInfo(
+            ctypes.byref(free_bytes), ctypes.byref(total_bytes)
+        )
+        if rc != 0 or total_bytes.value == 0:
+            raise RuntimeError(f"cudaMemGetInfo rc={rc} total={total_bytes.value}")
         total = total_bytes.value
-    except Exception:
-        logger.debug("cudaMemGetInfo unavailable; using 4 GB gpu_mem_limit fallback")
+        free = free_bytes.value
+    except Exception as e:
+        logger.debug("cudaMemGetInfo unavailable (%s); using 4 GB gpu_mem_limit fallback", e)
         return 4 * 1024**3
 
     peak_multiplier = 14 if cuda_graph else 7
     floor = max(os.path.getsize(model_path) * peak_multiplier, 2 * 1024**3)
-    ceiling = int(total * 0.80)
-    return min(floor, ceiling)
+    # Honor free VRAM so co-resident embedding sessions (jina text + vision,
+    # paddleocr det + rec, arcface) don't OOM each other on shared GPUs.
+    return min(floor, int(total * 0.80), int(free * 0.90))
 
 
 def get_ort_providers(
