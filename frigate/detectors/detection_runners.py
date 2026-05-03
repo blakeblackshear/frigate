@@ -32,7 +32,7 @@ def get_ort_session_options(
         is_complex_model: Whether the model needs basic optimization to avoid graph fusion issues.
         variable_length_inputs: Whether the model receives variable-length inputs (e.g. text
             embeddings).  When True, disables memory-pattern caching, which otherwise builds
-            a plan per unique input shape and holds onto mmap regions indefinitely — a major
+            a plan per unique input shape and holds onto mmap regions indefinitely - a major
             source of RSS growth in the embeddings_manager process.
 
     Returns:
@@ -40,15 +40,18 @@ def get_ort_session_options(
     """
     sess_options = ort.SessionOptions()
     # Disable the CPU BFC arena for all sessions.  With the arena enabled ORT pools
-    # host-side staging buffers for GPU↔CPU transfers and never releases them back to
+    # host-side staging buffers for GPU -> CPU transfers and never releases them back to
     # the OS, causing RSS to grow without bound in long-running embedding processes.
     sess_options.enable_cpu_mem_arena = False
     if variable_length_inputs:
         # Disable per-shape memory-layout plan caching for models with variable-length
         # inputs (Jina CLIP text, PaddleOCR).  Each unique sequence length creates a
         # new mmap-backed plan that is never freed, leading to unbounded anon-mmap growth.
-        # Fixed-size models (YOLO at 640×640) should keep this enabled for buffer aliasing.
         sess_options.enable_mem_pattern = False
+    else:
+        # Fixed-size models (like YOLO ) keep mem_pattern on for buffer aliasing.
+        # Set explicitly to be robust against ORT default changes.
+        sess_options.enable_mem_pattern = True
     if is_complex_model:
         sess_options.graph_optimization_level = (
             ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
