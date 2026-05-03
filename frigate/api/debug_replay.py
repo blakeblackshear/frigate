@@ -29,12 +29,16 @@ class DebugReplayStartResponse(BaseModel):
 
     success: bool
     replay_camera: str
+    state: str
 
 
 class DebugReplayStatusResponse(BaseModel):
     """Response for debug replay status."""
 
     active: bool
+    state: str
+    progress_percent: float | None = None
+    error_message: str | None = None
     replay_camera: str | None = None
     source_camera: str | None = None
     start_time: float | None = None
@@ -53,10 +57,12 @@ class DebugReplayStopResponse(BaseModel):
     response_model=DebugReplayStartResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Start debug replay",
-    description="Start a debug replay session from camera recordings.",
+    description="Start a debug replay session from camera recordings. Returns "
+    "immediately while clip generation runs asynchronously; poll "
+    "/debug_replay/status to track progress.",
 )
 async def start_debug_replay(request: Request, body: DebugReplayStartBody):
-    """Start a debug replay session."""
+    """Start a debug replay session asynchronously."""
     replay_manager = request.app.replay_manager
 
     if replay_manager.active:
@@ -77,28 +83,23 @@ async def start_debug_replay(request: Request, body: DebugReplayStartBody):
             frigate_config=request.app.frigate_config,
             config_publisher=request.app.config_publisher,
         )
-    except ValueError:
-        logger.exception("Invalid parameters for debug replay start request")
+    except ValueError as exc:
+        logger.info("Rejected debug replay start request: %s", exc)
         return JSONResponse(
             content={
                 "success": False,
-                "message": "Invalid debug replay request parameters",
+                "message": str(exc),
             },
             status_code=400,
         )
-    except RuntimeError:
-        logger.exception("Error while starting debug replay session")
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": "An internal error occurred while starting debug replay",
-            },
-            status_code=500,
-        )
 
-    return DebugReplayStartResponse(
-        success=True,
-        replay_camera=replay_camera,
+    return JSONResponse(
+        content={
+            "success": True,
+            "replay_camera": replay_camera,
+            "state": replay_manager.state.value,
+        },
+        status_code=202,
     )
 
 
@@ -132,6 +133,9 @@ def get_debug_replay_status(request: Request):
 
     return DebugReplayStatusResponse(
         active=replay_manager.active,
+        state=replay_manager.state.value,
+        progress_percent=replay_manager.progress_percent,
+        error_message=replay_manager.error_message,
         replay_camera=replay_camera,
         source_camera=replay_manager.source_camera,
         start_time=replay_manager.start_ts,
