@@ -272,6 +272,9 @@ class DebugReplayManager:
         except Exception as exc:
             logger.exception("Debug replay startup failed")
             with self._lock:
+                # If stop() already ran while we were preparing, don't overwrite idle state.
+                if self._state == ReplayState.idle:
+                    return
                 self._set_state(ReplayState.error, error_message=str(exc))
                 # Drop session pointers so the next /start is allowed.
                 self.replay_camera_name = None
@@ -355,23 +358,33 @@ class DebugReplayManager:
             return
 
         replay_name = self.replay_camera_name
+        was_preparing = self._state == ReplayState.preparing_clip
 
-        # Publish remove event so subscribers stop and remove from their config
-        if replay_name in frigate_config.cameras:
+        if was_preparing and self._active_process is not None:
+            logger.info("Cancelling in-flight replay clip generation")
+            try:
+                self._active_process.terminate()
+            except Exception as exc:
+                logger.warning("Failed to terminate ffmpeg subprocess: %s", exc)
+
+        # Keep a reference so we can join the worker after we've finished cleanup.
+        worker = self._worker_thread
+
+        # Only publish the remove event if the camera was actually published.
+        if (
+            not was_preparing
+            and replay_name is not None
+            and replay_name in frigate_config.cameras
+        ):
             config_publisher.publish_update(
                 CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, replay_name),
                 frigate_config.cameras[replay_name],
             )
-            # Do NOT pop here — let subscribers handle removal from the shared
-            # config dict when they process the ZMQ message to avoid race conditions
 
-        # Defensive DB cleanup
-        self._cleanup_db(replay_name)
+        if replay_name is not None:
+            self._cleanup_db(replay_name)
+            self._cleanup_files(replay_name)
 
-        # Remove filesystem artifacts
-        self._cleanup_files(replay_name)
-
-        # Reset state
         self.replay_camera_name = None
         self.source_camera = None
         self.clip_path = None
@@ -380,6 +393,10 @@ class DebugReplayManager:
         self._set_state(ReplayState.idle)
 
         logger.info("Debug replay stopped and cleaned up: %s", replay_name)
+
+        # Bounded worker join so the API never hangs.
+        if worker is not None and worker.is_alive():
+            worker.join(timeout=2.0)
 
     def _build_camera_config_dict(
         self,

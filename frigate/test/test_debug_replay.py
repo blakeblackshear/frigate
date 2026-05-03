@@ -198,3 +198,55 @@ class TestDebugReplayManagerAsyncStart(unittest.TestCase):
             self.assertEqual(self.manager.state, ReplayState.error)
             self.assertIsNotNone(self.manager.error_message)
             self.assertIn("ffmpeg", self.manager.error_message.lower())
+
+
+class TestDebugReplayManagerCancellation(unittest.TestCase):
+    def test_stop_during_preparing_clip_terminates_ffmpeg(self):
+        manager = DebugReplayManager()
+        frigate_config = MagicMock()
+        frigate_config.cameras = {"front": MagicMock()}
+        frigate_config.ffmpeg.ffmpeg_path = "/bin/sh"
+        publisher = MagicMock()
+
+        recordings_qs = MagicMock()
+        recordings_qs.count.return_value = 1
+        recordings_qs.__iter__.return_value = iter([MagicMock(path="/tmp/r1.mp4")])
+
+        terminated_event = threading.Event()
+        fake_proc = MagicMock()
+        original_terminate = MagicMock(side_effect=lambda: terminated_event.set())
+        fake_proc.terminate = original_terminate
+
+        def fake_helper(cmd, *, expected_duration_seconds, on_progress, process_started, **kwargs):
+            if process_started is not None:
+                process_started(fake_proc)
+            # Block until stop() calls fake_proc.terminate()
+            terminated_event.wait(timeout=5)
+            return -15, "killed"
+
+        with (
+            patch.object(manager, "_query_recordings", return_value=recordings_qs),
+            patch("frigate.debug_replay.run_ffmpeg_with_progress", side_effect=fake_helper),
+            patch("os.path.exists", return_value=True),
+            patch("os.makedirs"),
+            patch("os.remove"),
+            patch("builtins.open", unittest.mock.mock_open()),
+        ):
+            manager.start(
+                source_camera="front",
+                start_ts=100.0,
+                end_ts=200.0,
+                frigate_config=frigate_config,
+                config_publisher=publisher,
+            )
+            # Wait for the worker to register the active process
+            for _ in range(50):
+                if manager._active_process is fake_proc:
+                    break
+                time.sleep(0.02)
+            self.assertEqual(manager.state, ReplayState.preparing_clip)
+
+            manager.stop(frigate_config=frigate_config, config_publisher=publisher)
+
+            self.assertTrue(original_terminate.called, "terminate() should have been called")
+            self.assertEqual(manager.state, ReplayState.idle)
