@@ -436,13 +436,15 @@ export default function Replay() {
           ) : (
             status.replay_camera && (
               <div className="relative size-full min-h-10" ref={containerRef}>
-                <AutoUpdatingCameraImage
-                  className="size-full"
-                  cameraClasses="relative w-full h-full flex flex-col justify-start"
-                  searchParams={searchParams}
-                  camera={status.replay_camera}
-                  showFps={false}
-                />
+                {status.live_ready && (
+                  <AutoUpdatingCameraImage
+                    className="size-full"
+                    cameraClasses="relative w-full h-full flex flex-col justify-start"
+                    searchParams={searchParams}
+                    camera={status.replay_camera}
+                    showFps={false}
+                  />
+                )}
                 {debugDraw && (
                   <DebugDrawingLayer
                     containerRef={containerRef}
