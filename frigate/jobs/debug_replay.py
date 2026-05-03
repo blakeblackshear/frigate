@@ -13,7 +13,7 @@ import subprocess as sp
 import threading
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 from peewee import ModelSelect
 
@@ -97,7 +97,7 @@ def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> Mode
 
     Module-level so tests can patch it without instantiating a runner.
     """
-    return (
+    query = (
         Recordings.select(
             Recordings.path,
             Recordings.start_time,
@@ -111,6 +111,7 @@ def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> Mode
         .where(Recordings.camera == source_camera)
         .order_by(Recordings.start_time.asc())
     )
+    return cast(ModelSelect, query)
 
 
 class DebugReplayJobRunner(threading.Thread):

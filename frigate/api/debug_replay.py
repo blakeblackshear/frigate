@@ -84,20 +84,20 @@ async def start_debug_replay(request: Request, body: DebugReplayStartBody):
             config_publisher=request.app.config_publisher,
             replay_manager=replay_manager,
         )
-    except RuntimeError as exc:
+    except RuntimeError:
         return JSONResponse(
             content={
                 "success": False,
-                "message": str(exc),
+                "message": "A replay session is already active",
             },
             status_code=409,
         )
-    except ValueError as exc:
-        logger.info("Rejected debug replay start request: %s", exc)
+    except ValueError:
+        logger.exception("Rejected debug replay start request")
         return JSONResponse(
             content={
                 "success": False,
-                "message": str(exc),
+                "message": "Invalid debug replay parameters",
             },
             status_code=400,
         )
