@@ -59,6 +59,11 @@ class DebugReplayStopResponse(BaseModel):
 @router.post(
     "/debug_replay/start",
     response_model=DebugReplayStartResponse,
+    status_code=202,
+    responses={
+        400: {"description": "Invalid camera, time range, or no recordings"},
+        409: {"description": "A replay session is already active"},
+    },
     dependencies=[Depends(require_role(["admin"]))],
     summary="Start debug replay",
     description="Start a debug replay session from camera recordings. Returns "

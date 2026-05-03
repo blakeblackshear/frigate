@@ -100,9 +100,7 @@ class TestDebugReplayManagerStop(unittest.TestCase):
         with (
             patch.object(manager, "_cleanup_db"),
             patch.object(manager, "_cleanup_files"),
-            patch(
-                "frigate.debug_replay.cancel_debug_replay_job", return_value=False
-            ),
+            patch("frigate.debug_replay.cancel_debug_replay_job", return_value=False),
         ):
             manager.stop(frigate_config=frigate_config, config_publisher=publisher)
 
@@ -127,9 +125,7 @@ class TestDebugReplayManagerStop(unittest.TestCase):
         with (
             patch.object(manager, "_cleanup_db"),
             patch.object(manager, "_cleanup_files"),
-            patch(
-                "frigate.debug_replay.cancel_debug_replay_job", return_value=True
-            ),
+            patch("frigate.debug_replay.cancel_debug_replay_job", return_value=True),
         ):
             manager.stop(frigate_config=frigate_config, config_publisher=publisher)
 

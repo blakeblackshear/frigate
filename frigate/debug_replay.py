@@ -124,9 +124,7 @@ class DebugReplayManager:
         try:
             new_config = FrigateConfig.parse_object(config_data)
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to validate replay camera config: {e}"
-            ) from e
+            raise RuntimeError(f"Failed to validate replay camera config: {e}") from e
         frigate_config.cameras[replay_name] = new_config.cameras[replay_name]
 
         config_publisher.publish_update(

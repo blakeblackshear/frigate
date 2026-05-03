@@ -1,6 +1,5 @@
 """Tests for the shared ffmpeg progress helper."""
 
-import subprocess as sp
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -13,7 +12,17 @@ class TestInjectProgressFlags(unittest.TestCase):
         result = inject_progress_flags(cmd)
         self.assertEqual(
             result,
-            ["ffmpeg", "-i", "in.mp4", "-c", "copy", "-progress", "pipe:2", "-nostats", "out.mp4"],
+            [
+                "ffmpeg",
+                "-i",
+                "in.mp4",
+                "-c",
+                "copy",
+                "-progress",
+                "pipe:2",
+                "-nostats",
+                "out.mp4",
+            ],
         )
 
     def test_empty_cmd_returns_empty(self):
