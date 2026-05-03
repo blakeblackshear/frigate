@@ -499,5 +499,56 @@ class TestSchedulesCleanup(unittest.TestCase):
             assert job.id not in manager.jobs
 
 
+class TestChapterMetadataInProgressReview(unittest.TestCase):
+    """Regression: in-progress review segments have end_time=NULL until the
+    activity closes. The chapter builder must clamp the chapter end to the
+    last recorded second instead of crashing on float(None)."""
+
+    def _fake_select_returning(self, rows: list) -> MagicMock:
+        mock_query = MagicMock()
+        mock_query.where.return_value = mock_query
+        mock_query.order_by.return_value = mock_query
+        mock_query.iterator.return_value = iter(rows)
+        return mock_query
+
+    def test_in_progress_review_does_not_crash_and_clamps_to_last_recording(
+        self,
+    ) -> None:
+        exporter = _make_exporter(end_minus_start=200)
+        # Recordings cover [1000, 1150]; export window is [1000, 1200] so
+        # the last recorded second is 1150 (a 50s gap at the tail).
+        recordings = [
+            MagicMock(start_time=1000.0, end_time=1150.0),
+        ]
+        in_progress = MagicMock(
+            start_time=1100.0,
+            end_time=None,
+            severity="alert",
+            data={"objects": ["person"]},
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            chapter_path = os.path.join(tmpdir, "chapters.txt")
+            exporter._chapter_metadata_path = lambda: chapter_path  # type: ignore[method-assign]
+
+            with patch(
+                "frigate.record.export.ReviewSegment.select",
+                return_value=self._fake_select_returning([in_progress]),
+            ):
+                result = exporter._build_chapter_metadata_file(recordings)
+
+            assert result == chapter_path
+            with open(chapter_path) as f:
+                content = f.read()
+
+        # Output time is windows[-1][1] - windows[-1][0] = 150s.
+        # Review starts at wall=1100, output offset = 100s -> 100000ms.
+        # Clamped end = last_recorded_end (1150) -> output offset = 150s -> 150000ms.
+        assert "[CHAPTER]" in content
+        assert "START=100000" in content
+        assert "END=150000" in content
+        assert "title=Alert: person" in content
+
+
 if __name__ == "__main__":
     unittest.main()
