@@ -14,6 +14,7 @@ from frigate.jobs.export import (
 )
 from frigate.record.export import PlaybackSourceEnum, RecordingExporter
 from frigate.types import JobStatusTypesEnum
+from frigate.util.ffmpeg import inject_progress_flags
 
 
 def _make_exporter(
@@ -118,10 +119,9 @@ class TestExpectedOutputDuration(unittest.TestCase):
 
 class TestProgressFlagInjection(unittest.TestCase):
     def test_inserts_before_output_path(self) -> None:
-        exporter = _make_exporter()
         cmd = ["ffmpeg", "-i", "input.m3u8", "-c", "copy", "/tmp/output.mp4"]
 
-        result = exporter._inject_progress_flags(cmd)
+        result = inject_progress_flags(cmd)
 
         assert result == [
             "ffmpeg",
@@ -136,8 +136,7 @@ class TestProgressFlagInjection(unittest.TestCase):
         ]
 
     def test_handles_empty_cmd(self) -> None:
-        exporter = _make_exporter()
-        assert exporter._inject_progress_flags([]) == []
+        assert inject_progress_flags([]) == []
 
 
 class TestFfmpegProgressParsing(unittest.TestCase):
@@ -167,7 +166,7 @@ class TestFfmpegProgressParsing(unittest.TestCase):
         fake_proc.returncode = 0
         fake_proc.wait = MagicMock(return_value=0)
 
-        with patch("frigate.record.export.sp.Popen", return_value=fake_proc):
+        with patch("frigate.util.ffmpeg.sp.Popen", return_value=fake_proc):
             returncode, _stderr = exporter._run_ffmpeg_with_progress(
                 ["ffmpeg", "-i", "x.m3u8", "/tmp/out.mp4"], "playlist", step="encoding"
             )

@@ -23,13 +23,13 @@ from frigate.const import (
     EXPORT_DIR,
     MAX_PLAYLIST_SECONDS,
     PREVIEW_FRAME_TYPE,
-    PROCESS_PRIORITY_LOW,
 )
 from frigate.ffmpeg_presets import (
     EncodeTypeEnum,
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Export, Previews, Recordings, ReviewSegment
+from frigate.util.ffmpeg import run_ffmpeg_with_progress
 from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
@@ -243,106 +243,28 @@ class RecordingExporter(threading.Thread):
 
         return total
 
-    def _inject_progress_flags(self, ffmpeg_cmd: list[str]) -> list[str]:
-        """Insert FFmpeg progress reporting flags before the output path.
-
-        ``-progress pipe:2`` writes structured key=value lines to stderr,
-        ``-nostats`` suppresses the noisy default stats output.
-        """
-        if not ffmpeg_cmd:
-            return ffmpeg_cmd
-        return ffmpeg_cmd[:-1] + ["-progress", "pipe:2", "-nostats", ffmpeg_cmd[-1]]
-
     def _run_ffmpeg_with_progress(
         self,
         ffmpeg_cmd: list[str],
         playlist_lines: str | list[str],
         step: str = "encoding",
     ) -> tuple[int, str]:
-        """Run an FFmpeg export command, parsing progress events from stderr.
+        """Delegate to the shared helper, mapping percent → (step, percent).
 
-        Returns ``(returncode, captured_stderr)``. Stdout is left attached to
-        the parent process so we don't have to drain it (and risk a deadlock
-        if the buffer fills). Progress percent is computed against the
-        expected output duration; values are clamped to [0, 100] inside
-        :py:meth:`_emit_progress`.
+        Returns ``(returncode, captured_stderr)``.
         """
-        cmd = ["nice", "-n", str(PROCESS_PRIORITY_LOW)] + self._inject_progress_flags(
-            ffmpeg_cmd
-        )
-
         if isinstance(playlist_lines, list):
             stdin_payload = "\n".join(playlist_lines)
         else:
             stdin_payload = playlist_lines
 
-        expected_duration = self._expected_output_duration_seconds()
-
-        self._emit_progress(step, 0.0)
-
-        proc = sp.Popen(
-            cmd,
-            stdin=sp.PIPE,
-            stderr=sp.PIPE,
-            text=True,
-            encoding="ascii",
-            errors="replace",
+        return run_ffmpeg_with_progress(
+            ffmpeg_cmd,
+            expected_duration_seconds=self._expected_output_duration_seconds(),
+            on_progress=lambda percent: self._emit_progress(step, percent),
+            stdin_payload=stdin_payload,
+            use_low_priority=True,
         )
-
-        assert proc.stdin is not None
-        assert proc.stderr is not None
-
-        try:
-            proc.stdin.write(stdin_payload)
-        except (BrokenPipeError, OSError):
-            # FFmpeg may have rejected the input early; still wait for it
-            # to terminate so the returncode is meaningful.
-            pass
-        finally:
-            try:
-                proc.stdin.close()
-            except (BrokenPipeError, OSError):
-                pass
-
-        captured: list[str] = []
-
-        try:
-            for raw_line in proc.stderr:
-                captured.append(raw_line)
-                line = raw_line.strip()
-
-                if not line:
-                    continue
-
-                if line.startswith("out_time_us="):
-                    if expected_duration <= 0:
-                        continue
-                    try:
-                        out_time_us = int(line.split("=", 1)[1])
-                    except (ValueError, IndexError):
-                        continue
-                    if out_time_us < 0:
-                        continue
-                    out_seconds = out_time_us / 1_000_000.0
-                    percent = (out_seconds / expected_duration) * 100.0
-                    self._emit_progress(step, percent)
-                elif line == "progress=end":
-                    self._emit_progress(step, 100.0)
-                    break
-        except Exception:
-            logger.exception("Failed reading FFmpeg progress for %s", self.export_id)
-
-        proc.wait()
-
-        # Drain any remaining stderr so callers can log it on failure.
-        try:
-            remaining = proc.stderr.read()
-            if remaining:
-                captured.append(remaining)
-        except Exception:
-            pass
-
-        return proc.returncode, "".join(captured)
 
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
         # return in iso format using the configured ui.timezone when set,
