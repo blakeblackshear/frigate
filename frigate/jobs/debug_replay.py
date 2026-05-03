@@ -15,6 +15,8 @@ import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional
 
+from peewee import ModelSelect
+
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.const import REPLAY_CAMERA_PREFIX, REPLAY_DIR
@@ -90,7 +92,9 @@ class DebugReplayJob(Job):
         }
 
 
-def query_recordings(source_camera: str, start_ts: float, end_ts: float):
+def query_recordings(
+    source_camera: str, start_ts: float, end_ts: float
+) -> ModelSelect:
     """Return the Recordings query for the time range.
 
     Module-level so tests can patch it without instantiating a runner.

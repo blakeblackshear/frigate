@@ -137,7 +137,7 @@ def get_debug_replay_status(request: Request):
         if frame is not None:
             frame_time = frame_processor.get_current_frame_time(replay_camera)
             camera_config = request.app.frigate_config.cameras.get(replay_camera)
-            retry_interval = 10
+            retry_interval = 10.0
 
             if camera_config is not None:
                 retry_interval = float(camera_config.ffmpeg.retry_interval or 10)
