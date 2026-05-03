@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess as sp
 import threading
+from enum import Enum
 
 from ruamel.yaml import YAML
 
@@ -28,11 +29,30 @@ from frigate.util.config import find_config_file
 logger = logging.getLogger(__name__)
 
 
+class ReplayState(str, Enum):
+    """State of the debug replay session lifecycle.
+
+    idle:             no session
+    preparing_clip:   ffmpeg concat is running, no replay camera yet
+    starting_camera:  clip ready, publishing camera config update
+    active:           replay camera is published; first frame may not have arrived yet
+    error:            startup failed; error_message is set
+    """
+
+    idle = "idle"
+    preparing_clip = "preparing_clip"
+    starting_camera = "starting_camera"
+    active = "active"
+    error = "error"
+
+
 class DebugReplayManager:
     """Manages a single debug replay session."""
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
+        self._state: ReplayState = ReplayState.idle
+        self.error_message: str | None = None
         self.replay_camera_name: str | None = None
         self.source_camera: str | None = None
         self.clip_path: str | None = None
@@ -40,9 +60,24 @@ class DebugReplayManager:
         self.end_ts: float | None = None
 
     @property
+    def state(self) -> ReplayState:
+        return self._state
+
+    @property
     def active(self) -> bool:
-        """Whether a replay session is currently active."""
-        return self.replay_camera_name is not None
+        """Whether a replay session is in progress (preparing, starting, or active)."""
+        return self._state in (
+            ReplayState.preparing_clip,
+            ReplayState.starting_camera,
+            ReplayState.active,
+        )
+
+    def _set_state(
+        self, state: ReplayState, error_message: str | None = None
+    ) -> None:
+        """Internal state transition helper. Always pair `error` with an error_message."""
+        self._state = state
+        self.error_message = error_message if state == ReplayState.error else None
 
     def start(
         self,
@@ -208,6 +243,7 @@ class DebugReplayManager:
         self.clip_path = clip_path
         self.start_ts = start_ts
         self.end_ts = end_ts
+        self._set_state(ReplayState.active)
 
         logger.info("Debug replay started: %s -> %s", source_camera, replay_name)
         return replay_name
@@ -258,6 +294,7 @@ class DebugReplayManager:
         self.clip_path = None
         self.start_ts = None
         self.end_ts = None
+        self._set_state(ReplayState.idle)
 
         logger.info("Debug replay stopped and cleaned up: %s", replay_name)
 
