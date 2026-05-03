@@ -1,11 +1,14 @@
-"""Debug replay camera management for replaying recordings with detection overlays."""
+"""Debug replay camera management for replaying recordings with detection overlays.
+
+The startup work (ffmpeg concat + camera config publish) lives in
+``frigate.jobs.debug_replay``. This module owns only session presence
+(``active``), session metadata, and post-session cleanup.
+"""
 
 import logging
 import os
 import shutil
-import subprocess as sp
 import threading
-from enum import Enum
 
 from ruamel.yaml import YAML
 
@@ -22,280 +25,77 @@ from frigate.const import (
     REPLAY_DIR,
     THUMB_DIR,
 )
-from frigate.models import Recordings
+from frigate.jobs.debug_replay import cancel_debug_replay_job, wait_for_runner
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
-from frigate.util.ffmpeg import run_ffmpeg_with_progress
 
 logger = logging.getLogger(__name__)
 
 
-class ReplayState(str, Enum):
-    """State of the debug replay session lifecycle.
-
-    idle:             no session
-    preparing_clip:   ffmpeg concat is running, no replay camera yet
-    starting_camera:  clip ready, publishing camera config update
-    active:           replay camera is published; first frame may not have arrived yet
-    error:            startup failed; error_message is set
-    """
-
-    idle = "idle"
-    preparing_clip = "preparing_clip"
-    starting_camera = "starting_camera"
-    active = "active"
-    error = "error"
-
-
 class DebugReplayManager:
-    """Manages a single debug replay session."""
+    """Owns the lifecycle pointers for a single debug replay session.
+
+    A session exists from the moment ``mark_starting`` is called (synchronously,
+    inside the API handler) until ``clear_session`` runs (on success cleanup,
+    failure, or stop). The ``active`` property is the source of truth that the
+    status bar consumes — broader than the startup job, which only covers the
+    preparing_clip / starting_camera window.
+    """
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
-        self._state: ReplayState = ReplayState.idle
-        self.error_message: str | None = None
         self.replay_camera_name: str | None = None
         self.source_camera: str | None = None
         self.clip_path: str | None = None
         self.start_ts: float | None = None
         self.end_ts: float | None = None
-        self._active_process: sp.Popen | None = None
-        self._worker_thread: threading.Thread | None = None
-        self.progress_percent: float | None = None
-
-    @property
-    def state(self) -> ReplayState:
-        return self._state
 
     @property
     def active(self) -> bool:
-        """Whether a replay session is in progress (preparing, starting, or active)."""
-        return self._state in (
-            ReplayState.preparing_clip,
-            ReplayState.starting_camera,
-            ReplayState.active,
-        )
+        """True from ``mark_starting`` until ``clear_session``."""
+        return self.replay_camera_name is not None
 
-    def _set_state(
-        self, state: ReplayState, error_message: str | None = None
-    ) -> None:
-        """Internal state transition helper. Always pair `error` with an error_message."""
-        self._state = state
-        self.error_message = error_message if state == ReplayState.error else None
-        if state in (ReplayState.idle, ReplayState.error):
-            self.progress_percent = None
-
-    def start(
+    def mark_starting(
         self,
         source_camera: str,
+        replay_camera_name: str,
         start_ts: float,
         end_ts: float,
-        frigate_config: FrigateConfig,
-        config_publisher: CameraConfigUpdatePublisher,
-    ) -> str:
-        """Validate inputs and kick off async startup. Returns immediately.
+    ) -> None:
+        """Synchronously claim the session before the job runner starts.
 
-        The clip generation, config build, and camera publish run on a worker
-        thread. Poll `state` / `error_message` to track progress.
-
-        Args:
-            source_camera: Name of the source camera to replay
-            start_ts: Start timestamp
-            end_ts: End timestamp
-            frigate_config: Current Frigate configuration
-            config_publisher: Publisher for camera config updates
-
-        Returns:
-            The replay camera name (deterministic from source_camera)
-
-        Raises:
-            ValueError: If a session is already active or parameters are invalid
+        Called inside the API handler so the status bar sees ``active=True``
+        immediately, before the worker thread does any ffmpeg work.
         """
         with self._lock:
-            if self.active:
-                raise ValueError("A replay session is already active")
-
-            if source_camera not in frigate_config.cameras:
-                raise ValueError(f"Camera '{source_camera}' not found")
-
-            if end_ts <= start_ts:
-                raise ValueError("End time must be after start time")
-
-            recordings = self._query_recordings(source_camera, start_ts, end_ts)
-            if not recordings.count():
-                raise ValueError(
-                    f"No recordings found for camera '{source_camera}' in the specified time range"
-                )
-
-            replay_name = f"{REPLAY_CAMERA_PREFIX}{source_camera}"
-            self.replay_camera_name = replay_name
+            self.replay_camera_name = replay_camera_name
             self.source_camera = source_camera
             self.start_ts = start_ts
             self.end_ts = end_ts
-            self.progress_percent = None
-            self._set_state(ReplayState.preparing_clip)
+            self.clip_path = None
 
-        worker = threading.Thread(
-            target=self._run_start_worker,
-            name=f"debug-replay-start-{replay_name}",
-            args=(source_camera, start_ts, end_ts, frigate_config, config_publisher),
-            daemon=True,
-        )
-        self._worker_thread = worker
-        worker.start()
+    def mark_session_ready(self, clip_path: str) -> None:
+        """Record the on-disk clip path after the camera has been published."""
+        with self._lock:
+            self.clip_path = clip_path
 
-        return replay_name
+    def clear_session(self) -> None:
+        """Reset session pointers without publishing camera removal.
 
-    def _query_recordings(self, source_camera: str, start_ts: float, end_ts: float):
-        """Return the Recordings query for the time range. Extracted so tests can patch.
-
-        Args:
-            source_camera: Name of the source camera
-            start_ts: Start timestamp
-            end_ts: End timestamp
-
-        Returns:
-            Peewee query for recordings in the time range
+        Used by the job runner on failure paths. ``stop()`` does the camera
+        teardown plus this clear in one step.
         """
-        return (
-            Recordings.select(
-                Recordings.path,
-                Recordings.start_time,
-                Recordings.end_time,
-            )
-            .where(
-                Recordings.start_time.between(start_ts, end_ts)
-                | Recordings.end_time.between(start_ts, end_ts)
-                | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
-            )
-            .where(Recordings.camera == source_camera)
-            .order_by(Recordings.start_time.asc())
-        )
+        with self._lock:
+            self._clear_locked()
 
-    def _run_start_worker(
-        self,
-        source_camera: str,
-        start_ts: float,
-        end_ts: float,
-        frigate_config: FrigateConfig,
-        config_publisher: CameraConfigUpdatePublisher,
-    ) -> None:
-        """Worker thread body — runs ffmpeg and publishes the camera config.
+    def _clear_locked(self) -> None:
+        self.replay_camera_name = None
+        self.source_camera = None
+        self.clip_path = None
+        self.start_ts = None
+        self.end_ts = None
 
-        Args:
-            source_camera: Name of the source camera to replay
-            start_ts: Start timestamp
-            end_ts: End timestamp
-            frigate_config: Current Frigate configuration
-            config_publisher: Publisher for camera config updates
-        """
-        replay_name = self.replay_camera_name
-        if replay_name is None:
-            return
-
-        os.makedirs(REPLAY_DIR, exist_ok=True)
-        concat_file = os.path.join(REPLAY_DIR, f"{replay_name}_concat.txt")
-        clip_path = os.path.join(REPLAY_DIR, f"{replay_name}.mp4")
-
-        try:
-            recordings = self._query_recordings(source_camera, start_ts, end_ts)
-            with open(concat_file, "w") as f:
-                for recording in recordings:
-                    f.write(f"file '{recording.path}'\n")
-
-            ffmpeg_cmd = [
-                frigate_config.ffmpeg.ffmpeg_path,
-                "-hide_banner",
-                "-y",
-                "-f",
-                "concat",
-                "-safe",
-                "0",
-                "-i",
-                concat_file,
-                "-c",
-                "copy",
-                "-movflags",
-                "+faststart",
-                clip_path,
-            ]
-
-            logger.info(
-                "Generating replay clip for %s (%.1f - %.1f)",
-                source_camera,
-                start_ts,
-                end_ts,
-            )
-
-            def _record_proc(p: sp.Popen) -> None:
-                self._active_process = p
-
-            def _on_progress(percent: float) -> None:
-                self.progress_percent = percent
-
-            try:
-                returncode, stderr = run_ffmpeg_with_progress(
-                    ffmpeg_cmd,
-                    expected_duration_seconds=max(0.0, end_ts - start_ts),
-                    on_progress=_on_progress,
-                    process_started=_record_proc,
-                    use_low_priority=True,
-                )
-            finally:
-                self._active_process = None
-
-            if returncode != 0:
-                raise RuntimeError(f"FFmpeg failed: {stderr[-500:]}")
-
-            if not os.path.exists(clip_path):
-                raise RuntimeError("Clip file was not created")
-
-            with self._lock:
-                # If stop() ran while we were preparing, bail out cleanly.
-                if self._state != ReplayState.preparing_clip:
-                    logger.info(
-                        "Replay startup aborted (state=%s); discarding clip",
-                        self._state,
-                    )
-                    return
-                self._set_state(ReplayState.starting_camera)
-
-            self._publish_replay_camera(
-                source_camera, replay_name, clip_path, frigate_config, config_publisher
-            )
-
-            with self._lock:
-                self.clip_path = clip_path
-                self._set_state(ReplayState.active)
-
-            logger.info("Debug replay started: %s -> %s", source_camera, replay_name)
-        except Exception as exc:
-            logger.exception("Debug replay startup failed")
-            with self._lock:
-                # If stop() already ran while we were preparing, don't overwrite idle state.
-                if self._state == ReplayState.idle:
-                    return
-                self._set_state(ReplayState.error, error_message=str(exc))
-                # Drop session pointers so the next /start is allowed.
-                self.replay_camera_name = None
-                self.source_camera = None
-                self.clip_path = None
-                self.start_ts = None
-                self.end_ts = None
-            # Best-effort cleanup of any partial clip on disk.
-            try:
-                if os.path.exists(clip_path):
-                    os.remove(clip_path)
-            except OSError:
-                pass
-        finally:
-            try:
-                if os.path.exists(concat_file):
-                    os.remove(concat_file)
-            except OSError:
-                pass
-
-    def _publish_replay_camera(
+    def publish_camera(
         self,
         source_camera: str,
         replay_name: str,
@@ -303,14 +103,9 @@ class DebugReplayManager:
         frigate_config: FrigateConfig,
         config_publisher: CameraConfigUpdatePublisher,
     ) -> None:
-        """Build the in-memory camera config and publish the add event.
+        """Build the in-memory replay camera config and publish the add event.
 
-        Args:
-            source_camera: Name of the source camera
-            replay_name: Name for the replay camera
-            clip_path: Path to the replay clip file
-            frigate_config: Current Frigate configuration
-            config_publisher: Publisher for camera config updates
+        Called by the job runner during the ``starting_camera`` phase.
         """
         source_config = frigate_config.cameras[source_camera]
         camera_dict = self._build_camera_config_dict(
@@ -339,64 +134,35 @@ class DebugReplayManager:
         frigate_config: FrigateConfig,
         config_publisher: CameraConfigUpdatePublisher,
     ) -> None:
-        """Stop the active replay session and clean up all artifacts.
+        """Cancel any in-flight startup job and tear down the active session.
 
-        Args:
-            frigate_config: Current Frigate configuration
-            config_publisher: Publisher for camera config updates
+        Safe to call when no session is active (no-op with a warning).
         """
+        cancel_debug_replay_job()
+        wait_for_runner(timeout=2.0)
+
         with self._lock:
-            self._stop_locked(frigate_config, config_publisher)
+            if not self.active:
+                logger.warning("No active replay session to stop")
+                return
 
-    def _stop_locked(
-        self,
-        frigate_config: FrigateConfig,
-        config_publisher: CameraConfigUpdatePublisher,
-    ) -> None:
-        if not self.active:
-            logger.warning("No active replay session to stop")
-            return
+            replay_name = self.replay_camera_name
 
-        replay_name = self.replay_camera_name
-        was_preparing = self._state == ReplayState.preparing_clip
+            # Only publish remove if the camera was actually added to the live
+            # config (i.e. the runner reached the starting_camera phase).
+            if replay_name is not None and replay_name in frigate_config.cameras:
+                config_publisher.publish_update(
+                    CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, replay_name),
+                    frigate_config.cameras[replay_name],
+                )
 
-        if was_preparing and self._active_process is not None:
-            logger.info("Cancelling in-flight replay clip generation")
-            try:
-                self._active_process.terminate()
-            except Exception as exc:
-                logger.warning("Failed to terminate ffmpeg subprocess: %s", exc)
+            if replay_name is not None:
+                self._cleanup_db(replay_name)
+                self._cleanup_files(replay_name)
 
-        # Keep a reference so we can join the worker after we've finished cleanup.
-        worker = self._worker_thread
+            self._clear_locked()
 
-        # Only publish the remove event if the camera was actually published.
-        if (
-            not was_preparing
-            and replay_name is not None
-            and replay_name in frigate_config.cameras
-        ):
-            config_publisher.publish_update(
-                CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, replay_name),
-                frigate_config.cameras[replay_name],
-            )
-
-        if replay_name is not None:
-            self._cleanup_db(replay_name)
-            self._cleanup_files(replay_name)
-
-        self.replay_camera_name = None
-        self.source_camera = None
-        self.clip_path = None
-        self.start_ts = None
-        self.end_ts = None
-        self._set_state(ReplayState.idle)
-
-        logger.info("Debug replay stopped and cleaned up: %s", replay_name)
-
-        # Bounded worker join so the API never hangs.
-        if worker is not None and worker.is_alive():
-            worker.join(timeout=2.0)
+            logger.info("Debug replay stopped and cleaned up: %s", replay_name)
 
     def _build_camera_config_dict(
         self,
@@ -404,16 +170,7 @@ class DebugReplayManager:
         replay_name: str,
         clip_path: str,
     ) -> dict:
-        """Build a camera config dictionary for the replay camera.
-
-        Args:
-            source_config: Source camera's CameraConfig
-            replay_name: Name for the replay camera
-            clip_path: Path to the replay clip file
-
-        Returns:
-            Camera config as a dictionary
-        """
+        """Build a camera config dictionary for the replay camera."""
         # Extract detect config (exclude computed fields)
         detect_dict = source_config.detect.model_dump(
             exclude={"min_initialized", "max_disappeared", "enabled_in_config"}
@@ -448,7 +205,6 @@ class DebugReplayManager:
             zone_dump = zone_config.model_dump(
                 exclude={"contour", "color"}, exclude_defaults=True
             )
-            # Always include required fields
             zone_dump.setdefault("coordinates", zone_config.coordinates)
             zones_dict[zone_name] = zone_dump
 
