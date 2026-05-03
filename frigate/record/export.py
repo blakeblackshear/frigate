@@ -420,6 +420,7 @@ class RecordingExporter(threading.Thread):
             return None
 
         total_output = windows[-1][2] + (windows[-1][1] - windows[-1][0])
+        last_recorded_end = windows[-1][1]
 
         def wall_to_output(t: float) -> float:
             t = max(float(self.start_time), min(float(self.end_time), t))
@@ -432,8 +433,18 @@ class RecordingExporter(threading.Thread):
 
         chapter_blocks: list[str] = []
         for review in review_rows:
+            if review.start_time is None:
+                continue
+            # In-progress segments have a NULL end_time until the activity
+            # closes; clamp to the last recorded second so the chapter never
+            # extends past the actual video.
+            review_end = (
+                float(review.end_time)
+                if review.end_time is not None
+                else last_recorded_end
+            )
             start_out = wall_to_output(float(review.start_time))
-            end_out = wall_to_output(float(review.end_time))
+            end_out = wall_to_output(review_end)
 
             # Drop chapters that fall entirely in a recording gap, or are
             # too short to be navigable in a player.
@@ -516,16 +527,14 @@ class RecordingExporter(threading.Thread):
             except DoesNotExist:
                 return ""
 
-            diff = self.start_time - preview.start_time
-            minutes = int(diff / 60)
-            seconds = int(diff % 60)
+            diff = max(0.0, float(self.start_time) - float(preview.start_time))
             ffmpeg_cmd = [
                 "/usr/lib/ffmpeg/7.0/bin/ffmpeg",  # hardcode path for exports thumbnail due to missing libwebp support
                 "-hide_banner",
                 "-loglevel",
                 "warning",
                 "-ss",
-                f"00:{minutes}:{seconds}",
+                f"{diff:.3f}",
                 "-i",
                 preview.path,
                 "-frames",
