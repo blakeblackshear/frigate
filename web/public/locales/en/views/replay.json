@@ -24,13 +24,21 @@
       "alreadyActive": "A replay session is already active",
       "stopped": "Debug replay stopped",
       "stopError": "Failed to stop debug replay: {{error}}",
-      "goToReplay": "Go to Replay"
+      "goToReplay": "Go to Replay",
+      "preparingClip": "Preparing replay clip…"
     }
   },
   "page": {
     "noSession": "No Active Replay Session",
     "noSessionDesc": "Start a debug replay from the History view by clicking the Debug Replay button in the toolbar.",
     "goToRecordings": "Go to History",
+    "preparingClip": "Preparing replay clip…",
+    "preparingClipDesc": "Stitching together recordings for the selected time range. This can take a minute for longer ranges.",
+    "startingCamera": "Starting replay camera…",
+    "startError": {
+      "title": "Failed to start debug replay",
+      "back": "Back to History"
+    },
     "sourceCamera": "Source Camera",
     "replayCamera": "Replay Camera",
     "initializingReplay": "Initializing replay...",
