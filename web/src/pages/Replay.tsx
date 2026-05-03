@@ -167,9 +167,6 @@ export default function Replay() {
     axios
       .post("debug_replay/stop")
       .then(() => {
-        toast.success(t("dialog.toast.stopped"), {
-          position: "top-center",
-        });
         refreshStatus();
       })
       .catch((error) => {
