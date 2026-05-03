@@ -429,7 +429,10 @@ class WebPushClient(Communicator):
             else:
                 title = base_title
 
-            message = payload["after"]["data"]["metadata"]["shortSummary"]
+            if payload["after"]["data"]["metadata"].get("shortSummary"):
+                message = payload["after"]["data"]["metadata"]["shortSummary"]
+            else:
+                message = f"Detected on {camera_name}"
         else:
             zone_names = payload["after"]["data"]["zones"]
             formatted_zone_names = []

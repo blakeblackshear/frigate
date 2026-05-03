@@ -31,6 +31,12 @@ class OllamaClient(GenAIClient):
     provider: ApiClient | None
     provider_options: dict[str, Any]
 
+    def _auth_headers(self) -> dict | None:
+        if self.genai_config.api_key:
+            return {"Authorization": "Bearer " + self.genai_config.api_key}
+
+        return None
+
     def _init_provider(self) -> ApiClient | None:
         """Initialize the client."""
         self.provider_options = {
@@ -39,7 +45,11 @@ class OllamaClient(GenAIClient):
         }
 
         try:
-            client = ApiClient(host=self.genai_config.base_url, timeout=self.timeout)
+            client = ApiClient(
+                host=self.genai_config.base_url,
+                timeout=self.timeout,
+                headers=self._auth_headers(),
+            )
             # ensure the model is available locally
             response = client.show(self.genai_config.model)
             if response.get("error"):
@@ -166,7 +176,9 @@ class OllamaClient(GenAIClient):
                 return []
             try:
                 client = ApiClient(
-                    host=self.genai_config.base_url, timeout=self.timeout
+                    host=self.genai_config.base_url,
+                    timeout=self.timeout,
+                    headers=self._auth_headers(),
                 )
             except Exception:
                 return []
@@ -344,6 +356,7 @@ class OllamaClient(GenAIClient):
                 async_client = OllamaAsyncClient(
                     host=self.genai_config.base_url,
                     timeout=self.timeout,
+                    headers=self._auth_headers(),
                 )
                 response = await async_client.chat(**request_params)
                 result = self._message_from_response(response)
@@ -359,6 +372,7 @@ class OllamaClient(GenAIClient):
             async_client = OllamaAsyncClient(
                 host=self.genai_config.base_url,
                 timeout=self.timeout,
+                headers=self._auth_headers(),
             )
             content_parts: list[str] = []
             final_message: dict[str, Any] | None = None

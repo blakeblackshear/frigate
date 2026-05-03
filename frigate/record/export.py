@@ -13,6 +13,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional
 
+import pytz  # type: ignore[import-untyped]
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
@@ -22,13 +23,13 @@ from frigate.const import (
     EXPORT_DIR,
     MAX_PLAYLIST_SECONDS,
     PREVIEW_FRAME_TYPE,
-    PROCESS_PRIORITY_LOW,
 )
 from frigate.ffmpeg_presets import (
     EncodeTypeEnum,
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Export, Previews, Recordings, ReviewSegment
+from frigate.util.ffmpeg import run_ffmpeg_with_progress
 from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
@@ -242,109 +243,43 @@ class RecordingExporter(threading.Thread):
 
         return total
 
-    def _inject_progress_flags(self, ffmpeg_cmd: list[str]) -> list[str]:
-        """Insert FFmpeg progress reporting flags before the output path.
-
-        ``-progress pipe:2`` writes structured key=value lines to stderr,
-        ``-nostats`` suppresses the noisy default stats output.
-        """
-        if not ffmpeg_cmd:
-            return ffmpeg_cmd
-        return ffmpeg_cmd[:-1] + ["-progress", "pipe:2", "-nostats", ffmpeg_cmd[-1]]
-
     def _run_ffmpeg_with_progress(
         self,
         ffmpeg_cmd: list[str],
         playlist_lines: str | list[str],
         step: str = "encoding",
     ) -> tuple[int, str]:
-        """Run an FFmpeg export command, parsing progress events from stderr.
+        """Delegate to the shared helper, mapping percent → (step, percent).
 
-        Returns ``(returncode, captured_stderr)``. Stdout is left attached to
-        the parent process so we don't have to drain it (and risk a deadlock
-        if the buffer fills). Progress percent is computed against the
-        expected output duration; values are clamped to [0, 100] inside
-        :py:meth:`_emit_progress`.
+        Returns ``(returncode, captured_stderr)``.
         """
-        cmd = ["nice", "-n", str(PROCESS_PRIORITY_LOW)] + self._inject_progress_flags(
-            ffmpeg_cmd
-        )
-
         if isinstance(playlist_lines, list):
             stdin_payload = "\n".join(playlist_lines)
         else:
             stdin_payload = playlist_lines
 
-        expected_duration = self._expected_output_duration_seconds()
-
-        self._emit_progress(step, 0.0)
-
-        proc = sp.Popen(
-            cmd,
-            stdin=sp.PIPE,
-            stderr=sp.PIPE,
-            text=True,
-            encoding="ascii",
-            errors="replace",
+        return run_ffmpeg_with_progress(
+            ffmpeg_cmd,
+            expected_duration_seconds=self._expected_output_duration_seconds(),
+            on_progress=lambda percent: self._emit_progress(step, percent),
+            stdin_payload=stdin_payload,
+            use_low_priority=True,
         )
 
-        assert proc.stdin is not None
-        assert proc.stderr is not None
-
-        try:
-            proc.stdin.write(stdin_payload)
-        except (BrokenPipeError, OSError):
-            # FFmpeg may have rejected the input early; still wait for it
-            # to terminate so the returncode is meaningful.
-            pass
-        finally:
-            try:
-                proc.stdin.close()
-            except (BrokenPipeError, OSError):
-                pass
-
-        captured: list[str] = []
-
-        try:
-            for raw_line in proc.stderr:
-                captured.append(raw_line)
-                line = raw_line.strip()
-
-                if not line:
-                    continue
-
-                if line.startswith("out_time_us="):
-                    if expected_duration <= 0:
-                        continue
-                    try:
-                        out_time_us = int(line.split("=", 1)[1])
-                    except (ValueError, IndexError):
-                        continue
-                    if out_time_us < 0:
-                        continue
-                    out_seconds = out_time_us / 1_000_000.0
-                    percent = (out_seconds / expected_duration) * 100.0
-                    self._emit_progress(step, percent)
-                elif line == "progress=end":
-                    self._emit_progress(step, 100.0)
-                    break
-        except Exception:
-            logger.exception("Failed reading FFmpeg progress for %s", self.export_id)
-
-        proc.wait()
-
-        # Drain any remaining stderr so callers can log it on failure.
-        try:
-            remaining = proc.stderr.read()
-            if remaining:
-                captured.append(remaining)
-        except Exception:
-            pass
-
-        return proc.returncode, "".join(captured)
-
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
-        # return in iso format
+        # return in iso format using the configured ui.timezone when set,
+        # so the auto-generated export name reflects local time rather
+        # than the container's UTC clock
+        tz_name = self.config.ui.timezone
+        if tz_name:
+            try:
+                tz = pytz.timezone(tz_name)
+            except pytz.UnknownTimeZoneError:
+                tz = None
+            if tz is not None:
+                return datetime.datetime.fromtimestamp(timestamp, tz=tz).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
         return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
     def _chapter_metadata_path(self) -> str:
@@ -407,6 +342,7 @@ class RecordingExporter(threading.Thread):
             return None
 
         total_output = windows[-1][2] + (windows[-1][1] - windows[-1][0])
+        last_recorded_end = windows[-1][1]
 
         def wall_to_output(t: float) -> float:
             t = max(float(self.start_time), min(float(self.end_time), t))
@@ -419,8 +355,18 @@ class RecordingExporter(threading.Thread):
 
         chapter_blocks: list[str] = []
         for review in review_rows:
+            if review.start_time is None:
+                continue
+            # In-progress segments have a NULL end_time until the activity
+            # closes; clamp to the last recorded second so the chapter never
+            # extends past the actual video.
+            review_end = (
+                float(review.end_time)
+                if review.end_time is not None
+                else last_recorded_end
+            )
             start_out = wall_to_output(float(review.start_time))
-            end_out = wall_to_output(float(review.end_time))
+            end_out = wall_to_output(review_end)
 
             # Drop chapters that fall entirely in a recording gap, or are
             # too short to be navigable in a player.
@@ -503,16 +449,14 @@ class RecordingExporter(threading.Thread):
             except DoesNotExist:
                 return ""
 
-            diff = self.start_time - preview.start_time
-            minutes = int(diff / 60)
-            seconds = int(diff % 60)
+            diff = max(0.0, float(self.start_time) - float(preview.start_time))
             ffmpeg_cmd = [
                 "/usr/lib/ffmpeg/7.0/bin/ffmpeg",  # hardcode path for exports thumbnail due to missing libwebp support
                 "-hide_banner",
                 "-loglevel",
                 "warning",
                 "-ss",
-                f"00:{minutes}:{seconds}",
+                f"{diff:.3f}",
                 "-i",
                 preview.path,
                 "-frames",
@@ -538,12 +482,18 @@ class RecordingExporter(threading.Thread):
             start_file = f"{file_start}{self.start_time}.{PREVIEW_FRAME_TYPE}"
             end_file = f"{file_start}{self.end_time}.{PREVIEW_FRAME_TYPE}"
             selected_preview = None
+            # Preview frames are written at most 1-2 fps during activity
+            # and as little as one every 30s during quiet periods, so a
+            # short export window can contain zero frames. Track the most
+            # recent frame before the window as a fallback.
+            fallback_preview = None
 
             for file in sorted(os.listdir(preview_dir)):
                 if not file.startswith(file_start):
                     continue
 
                 if file < start_file:
+                    fallback_preview = os.path.join(preview_dir, file)
                     continue
 
                 if file > end_file:
@@ -551,6 +501,9 @@ class RecordingExporter(threading.Thread):
 
                 selected_preview = os.path.join(preview_dir, file)
                 break
+
+            if not selected_preview:
+                selected_preview = fallback_preview
 
             if not selected_preview:
                 return ""

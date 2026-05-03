@@ -98,10 +98,7 @@ export default function SearchResultActions({
           end_time: event.end_time,
         })
         .then((response) => {
-          if (response.status === 200) {
-            toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
-              position: "top-center",
-            });
+          if (response.status === 202 || response.status === 200) {
             navigate("/replay");
           }
         })

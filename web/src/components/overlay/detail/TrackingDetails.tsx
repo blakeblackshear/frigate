@@ -1,5 +1,13 @@
 import useSWR from "swr";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { flushSync } from "react-dom";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { Event } from "@/types/event";
@@ -389,7 +397,12 @@ export function TrackingDetails({
 
   // When the pinned timestamp or offset changes, re-seek the video and
   // explicitly update currentTime so the overlay shows the pinned event's box.
-  useEffect(() => {
+  // useLayoutEffect + flushSync force the setCurrentTime commit to land before
+  // the browser paints, so the overlay never shows a frame where
+  // annotationOffset has changed but currentTime has not — that mismatch would
+  // resolve effectiveCurrentTime away from the pinned detect timestamp and
+  // make the bounding box disappear or jump for one frame.
+  useLayoutEffect(() => {
     const pinned = pinnedDetectTimestampRef.current;
     if (!isAnnotationSettingsOpen || pinned == null) return;
     if (!videoRef.current || displaySource !== "video") return;
@@ -398,10 +411,9 @@ export function TrackingDetails({
     const relativeTime = timestampToVideoTime(targetTimeRecord);
     videoRef.current.currentTime = relativeTime;
 
-    // Explicitly update currentTime state so the overlay's effectiveCurrentTime
-    // resolves back to the pinned detect timestamp:
-    //   effectiveCurrentTime = targetTimeRecord - annotationOffset/1000 = pinned
-    setCurrentTime(targetTimeRecord);
+    flushSync(() => {
+      setCurrentTime(targetTimeRecord);
+    });
   }, [
     isAnnotationSettingsOpen,
     annotationOffset,
@@ -1204,7 +1216,11 @@ function LifecycleIconRow({
           <div className="flex flex-row items-center gap-3">
             <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
             {isAdmin && (config?.plus?.enabled || item.data.box) && (
-              <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+              <DropdownMenu
+                modal={false}
+                open={isOpen}
+                onOpenChange={setIsOpen}
+              >
                 <DropdownMenuTrigger>
                   <div className="rounded p-1 pr-2" role="button">
                     <HiDotsHorizontal className="size-4 text-muted-foreground" />

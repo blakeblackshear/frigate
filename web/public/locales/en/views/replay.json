@@ -19,26 +19,31 @@
     "startLabel": "Start",
     "endLabel": "End",
     "toast": {
-      "success": "Debug replay started successfully",
       "error": "Failed to start debug replay: {{error}}",
       "alreadyActive": "A replay session is already active",
-      "stopped": "Debug replay stopped",
       "stopError": "Failed to stop debug replay: {{error}}",
       "goToReplay": "Go to Replay"
     }
   },
   "page": {
-    "noSession": "No Active Replay Session",
-    "noSessionDesc": "Start a debug replay from the History view by clicking the Debug Replay button in the toolbar.",
+    "noSession": "No Active Debug Replay Session",
+    "noSessionDesc": "Start a Debug Replay from History view by clicking the Actions button in the toolbar and choosing Debug Replay.",
     "goToRecordings": "Go to History",
+    "preparingClip": "Preparing clip…",
+    "preparingClipDesc": "Frigate is stitching together recordings for the selected time range. This can take a minute for longer ranges.",
+    "startingCamera": "Starting Debug Replay…",
+    "startError": {
+      "title": "Failed to start Debug Replay",
+      "back": "Back to History"
+    },
     "sourceCamera": "Source Camera",
     "replayCamera": "Replay Camera",
-    "initializingReplay": "Initializing replay...",
-    "stoppingReplay": "Stopping replay...",
+    "initializingReplay": "Initializing Debug Replay...",
+    "stoppingReplay": "Stopping Debug Replay...",
     "stopReplay": "Stop Replay",
     "confirmStop": {
       "title": "Stop Debug Replay?",
-      "description": "This will stop the replay session and clean up all temporary data. Are you sure?",
+      "description": "This will stop the session and clean up all temporary data. Are you sure?",
       "confirm": "Stop Replay",
       "cancel": "Cancel"
     },
@@ -49,6 +54,6 @@
     "activeTracking": "Active tracking",
     "noActiveTracking": "No active tracking",
     "configuration": "Configuration",
-    "configurationDesc": "Fine tune motion detection and object tracking settings for the debug replay camera. No changes are saved to your Frigate configuration file."
+    "configurationDesc": "Fine tune motion detection and object tracking settings for the Debug Replay camera. No changes are saved to your Frigate configuration file."
   }
 }

@@ -93,6 +93,14 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
     useSWR<ProfilesApiResponse>("profiles");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
 
+  const hasChatAgent = useMemo(
+    () =>
+      Object.values(config?.genai ?? {}).some((agent) =>
+        agent?.roles?.includes("chat"),
+      ),
+    [config?.genai],
+  );
+
   // languages
 
   const languages = useMemo(() => {
@@ -511,7 +519,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       <span>{t("menu.classification")}</span>
                     </MenuItem>
                   </Link>
-                  {config?.genai?.model !== "none" && (
+                  {hasChatAgent && (
                     <Link to="/chat">
                       <MenuItem
                         className="flex w-full items-center p-2 text-sm"

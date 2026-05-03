@@ -61,10 +61,7 @@ export default function EventMenu({
           end_time: event.end_time,
         })
         .then((response) => {
-          if (response.status === 200) {
-            toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
-              position: "top-center",
-            });
+          if (response.status === 202 || response.status === 200) {
             navigate("/replay");
           }
         })
@@ -106,7 +103,7 @@ export default function EventMenu({
   return (
     <>
       <span tabIndex={0} className="sr-only" />
-      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenu modal={false} open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger>
           <div className="rounded p-1 pr-2" role="button">
             <HiDotsHorizontal className="size-4 text-muted-foreground" />

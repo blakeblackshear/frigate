@@ -195,7 +195,7 @@ Pre and post capture footage is included in the **recording timeline**, visible 
 
 ## Will Frigate delete old recordings if my storage runs out?
 
-As of Frigate 0.12 if there is less than an hour left of storage, the oldest 2 hours of recordings will be deleted.
+If there is less than an hour left of storage, the oldest hour of recordings will be deleted and a message will be printed in the Frigate logs. This emergency cleanup deletes the oldest recordings first regardless of retention settings to reclaim space as quickly as possible.
 
 ## Configuring Recording Retention
 

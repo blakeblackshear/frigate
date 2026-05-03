@@ -73,7 +73,7 @@ export default function DetailActionsMenu({
   }
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+    <DropdownMenu modal={false} open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger>
         <div className="rounded" role="button">
           <HiDotsHorizontal className="size-4 text-muted-foreground" />
