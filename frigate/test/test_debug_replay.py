@@ -1,252 +1,209 @@
-"""Tests for DebugReplayManager state machine and async startup."""
+"""Tests for the simplified DebugReplayManager.
 
-import threading
-import time
+Startup orchestration lives in ``frigate.jobs.debug_replay`` (covered by
+``test_debug_replay_job``). The manager owns only session presence and
+cleanup.
+"""
+
 import unittest
 import unittest.mock
 from unittest.mock import MagicMock, patch
 
-from frigate.debug_replay import DebugReplayManager, ReplayState
 
+class TestDebugReplayManagerSession(unittest.TestCase):
+    def test_inactive_by_default(self) -> None:
+        from frigate.debug_replay import DebugReplayManager
 
-class TestDebugReplayManagerState(unittest.TestCase):
-    def test_initial_state_is_idle(self):
         manager = DebugReplayManager()
 
-        self.assertEqual(manager.state, ReplayState.idle)
-        self.assertIsNone(manager.error_message)
         self.assertFalse(manager.active)
+        self.assertIsNone(manager.replay_camera_name)
+        self.assertIsNone(manager.source_camera)
+        self.assertIsNone(manager.clip_path)
+        self.assertIsNone(manager.start_ts)
+        self.assertIsNone(manager.end_ts)
 
-    def test_active_property_true_for_preparing_starting_and_active_states(self):
+    def test_mark_starting_sets_session_pointers_and_active(self) -> None:
+        from frigate.debug_replay import DebugReplayManager
+
         manager = DebugReplayManager()
 
-        manager._set_state(ReplayState.preparing_clip)
-        self.assertTrue(manager.active)
-
-        manager._set_state(ReplayState.starting_camera)
-        self.assertTrue(manager.active)
-
-        manager._set_state(ReplayState.active)
-        self.assertTrue(manager.active)
-
-    def test_active_property_false_for_idle_and_error_states(self):
-        manager = DebugReplayManager()
-
-        manager._set_state(ReplayState.idle)
-        self.assertFalse(manager.active)
-
-        manager._set_state(ReplayState.error, error_message="boom")
-        self.assertFalse(manager.active)
-        self.assertEqual(manager.error_message, "boom")
-
-
-class TestDebugReplayManagerAsyncStart(unittest.TestCase):
-    def setUp(self):
-        self.manager = DebugReplayManager()
-        self.frigate_config = MagicMock()
-        self.frigate_config.cameras = {"front": MagicMock()}
-        self.frigate_config.ffmpeg.ffmpeg_path = "/bin/true"
-        self.publisher = MagicMock()
-
-    def test_progress_percent_tracks_helper_callbacks(self):
-        recordings_qs = MagicMock()
-        recordings_qs.count.return_value = 1
-        recordings_qs.__iter__.return_value = iter([MagicMock(path="/tmp/r1.mp4")])
-
-        def fake_helper(cmd, *, expected_duration_seconds, on_progress, **kwargs):
-            on_progress(0.0)
-            on_progress(42.5)
-            on_progress(100.0)
-            return 0, ""
-
-        with (
-            patch.object(self.manager, "_query_recordings", return_value=recordings_qs),
-            patch("frigate.debug_replay.run_ffmpeg_with_progress", side_effect=fake_helper),
-            patch.object(self.manager, "_publish_replay_camera"),
-            patch("os.path.exists", return_value=True),
-            patch("os.makedirs"),
-            patch("builtins.open", unittest.mock.mock_open()),
-        ):
-            self.manager.start(
-                source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
-                frigate_config=self.frigate_config,
-                config_publisher=self.publisher,
-            )
-            for _ in range(50):
-                if self.manager.state == ReplayState.active:
-                    break
-                time.sleep(0.05)
-
-        # Progress should have advanced through the callback values.
-        self.assertEqual(self.manager.state, ReplayState.active)
-        self.assertEqual(self.manager.progress_percent, 100.0)
-
-    def test_start_returns_immediately_with_preparing_state(self):
-        recordings_qs = MagicMock()
-        recordings_qs.count.return_value = 1
-        recordings_qs.__iter__.return_value = iter(
-            [MagicMock(path="/tmp/r1.mp4")]
+        manager.mark_starting(
+            source_camera="front",
+            replay_camera_name="_replay_front",
+            start_ts=100.0,
+            end_ts=200.0,
         )
 
-        # Block the worker thread before it transitions out of preparing_clip.
-        worker_can_proceed = threading.Event()
+        self.assertTrue(manager.active)
+        self.assertEqual(manager.replay_camera_name, "_replay_front")
+        self.assertEqual(manager.source_camera, "front")
+        self.assertEqual(manager.start_ts, 100.0)
+        self.assertEqual(manager.end_ts, 200.0)
+        self.assertIsNone(manager.clip_path)
 
-        def fake_helper(cmd, *, expected_duration_seconds, on_progress, **kwargs):
-            worker_can_proceed.wait(timeout=5)
-            return 0, ""
+    def test_mark_session_ready_sets_clip_path(self) -> None:
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        manager.mark_starting("front", "_replay_front", 100.0, 200.0)
+
+        manager.mark_session_ready(clip_path="/tmp/replay/_replay_front.mp4")
+
+        self.assertEqual(manager.clip_path, "/tmp/replay/_replay_front.mp4")
+        self.assertTrue(manager.active)
+
+    def test_clear_session_resets_all_pointers(self) -> None:
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        manager.mark_starting("front", "_replay_front", 100.0, 200.0)
+        manager.mark_session_ready("/tmp/replay/clip.mp4")
+
+        manager.clear_session()
+
+        self.assertFalse(manager.active)
+        self.assertIsNone(manager.replay_camera_name)
+        self.assertIsNone(manager.source_camera)
+        self.assertIsNone(manager.clip_path)
+        self.assertIsNone(manager.start_ts)
+        self.assertIsNone(manager.end_ts)
+
+
+class TestDebugReplayManagerStop(unittest.TestCase):
+    def test_stop_when_inactive_is_a_noop(self) -> None:
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        frigate_config = MagicMock()
+        frigate_config.cameras = {}
+        publisher = MagicMock()
+
+        # Should not raise; should not publish any events.
+        manager.stop(frigate_config=frigate_config, config_publisher=publisher)
+
+        publisher.publish_update.assert_not_called()
+
+    def test_stop_publishes_remove_when_camera_was_published(self) -> None:
+        from frigate.config.camera.updater import CameraConfigUpdateEnum
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        manager.mark_starting("front", "_replay_front", 100.0, 200.0)
+        manager.mark_session_ready("/tmp/replay/_replay_front.mp4")
+
+        camera_config = MagicMock()
+        frigate_config = MagicMock()
+        frigate_config.cameras = {"_replay_front": camera_config}
+        publisher = MagicMock()
+
+        with (
+            patch.object(manager, "_cleanup_db"),
+            patch.object(manager, "_cleanup_files"),
+            patch(
+                "frigate.debug_replay.cancel_debug_replay_job", return_value=False
+            ),
+        ):
+            manager.stop(frigate_config=frigate_config, config_publisher=publisher)
+
+        # One publish_update call with a remove topic.
+        self.assertEqual(publisher.publish_update.call_count, 1)
+        topic_arg = publisher.publish_update.call_args.args[0]
+        self.assertEqual(topic_arg.update_type, CameraConfigUpdateEnum.remove)
+        self.assertFalse(manager.active)
+
+    def test_stop_skips_remove_publish_when_camera_not_in_config(self) -> None:
+        """Cancellation during preparing_clip: no camera was published yet."""
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        manager.mark_starting("front", "_replay_front", 100.0, 200.0)
+        # clip_path stays None because we cancelled before camera publish.
+
+        frigate_config = MagicMock()
+        frigate_config.cameras = {}  # _replay_front not present
+        publisher = MagicMock()
+
+        with (
+            patch.object(manager, "_cleanup_db"),
+            patch.object(manager, "_cleanup_files"),
+            patch(
+                "frigate.debug_replay.cancel_debug_replay_job", return_value=True
+            ),
+        ):
+            manager.stop(frigate_config=frigate_config, config_publisher=publisher)
+
+        publisher.publish_update.assert_not_called()
+        self.assertFalse(manager.active)
+
+    def test_stop_calls_cancel_debug_replay_job(self) -> None:
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        manager.mark_starting("front", "_replay_front", 100.0, 200.0)
+
+        frigate_config = MagicMock()
+        frigate_config.cameras = {}
+        publisher = MagicMock()
+
+        with (
+            patch.object(manager, "_cleanup_db"),
+            patch.object(manager, "_cleanup_files"),
+            patch(
+                "frigate.debug_replay.cancel_debug_replay_job",
+                return_value=True,
+            ) as mock_cancel,
+        ):
+            manager.stop(frigate_config=frigate_config, config_publisher=publisher)
+
+        mock_cancel.assert_called_once()
+
+
+class TestDebugReplayManagerPublishCamera(unittest.TestCase):
+    def test_publish_camera_invokes_publisher_with_add_topic(self) -> None:
+        from frigate.config.camera.updater import CameraConfigUpdateEnum
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+
+        source_config = MagicMock()
+        new_camera_config = MagicMock()
+        frigate_config = MagicMock()
+        frigate_config.cameras = {"front": source_config}
+        publisher = MagicMock()
 
         with (
             patch.object(
-                self.manager,
-                "_query_recordings",
-                return_value=recordings_qs,
+                manager,
+                "_build_camera_config_dict",
+                return_value={"enabled": True},
             ),
-            patch("frigate.debug_replay.run_ffmpeg_with_progress", side_effect=fake_helper),
-            patch.object(self.manager, "_publish_replay_camera"),
-            patch("os.path.exists", return_value=True),
-            patch("os.makedirs"),
-            patch("builtins.open", unittest.mock.mock_open()),
+            patch("frigate.debug_replay.find_config_file", return_value="/cfg.yml"),
+            patch("frigate.debug_replay.YAML") as yaml_cls,
+            patch("frigate.debug_replay.FrigateConfig.parse_object") as parse_object,
+            patch("builtins.open", unittest.mock.mock_open(read_data="cameras:\n")),
         ):
-            replay_name = self.manager.start(
+            yaml_instance = yaml_cls.return_value
+            yaml_instance.load.return_value = {"cameras": {}}
+            parsed = MagicMock()
+            parsed.cameras = {"_replay_front": new_camera_config}
+            parse_object.return_value = parsed
+
+            manager.publish_camera(
                 source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
-                frigate_config=self.frigate_config,
-                config_publisher=self.publisher,
-            )
-
-            # Returned synchronously
-            self.assertTrue(replay_name.startswith("_replay_"))
-            self.assertEqual(self.manager.state, ReplayState.preparing_clip)
-
-            worker_can_proceed.set()
-
-            # Wait for worker to finish
-            for _ in range(50):
-                if self.manager.state == ReplayState.active:
-                    break
-                time.sleep(0.05)
-            self.assertEqual(self.manager.state, ReplayState.active)
-
-    def test_start_rejects_concurrent_calls_with_value_error(self):
-        recordings_qs = MagicMock()
-        recordings_qs.count.return_value = 1
-        recordings_qs.__iter__.return_value = iter([MagicMock(path="/tmp/r1.mp4")])
-
-        block = threading.Event()
-
-        def slow_helper(cmd, *, expected_duration_seconds, on_progress, **kwargs):
-            block.wait(timeout=5)
-            return 0, ""
-
-        with (
-            patch.object(self.manager, "_query_recordings", return_value=recordings_qs),
-            patch("frigate.debug_replay.run_ffmpeg_with_progress", side_effect=slow_helper),
-            patch.object(self.manager, "_publish_replay_camera"),
-            patch("os.path.exists", return_value=True),
-            patch("os.makedirs"),
-            patch("builtins.open", unittest.mock.mock_open()),
-        ):
-            self.manager.start(
-                source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
-                frigate_config=self.frigate_config,
-                config_publisher=self.publisher,
-            )
-
-            with self.assertRaises(ValueError):
-                self.manager.start(
-                    source_camera="front",
-                    start_ts=100.0,
-                    end_ts=200.0,
-                    frigate_config=self.frigate_config,
-                    config_publisher=self.publisher,
-                )
-
-            block.set()
-
-    def test_start_transitions_to_error_state_when_ffmpeg_fails(self):
-        recordings_qs = MagicMock()
-        recordings_qs.count.return_value = 1
-        recordings_qs.__iter__.return_value = iter([MagicMock(path="/tmp/r1.mp4")])
-
-        def failing_helper(cmd, *, expected_duration_seconds, on_progress, **kwargs):
-            return 1, "ffmpeg exploded"
-
-        with (
-            patch.object(self.manager, "_query_recordings", return_value=recordings_qs),
-            patch("frigate.debug_replay.run_ffmpeg_with_progress", side_effect=failing_helper),
-            patch("os.path.exists", return_value=True),
-            patch("os.makedirs"),
-            patch("builtins.open", unittest.mock.mock_open()),
-        ):
-            self.manager.start(
-                source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
-                frigate_config=self.frigate_config,
-                config_publisher=self.publisher,
-            )
-
-            for _ in range(50):
-                if self.manager.state == ReplayState.error:
-                    break
-                time.sleep(0.05)
-            self.assertEqual(self.manager.state, ReplayState.error)
-            self.assertIsNotNone(self.manager.error_message)
-            self.assertIn("ffmpeg", self.manager.error_message.lower())
-
-
-class TestDebugReplayManagerCancellation(unittest.TestCase):
-    def test_stop_during_preparing_clip_terminates_ffmpeg(self):
-        manager = DebugReplayManager()
-        frigate_config = MagicMock()
-        frigate_config.cameras = {"front": MagicMock()}
-        frigate_config.ffmpeg.ffmpeg_path = "/bin/sh"
-        publisher = MagicMock()
-
-        recordings_qs = MagicMock()
-        recordings_qs.count.return_value = 1
-        recordings_qs.__iter__.return_value = iter([MagicMock(path="/tmp/r1.mp4")])
-
-        terminated_event = threading.Event()
-        fake_proc = MagicMock()
-        original_terminate = MagicMock(side_effect=lambda: terminated_event.set())
-        fake_proc.terminate = original_terminate
-
-        def fake_helper(cmd, *, expected_duration_seconds, on_progress, process_started, **kwargs):
-            if process_started is not None:
-                process_started(fake_proc)
-            # Block until stop() calls fake_proc.terminate()
-            terminated_event.wait(timeout=5)
-            return -15, "killed"
-
-        with (
-            patch.object(manager, "_query_recordings", return_value=recordings_qs),
-            patch("frigate.debug_replay.run_ffmpeg_with_progress", side_effect=fake_helper),
-            patch("os.path.exists", return_value=True),
-            patch("os.makedirs"),
-            patch("os.remove"),
-            patch("builtins.open", unittest.mock.mock_open()),
-        ):
-            manager.start(
-                source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
+                replay_name="_replay_front",
+                clip_path="/tmp/clip.mp4",
                 frigate_config=frigate_config,
                 config_publisher=publisher,
             )
-            # Wait for the worker to register the active process
-            for _ in range(50):
-                if manager._active_process is fake_proc:
-                    break
-                time.sleep(0.02)
-            self.assertEqual(manager.state, ReplayState.preparing_clip)
 
-            manager.stop(frigate_config=frigate_config, config_publisher=publisher)
+        # Camera registered into the live config dict
+        self.assertIn("_replay_front", frigate_config.cameras)
+        # Publisher invoked with an add topic
+        self.assertEqual(publisher.publish_update.call_count, 1)
+        topic_arg = publisher.publish_update.call_args.args[0]
+        self.assertEqual(topic_arg.update_type, CameraConfigUpdateEnum.add)
 
-            self.assertTrue(original_terminate.called, "terminate() should have been called")
-            self.assertEqual(manager.state, ReplayState.idle)
+
+if __name__ == "__main__":
+    unittest.main()
