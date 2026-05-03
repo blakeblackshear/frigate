@@ -61,7 +61,9 @@ class TestDebugReplayAPI(BaseTestHttp):
         self.assertEqual(resp.status_code, 400)
         body = resp.json()
         self.assertFalse(body["success"])
-        self.assertIn("missing", body["message"])
+        # Message is hard-coded so we don't echo exception text back to clients
+        # (CodeQL: information exposure through an exception).
+        self.assertEqual(body["message"], "Invalid debug replay parameters")
 
     def test_start_returns_409_when_session_already_active(self):
         with patch(
