@@ -20,7 +20,18 @@
     "overriddenGlobal": "Overridden (Global)",
     "overriddenGlobalTooltip": "This camera overrides global configuration settings in this section",
     "overriddenBaseConfig": "Overridden (Base Config)",
-    "overriddenBaseConfigTooltip": "The {{profile}} profile overrides configuration settings in this section"
+    "overriddenBaseConfigTooltip": "The {{profile}} profile overrides configuration settings in this section",
+    "overriddenInCameras": {
+      "label_one": "Overridden in {{count}} camera",
+      "label_other": "Overridden in {{count}} cameras",
+      "tooltip_one": "{{count}} camera overrides values in this section. Click to see details.",
+      "tooltip_other": "{{count}} cameras override values in this section. Click to see details.",
+      "heading_one": "This global section has fields that are overridden in {{count}} camera.",
+      "heading_other": "This global section has fields that are overridden in {{count}} cameras.",
+      "othersField_one": "{{count}} other",
+      "othersField_other": "{{count}} others",
+      "profilePrefix": "{{profile}} profile: {{fields}}"
+    }
   },
   "menu": {
     "general": "General",

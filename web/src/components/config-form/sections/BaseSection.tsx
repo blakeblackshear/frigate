@@ -25,6 +25,7 @@ import {
 } from "./section-special-cases";
 import { getSectionValidation } from "../section-validations";
 import { useConfigOverride } from "@/hooks/use-config-override";
+import { CameraOverridesBadge } from "./CameraOverridesBadge";
 import { useSectionSchema } from "@/hooks/use-config-schema";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Badge } from "@/components/ui/badge";
@@ -1263,6 +1264,9 @@ export function ConfigSection({
                         </TooltipContent>
                       </Tooltip>
                     )}
+                  {showOverrideIndicator && effectiveLevel === "global" && (
+                    <CameraOverridesBadge sectionPath={sectionPath} />
+                  )}
                   {hasChanges && (
                     <Badge variant="outline" className="text-xs">
                       {t("button.modified", {
@@ -1334,6 +1338,9 @@ export function ConfigSection({
                       </TooltipContent>
                     </Tooltip>
                   )}
+                {showOverrideIndicator && effectiveLevel === "global" && (
+                  <CameraOverridesBadge sectionPath={sectionPath} />
+                )}
                 {hasChanges && (
                   <Badge
                     variant="secondary"
