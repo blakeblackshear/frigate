@@ -789,7 +789,7 @@ classification:
         interval: None
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v1.9.13)
+# Uses https://github.com/AlexxIT/go2rtc (v1.9.14)
 # NOTE: The default go2rtc API port (1984) must be used,
 #       changing this port for the integrated go2rtc instance is not supported.
 go2rtc:

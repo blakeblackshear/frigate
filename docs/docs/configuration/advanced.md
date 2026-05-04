@@ -351,7 +351,7 @@ To do this:
 
 ### Custom go2rtc version
 
-Frigate currently includes go2rtc v1.9.13, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.14, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 

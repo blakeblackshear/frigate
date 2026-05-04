@@ -29,7 +29,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "link",
           label: "Go2RTC Configuration Reference",
-          href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.13#configuration",
+          href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.14#configuration",
         } as PropSidebarItemLink,
       ],
       Detectors: [
