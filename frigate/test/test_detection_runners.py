@@ -141,6 +141,49 @@ class TestHasVariableLengthInputs(unittest.TestCase):
             )
         )
 
+    def test_every_enrichment_model_is_explicitly_classified(self):
+        """Every EnrichmentModelTypeEnum value must be deliberately classified.
+
+        Adding a new model to the enum without updating has_variable_length_inputs
+        silently defaults it to fixed-size (mem_pattern stays on), which
+        re-introduces the ORT mmap-plan leak if the new model is actually
+        variable-length.  This test fails on any unclassified enum value so the
+        author is forced to make a deliberate decision.
+
+        TODO: replace this guard with a single MODEL_TRAITS registry co-located
+        with EnrichmentModelTypeEnum so adding a value mechanically forces
+        classification across every classifier (variable-length, cpu_complex,
+        migraphx_complex, concurrent, cuda_graph_supported), not just this one.
+        """
+        from frigate.detectors.detection_runners import ONNXModelRunner
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        VARIABLE_LENGTH = {
+            EnrichmentModelTypeEnum.jina_v1,
+            EnrichmentModelTypeEnum.jina_v2,
+            EnrichmentModelTypeEnum.paddleocr,
+        }
+        FIXED_LENGTH = {
+            EnrichmentModelTypeEnum.arcface,
+            EnrichmentModelTypeEnum.facenet,
+            EnrichmentModelTypeEnum.yolov9_license_plate,
+        }
+        classified = VARIABLE_LENGTH | FIXED_LENGTH
+        for member in EnrichmentModelTypeEnum:
+            self.assertIn(
+                member,
+                classified,
+                f"{member.value} is not explicitly classified — audit "
+                "ONNXModelRunner.has_variable_length_inputs (and the other "
+                "classifiers listed in EnrichmentModelTypeEnum's docstring).",
+            )
+            self.assertEqual(
+                ONNXModelRunner.has_variable_length_inputs(member.value),
+                member in VARIABLE_LENGTH,
+                f"{member.value}: classification disagrees with "
+                "has_variable_length_inputs — update one or the other.",
+            )
+
 
 class TestComputeCudaMemLimit(unittest.TestCase):
     @staticmethod
