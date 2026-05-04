@@ -242,8 +242,8 @@
         "description": "Enable per-process network bandwidth monitoring for camera ffmpeg processes and detectors (requires capabilities)."
       },
       "intel_gpu_device": {
-        "label": "SR-IOV device",
-        "description": "Device identifier used when treating Intel GPUs as SR-IOV to fix GPU stats."
+        "label": "Intel GPU device",
+        "description": "PCI bus address or DRM device path (e.g. /dev/dri/card1) used to pin Intel GPU stats to a specific device when multiple are present."
       }
     },
     "version_check": {
@@ -1000,6 +1000,10 @@
       "hwaccel_args": {
         "label": "Export hwaccel args",
         "description": "Hardware acceleration args to use for export/transcode operations."
+      },
+      "max_concurrent": {
+        "label": "Maximum concurrent exports",
+        "description": "Maximum number of export jobs to process at the same time."
       }
     },
     "preview": {

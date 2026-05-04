@@ -264,156 +264,214 @@ def get_amd_gpu_stats() -> Optional[dict[str, str]]:
         return results
 
 
-def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, str]]:
-    """Get stats using intel_gpu_top.
+_INTEL_FDINFO_SAMPLE_SECONDS = 1.0
 
-    Returns overall GPU usage derived from rc6 residency (idle time),
-    plus individual engine breakdowns:
-      - enc: Render/3D engine (compute/shader encoder, used by QSV)
-      - dec: Video engines (fixed-function codec, used by VAAPI)
+# Engines we track. Render/3D and Compute are pooled into "compute"; Video and
+# VideoEnhance into "dec" (VideoEnhance is the post-process engine that handles
+# VAAPI scaling/deinterlace/CSC, e.g. ffmpeg `-vf scale_vaapi=...`). The Copy
+# (DMA blitter) engine is intentionally ignored — it represents transparent
+# memory transfers, not user-visible GPU work.
+# i915 fdinfo keys (cumulative ns) → logical engine name.
+_I915_ENGINE_KEYS = {
+    "drm-engine-render": "render",
+    "drm-engine-video": "video",
+    "drm-engine-video-enhance": "video-enhance",
+    "drm-engine-compute": "compute",
+}
+# Xe fdinfo suffixes (cumulative cycles, paired with drm-total-cycles-*).
+_XE_ENGINE_KEYS = {
+    "rcs": "render",
+    "vcs": "video",
+    "vecs": "video-enhance",
+    "ccs": "compute",
+}
+
+
+def _resolve_intel_gpu_pdev(device: Optional[str]) -> Optional[str]:
+    """Map a configured GPU hint (/dev/dri/card1, renderD128, or a PCI bus
+    address) to its drm-pdev string so we can filter fdinfo entries to that
+    device. Returns None when no hint is supplied or it cannot be resolved."""
+    if not device:
+        return None
+
+    if re.match(r"^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F]$", device):
+        return device
+
+    name = os.path.basename(device.rstrip("/"))
+    try:
+        return os.path.basename(os.path.realpath(f"/sys/class/drm/{name}/device"))
+    except OSError:
+        return None
+
+
+def _read_intel_drm_fdinfo(target_pdev: Optional[str]) -> dict:
+    """Snapshot DRM fdinfo for every Intel client visible in /proc.
+
+    Returns a dict keyed by (pdev, drm-client-id, pid) so the same context
+    seen via multiple file descriptors on a single process collapses to one
+    entry.
     """
-
-    def get_stats_manually(output: str) -> dict[str, str]:
-        """Find global stats via regex when json fails to parse."""
-        reading = "".join(output)
-        results: dict[str, str] = {}
-
-        # rc6 residency for overall GPU usage
-        rc6_match = re.search(r'"rc6":\{"value":([\d.]+)', reading)
-        if rc6_match:
-            rc6_value = float(rc6_match.group(1))
-            results["gpu"] = f"{round(100.0 - rc6_value, 2)}%"
-        else:
-            results["gpu"] = "-%"
-
-        results["mem"] = "-%"
-
-        # Render/3D is the compute/encode engine
-        render = []
-        for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
-            packet = json.loads(result[14:])
-            single = packet.get("busy", 0.0)
-            render.append(float(single))
-
-        if render:
-            results["compute"] = f"{round(sum(render) / len(render), 2)}%"
-
-        # Video engines are the fixed-function decode engines
-        video = []
-        for result in re.findall(r'"Video/\d":{[a-z":\d.,%]+}', reading):
-            packet = json.loads(result[10:])
-            single = packet.get("busy", 0.0)
-            video.append(float(single))
-
-        if video:
-            results["dec"] = f"{round(sum(video) / len(video), 2)}%"
-
-        return results
-
-    intel_gpu_top_command = [
-        "timeout",
-        "0.5s",
-        "intel_gpu_top",
-        "-J",
-        "-o",
-        "-",
-        "-s",
-        "1000",  # Intel changed this from seconds to milliseconds in 2024+ versions
-    ]
-
-    if intel_gpu_device:
-        intel_gpu_top_command += ["-d", intel_gpu_device]
+    snapshot: dict = {}
 
     try:
-        p = sp.run(
-            intel_gpu_top_command,
-            encoding="ascii",
-            capture_output=True,
-        )
-    except UnicodeDecodeError:
-        return None
+        proc_entries = os.listdir("/proc")
+    except OSError:
+        return snapshot
 
-    # timeout has a non-zero returncode when timeout is reached
-    if p.returncode != 124:
-        logger.error(f"Unable to poll intel GPU stats: {p.stderr}")
-        return None
-    else:
-        output = "".join(p.stdout.split())
+    for entry in proc_entries:
+        if not entry.isdigit():
+            continue
 
+        fdinfo_dir = f"/proc/{entry}/fdinfo"
         try:
-            data = json.loads(f"[{output}]")
-        except json.JSONDecodeError:
-            return get_stats_manually(output)
+            fds = os.listdir(fdinfo_dir)
+        except (FileNotFoundError, PermissionError, NotADirectoryError, OSError):
+            continue
 
-        results: dict[str, str] = {}
-        rc6_values = []
-        render_global = []
-        video_global = []
-        # per-client: {pid: [total_busy_per_sample, ...]}
-        client_usages: dict[str, list[float]] = {}
+        for fd in fds:
+            try:
+                with open(f"{fdinfo_dir}/{fd}") as f:
+                    content = f.read()
+            except (FileNotFoundError, PermissionError, OSError):
+                continue
 
-        for block in data:
-            # rc6 residency: percentage of time GPU is idle
-            rc6 = block.get("rc6", {}).get("value")
-            if rc6 is not None:
-                rc6_values.append(float(rc6))
+            if "drm-driver" not in content:
+                continue
 
-            global_engine = block.get("engines")
+            fields: dict[str, str] = {}
+            for line in content.splitlines():
+                key, sep, value = line.partition(":")
+                if sep:
+                    fields[key.strip()] = value.strip()
 
-            if global_engine:
-                render_frame = global_engine.get("Render/3D/0", {}).get("busy")
-                video_frame = global_engine.get("Video/0", {}).get("busy")
+            driver = fields.get("drm-driver")
+            if driver not in ("i915", "xe"):
+                continue
 
-                if render_frame is not None:
-                    render_global.append(float(render_frame))
+            pdev = fields.get("drm-pdev", "")
+            if target_pdev and pdev != target_pdev:
+                continue
 
-                if video_frame is not None:
-                    video_global.append(float(video_frame))
+            client_id = fields.get("drm-client-id")
+            if not client_id:
+                continue
 
-            clients = block.get("clients", {})
+            key = (pdev, client_id, entry)
+            if key in snapshot:
+                continue
 
-            if clients:
-                for client_block in clients.values():
-                    pid = client_block["pid"]
+            engines: dict[str, tuple[int, int]] = {}
 
-                    if pid not in client_usages:
-                        client_usages[pid] = []
+            if driver == "i915":
+                for fkey, engine in _I915_ENGINE_KEYS.items():
+                    raw = fields.get(fkey)
+                    if not raw:
+                        continue
+                    try:
+                        engines[engine] = (int(raw.split()[0]), 0)
+                    except (ValueError, IndexError):
+                        continue
+            else:
+                for suffix, engine in _XE_ENGINE_KEYS.items():
+                    busy_raw = fields.get(f"drm-cycles-{suffix}")
+                    total_raw = fields.get(f"drm-total-cycles-{suffix}")
+                    if not (busy_raw and total_raw):
+                        continue
+                    try:
+                        engines[engine] = (
+                            int(busy_raw.split()[0]),
+                            int(total_raw.split()[0]),
+                        )
+                    except (ValueError, IndexError):
+                        continue
 
-                    # Sum all engine-class busy values for this client
-                    total_busy = 0.0
-                    for engine in client_block.get("engine-classes", {}).values():
-                        busy = engine.get("busy")
-                        if busy is not None:
-                            total_busy += float(busy)
+            if not engines:
+                continue
 
-                    client_usages[pid].append(total_busy)
+            snapshot[key] = {"driver": driver, "pid": entry, "engines": engines}
 
-        # Overall GPU usage from rc6 (idle) residency
-        if rc6_values:
-            rc6_avg = sum(rc6_values) / len(rc6_values)
-            results["gpu"] = f"{round(100.0 - rc6_avg, 2)}%"
+    return snapshot
 
-        results["mem"] = "-%"
 
-        # Compute: Render/3D engine (compute/shader workloads and QSV encode)
-        if render_global:
-            results["compute"] = f"{round(sum(render_global) / len(render_global), 2)}%"
+def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, Any]]:
+    """Get stats by reading DRM fdinfo files.
 
-        # Decoder: Video engine (fixed-function codec)
-        if video_global:
-            results["dec"] = f"{round(sum(video_global) / len(video_global), 2)}%"
+    Each DRM client FD exposes monotonic per-engine busy counters via
+    /proc/<pid>/fdinfo/<fd> (i915 since kernel 5.19, Xe since first release).
+    We sample twice and divide busy-time deltas by wall-clock to derive
+    utilization. Render/3D and Compute are pooled into "compute"; Video and
+    VideoEnhance into "dec". Overall "gpu" is the sum of those pools (clamped
+    to 100%).
+    """
+    target_pdev = _resolve_intel_gpu_pdev(intel_gpu_device)
 
-        # Per-client GPU usage (sum of all engines per process)
-        if client_usages:
-            results["clients"] = {}
+    snapshot_a = _read_intel_drm_fdinfo(target_pdev)
+    if not snapshot_a:
+        return None
 
-            for pid, samples in client_usages.items():
-                if samples:
-                    results["clients"][pid] = (
-                        f"{round(sum(samples) / len(samples), 2)}%"
-                    )
+    start = time.monotonic()
+    time.sleep(_INTEL_FDINFO_SAMPLE_SECONDS)
+    elapsed_ns = (time.monotonic() - start) * 1e9
 
-        return results
+    snapshot_b = _read_intel_drm_fdinfo(target_pdev)
+    if not snapshot_b or elapsed_ns <= 0:
+        return None
+
+    engine_pct: dict[str, float] = {
+        "render": 0.0,
+        "video": 0.0,
+        "video-enhance": 0.0,
+        "compute": 0.0,
+    }
+    pid_pct: dict[str, float] = {}
+
+    for key, data_b in snapshot_b.items():
+        data_a = snapshot_a.get(key)
+        if not data_a or data_a["driver"] != data_b["driver"]:
+            continue
+
+        client_total = 0.0
+        for engine, (busy_b, total_b) in data_b["engines"].items():
+            if engine not in engine_pct:
+                continue
+
+            busy_a, total_a = data_a["engines"].get(engine, (busy_b, total_b))
+
+            if data_b["driver"] == "i915":
+                delta = max(0, busy_b - busy_a)
+                pct = min(100.0, delta / elapsed_ns * 100.0)
+            else:
+                delta_busy = max(0, busy_b - busy_a)
+                delta_total = total_b - total_a
+                if delta_total <= 0:
+                    continue
+                pct = min(100.0, delta_busy / delta_total * 100.0)
+
+            engine_pct[engine] += pct
+            client_total += pct
+
+        pid_pct[data_b["pid"]] = pid_pct.get(data_b["pid"], 0.0) + client_total
+
+    for engine in engine_pct:
+        engine_pct[engine] = min(100.0, engine_pct[engine])
+
+    compute_pct = min(100.0, engine_pct["render"] + engine_pct["compute"])
+    dec_pct = min(100.0, engine_pct["video"] + engine_pct["video-enhance"])
+    overall_pct = min(100.0, compute_pct + dec_pct)
+
+    results: dict[str, Any] = {
+        "gpu": f"{round(overall_pct, 2)}%",
+        "mem": "-%",
+        "compute": f"{round(compute_pct, 2)}%",
+        "dec": f"{round(dec_pct, 2)}%",
+    }
+
+    if pid_pct:
+        results["clients"] = {
+            pid: f"{round(min(100.0, pct), 2)}%" for pid, pct in pid_pct.items()
+        }
+
+    return results
 
 
 def get_openvino_npu_stats() -> Optional[dict[str, str]]:

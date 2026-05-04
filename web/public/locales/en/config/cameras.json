@@ -485,6 +485,10 @@
       "hwaccel_args": {
         "label": "Export hwaccel args",
         "description": "Hardware acceleration args to use for export/transcode operations."
+      },
+      "max_concurrent": {
+        "label": "Maximum concurrent exports",
+        "description": "Maximum number of export jobs to process at the same time."
       }
     },
     "preview": {
