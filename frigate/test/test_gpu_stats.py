@@ -24,14 +24,15 @@ class TestGpuStats(unittest.TestCase):
         # 1 second of wall clock between snapshots
         monotonic.side_effect = [0.0, 1.0]
 
-        # Two i915 clients on the same iGPU. Engine values are cumulative ns;
-        # we'll arrange deltas of:
-        #   client A (pid 100): render +200_000_000 ns (20%), video +500_000_000 ns (50%)
-        #   client B (pid 200): compute +100_000_000 ns (10%)
-        # Combined engine totals → render 20%, compute 10%, video 50%
-        # → "compute" = render + compute = 30%
-        # → "dec" = video = 50%
-        # → "gpu" = max(30, 50, 0, 0) = 50%
+        # Two i915 clients on the same iGPU. Engine values are cumulative ns.
+        # Deltas over the 1s window:
+        #   client A (pid 100): render +200_000_000 (20%), video +500_000_000 (50%),
+        #                       video-enhance +100_000_000 (10%)
+        #   client B (pid 200): compute +100_000_000 (10%)
+        # Engine totals → render 20, video 50, video-enhance 10, compute 10
+        # → compute = render + compute = 30
+        # → dec = video + video-enhance = 60
+        # → gpu = compute + dec = 90
         snapshot_a = {
             ("0000:00:02.0", "1", "100"): {
                 "driver": "i915",
@@ -39,6 +40,7 @@ class TestGpuStats(unittest.TestCase):
                 "engines": {
                     "render": (1_000_000_000, 0),
                     "video": (5_000_000_000, 0),
+                    "video-enhance": (200_000_000, 0),
                     "compute": (0, 0),
                 },
             },
@@ -58,6 +60,7 @@ class TestGpuStats(unittest.TestCase):
                 "engines": {
                     "render": (1_200_000_000, 0),
                     "video": (5_500_000_000, 0),
+                    "video-enhance": (300_000_000, 0),
                     "compute": (0, 0),
                 },
             },
@@ -76,11 +79,11 @@ class TestGpuStats(unittest.TestCase):
 
         sleep.assert_called_once()
         assert intel_stats == {
-            "gpu": "50.0%",
+            "gpu": "90.0%",
             "mem": "-%",
             "compute": "30.0%",
-            "dec": "50.0%",
-            "clients": {"100": "70.0%", "200": "10.0%"},
+            "dec": "60.0%",
+            "clients": {"100": "80.0%", "200": "10.0%"},
         }
 
     @patch("frigate.util.services._read_intel_drm_fdinfo")

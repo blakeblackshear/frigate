@@ -266,13 +266,17 @@ def get_amd_gpu_stats() -> Optional[dict[str, str]]:
 
 _INTEL_FDINFO_SAMPLE_SECONDS = 1.0
 
+# Engines we track. Render/3D and Compute are pooled into "compute"; Video and
+# VideoEnhance into "dec" (VideoEnhance is the post-process engine that handles
+# VAAPI scaling/deinterlace/CSC, e.g. ffmpeg `-vf scale_vaapi=...`). The Copy
+# (DMA blitter) engine is intentionally ignored — it represents transparent
+# memory transfers, not user-visible GPU work.
 # i915 fdinfo keys (cumulative ns) → logical engine name.
 _I915_ENGINE_KEYS = {
     "drm-engine-render": "render",
     "drm-engine-video": "video",
     "drm-engine-video-enhance": "video-enhance",
     "drm-engine-compute": "compute",
-    "drm-engine-copy": "copy",
 }
 # Xe fdinfo suffixes (cumulative cycles, paired with drm-total-cycles-*).
 _XE_ENGINE_KEYS = {
@@ -280,7 +284,6 @@ _XE_ENGINE_KEYS = {
     "vcs": "video",
     "vecs": "video-enhance",
     "ccs": "compute",
-    "bcs": "copy",
 }
 
 
@@ -396,8 +399,9 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, A
     Each DRM client FD exposes monotonic per-engine busy counters via
     /proc/<pid>/fdinfo/<fd> (i915 since kernel 5.19, Xe since first release).
     We sample twice and divide busy-time deltas by wall-clock to derive
-    utilisation. Render/3D and the dedicated Compute engine are pooled into
-    "compute"; Video into "dec".
+    utilization. Render/3D and Compute are pooled into "compute"; Video and
+    VideoEnhance into "dec". Overall "gpu" is the sum of those pools (clamped
+    to 100%).
     """
     target_pdev = _resolve_intel_gpu_pdev(intel_gpu_device)
 
@@ -418,7 +422,6 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, A
         "video": 0.0,
         "video-enhance": 0.0,
         "compute": 0.0,
-        "copy": 0.0,
     }
     pid_pct: dict[str, float] = {}
 
@@ -429,6 +432,9 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, A
 
         client_total = 0.0
         for engine, (busy_b, total_b) in data_b["engines"].items():
+            if engine not in engine_pct:
+                continue
+
             busy_a, total_a = data_a["engines"].get(engine, (busy_b, total_b))
 
             if data_b["driver"] == "i915":
@@ -450,10 +456,8 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, A
         engine_pct[engine] = min(100.0, engine_pct[engine])
 
     compute_pct = min(100.0, engine_pct["render"] + engine_pct["compute"])
-    dec_pct = engine_pct["video"]
-    overall_pct = max(
-        compute_pct, dec_pct, engine_pct["video-enhance"], engine_pct["copy"]
-    )
+    dec_pct = min(100.0, engine_pct["video"] + engine_pct["video-enhance"])
+    overall_pct = min(100.0, compute_pct + dec_pct)
 
     results: dict[str, Any] = {
         "gpu": f"{round(overall_pct, 2)}%",
