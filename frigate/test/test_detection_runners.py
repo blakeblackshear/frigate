@@ -40,6 +40,19 @@ class TestGetOrtSessionOptions(unittest.TestCase):
             ort.GraphOptimizationLevel.ORT_ENABLE_BASIC,
         )
 
+    def test_default_sets_enable_all_optimization(self):
+        # Guards the explicit `else` branch added so the optimization level is
+        # never implicit — protects against ORT default changes.
+        from frigate.detectors.detection_runners import get_ort_session_options
+
+        import onnxruntime as ort
+
+        opts = get_ort_session_options()
+        self.assertEqual(
+            opts.graph_optimization_level,
+            ort.GraphOptimizationLevel.ORT_ENABLE_ALL,
+        )
+
     def test_always_returns_session_options(self):
         from frigate.detectors.detection_runners import get_ort_session_options
 
@@ -97,6 +110,36 @@ class TestHasVariableLengthInputs(unittest.TestCase):
         from frigate.detectors.detection_runners import ONNXModelRunner
 
         self.assertFalse(ONNXModelRunner.has_variable_length_inputs(None))
+
+    def test_arcface_is_fixed(self):
+        from frigate.detectors.detection_runners import ONNXModelRunner
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        self.assertFalse(
+            ONNXModelRunner.has_variable_length_inputs(
+                EnrichmentModelTypeEnum.arcface.value
+            )
+        )
+
+    def test_facenet_is_fixed(self):
+        from frigate.detectors.detection_runners import ONNXModelRunner
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        self.assertFalse(
+            ONNXModelRunner.has_variable_length_inputs(
+                EnrichmentModelTypeEnum.facenet.value
+            )
+        )
+
+    def test_yolov9_license_plate_is_fixed(self):
+        from frigate.detectors.detection_runners import ONNXModelRunner
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        self.assertFalse(
+            ONNXModelRunner.has_variable_length_inputs(
+                EnrichmentModelTypeEnum.yolov9_license_plate.value
+            )
+        )
 
 
 class TestComputeCudaMemLimit(unittest.TestCase):
@@ -160,6 +203,27 @@ class TestComputeCudaMemLimit(unittest.TestCase):
         mock_lib.cudaMemGetInfo.return_value = 2  # cudaErrorMemoryAllocation
 
         self.assertIsNone(compute_cuda_mem_limit("/fake/model.onnx", cuda_graph=False))
+
+    @patch("frigate.util.model.ctypes.CDLL")
+    @patch("os.path.getsize", return_value=500 * 1024 * 1024)
+    def test_cuda_graph_doubles_peak_multiplier(self, _mock_getsize, mock_cdll):
+        # cuda_graph=True must use peak_multiplier=14 (vs 7 for cuda_graph=False)
+        # because graph capture pins all intermediate tensors live simultaneously.
+        from frigate.util.model import compute_cuda_mem_limit
+
+        total_vram = 24 * 1024**3
+        mock_lib = MagicMock()
+        mock_cdll.return_value = mock_lib
+        mock_lib.cudaMemGetInfo.side_effect = self._fake_mem_get_info(
+            total_vram, total_vram
+        )
+
+        model_size = 500 * 1024 * 1024
+        with_graph = compute_cuda_mem_limit("/fake/model.onnx", cuda_graph=True)
+        without_graph = compute_cuda_mem_limit("/fake/model.onnx", cuda_graph=False)
+        self.assertGreaterEqual(with_graph, model_size * 14)
+        self.assertGreaterEqual(without_graph, model_size * 7)
+        self.assertGreater(with_graph, without_graph)
 
     @patch("frigate.util.model.ctypes.CDLL")
     @patch("os.path.getsize", return_value=200 * 1024 * 1024)
@@ -380,6 +444,57 @@ class TestRunnerOmitsGpuMemLimitOnCudaQueryFailure(unittest.TestCase):
         )
 
 
+class TestRunnerInjectsGpuMemLimitOnCudaQuerySuccess(unittest.TestCase):
+    """Positive counterpart to TestRunnerOmitsGpuMemLimitOnCudaQueryFailure:
+    when cudaMemGetInfo succeeds, gpu_mem_limit must be injected into
+    provider_options so ORT's BFC arena is bounded."""
+
+    @staticmethod
+    def _fake_mem_get_info(free_value: int, total_value: int):
+        def _impl(free_ptr, total_ptr):
+            free_ptr._obj.value = free_value
+            total_ptr._obj.value = total_value
+            return 0  # cudaSuccess
+
+        return _impl
+
+    @patch("frigate.detectors.detection_runners.ort.InferenceSession")
+    @patch(
+        "frigate.detectors.detection_runners.get_ort_providers",
+        return_value=(["CUDAExecutionProvider"], [{"device_id": 0}]),
+    )
+    @patch(
+        "frigate.detectors.detection_runners.is_rknn_compatible",
+        return_value=False,
+    )
+    @patch("frigate.util.model.ctypes.CDLL")
+    @patch("os.path.getsize", return_value=200 * 1024 * 1024)
+    def test_gpu_mem_limit_key_present_when_cuda_query_succeeds(
+        self, _gs, mock_cdll, _rknn, _gp, mock_session
+    ):
+        from frigate.detectors.detection_runners import get_optimized_runner
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        total_vram = 24 * 1024**3
+        mock_lib = MagicMock()
+        mock_cdll.return_value = mock_lib
+        mock_lib.cudaMemGetInfo.side_effect = self._fake_mem_get_info(
+            total_vram, total_vram
+        )
+        mock_session.return_value.get_inputs.return_value = []
+        mock_session.return_value.get_outputs.return_value = []
+
+        get_optimized_runner(
+            "/fake/jina.onnx",
+            device="GPU",
+            model_type=EnrichmentModelTypeEnum.jina_v2.value,
+        )
+
+        provider_opts = mock_session.call_args.kwargs["provider_options"]
+        self.assertIn("gpu_mem_limit", provider_opts[0])
+        self.assertGreater(provider_opts[0]["gpu_mem_limit"], 0)
+
+
 class TestCudaGraphFallbackLogsException(unittest.TestCase):
     @patch("frigate.detectors.detection_runners.ort.InferenceSession")
     @patch(
@@ -416,6 +531,43 @@ class TestCudaGraphFallbackLogsException(unittest.TestCase):
         joined = "\n".join(captured.output)
         self.assertIn("CUDA graph capture failed", joined)
         self.assertIn("cudaErrorStreamCaptureUnsupported", joined)
+
+    @patch("frigate.detectors.detection_runners.ort.InferenceSession")
+    @patch(
+        "frigate.detectors.detection_runners.get_ort_providers",
+        return_value=(["CUDAExecutionProvider"], [{"device_id": 0}]),
+    )
+    @patch(
+        "frigate.detectors.detection_runners.is_rknn_compatible",
+        return_value=False,
+    )
+    @patch("frigate.util.model.ctypes.CDLL", side_effect=OSError("no cuda"))
+    @patch("os.path.getsize", return_value=200 * 1024 * 1024)
+    def test_fallback_warning_includes_developer_context(
+        self, _gs, _cdll, _rknn, _gp, mock_session
+    ):
+        # Guards the enriched warning fields (model_type, device_id, providers)
+        # so a future revert to the bare "model_path + e" form is caught.
+        from frigate.detectors.detection_runners import get_optimized_runner
+        from frigate.detectors.detector_config import ModelTypeEnum
+
+        mock_session.side_effect = [
+            RuntimeError("boom"),
+            MagicMock(get_inputs=lambda: [], get_outputs=lambda: []),
+        ]
+
+        with self.assertLogs(
+            "frigate.detectors.detection_runners", level="WARNING"
+        ) as captured:
+            get_optimized_runner(
+                "/m/yolo.onnx", "GPU", ModelTypeEnum.yologeneric.value
+            )
+
+        joined = "\n".join(captured.output)
+        self.assertIn(f"model_type={ModelTypeEnum.yologeneric.value}", joined)
+        self.assertIn("path=/m/yolo.onnx", joined)
+        self.assertIn("device_id=0", joined)
+        self.assertIn("CUDAExecutionProvider", joined)
 
 
 if __name__ == "__main__":
