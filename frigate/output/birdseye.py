@@ -593,112 +593,92 @@ class BirdsEyeFrameManager:
     ) -> Optional[list[list[Any]]]:
         """Calculate the optimal layout for 2+ cameras."""
 
-        def map_layout(
-            camera_layout: list[list[Any]], row_height: int
-        ) -> tuple[int, int, Optional[list[list[Any]]]]:
-            """Map the calculated layout."""
-            candidate_layout = []
-            starting_x = 0
-            x = 0
-            max_width = 0
-            y = 0
+        def find_available_x(
+            current_x: int,
+            width: int,
+            reserved_ranges: list[tuple[int, int]],
+            max_width: int,
+        ) -> Optional[int]:
+            """Find the first horizontal slot that does not collide with reservations."""
+            x = current_x
 
-            for row in camera_layout:
-                final_row = []
-                max_width = max(max_width, x)
-                x = starting_x
-                for cameras in row:
-                    camera_dims = self.cameras[cameras[0]]["dimensions"].copy()
-                    camera_aspect = cameras[1]
+            for reserved_start, reserved_end in sorted(reserved_ranges):
+                if x >= reserved_end:
+                    continue
 
-                    if camera_dims[1] > camera_dims[0]:
-                        scaled_height = int(row_height * 2)
-                        scaled_width = int(scaled_height * camera_aspect)
-                        starting_x = scaled_width
-                    else:
-                        scaled_height = row_height
-                        scaled_width = int(scaled_height * camera_aspect)
+                if x + width <= reserved_start:
+                    return x
 
-                    # layout is too large
-                    if (
-                        x + scaled_width > self.canvas.width
-                        or y + scaled_height > self.canvas.height
-                    ):
-                        return x + scaled_width, y + scaled_height, None
+                x = max(x, reserved_end)
 
-                    final_row.append((cameras[0], (x, y, scaled_width, scaled_height)))
-                    x += scaled_width
+            if x + width <= max_width:
+                return x
 
-                y += row_height
-                candidate_layout.append(final_row)
-
-            if max_width == 0:
-                max_width = x
-
-            return max_width, y, candidate_layout
-
-        canvas_aspect_x, canvas_aspect_y = self.canvas.get_aspect(coefficient)
-        camera_layout: list[list[Any]] = []
-        camera_layout.append([])
-        starting_x = 0
-        x = starting_x
-        y = 0
-        y_i = 0
-        max_y = 0
-        for camera in cameras_to_add:
-            camera_dims = self.cameras[camera]["dimensions"].copy()
-            camera_aspect_x, camera_aspect_y = self.canvas.get_camera_aspect(
-                camera, camera_dims[0], camera_dims[1]
-            )
-
-            if camera_dims[1] > camera_dims[0]:
-                portrait = True
-            else:
-                portrait = False
-
-            if (x + camera_aspect_x) <= canvas_aspect_x:
-                # insert if camera can fit on current row
-                camera_layout[y_i].append(
-                    (
-                        camera,
-                        camera_aspect_x / camera_aspect_y,
-                    )
-                )
-
-                if portrait:
-                    starting_x = camera_aspect_x
-                else:
-                    max_y = max(
-                        max_y,
-                        camera_aspect_y,
-                    )
-
-                x += camera_aspect_x
-            else:
-                # move on to the next row and insert
-                y += max_y
-                y_i += 1
-                camera_layout.append([])
-                x = starting_x
-
-                if x + camera_aspect_x > canvas_aspect_x:
-                    return None
-
-                camera_layout[y_i].append(
-                    (
-                        camera,
-                        camera_aspect_x / camera_aspect_y,
-                    )
-                )
-                x += camera_aspect_x
-
-        if y + max_y > canvas_aspect_y:
             return None
 
-        row_height = int(self.canvas.height / coefficient)
-        total_width, total_height, standard_candidate_layout = map_layout(
-            camera_layout, row_height
-        )
+        def map_layout(row_height: int) -> tuple[int, int, Optional[list[list[Any]]]]:
+            """Lay out cameras row by row while reserving portrait spans for the next row."""
+            candidate_layout: list[list[Any]] = []
+            reserved_ranges: dict[int, list[tuple[int, int]]] = {}
+            current_row: list[Any] = []
+            row_index = 0
+            row_y = 0
+            row_x = 0
+            max_width = 0
+            max_height = 0
+
+            for camera in cameras_to_add:
+                camera_dims = self.cameras[camera]["dimensions"].copy()
+                camera_aspect_x, camera_aspect_y = self.canvas.get_camera_aspect(
+                    camera, camera_dims[0], camera_dims[1]
+                )
+                portrait = camera_dims[1] > camera_dims[0]
+                scaled_height = row_height * 2 if portrait else row_height
+                scaled_width = int(scaled_height * (camera_aspect_x / camera_aspect_y))
+
+                while True:
+                    x = find_available_x(
+                        row_x,
+                        scaled_width,
+                        reserved_ranges.get(row_index, []),
+                        self.canvas.width,
+                    )
+
+                    if x is not None and row_y + scaled_height <= self.canvas.height:
+                        current_row.append(
+                            (camera, (x, row_y, scaled_width, scaled_height))
+                        )
+                        row_x = x + scaled_width
+                        max_width = max(max_width, row_x)
+                        max_height = max(max_height, row_y + scaled_height)
+
+                        if portrait:
+                            reserved_ranges.setdefault(row_index + 1, []).append(
+                                (x, row_x)
+                            )
+
+                        break
+
+                    if current_row:
+                        candidate_layout.append(current_row)
+                        current_row = []
+
+                    row_index += 1
+                    row_y = row_index * row_height
+                    row_x = 0
+
+                    if row_y + scaled_height > self.canvas.height:
+                        overflow_width = max(max_width, scaled_width)
+                        overflow_height = row_y + scaled_height
+                        return overflow_width, overflow_height, None
+
+            if current_row:
+                candidate_layout.append(current_row)
+
+            return max_width, max_height, candidate_layout
+
+        row_height = max(1, int(self.canvas.height / coefficient))
+        total_width, total_height, standard_candidate_layout = map_layout(row_height)
 
         if not standard_candidate_layout:
             # if standard layout didn't work
@@ -707,9 +687,9 @@ class BirdsEyeFrameManager:
                 total_width / self.canvas.width,
                 total_height / self.canvas.height,
             )
-            row_height = int(row_height / scale_down_percent)
+            row_height = max(1, int(row_height / scale_down_percent))
             total_width, total_height, standard_candidate_layout = map_layout(
-                camera_layout, row_height
+                row_height
             )
 
             if not standard_candidate_layout:
@@ -723,8 +703,8 @@ class BirdsEyeFrameManager:
             1 / (total_width / self.canvas.width),
             1 / (total_height / self.canvas.height),
         )
-        row_height = int(row_height * scale_up_percent)
-        _, _, scaled_layout = map_layout(camera_layout, row_height)
+        row_height = max(1, int(row_height * scale_up_percent))
+        _, _, scaled_layout = map_layout(row_height)
 
         if scaled_layout:
             return scaled_layout
