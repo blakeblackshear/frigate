@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SectionConfig } from "@/components/config-form/sections";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
+import { CameraOverridesBadge } from "@/components/config-form/sections/CameraOverridesBadge";
 import type { PolygonType } from "@/types/canvas";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -167,6 +168,9 @@ export function SingleSectionPage({
           </div>
           {/* Desktop: badge inline next to title */}
           <div className="hidden shrink-0 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
+            {level === "global" && showOverrideIndicator && (
+              <CameraOverridesBadge sectionPath={sectionKey} />
+            )}
             {level === "camera" &&
               showOverrideIndicator &&
               sectionStatus.isOverridden && (
@@ -224,6 +228,9 @@ export function SingleSectionPage({
         </div>
         {/* Mobile: badge below title/description */}
         <div className="flex flex-wrap items-center gap-2 sm:hidden">
+          {level === "global" && showOverrideIndicator && (
+            <CameraOverridesBadge sectionPath={sectionKey} />
+          )}
           {level === "camera" &&
             showOverrideIndicator &&
             sectionStatus.isOverridden && (
