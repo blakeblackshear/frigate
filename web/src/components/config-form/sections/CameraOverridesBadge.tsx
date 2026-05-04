@@ -256,13 +256,13 @@ export function CameraOverridesBadge({ sectionPath, className }: Props) {
           className={`cursor-pointer border-2 border-selected text-xs text-primary-variant ${className ?? ""}`}
           aria-label={t("button.overriddenInCameras.tooltip", {
             ns: "views/settings",
-            count,
+            count: count,
           })}
         >
           <span>
             {t("button.overriddenInCameras.label", {
               ns: "views/settings",
-              count,
+              count: count,
             })}
           </span>
           <LuChevronDown className="ml-1 size-3" />
@@ -273,7 +273,7 @@ export function CameraOverridesBadge({ sectionPath, className }: Props) {
           <div className="pr-4 text-xs text-primary-variant">
             {t("button.overriddenInCameras.heading", {
               ns: "views/settings",
-              count,
+              count: count,
             })}
           </div>
           <div className="scrollbar-container flex max-h-[40dvh] flex-col gap-2 overflow-y-auto pr-4">
