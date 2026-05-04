@@ -111,7 +111,11 @@ function groupDeltasBySource(deltas: FieldDelta[]): SourceGroup[] {
 }
 
 function CameraEntry({ sectionPath, entry, cameraPage }: CameraEntryProps) {
-  const { t, i18n } = useTranslation(["config/global", "views/settings"]);
+  const { t, i18n } = useTranslation([
+    "config/global",
+    "views/settings",
+    "objects",
+  ]);
   const friendlyName = useCameraFriendlyName(entry.camera);
   const { data: profilesData } = useSWR<ProfilesApiResponse>("profiles");
 
@@ -149,8 +153,14 @@ function CameraEntry({ sectionPath, entry, cameraPage }: CameraEntryProps) {
       const reducedKey = `${sectionPath}.${reduced}.label`;
       if (i18n.exists(reducedKey, { ns: "config/global" })) {
         const resolvedLabel = t(reducedKey, { ns: "config/global" });
-        const entry = humanizeKey(segments[i]);
-        return `${entry} · ${resolvedLabel}`;
+        const dropped = segments[i];
+        // Object class names ("person", "car", "fox") have translations in
+        // the `objects` namespace; fall back to humanizing the raw key for
+        // anything that isn't a known label.
+        const droppedLabel = i18n.exists(dropped, { ns: "objects" })
+          ? t(dropped, { ns: "objects" })
+          : humanizeKey(dropped);
+        return `${droppedLabel} · ${resolvedLabel}`;
       }
     }
 
