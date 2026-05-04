@@ -47,10 +47,13 @@ class EmbeddingProcess(FrigateProcess):
         self.metrics = metrics
 
     def run(self) -> None:
-        # Forkserver spawn exec's a fresh Python interpreter that does not
-        # inherit Docker env vars, so MALLOC_ARENA_MAX set in docker-compose
-        # never reaches this process.  Set it here via mallopt so glibc caps
-        # the number of malloc arenas to N_CPU instead of the default 8×N_CPU,
+        # glibc reads MALLOC_ARENA_MAX only once, at malloc init - before this
+        # Python interpreter is even up.  Setting it via docker-compose is
+        # brittle: it has to survive the s6-overlay service-supervision chain
+        # (which can filter env via s6-setuidgid/s6-envuidgid) and arrive
+        # before the very first malloc call.  Calling mallopt(M_ARENA_MAX, n_cpu)
+        # here is the runtime equivalent and works regardless of how we were
+        # spawned, capping arenas at N_CPU instead of the default 8×N_CPU and
         # preventing heap fragmentation under the embeddings workload.
         try:
             ctypes.CDLL("libc.so.6").mallopt(-8, os.cpu_count())  # M_ARENA_MAX

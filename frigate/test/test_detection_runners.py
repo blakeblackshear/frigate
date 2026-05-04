@@ -257,8 +257,9 @@ class TestOrtLeakFixRegression(unittest.TestCase):
          Must remain True for fixed-size models (YOLO) to preserve buffer aliasing.
 
       3. mallopt(M_ARENA_MAX) — must be called from inside EmbeddingProcess.run()
-         because forkserver spawn does not inherit Docker env vars, so setting
-         MALLOC_ARENA_MAX in docker-compose has no effect on the child process.
+         because glibc reads MALLOC_ARENA_MAX once at malloc init, and the env
+         var is brittle to deliver through s6-overlay supervision before that
+         point.  In-process mallopt is the runtime-safe equivalent.
     """
 
     def test_get_optimized_runner_passes_variable_length_for_jina(self):
@@ -367,9 +368,10 @@ class TestOrtLeakFixRegression(unittest.TestCase):
     def test_embedding_process_calls_mallopt(self):
         """EmbeddingProcess.run() must call mallopt(M_ARENA_MAX) to cap glibc arenas.
 
-        Forkserver spawn exec's a fresh Python interpreter that does not inherit
-        Docker env vars.  MALLOC_ARENA_MAX set in docker-compose never reaches
-        the child process, so mallopt() must be called explicitly from run().
+        glibc reads MALLOC_ARENA_MAX only at malloc init, before this Python
+        interpreter is up, and the env var is brittle to deliver through the
+        s6-overlay service-supervision chain before that point.  mallopt()
+        is the runtime-safe equivalent and must be called explicitly from run().
         """
         import frigate.embeddings as emb_module
 
