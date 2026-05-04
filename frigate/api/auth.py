@@ -812,6 +812,11 @@ limiter = Limiter(key_func=get_remote_addr)
 )
 @limiter.limit(limit_value=rateLimiter.get_limit)
 def login(request: Request, body: AppPostLoginBody):
+    if not request.app.frigate_config.auth.enabled:
+        return JSONResponse(
+            content={"message": "Authentication is disabled"}, status_code=404
+        )
+
     JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
     JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
     JWT_SESSION_LENGTH = request.app.frigate_config.auth.session_length
