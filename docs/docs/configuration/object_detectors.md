@@ -1022,12 +1022,12 @@ detectors:
 
 ### ONNX Supported Models
 
-| Model                         | Nvidia GPU | AMD GPU | Notes                                               |
-| ----------------------------- | ---------- | ------- | --------------------------------------------------- |
-| [YOLOv9](#yolo-v3-v4-v7-v9-2) | ✅         | ✅      | Supports CUDA Graphs for optimal Nvidia performance |
-| [RF-DETR](#rf-detr)           | ✅         | ❌      | Supports CUDA Graphs for optimal Nvidia performance |
-| [YOLO-NAS](#yolo-nas-1)       | ⚠️         | ⚠️      | Not supported by CUDA Graphs                        |
-| [YOLOX](#yolox-1)             | ✅         | ✅      | Supports CUDA Graphs for optimal Nvidia performance |
+| Model                                | Nvidia GPU | AMD GPU | Notes                                               |
+| ------------------------------------ | ---------- | ------- | --------------------------------------------------- |
+| [YOLOv9](#yolo-v3-v4-v7-v9-2)        | ✅         | ✅      | Supports CUDA Graphs for optimal Nvidia performance |
+| [RF-DETR](#rf-detr)                  | ✅         | ⚠️      | Supports CUDA Graphs for optimal Nvidia performance |
+| [YOLO-NAS](#yolo-nas-1)              | ⚠️         | ⚠️      | Not supported by CUDA Graphs                        |
+| [YOLOX](#yolox-1)                    | ✅         | ✅      | Supports CUDA Graphs for optimal Nvidia performance |
 | [D-FINE / DEIMv2](#d-fine--deimv2-1) | ⚠️         | ❌      | Not supported by CUDA Graphs                        |
 
 There is no default model provided, the following formats are supported:

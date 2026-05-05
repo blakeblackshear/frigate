@@ -223,11 +223,11 @@ Apple Silicon can not run within a container, so a ZMQ proxy is utilized to comm
 
 With the [ROCm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-| Name           | YOLOv9 Inference Time       | YOLO-NAS Inference Time   |
-| -------------- | --------------------------- | ------------------------- |
-| AMD 780M       | t-320: ~ 14 ms s-320: 20 ms | 320: ~ 25 ms 640: ~ 50 ms |
-| AMD 8700G      |                             | 320: ~ 20 ms 640: ~ 40 ms |
-| AMD 9060XT 16G | t-320: ~ 5 ms  s-320: 7 ms  | 320: ~ 6 ms               |
+| Name           | YOLOv9 Inference Time       | YOLO-NAS Inference Time   | RF-DETR Inference Time |
+| -------------- | --------------------------- | ------------------------- | ---------------------- |
+| AMD 780M       | t-320: ~ 14 ms s-320: 20 ms | 320: ~ 25 ms 640: ~ 50 ms |                        |
+| AMD 8700G      |                             | 320: ~ 20 ms 640: ~ 40 ms |                        |
+| AMD 9060XT 16G | t-320: ~ 5 ms  s-320: 7 ms  | 320: ~ 6 ms               | Nano-320: ~ 90 ms      |
 
 ## Community Supported Detectors
 
