@@ -25,8 +25,8 @@ class StatsConfig(FrigateBaseModel):
     )
     intel_gpu_device: Optional[str] = Field(
         default=None,
-        title="SR-IOV device",
-        description="Device identifier used when treating Intel GPUs as SR-IOV to fix GPU stats.",
+        title="Intel GPU device",
+        description="PCI bus address or DRM device path (e.g. /dev/dri/card1) used to pin Intel GPU stats to a specific device when multiple are present.",
     )
 
 
