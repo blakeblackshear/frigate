@@ -227,7 +227,7 @@ With the [ROCm](../configuration/object_detectors.md#amdrocm-gpu-detector) detec
 | -------------- | --------------------------- | ------------------------- |
 | AMD 780M       | t-320: ~ 14 ms s-320: 20 ms | 320: ~ 25 ms 640: ~ 50 ms |
 | AMD 8700G      |                             | 320: ~ 20 ms 640: ~ 40 ms |
-| AMD 9060XT 16G | t-320: ~ 4 ms s-320: ~ 6 ms |                           |
+| AMD 9060XT 16G | t-320: ~ 5 ms  s-320: 7 ms  | 320: ~ 6 ms               |
 
 ## Community Supported Detectors
 
