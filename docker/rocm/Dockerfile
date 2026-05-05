@@ -13,7 +13,7 @@ ARG ROCM
 
 RUN apt update -qq && \
     apt install -y wget gpg && \
-    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/7.2/ubuntu/jammy/amdgpu-install_7.2.70200-1_all.deb && \
+    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/7.2.3/ubuntu/jammy/amdgpu-install_7.2.3.70203-1_all.deb && \
     apt install -y ./rocm.deb && \
     apt update && \
     apt install -qq -y rocm
@@ -78,6 +78,10 @@ ENV MIGRAPHX_DISABLE_MIOPEN_FUSION=1
 ENV MIGRAPHX_DISABLE_SCHEDULE_PASS=1
 ENV MIGRAPHX_DISABLE_REDUCE_FUSION=1
 ENV MIGRAPHX_ENABLE_HIPRTC_WORKAROUNDS=1
+ENV MIOPEN_CUSTOM_CACHE_DIR=/config/model_cache/migraphx
+ENV MIOPEN_USER_DB_PATH=/config/model_cache/migraphx
+ENV AMD_COMGR_CACHE=1
+ENV AMD_COMGR_CACHE_DIR=/config/model_cache/migraphx
 
 COPY --from=rocm-dist / /
 
