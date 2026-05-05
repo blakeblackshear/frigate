@@ -229,9 +229,13 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 logger.debug(f"No person box available for {id}")
                 return
 
-            rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
+            # YuNet (cv2.FaceDetectorYN) is trained on BGR; feeding RGB
+            # silently degrades detection confidence by ~10x on typical
+            # person crops, causing face_recognition to fail with no log
+            # signal. The else-branch below already does YUV2BGR correctly.
+            bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             left, top, right, bottom = person_box
-            person = rgb[top:bottom, left:right]
+            person = bgr[top:bottom, left:right]
             face_box = self.__detect_face(person, self.face_config.detection_threshold)
 
             if not face_box:
@@ -250,11 +254,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 )
                 return
 
-            try:
-                face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
-            except Exception as e:
-                logger.debug(f"Failed to convert face frame color for {id}: {e}")
-                return
         else:
             # don't run for object without attributes
             if not obj_data.get("current_attributes"):
