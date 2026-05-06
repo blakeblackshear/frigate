@@ -12,6 +12,7 @@ const detect: SectionConfigOverrides = {
         position: "after",
         condition: (ctx) => {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
+          if (ctx.fullCameraConfig.type === "lpr") return false;
           const detectFps = ctx.formData?.fps as number | undefined;
           const streamFps = ctx.fullCameraConfig.detect?.fps;
           return detectFps != null && streamFps != null && detectFps > 5;
