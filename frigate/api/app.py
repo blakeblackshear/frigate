@@ -499,9 +499,7 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
-def _restore_masked_camera_paths(
-    config_data: dict, config: FrigateConfig
-) -> None:
+def _restore_masked_camera_paths(config_data: dict, config: FrigateConfig) -> None:
     """Substitute incoming `*:*` masked credentials with the in-memory ones.
 
     The /config response masks ffmpeg input credentials, so the settings UI
@@ -545,9 +543,7 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
     try:
         updates = {}
         if body.config_data:
-            _restore_masked_camera_paths(
-                body.config_data, request.app.frigate_config
-            )
+            _restore_masked_camera_paths(body.config_data, request.app.frigate_config)
             updates = flatten_config_data(body.config_data)
             updates = {k: ("" if v is None else v) for k, v in updates.items()}
 
