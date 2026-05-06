@@ -157,6 +157,8 @@ FROM base AS wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
 ARG DEBUG=false
+ARG HAILORT_VERSION=4.21.0
+ARG HAILORT_GIT_REPO=frigate-nvr/hailort
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \

@@ -397,6 +397,14 @@
         "description": "The device to use for Hailo inference (e.g. 'PCIe', 'M.2')."
       }
     },
+    "hailo10h": {
+      "label": "Hailo-10H",
+      "description": "Hailo-10H detector using HEF models and the HailoRT SDK for inference on Hailo hardware.",
+      "device": {
+        "label": "Device Type",
+        "description": "The device to use for Hailo inference (e.g. 'PCIe', 'M.2')."
+      }
+    },   
     "memryx": {
       "label": "MemryX",
       "description": "MemryX MX3 detector that runs compiled DFP models on MemryX accelerators.",
