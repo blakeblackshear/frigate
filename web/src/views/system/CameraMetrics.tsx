@@ -2,6 +2,7 @@ import { useFrigateStats } from "@/api/ws";
 import { CameraLineGraph } from "@/components/graph/LineGraph";
 import CameraInfoDialog from "@/components/overlay/CameraInfoDialog";
 import { ConnectionQualityIndicator } from "@/components/camera/ConnectionQualityIndicator";
+import { EmptyCard } from "@/components/card/EmptyCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats } from "@/types/stats";
@@ -13,6 +14,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { BsFillCameraVideoOffFill } from "react-icons/bs";
 import { MdInfo } from "react-icons/md";
 import {
   Tooltip,
@@ -173,7 +175,7 @@ export default function CameraMetrics({
       }
 
       Object.entries(stats.cameras).forEach(([key, camStats]) => {
-        if (!config?.cameras[key].enabled) {
+        if (!camStats || !config?.cameras[key]?.enabled) {
           return;
         }
 
@@ -228,6 +230,10 @@ export default function CameraMetrics({
       }
 
       Object.entries(stats.cameras).forEach(([key, camStats]) => {
+        if (!camStats) {
+          return;
+        }
+
         if (!(key in series)) {
           const camName = getCameraName(key);
           series[key] = {};
@@ -273,6 +279,17 @@ export default function CameraMetrics({
       setProbeCameraName("");
     }
   }, [showCameraInfoDialog]);
+
+  if (config && Object.keys(config.cameras).length === 0) {
+    return (
+      <div className="flex size-full items-center justify-center">
+        <EmptyCard
+          icon={<BsFillCameraVideoOffFill className="size-8" />}
+          title={t("cameras.noCameras.title")}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col gap-3 overflow-y-auto">
