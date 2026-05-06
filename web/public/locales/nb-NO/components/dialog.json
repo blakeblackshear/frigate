@@ -59,7 +59,7 @@
     "toast": {
       "success": "Eksport startet. Se filen på eksportsiden.",
       "error": {
-        "failed": "Kune ikke legge eksport i kø: {{error}}",
+        "failed": "Kunne ikke legge eksport i kø: {{error}}",
         "noVaildTimeSelected": "Ingen gyldig tidsperiode valgt",
         "endTimeMustAfterStartTime": "Sluttid må være etter starttid"
       },
