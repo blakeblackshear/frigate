@@ -9,7 +9,7 @@ import {
   useRef,
   useContext,
 } from "react";
-import useSWR from "swr";
+import useSWR, { mutate as swrMutate } from "swr";
 import axios from "axios";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -754,6 +754,7 @@ export function ConfigSection({
       }
 
       await refreshConfig();
+      swrMutate("config/raw_paths");
       setPendingData(null);
       onSave?.();
     } catch (error) {
