@@ -512,6 +512,14 @@
       "inherit": "Inherit",
       "enabled": "Enabled",
       "disabled": "Disabled"
+    },
+    "cameraType": {
+      "title": "Camera Type",
+      "label": "Camera type",
+      "description": "Set the type for each camera. Dedicated LPR cameras are single-purpose cameras with powerful optical zoom to capture license plates on distant vehicles. Most cameras should use the normal camera type unless the camera is specifically for LPR and has a tightly focused view on license plates.",
+      "normal": "Normal",
+      "dedicatedLpr": "Dedicated LPR",
+      "saveSuccess": "Updated camera type for {{cameraName}}. Restart Frigate to apply the changes."
     }
   },
   "cameraReview": {
@@ -1652,14 +1660,14 @@
       "audioDetectionDisabled": "Audio detection is not enabled for this camera. Audio transcription requires audio detection to be active."
     },
     "detect": {
-      "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended."
+      "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit."
     },
     "faceRecognition": {
-      "globalDisabled": "Face recognition is not enabled at the global level. Enable it in global settings for camera-level face recognition to function.",
+      "globalDisabled": "Face recognition is not enabled at the global level. Enable it in Enrichments for camera-level face recognition to function.",
       "personNotTracked": "Face recognition requires the 'person' object to be tracked. Ensure 'person' is in the object tracking list."
     },
     "lpr": {
-      "globalDisabled": "License plate recognition is not enabled at the global level. Enable it in global settings for camera-level LPR to function.",
+      "globalDisabled": "License plate recognition is not enabled at the global level. Enable it in Enrichments for camera-level LPR to function.",
       "vehicleNotTracked": "License plate recognition requires 'car' or 'motorcycle' to be tracked."
     },
     "record": {

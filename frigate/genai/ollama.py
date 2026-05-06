@@ -1,5 +1,7 @@
 """Ollama Provider for Frigate AI."""
 
+import base64
+import binascii
 import json
 import logging
 from typing import Any, AsyncGenerator, Optional
@@ -14,6 +16,41 @@ from frigate.genai import GenAIClient, register_genai_provider
 from frigate.genai.utils import parse_tool_calls_from_message
 
 logger = logging.getLogger(__name__)
+
+
+def _normalize_multimodal_content(
+    content: Any,
+) -> tuple[Optional[str], Optional[list[bytes]]]:
+    """Convert OpenAI-style multimodal content to Ollama's (text, images) shape.
+
+    The chat API constructs user messages with content as a list of
+    ``{"type": "text"}`` and ``{"type": "image_url"}`` parts when a tool
+    returns a live frame. Ollama's SDK requires content to be a string and
+    images to be passed in a separate field, so we extract each.
+    """
+    if not isinstance(content, list):
+        return content, None
+
+    text_parts: list[str] = []
+    images: list[bytes] = []
+    for part in content:
+        if not isinstance(part, dict):
+            continue
+        part_type = part.get("type")
+        if part_type == "text":
+            text = part.get("text")
+            if text:
+                text_parts.append(str(text))
+        elif part_type == "image_url":
+            url = (part.get("image_url") or {}).get("url", "")
+            if isinstance(url, str) and url.startswith("data:"):
+                try:
+                    encoded = url.split(",", 1)[1]
+                    images.append(base64.b64decode(encoded, validate=True))
+                except (ValueError, IndexError, binascii.Error) as e:
+                    logger.debug("Failed to decode multimodal image url: %s", e)
+
+    return ("\n".join(text_parts) if text_parts else None), (images or None)
 
 
 @register_genai_provider(GenAIProviderEnum.ollama)
@@ -207,10 +244,13 @@ class OllamaClient(GenAIClient):
         """Build request_messages and params for chat (sync or stream)."""
         request_messages = []
         for msg in messages:
-            msg_dict = {
+            content, images = _normalize_multimodal_content(msg.get("content", ""))
+            msg_dict: dict[str, Any] = {
                 "role": msg.get("role"),
-                "content": msg.get("content", ""),
+                "content": content if content is not None else "",
             }
+            if images:
+                msg_dict["images"] = images
             if msg.get("tool_call_id"):
                 msg_dict["tool_call_id"] = msg["tool_call_id"]
             if msg.get("name"):

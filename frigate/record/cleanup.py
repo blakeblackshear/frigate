@@ -351,9 +351,11 @@ class RecordingCleanup(threading.Thread):
                 )
                 .where(
                     ReviewSegment.camera == camera,
-                    # need to ensure segments for all reviews starting
-                    # before the expire date are included
-                    ReviewSegment.start_time < motion_expire_date,
+                    # candidate recordings can extend up to continuous_expire_date
+                    # (the no-motion no-audio branch of the recordings query),
+                    # so reviews must cover that full range to avoid deleting
+                    # segments that overlap recent alerts/detections.
+                    ReviewSegment.start_time < continuous_expire_date,
                 )
                 .order_by(ReviewSegment.start_time)
                 .namedtuples()
