@@ -1,0 +1,58 @@
+{
+    "documentTitle": "Wyszukiwanie zdarzeń ruchu - Frigate",
+    "title": "Wyszukiwanie zdarzeń ruchu",
+    "description": "Narysuj wielokąt aby wyznaczyć obszar zainteresowania, a następnie określ przedział czasowy w którym chcesz wyszukać zmiany ruchu w tym obszarze.",
+    "selectCamera": "Ładowanie wyszukiwania zdarzeń ruchu",
+    "startSearch": "Start wyszukiwania",
+    "searchStarted": "Uruchomiono wyszukiwanie",
+    "searchCancelled": "Zatrzymano wyszukiwanie",
+    "cancelSearch": "Anuluj",
+    "searching": "Wyszukiwanie w trakcie.",
+    "searchComplete": "Wyszukiwanie zakończono",
+    "noResultsYet": "Przeprowadź wyszukiwanie aby znaleźć zmiany ruchu w zaznaczonym obszarze",
+    "noChangesFound": "W wybranym obszarze nie wykryto żadnych zmian w pikselach",
+    "framesProcessed": "{{count}} przetworzonych klatek obrazu",
+    "jumpToTime": "Przejdź do tego momentu",
+    "results": "Wyniki",
+    "showSegmentHeatmap": "Mapa cieplna",
+    "newSearch": "Nowe wyszukiwanie",
+    "clearResults": "Wyczyść wyniki",
+    "clearROI": "Wyczyść strefę",
+    "polygonControls": {
+        "undo": "Cofnij ostatnią zmianę",
+        "reset": "Reset strefy"
+    },
+    "motionHeatmapLabel": "Mapa aktywności ruchu",
+    "dialog": {
+        "title": "Wyszukiwanie według ruchu",
+        "cameraLabel": "Kamera",
+        "previewAlt": "Podgląd z kamery {{camera}}"
+    },
+    "timeRange": {
+        "title": "Zakres wyszukiwania",
+        "start": "Czas rozpoczęcia",
+        "end": "Czas zakończenia"
+    },
+    "settings": {
+        "title": "Ustawienia wyszukiwania",
+        "parallelMode": "Tryb równoległy",
+        "parallelModeDesc": "Przeskanuj wiele fragmentów nagrania jednocześnie (szybsze, ale znacznie bardziej obciążające procesor)",
+        "threshold": "Próg czułości",
+        "thresholdDesc": "Niższe wartości pozwalają wykrywać mniejsze zmiany (1–255)",
+        "minArea": "Obszar minimalnej zmiany",
+        "minAreaDesc": "Minimalny procent obszaru zainteresowania który musi ulec zmianie aby uznano to za istotne",
+        "frameSkip": "Pominięcie klatki",
+        "frameSkipDesc": "Przetwarza co N klatkę. Ustaw wartość na liczbę klatek na sekundę swojej kamery, aby przetwarzać jedną klatkę na sekundę (np. 5 dla kamery o 5 klatkach na sekundę, 30 dla kamery o 30 klatkach na sekundę). Wyższe wartości zapewniają większą szybkość ale mogą powodować pominięcie krótkich zdarzeń ruchu.",
+        "maxResults": "Maksymalne wyniki",
+        "maxResultsDesc": "Zatrzymaj się po osiągnięciu określonej liczby pasujących znaczników czasu"
+    },
+    "errors": {
+        "noCamera": "Wybierz kamerę",
+        "noROI": "Zaznacz obszar zainteresowania",
+        "noTimeRange": "Ustaw przedział czasowy",
+        "invalidTimeRange": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia",
+        "searchFailed": "Wyszukiwanie nie powiodło się: {{message}}",
+        "polygonTooSmall": "Obszar musi mieć co najmniej 3 punkty",
+        "unknown": "Nieznany błąd"
+    }
+}
