@@ -1,0 +1,22 @@
+{
+    "documentTitle": "Mozgás Keresés - Frigate",
+    "title": "Mozgás Keresés",
+    "description": "Rajzoljon be egy sokszöget a vizsgálandó terület kijelöléséhez, majd adja meg az időtartományt, amelyen belül a mozgásváltozásokat szeretné keresni ezen a területen.",
+    "selectCamera": "Mozgás Keresés betöltése folyamatban",
+    "startSearch": "Keresés Indítása",
+    "searchStarted": "Megkezdődött a keresés",
+    "searchCancelled": "Keresés megszakítva",
+    "cancelSearch": "Mégse",
+    "searching": "Keresés folyamatban.",
+    "searchComplete": "A keresés befejeződött",
+    "noResultsYet": "Futtass keresést a kijelölt területen a mozgásváltozások felkutatásához",
+    "noChangesFound": "A kijelölt területen nem történt pixelváltozás",
+    "changesFound_one": "Észlelhető {{count}} mozgásváltozás",
+    "changesFound_other": "Észlelhető {{count}} mozgásváltozás",
+    "framesProcessed": "{{count}} képkocka feldolgozva",
+    "jumpToTime": "Ugrás erre az időpontra",
+    "results": "Eredmények",
+    "showSegmentHeatmap": "Hőtérkép",
+    "newSearch": "Új Keresés",
+    "clearResults": "Eredmények törlése"
+}

@@ -274,7 +274,8 @@
     "export": "Exportálás",
     "deleteNow": "Törlés Most",
     "next": "Következő",
-    "continue": "Tovább"
+    "continue": "Tovább",
+    "add": "Hozzáad"
   },
   "label": {
     "back": "Vissza",

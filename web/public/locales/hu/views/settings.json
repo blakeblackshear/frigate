@@ -15,8 +15,8 @@
     "cameraReview": "Kamera beállítások áttekintése – Frigate",
     "globalConfig": "Globális Konfiguráció - Frigate",
     "cameraConfig": "Kamera Konfiguráció - Frigate",
-    "maintenance": "Karbantartás - Fregatt",
-    "profiles": "Profilok - Fregatt"
+    "maintenance": "Karbantartás - Frigate",
+    "profiles": "Profilok - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -538,7 +538,7 @@
       "all": "Mindem Maszk és Zóna"
     },
     "motionMaskLabel": "Mozgási Maszk {{number}}",
-    "objectMaskLabel": "Tárgy Maszk {{number}} {{label}}",
+    "objectMaskLabel": "Tárgy Maszk {{number}}",
     "toast": {
       "success": {
         "copyCoordinates": "A {{polyName}} koordinátái vágólapra másolva."
@@ -888,5 +888,10 @@
     "overriddenGlobalTooltip": "Ez a kamera felülírja a globális konfigurációs beállításokat ebben a részben",
     "overriddenBaseConfig": "Felülírt (Alapbeállítás)",
     "overriddenBaseConfigTooltip": "A {{profile}} profil felülírja a konfigurációs beállításokat ebben a részben"
+  },
+  "detectionModel": {
+    "plusActive": {
+      "label": "A jelenlegi modell forrása"
+    }
   }
 }

@@ -89,8 +89,11 @@
         "topics": "Témák (topics)",
         "events": "Események",
         "reviews": "Értékelések (reviews)",
-        "face_recognition": "Arcfelismerés"
-      }
+        "face_recognition": "Arcfelismerés",
+        "classification": "Osztályozás",
+        "lpr": "LPR"
+      },
+      "clear": "Töröl"
     }
   },
   "general": {

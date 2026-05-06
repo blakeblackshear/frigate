@@ -1,0 +1,18 @@
+{
+    "documentTitle": "Chat - Frigate",
+    "title": "Frigate Chat",
+    "subtitle": "A kamerakezeléshez és elemzésekhez szükséges MI asszisztensed",
+    "placeholder": "Kérdezz bármit...",
+    "error": "Hiba történt. Kérjük, próbáld meg újra.",
+    "processing": "Feldolgozás...",
+    "toolsUsed": "Használatban: {{tools}}",
+    "showTools": "Eszközök megjelenítése ({{count}})",
+    "hideTools": "Eszközök elrejtése",
+    "call": "Hívás",
+    "result": "Eredmény",
+    "response": "Válasz:",
+    "attachment_chip_remove": "Melléklet eltávolítása",
+    "open_in_explore": "Megnyitás Böngészőben",
+    "attachment_picker_paste_label": "Vagy illeszd be az esemény ID-t",
+    "attachment_picker_attach": "Melléklet"
+}
