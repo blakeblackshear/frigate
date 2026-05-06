@@ -250,7 +250,8 @@
     "classification": "Klassifizierung",
     "actions": "Aktion",
     "chat": "Chat",
-    "profiles": "Profile"
+    "profiles": "Profile",
+    "features": "Funktionen"
   },
   "unit": {
     "speed": {

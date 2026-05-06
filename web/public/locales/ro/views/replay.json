@@ -1,0 +1,59 @@
+{
+    "title": "Reluare de depanare",
+    "description": "Redă înregistrările camerei pentru depanare. Lista de obiecte arată un rezumat decalat în timp al obiectelor detectate, iar tab-ul Mesaje arată un flux de mesaje interne ale Frigate din înregistrarea redată.",
+    "websocket_messages": "Mesaje",
+    "dialog": {
+        "title": "Pornește reluarea de depanare",
+        "description": "Creează o cameră temporară de reluare care rulează în buclă înregistrări istorice pentru depanarea problemelor de detecție și urmărire a obiectelor. Camera de reluare va avea aceeași configurație de detecție ca și camera sursă. Alege un interval de timp pentru a începe.",
+        "camera": "Cameră sursă",
+        "timeRange": "Interval de timp",
+        "preset": {
+            "1m": "Ultimul minut",
+            "5m": "Ultimele 5 minute",
+            "timeline": "Din cronologie",
+            "custom": "Personalizat"
+        },
+        "startButton": "Începe reluarea",
+        "selectFromTimeline": "Selectează",
+        "starting": "Pornire reluare...",
+        "startLabel": "Început",
+        "endLabel": "Sfârșit",
+        "toast": {
+            "error": "Pornirea reluării de depanare a eșuat: {{error}}",
+            "alreadyActive": "O sesiune de reluare este deja activă",
+            "stopError": "Oprirea reluării de depanare a eșuat: {{error}}",
+            "goToReplay": "Mergi la reluare"
+        }
+    },
+    "page": {
+        "noSession": "Nicio sesiune de reluare de depanare activă",
+        "noSessionDesc": "Pornește o reluare de depanare din vizualizarea Istoric dând click pe butonul Acțiuni din bara de instrumente și alegând Reluare depanare.",
+        "goToRecordings": "Mergi la istoric",
+        "preparingClip": "Pregătire clip…",
+        "preparingClipDesc": "Frigate îmbină înregistrările pentru intervalul de timp selectat. Acest lucru poate dura un minut pentru intervale mai mari.",
+        "startingCamera": "Pornire reluare depanare…",
+        "startError": {
+            "title": "Pornirea reluării de depanare a eșuat",
+            "back": "Înapoi la istoric"
+        },
+        "sourceCamera": "Camera sursă",
+        "replayCamera": "Camera de reluare",
+        "initializingReplay": "Inițializare reluare depanare...",
+        "stoppingReplay": "Oprire reluare depanare...",
+        "stopReplay": "Oprește reluarea",
+        "confirmStop": {
+            "title": "Oprești reluarea de depanare?",
+            "description": "Aceasta va opri sesiunea și va șterge toate datele temporare. Ești sigur?",
+            "confirm": "Oprește reluarea",
+            "cancel": "Anulează"
+        },
+        "activity": "Activitate",
+        "objects": "Listă de obiecte",
+        "audioDetections": "Detecții audio",
+        "noActivity": "Nicio activitate detectată",
+        "activeTracking": "Urmărire activă",
+        "noActiveTracking": "Nicio urmărire activă",
+        "configuration": "Configurație",
+        "configurationDesc": "Ajustează setările de detecție a mișcării și urmărire a obiectelor pentru camera de reluare de depanare. Nicio modificare nu este salvată în fișierul tău de configurare Frigate."
+    }
+}

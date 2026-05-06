@@ -1,0 +1,8 @@
+{
+  "time": {
+    "untilForRestart": "फ्रिगेट पुनः सुरु नभएसम्म।",
+    "untilRestart": "पुन: सुरु नभएसम्म",
+    "never": "कहिल्यै होइन",
+    "ago": "{{timeAgo}} अघि"
+  }
+}

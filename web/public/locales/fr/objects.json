@@ -116,5 +116,10 @@
   "dining_table": "Table à manger",
   "vase": "Vase",
   "purolator": "Purolator",
-  "postnord": "PostNord"
+  "postnord": "PostNord",
+  "canada_post": "Poste du Canada",
+  "royal_mail": "Poste du Royaume Uni",
+  "school_bus": "Bus scolaire",
+  "skunk": "Mouffette",
+  "kangaroo": "Kangourou"
 }

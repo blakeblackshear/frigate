@@ -485,6 +485,10 @@
             "hwaccel_args": {
                 "label": "Exporta els arguments de l'hwaccel",
                 "description": "Args d'acceleració de maquinari a utilitzar per a operacions d'exportació/transcodificació."
+            },
+            "max_concurrent": {
+                "label": "Màxim d'exportacions concurrents",
+                "description": "Nombre màxim de treballs d'exportació a processar al mateix temps."
             }
         },
         "preview": {

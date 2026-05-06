@@ -485,6 +485,10 @@
             "hwaccel_args": {
                 "label": "Argumente hwaccel export",
                 "description": "Argumente de accelerare hardware pentru operațiunile de export/transcodare."
+            },
+            "max_concurrent": {
+                "description": "Numărul maxim de sarcini de export de procesat în același timp.",
+                "label": "Număr maxim de exporturi simultane"
             }
         },
         "preview": {

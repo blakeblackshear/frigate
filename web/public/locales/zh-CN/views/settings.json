@@ -1773,7 +1773,14 @@
     "overriddenGlobal": "已覆盖全局通用配置",
     "overriddenGlobalTooltip": "当前摄像头配置，将优先覆盖全局通用设置",
     "overriddenBaseConfigTooltip": "当前 {{profile}} 配置模板会覆盖本节所有设置",
-    "overriddenBaseConfig": "已覆盖默认配置"
+    "overriddenBaseConfig": "已覆盖默认配置",
+    "overriddenInCameras": {
+      "label_other": "已在 {{count}} 个摄像头中单独配置",
+      "tooltip_other": "{{count}} 个摄像头在此项中存在单独配置，点击查看详情。",
+      "heading_other": "此全局设置项下有 {{count}} 个摄像头存在自定义单独配置。",
+      "othersField_other": "其余 {{count}} 个",
+      "profilePrefix": "{{profile}} 配置方案：{{fields}}"
+    }
   },
   "profiles": {
     "title": "配置模板",

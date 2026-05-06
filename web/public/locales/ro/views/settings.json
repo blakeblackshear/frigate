@@ -1356,6 +1356,14 @@
       "inherit": "Moștenire",
       "enabled": "Activat",
       "disabled": "Dezactivat"
+    },
+    "cameraType": {
+      "title": "Tip cameră",
+      "label": "Tip cameră",
+      "description": "Setează tipul pentru fiecare cameră. Camerele LPR dedicate sunt camere cu un singur scop, cu zoom optic puternic pentru a captura plăcuțele de înmatriculare ale vehiculelor aflate la distanță. Majoritatea camerelor ar trebui să folosească tipul normal de cameră, cu excepția cazului în care camera este special pentru LPR și are o vedere strâns focalizată pe plăcuțele de înmatriculare.",
+      "normal": "Normal",
+      "dedicatedLpr": "LPR dedicat",
+      "saveSuccess": "Tipul camerei a fost actualizat pentru {{cameraName}}. Repornește Frigate pentru a aplica modificările."
     }
   },
   "cameraReview": {
@@ -1722,7 +1730,22 @@
     "overriddenGlobal": "Suprascris (global)",
     "overriddenGlobalTooltip": "Această cameră suprascrie setările globale de configurare din această secțiune",
     "overriddenBaseConfig": "Suprascris (configurația de bază)",
-    "overriddenBaseConfigTooltip": "Profilul {{profile}} suprascrie setările de configurare din această secțiune"
+    "overriddenBaseConfigTooltip": "Profilul {{profile}} suprascrie setările de configurare din această secțiune",
+    "overriddenInCameras": {
+      "label_one": "Suprascris în {{count}} cameră",
+      "label_few": "Suprascris în {{count}} camere",
+      "label_other": "Suprascris în {{count}} de camere",
+      "tooltip_one": "{{count}} cameră suprascrie valorile din această secțiune. Click pentru a vedea detaliile.",
+      "tooltip_few": "{{count}} camere suprascriu valorile din această secțiune. Click pentru a vedea detaliile.",
+      "tooltip_other": "{{count}} de camere suprascriu valorile din această secțiune. Click pentru a vedea detaliile.",
+      "heading_one": "Această secțiune globală are câmpuri care sunt suprascrise în {{count}} cameră.",
+      "heading_few": "Această secțiune globală are câmpuri care sunt suprascrise în {{count}} camere.",
+      "heading_other": "Această secțiune globală are câmpuri care sunt suprascrise în {{count}} de camere.",
+      "othersField_one": "{{count}} alta",
+      "othersField_few": "{{count}} alte",
+      "othersField_other": "{{count}} de alte",
+      "profilePrefix": "Profil {{profile}}: {{fields}}"
+    }
   },
   "profiles": {
     "title": "Profile",
@@ -1832,14 +1855,14 @@
       "audioDetectionDisabled": "Detecția audio nu este activată pentru această cameră. Transcrierea audio necesită ca detecția audio să fie activă."
     },
     "detect": {
-      "fpsGreaterThanFive": "Setarea cadrelor pe secundă pentru detecție la o valoare mai mare de 5 nu este recomandată."
+      "fpsGreaterThanFive": "Setarea FPS-ului de detecție mai mare de 5 nu este recomandată. Valorile mai mari pot cauza probleme de performanță și nu vor oferi niciun beneficiu."
     },
     "faceRecognition": {
-      "globalDisabled": "Recunoașterea facială nu este activată la nivel global. Activați-o în setările globale pentru ca recunoașterea facială la nivel de cameră să funcționeze.",
+      "globalDisabled": "Recunoașterea facială nu este activată la nivel global. Activează-o în Îmbogățiri pentru ca recunoașterea facială la nivel de cameră să funcționeze.",
       "personNotTracked": "Recunoașterea facială necesită urmărirea obiectului „person”. Asigurați-vă că „person” este în lista de urmărire a obiectelor."
     },
     "lpr": {
-      "globalDisabled": "Recunoașterea plăcuțelor de înmatriculare nu este activată la nivel global. Activați-o în setările globale pentru ca recunoașterea la nivel de cameră să funcționeze.",
+      "globalDisabled": "Recunoașterea plăcuțelor de înmatriculare nu este activată la nivel global. Activează-o în Îmbogățiri pentru ca LPR-ul la nivel de cameră să funcționeze.",
       "vehicleNotTracked": "Recunoașterea plăcuțelor de înmatriculare necesită ca „car” sau „motorcycle” să fie urmărite."
     },
     "record": {

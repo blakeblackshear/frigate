@@ -1,6 +1,6 @@
 {
     "minimum": "Doit être au moins de {{limit}}",
-    "maximum": "Ne doit pas dépasser {{limit}}",
+    "maximum": "Doit être au maximum {{limit}}",
     "exclusiveMinimum": "Doit être supérieur à {{limit}}",
     "exclusiveMaximum": "Doit être inférieur à {{limit}}",
     "minLength": "Doit contenir au moins {{limit}} caractère(s)",

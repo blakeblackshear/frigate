@@ -347,7 +347,7 @@
           "object_mask": "Objektmaske"
         },
         "revertOverride": {
-          "title": "Basis Konfiguration wiederherstellen",
+          "title": "Auf Standardkonfiguration zurücksetzen",
           "desc": "Dadurch wird die Profilüberschreibung für {{type}}<em>{{name}}</em> aufgehoben und die Grundkonfiguration wiederhergestellt."
         }
       },
@@ -1333,7 +1333,8 @@
         },
         "hikvision": {
           "substreamWarning": "Substream 1 ist auf eine niedrige Auflösung festgelegt. Viele Hikvision-Kameras unterstützen zusätzliche Substreams, die in den Kameraeinstellungen aktiviert werden müssen. Es wird empfohlen, diese Streams zu überprüfen und zu nutzen, sofern sie verfügbar sind."
-        }
+        },
+        "resolutionUnknown": "Die Auflösung dieses Streams konnte nicht ermittelt werden. Sie sollten die Erkennungsauflösung manuell in den Einstellungen oder in Ihrer Konfiguration festlegen."
       }
     }
   },
@@ -1350,7 +1351,13 @@
       "enableDesc": "</em>Eine aktivierte Kamera vorübergehend deaktivieren, bis Frigate neu gestartet wird. Durch das Deaktivieren einer Kamera wird die Verarbeitung der Streams dieser Kamera durch Frigate vollständig unterbrochen. Erkennung, Aufzeichnung und Fehlerbehebung stehen dann nicht mehr zur Verfügung.<br /><em> Hinweis: go2rtc-Restreams werden dadurch nicht deaktiviert.</em>",
       "disableLabel": "Deaktivierte Kameras",
       "disableDesc": "Aktivieren Sie eine Kamera, die derzeit in der Benutzeroberfläche nicht sichtbar und in der Konfiguration deaktiviert ist. Nach der Aktivierung ist ein Neustart von Frigate erforderlich.",
-      "enableSuccess": "{{cameraName}} wurde in der Konfiguration aktiviert. Starte Frigate neu, um die Änderungen zu übernehmen."
+      "enableSuccess": "{{cameraName}} wurde in der Konfiguration aktiviert. Starte Frigate neu, um die Änderungen zu übernehmen.",
+      "friendlyName": {
+        "edit": "Anzeigenamen der Kamera bearbeiten",
+        "title": "Anzeigenamen bearbeiten",
+        "description": "Legen Sie den Anzeigenamen fest, der für diese Kamera in der gesamten Benutzeroberfläche von „Frigate“ angezeigt wird. Lassen Sie das Feld leer, um die Kamera-ID zu verwenden.",
+        "rename": "Umbenennen"
+      }
     },
     "cameraConfig": {
       "add": "Kamera hinzufügen",
@@ -1463,7 +1470,18 @@
     "overriddenGlobalTooltip": "Diese Kamera überschreibt globale Konfigurationseinstellungen in diesem Abschnitt",
     "overriddenBaseConfig": "Überschrieben (Basiskonfiguration)",
     "overriddenBaseConfigTooltip": "Das {{profile}}-Profil überschreibt Konfigurationseinstellungen in diesem Abschnitt",
-    "overriddenGlobal": "Überschrieben (Global)"
+    "overriddenGlobal": "Überschrieben (Global)",
+    "overriddenInCameras": {
+      "label_one": "In {{count}} Kamera überschrieben",
+      "label_other": "In {{count}} Kameras überschrieben",
+      "tooltip_one": "Die Kamera mit der Nummer {{count}} überschreibt die Werte in diesem Abschnitt. Klicken Sie hier, um Details anzuzeigen.",
+      "tooltip_other": "Die Kamera mit der Nummer {{count}} überschreibt die Werte in diesem Abschnitt. Klicken Sie hier, um Details anzuzeigen.",
+      "heading_one": "Dieser globale Abschnitt enthält Felder, die in {{count}} Kamera überschrieben werden.",
+      "heading_other": "Dieser globale Abschnitt enthält Felder, die bei {{count}} Kameras überschrieben werden.",
+      "othersField_one": "{{count}} andere",
+      "othersField_other": "{{count}} weitere",
+      "profilePrefix": "{{profile}} Profile: {{fields}}"
+    }
   },
   "timestampPosition": {
     "tl": "Oben links",
@@ -1491,7 +1509,7 @@
       "currentStatus": "Status",
       "jobId": "Job ID",
       "startTime": "Startzeit",
-      "endTime": "Endzeit",
+      "endTime": "End Zeit",
       "statusLabel": "Status",
       "results": "Ergebnisse",
       "errorLabel": "Fehler",
@@ -1653,7 +1671,7 @@
       "noSchema": "Es sind keine Detektorschemata verfügbar.",
       "none": "Es sind keine Detektorinstanzen konfiguriert.",
       "add": "Detektor hinzufügen",
-      "addCustomKey": "Benutzerdefinierten Schlüssel hinzufügen"
+      "addCustomKey": "Benutzter Schlüssel hinzufügen"
     },
     "record": {
       "title": "Aufnahmeeinstellungen"

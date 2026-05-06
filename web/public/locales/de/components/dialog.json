@@ -178,6 +178,14 @@
       "markAsReviewed": "Als geprüft markieren",
       "deleteNow": "Jetzt löschen",
       "markAsUnreviewed": "Als ungeprüft markieren"
+    },
+    "shareTimestamp": {
+      "label": "Zeitstempel teilen",
+      "title": "Zeitstempel teilen",
+      "description": "Teile eine URL mit Zeitstempel, die die aktuelle Position des Players angibt, oder wähle einen benutzerdefinierten Zeitstempel aus. Beachte, dass es sich hierbei nicht um eine öffentliche Freigabe-URL handelt und dass nur Benutzer Zugriff darauf haben, die Zugriff auf Frigate und diese Kamera haben.",
+      "custom": "Benutzerdefinierter Zeitstempel",
+      "button": "URL des Zeitstempels teilen",
+      "shareTitle": "Zeitstempel der Fregattenbewertung: {{camera}}"
     }
   },
   "imagePicker": {

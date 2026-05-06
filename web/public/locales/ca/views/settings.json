@@ -1354,6 +1354,14 @@
       "inherit": "Hereta",
       "enabled": "Habilitat",
       "disabled": "Desactivat"
+    },
+    "cameraType": {
+      "title": "Tipus de càmera",
+      "label": "Tipus de càmera",
+      "description": "Estableix el tipus per a cada càmera. Les càmeres LPR dedicades són càmeres d'un sol ús amb un potent zoom òptic per capturar matrícules en vehicles distants. La majoria de les càmeres haurien d'utilitzar el tipus de càmera normal llevat que la càmera sigui específicament per a LPR i tingui una vista molt centrada en les matrícules.",
+      "dedicatedLpr": "LPR dedicat",
+      "saveSuccess": "Tipus de càmera actualitzat per {{cameraName}}. Reinicia la fragata per aplicar els canvis.",
+      "normal": "Normal"
     }
   },
   "cameraReview": {
@@ -1720,7 +1728,22 @@
     "overriddenGlobal": "Sobreescrit (Global)",
     "overriddenGlobalTooltip": "Aquesta càmera anul·la la configuració global d'aquesta secció",
     "overriddenBaseConfig": "Sobreescrit (Configuració base)",
-    "overriddenBaseConfigTooltip": "El perfil {{profile}} substitueix la configuració d'aquesta secció"
+    "overriddenBaseConfigTooltip": "El perfil {{profile}} substitueix la configuració d'aquesta secció",
+    "overriddenInCameras": {
+      "label_one": "Sobreescrit a la càmera {{count}}",
+      "label_many": "Sobreescrit en {{count}} càmeres",
+      "label_other": "Sobreescrit en {{count}} càmeres",
+      "tooltip_one": "{{count}} la càmera anul·la els valors d'aquesta secció. Feu clic per veure els detalls.",
+      "tooltip_many": "{{count}} càmeres substitueixen els valors d'aquesta secció. Feu clic per veure els detalls.",
+      "tooltip_other": "{{count}} càmeres substitueixen els valors d'aquesta secció. Feu clic per veure els detalls.",
+      "heading_one": "Aquesta secció global té camps que estan sobreescrits a la càmera {{count}}.",
+      "heading_many": "Aquesta secció global té camps que estan sobreescrits en {{count}} càmeres.",
+      "heading_other": "Aquesta secció global té camps que estan sobreescrits en {{count}} càmeres.",
+      "othersField_one": "{{count}} altre",
+      "othersField_many": "{{count}} altres",
+      "othersField_other": "{{count}} altres",
+      "profilePrefix": "Perfil {{profile}}: {{fields}}"
+    }
   },
   "profiles": {
     "title": "Perfils",
@@ -1830,14 +1853,14 @@
       "audioDetectionDisabled": "La detecció d'àudio no està activada per a aquesta càmera. La transcripció d'àudio requereix que la detecció d'àudio estigui activa."
     },
     "detect": {
-      "fpsGreaterThanFive": "No es recomana establir el detect FPS superior a 5."
+      "fpsGreaterThanFive": "No es recomana establir el detect FPS superior a 5. Els valors més alts poden causar problemes de rendiment i no proporcionaran cap benefici."
     },
     "faceRecognition": {
-      "globalDisabled": "El reconeixement de cares no està habilitat a nivell global. Habilita-ho en la configuració global per al reconeixement facial a nivell de càmera per funcionar.",
+      "globalDisabled": "El reconeixement de cares no està habilitat a nivell global. Habilita-ho en enriquiments per al reconeixement facial a nivell de càmera per funcionar.",
       "personNotTracked": "El reconeixement de cares requereix que l'objecte 'persona' sigui rastrejat. Assegureu-vos que «persona» estigui a la llista de seguiment d'objectes."
     },
     "lpr": {
-      "globalDisabled": "El reconeixement de la matrícula no està habilitat a nivell global. Habilita-ho en la configuració global per al funcionament de LPR a nivell de càmera.",
+      "globalDisabled": "El reconeixement de la matrícula no està habilitat a nivell global. Habilita-ho en enriquiments per al funcionament de LPR a nivell de càmera.",
       "vehicleNotTracked": "El reconeixement de la matrícula requereix que es faci un seguiment del 'cotxe' o de la 'motocicleta'."
     },
     "record": {

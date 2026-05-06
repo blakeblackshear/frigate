@@ -224,8 +224,8 @@
       "aria": "Scarica istantanea pulita"
     },
     "debugReplay": {
-      "label": "Riproduzione di correzione",
-      "aria": "Visualizza questo oggetto tracciato nella vista di riproduzione di correzione"
+      "label": "Riproduzione di correzioni",
+      "aria": "Visualizza questo oggetto tracciato nella vista di riproduzione di correzioni"
     },
     "more": {
       "aria": "Altri"

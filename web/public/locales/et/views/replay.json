@@ -1,0 +1,17 @@
+{
+    "dialog": {
+        "camera": "Lähtekaamera",
+        "timeRange": "Ajavahemik",
+        "preset": {
+            "1m": "Viimase ühe minuti jooksul",
+            "5m": "Viimase viie minuti jooksul",
+            "timeline": "Ajajoonelt",
+            "custom": "Kohandatud"
+        },
+        "startButton": "Käivita kordus",
+        "selectFromTimeline": "Vali",
+        "starting": "Käivitan kordust…",
+        "startLabel": "Algus",
+        "endLabel": "Lõpp"
+    }
+}

@@ -1,0 +1,73 @@
+{
+    "audio": {
+        "global": {
+            "detection": "Globalna detekcija",
+            "sensitivity": "Globalna osjetljivost"
+        },
+        "cameras": {
+            "detection": "Detekcija",
+            "sensitivity": "Osjetljivost"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Globalno izgled"
+        },
+        "cameras": {
+            "appearance": "Izgled"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Globalna osjetljivost",
+            "algorithm": "Globalni algoritam"
+        },
+        "cameras": {
+            "sensitivity": "Osjetljivost",
+            "algorithm": "Algoritam"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Globalno prikazivanje"
+        },
+        "cameras": {
+            "display": "Prikazivanje"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Globalna rezolucija",
+            "tracking": "Globalno praćenje"
+        },
+        "cameras": {
+            "resolution": "Rezolucija",
+            "tracking": "Praćenje"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Globalno praćenje",
+            "filtering": "Globalno filtriranje"
+        },
+        "cameras": {
+            "tracking": "Praćenje",
+            "filtering": "Filtriranje"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Globalno zadržavanje",
+            "events": "Globalni događaji"
+        },
+        "cameras": {
+            "retention": "Zadržavanje",
+            "events": "Događaji"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Argumeni FFmpeg specifični za kameru"
+        }
+    }
+}

@@ -1,7 +1,8 @@
 {
   "submitFrigatePlus": {
     "submit": "제출",
-    "title": "이 프레임을 Frigate+에 제출하시겠습니까?"
+    "title": "이 프레임을 Frigate+에 제출하시겠습니까?",
+    "previewError": "스냅샷 미리보기를 불러올 수 없습니다. 현재 녹화된 영상을 사용할 수 없을 수 있습니다."
   },
   "stats": {
     "bandwidth": {

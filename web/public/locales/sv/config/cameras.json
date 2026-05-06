@@ -1,1 +1,6 @@
-{}
+{
+    "label": "Kamera konfiguration",
+    "name": {
+        "label": "Kameranamn"
+    }
+}

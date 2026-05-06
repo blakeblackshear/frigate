@@ -1,0 +1,73 @@
+{
+    "documentTitle": "变动搜索 - Frigate",
+    "title": "画面变动搜索",
+    "description": "绘制一个多边形以划定感兴趣区域，并指定时间范围，检索该区域内的异动变化。",
+    "selectCamera": "画面变动搜索正在加载中",
+    "startSearch": "开始搜索",
+    "searchStarted": "搜索已开始",
+    "searchCancelled": "搜索已取消",
+    "cancelSearch": "取消",
+    "searching": "搜索进行中。",
+    "searchComplete": "搜索完成",
+    "noResultsYet": "在所选区域内执行搜索，查找异常变化",
+    "noChangesFound": "所选区域未检测到像素变化",
+    "changesFound_other": "检测到 {{count}} 处画面变化",
+    "framesProcessed": "已处理 {{count}} 帧画面",
+    "jumpToTime": "跳转到该时间",
+    "results": "结果",
+    "showSegmentHeatmap": "热力图",
+    "newSearch": "新的搜索",
+    "clearResults": "清除结果",
+    "clearROI": "清除多边形选区",
+    "polygonControls": {
+        "points_other": "{{count}} 个点位",
+        "undo": "撤销上一个点位",
+        "reset": "重置多边形"
+    },
+    "motionHeatmapLabel": "画面变动热力图",
+    "dialog": {
+        "title": "画面变动搜索",
+        "cameraLabel": "摄像头",
+        "previewAlt": "{{camera}} 摄像头实时预览"
+    },
+    "timeRange": {
+        "title": "搜索范围",
+        "start": "开始时间",
+        "end": "结束时间"
+    },
+    "settings": {
+        "title": "搜索设置",
+        "parallelMode": "并行模式",
+        "parallelModeDesc": "同时扫描多个录制片段（速度更快，但 CPU 占用会显著升高）",
+        "threshold": "灵敏度阈值",
+        "thresholdDesc": "数值越低，可检测到越小的变化（取值范围 1-255）",
+        "minArea": "最小变化区域",
+        "minAreaDesc": "最小感兴趣区域变化占比，达到该比例才会判定为有效变动",
+        "frameSkip": "帧跳过",
+        "frameSkipDesc": "每隔 N 帧进行一次处理。将该值设置为摄像头的帧率，即可实现每秒处理一帧画面（例如：5 帧 / 秒的摄像头设为 5，30 帧 / 秒的摄像头设为 30）。数值越高处理速度越快，但有可能遗漏短时移动侦测事件。",
+        "maxResults": "最大结果数",
+        "maxResultsDesc": "匹配到设定条数的录像事件后，就自动停止检索"
+    },
+    "errors": {
+        "noCamera": "请选择摄像头",
+        "noROI": "请绘制感兴趣的区域",
+        "noTimeRange": "请选择时间范围",
+        "invalidTimeRange": "结束时间必须在开始时间之后",
+        "searchFailed": "搜索失败：{{message}}",
+        "polygonTooSmall": "多边形至少需要 3 个顶点",
+        "unknown": "未知错误"
+    },
+    "changePercentage": "{{percentage}}% 已变化",
+    "metrics": {
+        "title": "搜索指标",
+        "segmentsScanned": "已扫描片段数",
+        "segmentsProcessed": "已处理",
+        "segmentsSkippedInactive": "已跳过（无活动）",
+        "segmentsSkippedHeatmap": "已跳过（不在感兴趣区域）",
+        "fallbackFullRange": "备用全范围扫描",
+        "framesDecoded": "画面已解码",
+        "wallTime": "搜索时间",
+        "segmentErrors": "片段异常",
+        "seconds": "{{seconds}} 秒"
+    }
+}

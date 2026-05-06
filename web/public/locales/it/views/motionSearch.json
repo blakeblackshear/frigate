@@ -1,0 +1,77 @@
+{
+    "documentTitle": "Ricerca movimenti - Frigate",
+    "title": "Ricerca movimenti",
+    "description": "Disegna un poligono per definire la regione di interesse e specifica un intervallo di tempo per la ricerca di cambiamenti di movimento all'interno di tale regione.",
+    "selectCamera": "La ricerca di movimenti è in fase di caricamento",
+    "startSearch": "Avvia ricerca",
+    "searchStarted": "Ricerca avviata",
+    "searchCancelled": "Ricerca annullata",
+    "cancelSearch": "Annulla",
+    "searching": "Ricerca in corso.",
+    "searchComplete": "Ricerca completata",
+    "noResultsYet": "Esegui una ricerca per trovare le variazioni di movimento nella regione selezionata",
+    "noChangesFound": "Nessuna modifica dei pixel rilevata nella regione selezionata",
+    "changesFound_one": "Trovato {{count}} cambiamento di movimento",
+    "changesFound_many": "Trovati {{count}} cambiamenti di movimento",
+    "changesFound_other": "Trovati {{count}} cambiamenti di movimento",
+    "framesProcessed": "{{count}} fotogrammi elaborati",
+    "jumpToTime": "Vai a questo momento",
+    "results": "Risultati",
+    "showSegmentHeatmap": "Mappa di calore",
+    "newSearch": "Nuova ricerca",
+    "clearResults": "Pulisci risultati",
+    "clearROI": "Pulisci poligono",
+    "polygonControls": {
+        "points_one": "{{count}} punto",
+        "points_many": "{{count}} punti",
+        "points_other": "{{count}} punti",
+        "undo": "Annulla ultimo punto",
+        "reset": "Reimposta poligono"
+    },
+    "motionHeatmapLabel": "Mappa di calore del movimento",
+    "dialog": {
+        "title": "Ricerca di movimento",
+        "cameraLabel": "Telecamera",
+        "previewAlt": "Anteprima della telecamera per {{camera}}"
+    },
+    "timeRange": {
+        "title": "Intervallo di ricerca",
+        "start": "Ora di inizio",
+        "end": "Ora di fine"
+    },
+    "settings": {
+        "title": "Impostazioni di ricerca",
+        "parallelMode": "Modalità parallela",
+        "parallelModeDesc": "Scansiona più segmenti di registrazione contemporaneamente (più veloce, ma richiede un utilizzo della CPU significativamente maggiore)",
+        "threshold": "Soglia di sensibilità",
+        "thresholdDesc": "Valori più bassi indicano cambiamenti minori (1-255)",
+        "minArea": "Area di cambio minimo",
+        "minAreaDesc": "Percentuale minima della regione di interesse che deve cambiare per essere considerata significativa",
+        "frameSkip": "Salta fotogrammi",
+        "frameSkipDesc": "Elabora ogni N-esimo fotogramma. Imposta questo valore sulla frequenza dei fotogrammi della tua telecamera per elaborare un fotogramma al secondo (ad esempio, 5 per una telecamera a 5 FPS, 30 per una telecamera a 30 FPS). Valori più alti saranno più veloci, ma potrebbero perdere eventi di movimento brevi.",
+        "maxResults": "Risultati massimi",
+        "maxResultsDesc": "Interrompi dopo questo numero di orario corrispondenti"
+    },
+    "errors": {
+        "noCamera": "Seleziona una telecamera",
+        "noROI": "Disegna una regione di interesse",
+        "noTimeRange": "Seleziona un intervallo di tempo",
+        "invalidTimeRange": "L'ora di fine deve essere successiva all'ora di inizio",
+        "searchFailed": "Ricerca non riuscita: {{message}}",
+        "polygonTooSmall": "Il poligono deve avere almeno 3 punti",
+        "unknown": "Errore sconosciuto"
+    },
+    "changePercentage": "{{percentage}}% modificato",
+    "metrics": {
+        "title": "Metriche di ricerca",
+        "segmentsScanned": "Segmenti scansionati",
+        "segmentsProcessed": "Elaborati",
+        "segmentsSkippedInactive": "Saltati (nessuna attività)",
+        "segmentsSkippedHeatmap": "Saltati (nessuna sovrapposizione del ROI)",
+        "fallbackFullRange": "Scansione gamma completa alternativa",
+        "framesDecoded": "Fotogrammi decodificati",
+        "wallTime": "Tempo di ricerca",
+        "segmentErrors": "Errori di segmento",
+        "seconds": "{{seconds}}s"
+    }
+}

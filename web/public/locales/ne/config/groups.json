@@ -1,0 +1,17 @@
+{
+    "audio": {
+        "global": {
+            "detection": "विश्वव्यापी पत्ता-लगाउने",
+            "sensitivity": "विश्वव्यापी संवेदनशीलता"
+        },
+        "cameras": {
+            "detection": "पत्ता-लगाउने",
+            "sensitivity": "संवेदनशीलता"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "विश्वव्यापी उपस्थिति"
+        }
+    }
+}

@@ -1,0 +1,59 @@
+{
+    "title": "Riproduzione correzioni",
+    "description": "Riproduci le registrazioni della telecamera per le correzioni. L'elenco degli oggetti mostra un riepilogo ritardato degli oggetti rilevati e la scheda Messaggi mostra un flusso di messaggi interni di Frigate tratti dal filmato riprodotto.",
+    "websocket_messages": "Messaggi",
+    "dialog": {
+        "title": "Avvia la riproduzione delle correzioni",
+        "description": "Crea una telecamera di riproduzione temporanea che riproduca in ciclo i filmati storici per la correzione dei problemi di rilevamento e tracciamento degli oggetti. La telecamera di riproduzione avrà la stessa configurazione di rilevamento della telecamera sorgente. Scegli un intervallo di tempo da cui iniziare.",
+        "camera": "Telecamera sorgente",
+        "timeRange": "Intervallo di tempo",
+        "preset": {
+            "1m": "Ultimo minuto",
+            "5m": "Ultimi 5 minuti",
+            "timeline": "Dalla cronologia",
+            "custom": "Personalizza"
+        },
+        "startButton": "Avvia riproduzione",
+        "selectFromTimeline": "Seleziona",
+        "starting": "Avvio riproduzione...",
+        "startLabel": "Inizio",
+        "endLabel": "Fine",
+        "toast": {
+            "error": "Impossibile avviare la riproduzione di correzioni: {{error}}",
+            "alreadyActive": "È già attiva una sessione di riproduzione",
+            "stopError": "Impossibile interrompere la riproduzione di correzioni: {{error}}",
+            "goToReplay": "Vai alla riproduzione"
+        }
+    },
+    "page": {
+        "noSession": "Nessuna sessione di riproduzione di correzioni attiva",
+        "noSessionDesc": "Avvia una riproduzione di correzioni dalla visualizzazione Cronologia facendo clic sul pulsante Azioni nella barra degli strumenti e scegliendo Riproduzione di correzioni.",
+        "goToRecordings": "Vai alla Cronologia",
+        "preparingClip": "Preparazione video…",
+        "preparingClipDesc": "Frigate sta unendo le registrazioni relative all'intervallo di tempo selezionato. Questa operazione può richiedere un minuto per intervalli più lunghi.",
+        "startingCamera": "Avvio della riproduzione di correzioni…",
+        "startError": {
+            "title": "Impossibile avviare la riproduzione di correzioni",
+            "back": "Torna alla Cronologia"
+        },
+        "sourceCamera": "Telecamera sorgente",
+        "replayCamera": "Telecamera di riproduzione",
+        "initializingReplay": "Inizializzazione riproduzione di correzioni...",
+        "stoppingReplay": "Interruzione riproduzione di correzioni...",
+        "stopReplay": "Ferma riproduzione",
+        "confirmStop": {
+            "title": "Interrompere la riproduzione di correzioni?",
+            "description": "In questo modo la sessione verrà interrotta e tutti i dati temporanei verranno eliminati. Sei sicuro?",
+            "confirm": "Ferma riproduzione",
+            "cancel": "Annulla"
+        },
+        "activity": "Attività",
+        "objects": "Elenco oggetti",
+        "audioDetections": "Rilevamento audio",
+        "noActivity": "Nessuna attività rilevata",
+        "activeTracking": "Tracciamento attivo",
+        "noActiveTracking": "Nessun tracciamento attivo",
+        "configuration": "Configurazione",
+        "configurationDesc": "Regola con precisione le impostazioni di rilevamento del movimento e tracciamento degli oggetti per la telecamera Riproduzione di correzioni. Nessuna modifica verrà salvata nel file di configurazione di Frigate."
+    }
+}

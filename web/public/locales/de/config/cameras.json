@@ -537,6 +537,10 @@
             "hwaccel_args": {
                 "label": "hwaccel-Argumente exportieren",
                 "description": "Argumente für die Hardwarebeschleunigung bei Export- und Transkodierungsvorgängen."
+            },
+            "max_concurrent": {
+                "label": "Maximale Anzahl gleichzeitiger Exporte",
+                "description": "Maximale Anzahl der gleichzeitig zu verarbeitenden Exportaufträge."
             }
         },
         "preview": {
