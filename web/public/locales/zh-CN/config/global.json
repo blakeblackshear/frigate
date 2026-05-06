@@ -522,8 +522,8 @@
                 "description": "为摄像头 ffmpeg 进程和检测器启用按进程网络带宽监控（需要权限）。"
             },
             "intel_gpu_device": {
-                "label": "SR-IOV 设备",
-                "description": "将 Intel GPU 视为 SR-IOV 时使用的设备标识符，用于修复 GPU 统计信息。"
+                "label": "Intel GPU 设备",
+                "description": "当系统存在多个 Intel 显卡时，用于将显卡运行数据绑定到指定设备的 PCI 总线地址或 DRM 设备路径（示例：/dev/dri/card1）。"
             }
         },
         "version_check": {
@@ -1735,6 +1735,10 @@
             "hwaccel_args": {
                 "label": "导出硬件加速参数",
                 "description": "用于导出/转码操作的硬件加速参数。"
+            },
+            "max_concurrent": {
+                "label": "最大并发导出数",
+                "description": "同时可处理的最大导出任务数量。"
             }
         },
         "preview": {

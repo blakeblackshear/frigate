@@ -516,6 +516,10 @@
             "hwaccel_args": {
                 "label": "导出硬件加速参数",
                 "description": "用于导出/转码操作的硬件加速参数。"
+            },
+            "max_concurrent": {
+                "label": "最大并发导出数",
+                "description": "同时可处理的最大导出任务数量。"
             }
         },
         "preview": {
