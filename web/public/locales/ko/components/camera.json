@@ -81,6 +81,7 @@
     "zones": "구역 (Zones)",
     "mask": "마스크",
     "motion": "움직임",
-    "regions": "영역 (Regions)"
+    "regions": "영역 (Regions)",
+    "paths": "경로"
   }
 }
