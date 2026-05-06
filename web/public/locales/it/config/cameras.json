@@ -47,7 +47,8 @@
     "ffmpeg": {
         "path": {
             "label": "Percorso FFmpeg"
-        }
+        },
+        "label": "FFmpeg"
     },
     "audio_transcription": {
         "label": "Trascrizione audio",
@@ -55,6 +56,13 @@
         "enabled": {
             "label": "Abilita la trascrizione",
             "description": "Abilita o disabilita la trascrizione manuale degli eventi audio."
+        },
+        "enabled_in_config": {
+            "label": "Stato di trascrizione originale"
+        },
+        "live_enabled": {
+            "label": "Trascrizione dal vivo",
+            "description": "Abilita la trascrizione in diretta dell'audio non appena viene ricevuto."
         }
     },
     "mqtt": {
@@ -101,6 +109,78 @@
         },
         "ignore_time_mismatch": {
             "label": "Ignora la discrepanza oraria"
+        },
+        "label": "ONVIF"
+    },
+    "detect": {
+        "label": "Rilevamento oggetti"
+    },
+    "face_recognition": {
+        "label": "Riconoscimento facciale"
+    },
+    "review": {
+        "label": "Revisiona"
+    },
+    "profiles": {
+        "label": "Profili"
+    },
+    "record": {
+        "label": "Registrazione"
+    },
+    "snapshots": {
+        "label": "Istantanee"
+    },
+    "motion": {
+        "label": "Rilevamento movimento"
+    },
+    "objects": {
+        "label": "Oggetti"
+    },
+    "live": {
+        "label": "Riproduzione in diretta"
+    },
+    "timestamp_style": {
+        "label": "Stile orario"
+    },
+    "notifications": {
+        "label": "Notifiche",
+        "enabled": {
+            "label": "Abilita le notifiche"
+        },
+        "email": {
+            "label": "Email di notifica",
+            "description": "Indirizzo email utilizzato per le notifiche push o richiesto da alcuni fornitori di servizi di notifica."
+        },
+        "cooldown": {
+            "label": "Periodo di raffreddamento",
+            "description": "Tempo di attesa (in secondi) tra le notifiche per evitare di inviare spam ai destinatari."
+        },
+        "enabled_in_config": {
+            "label": "Stato delle notifiche originali",
+            "description": "Indica se le notifiche erano abilitate nella configurazione statica originale."
         }
+    },
+    "birdseye": {
+        "label": "Birdseye"
+    },
+    "semantic_search": {
+        "label": "Ricerca semantica",
+        "triggers": {
+            "label": "Inneschi"
+        }
+    },
+    "lpr": {
+        "label": "Riconoscimento targhe"
+    },
+    "ui": {
+        "description": "Visualizza l'ordine e la visibilità di questa telecamera nell'interfaccia utente. L'ordine influisce sul cruscotto predefinito. Per un controllo più granulare, utilizza i gruppi di telecamere.",
+        "order": {
+            "description": "L'ordine numerico viene utilizzato per ordinare le telecamere nell'interfaccia utente (cruscotto ed elenchi predefiniti); i numeri più grandi compaiono successivamente."
+        },
+        "dashboard": {
+            "label": "Mostra nell'interfaccia utente",
+            "description": "Abilita o disabilita la visualizzazione di questa telecamera in ogni punto dell'interfaccia utente di Frigate. Disabilitando questa opzione, sarà necessario modificare manualmente la configurazione per visualizzare nuovamente la telecamera nell'interfaccia utente."
+        },
+        "label": "Interfaccia utente telecamera"
     }
 }

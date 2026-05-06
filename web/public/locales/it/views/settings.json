@@ -9,7 +9,7 @@
     "object": "Correzioni - Frigate",
     "general": "Impostazioni interfaccia - Frigate",
     "frigatePlus": "Impostazioni Frigate+ - Frigate",
-    "notifications": "Impostazioni di notifiche - Frigate",
+    "notifications": "Impostazioni di notifica - Frigate",
     "enrichments": "Impostazioni di miglioramento - Frigate",
     "cameraManagement": "Gestisci telecamere - Frigate",
     "cameraReview": "Impostazioni revisione telecamera - Frigate",
@@ -393,23 +393,72 @@
     "triggers": "Inneschi",
     "roles": "Ruoli",
     "cameraManagement": "Gestione",
-    "cameraReview": "Rivedi",
+    "cameraReview": "Revisiona",
     "profiles": "Profili",
     "general": "Generale",
     "globalConfig": "Configurazione globale",
     "system": "Sistema",
     "integrations": "Integrazioni",
-    "uiSettings": "Impostazioni interfaccia utente"
+    "uiSettings": "Impostazioni interfaccia utente",
+    "globalDetect": "Rilevamento oggetti",
+    "globalRecording": "Registrazione",
+    "globalSnapshots": "Istantanee",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Rilevamento movimento",
+    "globalObjects": "Oggetti",
+    "globalReview": "Revisiona",
+    "globalAudioEvents": "Eventi audio",
+    "globalLivePlayback": "Riproduzione in diretta",
+    "globalTimestampStyle": "Stile orario",
+    "systemDatabase": "Database",
+    "systemTls": "TLS",
+    "systemAuthentication": "Autenticazione",
+    "systemNetworking": "Reti",
+    "systemProxy": "Proxy",
+    "systemUi": "Interfaccia utente",
+    "systemLogging": "Registro",
+    "systemEnvironmentVariables": "Variabili d'ambiente",
+    "systemTelemetry": "Telemetria",
+    "systemBirdseye": "Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorHardware": "Hardware di rilevamento",
+    "systemDetectionModel": "Modello di rilevamento",
+    "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "Flussi go2rtc",
+    "integrationSemanticSearch": "Ricerca semantica",
+    "integrationGenerativeAi": "IA Generativa",
+    "integrationFaceRecognition": "Riconoscimento facciale",
+    "integrationLpr": "Riconoscimento targhe",
+    "integrationObjectClassification": "Classificazione oggetti",
+    "integrationAudioTranscription": "Trascrizione audio",
+    "cameraDetect": "Rilevamento oggetti",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "Registrazione",
+    "cameraSnapshots": "Istantanee",
+    "cameraMotion": "Rilevamento movimento",
+    "cameraObjects": "Oggetti",
+    "cameraConfigReview": "Revisiona",
+    "cameraAudioEvents": "Eventi audio",
+    "cameraAudioTranscription": "Trascrizione audio",
+    "cameraNotifications": "Notifiche",
+    "cameraLivePlayback": "Riproduzione in diretta",
+    "cameraBirdseye": "Birdseye",
+    "cameraFaceRecognition": "Riconoscimento facciale",
+    "cameraLpr": "Riconoscimento targhe",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraTimestampStyle": "Stile orario",
+    "cameraUi": "Interfaccia utente telecamera"
   },
   "users": {
     "dialog": {
       "changeRole": {
         "roleInfo": {
-          "viewerDesc": "Limitato solo alle schermate dal vivo, alle revisioni, alle esplorazioni e alle esportazioni.",
+          "viewerDesc": "Limitato solo ai cruscotti dal vivo, alle revisioni, alle esplorazioni e alle esportazioni.",
           "intro": "Seleziona il ruolo appropriato per questo utente:",
           "admin": "Amministratore",
           "adminDesc": "Accesso completo a tutte le funzionalità.",
-          "viewer": "Spettatore",
+          "viewer": "Visualizzatore",
           "customDesc": "Ruolo personalizzato con accesso specifico alla telecamera."
         },
         "title": "Cambia ruolo utente",
@@ -520,14 +569,14 @@
   "general": {
     "liveDashboard": {
       "automaticLiveView": {
-        "desc": "Passa automaticamente alla visualizzazione dal vivo di una telecamera quando viene rilevata attività. Disabilitando questa opzione, le immagini statiche della telecamera nella schermata dal vivo verranno aggiornate solo una volta al minuto.",
+        "desc": "Passa automaticamente alla visualizzazione dal vivo di una telecamera quando viene rilevata attività. Disabilitando questa opzione, le immagini statiche della telecamera nel cruscotto dal vivo verranno aggiornate solo una volta al minuto.",
         "label": "Visualizzazione automatica dal vivo"
       },
       "playAlertVideos": {
         "label": "Riproduci video di avvisi",
-        "desc": "Per impostazione predefinita, gli avvisi recenti nella schermata dal vivo vengono riprodotti come brevi video in ciclo. Disabilita questa opzione per visualizzare solo un'immagine statica degli avvisi recenti su questo dispositivo/browser."
+        "desc": "Per impostazione predefinita, gli avvisi recenti nel cruscotto dal vivo vengono riprodotti come brevi video in ciclo. Disabilita questa opzione per visualizzare solo un'immagine statica degli avvisi recenti su questo dispositivo/browser."
       },
-      "title": "Schermata dal vivo",
+      "title": "Cruscotto dal vivo",
       "displayCameraNames": {
         "label": "Mostra sempre i nomi delle telecamere",
         "desc": "Mostra sempre i nomi delle telecamere in una scheda nel cruscotto della visualizzazione dal vivo multi telecamera."
@@ -537,7 +586,7 @@
         "desc": "Quando la trasmissione dal vivo ad alta qualità di una telecamera non è disponibile, dopo questo numero di secondi torna alla modalità a bassa larghezza di banda. Valore predefinito: 3."
       }
     },
-    "title": "Impostazioni interfaccia",
+    "title": "Impostazioni interfaccia utente",
     "storedLayouts": {
       "title": "Formati memorizzati",
       "desc": "La disposizione delle telecamere in un gruppo può essere trascinata/ridimensionata. Le posizioni vengono salvate nella memoria locale del browser.",
@@ -639,7 +688,7 @@
   },
   "dialog": {
     "unsavedChanges": {
-      "title": "Ci sono modifiche non salvate.",
+      "title": "Sono presenti modifiche non salvate.",
       "desc": "Vuoi salvare le modifiche prima di continuare?"
     }
   },
@@ -912,8 +961,8 @@
   },
   "roles": {
     "management": {
-      "title": "Gestione del ruolo di spettatore",
-      "desc": "Gestisci i ruoli di spettatori personalizzati e le relative autorizzazioni di accesso alla telecamera per questa istanza Frigate."
+      "title": "Gestione del ruolo di visualizzatore",
+      "desc": "Gestisci i ruoli di visualizzatori personalizzati e le relative autorizzazioni di accesso alla telecamera per questa istanza Frigate."
     },
     "addRole": "Aggiungi ruolo",
     "table": {
@@ -929,9 +978,9 @@
         "createRole": "Ruolo {{role}} creato con successo",
         "updateCameras": "Telecamere aggiornate per il ruolo {{role}}",
         "deleteRole": "Ruolo {{role}} eliminato con successo",
-        "userRolesUpdated_one": "{{count}} utente assegnato a questo ruolo è stato aggiornato a \"spettatore\", che ha accesso a tutte le telecamere.",
-        "userRolesUpdated_many": "{{count}} utenti assegnati a questo ruolo sono stati aggiornati a \"spettatore\", che ha accesso a tutte le telecamere.",
-        "userRolesUpdated_other": "{{count}} utenti assegnati a questo ruolo sono stati aggiornati a \"spettatore\", che ha accesso a tutte le telecamere."
+        "userRolesUpdated_one": "{{count}} utente assegnato a questo ruolo è stato aggiornato a \"visualizzatore\", che ha accesso a tutte le telecamere.",
+        "userRolesUpdated_many": "{{count}} utenti assegnati a questo ruolo sono stati aggiornati a \"visualizzatore\", che ha accesso a tutte le telecamere.",
+        "userRolesUpdated_other": "{{count}} utenti assegnati a questo ruolo sono stati aggiornati a \"visualizzatore\", che ha accesso a tutte le telecamere."
       },
       "error": {
         "createRoleFailed": "Impossibile creare il ruolo: {{errorMessage}}",
@@ -951,7 +1000,7 @@
       },
       "deleteRole": {
         "title": "Elimina ruolo",
-        "desc": "Questa azione non può essere annullata. Ciò eliminerà definitivamente il ruolo e assegnerà a tutti gli utenti il ruolo di 'spettatore', che darà loro accesso a tutte le telecamere.",
+        "desc": "Questa azione non può essere annullata. Ciò eliminerà definitivamente il ruolo e assegnerà a tutti gli utenti il ruolo di 'visualizzatore', che darà loro accesso a tutte le telecamere.",
         "warn": "Sei sicuro di voler eliminare <strong>{{role}}</strong>?",
         "deleting": "Eliminazione in corso..."
       },
@@ -975,15 +1024,15 @@
   "cameraReview": {
     "title": "Impostazioni revisione telecamera",
     "object_descriptions": {
-      "title": "Descrizioni oggetti IA generativa",
+      "title": "Descrizioni oggetti IA Generativa",
       "desc": "Abilita/disabilita temporaneamente le descrizioni degli oggetti generate dall'IA per questa telecamera fino al riavvio di Frigate. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli oggetti tracciati su questa telecamera."
     },
     "review_descriptions": {
-      "title": "Descrizioni revisioni IA generativa",
+      "title": "Descrizioni revisioni IA Generativa",
       "desc": "Abilita/disabilita temporaneamente le descrizioni di revisione generate dall'IA per questa telecamera fino al riavvio di Frigate. Se disabilitate, le descrizioni generate dall'IA non saranno richieste per gli elementi di revisione su questa telecamera."
     },
     "review": {
-      "title": "Rivedi",
+      "title": "Revisiona",
       "desc": "Abilita/disabilita temporaneamente avvisi e rilevamenti per questa telecamera fino al riavvio di Frigate. Se disabilitato, non verranno generati nuovi elementi di revisione. ",
       "alerts": "Avvisi ",
       "detections": "Rilevamenti "
@@ -1067,7 +1116,7 @@
       "quality": "Qualità",
       "selectQuality": "Seleziona la qualità",
       "roleLabels": {
-        "detect": "Rilevamento di oggetti",
+        "detect": "Rilevamento oggetti",
         "record": "Registrazione",
         "audio": "Audio"
       },
@@ -1329,6 +1378,58 @@
     "overriddenGlobal": "Sovrascritto (Globale)",
     "overriddenGlobalTooltip": "Questa telecamera sovrascrive le impostazioni di configurazione globali in questa sezione",
     "overriddenBaseConfig": "Sovrascritto (Configurazione di base)",
-    "overriddenBaseConfigTooltip": "Il profilo {{profile}} sovrascrive le impostazioni di configurazione in questa sezione"
+    "overriddenBaseConfigTooltip": "Il profilo {{profile}} sovrascrive le impostazioni di configurazione in questa sezione",
+    "overriddenInCameras": {
+      "label_one": "Sovrascritto in {{count}} telecamera",
+      "label_many": "Sovrascritto in {{count}} telecamere",
+      "label_other": "Sovrascritto in {{count}} telecamere",
+      "tooltip_one": "{{count}} telecamera sovrascrive i valori in questa sezione. Fai clic per visualizzare i dettagli.",
+      "tooltip_many": "{{count}} telecamere sovrascrivono i valori in questa sezione. Fai clic per visualizzare i dettagli.",
+      "tooltip_other": "{{count}} telecamere sovrascrivono i valori in questa sezione. Fai clic per visualizzare i dettagli.",
+      "heading_one": "Questa sezione globale contiene campi che vengono sovrascritti in {{count}} telecamera.",
+      "heading_many": "Questa sezione globale contiene campi che vengono sovrascritti in {{count}} telecamere.",
+      "heading_other": "Questa sezione globale contiene campi che vengono sovrascritti in {{count}} telecamere.",
+      "othersField_one": "{{count}} altro",
+      "othersField_many": "{{count}} altri",
+      "othersField_other": "{{count}} altri",
+      "profilePrefix": "Profilo {{profile}}: {{fields}}"
+    }
+  },
+  "go2rtcStreams": {
+    "title": "Flussi go2rtc"
+  },
+  "configForm": {
+    "sections": {
+      "review": "Revisiona",
+      "record": "Registrazione",
+      "snapshots": "Istantanee",
+      "ffmpeg": "FFmpeg",
+      "objects": "Oggetti",
+      "database": "Database",
+      "mqtt": "MQTT",
+      "notifications": "Notifiche",
+      "tls": "TLS",
+      "auth": "Autenticazione",
+      "proxy": "Proxy",
+      "telemetry": "Telemetria",
+      "birdseye": "Birdseye",
+      "semantic_search": "Ricerca semantica",
+      "lpr": "Riconoscimento targhe",
+      "face_recognition": "Riconoscimento facciale",
+      "masksAndZones": "Maschere / Zone"
+    },
+    "tabs": {
+      "system": "Sistema",
+      "integrations": "Integrazioni"
+    }
+  },
+  "globalConfig": {
+    "title": "Configurazione globale"
+  },
+  "cameraConfig": {
+    "title": "Impostazioni telecamera"
+  },
+  "profiles": {
+    "title": "Profili"
   }
 }

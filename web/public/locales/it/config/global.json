@@ -44,7 +44,7 @@
     "logger": {
         "description": "Consente di controllare il livello di dettaglio predefinito dei registri e le opzioni di sovrascrittura per ciascun componente.",
         "default": {
-            "label": "Livello di registrazione",
+            "label": "Livello del registro",
             "description": "Livello di dettaglio predefinito del registro globale (debug, info, warning, error)."
         },
         "logs": {
@@ -86,12 +86,17 @@
         },
         "roles": {
             "label": "Mappatura dei ruoli"
+        },
+        "failed_login_rate_limit": {
+            "label": "Limiti di accesso non riusciti",
+            "description": "Regole di limitazione della frequenza per i tentativi di accesso non riusciti al fine di ridurre gli attacchi di forza bruta."
         }
     },
     "ffmpeg": {
         "path": {
             "label": "Percorso FFmpeg"
-        }
+        },
+        "label": "FFmpeg"
     },
     "detectors": {
         "cpu": {
@@ -99,19 +104,25 @@
                 "label": "Numero di processi di rilevamento",
                 "description": "Il numero di processi utilizzati per l'inferenza basata sulla CPU."
             }
-        }
+        },
+        "label": "Hardware di rilevamento"
     },
     "audio_transcription": {
         "label": "Trascrizione audio",
         "description": "Impostazioni per la trascrizione audio in tempo reale e del parlato utilizzata per eventi e sottotitoli in tempo reale.",
         "enabled": {
             "label": "Abilita la trascrizione audio"
+        },
+        "live_enabled": {
+            "label": "Trascrizione dal vivo",
+            "description": "Abilita la trascrizione in diretta dell'audio non appena viene ricevuto."
         }
     },
     "mqtt": {
         "label": "MQTT",
         "enabled": {
-            "label": "Abilita MQTT"
+            "label": "Abilita MQTT",
+            "description": "Abilita o disabilita l'integrazione MQTT per stato, eventi e istantanee."
         },
         "host": {
             "label": "Sistema MQTT",
@@ -122,13 +133,16 @@
             "description": "Porta del broker MQTT (solitamente 1883 per MQTT standard)."
         },
         "topic_prefix": {
-            "label": "Prefisso argomento"
+            "label": "Prefisso argomento",
+            "description": "Prefisso dell'argomento MQTT per tutti gli argomenti Frigate; deve essere univoco se si eseguono più istanze."
         },
         "client_id": {
-            "label": "ID client"
+            "label": "ID client",
+            "description": "Identificativo del client utilizzato per la connessione al broker MQTT; deve essere univoco per ogni istanza."
         },
         "stats_interval": {
-            "label": "Intervallo statistiche"
+            "label": "Intervallo statistiche",
+            "description": "Intervallo in secondi per la pubblicazione delle statistiche di sistema e della telecamera su MQTT."
         },
         "user": {
             "label": "Nome utente MQTT",
@@ -143,7 +157,21 @@
             "description": "Percorso al certificato CA per le connessioni TLS al broker (per certificati autofirmati)."
         },
         "tls_client_cert": {
-            "label": "Certificato client"
+            "label": "Certificato client",
+            "description": "Percorso del certificato client per l'autenticazione reciproca TLS; non impostare nome utente/password quando si utilizzano certificati client."
+        },
+        "description": "Impostazioni per la connessione e la pubblicazione di dati di telemetria, istantanee e dettagli degli eventi a un broker MQTT.",
+        "tls_client_key": {
+            "label": "Chiave client",
+            "description": "Percorso della chiave privata per il certificato client."
+        },
+        "tls_insecure": {
+            "label": "TLS non sicuro",
+            "description": "Consenti connessioni TLS non sicure saltando la verifica del nome sistema (sconsigliato)."
+        },
+        "qos": {
+            "label": "QoS MQTT",
+            "description": "Livello di qualità del servizio per le pubblicazioni/sottoscrizioni MQTT (0, 1 o 2)."
         }
     },
     "onvif": {
@@ -187,6 +215,171 @@
         },
         "ignore_time_mismatch": {
             "label": "Ignora la discrepanza oraria"
+        },
+        "label": "ONVIF"
+    },
+    "detect": {
+        "label": "Rilevamento oggetti"
+    },
+    "face_recognition": {
+        "label": "Riconoscimento facciale"
+    },
+    "proxy": {
+        "logout_url": {
+            "description": "URL per reindirizzare gli utenti al momento della registrazione tramite il proxy.",
+            "label": "URL di disconnessione"
+        },
+        "label": "Proxy",
+        "description": "Impostazioni per l'integrazione di Frigate dietro un proxy inverso che trasmette le intestazioni utente autenticate.",
+        "header_map": {
+            "label": "Mappatura dell'intestazione",
+            "description": "Mappa le intestazioni proxy in entrata ai campi utente e ruolo di Frigate per l'autenticazione basata su proxy.",
+            "user": {
+                "label": "Intestazione utente",
+                "description": "Intestazione contenente il nome utente autenticato fornito dal proxy a monte."
+            },
+            "role": {
+                "label": "Intestazione ruolo",
+                "description": "Intestazione contenente il ruolo o i gruppi dell'utente autenticato, provenienti dal proxy a monte."
+            },
+            "role_map": {
+                "label": "Mappatura dei ruoli",
+                "description": "Mappa i valori dei gruppi a monte dei ruoli di Frigate (ad esempio, mappa i gruppi di amministrazione al ruolo di amministratore)."
+            }
+        },
+        "auth_secret": {
+            "label": "Segreto di proxy",
+            "description": "Segreto opzionale verificato rispetto all'intestazione X-Proxy-Secret per convalidare i proxy attendibili."
+        },
+        "default_role": {
+            "label": "Ruolo predefinito",
+            "description": "Ruolo predefinito assegnato agli utenti autenticati tramite proxy quando non si applica alcuna mappatura dei ruoli (amministratore o visualizzatore)."
+        }
+    },
+    "review": {
+        "label": "Revisiona"
+    },
+    "ui": {
+        "label": "Interfaccia utente",
+        "description": "Preferenze dell'interfaccia utente come fuso orario, formato di data/ora e unità di misura."
+    },
+    "profiles": {
+        "label": "Profili"
+    },
+    "record": {
+        "label": "Registrazione"
+    },
+    "snapshots": {
+        "label": "Istantanee"
+    },
+    "motion": {
+        "label": "Rilevamento movimento"
+    },
+    "objects": {
+        "label": "Oggetti"
+    },
+    "live": {
+        "label": "Riproduzione in diretta"
+    },
+    "timestamp_style": {
+        "label": "Stile orario"
+    },
+    "database": {
+        "label": "Database",
+        "description": "Impostazioni per il database SQLite utilizzato da Frigate per memorizzare i metadati relativi agli oggetti tracciati e alle registrazioni.",
+        "path": {
+            "label": "Percorso del database",
+            "description": "Percorso del filesystem in cui verrà memorizzato il file del database Frigate SQLite."
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "Impostazioni per il servizio di ritrasmissione integrato go2rtc utilizzato per la ritrasmissione e la traduzione di flussi dal vivo."
+    },
+    "camera_mqtt": {
+        "label": "MQTT"
+    },
+    "notifications": {
+        "label": "Notifiche",
+        "description": "Impostazioni per abilitare e controllare le notifiche per tutte le telecamere; possono essere modificate per ogni singola telecamera.",
+        "enabled": {
+            "label": "Abilita le notifiche",
+            "description": "Abilita o disabilita le notifiche per tutte le telecamere; l'impostazione può essere modificata per ogni singola telecamera."
+        },
+        "email": {
+            "label": "Email di notifica",
+            "description": "Indirizzo email utilizzato per le notifiche push o richiesto da alcuni fornitori di servizi di notifica."
+        },
+        "cooldown": {
+            "label": "Periodo di raffreddamento",
+            "description": "Tempo di attesa (in secondi) tra le notifiche per evitare di inviare spam ai destinatari."
+        },
+        "enabled_in_config": {
+            "label": "Stato delle notifiche originali",
+            "description": "Indica se le notifiche erano abilitate nella configurazione statica originale."
+        }
+    },
+    "networking": {
+        "label": "Reti",
+        "description": "Impostazioni relative alla rete, come l'abilitazione di IPv6 per i dispositivi Frigate.",
+        "ipv6": {
+            "label": "Configurazione IPv6",
+            "description": "Impostazioni specifiche IPv6 per i servizi di rete Frigate.",
+            "enabled": {
+                "label": "Abilita IPv6",
+                "description": "Abilita il supporto IPv6 per i servizi Frigate (API e interfaccia utente) ove applicabile."
+            }
+        },
+        "listen": {
+            "label": "Configurazione delle porte di ascolto",
+            "description": "Configurazione per le porte di ascolto interne ed esterne. Questa sezione è destinata agli utenti esperti. Per la maggior parte dei casi, si consiglia di modificare la sezione relativa alle porte nel file Docker Compose.",
+            "internal": {
+                "label": "Porta interna",
+                "description": "Porta di ascolto interna per Frigate (predefinita 5000)."
+            },
+            "external": {
+                "label": "Porta esterna",
+                "description": "Porta di ascolto esterna per Frigate (predefinita 8971)."
+            }
+        }
+    },
+    "tls": {
+        "label": "TLS"
+    },
+    "telemetry": {
+        "label": "Telemetria"
+    },
+    "birdseye": {
+        "label": "Birdseye"
+    },
+    "model": {
+        "label": "Modello di rilevamento"
+    },
+    "semantic_search": {
+        "label": "Ricerca semantica",
+        "triggers": {
+            "label": "Inneschi"
+        }
+    },
+    "lpr": {
+        "label": "Riconoscimento targhe"
+    },
+    "classification": {
+        "label": "Classificazione oggetti"
+    },
+    "genai": {
+        "roles": {
+            "label": "Ruoli"
+        }
+    },
+    "camera_ui": {
+        "description": "Visualizza l'ordine e la visibilità di questa telecamera nell'interfaccia utente. L'ordine influisce sul cruscotto predefinito. Per un controllo più granulare, utilizza i gruppi di telecamere.",
+        "order": {
+            "description": "L'ordine numerico viene utilizzato per ordinare le telecamere nell'interfaccia utente (cruscotto ed elenchi predefiniti); i numeri più grandi compaiono successivamente."
+        },
+        "dashboard": {
+            "label": "Mostra nell'interfaccia utente",
+            "description": "Abilita o disabilita la visualizzazione di questa telecamera in ogni punto dell'interfaccia utente di Frigate. Disabilitando questa opzione, sarà necessario modificare manualmente la configurazione per visualizzare nuovamente la telecamera nell'interfaccia utente."
         }
     }
 }
