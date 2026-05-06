@@ -1,7 +1,7 @@
 {
     "version": {
         "label": "Version actuelle de la configuration",
-        "description": "Version numérique ou sous forme de chaîne de la configuration active, permettant de détecter les migrations ou les changements de format"
+        "description": "Version numérique ou textuelle de la configuration active, utilisée pour aider à détecter les migrations ou les changements de format."
     },
     "safe_mode": {
         "label": "Mode sans échec",
@@ -86,6 +86,31 @@
     "birdseye": {
         "quality": {
             "label": "Qualité d'encodage"
+        }
+    },
+    "detect": {
+        "enabled": {
+            "label": "Activer la détection d'objet"
+        }
+    },
+    "motion": {
+        "skip_motion_threshold": {
+            "label": "Ignorer le seuil de détection de mouvement",
+            "description": "Si une valeur entre 0,0 et 1,0 est définie, et que plus de cette fraction de l'image change en une seule trame, le détecteur ne retournera aucune zone de mouvement et se recalibrera immédiatement. Cela peut économiser du CPU et réduire les faux positifs lors d'éclairs, d'orages, etc., mais peut manquer des événements réels comme une caméra PTZ suivant automatiquement un objet. Le compromis est entre perdre quelques mégaoctets d'enregistrements ou visionner quelques courts clips. Laisser vide (None) pour désactiver cette fonctionnalité."
+        }
+    },
+    "objects": {
+        "filters": {
+            "min_area": {
+                "description": "Surface minimale de la boîte englobante (en pixels ou pourcentage) requise pour ce type d'objet. Peut être exprimée en pixels (entier) ou en pourcentage (flottant entre 0,000001 et 0,99)."
+            },
+            "max_area": {
+                "label": "Zone d'objet maximum",
+                "description": "Zone de boite englobante maximum (pixels ou pourcentage) autorisée pour ce type d'objet. Peut être en pixels (entier) ou pourcentage (décimale entre 0,000001 and 0,99)."
+            },
+            "min_ratio": {
+                "label": "Rapport d'aspect minimal"
+            }
         }
     }
 }

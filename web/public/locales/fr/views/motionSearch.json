@@ -1,0 +1,7 @@
+{
+    "documentTitle": "Recherche de mouvement - Frigate",
+    "title": "Recherche de mouvement",
+    "description": "Dessinez un polygone pour définir la zonecible, et spécifiez une fourchette de temps pour chercher les mouvements dans cette zone.",
+    "selectCamera": "Recherche de mouvement en cours de chargement",
+    "startSearch": "Commencer la recherche"
+}

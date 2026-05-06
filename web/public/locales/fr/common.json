@@ -1,6 +1,6 @@
 {
   "time": {
-    "untilForRestart": "Jusqu'au redémarrage de Frigate",
+    "untilForRestart": "Jusqu'à ce que Frigate redémarre.",
     "untilRestart": "Jusqu'au redémarrage",
     "untilForTime": "Jusqu'à {{time}}",
     "justNow": "À l'instant",
@@ -139,7 +139,9 @@
     "resetToDefault": "Réinitialiser aux réglages par défaut",
     "saveAll": "Tout enregistrer",
     "savingAll": "Enregistrement de tout en cours…",
-    "undoAll": "Tout annuler"
+    "undoAll": "Tout annuler",
+    "applying": "Enregistrement…",
+    "retry": "Réessayer"
   },
   "menu": {
     "configuration": "Configuration",
@@ -244,7 +246,10 @@
     "faceLibrary": "Bibliothèque de visages",
     "languages": "Langues",
     "classification": "Classification",
-    "profiles": "Profils"
+    "profiles": "Profils",
+    "actions": "Actions",
+    "features": "Fonctionnalités",
+    "chat": "Discuter"
   },
   "toast": {
     "save": {
@@ -252,9 +257,10 @@
       "error": {
         "noMessage": "Echec lors de l'enregistrement des changements de configuration",
         "title": "Échec de l'enregistrement des changements de configuration : {{errorMessage}}"
-      }
+      },
+      "success": "Modifications enregistrées avec succès."
     },
-    "copyUrlToClipboard": "URL copiée dans le presse-papiers"
+    "copyUrlToClipboard": "URL copiée dans le presse-papiers."
   },
   "role": {
     "title": "Rôle",
@@ -324,5 +330,7 @@
     "two": "{{0}} et {{1}}",
     "many": "{{items}}, et {{last}}",
     "separatorWithSpace": ", "
-  }
+  },
+  "no_items": "Aucun élément",
+  "validation_errors": "Erreurs de validation"
 }

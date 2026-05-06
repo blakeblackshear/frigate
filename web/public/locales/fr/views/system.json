@@ -111,7 +111,8 @@
         "description": "Il s'agit d'un bug connu de l'outil de statistiques GPU d'Intel (intel_gpu_top) : il peut afficher à tort une utilisation de 0 %, même lorsque l'accélération matérielle et la détection d'objets fonctionnent correctement sur l'iGPU. Ce problème ne vient pas de Frigate. Vous pouvez redémarrer l'hôte pour rétablir temporairement l'affichage et confirmer le fonctionnement du GPU. Les performances ne sont pas affectées."
       },
       "gpuTemperature": "Température du GPU",
-      "npuTemperature": "Température du NPU"
+      "npuTemperature": "Température du NPU",
+      "gpuCompute": "Calcul / Encodage GPU"
     },
     "otherProcesses": {
       "title": "Autres processus",
@@ -148,7 +149,11 @@
     "overview": "Vue d'ensemble",
     "shm": {
       "title": "Allocation de mémoire partagée SHM",
-      "warning": "La taille actuelle de la SHM de {{total}} Mo est trop petite. Augmentez-la au moins à {{min_shm}} Mo."
+      "warning": "La taille actuelle de la SHM de {{total}} Mo est trop petite. Augmentez-la au moins à {{min_shm}} Mo.",
+      "frameLifetime": {
+        "title": "Durée de vie de la trame",
+        "description": "Chaque caméra dispose de {{frames}} emplacements de trames en mémoire partagée. À la fréquence d'images de la caméra la plus rapide, chaque trame est disponible pendant environ {{lifetime}}s avant d'être écrasée."
+      }
     }
   },
   "cameras": {
@@ -185,7 +190,8 @@
       "cameraCapture": "{{camName}} capture",
       "cameraDetect": "{{camName}} détection",
       "cameraFramesPerSecond": "{{camName}} images par seconde",
-      "cameraDetectionsPerSecond": "{{camName}} détections par seconde"
+      "cameraDetectionsPerSecond": "{{camName}} détections par seconde",
+      "cameraGpu": "GPU {{camName}}"
     },
     "overview": "Vue d'ensemble",
     "toast": {
@@ -217,7 +223,8 @@
     "cameraIsOffline": "{{camera}} est hors ligne",
     "detectIsSlow": "{{detect}} est lent ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} est très lent ({{speed}} ms)",
-    "shmTooLow": "L'allocation /dev/shm ({{total}} Mo) devrait être augmentée à au moins {{min}} Mo."
+    "shmTooLow": "L'allocation /dev/shm ({{total}} Mo) devrait être augmentée à au moins {{min}} Mo.",
+    "debugReplayActive": "Session de relecture de débogage active"
   },
   "enrichments": {
     "title": "Enrichissements",

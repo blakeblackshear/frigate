@@ -80,7 +80,53 @@
     },
     "case": {
       "label": "Dossier",
-      "placeholder": "Sélectionner un dossier"
+      "placeholder": "Sélectionner un dossier",
+      "newCaseOption": "Créer un nouveau cas",
+      "newCaseNamePlaceholder": "Nouveau nom de cas",
+      "newCaseDescriptionPlaceholder": "Description de cas",
+      "nonAdminHelp": "Un nouveau cas sera créé pour ces exports."
+    },
+    "queueing": "Mise en file d'attente de l'export...",
+    "tabs": {
+      "export": "Caméra unique",
+      "multiCamera": "Multi-caméra"
+    },
+    "multiCamera": {
+      "timeRange": "Intervalle de temps",
+      "selectFromTimeline": "Sélectionner depuis la chronologie",
+      "cameraSelection": "Caméras",
+      "cameraSelectionHelp": "Les caméras avec des objets suivis dans cette intervalle sont pré-sélectionnées",
+      "checkingActivity": "Vérification de l'activité de la caméra...",
+      "noCameras": "Aucune caméra disponible",
+      "detectionCount_one": "{{count}} objet suivi",
+      "detectionCount_many": "{{count}} objets suivis",
+      "detectionCount_other": "{{count}} objets suivis",
+      "nameLabel": "Nom d'export",
+      "namePlaceholder": "Nom de base optionnel pour ces exports",
+      "queueingButton": "Mise en file d'attente des exports...",
+      "exportButton_one": "Exporter {{count}} caméra",
+      "exportButton_many": "Exporter {{count}} caméras",
+      "exportButton_other": "Exporter {{count}} caméras"
+    },
+    "multi": {
+      "title_one": "Export {{count}} revue",
+      "title_many": "Export {{count}} revues",
+      "title_other": "Export {{count}} revues",
+      "description": "Export chaque revue sélectionnée. Tous les exports sont regroupés sous un cas unique.",
+      "descriptionNoCase": "Exporter chaque revue sélectionnée.",
+      "caseNamePlaceholder": "Vérification de l'export – {{date}}",
+      "exportButton_one": "Exporter {{count}} revue",
+      "exportButton_many": "Exporter {{count}} revues",
+      "exportButton_other": "Exporter {{count}} revues",
+      "exportingButton": "Exportation...",
+      "toast": {
+        "started_one": "Un export a démarré. Ouverture du dossier en cours",
+        "started_many": "{{count}} exports ont démarré. Ouverture du dossier en cours",
+        "started_other": "",
+        "startedNoCase_one": "Un export a démarré.",
+        "startedNoCase_many": "{{count}} exports ont démarré.",
+        "startedNoCase_other": "{{count}} exports ont démarré."
+      }
     }
   },
   "search": {
