@@ -94,6 +94,9 @@
     "tabs": {
       "export": "シングルカメラ",
       "multiCamera": "マルチカメラ"
+    },
+    "multi": {
+      "title_other": "{{count}} 件のレビューをエクスポート"
     }
   },
   "streaming": {
