@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 type OptimisticStateResult<T> = [T, (newValue: T) => void];
 
@@ -8,37 +8,32 @@ const useOptimisticState = <T>(
   delay: number = 20,
 ): OptimisticStateResult<T> => {
   const [optimisticValue, setOptimisticValue] = useState<T>(currentState);
-  const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleValueChange = useCallback(
-    (newValue: T) => {
-      // Update the optimistic value immediately
-      setOptimisticValue(newValue);
-
-      // Clear any pending debounce timeout
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-
-      // Set a new debounce timeout
-      debounceTimeout.current = setTimeout(() => {
-        // Update the actual value using the provided setter function
-        setState(newValue);
-      }, delay);
-    },
-    [delay, setState],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-    };
+  const handleValueChange = useCallback((newValue: T) => {
+    // Update the optimistic value immediately
+    setOptimisticValue(newValue);
   }, []);
 
+  // Push the optimistic value to the real setter after the delay. Scoping
+  // this to an effect keyed on optimisticValue ensures the cleanup only
+  // cancels the timer for the value it scheduled — so StrictMode's
+  // effect-rerun (and future re-running mechanisms) reschedules cleanly
+  // instead of dropping the pending update on the floor.
   useEffect(() => {
-    if (currentState != optimisticValue) {
+    if (Object.is(optimisticValue, currentState)) {
+      return;
+    }
+    const id = setTimeout(() => setState(optimisticValue), delay);
+    return () => clearTimeout(id);
+  }, [optimisticValue, currentState, delay, setState]);
+
+  // External updates to currentState should win over a stale optimistic value.
+  // The guard matters under StrictMode: this effect's re-run captures the
+  // *old* currentState in its closure, so without the equality check it
+  // would clobber an optimistic update that another effect (e.g. a search
+  // param sync) made earlier in the same commit.
+  useEffect(() => {
+    if (!Object.is(currentState, optimisticValue)) {
       setOptimisticValue(currentState);
     }
     // sometimes an external action will cause the currentState to change
