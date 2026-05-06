@@ -22,6 +22,7 @@ import {
   modifySchemaForSection,
   getEffectiveDefaultsForSection,
   sanitizeOverridesForSection,
+  synthesizeMissingObjectFilters,
 } from "./section-special-cases";
 import { getSectionValidation } from "../section-validations";
 import { useConfigOverride } from "@/hooks/use-config-override";
@@ -357,15 +358,19 @@ export function ConfigSection({
     return get(config, sectionPath);
   }, [config, cameraName, sectionPath, effectiveLevel, profileName]);
 
-  const rawFormData = useMemo(() => {
+  const rawFormData = useMemo<ConfigSectionData>(() => {
     if (!config) return {};
 
     if (rawSectionValue === undefined || rawSectionValue === null) {
       return {};
     }
 
-    return rawSectionValue;
-  }, [config, rawSectionValue]);
+    return synthesizeMissingObjectFilters(
+      sectionPath,
+      rawSectionValue,
+      modifiedSchema ?? undefined,
+    ) as ConfigSectionData;
+  }, [config, rawSectionValue, sectionPath, modifiedSchema]);
 
   // When editing a profile, hide fields that require a restart since they
   // cannot take effect via profile switching alone.
@@ -387,7 +392,7 @@ export function ConfigSection({
     const baseData = modifiedSchema
       ? applySchemaDefaults(modifiedSchema, rawFormData)
       : rawFormData;
-    return sanitizeSectionData(baseData);
+    return sanitizeSectionData(baseData as ConfigSectionData);
   }, [rawFormData, modifiedSchema, sanitizeSectionData]);
 
   const baselineSnapshot = useMemo(() => {
@@ -506,7 +511,11 @@ export function ConfigSection({
         setPendingOverrides(undefined);
         return;
       }
-      const sanitizedData = sanitizeSectionData(data as ConfigSectionData);
+      const sanitizedData = synthesizeMissingObjectFilters(
+        sectionPath,
+        sanitizeSectionData(data as ConfigSectionData),
+        modifiedSchema ?? undefined,
+      ) as ConfigSectionData;
       const nextBaselineFormData = baselineSnapshot;
       const overrides = buildOverrides(
         sanitizedData,
@@ -546,6 +555,8 @@ export function ConfigSection({
       setPendingOverrides,
       setDirtyOverrides,
       baselineSnapshot,
+      sectionPath,
+      modifiedSchema,
     ],
   );
 
