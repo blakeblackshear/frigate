@@ -538,8 +538,8 @@
                 "description": "Aktivieren Sie die prozessbezogene Überwachung der Netzwerkbandbreite für Kamera-FFmpeg-Prozesse und Detektoren (erfordert entsprechende Funktionen)."
             },
             "intel_gpu_device": {
-                "label": "SR-IOV-Gerät",
-                "description": "Gerätekennung, die verwendet wird, wenn Intel-GPUs als SR-IOV behandelt werden, um die GPU-Statistiken zu korrigieren."
+                "label": "Intel GPU",
+                "description": "PCI-Bus-Adresse oder DRM-Gerätepfad (z. B. /dev/dri/card1), der verwendet wird, um die Intel-GPU-Statistiken einem bestimmten Gerät zuzuordnen, wenn mehrere vorhanden sind."
             }
         },
         "version_check": {
@@ -1357,6 +1357,10 @@
             "hwaccel_args": {
                 "label": "hwaccel-Argumente exportieren",
                 "description": "Argumente für die Hardwarebeschleunigung bei Export- und Transkodierungsvorgängen."
+            },
+            "max_concurrent": {
+                "label": "Maximale Anzahl gleichzeitiger Exporte",
+                "description": "Maximale Anzahl der gleichzeitig zu verarbeitenden Exportaufträge."
             }
         },
         "preview": {
