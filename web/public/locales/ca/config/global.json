@@ -341,6 +341,10 @@
             "hwaccel_args": {
                 "label": "Exporta els arguments de l'hwaccel",
                 "description": "Args d'acceleració de maquinari a utilitzar per a operacions d'exportació/transcodificació."
+            },
+            "max_concurrent": {
+                "label": "Màxim d'exportacions concurrents",
+                "description": "Nombre màxim de treballs d'exportació a processar al mateix temps."
             }
         },
         "preview": {
@@ -975,8 +979,8 @@
                 "description": "Habilita el monitoratge d'amplada de banda per procés per als processos i detectors de ffmpeg de càmera (requereix capacitats)."
             },
             "intel_gpu_device": {
-                "label": "Dispositiu SR-IOV",
-                "description": "Identificador de dispositiu utilitzat quan es tracten les GPU d'Intel com a SR-IOV per corregir les estadístiques de GPU."
+                "label": "Dispositiu GPU d'Intel",
+                "description": "Adreça de bus PCI o camí del dispositiu DRM (p. ex. /dev/dri/card1) utilitzat per fixar les estadístiques de GPU d'Intel a un dispositiu específic quan hi ha múltiples."
             }
         },
         "version_check": {
