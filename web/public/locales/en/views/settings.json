@@ -1641,14 +1641,14 @@
       "audioDetectionDisabled": "Audio detection is not enabled for this camera. Audio transcription requires audio detection to be active."
     },
     "detect": {
-      "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended."
+      "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit."
     },
     "faceRecognition": {
-      "globalDisabled": "Face recognition is not enabled at the global level. Enable it in global settings for camera-level face recognition to function.",
+      "globalDisabled": "Face recognition is not enabled at the global level. Enable it in Enrichments for camera-level face recognition to function.",
       "personNotTracked": "Face recognition requires the 'person' object to be tracked. Ensure 'person' is in the object tracking list."
     },
     "lpr": {
-      "globalDisabled": "License plate recognition is not enabled at the global level. Enable it in global settings for camera-level LPR to function.",
+      "globalDisabled": "License plate recognition is not enabled at the global level. Enable it in Enrichments for camera-level LPR to function.",
       "vehicleNotTracked": "License plate recognition requires 'car' or 'motorcycle' to be tracked."
     },
     "record": {
