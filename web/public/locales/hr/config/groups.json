@@ -1,1 +1,7 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Globalna detekcija"
+        }
+    }
+}
