@@ -1136,6 +1136,12 @@ function MotionReview({
   );
   const [isRegionFilterOpen, setIsRegionFilterOpen] = useState(false);
 
+  // reset filter when camera changes
+  useEffect(() => {
+    setMotionFilterCells(new Set());
+    setPendingFilterCells(new Set());
+  }, [motionPreviewsCamera]);
+
   const objectReviewItems = useMemo(
     () =>
       (overlapReviewSegments ?? []).filter(
