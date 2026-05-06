@@ -1,0 +1,11 @@
+{
+  "filter": "फिल्टर गर्नुहोस्",
+  "classes": {
+    "label": "कक्षाहरू",
+    "all": {
+      "title": "सबै कक्षाहरू"
+    },
+    "count_one": "{{count}} कक्षा",
+    "count_other": "{{count}} कक्षाहरू"
+  }
+}

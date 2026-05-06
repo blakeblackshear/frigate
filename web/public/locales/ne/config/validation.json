@@ -1,0 +1,7 @@
+{
+    "minimum": "कम्तिमा हुनुपर्छ {{limit}}",
+    "maximum": "बढीमा हुनुपर्छ {{limit}}",
+    "exclusiveMinimum": "{{limit}} भन्दा बढी हुनुपर्छ",
+    "exclusiveMaximum": ".{{limit}} भन्दा कम हुनुपर्छ",
+    "minLength": "कम्तिमा {{limit}} वर्ण(हरू) हुनुपर्छ।"
+}
