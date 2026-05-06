@@ -1,0 +1,92 @@
+{
+  "alerts": "Upozorenja",
+  "detections": "Detekcije",
+  "camera": "Kamera",
+  "motion": {
+    "label": "Kretanje",
+    "only": "Samo pokret"
+  },
+  "allCameras": "Sve Kamere",
+  "empty": {
+    "alert": "Nema upozorenja za pregled",
+    "detection": "Nema detekcija za pregled",
+    "motion": "Nema podataka o pokretu",
+    "recordingsDisabled": {
+      "title": "Snimci moraju biti omogućeni",
+      "description": "Pregledni stavci mogu se stvarati samo za kameru kada su snimci omogućeni za tu kameru."
+    }
+  },
+  "timeline": {
+    "label": "vremenska linija",
+    "aria": "Odaberite vremensku liniju"
+  },
+  "zoomIn": "Uvećajte",
+  "zoomOut": "Umanjite",
+  "events": {
+    "label": "Događaji",
+    "aria": "Odaberite događaje",
+    "noFoundForTimePeriod": "Nema događaja za ovaj vremenski period."
+  },
+  "detail": {
+    "label": "Detalj",
+    "noDataFound": "Nema detaljnih podataka za pregled",
+    "aria": "Prekidač pregleda detalja",
+    "trackedObject_one": "{{count}} objekt",
+    "trackedObject_other": "{{count}} objekta",
+    "noObjectDetailData": "Nema dostupnih detaljnih podataka o objektu.",
+    "settings": "Postavke pregleda detalja",
+    "alwaysExpandActive": {
+      "title": "Uvijek proširujte aktivno",
+      "desc": "Uvijek proširite detalje objekta aktivnog stavka pregleda kada su dostupni."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Praćeni točka",
+    "clickToSeek": "Kliknite da biste prešli na ovo vrijeme"
+  },
+  "documentTitle": "Pregled - Frigate",
+  "recordings": {
+    "documentTitle": "Snimci - Frigate",
+    "invalidSharedLink": "Nemoguće otvoriti vezu za snimak sa vremenskom oznakom zbog greške u parsiranju.",
+    "invalidSharedCamera": "Nemoguće otvoriti vezu za snimak sa vremenskom oznakom zbog nepoznate ili neovlašćene kamere."
+  },
+  "calendarFilter": {
+    "last24Hours": "Poslednje 24 sata"
+  },
+  "markAsReviewed": "Označi kao pregledano",
+  "markTheseItemsAsReviewed": "Označi ove stavke kao pregledane",
+  "newReviewItems": {
+    "label": "Pregledaj nove stavke za pregled",
+    "button": "Nove stavke za pregled"
+  },
+  "selected_one": "{{count}} odabrano",
+  "selected_other": "{{count}} odabrano",
+  "select_all": "Sve",
+  "detected": "detektovano",
+  "normalActivity": "Normal",
+  "needsReview": "Treba pregledati",
+  "securityConcern": "Sigurnosna zabrinutost",
+  "motionSearch": {
+    "menuItem": "Pretraga kretanja",
+    "openMenu": "Opcije kamere"
+  },
+  "motionPreviews": {
+    "menuItem": "Pregledaj preglednike kretanja",
+    "title": "Preglednici kretanja: {{camera}}",
+    "mobileSettingsTitle": "Postavke preglednika kretanja",
+    "mobileSettingsDesc": "Prilagodite brzinu reprodukcije i osvetljavanje, i odaberite datum za pregled snimaka samo sa kretanjem.",
+    "dim": "Osvetljavanje",
+    "dimAria": "Prilagodite intenzitet osvetljavanja",
+    "dimDesc": "Povećajte osvetljavanje da biste povećali vidljivost područja kretanja.",
+    "speed": "Brzina",
+    "speedAria": "Odaberite brzinu reprodukcije preglednika",
+    "speedDesc": "Odaberite koliko brzo će se pregledni snimci reproducirati.",
+    "back": "Nazad",
+    "empty": "Nema pregleda dostupnih",
+    "noPreview": "Pregled nije dostupan",
+    "seekAria": "Pretражuj {{camera}} igraču do {{time}}",
+    "filter": "Filtar",
+    "filterDesc": "Odaberite područja da biste prikazali samo klipove sa kretanjem u tim područjima.",
+    "filterClear": "Očisti"
+  }
+}

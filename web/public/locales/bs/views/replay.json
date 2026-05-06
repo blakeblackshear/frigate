@@ -1,0 +1,59 @@
+{
+    "title": "Debug ponavljanje",
+    "description": "Ponovno prikazivanje snimaka kamere za ispitivanje. Lista objekata prikazuje zakasnjelje sažetak detektiranih objekata, a kartica Zapisi prikazuje tok unutrašnjih poruka Frigate iz snimaka ponavljanja.",
+    "websocket_messages": "Poruke",
+    "dialog": {
+        "title": "Počni debug ponavljanje",
+        "description": "Kreiraj privremenu kameru za ponavljanje koja ponavlja povijesne snimke za ispitivanje problema detekcije i praćenja objekata. Kamera za ponavljanje će imati istu konfiguraciju detekcije kao i izvorna kamera. Odaberite vremenski raspon za početak.",
+        "camera": "Izvorna kamera",
+        "timeRange": "Vremenski opseg",
+        "preset": {
+            "1m": "Posljednja 1 minuta",
+            "5m": "Posljednje 5 minuta",
+            "timeline": "Iz vremenske linije",
+            "custom": "Prilagođeno"
+        },
+        "startButton": "Počni ponavljanje",
+        "selectFromTimeline": "Odaberite",
+        "starting": "Pokretanje ponavljanja...",
+        "startLabel": "Početak",
+        "endLabel": "Kraj",
+        "toast": {
+            "error": "Neuspješno pokretanje debug ponavljanja: {{error}}",
+            "alreadyActive": "Već postoji aktivna sesija ponavljanja",
+            "stopError": "Neuspješno zaustavljanje debug ponavljanja: {{error}}",
+            "goToReplay": "Idi na ponavljanje"
+        }
+    },
+    "page": {
+        "noSession": "Nema aktivne sesije ponavljanja",
+        "noSessionDesc": "Pokrenite debug ponavljanje iz pogleda Povijest klikom na dugme Debug Replay u alatnoj traci.",
+        "goToRecordings": "Idi na povijest",
+        "sourceCamera": "Izvorna kamera",
+        "replayCamera": "Kamera za ponavljanje",
+        "initializingReplay": "Inicijalizacija ponavljanja...",
+        "stoppingReplay": "Zaustavljanje ponavljanja...",
+        "stopReplay": "Zaustavi ponavljanje",
+        "confirmStop": {
+            "title": "Zaustavi režim ponavljanja za debagovanje?",
+            "description": "Ovo će zaustaviti sesiju ponavljanja i očistiti sve privremene podatke. Sigurni li?",
+            "confirm": "Zaustavi ponavljanje",
+            "cancel": "Otkaži"
+        },
+        "activity": "Aktivnost",
+        "objects": "Popis objekata",
+        "audioDetections": "Audio detekcije",
+        "noActivity": "Nema detektovane aktivnosti",
+        "activeTracking": "Aktivno praćenje",
+        "noActiveTracking": "Nema aktivnog praćenja",
+        "configuration": "Konfiguracija",
+        "configurationDesc": "Podesiti precizno detekciju pokreta i praćenje objekata za kameru za debagovanje ponavljanja. Promjene se ne čuvaju u datoteci konfiguracije Frigate.",
+        "preparingClip": "Pripremam klip…",
+        "preparingClipDesc": "Frigate spaja snimke za odabrani vremenski raspon. Ovo može potrajati minut za duže raspone.",
+        "startingCamera": "Pokretanje ponovnog pokretanja otklanjanja grešaka…",
+        "startError": {
+            "title": "Neuspjelo pokretanje ponovnog prikaza otklanjanja grešaka",
+            "back": "Povratak na historiju"
+        }
+    }
+}
