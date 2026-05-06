@@ -14,8 +14,10 @@ import { useTranslation } from "react-i18next";
 import CameraEditForm from "@/components/settings/CameraEditForm";
 import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import DeleteCameraDialog from "@/components/overlay/dialog/DeleteCameraDialog";
-import { LuPencil, LuPlus, LuTrash2 } from "react-icons/lu";
+import { LuExternalLink, LuPencil, LuPlus, LuTrash2 } from "react-icons/lu";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { Link } from "react-router-dom";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 import { isDesktop } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { Switch } from "@/components/ui/switch";
@@ -85,6 +87,13 @@ export default function CameraManagementView({
       return Object.keys(config.cameras)
         .filter((camera) => !config.cameras[camera].enabled_in_config)
         .sort();
+    }
+    return [];
+  }, [config]);
+
+  const allCameras = useMemo(() => {
+    if (config) {
+      return Object.keys(config.cameras).sort();
     }
     return [];
   }, [config]);
@@ -235,6 +244,15 @@ export default function CameraManagementView({
                       onConfigChanged={updateConfig}
                     />
                   )}
+
+                {config?.lpr?.enabled && allCameras.length > 0 && (
+                  <CameraTypeSection
+                    cameras={allCameras}
+                    config={config}
+                    onConfigChanged={updateConfig}
+                    setRestartDialogOpen={setRestartDialogOpen}
+                  />
+                )}
               </div>
             </>
           ) : (
@@ -494,6 +512,196 @@ function CameraConfigEnableSwitch({
         />
       )}
     </div>
+  );
+}
+
+type CameraTypeSectionProps = {
+  cameras: string[];
+  config: FrigateConfig | undefined;
+  onConfigChanged: () => Promise<unknown>;
+  setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+function CameraTypeSection({
+  cameras,
+  config,
+  onConfigChanged,
+  setRestartDialogOpen,
+}: CameraTypeSectionProps) {
+  const { t } = useTranslation([
+    "views/settings",
+    "common",
+    "components/dialog",
+  ]);
+  const { getLocaleDocUrl } = useDocDomain();
+  const [savingCamera, setSavingCamera] = useState<string | null>(null);
+  // Optimistic local state: the parsed config API doesn't reflect type
+  // changes until Frigate restarts, so we track saved values locally.
+  const [localOverrides, setLocalOverrides] = useState<Record<string, string>>(
+    {},
+  );
+
+  const handleTypeChange = useCallback(
+    async (camera: string, value: string) => {
+      setSavingCamera(camera);
+      try {
+        const typeValue = value === "lpr" ? "lpr" : null;
+        await axios.put("config/set", {
+          requires_restart: 1,
+          config_data: {
+            cameras: {
+              [camera]: {
+                type: typeValue,
+              },
+            },
+          },
+        });
+        await onConfigChanged();
+
+        setLocalOverrides((prev) => ({
+          ...prev,
+          [camera]: value,
+        }));
+
+        toast.success(
+          t("cameraManagement.cameraType.saveSuccess", {
+            ns: "views/settings",
+            cameraName: camera,
+          }),
+          {
+            position: "top-center",
+            action: (
+              <a onClick={() => setRestartDialogOpen(true)}>
+                <Button>
+                  {t("restart.button", { ns: "components/dialog" })}
+                </Button>
+              </a>
+            ),
+          },
+        );
+      } catch (error) {
+        const errorMessage =
+          axios.isAxiosError(error) &&
+          (error.response?.data?.message || error.response?.data?.detail)
+            ? error.response?.data?.message || error.response?.data?.detail
+            : t("toast.save.error.noMessage", { ns: "common" });
+
+        toast.error(
+          t("toast.save.error.title", { errorMessage, ns: "common" }),
+          { position: "top-center" },
+        );
+      } finally {
+        setSavingCamera(null);
+      }
+    },
+    [onConfigChanged, setRestartDialogOpen, t],
+  );
+
+  const getCameraType = useCallback(
+    (camera: string): string => {
+      const localValue = localOverrides[camera];
+      if (localValue) return localValue;
+
+      const type = config?.cameras?.[camera]?.type;
+      return type === "lpr" ? "lpr" : "normal";
+    },
+    [config, localOverrides],
+  );
+
+  return (
+    <SettingsGroupCard
+      title={t("cameraManagement.cameraType.title", {
+        ns: "views/settings",
+      })}
+    >
+      <div className={SPLIT_ROW_CLASS_NAME}>
+        <div className="space-y-1.5">
+          <Label>
+            {t("cameraManagement.cameraType.label", {
+              ns: "views/settings",
+            })}
+            <RestartRequiredIndicator className="ml-1" />
+          </Label>
+          <p className="hidden text-sm text-muted-foreground md:block">
+            {t("cameraManagement.cameraType.description", {
+              ns: "views/settings",
+            })}
+          </p>
+          <div className="hidden items-center text-sm text-primary md:flex">
+            <Link
+              to={getLocaleDocUrl(
+                "configuration/license_plate_recognition#dedicated-lpr-cameras",
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline"
+            >
+              {t("readTheDocumentation", { ns: "common" })}
+              <LuExternalLink className="ml-2 inline-flex size-3" />
+            </Link>
+          </div>
+        </div>
+        <div className={`${CONTROL_COLUMN_CLASS_NAME} space-y-1.5`}>
+          <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
+            {cameras.map((camera) => {
+              const currentType = getCameraType(camera);
+              const isSaving = savingCamera === camera;
+
+              return (
+                <div
+                  key={camera}
+                  className="flex flex-row items-center justify-between"
+                >
+                  <CameraNameLabel camera={camera} />
+                  {isSaving ? (
+                    <ActivityIndicator className="h-5 w-20" size={16} />
+                  ) : (
+                    <Select
+                      value={currentType}
+                      onValueChange={(v) => handleTypeChange(camera, v)}
+                    >
+                      <SelectTrigger className="h-7 w-full max-w-[140px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="normal">
+                          {t("cameraManagement.cameraType.normal", {
+                            ns: "views/settings",
+                          })}
+                        </SelectItem>
+                        <SelectItem value="lpr">
+                          {t("cameraManagement.cameraType.dedicatedLpr", {
+                            ns: "views/settings",
+                          })}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-sm text-muted-foreground md:hidden">
+            {t("cameraManagement.cameraType.description", {
+              ns: "views/settings",
+            })}
+          </p>
+          <div className="flex items-center text-sm text-primary md:hidden">
+            <Link
+              to={getLocaleDocUrl(
+                "configuration/license_plate_recognition#dedicated-lpr-cameras",
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline"
+            >
+              {t("readTheDocumentation", { ns: "common" })}
+              <LuExternalLink className="ml-2 inline-flex size-3" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </SettingsGroupCard>
   );
 }
 

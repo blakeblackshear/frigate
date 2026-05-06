@@ -501,6 +501,13 @@
       "inherit": "Inherit",
       "enabled": "Enabled",
       "disabled": "Disabled"
+    },
+    "cameraType": {
+      "title": "Camera Type",
+      "label": "Camera type",
+      "description": "Set the type for each camera. Dedicated LPR cameras are single-purpose cameras with powerful optical zoom to capture license plates on distant vehicles. Most cameras should use the normal camera type unless the camera is specifically for LPR and has a tightly focused view on license plates.",
+      "normal": "Normal",
+      "dedicatedLpr": "Dedicated LPR"
     }
   },
   "cameraReview": {
