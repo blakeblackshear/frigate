@@ -37,6 +37,7 @@ from frigate.api.defs.response.chat_response import (
 from frigate.api.defs.tags import Tags
 from frigate.api.event import events
 from frigate.config import FrigateConfig
+from frigate.config.ui import UnitSystemEnum
 from frigate.genai.utils import build_assistant_message_for_conversation
 from frigate.jobs.vlm_watch import (
     get_vlm_watch_job,
@@ -1301,6 +1302,7 @@ async def chat_completion(
 
     cameras_info = []
     config = request.app.frigate_config
+    has_speed_zone = False
     for camera_id in allowed_cameras:
         if camera_id not in config.cameras:
             continue
@@ -1311,6 +1313,10 @@ async def chat_completion(
             else camera_id.replace("_", " ").title()
         )
         zone_names = list(camera_config.zones.keys())
+        if not has_speed_zone:
+            has_speed_zone = any(
+                zone.distances for zone in camera_config.zones.values()
+            )
         if zone_names:
             cameras_info.append(
                 f"  - {friendly_name} (ID: {camera_id}, zones: {', '.join(zone_names)})"
@@ -1326,6 +1332,13 @@ async def chat_completion(
             + "\n\nWhen users refer to cameras by their friendly name (e.g., 'Back Deck Camera'), use the corresponding camera ID (e.g., 'back_deck_cam') in tool calls."
         )
 
+    speed_units_section = ""
+    if has_speed_zone:
+        speed_unit = (
+            "mph" if config.ui.unit_system == UnitSystemEnum.imperial else "km/h"
+        )
+        speed_units_section = f"\n\nReport object speeds to the user in {speed_unit}."
+
     system_prompt = f"""You are a helpful assistant for Frigate, a security camera NVR system. You help users answer questions about their cameras, detected objects, and events.
 
 Current server local date and time: {current_date_str} at {current_time_str}
@@ -1337,7 +1350,7 @@ When users ask about "today", "yesterday", "this week", etc., use the current da
 When searching for objects or events, use ISO 8601 format for dates (e.g., {current_date_str}T00:00:00Z for the start of today).
 Always be accurate with time calculations based on the current date provided.
 
-When a user refers to a specific object they have seen or describe with identifying details ("that green car", "the person in the red jacket", "a package left today"), prefer the find_similar_objects tool over search_objects. Use search_objects first only to locate the anchor event, then pass its id to find_similar_objects. For generic queries like "show me all cars today", keep using search_objects. If a user message begins with [attached_event:<id>], treat that event id as the anchor for any similarity or "tell me more" request in the same message and call find_similar_objects with that id.{cameras_section}"""
+When a user refers to a specific object they have seen or describe with identifying details ("that green car", "the person in the red jacket", "a package left today"), prefer the find_similar_objects tool over search_objects. Use search_objects first only to locate the anchor event, then pass its id to find_similar_objects. For generic queries like "show me all cars today", keep using search_objects. If a user message begins with [attached_event:<id>], treat that event id as the anchor for any similarity or "tell me more" request in the same message and call find_similar_objects with that id.{cameras_section}{speed_units_section}"""
 
     conversation.append(
         {
