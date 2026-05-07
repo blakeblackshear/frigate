@@ -59,7 +59,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { cn } from "@/lib/utils";
-import { ConfigSectionData, JsonValue } from "@/types/configForm";
+import {
+  ConfigSectionData,
+  HiddenFieldEntry,
+  JsonValue,
+} from "@/types/configForm";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import {
@@ -69,6 +73,7 @@ import {
   buildConfigDataForPath,
   flattenOverrides,
   getBaseCameraSectionValue,
+  resolveHiddenFieldEntries,
   sanitizeSectionData as sharedSanitizeSectionData,
   requiresRestartForOverrides as sharedRequiresRestartForOverrides,
 } from "@/utils/configUtil";
@@ -91,7 +96,7 @@ export interface SectionConfig {
   /** Fields to group together */
   fieldGroups?: Record<string, string[]>;
   /** Fields to hide from UI */
-  hiddenFields?: string[];
+  hiddenFields?: HiddenFieldEntry[];
   /** Fields to show in advanced section */
   advancedFields?: string[];
   /** Fields to compare for override detection */
@@ -375,12 +380,17 @@ export function ConfigSection({
   // When editing a profile, hide fields that require a restart since they
   // cannot take effect via profile switching alone.
   const effectiveHiddenFields = useMemo(() => {
+    const base = resolveHiddenFieldEntries(sectionConfig.hiddenFields, config);
     if (!profileName || !sectionConfig.restartRequired?.length) {
-      return sectionConfig.hiddenFields;
+      return base;
     }
-    const base = sectionConfig.hiddenFields ?? [];
     return [...new Set([...base, ...sectionConfig.restartRequired])];
-  }, [profileName, sectionConfig.hiddenFields, sectionConfig.restartRequired]);
+  }, [
+    profileName,
+    sectionConfig.hiddenFields,
+    sectionConfig.restartRequired,
+    config,
+  ]);
 
   const sanitizeSectionData = useCallback(
     (data: ConfigSectionData) =>

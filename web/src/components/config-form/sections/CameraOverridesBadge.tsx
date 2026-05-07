@@ -20,7 +20,7 @@ import type { ProfilesApiResponse } from "@/types/profile";
 import { humanizeKey } from "@/components/config-form/theme/utils/i18n";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { formatList } from "@/utils/stringUtil";
-import { getSectionConfig } from "@/utils/configUtil";
+import { getEffectiveHiddenFields } from "@/utils/configUtil";
 
 const CAMERA_PAGE_BY_SECTION: Record<string, string> = {
   detect: "cameraDetect",
@@ -247,8 +247,11 @@ export function CameraOverridesBadge({ sectionPath, className }: Props) {
   const rawEntries = useCamerasOverridingSection(config, sectionPath);
 
   const entries = useMemo(() => {
-    const hiddenFields =
-      getSectionConfig(sectionPath, "global").hiddenFields ?? [];
+    const hiddenFields = getEffectiveHiddenFields(
+      sectionPath,
+      "global",
+      config,
+    );
     if (hiddenFields.length === 0) return rawEntries;
     return rawEntries
       .map((entry) => ({
@@ -261,7 +264,7 @@ export function CameraOverridesBadge({ sectionPath, className }: Props) {
         ),
       }))
       .filter((entry) => entry.fieldDeltas.length > 0);
-  }, [rawEntries, sectionPath]);
+  }, [rawEntries, sectionPath, config]);
 
   if (SECTIONS_WITHOUT_OVERRIDE_BADGE.has(sectionPath)) {
     return null;

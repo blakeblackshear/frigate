@@ -587,13 +587,14 @@ export function prepareSectionSavePayload(opts: {
   // For profile sections, also hide restart-required fields to match
   // effectiveHiddenFields in BaseSection (prevents spurious deletion markers
   // for fields that are hidden from the form during profile editing).
-  let hiddenFieldsForSanitize = sectionConfig.hiddenFields;
-  if (profileInfo.isProfile && sectionConfig.restartRequired?.length) {
-    const base = sectionConfig.hiddenFields ?? [];
-    hiddenFieldsForSanitize = [
-      ...new Set([...base, ...sectionConfig.restartRequired]),
-    ];
-  }
+  const resolvedHidden = resolveHiddenFieldEntries(
+    sectionConfig.hiddenFields,
+    config,
+  );
+  const hiddenFieldsForSanitize =
+    profileInfo.isProfile && sectionConfig.restartRequired?.length
+      ? [...new Set([...resolvedHidden, ...sectionConfig.restartRequired])]
+      : resolvedHidden;
 
   // Sanitize raw form data
   const rawData = sanitizeSectionData(
@@ -701,4 +702,37 @@ export function getSectionConfig(
         ? entry.replay
         : entry.camera;
   return mergeSectionConfig(entry.base, overrides);
+}
+
+/**
+ * Resolve the effective hidden-field patterns for a section. Each entry in
+ * `hiddenFields` is either a literal pattern or a function that produces
+ * patterns from the loaded config (e.g. `filters.<attr>` for each
+ * `model.all_attributes` entry on the objects section).
+ */
+export function getEffectiveHiddenFields(
+  sectionKey: string,
+  level: "global" | "camera" | "replay",
+  config: FrigateConfig | undefined,
+): string[] {
+  return resolveHiddenFieldEntries(
+    getSectionConfig(sectionKey, level).hiddenFields,
+    config,
+  );
+}
+
+export function resolveHiddenFieldEntries(
+  entries: SectionConfig["hiddenFields"] | undefined,
+  config: FrigateConfig | undefined,
+): string[] {
+  if (!entries || entries.length === 0) return [];
+  const result: string[] = [];
+  for (const entry of entries) {
+    if (typeof entry === "function") {
+      if (config) result.push(...entry(config));
+    } else {
+      result.push(entry);
+    }
+  }
+  return result;
 }
