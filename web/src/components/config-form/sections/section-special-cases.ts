@@ -15,7 +15,7 @@ import { JsonObject, JsonValue } from "@/types/configForm";
  * Sections that require special handling at the global level.
  * Add new section paths here as needed.
  */
-const SPECIAL_CASE_SECTIONS = ["motion", "detectors"] as const;
+const SPECIAL_CASE_SECTIONS = ["motion", "detectors", "genai"] as const;
 
 /**
  * Check if a section requires special case handling.
@@ -51,6 +51,29 @@ export function modifySchemaForSection(
   if (sectionPath === "detectors" && "default" in schema) {
     const { default: _, ...schemaWithoutDefault } = schema;
     return schemaWithoutDefault;
+  }
+
+  if (sectionPath === "genai") {
+    const additional = schema.additionalProperties;
+    if (
+      additional &&
+      typeof additional === "object" &&
+      !Array.isArray(additional)
+    ) {
+      const props = (additional as RJSFSchema).properties;
+      if (props && typeof props.provider === "object") {
+        return {
+          ...schema,
+          additionalProperties: {
+            ...additional,
+            properties: {
+              ...props,
+              provider: { ...(props.provider as object), default: "openai" },
+            },
+          },
+        };
+      }
+    }
   }
 
   return schema;
