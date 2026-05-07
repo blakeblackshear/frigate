@@ -539,7 +539,7 @@
     }
   },
   "audio": {
-    "label": "Audio events",
+    "label": "Audio detection",
     "description": "Settings for audio-based event detection for all cameras; can be overridden per-camera.",
     "enabled": {
       "label": "Enable audio detection",

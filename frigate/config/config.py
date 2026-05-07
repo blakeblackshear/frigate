@@ -477,7 +477,7 @@ class FrigateConfig(FrigateBaseModel):
     cameras: Dict[str, CameraConfig] = Field(title="Cameras", description="Cameras")
     audio: AudioConfig = Field(
         default_factory=AudioConfig,
-        title="Audio events",
+        title="Audio detection",
         description="Settings for audio-based event detection for all cameras; can be overridden per-camera.",
     )
     birdseye: BirdseyeConfig = Field(

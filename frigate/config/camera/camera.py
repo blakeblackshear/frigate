@@ -76,7 +76,7 @@ class CameraConfig(FrigateBaseModel):
     # Options with global fallback
     audio: AudioConfig = Field(
         default_factory=AudioConfig,
-        title="Audio events",
+        title="Audio detection",
         description="Settings for audio-based event detection for this camera.",
     )
     audio_transcription: CameraAudioTranscriptionConfig = Field(
