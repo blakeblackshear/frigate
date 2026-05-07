@@ -53,6 +53,11 @@ const faceRecognition: SectionConfigOverrides = {
       "device",
     ],
     restartRequired: ["enabled", "model_size", "device"],
+    uiSchema: {
+      model_size: {
+        "ui:options": { size: "xs" },
+      },
+    },
   },
 };
 

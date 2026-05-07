@@ -10,7 +10,11 @@ const audioTranscription: SectionConfigOverrides = {
         severity: "warning",
         condition: (ctx) => {
           if (ctx.level === "camera" && ctx.fullCameraConfig) {
-            return ctx.fullCameraConfig.audio.enabled === false;
+            return (
+              !ctx.fullCameraConfig.ffmpeg?.inputs?.some((input) =>
+                input.roles?.includes("audio"),
+              ) || ctx.fullCameraConfig.audio.enabled === false
+            );
           }
           return false;
         },
