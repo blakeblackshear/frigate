@@ -72,7 +72,7 @@ This does not affect using hardware for accelerating other tasks such as [semant
 
 # Officially Supported Detectors
 
-Frigate provides a number of builtin detector types. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides a number of builtin detector types. By default, Frigate will use a single OpenVINO detector running on the CPU. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 

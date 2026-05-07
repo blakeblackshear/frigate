@@ -192,7 +192,7 @@ cameras:
 
 ### Step 4: Configure detectors
 
-By default, Frigate will use a single CPU detector.
+By default, Frigate will use a single OpenVINO detector running on the CPU.
 
 In many cases, the integrated graphics on Intel CPUs provides sufficient performance for typical Frigate setups. If you have an Intel processor, you can follow the configuration below.
 
