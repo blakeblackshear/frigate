@@ -11,6 +11,16 @@ const hideAttributeFilters = (config: FrigateConfig): string[] =>
 const objects: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/object_filters",
+    messages: [
+      {
+        key: "detect-disabled",
+        messageKey: "configMessages.detect.disabled",
+        severity: "info",
+        condition: (ctx) =>
+          ctx.level === "camera" &&
+          ctx.fullCameraConfig?.detect?.enabled === false,
+      },
+    ],
     fieldMessages: [
       {
         key: "genai-no-descriptions-provider",

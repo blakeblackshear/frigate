@@ -7,7 +7,7 @@ const detect: SectionConfigOverrides = {
       {
         key: "detect-disabled",
         messageKey: "configMessages.detect.disabled",
-        severity: "warning",
+        severity: "info",
         condition: (ctx) =>
           ctx.level === "camera" && ctx.formData?.enabled === false,
       },
