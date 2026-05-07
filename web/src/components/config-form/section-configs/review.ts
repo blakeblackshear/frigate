@@ -55,6 +55,24 @@ const review: SectionConfigOverrides = {
           );
         },
       },
+      {
+        key: "genai-image-source-recordings-record-disabled",
+        field: "genai.image_source",
+        messageKey:
+          "configMessages.review.genaiImageSourceRecordingsRecordDisabled",
+        severity: "warning",
+        position: "after",
+        condition: (ctx) => {
+          const genai = ctx.formData?.genai as
+            | Record<string, unknown>
+            | undefined;
+          if (genai?.image_source !== "recordings") return false;
+          if (ctx.level === "camera" && ctx.fullCameraConfig) {
+            return ctx.fullCameraConfig.record?.enabled === false;
+          }
+          return ctx.fullConfig.record?.enabled === false;
+        },
+      },
     ],
     fieldDocs: {
       "alerts.labels": "/configuration/review/#alerts-and-detections",

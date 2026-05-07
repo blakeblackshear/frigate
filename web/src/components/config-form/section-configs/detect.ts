@@ -3,6 +3,15 @@ import type { SectionConfigOverrides } from "./types";
 const detect: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/camera_specific",
+    messages: [
+      {
+        key: "detect-disabled",
+        messageKey: "configMessages.detect.disabled",
+        severity: "warning",
+        condition: (ctx) =>
+          ctx.level === "camera" && ctx.formData?.enabled === false,
+      },
+    ],
     fieldMessages: [
       {
         key: "fps-greater-than-five",
