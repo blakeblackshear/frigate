@@ -24,7 +24,7 @@ const getSchemaDefinitions = (schema: RJSFSchema): Record<string, RJSFSchema> =>
  * Extracts and resolves a section schema from the full config schema
  * Uses caching to avoid repeated expensive resolution
  */
-function extractSectionSchema(
+export function extractSectionSchema(
   schema: RJSFSchema,
   sectionPath: string,
   level: "global" | "camera",

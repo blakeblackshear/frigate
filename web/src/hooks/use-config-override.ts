@@ -1,12 +1,16 @@
 // Hook to detect when camera config overrides global defaults
 import { useMemo } from "react";
+import useSWR from "swr";
 import isEqual from "lodash/isEqual";
 import get from "lodash/get";
 import set from "lodash/set";
+import type { RJSFSchema } from "@rjsf/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { JsonObject, JsonValue } from "@/types/configForm";
 import { isJsonObject } from "@/lib/utils";
 import { getBaseCameraSectionValue } from "@/utils/configUtil";
+import { extractSectionSchema } from "@/hooks/use-config-schema";
+import { applySchemaDefaults } from "@/lib/config-schema";
 
 const INTERNAL_FIELD_SUFFIXES = ["enabled_in_config", "raw_mask"];
 
@@ -32,6 +36,36 @@ function stripInternalFields(value: JsonValue): JsonValue {
 
 export function normalizeConfigValue(value: unknown): JsonValue {
   return stripInternalFields(value as JsonValue);
+}
+
+/**
+ * Collapse null and empty-object values for override comparisons so
+ * semantically equivalent shapes match. The schema may default `mask: None`
+ * while the runtime camera config carries `mask: {}` — both mean "no
+ * masks", so collapsing them here keeps the equality check honest. We
+ * keep this off the public `normalizeConfigValue` so save-flow code paths
+ * (which serialize form data) aren't affected.
+ */
+function collapseEmpty(value: JsonValue): JsonValue {
+  if (Array.isArray(value)) {
+    return value.map(collapseEmpty);
+  }
+  if (isJsonObject(value)) {
+    const cleaned: JsonObject = {};
+    for (const [key, val] of Object.entries(value as JsonObject)) {
+      if (val === null || val === undefined) continue;
+      const collapsed = collapseEmpty(val as JsonValue);
+      if (
+        isJsonObject(collapsed) &&
+        Object.keys(collapsed as JsonObject).length === 0
+      ) {
+        continue;
+      }
+      cleaned[key] = collapsed;
+    }
+    return cleaned;
+  }
+  return value;
 }
 
 export interface OverrideStatus {
@@ -96,6 +130,7 @@ export function useConfigOverride({
   sectionPath,
   compareFields,
 }: UseConfigOverrideOptions) {
+  const { data: schema } = useSWR<RJSFSchema>("config/schema.json");
   return useMemo(() => {
     if (!config) {
       return {
@@ -153,15 +188,29 @@ export function useConfigOverride({
       sectionPath,
     );
 
-    const normalizedGlobalValue = normalizeConfigValue(globalValue);
+    // Use the effective baseline (schema defaults when the global section
+    // is unset, e.g. motion). Without this, sections omitted from the global
+    // YAML would always read as "overridden" because the raw global value is
+    // null while every camera has populated defaults.
+    const normalizedGlobalValue = getEffectiveGlobalBaseline(
+      config,
+      sectionPath,
+      compareFields,
+      schema,
+    );
     const normalizedCameraValue = normalizeConfigValue(cameraValue);
 
+    // Collapse empty/null values for comparison so semantically equivalent
+    // shapes (e.g. schema default `mask: null` vs runtime `mask: {}`) match.
+    const collapsedGlobal = collapseEmpty(normalizedGlobalValue);
+    const collapsedCamera = collapseEmpty(normalizedCameraValue);
+
     const comparisonGlobal = compareFields
-      ? pickFields(normalizedGlobalValue, compareFields)
-      : normalizedGlobalValue;
+      ? pickFields(collapsedGlobal, compareFields)
+      : collapsedGlobal;
     const comparisonCamera = compareFields
-      ? pickFields(normalizedCameraValue, compareFields)
-      : normalizedCameraValue;
+      ? pickFields(collapsedCamera, compareFields)
+      : collapsedCamera;
 
     // Check if the entire section is overridden
     const isOverridden = compareFields
@@ -176,7 +225,10 @@ export function useConfigOverride({
       const cameraFieldValue = get(normalizedCameraValue, fieldPath);
 
       return {
-        isOverridden: !isEqual(globalFieldValue, cameraFieldValue),
+        isOverridden: !isEqual(
+          collapseEmpty(globalFieldValue as JsonValue),
+          collapseEmpty(cameraFieldValue as JsonValue),
+        ),
         globalValue: globalFieldValue,
         cameraValue: cameraFieldValue,
       };
@@ -199,7 +251,7 @@ export function useConfigOverride({
       getFieldOverride,
       resetToGlobal,
     };
-  }, [config, cameraName, sectionPath, compareFields]);
+  }, [config, cameraName, sectionPath, compareFields, schema]);
 }
 
 /**
@@ -252,6 +304,7 @@ export function useAllCameraOverrides(
   config: FrigateConfig | undefined,
   cameraName: string | undefined,
 ) {
+  const { data: schema } = useSWR<RJSFSchema>("config/schema.json");
   return useMemo(() => {
     if (!config || !cameraName) {
       return [];
@@ -265,17 +318,24 @@ export function useAllCameraOverrides(
     const overriddenSections: string[] = [];
 
     for (const { key, compareFields } of OVERRIDABLE_SECTIONS) {
-      const globalValue = normalizeConfigValue(get(config, key));
+      const globalValue = getEffectiveGlobalBaseline(
+        config,
+        key,
+        compareFields,
+        schema,
+      );
       const cameraValue = normalizeConfigValue(
         getBaseCameraSectionValue(config, cameraName, key),
       );
 
+      const collapsedGlobal = collapseEmpty(globalValue);
+      const collapsedCamera = collapseEmpty(cameraValue);
       const comparisonGlobal = compareFields
-        ? pickFields(globalValue, compareFields)
-        : globalValue;
+        ? pickFields(collapsedGlobal, compareFields)
+        : collapsedGlobal;
       const comparisonCamera = compareFields
-        ? pickFields(cameraValue, compareFields)
-        : cameraValue;
+        ? pickFields(collapsedCamera, compareFields)
+        : collapsedCamera;
 
       if (
         compareFields && compareFields.length === 0
@@ -287,7 +347,7 @@ export function useAllCameraOverrides(
     }
 
     return overriddenSections;
-  }, [config, cameraName]);
+  }, [config, cameraName, schema]);
 }
 
 export interface FieldDelta {
@@ -386,14 +446,40 @@ function isPathAllowed(path: string, compareFields?: string[]): boolean {
 }
 
 /**
- * Some Frigate sections (notably `motion`) are dumped by the backend with
- * `exclude_unset=True`, so when the user hasn't explicitly written the section
- * in their global YAML the API returns null even though every camera still
- * gets defaults applied at runtime. To still detect cross-camera differences
- * in those sections we synthesize a baseline by taking the modal (most common)
- * value at each leaf path across cameras — cameras whose value diverges from
- * the modal are treated as overriding.
+ * Resolve the effective global baseline used for override comparisons.
+ *
+ * - When the global section is explicitly set, return it (normalized).
+ * - Otherwise prefer the camera-level schema defaults so a camera that
+ *   diverges from the implicit Pydantic default registers as overriding
+ *   even with a single camera in the deployment. (Sections like `motion`
+ *   are dumped with `exclude_unset=True`, so the API returns null whenever
+ *   the user hasn't written the section globally.)
+ * - Fall back to a modal-across-cameras synthetic baseline when the schema
+ *   hasn't loaded yet or the section isn't in it.
  */
+function getEffectiveGlobalBaseline(
+  config: FrigateConfig,
+  sectionPath: string,
+  compareFields?: string[],
+  schema?: RJSFSchema,
+): JsonValue {
+  const rawGlobalValue = get(config, sectionPath);
+  if (rawGlobalValue != null) {
+    return normalizeConfigValue(rawGlobalValue);
+  }
+  if (schema) {
+    const sectionSchema = extractSectionSchema(schema, sectionPath, "camera");
+    if (sectionSchema) {
+      const defaults = applySchemaDefaults(sectionSchema, {});
+      return normalizeConfigValue(defaults as JsonValue);
+    }
+  }
+  const cameraSectionValues = Object.keys(config.cameras ?? {}).map((name) =>
+    normalizeConfigValue(getBaseCameraSectionValue(config, name, sectionPath)),
+  );
+  return deriveSyntheticGlobalValue(cameraSectionValues, compareFields);
+}
+
 function deriveSyntheticGlobalValue(
   cameraSectionValues: JsonValue[],
   compareFields?: string[],
@@ -461,6 +547,7 @@ export function useCamerasOverridingSection(
   config: FrigateConfig | undefined,
   sectionPath: string,
 ): CameraOverrideEntry[] {
+  const { data: schema } = useSWR<RJSFSchema>("config/schema.json");
   return useMemo(() => {
     if (!config?.cameras || !sectionPath) {
       return [];
@@ -476,11 +563,9 @@ export function useCamerasOverridingSection(
       ),
     );
 
-    const rawGlobalValue = get(config, sectionPath);
-    const globalValue: JsonValue =
-      rawGlobalValue == null
-        ? deriveSyntheticGlobalValue(cameraSectionValues, compareFields)
-        : normalizeConfigValue(rawGlobalValue);
+    const globalValue = collapseEmpty(
+      getEffectiveGlobalBaseline(config, sectionPath, compareFields, schema),
+    );
 
     const entries: CameraOverrideEntry[] = [];
     for (let idx = 0; idx < cameraNames.length; idx += 1) {
@@ -489,7 +574,7 @@ export function useCamerasOverridingSection(
       const deltasByPath = new Map<string, FieldDelta>();
 
       // 1. Camera-level overrides (uses base_config when a profile is active)
-      const cameraValue = cameraSectionValues[idx];
+      const cameraValue = collapseEmpty(cameraSectionValues[idx]);
       for (const delta of collectFieldDeltas(
         globalValue,
         cameraValue,
@@ -536,5 +621,5 @@ export function useCamerasOverridingSection(
     }
 
     return entries;
-  }, [config, sectionPath]);
+  }, [config, sectionPath, schema]);
 }
