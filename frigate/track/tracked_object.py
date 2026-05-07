@@ -330,7 +330,12 @@ class TrackedObject:
             if self.obj_data["position_changes"] != obj_data["position_changes"]:
                 significant_change = True
 
-            if self.obj_data["attributes"] != obj_data["attributes"]:
+            # disappearance of a per-frame attribute can be caused by detection
+            # skipping the object on a frame (stationary objects on non-interval
+            # frames), so only flag when a new attribute label appears
+            prev_labels = {a["label"] for a in self.obj_data["attributes"]}
+            curr_labels = {a["label"] for a in obj_data["attributes"]}
+            if curr_labels - prev_labels:
                 significant_change = True
 
             # if the state changed between stationary and active
