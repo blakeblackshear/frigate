@@ -106,6 +106,51 @@ export function getEffectiveDefaultsForSection(
 }
 
 /**
+ * Add default filter entries for any label in `objects.track` that isn't
+ * already in `objects.filters`, so each tracked label gets a collapsible.
+ * The backend only auto-populates filters at config init, not after profile
+ * merges or live track edits.
+ */
+export function synthesizeMissingObjectFilters(
+  sectionPath: string,
+  data: unknown,
+  sectionSchema: RJSFSchema | undefined,
+): unknown {
+  if (sectionPath !== "objects") return data;
+  if (!isJsonObject(data)) return data;
+
+  const trackValue = (data as JsonObject).track;
+  if (!Array.isArray(trackValue) || trackValue.length === 0) return data;
+
+  const properties = (sectionSchema as { properties?: Record<string, unknown> })
+    ?.properties;
+  const filtersSchema = isJsonObject(properties)
+    ? (properties.filters as { additionalProperties?: unknown } | undefined)
+    : undefined;
+  const filterEntrySchema = isJsonObject(filtersSchema?.additionalProperties)
+    ? (filtersSchema.additionalProperties as RJSFSchema)
+    : undefined;
+
+  const existingFilters = isJsonObject((data as JsonObject).filters)
+    ? ((data as JsonObject).filters as JsonObject)
+    : {};
+
+  const newFilters: JsonObject = { ...existingFilters };
+  let added = false;
+  for (const label of trackValue) {
+    if (typeof label !== "string") continue;
+    if (Object.prototype.hasOwnProperty.call(newFilters, label)) continue;
+    newFilters[label] = (
+      filterEntrySchema ? applySchemaDefaults(filterEntrySchema, {}) : {}
+    ) as JsonValue;
+    added = true;
+  }
+
+  if (!added) return data;
+  return { ...(data as JsonObject), filters: newFilters };
+}
+
+/**
  * Sanitize overrides payloads for section-specific quirks.
  */
 export function sanitizeOverridesForSection(

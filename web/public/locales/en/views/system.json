@@ -177,6 +177,9 @@
       }
     },
     "framesAndDetections": "Frames / Detections",
+    "noCameras": {
+      "title": "No Cameras Found"
+    },
     "label": {
       "camera": "camera",
       "detect": "detect",
