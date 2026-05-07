@@ -1,6 +1,7 @@
 // Hook to detect when camera config overrides global defaults
 import { useMemo } from "react";
 import useSWR from "swr";
+import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import get from "lodash/get";
 import set from "lodash/set";
@@ -8,7 +9,11 @@ import type { RJSFSchema } from "@rjsf/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { JsonObject, JsonValue } from "@/types/configForm";
 import { isJsonObject } from "@/lib/utils";
-import { getBaseCameraSectionValue } from "@/utils/configUtil";
+import {
+  getBaseCameraSectionValue,
+  getEffectiveHiddenFields,
+  unsetWithWildcard,
+} from "@/utils/configUtil";
 import { extractSectionSchema } from "@/hooks/use-config-schema";
 import { applySchemaDefaults } from "@/lib/config-schema";
 
@@ -39,13 +44,28 @@ export function normalizeConfigValue(value: unknown): JsonValue {
 }
 
 /**
+ * Remove hidden-field paths from a value before comparison so fields the
+ * user can't change in the UI (e.g. motion masks, attribute filters) don't
+ * trigger override badges. Operates on a clone so the input is unchanged.
+ */
+function stripHiddenPaths(value: JsonValue, hiddenFields: string[]): JsonValue {
+  if (hiddenFields.length === 0 || !isJsonObject(value)) return value;
+  const cloned = cloneDeep(value) as JsonObject;
+  for (const path of hiddenFields) {
+    if (!path) continue;
+    unsetWithWildcard(cloned as Record<string, unknown>, path);
+  }
+  return cloned;
+}
+
+/**
  * Collapse null and empty-object values for override comparisons so
  * semantically equivalent shapes match. The schema may default `mask: None`
  * while the runtime camera config carries `mask: {}` — both mean "no
  * masks", so collapsing them here keeps the equality check honest. We
  * keep this off the public `normalizeConfigValue` so save-flow code paths
  * (which serialize form data) aren't affected.
- */
+ **/
 function collapseEmpty(value: JsonValue): JsonValue {
   if (Array.isArray(value)) {
     return value.map(collapseEmpty);
@@ -202,8 +222,21 @@ export function useConfigOverride({
 
     // Collapse empty/null values for comparison so semantically equivalent
     // shapes (e.g. schema default `mask: null` vs runtime `mask: {}`) match.
-    const collapsedGlobal = collapseEmpty(normalizedGlobalValue);
-    const collapsedCamera = collapseEmpty(normalizedCameraValue);
+    // Also strip hidden-field paths (motion masks, attribute filters, etc.)
+    // so fields the user can't edit in the UI don't trigger override badges.
+    const hiddenFields = getEffectiveHiddenFields(
+      sectionPath,
+      "camera",
+      config,
+    );
+    const collapsedGlobal = stripHiddenPaths(
+      collapseEmpty(normalizedGlobalValue),
+      hiddenFields,
+    );
+    const collapsedCamera = stripHiddenPaths(
+      collapseEmpty(normalizedCameraValue),
+      hiddenFields,
+    );
 
     const comparisonGlobal = compareFields
       ? pickFields(collapsedGlobal, compareFields)
@@ -328,8 +361,15 @@ export function useAllCameraOverrides(
         getBaseCameraSectionValue(config, cameraName, key),
       );
 
-      const collapsedGlobal = collapseEmpty(globalValue);
-      const collapsedCamera = collapseEmpty(cameraValue);
+      const hiddenFields = getEffectiveHiddenFields(key, "camera", config);
+      const collapsedGlobal = stripHiddenPaths(
+        collapseEmpty(globalValue),
+        hiddenFields,
+      );
+      const collapsedCamera = stripHiddenPaths(
+        collapseEmpty(cameraValue),
+        hiddenFields,
+      );
       const comparisonGlobal = compareFields
         ? pickFields(collapsedGlobal, compareFields)
         : collapsedGlobal;
