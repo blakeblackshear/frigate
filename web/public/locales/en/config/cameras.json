@@ -13,7 +13,7 @@
     "description": "Enabled"
   },
   "audio": {
-    "label": "Audio events",
+    "label": "Audio detection",
     "description": "Settings for audio-based event detection for this camera.",
     "enabled": {
       "label": "Enable audio detection",

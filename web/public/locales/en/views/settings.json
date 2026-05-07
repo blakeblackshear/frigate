@@ -49,7 +49,7 @@
     "globalMotion": "Motion detection",
     "globalObjects": "Objects",
     "globalReview": "Review",
-    "globalAudioEvents": "Audio events",
+    "globalAudioEvents": "Audio detection",
     "globalLivePlayback": "Live playback",
     "globalTimestampStyle": "Timestamp style",
     "systemDatabase": "Database",
@@ -80,7 +80,7 @@
     "cameraMotion": "Motion detection",
     "cameraObjects": "Objects",
     "cameraConfigReview": "Review",
-    "cameraAudioEvents": "Audio events",
+    "cameraAudioEvents": "Audio detection",
     "cameraAudioTranscription": "Audio transcription",
     "cameraNotifications": "Notifications",
     "cameraLivePlayback": "Live playback",
@@ -1651,7 +1651,8 @@
     "review": {
       "recordDisabled": "Recording is disabled, review items will not be generated.",
       "detectDisabled": "Object detection is disabled. Review items require detected objects to categorize alerts and detections.",
-      "allNonAlertDetections": "All non-alert activity will be included as detections."
+      "allNonAlertDetections": "All non-alert activity will be included as detections.",
+      "genaiImageSourceRecordingsRecordDisabled": "Image source is set to 'recordings', but recording is disabled. Frigate will fall back to preview images."
     },
     "audio": {
       "noAudioRole": "No streams have the audio role defined. You must enable the audio role for audio detection to function."
@@ -1660,15 +1661,21 @@
       "audioDetectionDisabled": "Audio detection is not enabled for this camera. Audio transcription requires audio detection to be active."
     },
     "detect": {
-      "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit."
+      "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit.",
+      "disabled": "Object detection is disabled. Snapshots, review items, and enrichments such as face recognition, license plate recognition, and Generative AI will not function."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "You must configure a GenAI provider with the 'descriptions' role for descriptions to be generated."
     },
     "faceRecognition": {
       "globalDisabled": "The face recognition enrichment must be enabled for face recognition features to function on this camera.",
-      "personNotTracked": "Face recognition requires the 'person' object to be tracked. Enable 'person' in Objects for this camera."
+      "personNotTracked": "Face recognition requires the 'person' object to be tracked. Enable 'person' in Objects for this camera.",
+      "modelSizeLarge": "The 'large' model requires a GPU or NPU for reasonable performance. Use 'small' on CPU-only systems."
     },
     "lpr": {
       "globalDisabled": "The license plate recognition enrichment must be enabled for LPR features to function on this camera.",
-      "vehicleNotTracked": "License plate recognition requires 'car' or 'motorcycle' to be tracked. Enable 'car' or 'motorcycle' in Objects for this camera."
+      "vehicleNotTracked": "License plate recognition requires 'car' or 'motorcycle' to be tracked. Enable 'car' or 'motorcycle' in Objects for this camera.",
+      "modelSizeLarge": "The 'large' model is optimized for multi-line license plates. The 'small' model provides better performance over 'large' and should be used unless your region uses multi-line plate formats."
     },
     "record": {
       "noRecordRole": "No streams have the record role defined. Recording will not function."
@@ -1682,6 +1689,9 @@
     "detectors": {
       "mixedTypes": "All detectors must use the same type. Remove existing detectors to use a different type.",
       "mixedTypesSuggestion": "All detectors must use the same type. Remove existing detectors or select {{type}}."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended."
     }
   }
 }

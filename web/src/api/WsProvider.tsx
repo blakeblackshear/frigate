@@ -56,7 +56,14 @@ export function WsProvider({ children }: { children: ReactNode }) {
       if (reconnectTimer.current) {
         clearTimeout(reconnectTimer.current);
       }
-      wsRef.current?.close();
+      const ws = wsRef.current;
+      if (ws) {
+        ws.onopen = null;
+        ws.onmessage = null;
+        ws.onclose = null;
+        ws.onerror = null;
+        ws.close();
+      }
       resetWsStore();
     };
   }, [wsUrl]);

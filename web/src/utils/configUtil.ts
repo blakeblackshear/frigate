@@ -254,7 +254,10 @@ export function flattenOverrides(
 
 // lodash `unset` treats `*` as a literal key.  This helper expands wildcard
 // segments so that e.g. `"filters.*.mask"` unsets `filters.<each key>.mask`.
-function unsetWithWildcard(obj: Record<string, unknown>, path: string): void {
+export function unsetWithWildcard(
+  obj: Record<string, unknown>,
+  path: string,
+): void {
   if (!path.includes("*")) {
     unset(obj, path);
     return;
