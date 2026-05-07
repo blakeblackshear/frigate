@@ -70,7 +70,8 @@
   },
   "recording": {
     "enable": "Enable Recording",
-    "disable": "Disable Recording"
+    "disable": "Disable Recording",
+    "disabledInConfig": "Recording must first be enabled in Settings for this camera."
   },
   "snapshots": {
     "enable": "Enable Snapshots",
