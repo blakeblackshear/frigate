@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import json
 import logging
 import os
@@ -80,16 +81,39 @@ logger = logging.getLogger(__name__)
 
 yaml = YAML()
 
+DEFAULT_DETECTORS = {
+    "ov": {
+        "type": "openvino",
+        "device": "CPU",
+    }
+}
+DEFAULT_MODEL = {
+    "width": 300,
+    "height": 300,
+    "input_tensor": "nhwc",
+    "input_pixel_format": "bgr",
+    "path": "/openvino-model/ssdlite_mobilenet_v2.xml",
+    "labelmap_path": "/openvino-model/coco_91cl_bkgr.txt",
+}
+DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
+
+
+def _render_default_yaml(data: dict) -> str:
+    buf = io.StringIO()
+    _yaml_writer = YAML()
+    _yaml_writer.indent(mapping=2, sequence=4, offset=2)
+    _yaml_writer.dump(data, buf)
+    return buf.getvalue()
+
+
 DEFAULT_CONFIG = f"""
 mqtt:
   enabled: False
 
+{_render_default_yaml({"detectors": DEFAULT_DETECTORS, "model": DEFAULT_MODEL})}
 cameras: {{}}  # No cameras defined, UI wizard should be used
 version: {CURRENT_CONFIG_VERSION}
 """
-
-DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
-DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
 
 # stream info handler
 stream_info_retriever = StreamInfoRetriever()
@@ -679,6 +703,9 @@ class FrigateConfig(FrigateBaseModel):
                     model_config["path"] = "/cpu_model.tflite"
                 elif detector_config.type == "edgetpu":
                     model_config["path"] = "/edgetpu_model.tflite"
+                elif detector_config.type == "openvino":
+                    for default_key, default_value in DEFAULT_MODEL.items():
+                        model_config.setdefault(default_key, default_value)
 
             model = ModelConfig.model_validate(model_config)
             model.check_and_load_plus_model(self.plus_api, detector_config.type)

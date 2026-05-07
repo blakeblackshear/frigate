@@ -499,6 +499,40 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
+def _restore_masked_camera_paths(config_data: dict, config: FrigateConfig) -> None:
+    """Substitute incoming `*:*` masked credentials with the in-memory ones.
+
+    The /config response masks ffmpeg input credentials, so the settings UI
+    sends the masked path back when sibling fields (e.g. hwaccel_args) are
+    edited.  Without this we'd write `rtsp://*:*@host` into YAML and lose
+    the real credentials.  Mutates `config_data` in place.
+    """
+    cameras = config_data.get("cameras")
+    if not isinstance(cameras, dict):
+        return
+
+    for camera_name, camera_data in cameras.items():
+        if not isinstance(camera_data, dict):
+            continue
+        inputs = camera_data.get("ffmpeg", {}).get("inputs")
+        if not isinstance(inputs, list):
+            continue
+        existing = config.cameras.get(camera_name)
+        if existing is None:
+            continue
+        existing_paths = [inp.path for inp in existing.ffmpeg.inputs]
+        for index, input_obj in enumerate(inputs):
+            if not isinstance(input_obj, dict):
+                continue
+            path = input_obj.get("path")
+            if not isinstance(path, str):
+                continue
+            if ("://*:*@" in path or "user=*&password=*" in path) and index < len(
+                existing_paths
+            ):
+                input_obj["path"] = existing_paths[index]
+
+
 def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONResponse:
     """Apply config changes in-memory only, without writing to YAML.
 
@@ -509,6 +543,7 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
     try:
         updates = {}
         if body.config_data:
+            _restore_masked_camera_paths(body.config_data, request.app.frigate_config)
             updates = flatten_config_data(body.config_data)
             updates = {k: ("" if v is None else v) for k, v in updates.items()}
 
@@ -615,6 +650,9 @@ def config_set(request: Request, body: AppConfigSetBody):
                 if query_string:
                     updates = process_config_query_string(query_string)
                 elif body.config_data:
+                    _restore_masked_camera_paths(
+                        body.config_data, request.app.frigate_config
+                    )
                     updates = flatten_config_data(body.config_data)
                     # Convert None values to empty strings for deletion (e.g., when deleting masks)
                     updates = {k: ("" if v is None else v) for k, v in updates.items()}

@@ -1663,12 +1663,12 @@
       "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit."
     },
     "faceRecognition": {
-      "globalDisabled": "Face recognition is not enabled at the global level. Enable it in Enrichments for camera-level face recognition to function.",
-      "personNotTracked": "Face recognition requires the 'person' object to be tracked. Ensure 'person' is in the object tracking list."
+      "globalDisabled": "The face recognition enrichment must be enabled for face recognition features to function on this camera.",
+      "personNotTracked": "Face recognition requires the 'person' object to be tracked. Enable 'person' in Objects for this camera."
     },
     "lpr": {
-      "globalDisabled": "License plate recognition is not enabled at the global level. Enable it in Enrichments for camera-level LPR to function.",
-      "vehicleNotTracked": "License plate recognition requires 'car' or 'motorcycle' to be tracked."
+      "globalDisabled": "The license plate recognition enrichment must be enabled for LPR features to function on this camera.",
+      "vehicleNotTracked": "License plate recognition requires 'car' or 'motorcycle' to be tracked. Enable 'car' or 'motorcycle' in Objects for this camera."
     },
     "record": {
       "noRecordRole": "No streams have the record role defined. Recording will not function."

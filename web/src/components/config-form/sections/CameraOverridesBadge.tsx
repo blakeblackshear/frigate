@@ -20,7 +20,7 @@ import type { ProfilesApiResponse } from "@/types/profile";
 import { humanizeKey } from "@/components/config-form/theme/utils/i18n";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { formatList } from "@/utils/stringUtil";
-import { getSectionConfig } from "@/utils/configUtil";
+import { getEffectiveHiddenFields } from "@/utils/configUtil";
 
 const CAMERA_PAGE_BY_SECTION: Record<string, string> = {
   detect: "cameraDetect",
@@ -43,17 +43,33 @@ const CAMERA_PAGE_BY_SECTION: Record<string, string> = {
 const MAX_FIELDS_PER_CAMERA = 5;
 
 /**
- * Enrichment sections where the cross-camera override badge should be
- * suppressed because they're effectively global-only (or per-camera
- * configuration there isn't a useful affordance to surface here).
- * Face recognition and LPR are intentionally omitted so the badge does show
- * on those enrichment pages.
+ * Sections where the cross-camera override badge should be suppressed.
+ * Includes enrichment sections that aren't meaningfully per-camera
+ * (face recognition and LPR are intentionally omitted so the badge does show
+ * there) and every System sub-page (detector hardware, database, networking,
+ * etc.) which configures Frigate as a whole, not per-camera state.
  */
 const SECTIONS_WITHOUT_OVERRIDE_BADGE = new Set([
+  // Enrichments (face_recognition and lpr remain enabled)
   "semantic_search",
   "genai",
   "classification",
   "audio_transcription",
+  // System
+  "go2rtc_streams",
+  "database",
+  "mqtt",
+  "tls",
+  "auth",
+  "networking",
+  "proxy",
+  "ui",
+  "logger",
+  "environment_vars",
+  "telemetry",
+  "birdseye",
+  "detectors",
+  "model",
 ]);
 
 /**
@@ -231,8 +247,11 @@ export function CameraOverridesBadge({ sectionPath, className }: Props) {
   const rawEntries = useCamerasOverridingSection(config, sectionPath);
 
   const entries = useMemo(() => {
-    const hiddenFields =
-      getSectionConfig(sectionPath, "global").hiddenFields ?? [];
+    const hiddenFields = getEffectiveHiddenFields(
+      sectionPath,
+      "global",
+      config,
+    );
     if (hiddenFields.length === 0) return rawEntries;
     return rawEntries
       .map((entry) => ({
@@ -245,7 +264,7 @@ export function CameraOverridesBadge({ sectionPath, className }: Props) {
         ),
       }))
       .filter((entry) => entry.fieldDeltas.length > 0);
-  }, [rawEntries, sectionPath]);
+  }, [rawEntries, sectionPath, config]);
 
   if (SECTIONS_WITHOUT_OVERRIDE_BADGE.has(sectionPath)) {
     return null;

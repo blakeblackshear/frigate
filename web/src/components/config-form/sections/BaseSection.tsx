@@ -9,7 +9,7 @@ import {
   useRef,
   useContext,
 } from "react";
-import useSWR from "swr";
+import useSWR, { mutate as swrMutate } from "swr";
 import axios from "axios";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -22,6 +22,7 @@ import {
   modifySchemaForSection,
   getEffectiveDefaultsForSection,
   sanitizeOverridesForSection,
+  synthesizeMissingObjectFilters,
 } from "./section-special-cases";
 import { getSectionValidation } from "../section-validations";
 import { useConfigOverride } from "@/hooks/use-config-override";
@@ -58,7 +59,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { cn } from "@/lib/utils";
-import { ConfigSectionData, JsonValue } from "@/types/configForm";
+import {
+  ConfigSectionData,
+  HiddenFieldEntry,
+  JsonValue,
+} from "@/types/configForm";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import {
@@ -68,6 +73,7 @@ import {
   buildConfigDataForPath,
   flattenOverrides,
   getBaseCameraSectionValue,
+  resolveHiddenFieldEntries,
   sanitizeSectionData as sharedSanitizeSectionData,
   requiresRestartForOverrides as sharedRequiresRestartForOverrides,
 } from "@/utils/configUtil";
@@ -90,7 +96,7 @@ export interface SectionConfig {
   /** Fields to group together */
   fieldGroups?: Record<string, string[]>;
   /** Fields to hide from UI */
-  hiddenFields?: string[];
+  hiddenFields?: HiddenFieldEntry[];
   /** Fields to show in advanced section */
   advancedFields?: string[];
   /** Fields to compare for override detection */
@@ -357,25 +363,34 @@ export function ConfigSection({
     return get(config, sectionPath);
   }, [config, cameraName, sectionPath, effectiveLevel, profileName]);
 
-  const rawFormData = useMemo(() => {
+  const rawFormData = useMemo<ConfigSectionData>(() => {
     if (!config) return {};
 
     if (rawSectionValue === undefined || rawSectionValue === null) {
       return {};
     }
 
-    return rawSectionValue;
-  }, [config, rawSectionValue]);
+    return synthesizeMissingObjectFilters(
+      sectionPath,
+      rawSectionValue,
+      modifiedSchema ?? undefined,
+    ) as ConfigSectionData;
+  }, [config, rawSectionValue, sectionPath, modifiedSchema]);
 
   // When editing a profile, hide fields that require a restart since they
   // cannot take effect via profile switching alone.
   const effectiveHiddenFields = useMemo(() => {
+    const base = resolveHiddenFieldEntries(sectionConfig.hiddenFields, config);
     if (!profileName || !sectionConfig.restartRequired?.length) {
-      return sectionConfig.hiddenFields;
+      return base;
     }
-    const base = sectionConfig.hiddenFields ?? [];
     return [...new Set([...base, ...sectionConfig.restartRequired])];
-  }, [profileName, sectionConfig.hiddenFields, sectionConfig.restartRequired]);
+  }, [
+    profileName,
+    sectionConfig.hiddenFields,
+    sectionConfig.restartRequired,
+    config,
+  ]);
 
   const sanitizeSectionData = useCallback(
     (data: ConfigSectionData) =>
@@ -387,7 +402,7 @@ export function ConfigSection({
     const baseData = modifiedSchema
       ? applySchemaDefaults(modifiedSchema, rawFormData)
       : rawFormData;
-    return sanitizeSectionData(baseData);
+    return sanitizeSectionData(baseData as ConfigSectionData);
   }, [rawFormData, modifiedSchema, sanitizeSectionData]);
 
   const baselineSnapshot = useMemo(() => {
@@ -743,6 +758,7 @@ export function ConfigSection({
       }
 
       await refreshConfig();
+      swrMutate("config/raw_paths");
       setPendingData(null);
       onSave?.();
     } catch (error) {

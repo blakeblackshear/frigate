@@ -83,6 +83,9 @@ const lpr: SectionConfigOverrides = {
           suppressDescription: true,
         },
       },
+      model_size: {
+        "ui:options": { size: "xs" },
+      },
     },
   },
 };

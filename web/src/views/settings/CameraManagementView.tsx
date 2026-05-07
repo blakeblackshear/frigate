@@ -313,12 +313,18 @@ type CameraEnableSwitchProps = {
 function CameraEnableSwitch({ cameraName }: CameraEnableSwitchProps) {
   const { payload: enabledState, send: sendEnabled } =
     useEnabledState(cameraName);
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  const isChecked =
+    enabledState === "ON" || enabledState === "OFF"
+      ? enabledState === "ON"
+      : (config?.cameras?.[cameraName]?.enabled ?? false);
 
   return (
     <div className="flex flex-row items-center">
       <Switch
         id={`camera-enabled-${cameraName}`}
-        checked={enabledState === "ON"}
+        checked={isChecked}
         onCheckedChange={(isChecked) => {
           sendEnabled(isChecked ? "ON" : "OFF");
         }}

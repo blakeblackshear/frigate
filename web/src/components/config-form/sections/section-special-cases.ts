@@ -15,7 +15,7 @@ import { JsonObject, JsonValue } from "@/types/configForm";
  * Sections that require special handling at the global level.
  * Add new section paths here as needed.
  */
-const SPECIAL_CASE_SECTIONS = ["motion", "detectors"] as const;
+const SPECIAL_CASE_SECTIONS = ["motion", "detectors", "genai"] as const;
 
 /**
  * Check if a section requires special case handling.
@@ -51,6 +51,29 @@ export function modifySchemaForSection(
   if (sectionPath === "detectors" && "default" in schema) {
     const { default: _, ...schemaWithoutDefault } = schema;
     return schemaWithoutDefault;
+  }
+
+  if (sectionPath === "genai") {
+    const additional = schema.additionalProperties;
+    if (
+      additional &&
+      typeof additional === "object" &&
+      !Array.isArray(additional)
+    ) {
+      const props = (additional as RJSFSchema).properties;
+      if (props && typeof props.provider === "object") {
+        return {
+          ...schema,
+          additionalProperties: {
+            ...additional,
+            properties: {
+              ...props,
+              provider: { ...(props.provider as object), default: "openai" },
+            },
+          },
+        };
+      }
+    }
   }
 
   return schema;
@@ -103,6 +126,51 @@ export function getEffectiveDefaultsForSection(
   }
 
   return schemaDefaults;
+}
+
+/**
+ * Add default filter entries for any label in `objects.track` that isn't
+ * already in `objects.filters`, so each tracked label gets a collapsible.
+ * The backend only auto-populates filters at config init, not after profile
+ * merges.
+ */
+export function synthesizeMissingObjectFilters(
+  sectionPath: string,
+  data: unknown,
+  sectionSchema: RJSFSchema | undefined,
+): unknown {
+  if (sectionPath !== "objects") return data;
+  if (!isJsonObject(data)) return data;
+
+  const trackValue = (data as JsonObject).track;
+  if (!Array.isArray(trackValue) || trackValue.length === 0) return data;
+
+  const properties = (sectionSchema as { properties?: Record<string, unknown> })
+    ?.properties;
+  const filtersSchema = isJsonObject(properties)
+    ? (properties.filters as { additionalProperties?: unknown } | undefined)
+    : undefined;
+  const filterEntrySchema = isJsonObject(filtersSchema?.additionalProperties)
+    ? (filtersSchema.additionalProperties as RJSFSchema)
+    : undefined;
+
+  const existingFilters = isJsonObject((data as JsonObject).filters)
+    ? ((data as JsonObject).filters as JsonObject)
+    : {};
+
+  const newFilters: JsonObject = { ...existingFilters };
+  let added = false;
+  for (const label of trackValue) {
+    if (typeof label !== "string") continue;
+    if (Object.prototype.hasOwnProperty.call(newFilters, label)) continue;
+    newFilters[label] = (
+      filterEntrySchema ? applySchemaDefaults(filterEntrySchema, {}) : {}
+    ) as JsonValue;
+    added = true;
+  }
+
+  if (!added) return data;
+  return { ...(data as JsonObject), filters: newFilters };
 }
 
 /**

@@ -885,6 +885,7 @@ export default function Settings() {
 
     // Refresh config from server once
     await mutate("config");
+    mutate("config/raw_paths");
 
     // Clear hasChanges in sidebar for all successfully saved sections
     if (savedKeys.length > 0) {

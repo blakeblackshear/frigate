@@ -13,6 +13,8 @@ export type JsonArray = JsonValue[];
 
 export type ConfigSectionData = JsonObject;
 
+export type HiddenFieldEntry = string | ((config: FrigateConfig) => string[]);
+
 export type ConfigFormContext = {
   level?: "global" | "camera";
   cameraName?: string;
