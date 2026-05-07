@@ -41,6 +41,20 @@ const review: SectionConfigOverrides = {
           return !Array.isArray(labels) || labels.length === 0;
         },
       },
+      {
+        key: "genai-no-descriptions-provider",
+        field: "genai.enabled",
+        messageKey: "configMessages.objects.genaiNoDescriptionsProvider",
+        severity: "warning",
+        position: "before",
+        condition: (ctx) => {
+          const providers = ctx.fullConfig.genai;
+          if (!providers || Object.keys(providers).length === 0) return true;
+          return !Object.values(providers).some((agent) =>
+            agent.roles?.includes("descriptions"),
+          );
+        },
+      },
     ],
     fieldDocs: {
       "alerts.labels": "/configuration/review/#alerts-and-detections",

@@ -11,6 +11,22 @@ const hideAttributeFilters = (config: FrigateConfig): string[] =>
 const objects: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/object_filters",
+    fieldMessages: [
+      {
+        key: "genai-no-descriptions-provider",
+        field: "genai.enabled",
+        messageKey: "configMessages.objects.genaiNoDescriptionsProvider",
+        severity: "warning",
+        position: "before",
+        condition: (ctx) => {
+          const providers = ctx.fullConfig.genai;
+          if (!providers || Object.keys(providers).length === 0) return true;
+          return !Object.values(providers).some((agent) =>
+            agent.roles?.includes("descriptions"),
+          );
+        },
+      },
+    ],
     fieldDocs: {
       "filters.min_area": "/configuration/object_filters#object-area",
       "filters.max_area": "/configuration/object_filters#object-area",

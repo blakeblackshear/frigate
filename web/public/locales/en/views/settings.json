@@ -1662,6 +1662,9 @@
     "detect": {
       "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit."
     },
+    "objects": {
+      "genaiNoDescriptionsProvider": "You must configure a GenAI provider with the 'descriptions' role for descriptions to be generated."
+    },
     "faceRecognition": {
       "globalDisabled": "The face recognition enrichment must be enabled for face recognition features to function on this camera.",
       "personNotTracked": "Face recognition requires the 'person' object to be tracked. Enable 'person' in Objects for this camera."
