@@ -109,7 +109,7 @@ export function getEffectiveDefaultsForSection(
  * Add default filter entries for any label in `objects.track` that isn't
  * already in `objects.filters`, so each tracked label gets a collapsible.
  * The backend only auto-populates filters at config init, not after profile
- * merges or live track edits.
+ * merges.
  */
 export function synthesizeMissingObjectFilters(
   sectionPath: string,

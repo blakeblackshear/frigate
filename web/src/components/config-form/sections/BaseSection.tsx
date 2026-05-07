@@ -521,11 +521,7 @@ export function ConfigSection({
         setPendingOverrides(undefined);
         return;
       }
-      const sanitizedData = synthesizeMissingObjectFilters(
-        sectionPath,
-        sanitizeSectionData(data as ConfigSectionData),
-        modifiedSchema ?? undefined,
-      ) as ConfigSectionData;
+      const sanitizedData = sanitizeSectionData(data as ConfigSectionData);
       const nextBaselineFormData = baselineSnapshot;
       const overrides = buildOverrides(
         sanitizedData,
@@ -565,8 +561,6 @@ export function ConfigSection({
       setPendingOverrides,
       setDirtyOverrides,
       baselineSnapshot,
-      sectionPath,
-      modifiedSchema,
     ],
   );
 
