@@ -54,6 +54,7 @@ from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
     clean_camera_user_pass,
     deep_merge,
+    atomic_write_config,
     flatten_config_data,
     load_labels,
     process_config_query_string,
@@ -453,10 +454,7 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
     # Save the config to file
     try:
         config_file = find_config_file()
-
-        with open(config_file, "w") as f:
-            f.write(new_config)
-            f.close()
+        atomic_write_config(config_file, new_config)
     except Exception:
         return JSONResponse(
             content=(
@@ -678,9 +676,7 @@ def config_set(request: Request, body: AppConfigSetBody):
                 try:
                     config = FrigateConfig.parse(new_raw_config)
                 except ValidationError as e:
-                    with open(config_file, "w") as f:
-                        f.write(old_raw_config)
-                        f.close()
+                    atomic_write_config(config_file, old_raw_config)
                     logger.error(
                         f"Config Validation Error:\n\n{str(traceback.format_exc())}"
                     )
@@ -706,9 +702,7 @@ def config_set(request: Request, body: AppConfigSetBody):
                         status_code=400,
                     )
                 except Exception:
-                    with open(config_file, "w") as f:
-                        f.write(old_raw_config)
-                        f.close()
+                    atomic_write_config(config_file, old_raw_config)
                     logger.error(f"\nConfig Error:\n\n{str(traceback.format_exc())}")
                     return JSONResponse(
                         content=(

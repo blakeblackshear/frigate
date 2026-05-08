@@ -1,5 +1,6 @@
 import json
 import os
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -10,7 +11,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
-from frigate.util.builtin import deep_merge, load_labels
+from frigate.util.builtin import atomic_write_config, deep_merge, load_labels
 
 
 class TestConfig(unittest.TestCase):
@@ -1675,6 +1676,52 @@ class TestConfig(unittest.TestCase):
         }
 
         self.assertRaises(ValueError, lambda: FrigateConfig(**config))
+
+
+class TestAtomicWriteConfig(unittest.TestCase):
+    def test_writes_content(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "config.yml")
+            atomic_write_config(path, "foo: bar\n")
+            with open(path) as f:
+                self.assertEqual(f.read(), "foo: bar\n")
+
+    def test_preserves_original_when_replace_fails(self):
+        """os.replace failure (e.g. cross-device) must leave the original intact."""
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "config.yml")
+            original = "original: content\n"
+            with open(path, "w") as f:
+                f.write(original)
+
+            with patch("frigate.util.builtin.os.replace", side_effect=OSError("fail")):
+                with self.assertRaises(OSError):
+                    atomic_write_config(path, "new: content\n")
+
+            with open(path) as f:
+                self.assertEqual(f.read(), original)
+
+    def test_preserves_original_when_write_fails(self):
+        """Disk-full during temp-file write must leave the original intact."""
+        from unittest.mock import MagicMock
+
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "config.yml")
+            original = "original: content\n"
+            with open(path, "w") as f:
+                f.write(original)
+
+            mock_fh = MagicMock()
+            mock_fh.__enter__ = lambda s: mock_fh
+            mock_fh.__exit__ = MagicMock(return_value=False)
+            mock_fh.write.side_effect = OSError("No space left on device")
+
+            with patch("frigate.util.builtin.os.fdopen", return_value=mock_fh):
+                with self.assertRaises(OSError):
+                    atomic_write_config(path, "new: content\n")
+
+            with open(path) as f:
+                self.assertEqual(f.read(), original)
 
 
 if __name__ == "__main__":

@@ -6,11 +6,14 @@ import datetime
 import logging
 import math
 import multiprocessing.queues
+import os
 import queue
 import re
 import shlex
 import struct
+import tempfile
 import urllib.parse
+from io import StringIO
 from collections.abc import Mapping
 from multiprocessing.managers import ValueProxy
 from pathlib import Path
@@ -242,6 +245,26 @@ def split_config_key_path(key_path_str: str) -> list[str]:
     return parts
 
 
+def atomic_write_config(file_path: str, content: str) -> None:
+    """Write content to file_path atomically via a temp file + os.replace.
+
+    Prevents truncation to zero bytes on out-of-disk-space errors: the
+    original file is only replaced after the new content is fully written.
+    """
+    dir_path = os.path.dirname(os.path.abspath(file_path))
+    fd, tmp_path = tempfile.mkstemp(dir=dir_path)
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(content)
+        os.replace(tmp_path, file_path)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
 def update_yaml_file_bulk(file_path: str, updates: Dict[str, Any]):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
@@ -268,8 +291,9 @@ def update_yaml_file_bulk(file_path: str, updates: Dict[str, Any]):
         data = update_yaml(data, key_path, new_value)
 
     try:
-        with open(file_path, "w") as f:
-            yaml.dump(data, f)
+        buf = StringIO()
+        yaml.dump(data, buf)
+        atomic_write_config(file_path, buf.getvalue())
     except Exception as e:
         logger.error(f"Unable to write to Frigate config file {file_path}: {e}")
 
