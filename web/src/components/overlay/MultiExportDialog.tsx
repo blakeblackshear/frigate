@@ -178,6 +178,7 @@ export default function MultiExportDialog({
       start_time: review.start_time - REVIEW_PADDING,
       end_time: (review.end_time ?? Date.now() / 1000) + REVIEW_PADDING,
       image_path: review.thumb_path || undefined,
+      friendly_name: review.data.metadata?.title?.trim() || undefined,
       client_item_id: review.id,
     }));
 
