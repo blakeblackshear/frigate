@@ -399,13 +399,31 @@ def events_explore(
 
     label_counts = {}
 
+    explore_columns = (
+        Event.id,
+        Event.camera,
+        Event.label,
+        Event.sub_label,
+        Event.zones,
+        Event.start_time,
+        Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
+        Event.plus_id,
+        Event.retain_indefinitely,
+        Event.top_score,
+        Event.false_positive,
+        Event.box,
+        Event.data,
+    )
+
     def event_generator():
         for label_obj in distinct_labels.iterator():
             label = label_obj.label
 
             # get most recent events for this label
             label_events = (
-                Event.select()
+                Event.select(*explore_columns)
                 .where((Event.label == label) & (Event.camera << allowed_cameras))
                 .order_by(Event.start_time.desc())
                 .limit(limit)
