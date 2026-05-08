@@ -25,14 +25,14 @@ class ReviewMetadata(BaseModel):
             "that belongs in the scene field."
         ),
     )
-    title: str = Field(
-        max_length=80,
-        description="Under 10 words. Name the apparent purpose or outcome of the activity together with the location involved. Do not narrate or list the sequence of actions step by step.",
-    )
     scene: str = Field(
         min_length=150,
         max_length=600,
         description="A chronological narrative of what happens from start to finish, drawing directly from the items in observations.",
+    )
+    title: str = Field(
+        max_length=80,
+        description="Under 10 words. Name the apparent purpose or outcome of the activity together with the location involved. Do not narrate or list the sequence of actions step by step.",
     )
     shortSummary: str = Field(
         min_length=70,
