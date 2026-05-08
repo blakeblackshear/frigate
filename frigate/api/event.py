@@ -389,100 +389,69 @@ def events_explore(
     limit: int = 10,
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
-    # get distinct labels for all events
-    distinct_labels = (
-        Event.select(Event.label)
-        .where(Event.camera << allowed_cameras)
-        .distinct()
-        .order_by(Event.label)
-    )
+    if not allowed_cameras:
+        return JSONResponse(content=[])
 
-    label_counts = {}
+    # Single query: per-label COUNT and top-N ranking by start_time computed
+    # via window functions in a CTE, then filtered to rn <= limit. Replaces
+    # the previous loop that issued 2 queries per distinct label.
+    camera_placeholders = ",".join(["?"] * len(allowed_cameras))
+    sql = f"""
+        WITH ranked AS (
+            SELECT
+                id, camera, label, sub_label, zones, start_time, end_time,
+                has_clip, has_snapshot, plus_id, retain_indefinitely,
+                top_score, false_positive, box, data,
+                COUNT(*) OVER (PARTITION BY label) AS event_count,
+                ROW_NUMBER() OVER (
+                    PARTITION BY label ORDER BY start_time DESC
+                ) AS rn
+            FROM event
+            WHERE camera IN ({camera_placeholders})
+        )
+        SELECT * FROM ranked
+        WHERE rn <= ?
+        ORDER BY event_count DESC, start_time DESC
+    """
 
-    explore_columns = (
-        Event.id,
-        Event.camera,
-        Event.label,
-        Event.sub_label,
-        Event.zones,
-        Event.start_time,
-        Event.end_time,
-        Event.has_clip,
-        Event.has_snapshot,
-        Event.plus_id,
-        Event.retain_indefinitely,
-        Event.top_score,
-        Event.false_positive,
-        Event.box,
-        Event.data,
-    )
+    allowed_data_keys = {
+        "type",
+        "score",
+        "top_score",
+        "description",
+        "sub_label_score",
+        "average_estimated_speed",
+        "velocity_angle",
+        "path_data",
+        "recognized_license_plate",
+        "recognized_license_plate_score",
+    }
 
-    def event_generator():
-        for label_obj in distinct_labels.iterator():
-            label = label_obj.label
-
-            # get most recent events for this label
-            label_events = (
-                Event.select(*explore_columns)
-                .where((Event.label == label) & (Event.camera << allowed_cameras))
-                .order_by(Event.start_time.desc())
-                .limit(limit)
-                .iterator()
-            )
-
-            # count total events for this label
-            label_counts[label] = (
-                Event.select()
-                .where((Event.label == label) & (Event.camera << allowed_cameras))
-                .count()
-            )
-
-            yield from label_events
-
-    def process_events():
-        for event in event_generator():
-            processed_event = {
-                "id": event.id,
-                "camera": event.camera,
-                "label": event.label,
-                "zones": event.zones,
-                "start_time": event.start_time,
-                "end_time": event.end_time,
-                "has_clip": event.has_clip,
-                "has_snapshot": event.has_snapshot,
-                "plus_id": event.plus_id,
-                "retain_indefinitely": event.retain_indefinitely,
-                "sub_label": event.sub_label,
-                "top_score": event.top_score,
-                "false_positive": event.false_positive,
-                "box": event.box,
-                "data": {
-                    k: v
-                    for k, v in event.data.items()
-                    if k
-                    in [
-                        "type",
-                        "score",
-                        "top_score",
-                        "description",
-                        "sub_label_score",
-                        "average_estimated_speed",
-                        "velocity_angle",
-                        "path_data",
-                        "recognized_license_plate",
-                        "recognized_license_plate_score",
-                    ]
-                },
-                "event_count": label_counts[event.label],
-            }
-            yield processed_event
-
-    # convert iterator to list and sort
-    processed_events = sorted(
-        process_events(),
-        key=lambda x: (x["event_count"], x["start_time"]),
-        reverse=True,
-    )
+    processed_events = [
+        {
+            "id": event.id,
+            "camera": event.camera,
+            "label": event.label,
+            "zones": event.zones,
+            "start_time": event.start_time,
+            "end_time": event.end_time,
+            "has_clip": event.has_clip,
+            "has_snapshot": event.has_snapshot,
+            "plus_id": event.plus_id,
+            "retain_indefinitely": event.retain_indefinitely,
+            "sub_label": event.sub_label,
+            "top_score": event.top_score,
+            "false_positive": event.false_positive,
+            "box": event.box,
+            "data": {
+                k: v
+                for k, v in (event.data or {}).items()
+                if k in allowed_data_keys
+            },
+            "event_count": event.event_count,
+        }
+        for event in Event.raw(sql, *allowed_cameras, limit)
+    ]
 
     return JSONResponse(content=processed_events)
 
