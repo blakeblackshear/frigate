@@ -1680,6 +1680,15 @@
       "previews": "Previews"
     }
   },
+  "logger": {
+    "logLevel": {
+      "debug": "Debug",
+      "info": "Info",
+      "warning": "Warning",
+      "error": "Error",
+      "critical": "Critical"
+    }
+  },
   "onvif": {
     "profileAuto": "Auto",
     "profileLoading": "Loading profiles..."
