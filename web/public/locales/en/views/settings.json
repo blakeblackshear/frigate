@@ -1490,8 +1490,8 @@
     "genaiRoles": {
       "options": {
         "embeddings": "Embedding",
-        "vision": "Vision",
-        "tools": "Tools"
+        "descriptions": "Descriptions",
+        "chat": "Chat"
       }
     },
     "semanticSearchModel": {
