@@ -1643,9 +1643,50 @@
       "hardwareAuto": "Automatic hardware acceleration"
     }
   },
+  "birdseye": {
+    "trackingMode": {
+      "objects": "Objects",
+      "motion": "Motion",
+      "continuous": "Continuous"
+    }
+  },
+  "snapshot": {
+    "retainMode": {
+      "all": "All",
+      "motion": "Motion",
+      "active_objects": "Active Objects"
+    }
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "Browser",
+      "12hour": "12 hour",
+      "24hour": "24 hour"
+    },
+    "TimeOrDateStyle": {
+      "full": "Full",
+      "long": "Long",
+      "medium": "Medium",
+      "short": "Short"
+    },
+    "unitSystem": {
+      "metric": "Metric",
+      "imperial": "Imperial"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "Recordings",
+      "previews": "Previews"
+    }
+  },
   "onvif": {
     "profileAuto": "Auto",
     "profileLoading": "Loading profiles..."
+  },
+  "modelSize": {
+    "small": "Small",
+    "large": "Large"
   },
   "configMessages": {
     "review": {
