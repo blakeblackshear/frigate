@@ -94,7 +94,7 @@ def remove_empty_directories(root: Path, paths: Iterable[Path]) -> None:
 
         paths = parents
 
-    logger.debug("Removed {count} empty directories")
+    logger.debug(f"Removed {count} empty directories")
 
 
 def sync_recordings(
