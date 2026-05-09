@@ -130,11 +130,11 @@ const review: SectionConfigOverrides = {
             size: "full",
           },
         },
-        "image_source": {
+        image_source: {
           "ui:options": {
             enumI18nPrefix: "review.imageSource",
           },
-        }
+        },
       },
     },
   },

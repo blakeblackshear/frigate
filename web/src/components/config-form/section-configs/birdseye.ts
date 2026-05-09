@@ -26,8 +26,8 @@ const birdseye: SectionConfigOverrides = {
       mode: {
         "ui:size": "xs",
         "ui:options": {
-          enumI18nPrefix: "birdseye.trackingMode"
-        }
+          enumI18nPrefix: "birdseye.trackingMode",
+        },
       },
     },
   },
