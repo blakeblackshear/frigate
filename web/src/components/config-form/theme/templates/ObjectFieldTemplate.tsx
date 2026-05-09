@@ -52,12 +52,11 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   } = props;
   const formContext = registry?.formContext as ConfigFormContext | undefined;
 
-  // Check if this is a root-level object
-  const isRoot = registry?.rootSchema === schema;
   const overrides = formContext?.overrides;
   const baselineFormData = formContext?.baselineFormData;
   const hiddenFields = formContext?.hiddenFields;
   const fieldPath = props.fieldPathId.path;
+  const isRoot = fieldPath.length === 0;
   const restartRequired = formContext?.restartRequired;
   const defaultRequiresRestart = formContext?.requiresRestart ?? true;
 
