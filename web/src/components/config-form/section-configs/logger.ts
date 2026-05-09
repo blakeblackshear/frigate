@@ -10,6 +10,11 @@ const logger: SectionConfigOverrides = {
       default: {
         "ui:options": { enumI18nPrefix: "logger.logLevel" },
       },
+      logs: {
+        additionalProperties: {
+          "ui:options": { enumI18nPrefix: "logger.logLevel" },
+        },
+      },
     },
   },
 };
