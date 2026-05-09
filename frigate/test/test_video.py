@@ -1,3 +1,4 @@
+import io
 import unittest
 
 import cv2
@@ -13,6 +14,7 @@ from frigate.util.object import (
     get_region_from_grid,
     reduce_detections,
 )
+from frigate.video.ffmpeg import _read_frame_into
 
 
 def draw_box(frame, box, color=(255, 0, 0), thickness=2):
@@ -352,3 +354,57 @@ class TestRegionGrid(unittest.TestCase):
 
         region = get_region_from_grid(frame_shape, box, 320, region_grid)
         assert region[2] - region[0] > 320
+
+
+class _ChunkedPipe(io.RawIOBase):
+    """Stub stdout that returns the queued chunks one readinto at a time."""
+
+    def __init__(self, chunks):
+        self._chunks = [bytes(c) for c in chunks]
+
+    def readable(self) -> bool:
+        return True
+
+    def readinto(self, b) -> int:
+        if not self._chunks:
+            return 0
+        chunk = self._chunks.pop(0)
+        n = min(len(b), len(chunk))
+        b[:n] = chunk[:n]
+        if n < len(chunk):
+            self._chunks.insert(0, chunk[n:])
+        return n
+
+
+class TestReadFrameInto(unittest.TestCase):
+    """Cover the partial-read path of the capture loop helper."""
+
+    def test_full_frame_in_one_call(self):
+        buf = bytearray(8)
+        n = _read_frame_into(_ChunkedPipe([b"\x01\x02\x03\x04\x05\x06\x07\x08"]), buf)
+        assert n == 8
+        assert bytes(buf) == b"\x01\x02\x03\x04\x05\x06\x07\x08"
+
+    def test_short_reads_are_reassembled(self):
+        buf = bytearray(8)
+        pipe = _ChunkedPipe([b"\x01\x02\x03", b"\x04\x05", b"\x06\x07\x08"])
+        n = _read_frame_into(pipe, buf)
+        assert n == 8
+        assert bytes(buf) == b"\x01\x02\x03\x04\x05\x06\x07\x08"
+
+    def test_eof_before_full_buffer_returns_partial_count(self):
+        buf = bytearray(8)
+        n = _read_frame_into(_ChunkedPipe([b"\x01\x02\x03"]), buf)
+        assert n == 3
+
+    def test_immediate_eof_returns_zero(self):
+        buf = bytearray(8)
+        n = _read_frame_into(_ChunkedPipe([]), buf)
+        assert n == 0
+
+    def test_writes_into_existing_memoryview(self):
+        backing = bytearray(8)
+        view = memoryview(backing)
+        n = _read_frame_into(_ChunkedPipe([b"abcdefgh"]), view)
+        assert n == 8
+        assert bytes(backing) == b"abcdefgh"

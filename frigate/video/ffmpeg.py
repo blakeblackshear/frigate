@@ -52,6 +52,32 @@ def _get_record_segment_time(config: CameraConfig) -> int:
         return DEFAULT_RECORD_SEGMENT_TIME
 
 
+def _read_frame_into(stream, buffer) -> int:
+    """Read len(buffer) bytes from stream directly into buffer.
+
+    Returns the number of bytes actually read. A return value less than
+    len(buffer) indicates the stream reached EOF (or the pipe was closed)
+    before the buffer could be filled — the contents of buffer past the
+    returned offset must be treated as undefined.
+
+    BufferedReader.read(n) is documented to return "up to" n bytes, and a
+    subprocess pipe will hand back a short read if the producer closes
+    mid-frame even on a blocking pipe. Reading directly into the
+    pre-allocated frame buffer also avoids the extra Python bytes
+    allocation and copy that ``buffer[:] = stream.read(n)`` performs on
+    every frame.
+    """
+    target = len(buffer)
+    view = memoryview(buffer)
+    pos = 0
+    while pos < target:
+        n = stream.readinto(view[pos:])
+        if not n:
+            return pos
+        pos += n
+    return pos
+
+
 def capture_frames(
     ffmpeg_process: sp.Popen[Any],
     config: CameraConfig,
@@ -92,7 +118,7 @@ def capture_frames(
             frame_name = f"{config.name}_frame{frame_index}"
             frame_buffer = frame_manager.write(frame_name)
             try:
-                frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
+                bytes_read = _read_frame_into(ffmpeg_process.stdout, frame_buffer)
             except Exception:
                 # shutdown has been initiated
                 if stop_event.is_set():
@@ -109,6 +135,23 @@ def capture_frames(
                     break
 
                 continue
+
+            if bytes_read < frame_size:
+                # ffmpeg's stdout pipe was closed (or returned EOF) before
+                # the full frame could be received. The buffer holds a
+                # partial frame, so don't pass it to detection: a
+                # half-frame in shared memory will produce garbage
+                # detections, and continuing to read would resume in the
+                # middle of the next frame, putting capture out of sync
+                # with frame boundaries until the next watchdog restart.
+                if stop_event.is_set():
+                    break
+
+                logger.error(
+                    f"{config.name}: ffmpeg returned an incomplete frame "
+                    f"({bytes_read}/{frame_size} bytes); exiting capture thread..."
+                )
+                break
 
             frame_rate.update()
 
