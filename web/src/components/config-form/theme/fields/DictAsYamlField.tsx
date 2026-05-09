@@ -3,6 +3,8 @@ import yaml from "js-yaml";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ConfigFormContext } from "@/types/configForm";
+import { useTranslation } from "react-i18next";
 
 function formatYaml(value: unknown): string {
   if (
@@ -45,8 +47,14 @@ function parseYaml(text: string): {
 }
 
 export function DictAsYamlField(props: FieldProps) {
-  const { formData, onChange, readonly, disabled, idSchema, schema } = props;
-
+  const { formData, onChange, readonly, disabled, idSchema, schema, registry } =
+    props;
+  const formContext = registry.formContext as ConfigFormContext | undefined;
+  const configNamespace =
+    formContext?.i18nNamespace ??
+    (formContext?.level === "camera" ? "config/cameras" : "config/global");
+  const { t: fallbackT } = useTranslation(["common", configNamespace]);
+  const t = formContext?.t ?? fallbackT;
   const emptyPath = useMemo(() => [] as FieldPathList, []);
   const fieldPath =
     (props as { fieldPathId?: { path?: FieldPathList } }).fieldPathId?.path ??
@@ -94,12 +102,16 @@ export function DictAsYamlField(props: FieldProps) {
   );
 
   const id = idSchema?.$id ?? props.name;
+  const sectionPrefix = formContext?.sectionI18nPrefix;
 
+  const title = t(`${sectionPrefix}.${id}.label`) ?? schema.title;
+  const description =
+    t(`${sectionPrefix}.${id}.description`) ?? schema.description;
   return (
     <div className="flex flex-col gap-1.5">
-      {schema.title && (
+      {title && (
         <label htmlFor={id} className="text-sm font-medium">
-          {schema.title}
+          {title}
         </label>
       )}
       <Textarea
@@ -114,8 +126,8 @@ export function DictAsYamlField(props: FieldProps) {
         onBlur={handleBlur}
       />
       {error && <p className="text-xs text-destructive">{error}</p>}
-      {schema.description && (
-        <p className="text-xs text-muted-foreground">{schema.description}</p>
+      {description && (
+        <p className="text-xs text-muted-foreground">{description}</p>
       )}
     </div>
   );
