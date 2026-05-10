@@ -1,0 +1,77 @@
+{
+    "documentTitle": "Busca Deteccións - Frigate",
+    "title": "Búsqueda de Deteccions",
+    "selectCamera": "Búsqueda de Deteccions s'esta carregant",
+    "startSearch": "Començar Búsqueda",
+    "searchStarted": "Búsqueda inicada",
+    "searchCancelled": "Búsqueda cancel·lada",
+    "cancelSearch": "Cancel·lar",
+    "searching": "Búsqueda en progrés.",
+    "searchComplete": "Búsqueda completa",
+    "description": "Dibuixa un polígon per definir la regió d'interès, i especifica un interval de temps per cercar canvis de moviment dins d'aquesta regió.",
+    "noResultsYet": "Executa una cerca per a trobar canvis de moviment a la regió seleccionada",
+    "noChangesFound": "No s'ha detectat cap canvi de píxel a la regió seleccionada",
+    "changesFound_one": "S'ha trobat el canvi de moviment {{count}}",
+    "changesFound_many": "S'han trobat {{count}} canvis de moviment",
+    "changesFound_other": "S'han trobat {{count}} canvis de moviment",
+    "framesProcessed": "{{count}} fotogrames processats",
+    "jumpToTime": "Salta a aquesta hora",
+    "results": "Resultats",
+    "showSegmentHeatmap": "Mapa de calor",
+    "newSearch": "Cerca nova",
+    "clearResults": "Neteja els resultats",
+    "clearROI": "Neteja el polígon",
+    "polygonControls": {
+        "points_one": "{{count}} punt",
+        "points_many": "{{count}} punts",
+        "points_other": "{{count}} punts",
+        "undo": "Desfés l'últim punt",
+        "reset": "Restableix el polígon"
+    },
+    "motionHeatmapLabel": "Mapa de calor del moviment",
+    "dialog": {
+        "title": "Cerca de moviment",
+        "cameraLabel": "Càmara",
+        "previewAlt": "Vista prèvia de la càmera per a {{camera}}"
+    },
+    "timeRange": {
+        "title": "Interval de cerca",
+        "start": "Hora d'inici",
+        "end": "Hora final"
+    },
+    "settings": {
+        "title": "Configuració de la cerca",
+        "parallelMode": "Mode paral·lel",
+        "parallelModeDesc": "Escaneja múltiples segments d'enregistrament al mateix temps (més ràpid, però significativament més intensiu en CPU)",
+        "threshold": "Llindar de la sensibilitat",
+        "thresholdDesc": "Els valors més baixos detecten canvis més petits (1-255)",
+        "minArea": "Àrea de canvi mínim",
+        "minAreaDesc": "Percentatge mínim de la regió d'interès que s'ha de canviar per considerar-se significatiu",
+        "frameSkip": "Omet el fotograma",
+        "frameSkipDesc": "Processa cada N fotograma. Establiu això a la velocitat de fotogrames de la càmera per processar un fotograma per segon (p. ex. 5 per a una càmera de 5 FPS, 30 per a una càmera de 30 FPS). Els valors més alts seran més ràpids, però poden perdre els esdeveniments de curt moviment.",
+        "maxResults": "Resultats màxims",
+        "maxResultsDesc": "Atura després d'aquestes quantes marques horàries coincidents"
+    },
+    "errors": {
+        "noCamera": "Seleccioneu una càmera",
+        "noROI": "Dibuixeu una regió d'interès",
+        "noTimeRange": "Seleccioneu un interval de temps",
+        "invalidTimeRange": "L'hora de finalització ha de ser posterior a l'hora d'inici",
+        "searchFailed": "Ha fallat la cerca: {{message}}",
+        "polygonTooSmall": "El polígon ha de tenir almenys 3 punts",
+        "unknown": "Error desconegut"
+    },
+    "changePercentage": "{{percentage}}% canviat",
+    "metrics": {
+        "title": "Cerca les mètriques",
+        "segmentsScanned": "Segments escanejats",
+        "segmentsProcessed": "Processat",
+        "segmentsSkippedInactive": "S'ha omès (sense activitat)",
+        "segmentsSkippedHeatmap": "S'ha omès (sense superposició ROI)",
+        "fallbackFullRange": "Escaneig de rang complet alternatiu",
+        "framesDecoded": "Fotogrames descodificats",
+        "wallTime": "Temps de cerca",
+        "segmentErrors": "Errors del segment",
+        "seconds": "{{seconds}}s"
+    }
+}
