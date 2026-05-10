@@ -198,7 +198,7 @@ export default function VideoControls({
   return (
     <div
       className={cn(
-        "z-50 flex w-auto items-center justify-between gap-4 rounded-lg bg-background/60 px-4 py-2 text-primary sm:flex-nowrap sm:gap-8",
+        "z-50 flex w-auto select-none items-center justify-between gap-4 rounded-lg bg-background/60 px-4 py-2 text-primary sm:flex-nowrap sm:gap-8",
         className,
         isMobileOnly &&
           Object.values(features).filter((feat) => feat).length >
