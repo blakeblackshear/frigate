@@ -78,8 +78,8 @@
         "label": "Détection d'objets",
         "description": "Réglages pour la détection ou le rôle de détection utilisé pour exécuter la détection des objets et initialiser les traceurs.",
         "enabled": {
-            "label": "Détection activée",
-            "description": "Activer ou désactiver la détection des objets pour cette caméra. La détection doit être activée pour que le suivi des objets fonctionne."
+            "label": "Activer la détection d'objet",
+            "description": "Activer ou désactiver la détection des objets pour cette caméra."
         },
         "height": {
             "label": "Hauteur de détection",
@@ -299,6 +299,10 @@
         },
         "raw_mask": {
             "label": "Masque brut"
+        },
+        "skip_motion_threshold": {
+            "label": "Ignorer le seuil de détection de mouvement",
+            "description": "Si une valeur entre 0,0 et 1,0 est définie, et que plus de cette fraction de l'image change en une seule trame, le détecteur ne retournera aucune zone de mouvement et se recalibrera immédiatement. Cela peut économiser du CPU et réduire les faux positifs lors d'éclairs, d'orages, etc., mais peut manquer des événements réels comme une caméra PTZ suivant automatiquement un objet. Le compromis est entre perdre quelques mégaoctets d'enregistrements ou visionner quelques courts clips. Laisser vide (None) pour désactiver cette fonctionnalité."
         }
     },
     "objects": {
@@ -312,9 +316,17 @@
             "label": "Filtres d'objets",
             "description": "Filtres appliqués aux objets détectés afin de réduire les faux positifs (aire, rapport, facteur de confiance).",
             "min_area": {
-                "label": "Aire minimal de l'objet"
+                "label": "Aire minimal de l'objet",
+                "description": "Surface minimale de la boîte englobante (en pixels ou pourcentage) requise pour ce type d'objet. Peut être exprimée en pixels (entier) ou en pourcentage (flottant entre 0,000001 et 0,99)."
+            },
+            "max_area": {
+                "label": "Zone d'objet maximum",
+                "description": "Zone de boite englobante maximum (pixels ou pourcentage) autorisée pour ce type d'objet. Peut être en pixels (entier) ou pourcentage (décimale entre 0,000001 and 0,99)."
+            },
+            "min_ratio": {
+                "label": "Rapport d'aspect minimal"
             }
         }
     },
-    "label": "ConfigurationCamera"
+    "label": "Configuration de la caméra"
 }
