@@ -22,6 +22,14 @@ const birdseye: SectionConfigOverrides = {
     hiddenFields: [],
     advancedFields: [],
     overrideFields: ["enabled", "mode"],
+    uiSchema: {
+      mode: {
+        "ui:size": "xs",
+        "ui:options": {
+          enumI18nPrefix: "birdseye.trackingMode",
+        },
+      },
+    },
   },
   global: {
     fieldOrder: [
