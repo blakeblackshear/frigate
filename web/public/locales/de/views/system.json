@@ -213,6 +213,9 @@
       "expectedFps": "Erwartete FPS",
       "reconnectsLastHour": "Wiederverbindungen (letzte Stunde)",
       "stallsLastHour": "Stände (letzte Stunde)"
+    },
+    "noCameras": {
+      "title": "keine Kameras gefunden"
     }
   },
   "enrichments": {

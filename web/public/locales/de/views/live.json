@@ -62,7 +62,8 @@
   },
   "recording": {
     "disable": "Aufzeichnung deaktivieren",
-    "enable": "Aufzeichnung aktivieren"
+    "enable": "Aufzeichnung aktivieren",
+    "disabledInConfig": "Aufnahme muss erst in den Einstellung für diese Kamera aktiviert werden."
   },
   "snapshots": {
     "enable": "Schnappschüsse aktivieren",

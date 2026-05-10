@@ -1,0 +1,75 @@
+{
+    "documentTitle": "Bewegungssuche - Frigate",
+    "title": "Bewegungssuche",
+    "description": "Zeichnen Sie ein Polygon, um den gewünschten Bereich zu definieren, und geben Sie einen Zeitbereich an, um innerhalb dieses Bereichs nach Bewegungsänderungen zu suchen.",
+    "selectCamera": "Die Bewegungssuche wird geladen",
+    "startSearch": "Suche starten",
+    "searchStarted": "Die Suche wurde gestartet",
+    "searchCancelled": "Suche abgebrochen",
+    "cancelSearch": "Abbrechen",
+    "searching": "Suche läuft.",
+    "searchComplete": "Suche abgeschlossen",
+    "noResultsYet": "Führen Sie eine Suche durch, um Bewegungsänderungen im ausgewählten Bereich zu finden",
+    "noChangesFound": "Im ausgewählten Bereich wurden keine Pixeländerungen festgestellt",
+    "changesFound_one": "Es wurde {{count}} Bewegungsänderungen gefunden",
+    "changesFound_other": "Es wurden {{count}} Bewegungsänderungen gefunden",
+    "framesProcessed": "{{count}} Bilder verarbeitet",
+    "jumpToTime": "Zu diesem Zeitpunkt springen",
+    "results": "Ergebnisse",
+    "showSegmentHeatmap": "Heatmap",
+    "newSearch": "Neue Suche",
+    "clearResults": "Eindeutige Ergebnisse",
+    "clearROI": "Polygon löschen",
+    "polygonControls": {
+        "points_one": "{{count}} Punkt",
+        "points_other": "{{count}} Punkte",
+        "undo": "Letzten Schritt rückgängig machen",
+        "reset": "Polygon zurücksetzen"
+    },
+    "motionHeatmapLabel": "Bewegungs-Heatmap",
+    "dialog": {
+        "title": "Bewegungssuche",
+        "cameraLabel": "Kamera",
+        "previewAlt": "Kamera-Vorschau für {{camera}}"
+    },
+    "timeRange": {
+        "title": "Suchbereich",
+        "start": "Startzeit",
+        "end": "Endzeit"
+    },
+    "settings": {
+        "title": "Sucheinstellungen",
+        "parallelMode": "Parallelbetrieb",
+        "parallelModeDesc": "Mehrere Aufzeichnungssegmente gleichzeitig scannen (schneller, aber deutlich rechenintensiver)",
+        "threshold": "Empfindlichkeitsschwelle",
+        "thresholdDesc": "Niedrigere Werte erkennen geringere Veränderungen (1–255)",
+        "minArea": "Mindestwechselbereich",
+        "minAreaDesc": "Mindestanteil der untersuchten Region, der sich ändern muss, damit die Veränderung als signifikant gilt",
+        "frameSkip": "Bild überspringen",
+        "frameSkipDesc": "Verarbeite jeden N-ten Frame. Stelle diesen Wert auf die Bildrate deiner Kamera ein, um einen Frame pro Sekunde zu verarbeiten (z. B. 5 für eine Kamera mit 5 FPS, 30 für eine Kamera mit 30 FPS). Höhere Werte sorgen für eine schnellere Verarbeitung, können jedoch kurze Bewegungsabläufe übersehen.",
+        "maxResults": "Maximale Ergebnisse",
+        "maxResultsDesc": "Nach dieser Anzahl übereinstimmender Zeitstempel anhalten"
+    },
+    "errors": {
+        "noCamera": "Bitte wählen Sie eine Kamera aus",
+        "noROI": "Bitte zeichnen Sie einen Bereich von Interesse ein",
+        "noTimeRange": "Bitte wählen Sie einen Zeitraum aus",
+        "invalidTimeRange": "Die Endzeit muss nach der Startzeit liegen",
+        "searchFailed": "Suche fehlgeschlagen: {{message}}",
+        "polygonTooSmall": "Ein Polygon muss mindestens 3 Punkte haben",
+        "unknown": "Unbekannter Fehler"
+    },
+    "changePercentage": "Um {{percentage}} % verändert",
+    "metrics": {
+        "title": "Suchmetriken",
+        "segmentsScanned": "Durchsuchte Segmente",
+        "segmentsProcessed": "Bearbeitet",
+        "segmentsSkippedInactive": "Übersprungen (keine Aktivität)",
+        "segmentsSkippedHeatmap": "Übersprungen (keine Überschneidung der ROI)",
+        "fallbackFullRange": "Ausweich-Vollbereichsscan",
+        "framesDecoded": "Rahmen decodiert",
+        "wallTime": "Suchzeit",
+        "segmentErrors": "Segmentfehler",
+        "seconds": "{{seconds}}s"
+    }
+}

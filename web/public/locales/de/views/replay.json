@@ -1,0 +1,59 @@
+{
+    "title": "Debug-Wiedergabe",
+    "description": "Spielen Sie Kameraaufnahmen zur Fehlerbehebung ab. Die Objektliste zeigt eine zeitversetzte Übersicht der erkannten Objekte an, und auf der Registerkarte „Meldungen“ wird ein Stream der internen Meldungen von Frigate aus dem Wiedergabematerial angezeigt.",
+    "websocket_messages": "Nachrichten",
+    "dialog": {
+        "title": "Debug-Wiedergabe starten",
+        "description": "Erstellen Sie eine temporäre Wiedergabekamera, die historisches Bildmaterial in einer Schleife wiedergibt, um Probleme bei der Objekterkennung und -verfolgung zu beheben. Die Wiedergabekamera verfügt über dieselbe Erkennungskonfiguration wie die Quellkamera. Wählen Sie einen Zeitbereich aus, ab dem die Wiedergabe beginnen soll.",
+        "camera": "Quellkamera",
+        "timeRange": "Zeitraum",
+        "preset": {
+            "1m": "Letzte Minute",
+            "5m": "Die letzten 5 Minuten",
+            "timeline": "Aus der Zeitleiste",
+            "custom": "Benutzerdefiniert"
+        },
+        "startButton": "Wiedergabe starten",
+        "selectFromTimeline": "Auswählen",
+        "starting": "Wiedergabe wird gestartet...",
+        "startLabel": "Start",
+        "endLabel": "Ende",
+        "toast": {
+            "error": "Fehler beim Starten der Debug-Wiedergabe: {{error}}",
+            "alreadyActive": "Eine Wiederholungssitzung ist bereits aktiv",
+            "stopError": "Die Wiedergabe der Debug-Daten konnte nicht beendet werden: {{error}}",
+            "goToReplay": "Zur Aufzeichnung"
+        }
+    },
+    "page": {
+        "noSession": "Keine aktive Debug-Wiedergabesitzung",
+        "noSessionDesc": "Starten Sie eine Debug-Wiedergabe aus der Verlaufsansicht, indem Sie in der Symbolleiste auf die Schaltfläche „Aktionen“ klicken und „Debug-Wiedergabe“ auswählen.",
+        "goToRecordings": "Zur Historie",
+        "preparingClip": "Clip wird vorbereitet…",
+        "preparingClipDesc": "Frigate fasst die Aufzeichnungen für den ausgewählten Zeitraum zusammen. Bei längeren Zeiträumen kann dies eine Minute dauern.",
+        "startingCamera": "Debug-Wiedergabe wird gestartet…",
+        "startError": {
+            "title": "Debug Replay konnte nicht gestartet werden",
+            "back": "Zurück zur Übersicht"
+        },
+        "sourceCamera": "Quell Kamera",
+        "replayCamera": "Wiederholungskamera",
+        "initializingReplay": "Debug-Wiedergabe wird initialisiert...",
+        "stoppingReplay": "Debug-Wiedergabe wird angehalten...",
+        "stopReplay": "Stopp Wiederholung",
+        "confirmStop": {
+            "title": "Debug-Wiedergabe anhalten?",
+            "description": "Dadurch wird die Sitzung beendet und alle temporären Daten werden gelöscht. Sind Sie sicher?",
+            "confirm": "Anhalten Wiederholen",
+            "cancel": "Abbrechen"
+        },
+        "activity": "Aktivität",
+        "objects": "Objektliste",
+        "audioDetections": "Audioerkennungen",
+        "noActivity": "Es wurde keine Aktivität festgestellt",
+        "activeTracking": "Aktive Verfolgung",
+        "noActiveTracking": "Keine aktive Nachverfolgung",
+        "configuration": "Konfiguration",
+        "configurationDesc": "Passen Sie die Einstellungen für die Bewegungserkennung und die Objektverfolgung der Debug-Replay-Kamera an. Es werden keine Änderungen in Ihrer Frigate-Konfigurationsdatei gespeichert."
+    }
+}
