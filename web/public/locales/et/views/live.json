@@ -81,7 +81,8 @@
   },
   "recording": {
     "enable": "Lülita salvestamine sisse",
-    "disable": "Lülita salvestamine välja"
+    "disable": "Lülita salvestamine välja",
+    "disabledInConfig": "Pead olema selle kaamera jaoks Seadistustest määranud salvestamise."
   },
   "snapshots": {
     "enable": "Lülita hetkvõtted sisse",
