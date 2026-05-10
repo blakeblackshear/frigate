@@ -1,0 +1,25 @@
+{
+    "title": "Hibakeresés visszajátszás",
+    "websocket_messages": "Üzenetek",
+    "dialog": {
+        "title": "Hibakeresés visszajátszásának indítása",
+        "camera": "Forráskamera",
+        "timeRange": "Időtartomány",
+        "preset": {
+            "1m": "Legutóbbi 1 perc",
+            "5m": "Legutóbbi 5 perc",
+            "timeline": "Az Idővonalból",
+            "custom": "Egyedi"
+        },
+        "startButton": "Visszajátszás indítása",
+        "selectFromTimeline": "Válassz",
+        "starting": "Visszajátszás indítása...",
+        "startLabel": "Indítás",
+        "endLabel": "Vége",
+        "toast": {
+            "error": "A hibakeresési visszajátszás elindítása sikertelen: {{error}}",
+            "alreadyActive": "A visszajátszási munkamenet már aktív",
+            "goToReplay": "Ugrás a visszajátszásra"
+        }
+    }
+}

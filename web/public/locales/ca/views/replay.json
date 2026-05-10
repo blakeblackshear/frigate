@@ -1,0 +1,59 @@
+{
+    "page": {
+        "startError": {
+            "back": "Torna a l'Historial",
+            "title": "No s'ha pogut iniciar la repetició de la depuració"
+        },
+        "sourceCamera": "Camera d'origen",
+        "replayCamera": "Reproduïr Càmera",
+        "initializingReplay": "Inicialitzant depurar repetició...",
+        "stoppingReplay": "Parant depurar repetició...",
+        "stopReplay": "Parar Repetició",
+        "confirmStop": {
+            "title": "Parar Depurar Repetició?",
+            "description": "Aixó pararà la sessió i netejarà les dades temporals. Estás segur?",
+            "confirm": "Parar Repetició",
+            "cancel": "Cancel·lar"
+        },
+        "activity": "Activitat",
+        "objects": "Llista d'Objectes",
+        "audioDetections": "Deteccions d'Audio",
+        "noActivity": "Sense activitat detectada",
+        "activeTracking": "Tracking Actiu",
+        "noActiveTracking": "Sense tracking actiu",
+        "configuration": "Configuració",
+        "configurationDesc": "Configuració d'ajust fi de detecció de moviment i tracking d'objectes per a la depuració de reproducció de càmera. Cap canvi es graba en el teu arxiu de configuració de Frigate.",
+        "noSession": "No hi ha una sessió activa de reproducció de depuració",
+        "noSessionDesc": "Inicia una reproducció de depuració des de la vista Historial fent clic al botó Accions a la barra d'eines i escollint Depura Repeteix.",
+        "goToRecordings": "Ves a l'historial",
+        "preparingClip": "S'està preparant el clip…",
+        "preparingClipDesc": "Frigate està cosint enregistraments per a l'interval de temps seleccionat. Això pot trigar un minut en intervals més llargs.",
+        "startingCamera": "S'està iniciant la repetició de la depuració…"
+    },
+    "title": "Repetició de depuració",
+    "websocket_messages": "Missatges",
+    "dialog": {
+        "title": "Iniciar Depuració de Repeticions",
+        "camera": "Càmera Font",
+        "timeRange": "Rang de Temps",
+        "preset": {
+            "1m": "Últim 1 Minut",
+            "5m": "Últims 5 Minuts",
+            "timeline": "Desde la Línia de Temps",
+            "custom": "Personalitzat"
+        },
+        "description": "Crea una càmera de reproducció temporal que fa bucles de metratge històric per depurar la detecció d'objectes i els problemes de seguiment. La càmera de reproducció tindrà la mateixa configuració de detecció que la càmera d'origen. Trieu un interval de temps per començar.",
+        "startButton": "Inicia la repetició",
+        "selectFromTimeline": "Selecciona",
+        "starting": "S'està iniciant la repetició...",
+        "startLabel": "Inici",
+        "endLabel": "Final",
+        "toast": {
+            "error": "No s'ha pogut iniciar la repetició de depuració: {{error}}",
+            "alreadyActive": "Ja hi ha activada una sessió de reproducció",
+            "stopError": "No s'ha pogut aturar la repetició de depuració: {{error}}",
+            "goToReplay": "Ves a la repetició"
+        }
+    },
+    "description": "Reprodueix els enregistraments de la càmera per a la depuració. La llista d'objectes mostra un resum retardat en el temps dels objectes detectats i la pestanya Missatges mostra un flux de missatges interns de la fragata a partir del metratge de reproducció."
+}

@@ -208,6 +208,9 @@
       "expectedFps": "FPS previsti",
       "reconnectsLastHour": "Riconnessioni (ultima ora)",
       "stallsLastHour": "Blocchi (ultima ora)"
+    },
+    "noCameras": {
+      "title": "Nessuna telecamera trovata"
     }
   },
   "stats": {

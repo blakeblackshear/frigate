@@ -1,0 +1,73 @@
+{
+  "search": "Pretraga",
+  "button": {
+    "save": "Sačuvaj pretragu",
+    "clear": "Očisti pretragu",
+    "delete": "Obriši sačuvanu pretragu",
+    "filterInformation": "Filtrirajte informacije",
+    "filterActive": "Filtari aktivni"
+  },
+  "savedSearches": "Sačuvane pretrage",
+  "searchFor": "Pretraga za {{inputValue}}",
+  "trackedObjectId": "ID praćenog objekta",
+  "filter": {
+    "label": {
+      "cameras": "Kamere",
+      "labels": "Oznake",
+      "zones": "Zone",
+      "sub_labels": "Podoznake",
+      "attributes": "Atributi",
+      "search_type": "Tip pretrage",
+      "time_range": "Vremenski opseg",
+      "before": "Prije",
+      "after": "Nakon",
+      "min_score": "Min. bodovi",
+      "max_score": "Max. bodovi",
+      "min_speed": "Min. brzina",
+      "max_speed": "Max. brzina",
+      "recognized_license_plate": "Prepoznata tablica",
+      "has_clip": "Ima klip",
+      "has_snapshot": "Ima snimak"
+    },
+    "searchType": {
+      "thumbnail": "Minijatura",
+      "description": "Opis"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Datum 'before' mora biti kasniji od datuma 'after'.",
+        "afterDatebeEarlierBefore": "Datum 'after' mora biti raniji od datuma 'before'.",
+        "minScoreMustBeLessOrEqualMaxScore": "Vrijednost 'min_score' mora biti manja ili jednaka vrijednosti 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Vrijednost 'max_score' mora biti veća ili jednaka vrijednosti 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Vrijednost 'min_speed' mora biti manja ili jednaka vrijednosti 'max_speed'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Vrijednost 'max_speed' mora biti veća ili jednaka vrijednosti 'min_speed'."
+      }
+    },
+    "tips": {
+      "title": "Kako koristiti tekstualne filtere",
+      "desc": {
+        "text": "Filteri vam pomažu da sužite rezultate pretrage. Evo kako ih koristiti u polju za unos:",
+        "step1": "Unesite ime ključa filtera, zatim dvojtočku (npr. \"kamere:\").",
+        "step2": "Izaberite vrijednost iz predloga ili unesite vlastitu.",
+        "step3": "Koristite više filtera dodavanjem jednog za drugim s razmakom između.",
+        "step4": "Filteri datuma (pre: i nakon:) koriste {{DateFormat}} format.",
+        "step5": "Filter raspona vremena koristi format {{exampleTime}}.",
+        "step6": "Uklonite filtre klikom na 'x' pored njih.",
+        "exampleLabel": "Primjer:"
+      }
+    },
+    "header": {
+      "currentFilterType": "Vrijednosti filtera",
+      "noFilters": "Filtari",
+      "activeFilters": "Aktivni filteri"
+    }
+  },
+  "similaritySearch": {
+    "title": "Pretraga sličnosti",
+    "active": "Pretraga sličnosti aktivna",
+    "clear": "Očisti pretragu sličnosti"
+  },
+  "placeholder": {
+    "search": "Pretraži…"
+  }
+}

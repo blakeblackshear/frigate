@@ -70,7 +70,8 @@
   },
   "recording": {
     "enable": "开启录制",
-    "disable": "关闭录制"
+    "disable": "关闭录制",
+    "disabledInConfig": "必须先在该摄像头的设置中开启录制功能。"
   },
   "snapshots": {
     "enable": "开启快照",

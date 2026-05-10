@@ -8,7 +8,7 @@
         "description": "Home Assistant OS の Frigate プロセスに設定する環境変数のキー/値ペア。HAOS をご利用でない場合は、代わりに Docker の環境変数設定を使用してください。"
     },
     "audio": {
-        "label": "音声イベント",
+        "label": "音声検出",
         "enabled": {
             "label": "音声検知を有効化"
         },

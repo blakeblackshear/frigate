@@ -258,7 +258,7 @@
       "label": "Documentazione di Frigate"
     },
     "restart": "Riavvia Frigate",
-    "review": "Rivedi",
+    "review": "Revisiona",
     "explore": "Esplora",
     "export": "Esporta",
     "uiPlayground": "Interfaccia area prove",
@@ -275,7 +275,8 @@
     "classification": "Classificazione",
     "chat": "Chat",
     "profiles": "Profili",
-    "actions": "Azioni"
+    "actions": "Azioni",
+    "features": "Caratteristiche"
   },
   "pagination": {
     "next": {
@@ -292,8 +293,8 @@
   "role": {
     "title": "Ruolo",
     "admin": "Amministratore",
-    "viewer": "Spettatore",
-    "desc": "Gli amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia utente di Frigate. Gli spettatori possono visualizzare solo le telecamere, gli elementi di revisione e i filmati storici nell'interfaccia utente."
+    "viewer": "Visualizzatore",
+    "desc": "Gli amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia utente di Frigate. I visualizzatori possono visualizzare solo le telecamere, gli elementi di revisione e i filmati storici nell'interfaccia utente."
   },
   "accessDenied": {
     "desc": "Non hai i permessi per visualizzare questa pagina.",

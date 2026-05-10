@@ -1,0 +1,140 @@
+{
+  "filter": "Filtar",
+  "classes": {
+    "label": "Klase",
+    "all": {
+      "title": "Sve klase"
+    },
+    "count_one": "{{count}} Klasa",
+    "count_other": "{{count}} Klase"
+  },
+  "labels": {
+    "label": "Oznake",
+    "all": {
+      "title": "Sve oznake",
+      "short": "Oznake"
+    },
+    "count_one": "{{count}} Oznaka",
+    "count_other": "{{count}} Oznake"
+  },
+  "zones": {
+    "label": "Zone",
+    "all": {
+      "title": "Sve zone",
+      "short": "Zone"
+    }
+  },
+  "dates": {
+    "selectPreset": "Odaberite predpostavku…",
+    "all": {
+      "title": "Svi datumi",
+      "short": "Datumi"
+    }
+  },
+  "more": "Više filtera",
+  "reset": {
+    "label": "Poništi filtere na zadane vrijednosti"
+  },
+  "timeRange": "Vremenski opseg",
+  "subLabels": {
+    "label": "Podoznake",
+    "all": "Sve podoznake"
+  },
+  "attributes": {
+    "label": "Atributi klasifikacije",
+    "all": "Svi atributi"
+  },
+  "score": "Rezultat",
+  "estimatedSpeed": "Procijenjena brzina ({{unit}})",
+  "features": {
+    "label": "Funkcije",
+    "hasSnapshot": "Ima snimak",
+    "hasVideoClip": "Ima video zapis",
+    "submittedToFrigatePlus": {
+      "label": "Predano Frigate+",
+      "tips": "Prvo morate filtrirati prateće objekte koji imaju snimak.<br /><br />Prateći objekti bez snimka ne mogu se poslati na Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Sortiraj",
+    "dateAsc": "Datum (Uzlazno)",
+    "dateDesc": "Datum (Silazno)",
+    "scoreAsc": "Ocjena objekta (Uzlazno)",
+    "scoreDesc": "Ocjena objekta (Silazno)",
+    "speedAsc": "Procijenjena brzina (Uzlazno)",
+    "speedDesc": "Procijenjena brzina (Silazno)",
+    "relevance": "Relevantnost"
+  },
+  "cameras": {
+    "label": "Filter kamere",
+    "all": {
+      "title": "Sve Kamere",
+      "short": "Kamere"
+    }
+  },
+  "review": {
+    "showReviewed": "Prikaži pregledane"
+  },
+  "motion": {
+    "showMotionOnly": "Prikaži samo pokret"
+  },
+  "explore": {
+    "settings": {
+      "title": "Postavke",
+      "defaultView": {
+        "title": "Zadani prikaz",
+        "desc": "Kada nisu odabrani filteri, prikazuje se sažetak najnovijih pratećih objekata po oznaci, ili prikazuje se mreža bez filtriranja.",
+        "summary": "Sažetak",
+        "unfilteredGrid": "Mreža bez filtriranja"
+      },
+      "gridColumns": {
+        "title": "Kolone mreže",
+        "desc": "Odaberite broj kolona u prikazu mreže."
+      },
+      "searchSource": {
+        "label": "Izvor pretrage",
+        "desc": "Odaberite da li ćete pretraživati miniaturne slike ili opise vaših praćenih objekata.",
+        "options": {
+          "thumbnailImage": "Miniaturna slika",
+          "description": "Opis"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Odaberite datum za filtriranje"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtrirajte nivo zapisa",
+    "filterBySeverity": "Filtrirajte zapise prema ozbiljnosti",
+    "loading": {
+      "title": "Učitavanje",
+      "desc": "Kada se panel zapisa pomakne do dna, novi zapisi automatski se prikazuju kada se dodaju."
+    },
+    "disableLogStreaming": "Onemogući praćenje zapisa",
+    "allLogs": "Svi zapisi"
+  },
+  "trackedObjectDelete": {
+    "title": "Potvrdi brisanje",
+    "desc": "Brisanje ovih {{objectLength}} praćenih objekata uklanja snimku, bilo koje sačuvane ugradnje, i sve povezane uloge objekata. Snimljeni materijal ovih praćenih objekata u pogledu Historija <em>NEĆE</em> biti obrisan.<br /><br />Sigurni ste da želite nastaviti?<br /><br />Zadržite tipku <em>Shift</em> da biste preskočili ovaj dijalog u budućnosti.",
+    "toast": {
+      "success": "Praćeni objekti uspješno obrisani.",
+      "error": "Neuspješno brisanje praćenih objekata: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtriraj po maski zone"
+  },
+  "recognizedLicensePlates": {
+    "title": "Prepoznate tablice",
+    "loadFailed": "Neuspješno učitavanje prepoznatih tablica.",
+    "loading": "Učitavanje prepoznatih tablica…",
+    "placeholder": "Unesite za pretragu tablica…",
+    "noLicensePlatesFound": "Nema pronađenih tablica.",
+    "selectPlatesFromList": "Odaberite jednu ili više tablica iz liste.",
+    "selectAll": "Odaberite sve",
+    "clearAll": "Očistite sve"
+  }
+}

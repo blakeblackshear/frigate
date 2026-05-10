@@ -9,7 +9,7 @@
         "description": "有効"
     },
     "audio": {
-        "label": "音声イベント",
+        "label": "音声検出",
         "enabled": {
             "label": "音声検知を有効化",
             "description": "このカメラのオーディオイベント検出を有効または無効にします。"

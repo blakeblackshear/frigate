@@ -45,7 +45,7 @@
     "globalMotion": "画面变动检测",
     "globalObjects": "目标",
     "globalReview": "核查",
-    "globalAudioEvents": "音频事件",
+    "globalAudioEvents": "音频检测",
     "globalLivePlayback": "实时监控观看",
     "globalTimestampStyle": "时间戳样式",
     "systemDatabase": "数据库",
@@ -75,7 +75,7 @@
     "cameraMotion": "画面变动检测",
     "cameraObjects": "目标",
     "cameraConfigReview": "核查",
-    "cameraAudioEvents": "音频事件",
+    "cameraAudioEvents": "音频检测",
     "cameraAudioTranscription": "音频转录",
     "cameraNotifications": "通知",
     "cameraLivePlayback": "实时监控观看",
@@ -1412,6 +1412,14 @@
       "inherit": "继承",
       "enabled": "开启",
       "disabled": "关闭"
+    },
+    "cameraType": {
+      "title": "摄像头类型",
+      "label": "摄像头类型",
+      "description": "为每路摄像头设置类型。专用车牌识别（LPR）摄像头为单用途设备，配备高倍光学变焦，可抓拍远处车辆的车牌。绝大多数摄像头应选用通用类型；只有专为车牌识别部署、且画面聚焦对准车牌的摄像头，才需选择专用 LPR 类型。",
+      "normal": "通用",
+      "dedicatedLpr": "车牌识别专用",
+      "saveSuccess": "已更新 {{cameraName}} 的摄像头类型，请重启 Frigate 以使更改生效。"
     }
   },
   "cameraReview": {
@@ -1773,7 +1781,14 @@
     "overriddenGlobal": "已覆盖全局通用配置",
     "overriddenGlobalTooltip": "当前摄像头配置，将优先覆盖全局通用设置",
     "overriddenBaseConfigTooltip": "当前 {{profile}} 配置模板会覆盖本节所有设置",
-    "overriddenBaseConfig": "已覆盖默认配置"
+    "overriddenBaseConfig": "已覆盖默认配置",
+    "overriddenInCameras": {
+      "label_other": "已在 {{count}} 个摄像头中单独配置",
+      "tooltip_other": "{{count}} 个摄像头在此项中存在单独配置，点击查看详情。",
+      "heading_other": "此全局设置项下有 {{count}} 个摄像头存在自定义单独配置。",
+      "othersField_other": "其余 {{count}} 个",
+      "profilePrefix": "{{profile}} 配置方案：{{fields}}"
+    }
   },
   "profiles": {
     "title": "配置模板",
@@ -1872,11 +1887,13 @@
     "review": {
       "recordDisabled": "录制已禁用，不会生成核查记录项。",
       "detectDisabled": "目标检测已禁用。核查记录需要依靠检测到的目标来对警报和检测事件进行分类。",
-      "allNonAlertDetections": "所有非警报类活动都将被记录为检测事件。"
+      "allNonAlertDetections": "所有非警报类活动都将被记录为检测事件。",
+      "genaiImageSourceRecordingsRecordDisabled": "图像源虽然设置为“录制”，但录制功能已关闭。Frigate 将自动降级使用预览图片。"
     },
     "lpr": {
-      "vehicleNotTracked": "车牌识别需要先开启对 “汽车” 或 “摩托车” 的目标追踪。",
-      "globalDisabled": "车牌识别未在全局开启。请在全局设置中开启该功能，才能在摄像头下单独配置车牌识别是否开启。"
+      "vehicleNotTracked": "车牌识别需要先开启对 “汽车” 或 “摩托车” 的目标追踪。请在该摄像头的检测目标中添加“汽车”或“摩托车”。",
+      "globalDisabled": "要让该摄像头的车牌识别功能正常使用，必须先开启车牌识别增强功能。",
+      "modelSizeLarge": "大型模型针对多行格式车牌做了优化。小型模型的性能优于大型模型，而且只有小型模型才能支持中文车牌。除非你所在地区使用多行车牌格式，否则建议使用小型模型。"
     },
     "audio": {
       "noAudioRole": "暂无任何流已开启音频（audio）功能（role）。必须在视频流上启用音频功能，音频检测才能正常工作。"
@@ -1885,11 +1902,13 @@
       "audioDetectionDisabled": "该摄像头未开启音频检测功能。音频转录需要先开启音频检测。"
     },
     "detect": {
-      "fpsGreaterThanFive": "不建议设置检测帧率高于 5。"
+      "fpsGreaterThanFive": "不建议设置检测帧率高于 5，数值设置过高可能引发性能问题，且不会带来任何增益。",
+      "disabled": "目标检测已禁用。快照、回放条目以及人脸识别、车牌识别、生成式 AI 等增强功能都将无法使用。"
     },
     "faceRecognition": {
-      "globalDisabled": "人脸识别未在全局开启。请在全局设置中开启该功能，才能在摄像头下单独配置人脸识别是否开启。",
-      "personNotTracked": "人脸识别需要检测到 “人”（person） 后才能工作。请确保 “person” 已添加到目标追踪列表中。"
+      "globalDisabled": "必须开启人脸识别增强功能，此摄像头的人脸识别相关功能才能正常使用。",
+      "personNotTracked": "人脸识别需要检测到 “人”（person） 后才能工作。请在该摄像头的检测目标设置中添加“人”。",
+      "modelSizeLarge": "大型模型需要 GPU 或 NPU 才能运行正常。仅使用 CPU 的设备请选用小型模型。"
     },
     "record": {
       "noRecordRole": "暂无任何视频流已配置录制功能，录制功能将无法正常工作。"
@@ -1903,6 +1922,12 @@
     "detectors": {
       "mixedTypes": "所有检测器必须为同一类型。若要更换为其他类型，请先移除现有的检测器。",
       "mixedTypesSuggestion": "所有检测器必须使用相同类型。请移除现有检测器，或选择 {{type}}。"
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "必须配置具备“描述”功能的生成式 AI 服务商，才能自动生成事件描述。"
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "Jina V2 的大型模型版本内存占用与推理开销较高，建议搭配独立显卡使用大型模型。"
     }
   }
 }

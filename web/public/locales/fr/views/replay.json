@@ -1,0 +1,8 @@
+{
+    "title": "Debug - Rejouer",
+    "description": "Rejouer les enregistrement de la camera, à but de débogage. La liste d'objets montre un résumé avec retard des objets détectés; et l'onglet Messages montre le flux des messages internes à Frigate liés à la vidéo rejouée.",
+    "websocket_messages": "Messages",
+    "dialog": {
+        "title": "Démarrer le Rejeu-Debogage"
+    }
+}

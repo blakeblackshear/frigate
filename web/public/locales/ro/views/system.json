@@ -241,6 +241,9 @@
       "expectedFps": "FPS așteptat",
       "reconnectsLastHour": "Reconectări (ultima oră)",
       "stallsLastHour": "Blocaje (ultima oră)"
+    },
+    "noCameras": {
+      "title": "Nicio cameră găsită"
     }
   },
   "stats": {

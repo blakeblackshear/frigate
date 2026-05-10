@@ -1,6 +1,6 @@
 {
   "yell": "Teriakan",
-  "speech": "Bahasa",
+  "speech": "Percakapan",
   "babbling": "Ocehan",
   "bellow": "Di bawah",
   "whoop": "Teriakan",
@@ -87,5 +87,12 @@
   "clapping": "Tepukan",
   "camera": "Kamera",
   "wheeze": "Nafas",
-  "gasp": "Tersedak"
+  "gasp": "Tersedak",
+  "sound_effect": "Efek Suara",
+  "environmental_noise": "Suara Lingkungan",
+  "static": "Statis",
+  "white_noise": "Suara Derau",
+  "television": "Televisi",
+  "radio": "Radio",
+  "scream": "Teriakan"
 }

@@ -1,0 +1,77 @@
+{
+    "documentTitle": "Căutare mișcare - Frigate",
+    "title": "Căutare mișcare",
+    "description": "Desenează un poligon pentru a defini regiunea de interes și specifică un interval de timp pentru a căuta schimbări de mișcare în acea regiune.",
+    "selectCamera": "Căutarea de mișcare se încarcă",
+    "startSearch": "Începe căutarea",
+    "searchStarted": "Căutarea a început",
+    "searchCancelled": "Căutare anulată",
+    "cancelSearch": "Anulează",
+    "searching": "Căutare în curs.",
+    "searchComplete": "Căutare finalizată",
+    "noResultsYet": "Rulează o căutare pentru a găsi schimbări de mișcare în regiunea selectată",
+    "noChangesFound": "Nu au fost detectate schimbări de pixeli în regiunea selectată",
+    "changesFound_one": "Am găsit {{count}} schimbare de mișcare",
+    "changesFound_few": "Am găsit {{count}} schimbări de mișcare",
+    "changesFound_other": "Am găsit {{count}} de schimbări de mișcare",
+    "framesProcessed": "{{count}} cadre procesate",
+    "jumpToTime": "Sari la acest timp",
+    "results": "Rezultate",
+    "showSegmentHeatmap": "Hartă termică",
+    "newSearch": "Căutare nouă",
+    "clearResults": "Curăță rezultatele",
+    "clearROI": "Curăță poligonul",
+    "polygonControls": {
+        "points_one": "{{count}} punct",
+        "points_few": "{{count}} puncte",
+        "points_other": "{{count}} de puncte",
+        "undo": "Anulează ultimul punct",
+        "reset": "Resetează poligonul"
+    },
+    "motionHeatmapLabel": "Harta termică a mișcării",
+    "dialog": {
+        "title": "Căutare mișcare",
+        "cameraLabel": "Cameră",
+        "previewAlt": "Previzualizarea camerei pentru {{camera}}"
+    },
+    "timeRange": {
+        "title": "Interval de căutare",
+        "start": "Timp de început",
+        "end": "Timp de sfârșit"
+    },
+    "settings": {
+        "title": "Setări de căutare",
+        "parallelMode": "Mod paralel",
+        "parallelModeDesc": "Scanează mai multe segmente de înregistrare în același timp (mai rapid, dar consumă semnificativ mai mult procesorul)",
+        "threshold": "Prag de sensibilitate",
+        "thresholdDesc": "Valorile mai mici detectează schimbări mai mici (1-255)",
+        "minArea": "Arie minimă de schimbare",
+        "minAreaDesc": "Procentul minim din regiunea de interes care trebuie să se schimbe pentru a fi considerat semnificativ",
+        "frameSkip": "Omitere cadre",
+        "frameSkipDesc": "Procesează fiecare al N-lea cadru. Setează asta la rata de cadre a camerei tale pentru a procesa un cadru pe secundă (ex. 5 pentru o cameră de 5 FPS, 30 pentru o cameră de 30 FPS). Valorile mai mari vor fi mai rapide, dar pot rata evenimente scurte de mișcare.",
+        "maxResults": "Rezultate maxime",
+        "maxResultsDesc": "Oprește-te după acest număr de marcaje de timp potrivite"
+    },
+    "errors": {
+        "noCamera": "Te rog selectează o cameră",
+        "noROI": "Te rog desenează o regiune de interes",
+        "noTimeRange": "Te rog selectează un interval de timp",
+        "invalidTimeRange": "Timpul de sfârșit trebuie să fie după timpul de început",
+        "searchFailed": "Căutarea a eșuat: {{message}}",
+        "polygonTooSmall": "Poligonul trebuie să aibă cel puțin 3 puncte",
+        "unknown": "Eroare necunoscută"
+    },
+    "changePercentage": "{{percentage}}% schimbat",
+    "metrics": {
+        "title": "Metrici de căutare",
+        "segmentsScanned": "Segmente scanate",
+        "segmentsProcessed": "Procesat",
+        "segmentsSkippedInactive": "Omis (fără activitate)",
+        "segmentsSkippedHeatmap": "Omis (fără suprapunere ROI)",
+        "fallbackFullRange": "Scanare completă de rezervă",
+        "framesDecoded": "Cadre decodate",
+        "wallTime": "Timp de căutare",
+        "segmentErrors": "Erori segment",
+        "seconds": "{{seconds}}s"
+    }
+}

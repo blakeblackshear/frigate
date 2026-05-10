@@ -110,7 +110,8 @@
   },
   "recording": {
     "enable": "Abilita registrazione",
-    "disable": "Disabilita registrazione"
+    "disable": "Disabilita registrazione",
+    "disabledInConfig": "Per questa telecamera è necessario prima abilitare la registrazione nelle impostazioni."
   },
   "audioDetect": {
     "enable": "Abilita rilevamento audio",

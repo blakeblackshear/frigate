@@ -38,5 +38,26 @@
         "enabled_in_config": {
             "label": "원래 오디오 상태"
         }
+    },
+    "mqtt": {
+        "label": "MQTT"
+    },
+    "notifications": {
+        "label": "알림",
+        "enabled": {
+            "label": "알림 활성화"
+        },
+        "email": {
+            "label": "알림 이메일",
+            "description": "푸시 알림에 사용되거나 특정 알림 제공업체에서 요구하는 이메일 주소입니다."
+        },
+        "cooldown": {
+            "label": "알림 재발송 대기 시간",
+            "description": "수신자에게 스팸 메일을 보내는 것을 방지하기 위해 알림 재발송 대기시간(초)을 설정합니다."
+        },
+        "enabled_in_config": {
+            "label": "초기 알림 활성 상태",
+            "description": "초기 구성에서 알림이 활성화되었는지 여부를 나타냅니다."
+        }
     }
 }
