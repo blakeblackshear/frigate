@@ -70,7 +70,8 @@
   },
   "recording": {
     "enable": "Activează înregistrarea",
-    "disable": "Dezactivează înregistrarea"
+    "disable": "Dezactivează înregistrarea",
+    "disabledInConfig": "Înregistrarea trebuie mai întâi activată în Setări pentru această cameră."
   },
   "snapshots": {
     "disable": "Dezactivează snapshoturile",

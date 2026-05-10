@@ -44,7 +44,7 @@
     "globalMotion": "Detecție mișcare",
     "globalObjects": "Obiecte",
     "globalReview": "Recenzie",
-    "globalAudioEvents": "Evenimente audio",
+    "globalAudioEvents": "Detecție audio",
     "globalLivePlayback": "Redare live",
     "globalTimestampStyle": "Stil timestamp",
     "systemDatabase": "Bază de date",
@@ -74,7 +74,7 @@
     "cameraMotion": "Detecție mișcare",
     "cameraObjects": "Obiecte",
     "cameraConfigReview": "Recenzie",
-    "cameraAudioEvents": "Evenimente audio",
+    "cameraAudioEvents": "Detecție audio",
     "cameraAudioTranscription": "Transcriere audio",
     "cameraNotifications": "Notificări",
     "cameraLivePlayback": "Redare live",
@@ -1356,6 +1356,14 @@
       "inherit": "Moștenire",
       "enabled": "Activat",
       "disabled": "Dezactivat"
+    },
+    "cameraType": {
+      "title": "Tip cameră",
+      "label": "Tip cameră",
+      "description": "Setează tipul pentru fiecare cameră. Camerele LPR dedicate sunt camere cu un singur scop, cu zoom optic puternic pentru a captura plăcuțele de înmatriculare ale vehiculelor aflate la distanță. Majoritatea camerelor ar trebui să folosească tipul normal de cameră, cu excepția cazului în care camera este special pentru LPR și are o vedere strâns focalizată pe plăcuțele de înmatriculare.",
+      "normal": "Normal",
+      "dedicatedLpr": "LPR dedicat",
+      "saveSuccess": "Tipul camerei a fost actualizat pentru {{cameraName}}. Repornește Frigate pentru a aplica modificările."
     }
   },
   "cameraReview": {
@@ -1722,7 +1730,22 @@
     "overriddenGlobal": "Suprascris (global)",
     "overriddenGlobalTooltip": "Această cameră suprascrie setările globale de configurare din această secțiune",
     "overriddenBaseConfig": "Suprascris (configurația de bază)",
-    "overriddenBaseConfigTooltip": "Profilul {{profile}} suprascrie setările de configurare din această secțiune"
+    "overriddenBaseConfigTooltip": "Profilul {{profile}} suprascrie setările de configurare din această secțiune",
+    "overriddenInCameras": {
+      "label_one": "Suprascris în {{count}} cameră",
+      "label_few": "Suprascris în {{count}} camere",
+      "label_other": "Suprascris în {{count}} de camere",
+      "tooltip_one": "{{count}} cameră suprascrie valorile din această secțiune. Click pentru a vedea detaliile.",
+      "tooltip_few": "{{count}} camere suprascriu valorile din această secțiune. Click pentru a vedea detaliile.",
+      "tooltip_other": "{{count}} de camere suprascriu valorile din această secțiune. Click pentru a vedea detaliile.",
+      "heading_one": "Această secțiune globală are câmpuri care sunt suprascrise în {{count}} cameră.",
+      "heading_few": "Această secțiune globală are câmpuri care sunt suprascrise în {{count}} camere.",
+      "heading_other": "Această secțiune globală are câmpuri care sunt suprascrise în {{count}} de camere.",
+      "othersField_one": "{{count}} alta",
+      "othersField_few": "{{count}} alte",
+      "othersField_other": "{{count}} de alte",
+      "profilePrefix": "Profil {{profile}}: {{fields}}"
+    }
   },
   "profiles": {
     "title": "Profile",
@@ -1823,7 +1846,8 @@
     "review": {
       "recordDisabled": "Înregistrarea este dezactivată, elementele de revizuire nu vor fi generate.",
       "detectDisabled": "Detecția obiectelor este dezactivată. Elementele de revizuire necesită obiecte detectate pentru a categorisi alertele și detecțiile.",
-      "allNonAlertDetections": "Toată activitatea fără alertă va fi inclusă ca detecții."
+      "allNonAlertDetections": "Toată activitatea fără alertă va fi inclusă ca detecții.",
+      "genaiImageSourceRecordingsRecordDisabled": "Sursa imaginii este setată pe 'recordings', dar înregistrarea este dezactivată. Frigate va reveni la imaginile de previzualizare."
     },
     "audio": {
       "noAudioRole": "Niciun flux nu are rolul audio definit. Trebuie să activați rolul audio pentru ca detecția audio să funcționeze."
@@ -1832,15 +1856,18 @@
       "audioDetectionDisabled": "Detecția audio nu este activată pentru această cameră. Transcrierea audio necesită ca detecția audio să fie activă."
     },
     "detect": {
-      "fpsGreaterThanFive": "Setarea cadrelor pe secundă pentru detecție la o valoare mai mare de 5 nu este recomandată."
+      "fpsGreaterThanFive": "Setarea FPS-ului de detecție mai mare de 5 nu este recomandată. Valorile mai mari pot cauza probleme de performanță și nu vor oferi niciun beneficiu.",
+      "disabled": "Detecția de obiecte este dezactivată. Snapshot-urile, elementele de revizuire și îmbogățirile precum recunoașterea facială, recunoașterea plăcuțelor de înmatriculare și AI-ul generativ nu vor funcționa."
     },
     "faceRecognition": {
-      "globalDisabled": "Recunoașterea facială nu este activată la nivel global. Activați-o în setările globale pentru ca recunoașterea facială la nivel de cameră să funcționeze.",
-      "personNotTracked": "Recunoașterea facială necesită urmărirea obiectului „person”. Asigurați-vă că „person” este în lista de urmărire a obiectelor."
+      "globalDisabled": "Îmbogățirea pentru recunoaștere facială trebuie activată pentru ca funcțiile de recunoaștere facială să funcționeze pe această cameră.",
+      "personNotTracked": "Recunoașterea facială necesită ca obiectul 'person' să fie urmărit. Activează 'person' în Obiecte pentru această cameră.",
+      "modelSizeLarge": "Modelul 'large' necesită un GPU sau NPU pentru o performanță rezonabilă. Folosește 'small' pe sistemele doar cu CPU."
     },
     "lpr": {
-      "globalDisabled": "Recunoașterea plăcuțelor de înmatriculare nu este activată la nivel global. Activați-o în setările globale pentru ca recunoașterea la nivel de cameră să funcționeze.",
-      "vehicleNotTracked": "Recunoașterea plăcuțelor de înmatriculare necesită ca „car” sau „motorcycle” să fie urmărite."
+      "globalDisabled": "Îmbogățirea pentru recunoașterea plăcuțelor de înmatriculare trebuie activată pentru ca funcțiile LPR să funcționeze pe această cameră.",
+      "vehicleNotTracked": "Recunoașterea plăcuțelor de înmatriculare necesită ca „car” sau „motorcycle” să fie urmărite.",
+      "modelSizeLarge": "Modelul 'large' este optimizat pentru plăcuțele de înmatriculare pe mai multe rânduri. Modelul 'small' oferă o performanță mai bună decât 'large' și ar trebui folosit cu excepția cazului în care regiunea ta folosește formate de plăcuțe pe mai multe rânduri."
     },
     "record": {
       "noRecordRole": "Niciun flux nu are rolul de înregistrare definit. Înregistrarea nu va funcționa."
@@ -1854,6 +1881,12 @@
     "detectors": {
       "mixedTypes": "Toți detectorii trebuie să folosească același tip. Șterge detectorii existenți pentru a folosi un alt tip.",
       "mixedTypesSuggestion": "Toți detectorii trebuie să folosească același tip. Șterge detectorii existenți sau selectează {{type}}."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "Trebuie să configurezi un furnizor GenAI cu rolul 'descriptions' pentru ca descrierile să fie generate."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "Dimensiunea 'small' cu modelul Jina V2 are un cost ridicat de RAM și inferență. Modelul 'large' cu un GPU dedicat este recomandat."
     }
   }
 }
