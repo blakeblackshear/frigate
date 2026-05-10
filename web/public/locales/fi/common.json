@@ -38,8 +38,8 @@
     "s": "{{time}}s",
     "minute_one": "{{time}}minuutti",
     "minute_other": "{{time}}minuuttia",
-    "second_one": "{{time}}sekuntti",
-    "second_other": "{{time}}sekunttia",
+    "second_one": "{{time}} sekunti",
+    "second_other": "{{time}} sekuntia",
     "formattedTimestampHourMinute": {
       "24hour": "HH:mm"
     },
