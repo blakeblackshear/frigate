@@ -1,5 +1,6 @@
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { EmptyCard } from "@/components/card/EmptyCard";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
@@ -474,6 +475,7 @@ export default function FaceLibrary() {
             faceNames={faces}
             selectedFaces={selectedFaces}
             onClickFaces={onClickFaces}
+            onAddFace={() => setAddFace(true)}
             onRefresh={refreshFaces}
           />
         ) : (
@@ -692,6 +694,7 @@ type TrainingGridProps = {
   faceNames: string[];
   selectedFaces: string[];
   onClickFaces: (images: string[], ctrl: boolean) => void;
+  onAddFace: () => void;
   onRefresh: (
     data?:
       | FaceLibraryData
@@ -709,6 +712,7 @@ function TrainingGrid({
   faceNames,
   selectedFaces,
   onClickFaces,
+  onAddFace,
   onRefresh,
 }: TrainingGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -762,6 +766,19 @@ function TrainingGrid({
   ]);
 
   if (attemptImages.length == 0) {
+    if (faceNames.length == 0) {
+      return (
+        <EmptyCard
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center text-center"
+          icon={<AddFaceIcon className="size-16" />}
+          title={t("train.emptyNoLibrary.title")}
+          description={t("train.emptyNoLibrary.description")}
+          buttonText={t("button.addFace")}
+          onClick={onAddFace}
+        />
+      );
+    }
+
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderCheck className="size-16" />
