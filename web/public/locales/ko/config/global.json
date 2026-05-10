@@ -60,7 +60,140 @@
             "description": "true로 설정하면 시작 시 관리자 비밀번호를 재설정하고 새 비밀번호를 로그에 출력합니다."
         },
         "cookie_name": {
-            "label": "JWT 쿠키 이름"
+            "label": "JWT 쿠키 이름",
+            "description": "자체 인증용 JWT 토큰을 저장할 쿠키 이름입니다."
+        },
+        "cookie_secure": {
+            "label": "보안 쿠키 설정",
+            "description": "인증 쿠키에 보안 플래그를 설정합니다. TLS를 사용하는 경우 'True'로 설정해야 합니다."
+        },
+        "session_length": {
+            "label": "세션 길이",
+            "description": "JWT 기반 세션의 유지 시간(초)입니다."
+        },
+        "refresh_time": {
+            "label": "세션 갱신 주기",
+            "description": "세션 만료까지 남은 시간이 몇 초 남지 않을 경우, 세션 시간을 다시 최대로 연장합니다."
+        },
+        "failed_login_rate_limit": {
+            "label": "로그인 실패 제한",
+            "description": "무차별 대입 공격을 줄이기 위해 로그인 시도 실패 횟수를 제한하는 규칙을 적용합니다."
+        },
+        "trusted_proxies": {
+            "label": "신뢰할 수 있는 프록시",
+            "description": "속도 제한을 위해 클라이언트 IP를 결정할 때 사용되는 신뢰할 수 있는 프록시 IP 목록입니다."
+        },
+        "hash_iterations": {
+            "label": "해시 반복 횟수",
+            "description": "사용자 암호를 해싱할 때 사용할 PBKDF2-SHA256 반복 횟수입니다."
+        },
+        "roles": {
+            "label": "역할 할당",
+            "description": "역할별로 접근 가능한 카메라 목록을 매핑합니다. 목록이 비어 있으면 해당 역할에 모든 카메라 접근 권한을 부여합니다."
+        },
+        "admin_first_time_login": {
+            "label": "관리자 초기 로그인 설정",
+            "description": "활성화 시, 관리자 비밀번호 초기화 후 로그인 방법 안내 링크가 로그인 페이지에 표시됩니다. "
+        }
+    },
+    "database": {
+        "label": "데이터베이스",
+        "description": "추적된 객체 및 녹화 메타데이터를 저장하는 SQLite 데이터베이스 설정입니다.",
+        "path": {
+            "label": "데이터베이스 경로",
+            "description": "Frigate SQLite 데이터베이스 파일이 저장될 파일 시스템 경로입니다."
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "라이브 스트림 중계 및 번역에 사용되는 통합 go2rtc 리스트리밍 서비스 설정입니다."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "MQTT 브로커에 원격 측정 데이터, 스냅샷 및 이벤트 세부 정보를 연결하고 게시하기 위한 설정입니다.",
+        "enabled": {
+            "label": "MQTT 활성화",
+            "description": "상태, 이벤트 및 스냅샷에 대한 MQTT 통합을 활성화 또는 비활성화합니다."
+        },
+        "host": {
+            "label": "MQTT 호스트",
+            "description": "MQTT 브로커의 호스트 이름 또는 IP 주소입니다."
+        },
+        "port": {
+            "label": "MQTT 포트",
+            "description": "MQTT 브로커의 포트 번호입니다 (일반적인 포트는 1883입니다)."
+        },
+        "topic_prefix": {
+            "label": "토픽 접두사",
+            "description": "Frigate의 모든 MQTT 메시지에 사용할 접두사입니다. 여러 대의 Frigate를 실행하는 경우 각각 고유한 이름을 사용해야 합니다."
+        },
+        "client_id": {
+            "label": "클라이언트 ID",
+            "description": "MQTT 브로커 연결 시 사용하는 클라이언트 식별자입니다. 인스턴스마다 고유한 이름을 사용해야 합니다."
+        },
+        "stats_interval": {
+            "label": "통계 간격",
+            "description": "시스템 및 카메라 통계 정보를 MQTT로 전송하는 간격(초)입니다."
+        },
+        "user": {
+            "label": "MQTT 사용자 이름",
+            "description": "MQTT 사용자 이름(선택 사항)입니다. 환경 변수나 비밀 값(Secrets)을 통해 입력할 수 있습니다."
+        },
+        "password": {
+            "label": "MQTT 비밀번호",
+            "description": "MQTT 비밀번호(선택 사항)입니다. 환경 변수나 비밀 값(Secrets)을 통해 입력할 수 있습니다."
+        },
+        "tls_ca_certs": {
+            "label": "TLS CA 인증서",
+            "description": "브로커와의 TLS 연결에 사용할 CA 인증서 경로(자체 서명 인증서의 경우)."
+        },
+        "tls_client_cert": {
+            "label": "클라이언트 인증서",
+            "description": "TLS 상호 인증을 위한 클라이언트 인증서 경로입니다. 클라이언트 인증서를 사용할 때는 사용자 이름/암호를 설정하지 마십시오."
+        },
+        "tls_client_key": {
+            "label": "클라이언트 키",
+            "description": "클라이언트 인증서의 개인 키 경로입니다."
+        },
+        "tls_insecure": {
+            "label": "TLS 비보안 모드",
+            "description": "호스트 이름 확인을 건너뛰어 안전하지 않은 TLS 연결을 허용합니다(권장하지 않음)."
+        },
+        "qos": {
+            "label": "MQTT QoS",
+            "description": "MQTT 메시지 전송 및 구독에 대한 서비스 품질(QoS) 등급입니다 (0, 1, 2 중 선택)."
+        }
+    },
+    "notifications": {
+        "label": "알림",
+        "description": "모든 카메라에 대한 알림을 활성화하고 제어하는 설정입니다. 카메라별로 설정을 재정의할 수 있습니다.",
+        "enabled": {
+            "label": "알림 활성화",
+            "description": "모든 카메라에 대한 알림을 활성화 또는 비활성화할 수 있으며, 카메라별로 설정을 재정의할 수 있습니다."
+        },
+        "email": {
+            "label": "알림 이메일",
+            "description": "푸시 알림에 사용되거나 특정 알림 제공업체에서 요구하는 이메일 주소입니다."
+        },
+        "cooldown": {
+            "label": "알림 재발송 대기 시간",
+            "description": "수신자에게 스팸 메일을 보내는 것을 방지하기 위해 알림 재발송 대기시간(초)을 설정합니다."
+        },
+        "enabled_in_config": {
+            "label": "초기 알림 활성 상태",
+            "description": "초기 구성에서 알림이 활성화되었는지 여부를 나타냅니다."
+        }
+    },
+    "networking": {
+        "label": "네트워킹",
+        "description": "Frigate 엔드포인트에 대한 IPv6 활성화와 같은 네트워크 관련 설정입니다.",
+        "ipv6": {
+            "label": "IPv6 구성",
+            "description": "Frigate 네트워크 서비스에 대한 IPv6 관련 설정입니다.",
+            "enabled": {
+                "label": "IPv6 활성화",
+                "description": "Frigate 서비스(API 및 UI)에 IPv6 지원이 필요한 경우 활성화하십시오."
+            }
         }
     }
 }
