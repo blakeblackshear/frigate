@@ -1,7 +1,8 @@
 {
     "audio": {
         "global": {
-            "detection": "التحري العام"
+            "detection": "التحري العام",
+            "sensitivity": "الحساسية العامة"
         }
     }
 }
