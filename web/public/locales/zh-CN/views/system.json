@@ -213,6 +213,9 @@
       "expectedFps": "预期帧率",
       "reconnectsLastHour": "最近一小时重连次数",
       "stallsLastHour": "最近一小时卡顿次数"
+    },
+    "noCameras": {
+      "title": "没有找到摄像头"
     }
   },
   "lastRefreshed": "最后刷新时间： ",
