@@ -2,7 +2,7 @@
   "documentTitle": "Klasifikasi Model - Frigate",
   "details": {
     "scoreInfo": "Skor tersebut mewakili rata-rata kepercayaan klasifikasi di seluruh deteksi objek ini.",
-    "none": "Tidak ada",
+    "none": "Tidak Ada",
     "unknown": "Tidak diketahui"
   },
   "button": {

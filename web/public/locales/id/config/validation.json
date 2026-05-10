@@ -1,1 +1,3 @@
-{}
+{
+    "minimum": "Nilai harus lebih besar dari {{limit}}"
+}

@@ -5,7 +5,7 @@
   "deleteExport": "Hapus Ekspor",
   "deleteExport.desc": "Apakah Anda yakin ingin menghapus {{exportName}}?",
   "editExport": {
-    "title": "Ganti Nama Ekspor",
+    "title": "Ubah nama ekspor",
     "desc": "Masukkan nama baru untuk ekspor ini.",
     "saveExport": "Simpan Ekspor"
   },
