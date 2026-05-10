@@ -474,6 +474,7 @@ export default function FaceLibrary() {
             attemptImages={trainImages}
             faceNames={faces}
             selectedFaces={selectedFaces}
+            isLoading={faceData === undefined}
             onClickFaces={onClickFaces}
             onAddFace={() => setAddFace(true)}
             onRefresh={refreshFaces}
@@ -693,6 +694,7 @@ type TrainingGridProps = {
   attemptImages: string[];
   faceNames: string[];
   selectedFaces: string[];
+  isLoading: boolean;
   onClickFaces: (images: string[], ctrl: boolean) => void;
   onAddFace: () => void;
   onRefresh: (
@@ -711,6 +713,7 @@ function TrainingGrid({
   attemptImages,
   faceNames,
   selectedFaces,
+  isLoading,
   onClickFaces,
   onAddFace,
   onRefresh,
@@ -766,6 +769,12 @@ function TrainingGrid({
   ]);
 
   if (attemptImages.length == 0) {
+    if (isLoading) {
+      return (
+        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center text-center" />
+      );
+    }
+
     if (faceNames.length == 0) {
       return (
         <EmptyCard
