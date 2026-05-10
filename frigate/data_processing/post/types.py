@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
-ObservationItem = Annotated[str, StringConstraints(min_length=20, max_length=160)]
+ObservationItem = Annotated[str, StringConstraints(min_length=20, max_length=200)]
 
 
 class ReviewMetadata(BaseModel):
@@ -11,33 +11,22 @@ class ReviewMetadata(BaseModel):
     observations: list[ObservationItem] = Field(
         ...,
         min_length=3,
-        max_length=15,
-        description=(
-            "Enumerate the significant observations across all frames, in "
-            "chronological order, BEFORE composing the scene narrative. "
-            "Include the very start of the activity — for example, a vehicle "
-            "entering the frame or pulling into the driveway — even if it "
-            "lasts only a few frames and the rest of the clip is dominated "
-            "by a longer activity. Include each arrival, departure, motion "
-            "event, object handled, and notable change in position or state. "
-            "Each item is a single concrete fact written as a complete "
-            "sentence. Do not summarize, interpret, or assign meaning here — "
-            "that belongs in the scene field."
-        ),
-    )
-    title: str = Field(
-        max_length=80,
-        description="Under 10 words. Name the apparent purpose or outcome of the activity together with the location involved. Do not narrate or list the sequence of actions step by step.",
+        max_length=8,
+        description="Enumerate the significant observations across all frames, in chronological order.",
     )
     scene: str = Field(
         min_length=150,
         max_length=600,
         description="A chronological narrative of what happens from start to finish, drawing directly from the items in observations.",
     )
+    title: str = Field(
+        max_length=80,
+        description="Title for the activity.",
+    )
     shortSummary: str = Field(
         min_length=70,
-        max_length=120,
-        description="A brief 2-sentence summary of the scene, suitable for notifications.",
+        max_length=140,
+        description="A brief summary for the activity.",
     )
     confidence: float = Field(
         ge=0.0,

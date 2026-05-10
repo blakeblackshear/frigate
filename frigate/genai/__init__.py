@@ -108,10 +108,11 @@ When forming your description:
 ## Response Field Guidelines
 
 Respond with a JSON object matching the provided schema. Field-specific guidance:
+- `observations`: Include the very start of the activity — for example, a vehicle entering the frame or pulling into the driveway — even if it lasts only a few frames and the rest of the clip is dominated by a longer activity. Include each arrival, departure, object handled, and notable change in position or state. Each item is a single concrete fact written as a complete sentence.
 - `scene`: Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name — do not replace them with generic terms. For unnamed objects (e.g., "person", "car"), refer to them naturally with articles (e.g., "a person", "the car"). Your description should align with and support the threat level you assign.
-- `title`: Characterize **what took place and where** — interpret the overall purpose or outcome, do not simply compress the scene description into fewer words. Include the relevant location (zone, area, or entry point). For named subjects, always use their name. For unnamed objects, refer to them naturally with articles. No editorial qualifiers like "routine" or "suspicious."
+- `title`: Name the primary activity across the observations, together with the location. An activity is what is being done with objects, tools, or surfaces; locomotion through the scene qualifies as the activity only when no other interaction is observed. For named subjects, always use their name. For unnamed objects, refer to them naturally with articles.
+- `shortSummary`: Briefly summarize the primary activity across the observations.
 - `potential_threat_level`: Must be consistent with your scene description and the activity patterns above.
-{get_concern_prompt()}
 
 ## Sequence Details
 

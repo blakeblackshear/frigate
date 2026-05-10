@@ -67,6 +67,8 @@ class LlamaCppClient(GenAIClient):
 
         if base_url is None:
             return None
+        else:
+            base_url = base_url.replace("/v1", "")  # Strip /v1 if included in base_url
 
         configured_model = self.genai_config.model
 

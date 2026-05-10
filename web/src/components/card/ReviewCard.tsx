@@ -79,10 +79,15 @@ export default function ReviewCard({
       ? event.end_time + REVIEW_PADDING
       : Date.now() / 1000;
 
+    const genAiTitle = event.data.metadata?.title?.trim();
+
     axios
       .post(
         `export/${event.camera}/start/${event.start_time - REVIEW_PADDING}/end/${endTime}`,
-        { playback: "realtime" },
+        {
+          playback: "realtime",
+          ...(genAiTitle ? { name: genAiTitle } : {}),
+        },
       )
       .then((response) => {
         if (response.status < 300) {

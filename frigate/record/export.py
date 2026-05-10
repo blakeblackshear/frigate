@@ -380,9 +380,14 @@ class RecordingExporter(threading.Thread):
                 if label and label not in labels:
                     labels.append(label)
 
-            title = str(review.severity).capitalize()
-            if labels:
-                title = f"{title}: {', '.join(labels)}"
+            metadata = data.get("metadata") or {}
+            title = metadata.get("title")
+
+            if not title:
+                title = str(review.severity).capitalize()
+
+                if labels:
+                    title = f"{title}: {', '.join(labels)}"
 
             chapter_blocks.append(
                 "[CHAPTER]\n"
