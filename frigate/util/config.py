@@ -608,11 +608,14 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
 
 def get_relative_coordinates(
-    mask: Optional[Union[str, list]], frame_shape: tuple[int, int]
+    mask: Optional[Union[str, list]],
+    frame_shape: tuple[int, int],
+    camera_name: str = "",
 ) -> Union[str, list]:
     # masks and zones are saved as relative coordinates
     # we know if any points are > 1 then it is using the
     # old native resolution coordinates
+    where = f" for camera {camera_name}" if camera_name else ""
     if mask:
         if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
             relative_masks = []
@@ -627,7 +630,7 @@ def get_relative_coordinates(
 
                         if x > frame_shape[1] or y > frame_shape[0]:
                             logger.error(
-                                f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
+                                f"Not applying mask due to invalid coordinates{where}. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
                             )
                             continue
 
@@ -650,7 +653,7 @@ def get_relative_coordinates(
 
                 if x > frame_shape[1] or y > frame_shape[0]:
                     logger.error(
-                        f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
+                        f"Not applying mask due to invalid coordinates{where}. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
                     )
                     return []
 
