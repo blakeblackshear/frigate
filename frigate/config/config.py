@@ -862,7 +862,9 @@ class FrigateConfig(FrigateBaseModel):
                     if mask_config:
                         coords = mask_config.coordinates
                         relative_coords = get_relative_coordinates(
-                            coords, camera_config.frame_shape
+                            coords,
+                            camera_config.frame_shape,
+                            camera_name=camera_config.name,
                         )
                         # Create a new ObjectMaskConfig with raw_coordinates set
                         processed_global_masks[mask_id] = ObjectMaskConfig(
