@@ -67,5 +67,9 @@
   "select_all": "すべて",
   "normalActivity": "通常",
   "needsReview": "要確認",
-  "securityConcern": "セキュリティ上の懸念"
+  "securityConcern": "セキュリティ上の懸念",
+  "motionSearch": {
+    "menuItem": "モーション検索",
+    "openMenu": "カメラオプション"
+  }
 }

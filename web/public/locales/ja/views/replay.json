@@ -1,0 +1,59 @@
+{
+    "title": "デバッグリプレイ",
+    "description": "デバッグ用にカメラの録画をリプレイします。オブジェクトリストには検出されたオブジェクトの遅延サマリーが表示され、「メッセージ」タブにはリプレイ映像からのFrigate内部メッセージのストリームが表示されます。",
+    "websocket_messages": "メッセージ",
+    "dialog": {
+        "title": "デバッグリプレイを開始",
+        "description": "オブジェクトの検出やトラッキングの問題をデバッグするために、過去の映像をループ再生する一時的なリプレイカメラを作成します。このリプレイカメラは、ソースカメラ（元カメラ）と同じ検出設定を引き継ぎます。開始する時間範囲を選択してください。",
+        "camera": "ソースカメラ",
+        "timeRange": "時間範囲",
+        "preset": {
+            "1m": "直近1分間",
+            "5m": "直近5分間",
+            "timeline": "タイムラインから選択",
+            "custom": "カスタム"
+        },
+        "startButton": "リプレイ開始",
+        "selectFromTimeline": "選択",
+        "starting": "リプレイを開始しています...",
+        "startLabel": "開始",
+        "endLabel": "終了",
+        "toast": {
+            "error": "デバッグリプレイの開始に失敗しました: {{error}}",
+            "alreadyActive": "リプレイセッションはすでに実行中です",
+            "stopError": "デバッグリプレイの停止に失敗しました: {{error}}",
+            "goToReplay": "リプレイへ移動"
+        }
+    },
+    "page": {
+        "noSession": "アクティブなデバッグリプレイセッションはありません",
+        "noSessionDesc": "履歴ビューからデバッグリプレイを開始するには、ツールバーの「アクション」ボタンをクリックし、「デバッグリプレイ」を選択してください。",
+        "goToRecordings": "履歴画面へ",
+        "preparingClip": "クリップを準備しています…",
+        "preparingClipDesc": "Frigateは選択された時間範囲の録画を結合しています。指定した期間が長い場合、処理に1分ほどかかる場合があります。",
+        "startingCamera": "デバッグリプレイを開始しています…",
+        "startError": {
+            "title": "デバッグリプレイの開始に失敗しました",
+            "back": "履歴へ戻る"
+        },
+        "sourceCamera": "ソースカメラ",
+        "replayCamera": "リプレイカメラ",
+        "initializingReplay": "デバッグリプレイを初期化しています...",
+        "stoppingReplay": "デバッグリプレイを停止しています...",
+        "stopReplay": "リプレイを停止",
+        "confirmStop": {
+            "title": "デバッグリプレイを停止しますか？",
+            "description": "セッションを停止し、すべての一時データを削除します。よろしいですか？",
+            "confirm": "リプレイ停止",
+            "cancel": "キャンセル"
+        },
+        "activity": "アクティビティ",
+        "objects": "オブジェクトリスト",
+        "audioDetections": "オーディオ検出",
+        "noActivity": "アクティビティは検出されませんでした",
+        "activeTracking": "アクティブトラッキング",
+        "noActiveTracking": "アクティブトラッキングなし",
+        "configuration": "設定",
+        "configurationDesc": "デバッグリプレイカメラのモーション検知およびオブジェクトトラッキング設定を微調整します。ここで行った変更はFrigateの設定ファイルには保存されません。"
+    }
+}

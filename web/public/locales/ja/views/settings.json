@@ -1263,6 +1263,13 @@
     "overriddenGlobal": "上書き済み（グローバル）",
     "overriddenGlobalTooltip": "このカメラは、このセクションのグローバル設定を上書きします",
     "overriddenBaseConfig": "上書き済み（基本設定）",
-    "overriddenBaseConfigTooltip": "{{profile}} プロファイルは、このセクションの設定を上書きします"
+    "overriddenBaseConfigTooltip": "{{profile}} プロファイルは、このセクションの設定を上書きします",
+    "overriddenInCameras": {
+      "label_other": "{{count}} 台のカメラで上書きされました",
+      "tooltip_other": "{{count}} 台のカメラがこのセクションの設定値を上書きしています。詳細を表示するにはクリックしてください。",
+      "heading_other": "このグローバルセクションには、{{count}} 台のカメラで上書きされているフィールドがあります。",
+      "othersField_other": "{{count}} その他",
+      "profilePrefix": "{{profile}} プロファイル: {{fields}}"
+    }
   }
 }

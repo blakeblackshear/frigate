@@ -70,7 +70,8 @@
   },
   "recording": {
     "enable": "録画を有効化",
-    "disable": "録画を無効化"
+    "disable": "録画を無効化",
+    "disabledInConfig": "このカメラでは、まず「設定」で録画機能を有効にする必要があります。"
   },
   "snapshots": {
     "enable": "スナップショットを有効化",
