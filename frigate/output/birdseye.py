@@ -62,8 +62,10 @@ def get_canvas_shape(width: int, height: int) -> tuple[int, int]:
     if round(a_w / a_h, 2) != round(width / height, 2):
         canvas_width = int(width // 4 * 4)
         canvas_height = int((canvas_width / a_w * a_h) // 4 * 4)
-        logger.warning(
-            f"The birdseye resolution is a non-standard aspect ratio, forcing birdseye resolution to {canvas_width} x {canvas_height}"
+        logger.error(
+            f"Birdseye resolution {width}x{height} is not a supported aspect ratio "
+            f"and may cause visual distortion; falling back to {canvas_width}x{canvas_height}. "
+            f"Set width and height to a supported aspect ratio (16:9, 20:10, 16:6, 32:9, 12:9, 22:15, 9:16, 9:12, 16:3, or 1:1)"
         )
 
     return (canvas_width, canvas_height)
@@ -796,15 +798,18 @@ class Birdseye:
         websocket_server: Any,
     ) -> None:
         self.config = config
+        canvas_width, canvas_height = get_canvas_shape(
+            config.birdseye.width, config.birdseye.height
+        )
         self.input: queue.Queue[bytes] = queue.Queue(maxsize=10)
         self.converter = FFMpegConverter(
             config.ffmpeg,
             self.input,
             stop_event,
-            config.birdseye.width,
-            config.birdseye.height,
-            config.birdseye.width,
-            config.birdseye.height,
+            canvas_width,
+            canvas_height,
+            canvas_width,
+            canvas_height,
             config.birdseye.quality,
             config.birdseye.restream,
         )
