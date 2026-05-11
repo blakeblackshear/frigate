@@ -16,13 +16,10 @@ export default function FrigatePlusCurrentModelSummary({
 
   return (
     <SettingsGroupCard title={t("frigatePlus.cardTitles.currentModel")}>
-      {plusModel === undefined && (
+      {!plusModel && (
         <p className="text-muted-foreground">
-          {t("frigatePlus.modelInfo.loading")}
+          {t("frigatePlus.modelInfo.noModelLoaded")}
         </p>
-      )}
-      {plusModel === null && (
-        <p className="text-danger">{t("frigatePlus.modelInfo.error")}</p>
       )}
       {plusModel && (
         <div className="space-y-6">
