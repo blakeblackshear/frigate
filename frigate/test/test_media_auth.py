@@ -130,7 +130,11 @@ class TestResolveMediaUri(unittest.TestCase):
         )
 
     def test_clip_filename_no_matching_camera(self):
-        self._assert("/clips/nonexistent-1234.jpg", MediaAuthResolution.UNKNOWN)
+        # Looks like a media path but couldn't classify — fail closed for
+        # restricted users (UNRESOLVED_MEDIA), not pass-through.
+        self._assert(
+            "/clips/nonexistent-1234.jpg", MediaAuthResolution.UNRESOLVED_MEDIA
+        )
 
     def test_clip_thumbs(self):
         self._assert("/clips/thumbs/", MediaAuthResolution.LISTING_MULTI_CAMERA)
@@ -145,11 +149,53 @@ class TestResolveMediaUri(unittest.TestCase):
             camera="back_door",
         )
 
+    def test_clip_previews(self):
+        self._assert("/clips/previews/", MediaAuthResolution.LISTING_MULTI_CAMERA)
+        self._assert(
+            "/clips/previews/front_door/",
+            MediaAuthResolution.CAMERA,
+            camera="front_door",
+        )
+        self._assert(
+            "/clips/previews/back_door/segment.mp4",
+            MediaAuthResolution.CAMERA,
+            camera="back_door",
+        )
+
+    def test_clip_review_thumbs(self):
+        # Format: /clips/review/thumb-{camera}-{review_id}.webp (frigate/review/maintainer.py).
+        self._assert(
+            "/clips/review/thumb-front_door-abc123.webp",
+            MediaAuthResolution.CAMERA,
+            camera="front_door",
+        )
+        # Hyphenated camera name — longest-prefix match.
+        self._assert(
+            "/clips/review/thumb-back-yard-abc123.webp",
+            MediaAuthResolution.CAMERA,
+            camera="back-yard",
+        )
+        # Unknown camera prefix → unresolved, not allowed for restricted users.
+        self._assert(
+            "/clips/review/thumb-unknown-cam-abc123.webp",
+            MediaAuthResolution.UNRESOLVED_MEDIA,
+        )
+
     def test_clip_admin_only_subtrees(self):
         self._assert("/clips/faces/train/foo.webp", MediaAuthResolution.ADMIN_ONLY)
         self._assert("/clips/faces/", MediaAuthResolution.ADMIN_ONLY)
+        self._assert("/clips/genai-requests/x/0.webp", MediaAuthResolution.ADMIN_ONLY)
+        self._assert(
+            "/clips/preview_restart_cache/x.mp4", MediaAuthResolution.ADMIN_ONLY
+        )
         self._assert("/clips/some_model/train/x.jpg", MediaAuthResolution.ADMIN_ONLY)
         self._assert("/clips/some_model/dataset/x.jpg", MediaAuthResolution.ADMIN_ONLY)
+
+    def test_clip_unknown_subtree_is_unresolved(self):
+        # Unknown /clips/{x}/{y}/... subtree falls through as unresolved (not
+        # admin-only) so restricted users get 403 without admins being denied
+        # access to legitimate but unrecognized resources.
+        self._assert("/clips/random_dir/foo.jpg", MediaAuthResolution.UNRESOLVED_MEDIA)
 
     def test_clip_top_level_listing(self):
         self._assert("/clips/", MediaAuthResolution.LISTING_MULTI_CAMERA)
@@ -201,12 +247,23 @@ class TestExportResolution(unittest.TestCase):
         self.assertEqual(resolution, MediaAuthResolution.CAMERA)
         self.assertEqual(camera, "back_door")
 
-    def test_unknown_export(self):
+    def test_unknown_export_is_unresolved(self):
+        # No matching row → UNRESOLVED_MEDIA (fail closed for restricted users),
+        # not UNKNOWN (which would pass-through).
         resolution, camera = resolve_media_uri(
             "/exports/does_not_exist.mp4", self.config
         )
-        self.assertEqual(resolution, MediaAuthResolution.UNKNOWN)
+        self.assertEqual(resolution, MediaAuthResolution.UNRESOLVED_MEDIA)
         self.assertIsNone(camera)
+
+    def test_export_anchored_match_not_endswith(self):
+        # Anchored exact-path equality must NOT match by filename suffix.
+        # A request like /exports/clip.mp4 must not authorize against a row at
+        # /media/frigate/exports/back_door_clip.mp4 just because the suffix matches.
+        self._insert_export("exp_bd", "back_door", "back_door_clip.mp4")
+        self._insert_export("exp_fd", "front_door", "front_door_clip.mp4")
+        resolution, _ = resolve_media_uri("/exports/clip.mp4", self.config)
+        self.assertEqual(resolution, MediaAuthResolution.UNRESOLVED_MEDIA)
 
 
 class TestDenyResponseForMediaUri(unittest.TestCase):
@@ -270,6 +327,54 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
     def test_missing_header(self):
         self.assertIsNone(self._deny(None, "limited_user"))
         self.assertIsNone(self._deny("", "limited_user"))
+
+    def test_traversal_in_media_uri_denied_for_all_roles(self):
+        # Bypass attempt: parts[3] looks like an allowed camera, but the
+        # normalized path nginx would serve points at a forbidden camera.
+        # Both restricted and admin should be denied — the URI is malformed
+        # and we refuse to make an auth decision against it.
+        traversal_uris = [
+            "/recordings/2026-05-11/14/front_door/../back_door/00.00.mp4",
+            "/clips/front_door-1.jpg/../back_door-1.jpg",
+            "/exports/../recordings/2026-05-11/14/back_door/00.00.mp4",
+            "/clips/./back_door-1.jpg",
+        ]
+        for uri in traversal_uris:
+            self.assertEqual(self._deny(uri, "limited_user"), 403, uri)
+            self.assertEqual(self._deny(uri, "admin"), 403, uri)
+            self.assertEqual(self._deny(uri, "viewer"), 403, uri)
+
+    def test_traversal_outside_media_passes_through(self):
+        # `..` in non-media URIs is not our problem; the backend handles it.
+        self.assertIsNone(self._deny("/api/foo/../bar", "limited_user"))
+
+    def test_percent_encoded_traversal_denied(self):
+        # nginx may decode percent-encoded `%2E%2E` to `..` before serving;
+        # we must apply the same denial after percent-decoding.
+        self.assertEqual(
+            self._deny(
+                "/recordings/2026-05-11/14/front_door/%2E%2E/back_door/00.mp4",
+                "limited_user",
+            ),
+            403,
+        )
+
+    def test_unresolved_media_fails_closed_for_restricted(self):
+        # Restricted user requesting a media URI we can't classify (no DB row,
+        # unknown clip prefix, unknown clip subtree) must be denied.
+        self.assertEqual(self._deny("/clips/nonexistent-1.jpg", "limited_user"), 403)
+        self.assertEqual(self._deny("/clips/random_dir/foo.jpg", "limited_user"), 403)
+        self.assertEqual(
+            self._deny("/clips/review/thumb-unknown_cam-1.webp", "limited_user"),
+            403,
+        )
+
+    def test_unresolved_media_allowed_for_admin(self):
+        # Admin and full-access roles are *not* denied on UNRESOLVED_MEDIA —
+        # nginx returns 404 if the file doesn't exist on disk anyway, and we
+        # don't want a stale DB to lock out admins.
+        self.assertIsNone(self._deny("/clips/nonexistent-1.jpg", "admin"))
+        self.assertIsNone(self._deny("/clips/nonexistent-1.jpg", "viewer"))
 
 
 if __name__ == "__main__":
