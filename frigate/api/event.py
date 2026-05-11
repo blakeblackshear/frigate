@@ -392,27 +392,66 @@ def events_explore(
     if not allowed_cameras:
         return JSONResponse(content=[])
 
+    explore_columns = (
+        Event.id,
+        Event.camera,
+        Event.label,
+        Event.sub_label,
+        Event.zones,
+        Event.start_time,
+        Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
+        Event.plus_id,
+        Event.retain_indefinitely,
+        Event.top_score,
+        Event.false_positive,
+        Event.box,
+        Event.data,
+    )
+
     # Single query: per-label COUNT and top-N ranking by start_time computed
     # via window functions in a CTE, then filtered to rn <= limit. Replaces
     # the previous loop that issued 2 queries per distinct label.
-    camera_placeholders = ",".join(["?"] * len(allowed_cameras))
-    sql = f"""
-        WITH ranked AS (
-            SELECT
-                id, camera, label, sub_label, zones, start_time, end_time,
-                has_clip, has_snapshot, plus_id, retain_indefinitely,
-                top_score, false_positive, box, data,
-                COUNT(*) OVER (PARTITION BY label) AS event_count,
-                ROW_NUMBER() OVER (
-                    PARTITION BY label ORDER BY start_time DESC
-                ) AS rn
-            FROM event
-            WHERE camera IN ({camera_placeholders})
+    event_count = fn.COUNT(Event.id).over(partition_by=[Event.label]).alias("event_count")
+    rn = fn.ROW_NUMBER().over(
+        partition_by=[Event.label], order_by=[Event.start_time.desc()]
+    ).alias("rn")
+
+    base_query = (
+        Event.select(
+            *explore_columns,
+            event_count,
+            rn,
         )
-        SELECT * FROM ranked
-        WHERE rn <= ?
-        ORDER BY event_count DESC, start_time DESC
-    """
+        .where(Event.camera << allowed_cameras)
+    )
+    ranked = base_query.cte("ranked")
+    query = (
+        Event.select(
+            ranked.c.id,
+            ranked.c.camera,
+            ranked.c.label,
+            ranked.c.sub_label,
+            ranked.c.zones,
+            ranked.c.start_time,
+            ranked.c.end_time,
+            ranked.c.has_clip,
+            ranked.c.has_snapshot,
+            ranked.c.plus_id,
+            ranked.c.retain_indefinitely,
+            ranked.c.top_score,
+            ranked.c.false_positive,
+            ranked.c.box,
+            ranked.c.data,
+            ranked.c.event_count,
+        )
+        .from_(ranked)
+        .with_cte(ranked)
+        .where(ranked.c.rn <= limit)
+        .order_by(ranked.c.event_count.desc(), ranked.c.start_time.desc())
+        .objects()
+    )
 
     allowed_data_keys = {
         "type",
@@ -450,7 +489,7 @@ def events_explore(
             },
             "event_count": event.event_count,
         }
-        for event in Event.raw(sql, *allowed_cameras, limit)
+        for event in query
     ]
 
     return JSONResponse(content=processed_events)
