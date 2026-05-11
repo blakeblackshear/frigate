@@ -163,9 +163,7 @@ def _resolve_export(
         return MediaAuthResolution.UNKNOWN, None
 
 
-def check_camera_access(
-    role: str, camera: str, frigate_config: FrigateConfig
-) -> bool:
+def check_camera_access(role: str, camera: str, frigate_config: FrigateConfig) -> bool:
     """Return True iff `role` may access `camera`.
 
     Mirrors the gating logic in `require_camera_access`: admin and any role

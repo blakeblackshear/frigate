@@ -130,9 +130,7 @@ class TestResolveMediaUri(unittest.TestCase):
         )
 
     def test_clip_filename_no_matching_camera(self):
-        self._assert(
-            "/clips/nonexistent-1234.jpg", MediaAuthResolution.UNKNOWN
-        )
+        self._assert("/clips/nonexistent-1234.jpg", MediaAuthResolution.UNKNOWN)
 
     def test_clip_thumbs(self):
         self._assert("/clips/thumbs/", MediaAuthResolution.LISTING_MULTI_CAMERA)
@@ -235,26 +233,18 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         self.assertIsNone(self._deny("/clips/", "viewer"))
 
     def test_restricted_role_allowed_camera(self):
+        self.assertIsNone(self._deny("/clips/front_door-1.jpg", "limited_user"))
         self.assertIsNone(
-            self._deny("/clips/front_door-1.jpg", "limited_user")
-        )
-        self.assertIsNone(
-            self._deny(
-                "/recordings/2026-05-11/14/front_door/00.00.mp4", "limited_user"
-            )
+            self._deny("/recordings/2026-05-11/14/front_door/00.00.mp4", "limited_user")
         )
         self.assertIsNone(
             self._deny("/clips/thumbs/front_door/abc.webp", "limited_user")
         )
 
     def test_restricted_role_blocked_other_camera(self):
+        self.assertEqual(self._deny("/clips/back_door-1.jpg", "limited_user"), 403)
         self.assertEqual(
-            self._deny("/clips/back_door-1.jpg", "limited_user"), 403
-        )
-        self.assertEqual(
-            self._deny(
-                "/recordings/2026-05-11/14/back_door/00.00.mp4", "limited_user"
-            ),
+            self._deny("/recordings/2026-05-11/14/back_door/00.00.mp4", "limited_user"),
             403,
         )
         self.assertEqual(
@@ -262,16 +252,12 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         )
 
     def test_restricted_role_blocked_admin_only(self):
-        self.assertEqual(
-            self._deny("/clips/faces/train/foo.webp", "limited_user"), 403
-        )
+        self.assertEqual(self._deny("/clips/faces/train/foo.webp", "limited_user"), 403)
 
     def test_restricted_role_blocked_multi_camera_listing(self):
         self.assertEqual(self._deny("/clips/", "limited_user"), 403)
         self.assertEqual(self._deny("/exports/", "limited_user"), 403)
-        self.assertEqual(
-            self._deny("/recordings/2026-05-11/14/", "limited_user"), 403
-        )
+        self.assertEqual(self._deny("/recordings/2026-05-11/14/", "limited_user"), 403)
 
     def test_restricted_role_allowed_neutral_listing(self):
         self.assertIsNone(self._deny("/recordings/", "limited_user"))
