@@ -24,6 +24,76 @@ from frigate.util.builtin import find_by_key
 logger = logging.getLogger(__name__)
 
 
+PTZ_CONFIGURATION_TAG_SUFFIX = "}PTZConfiguration"
+
+
+async def _reattach_orphaned_ptz_configurations(
+    onvif: ONVIFCamera, profiles: list[Any], camera_name: str
+) -> None:
+    """Repair profiles whose ``<PTZConfiguration>`` was dropped by zeep's parser.
+
+    Some camera firmwares emit a non-standard child element (commonly
+    ``<tt:AnalyticsEngineConfiguration>``) inside ``<trt:Profile>``. zeep's
+    strict-sequence XSD parser then drops every subsequent in-Profile element
+    (including ``<tt:PTZConfiguration>``) into ``profile._raw_elements``
+    instead of populating ``profile.PTZConfiguration``. The downstream filter
+    in :meth:`OnvifController._init_onvif` then rejects these profiles even
+    though the device exposes a working PTZ configuration via
+    ``PTZ.GetConfigurations()``.
+
+    For each profile that has ``PTZConfiguration is None`` but carries a raw
+    ``<PTZConfiguration>`` element in ``_raw_elements``, look up the matching
+    config returned by ``PTZ.GetConfigurations()`` and re-attach it. Profiles
+    that have no raw ``<PTZConfiguration>`` are left untouched.
+    """
+    needs_repair = [
+        p
+        for p in profiles
+        if getattr(p, "PTZConfiguration", None) is None
+        and any(
+            getattr(el, "tag", "").endswith(PTZ_CONFIGURATION_TAG_SUFFIX)
+            for el in (getattr(p, "_raw_elements", None) or [])
+        )
+    ]
+    if not needs_repair:
+        return
+
+    try:
+        ptz = await onvif.create_ptz_service()
+        configs = await ptz.GetConfigurations() or []
+    except (Fault, ONVIFError, TransportError, Exception) as e:
+        logger.warning(
+            "Unable to recover orphaned PTZConfiguration for %s: "
+            "PTZ.GetConfigurations failed: %s",
+            camera_name,
+            e,
+        )
+        return
+
+    by_token = {getattr(c, "token", None): c for c in configs}
+    for profile in needs_repair:
+        raw_token = next(
+            (
+                el.get("token")
+                for el in (profile._raw_elements or [])
+                if el.tag.endswith(PTZ_CONFIGURATION_TAG_SUFFIX)
+            ),
+            None,
+        )
+        config = by_token.get(raw_token)
+        if config is None:
+            continue
+        profile.PTZConfiguration = config
+        logger.info(
+            "Re-attached orphaned PTZ config '%s' to profile '%s' on %s "
+            "(camera firmware emitted a non-standard child element that "
+            "broke zeep's profile parsing).",
+            raw_token,
+            getattr(profile, "token", "?"),
+            camera_name,
+        )
+
+
 class OnvifCommandEnum(str, Enum):
     """Holds all possible move commands"""
 
@@ -209,6 +279,12 @@ class OnvifController:
                 f"Unable to get Onvif media profiles for camera: {camera_name}: {e}"
             )
             return False
+
+        # Some firmwares emit non-standard elements inside <Profile>, which
+        # makes zeep's strict-sequence parser drop <PTZConfiguration> into the
+        # profile's _raw_elements. Recover those so PTZ-capable profiles are
+        # not silently rejected by the filter below.
+        await _reattach_orphaned_ptz_configurations(onvif, profiles, camera_name)
 
         # build list of valid PTZ profiles
         valid_profiles = [
