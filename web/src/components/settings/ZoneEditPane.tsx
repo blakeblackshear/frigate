@@ -528,7 +528,7 @@ export default function ZoneEditPane({
             );
             updateConfig();
             // Only publish WS state for base config when zone has a name
-            if (!editingProfile && zoneName) {
+            if (!editingProfile && polygon?.name) {
               sendZoneState(enabled ? "ON" : "OFF");
             }
           } else {
