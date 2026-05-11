@@ -26,6 +26,7 @@ from frigate.api.defs.request.app_body import (
     AppPutRoleBody,
 )
 from frigate.api.defs.tags import Tags
+from frigate.api.media_auth import check_camera_access, deny_response_for_media_uri
 from frigate.config import AuthConfig, NetworkingConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
@@ -633,6 +634,9 @@ def auth(request: Request):
         logger.debug("X-Proxy-Secret header does not match configured secret value")
         return fail_response
 
+    original_url = request.headers.get("x-original-url")
+    frigate_config = request.app.frigate_config
+
     # if auth is disabled, just apply the proxy header map and return success
     if not auth_config.enabled:
         # pass the user header value from the upstream proxy if a mapping is specified
@@ -649,6 +653,11 @@ def auth(request: Request):
         role = resolve_role(request.headers, proxy_config, config_roles_set)
 
         success_response.headers["remote-role"] = role
+
+        deny_status = deny_response_for_media_uri(original_url, role, frigate_config)
+        if deny_status is not None:
+            return Response("", status_code=deny_status)
+
         return success_response
 
     # now apply authentication
@@ -743,6 +752,11 @@ def auth(request: Request):
 
         success_response.headers["remote-user"] = user
         success_response.headers["remote-role"] = role
+
+        deny_status = deny_response_for_media_uri(original_url, role, frigate_config)
+        if deny_status is not None:
+            return Response("", status_code=deny_status)
+
         return success_response
     except Exception as e:
         logger.error(f"Error parsing jwt: {e}")
@@ -1069,19 +1083,19 @@ async def require_camera_access(
         raise HTTPException(status_code=current_user.status_code, detail=detail)
 
     role = current_user["role"]
-    all_camera_names = set(request.app.frigate_config.cameras.keys())
-    roles_dict = request.app.frigate_config.auth.roles
-    allowed_cameras = User.get_allowed_cameras(role, roles_dict, all_camera_names)
+    frigate_config = request.app.frigate_config
 
-    # Admin or full access bypasses
-    if role == "admin" or not roles_dict.get(role):
+    if check_camera_access(role, camera_name, frigate_config):
         return
 
-    if camera_name not in allowed_cameras:
-        raise HTTPException(
-            status_code=403,
-            detail=f"Access denied to camera '{camera_name}'. Allowed: {allowed_cameras}",
-        )
+    all_camera_names = set(frigate_config.cameras.keys())
+    allowed_cameras = User.get_allowed_cameras(
+        role, frigate_config.auth.roles, all_camera_names
+    )
+    raise HTTPException(
+        status_code=403,
+        detail=f"Access denied to camera '{camera_name}'. Allowed: {allowed_cameras}",
+    )
 
 
 def _get_stream_owner_cameras(request: Request, stream_name: str) -> set[str]:
