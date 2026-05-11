@@ -123,6 +123,7 @@ class RecordingExporter(threading.Thread):
         ffmpeg_output_args: Optional[str] = None,
         cpu_fallback: bool = False,
         on_progress: Optional[Callable[[str, float], None]] = None,
+        source_review_id: Optional[str] = None,
     ) -> None:
         super().__init__()
         self.config = config
@@ -138,6 +139,7 @@ class RecordingExporter(threading.Thread):
         self.ffmpeg_output_args = ffmpeg_output_args
         self.cpu_fallback = cpu_fallback
         self.on_progress = on_progress
+        self.source_review_id = source_review_id
 
         # ensure export thumb dir
         Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
@@ -719,6 +721,17 @@ class RecordingExporter(threading.Thread):
 
         if self.export_case_id is not None:
             export_values[Export.export_case] = self.export_case_id
+
+        # Persist source metadata for overlap lookup and frontend needs
+        try:
+            export_values[Export.source] = self.playback_source.value
+            export_values[Export.source_start_time] = float(self.start_time)
+            export_values[Export.source_end_time] = float(self.end_time)
+            if getattr(self, "source_review_id", None) is not None:
+                export_values[Export.source_review_id] = self.source_review_id
+        except Exception:
+            # Be conservative: if any metadata can't be set, don't block export
+            pass
 
         Export.insert(export_values).execute()
 

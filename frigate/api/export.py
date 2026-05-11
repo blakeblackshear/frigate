@@ -254,6 +254,7 @@ def _build_export_job(
     ffmpeg_input_args: Optional[str] = None,
     ffmpeg_output_args: Optional[str] = None,
     cpu_fallback: bool = False,
+    source_review_id: Optional[str] = None,
 ) -> ExportJob:
     return ExportJob(
         id=_generate_export_id(camera_name),
@@ -267,6 +268,7 @@ def _build_export_job(
         ffmpeg_input_args=ffmpeg_input_args,
         ffmpeg_output_args=ffmpeg_output_args,
         cpu_fallback=cpu_fallback,
+        source_review_id=source_review_id,
     )
 
 
@@ -319,6 +321,58 @@ def get_exports(
 
     exports = query.order_by(Export.date.desc()).dicts().iterator()
     return JSONResponse(content=[e for e in exports])
+
+
+@router.get(
+    "/exports/overlap",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Find exports overlapping a camera/time window",
+    description="Returns raw overlapping export ranges for cameras the user can access.",
+)
+def find_overlapping_exports(
+    camera: str,
+    start_time: float,
+    end_time: float,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
+    if camera not in allowed_cameras:
+        return JSONResponse(content=[], status_code=200)
+
+    # any-intersection semantics: start < requested_end AND end > requested_start
+    rows = (
+        Export.select(
+            Export.id,
+            Export.camera,
+            Export.name,
+            Export.source,
+            Export.source_start_time,
+            Export.source_end_time,
+            Export.in_progress,
+        )
+        .where(
+            Export.camera == camera,
+            Export.source.is_null(False),
+            (Export.source_start_time < end_time) & (Export.source_end_time > start_time),
+        )
+        .order_by(Export.date.desc())
+        .dicts()
+        .iterator()
+    )
+
+    results = [
+        {
+            "id": r["id"],
+            "camera": r["camera"],
+            "name": r["name"],
+            "source": r["source"],
+            "source_start_time": r["source_start_time"],
+            "source_end_time": r["source_end_time"],
+            "in_progress": r["in_progress"],
+        }
+        for r in rows
+    ]
+
+    return JSONResponse(content=results)
 
 
 @router.get(
@@ -725,6 +779,7 @@ def export_recordings_batch(
             sanitized_images[index],
             PlaybackSourceEnum.recordings,
             export_case_id,
+            source_review_id=item.source_review_id,
         )
         try:
             start_export_job(request.app.frigate_config, export_job)
@@ -839,6 +894,7 @@ def export_recording(
         existing_image,
         playback_source,
         export_case_id,
+        source_review_id=body.source_review_id,
     )
     try:
         start_export_job(request.app.frigate_config, export_job)
@@ -990,6 +1046,7 @@ def export_recording_custom(
         ffmpeg_input_args,
         ffmpeg_output_args,
         cpu_fallback,
+        source_review_id=body.source_review_id,
     )
     try:
         start_export_job(request.app.frigate_config, export_job)

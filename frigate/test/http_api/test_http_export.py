@@ -286,6 +286,162 @@ class TestHttpExport(BaseTestHttp):
         assert response_json["export_id"].startswith("front_door_")
         start_export_job.assert_called_once()
 
+    def test_recording_export_persists_source_metadata(self):
+        # Tracer-bullet: ensure RecordingExporter.run() inserts source metadata
+        from frigate.record.export import RecordingExporter, PlaybackSourceEnum, run_ffmpeg_with_progress
+
+        # Patch out thumbnail generation and ffmpeg execution to avoid side effects
+        with patch(
+            "frigate.record.export.RecordingExporter.save_thumbnail",
+            return_value="",
+        ), patch(
+            "frigate.record.export.run_ffmpeg_with_progress",
+            return_value=(0, ""),
+        ):
+            exporter = RecordingExporter(
+                self.app.frigate_config,
+                "test_export_src",
+                "front_door",
+                "Source metadata test",
+                None,
+                100,
+                200,
+                PlaybackSourceEnum.recordings,
+            )
+
+            # Run exporter which should insert the Export row before running ffmpeg
+            exporter.run()
+
+        exp = Export.get(Export.id == "test_export_src")
+        # Expected source metadata fields (will be added by feature)
+        assert getattr(exp, "source", None) == PlaybackSourceEnum.recordings.value
+        assert getattr(exp, "source_start_time", None) == 100
+        assert getattr(exp, "source_end_time", None) == 200
+
+    def test_exports_overlap_lookup_returns_overlapping(self):
+        # Insert exports: one overlapping, one non-overlapping, one different camera
+        Export.create(
+            id="exp_overlap",
+            camera="front_door",
+            name="Overlap",
+            date=100,
+            video_path="/tmp/ov.mp4",
+            thumb_path="",
+            in_progress=False,
+            source="recordings",
+            source_start_time=120,
+            source_end_time=180,
+        )
+        Export.create(
+            id="exp_non",
+            camera="front_door",
+            name="NonOverlap",
+            date=90,
+            video_path="/tmp/non.mp4",
+            thumb_path="",
+            in_progress=False,
+            source="recordings",
+            source_start_time=10,
+            source_end_time=50,
+        )
+        Export.create(
+            id="exp_other_cam",
+            camera="backyard",
+            name="OtherCam",
+            date=110,
+            video_path="/tmp/other.mp4",
+            thumb_path="",
+            in_progress=False,
+            source="recordings",
+            source_start_time=150,
+            source_end_time=210,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.get(
+                "/exports/overlap?camera=front_door&start_time=150&end_time=200"
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        assert any(d["id"] == "exp_overlap" for d in data)
+        assert all(d["camera"] == "front_door" for d in data)
+
+    def test_exports_overlap_ignores_null_source_ranges(self):
+        # Insert an export without source metadata which would otherwise overlap
+        Export.create(
+            id="exp_null_src",
+            camera="front_door",
+            name="NullSource",
+            date=120,
+            video_path="/tmp/null.mp4",
+            thumb_path="",
+            in_progress=False,
+            source=None,
+            source_start_time=None,
+            source_end_time=None,
+        )
+
+        # Insert a valid overlapping export
+        Export.create(
+            id="exp_valid",
+            camera="front_door",
+            name="Valid",
+            date=130,
+            video_path="/tmp/val.mp4",
+            thumb_path="",
+            in_progress=False,
+            source="recordings",
+            source_start_time=140,
+            source_end_time=160,
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.get(
+                "/exports/overlap?camera=front_door&start_time=150&end_time=170"
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        ids = {d["id"] for d in data}
+        assert "exp_null_src" not in ids
+        assert "exp_valid" in ids
+
+    def test_exports_overlap_respects_camera_access(self):
+        # Insert an export for front_door
+        Export.create(
+            id="exp_access",
+            camera="front_door",
+            name="Access",
+            date=140,
+            video_path="/tmp/access.mp4",
+            thumb_path="",
+            in_progress=False,
+            source="recordings",
+            source_start_time=145,
+            source_end_time=155,
+        )
+
+        from fastapi import Request as _Request
+
+        async def restricted(request: _Request):
+            return ["backyard"]
+
+        from frigate.api.auth import get_allowed_cameras_for_filter
+
+        self.app.dependency_overrides[get_allowed_cameras_for_filter] = restricted
+
+        with AuthTestClient(self.app) as client:
+            response = client.get(
+                "/exports/overlap?camera=front_door&start_time=140&end_time=160"
+            )
+
+        assert response.status_code == 200, response.json()
+        data = response.json()
+        # No accessible exports
+        assert data == []
+
     def test_single_export_returns_503_when_queue_full(self):
         self._insert_recording("rec-front", "front_door", 100, 200)
 

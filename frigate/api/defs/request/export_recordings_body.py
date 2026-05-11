@@ -18,6 +18,12 @@ class ExportRecordingsBody(BaseModel):
         max_length=30,
         description="ID of the export case to assign this export to",
     )
+    source_review_id: Optional[str] = Field(
+        default=None,
+        title="Source review ID",
+        max_length=30,
+        description="Optional originating review ID for review-origin exports",
+    )
 
 
 class ExportRecordingsCustomBody(BaseModel):
@@ -31,6 +37,12 @@ class ExportRecordingsCustomBody(BaseModel):
         title="Export case ID",
         max_length=30,
         description="ID of the export case to assign this export to",
+    )
+    source_review_id: Optional[str] = Field(
+        default=None,
+        title="Source review ID",
+        max_length=30,
+        description="Optional originating review ID for review-origin exports",
     )
     ffmpeg_input_args: Optional[str] = Field(
         default=None,

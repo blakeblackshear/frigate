@@ -26,6 +26,12 @@ class BatchExportItem(BaseModel):
         max_length=128,
         description="Optional opaque client identifier echoed back in results",
     )
+    source_review_id: Optional[str] = Field(
+        default=None,
+        title="Source review ID",
+        max_length=30,
+        description="Optional originating review ID for review-origin exports",
+    )
 
 
 class BatchExportBody(BaseModel):

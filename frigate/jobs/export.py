@@ -55,6 +55,7 @@ class ExportJob(Job):
     ffmpeg_input_args: Optional[str] = None
     ffmpeg_output_args: Optional[str] = None
     cpu_fallback: bool = False
+    source_review_id: Optional[str] = None
     current_step: str = "queued"
     progress_percent: float = 0.0
 
@@ -344,6 +345,7 @@ class ExportJobManager:
             job.ffmpeg_output_args,
             job.cpu_fallback,
             on_progress=self._make_progress_callback(job),
+            source_review_id=job.source_review_id,
         )
 
         try:

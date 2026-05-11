@@ -103,6 +103,11 @@ class Export(Model):
         backref="exports",
         column_name="export_case_id",
     )
+    # Source metadata for overlapping-range lookups
+    source = CharField(index=True, max_length=20, null=True)
+    source_start_time = FloatField(null=True)
+    source_end_time = FloatField(null=True)
+    source_review_id = CharField(max_length=30, null=True)
 
 
 class ReviewSegment(Model):
