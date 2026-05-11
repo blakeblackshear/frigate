@@ -450,7 +450,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        if (stats.temp !== undefined) {
+        if (stats?.temp !== undefined) {
           hasValidGpu = true;
           series[key].data.push({ x: statsIdx + 1, y: stats.temp });
         }
@@ -562,7 +562,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        if (stats.temp !== undefined) {
+        if (stats?.temp !== undefined) {
           hasValidNpu = true;
           series[key].data.push({ x: statsIdx + 1, y: stats.temp });
         }
