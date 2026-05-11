@@ -474,21 +474,17 @@ async def event_ids(ids: str, request: Request):
             status_code=400,
         )
 
-    for event_id in ids:
-        try:
-            event = Event.get(Event.id == event_id)
-            await require_camera_access(event.camera, request=request)
-        except DoesNotExist:
-            # we should not fail the entire request if an event is not found
-            continue
-
     try:
-        events = Event.select().where(Event.id << ids).dicts().iterator()
-        return JSONResponse(list(events))
+        events = list(Event.select().where(Event.id << ids).dicts().iterator())
     except Exception:
         return JSONResponse(
             content=({"success": False, "message": "Events not found"}), status_code=400
         )
+
+    for event in events:
+        await require_camera_access(event["camera"], request=request)
+
+    return JSONResponse(events)
 
 
 @router.get(
