@@ -269,7 +269,9 @@ class ObjectDescriptionProcessor(PostProcessorApi):
 
         if event.has_snapshot and camera_config.objects.genai.use_snapshot:
             snapshot_image = self._read_and_crop_snapshot(event)
+
             if not snapshot_image:
+                self.cleanup_event(event_id)
                 return
 
         num_thumbnails = len(self.tracked_events.get(event_id, []))
