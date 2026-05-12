@@ -1047,6 +1047,7 @@ export function ConfigSection({
           hiddenFields: effectiveHiddenFields,
           restartRequired: sectionConfig.restartRequired,
           requiresRestart,
+          isProfile: !!profileName,
         }}
       />
 
