@@ -41,7 +41,6 @@ import Heading from "@/components/ui/heading";
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
-import merge from "lodash/merge";
 import {
   Collapsible,
   CollapsibleContent,
@@ -73,6 +72,7 @@ import {
   buildConfigDataForPath,
   flattenOverrides,
   getBaseCameraSectionValue,
+  mergeProfileOverrides,
   resolveHiddenFieldEntries,
   sanitizeSectionData as sharedSanitizeSectionData,
   requiresRestartForOverrides as sharedRequiresRestartForOverrides,
@@ -353,7 +353,10 @@ export function ConfigSection({
           `profiles.${profileName}.${sectionPath}`,
         );
         if (profileOverrides && typeof profileOverrides === "object") {
-          return merge(cloneDeep(baseValue ?? {}), cloneDeep(profileOverrides));
+          return mergeProfileOverrides(
+            (baseValue as object) ?? {},
+            profileOverrides as object,
+          );
         }
         return baseValue;
       }
