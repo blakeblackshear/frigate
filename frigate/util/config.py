@@ -492,7 +492,7 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
     genai = new_config.get("genai")
 
     if genai and genai.get("provider"):
-        genai["roles"] = ["embeddings", "vision", "tools"]
+        genai["roles"] = ["embeddings", "descriptions", "chat"]
         new_config["genai"] = {"default": genai}
 
     # Remove deprecated sync_recordings from global record config

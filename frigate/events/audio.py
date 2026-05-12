@@ -84,7 +84,6 @@ class AudioProcessor(FrigateProcess):
     def __init__(
         self,
         config: FrigateConfig,
-        cameras: list[CameraConfig],
         camera_metrics: DictProxy,
         stop_event: MpEvent,
     ):
@@ -93,12 +92,11 @@ class AudioProcessor(FrigateProcess):
         )
 
         self.camera_metrics = camera_metrics
-        self.cameras = cameras
         self.config = config
 
     def run(self) -> None:
         self.pre_run_setup(self.config.logger)
-        audio_threads: list[AudioEventMaintainer] = []
+        audio_threads: dict[str, AudioEventMaintainer] = {}
 
         threading.current_thread().name = "process:audio_manager"
 
@@ -112,32 +110,56 @@ class AudioProcessor(FrigateProcess):
         else:
             self.transcription_model_runner = None
 
-        if len(self.cameras) == 0:
-            return
+        config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.audio,
+                CameraConfigUpdateEnum.ffmpeg,
+            ],
+        )
 
-        for camera in self.cameras:
-            audio_thread = AudioEventMaintainer(
+        def spawn_if_needed(camera: CameraConfig) -> None:
+            name = camera.name
+            if name is None or name in audio_threads:
+                return
+            if not camera.enabled or not camera.audio.enabled:
+                return
+            # ffmpeg update may not have arrived yet; wait for next poll
+            if not any("audio" in i.roles for i in camera.ffmpeg.inputs):
+                return
+            thread = AudioEventMaintainer(
                 camera,
                 self.config,
                 self.camera_metrics,
                 self.transcription_model_runner,
                 self.stop_event,  # type: ignore[arg-type]
             )
-            audio_threads.append(audio_thread)
-            audio_thread.start()
+            audio_threads[name] = thread
+            thread.start()
+            self.logger.info(f"Audio maintainer started for {name}")
+
+        for camera in self.config.cameras.values():
+            spawn_if_needed(camera)
 
         self.logger.info(f"Audio processor started (pid: {self.pid})")
 
-        while not self.stop_event.wait():
-            pass
+        # poll for newly added cameras or cameras flipped to audio.enabled at runtime
+        while not self.stop_event.wait(timeout=1.0):
+            config_subscriber.check_for_updates()
+            for camera in self.config.cameras.values():
+                spawn_if_needed(camera)
 
-        for thread in audio_threads:
+        config_subscriber.stop()
+
+        for thread in audio_threads.values():
             thread.join(1)
             if thread.is_alive():
                 self.logger.info(f"Waiting for thread {thread.name:s} to exit")
                 thread.join(10)
 
-        for thread in audio_threads:
+        for thread in audio_threads.values():
             if thread.is_alive():
                 self.logger.warning(f"Thread {thread.name} is still alive")
 

@@ -32,7 +32,11 @@
     "title": "Recent Recognitions",
     "titleShort": "Recent",
     "aria": "Select recent recognitions",
-    "empty": "There are no recent face recognition attempts"
+    "empty": "There are no recent face recognition attempts",
+    "emptyNoLibrary": {
+      "title": "Upload a face",
+      "description": "You must add at least one face to the library for face recognition to function."
+    }
   },
   "deleteFaceLibrary": {
     "title": "Delete Name",

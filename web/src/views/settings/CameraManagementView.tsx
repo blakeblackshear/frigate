@@ -122,9 +122,12 @@ export default function CameraManagementView({
         <div className="scrollbar-container flex-1 overflow-y-auto pb-2">
           {viewMode === "settings" ? (
             <>
-              <Heading as="h4" className="mb-6">
+              <Heading as="h4" className="mb-2">
                 {t("cameraManagement.title")}
               </Heading>
+              <p className="mb-6 max-w-5xl text-sm text-muted-foreground">
+                {t("cameraManagement.description")}
+              </p>
 
               <div className="w-full max-w-5xl space-y-6">
                 <div className="flex gap-2">

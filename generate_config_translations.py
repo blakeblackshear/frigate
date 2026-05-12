@@ -150,29 +150,51 @@ def extract_translations_from_schema(
             # Handle anyOf cases
             elif "anyOf" in field_schema:
                 for item in field_schema["anyOf"]:
+                    nested = None
+                    if item.get("type") == "null":
+                        continue
                     if "properties" in item:
                         nested = extract_translations_from_schema(item, defs=defs)
+                    elif "$ref" in item:
+                        ref_path = item["$ref"]
+                        if ref_path.startswith("#/$defs/"):
+                            ref_name = ref_path.split("/")[-1]
+                            if ref_name in defs:
+                                nested = extract_translations_from_schema(
+                                    defs[ref_name], defs=defs
+                                )
+                    elif (
+                        "additionalProperties" in item
+                        and isinstance(item["additionalProperties"], dict)
+                        and "$ref" in item["additionalProperties"]
+                    ):
+                        ref_path = item["additionalProperties"]["$ref"]
+                        if ref_path.startswith("#/$defs/"):
+                            ref_name = ref_path.split("/")[-1]
+                            if ref_name in defs:
+                                nested = extract_translations_from_schema(
+                                    defs[ref_name], defs=defs
+                                )
+                    elif (
+                        "items" in item
+                        and isinstance(item["items"], dict)
+                        and ("$ref" in item["items"])
+                    ):
+                        ref_path = item["items"]["$ref"]
+                        if ref_path.startswith("#/$defs/"):
+                            ref_name = ref_path.split("/")[-1]
+                            if ref_name in defs:
+                                nested = extract_translations_from_schema(
+                                    defs[ref_name], defs=defs
+                                )
+
+                    if nested:
                         nested_without_root = {
                             k: v
                             for k, v in nested.items()
                             if k not in ("label", "description")
                         }
                         field_translations.update(nested_without_root)
-                    elif "$ref" in item:
-                        ref_path = item["$ref"]
-                        if ref_path.startswith("#/$defs/"):
-                            ref_name = ref_path.split("/")[-1]
-                            if ref_name in defs:
-                                ref_schema = defs[ref_name]
-                                nested = extract_translations_from_schema(
-                                    ref_schema, defs=defs
-                                )
-                                nested_without_root = {
-                                    k: v
-                                    for k, v in nested.items()
-                                    if k not in ("label", "description")
-                                }
-                                field_translations.update(nested_without_root)
 
         if field_translations:
             translations[field_name] = field_translations

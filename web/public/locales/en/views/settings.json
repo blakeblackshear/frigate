@@ -446,6 +446,7 @@
   },
   "cameraManagement": {
     "title": "Manage Cameras",
+    "description": "Add, edit, and delete cameras, control which cameras are enabled, and configure per-profile and camera type overrides. To configure streams, detection, motion, and other camera-specific settings, choose the specific section under Camera Configuration.",
     "addCamera": "Add New Camera",
     "deleteCamera": "Delete Camera",
     "deleteCameraDialog": {
@@ -1127,8 +1128,16 @@
       "cameras": "Cameras",
       "loading": "Loading model information…",
       "error": "Failed to load model information",
+      "noModelLoaded": "No Frigate+ model is currently loaded.",
       "availableModels": "Available Models",
       "loadingAvailableModels": "Loading available models…",
+      "selectModel": "Select a model",
+      "noModelsAvailable": "No models available",
+      "filter": {
+        "ariaLabel": "Filter models by type",
+        "baseModels": "Base Models",
+        "fineTunedModels": "Fine-tuned Models"
+      },
       "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration can be selected."
     },
     "unsavedChanges": "Unsaved Frigate+ settings changes",
