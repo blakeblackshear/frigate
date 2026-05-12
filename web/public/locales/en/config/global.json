@@ -559,7 +559,11 @@
     },
     "filters": {
       "label": "Audio filters",
-      "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives."
+      "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives.",
+      "threshold": {
+        "label": "Minimum audio confidence",
+        "description": "Minimum confidence threshold for the audio event to be counted."
+      }
     },
     "enabled_in_config": {
       "label": "Original audio state",

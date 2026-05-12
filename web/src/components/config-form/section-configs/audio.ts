@@ -42,6 +42,7 @@ const audio: SectionConfigOverrides = {
       "filters.*": {
         "ui:options": {
           additionalPropertyKeyReadonly: true,
+          isAudioLabels: true,
         },
       },
       listen: {

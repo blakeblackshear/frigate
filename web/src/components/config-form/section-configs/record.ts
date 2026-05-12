@@ -49,6 +49,17 @@ const record: SectionConfigOverrides = {
           "ui:options": { suppressMultiSchema: true, size: "lg" },
         },
       },
+      "alerts.retain.mode": {
+        "ui:options": { enumI18nPrefix: "retainMode" },
+      },
+      "detections.retain.mode": {
+        "ui:options": { enumI18nPrefix: "retainMode" },
+      },
+      "preview.quality": {
+        "ui:options": {
+          enumI18nPrefix: "previewQuality",
+        },
+      },
     },
   },
   global: {

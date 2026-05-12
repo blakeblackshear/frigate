@@ -65,7 +65,7 @@ const faceRecognition: SectionConfigOverrides = {
     ],
     uiSchema: {
       model_size: {
-        "ui:options": { size: "xs" },
+        "ui:options": { size: "xs", enumI18nPrefix: "modelSize" },
       },
     },
   },

@@ -1650,12 +1650,17 @@
       "continuous": "Continuous"
     }
   },
-  "snapshot": {
-    "retainMode": {
-      "all": "All",
-      "motion": "Motion",
-      "active_objects": "Active Objects"
-    }
+  "retainMode": {
+    "all": "All",
+    "motion": "Motion",
+    "active_objects": "Active Objects"
+  },
+  "previewQuality": {
+    "very_high": "Very High",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "very_low": "Very Low"
   },
   "ui": {
     "timeFormat": {
@@ -1691,7 +1696,14 @@
   },
   "onvif": {
     "profileAuto": "Auto",
-    "profileLoading": "Loading profiles..."
+    "profileLoading": "Loading profiles...",
+    "autotracking": {
+      "zooming": {
+        "disabled": "Disabled",
+        "absolute": "Absolute",
+        "relative": "Relative"
+      }
+    }
   },
   "modelSize": {
     "small": "Small",
