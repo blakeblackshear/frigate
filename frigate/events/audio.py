@@ -121,7 +121,8 @@ class AudioProcessor(FrigateProcess):
         )
 
         def spawn_if_needed(camera: CameraConfig) -> None:
-            if camera.name in audio_threads:
+            name = camera.name
+            if name is None or name in audio_threads:
                 return
             if not camera.enabled or not camera.audio.enabled:
                 return
@@ -135,9 +136,9 @@ class AudioProcessor(FrigateProcess):
                 self.transcription_model_runner,
                 self.stop_event,  # type: ignore[arg-type]
             )
-            audio_threads[camera.name] = thread
+            audio_threads[name] = thread
             thread.start()
-            self.logger.info(f"Audio maintainer started for {camera.name}")
+            self.logger.info(f"Audio maintainer started for {name}")
 
         for camera in self.config.cameras.values():
             spawn_if_needed(camera)
