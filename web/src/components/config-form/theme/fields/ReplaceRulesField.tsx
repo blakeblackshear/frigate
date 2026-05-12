@@ -75,10 +75,10 @@ export function ReplaceRulesField(props: FieldProps) {
     (schema as RJSFSchema).description;
   const patternTitle =
     t(`${sectionPrefix}.${id}.pattern.label`) ??
-    getPropertyTitle(itemSchema, "pattern", t);
+    getPropertyTitle(itemSchema, "pattern");
   const replacementTitle =
     t(`${sectionPrefix}.${id}.replacement.label`) ??
-    getPropertyTitle(itemSchema, "replacement", t);
+    getPropertyTitle(itemSchema, "replacement");
 
   const hasItems = rules.length > 0;
   const emptyPath = useMemo(() => [] as FieldPathList, []);
