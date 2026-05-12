@@ -157,8 +157,9 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
   const hasModifiedDescendants = checkSubtreeModified(fieldPath);
   const [isOpen, setIsOpen] = useState(hasModifiedDescendants);
-  const resetKey = `${formContext?.level ?? "global"}::${formContext?.cameraName ?? "global"
-    }`;
+  const resetKey = `${formContext?.level ?? "global"}::${
+    formContext?.cameraName ?? "global"
+  }`;
   const lastResetKeyRef = useRef<string | null>(null);
 
   // Auto-expand collapsible when modifications are detected
@@ -336,12 +337,12 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
 
       const label = domain
         ? t(`${sectionI18nPrefix}.${domain}.${groupKey}`, {
-          ns: "config/groups",
-          defaultValue: humanizeKey(groupKey),
-        })
+            ns: "config/groups",
+            defaultValue: humanizeKey(groupKey),
+          })
         : t(`groups.${groupKey}`, {
-          defaultValue: humanizeKey(groupKey),
-        });
+            defaultValue: humanizeKey(groupKey),
+          });
 
       const groupInfo = { groupKey, label, items: ordered };
       for (const item of ordered) {

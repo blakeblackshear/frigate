@@ -28,7 +28,11 @@ export function KnownPlatesField(props: FieldProps) {
     | ConfigFormContext
     | undefined;
 
-  const { t } = useTranslation(["views/settings", "common"]);
+  const configNamespace =
+    formContext?.i18nNamespace ??
+    (formContext?.level === "camera" ? "config/cameras" : "config/global");
+  const { t: fallbackT } = useTranslation(["common", configNamespace]);
+  const t = formContext?.t ?? fallbackT;
 
   const data: KnownPlatesData = useMemo(() => {
     if (!formData || typeof formData !== "object" || Array.isArray(formData)) {
@@ -39,8 +43,14 @@ export function KnownPlatesField(props: FieldProps) {
 
   const entries = useMemo(() => Object.entries(data), [data]);
 
-  const title = (schema as RJSFSchema).title;
-  const description = (schema as RJSFSchema).description;
+  const id = idSchema?.$id ?? props.name;
+  const sectionPrefix = formContext?.sectionI18nPrefix;
+
+  const title =
+    t(`${sectionPrefix}.${id}.label`) ?? (schema as RJSFSchema).title;
+  const description =
+    t(`${sectionPrefix}.${id}.description`) ??
+    (schema as RJSFSchema).description;
 
   const hasItems = entries.length > 0;
   const emptyPath = useMemo(() => [] as FieldPathList, []);
