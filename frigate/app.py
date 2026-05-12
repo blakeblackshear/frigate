@@ -144,7 +144,7 @@ class FrigateApp:
         for d in dirs:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
-                os.makedirs(d)
+                os.makedirs(d, exist_ok=True)
             else:
                 logger.debug(f"Skipping directory: {d}")
 

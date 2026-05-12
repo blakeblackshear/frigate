@@ -531,8 +531,7 @@ class TrackedObject:
 
         directory = os.path.join(THUMB_DIR, self.camera_config.name)
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
         thumb_bytes = self.get_thumbnail("webp")
 
