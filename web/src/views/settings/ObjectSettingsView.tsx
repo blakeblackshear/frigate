@@ -33,6 +33,7 @@ import { getTranslatedLabel } from "@/utils/i18n";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { AudioLevelGraph } from "@/components/audio/AudioLevelGraph";
 import { useWs } from "@/api/ws";
+import { cn } from "@/lib/utils";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -200,15 +201,18 @@ export default function ObjectSettingsView({
 
         <Tabs defaultValue="debug" className="w-full">
           <TabsList
-            className={`grid w-full ${cameraConfig.ffmpeg.inputs.some((input) => input.roles.includes("audio")) ? "grid-cols-3" : "grid-cols-2"}`}
+            className={cn(
+              "grid w-full",
+              cameraConfig.audio.enabled_in_config
+                ? "grid-cols-3"
+                : "grid-cols-2",
+            )}
           >
             <TabsTrigger value="debug">{t("debug.debugging")}</TabsTrigger>
             <TabsTrigger value="objectlist">
               {t("debug.objectList")}
             </TabsTrigger>
-            {cameraConfig.ffmpeg.inputs.some((input) =>
-              input.roles.includes("audio"),
-            ) && (
+            {cameraConfig.audio.enabled_in_config && (
               <TabsTrigger value="audio">{t("debug.audio.title")}</TabsTrigger>
             )}
           </TabsList>
@@ -325,9 +329,7 @@ export default function ObjectSettingsView({
           <TabsContent value="objectlist">
             <ObjectList cameraConfig={cameraConfig} objects={memoizedObjects} />
           </TabsContent>
-          {cameraConfig.ffmpeg.inputs.some((input) =>
-            input.roles.includes("audio"),
-          ) && (
+          {cameraConfig.audio.enabled_in_config && (
             <TabsContent value="audio">
               <AudioList
                 cameraConfig={cameraConfig}
