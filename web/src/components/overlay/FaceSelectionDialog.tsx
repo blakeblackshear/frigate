@@ -86,6 +86,8 @@ export default function FaceSelectionDialog({
         </DrawerClose>
       );
 
+  // keep modal false on desktop to prevent dismissable layer pointer events
+  // issue with dialog auto-close
   return (
     <div className={className ?? "flex"}>
       {newFace && (
@@ -96,8 +98,6 @@ export default function FaceSelectionDialog({
           onSave={(newName) => onTrainAttempt(newName)}
         />
       )}
-      // keep modal false on desktop to prevent dismissable layer pointer events
-      // issue with dialog auto-close
       <Selector {...(isDesktop ? { modal: false } : {})}>
         <Tooltip>
           <TooltipTrigger asChild={isChildButton}>

@@ -127,6 +127,8 @@ export default function ClassificationSelectionDialog({
         </DrawerClose>
       );
 
+  // keep modal false on desktop to prevent dismissable layer pointer events
+  // issue with dialog auto-close
   return (
     <div className={className ?? "flex"}>
       <TextEntryDialog
@@ -135,8 +137,6 @@ export default function ClassificationSelectionDialog({
         title={t("createCategory.new")}
         onSave={(newCat) => onCategorizeImage(newCat)}
       />
-      // keep modal false on desktop to prevent dismissable layer pointer events
-      // issue with dialog auto-close
       <Selector {...(isDesktop ? { modal: false } : {})}>
         <Tooltip>
           <TooltipTrigger asChild={isChildButton}>
