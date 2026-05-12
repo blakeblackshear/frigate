@@ -3,18 +3,14 @@ import { useTranslation } from "react-i18next";
 import type { SectionConfig } from "@/components/config-form/sections";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import { CameraOverridesBadge } from "@/components/config-form/sections/CameraOverridesBadge";
+import { GlobalOverridesBadge } from "@/components/config-form/sections/GlobalOverridesBadge";
+import { ProfileOverridesBadge } from "@/components/config-form/sections/ProfileOverridesBadge";
 import type { PolygonType } from "@/types/canvas";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { ConfigSectionData } from "@/types/configForm";
 import type { ProfileState } from "@/types/profile";
 import { getSectionConfig } from "@/utils/configUtil";
 import { getProfileColor } from "@/utils/profileColors";
-import { cn } from "@/lib/utils";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
@@ -173,46 +169,25 @@ export function SingleSectionPage({
             )}
             {level === "camera" &&
               showOverrideIndicator &&
-              sectionStatus.isOverridden && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge
-                      variant="secondary"
-                      className={cn(
-                        "cursor-default border-2 text-center text-xs text-primary-variant",
-                        sectionStatus.overrideSource === "profile" &&
-                          profileColor
-                          ? profileColor.border
-                          : "border-selected",
-                      )}
-                    >
-                      {sectionStatus.overrideSource === "profile"
-                        ? t("button.overriddenBaseConfig", {
-                            ns: "views/settings",
-                            defaultValue: "Overridden (Base Config)",
-                          })
-                        : t("button.overriddenGlobal", {
-                            ns: "views/settings",
-                            defaultValue: "Overridden (Global)",
-                          })}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {sectionStatus.overrideSource === "profile"
-                      ? t("button.overriddenBaseConfigTooltip", {
-                          ns: "views/settings",
-                          profile: currentEditingProfile
-                            ? (profileState?.profileFriendlyNames.get(
-                                currentEditingProfile,
-                              ) ?? currentEditingProfile)
-                            : "",
-                        })
-                      : t("button.overriddenGlobalTooltip", {
-                          ns: "views/settings",
-                        })}
-                  </TooltipContent>
-                </Tooltip>
-              )}
+              sectionStatus.isOverridden &&
+              selectedCamera &&
+              (sectionStatus.overrideSource === "profile" &&
+              currentEditingProfile ? (
+                <ProfileOverridesBadge
+                  sectionPath={sectionKey}
+                  cameraName={selectedCamera}
+                  profileName={currentEditingProfile}
+                  profileFriendlyName={profileState?.profileFriendlyNames.get(
+                    currentEditingProfile,
+                  )}
+                  profileBorderColor={profileColor?.border}
+                />
+              ) : (
+                <GlobalOverridesBadge
+                  sectionPath={sectionKey}
+                  cameraName={selectedCamera}
+                />
+              ))}
             {sectionStatus.hasChanges && (
               <Badge
                 variant="secondary"
@@ -233,27 +208,25 @@ export function SingleSectionPage({
           )}
           {level === "camera" &&
             showOverrideIndicator &&
-            sectionStatus.isOverridden && (
-              <Badge
-                variant="secondary"
-                className={cn(
-                  "cursor-default border-2 text-center text-xs text-primary-variant",
-                  sectionStatus.overrideSource === "profile" && profileColor
-                    ? profileColor.border
-                    : "border-selected",
+            sectionStatus.isOverridden &&
+            selectedCamera &&
+            (sectionStatus.overrideSource === "profile" &&
+            currentEditingProfile ? (
+              <ProfileOverridesBadge
+                sectionPath={sectionKey}
+                cameraName={selectedCamera}
+                profileName={currentEditingProfile}
+                profileFriendlyName={profileState?.profileFriendlyNames.get(
+                  currentEditingProfile,
                 )}
-              >
-                {sectionStatus.overrideSource === "profile"
-                  ? t("button.overriddenBaseConfig", {
-                      ns: "views/settings",
-                      defaultValue: "Overridden (Base Config)",
-                    })
-                  : t("button.overriddenGlobal", {
-                      ns: "views/settings",
-                      defaultValue: "Overridden (Global)",
-                    })}
-              </Badge>
-            )}
+                profileBorderColor={profileColor?.border}
+              />
+            ) : (
+              <GlobalOverridesBadge
+                sectionPath={sectionKey}
+                cameraName={selectedCamera}
+              />
+            ))}
           {sectionStatus.hasChanges && (
             <Badge
               variant="secondary"

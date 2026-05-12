@@ -763,3 +763,26 @@ export function resolveHiddenFieldEntries(
   }
   return result;
 }
+
+/**
+ * Match a delta path against a hidden-field pattern. Supports literal prefixes
+ * (so a hidden field "streams" also hides "streams.foo.bar") and `*` wildcards
+ * matching exactly one path segment (e.g. "filters.*.mask").
+ */
+export function pathMatchesHiddenPattern(
+  path: string,
+  pattern: string,
+): boolean {
+  if (!pattern) return false;
+  if (!pattern.includes("*")) {
+    return path === pattern || path.startsWith(`${pattern}.`);
+  }
+  const patternSegments = pattern.split(".");
+  const pathSegments = path.split(".");
+  if (pathSegments.length < patternSegments.length) return false;
+  for (let i = 0; i < patternSegments.length; i += 1) {
+    if (patternSegments[i] === "*") continue;
+    if (patternSegments[i] !== pathSegments[i]) return false;
+  }
+  return true;
+}

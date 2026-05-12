@@ -12,6 +12,7 @@ import { isJsonObject } from "@/lib/utils";
 import {
   getBaseCameraSectionValue,
   getEffectiveHiddenFields,
+  pathMatchesHiddenPattern,
   unsetWithWildcard,
 } from "@/utils/configUtil";
 import { extractSectionSchema } from "@/hooks/use-config-schema";
@@ -662,4 +663,139 @@ export function useCamerasOverridingSection(
 
     return entries;
   }, [config, sectionPath, schema]);
+}
+
+/**
+ * Hook returning the field-level deltas between a single camera's base
+ * (pre-profile) section value and the effective global baseline. Mirrors
+ * `useConfigOverride`'s comparison logic but exposes per-field deltas so a
+ * popover can list the overridden fields.
+ *
+ * @example
+ * ```tsx
+ * const deltas = useCameraSectionDeltas(config, "front_door", "detect");
+ * // [{ fieldPath: "fps", globalValue: 5, cameraValue: 10 }]
+ * ```
+ */
+export function useCameraSectionDeltas(
+  config: FrigateConfig | undefined,
+  cameraName: string | undefined,
+  sectionPath: string,
+): FieldDelta[] {
+  const { data: schema } = useSWR<RJSFSchema>("config/schema.json");
+  return useMemo(() => {
+    if (!config?.cameras || !cameraName || !sectionPath) {
+      return [];
+    }
+    const cameraConfig = config.cameras[cameraName];
+    if (!cameraConfig) return [];
+
+    const sectionMeta = OVERRIDABLE_SECTIONS.find((s) => s.key === sectionPath);
+    const compareFields = sectionMeta?.compareFields;
+
+    const globalValue = collapseEmpty(
+      getEffectiveGlobalBaseline(config, sectionPath, compareFields, schema),
+    );
+    const cameraValue = collapseEmpty(
+      normalizeConfigValue(
+        getBaseCameraSectionValue(config, cameraName, sectionPath),
+      ),
+    );
+
+    const hiddenFields = getEffectiveHiddenFields(
+      sectionPath,
+      "camera",
+      config,
+    );
+
+    const deltas: FieldDelta[] = [];
+    for (const delta of collectFieldDeltas(
+      globalValue,
+      cameraValue,
+      compareFields,
+    )) {
+      if (
+        hiddenFields.some((pattern) =>
+          pathMatchesHiddenPattern(delta.fieldPath, pattern),
+        )
+      ) {
+        continue;
+      }
+      deltas.push(delta);
+    }
+    return deltas;
+  }, [config, cameraName, sectionPath, schema]);
+}
+
+/**
+ * Hook returning the field-level deltas between a single profile's overrides
+ * and the camera's base (pre-profile) section value. Honors per-section
+ * `compareFields` filters and hidden-field patterns so the result matches
+ * what's actually exposed in the UI.
+ *
+ * @example
+ * ```tsx
+ * const deltas = useProfileSectionDeltas(config, "front_door", "night", "detect");
+ * // [{ fieldPath: "fps", globalValue: 5, cameraValue: 10, profileName: "night" }]
+ * ```
+ */
+export function useProfileSectionDeltas(
+  config: FrigateConfig | undefined,
+  cameraName: string | undefined,
+  profileName: string | undefined,
+  sectionPath: string,
+): FieldDelta[] {
+  return useMemo(() => {
+    if (!config?.cameras || !cameraName || !profileName || !sectionPath) {
+      return [];
+    }
+    const cameraConfig = config.cameras[cameraName];
+    if (!cameraConfig) return [];
+
+    const profileSection = (
+      cameraConfig.profiles?.[profileName] as
+        | Record<string, unknown>
+        | undefined
+    )?.[sectionPath];
+    if (profileSection == null) return [];
+
+    const sectionMeta = OVERRIDABLE_SECTIONS.find((s) => s.key === sectionPath);
+    const compareFields = sectionMeta?.compareFields;
+
+    const baseValue = collapseEmpty(
+      normalizeConfigValue(
+        getBaseCameraSectionValue(config, cameraName, sectionPath),
+      ),
+    );
+    const profileValue = collapseEmpty(
+      normalizeConfigValue(profileSection as JsonValue),
+    );
+
+    const hiddenFields = getEffectiveHiddenFields(
+      sectionPath,
+      "camera",
+      config,
+    );
+
+    const deltas: FieldDelta[] = [];
+    for (const path of collectDefinedLeafPaths(profileValue)) {
+      if (!isPathAllowed(path, compareFields)) continue;
+      if (
+        hiddenFields.some((pattern) => pathMatchesHiddenPattern(path, pattern))
+      ) {
+        continue;
+      }
+      const baseField = get(baseValue, path);
+      const profileField = get(profileValue, path);
+      if (!isEqual(baseField, profileField)) {
+        deltas.push({
+          fieldPath: path,
+          globalValue: baseField,
+          cameraValue: profileField,
+          profileName,
+        });
+      }
+    }
+    return deltas;
+  }, [config, cameraName, profileName, sectionPath]);
 }

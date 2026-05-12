@@ -27,14 +27,11 @@ import {
 import { getSectionValidation } from "../section-validations";
 import { useConfigOverride } from "@/hooks/use-config-override";
 import { CameraOverridesBadge } from "./CameraOverridesBadge";
+import { GlobalOverridesBadge } from "./GlobalOverridesBadge";
+import { ProfileOverridesBadge } from "./ProfileOverridesBadge";
 import { useSectionSchema } from "@/hooks/use-config-schema";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import Heading from "@/components/ui/heading";
@@ -1257,33 +1254,22 @@ export function ConfigSection({
                   <Heading as="h4">{title}</Heading>
                   {showOverrideIndicator &&
                     effectiveLevel === "camera" &&
-                    (profileOverridesSection || isOverridden) && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge variant="secondary" className="text-xs">
-                            {overrideSource === "profile"
-                              ? t("button.overriddenBaseConfig", {
-                                  ns: "views/settings",
-                                  defaultValue: "Overridden (Base Config)",
-                                })
-                              : t("button.overriddenGlobal", {
-                                  ns: "views/settings",
-                                  defaultValue: "Overridden (Global)",
-                                })}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {overrideSource === "profile"
-                            ? t("button.overriddenBaseConfigTooltip", {
-                                ns: "views/settings",
-                                profile: profileFriendlyName ?? profileName,
-                              })
-                            : t("button.overriddenGlobalTooltip", {
-                                ns: "views/settings",
-                              })}
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
+                    (profileOverridesSection || isOverridden) &&
+                    cameraName &&
+                    (overrideSource === "profile" && profileName ? (
+                      <ProfileOverridesBadge
+                        sectionPath={sectionPath}
+                        cameraName={cameraName}
+                        profileName={profileName}
+                        profileFriendlyName={profileFriendlyName}
+                        profileBorderColor={profileBorderColor}
+                      />
+                    ) : (
+                      <GlobalOverridesBadge
+                        sectionPath={sectionPath}
+                        cameraName={cameraName}
+                      />
+                    ))}
                   {showOverrideIndicator && effectiveLevel === "global" && (
                     <CameraOverridesBadge sectionPath={sectionPath} />
                   )}
@@ -1323,41 +1309,22 @@ export function ConfigSection({
                 <Heading as="h4">{title}</Heading>
                 {showOverrideIndicator &&
                   effectiveLevel === "camera" &&
-                  (profileOverridesSection || isOverridden) && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            "cursor-default border-2 text-center text-xs text-primary-variant",
-                            overrideSource === "profile" && profileBorderColor
-                              ? profileBorderColor
-                              : "border-selected",
-                          )}
-                        >
-                          {overrideSource === "profile"
-                            ? t("button.overriddenBaseConfig", {
-                                ns: "views/settings",
-                                defaultValue: "Overridden (Base Config)",
-                              })
-                            : t("button.overriddenGlobal", {
-                                ns: "views/settings",
-                                defaultValue: "Overridden (Global)",
-                              })}
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {overrideSource === "profile"
-                          ? t("button.overriddenBaseConfigTooltip", {
-                              ns: "views/settings",
-                              profile: profileFriendlyName ?? profileName,
-                            })
-                          : t("button.overriddenGlobalTooltip", {
-                              ns: "views/settings",
-                            })}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
+                  (profileOverridesSection || isOverridden) &&
+                  cameraName &&
+                  (overrideSource === "profile" && profileName ? (
+                    <ProfileOverridesBadge
+                      sectionPath={sectionPath}
+                      cameraName={cameraName}
+                      profileName={profileName}
+                      profileFriendlyName={profileFriendlyName}
+                      profileBorderColor={profileBorderColor}
+                    />
+                  ) : (
+                    <GlobalOverridesBadge
+                      sectionPath={sectionPath}
+                      cameraName={cameraName}
+                    />
+                  ))}
                 {showOverrideIndicator && effectiveLevel === "global" && (
                   <CameraOverridesBadge sectionPath={sectionPath} />
                 )}

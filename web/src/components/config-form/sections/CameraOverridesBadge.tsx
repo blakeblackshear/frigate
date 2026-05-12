@@ -17,10 +17,13 @@ import {
 } from "@/hooks/use-config-override";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import type { ProfilesApiResponse } from "@/types/profile";
-import { humanizeKey } from "@/components/config-form/theme/utils/i18n";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { formatList } from "@/utils/stringUtil";
-import { getEffectiveHiddenFields } from "@/utils/configUtil";
+import {
+  getEffectiveHiddenFields,
+  pathMatchesHiddenPattern,
+} from "@/utils/configUtil";
+import { useOverrideFieldLabel } from "./useOverrideFieldLabel";
 
 const CAMERA_PAGE_BY_SECTION: Record<string, string> = {
   detect: "cameraDetect",
@@ -72,26 +75,6 @@ const SECTIONS_WITHOUT_OVERRIDE_BADGE = new Set([
   "model",
 ]);
 
-/**
- * Match a delta path against a hidden-field pattern. Supports literal prefixes
- * (so a hidden field "streams" also hides "streams.foo.bar") and `*` wildcards
- * matching exactly one path segment (e.g. "filters.*.mask").
- */
-function pathMatchesHiddenPattern(path: string, pattern: string): boolean {
-  if (!pattern) return false;
-  if (!pattern.includes("*")) {
-    return path === pattern || path.startsWith(`${pattern}.`);
-  }
-  const patternSegments = pattern.split(".");
-  const pathSegments = path.split(".");
-  if (pathSegments.length < patternSegments.length) return false;
-  for (let i = 0; i < patternSegments.length; i += 1) {
-    if (patternSegments[i] === "*") continue;
-    if (patternSegments[i] !== pathSegments[i]) return false;
-  }
-  return true;
-}
-
 type CameraEntryProps = {
   sectionPath: string;
   entry: CameraOverrideEntry;
@@ -127,11 +110,8 @@ function groupDeltasBySource(deltas: FieldDelta[]): SourceGroup[] {
 }
 
 function CameraEntry({ sectionPath, entry, cameraPage }: CameraEntryProps) {
-  const { t, i18n } = useTranslation([
-    "config/global",
-    "views/settings",
-    "objects",
-  ]);
+  const { t } = useTranslation(["views/settings"]);
+  const fieldLabel = useOverrideFieldLabel(sectionPath);
   const friendlyName = useCameraFriendlyName(entry.camera);
   const { data: profilesData } = useSWR<ProfilesApiResponse>("profiles");
 
@@ -140,49 +120,6 @@ function CameraEntry({ sectionPath, entry, cameraPage }: CameraEntryProps) {
     profilesData?.profiles?.forEach((p) => map.set(p.name, p.friendly_name));
     return map;
   }, [profilesData]);
-
-  const fieldLabel = (fieldPath: string) => {
-    if (!fieldPath) {
-      const sectionKey = `${sectionPath}.label`;
-      return i18n.exists(sectionKey, { ns: "config/global" })
-        ? t(sectionKey, { ns: "config/global" })
-        : humanizeKey(sectionPath);
-    }
-
-    const segments = fieldPath.split(".");
-
-    // Most specific: try the full nested path
-    const fullKey = `${sectionPath}.${fieldPath}.label`;
-    if (i18n.exists(fullKey, { ns: "config/global" })) {
-      return t(fullKey, { ns: "config/global" });
-    }
-
-    // Try dropping each intermediate segment in turn — those are typically
-    // user-defined dict keys (object class names, zone names, etc.) that
-    // don't have their own label entries. Prepend the dropped segment as
-    // context to disambiguate (e.g. "Person · Minimum object area").
-    for (let i = 0; i < segments.length; i++) {
-      const reduced = [...segments.slice(0, i), ...segments.slice(i + 1)].join(
-        ".",
-      );
-      if (!reduced) continue;
-      const reducedKey = `${sectionPath}.${reduced}.label`;
-      if (i18n.exists(reducedKey, { ns: "config/global" })) {
-        const resolvedLabel = t(reducedKey, { ns: "config/global" });
-        const dropped = segments[i];
-        // Object class names ("person", "car", "fox") have translations in
-        // the `objects` namespace; fall back to humanizing the raw key for
-        // anything that isn't a known label.
-        const droppedLabel = i18n.exists(dropped, { ns: "objects" })
-          ? t(dropped, { ns: "objects" })
-          : humanizeKey(dropped);
-        return `${droppedLabel} · ${resolvedLabel}`;
-      }
-    }
-
-    // Last resort: humanize the leaf segment
-    return humanizeKey(segments[segments.length - 1]);
-  };
 
   const formatDeltas = (deltas: FieldDelta[]) => {
     const visibleLabels = deltas
