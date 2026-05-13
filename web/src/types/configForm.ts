@@ -44,4 +44,5 @@ export type ConfigFormContext = {
   requiresRestart?: boolean;
   t?: (key: string, options?: Record<string, unknown>) => string;
   renderers?: Record<string, RendererComponent>;
+  isProfile?: boolean;
 };

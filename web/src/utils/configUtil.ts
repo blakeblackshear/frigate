@@ -6,7 +6,6 @@
 
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
-import merge from "lodash/merge";
 import unset from "lodash/unset";
 import isEqual from "lodash/isEqual";
 import mergeWith from "lodash/mergeWith";
@@ -90,6 +89,32 @@ export function getBaseCameraSectionValue(
   if (!cam) return undefined;
   const base = cam.base_config?.[sectionPath];
   return base !== undefined ? base : get(cam, sectionPath);
+}
+
+// mergeWith customizer that replaces arrays wholesale instead of merging them
+// positionally by index. Used when the source value is meant to fully replace
+// the destination (e.g. profile overrides, section config overrides), so an
+// empty source array correctly clears the destination array.
+const replaceArraysCustomizer = (objValue: unknown, srcValue: unknown) => {
+  if (Array.isArray(objValue) || Array.isArray(srcValue)) {
+    return srcValue !== undefined ? srcValue : objValue;
+  }
+  return undefined;
+};
+
+// Merge profile overrides on top of base config values. Matches the backend's
+// deep_merge(overrides, base_data) semantics: arrays are replaced wholesale by
+// the profile's value rather than merged positionally, so an empty array in a
+// profile clears the base array instead of leaving stale entries behind.
+export function mergeProfileOverrides<T extends object>(
+  baseValue: T,
+  profileOverrides: object,
+): T {
+  return mergeWith(
+    cloneDeep(baseValue),
+    cloneDeep(profileOverrides),
+    replaceArraysCustomizer,
+  ) as T;
 }
 
 /** Sections that can appear inside a camera profile definition. */
@@ -564,9 +589,9 @@ export function prepareSectionSavePayload(opts: {
         baseValue &&
         typeof baseValue === "object"
       ) {
-        rawSectionValue = merge(
-          cloneDeep(baseValue),
-          cloneDeep(profileOverrides),
+        rawSectionValue = mergeProfileOverrides(
+          baseValue as object,
+          profileOverrides as object,
         );
       } else {
         rawSectionValue = baseValue;
@@ -675,13 +700,12 @@ const mergeSectionConfig = (
   overrides: Partial<SectionConfig> | undefined,
 ): SectionConfig =>
   mergeWith({}, base ?? {}, overrides ?? {}, (objValue, srcValue, key) => {
-    if (Array.isArray(objValue) || Array.isArray(srcValue)) {
-      return srcValue ?? objValue;
-    }
+    const arrayResult = replaceArraysCustomizer(objValue, srcValue);
+    if (arrayResult !== undefined) return arrayResult;
 
     if (key === "uiSchema") {
       if (objValue && srcValue) {
-        return merge({}, objValue, srcValue);
+        return mergeWith({}, objValue, srcValue, replaceArraysCustomizer);
       }
       return srcValue ?? objValue;
     }
@@ -738,4 +762,27 @@ export function resolveHiddenFieldEntries(
     }
   }
   return result;
+}
+
+/**
+ * Match a delta path against a hidden-field pattern. Supports literal prefixes
+ * (so a hidden field "streams" also hides "streams.foo.bar") and `*` wildcards
+ * matching exactly one path segment (e.g. "filters.*.mask").
+ */
+export function pathMatchesHiddenPattern(
+  path: string,
+  pattern: string,
+): boolean {
+  if (!pattern) return false;
+  if (!pattern.includes("*")) {
+    return path === pattern || path.startsWith(`${pattern}.`);
+  }
+  const patternSegments = pattern.split(".");
+  const pathSegments = path.split(".");
+  if (pathSegments.length < patternSegments.length) return false;
+  for (let i = 0; i < patternSegments.length; i += 1) {
+    if (patternSegments[i] === "*") continue;
+    if (patternSegments[i] !== pathSegments[i]) return false;
+  }
+  return true;
 }

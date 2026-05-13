@@ -23,7 +23,7 @@ import {
 import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import React, { ReactNode, useMemo, useState } from "react";
+import React, { ReactNode, useCallback, useMemo, useState } from "react";
 import TextEntryDialog from "./dialog/TextEntryDialog";
 import { Button } from "../ui/button";
 
@@ -61,6 +61,19 @@ export default function FaceSelectionDialog({
   // control
   const [newFace, setNewFace] = useState(false);
 
+  // Non-modal Radix DropdownMenu doesn't propagate wheel events to nested
+  // scroll containers, so attach a non-passive listener that scrolls manually.
+  const scrollContainerRef = useCallback((el: HTMLDivElement | null) => {
+    if (!el || !isDesktop) return;
+    const handleWheel = (e: WheelEvent) => {
+      if (el.scrollHeight <= el.clientHeight) return;
+      e.preventDefault();
+      el.scrollTop += e.deltaY;
+    };
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, []);
+
   // components
   const Selector = isDesktop ? DropdownMenu : Drawer;
   const SelectorTrigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
@@ -73,6 +86,8 @@ export default function FaceSelectionDialog({
         </DrawerClose>
       );
 
+  // keep modal false on desktop to prevent dismissable layer pointer events
+  // issue with dialog auto-close
   return (
     <div className={className ?? "flex"}>
       {newFace && (
@@ -83,52 +98,56 @@ export default function FaceSelectionDialog({
           onSave={(newName) => onTrainAttempt(newName)}
         />
       )}
-
-      <Tooltip>
-        <Selector {...(isDesktop ? { modal: false } : {})}>
-          <SelectorTrigger asChild>
-            <TooltipTrigger asChild={isChildButton}>{children}</TooltipTrigger>
-          </SelectorTrigger>
-          <SelectorContent
-            className={cn("", isMobile && "mx-1 gap-2 rounded-t-2xl px-4")}
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            {isMobile && (
-              <DrawerHeader className="sr-only">
-                <DrawerTitle>Details</DrawerTitle>
-                <DrawerDescription>Details</DrawerDescription>
-              </DrawerHeader>
+      <Selector {...(isDesktop ? { modal: false } : {})}>
+        <Tooltip>
+          <TooltipTrigger asChild={isChildButton}>
+            <SelectorTrigger asChild>{children}</SelectorTrigger>
+          </TooltipTrigger>
+          <TooltipContent>{tooltipLabel ?? t("trainFace")}</TooltipContent>
+        </Tooltip>
+        <SelectorContent
+          ref={scrollContainerRef}
+          className={cn(
+            isDesktop && "scrollbar-container max-h-[40dvh] overflow-y-auto",
+            isMobile && "mx-1 gap-2 rounded-t-2xl px-4",
+          )}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          {isMobile && (
+            <DrawerHeader className="sr-only">
+              <DrawerTitle>Details</DrawerTitle>
+              <DrawerDescription>Details</DrawerDescription>
+            </DrawerHeader>
+          )}
+          <DropdownMenuLabel>
+            {dialogLabel ?? t("trainFaceAs")}
+          </DropdownMenuLabel>
+          <div
+            className={cn(
+              "flex flex-col",
+              isMobile &&
+                "max-h-[40dvh] gap-2 overflow-y-auto overflow-x-hidden pb-4",
             )}
-            <DropdownMenuLabel>
-              {dialogLabel ?? t("trainFaceAs")}
-            </DropdownMenuLabel>
-            <div
-              className={cn(
-                "flex max-h-[40dvh] flex-col overflow-y-auto overflow-x-hidden",
-                isMobile && "gap-2 pb-4",
-              )}
-            >
-              {filteredNames.sort().map((faceName) => (
-                <SelectorItem
-                  key={faceName}
-                  className="flex cursor-pointer gap-2 smart-capitalize"
-                  onClick={() => onTrainAttempt(faceName)}
-                >
-                  {faceName}
-                </SelectorItem>
-              ))}
-              <DropdownMenuSeparator />
+          >
+            {filteredNames.sort().map((faceName) => (
               <SelectorItem
+                key={faceName}
                 className="flex cursor-pointer gap-2 smart-capitalize"
-                onClick={() => setNewFace(true)}
+                onClick={() => onTrainAttempt(faceName)}
               >
-                {t("createFaceLibrary.new")}
+                {faceName}
               </SelectorItem>
-            </div>
-          </SelectorContent>
-        </Selector>
-        <TooltipContent>{tooltipLabel ?? t("trainFace")}</TooltipContent>
-      </Tooltip>
+            ))}
+            <DropdownMenuSeparator />
+            <SelectorItem
+              className="flex cursor-pointer gap-2 smart-capitalize"
+              onClick={() => setNewFace(true)}
+            >
+              {t("createFaceLibrary.new")}
+            </SelectorItem>
+          </div>
+        </SelectorContent>
+      </Selector>
     </div>
   );
 }
