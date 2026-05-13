@@ -393,8 +393,10 @@ def _read_intel_drm_fdinfo(target_pdev: Optional[str]) -> dict:
     return snapshot
 
 
-def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, Any]]:
-    """Get stats by reading DRM fdinfo files.
+def get_intel_gpu_stats(
+    intel_gpu_device: Optional[str],
+) -> Optional[dict[str, dict[str, Any]]]:
+    """Get stats by reading DRM fdinfo files, bucketed per-pdev.
 
     Each DRM client FD exposes monotonic per-engine busy counters via
     /proc/<pid>/fdinfo/<fd> (i915 since kernel 5.19, Xe since first release).
@@ -402,7 +404,14 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, A
     utilization. Render/3D and Compute are pooled into "compute"; Video and
     VideoEnhance into "dec". Overall "gpu" is the sum of those pools (clamped
     to 100%).
+
+    The return value is keyed by the GPU's drm-pdev string so multiple Intel
+    GPUs in the same system are reported separately. Each entry carries a
+    "name" populated from OpenVINO (falling back to the pdev) so callers can
+    surface a real device name in the UI.
     """
+    from frigate.stats.intel_gpu_info import intel_gpu_name_resolver
+
     target_pdev = _resolve_intel_gpu_pdev(intel_gpu_device)
 
     snapshot_a = _read_intel_drm_fdinfo(target_pdev)
@@ -417,18 +426,20 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, A
     if not snapshot_b or elapsed_ns <= 0:
         return None
 
-    engine_pct: dict[str, float] = {
-        "render": 0.0,
-        "video": 0.0,
-        "video-enhance": 0.0,
-        "compute": 0.0,
-    }
-    pid_pct: dict[str, float] = {}
+    def _new_engine_pct() -> dict[str, float]:
+        return {"render": 0.0, "video": 0.0, "video-enhance": 0.0, "compute": 0.0}
+
+    per_pdev_engine_pct: dict[str, dict[str, float]] = {}
+    per_pdev_pid_pct: dict[str, dict[str, float]] = {}
 
     for key, data_b in snapshot_b.items():
         data_a = snapshot_a.get(key)
         if not data_a or data_a["driver"] != data_b["driver"]:
             continue
+
+        pdev = key[0]
+        engine_pct = per_pdev_engine_pct.setdefault(pdev, _new_engine_pct())
+        pid_pct = per_pdev_pid_pct.setdefault(pdev, {})
 
         client_total = 0.0
         for engine, (busy_b, total_b) in data_b["engines"].items():
@@ -452,24 +463,35 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, A
 
         pid_pct[data_b["pid"]] = pid_pct.get(data_b["pid"], 0.0) + client_total
 
-    for engine in engine_pct:
-        engine_pct[engine] = min(100.0, engine_pct[engine])
+    if not per_pdev_engine_pct:
+        return None
 
-    compute_pct = min(100.0, engine_pct["render"] + engine_pct["compute"])
-    dec_pct = min(100.0, engine_pct["video"] + engine_pct["video-enhance"])
-    overall_pct = min(100.0, compute_pct + dec_pct)
+    names = intel_gpu_name_resolver.get_names()
+    results: dict[str, dict[str, Any]] = {}
 
-    results: dict[str, Any] = {
-        "gpu": f"{round(overall_pct, 2)}%",
-        "mem": "-%",
-        "compute": f"{round(compute_pct, 2)}%",
-        "dec": f"{round(dec_pct, 2)}%",
-    }
+    for pdev, engine_pct in per_pdev_engine_pct.items():
+        for engine in engine_pct:
+            engine_pct[engine] = min(100.0, engine_pct[engine])
 
-    if pid_pct:
-        results["clients"] = {
-            pid: f"{round(min(100.0, pct), 2)}%" for pid, pct in pid_pct.items()
+        compute_pct = min(100.0, engine_pct["render"] + engine_pct["compute"])
+        dec_pct = min(100.0, engine_pct["video"] + engine_pct["video-enhance"])
+        overall_pct = min(100.0, compute_pct + dec_pct)
+
+        entry: dict[str, Any] = {
+            "name": names.get(pdev) or f"Intel GPU {pdev}",
+            "gpu": f"{round(overall_pct, 2)}%",
+            "mem": "-%",
+            "compute": f"{round(compute_pct, 2)}%",
+            "dec": f"{round(dec_pct, 2)}%",
         }
+
+        pid_pct = per_pdev_pid_pct.get(pdev)
+        if pid_pct:
+            entry["clients"] = {
+                pid: f"{round(min(100.0, pct), 2)}%" for pid, pct in pid_pct.items()
+            }
+
+        results[pdev] = entry
 
     return results
 

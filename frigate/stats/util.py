@@ -230,6 +230,7 @@ async def set_gpu_stats(
                 hwaccel_args.append(args)
 
     stats: dict[str, dict] = {}
+    intel_gpu_collected = False
 
     for args in hwaccel_args:
         if args in hwaccel_errors:
@@ -265,14 +266,17 @@ async def set_gpu_stats(
             if not config.telemetry.stats.intel_gpu_stats:
                 continue
 
-            if "intel-gpu" not in stats:
+            if not intel_gpu_collected:
                 # intel GPU (QSV or VAAPI both use the same physical GPU)
+                intel_gpu_collected = True
                 intel_usage = get_intel_gpu_stats(
                     config.telemetry.stats.intel_gpu_device
                 )
 
-                if intel_usage is not None:
-                    stats["intel-gpu"] = intel_usage or {"gpu": "", "mem": ""}
+                if intel_usage:
+                    for entry in intel_usage.values():
+                        name = entry.pop("name")
+                        stats[name] = entry
                 else:
                     stats["intel-gpu"] = {"gpu": "", "mem": ""}
                     hwaccel_errors.append(args)
