@@ -835,7 +835,7 @@ def nvinfo():
 @router.get(
     "/logs/{service}",
     tags=[Tags.logs],
-    dependencies=[Depends(allow_any_authenticated())],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 async def logs(
     service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
@@ -1040,12 +1040,27 @@ def get_media_sync_status(job_id: str):
 
 
 @router.get("/labels", dependencies=[Depends(allow_any_authenticated())])
-def get_labels(camera: str = ""):
+def get_labels(
+    camera: str = "",
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
         if camera:
+            if camera not in allowed_cameras:
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Access denied to camera '{camera}'",
+                    },
+                    status_code=403,
+                )
             events = Event.select(Event.label).where(Event.camera == camera).distinct()
         else:
-            events = Event.select(Event.label).distinct()
+            events = (
+                Event.select(Event.label)
+                .where(Event.camera << allowed_cameras)
+                .distinct()
+            )
     except Exception as e:
         logger.error(e)
         return JSONResponse(
@@ -1058,9 +1073,16 @@ def get_labels(camera: str = ""):
 
 
 @router.get("/sub_labels", dependencies=[Depends(allow_any_authenticated())])
-def get_sub_labels(split_joined: Optional[int] = None):
+def get_sub_labels(
+    split_joined: Optional[int] = None,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
-        events = Event.select(Event.sub_label).distinct()
+        events = (
+            Event.select(Event.sub_label)
+            .where(Event.camera << allowed_cameras)
+            .distinct()
+        )
     except Exception:
         return JSONResponse(
             content=({"success": False, "message": "Failed to get sub_labels"}),

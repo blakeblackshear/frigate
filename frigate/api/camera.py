@@ -19,7 +19,9 @@ from zeep.exceptions import Fault, TransportError
 from zeep.transports import AsyncTransport
 
 from frigate.api.auth import (
+    _get_stream_owner_cameras,
     allow_any_authenticated,
+    get_current_user,
     require_go2rtc_stream_access,
     require_role,
 )
@@ -31,6 +33,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateTopic,
 )
 from frigate.config.env import substitute_frigate_vars
+from frigate.models import User
 from frigate.util.builtin import clean_camera_user_pass
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
@@ -66,7 +69,7 @@ def _is_valid_host(host: str) -> bool:
 
 
 @router.get("/go2rtc/streams", dependencies=[Depends(allow_any_authenticated())])
-def go2rtc_streams():
+async def go2rtc_streams(request: Request):
     r = requests.get("http://127.0.0.1:1984/api/streams")
     if not r.ok:
         logger.error("Failed to fetch streams from go2rtc")
@@ -75,6 +78,24 @@ def go2rtc_streams():
             status_code=500,
         )
     stream_data = r.json()
+
+    # Roles with an explicit camera list see only streams owned by an allowed
+    # camera. Admin and full-access roles (no list / empty list) see all streams.
+    current_user = await get_current_user(request)
+    if not isinstance(current_user, JSONResponse):
+        role = current_user["role"]
+        roles_dict = request.app.frigate_config.auth.roles
+        if role != "admin" and roles_dict.get(role):
+            all_camera_names = set(request.app.frigate_config.cameras.keys())
+            allowed_cameras = set(
+                User.get_allowed_cameras(role, roles_dict, all_camera_names)
+            )
+            stream_data = {
+                name: data
+                for name, data in stream_data.items()
+                if _get_stream_owner_cameras(request, name) & allowed_cameras
+            }
+
     for data in stream_data.values():
         for producer in data.get("producers") or []:
             producer["url"] = clean_camera_user_pass(producer.get("url", ""))
@@ -966,7 +987,6 @@ async def onvif_probe(
                         probe = ffprobe_stream(
                             request.app.frigate_config.ffmpeg, test_uri, detailed=False
                         )
-                        print(probe)
                         ok = probe is not None and getattr(probe, "returncode", 1) == 0
                         tested_candidates.append(
                             {
