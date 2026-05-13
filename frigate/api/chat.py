@@ -10,7 +10,7 @@ from functools import reduce
 from typing import Any, Dict, List, Optional
 
 import cv2
-from fastapi import APIRouter, Body, Depends, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
@@ -1641,6 +1641,7 @@ async def start_vlm_monitor(
             dispatcher=request.app.dispatcher,
             labels=body.labels,
             zones=body.zones,
+            username=request.headers.get("remote-user", ""),
         )
     except RuntimeError as e:
         logger.error("Failed to start VLM watch job: %s", e, exc_info=True)
@@ -1661,10 +1662,22 @@ async def start_vlm_monitor(
     summary="Get current VLM watch job",
     description="Returns the current (or most recently completed) VLM watch job.",
 )
-async def get_vlm_monitor() -> JSONResponse:
+async def get_vlm_monitor(request: Request) -> JSONResponse:
     job = get_vlm_watch_job()
     if job is None:
         return JSONResponse(content={"active": False}, status_code=200)
+
+    role = request.headers.get("remote-role", "viewer")
+    username = request.headers.get("remote-user", "")
+
+    # Admin and the job's creator always see the job. Other users only see it
+    # if they have access to the camera being watched; otherwise hide it.
+    if role != "admin" and username != job.username:
+        try:
+            await require_camera_access(job.camera, request=request)
+        except HTTPException:
+            return JSONResponse(content={"active": False}, status_code=200)
+
     return JSONResponse(content={"active": True, **job.to_dict()}, status_code=200)
 
 
@@ -1674,7 +1687,27 @@ async def get_vlm_monitor() -> JSONResponse:
     summary="Cancel the current VLM watch job",
     description="Cancels the running watch job if one exists.",
 )
-async def cancel_vlm_monitor() -> JSONResponse:
+async def cancel_vlm_monitor(request: Request) -> JSONResponse:
+    job = get_vlm_watch_job()
+    if job is None:
+        return JSONResponse(
+            content={"success": False, "message": "No active watch job to cancel."},
+            status_code=404,
+        )
+
+    role = request.headers.get("remote-role", "viewer")
+    username = request.headers.get("remote-user", "")
+
+    # Admin can cancel any job; other users can only cancel jobs they started.
+    if role != "admin" and username != job.username:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Not authorized to cancel this watch job.",
+            },
+            status_code=403,
+        )
+
     cancelled = stop_vlm_watch_job()
     if not cancelled:
         return JSONResponse(
