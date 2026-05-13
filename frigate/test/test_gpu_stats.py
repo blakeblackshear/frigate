@@ -17,12 +17,14 @@ class TestGpuStats(unittest.TestCase):
         amd_stats = get_amd_gpu_stats()
         assert amd_stats == {"gpu": "4.17%", "mem": "60.37%"}
 
+    @patch("frigate.stats.intel_gpu_info.intel_gpu_name_resolver.get_names")
     @patch("frigate.util.services.time.sleep")
     @patch("frigate.util.services.time.monotonic")
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    def test_intel_gpu_stats_fdinfo(self, read_fdinfo, monotonic, sleep):
+    def test_intel_gpu_stats_fdinfo(self, read_fdinfo, monotonic, sleep, get_names):
         # 1 second of wall clock between snapshots
         monotonic.side_effect = [0.0, 1.0]
+        get_names.return_value = {"0000:00:02.0": "Intel Graphics"}
 
         # Two i915 clients on the same iGPU. Engine values are cumulative ns.
         # Deltas over the 1s window:
@@ -79,11 +81,15 @@ class TestGpuStats(unittest.TestCase):
 
         sleep.assert_called_once()
         assert intel_stats == {
-            "gpu": "90.0%",
-            "mem": "-%",
-            "compute": "30.0%",
-            "dec": "60.0%",
-            "clients": {"100": "80.0%", "200": "10.0%"},
+            "0000:00:02.0": {
+                "name": "Intel Graphics",
+                "vendor": "intel",
+                "gpu": "90.0%",
+                "mem": "-%",
+                "compute": "30.0%",
+                "dec": "60.0%",
+                "clients": {"100": "80.0%", "200": "10.0%"},
+            },
         }
 
     @patch("frigate.util.services._read_intel_drm_fdinfo")

@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { FrigateStats, GpuInfo } from "@/types/stats";
+import { FrigateStats, GpuInfo, GpuStats } from "@/types/stats";
 import { startTransition, useEffect, useMemo, useState } from "react";
 import { useFrigateStats } from "@/api/ws";
 import {
@@ -98,13 +98,11 @@ export default function GeneralMetrics({
     let nvCount = 0;
 
     statsHistory.length > 0 &&
-      Object.keys(statsHistory[0]?.gpu_usages ?? {}).forEach((key) => {
-        if (key == "amd-vaapi" || key == "intel-gpu") {
-          vaCount += 1;
-        }
-
-        if (key.includes("NVIDIA")) {
+      Object.values(statsHistory[0]?.gpu_usages ?? {}).forEach((stats) => {
+        if (stats.vendor === "nvidia") {
           nvCount += 1;
+        } else if (stats.vendor === "intel" || stats.vendor === "amd") {
+          vaCount += 1;
         }
       });
 
@@ -288,11 +286,15 @@ export default function GeneralMetrics({
       return [];
     }
 
+    // Intel doesn't expose VRAM usage, so hide the memory section
+    // entirely when every reporting GPU is Intel.
+    const firstEntries: GpuStats[] = Object.values(
+      statsHistory[0]?.gpu_usages ?? {},
+    );
     if (
-      Object.keys(statsHistory?.at(0)?.gpu_usages ?? {}).length == 1 &&
-      Object.keys(statsHistory?.at(0)?.gpu_usages ?? {})[0] === "intel-gpu"
+      firstEntries.length > 0 &&
+      firstEntries.every((s) => s.vendor === "intel")
     ) {
-      // intel gpu stats do not support memory
       return undefined;
     }
 
@@ -307,6 +309,10 @@ export default function GeneralMetrics({
       }
 
       Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
+        if (stats.vendor === "intel") {
+          return;
+        }
+
         if (!(key in series)) {
           series[key] = { name: key, data: [] };
         }
@@ -470,8 +476,9 @@ export default function GeneralMetrics({
       return false;
     }
 
-    const gpuKeys = Object.keys(statsHistory[0]?.gpu_usages ?? {});
-    const hasIntelGpu = gpuKeys.some((key) => key === "intel-gpu");
+    const hasIntelGpu = Object.values(statsHistory[0]?.gpu_usages ?? {}).some(
+      (stats) => stats.vendor === "intel",
+    );
 
     if (!hasIntelGpu) {
       return false;
@@ -486,14 +493,15 @@ export default function GeneralMetrics({
         continue;
       }
 
-      Object.entries(stats.gpu_usages || {}).forEach(([key, gpuStats]) => {
-        if (key === "intel-gpu") {
-          if (gpuStats.gpu) {
-            hasDataPoints = true;
-            const gpuValue = parseFloat(gpuStats.gpu.slice(0, -1));
-            if (!isNaN(gpuValue) && gpuValue > 0) {
-              allZero = false;
-            }
+      Object.values(stats.gpu_usages || {}).forEach((gpuStats) => {
+        if (gpuStats.vendor !== "intel") {
+          return;
+        }
+        if (gpuStats.gpu) {
+          hasDataPoints = true;
+          const gpuValue = parseFloat(gpuStats.gpu.slice(0, -1));
+          if (!isNaN(gpuValue) && gpuValue > 0) {
+            allZero = false;
           }
         }
       });
