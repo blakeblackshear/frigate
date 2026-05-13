@@ -96,11 +96,42 @@ def version():
 
 
 @router.get("/stats", dependencies=[Depends(allow_any_authenticated())])
-def stats(request: Request):
-    return JSONResponse(content=request.app.stats_emitter.get_latest_stats())
+def stats(
+    request: Request,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
+    stats_data = request.app.stats_emitter.get_latest_stats()
+    allowed_set = set(allowed_cameras)
+
+    # Shallow-copy so we don't mutate the cached stats history entry.
+    filtered = {**stats_data}
+
+    cameras = stats_data.get("cameras")
+    if cameras is not None:
+        filtered["cameras"] = {
+            name: data for name, data in cameras.items() if name in allowed_set
+        }
+
+    bandwidth = stats_data.get("bandwidth_usages")
+    if bandwidth is not None:
+        filtered["bandwidth_usages"] = {
+            name: data for name, data in bandwidth.items() if name in allowed_set
+        }
+
+    # cmdline can leak camera URLs/paths; strip for non-admin but keep
+    # cpu/mem so client-side problem heuristics still work.
+    if request.headers.get("remote-role") != "admin":
+        cpu_usages = stats_data.get("cpu_usages")
+        if cpu_usages is not None:
+            filtered["cpu_usages"] = {
+                pid: {k: v for k, v in usage.items() if k != "cmdline"}
+                for pid, usage in cpu_usages.items()
+            }
+
+    return JSONResponse(content=filtered)
 
 
-@router.get("/stats/history", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/stats/history", dependencies=[Depends(require_role(["admin"]))])
 def stats_history(request: Request, keys: str = None):
     if keys:
         keys = keys.split(",")
