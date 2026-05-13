@@ -79,7 +79,11 @@ def is_openvino_gpu_npu_available() -> bool:
     available_devices = get_openvino_available_devices()
     # Check for GPU, NPU, or other acceleration devices (excluding CPU)
     acceleration_devices = ["GPU", "MYRIAD", "NPU", "GNA", "HDDL"]
-    return any(device in available_devices for device in acceleration_devices)
+    return any(
+        avail_dev == accel_dev or avail_dev.startswith(accel_dev + ".")
+        for avail_dev in available_devices
+        for accel_dev in acceleration_devices
+    )
 
 
 class BaseModelRunner(ABC):
