@@ -96,11 +96,46 @@ def version():
 
 
 @router.get("/stats", dependencies=[Depends(allow_any_authenticated())])
-def stats(request: Request):
-    return JSONResponse(content=request.app.stats_emitter.get_latest_stats())
+def stats(
+    request: Request,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
+    stats_data = request.app.stats_emitter.get_latest_stats()
+
+    # Admins see the full snapshot
+    if request.headers.get("remote-role") == "admin":
+        return JSONResponse(content=stats_data)
+
+    allowed_set = set(allowed_cameras)
+
+    # Shallow-copy so we don't mutate the cached stats history entry.
+    filtered = {**stats_data}
+
+    cameras = stats_data.get("cameras")
+    if cameras is not None:
+        filtered["cameras"] = {
+            name: data for name, data in cameras.items() if name in allowed_set
+        }
+
+    bandwidth = stats_data.get("bandwidth_usages")
+    if bandwidth is not None:
+        filtered["bandwidth_usages"] = {
+            name: data for name, data in bandwidth.items() if name in allowed_set
+        }
+
+    # cmdline can leak camera URLs/paths; strip but keep cpu/mem so
+    # client-side problem heuristics still work.
+    cpu_usages = stats_data.get("cpu_usages")
+    if cpu_usages is not None:
+        filtered["cpu_usages"] = {
+            pid: {k: v for k, v in usage.items() if k != "cmdline"}
+            for pid, usage in cpu_usages.items()
+        }
+
+    return JSONResponse(content=filtered)
 
 
-@router.get("/stats/history", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/stats/history", dependencies=[Depends(require_role(["admin"]))])
 def stats_history(request: Request, keys: str = None):
     if keys:
         keys = keys.split(",")
@@ -835,7 +870,7 @@ def nvinfo():
 @router.get(
     "/logs/{service}",
     tags=[Tags.logs],
-    dependencies=[Depends(allow_any_authenticated())],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 async def logs(
     service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
@@ -1040,12 +1075,27 @@ def get_media_sync_status(job_id: str):
 
 
 @router.get("/labels", dependencies=[Depends(allow_any_authenticated())])
-def get_labels(camera: str = ""):
+def get_labels(
+    camera: str = "",
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
         if camera:
+            if camera not in allowed_cameras:
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Access denied to camera '{camera}'",
+                    },
+                    status_code=403,
+                )
             events = Event.select(Event.label).where(Event.camera == camera).distinct()
         else:
-            events = Event.select(Event.label).distinct()
+            events = (
+                Event.select(Event.label)
+                .where(Event.camera << allowed_cameras)
+                .distinct()
+            )
     except Exception as e:
         logger.error(e)
         return JSONResponse(
@@ -1058,9 +1108,16 @@ def get_labels(camera: str = ""):
 
 
 @router.get("/sub_labels", dependencies=[Depends(allow_any_authenticated())])
-def get_sub_labels(split_joined: Optional[int] = None):
+def get_sub_labels(
+    split_joined: Optional[int] = None,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
-        events = Event.select(Event.sub_label).distinct()
+        events = (
+            Event.select(Event.sub_label)
+            .where(Event.camera << allowed_cameras)
+            .distinct()
+        )
     except Exception:
         return JSONResponse(
             content=({"success": False, "message": "Failed to get sub_labels"}),
