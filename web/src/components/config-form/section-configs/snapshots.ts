@@ -37,7 +37,7 @@ const snapshots: SectionConfigOverrides = {
       },
       "retain.mode": {
         "ui:options": {
-          enumI18nPrefix: "snapshot.retainMode",
+          enumI18nPrefix: "retainMode",
         },
       },
     },

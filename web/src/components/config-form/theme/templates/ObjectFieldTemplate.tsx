@@ -210,6 +210,9 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
       (p.content.props as RjsfElementProps).uiSchema?.["ui:options"]
         ?.advanced !== true,
   );
+
+  const isAudioLabels = uiSchema?.["ui:options"]?.isAudioLabels === true;
+
   const hasModifiedAdvanced = advancedProps.some((prop) =>
     checkSubtreeModified([...fieldPath, prop.name]),
   );
@@ -243,7 +246,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const path = fieldPathId?.path;
   const filterObjectLabel = path ? getFilterObjectLabel(path) : undefined;
   const translatedFilterLabel = filterObjectLabel
-    ? getTranslatedLabel(filterObjectLabel, "object")
+    ? getTranslatedLabel(filterObjectLabel, isAudioLabels ? "audio" : "object")
     : undefined;
   if (path) {
     translationPath = buildTranslationPath(
