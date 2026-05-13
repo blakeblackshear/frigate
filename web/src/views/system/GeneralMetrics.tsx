@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { FrigateStats, GpuInfo } from "@/types/stats";
+import { FrigateStats, GpuInfo, GpuStats } from "@/types/stats";
 import { startTransition, useEffect, useMemo, useState } from "react";
 import { useFrigateStats } from "@/api/ws";
 import {
@@ -288,8 +288,9 @@ export default function GeneralMetrics({
 
     // Intel doesn't expose VRAM usage, so hide the memory section
     // entirely when every reporting GPU is Intel.
-    const firstUsages = statsHistory[0]?.gpu_usages ?? {};
-    const firstEntries = Object.values(firstUsages);
+    const firstEntries: GpuStats[] = Object.values(
+      statsHistory[0]?.gpu_usages ?? {},
+    );
     if (
       firstEntries.length > 0 &&
       firstEntries.every((s) => s.vendor === "intel")
