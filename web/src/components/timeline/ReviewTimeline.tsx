@@ -539,7 +539,7 @@ export function ReviewTimeline({
               </Button>
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent>{t("zoomIn")}</TooltipContent>
+              <TooltipContent>{t("zoomOut")}</TooltipContent>
             </TooltipPortal>
           </Tooltip>
           <Tooltip>
@@ -562,7 +562,7 @@ export function ReviewTimeline({
               </Button>
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent>{t("zoomOut")}</TooltipContent>
+              <TooltipContent>{t("zoomIn")}</TooltipContent>
             </TooltipPortal>
           </Tooltip>
         </div>
