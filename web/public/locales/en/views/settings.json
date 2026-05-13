@@ -21,7 +21,7 @@
     "overriddenGlobalTooltip": "This camera overrides global configuration settings in this section",
     "overriddenGlobalHeading_one": "This camera overrides {{count}} field from the global config:",
     "overriddenGlobalHeading_other": "This camera overrides {{count}} fields from the global config:",
-    "overriddenGlobalNoDeltas": "This section is marked as overridden, but no field values differ from the global config.",
+    "overriddenGlobalNoDeltas": "This camera overrides the global config, but no field values differ.",
     "overriddenBaseConfig": "Overridden (Base Config)",
     "overriddenBaseConfigTooltip": "The {{profile}} profile overrides configuration settings in this section",
     "overriddenBaseConfigHeading_one": "The {{profile}} profile overrides {{count}} field from the base config:",
