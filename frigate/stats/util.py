@@ -243,6 +243,7 @@ async def set_gpu_stats(
             if nvidia_usage:
                 for i in range(len(nvidia_usage)):
                     stats[nvidia_usage[i]["name"]] = {
+                        "vendor": "nvidia",
                         "gpu": str(round(float(nvidia_usage[i]["gpu"]), 2)) + "%",
                         "mem": str(round(float(nvidia_usage[i]["mem"]), 2)) + "%",
                         "enc": str(round(float(nvidia_usage[i]["enc"]), 2)) + "%",
@@ -251,16 +252,16 @@ async def set_gpu_stats(
                     }
 
             else:
-                stats["nvidia-gpu"] = {"gpu": "", "mem": ""}
+                stats["nvidia-gpu"] = {"vendor": "nvidia", "gpu": "", "mem": ""}
                 hwaccel_errors.append(args)
         elif "nvmpi" in args or "jetson" in args:
             # nvidia Jetson
             jetson_usage = get_jetson_stats()
 
             if jetson_usage:
-                stats["jetson-gpu"] = jetson_usage
+                stats["jetson-gpu"] = {"vendor": "nvidia", **jetson_usage}
             else:
-                stats["jetson-gpu"] = {"gpu": "", "mem": ""}
+                stats["jetson-gpu"] = {"vendor": "nvidia", "gpu": "", "mem": ""}
                 hwaccel_errors.append(args)
         elif "qsv" in args or ("vaapi" in args and not is_vaapi_amd_driver()):
             if not config.telemetry.stats.intel_gpu_stats:
@@ -278,7 +279,7 @@ async def set_gpu_stats(
                         name = entry.pop("name")
                         stats[name] = entry
                 else:
-                    stats["intel-gpu"] = {"gpu": "", "mem": ""}
+                    stats["intel-gpu"] = {"vendor": "intel", "gpu": "", "mem": ""}
                     hwaccel_errors.append(args)
         elif "vaapi" in args:
             if not config.telemetry.stats.amd_gpu_stats:
@@ -288,18 +289,18 @@ async def set_gpu_stats(
             amd_usage = get_amd_gpu_stats()
 
             if amd_usage:
-                stats["amd-vaapi"] = amd_usage
+                stats["amd-vaapi"] = {"vendor": "amd", **amd_usage}
             else:
-                stats["amd-vaapi"] = {"gpu": "", "mem": ""}
+                stats["amd-vaapi"] = {"vendor": "amd", "gpu": "", "mem": ""}
                 hwaccel_errors.append(args)
         elif "preset-rk" in args:
             rga_usage = get_rockchip_gpu_stats()
 
             if rga_usage:
-                stats["rockchip"] = rga_usage
+                stats["rockchip"] = {"vendor": "rockchip", **rga_usage}
         elif "v4l2m2m" in args or "rpi" in args:
             # RPi v4l2m2m is currently not able to get usage stats
-            stats["rpi-v4l2m2m"] = {"gpu": "", "mem": ""}
+            stats["rpi-v4l2m2m"] = {"vendor": "rpi", "gpu": "", "mem": ""}
 
     if stats:
         all_stats["gpu_usages"] = stats

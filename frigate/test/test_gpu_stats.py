@@ -83,6 +83,7 @@ class TestGpuStats(unittest.TestCase):
         assert intel_stats == {
             "0000:00:02.0": {
                 "name": "Intel Graphics",
+                "vendor": "intel",
                 "gpu": "90.0%",
                 "mem": "-%",
                 "compute": "30.0%",
