@@ -1411,6 +1411,11 @@ When a user refers to a specific object they have seen or describe with identify
                             )
                             + b"\n"
                         )
+                    elif kind == "stats":
+                        yield (
+                            json.dumps({"type": "stats", **value}).encode("utf-8")
+                            + b"\n"
+                        )
                     elif kind == "message":
                         msg = value
                         if msg.get("finish_reason") == "error":

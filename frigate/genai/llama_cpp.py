@@ -18,6 +18,52 @@ from frigate.genai.utils import parse_tool_calls_from_message
 logger = logging.getLogger(__name__)
 
 
+def _stats_from_llama_cpp_chunk(data: dict[str, Any]) -> Optional[dict[str, Any]]:
+    """Build a stats dict from a llama.cpp streaming chunk.
+
+    Final-chunk `usage` carries authoritative token counts. Per-chunk
+    `timings` (enabled via timings_per_token) carries the running token
+    counts (prompt_n, predicted_n) and generation rate, so live updates
+    work mid-stream.
+    """
+    usage = data.get("usage") or {}
+    timings = data.get("timings") or {}
+    prompt_tokens = usage.get("prompt_tokens")
+    completion_tokens = usage.get("completion_tokens")
+    predicted_ms = timings.get("predicted_ms")
+    tps = timings.get("predicted_per_second")
+    stats: dict[str, Any] = {}
+
+    if not isinstance(prompt_tokens, int):
+        prompt_n = timings.get("prompt_n")
+
+        if isinstance(prompt_n, int):
+            prompt_tokens = prompt_n
+
+    if not isinstance(completion_tokens, int):
+        predicted_n = timings.get("predicted_n")
+
+        if isinstance(predicted_n, int):
+            completion_tokens = predicted_n
+
+    if not isinstance(prompt_tokens, int) and not isinstance(completion_tokens, int):
+        return None
+
+    if isinstance(prompt_tokens, int):
+        stats["prompt_tokens"] = prompt_tokens
+
+    if isinstance(completion_tokens, int):
+        stats["completion_tokens"] = completion_tokens
+
+    if isinstance(predicted_ms, (int, float)) and predicted_ms > 0:
+        stats["completion_duration_ms"] = float(predicted_ms)
+
+    if isinstance(tps, (int, float)) and tps > 0:
+        stats["tokens_per_second"] = float(tps)
+
+    return stats or None
+
+
 def _parse_launch_arg(args: list[str], flag: str) -> str | None:
     """Return the value following `flag` in a positional argv list, or None."""
     try:
@@ -462,6 +508,8 @@ class LlamaCppClient(GenAIClient):
         }
         if stream:
             payload["stream"] = True
+            payload["stream_options"] = {"include_usage": True}
+            payload["timings_per_token"] = True
         if tools:
             payload["tools"] = tools
             if openai_tool_choice is not None:
@@ -724,6 +772,9 @@ class LlamaCppClient(GenAIClient):
                             data = json.loads(data_str)
                         except json.JSONDecodeError:
                             continue
+                        maybe_stats = _stats_from_llama_cpp_chunk(data)
+                        if maybe_stats is not None:
+                            yield ("stats", maybe_stats)
                         choices = data.get("choices") or []
                         if not choices:
                             continue

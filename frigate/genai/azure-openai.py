@@ -10,6 +10,7 @@ from openai import AzureOpenAI
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai.openai import _stats_from_openai_usage
 
 logger = logging.getLogger(__name__)
 
@@ -210,6 +211,7 @@ class OpenAIClient(GenAIClient):
                 "messages": messages,
                 "timeout": self.timeout,
                 "stream": True,
+                "stream_options": {"include_usage": True},
             }
 
             if tools:
@@ -221,10 +223,15 @@ class OpenAIClient(GenAIClient):
             content_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
+            usage_stats: Optional[dict[str, Any]] = None
 
             stream = self.provider.chat.completions.create(**request_params)  # type: ignore[call-overload]
 
             for chunk in stream:
+                chunk_usage = getattr(chunk, "usage", None)
+                if chunk_usage is not None:
+                    usage_stats = _stats_from_openai_usage(chunk_usage)
+
                 if not chunk or not chunk.choices:
                     continue
 
@@ -283,6 +290,9 @@ class OpenAIClient(GenAIClient):
                         }
                     )
                 finish_reason = "tool_calls"
+
+            if usage_stats is not None:
+                yield ("stats", usage_stats)
 
             yield (
                 "message",

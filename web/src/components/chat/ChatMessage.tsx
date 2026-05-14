@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ChatAttachmentChip } from "@/components/chat/ChatAttachmentChip";
 import { parseAttachedEvent } from "@/utils/chatUtil";
+import type { ChatStats, ShowStatsMode } from "@/types/chat";
 
 type MessageBubbleProps = {
   role: "user" | "assistant";
@@ -24,7 +25,20 @@ type MessageBubbleProps = {
   messageIndex?: number;
   onEditSubmit?: (messageIndex: number, newContent: string) => void;
   isComplete?: boolean;
+  stats?: ChatStats;
+  showStats?: ShowStatsMode;
 };
+
+function formatTokens(n: number | undefined): string | null {
+  if (n === undefined) return null;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+
+function formatRate(rate: number | undefined): string | null {
+  if (rate === undefined || rate <= 0) return null;
+  return rate >= 10 ? rate.toFixed(0) : rate.toFixed(1);
+}
 
 export function MessageBubble({
   role,
@@ -32,6 +46,8 @@ export function MessageBubble({
   messageIndex = 0,
   onEditSubmit,
   isComplete = true,
+  stats,
+  showStats = "while_generating",
 }: MessageBubbleProps) {
   const { t } = useTranslation(["views/chat", "common"]);
   const isUser = role === "user";
@@ -214,7 +230,7 @@ export function MessageBubble({
           </div>
         )}
       </div>
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1.5">
         {isUser && onEditSubmit != null && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -256,6 +272,27 @@ export function MessageBubble({
             </TooltipContent>
           </Tooltip>
         )}
+        {!isUser &&
+          stats &&
+          (showStats === "always" || !isComplete) &&
+          (() => {
+            const ctx = formatTokens(stats.promptTokens);
+            const rate = formatRate(stats.tokensPerSecond);
+            if (ctx === null && rate === null) return null;
+            return (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                {ctx !== null && (
+                  <span>{t("stats.context", { tokens: ctx })}</span>
+                )}
+                {ctx !== null && rate !== null && (
+                  <span aria-hidden="true">·</span>
+                )}
+                {rate !== null && (
+                  <span>{t("stats.tokens_per_second", { rate })}</span>
+                )}
+              </div>
+            );
+          })()}
       </div>
     </div>
   );

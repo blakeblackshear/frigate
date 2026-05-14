@@ -14,6 +14,22 @@ from frigate.genai import GenAIClient, register_genai_provider
 logger = logging.getLogger(__name__)
 
 
+def _stats_from_openai_usage(usage: Any) -> Optional[dict[str, Any]]:
+    """Build a stats dict from an OpenAI-compatible usage object."""
+    if usage is None:
+        return None
+    prompt_tokens = getattr(usage, "prompt_tokens", None)
+    completion_tokens = getattr(usage, "completion_tokens", None)
+    if prompt_tokens is None and completion_tokens is None:
+        return None
+    stats: dict[str, Any] = {}
+    if isinstance(prompt_tokens, int):
+        stats["prompt_tokens"] = prompt_tokens
+    if isinstance(completion_tokens, int):
+        stats["completion_tokens"] = completion_tokens
+    return stats or None
+
+
 @register_genai_provider(GenAIProviderEnum.openai)
 class OpenAIClient(GenAIClient):
     """Generative AI client for Frigate using OpenAI."""
@@ -298,6 +314,7 @@ class OpenAIClient(GenAIClient):
                 "messages": messages,
                 "timeout": self.timeout,
                 "stream": True,
+                "stream_options": {"include_usage": True},
             }
 
             if tools:
@@ -318,10 +335,15 @@ class OpenAIClient(GenAIClient):
             content_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
+            usage_stats: Optional[dict[str, Any]] = None
 
             stream = self.provider.chat.completions.create(**request_params)  # type: ignore[call-overload]
 
             for chunk in stream:
+                chunk_usage = getattr(chunk, "usage", None)
+                if chunk_usage is not None:
+                    usage_stats = _stats_from_openai_usage(chunk_usage)
+
                 if not chunk or not chunk.choices:
                     continue
 
@@ -380,6 +402,9 @@ class OpenAIClient(GenAIClient):
                         }
                     )
                 finish_reason = "tool_calls"
+
+            if usage_stats is not None:
+                yield ("stats", usage_stats)
 
             yield (
                 "message",
