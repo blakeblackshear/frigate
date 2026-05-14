@@ -4,7 +4,13 @@ import { isDesktop } from "react-device-detect";
 import { cn } from "@/lib/utils";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { FaCog } from "react-icons/fa";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -47,32 +53,26 @@ export default function ChatSettings({
             {t("settings.show_stats.desc")}
           </div>
         </div>
-        <RadioGroup
+        <Select
           value={showStats}
           onValueChange={(v) => setShowStats(v as ShowStatsMode)}
         >
-          <div className="flex items-center gap-2">
-            <RadioGroupItem
-              id="show-stats-while-generating"
-              value="while_generating"
-            />
-            <Label
-              htmlFor="show-stats-while-generating"
-              className="cursor-pointer text-sm"
-            >
-              {t("settings.show_stats.while_generating")}
-            </Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem id="show-stats-always" value="always" />
-            <Label
-              htmlFor="show-stats-always"
-              className="cursor-pointer text-sm"
-            >
-              {t("settings.show_stats.always")}
-            </Label>
-          </div>
-        </RadioGroup>
+          <SelectTrigger className="w-full">
+            {showStats === "always"
+              ? t("settings.show_stats.always")
+              : t("settings.show_stats.while_generating")}
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem className="cursor-pointer" value="while_generating">
+                {t("settings.show_stats.while_generating")}
+              </SelectItem>
+              <SelectItem className="cursor-pointer" value="always">
+                {t("settings.show_stats.always")}
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
       <DropdownMenuSeparator />
       <div className="flex items-center justify-between gap-3">
