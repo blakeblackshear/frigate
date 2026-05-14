@@ -14,6 +14,20 @@ from frigate.genai import GenAIClient, register_genai_provider
 logger = logging.getLogger(__name__)
 
 
+def _stats_from_gemini_usage(usage: Any) -> Optional[dict[str, Any]]:
+    """Build a stats dict from a Gemini usage_metadata object."""
+    prompt_tokens = getattr(usage, "prompt_token_count", None)
+    completion_tokens = getattr(usage, "candidates_token_count", None)
+    if prompt_tokens is None and completion_tokens is None:
+        return None
+    stats: dict[str, Any] = {}
+    if isinstance(prompt_tokens, int):
+        stats["prompt_tokens"] = prompt_tokens
+    if isinstance(completion_tokens, int):
+        stats["completion_tokens"] = completion_tokens
+    return stats or None
+
+
 @register_genai_provider(GenAIProviderEnum.gemini)
 class GeminiClient(GenAIClient):
     """Generative AI client for Frigate using Gemini."""
@@ -471,6 +485,7 @@ class GeminiClient(GenAIClient):
             content_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
+            usage_stats: Optional[dict[str, Any]] = None
 
             stream = await self.provider.aio.models.generate_content_stream(
                 model=self.genai_config.model,
@@ -479,6 +494,12 @@ class GeminiClient(GenAIClient):
             )
 
             async for chunk in stream:
+                chunk_usage = getattr(chunk, "usage_metadata", None)
+                if chunk_usage is not None:
+                    maybe_stats = _stats_from_gemini_usage(chunk_usage)
+                    if maybe_stats is not None:
+                        usage_stats = maybe_stats
+
                 if not chunk or not chunk.candidates:
                     continue
 
@@ -564,6 +585,9 @@ class GeminiClient(GenAIClient):
                         }
                     )
                 finish_reason = "tool_calls"
+
+            if usage_stats is not None:
+                yield ("stats", usage_stats)
 
             yield (
                 "message",

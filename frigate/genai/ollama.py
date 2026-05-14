@@ -18,6 +18,37 @@ from frigate.genai.utils import parse_tool_calls_from_message
 logger = logging.getLogger(__name__)
 
 
+def _extract_ollama_stats(response: Any) -> Optional[dict[str, Any]]:
+    """Build a stats dict from Ollama's response metadata.
+
+    Ollama reports eval_count/eval_duration (generation) and
+    prompt_eval_count (context size). Durations are nanoseconds.
+    """
+    if not response:
+        return None
+    if hasattr(response, "get"):
+        getter = response.get
+    else:
+        getter = lambda key: getattr(response, key, None)  # noqa: E731
+
+    eval_count = getter("eval_count")
+    eval_duration_ns = getter("eval_duration")
+    prompt_eval_count = getter("prompt_eval_count")
+    if eval_count is None and prompt_eval_count is None:
+        return None
+
+    stats: dict[str, Any] = {}
+    if isinstance(prompt_eval_count, int):
+        stats["prompt_tokens"] = prompt_eval_count
+    if isinstance(eval_count, int):
+        stats["completion_tokens"] = eval_count
+    if isinstance(eval_duration_ns, int) and eval_duration_ns > 0:
+        stats["completion_duration_ms"] = eval_duration_ns / 1_000_000
+        if isinstance(eval_count, int) and eval_count > 0:
+            stats["tokens_per_second"] = eval_count / (eval_duration_ns / 1_000_000_000)
+    return stats or None
+
+
 def _normalize_multimodal_content(
     content: Any,
 ) -> tuple[Optional[str], Optional[list[bytes]]]:
@@ -403,6 +434,9 @@ class OllamaClient(GenAIClient):
                 content = result.get("content")
                 if content:
                     yield ("content_delta", content)
+                stats = _extract_ollama_stats(response)
+                if stats is not None:
+                    yield ("stats", stats)
                 yield ("message", result)
                 return
 
@@ -416,6 +450,7 @@ class OllamaClient(GenAIClient):
             )
             content_parts: list[str] = []
             final_message: dict[str, Any] | None = None
+            final_chunk: Any = None
             stream = await async_client.chat(**request_params)
             async for chunk in stream:
                 if not chunk or "message" not in chunk:
@@ -426,6 +461,7 @@ class OllamaClient(GenAIClient):
                     content_parts.append(delta)
                     yield ("content_delta", delta)
                 if chunk.get("done"):
+                    final_chunk = chunk
                     full_content = "".join(content_parts).strip() or None
                     final_message = {
                         "content": full_content,
@@ -433,6 +469,10 @@ class OllamaClient(GenAIClient):
                         "finish_reason": "stop",
                     }
                     break
+
+            stats = _extract_ollama_stats(final_chunk)
+            if stats is not None:
+                yield ("stats", stats)
 
             if final_message is not None:
                 yield ("message", final_message)
