@@ -35,12 +35,12 @@ export default function ChatSettings({
 
   const trigger = (
     <Button
-      className="flex items-center gap-2"
+      className="flex items-center md:gap-2"
       aria-label={t("settings.title")}
       size="sm"
     >
       <FaCog className="text-secondary-foreground" />
-      {t("settings.title")}
+      <span className="hidden md:inline">{t("settings.title")}</span>
     </Button>
   );
 

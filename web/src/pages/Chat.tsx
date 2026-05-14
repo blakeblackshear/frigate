@@ -165,16 +165,16 @@ export default function ChatPage() {
 
   return (
     <div className="flex size-full flex-col">
-      <div className="flex shrink-0 items-center justify-end gap-2 px-2 pt-2 md:px-4 md:pt-4">
+      <div className="flex shrink-0 items-center justify-end gap-2 px-2 pb-3 pt-2 md:px-4 md:pt-4">
         {hasStarted && (
           <Button
-            className="flex items-center gap-2"
+            className="flex items-center md:gap-2"
             aria-label={t("new_chat")}
             size="sm"
             onClick={startNewChat}
           >
             <LuMessageSquarePlus className="text-secondary-foreground" />
-            {t("new_chat")}
+            <span className="hidden md:inline">{t("new_chat")}</span>
           </Button>
         )}
         <ChatSettings
@@ -191,7 +191,7 @@ export default function ChatPage() {
         <div className="flex flex-1 justify-center px-2 md:px-4">
           <div className="flex w-full flex-col xl:w-[50%] 3xl:w-[35%]">
             {hasStarted ? (
-              <div className="flex w-full flex-1 flex-col gap-3 pb-3 pt-3">
+              <div className="flex w-full flex-1 flex-col gap-3 pb-3">
                 {messages.map((msg, i) => {
                   const isLastAssistant =
                     i === messages.length - 1 && msg.role === "assistant";
@@ -295,7 +295,7 @@ export default function ChatPage() {
         </div>
       </div>
       {hasStarted && (
-        <div className="flex shrink-0 justify-center px-2 pb-2 md:px-4 md:pb-4">
+        <div className="flex shrink-0 justify-center p-2 md:px-4 md:pb-4">
           <div className="flex w-full xl:w-[50%] 3xl:w-[35%]">
             <ChatEntry
               input={input}
