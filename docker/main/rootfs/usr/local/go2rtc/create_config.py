@@ -3,7 +3,6 @@
 import json
 import os
 import sys
-from pathlib import Path
 from typing import Any
 
 from ruamel.yaml import YAML
@@ -18,37 +17,11 @@ from frigate.const import (
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 from frigate.util.config import find_config_file
-from frigate.util.services import is_restricted_source
+from frigate.util.services import is_restricted_go2rtc_source
 
 sys.path.remove("/opt/frigate")
 
 yaml = YAML()
-
-# Check if arbitrary exec sources are allowed (defaults to False for security)
-allow_arbitrary_exec = None
-if "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.environ:
-    allow_arbitrary_exec = os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC")
-elif (
-    os.path.isdir("/run/secrets")
-    and os.access("/run/secrets", os.R_OK)
-    and "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.listdir("/run/secrets")
-):
-    allow_arbitrary_exec = (
-        Path(os.path.join("/run/secrets", "GO2RTC_ALLOW_ARBITRARY_EXEC"))
-        .read_text()
-        .strip()
-    )
-# check for the add-on options file
-elif os.path.isfile("/data/options.json"):
-    with open("/data/options.json") as f:
-        raw_options = f.read()
-    options = json.loads(raw_options)
-    allow_arbitrary_exec = options.get("go2rtc_allow_arbitrary_exec")
-
-ALLOW_ARBITRARY_EXEC = allow_arbitrary_exec is not None and str(
-    allow_arbitrary_exec
-).lower() in ("true", "1", "yes")
-
 
 config_file = find_config_file()
 
@@ -135,7 +108,7 @@ for name in list(go2rtc_config.get("streams", {})):
     if isinstance(stream, str):
         try:
             formatted_stream = substitute_frigate_vars(stream)
-            if not ALLOW_ARBITRARY_EXEC and is_restricted_source(formatted_stream):
+            if is_restricted_go2rtc_source(formatted_stream):
                 print(
                     f"[ERROR] Stream '{name}' uses a restricted source (echo/expr/exec) which is disabled by default for security. "
                     f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
@@ -154,7 +127,7 @@ for name in list(go2rtc_config.get("streams", {})):
         for i, stream_item in enumerate(stream):
             try:
                 formatted_stream = substitute_frigate_vars(stream_item)
-                if not ALLOW_ARBITRARY_EXEC and is_restricted_source(formatted_stream):
+                if is_restricted_go2rtc_source(formatted_stream):
                     print(
                         f"[ERROR] Stream '{name}' item {i + 1} uses a restricted source (echo/expr/exec) which is disabled by default for security. "
                         f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."

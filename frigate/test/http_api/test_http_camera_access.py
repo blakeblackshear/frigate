@@ -1,3 +1,4 @@
+import os
 from unittest.mock import patch
 
 from fastapi import HTTPException, Request
@@ -383,6 +384,24 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
             assert resp.status_code != 400, (
                 f"Non-restricted source should not be rejected with 400; got {resp.status_code}"
             )
+
+    def test_add_stream_allows_restricted_source_when_override_set(self):
+        """When GO2RTC_ALLOW_ARBITRARY_EXEC is set, the API must defer to operator
+        intent and forward the request to go2rtc instead of short-circuiting with 400."""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        mock_response = type("R", (), {"ok": True, "status_code": 200, "text": "ok"})()
+        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+            with patch(
+                "frigate.api.camera.requests.put", return_value=mock_response
+            ) as mock_put:
+                with AuthTestClient(app) as client:
+                    resp = client.put("/go2rtc/streams/legit?src=exec:/tmp/something")
+                assert resp.status_code == 200, (
+                    f"Restricted src should be forwarded when override set; got {resp.status_code}"
+                )
+                mock_put.assert_called_once()
+                forwarded_src = mock_put.call_args.kwargs["params"]["src"]
+                assert forwarded_src == "exec:/tmp/something"
 
     def test_stream_alias_blocked_when_owning_camera_disallowed(self):
         """limited_user cannot access a stream alias that belongs to a camera they
