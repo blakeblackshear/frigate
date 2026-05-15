@@ -68,62 +68,123 @@ class VLMMonitorRequest(BaseModel):
     zones: List[str] = []
 
 
-def get_tool_definitions() -> List[Dict[str, Any]]:
+def get_tool_definitions(
+    semantic_search_enabled: bool = False,
+) -> List[Dict[str, Any]]:
     """
     Get OpenAI-compatible tool definitions for Frigate.
 
     Returns a list of tool definitions that can be used with OpenAI-compatible
-    function calling APIs.
+    function calling APIs. When semantic search is enabled, the search_objects
+    tool exposes an additional `semantic_query` parameter for descriptive
+    queries (e.g. "person riding a lawn mower") and find_similar_objects is
+    included.
     """
+    search_objects_properties: Dict[str, Any] = {
+        "camera": {
+            "type": "string",
+            "description": "Camera name to filter by (optional).",
+        },
+        "label": {
+            "type": "string",
+            "description": (
+                "Generic object class to filter by — one of the tracked detector "
+                "labels such as 'person', 'package', 'car', 'dog', 'bird'. Use "
+                "this for broad queries like 'show me all cars today'. Combine "
+                "with semantic_query when the user also describes appearance or "
+                "behavior (e.g. label='person', semantic_query='riding a lawn "
+                "mower')."
+            ),
+        },
+        "sub_label": {
+            "type": "string",
+            "description": (
+                "Filter by a DISCRETE NAMED entity recognized in the detection. "
+                "Use this for: a known person's name ('John'), a delivery "
+                "company ('Amazon', 'UPS'), a recognized animal species or "
+                "breed ('blue jay', 'cardinal', 'golden retriever'), or a "
+                "license plate string. When filtering by a specific name, set "
+                "only sub_label and leave label unset. Do NOT use sub_label "
+                "for descriptions of appearance, clothing, or actions — those "
+                "belong in semantic_query."
+            ),
+        },
+        "after": {
+            "type": "string",
+            "description": "Start time in ISO 8601 format (e.g., '2024-01-01T00:00:00Z').",
+        },
+        "before": {
+            "type": "string",
+            "description": "End time in ISO 8601 format (e.g., '2024-01-01T23:59:59Z').",
+        },
+        "zones": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "List of zone names to filter by.",
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum number of objects to return (default: 25).",
+            "default": 25,
+        },
+    }
+
+    if semantic_search_enabled:
+        search_objects_properties["semantic_query"] = {
+            "type": "string",
+            "description": (
+                "Optional natural-language description of a PHYSICAL "
+                "CHARACTERISTIC, APPEARANCE, or ACTIVITY the user mentioned, "
+                "used to semantically narrow results. Only set this when the "
+                "user describes something beyond what label and sub_label can "
+                "express on their own.\n"
+                "USE for descriptive phrases like: 'riding a lawn mower', "
+                "'wearing a red jacket', 'carrying a package', 'walking a "
+                "dog', 'on a bicycle', 'holding an umbrella'.\n"
+                "DO NOT USE for:\n"
+                "- specific named people, pets, or delivery companies → use sub_label\n"
+                "- animal species or breed names like 'blue jay', 'cardinal', "
+                "'golden retriever' → use sub_label\n"
+                "- license plate strings → use sub_label\n"
+                "- generic object queries like 'all cars today' or 'every "
+                "person' → use label alone with no semantic_query\n"
+                "When set, combine with label/time/camera/zone filters as "
+                "usual (e.g. label='person', semantic_query='riding a lawn "
+                "mower', after='2024-05-01T00:00:00Z')."
+            ),
+        }
+
+    search_objects_description = (
+        "Search the historical record of detected objects in Frigate. "
+        "Use this ONLY for questions about the PAST — e.g. 'did anyone come by today?', "
+        "'when was the last car?', 'show me detections from yesterday'. "
+        "Do NOT use this for monitoring or alerting requests about future events — "
+        "use start_camera_watch instead for those. "
+        "An 'object' in Frigate represents a tracked detection (e.g., a person, package, car).\n\n"
+        "Choose filters based on what the user is asking for:\n"
+        "- Generic class query ('show me all cars today'): set `label` only.\n"
+        "- Specific NAMED entity (known person, delivery company, animal "
+        "species/breed like 'blue jay' or 'golden retriever', license "
+        "plate): set `sub_label` only and leave `label` unset.\n"
+    )
+    if semantic_search_enabled:
+        search_objects_description += (
+            "- Physical CHARACTERISTIC, APPEARANCE, or ACTIVITY that is not a "
+            "discrete name ('person riding a lawn mower', 'someone in a red "
+            "jacket', 'person carrying a package'): set `semantic_query` with "
+            "the descriptive phrase, optionally alongside `label` for the "
+            "object class. Do NOT put descriptive phrases in sub_label."
+        )
+
     return [
         {
             "type": "function",
             "function": {
                 "name": "search_objects",
-                "description": (
-                    "Search the historical record of detected objects in Frigate. "
-                    "Use this ONLY for questions about the PAST — e.g. 'did anyone come by today?', "
-                    "'when was the last car?', 'show me detections from yesterday'. "
-                    "Do NOT use this for monitoring or alerting requests about future events — "
-                    "use start_camera_watch instead for those. "
-                    "An 'object' in Frigate represents a tracked detection (e.g., a person, package, car). "
-                    "When the user asks about a specific name (person, delivery company, animal, etc.), "
-                    "filter by sub_label only and do not set label."
-                ),
+                "description": search_objects_description,
                 "parameters": {
                     "type": "object",
-                    "properties": {
-                        "camera": {
-                            "type": "string",
-                            "description": "Camera name to filter by (optional).",
-                        },
-                        "label": {
-                            "type": "string",
-                            "description": "Object label to filter by (e.g., 'person', 'package', 'car').",
-                        },
-                        "sub_label": {
-                            "type": "string",
-                            "description": "Name of a person, delivery company, animal, etc. When filtering by a specific name, use only sub_label; do not set label.",
-                        },
-                        "after": {
-                            "type": "string",
-                            "description": "Start time in ISO 8601 format (e.g., '2024-01-01T00:00:00Z').",
-                        },
-                        "before": {
-                            "type": "string",
-                            "description": "End time in ISO 8601 format (e.g., '2024-01-01T23:59:59Z').",
-                        },
-                        "zones": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "List of zone names to filter by.",
-                        },
-                        "limit": {
-                            "type": "integer",
-                            "description": "Maximum number of objects to return (default: 25).",
-                            "default": 25,
-                        },
-                    },
+                    "properties": search_objects_properties,
                 },
                 "required": [],
             },
@@ -397,9 +458,12 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
     summary="Get available tools",
     description="Returns OpenAI-compatible tool definitions for function calling.",
 )
-def get_tools() -> JSONResponse:
+def get_tools(request: Request) -> JSONResponse:
     """Get list of available tools for LLM function calling."""
-    tools = get_tool_definitions()
+    semantic_search_enabled = bool(
+        getattr(request.app.frigate_config.semantic_search, "enabled", False)
+    )
+    tools = get_tool_definitions(semantic_search_enabled=semantic_search_enabled)
     return JSONResponse(content={"tools": tools})
 
 
@@ -432,16 +496,29 @@ def _resolve_zones(
 
 
 async def _execute_search_objects(
+    request: Request,
     arguments: Dict[str, Any],
     allowed_cameras: List[str],
-    config: FrigateConfig,
 ) -> JSONResponse:
     """
     Execute the search_objects tool.
 
-    This searches for detected objects (events) in Frigate using the same
-    logic as the events API endpoint.
+    Routes to the semantic path when the LLM supplied a `semantic_query`
+    and semantic search is enabled; otherwise delegates to the standard
+    events API logic.
     """
+    config = request.app.frigate_config
+    semantic_query = arguments.get("semantic_query")
+    if isinstance(semantic_query, str):
+        semantic_query = semantic_query.strip() or None
+    else:
+        semantic_query = None
+
+    if semantic_query and getattr(config.semantic_search, "enabled", False):
+        return await _execute_search_objects_semantic(
+            request, arguments, allowed_cameras, semantic_query
+        )
+
     # Parse after/before as server local time; convert to Unix timestamp
     after = arguments.get("after")
     before = arguments.get("before")
@@ -506,6 +583,119 @@ async def _execute_search_objects(
             },
             status_code=500,
         )
+
+
+async def _execute_search_objects_semantic(
+    request: Request,
+    arguments: Dict[str, Any],
+    allowed_cameras: List[str],
+    semantic_query: str,
+) -> JSONResponse:
+    """Search objects via fused thumbnail + description embeddings.
+
+    Runs both visual and description vec searches against `semantic_query`,
+    intersects the candidates with the structured filters (camera, label,
+    sub_label, zones, time window) the LLM supplied, and ranks the survivors
+    by fused similarity. Mirrors the candidate-then-filter pattern used by
+    find_similar_objects since sqlite-vec's IN filter is unreliable.
+    """
+    from peewee import fn
+
+    config = request.app.frigate_config
+    context = request.app.embeddings
+    if context is None:
+        logger.warning(
+            "semantic_query supplied but embeddings context is unavailable; "
+            "returning empty results."
+        )
+        return JSONResponse(content=[])
+
+    after = parse_iso_to_timestamp(arguments.get("after"))
+    before = parse_iso_to_timestamp(arguments.get("before"))
+
+    camera_arg = arguments.get("camera")
+    if camera_arg and camera_arg != "all":
+        if camera_arg not in allowed_cameras:
+            return JSONResponse(content=[])
+        cameras = [camera_arg]
+    else:
+        cameras = list(allowed_cameras) if allowed_cameras else []
+
+    if not cameras:
+        return JSONResponse(content=[])
+
+    label = arguments.get("label")
+    sub_label = arguments.get("sub_label")
+
+    zones = arguments.get("zones")
+    if isinstance(zones, list) and zones:
+        zones = _resolve_zones(zones, config, cameras)
+    else:
+        zones = None
+
+    limit = int(arguments.get("limit", 25))
+    limit = max(1, min(limit, 100))
+
+    visual_distances: Dict[str, float] = {}
+    description_distances: Dict[str, float] = {}
+    try:
+        rows = context.search_thumbnail(semantic_query)
+        visual_distances = {row[0]: row[1] for row in rows}
+    except Exception:
+        logger.exception(
+            "search_thumbnail failed for semantic_query: %s", semantic_query
+        )
+
+    try:
+        rows = context.search_description(semantic_query)
+        description_distances = {row[0]: row[1] for row in rows}
+    except Exception:
+        logger.exception(
+            "search_description failed for semantic_query: %s", semantic_query
+        )
+
+    vec_ids = set(visual_distances) | set(description_distances)
+    if not vec_ids:
+        return JSONResponse(content=[])
+
+    clauses = [Event.id.in_(list(vec_ids)), Event.camera.in_(cameras)]
+    if after is not None:
+        clauses.append(Event.start_time >= after)
+    if before is not None:
+        clauses.append(Event.start_time <= before)
+    if label:
+        clauses.append(Event.label == label)
+    if sub_label:
+        # case-insensitive match to mirror events() behavior
+        clauses.append(fn.LOWER(Event.sub_label.cast("text")) == sub_label.lower())
+    if zones:
+        zone_clauses = [Event.zones.cast("text") % f'*"{zone}"*' for zone in zones]
+        clauses.append(reduce(operator.or_, zone_clauses))
+
+    eligible = {e.id: e for e in Event.select().where(reduce(operator.and_, clauses))}
+
+    scored: List[tuple[str, float]] = []
+    for eid in eligible:
+        v_score = (
+            distance_to_score(visual_distances[eid], context.thumb_stats)
+            if eid in visual_distances
+            else None
+        )
+        d_score = (
+            distance_to_score(description_distances[eid], context.desc_stats)
+            if eid in description_distances
+            else None
+        )
+        fused = fuse_scores(v_score, d_score)
+        if fused is None:
+            continue
+        scored.append((eid, fused))
+
+    scored.sort(key=lambda pair: pair[1], reverse=True)
+    scored = scored[:limit]
+
+    results = [hydrate_event(eligible[eid], score=score) for eid, score in scored]
+    return JSONResponse(content=results)
 
 
 async def _execute_find_similar_objects(
@@ -696,9 +886,7 @@ async def execute_tool(
     logger.debug(f"Executing tool: {tool_name} with arguments: {arguments}")
 
     if tool_name == "search_objects":
-        return await _execute_search_objects(
-            arguments, allowed_cameras, request.app.frigate_config
-        )
+        return await _execute_search_objects(request, arguments, allowed_cameras)
 
     if tool_name == "find_similar_objects":
         result = await _execute_find_similar_objects(
@@ -878,9 +1066,7 @@ async def _execute_tool_internal(
     This is used by the chat completion endpoint to execute tools.
     """
     if tool_name == "search_objects":
-        response = await _execute_search_objects(
-            arguments, allowed_cameras, request.app.frigate_config
-        )
+        response = await _execute_search_objects(request, arguments, allowed_cameras)
         try:
             if hasattr(response, "body"):
                 body_str = response.body.decode("utf-8")
@@ -1293,7 +1479,9 @@ async def chat_completion(
             status_code=400,
         )
 
-    tools = get_tool_definitions()
+    config = request.app.frigate_config
+    semantic_search_enabled = bool(getattr(config.semantic_search, "enabled", False))
+    tools = get_tool_definitions(semantic_search_enabled=semantic_search_enabled)
     conversation = []
 
     current_datetime = datetime.now()
@@ -1301,7 +1489,6 @@ async def chat_completion(
     current_time_str = current_datetime.strftime("%I:%M:%S %p")
 
     cameras_info = []
-    config = request.app.frigate_config
     has_speed_zone = False
     for camera_id in allowed_cameras:
         if camera_id not in config.cameras:
@@ -1339,6 +1526,15 @@ async def chat_completion(
         )
         speed_units_section = f"\n\nReport object speeds to the user in {speed_unit}."
 
+    semantic_search_section = ""
+    if semantic_search_enabled:
+        semantic_search_section = (
+            "\n\nWhen routing a search_objects call, pick filters by the shape of the user's request:\n"
+            "- Generic class ('show me all cars today'): set `label` only.\n"
+            "- Specific named entity — a known person ('John'), delivery company ('Amazon'), animal species/breed ('blue jay', 'cardinal', 'golden retriever'), or license plate: set `sub_label` only and leave `label` unset.\n"
+            "- Physical characteristic, appearance, or activity that is NOT a discrete name ('find me people riding a lawn mower', 'someone in a red jacket', 'a person carrying a package'): set `semantic_query` with the descriptive phrase, optionally combined with `label` for the object class. Never put descriptive phrases in `sub_label`."
+        )
+
     system_prompt = f"""You are a helpful assistant for Frigate, a security camera NVR system. You help users answer questions about their cameras, detected objects, and events.
 
 Current server local date and time: {current_date_str} at {current_time_str}
@@ -1350,7 +1546,7 @@ When users ask about "today", "yesterday", "this week", etc., use the current da
 When searching for objects or events, use ISO 8601 format for dates (e.g., {current_date_str}T00:00:00Z for the start of today).
 Always be accurate with time calculations based on the current date provided.
 
-When a user refers to a specific object they have seen or describe with identifying details ("that green car", "the person in the red jacket", "a package left today"), prefer the find_similar_objects tool over search_objects. Use search_objects first only to locate the anchor event, then pass its id to find_similar_objects. For generic queries like "show me all cars today", keep using search_objects. If a user message begins with [attached_event:<id>], treat that event id as the anchor for any similarity or "tell me more" request in the same message and call find_similar_objects with that id.{cameras_section}{speed_units_section}"""
+When a user refers to a specific object they have seen or describe with identifying details ("that green car", "the person in the red jacket", "a package left today"), prefer the find_similar_objects tool over search_objects. Use search_objects first only to locate the anchor event, then pass its id to find_similar_objects. For generic queries like "show me all cars today", keep using search_objects. If a user message begins with [attached_event:<id>], treat that event id as the anchor for any similarity or "tell me more" request in the same message and call find_similar_objects with that id.{semantic_search_section}{cameras_section}{speed_units_section}"""
 
     conversation.append(
         {
