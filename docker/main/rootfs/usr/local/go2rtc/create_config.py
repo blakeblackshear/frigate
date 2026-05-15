@@ -18,6 +18,7 @@ from frigate.const import (
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 from frigate.util.config import find_config_file
+from frigate.util.services import is_restricted_source
 
 sys.path.remove("/opt/frigate")
 
@@ -126,11 +127,6 @@ if LIBAVFORMAT_VERSION_MAJOR < 59:
         go2rtc_config["ffmpeg"] = {"rtsp": rtsp_args}
     elif go2rtc_config["ffmpeg"].get("rtsp") is None:
         go2rtc_config["ffmpeg"]["rtsp"] = rtsp_args
-
-
-def is_restricted_source(stream_source: str) -> bool:
-    """Check if a stream source is restricted (echo, expr, or exec)."""
-    return stream_source.strip().startswith(("echo:", "expr:", "exec:"))
 
 
 for name in list(go2rtc_config.get("streams", {})):

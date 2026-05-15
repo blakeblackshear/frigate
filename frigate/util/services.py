@@ -778,6 +778,11 @@ def get_hailo_temps() -> dict[str, float]:
     return temps
 
 
+def is_restricted_source(stream_source: str) -> bool:
+    """Check if a stream source is restricted (echo, expr, or exec)."""
+    return stream_source.strip().startswith(("echo:", "expr:", "exec:"))
+
+
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     clean_path = escape_special_characters(path)

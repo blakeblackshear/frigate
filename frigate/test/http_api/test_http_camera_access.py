@@ -357,6 +357,33 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
             f"got {resp.status_code}"
         )
 
+    def test_add_stream_rejects_restricted_source(self):
+        """PUT /go2rtc/streams must reject exec:/echo:/expr: sources even for
+        admins"""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        with AuthTestClient(app) as client:
+            for src in (
+                "exec:/tmp/rev.sh",
+                "echo:foo",
+                "expr:bar",
+                "  exec:/tmp/rev.sh",
+            ):
+                resp = client.put(f"/go2rtc/streams/revshell?src={src}")
+                assert resp.status_code == 400, (
+                    f"Expected 400 for restricted src {src!r}; got {resp.status_code}"
+                )
+                assert resp.json().get("success") is False
+
+    def test_add_stream_allows_non_restricted_source(self):
+        """A normal stream URL should pass the restricted-source check and reach
+        the (unavailable in tests) go2rtc proxy — so we expect 500, not 400."""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        with AuthTestClient(app) as client:
+            resp = client.put("/go2rtc/streams/legit?src=rtsp://10.0.0.1:554/video")
+            assert resp.status_code != 400, (
+                f"Non-restricted source should not be rejected with 400; got {resp.status_code}"
+            )
+
     def test_stream_alias_blocked_when_owning_camera_disallowed(self):
         """limited_user cannot access a stream alias that belongs to a camera they
         are not allowed to see."""
