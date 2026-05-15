@@ -26,7 +26,6 @@ from frigate.plus import PlusApi
 from frigate.util.builtin import (
     deep_merge,
     get_ffmpeg_arg_list,
-    load_labels,
 )
 from frigate.util.config import (
     CURRENT_CONFIG_VERSION,
@@ -638,17 +637,12 @@ class FrigateConfig(FrigateBaseModel):
         if self.ffmpeg.hwaccel_args == "auto":
             self.ffmpeg.hwaccel_args = auto_detect_hwaccel()
 
-        # Populate global audio filters for all audio labels
-        all_audio_labels = {
-            label
-            for label in load_labels("/audio-labelmap.txt", prefill=521).values()
-            if label
-        }
-
+        # Populate global audio filters from listen. Existing user-defined
+        # entries for labels not in listen are preserved but unused at runtime.
         if self.audio.filters is None:
             self.audio.filters = {}
 
-        for key in sorted(all_audio_labels - self.audio.filters.keys()):
+        for key in sorted(set(self.audio.listen) - self.audio.filters.keys()):
             self.audio.filters[key] = AudioFilterConfig()
 
         self.audio.filters = dict(sorted(self.audio.filters.items()))
@@ -840,7 +834,9 @@ class FrigateConfig(FrigateBaseModel):
             if camera_config.audio.filters is None:
                 camera_config.audio.filters = {}
 
-            for key in sorted(all_audio_labels - camera_config.audio.filters.keys()):
+            for key in sorted(
+                set(camera_config.audio.listen) - camera_config.audio.filters.keys()
+            ):
                 camera_config.audio.filters[key] = AudioFilterConfig()
 
             camera_config.audio.filters = dict(

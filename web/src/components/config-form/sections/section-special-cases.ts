@@ -128,22 +128,31 @@ export function getEffectiveDefaultsForSection(
   return schemaDefaults;
 }
 
+// Sections whose `filters` dict is keyed by a sibling list field. The backend
+// auto-populates these filters at config init but doesn't re-run after profile
+// merges, so we synthesize the missing entries on the frontend.
+const FILTER_SECTIONS: Record<string, { listField: string }> = {
+  objects: { listField: "track" },
+  audio: { listField: "listen" },
+};
+
 /**
- * Add default filter entries for any label in `objects.track` that isn't
- * already in `objects.filters`, so each tracked label gets a collapsible.
- * The backend only auto-populates filters at config init, not after profile
- * merges.
+ * Add default filter entries for any label in the section's list field
+ * (e.g. `objects.track`, `audio.listen`) that isn't already in `filters`, so
+ * each label gets a collapsible. The backend only auto-populates filters at
+ * config init, not after profile merges.
  */
-export function synthesizeMissingObjectFilters(
+export function synthesizeMissingFilters(
   sectionPath: string,
   data: unknown,
   sectionSchema: RJSFSchema | undefined,
 ): unknown {
-  if (sectionPath !== "objects") return data;
+  const sectionConfig = FILTER_SECTIONS[sectionPath];
+  if (!sectionConfig) return data;
   if (!isJsonObject(data)) return data;
 
-  const trackValue = (data as JsonObject).track;
-  if (!Array.isArray(trackValue) || trackValue.length === 0) return data;
+  const listValue = (data as JsonObject)[sectionConfig.listField];
+  if (!Array.isArray(listValue) || listValue.length === 0) return data;
 
   const properties = (sectionSchema as { properties?: Record<string, unknown> })
     ?.properties;
@@ -160,7 +169,7 @@ export function synthesizeMissingObjectFilters(
 
   const newFilters: JsonObject = { ...existingFilters };
   let added = false;
-  for (const label of trackValue) {
+  for (const label of listValue) {
     if (typeof label !== "string") continue;
     if (Object.prototype.hasOwnProperty.call(newFilters, label)) continue;
     newFilters[label] = (

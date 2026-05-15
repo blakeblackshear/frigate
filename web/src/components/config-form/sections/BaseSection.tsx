@@ -22,7 +22,7 @@ import {
   modifySchemaForSection,
   getEffectiveDefaultsForSection,
   sanitizeOverridesForSection,
-  synthesizeMissingObjectFilters,
+  synthesizeMissingFilters,
 } from "./section-special-cases";
 import { getSectionValidation } from "../section-validations";
 import { useConfigOverride } from "@/hooks/use-config-override";
@@ -370,7 +370,7 @@ export function ConfigSection({
       return {};
     }
 
-    return synthesizeMissingObjectFilters(
+    return synthesizeMissingFilters(
       sectionPath,
       rawSectionValue,
       modifiedSchema ?? undefined,

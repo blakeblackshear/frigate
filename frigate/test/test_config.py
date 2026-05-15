@@ -10,7 +10,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
-from frigate.util.builtin import deep_merge, load_labels
+from frigate.util.builtin import deep_merge
 
 
 class TestConfig(unittest.TestCase):
@@ -309,15 +309,10 @@ class TestConfig(unittest.TestCase):
         }
 
         frigate_config = FrigateConfig(**config)
-        all_audio_labels = {
-            label
-            for label in load_labels("/audio-labelmap.txt", prefill=521).values()
-            if label
+        assert set(frigate_config.cameras["back"].audio.filters.keys()) == {
+            "speech",
+            "yell",
         }
-
-        assert all_audio_labels.issubset(
-            set(frigate_config.cameras["back"].audio.filters.keys())
-        )
 
     def test_override_audio_filters(self):
         config = {
@@ -345,7 +340,8 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "speech" in frigate_config.cameras["back"].audio.filters
         assert frigate_config.cameras["back"].audio.filters["speech"].threshold == 0.9
-        assert "babbling" in frigate_config.cameras["back"].audio.filters
+        assert "yell" in frigate_config.cameras["back"].audio.filters
+        assert "babbling" not in frigate_config.cameras["back"].audio.filters
 
     def test_inherit_object_filters(self):
         config = {

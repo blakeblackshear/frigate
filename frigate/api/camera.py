@@ -38,7 +38,7 @@ from frigate.util.builtin import clean_camera_user_pass
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
 from frigate.util.image import run_ffmpeg_snapshot
-from frigate.util.services import ffprobe_stream
+from frigate.util.services import ffprobe_stream, is_restricted_go2rtc_source
 
 logger = logging.getLogger(__name__)
 
@@ -147,9 +147,24 @@ def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
         params = {"name": stream_name}
         if src:
             try:
-                params["src"] = substitute_frigate_vars(src)
+                resolved_src = substitute_frigate_vars(src)
             except KeyError:
-                params["src"] = src
+                resolved_src = src
+
+            if is_restricted_go2rtc_source(resolved_src):
+                logger.warning(
+                    "Rejected go2rtc stream '%s' with restricted source type (echo/expr/exec)",
+                    stream_name,
+                )
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": "Restricted stream source type",
+                    },
+                    status_code=400,
+                )
+
+            params["src"] = resolved_src
 
         r = requests.put(
             "http://127.0.0.1:1984/api/streams",
