@@ -556,9 +556,39 @@ def get_jetson_stats() -> Optional[dict[int, dict]]:
     return results
 
 
-def is_restricted_source(stream_source: str) -> bool:
-    """Check if a stream source is restricted (echo, expr, or exec)."""
-    return stream_source.strip().startswith(("echo:", "expr:", "exec:"))
+def _go2rtc_arbitrary_exec_allowed() -> bool:
+    """Read the GO2RTC_ALLOW_ARBITRARY_EXEC override from env, docker
+    secrets, or the Home Assistant add-on options file."""
+    raw: Optional[str] = None
+    if "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.environ:
+        raw = os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC")
+    elif (
+        os.path.isdir("/run/secrets")
+        and os.access("/run/secrets", os.R_OK)
+        and "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.listdir("/run/secrets")
+    ):
+        try:
+            with open("/run/secrets/GO2RTC_ALLOW_ARBITRARY_EXEC") as f:
+                raw = f.read().strip()
+        except OSError:
+            raw = None
+    elif os.path.isfile("/data/options.json"):
+        try:
+            with open("/data/options.json") as f:
+                options = json.loads(f.read())
+            raw = options.get("go2rtc_allow_arbitrary_exec")
+        except (OSError, json.JSONDecodeError):
+            raw = None
+
+    return raw is not None and str(raw).lower() in ("true", "1", "yes")
+
+
+def is_restricted_go2rtc_source(stream_source: str) -> bool:
+    """Check if a stream source is a restricted type (echo, expr, or exec)
+    and the GO2RTC_ALLOW_ARBITRARY_EXEC override is not set."""
+    if not stream_source.strip().startswith(("echo:", "expr:", "exec:")):
+        return False
+    return not _go2rtc_arbitrary_exec_allowed()
 
 
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
