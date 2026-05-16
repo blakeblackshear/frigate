@@ -13,7 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import type { SettingsPageProps } from "@/views/settings/SingleSectionPage";
+import type { SectionStatus } from "@/views/settings/SingleSectionPage";
 import type { ConfigSectionData } from "@/types/configForm";
+import { SettingsGroupCard } from "@/components/card/SettingsGroupCard";
+import { ConfigSectionTemplate } from "@/components/config-form/sections";
 
 type ModelTab = "plus" | "custom";
 
@@ -65,6 +68,42 @@ export default function DetectorsAndModelSettingsView(
   const [snapshot, setSnapshot] = useState<PageState | null>(null);
   const [state, setState] = useState<PageState | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [childPending, setChildPending] = useState<
+    Record<string, ConfigSectionData>
+  >({});
+  const [detectorStatus, setDetectorStatus] = useState<SectionStatus>({
+    hasChanges: false,
+    isOverridden: false,
+    hasValidationErrors: false,
+  });
+
+  const handleChildPendingChange = useCallback(
+    (
+      sectionKey: string,
+      _cameraName: string | undefined,
+      data: ConfigSectionData | null,
+    ) => {
+      setChildPending((prev) => {
+        if (data === null) {
+          if (!(sectionKey in prev)) return prev;
+          const { [sectionKey]: _drop, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [sectionKey]: data };
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const detectorsPending = childPending["detectors"];
+    if (detectorsPending && state) {
+      setState((prev) =>
+        prev ? { ...prev, detectors: detectorsPending } : prev,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [childPending["detectors"]]);
 
   useEffect(() => {
     if (!config || snapshot !== null) return;
@@ -110,7 +149,8 @@ export default function DetectorsAndModelSettingsView(
     return <ActivityIndicator />;
   }
 
-  const saveDisabled = !isDirty || isSaving;
+  const saveDisabled =
+    !isDirty || isSaving || detectorStatus.hasValidationErrors;
 
   return (
     <div className="flex size-full flex-col md:pr-2">
@@ -145,10 +185,18 @@ export default function DetectorsAndModelSettingsView(
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-lg border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
-            {t("detectorsAndModel.cardTitles.detector")} — placeholder, filled
-            in Task 5.
-          </div>
+          <SettingsGroupCard title={t("detectorsAndModel.cardTitles.detector")}>
+            <ConfigSectionTemplate
+              sectionKey="detectors"
+              level="global"
+              showOverrideIndicator={false}
+              showTitle={false}
+              embedded
+              pendingDataBySection={childPending}
+              onPendingDataChange={handleChildPendingChange}
+              onStatusChange={(status) => setDetectorStatus(status)}
+            />
+          </SettingsGroupCard>
           <div className="rounded-lg border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
             {t("detectorsAndModel.cardTitles.model")} — placeholder, filled in
             Tasks 6–8.
