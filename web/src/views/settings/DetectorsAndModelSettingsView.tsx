@@ -66,10 +66,16 @@ type FrigatePlusModel = {
 const STATUS_BAR_KEY = "detectors_and_model";
 
 const deriveInitialState = (config: FrigateConfig): PageState => {
+  const plusModelId = config.model?.plus?.id;
   const modelPath = config.model?.path;
   const plusEnabled = Boolean(config.plus?.enabled);
+
+  // The reliable signal that a Plus model is currently active is the
+  // `model.plus.id` metadata — the backend resolves `plus://...` paths to a
+  // local cache path at runtime, so `model.path` can't be relied on for
+  // detection.
   let modelTab: ModelTab;
-  if (typeof modelPath === "string" && modelPath.startsWith("plus://")) {
+  if (plusModelId) {
     modelTab = "plus";
   } else if (typeof modelPath === "string" && modelPath.length > 0) {
     modelTab = "custom";
@@ -78,22 +84,19 @@ const deriveInitialState = (config: FrigateConfig): PageState => {
   } else {
     modelTab = "custom";
   }
-  // Fallback: if Plus is not enabled, prefer Custom regardless of saved path
+  // Fallback: if Plus is not enabled, prefer Custom regardless of saved state
   if (!plusEnabled && modelTab === "plus") {
     modelTab = "custom";
   }
 
-  const plusModelId = config.model?.plus?.id;
   const { plus: _plus, ...modelWithoutPlus } = (config.model ?? {}) as Record<
     string,
     unknown
   >;
-  // Don't carry a Plus path into the Custom tab — it would silently re-save
-  // the same Plus model when the user thinks they switched modes.
-  if (
-    typeof modelWithoutPlus.path === "string" &&
-    modelWithoutPlus.path.startsWith("plus://")
-  ) {
+  // If a Plus model is active, the resolved `model.path` is auto-derived from
+  // `plus.id` — drop it so the Custom tab starts clean and doesn't silently
+  // re-save the same Plus model when the user thinks they switched modes.
+  if (plusModelId) {
     delete modelWithoutPlus.path;
   }
 
