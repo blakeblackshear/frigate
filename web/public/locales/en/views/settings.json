@@ -1135,7 +1135,7 @@
       "loading": "Loading model information…",
       "error": "Failed to load model information",
       "noModelLoaded": "No Frigate+ model is currently loaded.",
-      "availableModels": "Available Models",
+      "availableModels": "Available Frigate+ models",
       "loadingAvailableModels": "Loading available models…",
       "selectModel": "Select a model",
       "noModelsAvailable": "No models available",

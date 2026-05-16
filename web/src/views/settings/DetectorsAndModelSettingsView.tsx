@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { LuExternalLink, LuFilter } from "react-icons/lu";
 import { toast } from "sonner";
@@ -36,7 +36,10 @@ import type {
   SettingsPageProps,
 } from "@/views/settings/SingleSectionPage";
 import type { ConfigSectionData } from "@/types/configForm";
-import { SettingsGroupCard } from "@/components/card/SettingsGroupCard";
+import {
+  SettingsGroupCard,
+  SplitCardRow,
+} from "@/components/card/SettingsGroupCard";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import { ConfigMessageBanner } from "@/components/config-form/ConfigMessageBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -445,154 +448,170 @@ export default function DetectorsAndModelSettingsView({
                 </TabsList>
 
                 <TabsContent value="plus">
-                  <div className="flex w-full items-center gap-2">
-                    <Select
-                      value={state.plusModelId}
-                      onValueChange={(value) =>
-                        setState((prev) =>
-                          prev ? { ...prev, plusModelId: value } : prev,
-                        )
-                      }
-                    >
-                      <SelectTrigger className="w-full">
-                        {state.plusModelId &&
-                        availableModels?.[state.plusModelId]
-                          ? new Date(
-                              availableModels[state.plusModelId].trainDate,
-                            ).toLocaleString() +
-                            " " +
-                            availableModels[state.plusModelId].baseModel +
-                            " (" +
-                            (availableModels[state.plusModelId].isBaseModel
-                              ? t(
-                                  "frigatePlus.modelInfo.plusModelType.baseModel",
-                                )
-                              : t(
-                                  "frigatePlus.modelInfo.plusModelType.userModel",
-                                )) +
-                            ") " +
-                            availableModels[state.plusModelId].name +
-                            " (" +
-                            availableModels[state.plusModelId].width +
-                            "x" +
-                            availableModels[state.plusModelId].height +
-                            ")"
-                          : isLoadingModels
-                            ? t("frigatePlus.modelInfo.loadingAvailableModels")
-                            : t("detectorsAndModel.plusModel.noModelSelected")}
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {filteredModelEntries.length === 0 ? (
-                            <div className="px-4 py-3 text-center text-sm text-muted-foreground">
-                              {t("frigatePlus.modelInfo.noModelsAvailable")}
-                            </div>
-                          ) : (
-                            filteredModelEntries.map(([id, model]) => (
-                              <SelectItem
-                                key={id}
-                                className="cursor-pointer"
-                                value={id}
-                                disabled={!isModelCompatible(model)}
-                              >
-                                {new Date(model.trainDate).toLocaleString()}{" "}
-                                <div>
-                                  {model.baseModel} {" ("}
-                                  {model.isBaseModel
-                                    ? t(
-                                        "frigatePlus.modelInfo.plusModelType.baseModel",
-                                      )
-                                    : t(
-                                        "frigatePlus.modelInfo.plusModelType.userModel",
-                                      )}
-                                  {")"}
-                                </div>
-                                <div>
-                                  {model.name} (
-                                  {model.width + "x" + model.height})
-                                </div>
-                                <div>
-                                  {t(
-                                    "frigatePlus.modelInfo.supportedDetectors",
-                                  )}
-                                  : {model.supportedDetectors.join(", ")}
-                                </div>
-                                {!isModelCompatible(model) && (
-                                  <div className="text-xs text-danger">
-                                    {t(
-                                      "detectorsAndModel.plusModel.requiresDetector",
-                                      {
-                                        detector:
-                                          model.supportedDetectors.join(", "),
-                                      },
-                                    )}
-                                  </div>
-                                )}
-                                <div className="text-xs text-muted-foreground">
-                                  {id}
-                                </div>
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          className="focus:outline-none"
-                          aria-label={t(
-                            "frigatePlus.modelInfo.filter.ariaLabel",
-                          )}
+                  <SplitCardRow
+                    label={t("frigatePlus.modelInfo.availableModels")}
+                    description={
+                      <Trans ns="views/settings">
+                        frigatePlus.modelInfo.modelSelect
+                      </Trans>
+                    }
+                    content={
+                      <div className="flex w-full items-center gap-2">
+                        <Select
+                          value={state.plusModelId}
+                          onValueChange={(value) =>
+                            setState((prev) =>
+                              prev ? { ...prev, plusModelId: value } : prev,
+                            )
+                          }
                         >
-                          <LuFilter
-                            className={cn(
-                              "size-4",
-                              isFilterActive
-                                ? "text-selected"
-                                : "text-secondary-foreground",
-                            )}
-                          />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" className="w-56">
-                        <div className="space-y-3">
-                          <div className="text-sm text-primary-variant">
-                            {t("frigatePlus.modelInfo.filter.ariaLabel")}
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <Label
-                              htmlFor="filterBaseModels"
-                              className="cursor-pointer text-primary"
-                            >
-                              {t("frigatePlus.modelInfo.filter.baseModels")}
-                            </Label>
-                            <Switch
-                              id="filterBaseModels"
-                              checked={showBaseModels}
-                              onCheckedChange={setShowBaseModels}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <Label
-                              htmlFor="filterFineTunedModels"
-                              className="cursor-pointer text-primary"
-                            >
-                              {t(
-                                "frigatePlus.modelInfo.filter.fineTunedModels",
+                          <SelectTrigger className="w-full">
+                            {state.plusModelId &&
+                            availableModels?.[state.plusModelId]
+                              ? new Date(
+                                  availableModels[state.plusModelId].trainDate,
+                                ).toLocaleString() +
+                                " " +
+                                availableModels[state.plusModelId].baseModel +
+                                " (" +
+                                (availableModels[state.plusModelId].isBaseModel
+                                  ? t(
+                                      "frigatePlus.modelInfo.plusModelType.baseModel",
+                                    )
+                                  : t(
+                                      "frigatePlus.modelInfo.plusModelType.userModel",
+                                    )) +
+                                ") " +
+                                availableModels[state.plusModelId].name +
+                                " (" +
+                                availableModels[state.plusModelId].width +
+                                "x" +
+                                availableModels[state.plusModelId].height +
+                                ")"
+                              : isLoadingModels
+                                ? t(
+                                    "frigatePlus.modelInfo.loadingAvailableModels",
+                                  )
+                                : t(
+                                    "detectorsAndModel.plusModel.noModelSelected",
+                                  )}
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {filteredModelEntries.length === 0 ? (
+                                <div className="px-4 py-3 text-center text-sm text-muted-foreground">
+                                  {t("frigatePlus.modelInfo.noModelsAvailable")}
+                                </div>
+                              ) : (
+                                filteredModelEntries.map(([id, model]) => (
+                                  <SelectItem
+                                    key={id}
+                                    className="cursor-pointer"
+                                    value={id}
+                                    disabled={!isModelCompatible(model)}
+                                  >
+                                    {new Date(model.trainDate).toLocaleString()}{" "}
+                                    <div>
+                                      {model.baseModel} {" ("}
+                                      {model.isBaseModel
+                                        ? t(
+                                            "frigatePlus.modelInfo.plusModelType.baseModel",
+                                          )
+                                        : t(
+                                            "frigatePlus.modelInfo.plusModelType.userModel",
+                                          )}
+                                      {")"}
+                                    </div>
+                                    <div>
+                                      {model.name} (
+                                      {model.width + "x" + model.height})
+                                    </div>
+                                    <div>
+                                      {t(
+                                        "frigatePlus.modelInfo.supportedDetectors",
+                                      )}
+                                      : {model.supportedDetectors.join(", ")}
+                                    </div>
+                                    {!isModelCompatible(model) && (
+                                      <div className="text-xs text-danger">
+                                        {t(
+                                          "detectorsAndModel.plusModel.requiresDetector",
+                                          {
+                                            detector:
+                                              model.supportedDetectors.join(
+                                                ", ",
+                                              ),
+                                          },
+                                        )}
+                                      </div>
+                                    )}
+                                    <div className="text-xs text-muted-foreground">
+                                      {id}
+                                    </div>
+                                  </SelectItem>
+                                ))
                               )}
-                            </Label>
-                            <Switch
-                              id="filterFineTunedModels"
-                              checked={showFineTunedModels}
-                              onCheckedChange={setShowFineTunedModels}
-                            />
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              className="focus:outline-none"
+                              aria-label={t(
+                                "frigatePlus.modelInfo.filter.ariaLabel",
+                              )}
+                            >
+                              <LuFilter
+                                className={cn(
+                                  "size-4",
+                                  isFilterActive
+                                    ? "text-selected"
+                                    : "text-secondary-foreground",
+                                )}
+                              />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent align="end" className="w-56">
+                            <div className="space-y-3">
+                              <div className="text-sm text-primary-variant">
+                                {t("frigatePlus.modelInfo.filter.ariaLabel")}
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <Label
+                                  htmlFor="filterBaseModels"
+                                  className="cursor-pointer text-primary"
+                                >
+                                  {t("frigatePlus.modelInfo.filter.baseModels")}
+                                </Label>
+                                <Switch
+                                  id="filterBaseModels"
+                                  checked={showBaseModels}
+                                  onCheckedChange={setShowBaseModels}
+                                />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <Label
+                                  htmlFor="filterFineTunedModels"
+                                  className="cursor-pointer text-primary"
+                                >
+                                  {t(
+                                    "frigatePlus.modelInfo.filter.fineTunedModels",
+                                  )}
+                                </Label>
+                                <Switch
+                                  id="filterFineTunedModels"
+                                  checked={showFineTunedModels}
+                                  onCheckedChange={setShowFineTunedModels}
+                                />
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    }
+                  />
                 </TabsContent>
 
                 <TabsContent value="custom">
