@@ -1170,8 +1170,7 @@
     },
     "plusModel": {
       "requiresDetector": "Requires: {{detector}}",
-      "noModelSelected": "Select a Frigate+ model",
-      "plusDisabled": "Add a Frigate+ API key to use Frigate+ models."
+      "noModelSelected": "Select a Frigate+ model"
     },
     "toast": {
       "saveSuccess": "Detector and model settings saved",

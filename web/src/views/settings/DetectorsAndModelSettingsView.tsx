@@ -417,29 +417,25 @@ export default function DetectorsAndModelSettingsView({
             />
           )}
           <SettingsGroupCard title={t("detectorsAndModel.cardTitles.model")}>
-            <Tabs
-              value={state.modelTab}
-              onValueChange={(value) =>
-                setState((prev) =>
-                  prev ? { ...prev, modelTab: value as ModelTab } : prev,
-                )
-              }
-            >
-              <TabsList className="mb-4">
-                <TabsTrigger value="plus" disabled={!plusEnabled}>
-                  {t("detectorsAndModel.tabs.plus")}
-                </TabsTrigger>
-                <TabsTrigger value="custom">
-                  {t("detectorsAndModel.tabs.custom")}
-                </TabsTrigger>
-              </TabsList>
+            {plusEnabled ? (
+              <Tabs
+                value={state.modelTab}
+                onValueChange={(value) =>
+                  setState((prev) =>
+                    prev ? { ...prev, modelTab: value as ModelTab } : prev,
+                  )
+                }
+              >
+                <TabsList className="mb-4">
+                  <TabsTrigger value="plus">
+                    {t("detectorsAndModel.tabs.plus")}
+                  </TabsTrigger>
+                  <TabsTrigger value="custom">
+                    {t("detectorsAndModel.tabs.custom")}
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="plus">
-                {!plusEnabled ? (
-                  <p className="py-4 text-sm text-muted-foreground">
-                    {t("detectorsAndModel.plusModel.plusDisabled")}
-                  </p>
-                ) : (
+                <TabsContent value="plus">
                   <div className="flex w-full items-center gap-2">
                     <Select
                       value={state.plusModelId}
@@ -588,22 +584,33 @@ export default function DetectorsAndModelSettingsView({
                       </PopoverContent>
                     </Popover>
                   </div>
-                )}
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="custom">
-                <ConfigSectionTemplate
-                  sectionKey="model"
-                  level="global"
-                  showOverrideIndicator={false}
-                  showTitle={false}
-                  embedded
-                  pendingDataBySection={childPending}
-                  onPendingDataChange={handleChildPendingChange}
-                  onStatusChange={handleModelStatusChange}
-                />
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="custom">
+                  <ConfigSectionTemplate
+                    sectionKey="model"
+                    level="global"
+                    showOverrideIndicator={false}
+                    showTitle={false}
+                    embedded
+                    pendingDataBySection={childPending}
+                    onPendingDataChange={handleChildPendingChange}
+                    onStatusChange={handleModelStatusChange}
+                  />
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <ConfigSectionTemplate
+                sectionKey="model"
+                level="global"
+                showOverrideIndicator={false}
+                showTitle={false}
+                embedded
+                pendingDataBySection={childPending}
+                onPendingDataChange={handleChildPendingChange}
+                onStatusChange={handleModelStatusChange}
+              />
+            )}
           </SettingsGroupCard>
         </div>
       </div>
