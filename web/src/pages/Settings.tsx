@@ -44,7 +44,7 @@ import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MediaSyncSettingsView from "@/views/settings/MediaSyncSettingsView";
 import RegionGridSettingsView from "@/views/settings/RegionGridSettingsView";
 import Go2RtcStreamsSettingsView from "@/views/settings/Go2RtcStreamsSettingsView";
-import SystemDetectionModelSettingsView from "@/views/settings/SystemDetectionModelSettingsView";
+import DetectorsAndModelSettingsView from "@/views/settings/DetectorsAndModelSettingsView";
 import {
   SingleSectionPage,
   type SettingsPageProps,
@@ -127,8 +127,7 @@ const allSettingsViews = [
   "systemEnvironmentVariables",
   "systemTelemetry",
   "systemBirdseye",
-  "systemDetectorHardware",
-  "systemDetectionModel",
+  "systemDetectorsAndModel",
   "systemMqtt",
   "systemGo2rtcStreams",
   "integrationSemanticSearch",
@@ -229,11 +228,6 @@ const SystemEnvironmentVariablesSettingsPage = createSectionPage(
 );
 const SystemTelemetrySettingsPage = createSectionPage("telemetry", "global");
 const SystemBirdseyeSettingsPage = createSectionPage("birdseye", "global");
-const SystemDetectorHardwareSettingsPage = createSectionPage(
-  "detectors",
-  "global",
-);
-const SystemDetectionModelSettingsPage = SystemDetectionModelSettingsView;
 const NotificationsSettingsPage = createSectionPage("notifications", "global");
 
 const SystemMqttSettingsPage = createSectionPage("mqtt", "global");
@@ -399,12 +393,8 @@ const settingsGroups = [
         component: Go2RtcStreamsSettingsView,
       },
       {
-        key: "systemDetectorHardware",
-        component: SystemDetectorHardwareSettingsPage,
-      },
-      {
-        key: "systemDetectionModel",
-        component: SystemDetectionModelSettingsPage,
+        key: "systemDetectorsAndModel",
+        component: DetectorsAndModelSettingsView,
       },
       { key: "systemDatabase", component: SystemDatabaseSettingsPage },
       { key: "systemMqtt", component: SystemMqttSettingsPage },
@@ -558,8 +548,8 @@ const SYSTEM_SECTION_MAPPING: Record<string, SettingsType> = {
   environment_vars: "systemEnvironmentVariables",
   telemetry: "systemTelemetry",
   birdseye: "systemBirdseye",
-  detectors: "systemDetectorHardware",
-  model: "systemDetectionModel",
+  detectors: "systemDetectorsAndModel",
+  model: "systemDetectorsAndModel",
 };
 
 const CAMERA_SECTION_KEYS = new Set<SettingsType>(
