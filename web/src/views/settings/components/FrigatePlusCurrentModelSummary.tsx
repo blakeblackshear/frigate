@@ -18,7 +18,7 @@ export default function FrigatePlusCurrentModelSummary({
   const { t } = useTranslation("views/settings");
 
   const title = action ? (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex w-full items-center justify-between gap-3">
       <span>{t("frigatePlus.cardTitles.currentModel")}</span>
       {action}
     </div>
