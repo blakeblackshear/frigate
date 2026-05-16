@@ -964,8 +964,11 @@ class TestConfig(unittest.TestCase):
             },
         }
 
+        # With no model defined, the top-level model adopts the default
+        # detector's resolved model (openvino + ssdlite_mobilenet_v2 with the
+        # coco_91cl_bkgr labelmap, which has __background__ at index 0).
         frigate_config = FrigateConfig(**config)
-        assert frigate_config.model.merged_labelmap[0] == "person"
+        assert frigate_config.model.merged_labelmap[1] == "person"
 
     def test_default_labelmap(self):
         config = {

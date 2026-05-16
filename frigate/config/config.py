@@ -708,6 +708,14 @@ class FrigateConfig(FrigateBaseModel):
             detector_config.model = model
             self.detectors[key] = detector_config
 
+        # If the top-level model is unset, adopt the first detector's resolved
+        # model so worker processes (which receive self.model) agree with the
+        # dimensions used to size the detection shared memory in start_detectors.
+        if not self.model.model_dump(exclude_unset=True, warnings="none") and self.detectors:
+            first_detector = next(iter(self.detectors.values()))
+            if first_detector.model is not None:
+                self.model = first_detector.model
+
         for name, camera in self.cameras.items():
             modified_global_config = global_config.copy()
 
