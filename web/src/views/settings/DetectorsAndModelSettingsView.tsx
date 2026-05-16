@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { LuExternalLink, LuFilter } from "react-icons/lu";
 import { toast } from "sonner";
@@ -39,6 +39,7 @@ import type {
 import type { ConfigSectionData } from "@/types/configForm";
 import { SettingsGroupCard } from "@/components/card/SettingsGroupCard";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
+import { ConfigMessageBanner } from "@/components/config-form/ConfigMessageBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type ModelTab = "plus" | "custom";
@@ -358,35 +359,34 @@ export default function DetectorsAndModelSettingsView({
   return (
     <div className="flex size-full flex-col md:pr-2">
       <Toaster position="top-center" closeButton={true} />
-      <div className="w-full max-w-5xl space-y-6 pt-2">
-        <div className="mb-1 flex items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <Heading as="h4">{t("detectorsAndModel.title")}</Heading>
-            <div className="my-1 text-sm text-muted-foreground">
-              {t("detectorsAndModel.description")}
-            </div>
-            <div className="flex items-center text-sm text-primary-variant">
-              <Link
-                to={getLocaleDocUrl("/configuration/object_detectors")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline"
-              >
-                {t("readTheDocumentation", { ns: "common" })}
-                <LuExternalLink className="ml-2 inline-flex size-3" />
-              </Link>
-            </div>
+      <div className="mb-1 flex items-center justify-between gap-4 pt-2">
+        <div className="flex max-w-5xl flex-col">
+          <Heading as="h4">{t("detectorsAndModel.title")}</Heading>
+          <div className="my-1 text-sm text-muted-foreground">
+            {t("detectorsAndModel.description")}
           </div>
-          {isDirty && (
-            <Badge
-              variant="secondary"
-              className="cursor-default bg-unsaved text-xs text-black hover:bg-unsaved"
+          <div className="flex items-center text-sm text-primary-variant">
+            <Link
+              to={getLocaleDocUrl("/configuration/object_detectors")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline"
             >
-              {t("button.modified", { ns: "common", defaultValue: "Modified" })}
-            </Badge>
-          )}
+              {t("readTheDocumentation", { ns: "common" })}
+              <LuExternalLink className="ml-2 inline-flex size-3" />
+            </Link>
+          </div>
         </div>
-
+        {isDirty && (
+          <Badge
+            variant="secondary"
+            className="cursor-default bg-unsaved text-xs text-black hover:bg-unsaved"
+          >
+            {t("button.modified", { ns: "common", defaultValue: "Modified" })}
+          </Badge>
+        )}
+      </div>
+      <div className="w-full max-w-5xl space-y-6 pt-4">
         <div className="space-y-6">
           <SettingsGroupCard title={t("detectorsAndModel.cardTitles.detector")}>
             <ConfigSectionTemplate
@@ -401,20 +401,20 @@ export default function DetectorsAndModelSettingsView({
             />
           </SettingsGroupCard>
           {plusMismatch && selectedPlusModel && (
-            <div className="rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger">
-              <Trans
-                ns="views/settings"
-                i18nKey="detectorsAndModel.mismatch.warning"
-                values={{
-                  model: selectedPlusModel.name,
-                  required: selectedPlusModel.supportedDetectors.join(", "),
-                }}
-                components={{
-                  0: <strong />,
-                  1: <strong />,
-                }}
-              />
-            </div>
+            <ConfigMessageBanner
+              messages={[
+                {
+                  key: "plus-mismatch",
+                  messageKey: "detectorsAndModel.mismatch.warning",
+                  severity: "warning",
+                  condition: () => true,
+                  values: {
+                    model: selectedPlusModel.name,
+                    required: selectedPlusModel.supportedDetectors.join(", "),
+                  },
+                },
+              ]}
+            />
           )}
           <SettingsGroupCard title={t("detectorsAndModel.cardTitles.model")}>
             <Tabs

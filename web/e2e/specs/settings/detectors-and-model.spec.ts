@@ -1,19 +1,19 @@
 /**
- * Detectors & Model settings page tests -- HIGH tier.
+ * Detectors and model settings page tests -- HIGH tier.
  *
  * Tests rendering of the merged page and navigation from the Frigate+ page.
  */
 
 import { test, expect } from "../../fixtures/frigate-test";
 
-test.describe("Detectors & Model Settings @high", () => {
+test.describe("Detectors and model Settings @high", () => {
   test("page renders with detector and model cards", async ({ frigateApp }) => {
     await frigateApp.goto("/settings?page=systemDetectorsAndModel");
     await frigateApp.page.waitForTimeout(2000);
     await expect(frigateApp.page.locator("#pageRoot")).toBeVisible();
 
     const text = await frigateApp.page.textContent("#pageRoot");
-    expect(text).toContain("Detectors & Model");
+    expect(text).toContain("Detectors and model");
     expect(text?.toLowerCase()).toContain("detector hardware");
     expect(text?.toLowerCase()).toContain("detection model");
   });
@@ -23,7 +23,7 @@ test.describe("Detectors & Model Settings @high", () => {
     await frigateApp.page.waitForTimeout(2000);
 
     const button = frigateApp.page.getByRole("button", {
-      name: /Change in Detectors & Model/,
+      name: /Change in Detectors and model/,
     });
 
     // Button only appears when Frigate+ is enabled in the test config; skip
@@ -32,7 +32,7 @@ test.describe("Detectors & Model Settings @high", () => {
       await button.first().click();
       await frigateApp.page.waitForURL(/page=systemDetectorsAndModel/);
       await expect(frigateApp.page.locator("#pageRoot")).toContainText(
-        "Detectors & Model",
+        "Detectors and model",
       );
     } else {
       test.skip(

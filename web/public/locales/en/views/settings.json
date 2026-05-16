@@ -12,7 +12,7 @@
     "globalConfig": "Global Configuration - Frigate",
     "cameraConfig": "Camera Configuration - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
-    "detectorsAndModel": "Detectors & Model - Frigate",
+    "detectorsAndModel": "Detectors and model - Frigate",
     "notifications": "Notification Settings - Frigate",
     "maintenance": "Maintenance - Frigate",
     "profiles": "Profiles - Frigate"
@@ -70,7 +70,7 @@
     "systemTelemetry": "Telemetry",
     "systemBirdseye": "Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorsAndModel": "Detectors & Model",
+    "systemDetectorsAndModel": "Detectors and model",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "go2rtc streams",
     "integrationSemanticSearch": "Semantic search",
@@ -1146,7 +1146,7 @@
       },
       "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration can be selected."
     },
-    "changeInDetectorsAndModel": "Change in Detectors & Model →",
+    "changeInDetectorsAndModel": "Change model",
     "unsavedChanges": "Unsaved Frigate+ settings changes",
     "restart_required": "Restart required (Frigate+ model changed)",
     "toast": {
@@ -1155,7 +1155,7 @@
     }
   },
   "detectorsAndModel": {
-    "title": "Detectors & Model",
+    "title": "Detectors and model",
     "description": "Configure the detector backend that runs object detection and the model it uses. Changes are saved together so the detector and model stay in sync.",
     "cardTitles": {
       "detector": "Detector Hardware",
@@ -1166,7 +1166,7 @@
       "custom": "Custom Model"
     },
     "mismatch": {
-      "warning": "The current Frigate+ model <0>{{model}}</0> requires the <1>{{required}}</1> detector. Pick a compatible model below or switch to Custom Model before saving."
+      "warning": "The current Frigate+ model \"{{model}}\" requires the {{required}} detector. Pick a compatible model below or switch to Custom Model before saving."
     },
     "plusModel": {
       "requiresDetector": "Requires: {{detector}}",
