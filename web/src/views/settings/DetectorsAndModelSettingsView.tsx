@@ -2,9 +2,14 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { LuExternalLink, LuFilter } from "react-icons/lu";
+import { toast } from "sonner";
+import isEqual from "lodash/isEqual";
 import axios from "axios";
 import useSWR from "swr";
+import { useSWRConfig } from "swr";
 import { cn } from "@/lib/utils";
+import { useRestart } from "@/api/ws";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -97,11 +102,14 @@ export default function DetectorsAndModelSettingsView(
   const { t } = useTranslation(["views/settings", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { mutate: globalMutate } = useSWRConfig();
   const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
   const [snapshot, setSnapshot] = useState<PageState | null>(null);
   const [state, setState] = useState<PageState | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+  const { send: sendRestart } = useRestart();
   const [childPending, setChildPending] = useState<
     Record<string, ConfigSectionData>
   >({});
@@ -254,10 +262,67 @@ export default function DetectorsAndModelSettingsView(
   }, [t]);
 
   const onSave = useCallback(async () => {
-    // implemented in Task 9
+    if (!state || !snapshot) return;
+
+    const detectorChanged = !isEqual(state.detectors, snapshot.detectors);
+    const tabChanged = state.modelTab !== snapshot.modelTab;
+
+    const modelPayload =
+      state.modelTab === "plus"
+        ? { path: `plus://${state.plusModelId}` }
+        : state.customModel;
+
     setIsSaving(true);
-    setIsSaving(false);
-  }, []);
+    try {
+      if (tabChanged) {
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: { model: null },
+        });
+      }
+
+      await axios.put("config/set", {
+        requires_restart: detectorChanged ? 1 : 0,
+        config_data: {
+          detectors: state.detectors,
+          model: modelPayload,
+        },
+      });
+
+      await globalMutate("config");
+      await globalMutate("config/raw_paths");
+
+      // Re-derive snapshot from the freshly saved state so isDirty resets.
+      setSnapshot({ ...state });
+      setChildPending({});
+
+      if (detectorChanged) {
+        toast.success(t("detectorsAndModel.toast.saveSuccessRestart"), {
+          position: "top-center",
+          action: (
+            <Button onClick={() => setRestartDialogOpen(true)}>
+              {t("restart.button", { ns: "components/dialog" })}
+            </Button>
+          ),
+        });
+      } else {
+        toast.success(t("detectorsAndModel.toast.saveSuccess"), {
+          position: "top-center",
+        });
+      }
+    } catch (error) {
+      const err = error as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        t("detectorsAndModel.toast.saveError");
+      toast.error(message, { position: "top-center" });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [state, snapshot, globalMutate, t]);
 
   const onUndo = useCallback(() => {
     if (snapshot) setState(snapshot);
@@ -569,6 +634,11 @@ export default function DetectorsAndModelSettingsView(
           </div>
         </div>
       </div>
+      <RestartDialog
+        isOpen={restartDialogOpen}
+        onClose={() => setRestartDialogOpen(false)}
+        onRestart={() => sendRestart("restart")}
+      />
     </div>
   );
 }
