@@ -12,11 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import type { FrigateConfig } from "@/types/frigateConfig";
-import type { SettingsPageProps } from "@/views/settings/SingleSectionPage";
-import type { SectionStatus } from "@/views/settings/SingleSectionPage";
+import type {
+  SectionStatus,
+  SettingsPageProps,
+} from "@/views/settings/SingleSectionPage";
 import type { ConfigSectionData } from "@/types/configForm";
 import { SettingsGroupCard } from "@/components/card/SettingsGroupCard";
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type ModelTab = "plus" | "custom";
 
@@ -76,6 +79,11 @@ export default function DetectorsAndModelSettingsView(
     isOverridden: false,
     hasValidationErrors: false,
   });
+  const [modelStatus, setModelStatus] = useState<SectionStatus>({
+    hasChanges: false,
+    isOverridden: false,
+    hasValidationErrors: false,
+  });
 
   const handleChildPendingChange = useCallback(
     (
@@ -95,15 +103,35 @@ export default function DetectorsAndModelSettingsView(
     [],
   );
 
+  const handleDetectorStatusChange = useCallback(
+    (status: SectionStatus) => setDetectorStatus(status),
+    [],
+  );
+
+  const handleModelStatusChange = useCallback(
+    (status: SectionStatus) => setModelStatus(status),
+    [],
+  );
+
   useEffect(() => {
     const detectorsPending = childPending["detectors"];
-    if (detectorsPending && state) {
+    if (detectorsPending) {
       setState((prev) =>
         prev ? { ...prev, detectors: detectorsPending } : prev,
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [childPending["detectors"]]);
+
+  useEffect(() => {
+    const modelPending = childPending["model"];
+    if (modelPending) {
+      setState((prev) =>
+        prev ? { ...prev, customModel: modelPending } : prev,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [childPending["model"]]);
 
   useEffect(() => {
     if (!config || snapshot !== null) return;
@@ -150,7 +178,10 @@ export default function DetectorsAndModelSettingsView(
   }
 
   const saveDisabled =
-    !isDirty || isSaving || detectorStatus.hasValidationErrors;
+    !isDirty ||
+    isSaving ||
+    detectorStatus.hasValidationErrors ||
+    (state.modelTab === "custom" && modelStatus.hasValidationErrors);
 
   return (
     <div className="flex size-full flex-col md:pr-2">
@@ -194,13 +225,47 @@ export default function DetectorsAndModelSettingsView(
               embedded
               pendingDataBySection={childPending}
               onPendingDataChange={handleChildPendingChange}
-              onStatusChange={(status) => setDetectorStatus(status)}
+              onStatusChange={handleDetectorStatusChange}
             />
           </SettingsGroupCard>
-          <div className="rounded-lg border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
-            {t("detectorsAndModel.cardTitles.model")} — placeholder, filled in
-            Tasks 6–8.
-          </div>
+          <SettingsGroupCard title={t("detectorsAndModel.cardTitles.model")}>
+            <Tabs
+              value={state.modelTab}
+              onValueChange={(value) =>
+                setState((prev) =>
+                  prev ? { ...prev, modelTab: value as ModelTab } : prev,
+                )
+              }
+            >
+              <TabsList className="mb-4">
+                <TabsTrigger value="plus" disabled={!config.plus?.enabled}>
+                  {t("detectorsAndModel.tabs.plus")}
+                </TabsTrigger>
+                <TabsTrigger value="custom">
+                  {t("detectorsAndModel.tabs.custom")}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="plus">
+                <div className="py-4 text-sm text-muted-foreground">
+                  Frigate+ model selector — added in Task 7.
+                </div>
+              </TabsContent>
+
+              <TabsContent value="custom">
+                <ConfigSectionTemplate
+                  sectionKey="model"
+                  level="global"
+                  showOverrideIndicator={false}
+                  showTitle={false}
+                  embedded
+                  pendingDataBySection={childPending}
+                  onPendingDataChange={handleChildPendingChange}
+                  onStatusChange={handleModelStatusChange}
+                />
+              </TabsContent>
+            </Tabs>
+          </SettingsGroupCard>
         </div>
       </div>
 
