@@ -110,7 +110,7 @@ Here are some common starter configuration examples. These can be configured thr
 
 1. Navigate to <NavPath path="Settings > System > MQTT" /> and configure the MQTT connection to your Home Assistant Mosquitto broker
 2. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `Raspberry Pi (H.264)`
-3. Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`
+3. Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`
 4. Navigate to <NavPath path="Settings > Global configuration > Recording" /> and set **Enable recording** to on, **Motion retention > Retention days** to `7`, **Alert retention > Event retention > Retention days** to `30`, **Alert retention > Event retention > Retention mode** to `motion`, **Detection retention > Event retention > Retention days** to `30`, **Detection retention > Event retention > Retention mode** to `motion`
 5. Navigate to <NavPath path="Settings > Global configuration > Snapshots" /> and set **Enable snapshots** to on, **Snapshot retention > Default retention** to `30`
 6. Navigate to <NavPath path="Settings > Camera configuration > Management" /> and add your camera with the appropriate RTSP stream URL
@@ -189,7 +189,7 @@ cameras:
 
 1. Navigate to <NavPath path="Settings > System > MQTT" /> and set **Enable MQTT** to off
 2. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `VAAPI (Intel/AMD GPU)`
-3. Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`
+3. Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`
 4. Navigate to <NavPath path="Settings > Global configuration > Recording" /> and set **Enable recording** to on, **Motion retention > Retention days** to `7`, **Alert retention > Event retention > Retention days** to `30`, **Alert retention > Event retention > Retention mode** to `motion`, **Detection retention > Event retention > Retention days** to `30`, **Detection retention > Event retention > Retention mode** to `motion`
 5. Navigate to <NavPath path="Settings > Global configuration > Snapshots" /> and set **Enable snapshots** to on, **Snapshot retention > Default retention** to `30`
 6. Navigate to <NavPath path="Settings > Camera configuration > Management" /> and add your camera with the appropriate RTSP stream URL
@@ -266,8 +266,8 @@ cameras:
 
 1. Navigate to <NavPath path="Settings > System > MQTT" /> and configure the connection to your MQTT broker
 2. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `VAAPI (Intel/AMD GPU)`
-3. Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `openvino` and **Device** `AUTO`
-4. Navigate to <NavPath path="Settings > System > Detection model" /> and configure the OpenVINO model path and settings
+3. Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `openvino` and **Device** `AUTO`
+4. On the same page, in the **Custom Model** tab, configure the OpenVINO model path and settings
 5. Navigate to <NavPath path="Settings > Global configuration > Recording" /> and set **Enable recording** to on, **Motion retention > Retention days** to `7`, **Alert retention > Event retention > Retention days** to `30`, **Alert retention > Event retention > Retention mode** to `motion`, **Detection retention > Event retention > Retention days** to `30`, **Detection retention > Event retention > Retention mode** to `motion`
 6. Navigate to <NavPath path="Settings > Global configuration > Snapshots" /> and set **Enable snapshots** to on, **Snapshot retention > Default retention** to `30`
 7. Navigate to <NavPath path="Settings > Camera configuration > Management" /> and add your camera with the appropriate RTSP stream URL
