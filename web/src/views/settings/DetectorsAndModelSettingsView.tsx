@@ -120,6 +120,7 @@ export default function DetectorsAndModelSettingsView({
   const [snapshot, setSnapshot] = useState<PageState | null>(null);
   const [state, setState] = useState<PageState | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const { send: sendRestart } = useRestart();
   const [childPending, setChildPending] = useState<
@@ -225,21 +226,28 @@ export default function DetectorsAndModelSettingsView({
 
   useEffect(() => {
     const detectorsPending = childPending["detectors"];
-    if (detectorsPending) {
-      setState((prev) =>
-        prev ? { ...prev, detectors: detectorsPending } : prev,
-      );
-    }
+    setState((prev) => {
+      if (!prev || !snapshot) return prev;
+      // When the embedded form un-modifies (data returns to baseline) it clears
+      // its entry from childPending — fall back to snapshot so state.detectors
+      // doesn't keep a stale value the user has visually reverted.
+      return {
+        ...prev,
+        detectors: detectorsPending ?? snapshot.detectors,
+      };
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [childPending["detectors"]]);
 
   useEffect(() => {
     const modelPending = childPending["model"];
-    if (modelPending) {
-      setState((prev) =>
-        prev ? { ...prev, customModel: modelPending } : prev,
-      );
-    }
+    setState((prev) => {
+      if (!prev || !snapshot) return prev;
+      return {
+        ...prev,
+        customModel: modelPending ?? snapshot.customModel,
+      };
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [childPending["model"]]);
 
@@ -308,6 +316,7 @@ export default function DetectorsAndModelSettingsView({
       // Re-derive snapshot from the freshly saved state so isDirty resets.
       setSnapshot({ ...state });
       setChildPending({});
+      setResetKey((k) => k + 1);
 
       if (detectorChanged) {
         toast.success(t("detectorsAndModel.toast.saveSuccessRestart"), {
@@ -344,6 +353,10 @@ export default function DetectorsAndModelSettingsView({
     if (snapshot) {
       setState(snapshot);
       setChildPending({});
+      // Force the embedded forms to re-mount so their internal dirty/baseline
+      // state is rebuilt from the current config — clearing childPending alone
+      // doesn't reset BaseSection's internal tracking.
+      setResetKey((k) => k + 1);
     }
   }, [snapshot]);
 
@@ -393,6 +406,7 @@ export default function DetectorsAndModelSettingsView({
         <div className="space-y-6">
           <SettingsGroupCard title={t("detectorsAndModel.cardTitles.detector")}>
             <ConfigSectionTemplate
+              key={`detectors-${resetKey}`}
               sectionKey="detectors"
               level="global"
               showOverrideIndicator={false}
@@ -591,6 +605,7 @@ export default function DetectorsAndModelSettingsView({
 
                 <TabsContent value="custom">
                   <ConfigSectionTemplate
+                    key={`model-${resetKey}`}
                     sectionKey="model"
                     level="global"
                     showOverrideIndicator={false}
@@ -604,6 +619,7 @@ export default function DetectorsAndModelSettingsView({
               </Tabs>
             ) : (
               <ConfigSectionTemplate
+                key={`model-${resetKey}`}
                 sectionKey="model"
                 level="global"
                 showOverrideIndicator={false}
