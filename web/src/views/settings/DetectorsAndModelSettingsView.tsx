@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { LuExternalLink, LuFilter } from "react-icons/lu";
 import axios from "axios";
@@ -163,6 +163,18 @@ export default function DetectorsAndModelSettingsView(
     [currentDetectorType],
   );
 
+  const selectedPlusModel = state?.plusModelId
+    ? availableModels?.[state.plusModelId]
+    : undefined;
+
+  const plusMismatch =
+    state?.modelTab === "plus" &&
+    selectedPlusModel !== undefined &&
+    currentDetectorType !== undefined &&
+    !isModelCompatible(selectedPlusModel);
+
+  const plusModelMissing = state?.modelTab === "plus" && !state?.plusModelId;
+
   const handleChildPendingChange = useCallback(
     (
       sectionKey: string,
@@ -259,7 +271,9 @@ export default function DetectorsAndModelSettingsView(
     !isDirty ||
     isSaving ||
     detectorStatus.hasValidationErrors ||
-    (state.modelTab === "custom" && modelStatus.hasValidationErrors);
+    (state.modelTab === "custom" && modelStatus.hasValidationErrors) ||
+    plusMismatch ||
+    plusModelMissing;
 
   return (
     <div className="flex size-full flex-col md:pr-2">
@@ -306,6 +320,22 @@ export default function DetectorsAndModelSettingsView(
               onStatusChange={handleDetectorStatusChange}
             />
           </SettingsGroupCard>
+          {plusMismatch && selectedPlusModel && (
+            <div className="rounded-md border border-danger bg-danger/10 px-4 py-3 text-sm text-danger">
+              <Trans
+                ns="views/settings"
+                i18nKey="detectorsAndModel.mismatch.warning"
+                values={{
+                  model: selectedPlusModel.name,
+                  required: selectedPlusModel.supportedDetectors.join(", "),
+                }}
+                components={{
+                  0: <strong />,
+                  1: <strong />,
+                }}
+              />
+            </div>
+          )}
           <SettingsGroupCard title={t("detectorsAndModel.cardTitles.model")}>
             <Tabs
               value={state.modelTab}
