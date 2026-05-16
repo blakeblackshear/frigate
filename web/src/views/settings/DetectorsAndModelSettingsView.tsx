@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { LuExternalLink, LuFilter } from "react-icons/lu";
 import { toast } from "sonner";
-import isEqual from "lodash/isEqual";
 import axios from "axios";
 import useSWR from "swr";
 import { useSWRConfig } from "swr";
@@ -285,7 +284,6 @@ export default function DetectorsAndModelSettingsView({
   const onSave = useCallback(async () => {
     if (!state || !snapshot) return;
 
-    const detectorChanged = !isEqual(state.detectors, snapshot.detectors);
     const tabChanged = state.modelTab !== snapshot.modelTab;
 
     const modelPayload =
@@ -303,7 +301,7 @@ export default function DetectorsAndModelSettingsView({
       }
 
       await axios.put("config/set", {
-        requires_restart: detectorChanged ? 1 : 0,
+        requires_restart: 1,
         config_data: {
           detectors: state.detectors,
           model: modelPayload,
@@ -318,20 +316,14 @@ export default function DetectorsAndModelSettingsView({
       setChildPending({});
       setResetKey((k) => k + 1);
 
-      if (detectorChanged) {
-        toast.success(t("detectorsAndModel.toast.saveSuccessRestart"), {
-          position: "top-center",
-          action: (
-            <Button onClick={() => setRestartDialogOpen(true)}>
-              {t("restart.button", { ns: "components/dialog" })}
-            </Button>
-          ),
-        });
-      } else {
-        toast.success(t("detectorsAndModel.toast.saveSuccess"), {
-          position: "top-center",
-        });
-      }
+      toast.success(t("detectorsAndModel.toast.saveSuccess"), {
+        position: "top-center",
+        action: (
+          <Button onClick={() => setRestartDialogOpen(true)}>
+            {t("restart.button", { ns: "components/dialog" })}
+          </Button>
+        ),
+      });
     } catch (error) {
       const err = error as {
         response?: { data?: { message?: string; detail?: string } };

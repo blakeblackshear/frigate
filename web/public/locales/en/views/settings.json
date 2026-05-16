@@ -1173,8 +1173,7 @@
       "noModelSelected": "Select a Frigate+ model"
     },
     "toast": {
-      "saveSuccess": "Detector and model settings saved",
-      "saveSuccessRestart": "Detector changed — restart Frigate to apply",
+      "saveSuccess": "Settings saved — restart Frigate to apply",
       "saveError": "Failed to save detector and model settings"
     },
     "unsavedChanges": "Unsaved detector and model changes"
