@@ -325,7 +325,10 @@ export default function DetectorsAndModelSettingsView(
   }, [state, snapshot, globalMutate, t]);
 
   const onUndo = useCallback(() => {
-    if (snapshot) setState(snapshot);
+    if (snapshot) {
+      setState(snapshot);
+      setChildPending({});
+    }
   }, [snapshot]);
 
   if (!config || !state) {
