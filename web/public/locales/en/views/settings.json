@@ -69,8 +69,7 @@
     "systemTelemetry": "Telemetry",
     "systemBirdseye": "Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorHardware": "Detector hardware",
-    "systemDetectionModel": "Detection model",
+    "systemDetectorsAndModel": "Detectors & Model",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "go2rtc streams",
     "integrationSemanticSearch": "Semantic search",
@@ -1146,6 +1145,7 @@
       },
       "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration can be selected."
     },
+    "changeInDetectorsAndModel": "Change in Detectors & Model →",
     "unsavedChanges": "Unsaved Frigate+ settings changes",
     "restart_required": "Restart required (Frigate+ model changed)",
     "toast": {
@@ -1153,14 +1153,31 @@
       "error": "Failed to save config changes: {{errorMessage}}"
     }
   },
-  "detectionModel": {
-    "plusActive": {
-      "title": "Frigate+ model management",
-      "label": "Current model source",
-      "description": "This instance is running a Frigate+ model. Select or change your model in Frigate+ settings.",
-      "goToFrigatePlus": "Go to Frigate+ settings",
-      "showModelForm": "Manually configure a model"
-    }
+  "detectorsAndModel": {
+    "title": "Detectors & Model",
+    "description": "Configure the detector backend that runs object detection and the model it uses. Changes are saved together so the detector and model stay in sync.",
+    "cardTitles": {
+      "detector": "Detector Hardware",
+      "model": "Detection Model"
+    },
+    "tabs": {
+      "plus": "Frigate+ Model",
+      "custom": "Custom Model"
+    },
+    "mismatch": {
+      "warning": "The current Frigate+ model <0>{{model}}</0> requires the <1>{{required}}</1> detector. Pick a compatible model below or switch to Custom Model before saving."
+    },
+    "plusModel": {
+      "requiresDetector": "Requires: {{detector}}",
+      "noModelSelected": "Select a Frigate+ model",
+      "plusDisabled": "Add a Frigate+ API key to use Frigate+ models."
+    },
+    "toast": {
+      "saveSuccess": "Detector and model settings saved",
+      "saveSuccessRestart": "Detector changed — restart Frigate to apply",
+      "saveError": "Failed to save detector and model settings"
+    },
+    "unsavedChanges": "Unsaved detector and model changes"
   },
   "triggers": {
     "documentTitle": "Triggers",
