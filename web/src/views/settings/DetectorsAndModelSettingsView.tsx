@@ -87,6 +87,14 @@ const deriveInitialState = (config: FrigateConfig): PageState => {
     string,
     unknown
   >;
+  // Don't carry a Plus path into the Custom tab — it would silently re-save
+  // the same Plus model when the user thinks they switched modes.
+  if (
+    typeof modelWithoutPlus.path === "string" &&
+    modelWithoutPlus.path.startsWith("plus://")
+  ) {
+    delete modelWithoutPlus.path;
+  }
 
   return {
     detectors: (config.detectors ?? {}) as ConfigSectionData,
@@ -96,9 +104,9 @@ const deriveInitialState = (config: FrigateConfig): PageState => {
   };
 };
 
-export default function DetectorsAndModelSettingsView(
-  _props: SettingsPageProps,
-) {
+export default function DetectorsAndModelSettingsView({
+  setUnsavedChanges,
+}: SettingsPageProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -254,6 +262,7 @@ export default function DetectorsAndModelSettingsView(
     } else {
       removeMessage(STATUS_BAR_KEY, STATUS_BAR_KEY);
     }
+    setUnsavedChanges?.(isDirty);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDirty]);
 
@@ -319,6 +328,9 @@ export default function DetectorsAndModelSettingsView(
         err.response?.data?.detail ||
         t("detectorsAndModel.toast.saveError");
       toast.error(message, { position: "top-center" });
+      // Re-sync the config cache in case the two-step PUT left the backend
+      // ahead of the frontend (e.g. step 1 cleared `model` but step 2 failed).
+      await globalMutate("config");
     } finally {
       setIsSaving(false);
     }
