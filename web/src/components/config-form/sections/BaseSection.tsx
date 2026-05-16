@@ -175,6 +175,9 @@ export interface BaseSectionProps {
   isSavingAll?: boolean;
   /** Callback when this section's saving state changes */
   onSavingChange?: (isSaving: boolean) => void;
+  /** When true, render the form fields only; suppress the internal save/undo bar.
+   *  The parent owns the save action and reads pending data via `onPendingDataChange`. */
+  embedded?: boolean;
 }
 
 export interface CreateSectionOptions {
@@ -211,6 +214,7 @@ export function ConfigSection({
   onDeleteProfileSection,
   isSavingAll = false,
   onSavingChange,
+  embedded = false,
 }: ConfigSectionProps) {
   // For replay level, treat as camera-level config access
   const effectiveLevel = level === "replay" ? "camera" : level;
@@ -1048,121 +1052,123 @@ export function ConfigSection({
         }}
       />
 
-      <div
-        className={cn(
-          "w-full border-t border-secondary bg-background pt-0",
-          !noStickyButtons && "sticky bottom-0 z-50",
-        )}
-      >
+      {!embedded && (
         <div
           className={cn(
-            "flex flex-col items-center gap-4 pt-2 md:flex-row",
-            hasChanges ? "justify-between" : "justify-end",
+            "w-full border-t border-secondary bg-background pt-0",
+            !noStickyButtons && "sticky bottom-0 z-50",
           )}
         >
-          {hasChanges && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-unsaved">
-                {t("unsavedChanges", {
-                  ns: "views/settings",
-                  defaultValue: "You have unsaved changes",
-                })}
-              </span>
-              <SaveAllPreviewPopover
-                items={sectionPreviewItems}
-                className="h-7 w-7"
-                align="start"
-                side="top"
-              />
-            </div>
-          )}
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
-            {((effectiveLevel === "camera" && isOverridden) ||
-              effectiveLevel === "global") &&
-              !hasChanges &&
-              !skipSave &&
-              !profileName && (
-                <Button
-                  onClick={() => setIsResetDialogOpen(true)}
-                  variant="outline"
-                  disabled={isSaving || isResettingToDefault || disabled}
-                  className="flex flex-1 gap-2"
-                >
-                  {isResettingToDefault && (
-                    <ActivityIndicator className="h-4 w-4" />
-                  )}
-                  {effectiveLevel === "global"
-                    ? t("button.resetToDefault", {
-                        ns: "common",
-                        defaultValue: "Reset to Default",
-                      })
-                    : t("button.resetToGlobal", {
-                        ns: "common",
-                        defaultValue: "Reset to Global",
-                      })}
-                </Button>
-              )}
-            {profileName &&
-              profileOverridesSection &&
-              !hasChanges &&
-              !skipSave &&
-              onDeleteProfileSection && (
-                <Button
-                  onClick={() => setIsDeleteProfileDialogOpen(true)}
-                  variant="outline"
-                  disabled={isSaving || disabled}
-                  className="flex flex-1 gap-2"
-                >
-                  {t("profiles.removeOverride", {
-                    ns: "views/settings",
-                    defaultValue: "Remove Profile Override",
-                  })}
-                </Button>
-              )}
+          <div
+            className={cn(
+              "flex flex-col items-center gap-4 pt-2 md:flex-row",
+              hasChanges ? "justify-between" : "justify-end",
+            )}
+          >
             {hasChanges && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-unsaved">
+                  {t("unsavedChanges", {
+                    ns: "views/settings",
+                    defaultValue: "You have unsaved changes",
+                  })}
+                </span>
+                <SaveAllPreviewPopover
+                  items={sectionPreviewItems}
+                  className="h-7 w-7"
+                  align="start"
+                  side="top"
+                />
+              </div>
+            )}
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
+              {((effectiveLevel === "camera" && isOverridden) ||
+                effectiveLevel === "global") &&
+                !hasChanges &&
+                !skipSave &&
+                !profileName && (
+                  <Button
+                    onClick={() => setIsResetDialogOpen(true)}
+                    variant="outline"
+                    disabled={isSaving || isResettingToDefault || disabled}
+                    className="flex flex-1 gap-2"
+                  >
+                    {isResettingToDefault && (
+                      <ActivityIndicator className="h-4 w-4" />
+                    )}
+                    {effectiveLevel === "global"
+                      ? t("button.resetToDefault", {
+                          ns: "common",
+                          defaultValue: "Reset to Default",
+                        })
+                      : t("button.resetToGlobal", {
+                          ns: "common",
+                          defaultValue: "Reset to Global",
+                        })}
+                  </Button>
+                )}
+              {profileName &&
+                profileOverridesSection &&
+                !hasChanges &&
+                !skipSave &&
+                onDeleteProfileSection && (
+                  <Button
+                    onClick={() => setIsDeleteProfileDialogOpen(true)}
+                    variant="outline"
+                    disabled={isSaving || disabled}
+                    className="flex flex-1 gap-2"
+                  >
+                    {t("profiles.removeOverride", {
+                      ns: "views/settings",
+                      defaultValue: "Remove Profile Override",
+                    })}
+                  </Button>
+                )}
+              {hasChanges && (
+                <Button
+                  onClick={handleReset}
+                  variant="outline"
+                  disabled={isSaving || isSavingAll || disabled}
+                  className="flex min-w-36 flex-1 gap-2"
+                >
+                  {t("button.undo", { ns: "common", defaultValue: "Undo" })}
+                </Button>
+              )}
               <Button
-                onClick={handleReset}
-                variant="outline"
-                disabled={isSaving || isSavingAll || disabled}
+                onClick={handleSave}
+                variant="select"
+                disabled={
+                  !hasChanges ||
+                  hasValidationErrors ||
+                  isSaving ||
+                  isSavingAll ||
+                  disabled
+                }
                 className="flex min-w-36 flex-1 gap-2"
               >
-                {t("button.undo", { ns: "common", defaultValue: "Undo" })}
+                {isSaving ? (
+                  <>
+                    <ActivityIndicator className="h-4 w-4" />
+                    {skipSave
+                      ? t("button.applying", {
+                          ns: "common",
+                          defaultValue: "Applying...",
+                        })
+                      : t("button.saving", {
+                          ns: "common",
+                          defaultValue: "Saving...",
+                        })}
+                  </>
+                ) : skipSave ? (
+                  t("button.apply", { ns: "common", defaultValue: "Apply" })
+                ) : (
+                  t("button.save", { ns: "common", defaultValue: "Save" })
+                )}
               </Button>
-            )}
-            <Button
-              onClick={handleSave}
-              variant="select"
-              disabled={
-                !hasChanges ||
-                hasValidationErrors ||
-                isSaving ||
-                isSavingAll ||
-                disabled
-              }
-              className="flex min-w-36 flex-1 gap-2"
-            >
-              {isSaving ? (
-                <>
-                  <ActivityIndicator className="h-4 w-4" />
-                  {skipSave
-                    ? t("button.applying", {
-                        ns: "common",
-                        defaultValue: "Applying...",
-                      })
-                    : t("button.saving", {
-                        ns: "common",
-                        defaultValue: "Saving...",
-                      })}
-                </>
-              ) : skipSave ? (
-                t("button.apply", { ns: "common", defaultValue: "Apply" })
-              ) : (
-                t("button.save", { ns: "common", defaultValue: "Save" })
-              )}
-            </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
         <AlertDialogContent>
