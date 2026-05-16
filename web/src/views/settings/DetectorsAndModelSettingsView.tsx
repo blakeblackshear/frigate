@@ -93,7 +93,7 @@ export default function DetectorsAndModelSettingsView(
   }, [isDirty]);
 
   useEffect(() => {
-    document.title = `${t("detectorsAndModel.title")} - Frigate`;
+    document.title = t("documentTitle.detectorsAndModel");
   }, [t]);
 
   const onSave = useCallback(async () => {

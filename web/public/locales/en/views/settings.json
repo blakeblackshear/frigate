@@ -12,6 +12,7 @@
     "globalConfig": "Global Configuration - Frigate",
     "cameraConfig": "Camera Configuration - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
+    "detectorsAndModel": "Detectors & Model - Frigate",
     "notifications": "Notification Settings - Frigate",
     "maintenance": "Maintenance - Frigate",
     "profiles": "Profiles - Frigate"
