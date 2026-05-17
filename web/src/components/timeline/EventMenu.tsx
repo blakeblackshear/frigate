@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { useApiHost } from "@/api";
+import { baseUrl } from "@/api/baseUrl";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Event } from "@/types/event";
@@ -79,7 +80,11 @@ export default function EventMenu({
                 closeButton: true,
                 dismissible: false,
                 action: (
-                  <a href="/replay" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`${baseUrl}replay`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button>
                       {t("dialog.toast.goToReplay", { ns: "views/replay" })}
                     </Button>

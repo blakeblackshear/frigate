@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import axios from "axios";
 import { isDesktop, isMobile } from "react-device-detect";
+import { baseUrl } from "@/api/baseUrl";
 import Logo from "@/components/Logo";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { TimeRange } from "@/types/timeline";
@@ -363,7 +364,11 @@ export default function MotionSearchView({
             {
               position: "top-center",
               action: (
-                <a href="/export" target="_blank" rel="noopener noreferrer">
+                <a
+                  href={`${baseUrl}export`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Button>
                     {t("export.toast.view", { ns: "components/dialog" })}
                   </Button>

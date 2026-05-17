@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { baseUrl } from "@/api/baseUrl";
 import {
   Dialog,
   DialogContent,
@@ -227,7 +228,11 @@ export default function DebugReplayDialog({
             closeButton: true,
             dismissible: false,
             action: (
-              <a href="/replay" target="_blank" rel="noopener noreferrer">
+              <a
+                href={`${baseUrl}replay`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button>{t("dialog.toast.goToReplay")}</Button>
               </a>
             ),

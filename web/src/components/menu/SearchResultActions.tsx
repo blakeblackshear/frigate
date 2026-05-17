@@ -116,7 +116,11 @@ export default function SearchResultActions({
                 closeButton: true,
                 dismissible: false,
                 action: (
-                  <a href="/replay" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`${baseUrl}replay`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button>
                       {t("dialog.toast.goToReplay", { ns: "views/replay" })}
                     </Button>

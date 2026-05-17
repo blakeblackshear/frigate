@@ -94,7 +94,11 @@ export default function ReviewCard({
           toast.success(t("export.toast.success"), {
             position: "top-center",
             action: (
-              <a href="/export" target="_blank" rel="noopener noreferrer">
+              <a
+                href={`${baseUrl}export`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button>{t("export.toast.view")}</Button>
               </a>
             ),

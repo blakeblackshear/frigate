@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { baseUrl } from "@/api/baseUrl";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
@@ -190,7 +191,11 @@ export default function MobileReviewSettingsDrawer({
       toast.success(t("export.toast.queued", { ns: "components/dialog" }), {
         position: "top-center",
         action: (
-          <a href="/export" target="_blank" rel="noopener noreferrer">
+          <a
+            href={`${baseUrl}export`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button>
               {t("export.toast.view", { ns: "components/dialog" })}
             </Button>

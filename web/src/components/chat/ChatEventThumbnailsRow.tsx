@@ -1,4 +1,5 @@
 import { useApiHost } from "@/api";
+import { baseUrl } from "@/api/baseUrl";
 import { useTranslation } from "react-i18next";
 import { LuExternalLink } from "react-icons/lu";
 import {
@@ -54,7 +55,7 @@ export function ChatEventThumbnailsRow({
       <Tooltip>
         <TooltipTrigger asChild>
           <a
-            href={`/explore?event_id=${event.id}`}
+            href={`${baseUrl}explore?event_id=${event.id}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
