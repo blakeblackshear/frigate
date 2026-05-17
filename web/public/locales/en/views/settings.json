@@ -12,6 +12,7 @@
     "globalConfig": "Global Configuration - Frigate",
     "cameraConfig": "Camera Configuration - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
+    "detectorsAndModel": "Detectors and model - Frigate",
     "notifications": "Notification Settings - Frigate",
     "maintenance": "Maintenance - Frigate",
     "profiles": "Profiles - Frigate"
@@ -69,8 +70,7 @@
     "systemTelemetry": "Telemetry",
     "systemBirdseye": "Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorHardware": "Detector hardware",
-    "systemDetectionModel": "Detection model",
+    "systemDetectorsAndModel": "Detectors and model",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "go2rtc streams",
     "integrationSemanticSearch": "Semantic search",
@@ -1135,7 +1135,7 @@
       "loading": "Loading model information…",
       "error": "Failed to load model information",
       "noModelLoaded": "No Frigate+ model is currently loaded.",
-      "availableModels": "Available Models",
+      "availableModels": "Available Frigate+ models",
       "loadingAvailableModels": "Loading available models…",
       "selectModel": "Select a model",
       "noModelsAvailable": "No models available",
@@ -1146,6 +1146,7 @@
       },
       "modelSelect": "Your available models on Frigate+ can be selected here. Note that only models compatible with your current detector configuration can be selected."
     },
+    "changeInDetectorsAndModel": "Change model",
     "unsavedChanges": "Unsaved Frigate+ settings changes",
     "restart_required": "Restart required (Frigate+ model changed)",
     "toast": {
@@ -1153,14 +1154,30 @@
       "error": "Failed to save config changes: {{errorMessage}}"
     }
   },
-  "detectionModel": {
-    "plusActive": {
-      "title": "Frigate+ model management",
-      "label": "Current model source",
-      "description": "This instance is running a Frigate+ model. Select or change your model in Frigate+ settings.",
-      "goToFrigatePlus": "Go to Frigate+ settings",
-      "showModelForm": "Manually configure a model"
-    }
+  "detectorsAndModel": {
+    "title": "Detectors and model",
+    "description": "Configure the detector backend that runs object detection and the model it uses. Changes are saved together so the detector and model stay in sync.",
+    "cardTitles": {
+      "detector": "Detector Hardware",
+      "model": "Detection Model"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Custom Model"
+    },
+    "mismatch": {
+      "warning": "The current Frigate+ model \"{{model}}\" requires the {{required}} detector. Pick a compatible model below or switch to Custom Model before saving."
+    },
+    "plusModel": {
+      "requiresDetector": "Requires: {{detector}}",
+      "noModelSelected": "Select a Frigate+ model"
+    },
+    "toast": {
+      "saveSuccess": "Detectors and model settings saved. Restart Frigate to apply changes.",
+      "saveError": "Failed to save detector and model settings"
+    },
+    "unsavedChanges": "Unsaved detector and model changes",
+    "restartRequired": "Restart required (detector or model changed)"
   },
   "triggers": {
     "documentTitle": "Triggers",

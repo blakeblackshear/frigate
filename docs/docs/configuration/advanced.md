@@ -172,7 +172,7 @@ Custom models may also require different input tensor formats. The colorspace co
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detection model" /> to configure the model path, dimensions, and input format.
+Navigate to <NavPath path="Settings > System > Detectors and model" /> and open the **Custom Model** tab to configure the model path, dimensions, and input format.
 
 | Field                                         | Description                          |
 | --------------------------------------------- | ------------------------------------ |

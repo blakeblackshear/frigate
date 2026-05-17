@@ -80,12 +80,12 @@ logger = logging.getLogger(__name__)
 
 yaml = YAML()
 
-DEFAULT_DETECTORS = {
-    "ov": {
-        "type": "openvino",
-        "device": "CPU",
-    }
-}
+# Pydantic field default applied when an existing config omits `detectors:`.
+# Kept as cpu tflite for backwards compatibility with 0.17 configs.
+DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
+
+# Used by the openvino branch below and rendered into the new-config YAML
+# template so first-time setups default to openvino on CPU.
 DEFAULT_MODEL = {
     "width": 300,
     "height": 300,
@@ -94,6 +94,7 @@ DEFAULT_MODEL = {
     "path": "/openvino-model/ssdlite_mobilenet_v2.xml",
     "labelmap_path": "/openvino-model/coco_91cl_bkgr.txt",
 }
+NEW_CONFIG_DETECTORS = {"ov": {"type": "openvino", "device": "CPU"}}
 DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
 
 
@@ -109,7 +110,7 @@ DEFAULT_CONFIG = f"""
 mqtt:
   enabled: False
 
-{_render_default_yaml({"detectors": DEFAULT_DETECTORS, "model": DEFAULT_MODEL})}
+{_render_default_yaml({"detectors": NEW_CONFIG_DETECTORS, "model": DEFAULT_MODEL})}
 cameras: {{}}  # No cameras defined, UI wizard should be used
 version: {CURRENT_CONFIG_VERSION}
 """

@@ -63,8 +63,8 @@ SYSTEM_NAV: dict[str, tuple[str, str]] = {
     "environment_vars": ("System", "Environment variables"),
     "telemetry": ("System", "Telemetry"),
     "birdseye": ("System", "Birdseye"),
-    "detectors": ("System", "Detector hardware"),
-    "model": ("System", "Detection model"),
+    "detectors": ("System", "Detectors and model"),
+    "model": ("System", "Detectors and model"),
 }
 
 # All known top-level config section keys

@@ -3,6 +3,8 @@ id: plus
 title: Frigate+
 ---
 
+import NavPath from "@site/src/components/NavPath";
+
 For more information about how to use Frigate+ to improve your model, see the [Frigate+ docs](/plus/).
 
 :::info
@@ -57,7 +59,7 @@ You can view all of your submitted images at [https://plus.frigate.video](https:
 
 Once you have [requested your first model](../plus/first_model.md) and gotten your own model ID, it can be used with a special model path. No other information needs to be configured for Frigate+ models because it fetches the remaining config from Frigate+ automatically.
 
-You can either choose the new model from the Frigate+ pane in the Settings page of the Frigate UI, or manually set the model at the root level in your config:
+You can either choose the new model from the <NavPath path="Settings > System > Detectors and model" /> pane in the Frigate UI (the **Frigate+ Model** tab), or manually set the model at the root level in your config:
 
 ```yaml
 detectors: ...
