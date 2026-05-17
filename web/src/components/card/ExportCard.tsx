@@ -266,7 +266,7 @@ export function ExportCard({
         )}
         {!exportedRecording.in_progress && !selectionMode && (
           <div className="absolute bottom-2 right-3 z-40">
-            <DropdownMenu modal={false}>
+            <DropdownMenu>
               <DropdownMenuTrigger>
                 <BlurredIconButton
                   aria-label={t("tooltip.editName")}

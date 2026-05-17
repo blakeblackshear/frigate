@@ -34,6 +34,11 @@
   },
   "details": {
     "timestamp": "Ajatampel",
-    "unknown": "Pole teada"
+    "unknown": "Pole teada",
+    "scoreInfo": "Skoor on kõigi nägude hindete kaalutud keskmine, kus kaalukoefitsiendiks on iga pildi näo suurus."
+  },
+  "uploadFaceImage": {
+    "title": "Laadi näopilt üles",
+    "desc": "Laadi üles pilt, et otsida sellelt nägusid ja lisada see {{pageToggle}}'i jaoks"
   }
 }

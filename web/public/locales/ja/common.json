@@ -133,7 +133,7 @@
     "unsuspended": "再開",
     "play": "再生",
     "unselect": "選択解除",
-    "export": "書き出し",
+    "export": "エクスポート",
     "deleteNow": "今すぐ削除",
     "next": "次へ",
     "continue": "続行"
@@ -181,7 +181,7 @@
     },
     "review": "レビュー",
     "explore": "ブラウズ",
-    "export": "書き出し",
+    "export": "エクスポート",
     "uiPlayground": "UI テスト環境",
     "faceLibrary": "顔データベース",
     "user": {
@@ -237,7 +237,8 @@
       },
       "hr": "Hrvatski (クロアチア語)"
     },
-    "classification": "分類"
+    "classification": "分類",
+    "profiles": "プロファイル"
   },
   "toast": {
     "copyUrlToClipboard": "URLをクリップボードにコピーしました。",

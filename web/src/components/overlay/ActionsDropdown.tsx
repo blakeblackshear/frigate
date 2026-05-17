@@ -22,7 +22,7 @@ export default function ActionsDropdown({
   const { t } = useTranslation(["components/dialog", "views/replay", "common"]);
 
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           className="flex items-center gap-2"

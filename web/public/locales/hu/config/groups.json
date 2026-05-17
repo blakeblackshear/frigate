@@ -16,5 +16,43 @@
         "cameras": {
             "appearance": "Kinézet"
         }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Globális érzékenység",
+            "algorithm": "Globális Algoritmus"
+        },
+        "cameras": {
+            "sensitivity": "Érzékenység",
+            "algorithm": "Algoritmus"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Globális Felbontás",
+            "tracking": "Globális követés"
+        },
+        "cameras": {
+            "resolution": "Felbontás",
+            "tracking": "Követés (tracking)"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Globális kijelző"
+        },
+        "cameras": {
+            "display": "Kijelző"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Globális objektumkövetés",
+            "filtering": "Globális szűrés (filtering)"
+        },
+        "cameras": {
+            "tracking": "Követés",
+            "filtering": "Szűrés (filtering)"
+        }
     }
 }

@@ -89,7 +89,8 @@
     "cameraMqtt": "MQTT de la caméra",
     "maintenance": "Maintenance",
     "uiSettings": "Paramètres IU",
-    "profiles": "Profils"
+    "profiles": "Profils",
+    "systemGo2rtcStreams": "Streams go2rtc"
   },
   "dialog": {
     "unsavedChanges": {
@@ -448,6 +449,17 @@
         "error": {
           "mustBeGreaterOrEqualTo": "Le seuil de vitesse doit être supérieur ou égal à 0.1."
         }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "L'ID ne doit pas être vide.",
+          "alreadyExists": "Un masque avec cet ID existe déjà pour cette caméra."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Le nom ne doit pas être vide."
+        }
       }
     },
     "zones": {
@@ -572,7 +584,11 @@
     },
     "restart_required": "Redémarrage requis (masques/zones changés)",
     "objectMaskLabel": "Masque d'objet {{number}}",
-    "motionMaskLabel": "Masque de mouvement {{number}}"
+    "motionMaskLabel": "Masque de mouvement {{number}}",
+    "disabledInConfig": "Cet objet est désactivé dans le fichier de configuration",
+    "addDisabledProfile": "Ajouter dans la configuration de base d’abord puis remplacez le dans le profil",
+    "profileBase": "(base)",
+    "profileOverride": "(remplacer)"
   },
   "motionDetectionTuner": {
     "title": "Réglage de la détection de mouvement",
@@ -1308,7 +1324,11 @@
     "backToSettings": "Retour aux paramètres de la caméra",
     "streams": {
       "title": "Activer / désactiver les caméras",
-      "desc": "Désactive temporairement une caméra jusqu'au redémarrage de Frigate. La désactivation d'une caméra interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l'enregistrement et le débogage deviennent alors indisponibles.<br /><em>Remarque : cela n'affecte pas les rediffusions des flux go2rtc.</em>"
+      "desc": "Désactive temporairement une caméra jusqu'au redémarrage de Frigate. La désactivation d'une caméra interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l'enregistrement et le débogage deviennent alors indisponibles.<br /><em>Remarque : cela n'affecte pas les rediffusions des flux go2rtc.</em>",
+      "enableLabel": "Caméras activées",
+      "disableLabel": "Caméra désactivées",
+      "disableDesc": "Activer une caméra qui n'est pas visible dans l'interface et désactivée dans la configuration. Un redémarrage de Frigate est nécessaire après l'activation.",
+      "enableSuccess": "Activer {{cameraName}} dans la configuration. Redémarrer Frigate pour appliquer les changements."
     },
     "cameraConfig": {
       "add": "Ajouter une caméra",
@@ -1338,6 +1358,25 @@
       "toast": {
         "success": "La caméra {{cameraName}} a été enregistrée avec succès"
       }
+    },
+    "deleteCamera": "Supprimer la caméra",
+    "deleteCameraDialog": {
+      "title": "Supprimer la caméra",
+      "description": "Supprimer la caméra va supprimer de façon permanente les enregistrements, les objets suivis, et la configuration de la caméra. Tous les streams go2rtc associés à la caméra devront être supprimés manuellement.",
+      "selectPlaceholder": "Choisir une caméra...",
+      "confirmTitle": "Êtes-vous sûr?",
+      "confirmWarning": "Supprimer <strong>\n{{cameraName}}\n</strong> ne peut être annulé.",
+      "deleteExports": "Supprimer aussi les exports de cette caméra",
+      "confirmButton": "Suppression permanente",
+      "success": "Caméra {{cameraName}} supprimée avec succès",
+      "error": "Impossible de supprimer la caméra {{cameraName}}"
+    },
+    "profiles": {
+      "selectLabel": "Choisir un profil",
+      "description": "Configurer quelles caméras sont activées ou désactivées quand un profil est activé. Les caméras activées avec \"Inherit\" conservent leur statut de base.",
+      "inherit": "Hériter",
+      "enabled": "Activé",
+      "disabled": "Désactivé"
     }
   },
   "cameraReview": {
@@ -1392,6 +1431,9 @@
     "value": {
       "label": "Nouvelle valeur",
       "reset": "Réinitialiser"
+    },
+    "profile": {
+      "label": "Profil"
     }
   },
   "button": {
@@ -1405,5 +1447,115 @@
     "sync": {
       "title": "Synchronisation du Média"
     }
-  }
+  },
+  "configMessages": {
+    "lpr": {
+      "vehicleNotTracked": "La reconnaissance de plaque d'immatriculation requiert que 'voiture' ou 'moto' soit suivi.",
+      "globalDisabled": "La reconnaissance de numéro d'immatriculation n'est pas activée au niveau global. Activez-la dans les paramètres globaux pour que la reconnaissance de plaques fonctionne au niveau caméra."
+    },
+    "review": {
+      "recordDisabled": "L'enregistrement est désactivé, aucune révision ne sera générée.",
+      "detectDisabled": "La détection d'objet est désactivée. Les révisions requièrent que les objets détectés catégorisent les alertes et les détections.",
+      "allNonAlertDetections": "Toutes les activités de non alerte seront incluses en tant que détections."
+    },
+    "audio": {
+      "noAudioRole": "Aucun flux ne possède de rôle audio défini. Vous devez activer le rôle audio afin de faire fonctionner la détection audio."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "La détection audio n'est pas active pour cette caméra. La transcription audio nécessite que la détection audio soit active."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Il n'est pas recommandé de régler la détection au-delà de 5 FPS."
+    },
+    "faceRecognition": {
+      "globalDisabled": "La reconnaissance faciale n'est pas activée au niveau global. Activez-la dans les paramètres globaux pour que la reconnaissance faciale fonctionne au niveau caméra.",
+      "personNotTracked": "La reconnaissance faciale requiert que l'objet 'person' soit suivie. Assurez-vous que 'person' soit dans la liste d'objets suivis."
+    }
+  },
+  "go2rtcStreams": {
+    "ffmpeg": {
+      "audioMp3": "Transcoder en PM3",
+      "audioExclude": "Exclure",
+      "hardwareNone": "Pas d'accélération matérielle",
+      "hardwareAuto": "Accélération matérielle automatique",
+      "audioCopy": "Copier",
+      "audioAac": "Transcoder en AAC",
+      "audioOpus": "Transcoder vers Opus",
+      "audioPcmu": "Transcoder vers PCM μ-law",
+      "video": "Vidéo",
+      "audio": "Audio",
+      "hardware": "Accélération matérielle",
+      "videoCopy": "Copier",
+      "videoH264": "Transcoder vers H.264",
+      "videoH265": "Transcoder vers H.265",
+      "videoExclude": "Exclure",
+      "useFfmpegModule": "Utiliser le mode de compatibilité (ffmpeg)",
+      "audioPcma": "Transcoder vers PCM A-law",
+      "audioPcm": "Transcoder vers PCM"
+    },
+    "renameStream": "Renommer le flux",
+    "renameStreamDesc": "Saisir un nouveau nom pour ce flux. Le renommage d'un flux peut induire un problème avec les caméras ou les autres flux qui le référence par nom.",
+    "addStream": "Ajouter un flux",
+    "title": "Flux go2rtc",
+    "description": "Gérer les paramètres de flux go2rtc pour la rediffusion de caméra. Chaque flux possède un nom et une ou plusieurs URLs source.",
+    "deleteStream": "Supprimer flux",
+    "deleteStreamConfirm": "Êtes-vous sûr de vouloir supprimer le flux \"{{streamName}}\" ? Les caméras qui référencent ce flux pourraient ne plus fonctionner.",
+    "noStreams": "Aucun flux go2rtc configuré. Ajoutez un flux pour commencer.",
+    "validation": {
+      "nameRequired": "Le nom de flux est obligatoire",
+      "nameDuplicate": "Un flux avec ce nom existe déjà",
+      "nameInvalid": "Le nom de flux ne peut contenir que des lettres, nombres, underscores et tirets",
+      "urlRequired": "Au moins une URL est requise"
+    },
+    "newStreamName": "Nouveau nom de flux",
+    "addUrl": "Ajouter URL",
+    "streamName": "Nom de flux",
+    "streamNamePlaceholder": "p. ex., porte_entree",
+    "streamUrlPlaceholder": "p. ex., rtsp://utilisateur:motpasse@192.168.1.100/flux",
+    "addStreamDesc": "Saisir un nom pour ce nouveau flux. Ce nom sera utilisé pour référencer le flux dans les paramètres de votre caméra."
+  },
+  "onvif": {
+    "profileAuto": "Automatique",
+    "profileLoading": "Chargement des profils..."
+  },
+  "profiles": {
+    "enableSwitch": "Activer les profils",
+    "enabledDescription": "Les profils sont actifs. Créer un nouveau profil ci-dessous, naviguer vers la section de configuration de la caméra afin de faire vos changements, et les sauvegarder afin de les prendre en compte.",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Doit comporter au moins 2 caractères",
+      "mustNotContainPeriod": "Ne doit pas contenir de points",
+      "alreadyExists": "Un profil avec cet identifiant existe déjà"
+    },
+    "deactivated": "Profil désactivé",
+    "noProfiles": "Aucun profil défini.",
+    "noOverrides": "Aucune surcharge",
+    "cameraCount_one": "{{count}} caméra",
+    "cameraCount_many": "{{count}} caméras",
+    "cameraCount_other": "{{count}} caméras",
+    "columnCamera": "Caméra",
+    "columnOverrides": "Surcharges de profil",
+    "baseConfig": "Configuration de base",
+    "addProfile": "Ajouter un profil",
+    "newProfile": "Nouveau profil",
+    "friendlyNameLabel": "Nom profil",
+    "profileIdLabel": "ID profil",
+    "profileIdDescription": "Identifiant interne utilisé dans la configuration et automatisations",
+    "nameInvalid": "Ne sont autorisés que les lettres minuscules, nombres et underscores",
+    "nameDuplicate": "Un profil avec ce nom existe déjà",
+    "renameProfile": "Renommer profil",
+    "renameSuccess": "Profil renommé en '{{profile}}'",
+    "deleteProfile": "Supprimer Profil",
+    "deleteProfileConfirm": "Supprimer profil \"{{profile}}\" de toutes les caméras ? Ceci ne peut être annulé.",
+    "deleteSuccess": "Le profil '{{profile}}' a été supprimé",
+    "createSuccess": "Le profil '{{profile}}' a été créé",
+    "removeOverride": "Supprimer le profil surchargé",
+    "deleteSection": "Supprimer la section de surcharges",
+    "deleteSectionConfirm": "Supprimer les surcharges de {{section}} pour le profil {{profile}} sur {{camera}} ?",
+    "deleteSectionSuccess": "Surcharges de {{section}} supprimées pour {{profile}}",
+    "disabledDescription": "Les profils vous permettent de définir des ensembles nommés de surcharges de configuration de caméra (p. ex. armé, absent, nuit) qui peuvent être activés à la demande."
+  },
+  "unsavedChanges": "Vous avez des changements non sauvegardés",
+  "confirmReset": "Confirmer réinitialisation",
+  "resetToDefaultDescription": "Cela va réinitialiser les paramètres dans cette section avec les valeurs d'usine. Cette action ne peut être annulée.",
+  "resetToGlobalDescription": "Ceci va réinitialiser les paramètres de cette section vers les paramètres globaux. Cette action ne peut être annulée."
 }

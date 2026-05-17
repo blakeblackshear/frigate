@@ -1,8 +1,42 @@
+import type { FrigateConfig } from "@/types/frigateConfig";
 import type { SectionConfigOverrides } from "./types";
+
+// Attribute labels (face, license_plate, Frigate+ couriers like DHL/Amazon,
+// etc.) are populated into objects.filters by the backend even when the
+// model can't actually detect them. They aren't user-settable, so hide any
+// `filters.<attr>` patterns from forms and override comparisons.
+const hideAttributeFilters = (config: FrigateConfig): string[] =>
+  (config.model?.all_attributes ?? []).map((attr) => `filters.${attr}`);
 
 const objects: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/object_filters",
+    messages: [
+      {
+        key: "detect-disabled",
+        messageKey: "configMessages.detect.disabled",
+        severity: "info",
+        condition: (ctx) =>
+          ctx.level === "camera" &&
+          ctx.fullCameraConfig?.detect?.enabled === false,
+      },
+    ],
+    fieldMessages: [
+      {
+        key: "genai-no-descriptions-provider",
+        field: "genai.enabled",
+        messageKey: "configMessages.objects.genaiNoDescriptionsProvider",
+        severity: "warning",
+        position: "before",
+        condition: (ctx) => {
+          const providers = ctx.fullConfig.genai;
+          if (!providers || Object.keys(providers).length === 0) return true;
+          return !Object.values(providers).some((agent) =>
+            agent.roles?.includes("descriptions"),
+          );
+        },
+      },
+    ],
     fieldDocs: {
       "filters.min_area": "/configuration/object_filters#object-area",
       "filters.max_area": "/configuration/object_filters#object-area",
@@ -26,6 +60,7 @@ const objects: SectionConfigOverrides = {
       "filters.*.raw_mask",
       "filters.mask",
       "filters.raw_mask",
+      hideAttributeFilters,
     ],
     advancedFields: ["genai"],
     uiSchema: {
@@ -99,6 +134,7 @@ const objects: SectionConfigOverrides = {
       "filters.mask",
       "filters.raw_mask",
       "genai.required_zones",
+      hideAttributeFilters,
     ],
   },
   camera: {
@@ -123,6 +159,7 @@ const objects: SectionConfigOverrides = {
       "filters.*.raw_mask",
       "filters.mask",
       "filters.raw_mask",
+      hideAttributeFilters,
     ],
     advancedFields: [],
   },

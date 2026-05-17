@@ -7,7 +7,8 @@ import threading
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
-from frigate.config import CameraConfig, FfmpegConfig
+from frigate.config import CameraConfig, FfmpegConfig, FrigateConfig
+from frigate.output.ws_auth import ws_has_camera_access
 
 logger = logging.getLogger(__name__)
 
@@ -102,12 +103,14 @@ class BroadcastThread(threading.Thread):
         converter: FFMpegConverter,
         websocket_server: Any,
         stop_event: MpEvent,
+        config: FrigateConfig,
     ):
         super().__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
         self.stop_event = stop_event
+        self.config = config
 
     def run(self) -> None:
         while not self.stop_event.is_set():
@@ -122,6 +125,7 @@ class BroadcastThread(threading.Thread):
                     if (
                         not ws.terminated
                         and ws.environ["PATH_INFO"] == f"/{self.camera}"
+                        and ws_has_camera_access(ws, self.camera, self.config)
                     ):
                         try:
                             ws.send(buf, binary=True)
@@ -135,7 +139,11 @@ class BroadcastThread(threading.Thread):
 
 class JsmpegCamera:
     def __init__(
-        self, config: CameraConfig, stop_event: MpEvent, websocket_server: Any
+        self,
+        config: CameraConfig,
+        frigate_config: FrigateConfig,
+        stop_event: MpEvent,
+        websocket_server: Any,
     ) -> None:
         self.config = config
         self.input: queue.Queue[bytes] = queue.Queue(maxsize=config.detect.fps)
@@ -154,7 +162,11 @@ class JsmpegCamera:
             config.live.quality,
         )
         self.broadcaster = BroadcastThread(
-            config.name or "", self.converter, websocket_server, stop_event
+            config.name or "",
+            self.converter,
+            websocket_server,
+            stop_event,
+            frigate_config,
         )
 
         self.converter.start()

@@ -1,5 +1,18 @@
 {
     "name": {
-        "label": "Kamera ismi"
-    }
+        "label": "Kamera adı",
+        "description": "Kamera adı gereklidir"
+    },
+    "friendly_name": {
+        "label": "Kolay ad",
+        "description": "Frigate arayüzünde kullanılacak kolay ad"
+    },
+    "enabled": {
+        "label": "Etkin",
+        "description": "Etkin"
+    },
+    "audio": {
+        "label": "Ses olayları"
+    },
+    "label": "Kamera Konfigürasyonu"
 }

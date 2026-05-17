@@ -4,6 +4,7 @@ import base64
 import json
 import logging
 import os
+import sys
 import threading
 from json.decoder import JSONDecodeError
 from multiprocessing.synchronize import Event as MpEvent
@@ -52,6 +53,14 @@ class EmbeddingProcess(FrigateProcess):
             self.stop_event,
         )
         maintainer.start()
+        maintainer.join()
+
+        # If the maintainer thread exited but no shutdown was requested, it
+        # crashed. Surface as a non-zero exit so the watchdog restarts us
+        # instead of treating the silent thread death as a clean shutdown.
+        if not self.stop_event.is_set():
+            logger.error("Embeddings maintainer thread exited unexpectedly")
+            sys.exit(1)
 
 
 class EmbeddingsContext:

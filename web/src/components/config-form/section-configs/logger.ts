@@ -6,6 +6,16 @@ const logger: SectionConfigOverrides = {
     restartRequired: ["default", "logs"],
     fieldOrder: ["default", "logs"],
     advancedFields: ["logs"],
+    uiSchema: {
+      default: {
+        "ui:options": { enumI18nPrefix: "logger.logLevel" },
+      },
+      logs: {
+        additionalProperties: {
+          "ui:options": { enumI18nPrefix: "logger.logLevel" },
+        },
+      },
+    },
   },
 };
 

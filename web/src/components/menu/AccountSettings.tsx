@@ -81,7 +81,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
   };
 
   return (
-    <Container modal={!isDesktop}>
+    <Container>
       <Tooltip>
         <Trigger asChild>
           <TooltipTrigger asChild>

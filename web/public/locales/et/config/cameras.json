@@ -2,5 +2,21 @@
     "name": {
         "label": "Kaamera nimi",
         "description": "Kaamera nimi on nõutav"
+    },
+    "friendly_name": {
+        "label": "Sõbralik nimi",
+        "description": "Frigate UI-s kasutatud kaamerasõbralik nimi"
+    },
+    "enabled": {
+        "label": "Kasutusel",
+        "description": "Kasutusel"
+    },
+    "audio": {
+        "label": "Helisündmused"
+    },
+    "birdseye": {
+        "mode": {
+            "label": "Jälgimisrežiim"
+        }
     }
 }

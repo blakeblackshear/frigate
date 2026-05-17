@@ -43,7 +43,7 @@
     "globalMotion": "Detecció de moviment",
     "globalObjects": "Objectes",
     "globalReview": "Revisió",
-    "globalAudioEvents": "Esdeveniments d'àudio",
+    "globalAudioEvents": "Detecció d'àudio",
     "globalLivePlayback": "Reproducció en directe",
     "globalTimestampStyle": "Estil de la marca horària",
     "systemDatabase": "Base de dades",
@@ -73,7 +73,7 @@
     "cameraMotion": "Detecció de moviment",
     "cameraObjects": "Objectes",
     "cameraConfigReview": "Revisió",
-    "cameraAudioEvents": "Esdeveniments d'àudio",
+    "cameraAudioEvents": "Detecció d'àudio",
     "cameraAudioTranscription": "Transcripció d'àudio",
     "cameraNotifications": "Notificacions",
     "cameraLivePlayback": "Reproducció en directe",
@@ -1280,7 +1280,8 @@
         },
         "hikvision": {
           "substreamWarning": "El substream 1 està bloquejat a una resolució baixa. Moltes càmeres Hikvision suporten subfluxos addicionals que han d'estar habilitats a la configuració de la càmera. Es recomana comprovar i utilitzar aquests corrents si estan disponibles."
-        }
+        },
+        "resolutionUnknown": "La resolució d'aquest flux no s'ha pogut investigar. Heu d'establir manualment la resolució de detecció a Configuració o a la configuració."
       }
     }
   },
@@ -1297,7 +1298,13 @@
       "enableDesc": "Inhabilita temporalment una càmera habilitada fins que es reiniciï Frigate. La inhabilitació d'una càmera atura completament el processament de Frigate dels fluxos d'aquesta càmera. La detecció, l'enregistrament i la depuració no estaran disponibles.<br /> <em>Nota: això no desactiva les retransmissions de go2rtc.</em>",
       "disableLabel": "Càmeres inhabilitades",
       "disableDesc": "Habilita una càmera que actualment no és visible a la interfície d'usuari i està desactivada a la configuració. Es requereix un reinici de Frigate després d'activar-la.",
-      "enableSuccess": "{{cameraName}} activat a la configuració. Reinicia Frigate per aplicar els canvis."
+      "enableSuccess": "{{cameraName}} activat a la configuració. Reinicia Frigate per aplicar els canvis.",
+      "friendlyName": {
+        "edit": "Edita el nom de la pantalla de la càmera",
+        "title": "Edita el nom de la pantalla",
+        "description": "Estableix el nom amigable que es mostra per a aquesta càmera a tota la interfície d'usuari de la Fragata. Deixeu-ho en blanc per utilitzar l'ID de la càmera.",
+        "rename": "Canvia el nom"
+      }
     },
     "cameraConfig": {
       "add": "Afegeix una càmera",
@@ -1347,6 +1354,14 @@
       "inherit": "Hereta",
       "enabled": "Habilitat",
       "disabled": "Desactivat"
+    },
+    "cameraType": {
+      "title": "Tipus de càmera",
+      "label": "Tipus de càmera",
+      "description": "Estableix el tipus per a cada càmera. Les càmeres LPR dedicades són càmeres d'un sol ús amb un potent zoom òptic per capturar matrícules en vehicles distants. La majoria de les càmeres haurien d'utilitzar el tipus de càmera normal llevat que la càmera sigui específicament per a LPR i tingui una vista molt centrada en les matrícules.",
+      "dedicatedLpr": "LPR dedicat",
+      "saveSuccess": "Tipus de càmera actualitzat per {{cameraName}}. Reinicia la fragata per aplicar els canvis.",
+      "normal": "Normal"
     }
   },
   "cameraReview": {
@@ -1659,7 +1674,16 @@
       "empty": "No hi ha etiquetes disponibles",
       "allNonAlertDetections": "Totes les activitats no alertes s'inclouran com a deteccions."
     },
-    "addCustomLabel": "Afegeix una etiqueta personalitzada..."
+    "addCustomLabel": "Afegeix una etiqueta personalitzada...",
+    "genaiModel": {
+      "placeholder": "Selecciona el model…",
+      "search": "Cerca models…",
+      "noModels": "No hi ha models disponibles"
+    },
+    "knownPlates": {
+      "namePlaceholder": "per exemple. Cotxe de la parella",
+      "platePlaceholder": "Matricula o regex"
+    }
   },
   "globalConfig": {
     "title": "Configuració global",
@@ -1704,7 +1728,22 @@
     "overriddenGlobal": "Sobreescrit (Global)",
     "overriddenGlobalTooltip": "Aquesta càmera anul·la la configuració global d'aquesta secció",
     "overriddenBaseConfig": "Sobreescrit (Configuració base)",
-    "overriddenBaseConfigTooltip": "El perfil {{profile}} substitueix la configuració d'aquesta secció"
+    "overriddenBaseConfigTooltip": "El perfil {{profile}} substitueix la configuració d'aquesta secció",
+    "overriddenInCameras": {
+      "label_one": "Sobreescrit a la càmera {{count}}",
+      "label_many": "Sobreescrit en {{count}} càmeres",
+      "label_other": "Sobreescrit en {{count}} càmeres",
+      "tooltip_one": "{{count}} la càmera anul·la els valors d'aquesta secció. Feu clic per veure els detalls.",
+      "tooltip_many": "{{count}} càmeres substitueixen els valors d'aquesta secció. Feu clic per veure els detalls.",
+      "tooltip_other": "{{count}} càmeres substitueixen els valors d'aquesta secció. Feu clic per veure els detalls.",
+      "heading_one": "Aquesta secció global té camps que estan sobreescrits a la càmera {{count}}.",
+      "heading_many": "Aquesta secció global té camps que estan sobreescrits en {{count}} càmeres.",
+      "heading_other": "Aquesta secció global té camps que estan sobreescrits en {{count}} càmeres.",
+      "othersField_one": "{{count}} altre",
+      "othersField_many": "{{count}} altres",
+      "othersField_other": "{{count}} altres",
+      "profilePrefix": "Perfil {{profile}}: {{fields}}"
+    }
   },
   "profiles": {
     "title": "Perfils",
@@ -1805,7 +1844,8 @@
     "review": {
       "recordDisabled": "L'enregistrament està desactivat, els elements de revisió no es generaran.",
       "detectDisabled": "La detecció d'objectes està desactivada. Els elements de revisió requereixen objectes detectats per categoritzar alertes i deteccions.",
-      "allNonAlertDetections": "Totes les activitats no alertes s'inclouran com a deteccions."
+      "allNonAlertDetections": "Totes les activitats no alertes s'inclouran com a deteccions.",
+      "genaiImageSourceRecordingsRecordDisabled": "La font d'imatges està configurada com a 'enregistraments', però l'enregistrament està desactivat. La fragata tornarà a la vista prèvia de les imatges."
     },
     "audio": {
       "noAudioRole": "Cap flux té definit el rol d'àudio. Heu d'habilitar el rol d'àudio per a la detecció d'àudio perquè funcioni."
@@ -1814,15 +1854,18 @@
       "audioDetectionDisabled": "La detecció d'àudio no està activada per a aquesta càmera. La transcripció d'àudio requereix que la detecció d'àudio estigui activa."
     },
     "detect": {
-      "fpsGreaterThanFive": "No es recomana establir el detect FPS superior a 5."
+      "fpsGreaterThanFive": "No es recomana establir el detect FPS superior a 5. Els valors més alts poden causar problemes de rendiment i no proporcionaran cap benefici.",
+      "disabled": "La detecció d'objectes està desactivada. Les instantànies, articles de revisió i enriquiments com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran."
     },
     "faceRecognition": {
-      "globalDisabled": "El reconeixement de cares no està habilitat a nivell global. Habilita-ho en la configuració global per al reconeixement facial a nivell de càmera per funcionar.",
-      "personNotTracked": "El reconeixement de cares requereix que l'objecte 'persona' sigui rastrejat. Assegureu-vos que «persona» estigui a la llista de seguiment d'objectes."
+      "globalDisabled": "L'enriquiment del reconeixement facial s'ha d'habilitar perquè les funcions de reconeixement facial funcionin en aquesta càmera.",
+      "personNotTracked": "El reconeixement de cares requereix que l'objecte 'persona' sigui rastrejat. Habilita «persona» en objectes per a aquesta càmera.",
+      "modelSizeLarge": "El model 'gran' requereix una GPU o NPU per a un rendiment raonable. Usa «petit» en sistemes només de CPU."
     },
     "lpr": {
-      "globalDisabled": "El reconeixement de la matrícula no està habilitat a nivell global. Habilita-ho en la configuració global per al funcionament de LPR a nivell de càmera.",
-      "vehicleNotTracked": "El reconeixement de la matrícula requereix que es faci un seguiment del 'cotxe' o de la 'motocicleta'."
+      "globalDisabled": "L'enriquiment de reconeixement de matrícules ha d'estar habilitat perquè les funcions LPR funcionin en aquesta càmera.",
+      "vehicleNotTracked": "El reconeixement de la matrícula requereix que es faci un seguiment del 'cotxe' o de la 'motocicleta'.",
+      "modelSizeLarge": "El model 'gran' està optimitzat per a matrícules multilínies. El model 'petit' proporciona un millor rendiment sobre 'gran' i s'ha d'utilitzar tret que la vostra regió utilitzi formats de placa multilínia."
     },
     "record": {
       "noRecordRole": "Cap flux té el rol de registre definit. L'enregistrament no funcionarà."
@@ -1836,6 +1879,12 @@
     "detectors": {
       "mixedTypes": "Tots els detectors han d'utilitzar el mateix tipus. Elimina els detectors existents per utilitzar un tipus diferent.",
       "mixedTypesSuggestion": "Tots els detectors han d'utilitzar el mateix tipus. Suprimiu detectors existents o seleccioneu {{type}}."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "Heu de configurar un proveïdor de GenAI amb el rol 'descripcions' per a les descripcions que es generaran."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "La mida 'petita' amb el model Jina V2 té un alt cost de RAM i d'inferència. Es recomana el model 'gran' amb una GPU discreta."
     }
   }
 }

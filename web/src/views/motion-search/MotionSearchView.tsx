@@ -357,7 +357,7 @@ export default function MotionSearchView({
         },
       )
       .then((response) => {
-        if (response.status == 200) {
+        if (response.status < 300) {
           toast.success(
             t("export.toast.success", { ns: "components/dialog" }),
             {

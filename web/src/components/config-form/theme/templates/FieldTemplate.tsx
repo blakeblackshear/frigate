@@ -497,7 +497,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
         htmlFor={id}
         className={cn(
           "text-sm font-medium",
-          isModified && "text-danger",
+          isModified && "text-unsaved",
           hasFieldErrors && "text-destructive",
         )}
       >
@@ -516,7 +516,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
     return (
       <Label
         htmlFor={id}
-        className={cn("text-sm font-medium", isModified && "text-danger")}
+        className={cn("text-sm font-medium", isModified && "text-unsaved")}
       >
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
@@ -535,7 +535,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
         htmlFor={id}
         className={cn(
           "text-sm font-medium",
-          isModified && "text-danger",
+          isModified && "text-unsaved",
           hasFieldErrors && "text-destructive",
         )}
       >

@@ -1,21 +1,37 @@
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+
+ObservationItem = Annotated[str, StringConstraints(min_length=20, max_length=200)]
 
 
 class ReviewMetadata(BaseModel):
     model_config = ConfigDict(extra="ignore", protected_namespaces=())
 
-    title: str = Field(
-        description="A short title characterizing what took place and where, under 10 words."
+    observations: list[ObservationItem] = Field(
+        ...,
+        min_length=3,
+        max_length=8,
+        description="Enumerate the significant observations across all frames, in chronological order.",
     )
     scene: str = Field(
-        description="A chronological narrative of what happens from start to finish."
+        min_length=150,
+        max_length=600,
+        description="A chronological narrative of what happens from start to finish, drawing directly from the items in observations.",
+    )
+    title: str = Field(
+        max_length=80,
+        description="Title for the activity.",
     )
     shortSummary: str = Field(
-        description="A brief 2-sentence summary of the scene, suitable for notifications."
+        min_length=70,
+        max_length=140,
+        description="A brief summary for the activity.",
     )
     confidence: float = Field(
         ge=0.0,
-        description="Confidence in the analysis, from 0 to 1.",
+        le=1.0,
+        description="Confidence in the analysis as a decimal between 0.0 and 1.0, where 0.0 means no confidence and 1.0 means complete confidence. Express ONLY as a decimal.",
     )
     potential_threat_level: int = Field(
         ge=0,

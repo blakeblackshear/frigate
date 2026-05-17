@@ -46,6 +46,7 @@
   "livePlayerRequiredIOSVersion": "Bu canlı yayın türü için iOS 17.1 veya daha yeni sürüm gereklidir.",
   "submitFrigatePlus": {
     "title": "Bu kare Frigate+'ya gönderilsin mi?",
-    "submit": "Gönder"
+    "submit": "Gönder",
+    "previewError": "Önizleme şuan aktif edilemiyor. Kayıt şuan mevcut olmayabilir."
   }
 }

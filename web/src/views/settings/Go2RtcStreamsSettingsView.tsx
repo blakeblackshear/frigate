@@ -380,10 +380,12 @@ export default function Go2RtcStreamsSettingsView({
         >
           {hasChanges && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-danger">{t("unsavedChanges")}</span>
+              <span className="text-sm text-unsaved">
+                {t("unsavedChanges")}
+              </span>
             </div>
           )}
-          <div className="flex w-full items-center gap-2 md:w-auto">
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
             {hasChanges && (
               <Button
                 onClick={onReset}

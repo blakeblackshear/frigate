@@ -93,5 +93,7 @@
       "trainFailed": "学習に失敗しました: {{errorMessage}}",
       "updateFaceScoreFailed": "顔スコアの更新に失敗しました: {{errorMessage}}"
     }
-  }
+  },
+  "reclassifyFaceAs": "顔を再分類する:",
+  "reclassifyFace": "顔の再分類"
 }

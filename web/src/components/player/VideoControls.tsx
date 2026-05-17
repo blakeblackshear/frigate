@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { LuFolderX } from "react-icons/lu";
-import { isDesktop, isMobileOnly, isSafari } from "react-device-detect";
+import { isMobileOnly, isSafari } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
   DropdownMenu,
@@ -198,7 +198,7 @@ export default function VideoControls({
   return (
     <div
       className={cn(
-        "z-50 flex w-auto items-center justify-between gap-4 rounded-lg bg-background/60 px-4 py-2 text-primary sm:flex-nowrap sm:gap-8",
+        "z-50 flex w-auto select-none items-center justify-between gap-4 rounded-lg bg-background/60 px-4 py-2 text-primary sm:flex-nowrap sm:gap-8",
         className,
         isMobileOnly &&
           Object.values(features).filter((feat) => feat).length >
@@ -246,7 +246,6 @@ export default function VideoControls({
       )}
       {features.playbackRate && (
         <DropdownMenu
-          modal={!isDesktop}
           onOpenChange={(open) => {
             if (setControlsOpen) {
               setControlsOpen(open);

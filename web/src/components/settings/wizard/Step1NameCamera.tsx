@@ -377,7 +377,7 @@ export default function Step1NameCamera({
                           );
                           return selectedBrand &&
                             selectedBrand.value != "other" ? (
-                            <Popover modal={true}>
+                            <Popover>
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="ghost"

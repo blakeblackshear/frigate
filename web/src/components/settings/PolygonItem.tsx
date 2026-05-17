@@ -19,7 +19,7 @@ import { LuCopy, LuPencil } from "react-icons/lu";
 import { FaDrawPolygon, FaObjectGroup } from "react-icons/fa";
 import { BsPersonBoundingBox } from "react-icons/bs";
 import { HiOutlineDotsVertical, HiTrash } from "react-icons/hi";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { toRGBColorString } from "@/utils/canvasUtil";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { useCallback, useMemo, useState } from "react";
@@ -524,7 +524,7 @@ export default function PolygonItem({
 
         {isMobile && (
           <>
-            <DropdownMenu modal={!isDesktop}>
+            <DropdownMenu>
               <DropdownMenuTrigger>
                 <HiOutlineDotsVertical className="size-5" />
               </DropdownMenuTrigger>

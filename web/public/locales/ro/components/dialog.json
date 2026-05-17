@@ -59,6 +59,14 @@
       "desc": {
         "selected": "Ești sigur că vrei să ștergi toate videoclipurile înregistrate asociate acestui element de revizuire?<br /><br />Ține apăsată tasta <em>Shift</em> pentru a sări peste această confirmare pe viitor."
       }
+    },
+    "shareTimestamp": {
+      "label": "Partajează timestamp-ul",
+      "title": "Partajează timestamp-ul",
+      "description": "Partajează un URL cu timestamp al poziției actuale din player sau alege un timestamp personalizat. Reține că acesta nu este un URL de partajare publică și este accesibil doar utilizatorilor care au acces la Frigate și la această cameră.",
+      "custom": "Timestamp personalizat",
+      "button": "Partajează URL-ul cu timestamp",
+      "shareTitle": "Timestamp review Frigate: {{camera}}"
     }
   },
   "export": {
@@ -86,19 +94,80 @@
     "toast": {
       "success": "Exportul a început cu succes. Vizualizați fișierul pe pagina de exporturi.",
       "error": {
-        "failed": "Eroare la pornirea exportului: {{error}}",
+        "failed": "Nu s-a putut adăuga exportul în coadă: {{error}}",
         "endTimeMustAfterStartTime": "Ora de sfârșit trebuie să fie după ora de început",
         "noVaildTimeSelected": "Nu a fost selectat un interval de timp valid"
       },
-      "view": "Vizualizează"
+      "view": "Vizualizează",
+      "queued": "Export pus la coadă. Vezi progresul pe pagina de exporturi.",
+      "batchSuccess_one": "A început 1 export. Se deschide cazul acum.",
+      "batchSuccess_few": "Au început {{count}} exporturi. Se deschide cazul acum.",
+      "batchSuccess_other": "Au început {{count}} de exporturi. Se deschide cazul acum.",
+      "batchPartial": "Au început {{successful}} din {{total}} exporturi. Camere eșuate: {{failedCameras}}",
+      "batchFailed": "Eșec la pornirea a {{total}} exporturi. Camere eșuate: {{failedCameras}}",
+      "batchQueuedSuccess_one": "1 export pus la coadă. Se deschide cazul acum.",
+      "batchQueuedSuccess_few": "{{count}} exporturi puse la coadă. Se deschide cazul acum.",
+      "batchQueuedSuccess_other": "{{count}} de exporturi puse la coadă. Se deschide cazul acum.",
+      "batchQueuedPartial": "S-au pus la coadă {{successful}} din {{total}} exporturi. Camere eșuate: {{failedCameras}}",
+      "batchQueueFailed": "Eșec la punerea la coadă a {{total}} exporturi. Camere eșuate: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Salvează exportul",
-      "previewExport": "Previzualizează exportul"
+      "previewExport": "Previzualizează exportul",
+      "queueingExport": "Se adaugă exportul la coadă...",
+      "useThisRange": "Folosește acest interval"
     },
     "case": {
       "label": "Caz",
-      "placeholder": "Selectează caz"
+      "placeholder": "Selectează caz",
+      "newCaseOption": "Creează un caz nou",
+      "newCaseNamePlaceholder": "Nume caz nou",
+      "newCaseDescriptionPlaceholder": "Descrierea cazului",
+      "nonAdminHelp": "Un caz nou va fi creat pentru aceste exporturi."
+    },
+    "queueing": "Se adaugă exportul la coadă...",
+    "tabs": {
+      "export": "O singură cameră",
+      "multiCamera": "Mai multe camere"
+    },
+    "multiCamera": {
+      "timeRange": "Interval de timp",
+      "selectFromTimeline": "Selectează din timeline",
+      "cameraSelection": "Camere",
+      "cameraSelectionHelp": "Camerele cu obiecte urmărite în acest interval de timp sunt pre-selectate",
+      "checkingActivity": "Se verifică activitatea camerei...",
+      "noCameras": "Nu sunt camere disponibile",
+      "detectionCount_one": "1 obiect urmărit",
+      "detectionCount_few": "{{count}} obiecte urmărite",
+      "detectionCount_other": "{{count}} de obiecte urmărite",
+      "nameLabel": "Nume export",
+      "namePlaceholder": "Nume de bază opțional pentru aceste exporturi",
+      "queueingButton": "Se adaugă exporturile la coadă...",
+      "exportButton_one": "Exportă 1 cameră",
+      "exportButton_few": "Exportă {{count}} camere",
+      "exportButton_other": "Exportă {{count}} de camere"
+    },
+    "multi": {
+      "title_one": "Exportă 1 recenzie",
+      "title_few": "Exportă {{count}} recenzii",
+      "title_other": "Exportă {{count}} de recenzii",
+      "description": "Exportă fiecare recenzie selectată. Toate exporturile vor fi grupate sub un singur caz.",
+      "descriptionNoCase": "Exportă fiecare recenzie selectată.",
+      "caseNamePlaceholder": "Export recenzie - {{date}}",
+      "exportButton_one": "Exportă 1 recenzie",
+      "exportButton_few": "Exportă {{count}} recenzii",
+      "exportButton_other": "Exportă {{count}} de recenzii",
+      "exportingButton": "Se exportă...",
+      "toast": {
+        "started_one": "A început 1 export. Se deschide cazul acum.",
+        "started_few": "Au început {{count}} exporturi. Se deschide cazul acum.",
+        "started_other": "Au început {{count}} de exporturi. Se deschide cazul acum.",
+        "startedNoCase_one": "A început 1 export.",
+        "startedNoCase_few": "Au început {{count}} exporturi.",
+        "startedNoCase_other": "Au început {{count}} de exporturi.",
+        "partial": "Au început {{successful}} din {{total}} exporturi. Au eșuat: {{failedItems}}",
+        "failed": "Eșec la pornirea a {{total}} exporturi. Au eșuat: {{failedItems}}"
+      }
     }
   },
   "streaming": {

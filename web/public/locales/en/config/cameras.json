@@ -13,7 +13,7 @@
     "description": "Enabled"
   },
   "audio": {
-    "label": "Audio events",
+    "label": "Audio detection",
     "description": "Settings for audio-based event detection for this camera.",
     "enabled": {
       "label": "Enable audio detection",
@@ -33,7 +33,11 @@
     },
     "filters": {
       "label": "Audio filters",
-      "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives."
+      "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives.",
+      "threshold": {
+        "label": "Minimum audio confidence",
+        "description": "Minimum confidence threshold for the audio event to be counted."
+      }
     },
     "enabled_in_config": {
       "label": "Original audio state",
@@ -485,6 +489,10 @@
       "hwaccel_args": {
         "label": "Export hwaccel args",
         "description": "Hardware acceleration args to use for export/transcode operations."
+      },
+      "max_concurrent": {
+        "label": "Maximum concurrent exports",
+        "description": "Maximum number of export jobs to process at the same time."
       }
     },
     "preview": {

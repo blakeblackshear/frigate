@@ -126,13 +126,20 @@ export default function DetailStream({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlsExpanded]);
 
-  // Re-seek on annotation offset change while settings panel is open
-  useEffect(() => {
-    const pinned = pinnedDetectTimestampRef.current;
-    if (!controlsExpanded || pinned == null) return;
-    const recordTime = pinned + annotationOffset / 1000;
-    onSeek(recordTime, false);
-  }, [controlsExpanded, annotationOffset, onSeek]);
+  // The slider invokes this atomically with setAnnotationOffset (inside the
+  // same flushSync) so currentTime advances in the same React commit as the
+  // offset. Without this, the overlay would render one frame with the new
+  // offset but the old currentTime, briefly resolving effectiveCurrentTime to
+  // the wrong detect-stream timestamp and making the bounding box vanish or
+  // jump.
+  const handleApplyOffset = useCallback(
+    (newOffset: number) => {
+      const pinned = pinnedDetectTimestampRef.current;
+      if (!controlsExpanded || pinned == null) return;
+      onSeek(pinned + newOffset / 1000, false);
+    },
+    [controlsExpanded, onSeek],
+  );
 
   // Ensure we initialize the active review when reviewItems first arrive.
   // This helps when the component mounts while the video is already
@@ -337,7 +344,7 @@ export default function DetailStream({
           </button>
           {controlsExpanded && (
             <div className="space-y-4 px-3 pb-5 pt-2">
-              <AnnotationOffsetSlider />
+              <AnnotationOffsetSlider onApplyOffset={handleApplyOffset} />
               <Separator />
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between">

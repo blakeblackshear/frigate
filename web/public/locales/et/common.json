@@ -181,7 +181,8 @@
     "classification": "Klassifikatsioon",
     "chat": "Vestlus",
     "actions": "Tegevused",
-    "profiles": "Profiilid"
+    "profiles": "Profiilid",
+    "features": "Funktsionaalsused"
   },
   "unit": {
     "speed": {

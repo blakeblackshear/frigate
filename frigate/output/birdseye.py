@@ -8,7 +8,6 @@ import os
 import queue
 import subprocess as sp
 import threading
-import time
 import traceback
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Optional
@@ -19,6 +18,7 @@ import numpy as np
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import BirdseyeModeEnum, FfmpegConfig, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE, INSTALL_DIR, UPDATE_BIRDSEYE_LAYOUT
+from frigate.output.ws_auth import ws_has_camera_access
 from frigate.util.image import (
     SharedMemoryFrameManager,
     copy_yuv_to_position,
@@ -62,8 +62,10 @@ def get_canvas_shape(width: int, height: int) -> tuple[int, int]:
     if round(a_w / a_h, 2) != round(width / height, 2):
         canvas_width = int(width // 4 * 4)
         canvas_height = int((canvas_width / a_w * a_h) // 4 * 4)
-        logger.warning(
-            f"The birdseye resolution is a non-standard aspect ratio, forcing birdseye resolution to {canvas_width} x {canvas_height}"
+        logger.error(
+            f"Birdseye resolution {width}x{height} is not a supported aspect ratio "
+            f"and may cause visual distortion; falling back to {canvas_width}x{canvas_height}. "
+            f"Set width and height to a supported aspect ratio (16:9, 20:10, 16:6, 32:9, 12:9, 22:15, 9:16, 9:12, 16:3, or 1:1)"
         )
 
     return (canvas_width, canvas_height)
@@ -236,12 +238,14 @@ class BroadcastThread(threading.Thread):
         converter: FFMpegConverter,
         websocket_server: Any,
         stop_event: MpEvent,
+        config: FrigateConfig,
     ):
         super().__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
         self.stop_event = stop_event
+        self.config = config
 
     def run(self) -> None:
         while not self.stop_event.is_set():
@@ -256,6 +260,7 @@ class BroadcastThread(threading.Thread):
                     if (
                         not ws.terminated
                         and ws.environ["PATH_INFO"] == f"/{self.camera}"
+                        and ws_has_camera_access(ws, self.camera, self.config)
                     ):
                         try:
                             ws.send(buf, binary=True)
@@ -793,20 +798,27 @@ class Birdseye:
         websocket_server: Any,
     ) -> None:
         self.config = config
+        canvas_width, canvas_height = get_canvas_shape(
+            config.birdseye.width, config.birdseye.height
+        )
         self.input: queue.Queue[bytes] = queue.Queue(maxsize=10)
         self.converter = FFMpegConverter(
             config.ffmpeg,
             self.input,
             stop_event,
-            config.birdseye.width,
-            config.birdseye.height,
-            config.birdseye.width,
-            config.birdseye.height,
+            canvas_width,
+            canvas_height,
+            canvas_width,
+            canvas_height,
             config.birdseye.quality,
             config.birdseye.restream,
         )
         self.broadcaster = BroadcastThread(
-            "birdseye", self.converter, websocket_server, stop_event
+            "birdseye",
+            self.converter,
+            websocket_server,
+            stop_event,
+            config,
         )
         self.birdseye_manager = BirdsEyeFrameManager(self.config, stop_event)
         self.frame_manager = SharedMemoryFrameManager()
@@ -874,7 +886,7 @@ class Birdseye:
                 coordinates = self.birdseye_manager.get_camera_coordinates()
                 self.requestor.send_data(UPDATE_BIRDSEYE_LAYOUT, coordinates)
         if self._idle_interval:
-            now = time.monotonic()
+            now = datetime.datetime.now().timestamp()
             is_idle = len(self.birdseye_manager.camera_layout) == 0
             if (
                 is_idle

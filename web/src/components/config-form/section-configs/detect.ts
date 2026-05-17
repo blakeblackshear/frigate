@@ -3,6 +3,15 @@ import type { SectionConfigOverrides } from "./types";
 const detect: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/camera_specific",
+    messages: [
+      {
+        key: "detect-disabled",
+        messageKey: "configMessages.detect.disabled",
+        severity: "info",
+        condition: (ctx) =>
+          ctx.level === "camera" && ctx.formData?.enabled === false,
+      },
+    ],
     fieldMessages: [
       {
         key: "fps-greater-than-five",
@@ -12,6 +21,7 @@ const detect: SectionConfigOverrides = {
         position: "after",
         condition: (ctx) => {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
+          if (ctx.fullCameraConfig.type === "lpr") return false;
           const detectFps = ctx.formData?.fps as number | undefined;
           const streamFps = ctx.fullCameraConfig.detect?.fps;
           return detectFps != null && streamFps != null && detectFps > 5;

@@ -34,7 +34,15 @@
     "general": "Geral",
     "globalConfig": "Configuração global",
     "system": "Sistema",
-    "integrations": "Integrações"
+    "integrations": "Integrações",
+    "uiSettings": "Configurações de interface",
+    "profiles": "Perfis",
+    "globalDetect": "Detecção de objeto",
+    "globalRecording": "Gravando",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Detecção de movimento",
+    "globalObjects": "Objetos",
+    "globalReview": "Revisar"
   },
   "dialog": {
     "unsavedChanges": {

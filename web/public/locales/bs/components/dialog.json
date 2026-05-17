@@ -1,0 +1,197 @@
+{
+  "restart": {
+    "title": "Sigurni li ste da želite ponovno pokrenuti Frigate?",
+    "description": "Ovo privremeno zaustavi Frigate dok se ponovno pokreće.",
+    "button": "Ponovno pokretanje",
+    "restarting": {
+      "title": "Frigate se ponovo pokreće",
+      "content": "Ova stranica će se ponovno učitati za {{countdown}} sekundi.",
+      "button": "Silovito ponovno učitavanje sada"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Pošalji na Frigate+",
+        "desc": "Predmeti u lokacijama koje želite izbjeći nisu lažni pozitivi. Pošiljanje ih kao lažne pozitive zbunjuje model."
+      },
+      "review": {
+        "question": {
+          "label": "Potvrdite ovu oznaku za Frigate Plus",
+          "ask_a": "Je li ovaj objekt <code>{{label}}</code>?",
+          "ask_an": "Je li ovaj objekt <code>{{label}}</code>?",
+          "ask_full": "Je li ovaj objekt <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Pošlato"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Pregledajte u povijesti"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Odaberite iz vremenske linije",
+      "lastHour_one": "Prošli sat",
+      "lastHour_few": "Prošla {{count}} sata",
+      "lastHour_other": "Prošlih {{count}} sati",
+      "custom": "Prilagođeno",
+      "start": {
+        "title": "Vrijeme početka",
+        "label": "Odaberite vrijeme početka"
+      },
+      "end": {
+        "title": "Vrijeme kraja",
+        "label": "Odaberite vrijeme kraja"
+      }
+    },
+    "name": {
+      "placeholder": "Nazovite izvoz"
+    },
+    "case": {
+      "newCaseOption": "Napravite novi slučaj",
+      "newCaseNamePlaceholder": "Novo ime slučaja",
+      "newCaseDescriptionPlaceholder": "Opis slučaja",
+      "label": "Slučaj",
+      "nonAdminHelp": "Za ove izvoze će se stvoriti novi slučaj.",
+      "placeholder": "Odaberite slučaj"
+    },
+    "select": "Odaberite",
+    "export": "Izvoz",
+    "queueing": "Stavljanje izvoza u red...",
+    "selectOrExport": "Odaberite ili izvozite",
+    "tabs": {
+      "export": "Jedna kamera",
+      "multiCamera": "Više kamera"
+    },
+    "multiCamera": {
+      "timeRange": "Vremenski opseg",
+      "selectFromTimeline": "Odaberite iz vremenske linije",
+      "cameraSelection": "Kamere",
+      "cameraSelectionHelp": "Kamere s praćenim objektima u ovom vremenskom opsegu su preselektirane",
+      "checkingActivity": "Provjeravamo aktivnost kamere...",
+      "noCameras": "Nema dostupnih kamera",
+      "detectionCount_one": "1 praćen objekt",
+      "detectionCount_few": "{{count}} praćena objekta",
+      "detectionCount_other": "{{count}} praćenih objekata",
+      "nameLabel": "Ime izvoza",
+      "namePlaceholder": "Nepovlačenje baznog imena za ove izvoze",
+      "queueingButton": "Stavljanje izvoza u red...",
+      "exportButton_one": "Izvoz 1 kamere",
+      "exportButton_few": "Izvoz {{count}} kamere",
+      "exportButton_other": "Izvoz {{count}} kamera"
+    },
+    "multi": {
+      "title_one": "Izvoz 1 pregleda",
+      "title_few": "Izvoz {{count}} pregleda",
+      "title_other": "Izvoz {{count}} pregleda",
+      "description": "Izvoz svakog odabranih pregleda. Svi izvozi bit će grupirani pod jedan slučaj.",
+      "descriptionNoCase": "Izvoz svakog odabranih pregleda.",
+      "caseNamePlaceholder": "Pregled izvoza - {{date}}",
+      "exportButton_one": "Izvoz 1 pregleda",
+      "exportButton_few": "Izvoz {{count}} pregleda",
+      "exportButton_other": "Izvoz {{count}} pregleda",
+      "exportingButton": "Izvoz...",
+      "toast": {
+        "started_one": "Pokrenut 1 izvoz. Otvaranje slučaja sada.",
+        "started_few": "Pokrenuta {{count}} izvoza. Otvaranje slučaja sada.",
+        "started_other": "Pokrenuto {{count}} izvoza. Otvaranje slučaja sada.",
+        "startedNoCase_one": "Pokrenut 1 izvoz.",
+        "startedNoCase_few": "Pokrenuta {{count}} izvoza.",
+        "startedNoCase_other": "Pokrenuto {{count}} izvoza.",
+        "partial": "Pokrenuto {{successful}} od {{total}} izvoza. Neuspješno: {{failedItems}}",
+        "failed": "Neuspješno pokretanje {{total}} izvoza. Neuspješno: {{failedItems}}"
+      }
+    },
+    "toast": {
+      "success": "Uspješno pokrenut izvoz. Pregledajte datoteku na stranici izvoza.",
+      "queued": "Izvoz u redu. Pregledajte napredak na stranici izvoza.",
+      "view": "Pregled",
+      "batchSuccess_one": "Pokrenut 1 izvoz. Otvaranje slučaja sada.",
+      "batchSuccess_few": "Pokrenuta {{count}} izvoza. Otvaranje slučaja sada.",
+      "batchSuccess_other": "Pokrenuto {{count}} izvoza. Otvaranje slučaja sada.",
+      "batchPartial": "Pokrenuto {{successful}} od {{total}} izvoza. Neuspješne kamere: {{failedCameras}}",
+      "batchFailed": "Neuspješno pokretanje {{total}} izvoza. Neuspješne kamere: {{failedCameras}}",
+      "batchQueuedSuccess_one": "U red stavljen 1 izvoz. Otvaranje slučaja sada.",
+      "batchQueuedSuccess_few": "U red stavljena {{count}} izvoza. Otvaranje slučaja sada.",
+      "batchQueuedSuccess_other": "U red stavljeno {{count}} izvoza. Otvaranje slučaja sada.",
+      "batchQueuedPartial": "U redu {{successful}} od {{total}} izvoza. Neuspješne kamere: {{failedCameras}}",
+      "batchQueueFailed": "Neuspješno dodavanje {{total}} izvoza. Neuspješne kamere: {{failedCameras}}",
+      "error": {
+        "failed": "Neuspješno dodavanje izvoza: {{error}}",
+        "endTimeMustAfterStartTime": "Krajnje vrijeme mora biti nakon početnog vremena",
+        "noVaildTimeSelected": "Nije odabran valjan vremenski opseg"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Sačuvaj izvoz",
+      "queueingExport": "Kopiranje izvoza...",
+      "previewExport": "Pregled izvoza",
+      "useThisRange": "Koristi ovaj opseg"
+    }
+  },
+  "streaming": {
+    "label": "Tok",
+    "restreaming": {
+      "disabled": "Restreaming nije omogućeno za ovu kameru.",
+      "desc": {
+        "title": "Postavite go2rtc za dodatne opcije uživog pregleda i zvuk za ovu kameru."
+      }
+    },
+    "showStats": {
+      "label": "Prikaži statistiku strima",
+      "desc": "Omogući ovu opciju da prikaže statistiku prijenosa kao preklapanje na toku kamere."
+    },
+    "debugView": "Pregled za otklanjanje grešaka"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Sačuvaj pretragu",
+      "desc": "Navedite ime za ovu sačuvanu pretragu.",
+      "placeholder": "Unesite ime za svoju pretragu",
+      "overwrite": "{{searchName}} već postoji. Sačuvavanje će prebrisati postojet će vrijednost.",
+      "success": "Pretraga ({{searchName}}) je sačuvana.",
+      "button": {
+        "save": {
+          "label": "Sačuvaj ovu pretragu"
+        }
+      }
+    }
+  },
+  "recording": {
+    "shareTimestamp": {
+      "label": "Dijeli vremensku oznaku",
+      "title": "Dijeli vremensku oznaku",
+      "description": "Dijelite URL označen vremenom trenutne pozicije igrača ili odaberite prilagođenu vremensku oznaku. Napomena: ovo nije javni URL za dijeljenje i dostupan je samo korisnicima koji imaju pristup Frigate i ovoj kameri.",
+      "custom": "Prilagođena vremenska oznaka",
+      "button": "URL za dijeljenje vremenske oznake",
+      "shareTitle": "Vremenska oznaka pregleda Frigate: {{camera}}"
+    },
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "desc": {
+        "selected": "Sigurni li ste da želite izbrisati sve snimljeno video povezano s ovim preglednim stavkom?<br /><br />Zadržite tipku <em>Shift</em> da biste preskočili ovaj dijalog u budućnosti."
+      },
+      "toast": {
+        "success": "Video snimke povezane s odabranim preglednim stavcima uspješno su izbrisane.",
+        "error": "Neuspješno brisanje: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Izvoz",
+      "markAsReviewed": "Označi kao pregledano",
+      "markAsUnreviewed": "Označi kao nepregledano",
+      "deleteNow": "Obriši sada"
+    }
+  },
+  "imagePicker": {
+    "selectImage": "Odaberite minijaturu praćenog objekta",
+    "unknownLabel": "Sačuvana slika izazivača",
+    "search": {
+      "placeholder": "Pretraga po oznaci ili podoznaci..."
+    },
+    "noImages": "Nema mini prikaza za ovu kameru"
+  }
+}

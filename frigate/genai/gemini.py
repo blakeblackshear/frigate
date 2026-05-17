@@ -14,6 +14,20 @@ from frigate.genai import GenAIClient, register_genai_provider
 logger = logging.getLogger(__name__)
 
 
+def _stats_from_gemini_usage(usage: Any) -> Optional[dict[str, Any]]:
+    """Build a stats dict from a Gemini usage_metadata object."""
+    prompt_tokens = getattr(usage, "prompt_token_count", None)
+    completion_tokens = getattr(usage, "candidates_token_count", None)
+    if prompt_tokens is None and completion_tokens is None:
+        return None
+    stats: dict[str, Any] = {}
+    if isinstance(prompt_tokens, int):
+        stats["prompt_tokens"] = prompt_tokens
+    if isinstance(completion_tokens, int):
+        stats["completion_tokens"] = completion_tokens
+    return stats or None
+
+
 @register_genai_provider(GenAIProviderEnum.gemini)
 class GeminiClient(GenAIClient):
     """Generative AI client for Frigate using Gemini."""
@@ -136,22 +150,44 @@ class GeminiClient(GenAIClient):
                             )
                         )
                 elif role == "assistant":
-                    gemini_messages.append(
-                        types.Content(
-                            role="model", parts=[types.Part.from_text(text=content)]
-                        )
-                    )
+                    parts: list[types.Part] = []
+                    if content:
+                        parts.append(types.Part.from_text(text=content))
+                    for tc in msg.get("tool_calls") or []:
+                        func = tc.get("function") or {}
+                        tc_name = func.get("name") or ""
+                        tc_args: Any = func.get("arguments")
+                        if isinstance(tc_args, str):
+                            try:
+                                tc_args = json.loads(tc_args)
+                            except (json.JSONDecodeError, TypeError):
+                                tc_args = {}
+                        if not isinstance(tc_args, dict):
+                            tc_args = {}
+                        if tc_name:
+                            parts.append(
+                                types.Part.from_function_call(
+                                    name=tc_name, args=tc_args
+                                )
+                            )
+                    if not parts:
+                        parts.append(types.Part.from_text(text=" "))
+                    gemini_messages.append(types.Content(role="model", parts=parts))
                 elif role == "tool":
                     # Handle tool response
-                    function_response = {
-                        "name": msg.get("name", ""),
-                        "response": content,
-                    }
+                    response_payload = (
+                        content if isinstance(content, dict) else {"result": content}
+                    )
                     gemini_messages.append(
                         types.Content(
                             role="function",
                             parts=[
-                                types.Part.from_function_response(function_response)  # type: ignore[misc,call-arg,arg-type]
+                                types.Part.from_function_response(
+                                    name=msg.get("name")
+                                    or msg.get("tool_call_id")
+                                    or "",
+                                    response=response_payload,
+                                )
                             ],
                         )
                     )
@@ -343,22 +379,44 @@ class GeminiClient(GenAIClient):
                             )
                         )
                 elif role == "assistant":
-                    gemini_messages.append(
-                        types.Content(
-                            role="model", parts=[types.Part.from_text(text=content)]
-                        )
-                    )
+                    parts: list[types.Part] = []
+                    if content:
+                        parts.append(types.Part.from_text(text=content))
+                    for tc in msg.get("tool_calls") or []:
+                        func = tc.get("function") or {}
+                        tc_name = func.get("name") or ""
+                        tc_args: Any = func.get("arguments")
+                        if isinstance(tc_args, str):
+                            try:
+                                tc_args = json.loads(tc_args)
+                            except (json.JSONDecodeError, TypeError):
+                                tc_args = {}
+                        if not isinstance(tc_args, dict):
+                            tc_args = {}
+                        if tc_name:
+                            parts.append(
+                                types.Part.from_function_call(
+                                    name=tc_name, args=tc_args
+                                )
+                            )
+                    if not parts:
+                        parts.append(types.Part.from_text(text=" "))
+                    gemini_messages.append(types.Content(role="model", parts=parts))
                 elif role == "tool":
                     # Handle tool response
-                    function_response = {
-                        "name": msg.get("name", ""),
-                        "response": content,
-                    }
+                    response_payload = (
+                        content if isinstance(content, dict) else {"result": content}
+                    )
                     gemini_messages.append(
                         types.Content(
                             role="function",
                             parts=[
-                                types.Part.from_function_response(function_response)  # type: ignore[misc,call-arg,arg-type]
+                                types.Part.from_function_response(
+                                    name=msg.get("name")
+                                    or msg.get("tool_call_id")
+                                    or "",
+                                    response=response_payload,
+                                )
                             ],
                         )
                     )
@@ -427,6 +485,7 @@ class GeminiClient(GenAIClient):
             content_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
+            usage_stats: Optional[dict[str, Any]] = None
 
             stream = await self.provider.aio.models.generate_content_stream(
                 model=self.genai_config.model,
@@ -435,6 +494,12 @@ class GeminiClient(GenAIClient):
             )
 
             async for chunk in stream:
+                chunk_usage = getattr(chunk, "usage_metadata", None)
+                if chunk_usage is not None:
+                    maybe_stats = _stats_from_gemini_usage(chunk_usage)
+                    if maybe_stats is not None:
+                        usage_stats = maybe_stats
+
                 if not chunk or not chunk.candidates:
                     continue
 
@@ -520,6 +585,9 @@ class GeminiClient(GenAIClient):
                         }
                     )
                 finish_reason = "tool_calls"
+
+            if usage_stats is not None:
+                yield ("stats", usage_stats)
 
             yield (
                 "message",

@@ -22,17 +22,26 @@
     "downloadVideo": "Descargar video",
     "editName": "Editar nombre",
     "deleteExport": "Eliminar exportación",
-    "assignToCase": "Añadir al caso"
+    "assignToCase": "Añadir al caso",
+    "removeFromCase": "Remover del contenedor"
   },
   "headings": {
     "cases": "Casos",
-    "uncategorizedExports": "Exportaciones sin categorizar"
+    "uncategorizedExports": "Exportaciones sin Categorizar"
   },
   "caseDialog": {
     "title": "Añadir al caso",
     "newCaseOption": "Crear nuevo caso",
     "nameLabel": "Nombre del caso",
     "description": "Elige un caso existente o crea uno nuevo.",
-    "selectLabel": "Caso"
+    "selectLabel": "Caso",
+    "descriptionLabel": "Descripción"
+  },
+  "toolbar": {
+    "addExport": "Añadir Exportación"
+  },
+  "deleteCase": {
+    "label": "Eliminar caso",
+    "desc": "¿Estás seguro de que quieres eliminar {{caseName}}?"
   }
 }

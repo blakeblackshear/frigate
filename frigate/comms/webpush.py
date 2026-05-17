@@ -429,7 +429,10 @@ class WebPushClient(Communicator):
             else:
                 title = base_title
 
-            message = payload["after"]["data"]["metadata"]["shortSummary"]
+            if payload["after"]["data"]["metadata"].get("shortSummary"):
+                message = payload["after"]["data"]["metadata"]["shortSummary"]
+            else:
+                message = f"Detected on {camera_name}"
         else:
             zone_names = payload["after"]["data"]["zones"]
             formatted_zone_names = []
@@ -549,6 +552,14 @@ class WebPushClient(Communicator):
         logger.debug(f"Sending camera monitoring push notification for {camera_name}")
 
         for user in self.web_pushers:
+            if not self._user_has_camera_access(user, camera):
+                logger.debug(
+                    "Skipping notification for user %s - no access to camera %s",
+                    user,
+                    camera,
+                )
+                continue
+
             self.send_push_notification(
                 user=user,
                 payload=payload,

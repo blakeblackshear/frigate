@@ -53,6 +53,21 @@ const faceRecognition: SectionConfigOverrides = {
       "device",
     ],
     restartRequired: ["enabled", "model_size", "device"],
+    fieldMessages: [
+      {
+        key: "model-size-large",
+        field: "model_size",
+        messageKey: "configMessages.faceRecognition.modelSizeLarge",
+        severity: "info",
+        position: "after",
+        condition: (ctx) => ctx.formData?.model_size === "large",
+      },
+    ],
+    uiSchema: {
+      model_size: {
+        "ui:options": { size: "xs", enumI18nPrefix: "modelSize" },
+      },
+    },
   },
 };
 

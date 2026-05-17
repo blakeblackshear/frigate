@@ -47,7 +47,11 @@ export function ReplaceRulesField(props: FieldProps) {
     | ConfigFormContext
     | undefined;
 
-  const { t } = useTranslation(["common"]);
+  const configNamespace =
+    formContext?.i18nNamespace ??
+    (formContext?.level === "camera" ? "config/cameras" : "config/global");
+  const { t: fallbackT } = useTranslation(["common", configNamespace]);
+  const t = formContext?.t ?? fallbackT;
 
   const rules: ReplaceRule[] = useMemo(() => {
     if (!Array.isArray(formData)) {
@@ -60,10 +64,21 @@ export function ReplaceRulesField(props: FieldProps) {
     () => getItemSchema(schema as RJSFSchema),
     [schema],
   );
-  const title = (schema as RJSFSchema).title;
-  const description = (schema as RJSFSchema).description;
-  const patternTitle = getPropertyTitle(itemSchema, "pattern");
-  const replacementTitle = getPropertyTitle(itemSchema, "replacement");
+
+  const id = idSchema?.$id ?? props.name;
+  const sectionPrefix = formContext?.sectionI18nPrefix;
+
+  const title =
+    t(`${sectionPrefix}.${id}.label`) ?? (schema as RJSFSchema).title;
+  const description =
+    t(`${sectionPrefix}.${id}.description`) ??
+    (schema as RJSFSchema).description;
+  const patternTitle =
+    t(`${sectionPrefix}.${id}.pattern.label`) ??
+    getPropertyTitle(itemSchema, "pattern");
+  const replacementTitle =
+    t(`${sectionPrefix}.${id}.replacement.label`) ??
+    getPropertyTitle(itemSchema, "replacement");
 
   const hasItems = rules.length > 0;
   const emptyPath = useMemo(() => [] as FieldPathList, []);
@@ -142,7 +157,7 @@ export function ReplaceRulesField(props: FieldProps) {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle
-                  className={cn("text-sm", isModified && "text-danger")}
+                  className={cn("text-sm", isModified && "text-unsaved")}
                 >
                   {title}
                 </CardTitle>

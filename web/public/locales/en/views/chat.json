@@ -42,5 +42,23 @@
     "show_camera_status": "What is the current status of my cameras?",
     "recap": "What happened while I was away?",
     "watch_camera": "Watch the front door and let me know if anyone shows up"
+  },
+  "new_chat": "New chat",
+  "settings": {
+    "title": "Chat settings",
+    "show_stats": {
+      "title": "Show stats",
+      "desc": "Show generation rate and context size for chat responses.",
+      "while_generating": "While generating",
+      "always": "Always"
+    },
+    "auto_scroll": {
+      "title": "Auto-scroll",
+      "desc": "Follow new messages as they arrive."
+    }
+  },
+  "stats": {
+    "context": "{{tokens}} tokens",
+    "tokens_per_second": "{{rate}} t/s"
   }
 }

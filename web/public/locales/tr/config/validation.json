@@ -2,5 +2,7 @@
     "minimum": "En az {{limit}} olmalı",
     "maximum": "En fazla {{limit}} olmalı",
     "exclusiveMinimum": "{{limit}}’den büyük olmalı",
-    "exclusiveMaximum": "{{limit}}’den küçük olmalı"
+    "exclusiveMaximum": "{{limit}}’den küçük olmalı",
+    "minLength": "En az {{limit}} karakter olmalı",
+    "maxLength": "En fazla {{limit}} karakter olmalı"
 }

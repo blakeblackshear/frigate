@@ -113,11 +113,12 @@ export class ApiMocker {
       route.fulfill({ json: [] }),
     );
 
-    // Sub-labels and attributes (for explore filters)
-    await this.page.route("**/api/sub_labels", (route) =>
+    // Sub-labels and attributes (for explore filters).
+    // Use trailing ** so query-string variants (e.g. ?split_joined=1) match.
+    await this.page.route("**/api/sub_labels**", (route) =>
       route.fulfill({ json: [] }),
     );
-    await this.page.route("**/api/labels", (route) =>
+    await this.page.route("**/api/labels**", (route) =>
       route.fulfill({ json: ["person", "car"] }),
     );
     await this.page.route("**/api/*/attributes", (route) =>

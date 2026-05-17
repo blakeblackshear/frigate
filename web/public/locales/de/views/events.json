@@ -25,7 +25,9 @@
   },
   "documentTitle": "Überprüfung - Frigate",
   "recordings": {
-    "documentTitle": "Aufnahmen - Frigate"
+    "documentTitle": "Aufnahmen - Frigate",
+    "invalidSharedLink": "Der Link zur zeitgestempelten Aufzeichnung kann aufgrund eines Parsing-Fehlers nicht geöffnet werden.",
+    "invalidSharedCamera": "Der Link zur zeitgestempelten Aufzeichnung kann nicht geöffnet werden, da es sich um eine unbekannte oder nicht autorisierte Kamera handelt."
   },
   "calendarFilter": {
     "last24Hours": "Letzte 24 Stunden"

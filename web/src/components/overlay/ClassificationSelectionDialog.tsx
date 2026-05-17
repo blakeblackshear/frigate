@@ -102,6 +102,19 @@ export default function ClassificationSelectionDialog({
   // control
   const [newClass, setNewClass] = useState(false);
 
+  // Non-modal Radix DropdownMenu doesn't propagate wheel events to nested
+  // scroll containers, so attach a non-passive listener that scrolls manually.
+  const scrollContainerRef = useCallback((el: HTMLDivElement | null) => {
+    if (!el || !isDesktop) return;
+    const handleWheel = (e: WheelEvent) => {
+      if (el.scrollHeight <= el.clientHeight) return;
+      e.preventDefault();
+      el.scrollTop += e.deltaY;
+    };
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, []);
+
   // components
   const Selector = isDesktop ? DropdownMenu : Drawer;
   const SelectorTrigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
@@ -114,6 +127,8 @@ export default function ClassificationSelectionDialog({
         </DrawerClose>
       );
 
+  // keep modal false on desktop to prevent dismissable layer pointer events
+  // issue with dialog auto-close
   return (
     <div className={className ?? "flex"}>
       <TextEntryDialog
@@ -122,60 +137,60 @@ export default function ClassificationSelectionDialog({
         title={t("createCategory.new")}
         onSave={(newCat) => onCategorizeImage(newCat)}
       />
-
-      <Tooltip>
-        <Selector>
-          <SelectorTrigger asChild>
-            <TooltipTrigger asChild={isChildButton}>{children}</TooltipTrigger>
-          </SelectorTrigger>
-          <SelectorContent
-            className={cn("", isMobile && "mx-1 gap-2 rounded-t-2xl px-4")}
-            onCloseAutoFocus={(e) => e.preventDefault()}
-          >
-            {isMobile && (
-              <DrawerHeader className="sr-only">
-                <DrawerTitle>Details</DrawerTitle>
-                <DrawerDescription>Details</DrawerDescription>
-              </DrawerHeader>
-            )}
-            <DropdownMenuLabel>
-              {dialogLabel ?? t("categorizeImageAs")}
-            </DropdownMenuLabel>
-            <div
-              className={cn(
-                "flex max-h-[40dvh] flex-col overflow-y-auto",
-                isMobile && "gap-2 pb-4",
-              )}
+      <Selector {...(isDesktop ? { modal: false } : {})}>
+        <Tooltip>
+          <TooltipTrigger asChild={isChildButton}>
+            <SelectorTrigger asChild>{children}</SelectorTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            {tooltipLabel ?? t("categorizeImage")}
+          </TooltipContent>
+        </Tooltip>
+        <SelectorContent
+          ref={scrollContainerRef}
+          className={cn(
+            isDesktop && "scrollbar-container max-h-[40dvh] overflow-y-auto",
+            isMobile && "mx-1 gap-2 rounded-t-2xl px-4",
+          )}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          {isMobile && (
+            <DrawerHeader className="sr-only">
+              <DrawerTitle>Details</DrawerTitle>
+              <DrawerDescription>Details</DrawerDescription>
+            </DrawerHeader>
+          )}
+          <DropdownMenuLabel>
+            {dialogLabel ?? t("categorizeImageAs")}
+          </DropdownMenuLabel>
+          <div className={cn("flex flex-col", isMobile && "gap-2 pb-4")}>
+            {filteredClasses
+              .sort((a, b) => {
+                if (a === "none") return 1;
+                if (b === "none") return -1;
+                return a.localeCompare(b);
+              })
+              .map((category) => (
+                <SelectorItem
+                  key={category}
+                  className="flex cursor-pointer gap-2 smart-capitalize"
+                  onClick={() => onCategorizeImage(category)}
+                >
+                  {category === "none"
+                    ? t("details.none")
+                    : category.replaceAll("_", " ")}
+                </SelectorItem>
+              ))}
+            <Separator />
+            <SelectorItem
+              className="flex cursor-pointer gap-2 smart-capitalize"
+              onClick={() => setNewClass(true)}
             >
-              {filteredClasses
-                .sort((a, b) => {
-                  if (a === "none") return 1;
-                  if (b === "none") return -1;
-                  return a.localeCompare(b);
-                })
-                .map((category) => (
-                  <SelectorItem
-                    key={category}
-                    className="flex cursor-pointer gap-2 smart-capitalize"
-                    onClick={() => onCategorizeImage(category)}
-                  >
-                    {category === "none"
-                      ? t("details.none")
-                      : category.replaceAll("_", " ")}
-                  </SelectorItem>
-                ))}
-              <Separator />
-              <SelectorItem
-                className="flex cursor-pointer gap-2 smart-capitalize"
-                onClick={() => setNewClass(true)}
-              >
-                {t("createCategory.new")}
-              </SelectorItem>
-            </div>
-          </SelectorContent>
-        </Selector>
-        <TooltipContent>{tooltipLabel ?? t("categorizeImage")}</TooltipContent>
-      </Tooltip>
+              {t("createCategory.new")}
+            </SelectorItem>
+          </div>
+        </SelectorContent>
+      </Selector>
     </div>
   );
 }

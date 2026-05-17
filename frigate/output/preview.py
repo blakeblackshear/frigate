@@ -361,14 +361,17 @@ class PreviewRecorder:
             small_frame,
             cv2.COLOR_YUV2BGR_I420,
         )
-        cv2.imwrite(
-            get_cache_image_name(self.camera_name, frame_time),
+        cache_path = get_cache_image_name(self.camera_name, frame_time)
+
+        if not cv2.imwrite(
+            cache_path,
             small_frame,
             [
                 int(cv2.IMWRITE_WEBP_QUALITY),
                 PREVIEW_QUALITY_WEBP[self.config.record.preview.quality],
             ],
-        )
+        ):
+            logger.error("Failed to write preview frame to %s", cache_path)
 
     def write_data(
         self,

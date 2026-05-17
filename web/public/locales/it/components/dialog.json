@@ -64,15 +64,28 @@
     "toast": {
       "success": "Esportazione avviata correttamente. Visualizza il file nella pagina delle esportazioni.",
       "error": {
-        "failed": "Impossibile avviare l'esportazione: {{error}}",
+        "failed": "Impossibile mettere in coda l'esportazione: {{error}}",
         "endTimeMustAfterStartTime": "L'ora di fine deve essere successiva all'ora di inizio",
         "noVaildTimeSelected": "Nessun intervallo di tempo valido selezionato"
       },
-      "view": "Visualizzazione"
+      "view": "Visualizzazione",
+      "queued": "Esportazione in coda. Visualizza lo stato di avanzamento nella pagina delle esportazioni.",
+      "batchSuccess_one": "Avviata 1 esportazione. Apertura del caso in corso.",
+      "batchSuccess_many": "Avviate {{count}} esportazioni. Apertura del caso in corso.",
+      "batchSuccess_other": "Avviate {{count}} esportazioni. Apertura del caso in corso.",
+      "batchPartial": "Avviate {{successful}} esportazioni su un totale di {{total}}. Telecamere non riuscite: {{failedCameras}}",
+      "batchFailed": "Impossibile avviare {{total}} esportazioni. Telecamere non riuscite: {{failedCameras}}",
+      "batchQueuedSuccess_one": "1 esportazione in coda. Apertura del caso in corso.",
+      "batchQueuedSuccess_many": "Sono in coda {{count}} esportazioni. Apertura del caso in corso.",
+      "batchQueuedSuccess_other": "Sono in coda {{count}} esportazioni. Apertura del caso in corso.",
+      "batchQueuedPartial": "In coda {{successful}} di {{total}} esportazioni. Telecamere non riuscite: {{failedCameras}}",
+      "batchQueueFailed": "Impossibile mettere in coda {{total}} esportazioni. Telecamere non riuscite: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Salva esportazione",
-      "previewExport": "Anteprima esportazione"
+      "previewExport": "Anteprima esportazione",
+      "queueingExport": "Accodamento per l'esportazione...",
+      "useThisRange": "Utilizza questa intervallo"
     },
     "select": "Seleziona",
     "name": {
@@ -80,7 +93,55 @@
     },
     "case": {
       "label": "Caso",
-      "placeholder": "Seleziona un caso"
+      "placeholder": "Seleziona un caso",
+      "newCaseOption": "Crea un nuovo caso",
+      "newCaseNamePlaceholder": "Nuovo nome del caso",
+      "newCaseDescriptionPlaceholder": "Descrizione del caso",
+      "nonAdminHelp": "Per queste esportazioni verrà creato un nuovo caso."
+    },
+    "queueing": "Accodamento per l'esportazione...",
+    "tabs": {
+      "export": "Telecamera singola",
+      "multiCamera": "Multicamera"
+    },
+    "multiCamera": {
+      "timeRange": "Intervallo di tempo",
+      "selectFromTimeline": "Seleziona dalla cronologia",
+      "cameraSelection": "Telecamere",
+      "cameraSelectionHelp": "Le telecamere con oggetti tracciati in questo intervallo di tempo sono preselezionate",
+      "checkingActivity": "Controllo dell'attività della telecamera...",
+      "noCameras": "Nessuna telecamera disponibile",
+      "detectionCount_one": "1 oggetto tracciato",
+      "detectionCount_many": "{{count}} oggetti tracciati",
+      "detectionCount_other": "{{count}} oggetti tracciati",
+      "nameLabel": "Nome di esportazione",
+      "namePlaceholder": "Nome base facoltativo per queste esportazioni",
+      "queueingButton": "Accodamento delle esportazioni...",
+      "exportButton_one": "Esporta 1 telecamera",
+      "exportButton_many": "Esporta {{count}} telecamere",
+      "exportButton_other": "Esporta {{count}} telecamere"
+    },
+    "multi": {
+      "title_one": "Esporta 1 revisione",
+      "title_many": "Esporta {{count}} revisioni",
+      "title_other": "Esporta {{count}} revisioni",
+      "description": "Esporta ogni revisione selezionata. Tutte le esportazioni saranno raggruppate in un unico caso.",
+      "descriptionNoCase": "Esporta ogni revisione selezionata.",
+      "caseNamePlaceholder": "Esporta revisione - {{date}}",
+      "exportButton_one": "Esporta 1 revisione",
+      "exportButton_many": "Esporta {{count}} revisioni",
+      "exportButton_other": "Esporta {{count}} revisioni",
+      "exportingButton": "Esportazione...",
+      "toast": {
+        "started_one": "Avviata 1 esportazione. Apertura del caso in corso.",
+        "started_many": "Avviate {{count}} esportazioni. Apertura del caso in corso.",
+        "started_other": "Avviate {{count}} esportazioni. Apertura del caso in corso.",
+        "startedNoCase_one": "Avviata 1 esportazione.",
+        "startedNoCase_many": "Avviate {{count}} esportazioni.",
+        "startedNoCase_other": "Avviate {{count}} esportazioni.",
+        "partial": "Avviate {{successful}} esportazioni su un totale di {{total}}. Fallite: {{failedItems}}",
+        "failed": "Impossibile avviare {{total}} esportazioni. Errori: {{failedItems}}"
+      }
     }
   },
   "streaming": {
@@ -128,6 +189,14 @@
         "success": "Il filmato associato agli elementi di recensione selezionati è stato eliminato correttamente.",
         "error": "Impossibile eliminare: {{error}}"
       }
+    },
+    "shareTimestamp": {
+      "label": "Condividi orario",
+      "title": "Condividi orario",
+      "description": "Condividi un URL con l'orario della posizione attuale del lettore oppure scegli un orario personalizzato. Tieni presente che questo URL non è pubblico ed è accessibile solo agli utenti che hanno accesso a Frigate e a questa telecamera.",
+      "custom": "Orario personalizzato",
+      "button": "URL dell'orario di condivisione",
+      "shareTitle": "Orario revisione Frigate: {{camera}}"
     }
   },
   "imagePicker": {

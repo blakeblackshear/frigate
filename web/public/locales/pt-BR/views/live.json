@@ -17,7 +17,8 @@
       "clickMove": {
         "label": "Clique no quadro para centralizar a câmera",
         "enable": "Ativar clique para mover",
-        "disable": "Desativar clique para mover"
+        "disable": "Desativar clique para mover",
+        "enableWithZoom": "Habilitar clicar para mover / arrastar para zoom"
       },
       "left": {
         "label": "Mova a câmera PTZ para a esquerda"

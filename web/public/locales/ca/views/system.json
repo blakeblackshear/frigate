@@ -213,6 +213,9 @@
       "expectedFps": "FPS esperat",
       "reconnectsLastHour": "Reconnecta (última hora)",
       "stallsLastHour": "Parades (última hora)"
+    },
+    "noCameras": {
+      "title": "No s'ha trobat cap càmera"
     }
   },
   "lastRefreshed": "Darrera actualització: ",

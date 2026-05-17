@@ -35,5 +35,10 @@
     "newCaseOption": "Créer un nouveau dossier",
     "nameLabel": "Nom du dossier",
     "descriptionLabel": "Description"
+  },
+  "deleteCase": {
+    "desc": "Êtes-vous sûr de vouloir supprimer {{caseName}}?",
+    "descKeepExports": "Les exports seront disponibles comme exports non catégorisés.",
+    "deleteExports": "Supprimer aussi les exports"
   }
 }

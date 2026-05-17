@@ -45,7 +45,7 @@
     "globalMotion": "Bewegungserkennung",
     "globalObjects": "Objekte",
     "globalReview": "Überprüfung",
-    "globalAudioEvents": "Audio Events",
+    "globalAudioEvents": "Audioerkennung",
     "globalLivePlayback": "Live-Wiedergabe",
     "globalTimestampStyle": "Zeitstempelformat",
     "systemDatabase": "Datenbank",
@@ -75,7 +75,7 @@
     "cameraMotion": "Bewegungserkennung",
     "cameraObjects": "Objekte",
     "cameraConfigReview": "Überprüfung",
-    "cameraAudioEvents": "Audio Evente",
+    "cameraAudioEvents": "Audioerkennung",
     "cameraAudioTranscription": "Audio-Transkription",
     "cameraNotifications": "Benachrichtigung",
     "cameraLivePlayback": "Live-Wiedergabe",
@@ -345,6 +345,10 @@
           "zone": "Zone",
           "motion_mask": "Bewegungsmaske",
           "object_mask": "Objektmaske"
+        },
+        "revertOverride": {
+          "title": "Auf Standardkonfiguration zurücksetzen",
+          "desc": "Dadurch wird die Profilüberschreibung für {{type}}<em>{{name}}</em> aufgehoben und die Grundkonfiguration wiederhergestellt."
         }
       },
       "speed": {
@@ -507,7 +511,8 @@
         "title": "Aktiviert",
         "description": "Ob diese Maske in der Konfigurationsdatei aktiviert ist. Ist sie deaktiviert, kann sie nicht über MQTT aktiviert werden. Deaktivierte Masken werden zur Laufzeit ignoriert."
       }
-    }
+    },
+    "addDisabledProfile": "Fügen Sie es zuerst der Basiskonfiguration hinzu und überschreiben Sie es dann im Profil"
   },
   "debug": {
     "objectShapeFilterDrawing": {
@@ -1328,7 +1333,8 @@
         },
         "hikvision": {
           "substreamWarning": "Substream 1 ist auf eine niedrige Auflösung festgelegt. Viele Hikvision-Kameras unterstützen zusätzliche Substreams, die in den Kameraeinstellungen aktiviert werden müssen. Es wird empfohlen, diese Streams zu überprüfen und zu nutzen, sofern sie verfügbar sind."
-        }
+        },
+        "resolutionUnknown": "Die Auflösung dieses Streams konnte nicht ermittelt werden. Sie sollten die Erkennungsauflösung manuell in den Einstellungen oder in Ihrer Konfiguration festlegen."
       }
     }
   },
@@ -1345,7 +1351,13 @@
       "enableDesc": "</em>Eine aktivierte Kamera vorübergehend deaktivieren, bis Frigate neu gestartet wird. Durch das Deaktivieren einer Kamera wird die Verarbeitung der Streams dieser Kamera durch Frigate vollständig unterbrochen. Erkennung, Aufzeichnung und Fehlerbehebung stehen dann nicht mehr zur Verfügung.<br /><em> Hinweis: go2rtc-Restreams werden dadurch nicht deaktiviert.</em>",
       "disableLabel": "Deaktivierte Kameras",
       "disableDesc": "Aktivieren Sie eine Kamera, die derzeit in der Benutzeroberfläche nicht sichtbar und in der Konfiguration deaktiviert ist. Nach der Aktivierung ist ein Neustart von Frigate erforderlich.",
-      "enableSuccess": "{{cameraName}} wurde in der Konfiguration aktiviert. Starte Frigate neu, um die Änderungen zu übernehmen."
+      "enableSuccess": "{{cameraName}} wurde in der Konfiguration aktiviert. Starte Frigate neu, um die Änderungen zu übernehmen.",
+      "friendlyName": {
+        "edit": "Anzeigenamen der Kamera bearbeiten",
+        "title": "Anzeigenamen bearbeiten",
+        "description": "Legen Sie den Anzeigenamen fest, der für diese Kamera in der gesamten Benutzeroberfläche von „Frigate“ angezeigt wird. Lassen Sie das Feld leer, um die Kamera-ID zu verwenden.",
+        "rename": "Umbenennen"
+      }
     },
     "cameraConfig": {
       "add": "Kamera hinzufügen",
@@ -1395,6 +1407,14 @@
       "inherit": "Erben",
       "enabled": "Aktiviert",
       "disabled": "Deaktiviert"
+    },
+    "cameraType": {
+      "title": "Kamerytyp",
+      "label": "Kameratyp",
+      "description": "Legen Sie den Kameratyp für jede Kamera fest. Spezielle LPR-Kameras sind Kameras mit leistungsstarkem optischen Zoom, um Kennzeichen von weit entfernten Fahrzeugen zu erfassen. Für die meisten Kameras sollte der normale Kameratyp verwendet werden, es sei denn, die Kamera ist speziell für LPR vorgesehen und verfügt über einen stark fokussierten Blickwinkel auf die Kennzeichen.",
+      "normal": "Normal",
+      "dedicatedLpr": "Spezielles LPR-System",
+      "saveSuccess": "Der Kameratyp für {{cameraName}} wurde aktualisiert. Starte Frigate neu, um die Änderungen zu übernehmen."
     }
   },
   "cameraReview": {
@@ -1458,7 +1478,18 @@
     "overriddenGlobalTooltip": "Diese Kamera überschreibt globale Konfigurationseinstellungen in diesem Abschnitt",
     "overriddenBaseConfig": "Überschrieben (Basiskonfiguration)",
     "overriddenBaseConfigTooltip": "Das {{profile}}-Profil überschreibt Konfigurationseinstellungen in diesem Abschnitt",
-    "overriddenGlobal": "Überschrieben (Global)"
+    "overriddenGlobal": "Überschrieben (Global)",
+    "overriddenInCameras": {
+      "label_one": "In {{count}} Kamera überschrieben",
+      "label_other": "In {{count}} Kameras überschrieben",
+      "tooltip_one": "Die Kamera mit der Nummer {{count}} überschreibt die Werte in diesem Abschnitt. Klicken Sie hier, um Details anzuzeigen.",
+      "tooltip_other": "Die Kamera mit der Nummer {{count}} überschreibt die Werte in diesem Abschnitt. Klicken Sie hier, um Details anzuzeigen.",
+      "heading_one": "Dieser globale Abschnitt enthält Felder, die in {{count}} Kamera überschrieben werden.",
+      "heading_other": "Dieser globale Abschnitt enthält Felder, die bei {{count}} Kameras überschrieben werden.",
+      "othersField_one": "{{count}} andere",
+      "othersField_other": "{{count}} weitere",
+      "profilePrefix": "{{profile}} Profile: {{fields}}"
+    }
   },
   "timestampPosition": {
     "tl": "Oben links",
@@ -1486,7 +1517,7 @@
       "currentStatus": "Status",
       "jobId": "Job ID",
       "startTime": "Startzeit",
-      "endTime": "Endzeit",
+      "endTime": "End Zeit",
       "statusLabel": "Status",
       "results": "Ergebnisse",
       "errorLabel": "Fehler",
@@ -1647,7 +1678,8 @@
       "keyDuplicate": "Der Name des Detektors ist bereits vorhanden.",
       "noSchema": "Es sind keine Detektorschemata verfügbar.",
       "none": "Es sind keine Detektorinstanzen konfiguriert.",
-      "add": "Detektor hinzufügen"
+      "add": "Detektor hinzufügen",
+      "addCustomKey": "Benutzter Schlüssel hinzufügen"
     },
     "record": {
       "title": "Aufnahmeeinstellungen"
@@ -1718,7 +1750,16 @@
       "title": "Einstellungen für Zeitstempel"
     },
     "searchPlaceholder": "Suche...",
-    "addCustomLabel": "Benutzerdefiniertes Etikett hinzufügen..."
+    "addCustomLabel": "Benutzerdefiniertes Etikett hinzufügen...",
+    "knownPlates": {
+      "namePlaceholder": "z.B. das Auto der Frau",
+      "platePlaceholder": "Kennzeichen oder regulärer Ausdruck"
+    },
+    "genaiModel": {
+      "placeholder": "Modell auswählen…",
+      "search": "Modell suchen…",
+      "noModels": "Keine Modelle verfügbar"
+    }
   },
   "globalConfig": {
     "title": "Globale Konfiguration",
@@ -1849,7 +1890,8 @@
     "review": {
       "recordDisabled": "Aufnahme ist deaktiviert, Überprüfungspunkt konnte nicht erstellt werden.",
       "detectDisabled": "Die Objekterkennung ist deaktiviert. Für die Überprüfung von Elementen müssen Objekte erkannt werden, um Warnmeldungen und Erkennungen zu kategorisieren.",
-      "allNonAlertDetections": "Alle Aktivitäten, die keine Warnmeldungen auslösen, werden als Erkennungen erfasst."
+      "allNonAlertDetections": "Alle Aktivitäten, die keine Warnmeldungen auslösen, werden als Erkennungen erfasst.",
+      "genaiImageSourceRecordingsRecordDisabled": "Als Bildquelle ist „Aufnahmen“ eingestellt, die Aufnahmefunktion ist jedoch deaktiviert. Frigate greift in diesem Fall auf Vorschaubilder zurück."
     },
     "audio": {
       "noAudioRole": "Für keinen Stream ist die Audio-Rolle definiert. Sie müssen die Audio-Rolle aktivieren, damit die Audioerkennung funktioniert."
@@ -1858,15 +1900,18 @@
       "audioDetectionDisabled": "Die Audioerkennung ist für diese Kamera nicht aktiviert. Für die Audio-Transkription muss die Audioerkennung aktiviert sein."
     },
     "detect": {
-      "fpsGreaterThanFive": "Es wird nicht empfohlen, den Wert für die FPS-Erkennung auf mehr als 5 einzustellen."
+      "fpsGreaterThanFive": "Es wird nicht empfohlen, den Wert für die FPS-Erkennung auf mehr als 5 zu setzen. Höhere Werte können zu Leistungseinbußen führen und bieten keinerlei Vorteile.",
+      "disabled": "Die Objekterkennung ist deaktiviert. Momentaufnahmen, Überprüfungselemente und Erweiterungsfunktionen wie Gesichtserkennung, Kennzeichenerkennung und generative KI funktionieren nicht."
     },
     "faceRecognition": {
-      "globalDisabled": "Die Gesichtserkennung ist auf globaler Ebene nicht aktiviert. Aktivieren Sie sie in den globalen Einstellungen, damit die Gesichtserkennung auf Kameraebene funktioniert.",
-      "personNotTracked": "Für die Gesichtserkennung muss das Objekt „person“ verfolgt werden. Stellen Sie sicher, dass „person“ in der Objektverfolgungsliste enthalten ist."
+      "globalDisabled": "Die Gesichtserkennungserweiterung muss aktiviert sein, damit die Gesichtserkennungsfunktionen bei dieser Kamera funktionieren.",
+      "personNotTracked": "Für die Gesichtserkennung muss das Objekt „Person“ verfolgt werden. Aktivieren Sie „Person“ unter „Objekte“ für diese Kamera.",
+      "modelSizeLarge": "Das „große“ Modell erfordert eine GPU oder NPU, um eine angemessene Leistung zu erzielen. Verwenden Sie auf reinen CPU-Systemen die Option „klein“."
     },
     "lpr": {
-      "globalDisabled": "Die Kennzeichenerkennung ist auf globaler Ebene nicht aktiviert. Aktivieren Sie sie in den globalen Einstellungen, damit die Kennzeichenerkennung auf Kameraebene funktioniert.",
-      "vehicleNotTracked": "Für die Kennzeichenerkennung muss entweder ein „Pkw“ oder ein „Motorrad“ erfasst werden."
+      "globalDisabled": "Die Erweiterung zur Kennzeichenerkennung muss aktiviert sein, damit die LPR-Funktionen bei dieser Kamera funktionieren.",
+      "vehicleNotTracked": "Für die Kennzeichenerkennung muss entweder „Auto“ oder „Motorrad“ erfasst werden. Aktivieren Sie „Auto“ oder „Motorrad“ unter „Objekte“ für diese Kamera.",
+      "modelSizeLarge": "Das „große“ Modell ist für mehrzeilige Kennzeichen optimiert. Das „kleine“ Modell bietet eine bessere Leistung als das „große“ und sollte verwendet werden, sofern in Ihrer Region keine mehrzeiligen Kennzeichenformate verwendet werden."
     },
     "record": {
       "noRecordRole": "Für keinen Stream ist die Rolle „Record“ definiert. Die Aufzeichnung funktioniert nicht."
@@ -1876,6 +1921,16 @@
     },
     "snapshots": {
       "detectDisabled": "Die Objekterkennung ist deaktiviert. Es werden keine Momentaufnahmen von verfolgten Objekten erstellt."
+    },
+    "detectors": {
+      "mixedTypes": "Alle Detektoren müssen von gleichem Typ sein, Entferne bestehende Detektoren um einen anderen Typ zu benutzen.",
+      "mixedTypesSuggestion": "Alle Detektoren müssen vom gleichem Typ sein. Entferne bestehende oder wähle {{type}}."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "Sie müssen einen GenAI-Anbieter mit der Rolle „Beschreibung“ konfigurieren, damit Beschreibungen generiert werden können."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "Die „kleine“ Variante des Jina V2-Modells verursacht hohe RAM- und Inferenzkosten. Es wird das „große“ Modell mit einer dedizierten GPU empfohlen."
     }
   }
 }

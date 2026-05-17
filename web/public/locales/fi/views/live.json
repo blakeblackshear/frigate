@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Suora - Frigate",
+  "documentTitle": {
+    "default": "Suora - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Suora - Frigate",
   "lowBandwidthMode": "Pienen kaistanleveyden tila",
   "twoWayTalk": {

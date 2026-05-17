@@ -31,7 +31,9 @@
   "timeline.aria": "Velg tidslinje",
   "documentTitle": "Inspeksjon - Frigate",
   "recordings": {
-    "documentTitle": "Opptak - Frigate"
+    "documentTitle": "Opptak - Frigate",
+    "invalidSharedLink": "Kunne ikke åpne tidsstemplet opptakslenke på grunn av tolkningsfeil.",
+    "invalidSharedCamera": "Kunne ikke åpne tidsstemplet opptakslenke på grunn av et ukjent eller uautorisert kamera."
   },
   "calendarFilter": {
     "last24Hours": "Siste 24 timer"
@@ -39,7 +41,7 @@
   "markAsReviewed": "Merk som inspisert",
   "markTheseItemsAsReviewed": "Merk disse elementene som inspiserte",
   "selected_one": "{{count}} valgt",
-  "selected_other": "{{count}} valgt",
+  "selected_other": "{{count}} valgte",
   "detected": "detektert",
   "suspiciousActivity": "Mistenkelig aktivitet",
   "threateningActivity": "Truende aktivitet",

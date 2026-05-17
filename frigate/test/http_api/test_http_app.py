@@ -23,6 +23,26 @@ class TestHttpApp(BaseTestHttp):
             response_json = response.json()
             assert response_json == self.test_stats
 
+    def test_recordings_storage_requires_admin(self):
+        stats = Mock(spec=StatsEmitter)
+        stats.get_latest_stats.return_value = self.test_stats
+        app = super().create_app(stats)
+        app.storage_maintainer = Mock()
+        app.storage_maintainer.calculate_camera_usages.return_value = {
+            "front_door": {"usage": 2.0},
+        }
+
+        with AuthTestClient(app) as client:
+            response = client.get(
+                "/recordings/storage",
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+            )
+            assert response.status_code == 403
+
+            response = client.get("/recordings/storage")
+            assert response.status_code == 200
+            assert response.json()["front_door"]["usage_percent"] == 25.0
+
     def test_config_set_in_memory_replaces_objects_track_list(self):
         self.minimal_config["cameras"]["front_door"]["objects"] = {
             "track": ["person", "car"],

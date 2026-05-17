@@ -82,6 +82,7 @@
     },
     "boundingBox": "Cadre de détection",
     "zones": "Zones",
-    "regions": "Régions"
+    "regions": "Régions",
+    "paths": "Chemins"
   }
 }

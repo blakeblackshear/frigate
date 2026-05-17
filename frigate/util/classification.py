@@ -24,8 +24,12 @@ from frigate.log import redirect_output_to_logger, suppress_stderr_during
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
-from frigate.util.file import get_event_thumbnail_bytes
-from frigate.util.image import get_image_from_recording
+from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
+from frigate.util.image import (
+    calculate_region,
+    get_image_from_recording,
+    relative_box_to_absolute,
+)
 from frigate.util.process import FrigateProcess
 
 BATCH_SIZE = 16
@@ -713,7 +717,7 @@ def collect_object_classification_examples(
     This function:
     1. Queries events for the specified label
     2. Selects 100 balanced events across different cameras and times
-    3. Retrieves thumbnails for selected events (with 33% center crop applied)
+    3. Crops each event's clean snapshot around the object bounding box
     4. Selects 24 most visually distinct thumbnails
     5. Saves to dataset directory
 
@@ -832,66 +836,106 @@ def _select_balanced_events(
 
 def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]:
     """
-    Extract thumbnails from events and save to disk.
+    Extract a training image for each event.
+
+    Preferred path: load the full-frame clean snapshot and crop around the
+    stored bounding box with the same calculate_region(..., max(w, h), 1.0)
+    call the live ObjectClassificationProcessor uses, so wizard examples
+    are framed like inference-time inputs.
+
+    Fallback: if no clean snapshot exists (snapshots disabled, or only a
+    legacy annotated JPG is on disk), center-crop the stored thumbnail
+    using a step ladder sized from the box/region area ratio.
 
     Args:
         events: List of Event objects
-        output_dir: Directory to save thumbnails
+        output_dir: Directory to save crops
 
     Returns:
-        List of paths to successfully extracted thumbnail images
+        List of paths to successfully extracted images
     """
-    thumbnail_paths = []
+    image_paths = []
 
     for idx, event in enumerate(events):
         try:
-            thumbnail_bytes = get_event_thumbnail_bytes(event)
+            img = _load_event_classification_crop(event)
+            if img is None:
+                continue
 
-            if thumbnail_bytes:
-                nparr = np.frombuffer(thumbnail_bytes, np.uint8)
-                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-                if img is not None:
-                    height, width = img.shape[:2]
-
-                    crop_size = 1.0
-                    if event.data and "box" in event.data and "region" in event.data:
-                        box = event.data["box"]
-                        region = event.data["region"]
-
-                        if len(box) == 4 and len(region) == 4:
-                            box_w, box_h = box[2], box[3]
-                            region_w, region_h = region[2], region[3]
-
-                            box_area = (box_w * box_h) / (region_w * region_h)
-
-                            if box_area < 0.05:
-                                crop_size = 0.4
-                            elif box_area < 0.10:
-                                crop_size = 0.5
-                            elif box_area < 0.20:
-                                crop_size = 0.65
-                            elif box_area < 0.35:
-                                crop_size = 0.80
-                            else:
-                                crop_size = 0.95
-
-                    crop_width = int(width * crop_size)
-                    crop_height = int(height * crop_size)
-
-                    x1 = (width - crop_width) // 2
-                    y1 = (height - crop_height) // 2
-                    x2 = x1 + crop_width
-                    y2 = y1 + crop_height
-
-                    cropped = img[y1:y2, x1:x2]
-                    resized = cv2.resize(cropped, (224, 224))
-                    output_path = os.path.join(output_dir, f"thumbnail_{idx:04d}.jpg")
-                    cv2.imwrite(output_path, resized)
-                    thumbnail_paths.append(output_path)
+            resized = cv2.resize(img, (224, 224))
+            output_path = os.path.join(output_dir, f"thumbnail_{idx:04d}.jpg")
+            cv2.imwrite(output_path, resized)
+            image_paths.append(output_path)
 
         except Exception as e:
-            logger.debug(f"Failed to extract thumbnail for event {event.id}: {e}")
+            logger.debug(f"Failed to extract image for event {event.id}: {e}")
             continue
 
-    return thumbnail_paths
+    return image_paths
+
+
+def _load_event_classification_crop(event: Event) -> np.ndarray | None:
+    """Prefer a snapshot-based object crop; fall back to a center-cropped thumbnail."""
+    if event.data and "box" in event.data:
+        snapshot, _ = load_event_snapshot_image(event, clean_only=True)
+        if snapshot is not None:
+            abs_box = relative_box_to_absolute(snapshot.shape, event.data["box"])
+            if abs_box is not None:
+                xmin, ymin, xmax, ymax = abs_box
+                box_w = xmax - xmin
+                box_h = ymax - ymin
+                if box_w > 0 and box_h > 0:
+                    x1, y1, x2, y2 = calculate_region(
+                        snapshot.shape,
+                        xmin,
+                        ymin,
+                        xmax,
+                        ymax,
+                        max(box_w, box_h),
+                        1.0,
+                    )
+                    cropped = snapshot[y1:y2, x1:x2]
+                    if cropped.size > 0:
+                        return cropped
+
+    thumbnail_bytes = get_event_thumbnail_bytes(event)
+    if not thumbnail_bytes:
+        return None
+
+    nparr = np.frombuffer(thumbnail_bytes, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    if img is None or img.size == 0:
+        return None
+
+    height, width = img.shape[:2]
+    crop_size = 1.0
+
+    if event.data and "box" in event.data and "region" in event.data:
+        box = event.data["box"]
+        region = event.data["region"]
+
+        if len(box) == 4 and len(region) == 4:
+            box_w, box_h = box[2], box[3]
+            region_w, region_h = region[2], region[3]
+            box_area = (box_w * box_h) / (region_w * region_h)
+
+            if box_area < 0.05:
+                crop_size = 0.4
+            elif box_area < 0.10:
+                crop_size = 0.5
+            elif box_area < 0.20:
+                crop_size = 0.65
+            elif box_area < 0.35:
+                crop_size = 0.80
+            else:
+                crop_size = 0.95
+
+    crop_width = int(width * crop_size)
+    crop_height = int(height * crop_size)
+    x1 = (width - crop_width) // 2
+    y1 = (height - crop_height) // 2
+    cropped = img[y1 : y1 + crop_height, x1 : x1 + crop_width]
+    if cropped.size == 0:
+        return None
+
+    return cropped

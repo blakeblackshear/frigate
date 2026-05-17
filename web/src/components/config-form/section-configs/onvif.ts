@@ -39,6 +39,11 @@ const onvif: SectionConfigOverrides = {
         track: {
           "ui:widget": "objectLabels",
         },
+        zooming: {
+          "ui:options": {
+            enumI18nPrefix: "onvif.autotracking.zooming",
+          },
+        },
       },
     },
   },

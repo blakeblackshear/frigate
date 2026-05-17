@@ -278,7 +278,7 @@ export default function EventView({
           { playback: "realtime", image_path: review.thumb_path },
         )
         .then((response) => {
-          if (response.status == 200) {
+          if (response.status < 300) {
             toast.success(
               t("export.toast.success", { ns: "components/dialog" }),
               {
@@ -1135,6 +1135,12 @@ function MotionReview({
     new Set(),
   );
   const [isRegionFilterOpen, setIsRegionFilterOpen] = useState(false);
+
+  // reset filter when camera changes
+  useEffect(() => {
+    setMotionFilterCells(new Set());
+    setPendingFilterCells(new Set());
+  }, [motionPreviewsCamera]);
 
   const objectReviewItems = useMemo(
     () =>

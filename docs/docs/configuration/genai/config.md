@@ -201,7 +201,7 @@ Cloud Generative AI providers require an active internet connection to send imag
 
 ### Ollama Cloud
 
-Ollama also supports [cloud models](https://ollama.com/cloud), where your local Ollama instance handles requests from Frigate, but model inference is performed in the cloud. Set up Ollama locally, sign in with your Ollama account, and specify the cloud model name in your Frigate config. For more details, see the Ollama cloud model [docs](https://docs.ollama.com/cloud).
+Ollama also supports [cloud models](https://ollama.com/cloud), where model inference is performed in the cloud. You can connect directly to Ollama Cloud by setting `base_url` to `https://ollama.com` and providing an API key. Alternatively, you can run Ollama locally and use a cloud model name so your local instance forwards requests to the cloud. For more details, see the Ollama cloud model [docs](https://docs.ollama.com/cloud).
 
 #### Configuration
 
@@ -210,7 +210,8 @@ Ollama also supports [cloud models](https://ollama.com/cloud), where your local 
 
 1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
    - Set **Provider** to `ollama`
-   - Set **Base URL** to your local Ollama address (e.g., `http://localhost:11434`)
+   - Set **Base URL** to your local Ollama address (e.g., `http://localhost:11434`) or `https://ollama.com` for direct cloud inference
+   - Set **API key** if required by your endpoint (e.g., when using `https://ollama.com`)
    - Set **Model** to the cloud model name
 
 </TabItem>
@@ -221,6 +222,16 @@ genai:
   provider: ollama
   base_url: http://localhost:11434
   model: cloud-model-name
+```
+
+or when using Ollama Cloud directly
+
+```yaml
+genai:
+  provider: ollama
+  base_url: https://ollama.com
+  model: cloud-model-name
+  api_key: your-api-key
 ```
 
 </TabItem>

@@ -19,7 +19,8 @@
     "ffmpeg": {
         "inputs": {
             "rolesUnique": "Cada rol solo puede asignarse a un flujo de entrada.",
-            "detectRequired": "Al menos un flujo de entrada debe tener asignado el rol 'detect'."
+            "detectRequired": "Al menos un flujo de entrada debe tener asignado el rol 'detect'.",
+            "hwaccelDetectOnly": "Solo el flujo de entrada con la función \"detect\" puede definir argumentos de aceleración por hardware."
         }
     },
     "anyOf": "Debe coincidir con al menos uno de los esquemas permitidos",

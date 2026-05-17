@@ -174,12 +174,10 @@ async def latest_frame(
     }
     quality_params = get_image_quality_params(extension.value, params.quality)
 
-    if camera_name in request.app.frigate_config.cameras:
+    camera_config = request.app.frigate_config.cameras.get(camera_name)
+    if camera_config is not None:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
-        retry_interval = float(
-            request.app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
-            or 10
-        )
+        retry_interval = float(camera_config.ffmpeg.retry_interval or 10)
 
         is_offline = False
         if frame is None or datetime.now().timestamp() > (
@@ -1368,12 +1366,17 @@ def preview_gif(
         file_start = f"preview_{camera_name}-"
         start_file = f"{file_start}{start_ts}.{PREVIEW_FRAME_TYPE}"
         end_file = f"{file_start}{end_ts}.{PREVIEW_FRAME_TYPE}"
+
+        camera_files = [
+            entry.name
+            for entry in os.scandir(preview_dir)
+            if entry.name.startswith(file_start)
+        ]
+        camera_files.sort()
+
         selected_previews = []
 
-        for file in sorted(os.listdir(preview_dir)):
-            if not file.startswith(file_start):
-                continue
-
+        for file in camera_files:
             if file < start_file:
                 continue
 
@@ -1550,12 +1553,17 @@ def preview_mp4(
         file_start = f"preview_{camera_name}-"
         start_file = f"{file_start}{start_ts}.{PREVIEW_FRAME_TYPE}"
         end_file = f"{file_start}{end_ts}.{PREVIEW_FRAME_TYPE}"
+
+        camera_files = [
+            entry.name
+            for entry in os.scandir(preview_dir)
+            if entry.name.startswith(file_start)
+        ]
+        camera_files.sort()
+
         selected_previews = []
 
-        for file in sorted(os.listdir(preview_dir)):
-            if not file.startswith(file_start):
-                continue
-
+        for file in camera_files:
             if file < start_file:
                 continue
 

@@ -67,7 +67,8 @@
       "deletedFace_many": "{{count}} visages supprimés avec succès",
       "deletedFace_other": "{{count}} visages supprimés avec succès",
       "trainedFace": "Visage entraîné avec succès",
-      "renamedFace": "Visage renommé avec succès en {{name}}"
+      "renamedFace": "Visage renommé avec succès en {{name}}",
+      "reclassifiedFace": "Visage reclassifié avec succès."
     },
     "error": {
       "uploadingImageFailed": "Échec du téléversement de l'image : {{errorMessage}}",
@@ -76,7 +77,8 @@
       "updateFaceScoreFailed": "Échec de la mise à jour du score du visage : {{errorMessage}}",
       "addFaceLibraryFailed": "Échec de l'attribution du nom au visage : {{errorMessage}}",
       "deleteNameFailed": "Échec de la suppression du nom : {{errorMessage}}",
-      "renameFaceFailed": "Échec du changement de nom du visage : {{errorMessage}}"
+      "renameFaceFailed": "Échec du changement de nom du visage : {{errorMessage}}",
+      "reclassifyFailed": "Échec de la reclassification du visage : {{errorMessage}}"
     }
   },
   "trainFaceAs": "Entraîner le visage comme :",
@@ -101,5 +103,7 @@
     "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible."
   },
   "nofaces": "Aucun visage disponible",
-  "pixels": "{{area}} pixels"
+  "pixels": "{{area}} pixels",
+  "reclassifyFaceAs": "Reclassifier le visage en :",
+  "reclassifyFace": "Reclassifier le visage"
 }

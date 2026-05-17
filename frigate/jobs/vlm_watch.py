@@ -45,6 +45,7 @@ class VLMWatchJob(Job):
     last_reasoning: str = ""
     notification_message: str = ""
     iteration_count: int = 0
+    username: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -374,6 +375,7 @@ def start_vlm_watch_job(
     dispatcher: Any,
     labels: list[str] | None = None,
     zones: list[str] | None = None,
+    username: str = "",
 ) -> str:
     """Start a new VLM watch job. Returns the job ID.
 
@@ -397,6 +399,7 @@ def start_vlm_watch_job(
             max_duration_minutes=max_duration_minutes,
             labels=labels or [],
             zones=zones or [],
+            username=username,
         )
         cancel_ev = threading.Event()
         _current_job = job

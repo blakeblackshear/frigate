@@ -41,8 +41,7 @@ class GenAIConfig(FrigateBaseModel):
         title="Model",
         description="The model to use from the provider for generating descriptions or summaries.",
     )
-    provider: GenAIProviderEnum | None = Field(
-        default=None,
+    provider: GenAIProviderEnum = Field(
         title="Provider",
         description="The GenAI provider to use (for example: ollama, gemini, openai).",
     )

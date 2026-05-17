@@ -19,7 +19,7 @@ Face recognition requires a one-time internet connection to download detection a
 
 ### Face Detection
 
-When running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
+When running a Frigate+ model (or any custom model that natively detects faces) should ensure that `face` is added to the [list of objects to track](../plus/index.md#available-label-types) either globally or for a specific camera. This will allow face detection to run at the same time as object detection and be more efficient.
 
 When running a default COCO model or another model that does not include `face` as a detectable label, face detection will run via CV2 using a lightweight DNN model that runs on the CPU. In this case, you should _not_ define `face` in your list of objects to track.
 
@@ -171,7 +171,7 @@ When choosing images to include in the face training set it is recommended to al
 - If it is difficult to make out details in a persons face it will not be helpful in training.
 - Avoid images with extreme under/over-exposure.
 - Avoid blurry / pixelated images.
-- Avoid training on infrared (gray-scale). The models are trained on color images and will be able to extract features from gray-scale images.
+- Avoid training on infrared (gray-scale). The models are trained on color images and will not be able to extract features from gray-scale images.
 - Using images of people wearing hats / sunglasses may confuse the model.
 - Do not upload too many similar images at the same time, it is recommended to train no more than 4-6 similar images for each person to avoid over-fitting.
 

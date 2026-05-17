@@ -1,6 +1,9 @@
 """Tests for export progress tracking, broadcast, and FFmpeg parsing."""
 
 import io
+import os
+import shutil
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -11,6 +14,7 @@ from frigate.jobs.export import (
 )
 from frigate.record.export import PlaybackSourceEnum, RecordingExporter
 from frigate.types import JobStatusTypesEnum
+from frigate.util.ffmpeg import inject_progress_flags
 
 
 def _make_exporter(
@@ -115,10 +119,9 @@ class TestExpectedOutputDuration(unittest.TestCase):
 
 class TestProgressFlagInjection(unittest.TestCase):
     def test_inserts_before_output_path(self) -> None:
-        exporter = _make_exporter()
         cmd = ["ffmpeg", "-i", "input.m3u8", "-c", "copy", "/tmp/output.mp4"]
 
-        result = exporter._inject_progress_flags(cmd)
+        result = inject_progress_flags(cmd)
 
         assert result == [
             "ffmpeg",
@@ -133,8 +136,7 @@ class TestProgressFlagInjection(unittest.TestCase):
         ]
 
     def test_handles_empty_cmd(self) -> None:
-        exporter = _make_exporter()
-        assert exporter._inject_progress_flags([]) == []
+        assert inject_progress_flags([]) == []
 
 
 class TestFfmpegProgressParsing(unittest.TestCase):
@@ -164,7 +166,7 @@ class TestFfmpegProgressParsing(unittest.TestCase):
         fake_proc.returncode = 0
         fake_proc.wait = MagicMock(return_value=0)
 
-        with patch("frigate.record.export.sp.Popen", return_value=fake_proc):
+        with patch("frigate.util.ffmpeg.sp.Popen", return_value=fake_proc):
             returncode, _stderr = exporter._run_ffmpeg_with_progress(
                 ["ffmpeg", "-i", "x.m3u8", "/tmp/out.mp4"], "playlist", step="encoding"
             )
@@ -363,6 +365,121 @@ class TestBroadcastAggregation(unittest.TestCase):
         assert job.progress_percent == 33.0
 
 
+class TestGetDatetimeFromTimestamp(unittest.TestCase):
+    """Auto-generated export name should honor config.ui.timezone, not
+    fall back to the container's UTC clock when a timezone is configured.
+    """
+
+    def test_uses_configured_ui_timezone(self) -> None:
+        exporter = _make_exporter()
+        exporter.config.ui.timezone = "America/New_York"
+        # 2025-01-15 12:00:00 UTC is 07:00:00 EST
+        assert exporter.get_datetime_from_timestamp(1736942400) == "2025-01-15 07:00:00"
+
+    def test_falls_back_to_local_when_timezone_unset(self) -> None:
+        exporter = _make_exporter()
+        exporter.config.ui.timezone = None
+        # No assertion on the exact wall-clock value — just confirm no
+        # exception and that pytz isn't required when the field is unset.
+        assert isinstance(exporter.get_datetime_from_timestamp(1736942400), str)
+
+    def test_invalid_timezone_falls_back_to_local(self) -> None:
+        exporter = _make_exporter()
+        exporter.config.ui.timezone = "Not/A_Real_Zone"
+        assert isinstance(exporter.get_datetime_from_timestamp(1736942400), str)
+
+
+class TestSaveThumbnailFromPreviewFrames(unittest.TestCase):
+    """Short exports in the current hour can fall between preview frame
+    writes (1-2 fps during activity, every 30s otherwise). When no frame
+    falls inside the export window, save_thumbnail should fall back to
+    the most recent prior frame instead of returning no thumbnail."""
+
+    def setUp(self) -> None:
+        self.tmp_root = tempfile.mkdtemp(prefix="frigate_thumb_test_")
+        self.preview_dir = os.path.join(self.tmp_root, "cache", "preview_frames")
+        self.export_clips = os.path.join(self.tmp_root, "clips", "export")
+        os.makedirs(self.preview_dir, exist_ok=True)
+        os.makedirs(self.export_clips, exist_ok=True)
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmp_root, ignore_errors=True)
+
+    def _write_frame(self, camera: str, frame_time: float) -> str:
+        path = os.path.join(self.preview_dir, f"preview_{camera}-{frame_time}.webp")
+        with open(path, "wb") as f:
+            f.write(b"fake-webp-bytes")
+        return path
+
+    def _make_short_current_hour_exporter(self) -> RecordingExporter:
+        # Use a "now-ish" timestamp so save_thumbnail's start-of-hour
+        # comparison takes the current-hour branch (preview frames).
+        import datetime
+
+        now = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        exporter = _make_exporter()
+        exporter.export_id = "thumb_short"
+        exporter.start_time = now
+        exporter.end_time = now + 3
+        return exporter
+
+    def test_short_export_falls_back_to_prior_preview_frame(self) -> None:
+        exporter = self._make_short_current_hour_exporter()
+        # Most recent preview frame is 10s before the export window
+        prior = self._write_frame(exporter.camera, exporter.start_time - 10.0)
+        thumb_target = os.path.join(self.export_clips, f"{exporter.export_id}.webp")
+
+        with (
+            patch(
+                "frigate.record.export.CACHE_DIR", os.path.join(self.tmp_root, "cache")
+            ),
+            patch(
+                "frigate.record.export.CLIPS_DIR", os.path.join(self.tmp_root, "clips")
+            ),
+        ):
+            result = exporter.save_thumbnail(exporter.export_id)
+
+        assert result == thumb_target
+        assert os.path.isfile(thumb_target)
+        with open(thumb_target, "rb") as f, open(prior, "rb") as src:
+            assert f.read() == src.read()
+
+    def test_returns_empty_when_no_preview_frames_exist(self) -> None:
+        exporter = self._make_short_current_hour_exporter()
+
+        with (
+            patch(
+                "frigate.record.export.CACHE_DIR", os.path.join(self.tmp_root, "cache")
+            ),
+            patch(
+                "frigate.record.export.CLIPS_DIR", os.path.join(self.tmp_root, "clips")
+            ),
+        ):
+            result = exporter.save_thumbnail(exporter.export_id)
+
+        assert result == ""
+
+    def test_prefers_in_window_frame_over_prior_frame(self) -> None:
+        exporter = self._make_short_current_hour_exporter()
+        self._write_frame(exporter.camera, exporter.start_time - 10.0)
+        in_window = self._write_frame(exporter.camera, exporter.start_time + 1.0)
+        thumb_target = os.path.join(self.export_clips, f"{exporter.export_id}.webp")
+
+        with (
+            patch(
+                "frigate.record.export.CACHE_DIR", os.path.join(self.tmp_root, "cache")
+            ),
+            patch(
+                "frigate.record.export.CLIPS_DIR", os.path.join(self.tmp_root, "clips")
+            ),
+        ):
+            result = exporter.save_thumbnail(exporter.export_id)
+
+        assert result == thumb_target
+        with open(thumb_target, "rb") as f, open(in_window, "rb") as src:
+            assert f.read() == src.read()
+
+
 class TestSchedulesCleanup(unittest.TestCase):
     def test_schedule_job_cleanup_removes_after_delay(self) -> None:
         config = MagicMock()
@@ -379,6 +496,57 @@ class TestSchedulesCleanup(unittest.TestCase):
             # Invoke the callback directly to confirm it removes the job.
             fn()
             assert job.id not in manager.jobs
+
+
+class TestChapterMetadataInProgressReview(unittest.TestCase):
+    """Regression: in-progress review segments have end_time=NULL until the
+    activity closes. The chapter builder must clamp the chapter end to the
+    last recorded second instead of crashing on float(None)."""
+
+    def _fake_select_returning(self, rows: list) -> MagicMock:
+        mock_query = MagicMock()
+        mock_query.where.return_value = mock_query
+        mock_query.order_by.return_value = mock_query
+        mock_query.iterator.return_value = iter(rows)
+        return mock_query
+
+    def test_in_progress_review_does_not_crash_and_clamps_to_last_recording(
+        self,
+    ) -> None:
+        exporter = _make_exporter(end_minus_start=200)
+        # Recordings cover [1000, 1150]; export window is [1000, 1200] so
+        # the last recorded second is 1150 (a 50s gap at the tail).
+        recordings = [
+            MagicMock(start_time=1000.0, end_time=1150.0),
+        ]
+        in_progress = MagicMock(
+            start_time=1100.0,
+            end_time=None,
+            severity="alert",
+            data={"objects": ["person"]},
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            chapter_path = os.path.join(tmpdir, "chapters.txt")
+            exporter._chapter_metadata_path = lambda: chapter_path  # type: ignore[method-assign]
+
+            with patch(
+                "frigate.record.export.ReviewSegment.select",
+                return_value=self._fake_select_returning([in_progress]),
+            ):
+                result = exporter._build_chapter_metadata_file(recordings)
+
+            assert result == chapter_path
+            with open(chapter_path) as f:
+                content = f.read()
+
+        # Output time is windows[-1][1] - windows[-1][0] = 150s.
+        # Review starts at wall=1100, output offset = 100s -> 100000ms.
+        # Clamped end = last_recorded_end (1150) -> output offset = 150s -> 150000ms.
+        assert "[CHAPTER]" in content
+        assert "START=100000" in content
+        assert "END=150000" in content
+        assert "title=Alert: person" in content
 
 
 if __name__ == "__main__":

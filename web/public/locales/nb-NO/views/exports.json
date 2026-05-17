@@ -14,7 +14,9 @@
   "toast": {
     "error": {
       "renameExportFailed": "Kunne ikke gi nytt navn til eksport: {{errorMessage}}",
-      "assignCaseFailed": "Kunne ikke oppdatere sakstilknytning: {{errorMessage}}"
+      "assignCaseFailed": "Kunne ikke oppdatere sakstilknytning: {{errorMessage}}",
+      "caseSaveFailed": "Kunne ikke lagre sak: {{errorMessage}}",
+      "caseDeleteFailed": "Kunne ikke slette sak: {{errorMessage}}"
     }
   },
   "tooltip": {
@@ -22,7 +24,8 @@
     "downloadVideo": "Last ned video",
     "editName": "Rediger navn",
     "deleteExport": "Slett eksport",
-    "assignToCase": "Legg til i sak"
+    "assignToCase": "Legg til i sak",
+    "removeFromCase": "Fjern fra sak"
   },
   "caseDialog": {
     "nameLabel": "Saksnavn",
@@ -35,5 +38,91 @@
   "headings": {
     "cases": "Saker",
     "uncategorizedExports": "Eksporter uten sak"
+  },
+  "toolbar": {
+    "newCase": "Ny sak",
+    "addExport": "Legg til eksport",
+    "editCase": "Rediger sak",
+    "deleteCase": "Slett sak"
+  },
+  "deleteCase": {
+    "label": "Slett sak",
+    "desc": "Er du sikker på at du vil slette {{caseName}}?",
+    "descKeepExports": "Eksporter vil fortsatt være tilgjengelige som eksporter uten sak.",
+    "descDeleteExports": "Alle eksporter i denne saken vil bli slettet permanent.",
+    "deleteExports": "Slett også eksporter"
+  },
+  "caseCard": {
+    "emptyCase": "Ingen eksporter ennå"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}}-eksport",
+    "queued": "Lagt i kø",
+    "running": "Kjører",
+    "preparing": "Forbereder",
+    "copying": "Kopierer",
+    "encoding": "Enkoder",
+    "encodingRetry": "Enkoder (nytt forsøk)",
+    "finalizing": "Fullfører"
+  },
+  "caseView": {
+    "noDescription": "Ingen beskrivelse",
+    "createdAt": "Opprettet {{value}}",
+    "exportCount_one": "1 eksport",
+    "exportCount_other": "{{count}} eksporter",
+    "cameraCount_one": "1 kamera",
+    "cameraCount_other": "{{count}} kameraer",
+    "showMore": "Vis mer",
+    "showLess": "Vis mindre",
+    "emptyTitle": "Denne saken er tom",
+    "emptyDescription": "Legg til eksisterende eksporter uten sak for å holde orden i saken.",
+    "emptyDescriptionNoExports": "Det er ingen ledige eksporter tilgjengelig for å legges til ennå."
+  },
+  "caseEditor": {
+    "createTitle": "Opprett sak",
+    "editTitle": "Rediger sak",
+    "namePlaceholder": "Saksnavn",
+    "descriptionPlaceholder": "Legg til notater eller kontekst for denne saken"
+  },
+  "addExportDialog": {
+    "title": "Legg til eksport i {{caseName}}",
+    "searchPlaceholder": "Søk i eksporter uten sak",
+    "empty": "Ingen eksporter uten sak samsvarer med søket.",
+    "addButton_one": "Legg til 1 eksport",
+    "addButton_other": "Legg til {{count}} eksporter",
+    "adding": "Legger til..."
+  },
+  "selected_one": "{{count}} valgt",
+  "selected_other": "{{count}} valgte",
+  "bulkActions": {
+    "addToCase": "Legg til i sak",
+    "moveToCase": "Flytt til sak",
+    "removeFromCase": "Fjern fra sak",
+    "delete": "Slett",
+    "deleteNow": "Slett nå"
+  },
+  "bulkDelete": {
+    "title": "Slett eksporter",
+    "desc_one": "Er du sikker på at du vil slette {{count}} eksport?",
+    "desc_other": "Er du sikker på at du vil slette {{count}} eksporter?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Fjern fra sak",
+    "desc_one": "Fjerne {{count}} eksport fra denne saken?",
+    "desc_other": "Fjerne {{count}} eksporter fra denne saken?",
+    "descKeepExports": "Eksporter vil bli flyttet til \"uten sak\".",
+    "descDeleteExports": "Eksporter vil bli slettet permanent.",
+    "deleteExports": "Slett eksporter i stedet"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Eksporter ble slettet",
+      "reassign": "Sakstilknytning ble oppdatert",
+      "remove": "Eksporter ble fjernet fra saken"
+    },
+    "error": {
+      "deleteFailed": "Kunne ikke slette eksporter: {{errorMessage}}",
+      "reassignFailed": "Kunne ikke oppdatere sakstilknytning: {{errorMessage}}"
+    }
   }
 }

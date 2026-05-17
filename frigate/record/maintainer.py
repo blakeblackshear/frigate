@@ -610,8 +610,7 @@ class RecordingMaintainer(threading.Thread):
             camera,
         )
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
         # file will be in utc due to start_time being in utc
         file_name = f"{start_time.strftime('%M.%S.mp4')}"

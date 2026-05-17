@@ -52,12 +52,11 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   } = props;
   const formContext = registry?.formContext as ConfigFormContext | undefined;
 
-  // Check if this is a root-level object
-  const isRoot = registry?.rootSchema === schema;
   const overrides = formContext?.overrides;
   const baselineFormData = formContext?.baselineFormData;
   const hiddenFields = formContext?.hiddenFields;
   const fieldPath = props.fieldPathId.path;
+  const isRoot = fieldPath.length === 0;
   const restartRequired = formContext?.restartRequired;
   const defaultRequiresRestart = formContext?.requiresRestart ?? true;
 
@@ -211,6 +210,9 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
       (p.content.props as RjsfElementProps).uiSchema?.["ui:options"]
         ?.advanced !== true,
   );
+
+  const isAudioLabels = uiSchema?.["ui:options"]?.isAudioLabels === true;
+
   const hasModifiedAdvanced = advancedProps.some((prop) =>
     checkSubtreeModified([...fieldPath, prop.name]),
   );
@@ -244,7 +246,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const path = fieldPathId?.path;
   const filterObjectLabel = path ? getFilterObjectLabel(path) : undefined;
   const translatedFilterLabel = filterObjectLabel
-    ? getTranslatedLabel(filterObjectLabel, "object")
+    ? getTranslatedLabel(filterObjectLabel, isAudioLabels ? "audio" : "object")
     : undefined;
   if (path) {
     translationPath = buildTranslationPath(
@@ -467,7 +469,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
                 <CardTitle
                   className={cn(
                     "flex items-center text-sm",
-                    hasModifiedDescendants && "text-danger",
+                    hasModifiedDescendants && "text-unsaved",
                   )}
                 >
                   {inferredLabel}

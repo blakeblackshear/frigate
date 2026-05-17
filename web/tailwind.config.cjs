@@ -65,6 +65,7 @@ module.exports = {
         ring: "hsl(var(--ring))",
         danger: "#ef4444",
         success: "#22c55e",
+        unsaved: "#f59e0b",
         background: "hsl(var(--background))",
         background_alt: "hsl(var(--background-alt))",
         foreground: "hsl(var(--foreground))",

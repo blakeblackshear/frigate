@@ -79,11 +79,11 @@ const PROFILE_COLORS: ProfileColor[] = [
     bgMuted: "bg-green-400/20",
   },
   {
-    bg: "bg-amber-400",
-    text: "text-amber-400",
-    dot: "bg-amber-400",
-    border: "border-amber-400",
-    bgMuted: "bg-amber-400/20",
+    bg: "bg-fuchsia-500",
+    text: "text-fuchsia-500",
+    dot: "bg-fuchsia-500",
+    border: "border-fuchsia-500",
+    bgMuted: "bg-fuchsia-500/20",
   },
   {
     bg: "bg-slate-400",
@@ -93,11 +93,11 @@ const PROFILE_COLORS: ProfileColor[] = [
     bgMuted: "bg-slate-400/20",
   },
   {
-    bg: "bg-orange-300",
-    text: "text-orange-300",
-    dot: "bg-orange-300",
-    border: "border-orange-300",
-    bgMuted: "bg-orange-300/20",
+    bg: "bg-stone-500",
+    text: "text-stone-500",
+    dot: "bg-stone-500",
+    border: "border-stone-500",
+    bgMuted: "bg-stone-500/20",
   },
   {
     bg: "bg-blue-300",

@@ -10,7 +10,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
-from frigate.util.builtin import deep_merge, load_labels
+from frigate.util.builtin import deep_merge
 
 
 class TestConfig(unittest.TestCase):
@@ -64,9 +64,9 @@ class TestConfig(unittest.TestCase):
 
     def test_config_class(self):
         frigate_config = FrigateConfig(**self.minimal)
-        assert "cpu" in frigate_config.detectors.keys()
-        assert frigate_config.detectors["cpu"].type == DetectorTypeEnum.cpu
-        assert frigate_config.detectors["cpu"].model.width == 320
+        assert "ov" in frigate_config.detectors.keys()
+        assert frigate_config.detectors["ov"].type == DetectorTypeEnum.openvino
+        assert frigate_config.detectors["ov"].model.width == 300
 
     @patch("frigate.detectors.detector_config.load_labels")
     def test_detector_custom_model_path(self, mock_labels):
@@ -309,15 +309,10 @@ class TestConfig(unittest.TestCase):
         }
 
         frigate_config = FrigateConfig(**config)
-        all_audio_labels = {
-            label
-            for label in load_labels("/audio-labelmap.txt", prefill=521).values()
-            if label
+        assert set(frigate_config.cameras["back"].audio.filters.keys()) == {
+            "speech",
+            "yell",
         }
-
-        assert all_audio_labels.issubset(
-            set(frigate_config.cameras["back"].audio.filters.keys())
-        )
 
     def test_override_audio_filters(self):
         config = {
@@ -345,7 +340,8 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "speech" in frigate_config.cameras["back"].audio.filters
         assert frigate_config.cameras["back"].audio.filters["speech"].threshold == 0.9
-        assert "babbling" in frigate_config.cameras["back"].audio.filters
+        assert "yell" in frigate_config.cameras["back"].audio.filters
+        assert "babbling" not in frigate_config.cameras["back"].audio.filters
 
     def test_inherit_object_filters(self):
         config = {
@@ -1005,6 +1001,7 @@ class TestConfig(unittest.TestCase):
 
         config = {
             "mqtt": {"host": "mqtt"},
+            "detectors": {"cpu": {"type": "cpu"}},
             "model": {"path": "plus://test"},
             "cameras": {
                 "back": {

@@ -6,7 +6,6 @@
 
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
-import merge from "lodash/merge";
 import unset from "lodash/unset";
 import isEqual from "lodash/isEqual";
 import mergeWith from "lodash/mergeWith";
@@ -90,6 +89,32 @@ export function getBaseCameraSectionValue(
   if (!cam) return undefined;
   const base = cam.base_config?.[sectionPath];
   return base !== undefined ? base : get(cam, sectionPath);
+}
+
+// mergeWith customizer that replaces arrays wholesale instead of merging them
+// positionally by index. Used when the source value is meant to fully replace
+// the destination (e.g. profile overrides, section config overrides), so an
+// empty source array correctly clears the destination array.
+const replaceArraysCustomizer = (objValue: unknown, srcValue: unknown) => {
+  if (Array.isArray(objValue) || Array.isArray(srcValue)) {
+    return srcValue !== undefined ? srcValue : objValue;
+  }
+  return undefined;
+};
+
+// Merge profile overrides on top of base config values. Matches the backend's
+// deep_merge(overrides, base_data) semantics: arrays are replaced wholesale by
+// the profile's value rather than merged positionally, so an empty array in a
+// profile clears the base array instead of leaving stale entries behind.
+export function mergeProfileOverrides<T extends object>(
+  baseValue: T,
+  profileOverrides: object,
+): T {
+  return mergeWith(
+    cloneDeep(baseValue),
+    cloneDeep(profileOverrides),
+    replaceArraysCustomizer,
+  ) as T;
 }
 
 /** Sections that can appear inside a camera profile definition. */
@@ -220,6 +245,32 @@ export function buildOverrides(
 }
 
 // ---------------------------------------------------------------------------
+// flattenOverrides — turn an overrides object into a list of leaf paths
+// ---------------------------------------------------------------------------
+
+// Walks a nested overrides value and produces a flat list of `{ path, value }`
+// entries, one per leaf.  Used by save/preview UIs to enumerate the individual
+// fields that will be changed.
+export function flattenOverrides(
+  value: JsonValue | undefined,
+  path: string[] = [],
+): Array<{ path: string; value: JsonValue }> {
+  if (value === undefined) return [];
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return [{ path: path.join("."), value }];
+  }
+
+  const entries = Object.entries(value);
+  if (entries.length === 0) {
+    return [{ path: path.join("."), value: {} }];
+  }
+
+  return entries.flatMap(([key, entryValue]) =>
+    flattenOverrides(entryValue, [...path, key]),
+  );
+}
+
+// ---------------------------------------------------------------------------
 // sanitizeSectionData — normalize config values and strip hidden fields
 // ---------------------------------------------------------------------------
 
@@ -228,7 +279,10 @@ export function buildOverrides(
 
 // lodash `unset` treats `*` as a literal key.  This helper expands wildcard
 // segments so that e.g. `"filters.*.mask"` unsets `filters.<each key>.mask`.
-function unsetWithWildcard(obj: Record<string, unknown>, path: string): void {
+export function unsetWithWildcard(
+  obj: Record<string, unknown>,
+  path: string,
+): void {
   if (!path.includes("*")) {
     unset(obj, path);
     return;
@@ -535,9 +589,9 @@ export function prepareSectionSavePayload(opts: {
         baseValue &&
         typeof baseValue === "object"
       ) {
-        rawSectionValue = merge(
-          cloneDeep(baseValue),
-          cloneDeep(profileOverrides),
+        rawSectionValue = mergeProfileOverrides(
+          baseValue as object,
+          profileOverrides as object,
         );
       } else {
         rawSectionValue = baseValue;
@@ -561,13 +615,14 @@ export function prepareSectionSavePayload(opts: {
   // For profile sections, also hide restart-required fields to match
   // effectiveHiddenFields in BaseSection (prevents spurious deletion markers
   // for fields that are hidden from the form during profile editing).
-  let hiddenFieldsForSanitize = sectionConfig.hiddenFields;
-  if (profileInfo.isProfile && sectionConfig.restartRequired?.length) {
-    const base = sectionConfig.hiddenFields ?? [];
-    hiddenFieldsForSanitize = [
-      ...new Set([...base, ...sectionConfig.restartRequired]),
-    ];
-  }
+  const resolvedHidden = resolveHiddenFieldEntries(
+    sectionConfig.hiddenFields,
+    config,
+  );
+  const hiddenFieldsForSanitize =
+    profileInfo.isProfile && sectionConfig.restartRequired?.length
+      ? [...new Set([...resolvedHidden, ...sectionConfig.restartRequired])]
+      : resolvedHidden;
 
   // Sanitize raw form data
   const rawData = sanitizeSectionData(
@@ -645,13 +700,12 @@ const mergeSectionConfig = (
   overrides: Partial<SectionConfig> | undefined,
 ): SectionConfig =>
   mergeWith({}, base ?? {}, overrides ?? {}, (objValue, srcValue, key) => {
-    if (Array.isArray(objValue) || Array.isArray(srcValue)) {
-      return srcValue ?? objValue;
-    }
+    const arrayResult = replaceArraysCustomizer(objValue, srcValue);
+    if (arrayResult !== undefined) return arrayResult;
 
     if (key === "uiSchema") {
       if (objValue && srcValue) {
-        return merge({}, objValue, srcValue);
+        return mergeWith({}, objValue, srcValue, replaceArraysCustomizer);
       }
       return srcValue ?? objValue;
     }
@@ -675,4 +729,60 @@ export function getSectionConfig(
         ? entry.replay
         : entry.camera;
   return mergeSectionConfig(entry.base, overrides);
+}
+
+/**
+ * Resolve the effective hidden-field patterns for a section. Each entry in
+ * `hiddenFields` is either a literal pattern or a function that produces
+ * patterns from the loaded config (e.g. `filters.<attr>` for each
+ * `model.all_attributes` entry on the objects section).
+ */
+export function getEffectiveHiddenFields(
+  sectionKey: string,
+  level: "global" | "camera" | "replay",
+  config: FrigateConfig | undefined,
+): string[] {
+  return resolveHiddenFieldEntries(
+    getSectionConfig(sectionKey, level).hiddenFields,
+    config,
+  );
+}
+
+export function resolveHiddenFieldEntries(
+  entries: SectionConfig["hiddenFields"] | undefined,
+  config: FrigateConfig | undefined,
+): string[] {
+  if (!entries || entries.length === 0) return [];
+  const result: string[] = [];
+  for (const entry of entries) {
+    if (typeof entry === "function") {
+      if (config) result.push(...entry(config));
+    } else {
+      result.push(entry);
+    }
+  }
+  return result;
+}
+
+/**
+ * Match a delta path against a hidden-field pattern. Supports literal prefixes
+ * (so a hidden field "streams" also hides "streams.foo.bar") and `*` wildcards
+ * matching exactly one path segment (e.g. "filters.*.mask").
+ */
+export function pathMatchesHiddenPattern(
+  path: string,
+  pattern: string,
+): boolean {
+  if (!pattern) return false;
+  if (!pattern.includes("*")) {
+    return path === pattern || path.startsWith(`${pattern}.`);
+  }
+  const patternSegments = pattern.split(".");
+  const pathSegments = path.split(".");
+  if (pathSegments.length < patternSegments.length) return false;
+  for (let i = 0; i < patternSegments.length; i += 1) {
+    if (patternSegments[i] === "*") continue;
+    if (patternSegments[i] !== pathSegments[i]) return false;
+  }
+  return true;
 }

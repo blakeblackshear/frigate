@@ -289,7 +289,10 @@
         "zones": "Zone",
         "ratio": "Raport",
         "area": "Aria",
-        "score": "Scor"
+        "score": "Scor",
+        "computedScore": "Scor calculat",
+        "topScore": "Cel mai mare scor",
+        "toggleAdvancedScores": "Comută scorurile avansate"
       }
     },
     "annotationSettings": {

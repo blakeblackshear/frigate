@@ -1,1 +1,64 @@
-{}
+{
+    "audio": {
+        "global": {
+            "sensitivity": "Общая чувствительность"
+        },
+        "cameras": {
+            "detection": "Обнаружение",
+            "sensitivity": "Чувствительность"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Глобальный вид"
+        },
+        "cameras": {
+            "appearance": "Вид"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Глобальная чувствительность",
+            "algorithm": "Глобальный алгоритм"
+        },
+        "cameras": {
+            "sensitivity": "Чувствительность",
+            "algorithm": "Алгоритм"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Глобальное разрешение",
+            "tracking": "Глобальное отслеживание"
+        },
+        "cameras": {
+            "resolution": "Разрешение",
+            "tracking": "Отслеживание"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Глобальное отслеживание",
+            "filtering": "Глобальная фильтрация"
+        },
+        "cameras": {
+            "tracking": "Отслеживание",
+            "filtering": "Фильтрация"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Глобальное сохранение данных",
+            "events": "Глобальные события"
+        },
+        "cameras": {
+            "retention": "Сохранение данных",
+            "events": "События"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Аргументы FFmpeg для этой камеры"
+        }
+    }
+}

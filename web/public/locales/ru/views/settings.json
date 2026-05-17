@@ -12,7 +12,11 @@
     "notifications": "Настройки уведомлений - Frigate",
     "enrichments": "Настройки обогащения - Frigate",
     "cameraManagement": "Управление камерами - Frigate",
-    "cameraReview": "Настройки просмотра камеры - Frigate"
+    "cameraReview": "Настройки просмотра камеры - Frigate",
+    "globalConfig": "Глобальная конфигурация - Frigate",
+    "cameraConfig": "Настройки камеры - Frigate",
+    "maintenance": "Обслуживание - Frigate",
+    "profiles": "Профили - Frigate"
   },
   "menu": {
     "cameras": "Настройки камеры",
@@ -28,7 +32,14 @@
     "triggers": "Триггеры",
     "cameraManagement": "Управление",
     "cameraReview": "Обзор",
-    "roles": "Роли"
+    "roles": "Роли",
+    "general": "Общее",
+    "globalConfig": "Глобальная конфигурация",
+    "system": "Система",
+    "integrations": "Интеграции",
+    "uiSettings": "Настройки интерфейса",
+    "profiles": "Профили",
+    "globalDetect": "Обнаружение объектов"
   },
   "dialog": {
     "unsavedChanges": {
@@ -1258,5 +1269,11 @@
         "success": "Конфигурация классификации обзора была сохранена. Перезапустите Frigate для применения изменений."
       }
     }
+  },
+  "button": {
+    "overriddenGlobal": "Перезаписано (глобально)",
+    "overriddenGlobalTooltip": "Эта камера перезаписывает глобальные настройки в этой секции",
+    "overriddenBaseConfig": "Перезаписано (базовые настройки)",
+    "overriddenBaseConfigTooltip": "Перезаписи настроек профиля {{profile}} в этой секции"
   }
 }

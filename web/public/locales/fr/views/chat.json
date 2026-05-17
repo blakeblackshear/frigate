@@ -1,0 +1,20 @@
+{
+    "documentTitle": "Messagerie - Frigate",
+    "title": "Messagerie Frigate",
+    "subtitle": "Votre assistant IA pour la gestion des camera et des aperçus",
+    "placeholder": "Posez moi toutes vos questions...",
+    "error": "Il y a eu un problème. Merci de bien vouloir réessayer.",
+    "processing": "Traitement en cours...",
+    "hideTools": "Masquer les outils",
+    "call": "Appeler",
+    "result": "Résultat",
+    "arguments": "Arguments :",
+    "response": "Réponse :",
+    "attachment_chip_label": "{{label}} sur {{camera}}",
+    "attachment_chip_remove": "Supprimer la pièce jointe",
+    "open_in_explore": "Ouvrir dans l'explorateur",
+    "attach_event_aria": "Attacher l'événement {{eventId}}",
+    "attachment_picker_paste_label": "Ou coller l'event ID",
+    "attachment_picker_placeholder": "Attacher un événement",
+    "quick_reply_find_similar": "Trouver des observations similaires"
+}

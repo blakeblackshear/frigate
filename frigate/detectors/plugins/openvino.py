@@ -52,6 +52,12 @@ class OvDetector(DetectionApi):
         self.h = detector_config.model.height
         self.w = detector_config.model.width
 
+        logger.info(
+            "Loading OpenVINO model %s on device %s",
+            detector_config.model.path,
+            detector_config.device,
+        )
+
         self.runner = OpenVINOModelRunner(
             model_path=detector_config.model.path,
             device=detector_config.device,

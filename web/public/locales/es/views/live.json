@@ -17,7 +17,7 @@
         "label": "Haz clic en el marco para centrar la cámara",
         "enable": "Habilitar clic para mover",
         "disable": "Deshabilitar clic para mover",
-        "enableWithZoom": "Activar clic para mover / arrastrar para hacer zoom"
+        "enableWithZoom": "Habilitar clic para mover / arrastrar para aumentar"
       },
       "up": {
         "label": "Mover la cámara PTZ hacia arriba"

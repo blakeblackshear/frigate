@@ -87,43 +87,43 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     # intel packages use zst compression so we need to update dpkg
     apt-get install -y dpkg
 
-    # use intel apt intel packages
+    # use intel apt repo for libmfx1 (legacy QSV, pre-Gen12)
     wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/gpu/ubuntu jammy client" | tee /etc/apt/sources.list.d/intel-gpu-jammy.list
     apt-get -qq update
+
     # intel-media-va-driver-non-free is built from source in the
     # intel-media-driver Dockerfile stage for Battlemage (Xe2) support
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        libmfx1 libmfxgen1 libvpl2
+        libmfx1
+    rm -f /usr/share/keyrings/intel-graphics.gpg
+    rm -f /etc/apt/sources.list.d/intel-gpu-jammy.list
 
+    # upgrade libva2, oneVPL runtime, and libvpl2 from trixie for Battlemage support
+    echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+    apt-get -qq update
+    apt-get -qq install -y -t trixie libva2 libva-drm2 libzstd1
+    apt-get -qq install -y -t trixie libmfx-gen1.2 libvpl2
+    rm -f /etc/apt/sources.list.d/trixie.list
+    apt-get -qq update
     apt-get -qq install -y ocl-icd-libopencl1
 
     # install libtbb12 for NPU support
     apt-get -qq install -y libtbb12
 
-    rm -f /usr/share/keyrings/intel-graphics.gpg
-    rm -f /etc/apt/sources.list.d/intel-gpu-jammy.list
-
-    # install legacy and standard intel icd and level-zero-gpu
+    # install legacy and standard intel compute packages
     # see https://github.com/intel/compute-runtime/blob/master/LEGACY_PLATFORMS.md for more info
-    # newer intel packages (gmmlib 22.9+, igc 2.32+) require libstdc++ >= 13.1 and libzstd >= 1.5.5
-    echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
-    apt-get -qq update
-    apt-get -qq install -y -t trixie libstdc++6 libzstd1
-    rm -f /etc/apt/sources.list.d/trixie.list
-    apt-get -qq update
-
     # needed core package
     wget https://github.com/intel/compute-runtime/releases/download/26.14.37833.4/libigdgmm12_22.9.0_amd64.deb
     dpkg -i libigdgmm12_22.9.0_amd64.deb
     rm libigdgmm12_22.9.0_amd64.deb
 
-    # legacy packages
+    # legacy compute-runtime packages
     wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.36/intel-opencl-icd-legacy1_24.35.30872.36_amd64.deb
     wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.36/intel-level-zero-gpu-legacy1_1.5.30872.36_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-opencl_1.0.17537.24_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-core_1.0.17537.24_amd64.deb
-    # standard packages
+    # standard compute-runtime packages
     wget https://github.com/intel/compute-runtime/releases/download/26.14.37833.4/intel-opencl-icd_26.14.37833.4-0_amd64.deb
     wget https://github.com/intel/compute-runtime/releases/download/26.14.37833.4/libze-intel-gpu1_26.14.37833.4-0_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.32.7/intel-igc-opencl-2_2.32.7+21184_amd64.deb
@@ -137,6 +137,10 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     dpkg -i *.deb
     rm *.deb
     apt-get -qq install -f -y
+
+    # Battlemage uses the xe kernel driver, but the VA-API driver is still iHD.
+    # The oneVPL runtime may look for a driver named after the kernel module.
+    ln -sf /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so /usr/lib/x86_64-linux-gnu/dri/xe_drv_video.so
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then

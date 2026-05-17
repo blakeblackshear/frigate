@@ -1630,7 +1630,16 @@
       "itemTitle": "Strøm {{index}}"
     },
     "searchPlaceholder": "Søk...",
-    "showAdvanced": "Vis avanserte innstillinger"
+    "showAdvanced": "Vis avanserte innstillinger",
+    "genaiModel": {
+      "placeholder": "Velg modell…",
+      "search": "Søk modeller…",
+      "noModels": "Ingen modeller tilgjengelig"
+    },
+    "knownPlates": {
+      "platePlaceholder": "Kjennemerke nummer eller regex",
+      "namePlaceholder": "f.eks konas bil"
+    }
   },
   "button": {
     "overriddenBaseConfigTooltip": "{{profile}}-profilen overstyrer konfigurasjonsinnstillinger i denne seksjonen",

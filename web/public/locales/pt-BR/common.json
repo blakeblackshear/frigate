@@ -262,7 +262,8 @@
       "setPassword": "Definir Senha"
     },
     "classification": "Classificação",
-    "chat": "Chat"
+    "chat": "Chat",
+    "profiles": "Perfis"
   },
   "toast": {
     "copyUrlToClipboard": "URL copiada para a área de transferência.",

@@ -85,7 +85,8 @@
     "attributes": "Atrybuty klasyfikacji",
     "title": {
       "label": "Tytuł"
-    }
+    },
+    "scoreInfo": "Informacje o wyniku"
   },
   "objectLifecycle": {
     "annotationSettings": {
@@ -222,6 +223,13 @@
     },
     "hideObjectDetails": {
       "label": "Ukryj ścieżkę obiektu"
+    },
+    "debugReplay": {
+      "label": "Odtwarzanie debugowania",
+      "aria": "Wyświetl śledzony obiekt w widoku odtwarzania debugowania"
+    },
+    "more": {
+      "aria": "Więcej"
     }
   },
   "trackedObjectsCount_one": "{{count}} śledzony obiekt ",
@@ -232,6 +240,9 @@
     "confirmDelete": {
       "desc": "Usunięcie tego śledzonego obiektu usuwa zrzut ekranu, wszelkie zapisane osadzenia i wszystkie powiązane wpisy śledzenia obiektu. Nagrany materiał tego śledzonego obiektu w widoku Historii <em>NIE</em> zostanie usunięty.<br /><br />Czy na pewno chcesz kontynuować?",
       "title": "Potwierdź usunięcie"
+    },
+    "toast": {
+      "error": "Błąd kasowania śledzonego obiektu: {{errorMessage}}"
     }
   },
   "fetchingTrackedObjectsFailed": "Błąd pobierania śledzonych obiektów: {{errorMessage}}",
@@ -276,7 +287,10 @@
         "zones": "Strefy",
         "area": "Powierzchnia",
         "score": "Wynik",
-        "ratio": "Proporcje"
+        "ratio": "Proporcje",
+        "toggleAdvancedScores": "Przełącz widok wyników zaawansowanych",
+        "computedScore": "Obliczony wynik",
+        "topScore": "Najwyższy wynik"
       },
       "heard": "{{label}} słyszałem"
     },

@@ -4,5 +4,29 @@
     "exclusiveMinimum": "Deve essere maggiore di {{limit}}",
     "exclusiveMaximum": "Deve essere minore di {{limit}}",
     "minLength": "Deve essere almeno {{limit}} carattere(i)",
-    "maxLength": "Deve essere al massimo {{limit}} carattere(i)"
+    "maxLength": "Deve essere al massimo {{limit}} carattere(i)",
+    "minItems": "Deve contenere almeno {{limit}} elementi",
+    "maxItems": "Deve avere al massimo {{limit}} elementi",
+    "pattern": "Formato non valido",
+    "required": "Questo campo è obbligatorio",
+    "type": "Tipo di valore non valido",
+    "enum": "Deve essere uno dei valori consentiti",
+    "const": "Il valore non corrisponde alla costante prevista",
+    "uniqueItems": "Tutti gli elementi devono essere unici",
+    "format": "Formato non valido",
+    "additionalProperties": "Proprietà sconosciuta non consentita",
+    "oneOf": "Deve corrispondere esattamente a uno degli schemi consentiti",
+    "anyOf": "Deve corrispondere ad almeno uno degli schemi consentiti",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "L'intestazione del ruolo è obbligatoria quando si configurano le mappature dei ruoli."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Ciascun ruolo può essere assegnato a un solo flusso di ingresso.",
+            "detectRequired": "Ad almeno un flusso di ingresso deve essere assegnato il ruolo di 'rilevamento'.",
+            "hwaccelDetectOnly": "Solo il flusso di ingresso con il ruolo di rilevamento può definire argomenti di accelerazione hardware."
+        }
+    }
 }

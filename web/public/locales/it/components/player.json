@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "Nessuna anteprima trovata per {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Vuoi inviare questo fotogramma a Frigate+?",
-    "submit": "Invia"
+    "submit": "Invia",
+    "previewError": "Impossibile caricare l'anteprima dell'istantanea. La registrazione potrebbe non essere disponibile al momento."
   },
   "livePlayerRequiredIOSVersion": "Per questo tipo di trasmissione dal vivo è richiesto iOS 17.1 o versione successiva.",
   "stats": {
@@ -47,5 +48,5 @@
       "submitFrigatePlusFailed": "Impossibile inviare il fotogramma a Frigate+"
     }
   },
-  "cameraDisabled": "La telecamera è disattivata"
+  "cameraDisabled": "La telecamera è disabilita"
 }

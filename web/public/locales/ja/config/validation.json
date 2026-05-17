@@ -2,5 +2,31 @@
     "pattern": "無効なフォーマット",
     "required": "この項目は必須です",
     "type": "無効な値タイプ",
-    "format": "無効なフォーマット"
+    "format": "無効なフォーマット",
+    "minimum": "{{limit}} 以上である必要があります",
+    "maximum": "{{limit}} 以下でなければなりません",
+    "exclusiveMinimum": "{{limit}} より大きい値である必要があります",
+    "exclusiveMaximum": "{{limit}} 未満でなければなりません",
+    "minLength": "{{limit}} 文字以上入力してください",
+    "maxLength": "最大 {{limit}} 文字までです",
+    "minItems": "{{limit}} 個以上のアイテムが必要です",
+    "maxItems": "アイテムは最大 {{limit}} 個までです",
+    "enum": "許可された値のいずれかである必要があります",
+    "const": "値が期待される定数と一致しません",
+    "uniqueItems": "全てのアイテムは一意である必要があります",
+    "additionalProperties": "不明なプロパティは使用できません",
+    "oneOf": "許可されたスキーマのうち、いずれか一つに完全一致する必要があります",
+    "anyOf": "許可されたスキーマのうち、少なくとも1つに一致する必要があります",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "ロールのマッピングを設定する際は、ロールヘッダーが必要です。"
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "各ロールは、1つの入力ストリームにのみ割り当てることができます。",
+            "detectRequired": "少なくとも1つの入力ストリームに「detect」ロールを割り当てる必要があります。",
+            "hwaccelDetectOnly": "ハードウェアアクセラレーション引数を定義できるのは、detect ロールを持つ入力ストリームのみです。"
+        }
+    }
 }

@@ -1,5 +1,5 @@
 import Heading from "@/components/ui/heading";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { LuExternalLink } from "react-icons/lu";
+import { LuExternalLink, LuFilter } from "react-icons/lu";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import {
   Select,
@@ -19,6 +19,14 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import {
@@ -26,6 +34,8 @@ import {
   SplitCardRow,
 } from "@/components/card/SettingsGroupCard";
 import FrigatePlusCurrentModelSummary from "@/views/settings/components/FrigatePlusCurrentModelSummary";
+import { useRestart } from "@/api/ws";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 
 type FrigatePlusModel = {
   id: string;
@@ -58,6 +68,8 @@ export default function FrigatePlusSettingsView({
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+  const { send: sendRestart } = useRestart();
 
   const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
@@ -76,7 +88,7 @@ export default function FrigatePlusSettingsView({
     },
   );
 
-  const { data: availableModels = {} } = useSWR<
+  const { data: availableModels = {}, isLoading: isLoadingModels } = useSWR<
     Record<string, FrigatePlusModel>
   >("/plus/models", {
     fallbackData: {},
@@ -91,6 +103,19 @@ export default function FrigatePlusSettingsView({
       );
     },
   });
+
+  const [showBaseModels, setShowBaseModels] = useState(true);
+  const [showFineTunedModels, setShowFineTunedModels] = useState(true);
+
+  const filteredModelEntries = useMemo(
+    () =>
+      Object.entries(availableModels || {}).filter(([, model]) =>
+        model.isBaseModel ? showBaseModels : showFineTunedModels,
+      ),
+    [availableModels, showBaseModels, showFineTunedModels],
+  );
+
+  const isFilterActive = !showBaseModels || !showFineTunedModels;
 
   useEffect(() => {
     if (config) {
@@ -128,47 +153,60 @@ export default function FrigatePlusSettingsView({
   const saveToConfig = useCallback(async () => {
     setIsLoading(true);
 
-    axios
-      .put(`config/set?model.path=plus://${frigatePlusSettings.model.id}`, {
+    try {
+      // Clear the existing model section so only the new path remains
+      await axios.put("config/set", {
         requires_restart: 0,
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          toast.success(t("frigatePlus.toast.success"), {
-            position: "top-center",
-          });
-          setChangedValue(false);
-          updateConfig();
-        } else {
-          toast.error(
-            t("frigatePlus.toast.error", { errorMessage: res.statusText }),
-            {
-              position: "top-center",
-            },
-          );
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
+        config_data: { model: null },
+      });
+      const res = await axios.put("config/set", {
+        requires_restart: 0,
+        config_data: {
+          model: { path: `plus://${frigatePlusSettings.model.id}` },
+        },
+      });
+
+      if (res.status === 200) {
+        toast.success(t("frigatePlus.toast.success"), {
+          position: "top-center",
+          action: (
+            <a onClick={() => setRestartDialogOpen(true)}>
+              <Button>
+                {t("restart.button", { ns: "components/dialog" })}
+              </Button>
+            </a>
+          ),
+        });
+        setChangedValue(false);
+        updateConfig();
+      } else {
         toast.error(
-          t("toast.save.error.title", { errorMessage, ns: "common" }),
+          t("frigatePlus.toast.error", { errorMessage: res.statusText }),
           {
             position: "top-center",
           },
         );
-      })
-      .finally(() => {
-        addMessage(
-          "plus_restart",
-          t("frigatePlus.restart_required"),
-          undefined,
-          "plus_restart",
-        );
-        setIsLoading(false);
+      }
+    } catch (error) {
+      const err = error as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        "Unknown error";
+      toast.error(t("toast.save.error.title", { errorMessage, ns: "common" }), {
+        position: "top-center",
       });
+    } finally {
+      addMessage(
+        "plus_restart",
+        t("frigatePlus.restart_required"),
+        undefined,
+        "plus_restart",
+      );
+      setIsLoading(false);
+    }
   }, [updateConfig, addMessage, frigatePlusSettings, t]);
 
   const onCancel = useCallback(() => {
@@ -201,274 +239,340 @@ export default function FrigatePlusSettingsView({
   }
 
   return (
-    <div className="flex size-full flex-col md:flex-row">
+    <div className="flex size-full flex-col md:pr-2">
       <Toaster position="top-center" closeButton={true} />
-      <div className="mt-2 flex h-full w-full flex-col">
-        <div className="scrollbar-container flex-1 overflow-y-auto">
-          <div className="w-full max-w-5xl space-y-6">
-            <div className="flex flex-col gap-0">
-              <Heading as="h4" className="mb-2">
-                {t("frigatePlus.title")}
-              </Heading>
+      <div className="w-full max-w-5xl space-y-6 pt-2">
+        <div className="flex flex-col gap-0">
+          <Heading as="h4" className="mb-2">
+            {t("frigatePlus.title")}
+          </Heading>
 
-              <p className="text-sm text-muted-foreground">
-                {t("frigatePlus.description")}
-              </p>
-            </div>
+          <p className="text-sm text-muted-foreground">
+            {t("frigatePlus.description")}
+          </p>
+        </div>
 
-            <div className="space-y-6">
-              <SettingsGroupCard title={t("frigatePlus.cardTitles.api")}>
-                <SplitCardRow
-                  label={t("frigatePlus.apiKey.title")}
-                  description={
-                    <>
-                      <p>{t("frigatePlus.apiKey.desc")}</p>
-                      {!config?.model.plus && (
-                        <div className="mt-2 flex items-center text-primary-variant">
-                          <Link
-                            to="https://frigate.video/plus"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline"
-                          >
-                            {t("frigatePlus.apiKey.plusLink")}
-                            <LuExternalLink className="ml-2 inline-flex size-3" />
-                          </Link>
-                        </div>
-                      )}
-                    </>
-                  }
-                  content={
-                    <div className="flex items-center gap-2">
-                      {config?.plus?.enabled ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
-                      )}
-                      <span className="text-sm">
-                        {config?.plus?.enabled
-                          ? t("frigatePlus.apiKey.validated")
-                          : t("frigatePlus.apiKey.notValidated")}
-                      </span>
-                    </div>
-                  }
-                />
-              </SettingsGroupCard>
-
-              {config?.model.plus && (
-                <FrigatePlusCurrentModelSummary plusModel={config.model.plus} />
-              )}
-
-              {config?.model.plus && (
-                <SettingsGroupCard
-                  title={t("frigatePlus.cardTitles.otherModels")}
-                >
-                  <SplitCardRow
-                    label={t("frigatePlus.modelInfo.availableModels")}
-                    description={
-                      <Trans ns="views/settings">
-                        frigatePlus.modelInfo.modelSelect
-                      </Trans>
-                    }
-                    content={
-                      <Select
-                        value={frigatePlusSettings.model.id}
-                        onValueChange={(value) =>
-                          handleFrigatePlusConfigChange({
-                            model: { id: value as string },
-                          })
-                        }
+        <div className="space-y-6">
+          <SettingsGroupCard title={t("frigatePlus.cardTitles.api")}>
+            <SplitCardRow
+              label={t("frigatePlus.apiKey.title")}
+              description={
+                <>
+                  <p>{t("frigatePlus.apiKey.desc")}</p>
+                  {!config?.model.plus && (
+                    <div className="mt-2 flex items-center text-primary-variant">
+                      <Link
+                        to="https://frigate.video/plus"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline"
                       >
+                        {t("frigatePlus.apiKey.plusLink")}
+                        <LuExternalLink className="ml-2 inline-flex size-3" />
+                      </Link>
+                    </div>
+                  )}
+                </>
+              }
+              content={
+                <div className="flex items-center gap-2">
+                  {config?.plus?.enabled ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-500" />
+                  )}
+                  <span className="text-sm">
+                    {config?.plus?.enabled
+                      ? t("frigatePlus.apiKey.validated")
+                      : t("frigatePlus.apiKey.notValidated")}
+                  </span>
+                </div>
+              }
+            />
+          </SettingsGroupCard>
+
+          {config?.plus?.enabled && (
+            <FrigatePlusCurrentModelSummary plusModel={config.model.plus} />
+          )}
+
+          {config?.plus?.enabled && (
+            <SettingsGroupCard title={t("frigatePlus.cardTitles.otherModels")}>
+              <SplitCardRow
+                label={t("frigatePlus.modelInfo.availableModels")}
+                description={
+                  <Trans ns="views/settings">
+                    frigatePlus.modelInfo.modelSelect
+                  </Trans>
+                }
+                content={
+                  <div className="flex w-full items-center gap-2">
+                    <Select
+                      value={frigatePlusSettings.model.id}
+                      onValueChange={(value) =>
+                        handleFrigatePlusConfigChange({
+                          model: { id: value as string },
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
                         {frigatePlusSettings.model.id &&
-                        availableModels?.[frigatePlusSettings.model.id] ? (
-                          <SelectTrigger className="w-full">
-                            {new Date(
+                        availableModels?.[frigatePlusSettings.model.id]
+                          ? new Date(
                               availableModels[
                                 frigatePlusSettings.model.id
                               ].trainDate,
                             ).toLocaleString() +
-                              " " +
-                              availableModels[frigatePlusSettings.model.id]
-                                .baseModel +
-                              " (" +
-                              (availableModels[frigatePlusSettings.model.id]
-                                .isBaseModel
-                                ? t(
-                                    "frigatePlus.modelInfo.plusModelType.baseModel",
+                            " " +
+                            availableModels[frigatePlusSettings.model.id]
+                              .baseModel +
+                            " (" +
+                            (availableModels[frigatePlusSettings.model.id]
+                              .isBaseModel
+                              ? t(
+                                  "frigatePlus.modelInfo.plusModelType.baseModel",
+                                )
+                              : t(
+                                  "frigatePlus.modelInfo.plusModelType.userModel",
+                                )) +
+                            ") " +
+                            availableModels[frigatePlusSettings.model.id].name +
+                            " (" +
+                            availableModels[frigatePlusSettings.model.id]
+                              .width +
+                            "x" +
+                            availableModels[frigatePlusSettings.model.id]
+                              .height +
+                            ")"
+                          : isLoadingModels
+                            ? t("frigatePlus.modelInfo.loadingAvailableModels")
+                            : t("frigatePlus.modelInfo.selectModel")}
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        <SelectGroup>
+                          {filteredModelEntries.length === 0 ? (
+                            <div className="px-4 py-3 text-center text-sm text-muted-foreground">
+                              {t("frigatePlus.modelInfo.noModelsAvailable")}
+                            </div>
+                          ) : (
+                            filteredModelEntries.map(([id, model]) => (
+                              <SelectItem
+                                key={id}
+                                className="cursor-pointer"
+                                value={id}
+                                disabled={
+                                  !model.supportedDetectors.includes(
+                                    Object.values(config.detectors)[0].type,
                                   )
-                                : t(
-                                    "frigatePlus.modelInfo.plusModelType.userModel",
-                                  )) +
-                              ") " +
-                              availableModels[frigatePlusSettings.model.id]
-                                .name +
-                              " (" +
-                              availableModels[frigatePlusSettings.model.id]
-                                .width +
-                              "x" +
-                              availableModels[frigatePlusSettings.model.id]
-                                .height +
-                              ")"}
-                          </SelectTrigger>
-                        ) : (
-                          <SelectTrigger className="w-full">
-                            {t("frigatePlus.modelInfo.loadingAvailableModels")}
-                          </SelectTrigger>
-                        )}
-
-                        <SelectContent>
-                          <SelectGroup>
-                            {Object.entries(availableModels || {}).map(
-                              ([id, model]) => (
-                                <SelectItem
-                                  key={id}
-                                  className="cursor-pointer"
-                                  value={id}
-                                  disabled={
-                                    !model.supportedDetectors.includes(
-                                      Object.values(config.detectors)[0].type,
-                                    )
-                                  }
-                                >
-                                  {new Date(model.trainDate).toLocaleString()}{" "}
-                                  <div>
-                                    {model.baseModel} {" ("}
-                                    {model.isBaseModel
-                                      ? t(
-                                          "frigatePlus.modelInfo.plusModelType.baseModel",
-                                        )
-                                      : t(
-                                          "frigatePlus.modelInfo.plusModelType.userModel",
-                                        )}
-                                    {")"}
-                                  </div>
-                                  <div>
-                                    {model.name} (
-                                    {model.width + "x" + model.height})
-                                  </div>
-                                  <div>
-                                    {t(
-                                      "frigatePlus.modelInfo.supportedDetectors",
-                                    )}
-                                    : {model.supportedDetectors.join(", ")}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {id}
-                                  </div>
-                                </SelectItem>
-                              ),
-                            )}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    }
-                  />
-                </SettingsGroupCard>
-              )}
-
-              <SettingsGroupCard
-                title={t("frigatePlus.cardTitles.configuration")}
-              >
-                <SplitCardRow
-                  label={t("frigatePlus.snapshotConfig.title")}
-                  description={
-                    <>
-                      <p>
-                        <Trans ns="views/settings">
-                          frigatePlus.snapshotConfig.desc
-                        </Trans>
-                      </p>
-                      <div className="mt-2 flex items-center text-primary-variant">
-                        <Link
-                          to={getLocaleDocUrl("plus/faq")}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline"
+                                }
+                              >
+                                {new Date(model.trainDate).toLocaleString()}{" "}
+                                <div>
+                                  {model.baseModel} {" ("}
+                                  {model.isBaseModel
+                                    ? t(
+                                        "frigatePlus.modelInfo.plusModelType.baseModel",
+                                      )
+                                    : t(
+                                        "frigatePlus.modelInfo.plusModelType.userModel",
+                                      )}
+                                  {")"}
+                                </div>
+                                <div>
+                                  {model.name} (
+                                  {model.width + "x" + model.height})
+                                </div>
+                                <div>
+                                  {t(
+                                    "frigatePlus.modelInfo.supportedDetectors",
+                                  )}
+                                  : {model.supportedDetectors.join(", ")}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {id}
+                                </div>
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="focus:outline-none"
+                          aria-label={t(
+                            "frigatePlus.modelInfo.filter.ariaLabel",
+                          )}
                         >
-                          {t("readTheDocumentation", { ns: "common" })}
-                          <LuExternalLink className="ml-2 inline-flex size-3" />
-                        </Link>
-                      </div>
-                    </>
-                  }
-                  content={
-                    <div className="space-y-3">
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b border-secondary">
-                              <th className="px-4 py-2 text-left">
-                                {t("frigatePlus.snapshotConfig.table.camera")}
-                              </th>
-                              <th className="px-4 py-2 text-center">
-                                {t(
-                                  "frigatePlus.snapshotConfig.table.snapshots",
-                                )}
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {Object.entries(config.cameras).map(
-                              ([name, camera]) => (
-                                <tr
-                                  key={name}
-                                  className="border-b border-secondary"
-                                >
-                                  <td className="px-4 py-2">
-                                    <CameraNameLabel camera={name} />
-                                  </td>
-                                  <td className="px-4 py-2 text-center">
-                                    {camera.snapshots.enabled ? (
-                                      <CheckCircle2 className="mx-auto size-5 text-green-500" />
-                                    ) : (
-                                      <XCircle className="mx-auto size-5 text-danger" />
-                                    )}
-                                  </td>
-                                </tr>
-                              ),
+                          <LuFilter
+                            className={cn(
+                              "size-4",
+                              isFilterActive
+                                ? "text-selected"
+                                : "text-secondary-foreground",
                             )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  }
-                />
-              </SettingsGroupCard>
-            </div>
-          </div>
-        </div>
+                          />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-56">
+                        <div className="space-y-3">
+                          <div className="text-sm text-primary-variant">
+                            {t("frigatePlus.modelInfo.filter.ariaLabel")}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label
+                              htmlFor="filterBaseModels"
+                              className="cursor-pointer text-primary"
+                            >
+                              {t("frigatePlus.modelInfo.filter.baseModels")}
+                            </Label>
+                            <Switch
+                              id="filterBaseModels"
+                              checked={showBaseModels}
+                              onCheckedChange={setShowBaseModels}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label
+                              htmlFor="filterFineTunedModels"
+                              className="cursor-pointer text-primary"
+                            >
+                              {t(
+                                "frigatePlus.modelInfo.filter.fineTunedModels",
+                              )}
+                            </Label>
+                            <Switch
+                              id="filterFineTunedModels"
+                              checked={showFineTunedModels}
+                              onCheckedChange={setShowFineTunedModels}
+                            />
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                }
+              />
+            </SettingsGroupCard>
+          )}
 
-        <div className="sticky bottom-0 z-50 w-full border-t border-secondary bg-background pb-5 pt-0 md:pr-2">
-          <div className="flex flex-col items-center gap-4 pt-2 md:flex-row md:justify-end">
-            <div className="flex w-full items-center gap-2 md:w-auto">
-              <Button
-                className="flex min-w-36 flex-1 gap-2"
-                variant="outline"
-                aria-label={t("button.reset", { ns: "common" })}
-                onClick={onCancel}
-              >
-                {t("button.reset", { ns: "common" })}
-              </Button>
-              <Button
-                variant="select"
-                disabled={!changedValue || isLoading}
-                className="flex min-w-36 flex-1 gap-2"
-                aria-label={t("button.save", { ns: "common" })}
-                onClick={saveToConfig}
-              >
-                {isLoading ? (
-                  <>
-                    <ActivityIndicator className="h-4 w-4" />
-                    {t("button.saving", { ns: "common" })}
-                  </>
-                ) : (
-                  t("button.save", { ns: "common" })
-                )}
-              </Button>
+          <SettingsGroupCard title={t("frigatePlus.cardTitles.configuration")}>
+            <SplitCardRow
+              label={t("frigatePlus.snapshotConfig.title")}
+              description={
+                <>
+                  <p>
+                    <Trans ns="views/settings">
+                      frigatePlus.snapshotConfig.desc
+                    </Trans>
+                  </p>
+                  <div className="mt-2 flex items-center text-primary-variant">
+                    <Link
+                      to={getLocaleDocUrl("plus/faq")}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      {t("readTheDocumentation", { ns: "common" })}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
+                </>
+              }
+              content={
+                <div className="space-y-3">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-secondary">
+                          <th className="px-4 py-2 text-left">
+                            {t("frigatePlus.snapshotConfig.table.camera")}
+                          </th>
+                          <th className="px-4 py-2 text-center">
+                            {t("frigatePlus.snapshotConfig.table.snapshots")}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(config.cameras).map(
+                          ([name, camera]) => (
+                            <tr
+                              key={name}
+                              className="border-b border-secondary"
+                            >
+                              <td className="px-4 py-2">
+                                <CameraNameLabel camera={name} />
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                {camera.snapshots.enabled ? (
+                                  <CheckCircle2 className="mx-auto size-5 text-green-500" />
+                                ) : (
+                                  <XCircle className="mx-auto size-5 text-danger" />
+                                )}
+                              </td>
+                            </tr>
+                          ),
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+            />
+          </SettingsGroupCard>
+        </div>
+      </div>
+
+      <div className="sticky bottom-0 z-50 mt-6 w-full border-t border-secondary bg-background pt-0">
+        <div
+          className={cn(
+            "flex flex-col items-center gap-4 pt-2 md:flex-row",
+            changedValue ? "justify-between" : "justify-end",
+          )}
+        >
+          {changedValue && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-unsaved">
+                {t("unsavedChanges")}
+              </span>
             </div>
+          )}
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
+            {changedValue && (
+              <Button
+                onClick={onCancel}
+                variant="outline"
+                disabled={isLoading}
+                className="flex min-w-36 flex-1 gap-2"
+              >
+                {t("button.undo", { ns: "common" })}
+              </Button>
+            )}
+            <Button
+              onClick={saveToConfig}
+              variant="select"
+              disabled={!changedValue || isLoading}
+              className="flex min-w-36 flex-1 gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <ActivityIndicator className="h-4 w-4" />
+                  {t("button.saving", { ns: "common" })}
+                </>
+              ) : (
+                t("button.save", { ns: "common" })
+              )}
+            </Button>
           </div>
         </div>
       </div>
+      <RestartDialog
+        isOpen={restartDialogOpen}
+        onClose={() => setRestartDialogOpen(false)}
+        onRestart={() => sendRestart("restart")}
+      />
     </div>
   );
 }

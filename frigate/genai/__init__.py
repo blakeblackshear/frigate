@@ -2,6 +2,7 @@
 
 import datetime
 import importlib
+import json
 import logging
 import os
 import re
@@ -9,6 +10,7 @@ from typing import Any, Callable, Optional
 
 import numpy as np
 from playhouse.shortcuts import model_to_dict
+from pydantic import ValidationError
 
 from frigate.config import CameraConfig, GenAIConfig, GenAIProviderEnum
 from frigate.const import CLIPS_DIR
@@ -106,10 +108,11 @@ When forming your description:
 ## Response Field Guidelines
 
 Respond with a JSON object matching the provided schema. Field-specific guidance:
+- `observations`: Include the very start of the activity — for example, a vehicle entering the frame or pulling into the driveway — even if it lasts only a few frames and the rest of the clip is dominated by a longer activity. Include each arrival, departure, object handled, and notable change in position or state. Each item is a single concrete fact written as a complete sentence.
 - `scene`: Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name — do not replace them with generic terms. For unnamed objects (e.g., "person", "car"), refer to them naturally with articles (e.g., "a person", "the car"). Your description should align with and support the threat level you assign.
-- `title`: Characterize **what took place and where** — interpret the overall purpose or outcome, do not simply compress the scene description into fewer words. Include the relevant location (zone, area, or entry point). For named subjects, always use their name. For unnamed objects, refer to them naturally with articles. No editorial qualifiers like "routine" or "suspicious."
+- `title`: Name the primary activity across the observations, together with the location. An activity is what is being done with objects, tools, or surfaces; locomotion through the scene qualifies as the activity only when no other interaction is observed. For named subjects, always use their name. For unnamed objects, refer to them naturally with articles.
+- `shortSummary`: Briefly summarize the primary activity across the observations.
 - `potential_threat_level`: Must be consistent with your scene description and the activity patterns above.
-{get_concern_prompt()}
 
 ## Sequence Details
 
@@ -151,9 +154,6 @@ Each line represents a detection state, not necessarily unique individuals. The 
             if "other_concerns" in schema.get("required", []):
                 schema["required"].remove("other_concerns")
 
-        # OpenAI strict mode requires additionalProperties: false on all objects
-        schema["additionalProperties"] = False
-
         response_format = {
             "type": "json_schema",
             "json_schema": {
@@ -181,7 +181,36 @@ Each line represents a detection state, not necessarily unique individuals. The 
 
             try:
                 metadata = ReviewMetadata.model_validate_json(clean_json)
+            except ValidationError as ve:
+                # Constraint violations (length, item count, ranges) are logged
+                # at debug and the response is kept anyway — a slightly
+                # off-spec answer is still usable, and dropping the whole
+                # response loses the narrative content the model produced.
+                for err in ve.errors():
+                    loc = ".".join(str(p) for p in err["loc"]) or "<root>"
+                    logger.debug(
+                        "Review metadata soft validation: %s — %s (input: %r)",
+                        loc,
+                        err["msg"],
+                        err.get("input"),
+                    )
+                try:
+                    raw = json.loads(clean_json)
+                except json.JSONDecodeError as je:
+                    logger.error("Failed to parse review description JSON: %s", je)
+                    return None
+                # observations and confidence are required on the model; fill an empty default
+                # if the response omitted it so attribute access stays safe.
+                raw.setdefault("observations", [])
+                raw.setdefault("confidence", 0.0)
+                metadata = ReviewMetadata.model_construct(**raw)
+            except Exception as e:
+                logger.error(
+                    f"Failed to parse review description as the response did not match expected format. {e}"
+                )
+                return None
 
+            try:
                 # Normalize confidence if model returned a percentage (e.g. 85 instead of 0.85)
                 if metadata.confidence > 1.0:
                     metadata.confidence = min(metadata.confidence / 100.0, 1.0)
@@ -194,10 +223,7 @@ Each line represents a detection state, not necessarily unique individuals. The 
                 metadata.time = review_data["start"]
                 return metadata
             except Exception as e:
-                # rarely LLMs can fail to follow directions on output format
-                logger.warning(
-                    f"Failed to parse review description as the response did not match expected format. {e}"
-                )
+                logger.error(f"Failed to post-process review metadata: {e}")
                 return None
         else:
             logger.debug(
@@ -343,6 +369,14 @@ Guidelines:
     def get_context_size(self) -> int:
         """Get the context window size for this provider in tokens."""
         return 4096
+
+    def estimate_image_tokens(self, width: int, height: int) -> float:
+        """Estimate prompt tokens consumed by a single image of the given dimensions.
+
+        Default heuristic: ~1 token per 1250 pixels. Providers that can measure or
+        know their model's exact image-token cost should override.
+        """
+        return (width * height) / 1250
 
     def embed(
         self,

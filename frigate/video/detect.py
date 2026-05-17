@@ -438,34 +438,32 @@ def process_frames(
             else:
                 object_tracker.update_frame_times(frame_name, frame_time)
 
-        # group the attribute detections based on what label they apply to
-        attribute_detections: dict[str, list[TrackedObjectAttribute]] = {}
-        for label, attribute_labels in attributes_map.items():
-            attribute_detections[label] = [
-                TrackedObjectAttribute(d)
-                for d in consolidated_detections
-                if d[0] in attribute_labels
-            ]
-
         # build detections
         detections = {}
         for obj in object_tracker.tracked_objects.values():
             detections[obj["id"]] = {**obj, "attributes": []}
 
-        # find the best object for each attribute to be assigned to
+        # assign each detected attribute to the best matching object.
+        # iterate consolidated_detections once so attributes that appear under
+        # multiple parent labels in attributes_map (e.g. license_plate is in
+        # both "car" and "motorcycle") are not appended more than once
         all_objects: list[dict[str, Any]] = object_tracker.tracked_objects.values()
-        for attributes in attribute_detections.values():
-            for attribute in attributes:
-                filtered_objects = filter(
-                    lambda o: attribute.label in attributes_map.get(o["label"], []),
-                    all_objects,
-                )
-                selected_object_id = attribute.find_best_object(filtered_objects)
+        detected_attributes = [
+            TrackedObjectAttribute(d)
+            for d in consolidated_detections
+            if d[0] in all_attributes
+        ]
+        for attribute in detected_attributes:
+            filtered_objects = filter(
+                lambda o: attribute.label in attributes_map.get(o["label"], []),
+                all_objects,
+            )
+            selected_object_id = attribute.find_best_object(filtered_objects)
 
-                if selected_object_id is not None:
-                    detections[selected_object_id]["attributes"].append(
-                        attribute.get_tracking_data()
-                    )
+            if selected_object_id is not None:
+                detections[selected_object_id]["attributes"].append(
+                    attribute.get_tracking_data()
+                )
 
         # debug object tracking
         if False:

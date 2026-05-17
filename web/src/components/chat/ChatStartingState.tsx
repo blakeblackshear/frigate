@@ -54,7 +54,9 @@ export function ChatStartingState({ onSendMessage }: ChatStartingStateProps) {
     <div className="flex size-full flex-col items-center justify-center gap-6 p-8">
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-4xl font-bold text-foreground">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+        <p className="text-center text-muted-foreground md:text-left">
+          {t("subtitle")}
+        </p>
       </div>
 
       <div className="flex w-full max-w-2xl flex-col items-center gap-4">

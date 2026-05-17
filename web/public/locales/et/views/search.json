@@ -9,7 +9,8 @@
     "clear": "Tühjenda otsing",
     "save": "Salvesta otsing",
     "delete": "Kustuta salvestatud otsing",
-    "filterInformation": "Filtri teave"
+    "filterInformation": "Filtri teave",
+    "filterActive": "Filtreid valituna"
   },
   "filter": {
     "label": {
@@ -17,7 +18,23 @@
       "cameras": "Kaamerad",
       "labels": "Sildid",
       "zones": "Tsoonid",
-      "sub_labels": "Alamsildid"
+      "sub_labels": "Alamsildid",
+      "attributes": "Omadused",
+      "search_type": "Otsingutüüp",
+      "time_range": "Ajavahemik",
+      "before": "Enne",
+      "after": "Pärast"
+    },
+    "searchType": {
+      "thumbnail": "Pisipilt",
+      "description": "Kirjeldus"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "„Enne“ kuupäev peab olema varasem, kui „Pärast“ kuupäev.",
+        "afterDatebeEarlierBefore": "„Pärast“ kuupäev peab olema hilisem, kui „Enne“ kuupäev."
+      }
     }
-  }
+  },
+  "trackedObjectId": "Jälgitava objekti tunnus"
 }

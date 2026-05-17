@@ -13,6 +13,8 @@ export type JsonArray = JsonValue[];
 
 export type ConfigSectionData = JsonObject;
 
+export type HiddenFieldEntry = string | ((config: FrigateConfig) => string[]);
+
 export type ConfigFormContext = {
   level?: "global" | "camera";
   cameraName?: string;
@@ -42,4 +44,5 @@ export type ConfigFormContext = {
   requiresRestart?: boolean;
   t?: (key: string, options?: Record<string, unknown>) => string;
   renderers?: Record<string, RendererComponent>;
+  isProfile?: boolean;
 };

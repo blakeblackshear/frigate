@@ -1,0 +1,42 @@
+{
+    "documentTitle": "モーション検索 - Frigate",
+    "title": "モーション検索",
+    "description": "関心領域を定義する多角形を描画し、その領域内で動きの変化を検索する時間範囲を指定します。",
+    "selectCamera": "モーション検索を読み込み中です",
+    "dialog": {
+        "title": "モーション検索",
+        "cameraLabel": "カメラ",
+        "previewAlt": "{{camera}} のカメラプレビュー"
+    },
+    "startSearch": "検索開始",
+    "searchStarted": "検索を開始しました",
+    "searchCancelled": "検索がキャンセルされました",
+    "cancelSearch": "キャンセル",
+    "searching": "検索中です。",
+    "searchComplete": "検索完了",
+    "noResultsYet": "選択した領域内の動きの変化を検索します",
+    "noChangesFound": "選択した領域でピクセルの変化は検出されませんでした",
+    "changesFound_other": "{{count}} 件の動きの変化が見つかりました",
+    "framesProcessed": "{{count}} フレームを処理しました",
+    "jumpToTime": "この時間に移動",
+    "results": "結果",
+    "showSegmentHeatmap": "ヒートマップ",
+    "newSearch": "新規検索",
+    "clearResults": "結果をクリア",
+    "clearROI": "ポリゴンをクリア",
+    "polygonControls": {
+        "points_other": "{{count}} ポイント",
+        "undo": "直前のポイントを元に戻す",
+        "reset": "ポリゴンをリセット"
+    },
+    "motionHeatmapLabel": "モーションヒートマップ",
+    "timeRange": {
+        "title": "検索範囲",
+        "start": "開始時間",
+        "end": "終了時間"
+    },
+    "settings": {
+        "title": "検索設定",
+        "parallelMode": "並列モード"
+    }
+}

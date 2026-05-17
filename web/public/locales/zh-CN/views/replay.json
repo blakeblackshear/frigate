@@ -1,0 +1,59 @@
+{
+    "title": "调试回放",
+    "description": "回放摄像头录像以供调试。目标列表会延时展示已检测目标的汇总信息，消息标签页则实时展示回放录像对应的 Frigate 内部日志信息流。",
+    "websocket_messages": "消息",
+    "dialog": {
+        "title": "开始调试回放",
+        "description": "创建临时回放摄像头，循环播放历史录制视频，用于调试目标检测与追踪相关问题。临时回放的摄像头将沿用原摄像头的检测配置。请选择一个时间范围开始。",
+        "camera": "原摄像头",
+        "timeRange": "时间范围",
+        "preset": {
+            "1m": "最后 1 分钟",
+            "5m": "最后 5 分钟",
+            "timeline": "从时间线",
+            "custom": "自定义"
+        },
+        "startButton": "开始回放",
+        "selectFromTimeline": "选择",
+        "starting": "开始回放…",
+        "startLabel": "开始",
+        "endLabel": "结束",
+        "toast": {
+            "error": "调试回放启动失败：{{error}}",
+            "alreadyActive": "已有回放会话正在运行",
+            "stopError": "调试回放停止失败：{{error}}",
+            "goToReplay": "进入回放"
+        }
+    },
+    "page": {
+        "noSession": "没有正在进行的调试回放会话",
+        "noSessionDesc": "从历史回放页面启动调试回放：点击工具栏中的操作按钮，选择调试回放即可。",
+        "goToRecordings": "查看历史记录",
+        "preparingClip": "正在准备片段…",
+        "preparingClipDesc": "Frigate 正在拼接所选时间范围的录像片段。时间跨度较大时，该过程可能需要一分钟左右。",
+        "startingCamera": "开始调试回放中…",
+        "startError": {
+            "title": "调试回放启动失败",
+            "back": "返回历史记录"
+        },
+        "sourceCamera": "源摄像头",
+        "replayCamera": "回放摄像头",
+        "initializingReplay": "初始化调试回放中…",
+        "stoppingReplay": "正在停止调试回放…",
+        "stopReplay": "停止回放",
+        "confirmStop": {
+            "title": "要停止调试回放吗？",
+            "description": "这将终止会话并清除所有临时数据。是否确定？",
+            "confirm": "停止回放",
+            "cancel": "取消"
+        },
+        "activity": "活动",
+        "objects": "目标列表",
+        "audioDetections": "音频检测",
+        "noActivity": "未检测到活动",
+        "activeTracking": "活动追踪中",
+        "noActiveTracking": "没有活动追踪",
+        "configuration": "配置",
+        "configurationDesc": "微调调试回放摄像头的移动侦测与目标追踪参数。本次调整不会保存到你的 Frigate 配置文件中。"
+    }
+}

@@ -26,7 +26,7 @@ import {
   ReviewSummary,
   ZoomLevel,
 } from "@/types/review";
-import { getChunkedTimeDay } from "@/utils/timelineUtil";
+import { findChunkIndex, getChunkedTimeDay } from "@/utils/timelineUtil";
 import {
   MutableRefObject,
   useCallback,
@@ -169,9 +169,7 @@ export function RecordingView({
     [timeRange],
   );
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
-    chunkedTimeRange.findIndex((chunk) => {
-      return chunk.after <= startTime && chunk.before >= startTime;
-    }),
+    findChunkIndex(chunkedTimeRange, startTime),
   );
   const currentTimeRange = useMemo<TimeRange>(
     () =>
@@ -274,9 +272,7 @@ export function RecordingView({
 
   const updateSelectedSegment = useCallback(
     (currentTime: number, updateStartTime: boolean) => {
-      const index = chunkedTimeRange.findIndex(
-        (seg) => seg.after <= currentTime && seg.before >= currentTime,
-      );
+      const index = findChunkIndex(chunkedTimeRange, currentTime);
 
       if (index != -1) {
         if (updateStartTime) {
@@ -728,10 +724,8 @@ export function RecordingView({
                   setShareTimestampOpen(true);
                 }}
                 onDebugReplayClick={() => {
-                  const now = new Date(timeRange.before * 1000);
-                  now.setHours(now.getHours() - 1);
                   setDebugReplayRange({
-                    after: now.getTime() / 1000,
+                    after: timeRange.before - 60,
                     before: timeRange.before,
                   });
                   setDebugReplayMode("select");

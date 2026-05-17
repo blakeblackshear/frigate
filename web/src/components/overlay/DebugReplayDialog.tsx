@@ -209,10 +209,7 @@ export default function DebugReplayDialog({
         end_time: range.before,
       })
       .then((response) => {
-        if (response.status === 200) {
-          toast.success(t("dialog.toast.success"), {
-            position: "top-center",
-          });
+        if (response.status === 202 || response.status === 200) {
           setMode("none");
           setRange(undefined);
           navigate("/replay");

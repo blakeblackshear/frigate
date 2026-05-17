@@ -287,7 +287,10 @@
         "zones": "Soner",
         "ratio": "Sideforhold",
         "area": "Område",
-        "score": "Score"
+        "score": "Score",
+        "computedScore": "Beregnet score",
+        "topScore": "Toppscore",
+        "toggleAdvancedScores": "Vis/skjul avanserte scoringer"
       }
     },
     "annotationSettings": {

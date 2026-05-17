@@ -12,12 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Clase Borrada",
-      "deletedCategory_many": "",
-      "deletedCategory_other": "",
-      "deletedImage_one": "Imágenes Borradas",
-      "deletedImage_many": "",
-      "deletedImage_other": "",
+      "deletedCategory_one": "Se eliminó {{count}} clase",
+      "deletedCategory_many": "Se eliminaron {{count}} clases",
+      "deletedCategory_other": "Se eliminaron {{count}} clases",
+      "deletedImage_one": "Se eliminó {{count}} imagen",
+      "deletedImage_many": "Se eliminaron {{count}} imágenes",
+      "deletedImage_other": "Se eliminaron {{count}} imágenes",
       "deletedModel_one": "Borrado con éxito {{count}} modelo",
       "deletedModel_many": "Borrados con éxito {{count}} modelos",
       "deletedModel_other": "Borrados con éxito {{count}} modelos",
@@ -68,7 +68,7 @@
   "details": {
     "scoreInfo": "La puntuación representa la confianza media de clasificación en todas las detecciones de este objeto.",
     "unknown": "Desconocido",
-    "none": "Ninguna"
+    "none": "Ninguno"
   },
   "categorizeImage": "Clasificar Imagen",
   "menu": {

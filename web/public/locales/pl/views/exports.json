@@ -2,7 +2,9 @@
   "search": "Szukaj",
   "documentTitle": "Eksportuj - Frigate",
   "noExports": "Nie znaleziono eksportów",
-  "deleteExport": "Usuń eksport",
+  "deleteExport": {
+    "label": "Usuń eksport"
+  },
   "deleteExport.desc": "Czy na pewno chcesz usunąć {{exportName}}?",
   "editExport": {
     "title": "Zmień nazwę eksportu",
@@ -18,6 +20,11 @@
     "shareExport": "Udostępnij eksport",
     "downloadVideo": "Pobierz wideo",
     "editName": "Edytuj nazwę",
-    "deleteExport": "Usuń eksport"
+    "deleteExport": "Usuń eksport",
+    "assignToCase": "Dodaj do sprawy"
+  },
+  "headings": {
+    "cases": "Przypadki",
+    "uncategorizedExports": "Bez kategorii Eksport"
   }
 }

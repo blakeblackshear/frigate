@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "没有在 {{cameraName}} 下找到预览",
   "submitFrigatePlus": {
     "title": "提交此帧到 Frigate+？",
-    "submit": "提交"
+    "submit": "提交",
+    "previewError": "无法加载快照预览。该录制当前可能不可用。"
   },
   "livePlayerRequiredIOSVersion": "此直播流类型需要 iOS 17.1 或更高版本。",
   "streamOffline": {

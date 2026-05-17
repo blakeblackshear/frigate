@@ -248,7 +248,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar la supressió",
-      "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol detall de seguiment. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
+      "desc": "Suprimir aquest objecte rastrejat elimina la instantània, qualsevol incrustació desada, i qualsevol entrada de detalls de seguiment associada. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
     },
     "toast": {
       "error": "S'ha produït un error en suprimir aquest objecte rastrejat: {{errorMessage}}"
@@ -289,7 +289,10 @@
         "zones": "Zones",
         "ratio": "Ràtio",
         "area": "Àrea",
-        "score": "Puntuació"
+        "score": "Puntuació",
+        "computedScore": "Puntuació calculada",
+        "topScore": "Puntuació superior",
+        "toggleAdvancedScores": "Commuta les puntuacions avançades"
       }
     },
     "annotationSettings": {

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import json
 import logging
 import os
@@ -25,7 +26,6 @@ from frigate.plus import PlusApi
 from frigate.util.builtin import (
     deep_merge,
     get_ffmpeg_arg_list,
-    load_labels,
 )
 from frigate.util.config import (
     CURRENT_CONFIG_VERSION,
@@ -80,16 +80,39 @@ logger = logging.getLogger(__name__)
 
 yaml = YAML()
 
+DEFAULT_DETECTORS = {
+    "ov": {
+        "type": "openvino",
+        "device": "CPU",
+    }
+}
+DEFAULT_MODEL = {
+    "width": 300,
+    "height": 300,
+    "input_tensor": "nhwc",
+    "input_pixel_format": "bgr",
+    "path": "/openvino-model/ssdlite_mobilenet_v2.xml",
+    "labelmap_path": "/openvino-model/coco_91cl_bkgr.txt",
+}
+DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
+
+
+def _render_default_yaml(data: dict) -> str:
+    buf = io.StringIO()
+    _yaml_writer = YAML()
+    _yaml_writer.indent(mapping=2, sequence=4, offset=2)
+    _yaml_writer.dump(data, buf)
+    return buf.getvalue()
+
+
 DEFAULT_CONFIG = f"""
 mqtt:
   enabled: False
 
+{_render_default_yaml({"detectors": DEFAULT_DETECTORS, "model": DEFAULT_MODEL})}
 cameras: {{}}  # No cameras defined, UI wizard should be used
 version: {CURRENT_CONFIG_VERSION}
 """
-
-DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
-DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
 
 # stream info handler
 stream_info_retriever = StreamInfoRetriever()
@@ -453,7 +476,7 @@ class FrigateConfig(FrigateBaseModel):
     cameras: Dict[str, CameraConfig] = Field(title="Cameras", description="Cameras")
     audio: AudioConfig = Field(
         default_factory=AudioConfig,
-        title="Audio events",
+        title="Audio detection",
         description="Settings for audio-based event detection for all cameras; can be overridden per-camera.",
     )
     birdseye: BirdseyeConfig = Field(
@@ -614,17 +637,12 @@ class FrigateConfig(FrigateBaseModel):
         if self.ffmpeg.hwaccel_args == "auto":
             self.ffmpeg.hwaccel_args = auto_detect_hwaccel()
 
-        # Populate global audio filters for all audio labels
-        all_audio_labels = {
-            label
-            for label in load_labels("/audio-labelmap.txt", prefill=521).values()
-            if label
-        }
-
+        # Populate global audio filters from listen. Existing user-defined
+        # entries for labels not in listen are preserved but unused at runtime.
         if self.audio.filters is None:
             self.audio.filters = {}
 
-        for key in sorted(all_audio_labels - self.audio.filters.keys()):
+        for key in sorted(set(self.audio.listen) - self.audio.filters.keys()):
             self.audio.filters[key] = AudioFilterConfig()
 
         self.audio.filters = dict(sorted(self.audio.filters.items()))
@@ -679,6 +697,9 @@ class FrigateConfig(FrigateBaseModel):
                     model_config["path"] = "/cpu_model.tflite"
                 elif detector_config.type == "edgetpu":
                     model_config["path"] = "/edgetpu_model.tflite"
+                elif detector_config.type == "openvino":
+                    for default_key, default_value in DEFAULT_MODEL.items():
+                        model_config.setdefault(default_key, default_value)
 
             model = ModelConfig.model_validate(model_config)
             model.check_and_load_plus_model(self.plus_api, detector_config.type)
@@ -813,7 +834,9 @@ class FrigateConfig(FrigateBaseModel):
             if camera_config.audio.filters is None:
                 camera_config.audio.filters = {}
 
-            for key in sorted(all_audio_labels - camera_config.audio.filters.keys()):
+            for key in sorted(
+                set(camera_config.audio.listen) - camera_config.audio.filters.keys()
+            ):
                 camera_config.audio.filters[key] = AudioFilterConfig()
 
             camera_config.audio.filters = dict(
@@ -835,7 +858,9 @@ class FrigateConfig(FrigateBaseModel):
                     if mask_config:
                         coords = mask_config.coordinates
                         relative_coords = get_relative_coordinates(
-                            coords, camera_config.frame_shape
+                            coords,
+                            camera_config.frame_shape,
+                            camera_name=camera_config.name,
                         )
                         # Create a new ObjectMaskConfig with raw_coordinates set
                         processed_global_masks[mask_id] = ObjectMaskConfig(

@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Прямой эфир - Frigate",
+  "documentTitle": {
+    "default": "Прямой эфир - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Прямой эфир - Frigate",
   "lowBandwidthMode": "Экономичный режим",
   "twoWayTalk": {
@@ -15,7 +17,8 @@
       "clickMove": {
         "label": "Кликните в кадре для центрирования камеры",
         "enable": "Включить перемещение по клику",
-        "disable": "Отключить перемещение по клику"
+        "disable": "Отключить перемещение по клику",
+        "enableWithZoom": "Включить \"клик для перемещения / перетащить для масштабирования\""
       },
       "left": {
         "label": "Переместить PTZ-камеру влево"

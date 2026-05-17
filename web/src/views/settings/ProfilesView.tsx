@@ -7,13 +7,20 @@ import useSWR from "swr";
 import axios from "axios";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
-import { LuChevronDown, LuChevronRight, LuPlus } from "react-icons/lu";
+import {
+  LuChevronDown,
+  LuChevronRight,
+  LuExternalLink,
+  LuPlus,
+} from "react-icons/lu";
+import { Link } from "react-router-dom";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import type { JsonObject } from "@/types/configForm";
 import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { PROFILE_ELIGIBLE_SECTIONS } from "@/utils/configUtil";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
@@ -66,6 +73,7 @@ export default function ProfilesView({
   setProfilesUIEnabled,
 }: ProfilesViewProps) {
   const { t } = useTranslation(["views/settings", "common"]);
+  const { getLocaleDocUrl } = useDocDomain();
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const { data: profilesData, mutate: updateProfiles } =
@@ -359,6 +367,17 @@ export default function ProfilesView({
       <Heading as="h4">{t("profiles.title", { ns: "views/settings" })}</Heading>
       <div className="my-1 text-sm text-muted-foreground">
         {t("profiles.disabledDescription", { ns: "views/settings" })}
+      </div>
+      <div className="flex items-center text-sm text-primary-variant">
+        <Link
+          to={getLocaleDocUrl("configuration/profiles")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline"
+        >
+          {t("readTheDocumentation", { ns: "common" })}
+          <LuExternalLink className="ml-2 inline-flex size-3" />
+        </Link>
       </div>
 
       {/* Enable Profiles Toggle — shown only when no profiles exist */}

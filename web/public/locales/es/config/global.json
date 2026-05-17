@@ -70,11 +70,45 @@
         "cookie_secure": {
             "label": "Flag de cookie segura",
             "description": "Establece el flag de seguridad en la cookie de autenticación; debe ser 'true' cuando se utilice TLS."
+        },
+        "failed_login_rate_limit": {
+            "label": "Limite de intento de acceso fallidos"
+        },
+        "session_length": {
+            "description": "Duración de la sesión en segundos para sesiones de JWT."
+        },
+        "admin_first_time_login": {
+            "description": "Cuando se establece en true, la interfaz de usuario puede mostrar un enlace de ayuda en la página de inicio de sesión, informando a los usuarios sobre cómo iniciar sesión tras el restablecimiento de la contraseña de administrador. "
+        },
+        "refresh_time": {
+            "description": "Cuando a una sesión le queden menos de esta cantidad de segundos para expirar, actualícela para restablecer su duración completa."
         }
     },
     "onvif": {
         "profile": {
-            "label": "Perfil ONVIF"
+            "label": "Perfil ONVIF",
+            "description": "Perfil multimedia ONVIF específico que se utilizará para el control PTZ, identificado por token o nombre. Si no se especifica, se selecciona automáticamente el primer perfil con una configuración PTZ válida."
+        },
+        "autotracking": {
+            "zoom_factor": {
+                "description": "Controla el nivel de zoom en los objetos rastreados. Los valores más bajos mantienen una mayor parte de la escena a la vista; los valores más altos acercan la imagen, pero pueden provocar la pérdida del rastreo. Valores entre 0.1 y 0.75."
+            },
+            "calibrate_on_startup": {
+                "description": "Mida la velocidad de los motores PTZ al encenderlos para mejorar la precisión del seguimiento. Frigate actualizará la configuración con los `movement_weights` tras la calibración."
+            },
+            "description": "Realice un seguimiento automático de objetos en movimiento y manténgalos centrados en el encuadre mediante movimientos de cámara PTZ.",
+            "zooming": {
+                "description": "Control del comportamiento del zoom: deshabilitado (solo panorámica/inclinación), absoluto (mayor compatibilidad) o relativo (panorámica/inclinación/zoom simultáneos)."
+            },
+            "return_preset": {
+                "description": "Nombre del preajuste ONVIF configurado en el firmware de la cámara al que regresar una vez finalizado el seguimiento."
+            },
+            "timeout": {
+                "description": "Espere esta cantidad de segundos después de perder el seguimiento antes de devolver la cámara a la posición preestablecida."
+            }
+        },
+        "tls_insecure": {
+            "description": "Omitir la verificación TLS y deshabilitar la autenticación digest para ONVIF (no seguro; usar solo en redes seguras)."
         }
     },
     "objects": {
@@ -91,7 +125,19 @@
             "use_snapshot": {
                 "label": "Usar instantáneas",
                 "description": "Usar instantáneas de objetos en lugar de miniaturas para la generación de descripciones de GenAI."
+            },
+            "send_triggers": {
+                "after_significant_updates": {
+                    "description": "Envía una solicitud a GenAI tras un número especificado de actualizaciones significativas del objeto rastreado."
+                },
+                "description": "Define cuándo se deben enviar los fotogramas a GenAI (al finalizar, después de las actualizaciones, etc.)."
+            },
+            "required_zones": {
+                "description": "Zonas en las que deben ubicarse los objetos para ser elegibles para la generación de descripciones con GenAI."
             }
+        },
+        "track": {
+            "description": "Lista de etiquetas de objetos a rastrear para todas las cámaras; puede anularse por cámara."
         }
     },
     "detectors": {
@@ -107,6 +153,310 @@
             "api_key": {
                 "label": "Clave de API de DeepStack (si es necesaria)"
             }
+        },
+        "type": {
+            "label": "Tipo"
+        },
+        "label": "Detector de hardware",
+        "cpu": {
+            "label": "CPU",
+            "num_threads": {
+                "label": "Número de hilos para detección"
+            },
+            "description": "Detector TFLite de CPU que ejecuta modelos de TensorFlow Lite en la CPU del host sin aceleración por hardware. No recomendado."
+        },
+        "axengine": {
+            "label": "Motor AX NPU"
+        },
+        "teflon_tfl": {
+            "description": "Detector de delegados Teflon para TFLite, que utiliza la biblioteca de delegados Mesa Teflon para acelerar la inferencia en las GPU compatibles."
+        },
+        "synaptics": {
+            "description": "Detector NPU de Synaptics para modelos en formato .synap, utilizando el Synap SDK en hardware de Synaptics."
+        },
+        "zmq": {
+            "description": "Detector ZMQ IPC que descarga la inferencia a un proceso externo a través de un punto de conexión IPC de ZeroMQ."
+        },
+        "hailo8l": {
+            "description": "Detector Hailo-8/Hailo-8L que utiliza modelos HEF y el SDK HailoRT para la inferencia en hardware Hailo."
+        },
+        "onnx": {
+            "description": "Detector ONNX para ejecutar modelos ONNX; utilizará los backends de aceleración disponibles (CUDA/ROCm/OpenVINO) cuando estén disponibles."
+        },
+        "description": "Configuración para detectores de objetos (backends de CPU, GPU y ONNX) y cualquier ajuste del modelo específico del detector.",
+        "openvino": {
+            "description": "Detector OpenVINO para CPU AMD e Intel, GPU Intel y hardware VPU Intel."
+        },
+        "tensorrt": {
+            "description": "Detector TensorRT para dispositivos Nvidia Jetson que utiliza motores TensorRT serializados para una inferencia acelerada."
+        },
+        "degirum": {
+            "description": "Detector DeGirum para ejecutar modelos a través de la nube de DeGirum o servicios de inferencia local."
+        },
+        "rknn": {
+            "description": "Detector RKNN para NPUs de Rockchip; ejecuta modelos compilados para RKNN en hardware de Rockchip."
+        }
+    },
+    "database": {
+        "label": "Base de datos",
+        "description": "Configuración de la base de datos SQLite utilizada por Frigate para almacenar los metadatos de los objetos rastreados y las grabaciones."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "port": {
+            "label": "Puerto MQTT"
+        },
+        "tls_client_cert": {
+            "label": "Certificado cliente"
+        },
+        "description": "Configuración para conectar y publicar telemetría, instantáneas y detalles de eventos en un broker MQTT.",
+        "topic_prefix": {
+            "description": "Prefijo del tema MQTT para todos los temas de Frigate; debe ser único si se ejecutan múltiples instancias."
+        },
+        "client_id": {
+            "description": "Identificador de cliente utilizado al conectarse al broker MQTT; debe ser único para cada instancia."
+        }
+    },
+    "notifications": {
+        "email": {
+            "label": "Email de notificacion"
+        }
+    },
+    "networking": {
+        "ipv6": {
+            "label": "Configuración IPV6"
+        },
+        "listen": {
+            "internal": {
+                "label": "Puerto interno"
+            },
+            "external": {
+                "label": "Puerto externo",
+                "description": "Puerto externo de escucha para Frigate (por defecto 8791)."
+            },
+            "description": "Configuración de los puertos de escucha internos y externos. Esto es para usuarios avanzados. Para la mayoría de los casos de uso, se recomienda modificar la sección de puertos de su configuración de Docker Compose."
+        }
+    },
+    "proxy": {
+        "label": "Proxy",
+        "separator": {
+            "label": "Carácter de separación"
+        },
+        "default_role": {
+            "description": "Rol predeterminado asignado a los usuarios autenticados por proxy cuando no se aplica ningún mapeo de roles (administrador o espectador)."
+        },
+        "description": "Configuración para integrar Frigate detrás de un proxy inverso que transmite encabezados de usuario autenticados.",
+        "header_map": {
+            "description": "Mapear los encabezados de proxy entrantes a los campos de usuario y rol de Frigate para la autenticación basada en proxy.",
+            "role": {
+                "description": "Encabezado que contiene el rol o los grupos del usuario autenticado provenientes del proxy ascendente."
+            }
+        }
+    },
+    "telemetry": {
+        "label": "Telemetria",
+        "stats": {
+            "intel_gpu_stats": {
+                "label": "Estadísticas GPU Intel",
+                "description": "Habilitar la recopilación de estadísticas de la GPU Intel si hay una GPU Intel presente."
+            },
+            "network_bandwidth": {
+                "label": "Ancho de banda"
+            },
+            "amd_gpu_stats": {
+                "label": "Estadísticas GPU Amd",
+                "description": "Habilitar la recopilación de estadísticas de la GPU AMD si hay una GPU AMD presente."
+            },
+            "intel_gpu_device": {
+                "description": "Identificador de dispositivo utilizado al tratar las GPU Intel como SR-IOV para corregir las estadísticas de la GPU."
+            }
+        },
+        "version_check": {
+            "description": "Habilite una verificación saliente para detectar si hay disponible una versión más reciente de Frigate."
+        }
+    },
+    "ui": {
+        "timezone": {
+            "label": "Uso horario",
+            "description": "Zona horaria opcional que se mostrará en la interfaz de usuario (si no se especifica, se utilizará la hora local del navegador)."
+        },
+        "unit_system": {
+            "label": "Unidad de sistema",
+            "description": "Sistema de unidades para la visualización (métrico o imperial) utilizado en la interfaz de usuario y en MQTT."
+        }
+    },
+    "audio_transcription": {
+        "description": "Configuración para la transcripción de audio en vivo y de voz, utilizada para eventos y subtítulos en tiempo real.",
+        "language": {
+            "description": "Código de idioma utilizado para la transcripción/traducción (por ejemplo, 'es' para Español). Consulte https://whisper-api.com/docs/languages/ para ver los códigos de idioma compatibles."
+        },
+        "enabled": {
+            "description": "Habilitar o deshabilitar la transcripción automática de audio para todas las cámaras; puede anularse por cámara."
+        }
+    },
+    "motion": {
+        "skip_motion_threshold": {
+            "description": "Si se establece en un valor entre 0,0 y 1,0, y más de esta fracción de la imagen cambia en un solo fotograma, el detector no devolverá cuadros de movimiento y se recalibrará inmediatamente. Esto puede ahorrar recursos de CPU y reducir los falsos positivos durante tormentas eléctricas, tempestades, etc., aunque podría pasar por alto eventos reales, como el seguimiento automático de un objeto por parte de una cámara PTZ. La disyuntiva está entre descartar unos cuantos megabytes de grabaciones o revisar un par de clips cortos. Deje este parámetro sin establecer (None) para desactivar esta función."
+        },
+        "lightning_threshold": {
+            "description": "Umbral para detectar e ignorar breves picos de luz (un valor menor indica mayor sensibilidad; valores entre 0,3 y 1,0). Esto no impide por completo la detección de movimiento; Simplemente provoca que el detector deje de analizar fotogramas adicionales una vez que se supera el umbral. Durante estos eventos aún se realizan grabaciones basadas en el movimiento."
+        },
+        "threshold": {
+            "description": "Umbral de diferencia de píxeles utilizado por el detector de movimiento; los valores más altos reducen la sensibilidad (rango 1-255)."
+        },
+        "enabled": {
+            "description": "Habilitar o deshabilitar la detección de movimiento para todas las cámaras; puede anularse para cada cámara individualmente."
+        }
+    },
+    "lpr": {
+        "enhancement": {
+            "description": "Nivel de mejora (0-10) que se aplicará a los recortes de matrículas antes del OCR; los valores más altos no siempre mejoran los resultados, y los niveles superiores a 5 podrían funcionar únicamente con matrículas capturadas de noche, por lo que deben utilizarse con precaución."
+        },
+        "expire_time": {
+            "description": "Tiempo en segundos tras el cual una matrícula no detectada caduca en el sistema de seguimiento (solo para cámaras LPR dedicadas)."
+        },
+        "enabled": {
+            "description": "Habilitar o deshabilitar el reconocimiento de matrículas para todas las cámaras; puede anularse por cámara."
+        },
+        "min_plate_length": {
+            "description": "Número mínimo de caracteres que debe contener una matrícula reconocida para ser considerada válida."
+        }
+    },
+    "detect": {
+        "fps": {
+            "description": "Fotogramas por segundo deseados para ejecutar la detección; los valores más bajos reducen el uso de la CPU (el valor recomendado es 5; establezca un valor superior —como máximo de 10— únicamente si realiza el seguimiento de objetos que se mueven con extrema rapidez)."
+        },
+        "min_initialized": {
+            "description": "Número de detecciones consecutivas requeridas antes de crear un objeto rastreado. Auméntelo para reducir las inicializaciones falsas. El valor predeterminado es los FPS divididos por 2."
+        },
+        "height": {
+            "description": "Altura (en píxeles) de los fotogramas utilizados para la transmisión de detección; déjelo vacío para utilizar la resolución nativa de la transmisión."
+        },
+        "width": {
+            "description": "Ancho (en píxeles) de los fotogramas utilizados para la transmisión de detección; déjelo vacío para utilizar la resolución nativa de la transmisión."
+        },
+        "stationary": {
+            "description": "Configuración para detectar y gestionar objetos que permanecen inmóviles durante un periodo de tiempo."
+        },
+        "enabled": {
+            "description": "Habilitar o deshabilitar la detección de objetos para todas las cámaras; puede anularse para cada cámara individualmente."
+        }
+    },
+    "record": {
+        "motion": {
+            "description": "Número de días para conservar las grabaciones activadas por movimiento, independientemente de los objetos rastreados. Establézcalo en 0 si solo desea conservar las grabaciones de alertas y detecciones."
+        },
+        "continuous": {
+            "description": "Número de días para conservar las grabaciones, independientemente de los objetos rastreados o del movimiento. Establézcalo en 0 si solo desea conservar las grabaciones de alertas y detecciones."
+        },
+        "detections": {
+            "pre_capture": {
+                "description": "Número de segundos antes del evento de detección que se incluirán en la grabación."
+            },
+            "post_capture": {
+                "description": "Número de segundos después del evento de detección que se incluirán en la grabación."
+            }
+        },
+        "alerts": {
+            "pre_capture": {
+                "description": "Número de segundos antes del evento de detección que se incluirán en la grabación."
+            },
+            "post_capture": {
+                "description": "Número de segundos después del evento de detección que se incluirán en la grabación."
+            }
+        }
+    },
+    "camera_ui": {
+        "dashboard": {
+            "description": "Alterna si esta cámara es visible en toda la interfaz de usuario de Frigate. Desactivar esta opción requerirá editar manualmente la configuración para volver a visualizar esta cámara en la interfaz."
+        }
+    },
+    "live": {
+        "description": "Configuración para controlar la resolución y la calidad de la transmisión en vivo de jsmpeg. Esto no afecta a las cámaras retransmitidas que utilizan go2rtc para la visualización en vivo.",
+        "height": {
+            "description": "Altura (en píxeles) para renderizar la transmisión en vivo de jsmpeg en la interfaz web; debe ser <= a la altura de la transmisión de detección."
+        }
+    },
+    "semantic_search": {
+        "model": {
+            "description": "El modelo de embeddings a utilizar para la búsqueda semántica (por ejemplo, 'jinav1'), o el nombre de un proveedor de GenAI con el rol de embeddings."
+        }
+    },
+    "review": {
+        "alerts": {
+            "required_zones": {
+                "description": "Zonas en las que debe entrar un objeto para ser considerado una alerta; dejar vacío para permitir cualquier zona."
+            },
+            "labels": {
+                "description": "Lista de etiquetas de objetos que califican como alertas (por ejemplo: car, person)."
+            }
+        },
+        "detections": {
+            "required_zones": {
+                "description": "Zonas en las que debe entrar un objeto para ser considerado detectado; dejar vacío para permitir cualquier zona."
+            },
+            "description": "Configuración para determinar qué objetos rastreados generan detecciones (no alertas) y cómo se retienen dichas detecciones."
+        },
+        "genai": {
+            "image_source": {
+                "description": "Fuente de las imágenes enviadas a GenAI ('preview' o 'recordings'); La opción 'recordings' utiliza fotogramas de mayor calidad, pero requiere más tokens."
+            },
+            "additional_concerns": {
+                "description": "Una lista de preocupaciones o notas adicionales que GenAI debería tener en cuenta al evaluar la actividad en esta cámara."
+            },
+            "activity_context_prompt": {
+                "description": "Instrucción personalizada que describe qué constituye y qué no una actividad sospechosa, con el fin de proporcionar contexto para los resúmenes generados por GenAI."
+            },
+            "description": "Controla el uso de IA generativa (GenAI) para la elaboración de descripciones y resúmenes de elementos de revisión.",
+            "debug_save_thumbnails": {
+                "description": "Guarde las miniaturas que se envían al proveedor de GenAI para su depuración y revisión."
+            }
+        }
+    },
+    "birdseye": {
+        "description": "Configuración para la vista compuesta Birdseye, que combina las transmisiones de múltiples cámaras en una sola vista.",
+        "restream": {
+            "description": "Retransmita la salida de video de Birdseye como una transmisión en vivo RTSP; al habilitar esta opción, Birdseye se mantendrá en ejecución de forma continua."
+        },
+        "layout": {
+            "max_cameras": {
+                "description": "Número máximo de cámaras a mostrar simultáneamente en Birdseye; muestra las cámaras más recientes."
+            }
+        }
+    },
+    "ffmpeg": {
+        "retry_interval": {
+            "description": "Segundos de espera antes de intentar reconectar la transmisión de una cámara tras un fallo. El valor predeterminado es 10."
+        },
+        "path": {
+            "description": "Ruta al binario de FFmpeg que se va a utilizar o un alias de versión (\"5.0\" o \"7.0\")."
+        },
+        "output_args": {
+            "description": "Argumentos de salida predeterminados utilizados para diferentes roles de FFmpeg, tales como detección y grabación."
+        },
+        "description": "Configuración de FFmpeg, incluyendo la ruta del binario, argumentos, opciones de aceleración por hardware y argumentos de salida por rol."
+    },
+    "go2rtc": {
+        "description": "Configuración del servicio integrado de retransmisión go2rtc, utilizado para el relevo y la traducción de transmisiones en vivo."
+    },
+    "genai": {
+        "description": "Configuración para los proveedores integrados de IA generativa (GenAI) utilizados para generar descripciones de objetos y resúmenes de reseñas.",
+        "api_key": {
+            "description": "Clave de API requerida por algunos proveedores (también puede configurarse mediante variables de entorno)."
+        },
+        "base_url": {
+            "description": "URL base para proveedores autoalojados o compatibles (por ejemplo, una instancia de Ollama)."
+        },
+        "model": {
+            "description": "El modelo del proveedor que se utilizará para generar descripciones o resúmenes."
+        }
+    },
+    "face_recognition": {
+        "description": "Configuración para la detección y el reconocimiento facial en todas las cámaras; puede anularse por cámara."
+    },
+    "camera_mqtt": {
+        "required_zones": {
+            "description": "Zonas en las que debe entrar un objeto para que se publique una imagen MQTT."
         }
     }
 }

@@ -241,7 +241,7 @@ function AnnotationSettings({
 
   return (
     <div className="ml-2">
-      <Overlay modal={isDesktop} open={open} onOpenChange={handleOpenChange}>
+      <Overlay open={open} onOpenChange={handleOpenChange}>
         <Trigger asChild>
           <Button
             type="button"
@@ -269,7 +269,6 @@ function AnnotationSettings({
               : "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4"
           }
           {...contentProps}
-          {...(isDesktop ? { disablePortal: true } : {})}
           data-annotation-popover
         >
           <AnnotationSettingsPane
@@ -958,8 +957,9 @@ function ObjectDetailsTab({
             toast.success(
               t("details.item.toast.success.regenerate", {
                 provider: capitalizeAll(
-                  config?.genai.provider.replaceAll("_", " ") ??
-                    t("generativeAI"),
+                  Object.values(config?.genai ?? {})
+                    .find((agent) => agent?.roles?.includes("descriptions"))
+                    ?.provider?.replaceAll("_", " ") ?? t("generativeAI"),
                 ),
               }),
               {
@@ -977,8 +977,9 @@ function ObjectDetailsTab({
           toast.error(
             t("details.item.toast.error.regenerate", {
               provider: capitalizeAll(
-                config?.genai.provider.replaceAll("_", " ") ??
-                  t("generativeAI"),
+                Object.values(config?.genai ?? {})
+                  .find((agent) => agent?.roles?.includes("descriptions"))
+                  ?.provider?.replaceAll("_", " ") ?? t("generativeAI"),
               ),
               errorMessage,
             }),

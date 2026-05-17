@@ -5,7 +5,7 @@
     },
     "safe_mode": {
         "label": "Trygg modus",
-        "description": "Når aktivert, start Frigate i trygg modus med reduserte funksjoner for feilsøking."
+        "description": "Når aktivert, start Frigate i trygg modus med redusert funksjonalitet for feilsøking."
     },
     "environment_vars": {
         "label": "Miljøvariabler",
@@ -15,7 +15,7 @@
         "label": "Logging",
         "description": "Kontrollerer standard loggdetaljnivå og overstyringer av loggnivå per komponent.",
         "default": {
-            "label": "Loggnivå",
+            "label": "Loggenivå",
             "description": "Standard globale loggedetaljer (debug, info, warning, error)."
         },
         "logs": {
@@ -527,7 +527,7 @@
         },
         "roles": {
             "label": "Roller",
-            "description": "GenAI-roller (verktøy, bildeforståelse/syn, vektorrepresentasjoner); én leverandør per rolle."
+            "description": "GenAI-roller (chat, beskrivelser, vektorrepresentasjoner); én leverandør per rolle."
         },
         "provider_options": {
             "label": "Leverandøralternativer",

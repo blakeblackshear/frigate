@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "Frigate ログ - Frigate",
       "go2rtc": "Go2RTC ログ - Frigate",
-      "nginx": "Nginx ログ - Frigate"
+      "nginx": "Nginx ログ - Frigate",
+      "websocket": "メッセージログ - Frigate"
     }
   },
   "title": "システム",
@@ -42,7 +43,23 @@
       "filter": {
         "events": "イベント",
         "classification": "分類",
-        "face_recognition": "顔認識"
+        "face_recognition": "顔認識",
+        "all": "全てのトピックス",
+        "topics": "トピックス",
+        "reviews": "レビュー",
+        "lpr": "LPR",
+        "camera_activity": "カメラアクティビティ",
+        "system": "システム",
+        "camera": "カメラ",
+        "all_cameras": "全てのカメラ",
+        "cameras_count_one": "{{count}} カメラ",
+        "cameras_count_other": "{{count}} カメラ"
+      },
+      "empty": "まだメッセージは記録されていません",
+      "count_one": "{{count}} メッセージ",
+      "count_other": "{{count}} メッセージ",
+      "expanded": {
+        "payload": "ペイロード"
       }
     }
   },

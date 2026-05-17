@@ -26,6 +26,11 @@ class EnrichmentsDeviceEnum(str, Enum):
     CPU = "CPU"
 
 
+class ModelSizeEnum(str, Enum):
+    small = "small"
+    large = "large"
+
+
 class TriggerType(str, Enum):
     THUMBNAIL = "thumbnail"
     DESCRIPTION = "description"
@@ -53,13 +58,13 @@ class AudioTranscriptionConfig(FrigateBaseModel):
         title="Transcription language",
         description="Language code used for transcription/translation (for example 'en' for English). See https://whisper-api.com/docs/languages/ for supported language codes.",
     )
-    device: Optional[EnrichmentsDeviceEnum] = Field(
+    device: EnrichmentsDeviceEnum = Field(
         default=EnrichmentsDeviceEnum.CPU,
         title="Transcription device",
         description="Device key (CPU/GPU) to run the transcription model on. Only NVIDIA CUDA GPUs are currently supported for transcription.",
     )
-    model_size: str = Field(
-        default="small",
+    model_size: ModelSizeEnum = Field(
+        default=ModelSizeEnum.small,
         title="Model size",
         description="Model size to use for offline audio event transcription.",
     )
@@ -189,8 +194,8 @@ class SemanticSearchConfig(FrigateBaseModel):
                 return v
         return v
 
-    model_size: str = Field(
-        default="small",
+    model_size: ModelSizeEnum = Field(
+        default=ModelSizeEnum.small,
         title="Model size",
         description="Select model size; 'small' runs on CPU and 'large' typically requires GPU.",
     )
@@ -253,8 +258,8 @@ class FaceRecognitionConfig(FrigateBaseModel):
         title="Enable face recognition",
         description="Enable or disable face recognition for all cameras; can be overridden per-camera.",
     )
-    model_size: str = Field(
-        default="small",
+    model_size: ModelSizeEnum = Field(
+        default=ModelSizeEnum.small,
         title="Model size",
         description="Model size to use for face embeddings (small/large); larger may require GPU.",
     )
@@ -335,8 +340,8 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         title="Enable LPR",
         description="Enable or disable license plate recognition for all cameras; can be overridden per-camera.",
     )
-    model_size: str = Field(
-        default="small",
+    model_size: ModelSizeEnum = Field(
+        default=ModelSizeEnum.small,
         title="Model size",
         description="Model size used for text detection/recognition. Most users should use 'small'.",
     )

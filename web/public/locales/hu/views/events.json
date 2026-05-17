@@ -15,7 +15,9 @@
     "only": "Csak mozgások"
   },
   "allCameras": "Összes kamera",
-  "timeline": "Idővonal",
+  "timeline": {
+    "label": "Idővonal"
+  },
   "detected": "észlelve",
   "events": {
     "label": "Események",

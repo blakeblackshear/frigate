@@ -34,7 +34,9 @@
   "normalActivity": "Tavaline",
   "needsReview": "Vajab ülevaatamist",
   "securityConcern": "Võib olla turvaprobleem",
-  "timeline": "Ajajoon",
+  "timeline": {
+    "label": "Ajajoon"
+  },
   "timeline.aria": "Vali ajajoon",
   "zoomIn": "Suumi sisse",
   "zoomOut": "Suumi välja",
@@ -53,7 +55,9 @@
   },
   "documentTitle": "Ülevaatamine - Frigate",
   "recordings": {
-    "documentTitle": "Salvestised - Frigate"
+    "documentTitle": "Salvestised - Frigate",
+    "invalidSharedLink": "Töötlemisvea tõttu ei õnnestu avada ajatempliga salvestuse linki.",
+    "invalidSharedCamera": "Tundmatu või volituseta kaamera tõttu ei õnnestu avada ajatempliga salvestuse linki."
   },
   "calendarFilter": {
     "last24Hours": "Viimased 24 tundi"
@@ -61,5 +65,28 @@
   "objectTrack": {
     "clickToSeek": "Klõpsa siia ajapunkti kerimiseks",
     "trackedPoint": "Jälgitav punkt"
+  },
+  "motionSearch": {
+    "menuItem": "Liikumise otsing",
+    "openMenu": "Kaamera valikud"
+  },
+  "motionPreviews": {
+    "menuItem": "Vaata liikumiste eelvaateid",
+    "title": "Liikumiste eelvaated: {{camera}}",
+    "mobileSettingsTitle": "Liikumiste eelvaadete seadistused",
+    "mobileSettingsDesc": "Kohenda taasesituse kiirust ja heledust ning vali kuupäev, et vaadata läbi ainult liikumist kajastavaid klipid.",
+    "dim": "Hämarus",
+    "dimAria": "Muuda hämarust",
+    "dimDesc": "Kohenda hämarust parandamaks liikumisala nähtavust.",
+    "speed": "Kiirus",
+    "speedAria": "Vali eelvaate taasesituse kiirus",
+    "speedDesc": "Määratle kiirus, millega eelvaate klippe näidatakse.",
+    "back": "Tagasi",
+    "empty": "Ühtegi eelvaadet pole saadaval",
+    "noPreview": "Eelvaade pole saadaval",
+    "seekAria": "Keri „{{camera}}“ kaamera vaade ajatempli juurde: {{time}}",
+    "filter": "Filtreeri",
+    "filterDesc": "Näitamaks ainult liikumisega klippe antud aladel, vali soovitud piirkonnad.",
+    "filterClear": "Tühjenda"
   }
 }

@@ -4,12 +4,15 @@ title: Installation
 ---
 
 import ShmCalculator from '@site/src/components/ShmCalculator'
+import DockerComposeGenerator from '@site/src/components/DockerComposeGenerator'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 Frigate is a Docker container that can be run on any Docker host including as a [Home Assistant App](https://www.home-assistant.io/apps/). Note that the Home Assistant App is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant, whether you are running Frigate as a standalone Docker container or as a Home Assistant App.
 
 :::tip
 
-If you already have Frigate installed as a Home Assistant App, check out the [getting started guide](../guides/getting_started#configuring-frigate) to configure Frigate.
+If you already have Frigate installed as a Home Assistant App, check out the [getting started guide](../guides/getting_started.md#configuring-frigate) to configure Frigate.
 
 :::
 
@@ -286,7 +289,7 @@ The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVM
 
 #### Installation
 
-To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/get_started/hardware_setup.html).
+To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/2p1/get_started/install_hardware.html).
 
 Then follow these steps for installing the correct driver/runtime configuration:
 
@@ -294,6 +297,12 @@ Then follow these steps for installing the correct driver/runtime configuration:
 2. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
 3. Run the script with `./user_installation.sh`
 4. **Restart your computer** to complete driver installation.
+
+:::warning
+
+For manual setup, use **MemryX SDK 2.1** only. Other SDK versions are not supported for this setup. See the [SDK 2.1 documentation](https://developer.memryx.com/2p1/index.html)
+
+:::
 
 #### Setup
 
@@ -468,6 +477,16 @@ Finally, configure [hardware object detection](/configuration/object_detectors#a
 
 Running through Docker with Docker Compose is the recommended install method.
 
+<Tabs>
+  <TabItem value="domestic" label="Docker Compose Generator" default>
+
+Generate a Frigate Docker Compose configuration based on your hardware and requirements.
+
+<DockerComposeGenerator/>
+
+
+  </TabItem>
+  <TabItem value="original" label="Example Docker Compose File">
 ```yaml
 services:
   frigate:
@@ -501,6 +520,10 @@ services:
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
+  </TabItem>
+</Tabs>
+
+**Docker CLI**
 
 If you can't use Docker Compose, you can run the container with something similar to this:
 

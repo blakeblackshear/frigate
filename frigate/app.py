@@ -144,7 +144,7 @@ class FrigateApp:
         for d in dirs:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
-                os.makedirs(d)
+                os.makedirs(d, exist_ok=True)
             else:
                 logger.debug(f"Skipping directory: {d}")
 
@@ -189,17 +189,6 @@ class FrigateApp:
             except PermissionError:
                 logger.error("Unable to write to /config to save DB state")
 
-        def cleanup_timeline_db(db: SqliteExtDatabase) -> None:
-            db.execute_sql(
-                "DELETE FROM timeline WHERE source_id NOT IN (SELECT id FROM event);"
-            )
-
-            try:
-                with open(f"{CONFIG_DIR}/.timeline", "w") as f:
-                    f.write(str(datetime.datetime.now().timestamp()))
-            except PermissionError:
-                logger.error("Unable to write to /config to save DB state")
-
         # Migrate DB schema
         migrate_db = SqliteExtDatabase(self.config.database.path)
 
@@ -215,11 +204,6 @@ class FrigateApp:
             )
 
         router.run()
-
-        # this is a temporary check to clean up user DB from beta
-        # will be removed before final release
-        if not os.path.exists(f"{CONFIG_DIR}/.timeline"):
-            cleanup_timeline_db(migrate_db)
 
         # check if vacuum needs to be run
         if os.path.exists(f"{CONFIG_DIR}/.vacuum"):
@@ -444,18 +428,11 @@ class FrigateApp:
         self.camera_maintainer.start()
 
     def start_audio_processor(self) -> None:
-        audio_cameras = [
-            c
-            for c in self.config.cameras.values()
-            if c.enabled and c.audio.enabled_in_config
-        ]
-
-        if audio_cameras:
-            self.audio_process = AudioProcessor(
-                self.config, audio_cameras, self.camera_metrics, self.stop_event
-            )
-            self.audio_process.start()
-            self.processes["audio_detector"] = self.audio_process.pid or 0
+        self.audio_process = AudioProcessor(
+            self.config, self.camera_metrics, self.stop_event
+        )
+        self.audio_process.start()
+        self.processes["audio_detector"] = self.audio_process.pid or 0
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(

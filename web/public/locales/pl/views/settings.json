@@ -7,7 +7,7 @@
     "cameras": "Ustawienia Kamery",
     "frigateplus": "Frigate+",
     "masksAndZones": "Maski / Strefy",
-    "motionTuner": "Konfigurator Ruchu",
+    "motionTuner": "Konfigurator ruchu",
     "debug": "Debugowanie",
     "enrichments": "Wzbogacenia",
     "triggers": "Wyzwalacze",
@@ -96,7 +96,11 @@
     "notifications": "Ustawienia powiadomień - Frigate",
     "enrichments": "Ustawienia wzbogacania - Frigate",
     "cameraManagement": "Zarządzanie kamerami – Frigate",
-    "cameraReview": "Ustawienia przeglądu kamer - Frigate"
+    "cameraReview": "Ustawienia przeglądu kamer - Frigate",
+    "globalConfig": "Konfiguracja globalna - Frigate",
+    "cameraConfig": "Konfiguracja kamery - Frigate",
+    "maintenance": "Konserwacja – Frigate",
+    "profiles": "Profile - Frigate"
   },
   "classification": {
     "title": "Ustawienia Klasyfikacji",
@@ -410,7 +414,7 @@
     },
     "restart_required": "Wymagane ponowne uruchomienie (maski/strefy zmienione)",
     "motionMaskLabel": "Maska Ruchu {{number}}",
-    "objectMaskLabel": "Maska Obiektu {{number}} ({{label}})"
+    "objectMaskLabel": "Maska Obiektu {{number}}"
   },
   "debug": {
     "objectList": "Lista Obiektów",
@@ -684,7 +688,7 @@
         "cleanCopySnapshots": "Zrzuty ekranu <code>clean_copy</code>",
         "camera": "Kamera"
       },
-      "cleanCopyWarning": "Niektóre kamery mają włączone zrzuty ekranu, ale mają wyłączoną funkcję czystej kopii. Musisz włączyć <code>clean_copy</code> w konfiguracji zrzutów ekranu, aby móc przesyłać obrazy z tych kamer do Frigate+."
+      "cleanCopyWarning": "Niektóre kamery mają wyłączone migawki"
     },
     "modelInfo": {
       "title": "Informacje o modelu",

@@ -136,90 +136,32 @@ ffmpeg:
 </TabItem>
 </ConfigTabs>
 
-### Configuring Intel GPU Stats in Docker
+### Configuring Intel GPU Stats
 
-Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. There are two options:
+Frigate reads Intel GPU utilization directly from the kernel's per-client DRM usage counters exposed at `/proc/<pid>/fdinfo/<fd>`. This requires:
 
-1. Run the container as privileged.
-2. Add the `CAP_PERFMON` capability (note: you might need to set the `perf_event_paranoid` low enough to allow access to the performance event system.)
+- Linux kernel **5.19 or newer** for the `i915` driver, or any release of the `xe` driver.
+- Frigate running with permission to read other processes' fdinfo. Running as root inside the container (the default) satisfies this; non-root setups may need `CAP_SYS_PTRACE`.
 
-#### Run as privileged
+No `intel_gpu_top` binary, `CAP_PERFMON`, privileged mode, or `perf_event_paranoid` tuning is required.
 
-This method works, but it gives more permissions to the container than are actually needed.
+#### Stats for SR-IOV or specific devices
 
-##### Docker Compose - Privileged
-
-```yaml
-services:
-  frigate:
-    ...
-    image: ghcr.io/blakeblackshear/frigate:stable
-    # highlight-next-line
-    privileged: true
-```
-
-##### Docker Run CLI - Privileged
-
-```bash {4}
-docker run -d \
-  --name frigate \
-  ...
-  --privileged \
-  ghcr.io/blakeblackshear/frigate:stable
-```
-
-#### CAP_PERFMON
-
-Only recent versions of Docker support the `CAP_PERFMON` capability. You can test to see if yours supports it by running: `docker run --cap-add=CAP_PERFMON hello-world`
-
-##### Docker Compose - CAP_PERFMON
-
-```yaml {5,6}
-services:
-  frigate:
-    ...
-    image: ghcr.io/blakeblackshear/frigate:stable
-    cap_add:
-      - CAP_PERFMON
-```
-
-##### Docker Run CLI - CAP_PERFMON
-
-```bash {4}
-docker run -d \
-  --name frigate \
-  ...
-  --cap-add=CAP_PERFMON \
-  ghcr.io/blakeblackshear/frigate:stable
-```
-
-#### perf_event_paranoid
-
-_Note: This setting must be changed for the entire system._
-
-For more information on the various values across different distributions, see https://askubuntu.com/questions/1400874/what-does-perf-paranoia-level-four-do.
-
-Depending on your OS and kernel configuration, you may need to change the `/proc/sys/kernel/perf_event_paranoid` kernel tunable. You can test the change by running `sudo sh -c 'echo 2 >/proc/sys/kernel/perf_event_paranoid'` which will persist until a reboot. Make it permanent by running `sudo sh -c 'echo kernel.perf_event_paranoid=2 >> /etc/sysctl.d/local.conf'`
-
-#### Stats for SR-IOV or other devices
-
-When using virtualized GPUs via SR-IOV, you need to specify the device path to use to gather stats from `intel_gpu_top`. This example may work for some systems using SR-IOV:
+If the host has more than one Intel GPU (e.g. an iGPU plus a discrete GPU, or SR-IOV virtual functions), pin stats collection to a specific device by setting `intel_gpu_device` to either its PCI bus address or a DRM card/render-node path:
 
 ```yaml
 telemetry:
   stats:
-    intel_gpu_device: "sriov"
+    intel_gpu_device: "0000:00:02.0"
 ```
-
-For other virtualized GPUs, try specifying the direct path to the device instead:
 
 ```yaml
 telemetry:
   stats:
-    intel_gpu_device: "drm:/dev/dri/card0"
+    intel_gpu_device: "/dev/dri/card1"
 ```
 
-If you are passing in a device path, make sure you've passed the device through to the container.
+When passing a device path, make sure the device is also passed through to the container.
 
 ## AMD-based CPUs
 

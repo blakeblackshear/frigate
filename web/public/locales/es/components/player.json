@@ -3,7 +3,8 @@
   "noPreviewFoundFor": "No se encontró vista previa para {{cameraName}}",
   "submitFrigatePlus": {
     "submit": "Enviar",
-    "title": "¿Enviar este fotograma a Frigate+?"
+    "title": "¿Enviar este fotograma a Frigate+?",
+    "previewError": "No se pudo cargar la vista previa de la instantánea. Es posible que la grabación no esté disponible en este momento."
   },
   "streamOffline": {
     "desc": "No se han recibido fotogramas en la transmisión <code>detect</code> de {{cameraName}}, revisa los registros de errores",

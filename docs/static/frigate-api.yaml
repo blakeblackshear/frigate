@@ -5997,7 +5997,10 @@ paths:
       tags:
         - App
       summary: Start debug replay
-      description: Start a debug replay session from camera recordings.
+      description:
+        Start a debug replay session from camera recordings. Returns
+        immediately while clip generation runs as a background job; subscribe
+        to the 'debug_replay' job_state WS topic to track progress.
       operationId: start_debug_replay_debug_replay_start_post
       requestBody:
         required: true
@@ -6006,12 +6009,16 @@ paths:
             schema:
               $ref: "#/components/schemas/DebugReplayStartBody"
       responses:
-        "200":
+        "202":
           description: Successful Response
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/DebugReplayStartResponse"
+        "400":
+          description: Invalid camera, time range, or no recordings
+        "409":
+          description: A replay session is already active
         "422":
           description: Validation Error
           content:
@@ -6272,10 +6279,14 @@ components:
         replay_camera:
           type: string
           title: Replay Camera
+        job_id:
+          type: string
+          title: Job Id
       type: object
       required:
         - success
         - replay_camera
+        - job_id
       title: DebugReplayStartResponse
       description: Response for starting a debug replay session.
     DebugReplayStatusResponse:

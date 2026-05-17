@@ -42,10 +42,32 @@
         "label": "Nombre descriptivo",
         "description": "Nombre descriptivo de la cámara utilizado en la interfaz de usuario de Frigate"
     },
-    "label": "Configuración de Cámara",
+    "label": "Configuración de cámara",
     "onvif": {
         "profile": {
-            "label": "Perfil ONVIF"
+            "label": "Perfil ONVIF",
+            "description": "Perfil multimedia ONVIF específico que se utilizará para el control PTZ, identificado por token o nombre. Si no se especifica, se selecciona automáticamente el primer perfil con una configuración PTZ válida."
+        },
+        "autotracking": {
+            "zoom_factor": {
+                "description": "Controla el nivel de zoom en los objetos rastreados. Los valores más bajos mantienen una mayor parte de la escena a la vista; los valores más altos acercan la imagen, pero pueden provocar la pérdida del rastreo. Valores entre 0.1 y 0.75."
+            },
+            "calibrate_on_startup": {
+                "description": "Mida la velocidad de los motores PTZ al encenderlos para mejorar la precisión del seguimiento. Frigate actualizará la configuración con los `movement_weights` tras la calibración."
+            },
+            "description": "Realice un seguimiento automático de objetos en movimiento y manténgalos centrados en el encuadre mediante movimientos de cámara PTZ.",
+            "zooming": {
+                "description": "Control del comportamiento del zoom: deshabilitado (solo panorámica/inclinación), absoluto (mayor compatibilidad) o relativo (panorámica/inclinación/zoom simultáneos)."
+            },
+            "return_preset": {
+                "description": "Nombre del preajuste ONVIF configurado en el firmware de la cámara al que regresar una vez finalizado el seguimiento."
+            },
+            "timeout": {
+                "description": "Espere esta cantidad de segundos después de perder el seguimiento antes de devolver la cámara a la posición preestablecida."
+            }
+        },
+        "tls_insecure": {
+            "description": "Omitir la verificación TLS y deshabilitar la autenticación digest para ONVIF (no seguro; usar solo en redes seguras)."
         }
     },
     "zones": {
@@ -83,7 +105,24 @@
             "max_area": {
                 "description": "Área máxima del cuadro delimitador (píxeles o porcentaje) permitida para este tipo de objeto. Puede expresarse en píxeles (entero) o como porcentaje (decimal entre 0,000001 y 0,99).",
                 "label": "Área máxima del objeto"
-            }
+            },
+            "description": "Filtros para aplicar a los objetos dentro de esta zona. Se utilizan para reducir los falsos positivos o restringir qué objetos se consideran presentes en la zona."
+        },
+        "objects": {
+            "description": "Lista de tipos de objetos (del mapa de etiquetas) que pueden activar esta zona. Puede ser una cadena de texto o una lista de cadenas. Si está vacío, se consideran todos los objetos."
+        },
+        "description": "Las zonas le permiten definir un área específica del fotograma, de modo que pueda determinar si un objeto se encuentra o no dentro de un área determinada.",
+        "speed_threshold": {
+            "description": "Velocidad mínima (en unidades del mundo real, si se han configurado distancias) requerida para que un objeto se considere presente en la zona. Se utiliza para los disparadores de zona basados en la velocidad."
+        },
+        "friendly_name": {
+            "description": "Un nombre fácil de usar para la zona, que se muestra en la interfaz de usuario de Frigate. Si no se especifica, se utilizará una versión formateada del nombre de la zona."
+        },
+        "inertia": {
+            "description": "Número de fotogramas consecutivos en los que se debe detectar un objeto dentro de la zona antes de considerarlo presente. Ayuda a filtrar las detecciones transitorias."
+        },
+        "loitering_time": {
+            "description": "Número de segundos que un objeto debe permanecer en la zona para ser considerado como merodeo. Establezca en 0 para desactivar la detección de merodeo."
         }
     },
     "objects": {
@@ -100,7 +139,151 @@
             "use_snapshot": {
                 "label": "Usar instantáneas",
                 "description": "Usar instantáneas de objetos en lugar de miniaturas para la generación de descripciones de GenAI."
+            },
+            "send_triggers": {
+                "after_significant_updates": {
+                    "description": "Envía una solicitud a GenAI tras un número especificado de actualizaciones significativas del objeto rastreado."
+                },
+                "description": "Define cuándo se deben enviar los fotogramas a GenAI (al finalizar, después de las actualizaciones, etc.)."
+            },
+            "required_zones": {
+                "description": "Zonas en las que deben ubicarse los objetos para ser elegibles para la generación de descripciones con GenAI."
             }
         }
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "required_zones": {
+            "description": "Zonas en las que debe entrar un objeto para que se publique una imagen MQTT."
+        }
+    },
+    "notifications": {
+        "email": {
+            "label": "Email de notificacion"
+        }
+    },
+    "audio_transcription": {
+        "description": "Configuración para la transcripción de audio en vivo y de voz, utilizada para eventos y subtítulos en tiempo real.",
+        "enabled": {
+            "label": "Habilitar transcripción"
+        }
+    },
+    "motion": {
+        "skip_motion_threshold": {
+            "description": "Si se establece en un valor entre 0,0 y 1,0, y más de esta fracción de la imagen cambia en un solo fotograma, el detector no devolverá cuadros de movimiento y se recalibrará inmediatamente. Esto puede ahorrar recursos de CPU y reducir los falsos positivos durante tormentas eléctricas, tempestades, etc., aunque podría pasar por alto eventos reales, como el seguimiento automático de un objeto por parte de una cámara PTZ. La disyuntiva está entre descartar unos cuantos megabytes de grabaciones o revisar un par de clips cortos. Deje este parámetro sin establecer (None) para desactivar esta función."
+        },
+        "lightning_threshold": {
+            "description": "Umbral para detectar e ignorar breves picos de luz (un valor menor indica mayor sensibilidad; valores entre 0,3 y 1,0). Esto no impide por completo la detección de movimiento; Simplemente provoca que el detector deje de analizar fotogramas adicionales una vez que se supera el umbral. Durante estos eventos aún se realizan grabaciones basadas en el movimiento."
+        },
+        "threshold": {
+            "description": "Umbral de diferencia de píxeles utilizado por el detector de movimiento; los valores más altos reducen la sensibilidad (rango 1-255)."
+        }
+    },
+    "lpr": {
+        "enhancement": {
+            "description": "Nivel de mejora (0-10) que se aplicará a los recortes de matrículas antes del OCR; los valores más altos no siempre mejoran los resultados, y los niveles superiores a 5 podrían funcionar únicamente con matrículas capturadas de noche, por lo que deben utilizarse con precaución."
+        },
+        "expire_time": {
+            "description": "Tiempo en segundos tras el cual una matrícula no detectada caduca en el sistema de seguimiento (solo para cámaras LPR dedicadas)."
+        }
+    },
+    "detect": {
+        "fps": {
+            "description": "Fotogramas por segundo deseados para ejecutar la detección; los valores más bajos reducen el uso de la CPU (el valor recomendado es 5; establezca un valor superior —como máximo de 10— únicamente si realiza el seguimiento de objetos que se mueven con extrema rapidez)."
+        },
+        "min_initialized": {
+            "description": "Número de detecciones consecutivas requeridas antes de crear un objeto rastreado. Auméntelo para reducir las inicializaciones falsas. El valor predeterminado es los FPS divididos por 2."
+        },
+        "height": {
+            "description": "Altura (en píxeles) de los fotogramas utilizados para la transmisión de detección; déjelo vacío para utilizar la resolución nativa de la transmisión."
+        },
+        "width": {
+            "description": "Ancho (en píxeles) de los fotogramas utilizados para la transmisión de detección; déjelo vacío para utilizar la resolución nativa de la transmisión."
+        },
+        "stationary": {
+            "description": "Configuración para detectar y gestionar objetos que permanecen inmóviles durante un periodo de tiempo."
+        }
+    },
+    "record": {
+        "motion": {
+            "description": "Número de días para conservar las grabaciones activadas por movimiento, independientemente de los objetos rastreados. Establézcalo en 0 si solo desea conservar las grabaciones de alertas y detecciones."
+        },
+        "continuous": {
+            "description": "Número de días para conservar las grabaciones, independientemente de los objetos rastreados o del movimiento. Establézcalo en 0 si solo desea conservar las grabaciones de alertas y detecciones."
+        },
+        "detections": {
+            "pre_capture": {
+                "description": "Número de segundos antes del evento de detección que se incluirán en la grabación."
+            },
+            "post_capture": {
+                "description": "Número de segundos después del evento de detección que se incluirán en la grabación."
+            }
+        },
+        "alerts": {
+            "pre_capture": {
+                "description": "Número de segundos antes del evento de detección que se incluirán en la grabación."
+            },
+            "post_capture": {
+                "description": "Número de segundos después del evento de detección que se incluirán en la grabación."
+            }
+        }
+    },
+    "ui": {
+        "dashboard": {
+            "description": "Alterna si esta cámara es visible en toda la interfaz de usuario de Frigate. Desactivar esta opción requerirá editar manualmente la configuración para volver a visualizar esta cámara en la interfaz."
+        }
+    },
+    "live": {
+        "height": {
+            "description": "Altura (en píxeles) para renderizar la transmisión en vivo de jsmpeg en la interfaz web; debe ser <= a la altura de la transmisión de detección."
+        },
+        "description": "Configuraciones utilizadas por la interfaz web para controlar la selección, la resolución y la calidad de transmisiónes en vivo."
+    },
+    "review": {
+        "description": "Configuraciones que controlan las alertas, las detecciones y los resúmenes de revisión de GenAI utilizados por la interfaz de usuario y el almacenamiento de esta cámara.",
+        "alerts": {
+            "required_zones": {
+                "description": "Zonas en las que debe entrar un objeto para ser considerado una alerta; dejar vacío para permitir cualquier zona."
+            },
+            "labels": {
+                "description": "Lista de etiquetas de objetos que califican como alertas (por ejemplo: car, person)."
+            }
+        },
+        "detections": {
+            "required_zones": {
+                "description": "Zonas en las que debe entrar un objeto para ser considerado detectado; dejar vacío para permitir cualquier zona."
+            },
+            "description": "Configuración para determinar qué objetos rastreados generan detecciones (no alertas) y cómo se retienen dichas detecciones."
+        },
+        "genai": {
+            "image_source": {
+                "description": "Fuente de las imágenes enviadas a GenAI ('preview' o 'recordings'); La opción 'recordings' utiliza fotogramas de mayor calidad, pero requiere más tokens."
+            },
+            "additional_concerns": {
+                "description": "Una lista de preocupaciones o notas adicionales que GenAI debería tener en cuenta al evaluar la actividad en esta cámara."
+            },
+            "activity_context_prompt": {
+                "description": "Instrucción personalizada que describe qué constituye y qué no una actividad sospechosa, con el fin de proporcionar contexto para los resúmenes generados por GenAI."
+            },
+            "description": "Controla el uso de IA generativa (GenAI) para la elaboración de descripciones y resúmenes de elementos de revisión.",
+            "debug_save_thumbnails": {
+                "description": "Guarde las miniaturas que se envían al proveedor de GenAI para su depuración y revisión."
+            }
+        }
+    },
+    "birdseye": {
+        "description": "Configuración para la vista compuesta Birdseye, que combina las transmisiones de múltiples cámaras en una sola vista."
+    },
+    "ffmpeg": {
+        "retry_interval": {
+            "description": "Segundos de espera antes de intentar reconectar la transmisión de una cámara tras un fallo. El valor predeterminado es 10."
+        },
+        "path": {
+            "description": "Ruta al binario de FFmpeg que se va a utilizar o un alias de versión (\"5.0\" o \"7.0\")."
+        },
+        "output_args": {
+            "description": "Argumentos de salida predeterminados utilizados para diferentes roles de FFmpeg, tales como detección y grabación."
+        },
+        "description": "Configuración de FFmpeg, incluyendo la ruta del binario, argumentos, opciones de aceleración por hardware y argumentos de salida por rol."
     }
 }

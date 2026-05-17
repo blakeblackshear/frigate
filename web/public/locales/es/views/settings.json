@@ -21,7 +21,7 @@
   "menu": {
     "cameras": "Configuración de Cámara",
     "debug": "Depuración",
-    "ui": "Interfaz de usuario",
+    "ui": "Interfaz de Usuario",
     "classification": "Clasificación",
     "motionTuner": "Ajuste de movimiento",
     "masksAndZones": "Máscaras / Zonas",
@@ -35,7 +35,22 @@
     "cameraReview": "Revisar",
     "general": "General",
     "globalConfig": "Configuración Global",
-    "system": "Sistema"
+    "system": "Sistema",
+    "integrations": "Integraciones",
+    "uiSettings": "Configuración de Interfaz de Usuario",
+    "profiles": "Perfiles",
+    "globalDetect": "Detección de Objetos",
+    "globalRecording": "Grabación",
+    "globalSnapshots": "Instantáneas",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Detección de Movimiento",
+    "globalObjects": "Objetos",
+    "globalReview": "Revisión",
+    "globalAudioEvents": "Eventos de Audio",
+    "globalLivePlayback": "Reproducción en Vivo",
+    "globalTimestampStyle": "Estilo de Marca de Tiempo",
+    "systemDatabase": "Base de Datos",
+    "systemAuthentication": "Autenticación"
   },
   "dialog": {
     "unsavedChanges": {
@@ -353,6 +368,9 @@
       "allObjects": "Todos los objetos",
       "toast": {
         "success": "La zona ({{zoneName}}) ha sido guardada."
+      },
+      "enabled": {
+        "description": "Indica si esta zona está activa y habilitada en la configuración. Si está deshabilitado, no puede ser habilitado por MQTT. Las zonas deshabilitadas se ignoran durante la ejecución."
       }
     },
     "toast": {
@@ -697,7 +715,7 @@
         "cleanCopySnapshots": "<code>clean_copy</code> Instantáneas"
       },
       "desc": "Enviar a Frigate+ requiere que tanto las capturas instantáneas como las capturas <code>clean_copy</code> estén habilitadas en tu configuración.",
-      "cleanCopyWarning": "Algunas cámaras tienen las instantáneas habilitadas pero tienen la copia limpia desactivada. Necesitas habilitar <code>clean_copy</code> en tu configuración de instantáneas para poder enviar imágenes de estas cámaras a Frigate+."
+      "cleanCopyWarning": "Algunas cámaras tienen las instantáneas deshabilitadas"
     },
     "modelInfo": {
       "title": "Información del modelo",
@@ -722,7 +740,8 @@
       "error": "No se pudieron guardar los cambios en la configuración: {{errorMessage}}"
     },
     "restart_required": "Es necesario reiniciar (se ha cambiado el modelo Frigate+)",
-    "unsavedChanges": "Cambios en la configuración de Frigate+ no guardados"
+    "unsavedChanges": "Cambios en la configuración de Frigate+ no guardados",
+    "description": "Frigate+ es un servicio de suscripción que proporciona acceso a funciones y capacidades adicionales para su instancia de Frigate, incluida la posibilidad de utilizar modelos de detección de objetos personalizados entrenados con sus propios datos. Puede gestionar la configuración de sus modelos de Frigate+ aquí."
   },
   "enrichments": {
     "title": "Configuración de Enriquecimientos",
@@ -1172,7 +1191,8 @@
     "backToSettings": "Volver a configuración de la cámara",
     "streams": {
       "title": "Habilitar/deshabilitar cámaras",
-      "desc": "Desactiva temporalmente una cámara hasta que Frigate se reinicie. Desactivar una cámara detiene por completo el procesamiento de las transmisiones de Frigate. La detección, la grabación y la depuración no estarán disponibles.<br /> <em>Nota: Esto no desactiva las retransmisiones de go2rtc.</em>"
+      "desc": "Desactiva temporalmente una cámara hasta que Frigate se reinicie. Desactivar una cámara detiene por completo el procesamiento de las transmisiones de Frigate. La detección, la grabación y la depuración no estarán disponibles.<br /> <em>Nota: Esto no desactiva las retransmisiones de go2rtc.</em>",
+      "enableDesc": "Deshabilita temporalmente una cámara habilitada hasta que Frigate se reinicie. Deshabilitar una cámara detiene por completo el procesamiento de las transmisiones de esa cámara por parte de Frigate. La detección, la grabación y la depuración no estarán disponibles.<br /> <em>Nota: Esto no deshabilita las retransmisiones de go2rtc.</em>"
     },
     "cameraConfig": {
       "add": "Añadir cámara",
@@ -1202,6 +1222,9 @@
       "toast": {
         "success": "Cámara {{cameraName}} guardada correctamente"
       }
+    },
+    "deleteCameraDialog": {
+      "description": "Eliminar una cámara borrará permanentemente todas las grabaciones, los objetos rastreados y la configuración de esa cámara. Es posible que sea necesario eliminar manualmente cualquier transmisión go2rtc asociada a esta cámara."
     }
   },
   "cameraReview": {
@@ -1253,12 +1276,133 @@
   "maintenance": {
     "sync": {
       "verboseDesc": "Escribe una lista completa de archivos huérfanos en el disco para su revisión.",
-      "verbose": "Detallado"
+      "verbose": "Detallado",
+      "desc": "Frigate limpiará periódicamente los archivos multimedia según un cronograma regular, de acuerdo con su configuración de retención. Es normal ver algunos archivos huérfanos mientras Frigate se ejecuta. Utilice esta función para eliminar del disco los archivos multimedia huérfanos que ya no se referencian en la base de datos.",
+      "forceDesc": "Omitir el umbral de seguridad y completar la sincronización incluso si se eliminara más del 50% de los archivos."
+    },
+    "regionGrid": {
+      "clearConfirmDesc": "No se recomienda borrar la cuadrícula de la región a menos que haya cambiado recientemente el tamaño del modelo de su detector o la posición física de su cámara y esté experimentando problemas de seguimiento de objetos. La cuadrícula se reconstruirá automáticamente con el tiempo a medida que se realice el seguimiento de los objetos. Es necesario reiniciar Frigate para que los cambios surtan efecto.",
+      "desc": "La cuadrícula de regiones es una optimización que aprende dónde suelen aparecer los objetos de diferentes tamaños en el campo de visión de cada cámara. Frigate utiliza estos datos para dimensionar de forma eficiente las regiones de detección. La cuadrícula se construye automáticamente a lo largo del tiempo a partir de los datos de los objetos rastreados."
     }
   },
   "configForm": {
     "camera": {
-      "noCameras": "No hay cámaras disponibles"
+      "noCameras": "No hay cámaras disponibles",
+      "description": "Estos ajustes se aplican únicamente a esta cámara y anulan los ajustes globales."
+    },
+    "genaiModel": {
+      "noModels": "No hay modelos disponibles"
+    },
+    "global": {
+      "description": "Estos ajustes se aplican a todas las cámaras, a menos que se anulen en los ajustes específicos de cada cámara."
+    }
+  },
+  "globalConfig": {
+    "title": "Configuración global",
+    "description": "Configura los ajustes globales que se aplican a todas las cámaras, a menos que se sobrescriban.",
+    "toast": {
+      "success": "Ajustes globales guardados con éxito",
+      "error": "Error al guardar los ajustes globales",
+      "validationError": "Error de validación"
+    }
+  },
+  "cameraConfig": {
+    "title": "Configuración de cámara",
+    "description": "Configura los ajustes de cámaras individuales. Estos ajustes sobrescriben los valores globales predeterminados.",
+    "overriddenBadge": "Sobrescrito",
+    "resetToGlobal": "Restablecer al valor global",
+    "toast": {
+      "success": "Ajustes de cámara guardados con éxito",
+      "error": "Error al guardar los ajustes de cámara"
+    }
+  },
+  "toast": {
+    "success": "Ajustes guardados con éxito",
+    "applied": "Ajustes aplicados con éxito",
+    "successRestartRequired": "Ajustes guardados con éxito. Reinicia Frigate para aplicar los cambios.",
+    "error": "Error al guardar los ajustes",
+    "validationError": "Error de validación: {{message}}",
+    "resetSuccess": "Restablecido a los valores globales predeterminados",
+    "resetError": "Error al restablecer los ajustes",
+    "saveAllSuccess_one": "Se ha guardado {{count}} sección con éxito.",
+    "saveAllSuccess_many": "Se han guardado las {{count}} secciones con éxito.",
+    "saveAllSuccess_other": "Se han guardado {{count}} secciones con éxito.",
+    "saveAllPartial_one": "Se ha guardado {{successCount}} de {{totalCount}} sección. {{failCount}} ha fallado.",
+    "saveAllPartial_many": "Se han guardado {{successCount}} de {{totalCount}} secciones. {{failCount}} han fallado.",
+    "saveAllPartial_other": "Se han guardado {{successCount}} de {{totalCount}} secciones. {{failCount}} han fallado.",
+    "saveAllFailure": "Error al guardar todas las secciones."
+  },
+  "profiles": {
+    "title": "Perfiles",
+    "activeProfile": "Perfil activo",
+    "noActiveProfile": "Sin perfil activo",
+    "active": "Activo",
+    "activated": "Perfil '{{profile}}' activado",
+    "activateFailed": "Error al establecer el perfil",
+    "deactivated": "Perfil desactivado",
+    "noProfiles": "No hay perfiles definidos.",
+    "noOverrides": "Sin sobrescripciones",
+    "cameraCount_one": "{{count}} cámara",
+    "cameraCount_many": "{{count}} de cámaras",
+    "cameraCount_other": "{{count}} cámaras",
+    "columnCamera": "Cámara",
+    "columnOverrides": "Sobrescripciones del perfil",
+    "baseConfig": "Configuración base",
+    "addProfile": "Añadir perfil",
+    "newProfile": "Nuevo perfil",
+    "profileNamePlaceholder": "ej. Armado, Fuera de casa, Modo noche",
+    "friendlyNameLabel": "Nombre del perfil",
+    "profileIdLabel": "ID del perfil",
+    "profileIdDescription": "Identificador interno utilizado en la configuración y automatizaciones",
+    "nameInvalid": "Solo se permiten letras minúsculas, números y guiones bajos",
+    "nameDuplicate": "Ya existe un perfil con este nombre",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Debe tener al menos 2 caracteres",
+      "mustNotContainPeriod": "No debe contener puntos",
+      "alreadyExists": "Ya existe un perfil con este ID"
+    },
+    "renameProfile": "Renombrar perfil",
+    "renameSuccess": "Perfil renombrado a '{{profile}}'",
+    "enabledDescription": "Los perfiles están habilitados. Cree un nuevo perfil a continuación, navegue a una sección de configuración de cámara para realizar sus cambios y guarde para que estos surtan efecto.",
+    "disabledDescription": "Los perfiles le permiten definir conjuntos con nombre de anulaciones de configuración de la cámara (por ejemplo: armado, fuera, noche) que pueden activarse bajo demanda."
+  },
+  "go2rtcStreams": {
+    "renameStreamDesc": "Introduce un nuevo nombre para esta transmisión. Cambiar el nombre de una transmisión puede provocar fallos en las cámaras u otras transmisiones que hagan referencia a ella por su nombre.",
+    "addStreamDesc": "Introduce un nombre para la nueva transmisión. Este nombre se utilizará para hacer referencia a la transmisión en la configuración de su cámara.",
+    "description": "Gestione las configuraciones de transmisión de go2rtc para la retransmisión de cámaras. Cada transmisión tiene un nombre y una o más URL de origen.",
+    "deleteStreamConfirm": "¿Está seguro de que desea eliminar la transmisión \"{{streamName}}\"? Las cámaras que hagan referencia a esta transmisión podrían dejar de funcionar."
+  },
+  "configMessages": {
+    "birdseye": {
+      "objectsModeDetectDisabled": "Birdseye está configurado en modo 'objects', pero la detección de objetos está desactivada para esta cámara. La cámara no aparecerá en Birdseye."
+    },
+    "lpr": {
+      "globalDisabled": "El reconocimiento de matrículas no está habilitado a nivel global. Habilítelo en la configuración global para que funcione el reconocimiento de matrículas a nivel de cámara."
+    },
+    "audio": {
+      "noAudioRole": "Ninguna transmisión tiene definido el rol de audio. Debe habilitar el rol de audio para que funcione la detección de audio."
+    },
+    "faceRecognition": {
+      "personNotTracked": "El reconocimiento facial requiere que se realice el seguimiento del objeto 'person'. Asegúrese de que 'person' se encuentre en la lista de seguimiento de objetos."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "La detección de audio no está habilitada para esta cámara. La transcripción de audio requiere que la detección de audio esté activa."
+    },
+    "snapshots": {
+      "detectDisabled": "La detección de objetos está desactivada. Las instantáneas se generan a partir de los objetos rastreados y no se crearán."
+    },
+    "detectors": {
+      "mixedTypes": "Todos los detectores deben ser del mismo tipo. Retire los detectores existentes para utilizar un tipo diferente."
+    },
+    "review": {
+      "detectDisabled": "La detección de objetos está desactivada. Los elementos de revisión requieren objetos detectados para categorizar las alertas y detecciones."
+    }
+  },
+  "resetToDefaultDescription": "Esto restablecerá todos los ajustes de esta sección a sus valores predeterminados. Esta acción no se puede deshacer.",
+  "resetToGlobalDescription": "Esto restablecerá la configuración de esta sección a los valores predeterminados globales. Esta acción no se puede deshacer.",
+  "detectionModel": {
+    "plusActive": {
+      "description": "Esta instancia está ejecutando un modelo de Frigate+. Seleccione o cambie su modelo en la configuración de Frigate+."
     }
   }
 }

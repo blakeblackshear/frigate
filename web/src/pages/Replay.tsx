@@ -42,7 +42,9 @@ import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { ObjectType } from "@/types/ws";
+import { useJobStatus } from "@/api/ws";
 import WsMessageFeed from "@/components/ws/WsMessageFeed";
 import { ConfigSectionTemplate } from "@/components/config-form/sections/ConfigSectionTemplate";
 
@@ -53,6 +55,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import Logo from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { useConfigSchema } from "@/hooks/use-config-schema";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
@@ -63,6 +66,15 @@ type DebugReplayStatus = {
   start_time: number | null;
   end_time: number | null;
   live_ready: boolean;
+};
+
+type DebugReplayJobResults = {
+  current_step: "preparing_clip" | "starting_camera" | null;
+  progress_percent: number | null;
+  source_camera: string | null;
+  replay_camera_name: string | null;
+  start_ts: number | null;
+  end_ts: number | null;
 };
 
 type DebugOptions = {
@@ -105,8 +117,6 @@ const DEBUG_OPTION_I18N_KEY: Record<keyof DebugOptions, string> = {
   paths: "paths",
 };
 
-const REPLAY_INIT_SKELETON_TIMEOUT_MS = 8000;
-
 export default function Replay() {
   const { t } = useTranslation(["views/replay", "views/settings", "common"]);
   const navigate = useNavigate();
@@ -119,6 +129,9 @@ export default function Replay() {
   } = useSWR<DebugReplayStatus>("debug_replay/status", {
     refreshInterval: 1000,
   });
+  const { payload: replayJob } =
+    useJobStatus<DebugReplayJobResults>("debug_replay");
+  const configSchema = useConfigSchema();
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Refresh status immediately on mount to avoid showing "no session" briefly
@@ -129,12 +142,6 @@ export default function Replay() {
     };
     initializeStatus();
   }, [refreshStatus]);
-
-  useEffect(() => {
-    if (status?.live_ready) {
-      setShowReplayInitSkeleton(false);
-    }
-  }, [status?.live_ready]);
 
   const [options, setOptions] = useState<DebugOptions>(DEFAULT_OPTIONS);
   const [isStopping, setIsStopping] = useState(false);
@@ -160,11 +167,7 @@ export default function Replay() {
     axios
       .post("debug_replay/stop")
       .then(() => {
-        toast.success(t("dialog.toast.stopped"), {
-          position: "top-center",
-        });
         refreshStatus();
-        navigate("/review");
       })
       .catch((error) => {
         const errorMessage =
@@ -178,7 +181,7 @@ export default function Replay() {
       .finally(() => {
         setIsStopping(false);
       });
-  }, [navigate, refreshStatus, t]);
+  }, [refreshStatus, t]);
 
   // Camera activity for the replay camera
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -191,34 +194,9 @@ export default function Replay() {
 
   const { objects } = useCameraActivity(replayCameraConfig);
 
-  const [showReplayInitSkeleton, setShowReplayInitSkeleton] = useState(false);
-
   // debug draw
   const containerRef = useRef<HTMLDivElement>(null);
   const [debugDraw, setDebugDraw] = useState(false);
-
-  useEffect(() => {
-    if (!status?.active || !status.replay_camera) {
-      setShowReplayInitSkeleton(false);
-      return;
-    }
-
-    setShowReplayInitSkeleton(true);
-
-    const timeout = window.setTimeout(() => {
-      setShowReplayInitSkeleton(false);
-    }, REPLAY_INIT_SKELETON_TIMEOUT_MS);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [status?.active, status?.replay_camera]);
-
-  useEffect(() => {
-    if (status?.live_ready) {
-      setShowReplayInitSkeleton(false);
-    }
-  }, [status?.live_ready]);
 
   // Format time range for display
   const timeRangeDisplay = useMemo(() => {
@@ -237,8 +215,39 @@ export default function Replay() {
     );
   }
 
-  // No active session
-  if (!status?.active) {
+  // Startup error (job failed). Only show when status.active is also true so
+  // we don't surface stale failed jobs after a session ended cleanly.
+  if (replayJob?.status === "failed" && status?.active) {
+    return (
+      <div className="flex size-full flex-col items-center justify-center gap-4 p-8">
+        <Heading as="h2" className="text-center">
+          {t("page.startError.title")}
+        </Heading>
+        {replayJob.error_message && (
+          <p className="max-w-xl text-center text-sm text-muted-foreground">
+            {replayJob.error_message}
+          </p>
+        )}
+        <Button
+          variant="default"
+          onClick={() => {
+            axios
+              .post("debug_replay/stop")
+              .catch(() => {})
+              .finally(() => navigate("/review"));
+          }}
+        >
+          {t("page.startError.back")}
+        </Button>
+      </div>
+    );
+  }
+
+  // No active session. Also covers the brief window between the runner
+  // pushing job.status = "cancelled" via WS and the next SWR refresh
+  // flipping status.active to false — without this, render falls through
+  // to the full replay UI and you see a flash of it before stop completes.
+  if (!status?.active || replayJob?.status === "cancelled") {
     return (
       <div className="flex size-full flex-col items-center justify-center gap-4 p-8">
         <MdReplay className="size-12" />
@@ -250,6 +259,52 @@ export default function Replay() {
         </p>
         <Button variant="default" onClick={() => navigate("/review")}>
           {t("page.goToRecordings")}
+        </Button>
+      </div>
+    );
+  }
+
+  // Startup in progress (job is running). The session is active but the
+  // replay camera isn't ready yet; show progress / phase from the job.
+  const startupStep =
+    replayJob?.status === "running"
+      ? (replayJob.results?.current_step ?? null)
+      : null;
+  if (startupStep === "preparing_clip" || startupStep === "starting_camera") {
+    const phaseTitle =
+      startupStep === "preparing_clip"
+        ? t("page.preparingClip")
+        : t("page.startingCamera");
+    const progressPercent = replayJob?.results?.progress_percent ?? null;
+    const showProgressBar =
+      startupStep === "preparing_clip" && progressPercent != null;
+    return (
+      <div className="flex size-full flex-col items-center justify-center gap-4 p-8">
+        {showProgressBar ? (
+          <div className="flex w-64 flex-col items-center gap-2">
+            <Progress value={progressPercent ?? 0} />
+            <div className="text-xs text-muted-foreground">
+              {Math.round(progressPercent ?? 0)}%
+            </div>
+          </div>
+        ) : (
+          <ActivityIndicator className="size-8" />
+        )}
+        <Heading as="h3" className="text-center">
+          {phaseTitle}
+        </Heading>
+        {startupStep === "preparing_clip" && (
+          <p className="max-w-md text-center text-sm text-muted-foreground">
+            {t("page.preparingClipDesc")}
+          </p>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isStopping}
+          onClick={handleStop}
+        >
+          {t("button.cancel", { ns: "common" })}
         </Button>
       </div>
     );
@@ -345,27 +400,30 @@ export default function Replay() {
           ) : (
             status.replay_camera && (
               <div className="relative size-full min-h-10" ref={containerRef}>
-                <AutoUpdatingCameraImage
-                  className="size-full"
-                  cameraClasses="relative w-full h-full flex flex-col justify-start"
-                  searchParams={searchParams}
-                  camera={status.replay_camera}
-                  showFps={false}
-                />
-                {debugDraw && (
-                  <DebugDrawingLayer
-                    containerRef={containerRef}
-                    cameraWidth={
-                      config?.cameras?.[status.source_camera ?? ""]?.detect
-                        .width ?? 1280
-                    }
-                    cameraHeight={
-                      config?.cameras?.[status.source_camera ?? ""]?.detect
-                        .height ?? 720
-                    }
-                  />
-                )}
-                {showReplayInitSkeleton && (
+                {status.live_ready ? (
+                  <>
+                    <AutoUpdatingCameraImage
+                      className="size-full"
+                      cameraClasses="relative w-full h-full flex flex-col justify-start"
+                      searchParams={searchParams}
+                      camera={status.replay_camera}
+                      showFps={false}
+                    />
+                    {debugDraw && (
+                      <DebugDrawingLayer
+                        containerRef={containerRef}
+                        cameraWidth={
+                          config?.cameras?.[status.source_camera ?? ""]?.detect
+                            .width ?? 1280
+                        }
+                        cameraHeight={
+                          config?.cameras?.[status.source_camera ?? ""]?.detect
+                            .height ?? 720
+                        }
+                      />
+                    )}
+                  </>
+                ) : (
                   <div className="pointer-events-none absolute inset-0 z-10 size-full rounded-lg bg-background">
                     <Skeleton className="size-full rounded-lg" />
                     <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-2">
@@ -595,32 +653,38 @@ export default function Replay() {
               {t("page.configurationDesc")}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-6">
-            <ConfigSectionTemplate
-              sectionKey="motion"
-              level="replay"
-              cameraName={status.replay_camera ?? undefined}
-              skipSave
-              noStickyButtons
-              requiresRestart={false}
-              collapsible
-              defaultCollapsed={false}
-              showTitle
-              showOverrideIndicator={false}
-            />
-            <ConfigSectionTemplate
-              sectionKey="objects"
-              level="replay"
-              cameraName={status.replay_camera ?? undefined}
-              skipSave
-              noStickyButtons
-              requiresRestart={false}
-              collapsible
-              defaultCollapsed={false}
-              showTitle
-              showOverrideIndicator={false}
-            />
-          </div>
+          {configSchema == null ? (
+            <div className="flex h-40 items-center justify-center">
+              <ActivityIndicator />
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <ConfigSectionTemplate
+                sectionKey="motion"
+                level="replay"
+                cameraName={status.replay_camera ?? undefined}
+                skipSave
+                noStickyButtons
+                requiresRestart={false}
+                collapsible
+                defaultCollapsed={false}
+                showTitle
+                showOverrideIndicator={false}
+              />
+              <ConfigSectionTemplate
+                sectionKey="objects"
+                level="replay"
+                cameraName={status.replay_camera ?? undefined}
+                skipSave
+                noStickyButtons
+                requiresRestart={false}
+                collapsible
+                defaultCollapsed={false}
+                showTitle
+                showOverrideIndicator={false}
+              />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

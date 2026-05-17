@@ -322,7 +322,7 @@ export default function Step1NameAndDefine({
                       <FormLabel className="text-primary-variant">
                         {t("wizard.step1.classificationType")}
                       </FormLabel>
-                      <Popover modal={true}>
+                      <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             variant="ghost"
@@ -405,7 +405,7 @@ export default function Step1NameAndDefine({
                     ? t("wizard.step1.states")
                     : t("wizard.step1.classes")}
                 </FormLabel>
-                <Popover modal={true}>
+                <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                       <LuInfo className="size-3" />

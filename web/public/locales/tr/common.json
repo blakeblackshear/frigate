@@ -123,7 +123,19 @@
     "twoWayTalk": "Çift Yönlü Ses",
     "close": "Kapat",
     "delete": "Sil",
-    "continue": "Devam Et"
+    "continue": "Devam Et",
+    "add": "Ekle",
+    "applying": "Uygulanıyor…",
+    "undo": "Geri al",
+    "copiedToClipboard": "Panoya kopyaladı",
+    "modified": "Değiştirilmiş",
+    "overridden": "Üstüne yazılmış",
+    "resetToGlobal": "Genele sıfırla",
+    "resetToDefault": "Varsayılana sıfırla",
+    "saveAll": "Hepsini Kaydet",
+    "savingAll": "Hepsi Kaydediliyor…",
+    "undoAll": "Hepsini Geri Al",
+    "retry": "Yeniden dene"
   },
   "menu": {
     "systemLogs": "Sistem günlükleri",
@@ -179,7 +191,8 @@
       "bg": "Български (Bulgarca)",
       "gl": "Galego (Galiçyaca)",
       "id": "Bahasa Indonesia (Endonezce)",
-      "ur": "اردو (Urduca)"
+      "ur": "اردو (Urduca)",
+      "hr": "Hrvatski (Hırvatça)"
     },
     "withSystem": "Sistem",
     "theme": {
@@ -225,7 +238,10 @@
     "faceLibrary": "Yüz Veritabanı",
     "systemMetrics": "Sistem metrikleri",
     "uiPlayground": "UI Deneme Alanı",
-    "classification": "Sınıflandırma"
+    "classification": "Sınıflandırma",
+    "profiles": "Profiller",
+    "actions": "Eylemler",
+    "chat": "Sohbet"
   },
   "label": {
     "back": "Geri",
@@ -283,7 +299,8 @@
       "error": {
         "noMessage": "Yapılandırma değişiklikleri kaydedilemedi",
         "title": "Yapılandırma değişiklikleri kaydedilemedi: {{errorMessage}}"
-      }
+      },
+      "success": "Yapılandırma değişiklikleri kaydedildi."
     }
   },
   "selectItem": "{{item}} seçin",
@@ -305,5 +322,7 @@
   },
   "information": {
     "pixels": "{{area}}px"
-  }
+  },
+  "no_items": "Öge bulunmuyor",
+  "validation_errors": "Doğrulama Hataları"
 }

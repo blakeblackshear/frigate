@@ -15,7 +15,7 @@ TRIGGER_DIR = f"{CLIPS_DIR}/triggers"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
 REPLAY_CAMERA_PREFIX = "_replay_"
-REPLAY_DIR = os.path.join(CACHE_DIR, "replay")
+REPLAY_DIR = os.path.join(CLIPS_DIR, "replay")
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 

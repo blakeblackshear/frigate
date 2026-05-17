@@ -96,11 +96,46 @@ def version():
 
 
 @router.get("/stats", dependencies=[Depends(allow_any_authenticated())])
-def stats(request: Request):
-    return JSONResponse(content=request.app.stats_emitter.get_latest_stats())
+def stats(
+    request: Request,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
+    stats_data = request.app.stats_emitter.get_latest_stats()
+
+    # Admins see the full snapshot
+    if request.headers.get("remote-role") == "admin":
+        return JSONResponse(content=stats_data)
+
+    allowed_set = set(allowed_cameras)
+
+    # Shallow-copy so we don't mutate the cached stats history entry.
+    filtered = {**stats_data}
+
+    cameras = stats_data.get("cameras")
+    if cameras is not None:
+        filtered["cameras"] = {
+            name: data for name, data in cameras.items() if name in allowed_set
+        }
+
+    bandwidth = stats_data.get("bandwidth_usages")
+    if bandwidth is not None:
+        filtered["bandwidth_usages"] = {
+            name: data for name, data in bandwidth.items() if name in allowed_set
+        }
+
+    # cmdline can leak camera URLs/paths; strip but keep cpu/mem so
+    # client-side problem heuristics still work.
+    cpu_usages = stats_data.get("cpu_usages")
+    if cpu_usages is not None:
+        filtered["cpu_usages"] = {
+            pid: {k: v for k, v in usage.items() if k != "cmdline"}
+            for pid, usage in cpu_usages.items()
+        }
+
+    return JSONResponse(content=filtered)
 
 
-@router.get("/stats/history", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/stats/history", dependencies=[Depends(require_role(["admin"]))])
 def stats_history(request: Request, keys: str = None):
     if keys:
         keys = keys.split(",")
@@ -146,8 +181,13 @@ def config(request: Request):
         for name, detector in config_obj.detectors.items()
     }
 
-    # remove the mqtt password
+    # remove environment_vars for non-admin users
+    if request.headers.get("remote-role") != "admin":
+        config.pop("environment_vars", None)
+
+    # remove mqtt credentials
     config["mqtt"].pop("password", None)
+    config["mqtt"].pop("user", None)
 
     # remove the proxy secret
     config["proxy"].pop("auth_secret", None)
@@ -494,6 +534,40 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
+def _restore_masked_camera_paths(config_data: dict, config: FrigateConfig) -> None:
+    """Substitute incoming `*:*` masked credentials with the in-memory ones.
+
+    The /config response masks ffmpeg input credentials, so the settings UI
+    sends the masked path back when sibling fields (e.g. hwaccel_args) are
+    edited.  Without this we'd write `rtsp://*:*@host` into YAML and lose
+    the real credentials.  Mutates `config_data` in place.
+    """
+    cameras = config_data.get("cameras")
+    if not isinstance(cameras, dict):
+        return
+
+    for camera_name, camera_data in cameras.items():
+        if not isinstance(camera_data, dict):
+            continue
+        inputs = camera_data.get("ffmpeg", {}).get("inputs")
+        if not isinstance(inputs, list):
+            continue
+        existing = config.cameras.get(camera_name)
+        if existing is None:
+            continue
+        existing_paths = [inp.path for inp in existing.ffmpeg.inputs]
+        for index, input_obj in enumerate(inputs):
+            if not isinstance(input_obj, dict):
+                continue
+            path = input_obj.get("path")
+            if not isinstance(path, str):
+                continue
+            if ("://*:*@" in path or "user=*&password=*" in path) and index < len(
+                existing_paths
+            ):
+                input_obj["path"] = existing_paths[index]
+
+
 def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONResponse:
     """Apply config changes in-memory only, without writing to YAML.
 
@@ -504,6 +578,7 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
     try:
         updates = {}
         if body.config_data:
+            _restore_masked_camera_paths(body.config_data, request.app.frigate_config)
             updates = flatten_config_data(body.config_data)
             updates = {k: ("" if v is None else v) for k, v in updates.items()}
 
@@ -610,6 +685,9 @@ def config_set(request: Request, body: AppConfigSetBody):
                 if query_string:
                     updates = process_config_query_string(query_string)
                 elif body.config_data:
+                    _restore_masked_camera_paths(
+                        body.config_data, request.app.frigate_config
+                    )
                     updates = flatten_config_data(body.config_data)
                     # Convert None values to empty strings for deletion (e.g., when deleting masks)
                     updates = {k: ("" if v is None else v) for k, v in updates.items()}
@@ -792,7 +870,7 @@ def nvinfo():
 @router.get(
     "/logs/{service}",
     tags=[Tags.logs],
-    dependencies=[Depends(allow_any_authenticated())],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 async def logs(
     service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
@@ -997,12 +1075,27 @@ def get_media_sync_status(job_id: str):
 
 
 @router.get("/labels", dependencies=[Depends(allow_any_authenticated())])
-def get_labels(camera: str = ""):
+def get_labels(
+    camera: str = "",
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
         if camera:
+            if camera not in allowed_cameras:
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Access denied to camera '{camera}'",
+                    },
+                    status_code=403,
+                )
             events = Event.select(Event.label).where(Event.camera == camera).distinct()
         else:
-            events = Event.select(Event.label).distinct()
+            events = (
+                Event.select(Event.label)
+                .where(Event.camera << allowed_cameras)
+                .distinct()
+            )
     except Exception as e:
         logger.error(e)
         return JSONResponse(
@@ -1015,9 +1108,16 @@ def get_labels(camera: str = ""):
 
 
 @router.get("/sub_labels", dependencies=[Depends(allow_any_authenticated())])
-def get_sub_labels(split_joined: Optional[int] = None):
+def get_sub_labels(
+    split_joined: Optional[int] = None,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
-        events = Event.select(Event.sub_label).distinct()
+        events = (
+            Event.select(Event.sub_label)
+            .where(Event.camera << allowed_cameras)
+            .distinct()
+        )
     except Exception:
         return JSONResponse(
             content=({"success": False, "message": "Failed to get sub_labels"}),
