@@ -1173,10 +1173,11 @@
       "noModelSelected": "Select a Frigate+ model"
     },
     "toast": {
-      "saveSuccess": "Settings saved — restart Frigate to apply",
+      "saveSuccess": "Detectors and model settings saved. Restart Frigate to apply changes.",
       "saveError": "Failed to save detector and model settings"
     },
-    "unsavedChanges": "Unsaved detector and model changes"
+    "unsavedChanges": "Unsaved detector and model changes",
+    "restartRequired": "Restart required (detector or model changed)"
   },
   "triggers": {
     "documentTitle": "Triggers",

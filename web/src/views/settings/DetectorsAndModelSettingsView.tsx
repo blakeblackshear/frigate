@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { LuExternalLink, LuFilter } from "react-icons/lu";
@@ -65,6 +72,39 @@ type FrigatePlusModel = {
   height: number;
 };
 
+const TYPE_MODEL_DEFAULTS: Record<string, ConfigSectionData> = {
+  cpu: {
+    path: "/cpu_model.tflite",
+    labelmap_path: "/labelmap.txt",
+    width: 320,
+    height: 320,
+    input_tensor: "nhwc",
+    input_pixel_format: "rgb",
+    input_dtype: "int",
+    model_type: "ssd",
+  },
+  edgetpu: {
+    path: "/edgetpu_model.tflite",
+    labelmap_path: "/labelmap.txt",
+    width: 320,
+    height: 320,
+    input_tensor: "nhwc",
+    input_pixel_format: "rgb",
+    input_dtype: "int",
+    model_type: "ssd",
+  },
+  openvino: {
+    path: "/openvino-model/ssdlite_mobilenet_v2.xml",
+    labelmap_path: "/openvino-model/coco_91cl_bkgr.txt",
+    width: 300,
+    height: 300,
+    input_tensor: "nhwc",
+    input_pixel_format: "bgr",
+    input_dtype: "int",
+    model_type: "ssd",
+  },
+};
+
 const STATUS_BAR_KEY = "detectors_and_model";
 
 const deriveInitialState = (config: FrigateConfig): PageState => {
@@ -73,9 +113,7 @@ const deriveInitialState = (config: FrigateConfig): PageState => {
   const plusEnabled = Boolean(config.plus?.enabled);
 
   // The reliable signal that a Plus model is currently active is the
-  // `model.plus.id` metadata — the backend resolves `plus://...` paths to a
-  // local cache path at runtime, so `model.path` can't be relied on for
-  // detection.
+  // `model.plus.id` metadata
   let modelTab: ModelTab;
   if (plusModelId) {
     modelTab = "plus";
@@ -177,6 +215,41 @@ export default function DetectorsAndModelSettingsView({
     const first = values[0] as { type?: string } | undefined;
     return first?.type;
   }, [state]);
+
+  // fill in defaults when detector type changes
+  const prevDetectorTypeRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const newType = currentDetectorType;
+    const prevType = prevDetectorTypeRef.current;
+    prevDetectorTypeRef.current = newType;
+    if (prevType === undefined || prevType === newType) return;
+    if (!newType || !(newType in TYPE_MODEL_DEFAULTS)) return;
+
+    const defaults = TYPE_MODEL_DEFAULTS[newType];
+    setChildPending((prev) => {
+      const next: Record<string, ConfigSectionData> = {
+        ...prev,
+        model: defaults,
+      };
+      if (newType === "openvino") {
+        const detectorsCurrent = (prev.detectors ?? state?.detectors ?? {}) as {
+          [key: string]: { device?: string };
+        };
+        const entries = Object.entries(detectorsCurrent);
+        if (entries.length > 0) {
+          const [firstKey, firstValue] = entries[0];
+          if (!firstValue?.device) {
+            next.detectors = {
+              ...detectorsCurrent,
+              [firstKey]: { ...firstValue, device: "CPU" },
+            } as ConfigSectionData;
+          }
+        }
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDetectorType]);
 
   const isModelCompatible = useCallback(
     (model: FrigatePlusModel) =>
@@ -294,17 +367,38 @@ export default function DetectorsAndModelSettingsView({
         ? { path: `plus://${state.plusModelId}` }
         : state.customModel;
 
+    const detectorKeysChanged =
+      JSON.stringify(Object.keys(state.detectors).sort()) !==
+      JSON.stringify(Object.keys(snapshot.detectors).sort());
+
     setIsSaving(true);
     try {
       if (tabChanged) {
-        await axios.put("config/set", {
-          requires_restart: 0,
-          config_data: { model: null },
-        });
+        // Best-effort cleanup of the prior model's fields
+        try {
+          await axios.put("config/set", {
+            requires_restart: 0,
+            config_data: { model: null },
+          });
+        } catch {
+          // intentional no-op — see comment above
+        }
+      }
+
+      if (detectorKeysChanged) {
+        // Best-effort cleanup
+        try {
+          await axios.put("config/set", {
+            requires_restart: 0,
+            config_data: { detectors: null },
+          });
+        } catch {
+          // intentional no-op — see comment above
+        }
       }
 
       await axios.put("config/set", {
-        requires_restart: 1,
+        requires_restart: 0,
         config_data: {
           detectors: state.detectors,
           model: modelPayload,
@@ -318,6 +412,13 @@ export default function DetectorsAndModelSettingsView({
       setSnapshot({ ...state });
       setChildPending({});
       setResetKey((k) => k + 1);
+
+      addMessage(
+        "detectors_and_model_restart",
+        t("detectorsAndModel.restartRequired"),
+        undefined,
+        "detectors_and_model_restart",
+      );
 
       toast.success(t("detectorsAndModel.toast.saveSuccess"), {
         position: "top-center",
@@ -342,7 +443,7 @@ export default function DetectorsAndModelSettingsView({
     } finally {
       setIsSaving(false);
     }
-  }, [state, snapshot, globalMutate, t]);
+  }, [state, snapshot, globalMutate, addMessage, t]);
 
   const onUndo = useCallback(() => {
     if (snapshot) {
