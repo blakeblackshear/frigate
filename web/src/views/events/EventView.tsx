@@ -49,6 +49,7 @@ import { FiMoreVertical } from "react-icons/fi";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import useSWR from "swr";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
+import { baseUrl } from "@/api/baseUrl";
 import { Button } from "@/components/ui/button";
 import BlurredIconButton from "@/components/button/BlurredIconButton";
 import {
@@ -284,7 +285,11 @@ export default function EventView({
               {
                 position: "top-center",
                 action: (
-                  <a href="/export" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`${baseUrl}export`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button>
                       {t("export.toast.view", { ns: "components/dialog" })}
                     </Button>
