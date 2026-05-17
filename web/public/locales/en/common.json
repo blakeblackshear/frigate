@@ -21,6 +21,7 @@
     "1hour": "1 hour",
     "12hours": "12 hours",
     "24hours": "24 hours",
+    "custom": "Custom\u2026",
     "pm": "pm",
     "am": "am",
     "yr": "{{time}}yr",

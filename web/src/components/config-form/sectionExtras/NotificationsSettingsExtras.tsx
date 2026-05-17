@@ -50,6 +50,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
+import CustomSuspensionDialog from "@/components/overlay/dialog/CustomSuspensionDialog";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { cn } from "@/lib/utils";
 import cloneDeep from "lodash/cloneDeep";
@@ -738,13 +739,24 @@ export function CameraNotificationSwitch({
     }
   }, [notificationSuspendUntil, notificationState]);
 
+  const [customDialogOpen, setCustomDialogOpen] = useState(false);
+
   const handleSuspend = (duration: string) => {
+    if (duration === "custom") {
+      setCustomDialogOpen(true);
+      return;
+    }
     setIsSuspended(true);
     if (duration == "off") {
       sendNotification("OFF");
     } else {
       sendNotificationSuspend(parseInt(duration));
     }
+  };
+
+  const handleCustomSuspend = (totalMinutes: number) => {
+    setIsSuspended(true);
+    sendNotificationSuspend(totalMinutes);
   };
 
   const handleCancelSuspension = () => {
@@ -829,6 +841,9 @@ export function CameraNotificationSwitch({
             <SelectItem value="1440">
               {t("notification.suspendTime.24hours")}
             </SelectItem>
+            <SelectItem value="custom">
+              {t("notification.suspendTime.custom")}
+            </SelectItem>
             <SelectItem value="off">
               {t("notification.suspendTime.untilRestart")}
             </SelectItem>
@@ -843,6 +858,13 @@ export function CameraNotificationSwitch({
           {t("notification.cancelSuspension")}
         </Button>
       )}
+
+      <CustomSuspensionDialog
+        open={customDialogOpen}
+        onOpenChange={setCustomDialogOpen}
+        onConfirm={handleCustomSuspend}
+        config={config}
+      />
     </div>
   );
 }
