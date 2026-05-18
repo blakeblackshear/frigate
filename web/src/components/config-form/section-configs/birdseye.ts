@@ -56,6 +56,7 @@ const birdseye: SectionConfigOverrides = {
     uiSchema: {
       mode: {
         "ui:size": "xs",
+        "ui:after": { render: "BirdseyeCameraReorder" },
       },
     },
   },

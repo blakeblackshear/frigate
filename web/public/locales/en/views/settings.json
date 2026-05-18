@@ -1690,7 +1690,9 @@
     "cameraOrder": {
       "label": "Camera order",
       "description": "Drag cameras to set their order in the Birdseye layout.",
-      "reorderHandle": "Drag to reorder"
+      "reorderHandle": "Drag to reorder",
+      "saving": "Saving…",
+      "saved": "Saved"
     }
   },
   "retainMode": {
