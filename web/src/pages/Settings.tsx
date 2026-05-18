@@ -90,9 +90,12 @@ import { RJSFSchema } from "@rjsf/utils";
 import {
   buildConfigDataForPath,
   flattenOverrides,
+  getSectionConfig,
   parseProfileFromSectionPath,
   prepareSectionSavePayload,
   PROFILE_ELIGIBLE_SECTIONS,
+  resolveHiddenFieldEntries,
+  sanitizeSectionData,
 } from "@/utils/configUtil";
 import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
@@ -786,24 +789,22 @@ export default function Settings() {
     [],
   );
 
-  // Show save/undo all buttons only when changes span multiple sections
-  // or the single changed section is not the one currently being viewed
+  // Show save/undo all buttons only when at least one pending change lives
+  // outside the currently visible page. Map each pending key to its menu key
+  // (e.g. both `detectors` and `model` collapse to `systemDetectorsAndModel`)
+  // so a composite page with two pending config-sections still counts as one.
   const showSaveAllButtons = useMemo(() => {
     const pendingKeys = Object.keys(pendingDataBySection);
     if (pendingKeys.length === 0) return false;
-    if (pendingKeys.length >= 2) return true;
 
-    // Exactly one pending section — check if it matches the current view
-    const key = pendingKeys[0];
-    const menuKey = pendingKeyToMenuKey(key);
-    if (menuKey !== pageToggle) return true;
-
-    // For camera-scoped keys, also check if the camera matches
-    if (key.includes("::")) {
-      const cameraName = key.slice(0, key.indexOf("::"));
-      return cameraName !== selectedCamera;
+    for (const key of pendingKeys) {
+      const menuKey = pendingKeyToMenuKey(key);
+      if (menuKey !== pageToggle) return true;
+      if (key.includes("::")) {
+        const cameraName = key.slice(0, key.indexOf("::"));
+        if (cameraName !== selectedCamera) return true;
+      }
     }
-
     return false;
   }, [pendingDataBySection, pendingKeyToMenuKey, pageToggle, selectedCamera]);
 
@@ -821,8 +822,119 @@ export default function Settings() {
     let failCount = 0;
     let anyNeedsRestart = false;
     const savedKeys: string[] = [];
+    // Pending entries that have been successfully PUT — cleared in one batch
+    // after `mutate("config")` resolves
+    const keysToClear: string[] = [];
 
-    const pendingKeys = Object.keys(pendingDataBySection);
+    // `detectors` and `model` are owned by DetectorsAndModelSettingsView,
+    // which saves them atomically (single combined PUT with a pre-clear when
+    // detector keys change or the Plus/Custom tab flips). Doing the same here
+    // keeps Save All consistent with the page's own Save button
+    const hasPendingDetectors = "detectors" in pendingDataBySection;
+    const hasPendingModel = "model" in pendingDataBySection;
+    if (hasPendingDetectors || hasPendingModel) {
+      try {
+        const pendingDetectors = hasPendingDetectors
+          ? pendingDataBySection.detectors
+          : undefined;
+        const pendingModel = hasPendingModel
+          ? pendingDataBySection.model
+          : undefined;
+
+        // Hidden-field lists come from the section configs themselves so
+        // they stay in sync with what the embedded forms strip on render
+        const detectorHiddenFields = resolveHiddenFieldEntries(
+          getSectionConfig("detectors", "global").hiddenFields,
+          config,
+        );
+        const modelHiddenFields = resolveHiddenFieldEntries(
+          getSectionConfig("model", "global").hiddenFields,
+          config,
+        );
+        const sanitizedDetectors =
+          pendingDetectors !== undefined
+            ? sanitizeSectionData(pendingDetectors, detectorHiddenFields)
+            : undefined;
+        const sanitizedModel =
+          pendingModel !== undefined
+            ? sanitizeSectionData(pendingModel, modelHiddenFields)
+            : undefined;
+
+        // Pre-clear conditions: detector keys differ from saved config (rename
+        // or add/remove), OR the model save flips between Plus and Custom modes
+        let detectorKeysChanged = false;
+        if (sanitizedDetectors && typeof sanitizedDetectors === "object") {
+          const pendingKeySet = Object.keys(
+            sanitizedDetectors as JsonObject,
+          ).sort();
+          const savedKeySet = Object.keys(config.detectors ?? {}).sort();
+          detectorKeysChanged =
+            JSON.stringify(pendingKeySet) !== JSON.stringify(savedKeySet);
+        }
+        let modelTabChanged = false;
+        if (sanitizedModel && typeof sanitizedModel === "object") {
+          const newPath = (sanitizedModel as { path?: string }).path;
+          const oldPath = config.model?.path;
+          const newIsPlus =
+            typeof newPath === "string" && newPath.startsWith("plus://");
+          const oldIsPlus =
+            typeof oldPath === "string" && oldPath.startsWith("plus://");
+          modelTabChanged = newIsPlus !== oldIsPlus;
+        }
+
+        if (detectorKeysChanged || modelTabChanged) {
+          try {
+            await axios.put("config/set", {
+              requires_restart: 0,
+              config_data: { detectors: null, model: null },
+            });
+          } catch {
+            // best-effort cleanup; the merge-write below will surface any
+            // real error.
+          }
+        }
+
+        const combinedConfigData: Record<string, unknown> = {};
+        if (sanitizedDetectors !== undefined) {
+          combinedConfigData.detectors = sanitizedDetectors;
+        }
+        if (sanitizedModel !== undefined) {
+          combinedConfigData.model = sanitizedModel;
+        }
+
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: combinedConfigData,
+        });
+
+        if (hasPendingDetectors) {
+          keysToClear.push("detectors");
+          savedKeys.push("detectors");
+        }
+        if (hasPendingModel) {
+          keysToClear.push("model");
+          savedKeys.push("model");
+        }
+
+        if (hasPendingDetectors || hasPendingModel) {
+          successCount++;
+          anyNeedsRestart = true;
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(
+          "Save All – error saving detectors/model atomically",
+          error,
+        );
+        if (hasPendingDetectors || hasPendingModel) {
+          failCount++;
+        }
+      }
+    }
+
+    const pendingKeys = Object.keys(pendingDataBySection).filter(
+      (key) => key !== "detectors" && key !== "model",
+    );
 
     for (const key of pendingKeys) {
       const pendingData = pendingDataBySection[key];
@@ -836,11 +948,8 @@ export default function Settings() {
         });
 
         if (!payload) {
-          // No actual overrides — clear the pending entry
-          setPendingDataBySection((prev) => {
-            const { [key]: _, ...rest } = prev;
-            return rest;
-          });
+          // No actual overrides — schedule the pending entry for clearing
+          keysToClear.push(key);
           successCount++;
           continue;
         }
@@ -859,11 +968,8 @@ export default function Settings() {
           anyNeedsRestart = true;
         }
 
-        // Clear pending entry on success
-        setPendingDataBySection((prev) => {
-          const { [key]: _, ...rest } = prev;
-          return rest;
-        });
+        // Defer clearing the pending entry until after mutate("config") resolves
+        keysToClear.push(key);
         savedKeys.push(key);
         successCount++;
       } catch (error) {
@@ -873,9 +979,21 @@ export default function Settings() {
       }
     }
 
-    // Refresh config from server once
+    // Refresh config from server once — must complete before clearing the
+    // pending entries so consumers don't observe a moment where pending is
+    // empty AND config is still stale
     await mutate("config");
     mutate("config/raw_paths");
+
+    if (keysToClear.length > 0) {
+      setPendingDataBySection((prev) => {
+        const next = { ...prev };
+        for (const key of keysToClear) {
+          delete next[key];
+        }
+        return next;
+      });
+    }
 
     // Clear hasChanges in sidebar for all successfully saved sections
     if (savedKeys.length > 0) {
@@ -900,11 +1018,12 @@ export default function Settings() {
     if (failCount === 0) {
       if (anyNeedsRestart) {
         toast.success(
-          t("toast.saveAllSuccess", {
+          t("toast.saveAllSuccessRestartRequired", {
             ns: "views/settings",
             count: successCount,
           }),
           {
+            duration: 10000,
             action: (
               <a onClick={() => setRestartDialogOpen(true)}>
                 <Button>
