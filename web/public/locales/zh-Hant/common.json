@@ -39,8 +39,8 @@
       "24hour": "M 月 d 日 HH:mm:ss"
     },
     "formattedTimestamp2": {
-      "12hour": "MM/dd h:mm:ssa",
-      "24hour": "d MMM HH:mm:ss"
+      "12hour": "MM月dd日 ah:mm:ss",
+      "24hour": "MM月dd日 HH:mm:ss"
     },
     "formattedTimestampHourMinute": {
       "12hour": "a h:mm",
@@ -69,7 +69,14 @@
     },
     "inProgress": "處理中",
     "invalidStartTime": "無效的起始時間",
-    "invalidEndTime": "無效的結束時間"
+    "invalidEndTime": "無效的結束時間",
+    "never": "從不",
+    "year_one": "{{time}} 年",
+    "month_one": "{{time}} 個月",
+    "day_one": "{{time}} 天",
+    "hour_one": "{{time}} 小時",
+    "minute_one": "{{time}} 分鐘",
+    "second_one": "{{time}} 秒"
   },
   "unit": {
     "speed": {
@@ -95,7 +102,8 @@
     "show": "顯示{{item}}",
     "ID": "ID",
     "none": "無",
-    "all": "全部"
+    "all": "全部",
+    "other": "其他"
   },
   "button": {
     "apply": "套用",
@@ -133,7 +141,19 @@
     "export": "匯出",
     "deleteNow": "立即刪除",
     "next": "繼續",
-    "continue": "繼續"
+    "continue": "繼續",
+    "add": "新增",
+    "applying": "應用中…",
+    "undo": "撤銷",
+    "copiedToClipboard": "已複製到剪貼簿",
+    "modified": "已修改",
+    "overridden": "已覆蓋",
+    "resetToGlobal": "重設為全域性",
+    "resetToDefault": "重設為預設",
+    "saveAll": "儲存全部",
+    "savingAll": "儲存全部中…",
+    "undoAll": "撤銷全部",
+    "retry": "重試"
   },
   "menu": {
     "system": "系統",
@@ -185,7 +205,9 @@
       "bg": "Български (保加利亞文)",
       "gl": "Galego (加利西亞文)",
       "id": "Bahasa Indonesia (印尼文)",
-      "ur": "اردو (烏爾都文)"
+      "ur": "اردو (烏爾都文)",
+      "hr": "克羅埃西亞語 (Hrvatski)",
+      "bs": "Bosanski (波士尼亞語)"
     },
     "appearance": "外觀",
     "darkMode": {
@@ -217,7 +239,8 @@
       "allCameras": "所有鏡頭",
       "cameras": {
         "title": "鏡頭",
-        "count_other": "{{count}} 個鏡頭"
+        "count_other": "{{count}} 個鏡頭",
+        "count_one": "{{count}} 個攝影機"
       }
     },
     "review": "審核",
@@ -233,7 +256,11 @@
       "logout": "登出",
       "setPassword": "設定密碼"
     },
-    "classification": "標籤分類"
+    "classification": "標籤分類",
+    "profiles": "設定檔",
+    "actions": "操作",
+    "features": "功能",
+    "chat": "聊天"
   },
   "toast": {
     "copyUrlToClipboard": "已複製連結至剪貼簿。",
@@ -242,7 +269,8 @@
       "error": {
         "title": "保存設定變更失敗：{{errorMessage}}",
         "noMessage": "保存設定變更失敗"
-      }
+      },
+      "success": "成功儲存設定檔。"
     }
   },
   "role": {
@@ -278,13 +306,15 @@
   "list": {
     "two": "{{0}}和{{1}}",
     "many": "{{items}}和{{last}}",
-    "separatorWithSpace": ", "
+    "separatorWithSpace": "、 "
   },
   "field": {
     "optional": "可選的",
     "internalID": "在Frigate 設定檔和資料庫使用的內部ID"
   },
   "information": {
-    "pixels": "{{area}}px"
-  }
+    "pixels": "{{area}} 像素"
+  },
+  "no_items": "沒有項目",
+  "validation_errors": "驗證錯誤"
 }
