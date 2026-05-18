@@ -4,7 +4,7 @@ import base64
 import io
 import json
 import logging
-from typing import Any, AsyncGenerator, Optional
+from typing import Any, AsyncGenerator, Optional, cast
 
 import httpx
 import numpy as np
@@ -88,14 +88,14 @@ def _fetch_llama_props(base_url: str, model: str) -> dict[str, Any]:
             timeout=10,
         )
         response.raise_for_status()
-        return response.json()
+        return cast(dict[str, Any], response.json())
     except Exception:
         response = requests.get(
             f"{base_url}/upstream/{model}/props",
             timeout=10,
         )
         response.raise_for_status()
-        return response.json()
+        return cast(dict[str, Any], response.json())
 
 
 def _to_jpeg(img_bytes: bytes) -> bytes | None:
