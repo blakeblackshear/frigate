@@ -2,16 +2,13 @@
   "description": {
     "addFace": "上傳您的第一張照片至臉部資料庫以新增一個新的集合。",
     "placeholder": "輸入此集合的名稱",
-    "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。"
+    "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。",
+    "nameCannotContainHash": "名稱中不允許包含“#”符號。"
   },
   "details": {
-    "person": "人",
     "timestamp": "時間戳",
     "unknown": "未知",
-    "subLabelScore": "子標籤分數",
-    "scoreInfo": "子標籤分數是所有已辨識的人臉信心值的加權平均，因此可能與截圖上顯示的分數不同。",
-    "face": "人臉詳細資料",
-    "faceDesc": "組成此人臉的追蹤物件的詳細資料"
+    "scoreInfo": "子標籤分數是所有已辨識的人臉信心值的加權平均，因此可能與截圖上顯示的分數不同。"
   },
   "documentTitle": "人臉資料庫 - Frigate",
   "uploadFaceImage": {
@@ -19,10 +16,7 @@
     "desc": "上傳圖片以掃描人臉並將其加入 {{pageToggle}}"
   },
   "collections": "集合",
-  "selectItem": "選擇 {{item}}",
   "createFaceLibrary": {
-    "title": "建立集合",
-    "desc": "建立新集合",
     "new": "建立新人臉",
     "nextSteps": "為了建立可靠的模型基底：<li>在最近的識別紀錄分頁中選擇並針對每個偵測到人的圖片進行訓練。</li><li>請優先使用正臉照以獲得最佳效果，請盡量避免使用從側面或有傾斜角度的人臉</li></ul>"
   },
@@ -38,16 +32,20 @@
     "title": "最近的識別紀錄",
     "aria": "選擇最近的識別紀錄",
     "empty": "最近沒有辨識人臉的操作",
-    "titleShort": "最近"
+    "titleShort": "最近",
+    "emptyNoLibrary": {
+      "title": "上傳一張人臉",
+      "description": "您必須先在資料庫中加入至少一張人臉，才能使用人臉辨識功能。"
+    }
   },
-  "selectFace": "選擇人臉",
   "deleteFaceLibrary": {
     "title": "刪除名稱",
     "desc": "你確定要刪除 {{name}} 集合嗎？這會刪除所有有關的人臉資料。"
   },
   "deleteFaceAttempts": {
     "title": "刪除人臉",
-    "desc_other": "你確定要刪除 {{count}} 個人臉嗎？這個步驟無法復原。"
+    "desc_other": "你確定要刪除 {{count}} 個人臉嗎？這個步驟無法復原。",
+    "desc_one": "您確定要刪除 {{count}} 張人臉嗎？此操作無法復原。"
   },
   "renameFace": {
     "title": "重新命名人臉",
@@ -70,8 +68,6 @@
     "maxSize": "最大檔案大小：{{size}}MB"
   },
   "nofaces": "沒有可用的人臉",
-  "pixels": "{{area}}px",
-  "readTheDocs": "閱讀文件",
   "trainFaceAs": "將人臉訓練為：",
   "trainFace": "訓練人臉",
   "toast": {
@@ -82,7 +78,11 @@
       "deletedName_other": "{{count}} 個人臉已成功刪除。",
       "renamedFace": "成功將人臉重新命名為 {{name}}",
       "trainedFace": "成功訓練人臉。",
-      "updatedFaceScore": "成功更新人臉分數{{name}}({{score}})。"
+      "updatedFaceScore": "成功更新人臉分數{{name}}({{score}})。",
+      "reclassifiedFace": "重新分類人臉成功。",
+      "deletedFace_one": "已成功刪除 {{count}} 張人臉。",
+      "deletedName_zero": "已成功刪除空白集合。",
+      "deletedName_one": "已成功刪除 {{count}} 張人臉。"
     },
     "error": {
       "uploadingImageFailed": "上傳圖片失敗：{{errorMessage}}",
@@ -91,7 +91,10 @@
       "deleteNameFailed": "刪除名稱失敗：{{errorMessage}}",
       "renameFaceFailed": "重新命名人臉失敗：{{errorMessage}}",
       "trainFailed": "訓練失敗：{{errorMessage}}",
-      "updateFaceScoreFailed": "更新人臉分數失敗：{{errorMessage}}"
+      "updateFaceScoreFailed": "更新人臉分數失敗：{{errorMessage}}",
+      "reclassifyFailed": "重新分類人臉失敗：{{errorMessage}}"
     }
-  }
+  },
+  "reclassifyFaceAs": "將人臉重新分類為：",
+  "reclassifyFace": "重新分類人臉"
 }

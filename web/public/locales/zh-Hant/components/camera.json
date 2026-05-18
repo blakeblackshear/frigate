@@ -35,8 +35,7 @@
         "audioIsUnavailable": "此串流不提供音訊",
         "audio": {
           "tips": {
-            "title": "此串流必須從你的鏡頭輸出音訊並在 go2rtc 中設定。",
-            "document": "請參照文件 "
+            "title": "此串流必須從你的鏡頭輸出音訊並在 go2rtc 中設定。"
           }
         },
         "stream": "串流",
@@ -82,6 +81,7 @@
     "zones": "區域",
     "mask": "遮罩",
     "motion": "移動",
-    "regions": "區塊"
+    "regions": "區塊",
+    "paths": "行動軌跡"
   }
 }

@@ -1,6 +1,8 @@
 {
-  "documentTitle": "即時畫面 - Frigate",
-  "documentTitle.withCamera": "{{camera}} - 即時畫面 - Frigate",
+  "documentTitle": {
+    "withCamera": "{{camera}} - 即時畫面 - Frigate",
+    "default": "即時監控 - Frigate"
+  },
   "lowBandwidthMode": "低流量模式",
   "twoWayTalk": {
     "enable": "啟用雙向通話",
@@ -11,7 +13,8 @@
       "clickMove": {
         "label": "點擊畫面以置中鏡頭",
         "enable": "啟用點擊移動",
-        "disable": "停用點擊移動"
+        "disable": "停用點擊移動",
+        "enableWithZoom": "開啟點選移動 / 拖動縮放功能"
       },
       "left": {
         "label": "向左移動 PTZ 鏡頭"
@@ -67,7 +70,8 @@
   },
   "recording": {
     "enable": "啟用錄影",
-    "disable": "停用錄影"
+    "disable": "停用錄影",
+    "disabledInConfig": "必須先在該攝影機的設定中開啟錄製功能。"
   },
   "snapshots": {
     "enable": "啟用截圖",
@@ -115,15 +119,13 @@
     "title": "串流",
     "audio": {
       "tips": {
-        "title": "此串流的音訊必須要從鏡頭輸出並且在 go2rtc 中被設定。",
-        "documentation": "閱讀文件 "
+        "title": "此串流的音訊必須要從鏡頭輸出並且在 go2rtc 中被設定。"
       },
       "available": "此串流支援音訊",
       "unavailable": "此串流不支援音訊"
     },
     "twoWayTalk": {
       "tips": "你的裝置被需支援此功能，並且需設定 WebRTC 以使用雙向通話。",
-      "tips.documentation": "閱讀文件 ",
       "available": "此串流支援雙向通話",
       "unavailable": "此串流不支援雙向通話"
     },
@@ -134,6 +136,9 @@
     "playInBackground": {
       "label": "背景播放",
       "tips": "啟用此選項以在播放器被隱藏時繼續播放串流。"
+    },
+    "debug": {
+      "picker": "除錯模式下無法切換影片流。除錯將始終使用偵測（detect）功能的影片流。"
     }
   },
   "cameraSettings": {
@@ -143,7 +148,8 @@
     "recording": "錄影",
     "snapshots": "截圖",
     "audioDetection": "音訊偵測",
-    "autotracking": "自動追蹤"
+    "autotracking": "自動追蹤",
+    "transcription": "音訊轉錄"
   },
   "history": {
     "label": "顯示歷史影像"
@@ -153,8 +159,7 @@
       "all": "全部",
       "motion": "移動",
       "active_objects": "活躍物件"
-    },
-    "notAllTips": "你的 {{source}} 錄影保留設定為 <code> {{effectiveRetainMode}} 模式</code>，因此此應需錄影僅會保留 {{effectiveRetainModeName}} 片段。"
+    }
   },
   "editLayout": {
     "label": "編輯版面配置",
@@ -172,5 +177,24 @@
     "noVideoSource": "沒有可用的影片資源以擷取快照。",
     "captureFailed": "快照擷取失敗。",
     "downloadStarted": "已開始下載快照。"
+  },
+  "noCameras": {
+    "title": "未設定攝影機",
+    "description": "準備開始連線攝影機至 Frigate 。",
+    "buttonText": "新增攝影機",
+    "restricted": {
+      "title": "無可用攝影機",
+      "description": "你沒有權限檢視此分組中的任何攝影機。"
+    },
+    "default": {
+      "title": "沒有配置攝影機",
+      "description": "現在就將攝影機接入到 Frigate 吧。",
+      "buttonText": "新增攝影機"
+    },
+    "group": {
+      "title": "攝影機組目前為空",
+      "description": "該攝影機組未分配或啟動了攝影機。",
+      "buttonText": "管理攝影機組"
+    }
   }
 }
