@@ -413,19 +413,20 @@ def events_explore(
     # Single query: per-label COUNT and top-N ranking by start_time computed
     # via window functions in a CTE, then filtered to rn <= limit. Replaces
     # the previous loop that issued 2 queries per distinct label.
-    event_count = fn.COUNT(Event.id).over(partition_by=[Event.label]).alias("event_count")
-    rn = fn.ROW_NUMBER().over(
-        partition_by=[Event.label], order_by=[Event.start_time.desc()]
-    ).alias("rn")
-
-    base_query = (
-        Event.select(
-            *explore_columns,
-            event_count,
-            rn,
-        )
-        .where(Event.camera << allowed_cameras)
+    event_count = (
+        fn.COUNT(Event.id).over(partition_by=[Event.label]).alias("event_count")
     )
+    rn = (
+        fn.ROW_NUMBER()
+        .over(partition_by=[Event.label], order_by=[Event.start_time.desc()])
+        .alias("rn")
+    )
+
+    base_query = Event.select(
+        *explore_columns,
+        event_count,
+        rn,
+    ).where(Event.camera << allowed_cameras)
     ranked = base_query.cte("ranked")
     query = (
         Event.select(
@@ -483,9 +484,7 @@ def events_explore(
             "false_positive": event.false_positive,
             "box": event.box,
             "data": {
-                k: v
-                for k, v in (event.data or {}).items()
-                if k in allowed_data_keys
+                k: v for k, v in (event.data or {}).items() if k in allowed_data_keys
             },
             "event_count": event.event_count,
         }
