@@ -1,1 +1,75 @@
-{}
+{
+  "documentTitle": "變動搜尋 - Frigate",
+  "title": "畫面變動搜尋",
+  "description": "繪製一個多邊形以劃定感興趣區域，並指定時間範圍，檢索該區域內的動態變化。",
+  "selectCamera": "畫面變動搜尋正在載入中",
+  "startSearch": "開始搜尋",
+  "searchStarted": "搜尋已開始",
+  "searchCancelled": "搜尋已取消",
+  "cancelSearch": "取消",
+  "searching": "搜尋進行中。",
+  "searchComplete": "搜尋完成",
+  "noResultsYet": "在所選區域內執行搜尋，查詢異常變化",
+  "noChangesFound": "所選區域未偵測到像素變化",
+  "changesFound_other": "偵測到 {{count}} 處畫面變化",
+  "framesProcessed": "已處理 {{count}} 幀畫面",
+  "jumpToTime": "跳轉到該時間",
+  "results": "結果",
+  "showSegmentHeatmap": "熱力圖",
+  "newSearch": "新的搜尋",
+  "clearResults": "清除結果",
+  "clearROI": "清除多邊形選區",
+  "polygonControls": {
+    "points_other": "{{count}} 個點位",
+    "undo": "撤銷上一個點位",
+    "reset": "重設多邊形",
+    "points_one": "{{count}} 個點"
+  },
+  "motionHeatmapLabel": "畫面變動熱力圖",
+  "dialog": {
+    "title": "畫面變動搜尋",
+    "cameraLabel": "攝影機",
+    "previewAlt": "{{camera}} 攝影機即時預覽"
+  },
+  "timeRange": {
+    "title": "搜尋範圍",
+    "start": "開始時間",
+    "end": "結束時間"
+  },
+  "settings": {
+    "title": "搜尋設定",
+    "parallelMode": "並行模式",
+    "parallelModeDesc": "同時掃描多個錄製片段（速度更快，但 CPU 佔用會顯著升高）",
+    "threshold": "靈敏度閾值",
+    "thresholdDesc": "數值越低，可偵測到越小的變化（取值範圍 1-255）",
+    "minArea": "最小變化區域",
+    "minAreaDesc": "最小感興趣區域變化佔比，達到該比例才會判定為有效變動",
+    "frameSkip": "幀跳過",
+    "frameSkipDesc": "每隔 N 幀進行一次處理。將該值設定為攝影機的幀率，即可實現每秒處理一幀畫面（例如：5 幀 / 秒的攝影機設為 5，30 幀 / 秒的攝影機設為 30）。數值越高處理速度越快，但有可能遺漏短時移動偵測事件。",
+    "maxResults": "最大結果數",
+    "maxResultsDesc": "匹配到設定條數的錄影事件後，就自動停止檢索"
+  },
+  "errors": {
+    "noCamera": "請選擇攝影機",
+    "noROI": "請繪製感興趣的區域",
+    "noTimeRange": "請選擇時間範圍",
+    "invalidTimeRange": "結束時間必須在開始時間之後",
+    "searchFailed": "搜尋失敗：{{message}}",
+    "polygonTooSmall": "多邊形至少需要 3 個頂點",
+    "unknown": "未知錯誤"
+  },
+  "changePercentage": "{{percentage}}% 已變化",
+  "metrics": {
+    "title": "搜尋指標",
+    "segmentsScanned": "已掃描片段數",
+    "segmentsProcessed": "已處理",
+    "segmentsSkippedInactive": "已跳過（無活動）",
+    "segmentsSkippedHeatmap": "已跳過（不在感興趣區域）",
+    "fallbackFullRange": "備用全範圍掃描",
+    "framesDecoded": "畫面已解碼",
+    "wallTime": "搜尋時間",
+    "segmentErrors": "片段異常",
+    "seconds": "{{seconds}} 秒"
+  },
+  "changesFound_one": "找到 {{count}} 個動態變化"
+}

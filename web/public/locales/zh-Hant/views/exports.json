@@ -2,7 +2,6 @@
   "search": "搜尋",
   "documentTitle": "匯出 - Frigate",
   "noExports": "找不到匯出內容",
-  "deleteExport": "刪除匯出內容",
   "editExport": {
     "saveExport": "儲存匯出內容",
     "title": "重新命名匯出內容",
@@ -10,14 +9,120 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "重新命名匯出內容失敗：{{errorMessage}}"
+      "renameExportFailed": "重新命名匯出內容失敗：{{errorMessage}}",
+      "assignCaseFailed": "更新案件分配失敗：{{errorMessage}}",
+      "caseSaveFailed": "儲存案件失敗：{{errorMessage}}",
+      "caseDeleteFailed": "刪除案件失敗：{{errorMessage}}"
     }
   },
-  "deleteExport.desc": "你確定要刪除 {{exportName}} 嗎？",
+  "deleteExport": {
+    "desc": "你確定要刪除 {{exportName}} 嗎？",
+    "label": "刪除匯出"
+  },
   "tooltip": {
     "shareExport": "分享匯出",
     "downloadVideo": "下載影片",
     "editName": "編輯名稱",
-    "deleteExport": "刪除匯出"
+    "deleteExport": "刪除匯出",
+    "assignToCase": "加入案件",
+    "removeFromCase": "從案件中移除"
+  },
+  "headings": {
+    "cases": "案件",
+    "uncategorizedExports": "未分類匯出項"
+  },
+  "toolbar": {
+    "newCase": "新案件",
+    "addExport": "新匯出",
+    "editCase": "編輯案件",
+    "deleteCase": "刪除案件"
+  },
+  "deleteCase": {
+    "label": "刪除案件",
+    "desc": "你確定要刪除 {{caseName}} 嗎？",
+    "descKeepExports": "匯出檔案將繼續保留為未分類匯出。",
+    "descDeleteExports": "此案件中的所有匯出項都將被永久刪除。",
+    "deleteExports": "同時刪除匯出檔案"
+  },
+  "caseDialog": {
+    "title": "加入案件",
+    "description": "選擇現有案件或建立新案件。",
+    "selectLabel": "案件",
+    "newCaseOption": "建立新案件",
+    "nameLabel": "案件名稱",
+    "descriptionLabel": "描述"
+  },
+  "caseCard": {
+    "emptyCase": "暫無匯出檔案"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} 匯出",
+    "queued": "佇列中",
+    "running": "執行中",
+    "preparing": "準備中",
+    "copying": "複製中",
+    "encoding": "編碼中",
+    "encodingRetry": "重試編碼中",
+    "finalizing": "正在完成"
+  },
+  "caseView": {
+    "noDescription": "沒有描述",
+    "createdAt": "已建立 {{value}}",
+    "exportCount_one": "1 個匯出",
+    "exportCount_other": "{{count}} 個匯出",
+    "cameraCount_one": "1 個攝影機",
+    "cameraCount_other": "{{count}} 個攝影機",
+    "showMore": "顯示更多",
+    "showLess": "顯示更少",
+    "emptyTitle": "該案件為空",
+    "emptyDescription": "將現有未分類的匯出新增進來，以便整理該條目。",
+    "emptyDescriptionNoExports": "目前沒有可新增的未分類匯出項。"
+  },
+  "caseEditor": {
+    "createTitle": "建立案件",
+    "editTitle": "編輯案件",
+    "namePlaceholder": "案件名稱",
+    "descriptionPlaceholder": "為該案件新增備註或相關說明"
+  },
+  "addExportDialog": {
+    "title": "將匯出新增到 {{caseName}}",
+    "searchPlaceholder": "搜尋未分類的匯出項",
+    "empty": "未找到匹配的未分類匯出。",
+    "addButton_one": "新增 1 個匯出",
+    "addButton_other": "新增 {{count}} 個匯出",
+    "adding": "新增中…"
+  },
+  "selected_one": "已選擇 {{count}} 個",
+  "selected_other": "已選擇 {{count}} 個",
+  "bulkActions": {
+    "addToCase": "新增至案件",
+    "moveToCase": "移動至案件",
+    "removeFromCase": "從案件中移除",
+    "delete": "刪除",
+    "deleteNow": "立即刪除"
+  },
+  "bulkDelete": {
+    "title": "刪除匯出",
+    "desc_one": "你確定要刪除 {{count}} 個匯出嗎？",
+    "desc_other": "確定要刪除 {{count}} 個匯出嗎？"
+  },
+  "bulkRemoveFromCase": {
+    "title": "從案件中移除",
+    "desc_one": "你確定要從該案件中移除這 {{count}} 個匯出嗎？",
+    "desc_other": "你確定要從該案件中移除這 {{count}} 個匯出嗎？",
+    "descKeepExports": "匯出將被移至未分類。",
+    "descDeleteExports": "匯出將被永久刪除。",
+    "deleteExports": "選擇刪除匯出"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "已刪除匯出",
+      "reassign": "已更新案件分配",
+      "remove": "已從案件中移除匯出"
+    },
+    "error": {
+      "deleteFailed": "刪除匯出失敗：{{errorMessage}}",
+      "reassignFailed": "更新案件分配失敗：{{errorMessage}}"
+    }
   }
 }
