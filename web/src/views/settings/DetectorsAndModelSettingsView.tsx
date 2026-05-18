@@ -373,27 +373,15 @@ export default function DetectorsAndModelSettingsView({
 
     setIsSaving(true);
     try {
-      if (tabChanged) {
-        // Best-effort cleanup of the prior model's fields
+      // Pre-clear both `detectors` and `model` together when a renaming
+      if (tabChanged || detectorKeysChanged) {
         try {
           await axios.put("config/set", {
             requires_restart: 0,
-            config_data: { model: null },
+            config_data: { detectors: null, model: null },
           });
         } catch {
-          // intentional no-op — see comment above
-        }
-      }
-
-      if (detectorKeysChanged) {
-        // Best-effort cleanup
-        try {
-          await axios.put("config/set", {
-            requires_restart: 0,
-            config_data: { detectors: null },
-          });
-        } catch {
-          // intentional no-op — see comment above
+          // best-effort cleanup
         }
       }
 
