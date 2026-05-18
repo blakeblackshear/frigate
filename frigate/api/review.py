@@ -10,7 +10,7 @@ import pandas as pd
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
-from peewee import Case, DoesNotExist, IntegrityError, fn, operator
+from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import (
@@ -173,7 +173,9 @@ async def review_ids(request: Request, ids: str):
         )
 
     try:
-        reviews = list(ReviewSegment.select().where(ReviewSegment.id << ids).dicts().iterator())
+        reviews = list(
+            ReviewSegment.select().where(ReviewSegment.id << ids).dicts().iterator()
+        )
     except Exception:
         return JSONResponse(
             content=({"success": False, "message": "Review segments not found"}),
@@ -490,54 +492,52 @@ async def set_multiple_reviewed(
 
     user_id = current_user["username"]
 
-    reviews = list(ReviewSegment.select(ReviewSegment.id, ReviewSegment.camera).where(ReviewSegment.id << body.ids))
-    
-    for review in reviews:
-        await require_camera_access(review.camera, request=request)
-        
-    found_ids = [r.id for r in reviews]
-
-    if not found_ids:
-        return JSONResponse(
-            content=(
-                {
-                    "success": True,
-                    "message": f"Marked multiple items as {'reviewed' if body.reviewed else 'unreviewed'}",
-                }
-            ),
-            status_code=200,
-        )
-
-    existing_statuses = list(
-        UserReviewStatus.select().where(
-            (UserReviewStatus.user_id == user_id) &
-            (UserReviewStatus.review_segment << found_ids)
+    reviews = list(
+        ReviewSegment.select(ReviewSegment.id, ReviewSegment.camera).where(
+            ReviewSegment.id << body.ids
         )
     )
-    
-    status_by_review = {s.review_segment_id: s for s in existing_statuses}
 
-    to_update = []
-    to_create = []
+    for review in reviews:
+        await require_camera_access(review.camera, request=request)
 
-    for review_id in found_ids:
-        if review_id in status_by_review:
-            status = status_by_review[review_id]
-            if status.has_been_reviewed != body.reviewed:
-                status.has_been_reviewed = body.reviewed
-                to_update.append(status)
-        else:
-            to_create.append({
-                "user_id": user_id,
-                "review_segment_id": review_id,
-                "has_been_reviewed": body.reviewed,
-            })
+    found_ids = [r.id for r in reviews]
 
-    if to_update:
-        UserReviewStatus.bulk_update(to_update, fields=[UserReviewStatus.has_been_reviewed], batch_size=100)
-    
-    if to_create:
-        UserReviewStatus.insert_many(to_create).execute()
+    if found_ids:
+        existing_statuses = list(
+            UserReviewStatus.select().where(
+                (UserReviewStatus.user_id == user_id)
+                & (UserReviewStatus.review_segment << found_ids)
+            )
+        )
+
+        status_by_review = {s.review_segment_id: s for s in existing_statuses}
+
+        to_update = []
+        to_create = []
+
+        for review_id in found_ids:
+            if review_id in status_by_review:
+                status = status_by_review[review_id]
+                if status.has_been_reviewed != body.reviewed:
+                    status.has_been_reviewed = body.reviewed
+                    to_update.append(status)
+            else:
+                to_create.append(
+                    {
+                        "user_id": user_id,
+                        "review_segment_id": review_id,
+                        "has_been_reviewed": body.reviewed,
+                    }
+                )
+
+        if to_update:
+            UserReviewStatus.bulk_update(
+                to_update, fields=[UserReviewStatus.has_been_reviewed], batch_size=100
+            )
+
+        if to_create:
+            UserReviewStatus.insert_many(to_create).execute()
 
     return JSONResponse(
         content=(
