@@ -1,1 +1,73 @@
-{}
+{
+  "audio": {
+    "global": {
+      "detection": "全域性偵測",
+      "sensitivity": "全域性靈敏度"
+    },
+    "cameras": {
+      "detection": "偵測",
+      "sensitivity": "靈敏度"
+    }
+  },
+  "timestamp_style": {
+    "global": {
+      "appearance": "全域性外觀"
+    },
+    "cameras": {
+      "appearance": "外觀"
+    }
+  },
+  "motion": {
+    "global": {
+      "sensitivity": "全域性靈敏度",
+      "algorithm": "全域性演算法"
+    },
+    "cameras": {
+      "sensitivity": "靈敏度",
+      "algorithm": "演算法"
+    }
+  },
+  "snapshots": {
+    "global": {
+      "display": "全域性顯示"
+    },
+    "cameras": {
+      "display": "顯示"
+    }
+  },
+  "detect": {
+    "global": {
+      "resolution": "全域性解析度",
+      "tracking": "全域性追蹤"
+    },
+    "cameras": {
+      "resolution": "解析度",
+      "tracking": "追蹤"
+    }
+  },
+  "objects": {
+    "global": {
+      "tracking": "全域性追蹤",
+      "filtering": "全域性篩選"
+    },
+    "cameras": {
+      "tracking": "追蹤",
+      "filtering": "篩選"
+    }
+  },
+  "record": {
+    "global": {
+      "retention": "全域性保留",
+      "events": "全域性事件"
+    },
+    "cameras": {
+      "retention": "保留",
+      "events": "事件"
+    }
+  },
+  "ffmpeg": {
+    "cameras": {
+      "cameraFfmpeg": "攝影機特定的 FFmpeg 引數"
+    }
+  }
+}

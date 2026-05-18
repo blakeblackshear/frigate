@@ -6,7 +6,8 @@
       "title": "Frigate 正在重新啟動",
       "content": "此頁面將在 {{countdown}} 秒後重新載入。",
       "button": "立即重新載入"
-    }
+    },
+    "description": "Frigate 在重啟期間將短暫停止執行。"
   },
   "explore": {
     "plus": {
@@ -42,7 +43,8 @@
       "end": {
         "title": "結束時間",
         "label": "選擇結束時間"
-      }
+      },
+      "lastHour_one": "過去一小時"
     },
     "name": {
       "placeholder": "替匯出資料命名"
@@ -57,11 +59,68 @@
         "endTimeMustAfterStartTime": "結束時間必須要在開始時間之後",
         "noVaildTimeSelected": "沒有選取有效的時間範圍"
       },
-      "view": "查看"
+      "view": "查看",
+      "queued": "匯出已加入佇列。請在匯出頁面檢視進度。",
+      "batchSuccess_other": "已開始 {{count}} 個匯出，正在開啟案件。",
+      "batchPartial": "已開始 {{total}} 個匯出中的 {{successful}} 個。失敗的攝影機：{{failedCameras}}",
+      "batchFailed": "啟動匯出失敗（共 {{total}} 個）。失敗的攝影機：{{failedCameras}}",
+      "batchQueuedSuccess_other": "已排隊 {{count}} 個匯出，正在開啟案件。",
+      "batchQueuedPartial": "已將 {{total}} 個匯出中的 {{successful}} 個加入佇列。失敗的攝影機：{{failedCameras}}",
+      "batchQueueFailed": "未能將 {{total}} 個匯出加入佇列。失敗的攝影機：{{failedCameras}}",
+      "batchSuccess_one": "已開始 1 個匯出。正在開啟案件。",
+      "batchQueuedSuccess_one": "已將 1 個匯出加入佇列。正在開啟案件。"
     },
     "fromTimeline": {
       "saveExport": "保存匯出資料",
-      "previewExport": "預覽匯出資料"
+      "previewExport": "預覽匯出資料",
+      "queueingExport": "正在加入匯出佇列…",
+      "useThisRange": "使用此範圍"
+    },
+    "case": {
+      "newCaseOption": "建立新案件",
+      "newCaseNamePlaceholder": "新案件名稱",
+      "newCaseDescriptionPlaceholder": "案件描述",
+      "label": "案件",
+      "nonAdminHelp": "將為這些匯出檔案建立一個新的案件。",
+      "placeholder": "選擇案件"
+    },
+    "queueing": "正在加入匯出佇列…",
+    "tabs": {
+      "export": "單個攝影機",
+      "multiCamera": "多個攝影機"
+    },
+    "multiCamera": {
+      "timeRange": "時間範圍",
+      "selectFromTimeline": "從時間線選擇",
+      "cameraSelection": "攝影機",
+      "cameraSelectionHelp": "在此時間範圍內具有追蹤目標的攝影機會被預先選中",
+      "checkingActivity": "正在檢查攝影機活動…",
+      "noCameras": "沒有可用的攝影機",
+      "detectionCount_other": "{{count}} 個追蹤目標",
+      "nameLabel": "匯出名稱",
+      "namePlaceholder": "這些匯出檔案的可選基礎名稱",
+      "queueingButton": "正在加入匯出佇列…",
+      "exportButton_other": "匯出 {{count}} 個攝影機",
+      "detectionCount_one": "1 個追蹤目標",
+      "exportButton_one": "匯出 1 個攝影機"
+    },
+    "multi": {
+      "title_other": "匯出 {{count}} 個審閱",
+      "description": "匯出每個選定的審閱項。所有匯出檔案將歸入同一個案件。",
+      "descriptionNoCase": "匯出每個選定的審閱項。",
+      "caseNamePlaceholder": "審閱匯出 - {{date}}",
+      "exportButton_other": "匯出 {{count}} 個審閱",
+      "exportingButton": "匯出中…",
+      "toast": {
+        "started_other": "已開始 {{count}} 個匯出。正在開啟案件。",
+        "startedNoCase_other": "已開始 {{count}} 個匯出。",
+        "partial": "已啟動 {{total}} 個匯出，其中 {{successful}} 個成功。失敗項：{{failedItems}}",
+        "failed": "啟動匯出失敗（共 {{total}} 個）。失敗項：{{failedItems}}",
+        "started_one": "已開始 1 個匯出。正在開啟案件。",
+        "startedNoCase_one": "已開始 1 個匯出。"
+      },
+      "title_one": "匯出 1 個審閱",
+      "exportButton_one": "匯出 1 個審閱"
     }
   },
   "streaming": {
@@ -69,8 +128,7 @@
     "restreaming": {
       "disabled": "此鏡頭並未啟用串流重導向。",
       "desc": {
-        "title": "設定 go2rtc 以啟用更多此鏡頭的預覽選項及音訊。",
-        "readTheDocumentation": "閱讀文件"
+        "title": "設定 go2rtc 以啟用更多此鏡頭的預覽選項及音訊。"
       }
     },
     "showStats": {
@@ -109,6 +167,14 @@
       "markAsReviewed": "標記為已審核",
       "deleteNow": "立即刪除",
       "markAsUnreviewed": "標記為未審核"
+    },
+    "shareTimestamp": {
+      "label": "分享該時間片段",
+      "title": "分享該時間片段",
+      "description": "分享帶當前錄製播放時間的網址，或選擇自訂時間。請注意這不是公開的分享連結，只有具備 Frigate 及此攝影機存取權限的使用者才能存取。",
+      "custom": "自訂時間",
+      "button": "分享時間片段網址",
+      "shareTitle": "Frigate 審閱時間：{{camera}}"
     }
   },
   "imagePicker": {
