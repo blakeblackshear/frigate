@@ -11,7 +11,11 @@ from pydantic import BaseModel, Field
 
 from frigate.api.auth import require_role
 from frigate.api.defs.tags import Tags
-from frigate.jobs.debug_replay import start_debug_replay_job
+from frigate.jobs.debug_replay import (
+    ExportDebugReplaySource,
+    RecordingDebugReplaySource,
+    start_debug_replay_job,
+)
 from frigate.models import Export
 from frigate.util.services import get_video_properties
 
@@ -82,13 +86,16 @@ class DebugReplayStopResponse(BaseModel):
 async def start_debug_replay(request: Request, body: DebugReplayStartBody):
     """Start a debug replay session asynchronously."""
     replay_manager = request.app.replay_manager
+    source = RecordingDebugReplaySource(
+        source_camera=body.camera,
+        start_ts=body.start_time,
+        end_ts=body.end_time,
+    )
 
     try:
         job_id = await asyncio.to_thread(
             start_debug_replay_job,
-            source_camera=body.camera,
-            start_ts=body.start_time,
-            end_ts=body.end_time,
+            source=source,
             frigate_config=request.app.frigate_config,
             config_publisher=request.app.config_publisher,
             replay_manager=replay_manager,
@@ -147,7 +154,6 @@ async def start_debug_replay_from_export(
             status_code=404,
         )
 
-    start_ts = datetime.timestamp(export.date)
     properties = await get_video_properties(
         request.app.frigate_config.ffmpeg, export.video_path, get_duration=True
     )
@@ -162,15 +168,13 @@ async def start_debug_replay_from_export(
             status_code=400,
         )
 
-    end_ts = start_ts + duration
     replay_manager = request.app.replay_manager
+    source = ExportDebugReplaySource(export=export, duration=float(duration))
 
     try:
         job_id = await asyncio.to_thread(
             start_debug_replay_job,
-            source_camera=export.camera,
-            start_ts=start_ts,
-            end_ts=end_ts,
+            source=source,
             frigate_config=request.app.frigate_config,
             config_publisher=request.app.config_publisher,
             replay_manager=replay_manager,

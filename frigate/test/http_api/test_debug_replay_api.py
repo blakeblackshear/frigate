@@ -15,11 +15,12 @@ class TestDebugReplayAPI(BaseTestHttp):
         # Stub the factory to skip validation/threading and just record the
         # name on the manager the way the real factory's mark_starting would.
         def fake_start(**kwargs):
+            source = kwargs["source"]
             kwargs["replay_manager"].mark_starting(
-                source_camera=kwargs["source_camera"],
+                source_camera=source.source_camera,
                 replay_camera_name="_replay_front",
-                start_ts=kwargs["start_ts"],
-                end_ts=kwargs["end_ts"],
+                start_ts=source.start_ts,
+                end_ts=source.end_ts,
             )
             return "job-1234"
 
