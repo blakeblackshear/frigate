@@ -482,6 +482,8 @@
       "disableDesc": "Enable a camera that is currently not visible in the UI and disabled in the configuration. A restart of Frigate is required after enabling.",
       "enableSuccess": "Enabled {{cameraName}} in configuration. Restart Frigate to apply the changes.",
       "reorderHandle": "Drag to reorder",
+      "saving": "Saving…",
+      "saved": "Saved",
       "friendlyName": {
         "edit": "Edit camera display name",
         "title": "Edit Display Name",

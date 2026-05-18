@@ -15,6 +15,7 @@ import CameraEditForm from "@/components/settings/CameraEditForm";
 import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import DeleteCameraDialog from "@/components/overlay/dialog/DeleteCameraDialog";
 import {
+  LuCheck,
   LuExternalLink,
   LuGripVertical,
   LuPencil,
@@ -51,6 +52,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+const REORDER_SAVED_INDICATOR_MS = 1500;
+
+type ReorderSaveStatus = "idle" | "saving" | "saved";
 
 type CameraManagementViewProps = {
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
@@ -113,6 +118,19 @@ export default function CameraManagementView({
     });
   }, [enabledCameras]);
 
+  const [reorderSaveStatus, setReorderSaveStatus] =
+    useState<ReorderSaveStatus>("idle");
+  const reorderSavedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  useEffect(() => {
+    return () => {
+      if (reorderSavedTimerRef.current) {
+        clearTimeout(reorderSavedTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleReorderDragEnd = useCallback(async () => {
     const current = orderedCamerasRef.current;
     if (
@@ -127,14 +145,26 @@ export default function CameraManagementView({
       cameraUpdates[cam] = { ui: { order: i * 10 } };
     });
 
+    if (reorderSavedTimerRef.current) {
+      clearTimeout(reorderSavedTimerRef.current);
+      reorderSavedTimerRef.current = null;
+    }
+    setReorderSaveStatus("saving");
+
     try {
       await axios.put("config/set", {
         requires_restart: 0,
         config_data: { cameras: cameraUpdates },
       });
       await updateConfig();
+      setReorderSaveStatus("saved");
+      reorderSavedTimerRef.current = setTimeout(() => {
+        setReorderSaveStatus("idle");
+        reorderSavedTimerRef.current = null;
+      }, REORDER_SAVED_INDICATOR_MS);
     } catch (error) {
       setOrderedCameras(enabledCameras);
+      setReorderSaveStatus("idle");
       const errorMessage =
         axios.isAxiosError(error) &&
         (error.response?.data?.message || error.response?.data?.detail)
@@ -238,22 +268,27 @@ export default function CameraManagementView({
                           </p>
                         </Label>
                       </div>
-                      <Reorder.Group
-                        as="div"
-                        axis="y"
-                        values={orderedCameras}
-                        onReorder={setOrderedCameras}
-                        className="max-w-md space-y-2 rounded-lg bg-secondary p-4"
-                      >
-                        {orderedCameras.map((camera) => (
-                          <EnabledCameraRow
-                            key={camera}
-                            camera={camera}
-                            onConfigChanged={updateConfig}
-                            onDragEnd={handleReorderDragEnd}
-                          />
-                        ))}
-                      </Reorder.Group>
+                      <div className="max-w-md space-y-1.5">
+                        <Reorder.Group
+                          as="div"
+                          axis="y"
+                          values={orderedCameras}
+                          onReorder={setOrderedCameras}
+                          className="space-y-2 rounded-lg bg-secondary p-4"
+                        >
+                          {orderedCameras.map((camera) => (
+                            <EnabledCameraRow
+                              key={camera}
+                              camera={camera}
+                              onConfigChanged={updateConfig}
+                              onDragEnd={handleReorderDragEnd}
+                            />
+                          ))}
+                        </Reorder.Group>
+                        <ReorderSaveStatusIndicator
+                          status={reorderSaveStatus}
+                        />
+                      </div>
                       <p className="text-sm text-muted-foreground md:hidden">
                         <Trans ns="views/settings">
                           cameraManagement.streams.enableDesc
@@ -370,6 +405,37 @@ export default function CameraManagementView({
         onRestart={() => sendRestart("restart")}
       />
     </>
+  );
+}
+
+type ReorderSaveStatusIndicatorProps = {
+  status: ReorderSaveStatus;
+};
+
+function ReorderSaveStatusIndicator({
+  status,
+}: ReorderSaveStatusIndicatorProps) {
+  const { t } = useTranslation(["views/settings"]);
+  return (
+    <div
+      aria-live="polite"
+      className={cn(
+        "flex h-4 items-center justify-start gap-1 text-xs transition-opacity duration-200",
+        status === "idle" ? "opacity-0" : "opacity-100",
+      )}
+    >
+      {status === "saving" && (
+        <span className="text-muted-foreground">
+          {t("cameraManagement.streams.saving")}
+        </span>
+      )}
+      {status === "saved" && (
+        <span className="flex items-center gap-1 text-success">
+          <LuCheck className="size-3.5" />
+          {t("cameraManagement.streams.saved")}
+        </span>
+      )}
+    </div>
   );
 }
 
