@@ -282,6 +282,13 @@ class OpenVINOModelRunner(BaseModelRunner):
             EnrichmentModelTypeEnum.arcface.value,
         ]
 
+    @staticmethod
+    def is_detection_model(model_type: str) -> bool:
+        # Import here to avoid circular imports
+        from frigate.detectors.detector_config import ModelTypeEnum
+
+        return model_type in [m.value for m in ModelTypeEnum]
+
     def __init__(self, model_path: str, device: str, model_type: str, **kwargs):
         self.model_path = model_path
         self.device = device
@@ -312,6 +319,12 @@ class OpenVINOModelRunner(BaseModelRunner):
 
         if device in ["GPU", "AUTO", "NPU"]:
             self.ov_core.set_property(device, {"PERFORMANCE_HINT": "LATENCY"})
+
+        if device == "NPU" and OpenVINOModelRunner.is_detection_model(model_type):
+            try:
+                self.ov_core.set_property(device, {"NPU_TURBO": "YES"})
+            except Exception as e:
+                logger.debug(f"NPU_TURBO not supported by driver: {e}")
 
         # Compile model
         self.compiled_model = self.ov_core.compile_model(
