@@ -230,7 +230,7 @@ class TestExportResolution(unittest.TestCase):
             id=export_id,
             camera=camera,
             name=f"export-{export_id}",
-            date=datetime.datetime.now(),
+            date=int(datetime.datetime.now().timestamp()),
             video_path=f"/media/frigate/exports/{filename}",
             thumb_path=f"/media/frigate/exports/{filename}.jpg",
             in_progress=False,

@@ -14,7 +14,6 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, Optional, cast
 
 from peewee import ModelSelect
@@ -209,7 +208,9 @@ class ExportDebugReplaySource(DebugReplaySource):
 
     def __init__(self, export: Export, duration: float) -> None:
         self._camera = cast(str, export.camera)
-        self._start_ts = datetime.timestamp(cast(datetime, export.date))
+        # Export.date is declared DateTimeField but Frigate writes raw unix
+        # timestamps to the column.
+        self._start_ts = float(cast(Any, export.date))
         self._video_path = cast(str, export.video_path)
         self._duration = duration
 
