@@ -21,17 +21,7 @@ def migrate(migrator, database, fake=False, **kwargs):
         'CREATE INDEX IF NOT EXISTS "event_camera_start_time" '
         'ON "event" ("camera", "start_time" DESC)'
     )
-    migrator.sql(
-        'CREATE INDEX IF NOT EXISTS "reviewsegment_camera_start_time" '
-        'ON "reviewsegment" ("camera", "start_time" DESC)'
-    )
-    migrator.sql(
-        'CREATE INDEX IF NOT EXISTS "reviewsegment_end_time" '
-        'ON "reviewsegment" ("end_time")'
-    )
 
 
 def rollback(migrator, database, fake=False, **kwargs):
     migrator.sql('DROP INDEX IF EXISTS "event_camera_start_time"')
-    migrator.sql('DROP INDEX IF EXISTS "reviewsegment_camera_start_time"')
-    migrator.sql('DROP INDEX IF EXISTS "reviewsegment_end_time"')
