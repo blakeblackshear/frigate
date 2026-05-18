@@ -222,7 +222,7 @@
       "label": "Hide object path"
     },
     "debugReplay": {
-      "label": "Debug replay",
+      "label": "Debug Replay",
       "aria": "View this tracked object in the debug replay view"
     },
     "more": {
