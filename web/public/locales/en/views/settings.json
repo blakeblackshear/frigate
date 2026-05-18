@@ -40,6 +40,11 @@
       "profilePrefix": "{{profile}} profile: {{fields}}"
     }
   },
+  "menuDot": {
+    "overrideGlobal": "This section overrides the global configuration",
+    "overrideProfile": "This section is overridden by the {{profile}} profile",
+    "unsaved": "This section has unsaved changes"
+  },
   "menu": {
     "general": "General",
     "globalConfig": "Global configuration",
