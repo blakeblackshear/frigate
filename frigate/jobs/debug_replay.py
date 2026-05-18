@@ -208,27 +208,29 @@ class ExportDebugReplaySource(DebugReplaySource):
     """
 
     def __init__(self, export: Export, duration: float) -> None:
-        self._export = export
+        self._camera = cast(str, export.camera)
+        self._start_ts = datetime.timestamp(cast(datetime, export.date))
+        self._video_path = cast(str, export.video_path)
         self._duration = duration
 
     @property
     def source_camera(self) -> str:
-        return self._export.camera
+        return self._camera
 
     @property
     def start_ts(self) -> float:
-        return datetime.timestamp(self._export.date)
+        return self._start_ts
 
     @property
     def end_ts(self) -> float:
-        return self.start_ts + self._duration
+        return self._start_ts + self._duration
 
     def validate(self) -> None:
-        if not os.path.exists(self._export.video_path):
-            raise ValueError(f"Export video file not found: {self._export.video_path}")
+        if not os.path.exists(self._video_path):
+            raise ValueError(f"Export video file not found: {self._video_path}")
 
     def ffmpeg_input_args(self, working_dir: str) -> list[str]:
-        return ["-i", self._export.video_path]
+        return ["-i", self._video_path]
 
 
 class DebugReplayJobRunner(threading.Thread):
