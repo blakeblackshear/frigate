@@ -50,21 +50,11 @@ import {
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import { ConfigMessageBanner } from "@/components/config-form/ConfigMessageBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { sanitizeSectionData } from "@/utils/configUtil";
-
-const DETECTOR_HIDDEN_FIELDS = [
-  "*.model.labelmap",
-  "*.model.attributes_map",
-  "*.model",
-  "*.model_path",
-];
-const MODEL_HIDDEN_FIELDS = [
-  "labelmap",
-  "attributes_map",
-  "colormap",
-  "all_attributes",
-  "non_logo_attributes",
-];
+import {
+  getSectionConfig,
+  resolveHiddenFieldEntries,
+  sanitizeSectionData,
+} from "@/utils/configUtil";
 
 type ModelTab = "plus" | "custom";
 
@@ -122,6 +112,8 @@ const TYPE_MODEL_DEFAULTS: Record<string, ConfigSectionData> = {
 
 const STATUS_BAR_KEY = "detectors_and_model";
 
+const EMPTY_PENDING: Record<string, ConfigSectionData> = {};
+
 const deriveInitialState = (config: FrigateConfig): PageState => {
   const plusModelId = config.model?.plus?.id;
   const modelPath = config.model?.path;
@@ -165,6 +157,11 @@ const deriveInitialState = (config: FrigateConfig): PageState => {
 
 export default function DetectorsAndModelSettingsView({
   setUnsavedChanges,
+  pendingDataBySection,
+  onPendingDataChange,
+  onSectionStatusChange,
+  isSavingAll,
+  onSectionSavingChange,
 }: SettingsPageProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
@@ -172,15 +169,17 @@ export default function DetectorsAndModelSettingsView({
   const { mutate: globalMutate } = useSWRConfig();
   const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
-  const [snapshot, setSnapshot] = useState<PageState | null>(null);
+  // track the saved config
+  const snapshot = useMemo<PageState | null>(
+    () => (config ? deriveInitialState(config) : null),
+    [config],
+  );
   const [state, setState] = useState<PageState | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const { send: sendRestart } = useRestart();
-  const [childPending, setChildPending] = useState<
-    Record<string, ConfigSectionData>
-  >({});
+  const childPending = pendingDataBySection ?? EMPTY_PENDING;
   const [detectorStatus, setDetectorStatus] = useState<SectionStatus>({
     hasChanges: false,
     isOverridden: false,
@@ -223,9 +222,23 @@ export default function DetectorsAndModelSettingsView({
 
   const isFilterActive = !showBaseModels || !showFineTunedModels;
 
-  // The "live" detector/model data lives in `childPending` (driven by the
-  // embedded forms) — derive on demand instead of mirroring it into state via
-  // a draining useEffect
+  const detectorHiddenFields = useMemo(
+    () =>
+      resolveHiddenFieldEntries(
+        getSectionConfig("detectors", "global").hiddenFields,
+        config,
+      ),
+    [config],
+  );
+  const modelHiddenFields = useMemo(
+    () =>
+      resolveHiddenFieldEntries(
+        getSectionConfig("model", "global").hiddenFields,
+        config,
+      ),
+    [config],
+  );
+
   const liveDetectors = useMemo(
     () => childPending["detectors"] ?? snapshot?.detectors,
     [childPending, snapshot],
@@ -252,28 +265,25 @@ export default function DetectorsAndModelSettingsView({
     if (!newType || !(newType in TYPE_MODEL_DEFAULTS)) return;
 
     const defaults = TYPE_MODEL_DEFAULTS[newType];
-    setChildPending((prev) => {
-      const next: Record<string, ConfigSectionData> = {
-        ...prev,
-        model: defaults,
+    onPendingDataChange?.("model", undefined, defaults);
+
+    if (newType === "openvino") {
+      const detectorsCurrent = (childPending.detectors ??
+        state?.detectors ??
+        {}) as {
+        [key: string]: { device?: string };
       };
-      if (newType === "openvino") {
-        const detectorsCurrent = (prev.detectors ?? state?.detectors ?? {}) as {
-          [key: string]: { device?: string };
-        };
-        const entries = Object.entries(detectorsCurrent);
-        if (entries.length > 0) {
-          const [firstKey, firstValue] = entries[0];
-          if (!firstValue?.device) {
-            next.detectors = {
-              ...detectorsCurrent,
-              [firstKey]: { ...firstValue, device: "CPU" },
-            } as ConfigSectionData;
-          }
+      const entries = Object.entries(detectorsCurrent);
+      if (entries.length > 0) {
+        const [firstKey, firstValue] = entries[0];
+        if (!firstValue?.device) {
+          onPendingDataChange?.("detectors", undefined, {
+            ...detectorsCurrent,
+            [firstKey]: { ...firstValue, device: "CPU" },
+          } as ConfigSectionData);
         }
       }
-      return next;
-    });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDetectorType]);
 
@@ -297,40 +307,112 @@ export default function DetectorsAndModelSettingsView({
 
   const plusModelMissing = state?.modelTab === "plus" && !state?.plusModelId;
 
-  const handleChildPendingChange = useCallback(
-    (
-      sectionKey: string,
-      _cameraName: string | undefined,
-      data: ConfigSectionData | null,
-    ) => {
-      setChildPending((prev) => {
-        if (data === null) {
-          if (!(sectionKey in prev)) return prev;
-          const { [sectionKey]: _drop, ...rest } = prev;
-          return rest;
-        }
-        return { ...prev, [sectionKey]: data };
-      });
-    },
-    [],
-  );
-
   const handleDetectorStatusChange = useCallback(
-    (status: SectionStatus) => setDetectorStatus(status),
-    [],
+    (status: SectionStatus) => {
+      setDetectorStatus(status);
+      onSectionStatusChange?.("detectors", "global", status);
+    },
+    [onSectionStatusChange],
   );
 
+  // BaseSection drives `modelStatus` only when the Custom tab is mounted
   const handleModelStatusChange = useCallback(
     (status: SectionStatus) => setModelStatus(status),
     [],
   );
 
+  // report the *combined* model-section status to the parent
   useEffect(() => {
-    if (!config || snapshot !== null) return;
+    if (!state || !snapshot) return;
+    const tabChanged = state.modelTab !== snapshot.modelTab;
+    const plusIdChanged =
+      state.modelTab === "plus" && state.plusModelId !== snapshot.plusModelId;
+    const pageLevelDirty = tabChanged || plusIdChanged;
+    onSectionStatusChange?.("model", "global", {
+      hasChanges: modelStatus.hasChanges || pageLevelDirty,
+      isOverridden: modelStatus.isOverridden,
+      overrideSource: modelStatus.overrideSource,
+      hasValidationErrors: modelStatus.hasValidationErrors,
+    });
+  }, [state, snapshot, modelStatus, onSectionStatusChange]);
+
+  // Tab toggle and Plus-model selection are page-local UI, but Save All and the
+  // sidebar dot live on `pendingDataBySection["model"]` and section status from
+  // the parent. These handlers mirror Plus-tab changes into both so a Plus-only
+  // edit (no custom-form typing) is still dirty and survives navigation.
+  const handleModelTabChange = useCallback(
+    (newTab: ModelTab) => {
+      setState((prev) => (prev ? { ...prev, modelTab: newTab } : prev));
+      if (!snapshot) return;
+
+      if (newTab === "plus") {
+        if (state?.plusModelId) {
+          onPendingDataChange?.("model", undefined, {
+            path: `plus://${state.plusModelId}`,
+          } as ConfigSectionData);
+        } else {
+          // No Plus model selected — clear any stale pending so the save
+          // action is correctly disabled until the user picks one.
+          onPendingDataChange?.("model", undefined, null);
+        }
+      } else {
+        // Switching to Custom: if pending["model"] still holds a plus path
+        // from a previous Plus selection, swap it for the snapshot's custom
+        // model so Save All writes the correct payload. Don't overwrite
+        // genuine custom-form edits the user typed earlier.
+        const currentPath = (
+          pendingDataBySection?.["model"] as { path?: string } | undefined
+        )?.path;
+        if (
+          typeof currentPath === "string" &&
+          currentPath.startsWith("plus://")
+        ) {
+          onPendingDataChange?.(
+            "model",
+            undefined,
+            snapshot.customModel as ConfigSectionData,
+          );
+        }
+      }
+    },
+    [state?.plusModelId, snapshot, pendingDataBySection, onPendingDataChange],
+  );
+
+  const handlePlusModelIdChange = useCallback(
+    (newId: string) => {
+      setState((prev) => (prev ? { ...prev, plusModelId: newId } : prev));
+      onPendingDataChange?.("model", undefined, {
+        path: `plus://${newId}`,
+      } as ConfigSectionData);
+    },
+    [onPendingDataChange],
+  );
+
+  useEffect(() => {
+    if (!config || state !== null) return;
     const initial = deriveInitialState(config);
-    setSnapshot(initial);
-    setState(initial);
-  }, [config, snapshot]);
+
+    // Restore Plus-tab UI state from any prior pending edits the user made
+    // before navigating away. `pendingDataBySection["model"]` is the source of
+    // truth for Save All; infer modelTab/plusModelId from it so the UI lines up.
+    const pendingModel = pendingDataBySection?.["model"] as
+      | { path?: string }
+      | undefined;
+    const pendingPath = pendingModel?.path;
+    if (typeof pendingPath === "string" && pendingPath.startsWith("plus://")) {
+      setState({
+        ...initial,
+        modelTab: "plus",
+        plusModelId: pendingPath.slice("plus://".length) || undefined,
+      });
+    } else if (pendingModel && initial.modelTab === "plus") {
+      // There's a pending custom-model edit while the saved tab was Plus —
+      // means the user already switched to Custom before navigating away.
+      setState({ ...initial, modelTab: "custom" });
+    } else {
+      setState(initial);
+    }
+  }, [config, state, pendingDataBySection]);
 
   const isDirty = useMemo(() => {
     if (!state || !snapshot) return false;
@@ -369,11 +451,11 @@ export default function DetectorsAndModelSettingsView({
     // responses but doesn't accept back on /config/set.
     const sanitizedDetectors = sanitizeSectionData(
       liveDetectors ?? {},
-      DETECTOR_HIDDEN_FIELDS,
+      detectorHiddenFields,
     );
     const sanitizedCustomModel = sanitizeSectionData(
       liveCustomModel ?? {},
-      MODEL_HIDDEN_FIELDS,
+      modelHiddenFields,
     );
 
     const modelPayload =
@@ -386,6 +468,7 @@ export default function DetectorsAndModelSettingsView({
       JSON.stringify(Object.keys(snapshot.detectors).sort());
 
     setIsSaving(true);
+    onSectionSavingChange?.(true);
     let preCleared = false;
     try {
       // Pre-clear both `detectors` and `model` together when renaming
@@ -412,14 +495,11 @@ export default function DetectorsAndModelSettingsView({
       await globalMutate("config");
       await globalMutate("config/raw_paths");
 
-      // Re-derive snapshot from the freshly saved data so isDirty resets.
-      setSnapshot({
-        modelTab: state.modelTab,
-        plusModelId: state.plusModelId,
-        detectors: liveDetectors ?? snapshot.detectors,
-        customModel: liveCustomModel ?? snapshot.customModel,
-      });
-      setChildPending({});
+      // `snapshot` is derived from `config` via useMemo, so the awaited mutate
+      // above has already refreshed it. Just clear the pending entries — that
+      // resets isDirty since state should now match snapshot.
+      onPendingDataChange?.("detectors", undefined, null);
+      onPendingDataChange?.("model", undefined, null);
       setResetKey((k) => k + 1);
 
       addMessage(
@@ -431,6 +511,7 @@ export default function DetectorsAndModelSettingsView({
 
       toast.success(t("detectorsAndModel.toast.saveSuccess"), {
         position: "top-center",
+        duration: 10000,
         action: (
           <Button onClick={() => setRestartDialogOpen(true)}>
             {t("restart.button", { ns: "components/dialog" })}
@@ -451,14 +532,14 @@ export default function DetectorsAndModelSettingsView({
         const restoreModel =
           snapshot.modelTab === "plus" && snapshot.plusModelId
             ? { path: `plus://${snapshot.plusModelId}` }
-            : sanitizeSectionData(snapshot.customModel, MODEL_HIDDEN_FIELDS);
+            : sanitizeSectionData(snapshot.customModel, modelHiddenFields);
         try {
           await axios.put("config/set", {
             requires_restart: 0,
             config_data: {
               detectors: sanitizeSectionData(
                 snapshot.detectors,
-                DETECTOR_HIDDEN_FIELDS,
+                detectorHiddenFields,
               ),
               model: restoreModel,
             },
@@ -473,27 +554,33 @@ export default function DetectorsAndModelSettingsView({
       await globalMutate("config");
     } finally {
       setIsSaving(false);
+      onSectionSavingChange?.(false);
     }
   }, [
     state,
     snapshot,
     liveDetectors,
     liveCustomModel,
+    detectorHiddenFields,
+    modelHiddenFields,
     globalMutate,
+    onSectionSavingChange,
     addMessage,
+    onPendingDataChange,
     t,
   ]);
 
   const onUndo = useCallback(() => {
     if (snapshot) {
       setState(snapshot);
-      setChildPending({});
+      onPendingDataChange?.("detectors", undefined, null);
+      onPendingDataChange?.("model", undefined, null);
       // Force the embedded forms to re-mount so their internal dirty/baseline
-      // state is rebuilt from the current config — clearing childPending alone
+      // state is rebuilt from the current config — clearing pending alone
       // doesn't reset BaseSection's internal tracking.
       setResetKey((k) => k + 1);
     }
-  }, [snapshot]);
+  }, [snapshot, onPendingDataChange]);
 
   if (!config || !state) {
     return <ActivityIndicator />;
@@ -502,6 +589,7 @@ export default function DetectorsAndModelSettingsView({
   const saveDisabled =
     !isDirty ||
     isSaving ||
+    isSavingAll ||
     detectorStatus.hasValidationErrors ||
     (state.modelTab === "custom" && modelStatus.hasValidationErrors) ||
     plusMismatch ||
@@ -548,7 +636,7 @@ export default function DetectorsAndModelSettingsView({
               showTitle={false}
               embedded
               pendingDataBySection={childPending}
-              onPendingDataChange={handleChildPendingChange}
+              onPendingDataChange={onPendingDataChange}
               onStatusChange={handleDetectorStatusChange}
             />
           </SettingsGroupCard>
@@ -573,9 +661,7 @@ export default function DetectorsAndModelSettingsView({
               <Tabs
                 value={state.modelTab}
                 onValueChange={(value) =>
-                  setState((prev) =>
-                    prev ? { ...prev, modelTab: value as ModelTab } : prev,
-                  )
+                  handleModelTabChange(value as ModelTab)
                 }
               >
                 <TabsList className="mb-4">
@@ -599,11 +685,7 @@ export default function DetectorsAndModelSettingsView({
                       <div className="flex w-full items-center gap-2">
                         <Select
                           value={state.plusModelId}
-                          onValueChange={(value) =>
-                            setState((prev) =>
-                              prev ? { ...prev, plusModelId: value } : prev,
-                            )
-                          }
+                          onValueChange={handlePlusModelIdChange}
                         >
                           <SelectTrigger className="w-full">
                             {state.plusModelId &&
@@ -763,7 +845,7 @@ export default function DetectorsAndModelSettingsView({
                     showTitle={false}
                     embedded
                     pendingDataBySection={childPending}
-                    onPendingDataChange={handleChildPendingChange}
+                    onPendingDataChange={onPendingDataChange}
                     onStatusChange={handleModelStatusChange}
                   />
                 </TabsContent>
@@ -777,7 +859,7 @@ export default function DetectorsAndModelSettingsView({
                 showTitle={false}
                 embedded
                 pendingDataBySection={childPending}
-                onPendingDataChange={handleChildPendingChange}
+                onPendingDataChange={onPendingDataChange}
                 onStatusChange={handleModelStatusChange}
               />
             )}
