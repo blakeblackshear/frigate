@@ -50,6 +50,21 @@ import {
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import { ConfigMessageBanner } from "@/components/config-form/ConfigMessageBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { sanitizeSectionData } from "@/utils/configUtil";
+
+const DETECTOR_HIDDEN_FIELDS = [
+  "*.model.labelmap",
+  "*.model.attributes_map",
+  "*.model",
+  "*.model_path",
+];
+const MODEL_HIDDEN_FIELDS = [
+  "labelmap",
+  "attributes_map",
+  "colormap",
+  "all_attributes",
+  "non_logo_attributes",
+];
 
 type ModelTab = "plus" | "custom";
 
@@ -208,13 +223,24 @@ export default function DetectorsAndModelSettingsView({
 
   const isFilterActive = !showBaseModels || !showFineTunedModels;
 
+  // The "live" detector/model data lives in `childPending` (driven by the
+  // embedded forms) — derive on demand instead of mirroring it into state via
+  // a draining useEffect
+  const liveDetectors = useMemo(
+    () => childPending["detectors"] ?? snapshot?.detectors,
+    [childPending, snapshot],
+  );
+  const liveCustomModel = useMemo(
+    () => childPending["model"] ?? snapshot?.customModel,
+    [childPending, snapshot],
+  );
+
   const currentDetectorType = useMemo(() => {
-    if (!state) return undefined;
-    const values = Object.values(state.detectors ?? {});
+    const values = Object.values(liveDetectors ?? {});
     if (values.length === 0) return undefined;
     const first = values[0] as { type?: string } | undefined;
     return first?.type;
-  }, [state]);
+  }, [liveDetectors]);
 
   // fill in defaults when detector type changes
   const prevDetectorTypeRef = useRef<string | undefined>(undefined);
@@ -300,33 +326,6 @@ export default function DetectorsAndModelSettingsView({
   );
 
   useEffect(() => {
-    const detectorsPending = childPending["detectors"];
-    setState((prev) => {
-      if (!prev || !snapshot) return prev;
-      // When the embedded form un-modifies (data returns to baseline) it clears
-      // its entry from childPending — fall back to snapshot so state.detectors
-      // doesn't keep a stale value the user has visually reverted.
-      return {
-        ...prev,
-        detectors: detectorsPending ?? snapshot.detectors,
-      };
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [childPending["detectors"]]);
-
-  useEffect(() => {
-    const modelPending = childPending["model"];
-    setState((prev) => {
-      if (!prev || !snapshot) return prev;
-      return {
-        ...prev,
-        customModel: modelPending ?? snapshot.customModel,
-      };
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [childPending["model"]]);
-
-  useEffect(() => {
     if (!config || snapshot !== null) return;
     const initial = deriveInitialState(config);
     setSnapshot(initial);
@@ -335,8 +334,12 @@ export default function DetectorsAndModelSettingsView({
 
   const isDirty = useMemo(() => {
     if (!state || !snapshot) return false;
-    return JSON.stringify(state) !== JSON.stringify(snapshot);
-  }, [state, snapshot]);
+    if (state.modelTab !== snapshot.modelTab) return true;
+    if (state.plusModelId !== snapshot.plusModelId) return true;
+    if ("detectors" in childPending) return true;
+    if ("model" in childPending) return true;
+    return false;
+  }, [state, snapshot, childPending]);
 
   useEffect(() => {
     if (isDirty) {
@@ -362,24 +365,37 @@ export default function DetectorsAndModelSettingsView({
 
     const tabChanged = state.modelTab !== snapshot.modelTab;
 
+    // Strip computed/merged fields that the backend populates in /config
+    // responses but doesn't accept back on /config/set.
+    const sanitizedDetectors = sanitizeSectionData(
+      liveDetectors ?? {},
+      DETECTOR_HIDDEN_FIELDS,
+    );
+    const sanitizedCustomModel = sanitizeSectionData(
+      liveCustomModel ?? {},
+      MODEL_HIDDEN_FIELDS,
+    );
+
     const modelPayload =
       state.modelTab === "plus"
         ? { path: `plus://${state.plusModelId}` }
-        : state.customModel;
+        : sanitizedCustomModel;
 
     const detectorKeysChanged =
-      JSON.stringify(Object.keys(state.detectors).sort()) !==
+      JSON.stringify(Object.keys(liveDetectors ?? {}).sort()) !==
       JSON.stringify(Object.keys(snapshot.detectors).sort());
 
     setIsSaving(true);
+    let preCleared = false;
     try {
-      // Pre-clear both `detectors` and `model` together when a renaming
+      // Pre-clear both `detectors` and `model` together when renaming
       if (tabChanged || detectorKeysChanged) {
         try {
           await axios.put("config/set", {
             requires_restart: 0,
             config_data: { detectors: null, model: null },
           });
+          preCleared = true;
         } catch {
           // best-effort cleanup
         }
@@ -388,7 +404,7 @@ export default function DetectorsAndModelSettingsView({
       await axios.put("config/set", {
         requires_restart: 0,
         config_data: {
-          detectors: state.detectors,
+          detectors: sanitizedDetectors,
           model: modelPayload,
         },
       });
@@ -396,8 +412,13 @@ export default function DetectorsAndModelSettingsView({
       await globalMutate("config");
       await globalMutate("config/raw_paths");
 
-      // Re-derive snapshot from the freshly saved state so isDirty resets.
-      setSnapshot({ ...state });
+      // Re-derive snapshot from the freshly saved data so isDirty resets.
+      setSnapshot({
+        modelTab: state.modelTab,
+        plusModelId: state.plusModelId,
+        detectors: liveDetectors ?? snapshot.detectors,
+        customModel: liveCustomModel ?? snapshot.customModel,
+      });
       setChildPending({});
       setResetKey((k) => k + 1);
 
@@ -425,13 +446,43 @@ export default function DetectorsAndModelSettingsView({
         err.response?.data?.detail ||
         t("detectorsAndModel.toast.saveError");
       toast.error(message, { position: "top-center" });
-      // Re-sync the config cache in case the two-step PUT left the backend
-      // ahead of the frontend (e.g. step 1 cleared `model` but step 2 failed).
+
+      if (preCleared) {
+        const restoreModel =
+          snapshot.modelTab === "plus" && snapshot.plusModelId
+            ? { path: `plus://${snapshot.plusModelId}` }
+            : sanitizeSectionData(snapshot.customModel, MODEL_HIDDEN_FIELDS);
+        try {
+          await axios.put("config/set", {
+            requires_restart: 0,
+            config_data: {
+              detectors: sanitizeSectionData(
+                snapshot.detectors,
+                DETECTOR_HIDDEN_FIELDS,
+              ),
+              model: restoreModel,
+            },
+          });
+        } catch {
+          // best-effort
+        }
+      }
+
+      // Re-sync the config cache to reflect whatever state the backend
+      // landed on after the failure (and any restore attempt).
       await globalMutate("config");
     } finally {
       setIsSaving(false);
     }
-  }, [state, snapshot, globalMutate, addMessage, t]);
+  }, [
+    state,
+    snapshot,
+    liveDetectors,
+    liveCustomModel,
+    globalMutate,
+    addMessage,
+    t,
+  ]);
 
   const onUndo = useCallback(() => {
     if (snapshot) {
