@@ -102,6 +102,11 @@ export default function useStats(stats: FrigateStats | undefined) {
 
     // check camera cpu usages
     Object.entries(memoizedStats["cameras"]).forEach(([name, cam]) => {
+      // Skip replay cameras
+      if (isReplayCamera(name)) {
+        return;
+      }
+
       const ffmpegAvg = parseFloat(
         memoizedStats["cpu_usages"][cam["ffmpeg_pid"]]?.cpu_average,
       );
@@ -111,12 +116,7 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       const cameraName = config?.cameras?.[name]?.friendly_name ?? name;
 
-      // Skip ffmpeg warnings for replay cameras
-      if (
-        !isNaN(ffmpegAvg) &&
-        ffmpegAvg >= CameraFfmpegThreshold.error &&
-        !isReplayCamera(name)
-      ) {
+      if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push({
           text: t("stats.ffmpegHighCpuUsage", {
             camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
