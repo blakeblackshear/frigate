@@ -235,7 +235,17 @@ class RecordingExporter(threading.Thread):
 
         # add metadata
         title = f"Frigate Recording for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
-        ffmpeg_cmd.extend(["-metadata", f"title={title}"])
+        creation_time = datetime.datetime.fromtimestamp(
+            self.start_time, tz=datetime.timezone.utc
+        ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        ffmpeg_cmd.extend(
+            [
+                "-metadata",
+                f"title={title}",
+                "-metadata",
+                f"creation_time={creation_time}",
+            ]
+        )
 
         ffmpeg_cmd.append(video_path)
 
@@ -326,7 +336,17 @@ class RecordingExporter(threading.Thread):
 
         # add metadata
         title = f"Frigate Preview for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
-        ffmpeg_cmd.extend(["-metadata", f"title={title}"])
+        creation_time = datetime.datetime.fromtimestamp(
+            self.start_time, tz=datetime.timezone.utc
+        ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        ffmpeg_cmd.extend(
+            [
+                "-metadata",
+                f"title={title}",
+                "-metadata",
+                f"creation_time={creation_time}",
+            ]
+        )
 
         return ffmpeg_cmd, playlist_lines
 

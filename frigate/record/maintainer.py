@@ -547,6 +547,8 @@ class RecordingMaintainer(threading.Thread):
                     "copy",
                     "-movflags",
                     "+faststart",
+                    "-metadata",
+                    f"creation_time={start_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')}",
                     file_path,
                     stderr=asyncio.subprocess.PIPE,
                     stdout=asyncio.subprocess.DEVNULL,
