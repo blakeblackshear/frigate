@@ -1583,6 +1583,8 @@
     "resetError": "Failed to reset settings",
     "saveAllSuccess_one": "Saved {{count}} section successfully.",
     "saveAllSuccess_other": "All {{count}} sections saved successfully.",
+    "saveAllSuccessRestartRequired_one": "Saved {{count}} section successfully. Restart Frigate to apply your changes.",
+    "saveAllSuccessRestartRequired_other": "All {{count}} sections saved successfully. Restart Frigate to apply your changes.",
     "saveAllPartial_one": "{{successCount}} of {{totalCount}} section saved. {{failCount}} failed.",
     "saveAllPartial_other": "{{successCount}} of {{totalCount}} sections saved. {{failCount}} failed.",
     "saveAllFailure": "Failed to save all sections."
