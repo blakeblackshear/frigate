@@ -743,6 +743,7 @@ export function ConfigSection({
               "Settings saved successfully. Restart Frigate to apply your changes.",
           }),
           {
+            duration: 10000,
             action: (
               <a onClick={() => setRestartDialogOpen(true)}>
                 <Button>
