@@ -5,6 +5,8 @@ import { LiveStreamMetadata } from "@/types/live";
 
 const FETCH_TIMEOUT_MS = 10000;
 const DEFER_DELAY_MS = 2000;
+const emptyObject: Readonly<{ [key: string]: LiveStreamMetadata }> =
+  Object.freeze({});
 
 /**
  * Hook that fetches go2rtc stream metadata with deferred loading.
@@ -77,7 +79,7 @@ export default function useDeferredStreamMetadata(streamNames: string[]) {
     return metadata;
   }, []);
 
-  const { data: metadata = {} } = useSWR<{
+  const { data: metadata = emptyObject } = useSWR<{
     [key: string]: LiveStreamMetadata;
   }>(swrKey, fetcher, {
     revalidateOnFocus: false,
