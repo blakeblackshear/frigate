@@ -12,10 +12,10 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Verwijderde klasse",
-      "deletedCategory_other": "Verwijderde klassen",
-      "deletedImage_one": "Verwijderde afbeelding",
-      "deletedImage_other": "Verwijderde afbeeldingen",
+      "deletedCategory_one": "Verwijderd {{count}} klasse",
+      "deletedCategory_other": "Verwijderde {{count}} klassen",
+      "deletedImage_one": "Verwijderde {{count}} afbeelding",
+      "deletedImage_other": "Verwijderde {{count}} afbeeldingen",
       "categorizedImage": "Succesvol geclassificeerde afbeelding",
       "trainedModel": "Succesvol getraind model.",
       "trainingModel": "Modeltraining succesvol gestart.",

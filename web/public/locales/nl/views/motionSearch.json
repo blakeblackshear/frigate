@@ -1,1 +1,65 @@
-{}
+{
+    "startSearch": "Zoeken Starten",
+    "searchStarted": "Zoekopdracht gestart",
+    "searchCancelled": "Zoekopdracht geannuleerd",
+    "cancelSearch": "Annuleer",
+    "searching": "Zoekopdracht bezig.",
+    "searchComplete": "Zoekopdracht voltooid",
+    "title": "Beweging Zoeken",
+    "selectCamera": "Beweging Zoeken is aan het laden",
+    "noResultsYet": "Start een zoekactie om beweging te vinden in de geselecteerde regio",
+    "noChangesFound": "Geen pixel wijziging gedetecteerd in de geselecteerde regio",
+    "changesFound_one": "{{count}} bewegingsverandering gevonden",
+    "changesFound_other": "{{count}} bewegingsveranderingen gevonden",
+    "framesProcessed": "{{count}} frames verwerkt",
+    "jumpToTime": "Spring naar deze tijd",
+    "results": "Resultaten",
+    "documentTitle": "Beweging Zoeken - Frigate",
+    "description": "Teken een polygoon om het interessegebied te definieren en specifeer een tijdspanne voor het zoeken in dit gebied.",
+    "newSearch": "Nieuwe Zoekopdracht",
+    "clearResults": "Verwijder Resultaten",
+    "clearROI": "Verwijder Polygoon",
+    "polygonControls": {
+        "points_one": "{{count}} punt",
+        "points_other": "{{count}} punten",
+        "undo": "Verwijder het laatste punt",
+        "reset": "Herstel Polygoon"
+    },
+    "dialog": {
+        "title": "Beweging Zoeken",
+        "cameraLabel": "Camera"
+    },
+    "timeRange": {
+        "start": "Starttijd",
+        "end": "Eindtijd"
+    },
+    "settings": {
+        "title": "Zoekinstellingen",
+        "parallelMode": "Parallelle modus",
+        "parallelModeDesc": "Scan meerdere video segmenten tegelijk (sneller, maar significant meer CPU gebruik)",
+        "threshold": "Gevoeligheid drempel",
+        "thresholdDesc": "Lagere waardes detecteren eerder veranderingen (1-255)",
+        "minArea": "Minimaal wijzigings gebied",
+        "minAreaDesc": "Minimale percentage van gebied welke moet wijzigen om als significante wijziging aan te merken",
+        "frameSkip": "Frame overlaan",
+        "maxResults": "Maximaal aantal resultaten",
+        "maxResultsDesc": "Stop na dit aantal overeenkomende tijdstempels"
+    },
+    "errors": {
+        "polygonTooSmall": "De Polygoon moet minstens 3 punten bevatten",
+        "unknown": "Onbekende fout",
+        "noCamera": "Selecteer een camera",
+        "noROI": "Teken een interesse gebied a.u.b.",
+        "noTimeRange": "Selecteer een tijdsbereik a.u.b.",
+        "invalidTimeRange": "Eindtijd moet na de starttijd liggen",
+        "searchFailed": "Zoeken gefaald: {{message}}"
+    },
+    "changePercentage": "{{percentage}}% gewijzigd",
+    "metrics": {
+        "title": "Zoek Meetgegevens",
+        "segmentsScanned": "Gescande segmenten",
+        "segmentsProcessed": "Verwerkt",
+        "segmentsSkippedInactive": "Overgeslagen (geen activiteit)",
+        "segmentsSkippedHeatmap": "Overgeslagen (geen ROI overlap)"
+    }
+}

@@ -1,6 +1,6 @@
 {
     "minimum": "Minimale waarde van {{limit}} vereist",
-    "maximum": "Mag niet meer dan {{limit}} bedragen.",
+    "maximum": "Mag niet meer dan {{limit}} bedragen",
     "exclusiveMinimum": "Waarde moet groter zijn dan {{limit}}",
     "exclusiveMaximum": "Moet minder zijn dan {{limit}}",
     "minLength": "Moet minstens {{limit}} karakters zijn",

@@ -1,24 +1,29 @@
 {
     "audio": {
-        "label": "Audiogebeurtenissen",
+        "label": "Geluiddetectie",
         "enabled": {
-            "label": "Geluiddetectie inschakelen"
+            "label": "Geluiddetectie inschakelen",
+            "description": "Audioeventdetectie voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
         },
         "max_not_heard": {
             "label": "Einde timeout",
-            "description": "Hoeveelheid secondes zonder de geconfigureerde audio soort, voordat de geluids gebeurtenis is beindigd."
+            "description": "Aantal seconden zonder het geconfigureerde audiotype, voordat de geluidsgebeurtenis is beëindigd."
         },
         "min_volume": {
-            "label": "Minimale volume",
-            "description": "Minimale RMS-volumedrempel die nodig is om audiodetectie te starten; Hoe lager de waarde, hoe gevoeliger de detectie (bijvoorbeeld, 200 hoog, 500 gemiddeld, 1000 laag)."
+            "label": "Minimumvolume",
+            "description": "Minimale RMS-volumedrempel die nodig is om audiodetectie te starten; hoe lager de waarde, hoe gevoeliger de detectie (bijvoorbeeld, 200 hoog, 500 gemiddeld, 1000 laag)."
         },
         "listen": {
             "label": "Luistercategorieën",
             "description": "Lijst van luistercategorie gebeurtenissen voor detectie (zoals: blaffen, band_alarm, schreeuw, praten, roepen)."
         },
         "filters": {
-            "label": "Geluids filters",
-            "description": "Instellingen per audiotype, waaronder betrouwbaarheidsdrempels, ter vermindering van foutieve detecties."
+            "label": "Geluidsfilters",
+            "description": "Instellingen per audiotype, waaronder betrouwbaarheidsdrempels, ter vermindering van foutieve detecties.",
+            "threshold": {
+                "label": "Minimale audiobetrouwbaarheid",
+                "description": "Minimale betrouwbaarheidsdrempel voor de audiogebeurtenis om te worden geteld."
+            }
         },
         "enabled_in_config": {
             "label": "Originele audio-instelling",
@@ -27,44 +32,98 @@
         "num_threads": {
             "label": "Detectiethreads",
             "description": "Aantal threads voor audiodetectieverwerking."
-        }
+        },
+        "description": "Instellingen voor audiogebaseerde gebeurtenisdetectie voor alle camera's; kan per camera worden overschreven."
     },
     "audio_transcription": {
-        "label": "Audio‑transcriptie",
+        "label": "Audiotranscriptie",
         "description": "Instellingen voor live en spraakgestuurde audiotranscriptie voor gebeurtenissen en live ondertitels.",
         "live_enabled": {
             "label": "Live transcriptie",
             "description": "Live streaming‑transcriptie van audio inschakelen tijdens ontvangst."
+        },
+        "enabled": {
+            "label": "Audiotranscriptie inschakelen",
+            "description": "Automatische audiotranscriptie voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
+        },
+        "language": {
+            "label": "Transcriptietaal",
+            "description": "Taalcode voor transcriptie/vertaling (bijv. 'nl' voor Nederlands). Zie https://whisper-api.com/docs/languages/ voor ondersteunde taalcodes."
+        },
+        "device": {
+            "label": "Transcriptieapparaat",
+            "description": "Apparaat (CPU/GPU) voor het uitvoeren van het transcriptiemodel. Momenteel worden alleen NVIDIA CUDA GPU's ondersteund voor transcriptie."
+        },
+        "model_size": {
+            "label": "Modelgrootte",
+            "description": "Modelgrootte voor offline audiotranscriptie."
         }
     },
     "birdseye": {
-        "label": "Overzichtsweergave",
+        "label": "Birdseye-overzicht",
         "description": "Instellingen voor de overzichtsweergave die meerdere camerafeeds combineert tot één lay‑out.",
         "enabled": {
-            "label": "Activeer overzichtsweergave",
+            "label": "Birdseye-overzicht inschakelen",
             "description": "De overzichtsweergavefunctie in- of uitschakelen."
         },
         "mode": {
-            "label": "Volgmodus",
+            "label": "Weergavemodus",
             "description": "Modus voor het opnemen van camera’s in overzichtsweergave: ‘objecten’, ‘beweging’ of ‘continu’."
         },
         "order": {
             "label": "Positie",
             "description": "Numerieke positie die de volgorde van de camera in de overzichtsweergave lay-out bepaalt."
+        },
+        "restream": {
+            "label": "RTSP-herstreaming",
+            "description": "De Birdseye-uitvoer herstreamen als RTSP-feed; hierdoor blijft Birdseye continu actief."
+        },
+        "width": {
+            "label": "Breedte",
+            "description": "Uitvoerbreedte (pixels) van het samengestelde Birdseye-frame."
+        },
+        "height": {
+            "label": "Hoogte",
+            "description": "Uitvoerhoogte (pixels) van het samengestelde Birdseye-frame."
+        },
+        "quality": {
+            "label": "Coderingskwaliteit",
+            "description": "Coderingskwaliteit van de Birdseye MPEG-1-feed (1 = hoogste kwaliteit, 31 = laagste)."
+        },
+        "inactivity_threshold": {
+            "label": "Inactiviteitsdrempel",
+            "description": "Seconden inactiviteit waarna een camera niet meer in Birdseye wordt getoond."
+        },
+        "layout": {
+            "label": "Lay-out",
+            "description": "Lay-outopties voor de Birdseye-samenstelling.",
+            "scaling_factor": {
+                "label": "Schaalfactor",
+                "description": "Schaalfactor voor de lay-outcalculator (bereik 1,0 tot 5,0)."
+            },
+            "max_cameras": {
+                "label": "Maximum camera's",
+                "description": "Maximaal aantal camera's dat tegelijk in Birdseye wordt weergegeven; toont de meest recente camera's."
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "Inactief heartbeat-FPS",
+            "description": "Frames per seconde voor het opnieuw verzenden van het laatste Birdseye-frame tijdens inactiviteit; stel 0 in om uit te schakelen."
         }
     },
     "detect": {
-        "label": "Detectie object",
+        "label": "Objectdetectie",
         "description": "Instellingen voor de detectierol om objecten te detecteren en trackers te starten.",
         "enabled": {
-            "label": "Detectie aan"
+            "label": "Detectie inschakelen",
+            "description": "Objectdetectie voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
         },
         "height": {
-            "label": "Detectie hoogte",
+            "label": "Detectiehoogte",
             "description": "De hoogte in pixels van frames voor de detectiestream. Laat dit veld leeg om de standaardresolutie te gebruiken."
         },
         "width": {
-            "label": "Detectie breedte",
+            "label": "Detectiebreedte",
             "description": "De breedte in pixels van frames voor de detectiestream. Laat dit veld leeg om de standaardresolutie te gebruiken."
         },
         "fps": {
@@ -98,72 +157,1444 @@
                     "description": "Standaardlimiet voor het aantal frames dat een stilstaand object wordt gevolgd voordat wordt gestopt."
                 },
                 "objects": {
-                    "label": "Object‑maximum aantal frames",
-                    "description": "Per‑object overschrijden voor het maximum aantal frames voor tracking van stationaire objecten."
+                    "label": "Maximaal aantal frames per object",
+                    "description": "Maximum aantal frames per object bij het volgen van stilstaande objecten."
                 }
+            },
+            "classifier": {
+                "label": "Visuele classifier inschakelen",
+                "description": "Gebruik een visuele classifier om echt stilstaande objecten te detecteren, zelfs wanneer detectiekaders licht verschuiven."
             }
+        },
+        "annotation_offset": {
+            "label": "Annotatie-offset",
+            "description": "Milliseconden om detectieannotaties te verschuiven voor betere uitlijning van tijdlijn-detectiekaders met opnames; kan positief of negatief zijn."
         }
     },
     "version": {
         "description": "Numerieke of string-versie van de actieve configuratie om migraties of formaatwijzigingen te helpen detecteren.",
-        "label": "Huidige configuratie versie"
+        "label": "Huidige config-versie"
     },
     "safe_mode": {
         "label": "Veilige modus",
-        "description": "Wanneer ingeschakeld, start Frigate in veilige modus met verminderde functionaliteit voor probleemoplossing."
+        "description": "Wanneer ingeschakeld, start Frigate op in veilige modus met beperkte functies voor probleemoplossing."
     },
     "environment_vars": {
         "label": "Omgevingsvariabelen",
-        "description": "Sleutel/waarde paren van omgevingsvariabelen voor het Frigate proces in Home Assistant OS. Niet-HAOS gebruikers moeten in plaats hiervan Docker omgevingsvariabelen gebruiken."
+        "description": "Sleutel/waarde-paren van omgevingsvariabelen die ingesteld worden voor het Frigate-proces in Home Assistant OS. Gebruikers zonder HAOS moeten in plaats daarvan de Docker-omgevingsvariabelenconfiguratie gebruiken."
     },
     "auth": {
         "label": "Authenticatie",
         "enabled": {
-            "label": "Authenticatie aanzetten",
+            "label": "Authenticatie inschakelen",
             "description": "Schakel native authenticatie in voor de Frigate UI."
         },
         "reset_admin_password": {
-            "label": "Reset admin wachtwoord",
-            "description": "Indien waar, reset het admin gebruiker wachtwoord tijdens opstarten en print het nieuwe wachtwoord in het logboek."
+            "label": "Adminwachtwoord resetten",
+            "description": "Indien waar, reset het wachtwoord van de admingebruiker tijdens opstarten en print het nieuwe wachtwoord in het logboek."
         },
-        "description": "Authenticatie en sessie-gerelateerde instellingen inclusief cookie en tempo limiet opties.",
+        "description": "Authenticatie- en sessie-instellingen inclusief cookie- en snelheidsbeperkingsopties.",
         "cookie_name": {
-            "label": "JWT cookie naam",
+            "label": "JWT-cookienaam",
             "description": "Naam van de gebruikte cookie om de JWT token voor native authenticatie op te slaan."
         },
         "cookie_secure": {
-            "label": "Veilige cookie instelling",
+            "label": "Secure-cookievlag",
             "description": "Stel de veilige instelling in op de auth cookie; moet waar zijn indien TLS in gebruik."
         },
         "session_length": {
-            "label": "Sessie duratie",
-            "description": "Sessie duratie in seconden voor JWT-gebaseerde sessies."
+            "label": "Sessieduur",
+            "description": "Sessieduur in seconden voor JWT-gebaseerde sessies."
         },
         "refresh_time": {
-            "label": "Sessie ververs scherm",
-            "description": "Als een sessie binnen dit aantal seconden verloopt, ververs het tot volledige duratie."
+            "label": "Sessie-verversperiode",
+            "description": "Als een sessie binnen dit aantal seconden verloopt, wordt de sessie verlengd tot de volledige duur."
         },
         "failed_login_rate_limit": {
-            "label": "Gefaalde log-in pogingen",
-            "description": "Tempo-limiet regels voor gefaalde inlogpogingen om brute-force aanvallen te beperken."
+            "label": "Limieten voor mislukte inlogpogingen",
+            "description": "Rate-limitregels voor mislukte inlogpogingen om brute-forceaanvallen te beperken."
         },
         "trusted_proxies": {
-            "label": "Vertrouwde proxies"
+            "label": "Vertrouwde proxies",
+            "description": "Lijst met vertrouwde proxy-IP's die worden gebruikt bij het bepalen van het client-IP voor rate limiting."
+        },
+        "hash_iterations": {
+            "label": "Hash-iteraties",
+            "description": "Aantal PBKDF2-SHA256-iteraties voor het hashen van gebruikerswachtwoorden."
+        },
+        "roles": {
+            "label": "Roltoewijzingen",
+            "description": "Koppel rollen aan cameralijsten. Een lege lijst geeft de rol toegang tot alle camera's."
+        },
+        "admin_first_time_login": {
+            "label": "Eerste keer admin-vlag",
+            "description": "Wanneer ingeschakeld kan de UI een helplink tonen op de inlogpagina om gebruikers te informeren hoe ze kunnen inloggen na een admin-wachtwoordreset. "
         }
     },
     "logger": {
         "default": {
             "label": "Loggingsniveau",
-            "description": "Standaard globale logboek detailniveau (debug, info, waarschuwing, fout)."
+            "description": "Standaard globale logdetailniveau (debug, info, warning, error)."
         },
         "label": "Logging",
         "logs": {
-            "label": "Per-proces logboek niveau",
-            "description": "Per-component logboekniveau afwijkingen om detailniveau te vergroten of verkleinen per specifieke module."
+            "label": "Logboekniveau per proces",
+            "description": "Logboekniveau-afwijkingen per component om het detailniveau per specifieke module te verhogen of verlagen."
         },
-        "description": "Beheert het standaard logboek detailniveau en afwijkende instellingen per logboek."
+        "description": "Beheert het standaard logdetailniveau en afwijkende instellingen per logboek."
     },
     "profiles": {
-        "label": "Profielen"
+        "label": "Profielen",
+        "description": "Benoemde profieldefinities met weergavenamen. Cameraprofielen moeten verwijzen naar hier gedefinieerde namen.",
+        "friendly_name": {
+            "label": "Weergavenaam",
+            "description": "Weergavenaam voor dit profiel in de UI."
+        }
+    },
+    "database": {
+        "label": "Database",
+        "description": "Instellingen voor de SQLite-database die Frigate gebruikt om gevolgde objecten en opname-metadata op te slaan.",
+        "path": {
+            "label": "Databasepad",
+            "description": "Bestandssysteempad waar het Frigate SQLite-databasebestand wordt opgeslagen."
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "Instellingen voor de geïntegreerde go2rtc-restreaming-service voor het doorzenden en omzetten van live streams."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Instellingen voor het verbinden met en publiceren van telemetrie, snapshots en gebeurtenisdetails naar een MQTT-broker.",
+        "enabled": {
+            "label": "MQTT inschakelen",
+            "description": "MQTT-integratie voor status, gebeurtenissen en snapshots in- of uitschakelen."
+        },
+        "host": {
+            "label": "MQTT-host",
+            "description": "Hostnaam of IP-adres van de MQTT-broker."
+        },
+        "port": {
+            "label": "MQTT-poort",
+            "description": "Poort van de MQTT-broker (gewoonlijk 1883 voor gewoon MQTT)."
+        },
+        "topic_prefix": {
+            "label": "Topic-prefix",
+            "description": "MQTT-topic-prefix voor alle Frigate-topics; moet uniek zijn bij meerdere instanties."
+        },
+        "client_id": {
+            "label": "Client-ID",
+            "description": "Client-ID voor verbinding met de MQTT-broker; moet uniek zijn per instantie."
+        },
+        "stats_interval": {
+            "label": "Statistiekeninterval",
+            "description": "Interval in seconden voor het publiceren van systeem- en camerastatistieken naar MQTT."
+        },
+        "user": {
+            "label": "MQTT-gebruikersnaam",
+            "description": "Optionele MQTT-gebruikersnaam; kan via omgevingsvariabelen of secrets worden opgegeven."
+        },
+        "password": {
+            "label": "MQTT-wachtwoord",
+            "description": "Optioneel MQTT-wachtwoord; kan via omgevingsvariabelen of secrets worden opgegeven."
+        },
+        "tls_ca_certs": {
+            "label": "TLS CA-certificaten",
+            "description": "Pad naar het CA-certificaat voor TLS-verbindingen met de broker (voor zelfondertekende certificaten)."
+        },
+        "tls_client_cert": {
+            "label": "Clientcertificaat",
+            "description": "Pad naar het clientcertificaat voor wederzijdse TLS-authenticatie; stel geen gebruiker/wachtwoord in bij gebruik van clientcertificaten."
+        },
+        "tls_client_key": {
+            "label": "Clientsleutel",
+            "description": "Pad naar de privésleutel van het clientcertificaat."
+        },
+        "tls_insecure": {
+            "label": "Onveilige TLS",
+            "description": "Onveilige TLS-verbindingen toestaan door hostnaamverificatie over te slaan (niet aanbevolen)."
+        },
+        "qos": {
+            "label": "MQTT QoS-niveau",
+            "description": "QoS-niveau voor MQTT-publicaties/abonnementen (0, 1 of 2)."
+        }
+    },
+    "notifications": {
+        "label": "Meldingen",
+        "description": "Instellingen om meldingen voor alle camera's in te schakelen en te beheren; kan per camera worden overschreven.",
+        "enabled": {
+            "label": "Meldingen inschakelen",
+            "description": "Meldingen voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
+        },
+        "email": {
+            "label": "Melding email",
+            "description": "E-mailadres voor pushmeldingen of vereist door bepaalde meldingsproviders."
+        },
+        "cooldown": {
+            "label": "Wachttijd",
+            "description": "Wachttijd (seconden) tussen meldingen om spammen te voorkomen."
+        },
+        "enabled_in_config": {
+            "label": "Originele meldingsstatus",
+            "description": "Geeft aan of meldingen waren ingeschakeld in de originele statische configuratie."
+        }
+    },
+    "networking": {
+        "label": "Netwerken",
+        "description": "Netwerkinstellingen zoals IPv6-ondersteuning voor Frigate-eindpunten.",
+        "ipv6": {
+            "label": "IPv6-configuratie",
+            "description": "IPv6-instellingen voor Frigate-netwerkdiensten.",
+            "enabled": {
+                "label": "IPv6 inschakelen",
+                "description": "IPv6-ondersteuning voor Frigate-diensten (API en UI) inschakelen waar van toepassing."
+            }
+        },
+        "listen": {
+            "label": "Luisterpoortenconfiguratie",
+            "description": "Configuratie van interne en externe luisterpoorten. Dit is voor gevorderde gebruikers. In de meeste gevallen wordt aanbevolen de poortensectie in het Docker Compose-bestand aan te passen.",
+            "internal": {
+                "label": "Interne poort",
+                "description": "Interne luisterpoort voor Frigate (standaard 5000)."
+            },
+            "external": {
+                "label": "Externe poort",
+                "description": "Externe luisterpoort voor Frigate (standaard 8971)."
+            }
+        }
+    },
+    "proxy": {
+        "label": "Proxy",
+        "description": "Instellingen voor het integreren van Frigate achter een reverse proxy die geauthenticeerde gebruikersheaders doorgeeft.",
+        "header_map": {
+            "label": "Headertoewijzing",
+            "description": "Inkomende proxyheaders koppelen aan Frigate gebruikers- en rolvelden voor proxy-authenticatie.",
+            "user": {
+                "label": "Gebruikersheader",
+                "description": "Header met de geauthenticeerde gebruikersnaam van de upstream-proxy."
+            },
+            "role": {
+                "label": "Rolheader",
+                "description": "Header met de rol of groepen van de geauthenticeerde gebruiker van de upstream-proxy."
+            },
+            "role_map": {
+                "label": "Roltoewijzing",
+                "description": "Koppel upstream-groepswaarden aan Frigate-rollen (bijv. admingroepen aan de adminrol)."
+            }
+        },
+        "logout_url": {
+            "label": "Uitlog-URL",
+            "description": "URL waarnaar gebruikers worden doorgestuurd bij uitloggen via de proxy."
+        },
+        "auth_secret": {
+            "label": "Proxygeheim",
+            "description": "Optioneel geheim dat wordt gecontroleerd tegen de X-Proxy-Secret-header om vertrouwde proxies te verifiëren."
+        },
+        "default_role": {
+            "label": "Standaardrol",
+            "description": "Standaardrol toegewezen aan proxy-geauthenticeerde gebruikers wanneer geen roltoewijzing van toepassing is (admin of viewer)."
+        },
+        "separator": {
+            "label": "Scheidingsteken",
+            "description": "Scheidingsteken voor meerdere waarden in proxyheaders."
+        }
+    },
+    "telemetry": {
+        "label": "Telemetrie",
+        "description": "Opties voor systeemtelemetrie en statistieken, inclusief GPU- en netwerkbandbreedtebewaking.",
+        "network_interfaces": {
+            "label": "Netwerkinterfaces",
+            "description": "Lijst met netwerkinterfacenaamprefixen voor bandbreedtestatistieken."
+        },
+        "stats": {
+            "label": "Systeemstatistieken",
+            "description": "Opties voor het in- of uitschakelen van het verzamelen van systeem- en GPU-statistieken.",
+            "amd_gpu_stats": {
+                "label": "AMD GPU-statistieken",
+                "description": "Verzameling van AMD GPU-statistieken inschakelen indien een AMD GPU aanwezig is."
+            },
+            "intel_gpu_stats": {
+                "label": "Intel GPU-statistieken",
+                "description": "Verzameling van Intel GPU-statistieken inschakelen indien een Intel GPU aanwezig is."
+            },
+            "network_bandwidth": {
+                "label": "Netwerkbandbreedte",
+                "description": "Per-proces netwerkbandbreedtebewaking voor camera-ffmpeg-processen en detectoren inschakelen (vereist Linux-capabilities)."
+            },
+            "intel_gpu_device": {
+                "label": "Intel GPU-apparaat",
+                "description": "PCI-busadres of DRM-apparaatpad (bijv. /dev/dri/card1) om Intel GPU-statistieken aan een specifiek apparaat te koppelen bij meerdere GPU's."
+            }
+        },
+        "version_check": {
+            "label": "Versiecontrole",
+            "description": "Een uitgaande controle inschakelen om te detecteren of een nieuwere Frigate-versie beschikbaar is."
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "TLS-instellingen voor de Frigate-webservice (poort 8971).",
+        "enabled": {
+            "label": "TLS inschakelen",
+            "description": "TLS inschakelen voor de Frigate-webinterface en API op de geconfigureerde TLS-poort."
+        }
+    },
+    "ui": {
+        "label": "UI",
+        "description": "Gebruikersinterfacevoorkeuren zoals tijdzone, tijd/datumopmaak en eenheden.",
+        "timezone": {
+            "label": "Tijdzone",
+            "description": "Optionele tijdzone voor weergave in de UI (standaard browsertijd indien niet ingesteld)."
+        },
+        "time_format": {
+            "label": "Tijdnotatie",
+            "description": "Tijdnotatie voor de UI (browser, 12-uurs of 24-uurs)."
+        },
+        "date_style": {
+            "label": "Datumstijl",
+            "description": "Datumstijl voor de UI (vol, lang, middel, kort)."
+        },
+        "time_style": {
+            "label": "Tijdstijl",
+            "description": "Tijdstijl voor de UI (vol, lang, middel, kort)."
+        },
+        "unit_system": {
+            "label": "Eenhedensysteem",
+            "description": "Eenhedensysteem voor weergave (metrisch of imperiaal) in de UI en MQTT."
+        }
+    },
+    "detectors": {
+        "label": "Detector hardware",
+        "description": "Configuratie voor objectdetectors (CPU, GPU, ONNX-backends) en detector-specifieke modelinstellingen.",
+        "type": {
+            "label": "Type"
+        },
+        "model": {
+            "label": "Detector-specifieke modelconfiguratie",
+            "description": "Detector-specifieke modelconfiguratie-opties (pad, invoergrootte, enz.).",
+            "path": {
+                "label": "Pad naar aangepast objectdetectormodel",
+                "description": "Pad naar een aangepast detectiemodel (of plus://<model_id> voor Frigate+-modellen)."
+            },
+            "labelmap_path": {
+                "label": "Labelmap voor aangepaste objectdetector",
+                "description": "Pad naar een labelmap-bestand dat numerieke klassen koppelt aan string-labels voor de detector."
+            },
+            "width": {
+                "label": "Invoerbreedte objectdetectiemodel",
+                "description": "Breedte van de modelinvoertensor in pixels."
+            },
+            "height": {
+                "label": "Invoerhoogte objectdetectiemodel",
+                "description": "Hoogte van de modelinvoertensor in pixels."
+            },
+            "labelmap": {
+                "label": "Labelmap-aanpassing",
+                "description": "Overschrijvingen of herwijzingen om samen te voegen met de standaard labelmap."
+            },
+            "attributes_map": {
+                "label": "Koppeling van objectlabels aan attribuutlabels",
+                "description": "Koppeling tussen objectlabels en attribuutlabels voor metadata (bijv. 'car' -> ['license_plate'])."
+            },
+            "input_tensor": {
+                "label": "Invoertensorvorm van het model",
+                "description": "Tensorformaat dat het model verwacht: 'nhwc' of 'nchw'."
+            },
+            "input_pixel_format": {
+                "label": "Invoerpixelkleurformaat van het model",
+                "description": "Pixelkleurruimte die het model verwacht: 'rgb', 'bgr' of 'yuv'."
+            },
+            "input_dtype": {
+                "label": "Invoergegevenstype van het model",
+                "description": "Gegevenstype van de modelinvoertensor (bijv. 'float32')."
+            },
+            "model_type": {
+                "label": "Modeltype voor objectdetectie",
+                "description": "Modelarchitectuurtype van de detector (ssd, yolox, yolonas) voor optimalisatie door sommige detectors."
+            }
+        },
+        "model_path": {
+            "label": "Detector-specifiek modelpad",
+            "description": "Bestandspad naar het detector-modelbinaire bestand, indien vereist door de gekozen detector."
+        },
+        "axengine": {
+            "label": "AXEngine NPU",
+            "description": "AXERA AX650N/AX8850N NPU-detector die gecompileerde .axmodel-bestanden uitvoert via de AXEngine-runtime."
+        },
+        "cpu": {
+            "label": "CPU",
+            "description": "CPU TFLite-detector die TensorFlow Lite-modellen uitvoert op de host-CPU zonder hardwareversnelling. Niet aanbevolen.",
+            "num_threads": {
+                "label": "Aantal detectiethreads",
+                "description": "Het aantal threads voor CPU-gebaseerde inferentie."
+            }
+        },
+        "deepstack": {
+            "label": "DeepStack",
+            "description": "DeepStack/CodeProject.AI-detector die afbeeldingen naar een externe DeepStack HTTP API stuurt voor inferentie. Niet aanbevolen.",
+            "api_url": {
+                "label": "DeepStack API URL",
+                "description": "De URL van de DeepStack API."
+            },
+            "api_timeout": {
+                "label": "DeepStack API-timeout (in seconden)",
+                "description": "Maximale toegestane tijd voor een DeepStack API-verzoek."
+            },
+            "api_key": {
+                "label": "DeepStack API-sleutel (indien vereist)",
+                "description": "Optionele API-sleutel voor geauthenticeerde DeepStack-diensten."
+            }
+        },
+        "degirum": {
+            "label": "DeGirum",
+            "description": "DeGirum-detector voor het uitvoeren van modellen via DeGirum-cloud of lokale inferentiediensten.",
+            "location": {
+                "label": "Locatie van inferentie-engine",
+                "description": "Locatie van de DeGirum-inferentie-engine (bijv. '@cloud', '127.0.0.1')."
+            },
+            "zoo": {
+                "label": "Model Zoo",
+                "description": "Pad of URL naar de DeGirum model zoo."
+            },
+            "token": {
+                "label": "DeGirum-cloudtoken",
+                "description": "Token voor toegang tot de DeGirum-cloud."
+            }
+        },
+        "edgetpu": {
+            "label": "EdgeTPU",
+            "description": "EdgeTPU-detector die TensorFlow Lite-modellen uitvoert die zijn gecompileerd voor Coral EdgeTPU via de EdgeTPU-delegate.",
+            "device": {
+                "label": "Apparaattype",
+                "description": "Het apparaat voor EdgeTPU-inferentie (bijv. 'usb', 'pci')."
+            }
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L",
+            "description": "Hailo-8/Hailo-8L-detector die HEF-modellen en de HailoRT SDK gebruikt voor inferentie op Hailo-hardware.",
+            "device": {
+                "label": "Apparaattype",
+                "description": "Het apparaat voor Hailo-inferentie (bijv. 'PCIe', 'M.2')."
+            }
+        },
+        "memryx": {
+            "label": "MemryX",
+            "description": "MemryX MX3-detector die gecompileerde DFP-modellen uitvoert op MemryX-accelerators.",
+            "device": {
+                "label": "Apparaatpad",
+                "description": "Het apparaat voor MemryX-inferentie (bijv. 'PCIe')."
+            }
+        },
+        "onnx": {
+            "label": "ONNX",
+            "description": "ONNX-detector voor het uitvoeren van ONNX-modellen; gebruikt beschikbare versnellingsbackends (CUDA/ROCm/OpenVINO) indien beschikbaar.",
+            "device": {
+                "label": "Apparaattype",
+                "description": "Het apparaat voor ONNX-inferentie (bijv. 'AUTO', 'CPU', 'GPU')."
+            }
+        },
+        "openvino": {
+            "label": "OpenVINO",
+            "description": "OpenVINO-detector voor AMD- en Intel-CPU's, Intel GPU's en Intel VPU-hardware.",
+            "device": {
+                "label": "Apparaattype",
+                "description": "Het apparaat voor OpenVINO-inferentie (bijv. 'CPU', 'GPU', 'NPU')."
+            }
+        },
+        "rknn": {
+            "label": "RKNN",
+            "description": "RKNN-detector voor Rockchip NPU's; voert gecompileerde RKNN-modellen uit op Rockchip-hardware.",
+            "num_cores": {
+                "label": "Aantal te gebruiken NPU-kernen.",
+                "description": "Het aantal te gebruiken NPU-kernen (0 voor automatisch)."
+            }
+        },
+        "synaptics": {
+            "label": "Synaptics",
+            "description": "Synaptics NPU-detector voor modellen in .synap-formaat via de Synap SDK op Synaptics-hardware."
+        },
+        "teflon_tfl": {
+            "label": "Teflon",
+            "description": "Teflon delegate-detector voor TFLite via de Mesa Teflon delegate-bibliotheek voor GPU-versnelling."
+        },
+        "tensorrt": {
+            "label": "TensorRT",
+            "description": "TensorRT-detector voor Nvidia Jetson-apparaten via geserialiseerde TensorRT-engines voor versnelde inferentie.",
+            "device": {
+                "label": "GPU-apparaatindex",
+                "description": "De te gebruiken GPU-apparaatindex."
+            }
+        },
+        "zmq": {
+            "label": "ZMQ IPC",
+            "description": "ZMQ IPC-detector die inferentie uitbesteedt aan een extern proces via een ZeroMQ IPC-eindpunt.",
+            "endpoint": {
+                "label": "ZMQ IPC-eindpunt",
+                "description": "Het ZMQ-eindpunt waarmee verbinding wordt gemaakt."
+            },
+            "request_timeout_ms": {
+                "label": "ZMQ-verzoektimeout in milliseconden",
+                "description": "Timeout voor ZMQ-verzoeken in milliseconden."
+            },
+            "linger_ms": {
+                "label": "ZMQ-socket linger in milliseconden",
+                "description": "Socket linger-periode in milliseconden."
+            }
+        }
+    },
+    "model": {
+        "label": "Detectie model",
+        "description": "Instellingen voor het configureren van een aangepast objectdetectiemodel en de invoervorm.",
+        "path": {
+            "label": "Pad naar aangepast objectdetectormodel",
+            "description": "Pad naar een aangepast detectiemodel (of plus://<model_id> voor Frigate+-modellen)."
+        },
+        "labelmap_path": {
+            "label": "Labelmap voor aangepaste objectdetector",
+            "description": "Pad naar een labelmap-bestand dat numerieke klassen koppelt aan string-labels voor de detector."
+        },
+        "width": {
+            "label": "Invoerbreedte objectdetectiemodel",
+            "description": "Breedte van de modelinvoertensor in pixels."
+        },
+        "height": {
+            "label": "Invoerhoogte objectdetectiemodel",
+            "description": "Hoogte van de modelinvoertensor in pixels."
+        },
+        "labelmap": {
+            "label": "Labelmap-aanpassing",
+            "description": "Overschrijvingen of herwijzingen om samen te voegen met de standaard labelmap."
+        },
+        "attributes_map": {
+            "label": "Koppeling van objectlabels aan attribuutlabels",
+            "description": "Koppeling tussen objectlabels en attribuutlabels voor metadata (bijv. 'car' -> ['license_plate'])."
+        },
+        "input_tensor": {
+            "label": "Invoertensorvorm van het model",
+            "description": "Tensorformaat dat het model verwacht: 'nhwc' of 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "Invoerpixelkleurformaat van het model",
+            "description": "Pixelkleurruimte die het model verwacht: 'rgb', 'bgr' of 'yuv'."
+        },
+        "input_dtype": {
+            "label": "Invoergegevenstype van het model",
+            "description": "Gegevenstype van de modelinvoertensor (bijv. 'float32')."
+        },
+        "model_type": {
+            "label": "Modeltype voor objectdetectie",
+            "description": "Modelarchitectuurtype van de detector (ssd, yolox, yolonas) voor optimalisatie door sommige detectors."
+        }
+    },
+    "genai": {
+        "label": "Generatieve AI-configuratie",
+        "description": "Instellingen voor geïntegreerde generatieve AI-providers voor het genereren van objectbeschrijvingen en beoordelingssamenvattingen.",
+        "api_key": {
+            "label": "API-sleutel",
+            "description": "API-sleutel vereist door sommige providers (kan ook via omgevingsvariabelen worden ingesteld)."
+        },
+        "base_url": {
+            "label": "Basis-URL",
+            "description": "Basis-URL voor zelf-gehoste of compatibele providers (bijv. een Ollama-instantie)."
+        },
+        "model": {
+            "label": "Model",
+            "description": "Het model van de provider voor het genereren van beschrijvingen of samenvattingen."
+        },
+        "provider": {
+            "label": "Provider",
+            "description": "De te gebruiken GenAI-provider (bijv. ollama, gemini, openai)."
+        },
+        "roles": {
+            "label": "Rollen",
+            "description": "GenAI-rollen (chat, beschrijvingen, inbeddingen); één provider per rol."
+        },
+        "provider_options": {
+            "label": "Provideropties",
+            "description": "Aanvullende provider-specifieke opties voor de GenAI-client."
+        },
+        "runtime_options": {
+            "label": "Runtime-opties",
+            "description": "Runtime-opties die bij elke inferentieaanroep aan de provider worden meegegeven."
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "FFmpeg-instellingen inclusief binaire pad, argumenten, hardwareversnellingsopties en uitvoerargumenten per rol.",
+        "path": {
+            "label": "FFmpeg-pad",
+            "description": "Pad naar het te gebruiken FFmpeg-binaire bestand of een versie-alias (\"5.0\" of \"7.0\")."
+        },
+        "global_args": {
+            "label": "FFmpeg globale argumenten",
+            "description": "Globale argumenten voor FFmpeg-processen."
+        },
+        "hwaccel_args": {
+            "label": "Hardwareversnellingsargumenten",
+            "description": "Hardwareversnellingsargumenten voor FFmpeg. Provider-specifieke presets worden aanbevolen."
+        },
+        "input_args": {
+            "label": "Invoerargumenten",
+            "description": "Invoerargumenten voor FFmpeg-invoerstromen."
+        },
+        "output_args": {
+            "label": "Uitvoerargumenten",
+            "description": "Standaard uitvoerargumenten voor verschillende FFmpeg-rollen zoals detectie en opname.",
+            "detect": {
+                "label": "Uitvoerargumenten voor detectie",
+                "description": "Standaard uitvoerargumenten voor streams met detectierol."
+            },
+            "record": {
+                "label": "Uitvoerargumenten voor opname",
+                "description": "Standaard uitvoerargumenten voor streams met opnamerol."
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg-herverbindingstijd",
+            "description": "Seconden wachten voor een herverbindingspoging na een mislukte camerastream. Standaard is 10."
+        },
+        "apple_compatibility": {
+            "label": "Apple-compatibiliteit",
+            "description": "HEVC-tagging inschakelen voor betere Apple-spelercompatibiliteit bij het opnemen van H.265."
+        },
+        "gpu": {
+            "label": "GPU-index",
+            "description": "Standaard GPU-index voor hardwareversnelling indien beschikbaar."
+        },
+        "inputs": {
+            "label": "Camera-invoer",
+            "description": "Lijst van invoerstream-definities (paden en rollen) voor deze camera.",
+            "path": {
+                "label": "Invoerpad",
+                "description": "URL of pad van de camera-invoerstroom."
+            },
+            "roles": {
+                "label": "Invoerrollen",
+                "description": "Rollen voor deze invoerstroom."
+            },
+            "global_args": {
+                "label": "FFmpeg globale argumenten",
+                "description": "FFmpeg globale argumenten voor deze invoerstroom."
+            },
+            "hwaccel_args": {
+                "label": "Hardwareversnellingsargumenten",
+                "description": "Hardwareversnellingsargumenten voor deze invoerstroom."
+            },
+            "input_args": {
+                "label": "Invoerargumenten",
+                "description": "Invoerargumenten specifiek voor deze stream."
+            }
+        }
+    },
+    "live": {
+        "label": "Live weergave",
+        "description": "Instellingen voor de jsmpeg-livestream-resolutie en -kwaliteit. Dit heeft geen invloed op gerestreamde camera's die go2rtc gebruiken voor live weergave.",
+        "streams": {
+            "label": "Live streamnamen",
+            "description": "Koppeling van geconfigureerde streamnamen aan restream/go2rtc-namen voor live weergave."
+        },
+        "height": {
+            "label": "Live hoogte",
+            "description": "Hoogte (pixels) voor weergave van de jsmpeg-livestream in de webinterface; moet ≤ hoogte van de detectiestream zijn."
+        },
+        "quality": {
+            "label": "Live kwaliteit",
+            "description": "Coderingskwaliteit voor de jsmpeg-stream (1 hoogste, 31 laagste)."
+        }
+    },
+    "motion": {
+        "label": "Bewegingsdetectie",
+        "description": "Standaard bewegingsdetectie-instellingen die worden toegepast op camera's tenzij per camera overschreven.",
+        "enabled": {
+            "label": "Bewegingsdetectie inschakelen",
+            "description": "Bewegingsdetectie voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
+        },
+        "threshold": {
+            "label": "Bewegingsdrempel",
+            "description": "Pixelverschildrempel voor de bewegingsdetector; hogere waarden verminderen de gevoeligheid (bereik 1-255)."
+        },
+        "lightning_threshold": {
+            "label": "Bliksemdrempel",
+            "description": "Drempel om korte lichtflitsen te detecteren en te negeren (lager is gevoeliger, waarden tussen 0,3 en 1,0). Dit voorkomt bewegingsdetectie niet volledig; het zorgt er alleen voor dat de detector stopt met het analyseren van extra frames zodra de drempel wordt overschreden. Op beweging gebaseerde opnames worden tijdens deze gebeurtenissen nog steeds aangemaakt."
+        },
+        "skip_motion_threshold": {
+            "label": "Drempel voor overgeslagen beweging",
+            "description": "Als ingesteld op een waarde tussen 0,0 en 1,0, en meer dan dit deel van het beeld verandert in één frame, geeft de detector geen bewegingsvakken terug en kalibreert hij direct opnieuw. Dit bespaart CPU en vermindert vals-positieven bij bliksem, stormen e.d., maar kan echte gebeurtenissen zoals PTZ-tracking missen. De afweging is tussen het weggooien van enkele megabytes opnames versus het bekijken van een paar korte clips. Leeg laten (None) om deze functie uit te schakelen."
+        },
+        "improve_contrast": {
+            "label": "Contrast verbeteren",
+            "description": "Contrastverbetering op frames toepassen vóór bewegingsanalyse om detectie te verbeteren."
+        },
+        "contour_area": {
+            "label": "Contouroppervlakte",
+            "description": "Minimale contouroppervlakte in pixels voor een bewegingscontour om te worden geteld."
+        },
+        "delta_alpha": {
+            "label": "Delta-alfa",
+            "description": "Alpha-mengfactor voor frameverschil bij bewegingsberekening."
+        },
+        "frame_alpha": {
+            "label": "Frame-alfa",
+            "description": "Alpha-waarde voor het mengen van frames bij bewegingsvoorverwerking."
+        },
+        "frame_height": {
+            "label": "Framehoogte",
+            "description": "Hoogte in pixels waarnaar frames worden geschaald bij het berekenen van beweging."
+        },
+        "mask": {
+            "label": "Maskercoördinaten",
+            "description": "Geordende x,y-coördinaten die het bewegingsmaskeerpolygoon definiëren voor het in- of uitsluiten van gebieden."
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT uit-vertraging",
+            "description": "Seconden wachten na de laatste beweging vóór publicatie van een MQTT 'off'-status."
+        },
+        "enabled_in_config": {
+            "label": "Originele bewegingsstatus",
+            "description": "Geeft aan of bewegingsdetectie was ingeschakeld in de originele statische configuratie."
+        },
+        "raw_mask": {
+            "label": "Onbewerkt masker"
+        }
+    },
+    "objects": {
+        "label": "Objecten",
+        "description": "Standaardinstellingen voor objectvolging, inclusief te volgen labels en per-object filters.",
+        "track": {
+            "label": "Te volgen objecten",
+            "description": "Lijst met objectlabels om te volgen voor alle camera's; kan per camera worden overschreven."
+        },
+        "filters": {
+            "label": "Objectfilters",
+            "description": "Filters op gedetecteerde objecten om vals-positieven te verminderen (oppervlakte, verhouding, betrouwbaarheid).",
+            "min_area": {
+                "label": "Minimale objectoppervlakte",
+                "description": "Minimale detectiekaderoppervlakte (pixels of percentage) voor dit objecttype. Kan pixels (int) of percentage (float tussen 0,000001 en 0,99) zijn."
+            },
+            "max_area": {
+                "label": "Maximale objectoppervlakte",
+                "description": "Maximale detectiekaderoppervlakte (pixels of percentage) voor dit objecttype. Kan pixels (int) of percentage (float tussen 0,000001 en 0,99) zijn."
+            },
+            "min_ratio": {
+                "label": "Minimale beeldverhouding",
+                "description": "Minimale breedte/hoogte-verhouding voor het detectiekader om te kwalificeren."
+            },
+            "max_ratio": {
+                "label": "Maximale beeldverhouding",
+                "description": "Maximale breedte/hoogte-verhouding voor het detectiekader om te kwalificeren."
+            },
+            "threshold": {
+                "label": "Betrouwbaarheidsdrempel",
+                "description": "Gemiddelde detectiebetrouwbaarheidsdrempel om een object als terecht positief te beschouwen."
+            },
+            "min_score": {
+                "label": "Minimale betrouwbaarheid",
+                "description": "Minimale detectiebetrouwbaarheid in één frame om het object te tellen."
+            },
+            "mask": {
+                "label": "Filtermasker",
+                "description": "Polygooncoördinaten die aangeven waar dit filter van toepassing is in het frame."
+            },
+            "raw_mask": {
+                "label": "Onbewerkt masker"
+            }
+        },
+        "mask": {
+            "label": "Objectmasker",
+            "description": "Maskeerpolygoon om objectdetectie in bepaalde gebieden te voorkomen."
+        },
+        "raw_mask": {
+            "label": "Onbewerkt masker"
+        },
+        "genai": {
+            "label": "GenAI-objectconfiguratie",
+            "description": "GenAI-opties voor het beschrijven van gevolgde objecten en het versturen van frames voor generatie.",
+            "enabled": {
+                "label": "GenAI inschakelen",
+                "description": "GenAI-beschrijvingen voor gevolgde objecten standaard inschakelen."
+            },
+            "use_snapshot": {
+                "label": "Snapshots gebruiken",
+                "description": "Objectsnapshots gebruiken in plaats van miniaturen voor GenAI-beschrijving."
+            },
+            "prompt": {
+                "label": "Bijschriftprompt",
+                "description": "Standaard promptsjabloon voor het genereren van beschrijvingen met GenAI."
+            },
+            "object_prompts": {
+                "label": "Objectprompts",
+                "description": "Prompts per object voor het aanpassen van GenAI-uitvoer voor specifieke labels."
+            },
+            "objects": {
+                "label": "GenAI-objecten",
+                "description": "Lijst van objectlabels die standaard naar GenAI worden gestuurd."
+            },
+            "required_zones": {
+                "label": "Vereiste zones",
+                "description": "Zones die objecten moeten betreden om in aanmerking te komen voor GenAI-beschrijving."
+            },
+            "debug_save_thumbnails": {
+                "label": "Snapshots opslaan",
+                "description": "Snapshots die naar GenAI worden gestuurd opslaan voor foutopsporing."
+            },
+            "send_triggers": {
+                "label": "GenAI-triggers",
+                "description": "Bepaalt wanneer frames naar GenAI worden gestuurd (bij einde, na updates, enz.).",
+                "tracked_object_end": {
+                    "label": "Sturen bij beëindiging",
+                    "description": "Een verzoek naar GenAI sturen wanneer het gevolgde object eindigt."
+                },
+                "after_significant_updates": {
+                    "label": "Vroege GenAI-trigger",
+                    "description": "Een verzoek naar GenAI sturen na een bepaald aantal significante updates voor het gevolgde object."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Originele GenAI-status",
+                "description": "Geeft aan of GenAI was ingeschakeld in de originele statische configuratie."
+            }
+        }
+    },
+    "record": {
+        "label": "Opname",
+        "description": "Opname- en bewaarinstellingen die worden toegepast op camera's tenzij per camera overschreven.",
+        "enabled": {
+            "label": "Opname inschakelen",
+            "description": "Opname voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
+        },
+        "expire_interval": {
+            "label": "Opruiminterval opnames",
+            "description": "Minuten tussen opruimrondes die verlopen opnamesegmenten verwijderen."
+        },
+        "continuous": {
+            "label": "Continue bewaring",
+            "description": "Aantal dagen om opnames te bewaren ongeacht gevolgde objecten of beweging. Stel 0 in om alleen opnames van meldingen en detecties te bewaren.",
+            "days": {
+                "label": "Bewaardagen",
+                "description": "Dagen om opnames te bewaren."
+            }
+        },
+        "motion": {
+            "label": "Bewegingsretentie",
+            "description": "Aantal dagen om opnames veroorzaakt door beweging te bewaren, ongeacht gevolgde objecten. Stel 0 in om alleen opnames van meldingen en detecties te bewaren.",
+            "days": {
+                "label": "Bewaardagen",
+                "description": "Dagen om opnames te bewaren."
+            }
+        },
+        "detections": {
+            "label": "Detectieretentie",
+            "description": "Opname-retentie-instellingen voor detectiegebeurtenissen inclusief pre/post-captureduur.",
+            "pre_capture": {
+                "label": "Seconden vóór opname",
+                "description": "Aantal seconden vóór de detectiegebeurtenis om op te nemen in de opname."
+            },
+            "post_capture": {
+                "label": "Seconden na opname",
+                "description": "Aantal seconden na de detectiegebeurtenis om op te nemen in de opname."
+            },
+            "retain": {
+                "label": "Gebeurtenisbewaring",
+                "description": "Bewaarinstellingen voor opnames van detectiegebeurtenissen.",
+                "days": {
+                    "label": "Bewaardagen",
+                    "description": "Aantal dagen om opnames van detectiegebeurtenissen te bewaren."
+                },
+                "mode": {
+                    "label": "Bewaarmodus",
+                    "description": "Bewaarmodus: all (alle segmenten), motion (segmenten met beweging) of active_objects (segmenten met actieve objecten)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Meldingsbewaring",
+            "description": "Opname-retentie-instellingen voor alertgebeurtenissen inclusief pre/post-captureduur.",
+            "pre_capture": {
+                "label": "Seconden vóór opname",
+                "description": "Aantal seconden vóór de detectiegebeurtenis om op te nemen in de opname."
+            },
+            "post_capture": {
+                "label": "Seconden na opname",
+                "description": "Aantal seconden na de detectiegebeurtenis om op te nemen in de opname."
+            },
+            "retain": {
+                "label": "Gebeurtenisbewaring",
+                "description": "Bewaarinstellingen voor opnames van detectiegebeurtenissen.",
+                "days": {
+                    "label": "Bewaardagen",
+                    "description": "Aantal dagen om opnames van detectiegebeurtenissen te bewaren."
+                },
+                "mode": {
+                    "label": "Bewaarmodus",
+                    "description": "Bewaarmodus: all (alle segmenten), motion (segmenten met beweging) of active_objects (segmenten met actieve objecten)."
+                }
+            }
+        },
+        "export": {
+            "label": "Exportconfiguratie",
+            "description": "Instellingen voor het exporteren van opnames, zoals timelapse en hardwareversnelling.",
+            "hwaccel_args": {
+                "label": "Hardwareversnellingsargumenten voor export",
+                "description": "Hardwareversnellingsargumenten voor export/transcodering."
+            },
+            "max_concurrent": {
+                "label": "Maximaal aantal gelijktijdige exports",
+                "description": "Maximum aantal exporttaken dat tegelijk wordt verwerkt."
+            }
+        },
+        "preview": {
+            "label": "Voorbeeldconfiguratie",
+            "description": "Instellingen voor de kwaliteit van opnamevoorbeelden in de UI.",
+            "quality": {
+                "label": "Voorbeeldkwaliteit",
+                "description": "Kwaliteitsniveau voor voorbeelden (very_low, low, medium, high, very_high)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Originele opnamestatus",
+            "description": "Geeft aan of opname was ingeschakeld in de originele statische configuratie."
+        }
+    },
+    "review": {
+        "label": "Beoordeling",
+        "description": "Instellingen voor meldingen, detecties en GenAI-beoordelingssamenvattingen in de UI en opslag.",
+        "alerts": {
+            "label": "Meldingsconfiguratie",
+            "description": "Instellingen voor welke gevolgde objecten alerts genereren en hoe alerts worden bewaard.",
+            "enabled": {
+                "label": "Alerts inschakelen",
+                "description": "Genereren van meldingen voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
+            },
+            "labels": {
+                "label": "Meldingslabels",
+                "description": "Lijst met objectlabels die kwalificeren als meldingen (bijv. auto, persoon)."
+            },
+            "required_zones": {
+                "label": "Vereiste zones",
+                "description": "Zones die een object moet betreden om als melding te worden beschouwd; leeg laten voor elke zone."
+            },
+            "enabled_in_config": {
+                "label": "Originele meldingsstatus",
+                "description": "Geeft aan of meldingen oorspronkelijk waren ingeschakeld in de statische configuratie."
+            },
+            "cutoff_time": {
+                "label": "Afsluitingstijd meldingen",
+                "description": "Seconden wachten na het uitblijven van melding veroorzakende activiteit voordat een melding wordt afgesloten."
+            }
+        },
+        "detections": {
+            "label": "Detectieconfiguratie",
+            "description": "Instellingen voor welke gevolgde objecten detecties genereren en hoe detecties worden bewaard.",
+            "enabled": {
+                "label": "Detecties inschakelen",
+                "description": "Detecties voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
+            },
+            "labels": {
+                "label": "Detectielabels",
+                "description": "Lijst met objectlabels die kwalificeren als detectiegebeurtenissen."
+            },
+            "required_zones": {
+                "label": "Vereiste zones",
+                "description": "Zones die een object moet betreden om als detectie te worden beschouwd; leeg laten voor elke zone."
+            },
+            "cutoff_time": {
+                "label": "Afsluitingstijd detecties",
+                "description": "Seconden wachten na het uitblijven van detectie veroorzakende activiteit voordat een detectie wordt afgesloten."
+            },
+            "enabled_in_config": {
+                "label": "Originele detectiestatus",
+                "description": "Geeft aan of detecties oorspronkelijk waren ingeschakeld in de statische configuratie."
+            }
+        },
+        "genai": {
+            "label": "GenAI-configuratie",
+            "description": "Beheert het gebruik van generatieve AI voor het produceren van beschrijvingen en samenvattingen van beoordelingsitems.",
+            "enabled": {
+                "label": "GenAI-beschrijvingen inschakelen",
+                "description": "Door GenAI gegenereerde beschrijvingen en samenvattingen voor beoordelingsitems in- of uitschakelen."
+            },
+            "alerts": {
+                "label": "GenAI inschakelen voor meldingen",
+                "description": "GenAI gebruiken voor het genereren van beschrijvingen bij meldingsitems."
+            },
+            "detections": {
+                "label": "GenAI inschakelen voor detecties",
+                "description": "GenAI gebruiken voor het genereren van beschrijvingen bij detectiebeoordelingen."
+            },
+            "image_source": {
+                "label": "Afbeeldingsbron voor beoordeling",
+                "description": "Bron van afbeeldingen naar GenAI ('preview' of 'recordings'); 'recordings' gebruikt hogere kwaliteit maar meer tokens."
+            },
+            "additional_concerns": {
+                "label": "Aanvullende aandachtspunten",
+                "description": "Een lijst met aanvullende aandachtspunten die GenAI moet meenemen bij het beoordelen van activiteit op deze camera."
+            },
+            "debug_save_thumbnails": {
+                "label": "Snapshots opslaan",
+                "description": "Snapshots die naar de GenAI-provider worden gestuurd opslaan voor foutopsporing."
+            },
+            "enabled_in_config": {
+                "label": "Originele GenAI-status",
+                "description": "Geeft aan of GenAI-beoordeling oorspronkelijk was ingeschakeld in de statische configuratie."
+            },
+            "preferred_language": {
+                "label": "Voorkeurstaal",
+                "description": "Voorkeurstaal voor gegenereerde antwoorden van de GenAI-provider."
+            },
+            "activity_context_prompt": {
+                "label": "Activiteitscontextprompt",
+                "description": "Aangepaste prompt die beschrijft wat wel en niet verdachte activiteit is, als context voor GenAI-samenvattingen."
+            }
+        }
+    },
+    "snapshots": {
+        "label": "Snapshots",
+        "description": "Instellingen voor API-gegenereerde snapshots van gevolgde objecten voor alle camera's; kan per camera worden overschreven.",
+        "enabled": {
+            "label": "Snapshots inschakelen",
+            "description": "Het opslaan van snapshots voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
+        },
+        "timestamp": {
+            "label": "Tijdstempel-overlay",
+            "description": "Een tijdstempel op API-snapshots weergeven."
+        },
+        "bounding_box": {
+            "label": "Detectiekader-overlay",
+            "description": "Detectiekaders voor gevolgde objecten tekenen op API-snapshots."
+        },
+        "crop": {
+            "label": "Snapshot bijsnijden",
+            "description": "API-snapshots bijsnijden tot het detectiekader van het gedetecteerde object."
+        },
+        "required_zones": {
+            "label": "Vereiste zones",
+            "description": "Zones die een object moet betreden voordat een snapshot wordt opgeslagen."
+        },
+        "height": {
+            "label": "Snapshothoogte",
+            "description": "Hoogte (pixels) om API-snapshots naar te schalen; leeg laten om de originele grootte te behouden."
+        },
+        "retain": {
+            "label": "Snapshot-bewaring",
+            "description": "Bewaarinstellingen voor snapshots inclusief standaarddagen en per-object overschrijvingen.",
+            "default": {
+                "label": "Standaard retentie",
+                "description": "Standaard aantal dagen om snapshots te bewaren."
+            },
+            "mode": {
+                "label": "Bewaarmodus",
+                "description": "Bewaarmodus: all (alle segmenten), motion (segmenten met beweging) of active_objects (segmenten met actieve objecten)."
+            },
+            "objects": {
+                "label": "Objectbewaring",
+                "description": "Objectspecifieke overschrijvingen voor het aantal bewaardagen van snapshots."
+            }
+        },
+        "quality": {
+            "label": "Snapshotkwaliteit",
+            "description": "Coderingskwaliteit voor opgeslagen snapshots (0-100)."
+        }
+    },
+    "timestamp_style": {
+        "label": "Tijdstempelstijl",
+        "description": "Stijlopties voor tijdstempels in de feed, toegepast op de debugweergave en snapshots.",
+        "position": {
+            "label": "Tijdstempelpositie",
+            "description": "Positie van de tijdstempel op de afbeelding (tl/tr/bl/br)."
+        },
+        "format": {
+            "label": "Tijdstempelformaat",
+            "description": "Datumtijdformaatstring voor tijdstempels (Python datetime-formaatcodes)."
+        },
+        "color": {
+            "label": "Tijdstempelkleur",
+            "description": "RGB-kleurwaarden voor de tijdstempeltekst (alle waarden 0-255).",
+            "red": {
+                "label": "Rood",
+                "description": "Roodcomponent (0-255) voor de tijdstempelkleur."
+            },
+            "green": {
+                "label": "Groen",
+                "description": "Groencomponent (0-255) voor de tijdstempelkleur."
+            },
+            "blue": {
+                "label": "Blauw",
+                "description": "Blauwcomponent (0-255) voor de tijdstempelkleur."
+            }
+        },
+        "thickness": {
+            "label": "Tijdstempeldikte",
+            "description": "Lijndikte van de tijdstempeltekst."
+        },
+        "effect": {
+            "label": "Tijdstempeleffect",
+            "description": "Visueel effect voor de tijdstempeltekst (geen, effen, schaduw)."
+        }
+    },
+    "classification": {
+        "label": "Objectclassificatie",
+        "description": "Instellingen voor classificatiemodellen die worden gebruikt om objectlabels of statusclassificatie te verfijnen.",
+        "bird": {
+            "label": "Vogelclassificatieconfiguratie",
+            "description": "Instellingen specifiek voor vogelclassificatiemodellen.",
+            "enabled": {
+                "label": "Vogelclassificatie",
+                "description": "Vogelclassificatie in- of uitschakelen."
+            },
+            "threshold": {
+                "label": "Minimale score",
+                "description": "Minimale classificatiescore om een vogelclassificatie te accepteren."
+            }
+        },
+        "custom": {
+            "label": "Aangepaste classificatiemodellen",
+            "description": "Configuratie voor aangepaste classificatiemodellen voor object- of statusdetectie.",
+            "enabled": {
+                "label": "Model inschakelen",
+                "description": "Het aangepaste classificatiemodel in- of uitschakelen."
+            },
+            "name": {
+                "label": "Modelnaam",
+                "description": "Identifier van het te gebruiken aangepaste classificatiemodel."
+            },
+            "threshold": {
+                "label": "Scoredrempel",
+                "description": "Scoredrempel voor het wijzigen van de classificatiestatus."
+            },
+            "save_attempts": {
+                "label": "Opgeslagen pogingen",
+                "description": "Aantal classificatiepogingen dat wordt bijgehouden voor de recente classificaties in de UI."
+            },
+            "object_config": {
+                "objects": {
+                    "label": "Objecten classificeren",
+                    "description": "Lijst van objecttypen waarop objectclassificatie wordt uitgevoerd."
+                },
+                "classification_type": {
+                    "label": "Classificatietype",
+                    "description": "Toegepast classificatietype: 'sub_label' (voegt sub_label toe) of andere ondersteunde typen."
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "Classificatiecamera's",
+                    "description": "Per-camera bijsnijdinstellingen voor statusclassificatie.",
+                    "crop": {
+                        "label": "Classificatie-uitsnede",
+                        "description": "Bijsnijdcoördinaten voor classificatie op deze camera."
+                    }
+                },
+                "motion": {
+                    "label": "Uitvoeren bij beweging",
+                    "description": "Indien ingeschakeld, classificatie uitvoeren wanneer beweging wordt gedetecteerd in het opgegeven bijsnijdgebied."
+                },
+                "interval": {
+                    "label": "Classificatie-interval",
+                    "description": "Interval (seconden) tussen periodieke classificatierondes voor statusclassificatie."
+                }
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "Semantisch zoeken",
+        "description": "Instellingen voor semantisch zoeken, dat objectinbeddingen opbouwt en bevraagt om vergelijkbare items te vinden.",
+        "enabled": {
+            "label": "Semantisch zoeken inschakelen",
+            "description": "De semantisch zoeken-functie in- of uitschakelen."
+        },
+        "reindex": {
+            "label": "Herindexeren bij opstarten",
+            "description": "Een volledige herindexering van historische gevolgde objecten in de inbeddingsdatabase starten."
+        },
+        "model": {
+            "label": "Semantisch zoekmodel of GenAI-providernaam",
+            "description": "Het inbeddingsmodel voor semantisch zoeken (bijv. 'jinav1'), of de naam van een GenAI-provider met de inbeddingsrol."
+        },
+        "model_size": {
+            "label": "Modelgrootte",
+            "description": "Selecteer modelgrootte; 'small' draait op CPU en 'large' vereist doorgaans een GPU."
+        },
+        "device": {
+            "label": "Apparaat",
+            "description": "Dit is een overschrijving om een specifiek apparaat te targeten. Zie https://onnxruntime.ai/docs/execution-providers/ voor meer informatie"
+        },
+        "triggers": {
+            "label": "Triggers",
+            "description": "Acties en matchcriteria voor cameraspecifieke semantisch-zoeken-triggers.",
+            "friendly_name": {
+                "label": "Weergavenaam",
+                "description": "Optionele weergavenaam voor deze trigger in de UI."
+            },
+            "enabled": {
+                "label": "Trigger inschakelen",
+                "description": "Deze semantisch-zoeken-trigger in- of uitschakelen."
+            },
+            "type": {
+                "label": "Triggertype",
+                "description": "Type trigger: 'thumbnail' (vergelijk met afbeelding) of 'description' (vergelijk met tekst)."
+            },
+            "data": {
+                "label": "Triggerinhoud",
+                "description": "Tekstzin of miniatuur-ID om te vergelijken met gevolgde objecten."
+            },
+            "threshold": {
+                "label": "Triggerdrempel",
+                "description": "Minimale gelijkenisscore (0-1) om deze trigger te activeren."
+            },
+            "actions": {
+                "label": "Triggeracties",
+                "description": "Lijst van uit te voeren acties bij triggermatch (melding, sub_label, attribuut)."
+            }
+        }
+    },
+    "face_recognition": {
+        "label": "Gezichtsherkenning",
+        "description": "Instellingen voor gezichtsdetectie en -herkenning voor alle camera's; kan per camera worden overschreven.",
+        "enabled": {
+            "label": "Gezichtsherkenning inschakelen",
+            "description": "Gezichtsherkenning voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
+        },
+        "model_size": {
+            "label": "Modelgrootte",
+            "description": "Modelgrootte voor gezichtsinbeddingen (small/large); groter vereist mogelijk een GPU."
+        },
+        "unknown_score": {
+            "label": "Drempel voor onbekende score",
+            "description": "Afstandsdrempel waaronder een gezicht als mogelijke match wordt beschouwd (hoger = strikter)."
+        },
+        "detection_threshold": {
+            "label": "Detectiedrempel",
+            "description": "Minimale detectiebetrouwbaarheid om een gezichtsdetectie als geldig te beschouwen."
+        },
+        "recognition_threshold": {
+            "label": "Herkenningsdrempel",
+            "description": "Gezichtsinbeddingsafstandsdrempel om twee gezichten als match te beschouwen."
+        },
+        "min_area": {
+            "label": "Minimale gezichtsoppervlakte",
+            "description": "Minimale oppervlakte (pixels) van een gedetecteerd gezichtskader om herkenning te proberen."
+        },
+        "min_faces": {
+            "label": "Minimum gezichten",
+            "description": "Minimum aantal gezichtsherkeningen vereist voordat een herkend sub-label aan een persoon wordt toegekend."
+        },
+        "save_attempts": {
+            "label": "Opgeslagen pogingen",
+            "description": "Aantal gezichtsherkenningspogingen dat wordt bijgehouden voor de recente herkenningen in de UI."
+        },
+        "blur_confidence_filter": {
+            "label": "Vaagheidsbetrouwbaarheidsfilter",
+            "description": "Betrouwbaarheidsscores aanpassen op basis van beeldvaagheid om vals-positieven bij slechte gezichtskwaliteit te verminderen."
+        },
+        "device": {
+            "label": "Apparaat",
+            "description": "Dit is een overschrijving om een specifiek apparaat te targeten. Zie https://onnxruntime.ai/docs/execution-providers/ voor meer informatie"
+        }
+    },
+    "lpr": {
+        "label": "Kentekenherkenning",
+        "description": "Instellingen voor kentekenherkenning inclusief detectiedrempels, opmaak en bekende kentekens.",
+        "enabled": {
+            "label": "LPR inschakelen",
+            "description": "Kentekenherkenning voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
+        },
+        "model_size": {
+            "label": "Modelgrootte",
+            "description": "Modelgrootte voor tekstdetectie/-herkenning. De meeste gebruikers moeten 'small' gebruiken."
+        },
+        "detection_threshold": {
+            "label": "Detectiedrempel",
+            "description": "Detectiebetrouwbaarheidsdrempel om OCR te starten op een vermoedelijk kenteken."
+        },
+        "min_area": {
+            "label": "Minimale kentekenoppervlakte",
+            "description": "Minimale kentekenoppervlakte (pixels) om herkenning te proberen."
+        },
+        "recognition_threshold": {
+            "label": "Herkenningsdrempel",
+            "description": "Betrouwbaarheidsdrempel voor herkende kentekentekst om als sub-label toe te voegen."
+        },
+        "min_plate_length": {
+            "label": "Minimale kentekenlengte",
+            "description": "Minimum aantal tekens dat een herkend kenteken moet bevatten om geldig te zijn."
+        },
+        "format": {
+            "label": "Regex voor kentekenformaat",
+            "description": "Optionele regex om herkende kentekens te valideren tegen een verwacht formaat."
+        },
+        "match_distance": {
+            "label": "Overeenkomstafstand",
+            "description": "Aantal toegestane tekenfouten bij vergelijking van gedetecteerde kentekens met bekende kentekens."
+        },
+        "known_plates": {
+            "label": "Bekende kentekens",
+            "description": "Lijst met kentekens of regex-patronen om specifiek te volgen of meldingen voor te genereren."
+        },
+        "enhancement": {
+            "label": "Verbeteringsniveau",
+            "description": "Verbeteringsniveau (0-10) voor kentekenuitsneden vóór OCR; hogere waarden verbeteren niet altijd het resultaat; niveaus boven 5 werken mogelijk alleen voor nachtelijke kentekens en moeten voorzichtig worden gebruikt."
+        },
+        "debug_save_plates": {
+            "label": "Kentekenplaten opslaan voor foutopsporing",
+            "description": "Kentekenuitsneden opslaan voor foutopsporing van LPR-prestaties."
+        },
+        "device": {
+            "label": "Apparaat",
+            "description": "Dit is een overschrijving om een specifiek apparaat te targeten. Zie https://onnxruntime.ai/docs/execution-providers/ voor meer informatie"
+        },
+        "replace_rules": {
+            "label": "Vervangingsregels",
+            "description": "Regex-vervangingsregels voor het normaliseren van gedetecteerde kentekenstrings vóór vergelijking.",
+            "pattern": {
+                "label": "Regex-patroon"
+            },
+            "replacement": {
+                "label": "Vervangende tekst"
+            }
+        },
+        "expire_time": {
+            "label": "Vervaltijd in seconden",
+            "description": "Tijd in seconden waarna een niet-gezien kenteken vervalt uit de tracker (alleen voor dedicated LPR-camera's)."
+        }
+    },
+    "camera_groups": {
+        "label": "Cameragroepen",
+        "description": "Configuratie voor benoemde cameragroepen voor het organiseren van camera's in de UI.",
+        "cameras": {
+            "label": "Cameralijst",
+            "description": "Lijst met cameranamen in deze groep."
+        },
+        "icon": {
+            "label": "Groepspictogram",
+            "description": "Pictogram voor de cameragroep in de UI."
+        },
+        "order": {
+            "label": "Sorteervolgorde",
+            "description": "Numerieke volgorde voor het sorteren van cameragroepen in de UI; grotere nummers verschijnen later."
+        }
+    },
+    "active_profile": {
+        "label": "Actief profiel",
+        "description": "Naam van het momenteel actieve profiel. Alleen runtime, wordt niet opgeslagen in YAML."
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "Instellingen voor het publiceren van MQTT-afbeeldingen.",
+        "enabled": {
+            "label": "Afbeelding versturen",
+            "description": "Het publiceren van afbeeldingssnapshots van objecten naar MQTT-topics voor deze camera inschakelen."
+        },
+        "timestamp": {
+            "label": "Tijdstempel toevoegen",
+            "description": "Een tijdstempel op naar MQTT gepubliceerde afbeeldingen weergeven."
+        },
+        "bounding_box": {
+            "label": "Detectiekader toevoegen",
+            "description": "Detectiekaders tekenen op via MQTT gepubliceerde afbeeldingen."
+        },
+        "crop": {
+            "label": "Afbeelding bijsnijden",
+            "description": "Naar MQTT gepubliceerde afbeeldingen bijsnijden tot het detectiekader van het gedetecteerde object."
+        },
+        "height": {
+            "label": "Afbeeldingshoogte",
+            "description": "Hoogte (pixels) voor het schalen van via MQTT gepubliceerde afbeeldingen."
+        },
+        "required_zones": {
+            "label": "Vereiste zones",
+            "description": "Zones die een object moet betreden voordat een MQTT-afbeelding wordt gepubliceerd."
+        },
+        "quality": {
+            "label": "JPEG-kwaliteit",
+            "description": "JPEG-kwaliteit voor naar MQTT gepubliceerde afbeeldingen (0-100)."
+        }
+    },
+    "camera_ui": {
+        "label": "Camera-UI",
+        "description": "Weergavevolgorde en zichtbaarheid van deze camera in de UI. De volgorde heeft invloed op het standaarddashboard. Gebruik cameragroepen voor fijnere controle.",
+        "order": {
+            "label": "UI-volgorde",
+            "description": "Numerieke volgorde voor het sorteren van de camera in de UI (standaarddashboard en lijsten); grotere nummers verschijnen later."
+        },
+        "dashboard": {
+            "label": "Tonen in UI",
+            "description": "Schakel de zichtbaarheid van deze camera overal in de Frigate-UI in of uit. Uitschakelen vereist handmatige aanpassing van de configuratie om de camera opnieuw te bekijken."
+        }
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "ONVIF-verbindings- en PTZ-autovolgingsinstellingen voor deze camera.",
+        "host": {
+            "label": "ONVIF-host",
+            "description": "Host (en optioneel schema) voor de ONVIF-dienst van deze camera."
+        },
+        "port": {
+            "label": "ONVIF-poort",
+            "description": "Poortnummer voor de ONVIF-dienst."
+        },
+        "user": {
+            "label": "ONVIF-gebruikersnaam",
+            "description": "Gebruikersnaam voor ONVIF-authenticatie; sommige apparaten vereisen de admin-gebruiker voor ONVIF."
+        },
+        "password": {
+            "label": "ONVIF-wachtwoord",
+            "description": "Wachtwoord voor ONVIF-authenticatie."
+        },
+        "tls_insecure": {
+            "label": "TLS-verificatie uitschakelen",
+            "description": "TLS-verificatie overslaan en digest-authenticatie uitschakelen voor ONVIF (onveilig; alleen in veilige netwerken)."
+        },
+        "profile": {
+            "label": "ONVIF-profiel",
+            "description": "Specifiek ONVIF-mediaprofiel voor PTZ-besturing, gekoppeld via token of naam. Indien niet ingesteld, wordt het eerste profiel met geldige PTZ-configuratie automatisch geselecteerd."
+        },
+        "autotracking": {
+            "label": "Automatisch volgen",
+            "description": "Bewegende objecten automatisch volgen en gecentreerd houden in het beeld via PTZ-camerabewegingen.",
+            "enabled": {
+                "label": "Automatisch volgen inschakelen",
+                "description": "Automatisch PTZ-camera volgen van gedetecteerde objecten in- of uitschakelen."
+            },
+            "calibrate_on_startup": {
+                "label": "Kalibreren bij opstarten",
+                "description": "PTZ-motorsnelheden meten bij opstarten voor nauwkeurigere volging. Frigate werkt de configuratie bij met movement_weights na kalibratie."
+            },
+            "zooming": {
+                "label": "Zoommodus",
+                "description": "Zoomgedrag instellen: disabled (alleen pan/tilt), absolute (meest compatibel) of relative (gelijktijdig pan/tilt/zoom)."
+            },
+            "zoom_factor": {
+                "label": "Zoomfactor",
+                "description": "Zoomniveau voor gevolgde objecten instellen. Lagere waarden tonen meer van de scène; hogere waarden zoomen verder in maar kunnen de volging verliezen. Waarden tussen 0,1 en 0,75."
+            },
+            "track": {
+                "label": "Gevolgde objecten",
+                "description": "Lijst van objecttypen die automatisch volgen activeren."
+            },
+            "required_zones": {
+                "label": "Vereiste zones",
+                "description": "Objecten moeten een van deze zones betreden voordat automatisch volgen begint."
+            },
+            "return_preset": {
+                "label": "Terugkeer-voorinstelling",
+                "description": "ONVIF-voorkeuzeinstelling in de camerafirmware om naar terug te keren na het volgen."
+            },
+            "timeout": {
+                "label": "Terugkeertimeout",
+                "description": "Dit aantal seconden wachten na het verliezen van de volging voordat de camera naar de voorkeuze-positie terugkeert."
+            },
+            "movement_weights": {
+                "label": "Bewegingsgewichten",
+                "description": "Kalibratiewaarden automatisch gegenereerd door camerakalbratie. Niet handmatig aanpassen."
+            },
+            "enabled_in_config": {
+                "label": "Originele autovolgstatus",
+                "description": "Intern veld om bij te houden of automatisch volgen was ingeschakeld in de configuratie."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Tijdsverschil negeren",
+            "description": "Tijdsynchronisatieverschillen tussen camera en Frigate-server negeren voor ONVIF-communicatie."
+        }
     }
 }
