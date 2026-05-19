@@ -1,4 +1,4 @@
-# GitHub Copilot Instructions for Frigate NVR
+# Agent Instructions for Frigate NVR
 
 This document provides coding guidelines and best practices for contributing to Frigate NVR, a complete and local NVR designed for Home Assistant with AI object detection.
 
