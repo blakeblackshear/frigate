@@ -6,6 +6,7 @@
  */
 
 import type { ConfigFormContext } from "@/types/configForm";
+import { getEffectiveAttributeLabels } from "@/utils/configUtil";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -80,7 +81,11 @@ export function buildTranslationPath(
   const filtersIndex = stringSegments.indexOf("filters");
   if (filtersIndex !== -1 && stringSegments.length > filtersIndex + 2) {
     const filterKey = stringSegments[filtersIndex + 1];
-    const allAttributes = formContext?.fullConfig?.model?.all_attributes ?? [];
+    const allAttributes = getEffectiveAttributeLabels(
+      formContext?.fullConfig,
+      formContext?.fullCameraConfig,
+      formContext?.level,
+    );
     const sectionWord = allAttributes.includes(filterKey)
       ? "filters_attribute"
       : "filters";

@@ -1,4 +1,5 @@
 import type { HiddenFieldContext } from "@/types/configForm";
+import { getEffectiveAttributeLabels } from "@/utils/configUtil";
 import type { SectionConfigOverrides } from "./types";
 
 // Attribute labels (face, license_plate, Frigate+ couriers like DHL/Amazon,
@@ -27,7 +28,7 @@ const hideAttributeFilters = ({
     fullConfig.objects?.track ??
     [];
 
-  return (fullConfig.model?.all_attributes ?? [])
+  return getEffectiveAttributeLabels(fullConfig, fullCameraConfig, level)
     .filter((attr) => !track.includes(attr))
     .map((attr) => `filters.${attr}`);
 };

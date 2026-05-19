@@ -10,6 +10,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
 import { HiddenFieldContext, JsonObject, JsonValue } from "@/types/configForm";
+import { getEffectiveAttributeLabels } from "@/utils/configUtil";
 
 /**
  * Sections that require special handling at the global level.
@@ -149,7 +150,11 @@ function modifyObjectsSchema(
 ): RJSFSchema {
   if (!ctx) return schema;
 
-  const allAttributes = ctx.fullConfig.model?.all_attributes ?? [];
+  const allAttributes = getEffectiveAttributeLabels(
+    ctx.fullConfig,
+    ctx.fullCameraConfig,
+    ctx.level,
+  );
 
   // Resolve effective track at this scope, falling back through camera
   // config then global config (matches hideAttributeFilters in objects.ts).

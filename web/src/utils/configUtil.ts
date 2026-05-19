@@ -19,7 +19,7 @@ import {
   sanitizeOverridesForSection,
 } from "@/components/config-form/sections/section-special-cases";
 import type { RJSFSchema } from "@rjsf/utils";
-import type { FrigateConfig } from "@/types/frigateConfig";
+import type { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import type {
   ConfigSectionData,
   HiddenFieldContext,
@@ -747,6 +747,26 @@ export function getSectionConfig(
         ? entry.replay
         : entry.camera;
   return mergeSectionConfig(entry.base, overrides);
+}
+
+/**
+ * Resolve the effective attribute label set at a given scope. At camera
+ * (and replay) scope on a dedicated LPR camera (`camera.type === "lpr"`),
+ * `license_plate` is treated as a regular tracked object — not an
+ * attribute — to match the backend's per-camera carve-out in
+ * `frigate/video/detect.py`. Returns the full attribute list at global
+ * scope and for non-LPR cameras.
+ */
+export function getEffectiveAttributeLabels(
+  fullConfig: FrigateConfig | undefined,
+  fullCameraConfig: CameraConfig | undefined,
+  level: "global" | "camera" | "replay" | undefined,
+): string[] {
+  const all = fullConfig?.model?.all_attributes ?? [];
+  if (level !== "global" && fullCameraConfig?.type === "lpr") {
+    return all.filter((attr) => attr !== "license_plate");
+  }
+  return all;
 }
 
 /**
