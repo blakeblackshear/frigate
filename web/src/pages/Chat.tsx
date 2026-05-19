@@ -242,7 +242,10 @@ export default function ChatPage() {
                           <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.15s]" />
                           <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60" />
                         </div>
-                      ) : (
+                      ) : msg.role === "assistant" &&
+                        !hasContent &&
+                        hasReasoning &&
+                        !isComplete ? null : (
                         <MessageBubble
                           role={msg.role}
                           content={msg.content}

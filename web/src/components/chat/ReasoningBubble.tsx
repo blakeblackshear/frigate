@@ -47,7 +47,7 @@ export function ReasoningBubble({
   };
 
   const label = !answerStarted
-    ? t("reasoning.thinking")
+    ? t("reasoning.active")
     : open
       ? t("reasoning.hide")
       : t("reasoning.show");
