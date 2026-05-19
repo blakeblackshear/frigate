@@ -162,7 +162,6 @@ const allSettingsViews = [
   "cameraLpr",
   "cameraMqttConfig",
   "cameraOnvif",
-  "cameraUi",
   "cameraTimestampStyle",
   "cameraManagement",
   "masksAndZones",
@@ -292,9 +291,6 @@ const CameraMqttConfigSettingsPage = createSectionPage("mqtt", "camera", {
 const CameraOnvifSettingsPage = createSectionPage("onvif", "camera", {
   showOverrideIndicator: false,
 });
-const CameraUiSettingsPage = createSectionPage("ui", "camera", {
-  showOverrideIndicator: false,
-});
 const CameraTimestampStyleSettingsPage = createSectionPage(
   "timestamp_style",
   "camera",
@@ -361,7 +357,6 @@ const settingsGroups = [
       { key: "cameraLpr", component: CameraLprSettingsPage },
       { key: "cameraOnvif", component: CameraOnvifSettingsPage },
       { key: "cameraMqttConfig", component: CameraMqttConfigSettingsPage },
-      { key: "cameraUi", component: CameraUiSettingsPage },
       {
         key: "cameraTimestampStyle",
         component: CameraTimestampStyleSettingsPage,
@@ -467,7 +462,6 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "cameraLpr",
   "cameraMqttConfig",
   "cameraOnvif",
-  "cameraUi",
   "cameraTimestampStyle",
   "masksAndZones",
   "motionTuner",
@@ -495,7 +489,6 @@ const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
   lpr: "cameraLpr",
   mqtt: "cameraMqttConfig",
   onvif: "cameraOnvif",
-  ui: "cameraUi",
   timestamp_style: "cameraTimestampStyle",
 };
 
