@@ -35,8 +35,9 @@ from frigate.api.defs.response.chat_response import (
     ToolCall,
 )
 from frigate.api.defs.tags import Tags
-from frigate.api.event import events
+from frigate.api.event import _build_attribute_filter_clause, events
 from frigate.config import FrigateConfig
+from frigate.config.classification import ObjectClassificationType
 from frigate.config.ui import UnitSystemEnum
 from frigate.genai.utils import build_assistant_message_for_conversation
 from frigate.jobs.vlm_watch import (
@@ -68,8 +69,39 @@ class VLMMonitorRequest(BaseModel):
     zones: List[str] = []
 
 
+def get_attribute_classifications(config: FrigateConfig) -> List[Dict[str, Any]]:
+    """Return enabled custom classification models of `attribute` type.
+
+    Each entry: {"name": <model name>, "objects": [<object label>, ...]}.
+    These models attach attribute metadata to events on the listed object
+    types, which can later be filtered via the search_objects `attribute`
+    field.
+    """
+    result: List[Dict[str, Any]] = []
+
+    for model_key, model_config in config.classification.custom.items():
+        if not model_config.enabled or model_config.object_config is None:
+            continue
+
+        if (
+            model_config.object_config.classification_type
+            != ObjectClassificationType.attribute
+        ):
+            continue
+
+        result.append(
+            {
+                "name": model_config.name or model_key,
+                "objects": list(model_config.object_config.objects or []),
+            }
+        )
+
+    return result
+
+
 def get_tool_definitions(
     semantic_search_enabled: bool = False,
+    attribute_classifications: Optional[List[Dict[str, Any]]] = None,
 ) -> List[Dict[str, Any]]:
     """
     Get OpenAI-compatible tool definitions for Frigate.
@@ -78,7 +110,8 @@ def get_tool_definitions(
     function calling APIs. When semantic search is enabled, the search_objects
     tool exposes an additional `semantic_query` parameter for descriptive
     queries (e.g. "person riding a lawn mower") and find_similar_objects is
-    included.
+    included. When attribute classification models are configured, an
+    `attribute` parameter is exposed for filtering by their labels.
     """
     search_objects_properties: Dict[str, Any] = {
         "camera": {
@@ -128,6 +161,24 @@ def get_tool_definitions(
             "default": 25,
         },
     }
+
+    if attribute_classifications:
+        model_outline = "; ".join(
+            f"{m['name']} (applies to {', '.join(m['objects']) or 'any object'})"
+            for m in attribute_classifications
+        )
+        search_objects_properties["attribute"] = {
+            "type": "string",
+            "description": (
+                "Filter by a classification attribute label produced by a "
+                "configured attribute classification model. Use this INSTEAD "
+                "of semantic_query when the user's request matches one of "
+                "these classifications. Configured models: "
+                f"{model_outline}. "
+                "Set the value to the attribute label that matches the user's "
+                "phrasing (case-sensitive)."
+            ),
+        }
 
     if semantic_search_enabled:
         search_objects_properties["semantic_query"] = {
@@ -460,10 +511,13 @@ def get_tool_definitions(
 )
 def get_tools(request: Request) -> JSONResponse:
     """Get list of available tools for LLM function calling."""
-    semantic_search_enabled = bool(
-        getattr(request.app.frigate_config.semantic_search, "enabled", False)
+    config = request.app.frigate_config
+    semantic_search_enabled = bool(getattr(config.semantic_search, "enabled", False))
+    attribute_classifications = get_attribute_classifications(config)
+    tools = get_tool_definitions(
+        semantic_search_enabled=semantic_search_enabled,
+        attribute_classifications=attribute_classifications,
     )
-    tools = get_tool_definitions(semantic_search_enabled=semantic_search_enabled)
     return JSONResponse(content={"tools": tools})
 
 
@@ -554,11 +608,14 @@ async def _execute_search_objects(
     elif zones is None:
         zones = "all"
 
+    attribute = arguments.get("attribute")
+
     # Build query parameters compatible with EventsQueryParams
     query_params = EventsQueryParams(
         cameras=arguments.get("camera", "all"),
         labels=arguments.get("label", "all"),
         sub_labels=arguments.get("sub_label", "all"),  # case-insensitive on the backend
+        attributes=attribute if attribute else "all",
         zones=zones,
         zone=zones,
         after=after,
@@ -626,6 +683,7 @@ async def _execute_search_objects_semantic(
 
     label = arguments.get("label")
     sub_label = arguments.get("sub_label")
+    attribute = arguments.get("attribute")
 
     zones = arguments.get("zones")
     if isinstance(zones, list) and zones:
@@ -668,6 +726,10 @@ async def _execute_search_objects_semantic(
     if sub_label:
         # case-insensitive match to mirror events() behavior
         clauses.append(fn.LOWER(Event.sub_label.cast("text")) == sub_label.lower())
+    if attribute:
+        attribute_clause = _build_attribute_filter_clause(attribute)
+        if attribute_clause is not None:
+            clauses.append(attribute_clause)
     if zones:
         zone_clauses = [Event.zones.cast("text") % f'*"{zone}"*' for zone in zones]
         clauses.append(reduce(operator.or_, zone_clauses))
@@ -1481,7 +1543,11 @@ async def chat_completion(
 
     config = request.app.frigate_config
     semantic_search_enabled = bool(getattr(config.semantic_search, "enabled", False))
-    tools = get_tool_definitions(semantic_search_enabled=semantic_search_enabled)
+    attribute_classifications = get_attribute_classifications(config)
+    tools = get_tool_definitions(
+        semantic_search_enabled=semantic_search_enabled,
+        attribute_classifications=attribute_classifications,
+    )
     conversation = []
 
     current_datetime = datetime.now()
@@ -1535,6 +1601,18 @@ async def chat_completion(
             "- Physical characteristic, appearance, or activity that is NOT a discrete name ('find me people riding a lawn mower', 'someone in a red jacket', 'a person carrying a package'): set `semantic_query` with the descriptive phrase, optionally combined with `label` for the object class. Never put descriptive phrases in `sub_label`."
         )
 
+    attribute_classification_section = ""
+    if attribute_classifications:
+        model_lines = "\n".join(
+            f"- {m['name']}: applies to {', '.join(m['objects']) or 'any object'}"
+            for m in attribute_classifications
+        )
+        attribute_classification_section = (
+            "\n\nAttribute classification models are configured for the following object types:\n"
+            f"{model_lines}\n"
+            "When the user's request matches one of these classifications, set the search_objects `attribute` field to the matching label rather than using `semantic_query`. Reserve `semantic_query` for descriptive phrases that fall outside the configured attribute labels."
+        )
+
     system_prompt = f"""You are a helpful assistant for Frigate, a security camera NVR system. You help users answer questions about their cameras, detected objects, and events.
 
 Current server local date and time: {current_date_str} at {current_time_str}
@@ -1546,7 +1624,7 @@ When users ask about "today", "yesterday", "this week", etc., use the current da
 When searching for objects or events, use ISO 8601 format for dates (e.g., {current_date_str}T00:00:00Z for the start of today).
 Always be accurate with time calculations based on the current date provided.
 
-When a user refers to a specific object they have seen or describe with identifying details ("that green car", "the person in the red jacket", "a package left today"), prefer the find_similar_objects tool over search_objects. Use search_objects first only to locate the anchor event, then pass its id to find_similar_objects. For generic queries like "show me all cars today", keep using search_objects. If a user message begins with [attached_event:<id>], treat that event id as the anchor for any similarity or "tell me more" request in the same message and call find_similar_objects with that id.{semantic_search_section}{cameras_section}{speed_units_section}"""
+When a user refers to a specific object they have seen or describe with identifying details ("that green car", "the person in the red jacket", "a package left today"), prefer the find_similar_objects tool over search_objects. Use search_objects first only to locate the anchor event, then pass its id to find_similar_objects. For generic queries like "show me all cars today", keep using search_objects. If a user message begins with [attached_event:<id>], treat that event id as the anchor for any similarity or "tell me more" request in the same message and call find_similar_objects with that id.{semantic_search_section}{attribute_classification_section}{cameras_section}{speed_units_section}"""
 
     conversation.append(
         {
