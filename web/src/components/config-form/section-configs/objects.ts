@@ -4,12 +4,22 @@ import type { SectionConfigOverrides } from "./types";
 
 // Attribute labels (face, license_plate, Frigate+ couriers like DHL/Amazon,
 // etc.) are populated into objects.filters by the backend for every
-// attribute the model knows about. Hide the filter collapsible for an
-// attribute unless it's in the effective objects.track list at this scope.
-// When an attribute IS tracked, only a subset of fields are exposed — see the
-// schema-modification path in modifySchemaForSection (objects branch) which
-// promotes tracked attribute keys to explicit `properties` with a
-// restricted FilterConfig shape so RJSF renders just that one field.
+// attribute the model knows about.
+//
+// - Untracked attributes: hide the whole `filters.<attr>` collapsible.
+// - Tracked attributes: strip the FilterConfig fields we don't expose
+//   (`threshold`, `min_ratio`, `max_ratio`) from the form data so RJSF
+//   doesn't surface them as ad-hoc additionalProperties entries under the
+//   restricted AttributeFilter schema (see modifySchemaForSection objects
+//   branch). The data is sanitized out symmetrically from the baseline
+//   too, so power-user YAML values for those fields are preserved on save
+//   (buildOverrides only emits diffs of fields the form has seen).
+const ATTRIBUTE_FILTER_HIDDEN_SUBFIELDS = [
+  "threshold",
+  "min_ratio",
+  "max_ratio",
+];
+
 const hideAttributeFilters = ({
   fullConfig,
   fullCameraConfig,
@@ -28,9 +38,22 @@ const hideAttributeFilters = ({
     fullConfig.objects?.track ??
     [];
 
-  return getEffectiveAttributeLabels(fullConfig, fullCameraConfig, level)
-    .filter((attr) => !track.includes(attr))
-    .map((attr) => `filters.${attr}`);
+  const attrs = getEffectiveAttributeLabels(
+    fullConfig,
+    fullCameraConfig,
+    level,
+  );
+  const hidden: string[] = [];
+  for (const attr of attrs) {
+    if (!track.includes(attr)) {
+      hidden.push(`filters.${attr}`);
+    } else {
+      for (const field of ATTRIBUTE_FILTER_HIDDEN_SUBFIELDS) {
+        hidden.push(`filters.${attr}.${field}`);
+      }
+    }
+  }
+  return hidden;
 };
 
 const objects: SectionConfigOverrides = {
