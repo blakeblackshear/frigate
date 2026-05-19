@@ -22,6 +22,7 @@ import type { RJSFSchema } from "@rjsf/utils";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import type {
   ConfigSectionData,
+  HiddenFieldContext,
   JsonObject,
   JsonValue,
 } from "@/types/configForm";
@@ -568,6 +569,17 @@ export function prepareSectionSavePayload(opts: {
     schemaSection,
     level,
     sectionSchema,
+    config
+      ? {
+          fullConfig: config,
+          fullCameraConfig:
+            level === "camera" && cameraName
+              ? config.cameras?.[cameraName]
+              : undefined,
+          level,
+          cameraName,
+        }
+      : undefined,
   );
 
   // Compute rawFormData (the current stored value for this section)
@@ -615,10 +627,16 @@ export function prepareSectionSavePayload(opts: {
   // For profile sections, also hide restart-required fields to match
   // effectiveHiddenFields in BaseSection (prevents spurious deletion markers
   // for fields that are hidden from the form during profile editing).
-  const resolvedHidden = resolveHiddenFieldEntries(
-    sectionConfig.hiddenFields,
-    config,
-  );
+  const resolvedHidden = resolveHiddenFieldEntries(sectionConfig.hiddenFields, {
+    fullConfig: config,
+    fullCameraConfig:
+      level === "camera" && cameraName
+        ? config.cameras?.[cameraName]
+        : undefined,
+    level,
+    cameraName,
+    formData: rawFormData as ConfigSectionData,
+  });
   const hiddenFieldsForSanitize =
     profileInfo.isProfile && sectionConfig.restartRequired?.length
       ? [...new Set([...resolvedHidden, ...sectionConfig.restartRequired])]
@@ -732,31 +750,56 @@ export function getSectionConfig(
 }
 
 /**
+ * Build a `HiddenFieldContext` for the common case where a callsite has
+ * `config`, an optional `cameraName`, and a level, but no per-section
+ * saved form data to thread through. Resolvers that don't read `formData`
+ * (which is most of them) just fall through to `fullCameraConfig` /
+ * `fullConfig`.
+ */
+export function buildHiddenFieldContext(
+  config: FrigateConfig | undefined,
+  level: "global" | "camera" | "replay",
+  cameraName?: string,
+): HiddenFieldContext | undefined {
+  if (!config) return undefined;
+  return {
+    fullConfig: config,
+    fullCameraConfig:
+      level !== "global" && cameraName
+        ? config.cameras?.[cameraName]
+        : undefined,
+    level,
+    cameraName,
+  };
+}
+
+/**
  * Resolve the effective hidden-field patterns for a section. Each entry in
  * `hiddenFields` is either a literal pattern or a function that produces
- * patterns from the loaded config (e.g. `filters.<attr>` for each
- * `model.all_attributes` entry on the objects section).
+ * patterns from the loaded config and scope (e.g. `filters.<attr>` for each
+ * `model.all_attributes` entry on the objects section, gated by the
+ * effective `objects.track` list at the current scope).
  */
 export function getEffectiveHiddenFields(
   sectionKey: string,
   level: "global" | "camera" | "replay",
-  config: FrigateConfig | undefined,
+  ctx: HiddenFieldContext | undefined,
 ): string[] {
   return resolveHiddenFieldEntries(
     getSectionConfig(sectionKey, level).hiddenFields,
-    config,
+    ctx,
   );
 }
 
 export function resolveHiddenFieldEntries(
   entries: SectionConfig["hiddenFields"] | undefined,
-  config: FrigateConfig | undefined,
+  ctx: HiddenFieldContext | undefined,
 ): string[] {
   if (!entries || entries.length === 0) return [];
   const result: string[] = [];
   for (const entry of entries) {
     if (typeof entry === "function") {
-      if (config) result.push(...entry(config));
+      if (ctx) result.push(...entry(ctx));
     } else {
       result.push(entry);
     }

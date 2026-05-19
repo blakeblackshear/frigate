@@ -20,6 +20,7 @@ import type { ProfilesApiResponse } from "@/types/profile";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { formatList } from "@/utils/stringUtil";
 import {
+  buildHiddenFieldContext,
   getEffectiveHiddenFields,
   pathMatchesHiddenPattern,
 } from "@/utils/configUtil";
@@ -187,7 +188,7 @@ export function CameraOverridesBadge({ sectionPath, className }: Props) {
     const hiddenFields = getEffectiveHiddenFields(
       sectionPath,
       "global",
-      config,
+      buildHiddenFieldContext(config, "global"),
     );
     if (hiddenFields.length === 0) return rawEntries;
     return rawEntries

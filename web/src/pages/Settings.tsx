@@ -89,6 +89,7 @@ import { mutate } from "swr";
 import { RJSFSchema } from "@rjsf/utils";
 import {
   buildConfigDataForPath,
+  buildHiddenFieldContext,
   flattenOverrides,
   getSectionConfig,
   parseProfileFromSectionPath,
@@ -851,11 +852,11 @@ export default function Settings() {
         // they stay in sync with what the embedded forms strip on render
         const detectorHiddenFields = resolveHiddenFieldEntries(
           getSectionConfig("detectors", "global").hiddenFields,
-          config,
+          buildHiddenFieldContext(config, "global"),
         );
         const modelHiddenFields = resolveHiddenFieldEntries(
           getSectionConfig("model", "global").hiddenFields,
-          config,
+          buildHiddenFieldContext(config, "global"),
         );
         const sanitizedDetectors =
           pendingDetectors !== undefined
