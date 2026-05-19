@@ -146,7 +146,7 @@
       "generateSuccess": "Imágenes de ejemplo generadas correctamente",
       "missingStatesWarning": {
         "title": "Faltan Ejemplos de Estado",
-        "description": "Se recomienda seleccionar ejemplos para todos los estados para obtener mejores resultados. Puede continuar sin seleccionar todos los estados, pero el modelo no se entrenará hasta que todos los estados tengan imágenes. Después de continuar, use la vista \"Clasificaciones recientes\" para clasificar las imágenes de los estados faltantes y luego entrene el modelo."
+        "description": "No todas las clases tienen ejemplos. Prueba a generar nuevos ejemplos para encontrar la clase que falta, o continúa y usa la vista de Clasificaciones recientes para añadir imágenes más tarde."
       },
       "allImagesRequired_one": "Por favor clasifique todas las imágenes. Queda {{count}} imagen.",
       "allImagesRequired_many": "Por favor clasifique todas las imágenes. Quedan {{count}} imágenes.",
