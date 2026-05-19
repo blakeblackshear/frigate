@@ -115,6 +115,7 @@ class OpenAIClient(GenAIClient):
                 "model": self.genai_config.model,
                 "messages": messages,
                 "timeout": self.timeout,
+                **self.genai_config.runtime_options,
             }
 
             if tools:
@@ -212,6 +213,7 @@ class OpenAIClient(GenAIClient):
                 "timeout": self.timeout,
                 "stream": True,
                 "stream_options": {"include_usage": True},
+                **self.genai_config.runtime_options,
             }
 
             if tools:

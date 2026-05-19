@@ -527,6 +527,7 @@ class LlamaCppClient(GenAIClient):
             k: v for k, v in self.provider_options.items() if k != "context_size"
         }
         payload.update(provider_opts)
+        payload.update(self.genai_config.runtime_options)
         return payload
 
     def _message_from_choice(self, choice: dict[str, Any]) -> dict[str, Any]:

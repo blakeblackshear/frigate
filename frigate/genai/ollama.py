@@ -309,6 +309,7 @@ class OllamaClient(GenAIClient):
             "model": self.genai_config.model,
             "messages": request_messages,
             **self.provider_options,
+            **self.genai_config.runtime_options,
         }
         if stream:
             request_params["stream"] = True
