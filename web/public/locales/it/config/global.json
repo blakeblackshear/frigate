@@ -30,7 +30,11 @@
         },
         "filters": {
             "label": "Filtri audio",
-            "description": "Impostazioni di filtro per ciascun tipo di audio, come le soglie di confidenza utilizzate per ridurre i falsi positivi."
+            "description": "Impostazioni di filtro per ciascun tipo di audio, come le soglie di confidenza utilizzate per ridurre i falsi positivi.",
+            "threshold": {
+                "label": "Affidabilità audio minima",
+                "description": "Soglia minima di fiducia affinché l'evento audio venga conteggiato."
+            }
         },
         "enabled_in_config": {
             "label": "Stato audio originale",
@@ -254,7 +258,44 @@
         }
     },
     "detect": {
-        "label": "Rilevamento oggetti"
+        "label": "Rilevamento oggetti",
+        "description": "Impostazioni per il ruolo di rilevamento/rilevamento utilizzato per eseguire il rilevamento degli oggetti e inizializzare i localizzatori.",
+        "enabled": {
+            "label": "Abilita il rilevamento degli oggetti",
+            "description": "Abilita o disabilita il rilevamento degli oggetti per tutte le telecamere; l'impostazione può essere modificata per ogni singola telecamera."
+        },
+        "height": {
+            "label": "Rileva altezza",
+            "description": "Altezza (in pixel) dei fotogrammi utilizzati per il flusso di rilevamento; lascia vuoto per utilizzare la risoluzione nativa del flusso."
+        },
+        "width": {
+            "label": "Rileva larghezza",
+            "description": "Larghezza (in pixel) dei fotogrammi utilizzati per il flusso di rilevamento; lascia vuoto per utilizzare la risoluzione nativa del flusso."
+        },
+        "fps": {
+            "label": "Rileva FPS",
+            "description": "Numero di fotogrammi al secondo desiderati per eseguire il rilevamento; valori inferiori riducono l'utilizzo della CPU (il valore consigliato è 5, impostarne uno superiore - al massimo 10 - solo se si devono tracciare oggetti in movimento estremamente rapidi)."
+        },
+        "min_initialized": {
+            "label": "Frame di inizializzazione minimi",
+            "description": "Numero di rilevamenti consecutivi necessari prima di creare un oggetto tracciato. Aumenta questo valore per ridurre le inizializzazioni errate. Il valore predefinito è FPS diviso per 2."
+        },
+        "max_disappeared": {
+            "label": "Numero di fotogrammi scomparsi",
+            "description": "Numero di fotogrammi senza rilevamento prima che un oggetto tracciato venga considerato scomparso."
+        },
+        "stationary": {
+            "label": "Configurazione degli oggetti stazionari",
+            "description": "Impostazioni per rilevare e gestire gli oggetti che rimangono fermi per un certo periodo di tempo.",
+            "interval": {
+                "label": "Intervallo stazionario",
+                "description": "Con quale frequenza (in fotogrammi) eseguire un controllo di rilevamento per confermare che l'oggetto sia stazionario."
+            },
+            "threshold": {
+                "label": "Soglia stazionaria",
+                "description": "Numero di fotogrammi senza cambio di posizione necessari per contrassegnare un oggetto come stazionario."
+            }
+        }
     },
     "face_recognition": {
         "label": "Riconoscimento facciale",
@@ -351,7 +392,7 @@
     },
     "notifications": {
         "label": "Notifiche",
-        "description": "Impostazioni per abilitare e controllare le notifiche per tutte le telecamere; possono essere modificate per ogni singola telecamera.",
+        "description": "Impostazioni per abilitare e controllare le notifiche per tutte le telecamere; possono essere sovrascritte per ogni singola telecamera.",
         "enabled": {
             "label": "Abilita le notifiche",
             "description": "Abilita o disabilita le notifiche per tutte le telecamere; l'impostazione può essere modificata per ogni singola telecamera."
@@ -400,7 +441,20 @@
         "label": "Telemetria"
     },
     "birdseye": {
-        "label": "Birdseye"
+        "label": "Birdseye",
+        "description": "Impostazioni per la vista composita Birdseye che unisce più flussi video di telecamere in un unico formato.",
+        "enabled": {
+            "label": "Abilita Birdseye",
+            "description": "Abilita o disabilita la funzione di visualizzazione Birdseye."
+        },
+        "mode": {
+            "label": "Modalità di tracciamento",
+            "description": "Modalità per includere le telecamere in Birdseye: 'oggetti', 'movimento' o 'continuo'."
+        },
+        "order": {
+            "label": "Posizione",
+            "description": "Posizione numerica che controlla l'ordine delle telecamere nella disposizione Birdseye."
+        }
     },
     "model": {
         "label": "Modello di rilevamento"
@@ -445,5 +499,8 @@
             "label": "Mostra nell'interfaccia utente",
             "description": "Abilita o disabilita la visualizzazione di questa telecamera in ogni punto dell'interfaccia utente di Frigate. Disabilitando questa opzione, sarà necessario modificare manualmente la configurazione per visualizzare nuovamente la telecamera nell'interfaccia utente."
         }
+    },
+    "active_profile": {
+        "label": "Profilo attivo"
     }
 }

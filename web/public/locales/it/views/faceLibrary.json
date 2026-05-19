@@ -20,7 +20,11 @@
     "title": "Riconoscimenti recenti",
     "aria": "Seleziona i riconoscimenti recenti",
     "empty": "Non ci sono recenti tentativi di riconoscimento facciale",
-    "titleShort": "Recente"
+    "titleShort": "Recente",
+    "emptyNoLibrary": {
+      "title": "Carica un volto",
+      "description": "Affinché il riconoscimento facciale funzioni è necessario aggiungere almeno un volto alla libreria."
+    }
   },
   "button": {
     "addFace": "Aggiungi volto",
