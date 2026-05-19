@@ -289,7 +289,8 @@ def _ws_role_header(ws: Any) -> str | None:
     environ = getattr(ws, "environ", None)
     if not environ:
         return None
-    return environ.get("HTTP_REMOTE_ROLE")
+    value = environ.get("HTTP_REMOTE_ROLE")
+    return value if isinstance(value, str) else None
 
 
 def _ws_valid_roles(ws: Any, config: FrigateConfig) -> list[str]:
@@ -390,14 +391,14 @@ def _materialize_for_ws(
         if not isinstance(parsed_payload, dict):
             return None
         allowed = _ws_allowed_cameras(ws, config)
-        filtered: dict[str, Any] = {}
+        filtered_jobs: dict[str, Any] = {}
         for job_type, job_payload in parsed_payload.items():
             scoped = _scope_job_entry_to_allowed(job_payload, allowed)
             if scoped is not None:
-                filtered[job_type] = scoped
-        if not filtered:
+                filtered_jobs[job_type] = scoped
+        if not filtered_jobs:
             return None
-        return _wrap_envelope(topic, filtered)
+        return _wrap_envelope(topic, filtered_jobs)
 
     if kind == "reshape_stats":
         if _ws_is_unrestricted(ws, config):
