@@ -30,7 +30,8 @@
   },
   "submitFrigatePlus": {
     "title": "Dit frame indienen bij Frigate+?",
-    "submit": "Indienen"
+    "submit": "Indienen",
+    "previewError": "Het was niet mogelijk om de snapshot preview te laden. De opname is mogelijk niet beschikbaar op dit moment."
   },
   "streamOffline": {
     "title": "Stream is Offline",

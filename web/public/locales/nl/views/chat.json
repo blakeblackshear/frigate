@@ -1,1 +1,17 @@
-{}
+{
+    "documentTitle": "Chat - Frigate",
+    "placeholder": "Stel een vraag...",
+    "error": "Er is iets misgegaan. Probeer opnieuw.",
+    "processing": "Verwerken...",
+    "toolsUsed": "Gebruikt: {{tools}}",
+    "hideTools": "Gereedschap verbergen",
+    "call": "Rinkel",
+    "title": "Frigate Chat",
+    "subtitle": "Jouw AI assistent voor camera beheer en inzichten",
+    "result": "Uitkomst",
+    "arguments": "Argumenten:",
+    "response": "Antwoord:",
+    "attachment_chip_remove": "Verwijder bijlage",
+    "open_in_explore": "Openen in Verken",
+    "showTools": "Gereedschap tonen"
+}
