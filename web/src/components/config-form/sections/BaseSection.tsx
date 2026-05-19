@@ -308,11 +308,30 @@ export function ConfigSection({
   // Get section schema using cached hook
   const sectionSchema = useSectionSchema(sectionPath, effectiveLevel);
 
-  // Apply special case handling for sections with problematic schema defaults
+  // Apply special case handling for sections with problematic schema defaults.
+  // The HiddenFieldContext is built from `config` (saved state) only — not the
+  // in-flight raw section value — because the schema is computed before
+  // rawFormData is derived. The objects-branch fallback in
+  // modifySchemaForSection reads `track` from fullCameraConfig / fullConfig.
   const modifiedSchema = useMemo(
     () =>
-      modifySchemaForSection(sectionPath, level, sectionSchema ?? undefined),
-    [sectionPath, level, sectionSchema],
+      modifySchemaForSection(
+        sectionPath,
+        level,
+        sectionSchema ?? undefined,
+        config
+          ? {
+              fullConfig: config,
+              fullCameraConfig:
+                effectiveLevel === "camera" && cameraName
+                  ? config.cameras?.[cameraName]
+                  : undefined,
+              level,
+              cameraName,
+            }
+          : undefined,
+      ),
+    [sectionPath, level, sectionSchema, config, effectiveLevel, cameraName],
   );
 
   // Get override status (camera vs global)
@@ -384,7 +403,19 @@ export function ConfigSection({
   // When editing a profile, hide fields that require a restart since they
   // cannot take effect via profile switching alone.
   const effectiveHiddenFields = useMemo(() => {
-    const base = resolveHiddenFieldEntries(sectionConfig.hiddenFields, config);
+    const ctx = config
+      ? {
+          fullConfig: config,
+          fullCameraConfig:
+            effectiveLevel === "camera" && cameraName
+              ? config.cameras?.[cameraName]
+              : undefined,
+          level,
+          cameraName,
+          formData: rawFormData,
+        }
+      : undefined;
+    const base = resolveHiddenFieldEntries(sectionConfig.hiddenFields, ctx);
     if (!profileName || !sectionConfig.restartRequired?.length) {
       return base;
     }
@@ -394,6 +425,10 @@ export function ConfigSection({
     sectionConfig.hiddenFields,
     sectionConfig.restartRequired,
     config,
+    effectiveLevel,
+    cameraName,
+    level,
+    rawFormData,
   ]);
 
   const sanitizeSectionData = useCallback(

@@ -1,12 +1,36 @@
-import type { FrigateConfig } from "@/types/frigateConfig";
+import type { HiddenFieldContext } from "@/types/configForm";
 import type { SectionConfigOverrides } from "./types";
 
 // Attribute labels (face, license_plate, Frigate+ couriers like DHL/Amazon,
-// etc.) are populated into objects.filters by the backend even when the
-// model can't actually detect them. They aren't user-settable, so hide any
-// `filters.<attr>` patterns from forms and override comparisons.
-const hideAttributeFilters = (config: FrigateConfig): string[] =>
-  (config.model?.all_attributes ?? []).map((attr) => `filters.${attr}`);
+// etc.) are populated into objects.filters by the backend for every
+// attribute the model knows about. Hide the filter collapsible for an
+// attribute unless it's in the effective objects.track list at this scope.
+// When an attribute IS tracked, only a subset of fields are exposed — see the
+// schema-modification path in modifySchemaForSection (objects branch) which
+// promotes tracked attribute keys to explicit `properties` with a
+// restricted FilterConfig shape so RJSF renders just that one field.
+const hideAttributeFilters = ({
+  fullConfig,
+  fullCameraConfig,
+  level,
+  formData,
+}: HiddenFieldContext): string[] => {
+  const trackFromForm = Array.isArray(
+    (formData as { track?: unknown } | undefined)?.track,
+  )
+    ? (formData as { track: string[] }).track
+    : undefined;
+
+  const track =
+    trackFromForm ??
+    (level !== "global" ? fullCameraConfig?.objects?.track : undefined) ??
+    fullConfig.objects?.track ??
+    [];
+
+  return (fullConfig.model?.all_attributes ?? [])
+    .filter((attr) => !track.includes(attr))
+    .map((attr) => `filters.${attr}`);
+};
 
 const objects: SectionConfigOverrides = {
   base: {
