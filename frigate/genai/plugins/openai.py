@@ -38,7 +38,11 @@ class OpenAIClient(GenAIClient):
     context_size: Optional[int] = None
 
     def _init_provider(self) -> OpenAI:
-        """Initialize the client."""
+        """Initialize the client.
+
+        Subclasses (e.g. Azure) should raise on configuration errors; the
+        manager catches construction failures and disables the provider.
+        """
         # Extract context_size from provider_options as it's not a valid OpenAI client parameter
         # It will be used in get_context_size() instead
         provider_opts = {
