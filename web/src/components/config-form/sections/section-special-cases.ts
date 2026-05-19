@@ -9,7 +9,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
-import { JsonObject, JsonValue } from "@/types/configForm";
+import { HiddenFieldContext, JsonObject, JsonValue } from "@/types/configForm";
 
 /**
  * Sections that require special handling at the global level.
@@ -37,13 +37,28 @@ export function isSpecialCaseSection(
  *
  * - detectors: Strip the "default" field to prevent RJSF from merging the
  *   default {"cpu": {"type": "cpu"}} with stored detector keys.
+ * - genai: Inject a default provider value on the additionalProperties shape.
+ * - objects: Promote tracked attribute labels (face, license_plate, courier
+ *   logos) from `filters.additionalProperties` to explicit
+ *   `filters.properties.<attr>` entries with a restricted FilterConfig
+ *   shape, so RJSF renders just that one field for
+ *   attribute filters. Non-attribute tracked labels (person, car, …)
+ *   keep flowing through the unmodified `additionalProperties` and render
+ *   the full FilterConfig form.
  */
 export function modifySchemaForSection(
   sectionPath: string,
   level: string,
   schema: RJSFSchema | undefined,
+  ctx?: HiddenFieldContext,
 ): RJSFSchema | undefined {
-  if (!schema || !isSpecialCaseSection(sectionPath, level)) {
+  if (!schema) return schema;
+
+  if (sectionPath === "objects") {
+    return modifyObjectsSchema(schema, ctx);
+  }
+
+  if (!isSpecialCaseSection(sectionPath, level)) {
     return schema;
   }
 
@@ -77,6 +92,147 @@ export function modifySchemaForSection(
   }
 
   return schema;
+}
+
+/**
+ * Build a stripped FilterConfig schema for tracked attribute filters
+ * (face, license_plate, etc.). Keeps only the fields meaningful for
+ * attribute detections — `min_score`, `min_area`, `max_area`. `threshold`
+ * and the ratio fields aren't exposed: attributes don't flow through
+ * `_is_false_positive` (no median-of-history check), and aspect-ratio
+ * filtering isn't a typical attribute-tuning knob.
+ *
+ * `min_area` and `max_area` are `Union[int, float]` in Pydantic which
+ * emits as `anyOf` in JSON schema; we flatten to a plain `number` so RJSF
+ * doesn't render the int/float type-selector dropdown for each attribute
+ * filter. The backend still accepts either int (pixels) or float
+ * (percentage) since the underlying FilterConfig union is unchanged.
+ */
+function buildAttributeFilterSchema(
+  filterConfigSchema: RJSFSchema,
+  attributeLabel: string,
+): RJSFSchema {
+  const props = isJsonObject(
+    (filterConfigSchema as { properties?: unknown }).properties,
+  )
+    ? (filterConfigSchema as { properties: Record<string, RJSFSchema> })
+        .properties
+    : undefined;
+
+  const minScoreSchema =
+    props && props.min_score ? props.min_score : { type: "number" };
+
+  const flattenToNumber = (src: RJSFSchema | undefined): RJSFSchema => {
+    if (!src) return { type: "number" };
+    const { anyOf: _anyOf, ...rest } = src as {
+      anyOf?: unknown;
+      [k: string]: unknown;
+    };
+    return { ...rest, type: "number" } as RJSFSchema;
+  };
+
+  return {
+    type: "object",
+    title: attributeLabel,
+    properties: {
+      min_score: minScoreSchema,
+      min_area: flattenToNumber(props && props.min_area),
+      max_area: flattenToNumber(props && props.max_area),
+    },
+    additionalProperties: false,
+  } as RJSFSchema;
+}
+
+function modifyObjectsSchema(
+  schema: RJSFSchema,
+  ctx: HiddenFieldContext | undefined,
+): RJSFSchema {
+  if (!ctx) return schema;
+
+  const allAttributes = ctx.fullConfig.model?.all_attributes ?? [];
+
+  // Resolve effective track at this scope, falling back through camera
+  // config then global config (matches hideAttributeFilters in objects.ts).
+  const trackFromForm = Array.isArray(
+    (ctx.formData as { track?: unknown } | undefined)?.track,
+  )
+    ? (ctx.formData as { track: string[] }).track
+    : undefined;
+  const track =
+    trackFromForm ??
+    (ctx.level !== "global"
+      ? ctx.fullCameraConfig?.objects?.track
+      : undefined) ??
+    ctx.fullConfig.objects?.track ??
+    [];
+
+  if (track.length === 0) return schema;
+
+  const schemaProperties = isJsonObject(
+    (schema as { properties?: unknown }).properties,
+  )
+    ? (schema as { properties: Record<string, RJSFSchema> }).properties
+    : undefined;
+  const filtersSchema =
+    schemaProperties && schemaProperties.filters
+      ? schemaProperties.filters
+      : undefined;
+  if (!filtersSchema) return schema;
+
+  const filterEntrySchema = isJsonObject(
+    (filtersSchema as { additionalProperties?: unknown }).additionalProperties,
+  )
+    ? (filtersSchema as { additionalProperties: RJSFSchema })
+        .additionalProperties
+    : undefined;
+  if (!filterEntrySchema) return schema;
+
+  const attributeSet = new Set(allAttributes);
+  const existingProperties = isJsonObject(
+    (filtersSchema as { properties?: unknown }).properties,
+  )
+    ? (filtersSchema as { properties: Record<string, RJSFSchema> }).properties
+    : {};
+
+  // Promote every tracked label to an explicit property entry so RJSF
+  // renders it as a normal collapsible (no additionalProperties key/value
+  // editor UI). Attribute labels get a restricted shape with only
+  // `min_score`; non-attribute labels get the full FilterConfig. Sorted
+  // alphabetically so the filter collapsibles match the order of the
+  // sibling `track` switches.
+  const sortedTrackedLabels = track
+    .filter((label): label is string => typeof label === "string")
+    .slice()
+    .sort((a, b) => a.localeCompare(b));
+  const updatedFilterProperties: Record<string, RJSFSchema> = {
+    ...existingProperties,
+  };
+  for (const label of sortedTrackedLabels) {
+    if (attributeSet.has(label)) {
+      updatedFilterProperties[label] = buildAttributeFilterSchema(
+        filterEntrySchema,
+        label,
+      );
+    } else {
+      updatedFilterProperties[label] = {
+        ...filterEntrySchema,
+        title: label,
+      } as RJSFSchema;
+    }
+  }
+
+  const updatedFiltersSchema: RJSFSchema = {
+    ...filtersSchema,
+    properties: updatedFilterProperties,
+  };
+
+  return {
+    ...schema,
+    properties: {
+      ...schemaProperties,
+      filters: updatedFiltersSchema,
+    },
+  };
 }
 
 /**
