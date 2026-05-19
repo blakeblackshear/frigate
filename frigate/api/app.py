@@ -774,6 +774,8 @@ def config_set(request: Request, body: AppConfigSetBody):
 
                 if request.app.dispatcher is not None:
                     request.app.dispatcher.config = config
+                    for comm in request.app.dispatcher.comms:
+                        comm.config = config
 
                 if body.update_topic:
                     if body.update_topic.startswith("config/cameras/"):

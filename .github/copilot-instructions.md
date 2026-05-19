@@ -162,7 +162,6 @@ When reviewing code, do NOT comment on:
 - **Linting**: ESLint (see `web/.eslintrc.cjs`)
 - **Formatting**: Prettier with Tailwind CSS plugin
 - **Type Safety**: TypeScript strict mode enabled
-- **Testing**: Vitest for unit tests
 
 ### Component Patterns
 
@@ -233,6 +232,9 @@ ruff format frigate/
 
 # Run linter
 ruff check frigate/
+
+# Type check
+python3 -u -m mypy --config-file frigate/mypy.ini frigate
 ```
 
 ### Frontend (from web/ directory)
@@ -252,6 +254,38 @@ npm run lint:fix
 
 # Format code
 npm run prettier:write
+
+# E2E: first-time setup
+npm install
+npx playwright install chromium
+
+# E2E: build the app and run all tests
+npm run e2e:build && npm run e2e
+
+# E2E: interactive UI for debugging
+npm run e2e:ui
+
+# E2E: run a specific spec
+npx playwright test --config e2e/playwright.config.ts e2e/specs/live.spec.ts
+
+# E2E: filter by name, or run only desktop/mobile
+npx playwright test --config e2e/playwright.config.ts --grep="severity tab"
+npx playwright test --config e2e/playwright.config.ts --project=desktop
+
+# E2E: regenerate mock data after backend model changes (from repo root)
+PYTHONPATH=. python3 web/e2e/fixtures/mock-data/generate-mock-data.py
+
+# Regenerate config translations from Pydantic models — outputs to
+# web/public/locales/en/config/{global,cameras}.json. NEVER edit those
+# JSON files by hand; change the Pydantic field title/description and
+# re-run this script. (from repo root)
+python3 generate_config_translations.py
+
+# Extract i18n keys from source into the locale files after adding
+# new t() calls. Use the :ci variant to verify the locale files are
+# in sync with source (fails if extraction would change anything).
+npm run i18n:extract
+npm run i18n:extract:ci
 ```
 
 ### Docker Development
@@ -370,6 +404,10 @@ except ValueError:
         },
     )
 ```
+
+## WebSocket Broadcasts
+
+Outbound WebSocket broadcasts go through a per-recipient classifier in `frigate/comms/ws.py` that enforces camera-level access. **The classifier is fail-closed: any topic it doesn't recognize is dropped for every client.** New outbound topics must be classified there or they'll silently disappear.
 
 ## Project-Specific Conventions
 
