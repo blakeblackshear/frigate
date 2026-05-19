@@ -121,5 +121,9 @@
   "royal_mail": "Royal-Mail",
   "school_bus": "Schulbus",
   "skunk": "Stinktier",
-  "kangaroo": "Känguruh"
+  "kangaroo": "Känguruh",
+  "baby": "Baby",
+  "baby_stroller": "Kinderwagen",
+  "rickshaw": "Rikscha",
+  "rodent": "Nagetier"
 }
