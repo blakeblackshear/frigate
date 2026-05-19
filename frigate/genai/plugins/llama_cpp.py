@@ -527,19 +527,28 @@ class LlamaCppClient(GenAIClient):
             k: v for k, v in self.provider_options.items() if k != "context_size"
         }
         payload.update(provider_opts)
+        payload.update(self.genai_config.runtime_options)
         return payload
 
     def _message_from_choice(self, choice: dict[str, Any]) -> dict[str, Any]:
-        """Parse OpenAI-style choice into {content, tool_calls, finish_reason}."""
+        """Parse OpenAI-style choice into {content, reasoning, tool_calls, finish_reason}.
+
+        llama.cpp's `--reasoning-format` puts the trace in
+        `message.reasoning_content` (preferred) or `message.thinking`; both
+        keys are accepted so different builds work without configuration.
+        """
         message = choice.get("message", {})
         content = message.get("content")
         content = content.strip() if content else None
+        reasoning = message.get("reasoning_content") or message.get("thinking")
+        reasoning = reasoning.strip() if reasoning else None
         tool_calls = parse_tool_calls_from_message(message)
         finish_reason = choice.get("finish_reason") or (
             "tool_calls" if tool_calls else "stop" if content else "error"
         )
         return {
             "content": content,
+            "reasoning": reasoning,
             "tool_calls": tool_calls,
             "finish_reason": finish_reason,
         }
@@ -802,6 +811,7 @@ class LlamaCppClient(GenAIClient):
         try:
             payload = self._build_payload(messages, tools, tool_choice, stream=True)
             content_parts: list[str] = []
+            reasoning_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
 
@@ -831,6 +841,15 @@ class LlamaCppClient(GenAIClient):
                         delta = choices[0].get("delta", {})
                         if choices[0].get("finish_reason"):
                             finish_reason = choices[0]["finish_reason"]
+                        # llama.cpp emits separated thinking under
+                        # reasoning_content (preferred) or thinking before any
+                        # content tokens arrive
+                        reasoning_delta = delta.get("reasoning_content") or delta.get(
+                            "thinking"
+                        )
+                        if reasoning_delta:
+                            reasoning_parts.append(reasoning_delta)
+                            yield ("reasoning_delta", reasoning_delta)
                         if delta.get("content"):
                             content_parts.append(delta["content"])
                             yield ("content_delta", delta["content"])
@@ -856,6 +875,7 @@ class LlamaCppClient(GenAIClient):
                                 )
 
             full_content = "".join(content_parts).strip() or None
+            full_reasoning = "".join(reasoning_parts).strip() or None
             tool_calls_list = self._streamed_tool_calls_to_list(tool_calls_by_index)
             if tool_calls_list:
                 finish_reason = "tool_calls"
@@ -863,6 +883,7 @@ class LlamaCppClient(GenAIClient):
                 "message",
                 {
                     "content": full_content,
+                    "reasoning": full_reasoning,
                     "tool_calls": tool_calls_list,
                     "finish_reason": finish_reason,
                 },

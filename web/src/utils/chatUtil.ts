@@ -27,6 +27,7 @@ type StreamChunk =
   | { type: "error"; error: string }
   | { type: "tool_calls"; tool_calls: ToolCall[] }
   | { type: "content"; delta: string }
+  | { type: "reasoning"; delta: string }
   | StatsChunk;
 
 /**
@@ -104,6 +105,19 @@ export async function streamChatCompletion(
             next[next.length - 1] = {
               ...lastMsg,
               content: lastMsg.content + data.delta,
+            };
+          return next;
+        });
+        return "continue";
+      }
+      if (data.type === "reasoning" && data.delta !== undefined) {
+        updateMessages((prev) => {
+          const next = [...prev];
+          const lastMsg = next[next.length - 1];
+          if (lastMsg?.role === "assistant")
+            next[next.length - 1] = {
+              ...lastMsg,
+              reasoning: (lastMsg.reasoning ?? "") + data.delta,
             };
           return next;
         });

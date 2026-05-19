@@ -309,6 +309,7 @@ class OllamaClient(GenAIClient):
             "model": self.genai_config.model,
             "messages": request_messages,
             **self.provider_options,
+            **self.genai_config.runtime_options,
         }
         if stream:
             request_params["stream"] = True
@@ -336,6 +337,9 @@ class OllamaClient(GenAIClient):
             response.get("done"),
         )
         content = message.get("content", "").strip() if message.get("content") else None
+        reasoning = (
+            message.get("thinking", "").strip() if message.get("thinking") else None
+        )
         tool_calls = parse_tool_calls_from_message(message)
         finish_reason = "error"
         if response.get("done"):
@@ -348,6 +352,7 @@ class OllamaClient(GenAIClient):
             finish_reason = "stop"
         return {
             "content": content,
+            "reasoning": reasoning,
             "tool_calls": tool_calls,
             "finish_reason": finish_reason,
         }
@@ -431,6 +436,9 @@ class OllamaClient(GenAIClient):
                 )
                 response = await async_client.chat(**request_params)
                 result = self._message_from_response(response)
+                reasoning = result.get("reasoning")
+                if reasoning:
+                    yield ("reasoning_delta", reasoning)
                 content = result.get("content")
                 if content:
                     yield ("content_delta", content)
@@ -449,6 +457,7 @@ class OllamaClient(GenAIClient):
                 headers=self._auth_headers(),
             )
             content_parts: list[str] = []
+            reasoning_parts: list[str] = []
             final_message: dict[str, Any] | None = None
             final_chunk: Any = None
             stream = await async_client.chat(**request_params)
@@ -456,6 +465,10 @@ class OllamaClient(GenAIClient):
                 if not chunk or "message" not in chunk:
                     continue
                 msg = chunk.get("message", {})
+                reasoning_delta = msg.get("thinking") or ""
+                if reasoning_delta:
+                    reasoning_parts.append(reasoning_delta)
+                    yield ("reasoning_delta", reasoning_delta)
                 delta = msg.get("content") or ""
                 if delta:
                     content_parts.append(delta)
@@ -463,8 +476,10 @@ class OllamaClient(GenAIClient):
                 if chunk.get("done"):
                     final_chunk = chunk
                     full_content = "".join(content_parts).strip() or None
+                    full_reasoning = "".join(reasoning_parts).strip() or None
                     final_message = {
                         "content": full_content,
+                        "reasoning": full_reasoning,
                         "tool_calls": None,
                         "finish_reason": "stop",
                     }
@@ -481,6 +496,7 @@ class OllamaClient(GenAIClient):
                     "message",
                     {
                         "content": "".join(content_parts).strip() or None,
+                        "reasoning": "".join(reasoning_parts).strip() or None,
                         "tool_calls": None,
                         "finish_reason": "stop",
                     },

@@ -1,47 +1,60 @@
-"""Azure OpenAI Provider for Frigate AI."""
+"""OpenAI Provider for Frigate AI."""
 
 import base64
 import json
 import logging
 from typing import Any, AsyncGenerator, Optional
-from urllib.parse import parse_qs, urlparse
 
-from openai import AzureOpenAI
+from httpx import TimeoutException
+from openai import OpenAI
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.openai import _stats_from_openai_usage
 
 logger = logging.getLogger(__name__)
 
 
-@register_genai_provider(GenAIProviderEnum.azure_openai)
+def _stats_from_openai_usage(usage: Any) -> Optional[dict[str, Any]]:
+    """Build a stats dict from an OpenAI-compatible usage object."""
+    if usage is None:
+        return None
+    prompt_tokens = getattr(usage, "prompt_tokens", None)
+    completion_tokens = getattr(usage, "completion_tokens", None)
+    if prompt_tokens is None and completion_tokens is None:
+        return None
+    stats: dict[str, Any] = {}
+    if isinstance(prompt_tokens, int):
+        stats["prompt_tokens"] = prompt_tokens
+    if isinstance(completion_tokens, int):
+        stats["completion_tokens"] = completion_tokens
+    return stats or None
+
+
+@register_genai_provider(GenAIProviderEnum.openai)
 class OpenAIClient(GenAIClient):
-    """Generative AI client for Frigate using Azure OpenAI."""
+    """Generative AI client for Frigate using OpenAI."""
 
-    provider: AzureOpenAI
+    provider: OpenAI
+    context_size: Optional[int] = None
 
-    def _init_provider(self) -> AzureOpenAI | None:
-        """Initialize the client."""
-        try:
-            parsed_url = urlparse(self.genai_config.base_url or "")
-            query_params = parse_qs(parsed_url.query)
-            api_version = query_params.get("api-version", [None])[0]
-            azure_endpoint = f"{parsed_url.scheme}://{parsed_url.netloc}/"
+    def _init_provider(self) -> OpenAI:
+        """Initialize the client.
 
-            if not api_version:
-                logger.warning("Azure OpenAI url is missing API version.")
-                return None
+        Subclasses (e.g. Azure) should raise on configuration errors; the
+        manager catches construction failures and disables the provider.
+        """
+        # Extract context_size from provider_options as it's not a valid OpenAI client parameter
+        # It will be used in get_context_size() instead
+        provider_opts = {
+            k: v
+            for k, v in self.genai_config.provider_options.items()
+            if k != "context_size"
+        }
 
-        except Exception as e:
-            logger.warning("Error parsing Azure OpenAI url: %s", str(e))
-            return None
+        if self.genai_config.base_url:
+            provider_opts["base_url"] = self.genai_config.base_url
 
-        return AzureOpenAI(
-            api_key=self.genai_config.api_key,
-            api_version=api_version,
-            azure_endpoint=azure_endpoint,
-        )
+        return OpenAI(api_key=self.genai_config.api_key, **provider_opts)
 
     def _send(
         self,
@@ -49,51 +62,125 @@ class OpenAIClient(GenAIClient):
         images: list[bytes],
         response_format: Optional[dict] = None,
     ) -> Optional[str]:
-        """Submit a request to Azure OpenAI."""
+        """Submit a request to OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
+        messages_content: list[dict] = [
+            {
+                "type": "text",
+                "text": prompt,
+            }
+        ]
+        for image in encoded_images:
+            messages_content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{image}",
+                        "detail": "low",
+                    },
+                }
+            )
         try:
             request_params = {
                 "model": self.genai_config.model,
                 "messages": [
                     {
                         "role": "user",
-                        "content": [{"type": "text", "text": prompt}]
-                        + [
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{image}",
-                                    "detail": "low",
-                                },
-                            }
-                            for image in encoded_images
-                        ],
+                        "content": messages_content,
                     },
                 ],
                 "timeout": self.timeout,
                 **self.genai_config.runtime_options,
             }
             if response_format:
+                # OpenAI strict mode requires additionalProperties: false on the schema
+                if response_format.get("type") == "json_schema" and response_format.get(
+                    "json_schema", {}
+                ).get("strict"):
+                    schema = response_format.get("json_schema", {}).get("schema")
+                    if isinstance(schema, dict):
+                        schema["additionalProperties"] = False
                 request_params["response_format"] = response_format
+
             result = self.provider.chat.completions.create(**request_params)
-        except Exception as e:
-            logger.warning("Azure OpenAI returned an error: %s", str(e))
+
+            if (
+                result is not None
+                and hasattr(result, "choices")
+                and len(result.choices) > 0
+            ):
+                message = result.choices[0].message
+                content = message.content
+
+                if not content:
+                    # When reasoning is enabled for some OpenAI backends the actual response
+                    # is incorrectly placed in reasoning_content instead of content.
+                    # This is buggy/incorrect behavior — reasoning should not be
+                    # enabled for these models.
+                    reasoning_content = getattr(message, "reasoning_content", None)
+                    if reasoning_content:
+                        logger.warning(
+                            "Response content was empty but reasoning_content was provided; "
+                            "reasoning appears to be enabled and should be disabled for this model."
+                        )
+                        content = reasoning_content
+
+                return str(content.strip()) if content else None
             return None
-        if len(result.choices) > 0:
-            return str(result.choices[0].message.content.strip())
-        return None
+        except (TimeoutException, Exception) as e:
+            logger.warning("OpenAI returned an error: %s", str(e))
+            return None
 
     def list_models(self) -> list[str]:
-        """Return available model IDs from Azure OpenAI."""
+        """Return available model IDs from the OpenAI-compatible API."""
         try:
             return sorted(m.id for m in self.provider.models.list().data)
         except Exception as e:
-            logger.warning("Failed to list Azure OpenAI models: %s", e)
+            logger.warning("Failed to list OpenAI models: %s", e)
             return []
 
     def get_context_size(self) -> int:
-        """Get the context window size for Azure OpenAI."""
-        return 128000
+        """Get the context window size for OpenAI."""
+        if self.context_size is not None:
+            return self.context_size
+
+        # First check provider_options for manually specified context size
+        # This is necessary for llama.cpp and other OpenAI-compatible servers
+        # that don't expose the configured runtime context size in the API response
+        if "context_size" in self.genai_config.provider_options:
+            self.context_size = self.genai_config.provider_options["context_size"]
+            logger.debug(
+                f"Using context size {self.context_size} from provider_options for model {self.genai_config.model}"
+            )
+            return self.context_size
+
+        try:
+            models = self.provider.models.list()
+            for model in models.data:
+                if model.id == self.genai_config.model:
+                    if hasattr(model, "max_model_len") and model.max_model_len:
+                        self.context_size = model.max_model_len
+                        logger.debug(
+                            f"Retrieved context size {self.context_size} for model {self.genai_config.model}"
+                        )
+                        return self.context_size
+
+        except Exception as e:
+            logger.debug(
+                f"Failed to fetch model context size from API: {e}, using default"
+            )
+
+        # Default to 128K for ChatGPT models, 8K for others
+        model_name = self.genai_config.model.lower()
+        if "gpt" in model_name:
+            self.context_size = 128000
+        else:
+            self.context_size = 8192
+
+        logger.debug(
+            f"Using default context size {self.context_size} for model {self.genai_config.model}"
+        )
+        return self.context_size
 
     def chat_with_tools(
         self,
@@ -101,6 +188,11 @@ class OpenAIClient(GenAIClient):
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
     ) -> dict[str, Any]:
+        """
+        Send chat messages to OpenAI with optional tool definitions.
+
+        Implements function calling/tool usage for OpenAI models.
+        """
         try:
             openai_tool_choice = None
             if tool_choice:
@@ -115,6 +207,7 @@ class OpenAIClient(GenAIClient):
                 "model": self.genai_config.model,
                 "messages": messages,
                 "timeout": self.timeout,
+                **self.genai_config.runtime_options,
             }
 
             if tools:
@@ -122,7 +215,16 @@ class OpenAIClient(GenAIClient):
                 if openai_tool_choice is not None:
                     request_params["tool_choice"] = openai_tool_choice
 
-            result = self.provider.chat.completions.create(**request_params)  # type: ignore[call-overload]
+            if isinstance(self.genai_config.provider_options, dict):
+                excluded_options = {"context_size"}
+                provider_opts = {
+                    k: v
+                    for k, v in self.genai_config.provider_options.items()
+                    if k not in excluded_options
+                }
+                request_params.update(provider_opts)
+
+            result = self.provider.chat.completions.create(**request_params)
 
             if (
                 result is None
@@ -137,8 +239,11 @@ class OpenAIClient(GenAIClient):
 
             choice = result.choices[0]
             message = choice.message
-
             content = message.content.strip() if message.content else None
+            raw_reasoning = getattr(message, "reasoning_content", None) or getattr(
+                message, "reasoning", None
+            )
+            reasoning = raw_reasoning.strip() if raw_reasoning else None
 
             tool_calls = None
             if message.tool_calls:
@@ -173,14 +278,24 @@ class OpenAIClient(GenAIClient):
 
             return {
                 "content": content,
+                "reasoning": reasoning,
                 "tool_calls": tool_calls,
                 "finish_reason": finish_reason,
             }
 
-        except Exception as e:
-            logger.warning("Azure OpenAI returned an error: %s", str(e))
+        except TimeoutException as e:
+            logger.warning("OpenAI request timed out: %s", str(e))
             return {
                 "content": None,
+                "reasoning": None,
+                "tool_calls": None,
+                "finish_reason": "error",
+            }
+        except Exception as e:
+            logger.warning("OpenAI returned an error: %s", str(e))
+            return {
+                "content": None,
+                "reasoning": None,
                 "tool_calls": None,
                 "finish_reason": "error",
             }
@@ -194,7 +309,7 @@ class OpenAIClient(GenAIClient):
         """
         Stream chat with tools; yields content deltas then final message.
 
-        Implements streaming function calling/tool usage for Azure OpenAI models.
+        Implements streaming function calling/tool usage for OpenAI models.
         """
         try:
             openai_tool_choice = None
@@ -212,6 +327,7 @@ class OpenAIClient(GenAIClient):
                 "timeout": self.timeout,
                 "stream": True,
                 "stream_options": {"include_usage": True},
+                **self.genai_config.runtime_options,
             }
 
             if tools:
@@ -219,13 +335,23 @@ class OpenAIClient(GenAIClient):
                 if openai_tool_choice is not None:
                     request_params["tool_choice"] = openai_tool_choice
 
+            if isinstance(self.genai_config.provider_options, dict):
+                excluded_options = {"context_size"}
+                provider_opts = {
+                    k: v
+                    for k, v in self.genai_config.provider_options.items()
+                    if k not in excluded_options
+                }
+                request_params.update(provider_opts)
+
             # Use streaming API
             content_parts: list[str] = []
+            reasoning_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
             usage_stats: Optional[dict[str, Any]] = None
 
-            stream = self.provider.chat.completions.create(**request_params)  # type: ignore[call-overload]
+            stream = self.provider.chat.completions.create(**request_params)
 
             for chunk in stream:
                 chunk_usage = getattr(chunk, "usage", None)
@@ -241,6 +367,15 @@ class OpenAIClient(GenAIClient):
                 # Check for finish reason
                 if choice.finish_reason:
                     finish_reason = choice.finish_reason
+
+                # Extract reasoning deltas (reasoning_content or reasoning,
+                # depending on the server)
+                reasoning_delta = getattr(delta, "reasoning_content", None) or getattr(
+                    delta, "reasoning", None
+                )
+                if reasoning_delta:
+                    reasoning_parts.append(reasoning_delta)
+                    yield ("reasoning_delta", reasoning_delta)
 
                 # Extract content deltas
                 if delta.content:
@@ -270,6 +405,7 @@ class OpenAIClient(GenAIClient):
 
             # Build final message
             full_content = "".join(content_parts).strip() or None
+            full_reasoning = "".join(reasoning_parts).strip() or None
 
             # Convert tool calls to list format
             tool_calls_list = None
@@ -298,17 +434,30 @@ class OpenAIClient(GenAIClient):
                 "message",
                 {
                     "content": full_content,
+                    "reasoning": full_reasoning,
                     "tool_calls": tool_calls_list,
                     "finish_reason": finish_reason,
                 },
             )
 
-        except Exception as e:
-            logger.warning("Azure OpenAI streaming returned an error: %s", str(e))
+        except TimeoutException as e:
+            logger.warning("OpenAI streaming request timed out: %s", str(e))
             yield (
                 "message",
                 {
                     "content": None,
+                    "reasoning": None,
+                    "tool_calls": None,
+                    "finish_reason": "error",
+                },
+            )
+        except Exception as e:
+            logger.warning("OpenAI streaming returned an error: %s", str(e))
+            yield (
+                "message",
+                {
+                    "content": None,
+                    "reasoning": None,
                     "tool_calls": None,
                     "finish_reason": "error",
                 },
