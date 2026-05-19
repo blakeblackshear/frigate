@@ -1,1 +1,64 @@
-{}
+{
+    "documentTitle": "聊天 - Frigate",
+    "title": "Frigate 聊天",
+    "subtitle": "你的攝影機管理與智慧分析 AI 助手",
+    "placeholder": "嘗試問我任何事…",
+    "error": "出現錯誤，請稍後重試。",
+    "processing": "進行中…",
+    "toolsUsed": "使用：{{tools}}",
+    "showTools": "顯示工具（{{count}}）",
+    "hideTools": "隱藏工具",
+    "call": "呼叫",
+    "result": "結果",
+    "arguments": "引數：",
+    "response": "回應：",
+    "attachment_chip_label": "在 {{camera}} 的 {{label}}",
+    "attachment_chip_remove": "移除附件",
+    "open_in_explore": "從瀏覽中開啟",
+    "attach_event_aria": "關聯事件 {{eventId}}",
+    "attachment_picker_paste_label": "或貼上事件 ID",
+    "attachment_picker_attach": "關聯",
+    "attachment_picker_placeholder": "關聯一個事件",
+    "quick_reply_find_similar": "查詢相似抓拍事件",
+    "quick_reply_tell_me_more": "瞭解更多詳情",
+    "quick_reply_when_else": "還在哪些時段出現過？",
+    "quick_reply_find_similar_text": "查詢與此相似的抓拍記錄。",
+    "quick_reply_tell_me_more_text": "瞭解此條更多詳情。",
+    "quick_reply_when_else_text": "還在哪些時間出現過？",
+    "anchor": "來源",
+    "similarity_score": "相似度",
+    "no_similar_objects_found": "未找到相似目標。",
+    "semantic_search_required": "必須啟用語意搜尋才能查詢相似目標。",
+    "send": "傳送",
+    "suggested_requests": "嘗試問問：",
+    "starting_requests": {
+        "show_recent_events": "檢視近期事件",
+        "show_camera_status": "顯示攝影機狀態",
+        "recap": "我不在的時候發生了什麼？",
+        "watch_camera": "監控攝影機活動"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "顯示最近一小時的事件",
+        "show_camera_status": "我的攝影機當前狀態如何？",
+        "recap": "我不在的時候發生了什麼事？",
+        "watch_camera": "監控前門，有人出現就通知我"
+    },
+    "new_chat": "新對話",
+    "settings": {
+        "title": "對話設定",
+        "show_stats": {
+            "title": "顯示統計",
+            "desc": "顯示對話回應的產生速度與上下文大小。",
+            "while_generating": "產生時",
+            "always": "一律顯示"
+        },
+        "auto_scroll": {
+            "title": "自動捲動",
+            "desc": "隨新訊息到來自動跟進。"
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} 個 token",
+        "tokens_per_second": "{{rate}} tokens/秒"
+    }
+}

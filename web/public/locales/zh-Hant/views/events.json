@@ -14,7 +14,9 @@
       "description": "僅當該攝影機啟用錄製功能時，才能為該攝影機建立審查項目。"
     }
   },
-  "timeline": "時間線",
+  "timeline": {
+    "label": "時間線"
+  },
   "timeline.aria": "選擇時間線",
   "events": {
     "label": "事件",
@@ -24,7 +26,9 @@
   "documentTitle": "審核 - Frigate",
   "allCameras": "所有鏡頭",
   "recordings": {
-    "documentTitle": "錄影 - Frigate"
+    "documentTitle": "錄影 - Frigate",
+    "invalidSharedLink": "由於解析錯誤，無法開啟帶時間戳的錄製連結。",
+    "invalidSharedCamera": "由於攝影機未知或未獲授權，無法開啟帶時間戳的錄製連結。"
   },
   "calendarFilter": {
     "last24Hours": "過去 24 小時"
@@ -63,5 +67,28 @@
   "normalActivity": "正常",
   "needsReview": "待審核",
   "securityConcern": "安全隱憂",
-  "select_all": "全選"
+  "select_all": "全選",
+  "motionSearch": {
+    "menuItem": "畫面變動搜尋",
+    "openMenu": "攝影機選項"
+  },
+  "motionPreviews": {
+    "menuItem": "檢視畫面變動預覽",
+    "title": "畫面變動預覽：{{camera}}",
+    "mobileSettingsTitle": "畫面變動預覽設定",
+    "mobileSettingsDesc": "調整播放速度和變暗程度，並選擇日期以僅檢視畫面變動的片段。",
+    "dim": "變暗",
+    "dimAria": "調整變暗強度",
+    "dimDesc": "增加變暗程度可以提高畫面變動區域的可見性。",
+    "speed": "速度",
+    "speedAria": "選擇預覽播放速度",
+    "speedDesc": "選擇預覽片段的播放速度。",
+    "back": "返回",
+    "empty": "沒有可用的預覽",
+    "noPreview": "預覽不可用",
+    "seekAria": "將 {{camera}} 播放器定位到 {{time}}",
+    "filter": "篩選",
+    "filterDesc": "選擇區域以僅顯示在這些區域中有畫面變動的片段。",
+    "filterClear": "清除"
+  }
 }

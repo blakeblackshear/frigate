@@ -82,6 +82,7 @@
     "zones": "區域",
     "mask": "遮罩",
     "motion": "移動",
-    "regions": "區塊"
+    "regions": "區塊",
+    "paths": "行動軌跡"
   }
 }
