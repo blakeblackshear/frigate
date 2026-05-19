@@ -162,7 +162,6 @@ When reviewing code, do NOT comment on:
 - **Linting**: ESLint (see `web/.eslintrc.cjs`)
 - **Formatting**: Prettier with Tailwind CSS plugin
 - **Type Safety**: TypeScript strict mode enabled
-- **Testing**: Vitest for unit tests
 
 ### Component Patterns
 
