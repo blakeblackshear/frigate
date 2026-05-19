@@ -457,8 +457,8 @@ Guidelines:
 
 
 def load_providers() -> None:
-    package_dir = os.path.dirname(__file__)
-    for filename in os.listdir(package_dir):
+    plugins_dir = os.path.join(os.path.dirname(__file__), "plugins")
+    for filename in os.listdir(plugins_dir):
         if filename.endswith(".py") and filename != "__init__.py":
-            module_name = f"frigate.genai.{filename[:-3]}"
+            module_name = f"frigate.genai.plugins.{filename[:-3]}"
             importlib.import_module(module_name)

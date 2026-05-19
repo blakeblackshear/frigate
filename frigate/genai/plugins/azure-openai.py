@@ -10,7 +10,7 @@ from openai import AzureOpenAI
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.openai import _stats_from_openai_usage
+from frigate.genai.plugins.openai import _stats_from_openai_usage
 
 logger = logging.getLogger(__name__)
 
