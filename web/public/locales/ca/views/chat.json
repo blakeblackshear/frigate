@@ -42,5 +42,28 @@
         "show_camera_status": "Quin és l'estat actual de les meves càmeres?",
         "recap": "Què va passar mentre jo era fora?",
         "watch_camera": "Vigila la porta d'entrada i fes-me saber si algú apareix"
+    },
+    "new_chat": "Xat nou",
+    "settings": {
+        "title": "Configuració del xat",
+        "show_stats": {
+            "title": "Mostra les estadístiques",
+            "desc": "Mostra la velocitat de generació i la mida del context per a les respostes del xat.",
+            "while_generating": "En generar",
+            "always": "Sempre"
+        },
+        "auto_scroll": {
+            "title": "Desplaçament automàtic",
+            "desc": "Segueix els missatges nous a mesura que arriben."
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} tokens",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Raonant…",
+        "show": "Mostra el raonament",
+        "hide": "Amaga el raonament"
     }
 }

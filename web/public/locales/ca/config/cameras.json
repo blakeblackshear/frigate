@@ -33,7 +33,11 @@
         },
         "filters": {
             "label": "Filtres d'àudio",
-            "description": "Paràmetres de filtre per-àudio-tipus, com ara llindars de confiança utilitzats per reduir falsos positius."
+            "description": "Paràmetres de filtre per-àudio-tipus, com ara llindars de confiança utilitzats per reduir falsos positius.",
+            "threshold": {
+                "label": "Confiança mínima de l'àudio",
+                "description": "Llindar mínim de confiança per a l'esdeveniment d'àudio a comptar."
+            }
         },
         "enabled_in_config": {
             "label": "Estat d'àudio original",
