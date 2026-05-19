@@ -1288,11 +1288,6 @@ export function ConfigSection({
             <CollapsibleTrigger asChild>
               <div className="flex cursor-pointer items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {isOpen ? (
-                    <LuChevronDown className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <LuChevronRight className="h-4 w-4 text-muted-foreground" />
-                  )}
                   <Heading as="h4">{title}</Heading>
                   {showOverrideIndicator &&
                     effectiveLevel === "camera" &&
@@ -1323,12 +1318,17 @@ export function ConfigSection({
                       })}
                     </Badge>
                   )}
+                  {isOpen ? (
+                    <LuChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <LuChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
                 </div>
               </div>
             </CollapsibleTrigger>
 
             <CollapsibleContent>
-              <div className="pl-7">{sectionContent}</div>
+              <div className="pl-0">{sectionContent}</div>
             </CollapsibleContent>
           </div>
         </Collapsible>
