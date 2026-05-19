@@ -803,7 +803,15 @@
       "availableModels": "Verfügbare Modelle",
       "loadingAvailableModels": "Lade verfügbare Modelle…",
       "baseModel": "Basis Model",
-      "title": "Model Informationen"
+      "title": "Model Informationen",
+      "noModelLoaded": "Derzeit ist kein „Frigate+“-Modell geladen.",
+      "selectModel": "Wählen Sie ein Modell aus",
+      "noModelsAvailable": "Keine Modelle verfügbar",
+      "filter": {
+        "ariaLabel": "Modelle nach Typ filtern",
+        "baseModels": "Basismodelle",
+        "fineTunedModels": "Optimierte Modelle"
+      }
     },
     "toast": {
       "error": "Speichern der Konfigurationsänderungen fehlgeschlagen: {{errorMessage}}",
@@ -1415,7 +1423,8 @@
       "normal": "Normal",
       "dedicatedLpr": "Spezielles LPR-System",
       "saveSuccess": "Der Kameratyp für {{cameraName}} wurde aktualisiert. Starte Frigate neu, um die Änderungen zu übernehmen."
-    }
+    },
+    "description": "Fügen Sie Kameras hinzu, bearbeiten und löschen Sie sie, legen Sie fest, welche Kameras aktiviert sind, und konfigurieren Sie profil- und kameratypabhängige Übersteuerungen. Um Streams, Erkennung, Bewegung und andere kameraspezifische Einstellungen zu konfigurieren, wählen Sie den entsprechenden Abschnitt unter „Kamerakonfiguration“ aus."
   },
   "cameraReview": {
     "title": "Kamera-Einstellungen überprüfen",
@@ -1489,7 +1498,13 @@
       "othersField_one": "{{count}} andere",
       "othersField_other": "{{count}} weitere",
       "profilePrefix": "{{profile}} Profile: {{fields}}"
-    }
+    },
+    "overriddenGlobalHeading_one": "Diese Kamera überschreibt das Feld {{count}} aus der globalen Konfiguration:",
+    "overriddenGlobalHeading_other": "Diese Kamera überschreibt alle Felder {{count}} aus der globalen Konfiguration:",
+    "overriddenGlobalNoDeltas": "Diese Kamera überschreibt die globale Konfiguration, es gibt jedoch keine Abweichungen bei den Feldwerten.",
+    "overriddenBaseConfigHeading_one": "Das Profil {{profile}} überschreibt das Feld {{count}} aus der Basiskonfiguration:",
+    "overriddenBaseConfigHeading_other": "Das Profil {{profile}} überschreibt di Felder {{count}} aus der Basiskonfiguration:",
+    "overriddenBaseConfigNoDeltas": "Das Profil {{profile}} überschreibt diesen Abschnitt, jedoch weichen keine Feldwerte von der Basiskonfiguration ab."
   },
   "timestampPosition": {
     "tl": "Oben links",
@@ -1726,7 +1741,9 @@
       "options": {
         "embeddings": "Einbetten",
         "vision": "Vision",
-        "tools": "Werkzeuge"
+        "tools": "Werkzeuge",
+        "descriptions": "Beschreibung",
+        "chat": "Chat"
       }
     },
     "semanticSearchModel": {
@@ -1884,7 +1901,14 @@
   },
   "onvif": {
     "profileAuto": "Auto",
-    "profileLoading": "Profile werden geladen..."
+    "profileLoading": "Profile werden geladen...",
+    "autotracking": {
+      "zooming": {
+        "disabled": "deaktiviert",
+        "absolute": "Absolut",
+        "relative": "Verwandter"
+      }
+    }
   },
   "configMessages": {
     "review": {
@@ -1932,5 +1956,60 @@
     "semanticSearch": {
       "jinav2SmallModelSize": "Die „kleine“ Variante des Jina V2-Modells verursacht hohe RAM- und Inferenzkosten. Es wird das „große“ Modell mit einer dedizierten GPU empfohlen."
     }
+  },
+  "birdseye": {
+    "trackingMode": {
+      "objects": "Objekte",
+      "motion": "Bewegung",
+      "continuous": "Fortlaufend"
+    }
+  },
+  "retainMode": {
+    "all": "Alle",
+    "motion": "Bewegung",
+    "active_objects": "Aktive Objekte"
+  },
+  "previewQuality": {
+    "very_high": "sehr hoch",
+    "high": "hoch",
+    "medium": "Mittel",
+    "low": "niedrig",
+    "very_low": "sehr niedrig"
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "Browser",
+      "12hour": "12 Stunden",
+      "24hour": "24 Stunden"
+    },
+    "TimeOrDateStyle": {
+      "full": "vollständig",
+      "long": "lang",
+      "medium": "mittel",
+      "short": "kurz"
+    },
+    "unitSystem": {
+      "metric": "Metrik",
+      "imperial": "Imperial"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "Aufnahmen",
+      "previews": "Vorschau"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "Debug",
+      "info": "Info",
+      "warning": "Warnung",
+      "error": "Fehler",
+      "critical": "Kritisch"
+    }
+  },
+  "modelSize": {
+    "small": "klein",
+    "large": "groß"
   }
 }
