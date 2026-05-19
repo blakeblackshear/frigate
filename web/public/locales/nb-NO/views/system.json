@@ -210,6 +210,9 @@
       "expectedFps": "Forventet BPS",
       "reconnectsLastHour": "Gjentatte tilkoblinger (siste time)",
       "stallsLastHour": "Avbrudd (siste time)"
+    },
+    "noCameras": {
+      "title": "Ingen kameraer funnet"
     }
   },
   "enrichments": {

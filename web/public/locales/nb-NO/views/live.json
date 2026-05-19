@@ -152,7 +152,8 @@
   },
   "recording": {
     "enable": "Aktiver opptak",
-    "disable": "Deaktiver opptak"
+    "disable": "Deaktiver opptak",
+    "disabledInConfig": "Opptak må først aktiveres i Innstillinger for dette kameraet."
   },
   "streamStats": {
     "enable": "Vis Strømmestatistikk",

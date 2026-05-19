@@ -1,1 +1,75 @@
-{}
+{
+    "documentTitle": "Bevegelsessøk - Frigate",
+    "title": "Bevegelsessøk",
+    "description": "Tegn et polygon for å definere et interesseområde, og angi et tidsrom for å søke etter bevegelsesendringer i dette området.",
+    "selectCamera": "Bevegelsessøk laster",
+    "startSearch": "Start søk",
+    "searchStarted": "Søk startet",
+    "searchCancelled": "Søk avbrutt",
+    "cancelSearch": "Avbryt",
+    "searching": "Søk pågår...",
+    "searchComplete": "Søk fullført",
+    "noResultsYet": "Kjør et søk for å finne bevegelsesendringer i det valgte området",
+    "noChangesFound": "Ingen pikselendringer ble funnet i det valgte området",
+    "changesFound_one": "Fant {{count}} bevegelsesendring",
+    "changesFound_other": "Fant {{count}} bevegelsesendringer",
+    "framesProcessed": "{{count}} bilder behandlet",
+    "jumpToTime": "Gå til dette tidspunktet",
+    "results": "Resultater",
+    "showSegmentHeatmap": "Varmekart",
+    "newSearch": "Nytt søk",
+    "clearResults": "Tøm resultater",
+    "clearROI": "Slett polygon",
+    "polygonControls": {
+        "points_one": "{{count}} punkt",
+        "points_other": "{{count}} punkter",
+        "undo": "Angre siste punkt",
+        "reset": "Tilbakestill polygon"
+    },
+    "motionHeatmapLabel": "Varmekart for bevegelse",
+    "dialog": {
+        "title": "Bevegelsessøk",
+        "cameraLabel": "Kamera",
+        "previewAlt": "Forhåndsvisning av kamera for {{camera}}"
+    },
+    "timeRange": {
+        "title": "Søkeperiode",
+        "start": "Starttid",
+        "end": "Sluttid"
+    },
+    "settings": {
+        "title": "Søkeinnstillinger",
+        "parallelMode": "Parallellmodus",
+        "parallelModeDesc": "Skann flere opptakssegmenter samtidig (raskere, men betydelig mer CPU-intensivt)",
+        "threshold": "Følsomhetsterskel",
+        "thresholdDesc": "Lavere verdier detekterer mindre endringer (1–255)",
+        "minArea": "Minimum endringsområde",
+        "minAreaDesc": "Minimum prosentandel av interesseområdet som må endres for å anses som betydelig",
+        "frameSkip": "Bilde-sprang",
+        "frameSkipDesc": "Behandle hvert N-te bilde. Sett denne til kameraets bildefrekvens for å behandle ett bilde i sekundet (f.eks. 5 for et 5 FPS-kamera, 30 for et 30 FPS-kamera). Høyere verdier vil være raskere, men kan gå glipp av korte bevegelseshendelser.",
+        "maxResults": "Maksimalt antall resultater",
+        "maxResultsDesc": "Stopp etter dette antallet samsvarende tidsstempler"
+    },
+    "errors": {
+        "noCamera": "Vennligst velg et kamera",
+        "noROI": "Vennligst tegn et interesseområde",
+        "noTimeRange": "Vennligst velg en tidsperiode",
+        "invalidTimeRange": "Sluttid må være etter starttid",
+        "searchFailed": "Søk mislyktes: {{message}}",
+        "polygonTooSmall": "Polygonet må ha minst 3 punkter",
+        "unknown": "Ukjent feil"
+    },
+    "changePercentage": "{{percentage}} % endret",
+    "metrics": {
+        "title": "Statistikk for søk",
+        "segmentsScanned": "Segmenter skannet",
+        "segmentsProcessed": "Behandlet",
+        "segmentsSkippedInactive": "Hoppet over (ingen aktivitet)",
+        "segmentsSkippedHeatmap": "Hoppet over (manglende ROI-overlapp)",
+        "fallbackFullRange": "Fullskanning som reserve",
+        "framesDecoded": "Bilder dekodet",
+        "wallTime": "Søketid",
+        "segmentErrors": "Segmentfeil",
+        "seconds": "{{seconds}}s"
+    }
+}

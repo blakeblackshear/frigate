@@ -27,7 +27,11 @@
     "aria": "Velg nylige gjenkjennelser",
     "title": "Nylige gjenkjennelser",
     "empty": "Det er ingen nylige forsøk på ansiktsgjenkjenning",
-    "titleShort": "Nylige"
+    "titleShort": "Nylige",
+    "emptyNoLibrary": {
+      "description": "Du må legge til minst ett ansikt i biblioteket for at ansiktsgjenkjenning skal fungere.",
+      "title": "Last opp et ansikt"
+    }
   },
   "selectFace": "Velg ansikt",
   "deleteFaceLibrary": {
