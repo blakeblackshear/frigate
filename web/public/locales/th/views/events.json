@@ -34,5 +34,6 @@
   "detections": "การตรวจจับ",
   "selected_one": "เลือก {{count}} แล้ว",
   "timeline.aria": "เลือกไทม์ไลน์",
-  "documentTitle": "รีวิว - Frigate"
+  "documentTitle": "รีวิว - Frigate",
+  "zoomIn": "ซูมเข้า"
 }
