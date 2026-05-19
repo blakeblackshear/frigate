@@ -1185,6 +1185,13 @@ async def chat_completion(
                             )
                             + b"\n"
                         )
+                    elif kind == "reasoning_delta":
+                        yield (
+                            json.dumps({"type": "reasoning", "delta": value}).encode(
+                                "utf-8"
+                            )
+                            + b"\n"
+                        )
                     elif kind == "stats":
                         yield (
                             json.dumps({"type": "stats", **value}).encode("utf-8")
@@ -1285,6 +1292,7 @@ async def chat_completion(
                 final_content = response.get("content") or ""
 
                 if body.stream:
+                    final_reasoning = response.get("reasoning")
 
                     async def stream_body() -> Any:
                         if tool_calls:
@@ -1296,6 +1304,15 @@ async def chat_completion(
                                             tc.model_dump() for tc in tool_calls
                                         ],
                                     }
+                                ).encode("utf-8")
+                                + b"\n"
+                            )
+                        # Emit the full reasoning trace up front when the
+                        # underlying client did not stream it
+                        if final_reasoning:
+                            yield (
+                                json.dumps(
+                                    {"type": "reasoning", "delta": final_reasoning}
                                 ).encode("utf-8")
                                 + b"\n"
                             )
@@ -1319,6 +1336,7 @@ async def chat_completion(
                         message=ChatMessageResponse(
                             role="assistant",
                             content=final_content,
+                            reasoning=response.get("reasoning"),
                             tool_calls=None,
                         ),
                         finish_reason=response.get("finish_reason", "stop"),

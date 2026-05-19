@@ -7,6 +7,7 @@ export type ToolCall = {
 export type ChatMessage = {
   role: "user" | "assistant";
   content: string;
+  reasoning?: string;
   toolCalls?: ToolCall[];
   stats?: ChatStats;
 };

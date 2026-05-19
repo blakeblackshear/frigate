@@ -7,6 +7,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import axios from "axios";
 import { ChatEventThumbnailsRow } from "@/components/chat/ChatEventThumbnailsRow";
 import { MessageBubble } from "@/components/chat/ChatMessage";
+import { ReasoningBubble } from "@/components/chat/ReasoningBubble";
 import { ToolCallsGroup } from "@/components/chat/ToolCallsGroup";
 import { ChatStartingState } from "@/components/chat/ChatStartingState";
 import { ChatAttachmentChip } from "@/components/chat/ChatAttachmentChip";
@@ -200,15 +201,18 @@ export default function ChatPage() {
                   const hasToolCalls =
                     msg.toolCalls && msg.toolCalls.length > 0;
                   const hasContent = !!msg.content?.trim();
+                  const hasReasoning = !!msg.reasoning?.trim();
                   const showProcessing =
-                    isLastAssistant && isLoading && !hasContent;
+                    isLastAssistant && isLoading && !hasContent && !hasReasoning;
 
-                  // Hide empty placeholder only when there are no tool calls yet
+                  // Hide empty placeholder only when there are no tool calls
+                  // and no reasoning streaming yet
                   if (
                     isLastAssistant &&
                     isLoading &&
                     !hasContent &&
-                    !hasToolCalls
+                    !hasToolCalls &&
+                    !hasReasoning
                   )
                     return (
                       <div
@@ -225,6 +229,12 @@ export default function ChatPage() {
                     <div key={i} className="flex flex-col gap-2">
                       {msg.role === "assistant" && hasToolCalls && (
                         <ToolCallsGroup toolCalls={msg.toolCalls!} />
+                      )}
+                      {msg.role === "assistant" && hasReasoning && (
+                        <ReasoningBubble
+                          reasoning={msg.reasoning!}
+                          answerStarted={hasContent}
+                        />
                       )}
                       {showProcessing ? (
                         <div className="flex items-center gap-2 self-start rounded-2xl bg-muted px-5 py-4">

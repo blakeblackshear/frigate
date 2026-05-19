@@ -300,6 +300,10 @@ class GenAIClient:
         Returns:
             Dictionary with:
             - 'content': Optional[str] - The text response from the LLM, None if tool calls
+            - 'reasoning': Optional[str] - The separated reasoning/thinking trace
+              if the model emitted one (e.g. via OpenAI-compatible
+              `reasoning_content`). None when the model does not surface a
+              trace or the provider does not parse it.
             - 'tool_calls': Optional[List[Dict]] - List of tool calls if LLM wants to call tools.
               Each tool call dict has:
                 - 'id': str - Unique identifier for this tool call
@@ -311,6 +315,14 @@ class GenAIClient:
                 - 'length': Hit token limit
                 - 'error': An error occurred
 
+        Streaming counterpart `chat_with_tools_stream` yields
+        ``(kind, value)`` tuples where ``kind`` is one of:
+            - 'content_delta': value is a string fragment of the answer
+            - 'reasoning_delta': value is a string fragment of the reasoning
+              trace (emitted before content for thinking models)
+            - 'stats': value is a usage stats dict
+            - 'message': value is the final dict shape described above
+
         Raises:
             NotImplementedError: If the provider doesn't implement this method.
         """
@@ -321,6 +333,7 @@ class GenAIClient:
         )
         return {
             "content": None,
+            "reasoning": None,
             "tool_calls": None,
             "finish_reason": "error",
         }

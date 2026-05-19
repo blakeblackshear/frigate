@@ -60,5 +60,10 @@
   "stats": {
     "context": "{{tokens}} tokens",
     "tokens_per_second": "{{rate}} t/s"
+  },
+  "reasoning": {
+    "thinking": "Thinking…",
+    "show": "Show reasoning",
+    "hide": "Hide reasoning"
   }
 }
