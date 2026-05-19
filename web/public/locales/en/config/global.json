@@ -921,6 +921,41 @@
         "label": "Original GenAI state",
         "description": "Indicates whether GenAI was enabled in the original static config."
       }
+    },
+    "filters_attribute": {
+      "label": "Attribute filters",
+      "description": "Filters applied to detected attributes to reduce false positives (area, ratio, confidence).",
+      "min_area": {
+        "label": "Minimum attribute area",
+        "description": "Minimum bounding box area (pixels or percentage) required for this attribute. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+      },
+      "max_area": {
+        "label": "Maximum attribute area",
+        "description": "Maximum bounding box area (pixels or percentage) allowed for this attribute. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+      },
+      "min_ratio": {
+        "label": "Minimum aspect ratio",
+        "description": "Minimum width/height ratio required for the bounding box to qualify."
+      },
+      "max_ratio": {
+        "label": "Maximum aspect ratio",
+        "description": "Maximum width/height ratio allowed for the bounding box to qualify."
+      },
+      "threshold": {
+        "label": "Confidence threshold",
+        "description": "Average detection confidence threshold required for the attribute to be considered a true positive."
+      },
+      "min_score": {
+        "label": "Minimum confidence",
+        "description": "Minimum single-frame detection confidence required to associate this attribute with its parent object."
+      },
+      "mask": {
+        "label": "Filter mask",
+        "description": "Polygon coordinates defining where this filter applies within the frame."
+      },
+      "raw_mask": {
+        "label": "Raw Mask"
+      }
     }
   },
   "record": {
