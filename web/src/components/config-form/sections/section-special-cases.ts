@@ -171,7 +171,20 @@ function modifyObjectsSchema(
     ctx.fullConfig.objects?.track ??
     [];
 
-  if (track.length === 0) return schema;
+  // Also promote any label that has a saved filter entry but isn't in
+  // `track` (e.g. the user toggled an object off but left a customized
+  // filter in YAML). Without this, RJSF falls back to the additional-
+  // properties Key/Value editor for those orphans.
+  const filtersSaved =
+    (ctx.level !== "global"
+      ? ctx.fullCameraConfig?.objects?.filters
+      : undefined) ??
+    ctx.fullConfig.objects?.filters ??
+    {};
+
+  if (track.length === 0 && Object.keys(filtersSaved).length === 0) {
+    return schema;
+  }
 
   const schemaProperties = isJsonObject(
     (schema as { properties?: unknown }).properties,
@@ -199,16 +212,27 @@ function modifyObjectsSchema(
     ? (filtersSchema as { properties: Record<string, RJSFSchema> }).properties
     : {};
 
-  // Promote every tracked label to an explicit property entry so RJSF
-  // renders it as a normal collapsible (no additionalProperties key/value
-  // editor UI). Attribute labels get a restricted shape with only
-  // `min_score`; non-attribute labels get the full FilterConfig. Sorted
-  // alphabetically so the filter collapsibles match the order of the
-  // sibling `track` switches.
-  const sortedTrackedLabels = track
-    .filter((label): label is string => typeof label === "string")
-    .slice()
-    .sort((a, b) => a.localeCompare(b));
+  // Promote every tracked label (and any orphaned filter entry) to an
+  // explicit property entry so RJSF renders it as a normal collapsible
+  // (no additionalProperties key/value editor UI). Attribute labels get a
+  // restricted shape with only `min_score`/`min_area`/`max_area`;
+  // non-attribute labels get the full FilterConfig. Sorted alphabetically
+  // so the filter collapsibles match the order of the sibling `track`
+  // switches.
+  const labelsToPromote = new Set<string>();
+  for (const label of track) {
+    if (typeof label === "string") labelsToPromote.add(label);
+  }
+  for (const key of Object.keys(filtersSaved)) {
+    // Skip attribute labels that aren't tracked — those are hidden
+    // entirely via hideAttributeFilters; promoting them would surface a
+    // collapsible we then have to hide separately.
+    if (attributeSet.has(key) && !labelsToPromote.has(key)) continue;
+    labelsToPromote.add(key);
+  }
+  const sortedTrackedLabels = [...labelsToPromote].sort((a, b) =>
+    a.localeCompare(b),
+  );
   const updatedFilterProperties: Record<string, RJSFSchema> = {
     ...existingProperties,
   };
