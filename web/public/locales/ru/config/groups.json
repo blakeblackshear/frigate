@@ -1,7 +1,8 @@
 {
     "audio": {
         "global": {
-            "sensitivity": "Общая чувствительность"
+            "sensitivity": "Общая чувствительность",
+            "detection": "Общее обнаружение"
         },
         "cameras": {
             "detection": "Обнаружение",
