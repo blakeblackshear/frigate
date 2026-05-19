@@ -357,6 +357,9 @@ class TrackedObjectProcessor(threading.Thread):
 
     def get_current_frame_time(self, camera: str) -> float:
         """Returns the latest frame time for a given camera."""
+        if camera not in self.camera_states:
+            return 0.0
+
         return self.camera_states[camera].current_frame_time
 
     def set_sub_label(

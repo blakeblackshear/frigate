@@ -10,15 +10,21 @@ export function WsProvider({ children }: { children: ReactNode }) {
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reconnectAttempt = useRef(0);
   const unmounted = useRef(false);
+  const pendingSends = useRef<Map<string, unknown>>(new Map());
 
   const sendJsonMessage = useCallback((msg: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(msg));
+    } else if (msg && typeof msg === "object" && "topic" in msg) {
+      // Sends issued before the socket reaches OPEN (or during a reconnect
+      // window) are buffered here and flushed in onopen
+      pendingSends.current.set(String((msg as { topic: unknown }).topic), msg);
     }
   }, []);
 
   useEffect(() => {
     unmounted.current = false;
+    const queue = pendingSends.current;
 
     function connect() {
       if (unmounted.current) return;
@@ -31,6 +37,10 @@ export function WsProvider({ children }: { children: ReactNode }) {
         ws.send(
           JSON.stringify({ topic: "onConnect", message: "", retain: false }),
         );
+        for (const queued of queue.values()) {
+          ws.send(JSON.stringify(queued));
+        }
+        queue.clear();
       };
 
       ws.onmessage = (event: MessageEvent) => {
@@ -64,6 +74,7 @@ export function WsProvider({ children }: { children: ReactNode }) {
         ws.onerror = null;
         ws.close();
       }
+      queue.clear();
       resetWsStore();
     };
   }, [wsUrl]);

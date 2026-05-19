@@ -40,6 +40,11 @@
       "profilePrefix": "{{profile}} profile: {{fields}}"
     }
   },
+  "menuDot": {
+    "overrideGlobal": "This section overrides the global configuration",
+    "overrideProfile": "This section is overridden by the {{profile}} profile",
+    "unsaved": "This section has unsaved changes"
+  },
   "menu": {
     "general": "General",
     "globalConfig": "Global configuration",
@@ -472,10 +477,13 @@
     "streams": {
       "title": "Enable / Disable Cameras",
       "enableLabel": "Enabled cameras",
-      "enableDesc": "Temporarily disable an enabled camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>",
+      "enableDesc": "Temporarily disable an enabled camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em><br /><br />Drag the handle to reorder the cameras as they appear in the UI. The order of enabled cameras will be reflected throughout the UI including the Live dashboard and camera selection dropdowns.",
       "disableLabel": "Disabled cameras",
       "disableDesc": "Enable a camera that is currently not visible in the UI and disabled in the configuration. A restart of Frigate is required after enabling.",
       "enableSuccess": "Enabled {{cameraName}} in configuration. Restart Frigate to apply the changes.",
+      "reorderHandle": "Drag to reorder",
+      "saving": "Saving…",
+      "saved": "Saved",
       "friendlyName": {
         "edit": "Edit camera display name",
         "title": "Edit Display Name",
@@ -1682,6 +1690,13 @@
       "objects": "Objects",
       "motion": "Motion",
       "continuous": "Continuous"
+    },
+    "cameraOrder": {
+      "label": "Camera order",
+      "description": "Drag cameras to set their order in the Birdseye layout.",
+      "reorderHandle": "Drag to reorder",
+      "saving": "Saving…",
+      "saved": "Saved"
     }
   },
   "retainMode": {

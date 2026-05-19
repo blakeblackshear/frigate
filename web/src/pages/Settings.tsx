@@ -106,6 +106,12 @@ import SaveAllPreviewPopover, {
   type SaveAllPreviewItem,
 } from "@/components/overlay/detail/SaveAllPreviewPopover";
 import { useRestart } from "@/api/ws";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 const allSettingsViews = [
   "uiSettings",
@@ -1505,10 +1511,20 @@ export default function Settings() {
         CAMERA_SECTION_KEYS.has(key) && status?.isOverridden;
       const showUnsavedDot = status?.hasChanges;
 
-      const dotColor =
-        status?.overrideSource === "profile" && activeProfileColor
-          ? activeProfileColor.dot
-          : "bg-selected";
+      const isProfileOverride =
+        status?.overrideSource === "profile" && activeProfileColor;
+      const dotColor = isProfileOverride
+        ? activeProfileColor.dot
+        : "bg-selected";
+
+      const overrideTooltip = isProfileOverride
+        ? t("menuDot.overrideProfile", {
+            profile: activeEditingProfile
+              ? (profileFriendlyNames.get(activeEditingProfile) ??
+                activeEditingProfile)
+              : "",
+          })
+        : t("menuDot.overrideGlobal");
 
       return (
         <div className="flex w-full min-w-0 items-center justify-between pr-4 md:pr-0">
@@ -1518,19 +1534,46 @@ export default function Settings() {
           {(showOverrideDot || showUnsavedDot) && (
             <div className="ml-2 flex shrink-0 items-center gap-2">
               {showOverrideDot && (
-                <span
-                  className={cn("inline-block size-2 rounded-full", dotColor)}
-                />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      className={cn(
+                        "inline-block size-2 rounded-full",
+                        dotColor,
+                      )}
+                    />
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent side="right">
+                      {overrideTooltip}
+                    </TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
               )}
               {showUnsavedDot && (
-                <span className="inline-block size-2 rounded-full bg-unsaved" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-block size-2 rounded-full bg-unsaved" />
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent side="right">
+                      {t("menuDot.unsaved")}
+                    </TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
               )}
             </div>
           )}
         </div>
       );
     },
-    [sectionStatusByKey, t, activeProfileColor],
+    [
+      sectionStatusByKey,
+      t,
+      activeProfileColor,
+      activeEditingProfile,
+      profileFriendlyNames,
+    ],
   );
 
   if (isMobile) {

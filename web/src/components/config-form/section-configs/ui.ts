@@ -5,7 +5,7 @@ const ui: SectionConfigOverrides = {
     sectionDocs: "/configuration/reference",
     restartRequired: [],
     fieldOrder: ["dashboard", "order"],
-    hiddenFields: [],
+    hiddenFields: ["order"],
     advancedFields: [],
     overrideFields: [],
   },

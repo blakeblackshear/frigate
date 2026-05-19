@@ -398,7 +398,7 @@ class _StreamingZipBuffer:
 def _unique_archive_name(export: Export, used: set[str]) -> str:
     base = sanitize_filename(export.name) if export.name else None
     if not base:
-        base = f"{export.camera}_{int(datetime.datetime.timestamp(export.date))}"
+        base = f"{export.camera}_{int(export.date)}"
 
     candidate = f"{base}.mp4"
     counter = 1

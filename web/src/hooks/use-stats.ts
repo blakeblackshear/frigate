@@ -10,7 +10,7 @@ import useSWR from "swr";
 import useDeepMemo from "./use-deep-memo";
 import { capitalizeAll, capitalizeFirstLetter } from "@/utils/stringUtil";
 import { isReplayCamera } from "@/utils/cameraUtil";
-import { useFrigateStats } from "@/api/ws";
+import { useFrigateStats, useJobStatus } from "@/api/ws";
 import { useIsAdmin } from "./use-is-admin";
 
 import { useTranslation } from "react-i18next";
@@ -19,11 +19,15 @@ export default function useStats(stats: FrigateStats | undefined) {
   const { t } = useTranslation(["views/system"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const isAdmin = useIsAdmin();
-  const { data: debugReplayStatus } = useSWR(
-    isAdmin ? "debug_replay/status" : null,
-    {
-      revalidateOnFocus: false,
-    },
+
+  // Pass isAdmin as revalidateOnFocus so non-admins never send the jobState snapshot pull
+  const { payload: replayJob } = useJobStatus("debug_replay", isAdmin);
+  const replayActive = Boolean(
+    isAdmin &&
+      replayJob &&
+      (replayJob.status === "queued" ||
+        replayJob.status === "running" ||
+        replayJob.status === "success"),
   );
 
   const memoizedStats = useDeepMemo(stats);
@@ -102,6 +106,11 @@ export default function useStats(stats: FrigateStats | undefined) {
 
     // check camera cpu usages
     Object.entries(memoizedStats["cameras"]).forEach(([name, cam]) => {
+      // Skip replay cameras
+      if (isReplayCamera(name)) {
+        return;
+      }
+
       const ffmpegAvg = parseFloat(
         memoizedStats["cpu_usages"][cam["ffmpeg_pid"]]?.cpu_average,
       );
@@ -111,12 +120,7 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       const cameraName = config?.cameras?.[name]?.friendly_name ?? name;
 
-      // Skip ffmpeg warnings for replay cameras
-      if (
-        !isNaN(ffmpegAvg) &&
-        ffmpegAvg >= CameraFfmpegThreshold.error &&
-        !isReplayCamera(name)
-      ) {
+      if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push({
           text: t("stats.ffmpegHighCpuUsage", {
             camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
@@ -140,7 +144,7 @@ export default function useStats(stats: FrigateStats | undefined) {
     });
 
     // Add message if debug replay is active
-    if (debugReplayStatus?.active) {
+    if (replayActive) {
       problems.push({
         text: t("stats.debugReplayActive", {
           defaultValue: "Debug replay session is active",
@@ -151,7 +155,7 @@ export default function useStats(stats: FrigateStats | undefined) {
     }
 
     return problems;
-  }, [config, memoizedStats, t, debugReplayStatus]);
+  }, [config, memoizedStats, t, replayActive]);
 
   return { potentialProblems };
 }

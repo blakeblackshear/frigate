@@ -4,7 +4,7 @@ import base64
 import io
 import json
 import logging
-from typing import Any, AsyncGenerator, Optional
+from typing import Any, AsyncGenerator, Optional, cast
 
 import httpx
 import numpy as np
@@ -73,6 +73,29 @@ def _parse_launch_arg(args: list[str], flag: str) -> str | None:
     if idx + 1 >= len(args):
         return None
     return args[idx + 1]
+
+
+def _fetch_llama_props(base_url: str, model: str) -> dict[str, Any]:
+    """Fetch /props from a llama.cpp server, with llama-swap fallback.
+
+    Raises the underlying RequestException if both endpoints fail; callers
+    decide how to surface the failure.
+    """
+    try:
+        response = requests.get(
+            f"{base_url}/props",
+            params={"model": model},
+            timeout=10,
+        )
+        response.raise_for_status()
+        return cast(dict[str, Any], response.json())
+    except Exception:
+        response = requests.get(
+            f"{base_url}/upstream/{model}/props",
+            timeout=10,
+        )
+        response.raise_for_status()
+        return cast(dict[str, Any], response.json())
 
 
 def _to_jpeg(img_bytes: bytes) -> bytes | None:
@@ -239,21 +262,7 @@ class LlamaCppClient(GenAIClient):
                 info["supports_tools"] = True
 
         try:
-            try:
-                response = requests.get(
-                    f"{base_url}/props",
-                    params={"model": configured_model},
-                    timeout=10,
-                )
-                response.raise_for_status()
-                props = response.json()
-            except Exception:
-                response = requests.get(
-                    f"{base_url}/upstream/{configured_model}/props",
-                    timeout=10,
-                )
-                response.raise_for_status()
-                props = response.json()
+            props = _fetch_llama_props(base_url, configured_model)
 
             if info["context_size"] is None:
                 default_settings = props.get("default_generation_settings", {})
@@ -559,6 +568,31 @@ class LlamaCppClient(GenAIClient):
             )
         return result if result else None
 
+    def _refresh_media_marker(self) -> bool:
+        """Re-fetch /props and update the cached media marker if it changed.
+
+        The server randomizes the marker per startup (unless LLAMA_MEDIA_MARKER
+        is set), so a stale marker indicates a restart. Returns True iff the
+        marker was updated to a new value — used to gate a one-shot retry of
+        a failed embeddings request.
+        """
+        if self.provider is None:
+            return False
+        try:
+            props = _fetch_llama_props(self.provider, self.genai_config.model)
+        except Exception as e:
+            logger.warning("Failed to refresh llama.cpp media marker: %s", e)
+            return False
+
+        marker = props.get("media_marker")
+
+        if not isinstance(marker, str) or not marker or marker == self._media_marker:
+            return False
+
+        logger.info("llama.cpp media marker changed (server restart); refreshed")
+        self._media_marker = marker
+        return True
+
     def embed(
         self,
         texts: list[str] | None = None,
@@ -583,30 +617,46 @@ class LlamaCppClient(GenAIClient):
 
         EMBEDDING_DIM = 768
 
-        content = []
-        for text in texts:
-            content.append({"prompt_string": text})
+        encoded_images: list[str] = []
         for img in images:
             # llama.cpp uses STB which does not support WebP; convert to JPEG
             jpeg_bytes = _to_jpeg(img)
             to_encode = jpeg_bytes if jpeg_bytes is not None else img
-            encoded = base64.b64encode(to_encode).decode("utf-8")
-            # prompt_string must contain the server's media marker placeholder.
-            # The marker is randomized per server startup (read from /props).
-            content.append(
-                {
-                    "prompt_string": f"{self._media_marker}\n",
-                    "multimodal_data": [encoded],  # type: ignore[dict-item]
-                }
+            encoded_images.append(base64.b64encode(to_encode).decode("utf-8"))
+
+        def build_content() -> list[dict[str, Any]]:
+            # prompt_string must contain the server's media marker placeholder
+            # for each image. The marker is randomized per server startup.
+            content: list[dict[str, Any]] = []
+            for text in texts:
+                content.append({"prompt_string": text})
+            for encoded in encoded_images:
+                content.append(
+                    {
+                        "prompt_string": f"{self._media_marker}\n",
+                        "multimodal_data": [encoded],
+                    }
+                )
+            return content
+
+        def post_embeddings() -> requests.Response:
+            return requests.post(
+                f"{self.provider}/embeddings",
+                json={"model": self.genai_config.model, "content": build_content()},
+                timeout=self.timeout,
             )
 
         try:
-            response = requests.post(
-                f"{self.provider}/embeddings",
-                json={"model": self.genai_config.model, "content": content},
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
+            try:
+                response = post_embeddings()
+                response.raise_for_status()
+            except requests.exceptions.RequestException:
+                # The server may have restarted with a new media marker.
+                # Refresh from /props; only retry if the marker actually changed.
+                if not encoded_images or not self._refresh_media_marker():
+                    raise
+                response = post_embeddings()
+                response.raise_for_status()
             result = response.json()
 
             items = result.get("data", result) if isinstance(result, dict) else result

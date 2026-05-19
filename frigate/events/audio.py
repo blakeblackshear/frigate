@@ -100,7 +100,10 @@ class AudioProcessor(FrigateProcess):
 
         threading.current_thread().name = "process:audio_manager"
 
-        if self.config.audio_transcription.enabled:
+        if any(
+            c.enabled_in_config and c.audio_transcription.enabled
+            for c in self.config.cameras.values()
+        ):
             self.transcription_model_runner: AudioTranscriptionModelRunner | None = (
                 AudioTranscriptionModelRunner(
                     self.config.audio_transcription.device or "AUTO",
@@ -206,7 +209,7 @@ class AudioEventMaintainer(threading.Thread):
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio.value)
 
         if (
-            self.config.audio_transcription.enabled
+            self.camera_config.audio_transcription.enabled
             and self.audio_transcription_model_runner is not None
         ):
             # init the transcription processor for this camera

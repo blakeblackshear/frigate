@@ -6,11 +6,18 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
+from peewee import DoesNotExist
 from pydantic import BaseModel, Field
 
 from frigate.api.auth import require_role
 from frigate.api.defs.tags import Tags
-from frigate.jobs.debug_replay import start_debug_replay_job
+from frigate.jobs.debug_replay import (
+    ExportDebugReplaySource,
+    RecordingDebugReplaySource,
+    start_debug_replay_job,
+)
+from frigate.models import Export
+from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +30,12 @@ class DebugReplayStartBody(BaseModel):
     camera: str = Field(title="Source camera name")
     start_time: float = Field(title="Start timestamp")
     end_time: float = Field(title="End timestamp")
+
+
+class DebugReplayStartFromExportBody(BaseModel):
+    """Request body for starting a debug replay session from an export."""
+
+    export_id: str = Field(title="Export id")
 
 
 class DebugReplayStartResponse(BaseModel):
@@ -73,13 +86,95 @@ class DebugReplayStopResponse(BaseModel):
 async def start_debug_replay(request: Request, body: DebugReplayStartBody):
     """Start a debug replay session asynchronously."""
     replay_manager = request.app.replay_manager
+    source = RecordingDebugReplaySource(
+        source_camera=body.camera,
+        start_ts=body.start_time,
+        end_ts=body.end_time,
+    )
 
     try:
         job_id = await asyncio.to_thread(
             start_debug_replay_job,
-            source_camera=body.camera,
-            start_ts=body.start_time,
-            end_ts=body.end_time,
+            source=source,
+            frigate_config=request.app.frigate_config,
+            config_publisher=request.app.config_publisher,
+            replay_manager=replay_manager,
+        )
+    except RuntimeError:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "A replay session is already active",
+            },
+            status_code=409,
+        )
+    except ValueError:
+        logger.exception("Rejected debug replay start request")
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Invalid debug replay parameters",
+            },
+            status_code=400,
+        )
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "replay_camera": replay_manager.replay_camera_name,
+            "job_id": job_id,
+        },
+        status_code=202,
+    )
+
+
+@router.post(
+    "/debug_replay/start_from_export",
+    response_model=DebugReplayStartResponse,
+    status_code=202,
+    responses={
+        400: {"description": "Invalid export, time range, or no recordings"},
+        404: {"description": "Export not found"},
+        409: {"description": "A replay session is already active"},
+    },
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Start debug replay from an export",
+    description="Start a debug replay session covering an existing export's "
+    "time range. The end time is derived from the export's video duration.",
+)
+async def start_debug_replay_from_export(
+    request: Request, body: DebugReplayStartFromExportBody
+):
+    """Start a debug replay session from an existing export."""
+    try:
+        export: Export = Export.get(Export.id == body.export_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Export not found"},
+            status_code=404,
+        )
+
+    properties = await get_video_properties(
+        request.app.frigate_config.ffmpeg, export.video_path, get_duration=True
+    )
+    duration = properties.get("duration", -1)
+
+    if duration is None or duration <= 0:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Could not determine export duration",
+            },
+            status_code=400,
+        )
+
+    replay_manager = request.app.replay_manager
+    source = ExportDebugReplaySource(export=export, duration=float(duration))
+
+    try:
+        job_id = await asyncio.to_thread(
+            start_debug_replay_job,
+            source=source,
             frigate_config=request.app.frigate_config,
             config_publisher=request.app.config_publisher,
             replay_manager=replay_manager,
