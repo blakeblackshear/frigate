@@ -1,1 +1,9 @@
-{}
+{
+    "maximum": "มากที่สุดไม่เกิน {{limit}}",
+    "exclusiveMinimum": "ต้องเกินกว่า {{limit}}",
+    "exclusiveMaximum": "ต้องน้อยกว่า {{limit}}",
+    "minLength": "จำนวนอย่างน้อย {{limit}} อักขระ",
+    "maxLength": "ต้องไม่เกิน {{limit}} อักขระ",
+    "maxItems": "ต้องไม่เกิน {{limit}}",
+    "minimum": "ขั้นต่ำ {{limit}}"
+}
