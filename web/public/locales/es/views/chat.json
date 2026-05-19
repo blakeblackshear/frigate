@@ -1,1 +1,69 @@
-{}
+{
+    "documentTitle": "Chat - Frigate",
+    "title": "Frigate Chat",
+    "subtitle": "Tu asistente de IA para la gestión de cámaras y análisis",
+    "placeholder": "Pregunta cualquier cosa...",
+    "error": "Algo salió mal. Por favor, inténtalo de nuevo.",
+    "processing": "Procesando...",
+    "toolsUsed": "Usado: {{tools}}",
+    "showTools": "Mostrar herramientas ({{count}})",
+    "hideTools": "Ocultar herramientas",
+    "call": "Llamar",
+    "result": "Resultado",
+    "arguments": "Argumentos:",
+    "response": "Respuesta:",
+    "attachment_chip_label": "{{label}} en {{camera}}",
+    "attachment_chip_remove": "Eliminar adjunto",
+    "open_in_explore": "Abrir en Explorar",
+    "attach_event_aria": "Adjuntar evento {{eventId}}",
+    "attachment_picker_paste_label": "O pega el ID del evento",
+    "attachment_picker_attach": "Adjuntar",
+    "attachment_picker_placeholder": "Adjuntar un evento",
+    "quick_reply_find_similar": "Buscar avistamientos similares",
+    "quick_reply_tell_me_more": "Cuéntame más sobre esto",
+    "quick_reply_when_else": "¿Cuándo más se vio?",
+    "quick_reply_find_similar_text": "Buscar avistamientos similares a este.",
+    "quick_reply_tell_me_more_text": "Cuéntame más sobre este.",
+    "quick_reply_when_else_text": "¿Cuándo más se vio esto?",
+    "anchor": "Referencia",
+    "similarity_score": "Similitud",
+    "no_similar_objects_found": "No se encontraron objetos similares.",
+    "semantic_search_required": "La búsqueda semántica debe estar activada para encontrar objetos similares.",
+    "send": "Enviar",
+    "suggested_requests": "Prueba preguntando:",
+    "starting_requests": {
+        "show_recent_events": "Mostrar eventos recientes",
+        "show_camera_status": "Mostrar estado de la cámara",
+        "recap": "¿Qué ha pasado mientras estaba fuera?",
+        "watch_camera": "Vigilar una cámara en busca de actividad"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "Muéstrame los eventos recientes de la última hora",
+        "show_camera_status": "¿Cuál es el estado actual de mis cámaras?",
+        "recap": "¿Qué ha pasado mientras estaba fuera?",
+        "watch_camera": "Vigila la puerta principal y avísame si aparece alguien"
+    },
+    "new_chat": "Nuevo chat",
+    "settings": {
+        "title": "Ajustes del chat",
+        "show_stats": {
+            "title": "Mostrar estadísticas",
+            "desc": "Mostrar la velocidad de generación y el tamaño del contexto en las respuestas del chat.",
+            "while_generating": "Durante la generación",
+            "always": "Siempre"
+        },
+        "auto_scroll": {
+            "title": "Desplazamiento automático",
+            "desc": "Seguir los mensajes nuevos a medida que llegan."
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} tokens",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Razonando…",
+        "show": "Mostrar razonamiento",
+        "hide": "Ocultar razonamiento"
+    }
+}

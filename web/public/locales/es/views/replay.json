@@ -1,1 +1,59 @@
-{}
+{
+    "title": "Depuración de reproducción",
+    "description": "Reproducir grabaciones de cámara para depuración. La lista de objetos muestra un resumen con retraso temporal de los objetos detectados y la pestaña Mensajes muestra un flujo de los mensajes internos de Frigate de la grabación reproducida.",
+    "websocket_messages": "Mensajes",
+    "dialog": {
+        "title": "Iniciar depuración de reproducción",
+        "description": "Crea una cámara de reproducción temporal que reproduzca en bucle imágenes históricas para depurar problemas de detección y seguimiento de objetos. La cámara de reproducción tendrá la misma configuración de detección que la cámara de origen. Elige un intervalo de tiempo para comenzar.",
+        "camera": "Cámara de origen",
+        "timeRange": "Intervalo de tiempo",
+        "preset": {
+            "1m": "Último 1 minuto",
+            "5m": "Últimos 5 minutos",
+            "timeline": "Desde la línea de tiempo",
+            "custom": "Personalizado"
+        },
+        "startButton": "Iniciar reproducción",
+        "selectFromTimeline": "Seleccionar",
+        "starting": "Iniciando reproducción...",
+        "startLabel": "Iniciar",
+        "endLabel": "Fin",
+        "toast": {
+            "error": "No se pudo iniciar la reproducción de depuración: {{error}}",
+            "alreadyActive": "Ya hay una sesión de reproducción activa",
+            "stopError": "No se pudo detener la reproducción de depuración: {{error}}",
+            "goToReplay": "Ir a la reproducción"
+        }
+    },
+    "page": {
+        "noSession": "No hay ninguna sesión activa de reproducción de depuración",
+        "noSessionDesc": "Inicia una reproducción de depuración desde la vista Historial haciendo clic en el botón Acciones de la barra de herramientas y seleccionando Reproducción de depuración.",
+        "goToRecordings": "Ir al historial",
+        "preparingClip": "Preparando clip…",
+        "preparingClipDesc": "Frigate está uniendo las grabaciones del intervalo de tiempo seleccionado. Esto puede tardar un minuto en intervalos más largos.",
+        "startingCamera": "Iniciando reproducción de depuración…",
+        "startError": {
+            "title": "No se pudo iniciar la reproducción de depuración",
+            "back": "Volver al historial"
+        },
+        "sourceCamera": "Cámara de origen",
+        "replayCamera": "Cámara de reproducción",
+        "initializingReplay": "Inicializando reproducción de depuración…",
+        "stoppingReplay": "Deteniendo repetición de depuración...",
+        "stopReplay": "Detener repetición",
+        "confirmStop": {
+            "title": "¿Detener repetición de depuración?",
+            "description": "Esto detendrá la sesión y eliminará todos los datos temporales. ¿Estás seguro?",
+            "confirm": "Detener repetición",
+            "cancel": "Cancelar"
+        },
+        "activity": "Actividad",
+        "objects": "Lista de objetos",
+        "audioDetections": "Detecciones de audio",
+        "noActivity": "No se detectó actividad",
+        "activeTracking": "Seguimiento activo",
+        "noActiveTracking": "No hay seguimiento activo",
+        "configuration": "Configuración",
+        "configurationDesc": "Ajusta con precisión la detección de movimiento y los ajustes de seguimiento de objetos para la cámara de repetición de depuración. No se guardará ningún cambio en el archivo de configuración de Frigate."
+    }
+}

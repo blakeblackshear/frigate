@@ -55,7 +55,10 @@
       },
       "count_other": "{{count}} mensajes",
       "count_one": "{{count}} mensaje",
-      "empty": "No se han capturado mensaje aún"
+      "empty": "No se han capturado mensaje aún",
+      "expanded": {
+        "payload": "Carga útil"
+      }
     }
   },
   "title": "Sistema",
@@ -209,6 +212,9 @@
       "unusable": "No usable",
       "fair": "Normal",
       "stallsLastHour": "Bloqueos (última hora)"
+    },
+    "noCameras": {
+      "title": "No se han encontrado cámaras"
     }
   },
   "lastRefreshed": "Última actualización: ",

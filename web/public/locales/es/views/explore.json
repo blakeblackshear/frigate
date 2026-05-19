@@ -226,6 +226,10 @@
     },
     "more": {
       "aria": "Más"
+    },
+    "debugReplay": {
+      "label": "Reproducción de depuración",
+      "aria": "Ver este objeto rastreado en la reproducción de depuración"
     }
   },
   "dialog": {
@@ -282,7 +286,10 @@
         "zones": "Zonas",
         "area": "Área",
         "score": "Puntuación",
-        "ratio": "Ratio(proporción)"
+        "ratio": "Ratio(proporción)",
+        "computedScore": "Puntuación calculada",
+        "topScore": "Puntuación más alta",
+        "toggleAdvancedScores": "Alternar puntuaciones avanzadas"
       },
       "entered_zone": "{{label}} ha entrado en {{zones}}"
     },

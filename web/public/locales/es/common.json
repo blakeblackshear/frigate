@@ -154,7 +154,8 @@
       "gl": "Galego (Gallego)",
       "id": "Bahasa Indonesia (Indonesio)",
       "ur": "اردو (Urdu)",
-      "hr": "Hrvatski (Croata)"
+      "hr": "Hrvatski (Croata)",
+      "bs": "Bosanski (Bosnio)"
     },
     "appearance": "Apariencia",
     "darkMode": {
@@ -196,7 +197,10 @@
     "uiPlayground": "Zona de pruebas de la interfaz de usuario",
     "faceLibrary": "Biblioteca de rostros",
     "classification": "Clasificación",
-    "profiles": "Perfiles"
+    "profiles": "Perfiles",
+    "actions": "Acciones",
+    "features": "Funciones",
+    "chat": "Chat"
   },
   "unit": {
     "speed": {
@@ -252,7 +256,19 @@
     "saving": "Guardando…",
     "exitFullscreen": "Salir de pantalla completa",
     "on": "ENCENDIDO",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "add": "Añadir",
+    "applying": "Aplicando…",
+    "undo": "Deshacer",
+    "copiedToClipboard": "Copiado al portapapeles",
+    "modified": "Modificado",
+    "overridden": "Sobrescrito",
+    "resetToGlobal": "Restablecer a global",
+    "resetToDefault": "Restablecer valores predeterminados",
+    "saveAll": "Guardar todo",
+    "savingAll": "Guardando todo…",
+    "undoAll": "Deshacer todo",
+    "retry": "Reintentar"
   },
   "toast": {
     "save": {
@@ -260,7 +276,8 @@
         "noMessage": "No se pudieron guardar los cambios de configuración",
         "title": "No se pudieron guardar los cambios de configuración: {{errorMessage}}"
       },
-      "title": "Guardar"
+      "title": "Guardar",
+      "success": "Cambios de configuración guardados correctamente."
     },
     "copyUrlToClipboard": "URL copiada al portapapeles."
   },
@@ -314,5 +331,7 @@
   "field": {
     "optional": "Opcional",
     "internalID": "La ID interna que usa Frigate en la configuración y en la base de datos"
-  }
+  },
+  "no_items": "No hay elementos",
+  "validation_errors": "Errores de validación"
 }
