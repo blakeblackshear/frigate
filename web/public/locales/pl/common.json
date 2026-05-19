@@ -260,7 +260,8 @@
     "help": "Pomoc",
     "settings": "Ustawienia",
     "export": "Eksportuj",
-    "classification": "Klasyfikacja"
+    "classification": "Klasyfikacja",
+    "profiles": "Profile"
   },
   "role": {
     "viewer": "Przeglądający",
