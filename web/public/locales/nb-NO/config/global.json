@@ -242,7 +242,7 @@
                 "description": "Aktiver overvåking av nettverksbåndbredde per prosess for kamera-ffmpeg-prosesser og detektorer."
             },
             "intel_gpu_device": {
-                "label": "SR-IOV-enhet",
+                "label": "Intel GPU-enhet",
                 "description": "Enhetsidentifikator som brukes når Intel-GPU-er behandles som SR-IOV for å korrigere GPU-statistikk."
             }
         },
@@ -539,7 +539,7 @@
         }
     },
     "audio": {
-        "label": "Lydhendelser",
+        "label": "Lyddeteksjon",
         "description": "Innstillinger for lydbasert hendelsesdeteksjon for alle kameraer; kan overstyres per kamera.",
         "enabled": {
             "label": "Aktiver lyddeteksjon",
@@ -559,7 +559,11 @@
         },
         "filters": {
             "label": "Lydfiltre",
-            "description": "Filterinnstillinger per lydtype, som konfidensterskler for å redusere falske positive."
+            "description": "Filterinnstillinger per lydtype, som konfidensterskler for å redusere falske positive.",
+            "threshold": {
+                "description": "Minimum konfidens-terskel for at lydhendelsen skal bli registrert.",
+                "label": "Minimum konfidens for lyd"
+            }
         },
         "enabled_in_config": {
             "label": "Opprinnelig lydstatus",
@@ -1000,6 +1004,10 @@
             "hwaccel_args": {
                 "label": "Argumenter for maskinvareakselerasjon ved eksport",
                 "description": "Argumenter for maskinvareakselerasjon som skal brukes ved eksport og transkoding."
+            },
+            "max_concurrent": {
+                "description": "Maksimalt antall eksportjobber som kan behandles samtidig.",
+                "label": "Maksimalt antall samtidige eksporter"
             }
         },
         "preview": {
