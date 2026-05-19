@@ -203,7 +203,10 @@ export default function ChatPage() {
                   const hasContent = !!msg.content?.trim();
                   const hasReasoning = !!msg.reasoning?.trim();
                   const showProcessing =
-                    isLastAssistant && isLoading && !hasContent && !hasReasoning;
+                    isLastAssistant &&
+                    isLoading &&
+                    !hasContent &&
+                    !hasReasoning;
 
                   // Hide empty placeholder only when there are no tool calls
                   // and no reasoning streaming yet
