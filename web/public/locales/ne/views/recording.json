@@ -5,7 +5,8 @@
   "filters": "फिल्टरहरू",
   "toast": {
     "error": {
-      "noValidTimeSelected": "कुनै मान्य समय दायरा चयन गरिएको छैन"
+      "noValidTimeSelected": "कुनै मान्य समय दायरा चयन गरिएको छैन",
+      "endTimeMustAfterStartTime": "अन्त्य समय सुरु समय पछि हुनुपर्छ"
     }
   }
 }

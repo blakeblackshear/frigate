@@ -7,5 +7,24 @@
     },
     "count_one": "{{count}} कक्षा",
     "count_other": "{{count}} कक्षाहरू"
+  },
+  "labels": {
+    "label": "लेबलहरू",
+    "all": {
+      "title": "सबै लेबलहरू",
+      "short": "लेबलहरू"
+    },
+    "count_one": "{{count}} लेबल",
+    "count_other": "{{count}} लेबलहरू"
+  },
+  "zones": {
+    "label": "क्षेत्रहरू",
+    "all": {
+      "title": "सबै क्षेत्रहरू",
+      "short": "क्षेत्रहरू"
+    }
+  },
+  "dates": {
+    "selectPreset": "प्रिसेट चयन गर्नुहोस्…"
   }
 }
