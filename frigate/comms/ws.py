@@ -68,6 +68,7 @@ _WS_VIEWER_TOPICS = frozenset(
         "audioTranscriptionState",
         "birdseyeLayout",
         "embeddingsReindexProgress",
+        "jobState",
     }
 )
 
