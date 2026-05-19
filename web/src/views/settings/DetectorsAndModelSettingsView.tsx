@@ -51,6 +51,7 @@ import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import { ConfigMessageBanner } from "@/components/config-form/ConfigMessageBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  buildHiddenFieldContext,
   getSectionConfig,
   resolveHiddenFieldEntries,
   sanitizeSectionData,
@@ -226,7 +227,7 @@ export default function DetectorsAndModelSettingsView({
     () =>
       resolveHiddenFieldEntries(
         getSectionConfig("detectors", "global").hiddenFields,
-        config,
+        buildHiddenFieldContext(config, "global"),
       ),
     [config],
   );
@@ -234,7 +235,7 @@ export default function DetectorsAndModelSettingsView({
     () =>
       resolveHiddenFieldEntries(
         getSectionConfig("model", "global").hiddenFields,
-        config,
+        buildHiddenFieldContext(config, "global"),
       ),
     [config],
   );

@@ -1,12 +1,60 @@
-import type { FrigateConfig } from "@/types/frigateConfig";
+import type { HiddenFieldContext } from "@/types/configForm";
+import { getEffectiveAttributeLabels } from "@/utils/configUtil";
 import type { SectionConfigOverrides } from "./types";
 
 // Attribute labels (face, license_plate, Frigate+ couriers like DHL/Amazon,
-// etc.) are populated into objects.filters by the backend even when the
-// model can't actually detect them. They aren't user-settable, so hide any
-// `filters.<attr>` patterns from forms and override comparisons.
-const hideAttributeFilters = (config: FrigateConfig): string[] =>
-  (config.model?.all_attributes ?? []).map((attr) => `filters.${attr}`);
+// etc.) are populated into objects.filters by the backend for every
+// attribute the model knows about.
+//
+// - Untracked attributes: hide the whole `filters.<attr>` collapsible.
+// - Tracked attributes: strip the FilterConfig fields we don't expose
+//   (`threshold`, `min_ratio`, `max_ratio`) from the form data so RJSF
+//   doesn't surface them as ad-hoc additionalProperties entries under the
+//   restricted AttributeFilter schema (see modifySchemaForSection objects
+//   branch). The data is sanitized out symmetrically from the baseline
+//   too, so power-user YAML values for those fields are preserved on save
+//   (buildOverrides only emits diffs of fields the form has seen).
+const ATTRIBUTE_FILTER_HIDDEN_SUBFIELDS = [
+  "threshold",
+  "min_ratio",
+  "max_ratio",
+];
+
+const hideAttributeFilters = ({
+  fullConfig,
+  fullCameraConfig,
+  level,
+  formData,
+}: HiddenFieldContext): string[] => {
+  const trackFromForm = Array.isArray(
+    (formData as { track?: unknown } | undefined)?.track,
+  )
+    ? (formData as { track: string[] }).track
+    : undefined;
+
+  const track =
+    trackFromForm ??
+    (level !== "global" ? fullCameraConfig?.objects?.track : undefined) ??
+    fullConfig.objects?.track ??
+    [];
+
+  const attrs = getEffectiveAttributeLabels(
+    fullConfig,
+    fullCameraConfig,
+    level,
+  );
+  const hidden: string[] = [];
+  for (const attr of attrs) {
+    if (!track.includes(attr)) {
+      hidden.push(`filters.${attr}`);
+    } else {
+      for (const field of ATTRIBUTE_FILTER_HIDDEN_SUBFIELDS) {
+        hidden.push(`filters.${attr}.${field}`);
+      }
+    }
+  }
+  return hidden;
+};
 
 const objects: SectionConfigOverrides = {
   base: {

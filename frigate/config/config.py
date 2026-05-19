@@ -629,10 +629,11 @@ class FrigateConfig(FrigateBaseModel):
 
         # set default min_score for object attributes
         for attribute in self.model.all_attributes:
-            if not self.objects.filters.get(attribute):
+            existing = self.objects.filters.get(attribute)
+            if existing is None:
                 self.objects.filters[attribute] = FilterConfig(min_score=0.7)
-            elif self.objects.filters[attribute].min_score == 0.5:
-                self.objects.filters[attribute].min_score = 0.7
+            elif "min_score" not in existing.model_fields_set:
+                existing.min_score = 0.7
 
         # auto detect hwaccel args
         if self.ffmpeg.hwaccel_args == "auto":
