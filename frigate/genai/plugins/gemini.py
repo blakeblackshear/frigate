@@ -248,6 +248,13 @@ class GeminiClient(GenAIClient):
             if tool_config:
                 config_params["tool_config"] = tool_config
 
+            # Ask thinking-capable models (Gemini 2.5+) to include their
+            # reasoning trace as separate `thought` parts so we can surface
+            # it on the reasoning channel. Older models ignore this field.
+            config_params["thinking_config"] = types.ThinkingConfig(
+                include_thoughts=True
+            )
+
             # Merge runtime_options
             if isinstance(self.genai_config.runtime_options, dict):
                 config_params.update(self.genai_config.runtime_options)
@@ -262,19 +269,24 @@ class GeminiClient(GenAIClient):
             if not response or not response.candidates:
                 return {
                     "content": None,
+                    "reasoning": None,
                     "tool_calls": None,
                     "finish_reason": "error",
                 }
 
             candidate = response.candidates[0]
             content = None
+            reasoning_parts: list[str] = []
             tool_calls = None
 
-            # Extract content and tool calls from response
+            # Extract content, reasoning, and tool calls from response
             if candidate.content and candidate.content.parts:
                 for part in candidate.content.parts:
                     if part.text:
-                        content = part.text.strip()
+                        if getattr(part, "thought", False):
+                            reasoning_parts.append(part.text)
+                        else:
+                            content = part.text.strip()
                     elif part.function_call:
                         # Handle function call
                         if tool_calls is None:
@@ -296,6 +308,8 @@ class GeminiClient(GenAIClient):
                                 "arguments": arguments,
                             }
                         )
+
+            reasoning = "".join(reasoning_parts).strip() or None
 
             # Determine finish reason
             finish_reason = "error"
@@ -322,6 +336,7 @@ class GeminiClient(GenAIClient):
 
             return {
                 "content": content,
+                "reasoning": reasoning,
                 "tool_calls": tool_calls,
                 "finish_reason": finish_reason,
             }
@@ -330,6 +345,7 @@ class GeminiClient(GenAIClient):
             logger.warning("Gemini API error during chat_with_tools: %s", str(e))
             return {
                 "content": None,
+                "reasoning": None,
                 "tool_calls": None,
                 "finish_reason": "error",
             }
@@ -339,6 +355,7 @@ class GeminiClient(GenAIClient):
             )
             return {
                 "content": None,
+                "reasoning": None,
                 "tool_calls": None,
                 "finish_reason": "error",
             }
@@ -477,12 +494,19 @@ class GeminiClient(GenAIClient):
             if tool_config:
                 config_params["tool_config"] = tool_config
 
+            # Ask thinking-capable models to include their reasoning trace
+            # as separate `thought` parts (Gemini 2.5+; ignored elsewhere).
+            config_params["thinking_config"] = types.ThinkingConfig(
+                include_thoughts=True
+            )
+
             # Merge runtime_options
             if isinstance(self.genai_config.runtime_options, dict):
                 config_params.update(self.genai_config.runtime_options)
 
             # Use streaming API
             content_parts: list[str] = []
+            reasoning_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
             usage_stats: Optional[dict[str, Any]] = None
@@ -519,12 +543,16 @@ class GeminiClient(GenAIClient):
                     ]:
                         finish_reason = "error"
 
-                # Extract content and tool calls from chunk
+                # Extract content, reasoning, and tool calls from chunk
                 if candidate.content and candidate.content.parts:
                     for part in candidate.content.parts:
                         if part.text:
-                            content_parts.append(part.text)
-                            yield ("content_delta", part.text)
+                            if getattr(part, "thought", False):
+                                reasoning_parts.append(part.text)
+                                yield ("reasoning_delta", part.text)
+                            else:
+                                content_parts.append(part.text)
+                                yield ("content_delta", part.text)
                         elif part.function_call:
                             # Handle function call
                             try:
@@ -565,6 +593,7 @@ class GeminiClient(GenAIClient):
 
             # Build final message
             full_content = "".join(content_parts).strip() or None
+            full_reasoning = "".join(reasoning_parts).strip() or None
 
             # Convert tool calls to list format
             tool_calls_list = None
@@ -593,6 +622,7 @@ class GeminiClient(GenAIClient):
                 "message",
                 {
                     "content": full_content,
+                    "reasoning": full_reasoning,
                     "tool_calls": tool_calls_list,
                     "finish_reason": finish_reason,
                 },
@@ -604,6 +634,7 @@ class GeminiClient(GenAIClient):
                 "message",
                 {
                     "content": None,
+                    "reasoning": None,
                     "tool_calls": None,
                     "finish_reason": "error",
                 },
@@ -616,6 +647,7 @@ class GeminiClient(GenAIClient):
                 "message",
                 {
                     "content": None,
+                    "reasoning": None,
                     "tool_calls": None,
                     "finish_reason": "error",
                 },

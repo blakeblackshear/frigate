@@ -236,6 +236,10 @@ class OpenAIClient(GenAIClient):
             choice = result.choices[0]
             message = choice.message
             content = message.content.strip() if message.content else None
+            raw_reasoning = getattr(message, "reasoning_content", None) or getattr(
+                message, "reasoning", None
+            )
+            reasoning = raw_reasoning.strip() if raw_reasoning else None
 
             tool_calls = None
             if message.tool_calls:
@@ -270,6 +274,7 @@ class OpenAIClient(GenAIClient):
 
             return {
                 "content": content,
+                "reasoning": reasoning,
                 "tool_calls": tool_calls,
                 "finish_reason": finish_reason,
             }
@@ -278,6 +283,7 @@ class OpenAIClient(GenAIClient):
             logger.warning("OpenAI request timed out: %s", str(e))
             return {
                 "content": None,
+                "reasoning": None,
                 "tool_calls": None,
                 "finish_reason": "error",
             }
@@ -285,6 +291,7 @@ class OpenAIClient(GenAIClient):
             logger.warning("OpenAI returned an error: %s", str(e))
             return {
                 "content": None,
+                "reasoning": None,
                 "tool_calls": None,
                 "finish_reason": "error",
             }
@@ -335,6 +342,7 @@ class OpenAIClient(GenAIClient):
 
             # Use streaming API
             content_parts: list[str] = []
+            reasoning_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
             usage_stats: Optional[dict[str, Any]] = None
@@ -355,6 +363,15 @@ class OpenAIClient(GenAIClient):
                 # Check for finish reason
                 if choice.finish_reason:
                     finish_reason = choice.finish_reason
+
+                # Extract reasoning deltas (reasoning_content or reasoning,
+                # depending on the server)
+                reasoning_delta = getattr(delta, "reasoning_content", None) or getattr(
+                    delta, "reasoning", None
+                )
+                if reasoning_delta:
+                    reasoning_parts.append(reasoning_delta)
+                    yield ("reasoning_delta", reasoning_delta)
 
                 # Extract content deltas
                 if delta.content:
@@ -384,6 +401,7 @@ class OpenAIClient(GenAIClient):
 
             # Build final message
             full_content = "".join(content_parts).strip() or None
+            full_reasoning = "".join(reasoning_parts).strip() or None
 
             # Convert tool calls to list format
             tool_calls_list = None
@@ -412,6 +430,7 @@ class OpenAIClient(GenAIClient):
                 "message",
                 {
                     "content": full_content,
+                    "reasoning": full_reasoning,
                     "tool_calls": tool_calls_list,
                     "finish_reason": finish_reason,
                 },
@@ -423,6 +442,7 @@ class OpenAIClient(GenAIClient):
                 "message",
                 {
                     "content": None,
+                    "reasoning": None,
                     "tool_calls": None,
                     "finish_reason": "error",
                 },
@@ -433,6 +453,7 @@ class OpenAIClient(GenAIClient):
                 "message",
                 {
                     "content": None,
+                    "reasoning": None,
                     "tool_calls": None,
                     "finish_reason": "error",
                 },
