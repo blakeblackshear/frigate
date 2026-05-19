@@ -1649,6 +1649,7 @@
     "addStream": "Add stream",
     "addStreamDesc": "Enter a name for the new stream. This name will be used to reference the stream in your camera configuration.",
     "addUrl": "Add URL",
+    "streamNumber": "Stream {{index}}",
     "streamName": "Stream name",
     "streamNamePlaceholder": "e.g., front_door",
     "streamUrlPlaceholder": "e.g., rtsp://user:pass@192.168.1.100/stream",
@@ -1682,7 +1683,15 @@
       "audioMp3": "Transcode to MP3",
       "audioExclude": "Exclude",
       "hardwareNone": "No hardware acceleration",
-      "hardwareAuto": "Automatic hardware acceleration"
+      "hardwareAuto": "Automatic (recommended)",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "Add video codec",
+      "addAudioCodec": "Add audio codec",
+      "removeCodec": "Remove codec"
     }
   },
   "birdseye": {

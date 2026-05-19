@@ -8,13 +8,23 @@ export type FfmpegAudioOption =
   | "pcm"
   | "mp3"
   | "exclude";
-export type FfmpegHardwareOption = "none" | "auto";
+export type FfmpegHardwareOption =
+  | "none"
+  | "auto"
+  | "vaapi"
+  | "cuda"
+  | "v4l2m2m"
+  | "dxva2"
+  | "videotoolbox";
 
 export type ParsedFfmpegUrl = {
   isFfmpeg: boolean;
   baseUrl: string;
-  video: FfmpegVideoOption;
-  audio: FfmpegAudioOption;
+  // go2rtc accepts repeatable #video=/#audio= fragments to express a fallback
+  // chain (copy if source codec matches, otherwise transcode). An empty array
+  // means no fragment is emitted for that track — equivalent to "exclude".
+  videos: FfmpegVideoOption[];
+  audios: FfmpegAudioOption[];
   hardware: FfmpegHardwareOption;
   extraFragments: string[];
 };
@@ -37,13 +47,21 @@ const HARDWARE_SPECIFIC = new Set([
   "videotoolbox",
 ]);
 
+function isRecognizedFragment(frag: string): boolean {
+  if (frag === "hardware") return true;
+  if (frag.startsWith("video=")) return VIDEO_VALUES.has(frag.slice(6));
+  if (frag.startsWith("audio=")) return AUDIO_VALUES.has(frag.slice(6));
+  if (frag.startsWith("hardware=")) return HARDWARE_SPECIFIC.has(frag.slice(9));
+  return false;
+}
+
 export function parseFfmpegUrl(url: string): ParsedFfmpegUrl {
   if (!url.startsWith("ffmpeg:")) {
     return {
       isFfmpeg: false,
       baseUrl: url,
-      video: "copy",
-      audio: "copy",
+      videos: [],
+      audios: [],
       hardware: "none",
       extraFragments: [],
     };
@@ -54,63 +72,76 @@ export function parseFfmpegUrl(url: string): ParsedFfmpegUrl {
   const baseUrl = parts[0];
   const fragments = parts.slice(1);
 
-  let video: FfmpegVideoOption | null = null;
-  let audio: FfmpegAudioOption | null = null;
+  const videos: FfmpegVideoOption[] = [];
+  const audios: FfmpegAudioOption[] = [];
   let hardware: FfmpegHardwareOption = "none";
   const extraFragments: string[] = [];
 
   for (const frag of fragments) {
-    if (frag.startsWith("video=")) {
-      const val = frag.slice(6);
-      if (VIDEO_VALUES.has(val)) {
-        video = val as FfmpegVideoOption;
-      } else {
-        extraFragments.push(frag);
-      }
-    } else if (frag.startsWith("audio=")) {
-      const val = frag.slice(6);
-      if (AUDIO_VALUES.has(val)) {
-        audio = val as FfmpegAudioOption;
-      } else {
-        extraFragments.push(frag);
-      }
+    if (frag.startsWith("video=") && VIDEO_VALUES.has(frag.slice(6))) {
+      videos.push(frag.slice(6) as FfmpegVideoOption);
+    } else if (frag.startsWith("audio=") && AUDIO_VALUES.has(frag.slice(6))) {
+      audios.push(frag.slice(6) as FfmpegAudioOption);
     } else if (frag === "hardware") {
       hardware = "auto";
-    } else if (frag.startsWith("hardware=")) {
-      const val = frag.slice(9);
-      if (HARDWARE_SPECIFIC.has(val)) {
-        hardware = "auto";
-      } else {
-        extraFragments.push(frag);
-      }
+    } else if (
+      frag.startsWith("hardware=") &&
+      HARDWARE_SPECIFIC.has(frag.slice(9))
+    ) {
+      hardware = frag.slice(9) as FfmpegHardwareOption;
     } else {
       extraFragments.push(frag);
     }
   }
 
-  const hasAnyKnownFragment = video !== null || audio !== null;
-
   return {
     isFfmpeg: true,
     baseUrl,
-    video: video ?? (hasAnyKnownFragment ? "exclude" : "copy"),
-    audio: audio ?? (hasAnyKnownFragment ? "exclude" : "copy"),
+    // Guarantee at least one row per track so the UI always has a primary
+    // dropdown to render; "exclude" is the sentinel meaning "no fragment".
+    videos: videos.length > 0 ? videos : ["exclude"],
+    audios: audios.length > 0 ? audios : ["exclude"],
     hardware,
     extraFragments,
   };
 }
 
+// Splits the editable "base URL + extra fragments" portion of a compat-mode
+// URL into its parts. Recognized fragments (video=, audio=, hardware) are
+// dropped — they are managed by the dedicated controls in the UI.
+export function parseFfmpegBaseAndExtras(input: string): {
+  baseUrl: string;
+  extraFragments: string[];
+} {
+  const cleaned = input.startsWith("ffmpeg:") ? input.slice(7) : input;
+  const parts = cleaned.split("#");
+  const baseUrl = parts[0];
+  const extraFragments = parts.slice(1).filter((f) => !isRecognizedFragment(f));
+  return { baseUrl, extraFragments };
+}
+
 export function buildFfmpegUrl(parsed: ParsedFfmpegUrl): string {
   let url = `ffmpeg:${parsed.baseUrl}`;
 
-  if (parsed.video !== "exclude") {
-    url += `#video=${parsed.video}`;
+  // Exclude is a primary-row sentinel meaning "no fragment for this track" —
+  // it's mutually exclusive with fallbacks. If the primary is exclude, emit
+  // nothing for that track regardless of trailing entries.
+  if (parsed.videos[0] !== "exclude") {
+    for (const v of parsed.videos) {
+      if (v === "exclude") continue;
+      url += `#video=${v}`;
+    }
   }
-  if (parsed.audio !== "exclude") {
-    url += `#audio=${parsed.audio}`;
+  if (parsed.audios[0] !== "exclude") {
+    for (const a of parsed.audios) {
+      if (a === "exclude") continue;
+      url += `#audio=${a}`;
+    }
   }
   if (parsed.hardware === "auto") {
     url += "#hardware";
+  } else if (parsed.hardware !== "none") {
+    url += `#hardware=${parsed.hardware}`;
   }
   for (const frag of parsed.extraFragments) {
     url += `#${frag}`;
@@ -131,7 +162,9 @@ export function toggleFfmpegMode(url: string, enable: boolean): string {
     return url;
   }
 
-  const withoutPrefix = url.slice(7);
-  const baseUrl = withoutPrefix.split("#")[0];
-  return baseUrl;
+  // Preserve unknown fragments (e.g. #timeout=10) when leaving compat mode;
+  // only video/audio/hardware are go2rtc-ffmpeg directives that should be
+  // dropped along with the prefix.
+  const parsed = parseFfmpegUrl(url);
+  return [parsed.baseUrl, ...parsed.extraFragments].join("#");
 }
