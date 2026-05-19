@@ -781,7 +781,15 @@
       "availableModels": "Modele Disponibile",
       "modelType": "Tip Model",
       "trainDate": "Data Antrenării",
-      "cameras": "Camere"
+      "cameras": "Camere",
+      "noModelLoaded": "Niciun model Frigate+ nu este încărcat în prezent.",
+      "selectModel": "Selectează un model",
+      "noModelsAvailable": "Niciun model disponibil",
+      "filter": {
+        "ariaLabel": "Filtrează modelele după tip",
+        "baseModels": "Modele de bază",
+        "fineTunedModels": "Modele optimizate"
+      }
     },
     "toast": {
       "error": "Eroare la salvarea modificărilor de config: {{errorMessage}}",
@@ -1364,7 +1372,8 @@
       "normal": "Normal",
       "dedicatedLpr": "LPR dedicat",
       "saveSuccess": "Tipul camerei a fost actualizat pentru {{cameraName}}. Repornește Frigate pentru a aplica modificările."
-    }
+    },
+    "description": "Adaugă, editează și șterge camere, controlează care camere sunt activate și configurează suprascrieri per profil și tip de cameră. Pentru a configura stream-uri, detecția, mișcarea și alte setări specifice camerei, alege secțiunea specifică din Configurare Cameră."
   },
   "cameraReview": {
     "title": "Setări Review Cameră",
@@ -1663,7 +1672,9 @@
       "options": {
         "embeddings": "Înglobare",
         "vision": "Viziune",
-        "tools": "Instrumente"
+        "tools": "Instrumente",
+        "descriptions": "Descrieri",
+        "chat": "Chat"
       }
     },
     "semanticSearchModel": {
@@ -1745,7 +1756,15 @@
       "othersField_few": "{{count}} alte",
       "othersField_other": "{{count}} de alte",
       "profilePrefix": "Profil {{profile}}: {{fields}}"
-    }
+    },
+    "overriddenGlobalHeading_one": "Această cameră suprascrie {{count}} câmp din configurația globală:",
+    "overriddenGlobalHeading_few": "Această cameră suprascrie {{count}} câmpuri din configurația globală:",
+    "overriddenGlobalHeading_other": "Această cameră suprascrie {{count}} de câmpuri din configurația globală:",
+    "overriddenGlobalNoDeltas": "Această cameră suprascrie configurația globală, dar nicio valoare a câmpurilor nu diferă.",
+    "overriddenBaseConfigHeading_one": "Profilul {{profile}} suprascrie {{count}} câmp din configurația de bază:",
+    "overriddenBaseConfigHeading_few": "Profilul {{profile}} suprascrie {{count}} câmpuri din configurația de bază:",
+    "overriddenBaseConfigHeading_other": "Profilul {{profile}} suprascrie {{count}} de câmpuri din configurația de bază:",
+    "overriddenBaseConfigNoDeltas": "Profilul {{profile}} suprascrie această secțiune, dar nicio valoare a câmpurilor nu diferă de configurația de bază."
   },
   "profiles": {
     "title": "Profile",
@@ -1840,7 +1859,14 @@
   },
   "onvif": {
     "profileAuto": "Auto",
-    "profileLoading": "Se încarcă profilurile..."
+    "profileLoading": "Se încarcă profilurile...",
+    "autotracking": {
+      "zooming": {
+        "disabled": "Dezactivat",
+        "absolute": "Absolut",
+        "relative": "Relativ"
+      }
+    }
   },
   "configMessages": {
     "review": {
@@ -1888,5 +1914,67 @@
     "semanticSearch": {
       "jinav2SmallModelSize": "Dimensiunea 'small' cu modelul Jina V2 are un cost ridicat de RAM și inferență. Modelul 'large' cu un GPU dedicat este recomandat."
     }
+  },
+  "birdseye": {
+    "trackingMode": {
+      "objects": "Obiecte",
+      "motion": "Mișcare",
+      "continuous": "Continuu"
+    }
+  },
+  "snapshot": {
+    "retainMode": {
+      "all": "Toate",
+      "motion": "Mișcare",
+      "active_objects": "Obiecte active"
+    }
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "Browser",
+      "12hour": "12 ore",
+      "24hour": "24 de ore"
+    },
+    "TimeOrDateStyle": {
+      "long": "Lung",
+      "medium": "Mediu",
+      "short": "Scurt",
+      "full": "Complet"
+    },
+    "unitSystem": {
+      "metric": "Metric",
+      "imperial": "Imperial"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "Înregistrări",
+      "previews": "Previzualizări"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "Depanare",
+      "info": "Informații",
+      "warning": "Avertisment",
+      "error": "Eroare",
+      "critical": "Critic"
+    }
+  },
+  "modelSize": {
+    "small": "Mic",
+    "large": "Mare"
+  },
+  "retainMode": {
+    "all": "Toate",
+    "motion": "Mișcare",
+    "active_objects": "Obiecte active"
+  },
+  "previewQuality": {
+    "medium": "Mediu",
+    "very_high": "Foarte ridicat",
+    "high": "Ridicat",
+    "low": "Scăzut",
+    "very_low": "Foarte scăzut"
   }
 }

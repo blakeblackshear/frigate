@@ -33,7 +33,11 @@
         },
         "filters": {
             "label": "Filtre audio",
-            "description": "Setări de filtrare per tip audio, cum ar fi pragul de încredere."
+            "description": "Setări de filtrare per tip audio, cum ar fi pragul de încredere.",
+            "threshold": {
+                "label": "Încredere audio minimă",
+                "description": "Pragul minim de încredere pentru ca evenimentul audio să fie luat în considerare."
+            }
         },
         "enabled_in_config": {
             "label": "Stare audio originală",
