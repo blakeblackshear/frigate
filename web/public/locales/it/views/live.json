@@ -158,7 +158,7 @@
   },
   "effectiveRetainMode": {
     "modes": {
-      "all": "Tutto",
+      "all": "Tutti",
       "motion": "Movimento",
       "active_objects": "Oggetti attivi"
     },

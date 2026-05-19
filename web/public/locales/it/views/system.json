@@ -175,7 +175,7 @@
     "framesAndDetections": "Fotogrammi / Rilevamenti",
     "label": {
       "camera": "telecamera",
-      "detect": "rilevamento",
+      "detect": "rileva",
       "skipped": "saltati",
       "ffmpeg": "FFmpeg",
       "capture": "cattura",
