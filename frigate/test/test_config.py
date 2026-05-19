@@ -1673,5 +1673,60 @@ class TestConfig(unittest.TestCase):
         self.assertRaises(ValueError, lambda: FrigateConfig(**config))
 
 
+class TestAttributeFilterDefaults(unittest.TestCase):
+    """Verify attribute filter min_score handling at config load."""
+
+    def setUp(self):
+        self.minimal = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+    def _build_config(self, object_filters: dict | None = None) -> FrigateConfig:
+        config = deep_merge({}, self.minimal)
+        if object_filters is not None:
+            config.setdefault("objects", {})["filters"] = object_filters
+        return FrigateConfig(**config)
+
+    def test_attribute_with_no_filter_gets_default_min_score(self):
+        """Attribute with no user-provided filter gets created with min_score=0.7."""
+        config = self._build_config()
+        face_filter = config.objects.filters.get("face")
+        self.assertIsNotNone(face_filter)
+        self.assertEqual(face_filter.min_score, 0.7)
+
+    def test_attribute_filter_without_min_score_gets_bumped(self):
+        """If user sets some FilterConfig field but not min_score, min_score is bumped to 0.7."""
+        config = self._build_config({"face": {"min_area": 500}})
+        face_filter = config.objects.filters["face"]
+        self.assertEqual(face_filter.min_area, 500)
+        self.assertEqual(face_filter.min_score, 0.7)
+
+    def test_attribute_filter_explicit_min_score_half_is_preserved(self):
+        """User-provided min_score=0.5 must NOT be silently rewritten to 0.7."""
+        config = self._build_config({"face": {"min_score": 0.5}})
+        face_filter = config.objects.filters["face"]
+        self.assertEqual(face_filter.min_score, 0.5)
+
+    def test_attribute_filter_explicit_min_score_other_value_is_preserved(self):
+        """Sanity: explicit non-0.5 values pass through unchanged."""
+        config = self._build_config({"face": {"min_score": 0.3}})
+        face_filter = config.objects.filters["face"]
+        self.assertEqual(face_filter.min_score, 0.3)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
