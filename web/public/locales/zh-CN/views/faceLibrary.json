@@ -30,7 +30,11 @@
     "title": "近期识别记录",
     "aria": "选择近期识别记录",
     "empty": "近期未检测到人脸识别操作",
-    "titleShort": "近期"
+    "titleShort": "近期",
+    "emptyNoLibrary": {
+      "title": "更新人脸",
+      "description": "你必须向库中添加至少一张人脸，人脸识别功能才能正常工作。"
+    }
   },
   "selectItem": "选择 {{item}}",
   "selectFace": "选择人脸",

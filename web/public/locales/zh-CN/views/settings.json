@@ -16,7 +16,8 @@
     "globalConfig": "全局配置 - Frigate",
     "cameraConfig": "摄像头配置 - Frigate",
     "maintenance": "维护 - Frigate",
-    "profiles": "配置模板 - Frigate"
+    "profiles": "配置模板 - Frigate",
+    "detectorsAndModel": "检测器和模型 - Frigate"
   },
   "menu": {
     "ui": "界面设置",
@@ -52,7 +53,7 @@
     "systemTls": "TLS加密链接",
     "systemAuthentication": "验证",
     "systemNetworking": "网络",
-    "systemProxy": "代理",
+    "systemProxy": "反向代理",
     "systemUi": "界面",
     "systemLogging": "日志",
     "systemEnvironmentVariables": "环境变量",
@@ -92,7 +93,8 @@
     "uiSettings": "界面设置",
     "profiles": "配置模板",
     "systemGo2rtcStreams": "go2rtc 视频流",
-    "maintenance": "维护"
+    "maintenance": "维护",
+    "systemDetectorsAndModel": "检测器和模型"
   },
   "dialog": {
     "unsavedChanges": {
@@ -795,12 +797,20 @@
       "cameras": "摄像头",
       "loading": "正在加载模型信息…",
       "error": "加载模型信息失败",
-      "availableModels": "可用模型",
+      "availableModels": "可用 Frigate+ 模型",
       "loadingAvailableModels": "正在加载可用模型…",
       "modelSelect": "您可以在Frigate+上选择可用的模型。请注意，只能选择与当前检测器配置兼容的模型。",
       "plusModelType": {
         "baseModel": "基础模型",
         "userModel": "定向调优"
+      },
+      "noModelLoaded": "当前未加载任何Frigate+模型。",
+      "selectModel": "选择一个模型",
+      "noModelsAvailable": "无可用模型",
+      "filter": {
+        "ariaLabel": "按类型筛选模型",
+        "baseModels": "基础模型",
+        "fineTunedModels": "微调过的模型"
       }
     },
     "toast": {
@@ -815,7 +825,8 @@
       "currentModel": "当前模型",
       "otherModels": "其他模型",
       "configuration": "配置"
-    }
+    },
+    "changeInDetectorsAndModel": "改变模型"
   },
   "enrichments": {
     "title": "增强功能设置",
@@ -1353,7 +1364,7 @@
       "title": "开启或关闭摄像头",
       "desc": "将临时禁用摄像头，直到 Frigate 重启。禁用摄像头将完全停止 Frigate 对该摄像头视频流的处理，届时检测、录制及调试功能均不可用。<br /><em>注意：go2rtc 的转流服务不受影响。</em>",
       "enableLabel": "开启摄像头",
-      "enableDesc": "暂时禁用已开启的摄像头，直到 Frigate 重启。禁用摄像头会完全停止 Frigate 对该摄像头视频流的处理。检测、录像和调试功能将不可用。<br /> <em>注意：这不会禁用 go2rtc 的转推流。</em>",
+      "enableDesc": "暂时禁用已开启的摄像头，直到 Frigate 重启。禁用摄像头会完全停止 Frigate 对该摄像头视频流的处理。检测、录像和调试功能将不可用。<br /> <em>注意：这不会禁用 go2rtc 的转推流。</em><br /><br />拖动滑块以重新排序摄像头，使其在用户界面中按顺序显示。启用的摄像头的顺序将在整个用户界面中反映，包括实时监控仪表板和摄像头选择下拉菜单。",
       "disableLabel": "关闭摄像头",
       "disableDesc": "开启在当前在界面中不可见且在配置中被禁用的摄像头。启用后需要重启 Frigate 才能生效。",
       "enableSuccess": "已在配置中启用 {{cameraName}}。请重启 Frigate 以应用更改。",
@@ -1362,7 +1373,10 @@
         "title": "修改显示名称",
         "description": "设置该摄像机在 Frigate 用户界面中显示的名称。若留空，则使用摄像机 ID。",
         "rename": "重命名"
-      }
+      },
+      "reorderHandle": "拖动以重新排序",
+      "saving": "保存中…",
+      "saved": "已保存"
     },
     "cameraConfig": {
       "add": "添加摄像头",
@@ -1416,11 +1430,12 @@
     "cameraType": {
       "title": "摄像头类型",
       "label": "摄像头类型",
-      "description": "为每路摄像头设置类型。专用车牌识别（LPR）摄像头为单用途设备，配备高倍光学变焦，可抓拍远处车辆的车牌。绝大多数摄像头应选用通用类型；只有专为车牌识别部署、且画面聚焦对准车牌的摄像头，才需选择专用 LPR 类型。",
+      "description": "为每路摄像头设置类型。专用车牌识别（LPR）摄像头为单用途设备，配备高倍光学变焦，可抓拍远处车辆的车牌。绝大多数摄像头应选用“通用”类型；只有专为车牌识别部署、且画面聚焦对准车牌的摄像头，才需选择“专用车牌识别”。",
       "normal": "通用",
       "dedicatedLpr": "车牌识别专用",
       "saveSuccess": "已更新 {{cameraName}} 的摄像头类型，请重启 Frigate 以使更改生效。"
-    }
+    },
+    "description": "添加、编辑和删除摄像头，控制启用哪些摄像头，并配置每个配置文件和摄像头类型的覆盖设置。要配置流媒体、检测、运动和其他特定于摄像头的设置，请在“摄像头配置”下选择相关功能。"
   },
   "cameraReview": {
     "title": "摄像头核查设置",
@@ -1659,7 +1674,9 @@
       "options": {
         "embeddings": "嵌入（Embedding）",
         "vision": "视觉（Vision）",
-        "tools": "工具（Tools）"
+        "tools": "工具（Tools）",
+        "descriptions": "描述生成",
+        "chat": "聊天对话"
       }
     },
     "semanticSearchModel": {
@@ -1771,7 +1788,8 @@
     "resetError": "重置设置失败",
     "saveAllSuccess_other": "所有 {{count}} 个部分保存成功。",
     "saveAllPartial_other": "已保存 {{successCount}} / {{totalCount}} 个部分。{{failCount}} 个失败。",
-    "saveAllFailure": "保存所有部分失败。"
+    "saveAllFailure": "保存所有部分失败。",
+    "saveAllSuccessRestartRequired_other": "成功保存 {{count}} 个部分。重启 Frigate 以生效。"
   },
   "unsavedChanges": "您有未保存的更改",
   "confirmReset": "确认重置",
@@ -1788,7 +1806,11 @@
       "heading_other": "此全局设置项下有 {{count}} 个摄像头存在自定义单独配置。",
       "othersField_other": "其余 {{count}} 个",
       "profilePrefix": "{{profile}} 配置方案：{{fields}}"
-    }
+    },
+    "overriddenGlobalHeading_other": "该摄像头已覆盖全局配置中的 {{count}} 项设置：",
+    "overriddenGlobalNoDeltas": "该摄像头已覆盖全局配置，但所有配置项数值均无差异。",
+    "overriddenBaseConfigHeading_other": "{{profile}} 配置模板已覆盖基础配置中的 {{count}} 项设置：",
+    "overriddenBaseConfigNoDeltas": "{{profile}} 配置模板已覆盖该板块，但各项参数与基础配置完全一致无差异。"
   },
   "profiles": {
     "title": "配置模板",
@@ -1881,7 +1903,14 @@
   },
   "onvif": {
     "profileAuto": "自动",
-    "profileLoading": "正在加载配置文件…"
+    "profileLoading": "正在加载配置文件…",
+    "autotracking": {
+      "zooming": {
+        "disabled": "关闭",
+        "absolute": "绝对",
+        "relative": "相对"
+      }
+    }
   },
   "configMessages": {
     "review": {
@@ -1929,5 +1958,104 @@
     "semanticSearch": {
       "jinav2SmallModelSize": "Jina V2 的大型模型版本内存占用与推理开销较高，建议搭配独立显卡使用大型模型。"
     }
+  },
+  "birdseye": {
+    "trackingMode": {
+      "objects": "基于目标",
+      "motion": "基于画面变动",
+      "continuous": "连续"
+    },
+    "cameraOrder": {
+      "label": "摄像头排序",
+      "description": "拖动摄像头以在鸟瞰布局中设置它们的顺序。",
+      "reorderHandle": "拖动以重新排序",
+      "saving": "保存中…",
+      "saved": "已保存"
+    }
+  },
+  "snapshot": {
+    "retainMode": {
+      "all": "所有",
+      "motion": "画面变动",
+      "active_objects": "活动目标"
+    }
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "基于浏览器",
+      "12hour": "12 小时制",
+      "24hour": "24 小时制"
+    },
+    "TimeOrDateStyle": {
+      "full": "完整",
+      "long": "长",
+      "medium": "中等",
+      "short": "段"
+    },
+    "unitSystem": {
+      "metric": "公制单位",
+      "imperial": "英制单位"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "录制文件",
+      "previews": "预览"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "调试",
+      "info": "信息",
+      "warning": "警告",
+      "error": "错误",
+      "critical": "关键"
+    }
+  },
+  "modelSize": {
+    "small": "小型",
+    "large": "大型"
+  },
+  "retainMode": {
+    "all": "全部",
+    "motion": "运动",
+    "active_objects": "活动目标"
+  },
+  "previewQuality": {
+    "very_high": "非常高",
+    "high": "高",
+    "medium": "中等",
+    "low": "低",
+    "very_low": "非常低"
+  },
+  "detectorsAndModel": {
+    "title": "检测器和模型",
+    "description": "配置用于运行目标检测的检测器后端及对应模型，配置将统一保存，确保检测器与模型保持匹配一致。",
+    "cardTitles": {
+      "detector": "检测器硬件",
+      "model": "检测器模型"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "自定义模型"
+    },
+    "mismatch": {
+      "warning": "当前 Frigate+ 模型“{{model}}”需搭配 {{required}} 检测器使用。请在下方选择兼容的模型，或切换为自定义模型后再保存。"
+    },
+    "plusModel": {
+      "requiresDetector": "需要检测器：{{detector}}",
+      "noModelSelected": "选择 Frigate+ 模型"
+    },
+    "toast": {
+      "saveSuccess": "检测器与模型设置已保存，请重启 Frigate 以生效配置。",
+      "saveError": "保存检测器及模型设置失败"
+    },
+    "unsavedChanges": "检测器与模型配置存在未保存修改",
+    "restartRequired": "需要重启（检测器 或 模型 的设置已变更）"
+  },
+  "menuDot": {
+    "overrideGlobal": "这一部分覆盖了全局配置",
+    "overrideProfile": "本节被 {{profile}} 配置文件覆盖",
+    "unsaved": "这一部分有未保存的更改"
   }
 }
