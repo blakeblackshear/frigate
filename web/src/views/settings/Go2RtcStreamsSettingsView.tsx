@@ -906,14 +906,15 @@ function StreamUrlEntry({
 
   return (
     <div className="pb-4">
-      <div className="flex flex-1 flex-row items-center justify-start text-sm text-primary-variant">
+      <div className="flex h-7 flex-row items-center justify-start gap-2 text-sm text-primary-variant">
         {t("go2rtcStreams.streamNumber", { index: urlIndex + 1 })}
         {canRemove && (
           <Button
             variant="ghost"
             size="sm"
             onClick={onRemoveUrl}
-            className="text-secondary-foreground hover:text-secondary-foreground"
+            className="size-7 p-0 text-secondary-foreground hover:text-secondary-foreground"
+            aria-label={t("button.delete", { ns: "common" })}
           >
             <LuTrash2 className="size-4" />
           </Button>
