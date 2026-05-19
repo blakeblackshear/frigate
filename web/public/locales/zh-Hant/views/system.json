@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "Frigate 日誌 - Frigate",
       "go2rtc": "Go2RTC 日誌 - Frigate",
-      "nginx": "Nginx 日誌 - Frigate"
+      "nginx": "Nginx 日誌 - Frigate",
+      "websocket": "訊息日誌 - Frigate"
     }
   },
   "title": "系統",
@@ -32,6 +33,33 @@
       "error": {
         "fetchingLogsFailed": "擷取日誌時出錯：{{errorMessage}}",
         "whileStreamingLogs": "串流日誌時出錯：{{errorMessage}}"
+      }
+    },
+    "websocket": {
+      "label": "訊息",
+      "pause": "暫停",
+      "resume": "繼續",
+      "clear": "清除",
+      "filter": {
+        "all": "全部主題",
+        "topics": "主題",
+        "events": "事件",
+        "reviews": "審閱",
+        "classification": "分類",
+        "face_recognition": "人臉辨識",
+        "lpr": "車牌辨識",
+        "camera_activity": "攝影機活動",
+        "system": "系統",
+        "camera": "攝影機",
+        "all_cameras": "所有攝影機",
+        "cameras_count_one": "{{count}} 個攝影機",
+        "cameras_count_other": "{{count}} 個攝影機"
+      },
+      "empty": "未捕獲到訊息",
+      "count_one": "{{count}} 則訊息",
+      "count_other": "{{count}} 則訊息",
+      "expanded": {
+        "payload": "Payload"
       }
     }
   },
@@ -81,7 +109,10 @@
         "title": "Intel GPU 狀態警告",
         "message": "GPU 狀態資訊不可用",
         "description": "這是一個在Intel GPU 狀態回報工具 (intel_gpu_top) 中已知的 Bug，該工具會故障並重複的回報 GPU占用率為 0%，甚至在硬體加速與物件偵測在 (i)GPU上正確運作時也是如此。這不是 Frigate 的 Bug。您可以透過重新啟動主機來暫時修復此問題以確認 GPU 運作正常。這不會影響效能。"
-      }
+      },
+      "gpuCompute": "GPU 計算 / 編碼",
+      "gpuTemperature": "GPU 溫度",
+      "npuTemperature": "NPU 溫度"
     },
     "otherProcesses": {
       "title": "其他行程",
@@ -118,7 +149,11 @@
     },
     "shm": {
       "title": "SHM（共享記憶體）配置",
-      "warning": "目前的 SHM 大小為 {{total}}MB，過小。請將其增加至至少 {{min_shm}}MB。"
+      "warning": "目前的 SHM 大小為 {{total}}MB，過小。請將其增加至至少 {{min_shm}}MB。",
+      "frameLifetime": {
+        "title": "幀保留時間",
+        "description": "每個攝影機在共享記憶體中擁有 {{frames}} 個幀槽位。在最快攝影機的幀率下，每一幀在被覆蓋前大約可保留 {{lifetime}} 秒。"
+      }
     }
   },
   "cameras": {
@@ -156,7 +191,8 @@
       "cameraDetect": "{{camName}} 偵測",
       "cameraFramesPerSecond": "{{camName}} 幀率",
       "cameraDetectionsPerSecond": "{{camName}} 每秒偵測幀率",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} 每秒跳過偵測幀率"
+      "cameraSkippedDetectionsPerSecond": "{{camName}} 每秒跳過偵測幀率",
+      "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
       "success": {
@@ -165,6 +201,20 @@
       "error": {
         "unableToProbeCamera": "無法檢測鏡頭：{{errorMessage}}"
       }
+    },
+    "noCameras": {
+      "title": "沒有找到攝影機"
+    },
+    "connectionQuality": {
+      "title": "連線品質",
+      "excellent": "優秀",
+      "fair": "一般",
+      "poor": "較差",
+      "unusable": "不可用",
+      "fps": "幀率",
+      "expectedFps": "預期幀率",
+      "reconnectsLastHour": "最近一小時重連次數",
+      "stallsLastHour": "最近一小時卡頓次數"
     }
   },
   "lastRefreshed": "最後更新： ",
@@ -176,7 +226,8 @@
     "cameraIsOffline": "{{camera}} 已離線",
     "detectIsSlow": "{{detect}} 偵測速度較慢（{{speed}} 毫秒）",
     "detectIsVerySlow": "{{detect}} 偵測速度緩慢（{{speed}} 毫秒）",
-    "shmTooLow": "/dev/shm 配置（{{total}} MB）應增加至至少{{min}} MB。"
+    "shmTooLow": "/dev/shm 配置（{{total}} MB）應增加至至少{{min}} MB。",
+    "debugReplayActive": "除錯回放工作階段正在進行"
   },
   "enrichments": {
     "title": "進階功能",
