@@ -24,6 +24,7 @@ const genai: SectionConfigOverrides = {
         "ui:widget": "genaiRoles",
       },
       "*.api_key": {
+        "ui:widget": "password",
         "ui:options": { size: "lg" },
       },
       "*.base_url": {

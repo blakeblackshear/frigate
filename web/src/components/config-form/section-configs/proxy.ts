@@ -18,6 +18,7 @@ const proxy: SectionConfigOverrides = {
         "ui:options": { size: "lg" },
       },
       auth_secret: {
+        "ui:widget": "password",
         "ui:options": { size: "md" },
       },
       header_map: {
