@@ -1,5 +1,8 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
+import frigate.genai
+from frigate.config import GenAIProviderEnum
+from frigate.genai import GenAIClient
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.stats.emitter import StatsEmitter
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
@@ -71,3 +74,94 @@ class TestHttpApp(BaseTestHttp):
 
             assert response.status_code == 200
             assert app.frigate_config.cameras["front_door"].objects.track == ["person"]
+
+    ####################################################################################################################
+    ###################################  POST /genai/probe Endpoint   ##################################################
+    ####################################################################################################################
+    def test_genai_probe_requires_admin(self):
+        app = super().create_app()
+
+        with AuthTestClient(app) as client:
+            response = client.post(
+                "/genai/probe",
+                json={"provider": "openai"},
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+            )
+            assert response.status_code == 403
+
+    def test_genai_probe_returns_models_from_transient_client(self):
+        class FakeClient(GenAIClient):
+            def list_models(self):
+                return ["fake-model-a", "fake-model-b"]
+
+        app = super().create_app()
+
+        with (
+            AuthTestClient(app) as client,
+            patch.dict(
+                frigate.genai.PROVIDERS,
+                {GenAIProviderEnum.openai: FakeClient},
+            ),
+        ):
+            response = client.post(
+                "/genai/probe",
+                json={
+                    "provider": "openai",
+                    "api_key": "sk-test",
+                    "base_url": "https://example.invalid",
+                },
+            )
+            assert response.status_code == 200
+            assert response.json() == {
+                "success": True,
+                "models": ["fake-model-a", "fake-model-b"],
+            }
+
+    def test_genai_probe_empty_list_is_treated_as_failure(self):
+        # The plugin's list_models() returns [] on connection failure rather
+        # than raising. The endpoint should surface that as success=false so
+        # the UI can show a meaningful error.
+        class EmptyClient(GenAIClient):
+            def list_models(self):
+                return []
+
+        app = super().create_app()
+
+        with (
+            AuthTestClient(app) as client,
+            patch.dict(
+                frigate.genai.PROVIDERS,
+                {GenAIProviderEnum.openai: EmptyClient},
+            ),
+        ):
+            response = client.post(
+                "/genai/probe",
+                json={"provider": "openai"},
+            )
+            assert response.status_code == 200
+            payload = response.json()
+            assert payload["success"] is False
+            assert "message" in payload
+
+    def test_genai_probe_handles_provider_failure(self):
+        class FailingClient(GenAIClient):
+            def list_models(self):
+                raise RuntimeError("provider unreachable")
+
+        app = super().create_app()
+
+        with (
+            AuthTestClient(app) as client,
+            patch.dict(
+                frigate.genai.PROVIDERS,
+                {GenAIProviderEnum.openai: FailingClient},
+            ),
+        ):
+            response = client.post(
+                "/genai/probe",
+                json={"provider": "openai"},
+            )
+            assert response.status_code == 200
+            payload = response.json()
+            assert payload["success"] is False
+            assert "message" in payload
