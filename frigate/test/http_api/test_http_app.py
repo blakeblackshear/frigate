@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import frigate.genai
 from frigate.config import GenAIProviderEnum
+from frigate.const import REDACTED_CREDENTIAL_SENTINEL
 from frigate.genai import GenAIClient
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.stats.emitter import StatsEmitter
@@ -74,6 +75,20 @@ class TestHttpApp(BaseTestHttp):
 
             assert response.status_code == 200
             assert app.frigate_config.cameras["front_door"].objects.track == ["person"]
+
+    ####################################################################################################################
+    ###################################  Credential redaction sentinel  ################################################
+    ####################################################################################################################
+    def test_config_response_redacts_mqtt_password_with_sentinel(self):
+        self.minimal_config["mqtt"]["user"] = "mqttuser"
+        self.minimal_config["mqtt"]["password"] = "supersecret"
+        app = super().create_app()
+
+        with AuthTestClient(app) as client:
+            response = client.get("/config")
+            assert response.status_code == 200
+            mqtt = response.json()["mqtt"]
+            assert mqtt["password"] == REDACTED_CREDENTIAL_SENTINEL
 
     ####################################################################################################################
     ###################################  POST /genai/probe Endpoint   ##################################################
