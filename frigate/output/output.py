@@ -342,20 +342,30 @@ def move_preview_frames(loc: str) -> None:
     preview_holdover = os.path.join(CLIPS_DIR, "preview_restart_cache")
     preview_cache = os.path.join(CACHE_DIR, "preview_frames")
 
+    if loc == "clips":
+        src = preview_cache
+        dst = preview_holdover
+    elif loc == "cache":
+        src = preview_holdover
+        dst = preview_cache
+    else:
+        return
+
     try:
-        if loc == "clips":
-            shutil.move(preview_cache, preview_holdover)
-        elif loc == "cache":
-            if not os.path.exists(preview_holdover):
-                return
+        if not os.path.exists(src):
+            return
 
-            if not os.access(preview_holdover, os.R_OK | os.W_OK):
-                logger.error(
-                    "Insufficient permissions on preview restart cache at %s",
-                    preview_holdover,
-                )
-                return
+        shutil.move(src, dst)
 
-            shutil.move(preview_holdover, preview_cache)
+    except PermissionError:
+        logger.error(
+            "Insufficient permissions while moving preview restart cache from %s to %s",
+            src,
+            dst,
+        )
     except shutil.Error:
-        logger.error("Failed to restore preview cache.")
+        logger.error(
+            "Failed to move preview restart cache from %s to %s",
+            src,
+            dst,
+        )
