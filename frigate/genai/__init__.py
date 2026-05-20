@@ -50,9 +50,15 @@ def register_genai_provider(key: GenAIProviderEnum) -> Callable:
 class GenAIClient:
     """Generative AI client for Frigate."""
 
-    def __init__(self, genai_config: GenAIConfig, timeout: int = 120) -> None:
+    def __init__(
+        self,
+        genai_config: GenAIConfig,
+        timeout: int = 120,
+        validate_model: bool = True,
+    ) -> None:
         self.genai_config: GenAIConfig = genai_config
         self.timeout = timeout
+        self.validate_model = validate_model
         self.provider = self._init_provider()
 
     def generate_review_description(

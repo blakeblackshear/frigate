@@ -2,12 +2,21 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from frigate.config import GenAIProviderEnum
+
 
 class AppConfigSetBody(BaseModel):
     requires_restart: int = 1
     update_topic: str | None = None
     config_data: Optional[Dict[str, Any]] = None
     skip_save: bool = False
+
+
+class GenAIProbeBody(BaseModel):
+    provider: GenAIProviderEnum
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
+    provider_options: Dict[str, Any] = Field(default_factory=dict)
 
 
 class AppPutPasswordBody(BaseModel):

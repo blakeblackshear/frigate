@@ -27,13 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { PlatformAwareSheet } from "@/components/overlay/dialog/PlatformAwareDialog";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
@@ -333,15 +327,64 @@ export default function Replay() {
           )}
         </Button>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            onClick={() => setConfigDialogOpen(true)}
-          >
-            <LuSettings className="size-4" />
-            <span className="hidden md:inline">{t("page.configuration")}</span>
-          </Button>
+          <PlatformAwareSheet
+            trigger={
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <LuSettings className="size-4" />
+                <span className="hidden md:inline">
+                  {t("page.configuration")}
+                </span>
+              </Button>
+            }
+            title={t("page.configuration")}
+            titleClassName="text-lg font-semibold"
+            contentClassName="scrollbar-container flex flex-col gap-0 overflow-y-auto px-6 pb-6 sm:max-w-xl md:max-w-2xl xl:max-w-3xl"
+            content={
+              <>
+                <p className="mb-5 text-sm text-muted-foreground">
+                  {t("page.configurationDesc")}
+                </p>
+                {configSchema == null ? (
+                  <div className="flex h-40 items-center justify-center">
+                    <ActivityIndicator />
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <ConfigSectionTemplate
+                      sectionKey="motion"
+                      level="replay"
+                      cameraName={status.replay_camera ?? undefined}
+                      skipSave
+                      noStickyButtons
+                      requiresRestart={false}
+                      collapsible
+                      defaultCollapsed={false}
+                      showTitle
+                      showOverrideIndicator={false}
+                    />
+                    <ConfigSectionTemplate
+                      sectionKey="objects"
+                      level="replay"
+                      cameraName={status.replay_camera ?? undefined}
+                      skipSave
+                      noStickyButtons
+                      requiresRestart={false}
+                      collapsible
+                      defaultCollapsed={false}
+                      showTitle
+                      showOverrideIndicator={false}
+                    />
+                  </div>
+                )}
+              </>
+            }
+            open={configDialogOpen}
+            onOpenChange={setConfigDialogOpen}
+          />
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -644,49 +687,6 @@ export default function Replay() {
           </Tabs>
         </div>
       </div>
-
-      <Dialog open={configDialogOpen} onOpenChange={setConfigDialogOpen}>
-        <DialogContent className="scrollbar-container max-h-[90dvh] overflow-y-auto sm:max-w-xl md:max-w-3xl lg:max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{t("page.configuration")}</DialogTitle>
-            <DialogDescription className="mb-5">
-              {t("page.configurationDesc")}
-            </DialogDescription>
-          </DialogHeader>
-          {configSchema == null ? (
-            <div className="flex h-40 items-center justify-center">
-              <ActivityIndicator />
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <ConfigSectionTemplate
-                sectionKey="motion"
-                level="replay"
-                cameraName={status.replay_camera ?? undefined}
-                skipSave
-                noStickyButtons
-                requiresRestart={false}
-                collapsible
-                defaultCollapsed={false}
-                showTitle
-                showOverrideIndicator={false}
-              />
-              <ConfigSectionTemplate
-                sectionKey="objects"
-                level="replay"
-                cameraName={status.replay_camera ?? undefined}
-                skipSave
-                noStickyButtons
-                requiresRestart={false}
-                collapsible
-                defaultCollapsed={false}
-                showTitle
-                showOverrideIndicator={false}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -118,6 +118,9 @@ class OllamaClient(GenAIClient):
                 timeout=self.timeout,
                 headers=self._auth_headers(),
             )
+            if not self.validate_model:
+                # Probe path
+                return client
             # ensure the model is available locally
             response = client.show(self.genai_config.model)
             if response.get("error"):

@@ -1557,9 +1557,14 @@
     "searchPlaceholder": "Search...",
     "addCustomLabel": "Add custom label...",
     "genaiModel": {
-      "placeholder": "Select model…",
-      "search": "Search models…",
-      "noModels": "No models available"
+      "placeholder": "Select or enter a model…",
+      "search": "Search or enter a model…",
+      "noModels": "No models available",
+      "available": "Available models",
+      "useCustom": "Use \"{{value}}\"",
+      "refresh": "Refresh models",
+      "probeFailed": "Failed to probe models",
+      "fetchedModels": "Successfully fetched model list"
     }
   },
   "globalConfig": {

@@ -150,6 +150,10 @@ class LlamaCppClient(GenAIClient):
         else:
             base_url = base_url.replace("/v1", "")  # Strip /v1 if included in base_url
 
+        if not self.validate_model:
+            # Probe path
+            return base_url
+
         configured_model = self.genai_config.model
         info = self._get_model_info(base_url, configured_model)
 

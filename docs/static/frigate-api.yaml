@@ -2058,6 +2058,47 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /genai/models:
+    get:
+      tags:
+        - App
+      summary: List available GenAI models
+      description: Returns available models for each configured GenAI provider.
+      operationId: genai_models_genai_models_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /genai/probe:
+    post:
+      tags:
+        - App
+      summary: Probe a GenAI provider without saving config
+      description: >-
+        Builds a transient client from the request body and returns its
+        available models. Used to validate provider credentials in the UI
+        before saving the configuration. Requires admin role.
+      operationId: genai_probe_genai_probe_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenAIProbeBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
   /vainfo:
     get:
       tags:
@@ -7031,6 +7072,39 @@ components:
                 "john_doe": ["face1.webp", "face2.jpg"],
                 "jane_smith": ["face3.png"]
             }
+    GenAIProbeBody:
+      properties:
+        provider:
+          type: string
+          enum:
+            - openai
+            - azure_openai
+            - gemini
+            - ollama
+            - llamacpp
+          title: Provider
+          description: GenAI provider to probe
+        api_key:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: API Key
+          description: API key for the provider (when applicable)
+        base_url:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Base URL
+          description: Base URL for self-hosted or compatible providers
+        provider_options:
+          type: object
+          title: Provider Options
+          description: Additional provider-specific options
+          default: {}
+      type: object
+      required:
+        - provider
+      title: GenAIProbeBody
     GenerateObjectExamplesBody:
       properties:
         model_name:
