@@ -121,7 +121,7 @@ export default function Replay() {
     mutate: refreshStatus,
     isLoading,
   } = useSWR<DebugReplayStatus>("debug_replay/status", {
-    refreshInterval: 1000,
+    refreshInterval: (latestData) => (latestData?.live_ready ? 0 : 1000),
   });
   const { payload: replayJob } =
     useJobStatus<DebugReplayJobResults>("debug_replay");

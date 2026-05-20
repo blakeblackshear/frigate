@@ -1,4 +1,4 @@
-"""Debug replay startup job: ffmpeg concat + camera config publish.
+"""Debug replay startup job: ffmpeg remux + camera config publish.
 
 The runner orchestrates the async portion of starting a debug replay
 session. The DebugReplayManager (in frigate.debug_replay) owns session
@@ -153,15 +153,22 @@ class DebugReplaySource(ABC):
 class RecordingDebugReplaySource(DebugReplaySource):
     """Replay source backed by the Recordings table.
 
-    Builds a concat playlist of recording files covering the time range
-    and feeds it to ffmpeg's concat demuxer.
+    Feeds ffmpeg the internal VOD endpoint so segments with mismatched
+    SPS/PPS (e.g. across day/night transitions) stitch cleanly via HLS
+    discontinuities.
     """
 
-    def __init__(self, source_camera: str, start_ts: float, end_ts: float) -> None:
+    def __init__(
+        self,
+        source_camera: str,
+        start_ts: float,
+        end_ts: float,
+        internal_port: int,
+    ) -> None:
         self._camera = source_camera
         self._start_ts = start_ts
         self._end_ts = end_ts
-        self._concat_file: Optional[str] = None
+        self._internal_port = internal_port
 
     @property
     def source_camera(self) -> str:
@@ -185,18 +192,16 @@ class RecordingDebugReplaySource(DebugReplaySource):
             )
 
     def ffmpeg_input_args(self, working_dir: str) -> list[str]:
-        replay_name = f"{REPLAY_CAMERA_PREFIX}{self._camera}"
-        concat_file = os.path.join(working_dir, f"{replay_name}_concat.txt")
-        recordings = query_recordings(self._camera, self._start_ts, self._end_ts)
-        with open(concat_file, "w") as f:
-            for recording in recordings:
-                f.write(f"file '{recording.path}'\n")
-        self._concat_file = concat_file
-        return ["-f", "concat", "-safe", "0", "-i", concat_file]
-
-    def cleanup(self, working_dir: str) -> None:
-        if self._concat_file:
-            _remove_silent(self._concat_file)
+        playlist_url = (
+            f"http://127.0.0.1:{self._internal_port}/vod/{self._camera}"
+            f"/start/{self._start_ts}/end/{self._end_ts}/index.m3u8"
+        )
+        return [
+            "-protocol_whitelist",
+            "pipe,file,http,tcp",
+            "-i",
+            playlist_url,
+        ]
 
 
 class ExportDebugReplaySource(DebugReplaySource):
