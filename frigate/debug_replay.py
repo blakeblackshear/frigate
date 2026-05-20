@@ -245,10 +245,22 @@ class DebugReplayManager:
                     "frame_shape",
                     "raw_mask",
                     "mask",
-                    "improved_contrast_enabled",
+                    "enabled_in_config",
                     "rasterized_mask",
                 }
             )
+
+            if source_config.motion.mask:
+                motion_dict["mask"] = {
+                    mask_id: (
+                        mask_cfg.model_dump(
+                            exclude={"raw_coordinates", "enabled_in_config"}
+                        )
+                        if mask_cfg is not None
+                        else None
+                    )
+                    for mask_id, mask_cfg in source_config.motion.mask.items()
+                }
 
         return {
             "enabled": True,
