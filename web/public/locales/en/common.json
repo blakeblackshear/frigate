@@ -316,5 +316,8 @@
     "pixels": "{{area}}px"
   },
   "no_items": "No items",
-  "validation_errors": "Validation Errors"
+  "validation_errors": "Validation Errors",
+  "credentialField": {
+    "savedPlaceholder": "Saved — leave blank to keep current"
+  }
 }

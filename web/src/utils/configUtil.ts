@@ -11,6 +11,7 @@ import isEqual from "lodash/isEqual";
 import mergeWith from "lodash/mergeWith";
 import set from "lodash/set";
 import { isJsonObject } from "@/lib/utils";
+import { REDACTED_CREDENTIAL_SENTINEL } from "@/lib/const";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { normalizeConfigValue } from "@/hooks/use-config-override";
 import {
@@ -28,6 +29,33 @@ import type {
 } from "@/types/configForm";
 import type { SectionConfig } from "../components/config-form/sections/BaseSection";
 import { sectionConfigs } from "../components/config-form/sectionConfigs";
+
+/**
+ * Recursively strip any key whose value is the redaction sentinel from a
+ * config_data payload. Use just before sending to /config/set so untouched
+ * credential placeholder fields don't clobber the saved YAML value. Mutates
+ * and returns the input.
+ */
+export function stripRedactedCredentials<T>(value: T): T {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      stripRedactedCredentials(item);
+    }
+    return value;
+  }
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    for (const key of Object.keys(obj)) {
+      const v = obj[key];
+      if (v === REDACTED_CREDENTIAL_SENTINEL) {
+        delete obj[key];
+      } else if (v && typeof v === "object") {
+        stripRedactedCredentials(v);
+      }
+    }
+  }
+  return value;
+}
 
 // ---------------------------------------------------------------------------
 // cameraUpdateTopicMap — maps config section paths to MQTT/WS update topics

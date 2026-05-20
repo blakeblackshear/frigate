@@ -29,6 +29,9 @@ const onvif: SectionConfigOverrides = {
       host: {
         "ui:options": { size: "sm" },
       },
+      password: {
+        "ui:widget": "password",
+      },
       profile: {
         "ui:widget": "onvifProfile",
       },

@@ -21,6 +21,8 @@ PLUS_API_HOST = "https://api.frigate.video"
 
 SHM_FRAMES_VAR = "SHM_MAX_FRAMES"
 
+REDACTED_CREDENTIAL_SENTINEL = "__FRIGATE_SAVED_CREDENTIAL__"
+
 # Attribute & Object constants
 
 DEFAULT_ATTRIBUTE_LABEL_MAP = {

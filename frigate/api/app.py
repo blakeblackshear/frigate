@@ -43,6 +43,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
+from frigate.const import REDACTED_CREDENTIAL_SENTINEL
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
 from frigate.genai import PROVIDERS, load_providers
 from frigate.jobs.media_sync import (
@@ -61,7 +62,11 @@ from frigate.util.builtin import (
     process_config_query_string,
     update_yaml_file_bulk,
 )
-from frigate.util.config import apply_section_update, find_config_file
+from frigate.util.config import (
+    apply_section_update,
+    find_config_file,
+    redact_credential,
+)
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
     get_nvidia_driver_info,
@@ -284,26 +289,24 @@ def config(request: Request):
     if request.headers.get("remote-role") != "admin":
         config.pop("environment_vars", None)
 
-    # remove mqtt credentials
-    config["mqtt"].pop("password", None)
-    config["mqtt"].pop("user", None)
+    # redact mqtt credentials
+    redact_credential(config["mqtt"], "password")
 
-    # remove the proxy secret
-    config["proxy"].pop("auth_secret", None)
+    # redact proxy secret
+    redact_credential(config["proxy"], "auth_secret")
 
-    # remove genai api keys
-    for genai_name, genai_cfg in config.get("genai", {}).items():
+    # redact genai api keys
+    for _genai_name, genai_cfg in config.get("genai", {}).items():
         if isinstance(genai_cfg, dict):
-            genai_cfg.pop("api_key", None)
+            redact_credential(genai_cfg, "api_key")
 
     for camera_name, camera in request.app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
 
-        # remove onvif credentials
+        # redact onvif credentials
         onvif_dict = camera_dict.get("onvif", {})
         if onvif_dict:
-            onvif_dict.pop("user", None)
-            onvif_dict.pop("password", None)
+            redact_credential(onvif_dict, "password")
 
         # clean paths
         for input in camera_dict.get("ffmpeg", {}).get("inputs", []):
@@ -680,6 +683,10 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
             _restore_masked_camera_paths(body.config_data, request.app.frigate_config)
             updates = flatten_config_data(body.config_data)
             updates = {k: ("" if v is None else v) for k, v in updates.items()}
+            # Drop any field whose value is still the redaction sentinel
+            updates = {
+                k: v for k, v in updates.items() if v != REDACTED_CREDENTIAL_SENTINEL
+            }
 
         if not updates:
             return JSONResponse(
@@ -790,6 +797,13 @@ def config_set(request: Request, body: AppConfigSetBody):
                     updates = flatten_config_data(body.config_data)
                     # Convert None values to empty strings for deletion (e.g., when deleting masks)
                     updates = {k: ("" if v is None else v) for k, v in updates.items()}
+                    # Drop sentinel-valued fields so untouched credential
+                    # placeholders don't clobber the saved YAML value.
+                    updates = {
+                        k: v
+                        for k, v in updates.items()
+                        if v != REDACTED_CREDENTIAL_SENTINEL
+                    }
 
                 if not updates:
                     return JSONResponse(
