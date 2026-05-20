@@ -101,7 +101,10 @@ class TestStartDebugReplayJob(unittest.TestCase):
         with self.assertRaises(ValueError):
             start_debug_replay_job(
                 source=RecordingDebugReplaySource(
-                    source_camera="missing", start_ts=100.0, end_ts=200.0
+                    source_camera="missing",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
                 ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
@@ -112,7 +115,10 @@ class TestStartDebugReplayJob(unittest.TestCase):
         with self.assertRaises(ValueError):
             start_debug_replay_job(
                 source=RecordingDebugReplaySource(
-                    source_camera="front", start_ts=200.0, end_ts=100.0
+                    source_camera="front",
+                    start_ts=200.0,
+                    end_ts=100.0,
+                    internal_port=5000,
                 ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
@@ -126,7 +132,10 @@ class TestStartDebugReplayJob(unittest.TestCase):
             with self.assertRaises(ValueError):
                 start_debug_replay_job(
                     source=RecordingDebugReplaySource(
-                        source_camera="front", start_ts=100.0, end_ts=200.0
+                        source_camera="front",
+                        start_ts=100.0,
+                        end_ts=200.0,
+                        internal_port=5000,
                     ),
                     frigate_config=self.frigate_config,
                     config_publisher=self.publisher,
@@ -156,7 +165,10 @@ class TestStartDebugReplayJob(unittest.TestCase):
         ):
             job_id = start_debug_replay_job(
                 source=RecordingDebugReplaySource(
-                    source_camera="front", start_ts=100.0, end_ts=200.0
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
                 ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
@@ -193,7 +205,10 @@ class TestStartDebugReplayJob(unittest.TestCase):
         ):
             start_debug_replay_job(
                 source=RecordingDebugReplaySource(
-                    source_camera="front", start_ts=100.0, end_ts=200.0
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
                 ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
@@ -203,7 +218,10 @@ class TestStartDebugReplayJob(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 start_debug_replay_job(
                     source=RecordingDebugReplaySource(
-                        source_camera="front", start_ts=100.0, end_ts=200.0
+                        source_camera="front",
+                        start_ts=100.0,
+                        end_ts=200.0,
+                        internal_port=5000,
                     ),
                     frigate_config=self.frigate_config,
                     config_publisher=self.publisher,
@@ -271,7 +289,10 @@ class TestRunnerHappyPath(unittest.TestCase):
         ):
             start_debug_replay_job(
                 source=RecordingDebugReplaySource(
-                    source_camera="front", start_ts=100.0, end_ts=200.0
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
                 ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
@@ -342,7 +363,10 @@ class TestRunnerFailurePath(unittest.TestCase):
         ):
             start_debug_replay_job(
                 source=RecordingDebugReplaySource(
-                    source_camera="front", start_ts=100.0, end_ts=200.0
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
                 ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
@@ -420,7 +444,10 @@ class TestRunnerCancellation(unittest.TestCase):
         ):
             start_debug_replay_job(
                 source=RecordingDebugReplaySource(
-                    source_camera="front", start_ts=100.0, end_ts=200.0
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
                 ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,

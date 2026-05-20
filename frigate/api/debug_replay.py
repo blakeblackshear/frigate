@@ -86,10 +86,15 @@ class DebugReplayStopResponse(BaseModel):
 async def start_debug_replay(request: Request, body: DebugReplayStartBody):
     """Start a debug replay session asynchronously."""
     replay_manager = request.app.replay_manager
+    internal_port = request.app.frigate_config.networking.listen.internal
+    if type(internal_port) is str:
+        internal_port = int(internal_port.split(":")[-1])
+
     source = RecordingDebugReplaySource(
         source_camera=body.camera,
         start_ts=body.start_time,
         end_ts=body.end_time,
+        internal_port=internal_port,
     )
 
     try:
