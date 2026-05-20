@@ -8,7 +8,7 @@ from typing import Any, Optional, Union
 
 from ruamel.yaml import YAML
 
-from frigate.const import CONFIG_DIR, EXPORT_DIR
+from frigate.const import CONFIG_DIR, EXPORT_DIR, REDACTED_CREDENTIAL_SENTINEL
 from frigate.util.builtin import deep_merge
 from frigate.util.services import get_video_properties
 
@@ -16,6 +16,21 @@ logger = logging.getLogger(__name__)
 
 CURRENT_CONFIG_VERSION = "0.18-0"
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
+
+
+def redact_credential(obj: dict[str, Any], key: str) -> None:
+    """Replace obj[key] with the redaction sentinel if a value is saved, else drop.
+
+    Used when shaping the /config response so saved credentials never leave
+    the server. The frontend recognizes REDACTED_CREDENTIAL_SENTINEL, renders
+    the field as empty with a "saved — leave blank to keep" placeholder, and
+    /config/set strips it from any incoming payload so the YAML value is
+    preserved when the user doesn't touch the field.
+    """
+    if obj.get(key):
+        obj[key] = REDACTED_CREDENTIAL_SENTINEL
+    else:
+        obj.pop(key, None)
 
 
 def find_config_file() -> str:
