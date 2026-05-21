@@ -369,11 +369,14 @@ class GeminiClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """
         Stream chat with tools; yields content deltas then final message.
 
         Implements streaming function calling/tool usage for Gemini models.
+        ``enable_thinking`` is accepted for interface parity; Gemini configures
+        thinking at the model level, so it is ignored here.
         """
         try:
             # Convert messages to Gemini format
