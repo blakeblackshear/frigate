@@ -238,6 +238,10 @@ class DebugReplayManager:
             zone_dump.setdefault("coordinates", zone_config.coordinates)
             zones_dict[zone_name] = zone_dump
 
+        # Extract LPR and face recognition configs
+        lpr_dict = source_config.lpr.model_dump()
+        face_recognition_dict = source_config.face_recognition.model_dump()
+
         # Extract motion config (exclude runtime fields)
         motion_dict = {}
         if source_config.motion is not None:
@@ -287,8 +291,8 @@ class DebugReplayManager:
             },
             "birdseye": {"enabled": False},
             "audio": {"enabled": False},
-            "lpr": {"enabled": False},
-            "face_recognition": {"enabled": False},
+            "lpr": lpr_dict,
+            "face_recognition": face_recognition_dict,
         }
 
     def _cleanup_db(self, camera_name: str) -> None:
