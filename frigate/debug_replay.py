@@ -169,6 +169,7 @@ class DebugReplayManager:
                     CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, replay_name),
                     frigate_config.cameras[replay_name],
                 )
+                frigate_config.cameras.pop(replay_name, None)
 
             if replay_name is not None:
                 self._cleanup_db(replay_name)
