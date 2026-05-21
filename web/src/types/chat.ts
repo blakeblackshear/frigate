@@ -25,3 +25,11 @@ export type ChatStats = {
 };
 
 export type ShowStatsMode = "while_generating" | "always";
+
+export type GenAIProviderInfo = {
+  models: string[];
+  roles: string[];
+  supports_toggleable_thinking: boolean;
+};
+
+export type GenAIModelsResponse = Record<string, GenAIProviderInfo>;

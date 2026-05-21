@@ -1173,6 +1173,7 @@ async def chat_completion(
                     messages=conversation,
                     tools=tools if tools else None,
                     tool_choice="auto",
+                    enable_thinking=body.enable_thinking,
                 ):
                     if await request.is_disconnected():
                         logger.debug("Client disconnected, stopping chat stream")
@@ -1267,6 +1268,7 @@ async def chat_completion(
                 messages=conversation,
                 tools=tools if tools else None,
                 tool_choice="auto",
+                enable_thinking=body.enable_thinking,
             )
 
             if response.get("finish_reason") == "error":

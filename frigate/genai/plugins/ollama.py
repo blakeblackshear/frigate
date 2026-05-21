@@ -98,6 +98,22 @@ class OllamaClient(GenAIClient):
 
     provider: ApiClient | None
     provider_options: dict[str, Any]
+    _supports_thinking_cache: Optional[bool] = None
+
+    @property
+    def supports_toggleable_thinking(self) -> bool:
+        if self._supports_thinking_cache is not None:
+            return self._supports_thinking_cache
+        if self.provider is None:
+            return False
+        try:
+            response = self.provider.show(self.genai_config.model)
+            capabilities = response.get("capabilities") or []
+            self._supports_thinking_cache = "thinking" in capabilities
+        except Exception as e:
+            logger.debug("Failed to query Ollama model capabilities: %s", e)
+            self._supports_thinking_cache = False
+        return self._supports_thinking_cache
 
     def _auth_headers(self) -> dict | None:
         if self.genai_config.api_key:
@@ -274,6 +290,7 @@ class OllamaClient(GenAIClient):
         tools: Optional[list[dict[str, Any]]],
         tool_choice: Optional[str],
         stream: bool = False,
+        enable_thinking: Optional[bool] = None,
     ) -> dict[str, Any]:
         """Build request_messages and params for chat (sync or stream)."""
         request_messages = []
@@ -318,6 +335,8 @@ class OllamaClient(GenAIClient):
             request_params["stream"] = True
         if tools:
             request_params["tools"] = tools
+        if enable_thinking is not None and self.supports_toggleable_thinking:
+            request_params["think"] = enable_thinking
         return request_params
 
     def _message_from_response(self, response: dict[str, Any]) -> dict[str, Any]:
@@ -365,6 +384,7 @@ class OllamaClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
     ) -> dict[str, Any]:
         if self.provider is None:
             logger.warning(
@@ -377,7 +397,11 @@ class OllamaClient(GenAIClient):
             }
         try:
             request_params = self._build_request_params(
-                messages, tools, tool_choice, stream=False
+                messages,
+                tools,
+                tool_choice,
+                stream=False,
+                enable_thinking=enable_thinking,
             )
             response = self.provider.chat(**request_params)
             return self._message_from_response(response)
@@ -401,6 +425,7 @@ class OllamaClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """Stream chat with tools; yields content deltas then final message.
 
@@ -430,7 +455,11 @@ class OllamaClient(GenAIClient):
                     "Ollama: tools provided, using non-streaming call for tool support"
                 )
                 request_params = self._build_request_params(
-                    messages, tools, tool_choice, stream=False
+                    messages,
+                    tools,
+                    tool_choice,
+                    stream=False,
+                    enable_thinking=enable_thinking,
                 )
                 async_client = OllamaAsyncClient(
                     host=self.genai_config.base_url,
@@ -452,7 +481,11 @@ class OllamaClient(GenAIClient):
                 return
 
             request_params = self._build_request_params(
-                messages, tools, tool_choice, stream=True
+                messages,
+                tools,
+                tool_choice,
+                stream=True,
+                enable_thinking=enable_thinking,
             )
             async_client = OllamaAsyncClient(
                 host=self.genai_config.base_url,

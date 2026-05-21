@@ -122,6 +122,7 @@ class LlamaCppClient(GenAIClient):
     _supports_vision: bool
     _supports_audio: bool
     _supports_tools: bool
+    _supports_reasoning: bool
     _image_token_cache: dict[tuple[int, int], int]
     _text_baseline_tokens: int | None
     _media_marker: str
@@ -135,6 +136,7 @@ class LlamaCppClient(GenAIClient):
         self._supports_vision = False
         self._supports_audio = False
         self._supports_tools = False
+        self._supports_reasoning = False
         self._image_token_cache = {}
         self._text_baseline_tokens = None
         self._media_marker = "<__media__>"
@@ -164,15 +166,17 @@ class LlamaCppClient(GenAIClient):
         self._supports_vision = info["supports_vision"]
         self._supports_audio = info["supports_audio"]
         self._supports_tools = info["supports_tools"]
+        self._supports_reasoning = info["supports_reasoning"]
         self._media_marker = info["media_marker"]
 
         logger.info(
-            "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s",
+            "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s, reasoning: %s",
             configured_model,
             self._context_size or "unknown",
             self._supports_vision,
             self._supports_audio,
             self._supports_tools,
+            self._supports_reasoning,
         )
 
         return base_url
@@ -200,6 +204,7 @@ class LlamaCppClient(GenAIClient):
             "supports_vision": False,
             "supports_audio": False,
             "supports_tools": False,
+            "supports_reasoning": False,
             "media_marker": "<__media__>",
         }
 
@@ -279,9 +284,16 @@ class LlamaCppClient(GenAIClient):
                 info["supports_vision"] = bool(modalities.get("vision", False))
                 info["supports_audio"] = bool(modalities.get("audio", False))
 
+            chat_caps = props.get("chat_template_caps") or {}
+
             if not info["supports_tools"]:
-                chat_caps = props.get("chat_template_caps", {})
                 info["supports_tools"] = bool(chat_caps.get("supports_tools", False))
+
+            # llama.cpp does not advertise per-template reasoning support, so
+            # detect it by looking for the `enable_thinking` toggle variable
+            # in the Jinja chat template itself.
+            chat_template = props.get("chat_template") or ""
+            info["supports_reasoning"] = "enable_thinking" in chat_template
 
             media_marker = props.get("media_marker")
             if isinstance(media_marker, str) and media_marker:
@@ -376,6 +388,10 @@ class LlamaCppClient(GenAIClient):
     def supports_tools(self) -> bool:
         """Whether the loaded model supports tool/function calling."""
         return self._supports_tools
+
+    @property
+    def supports_toggleable_thinking(self) -> bool:
+        return self._supports_reasoning
 
     def list_models(self) -> list[str]:
         """Return available model IDs from the llama.cpp server."""
@@ -504,6 +520,7 @@ class LlamaCppClient(GenAIClient):
         tools: Optional[list[dict[str, Any]]],
         tool_choice: Optional[str],
         stream: bool = False,
+        enable_thinking: Optional[bool] = None,
     ) -> dict[str, Any]:
         """Build request payload for chat completions (sync or stream)."""
         openai_tool_choice = None
@@ -519,14 +536,21 @@ class LlamaCppClient(GenAIClient):
             "messages": messages,
             "model": self.genai_config.model,
         }
+
         if stream:
             payload["stream"] = True
             payload["stream_options"] = {"include_usage": True}
             payload["timings_per_token"] = True
+
         if tools:
             payload["tools"] = tools
+
             if openai_tool_choice is not None:
                 payload["tool_choice"] = openai_tool_choice
+
+        if enable_thinking is not None and self._supports_reasoning:
+            payload["chat_template_kwargs"] = {"enable_thinking": enable_thinking}
+
         provider_opts = {
             k: v for k, v in self.provider_options.items() if k != "context_size"
         }
@@ -732,6 +756,7 @@ class LlamaCppClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
     ) -> dict[str, Any]:
         """
         Send chat messages to llama.cpp server with optional tool definitions.
@@ -749,7 +774,13 @@ class LlamaCppClient(GenAIClient):
                 "finish_reason": "error",
             }
         try:
-            payload = self._build_payload(messages, tools, tool_choice, stream=False)
+            payload = self._build_payload(
+                messages,
+                tools,
+                tool_choice,
+                stream=False,
+                enable_thinking=enable_thinking,
+            )
             response = requests.post(
                 f"{self.provider}/v1/chat/completions",
                 json=payload,
@@ -797,6 +828,7 @@ class LlamaCppClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """Stream chat with tools via OpenAI-compatible streaming API."""
         if self.provider is None:
@@ -813,7 +845,13 @@ class LlamaCppClient(GenAIClient):
             )
             return
         try:
-            payload = self._build_payload(messages, tools, tool_choice, stream=True)
+            payload = self._build_payload(
+                messages,
+                tools,
+                tool_choice,
+                stream=True,
+                enable_thinking=enable_thinking,
+            )
             content_parts: list[str] = []
             reasoning_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}

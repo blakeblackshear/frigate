@@ -34,12 +34,17 @@ type StreamChunk =
  * POST to chat/completion with stream: true, parse NDJSON stream, and invoke
  * callbacks so the caller can update UI (e.g. React state).
  */
+export type StreamChatOptions = {
+  enableThinking?: boolean;
+};
+
 export async function streamChatCompletion(
   url: string,
   headers: Record<string, string>,
   apiMessages: { role: string; content: string }[],
   callbacks: StreamChatCallbacks,
   signal?: AbortSignal,
+  options: StreamChatOptions = {},
 ): Promise<void> {
   const {
     updateMessages,
@@ -50,10 +55,17 @@ export async function streamChatCompletion(
   } = callbacks;
 
   try {
+    const body: Record<string, unknown> = {
+      messages: apiMessages,
+      stream: true,
+    };
+    if (options.enableThinking !== undefined) {
+      body.enable_thinking = options.enableThinking;
+    }
     const res = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify({ messages: apiMessages, stream: true }),
+      body: JSON.stringify(body),
       signal,
     });
 

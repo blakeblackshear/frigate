@@ -36,3 +36,10 @@ class ChatCompletionRequest(BaseModel):
         default=False,
         description="If true, stream the final assistant response in the body as newline-delimited JSON.",
     )
+    enable_thinking: Optional[bool] = Field(
+        default=None,
+        description=(
+            "Per-request thinking toggle. None means use the provider default. "
+            "Ignored by providers that do not expose a per-request thinking switch."
+        ),
+    )
