@@ -332,14 +332,18 @@ class CameraState:
                 current_detections[id],
             )
 
-            # add initial frame to frame cache
-            logger.debug(
-                f"{self.name}: New object, adding {frame_time} to frame cache for {id}"
-            )
-            self.frame_cache[frame_time] = {
-                "frame": np.copy(current_frame),  # type: ignore[arg-type]
-                "object_id": id,
-            }
+            # Skip caching when the frame buffer isn't readable — e.g.
+            # frame_manager.get returned None because the SHM segment was
+            # unlinked or hasn't been recreated yet during a camera
+            # add/remove cycle.
+            if current_frame is not None:
+                logger.debug(
+                    f"{self.name}: New object, adding {frame_time} to frame cache for {id}"
+                )
+                self.frame_cache[frame_time] = {
+                    "frame": np.copy(current_frame),
+                    "object_id": id,
+                }
 
             # save initial thumbnail data and best object
             thumbnail_data = {
