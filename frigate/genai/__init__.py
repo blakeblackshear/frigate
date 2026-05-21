@@ -5,7 +5,7 @@ import json
 import logging
 import os
 import re
-from typing import Any, Callable, Optional
+from typing import Any, AsyncGenerator, Callable, Optional
 
 import numpy as np
 from pydantic import ValidationError
@@ -358,6 +358,41 @@ class GenAIClient:
             "tool_calls": None,
             "finish_reason": "error",
         }
+
+    async def chat_with_tools_stream(
+        self,
+        messages: list[dict[str, Any]],
+        tools: Optional[list[dict[str, Any]]] = None,
+        tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
+    ) -> AsyncGenerator[tuple[str, Any], None]:
+        """Streaming counterpart to `chat_with_tools`.
+
+        Yields ``(kind, value)`` tuples where ``kind`` is one of:
+            - 'content_delta': value is a string fragment of the answer
+            - 'reasoning_delta': value is a string fragment of the reasoning
+              trace (emitted before content for thinking models)
+            - 'stats': value is a usage stats dict
+            - 'message': value is the final dict shape described in
+              `chat_with_tools`
+
+        Argument semantics — including ``enable_thinking`` — match
+        `chat_with_tools`. Providers that don't support streaming should
+        override this and yield an error 'message' event.
+        """
+        logger.warning(
+            f"{self.__class__.__name__} does not support chat_with_tools_stream. "
+            "This method should be overridden by the provider implementation."
+        )
+        yield (
+            "message",
+            {
+                "content": None,
+                "reasoning": None,
+                "tool_calls": None,
+                "finish_reason": "error",
+            },
+        )
 
 
 def load_providers() -> None:

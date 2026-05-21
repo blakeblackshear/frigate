@@ -309,11 +309,15 @@ class OpenAIClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """
         Stream chat with tools; yields content deltas then final message.
 
         Implements streaming function calling/tool usage for OpenAI models.
+        The OpenAI chat completions API does not expose a per-request thinking
+        toggle, so ``enable_thinking`` is accepted for interface parity and
+        ignored.
         """
         try:
             openai_tool_choice = None
