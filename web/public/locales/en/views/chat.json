@@ -65,5 +65,8 @@
     "active": "Reasoning…",
     "show": "Show reasoning",
     "hide": "Hide reasoning"
+  },
+  "thinking": {
+    "toggle": "Toggle thinking"
   }
 }

@@ -8,6 +8,12 @@ import {
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type ReasoningBubbleProps = {
   /** The accumulated reasoning text from the model. */
@@ -54,34 +60,42 @@ export function ReasoningBubble({
 
   return (
     <div className="self-start rounded-2xl bg-muted/60 px-3 py-2 text-muted-foreground">
-      <Collapsible open={open} onOpenChange={handleOpenChange}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto w-full min-w-0 justify-start gap-2 whitespace-normal p-0 text-left text-xs hover:bg-transparent"
-          >
-            <LuBrain
-              className={cn(
-                "size-3 shrink-0",
-                !answerStarted && "animate-pulse",
-              )}
-            />
-            <span className="break-words font-medium">{label}</span>
-            {answerStarted &&
-              (open ? (
-                <LuChevronDown className="ml-auto size-3 shrink-0" />
-              ) : (
-                <LuChevronRight className="ml-auto size-3 shrink-0" />
-              ))}
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <pre className="scrollbar-container mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded bg-muted/50 p-2 font-sans text-xs leading-relaxed">
-            {reasoning}
-          </pre>
-        </CollapsibleContent>
-      </Collapsible>
+      <TooltipProvider>
+        <Collapsible open={open} onOpenChange={handleOpenChange}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto w-full min-w-0 justify-start gap-2 whitespace-normal p-0 text-left text-xs hover:bg-transparent"
+            >
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <LuBrain
+                      className={cn(
+                        "size-3 shrink-0",
+                        !answerStarted && "animate-pulse",
+                      )}
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>{label}</TooltipContent>
+              </Tooltip>
+              {answerStarted &&
+                (open ? (
+                  <LuChevronDown className="ml-auto size-3 shrink-0" />
+                ) : (
+                  <LuChevronRight className="ml-auto size-3 shrink-0" />
+                ))}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <pre className="scrollbar-container mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded bg-muted/50 p-2 font-sans text-xs leading-relaxed">
+              {reasoning}
+            </pre>
+          </CollapsibleContent>
+        </Collapsible>
+      </TooltipProvider>
     </div>
   );
 }

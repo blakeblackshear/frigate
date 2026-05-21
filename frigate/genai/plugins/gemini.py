@@ -62,6 +62,7 @@ class GeminiClient(GenAIClient):
         prompt: str,
         images: list[bytes],
         response_format: Optional[dict] = None,
+        enable_thinking: bool = False,
     ) -> Optional[str]:
         """Submit a request to Gemini."""
         contents = [prompt] + [
@@ -119,11 +120,14 @@ class GeminiClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
     ) -> dict[str, Any]:
         """
         Send chat messages to Gemini with optional tool definitions.
 
-        Implements function calling/tool usage for Gemini models.
+        Implements function calling/tool usage for Gemini models. Thinking is
+        configured at the model level for Gemini, so ``enable_thinking`` is
+        accepted for interface parity and ignored.
         """
         try:
             # Convert messages to Gemini format

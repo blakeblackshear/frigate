@@ -23,6 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { ConfigFormContext, JsonObject } from "@/types/configForm";
+import type { GenAIModelsResponse } from "@/types/chat";
 import { getSizedFieldClassName } from "../utils";
 
 type ProbeResponse =
@@ -73,11 +74,12 @@ export function GenAIModelWidget(props: WidgetProps) {
     return `${e.provider ?? ""}|${e.base_url ?? ""}`;
   }, [providerKey, formContext?.fullConfig]);
 
-  const { data: allModels, mutate: mutateModels } = useSWR<
-    Record<string, string[]>
-  >("genai/models", {
-    revalidateOnFocus: false,
-  });
+  const { data: allModels, mutate: mutateModels } = useSWR<GenAIModelsResponse>(
+    "genai/models",
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   // Revalidate models when the saved config fingerprint changes (e.g. after
   // switching provider or base_url and saving).
@@ -89,9 +91,9 @@ export function GenAIModelWidget(props: WidgetProps) {
     }
   }, [configFingerprint, mutateModels]);
 
-  const fetchedModels = useMemo(() => {
+  const fetchedModels = useMemo<string[]>(() => {
     if (!allModels || !providerKey) return [];
-    return allModels[providerKey] ?? [];
+    return allModels[providerKey]?.models ?? [];
   }, [allModels, providerKey]);
 
   const [probeStatus, setProbeStatus] = useState<ProbeStatus>("idle");

@@ -222,8 +222,15 @@ class GenAIClient:
         prompt: str,
         images: list[bytes],
         response_format: Optional[dict] = None,
+        enable_thinking: bool = False,
     ) -> Optional[str]:
-        """Submit a request to the provider."""
+        """Submit a request to the provider.
+
+        ``enable_thinking`` is honored only by providers that report
+        ``supports_toggleable_thinking``. Description-style callers leave it
+        at the default (off) since synthesis tasks don't benefit from
+        reasoning traces.
+        """
         return None
 
     @property
@@ -234,6 +241,11 @@ class GenAIClient:
         capability at runtime (e.g. llama.cpp) should override this.
         """
         return True
+
+    @property
+    def supports_toggleable_thinking(self) -> bool:
+        """Whether the configured model exposes a per-request thinking toggle."""
+        return False
 
     def list_models(self) -> list[str]:
         """Return the list of model names available from this provider.
@@ -278,6 +290,7 @@ class GenAIClient:
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
     ) -> dict[str, Any]:
         """
         Send chat messages to LLM with optional tool definitions.
@@ -301,7 +314,9 @@ class GenAIClient:
                 - 'none': Model must not call tools
                 - 'required': Model must call at least one tool
                 - Or a dict specifying a specific tool to call
-            **kwargs: Additional provider-specific parameters.
+            enable_thinking: Per-request thinking toggle. None means use the
+                provider default. Ignored by providers without a per-request
+                toggle (see `supports_toggleable_thinking`).
 
         Returns:
             Dictionary with:
