@@ -63,8 +63,8 @@ Describe the scene based on observable actions and movements, evaluate the activ
 ## Analysis Guidelines
 
 When forming your description:
-- **CRITICAL: Only describe objects explicitly listed in "Objects in Scene" below.** Do not infer or mention additional people, vehicles, or objects not present in this list, even if visual patterns suggest them. If only a car is listed, do not describe a person interacting with it unless "person" is also in the objects list.
-- **Only describe actions actually visible in the frames.** Do not assume or infer actions that you don't observe happening. If someone walks toward furniture but you never see them sit, do not say they sat. Stick to what you can see across the sequence.
+- **Treat "Objects in Scene" as the list of tracked subjects to describe.** Do not introduce additional people or vehicles that are not present in this list. You may freely reference other items, surfaces, and environmental details visible in the frames when describing what the listed subjects are doing.
+- **Describe the most likely activity from visible cues across the sequence** — the subject's path, what they are carrying, and what they interact with. Avoid asserting completed outcomes you do not observe; describe in-progress actions rather than results.
 - Describe what you observe: actions, movements, interactions with objects and the environment. Include any observable environmental changes (e.g., lighting changes triggered by activity).
 - Note visible details such as clothing, items being carried or placed, tools or equipment present, and how they interact with the property or objects.
 - Consider the full sequence chronologically: what happens from start to finish, how duration and actions relate to the location and objects involved.
