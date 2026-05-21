@@ -57,6 +57,7 @@ import isEqual from "lodash/isEqual";
 import set from "lodash/set";
 import type { ConfigSectionData, JsonObject } from "@/types/configForm";
 import { sanitizeSectionData } from "@/utils/configUtil";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import type { SectionRendererProps } from "./registry";
 
 const NOTIFICATION_SERVICE_WORKER = "/notifications-worker.js";
@@ -94,7 +95,7 @@ export default function NotificationsSettingsExtras({
 
     return Object.values(config.cameras)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order)
-      .filter((c) => c.enabled_in_config);
+      .filter((c) => c.enabled_in_config && !isReplayCamera(c.name));
   }, [config]);
 
   const notificationCameras = useMemo(() => {
@@ -106,6 +107,7 @@ export default function NotificationsSettingsExtras({
       .filter(
         (conf) =>
           conf.enabled_in_config &&
+          !isReplayCamera(conf.name) &&
           conf.notifications &&
           conf.notifications.enabled_in_config,
       )
@@ -359,6 +361,7 @@ export default function NotificationsSettingsExtras({
       Object.values(config.cameras).some(
         (c) =>
           c.enabled_in_config &&
+          !isReplayCamera(c.name) &&
           c.notifications &&
           c.notifications.enabled_in_config,
       ),

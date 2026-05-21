@@ -19,6 +19,7 @@ import type { JsonObject } from "@/types/configForm";
 import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { PROFILE_ELIGIBLE_SECTIONS } from "@/utils/configUtil";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { cn } from "@/lib/utils";
@@ -145,7 +146,9 @@ export default function ProfilesView({
     if (!config || allProfileNames.length === 0) return {};
 
     const data: Record<string, Record<string, string[]>> = {};
-    const cameras = Object.keys(config.cameras).sort();
+    const cameras = Object.keys(config.cameras)
+      .filter((name) => !isReplayCamera(name))
+      .sort();
 
     for (const profile of allProfileNames) {
       data[profile] = {};

@@ -16,6 +16,7 @@ import FrigatePlusCurrentModelSummary from "@/views/settings/components/FrigateP
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import type { SettingsPageProps } from "@/views/settings/SingleSectionPage";
 
 export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
@@ -139,8 +140,9 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
                         </tr>
                       </thead>
                       <tbody>
-                        {Object.entries(config.cameras).map(
-                          ([name, camera]) => (
+                        {Object.entries(config.cameras)
+                          .filter(([name]) => !isReplayCamera(name))
+                          .map(([name, camera]) => (
                             <tr
                               key={name}
                               className="border-b border-secondary"
@@ -156,8 +158,7 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
                                 )}
                               </td>
                             </tr>
-                          ),
-                        )}
+                          ))}
                       </tbody>
                     </table>
                   </div>

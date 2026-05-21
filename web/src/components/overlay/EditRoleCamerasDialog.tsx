@@ -25,6 +25,7 @@ import {
 import { Trans, useTranslation } from "react-i18next";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
 type EditRoleCamerasOverlayProps = {
   show: boolean;
@@ -46,7 +47,9 @@ export default function EditRoleCamerasDialog({
   const { t } = useTranslation(["views/settings"]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const cameras = Object.keys(config.cameras || {});
+  const cameras = Object.keys(config.cameras || {}).filter(
+    (name) => !isReplayCamera(name),
+  );
 
   const formSchema = z.object({
     cameras: z
