@@ -79,9 +79,7 @@ export function ReasoningBubble({
                     />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>
-                  {label}
-                </TooltipContent>
+                <TooltipContent>{label}</TooltipContent>
               </Tooltip>
               {answerStarted &&
                 (open ? (
