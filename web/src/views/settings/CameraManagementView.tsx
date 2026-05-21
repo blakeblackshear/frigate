@@ -36,7 +36,15 @@ import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
-import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -53,6 +61,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 const REORDER_SAVED_INDICATOR_MS = 1500;
 
@@ -482,7 +501,7 @@ function EnabledCameraRow({
           <LuGripVertical className="size-4" />
         </button>
         <CameraNameLabel camera={camera} />
-        <CameraFriendlyNameEditor
+        <CameraDetailsEditor
           cameraName={camera}
           onConfigChanged={onConfigChanged}
         />
@@ -519,25 +538,91 @@ function CameraEnableSwitch({ cameraName }: CameraEnableSwitchProps) {
   );
 }
 
-type CameraFriendlyNameEditorProps = {
+type CameraDetailsEditorProps = {
   cameraName: string;
   onConfigChanged: () => Promise<unknown>;
 };
 
-function CameraFriendlyNameEditor({
+type CameraDetailsFormValues = {
+  friendlyName: string;
+  webuiUrl: string;
+};
+
+function CameraDetailsEditor({
   cameraName,
   onConfigChanged,
-}: CameraFriendlyNameEditorProps) {
+}: CameraDetailsEditorProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const [open, setOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const currentFriendlyName = config?.cameras?.[cameraName]?.friendly_name;
+  const currentWebuiUrl = config?.cameras?.[cameraName]?.webui_url;
 
-  const onSave = useCallback(
-    async (text: string) => {
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        friendlyName: z.string(),
+        webuiUrl: z.string().refine(
+          (val) => {
+            const trimmed = val.trim();
+            if (!trimmed) return true;
+            try {
+              new URL(trimmed);
+              return true;
+            } catch {
+              return false;
+            }
+          },
+          {
+            message: t("cameraManagement.streams.details.webuiUrlInvalid", {
+              ns: "views/settings",
+            }),
+          },
+        ),
+      }),
+    [t],
+  );
+
+  const form = useForm<CameraDetailsFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      friendlyName: currentFriendlyName ?? "",
+      webuiUrl: currentWebuiUrl ?? "",
+    },
+  });
+
+  // Reset form values from config whenever the dialog is opened.
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        friendlyName: currentFriendlyName ?? "",
+        webuiUrl: currentWebuiUrl ?? "",
+      });
+    }
+  }, [open, currentFriendlyName, currentWebuiUrl, form]);
+
+  const onSubmit = useCallback(
+    async (values: CameraDetailsFormValues) => {
       if (isSaving) return;
+
+      // only send fields the user actually changed
+      const newFriendly = values.friendlyName.trim() || null;
+      const newWebui = values.webuiUrl.trim() || null;
+      const cameraUpdate: Record<string, string | null> = {};
+      if (newFriendly !== (currentFriendlyName ?? null)) {
+        cameraUpdate.friendly_name = newFriendly;
+      }
+      if (newWebui !== (currentWebuiUrl ?? null)) {
+        cameraUpdate.webui_url = newWebui;
+      }
+
+      if (Object.keys(cameraUpdate).length === 0) {
+        setOpen(false);
+        return;
+      }
+
       setIsSaving(true);
 
       try {
@@ -545,9 +630,7 @@ function CameraFriendlyNameEditor({
           requires_restart: 0,
           config_data: {
             cameras: {
-              [cameraName]: {
-                friendly_name: text.trim() || null,
-              },
+              [cameraName]: cameraUpdate,
             },
           },
         });
@@ -573,10 +656,17 @@ function CameraFriendlyNameEditor({
         setIsSaving(false);
       }
     },
-    [cameraName, isSaving, onConfigChanged, t],
+    [
+      cameraName,
+      currentFriendlyName,
+      currentWebuiUrl,
+      isSaving,
+      onConfigChanged,
+      t,
+    ],
   );
 
-  const renameLabel = t("cameraManagement.streams.friendlyName.rename", {
+  const editLabel = t("cameraManagement.streams.details.edit", {
     ns: "views/settings",
   });
 
@@ -588,30 +678,107 @@ function CameraFriendlyNameEditor({
             variant="ghost"
             size="icon"
             className="size-7"
-            aria-label={renameLabel}
+            aria-label={editLabel}
             onClick={() => setOpen(true)}
             disabled={isSaving}
           >
             <LuPencil className="size-3.5" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{renameLabel}</TooltipContent>
+        <TooltipContent>{editLabel}</TooltipContent>
       </Tooltip>
-      <TextEntryDialog
-        open={open}
-        setOpen={setOpen}
-        title={t("cameraManagement.streams.friendlyName.title", {
-          ns: "views/settings",
-        })}
-        description={t("cameraManagement.streams.friendlyName.description", {
-          ns: "views/settings",
-        })}
-        defaultValue={currentFriendlyName ?? ""}
-        placeholder={currentFriendlyName ? undefined : cameraName}
-        allowEmpty
-        isSaving={isSaving}
-        onSave={onSave}
-      />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t("cameraManagement.streams.details.title", {
+                ns: "views/settings",
+              })}
+            </DialogTitle>
+            <DialogDescription>
+              {t("cameraManagement.streams.details.description", {
+                ns: "views/settings",
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="friendlyName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("cameraManagement.streams.details.friendlyNameLabel", {
+                        ns: "views/settings",
+                      })}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder={cameraName}
+                        disabled={isSaving}
+                        autoFocus
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      {t("cameraManagement.streams.details.friendlyNameHelp", {
+                        ns: "views/settings",
+                      })}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="webuiUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("cameraManagement.streams.details.webuiUrlLabel", {
+                        ns: "views/settings",
+                      })}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="https://"
+                        disabled={isSaving}
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      {t("cameraManagement.streams.details.webuiUrlHelp", {
+                        ns: "views/settings",
+                      })}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter className="pt-2">
+                <Button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() => setOpen(false)}
+                >
+                  {t("button.cancel", { ns: "common" })}
+                </Button>
+                <Button variant="select" type="submit" disabled={isSaving}>
+                  {isSaving ? (
+                    <div className="flex flex-row items-center gap-2">
+                      <ActivityIndicator className="size-4" />
+                      <span>{t("button.saving", { ns: "common" })}</span>
+                    </div>
+                  ) : (
+                    t("button.save", { ns: "common" })
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
