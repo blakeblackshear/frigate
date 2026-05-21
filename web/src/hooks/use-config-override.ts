@@ -18,6 +18,7 @@ import {
 } from "@/utils/configUtil";
 import { extractSectionSchema } from "@/hooks/use-config-schema";
 import { applySchemaDefaults } from "@/lib/config-schema";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
 const INTERNAL_FIELD_SUFFIXES = ["enabled_in_config", "raw_mask"];
 
@@ -602,9 +603,13 @@ function getEffectiveGlobalBaseline(
       return normalizeConfigValue(defaults as JsonValue);
     }
   }
-  const cameraSectionValues = Object.keys(config.cameras ?? {}).map((name) =>
-    normalizeConfigValue(getBaseCameraSectionValue(config, name, sectionPath)),
-  );
+  const cameraSectionValues = Object.keys(config.cameras ?? {})
+    .filter((name) => !isReplayCamera(name))
+    .map((name) =>
+      normalizeConfigValue(
+        getBaseCameraSectionValue(config, name, sectionPath),
+      ),
+    );
   return deriveSyntheticGlobalValue(cameraSectionValues, compareFields);
 }
 
@@ -684,7 +689,9 @@ export function useCamerasOverridingSection(
     const sectionMeta = OVERRIDABLE_SECTIONS.find((s) => s.key === sectionPath);
     const compareFields = sectionMeta?.compareFields;
 
-    const cameraNames = Object.keys(config.cameras);
+    const cameraNames = Object.keys(config.cameras).filter(
+      (name) => !isReplayCamera(name),
+    );
     const cameraSectionValues = cameraNames.map((name) =>
       normalizeConfigValue(
         getBaseCameraSectionValue(config, name, sectionPath),

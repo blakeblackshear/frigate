@@ -26,6 +26,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { CameraNameLabel } from "../camera/FriendlyNameLabel";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import { isDesktop, isMobile } from "react-device-detect";
 import { cn } from "@/lib/utils";
 import {
@@ -52,7 +53,9 @@ export default function CreateRoleDialog({
   const { t } = useTranslation(["views/settings"]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const cameras = Object.keys(config.cameras || {});
+  const cameras = Object.keys(config.cameras || {}).filter(
+    (name) => !isReplayCamera(name),
+  );
 
   const existingRoles = Object.keys(config.auth?.roles || {});
 

@@ -1,6 +1,7 @@
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
 /**
  * Returns true if the current user has access to all cameras.
@@ -16,7 +17,7 @@ export function useHasFullCameraAccess() {
   if (!config?.cameras) return false;
 
   const enabledCameraNames = Object.entries(config.cameras)
-    .filter(([, cam]) => cam.enabled_in_config)
+    .filter(([name, cam]) => cam.enabled_in_config && !isReplayCamera(name))
     .map(([name]) => name);
 
   return (

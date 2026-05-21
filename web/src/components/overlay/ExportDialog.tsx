@@ -54,6 +54,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -448,7 +449,9 @@ export function ExportContent({
   );
 
   const cameraActivities = useMemo<CameraActivity[]>(() => {
-    const allCameraIds = Object.keys(config?.cameras ?? {});
+    const allCameraIds = Object.keys(config?.cameras ?? {}).filter(
+      (name) => !isReplayCamera(name),
+    );
     const byCamera = new Map<string, Event[]>();
 
     events?.forEach((event) => {

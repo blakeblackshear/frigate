@@ -637,7 +637,7 @@ export default function Events() {
     }
 
     setStartTime(recording.startTime);
-    const allCameras = reviewFilter?.cameras ?? Object.keys(config.cameras);
+    const allCameras = reviewFilter?.cameras ?? allowedCameras;
 
     return {
       camera: recording.camera,

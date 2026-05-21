@@ -14,6 +14,7 @@ import Konva from "konva";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { useApiHost } from "@/api";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import Heading from "@/components/ui/heading";
 import { isMobile } from "react-device-detect";
 import { cn } from "@/lib/utils";
@@ -67,6 +68,7 @@ export default function Step2StateArea({
         ([name, cam]) =>
           cam.enabled &&
           cam.enabled_in_config &&
+          !isReplayCamera(name) &&
           !selectedCameraNames.includes(name),
       )
       .map(([name]) => ({

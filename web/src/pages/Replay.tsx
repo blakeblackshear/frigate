@@ -378,6 +378,34 @@ export default function Replay() {
                       showTitle
                       showOverrideIndicator={false}
                     />
+                    {config?.face_recognition?.enabled && (
+                      <ConfigSectionTemplate
+                        sectionKey="face_recognition"
+                        level="replay"
+                        cameraName={status.replay_camera ?? undefined}
+                        skipSave
+                        noStickyButtons
+                        requiresRestart={false}
+                        collapsible
+                        defaultCollapsed={false}
+                        showTitle
+                        showOverrideIndicator={false}
+                      />
+                    )}
+                    {config?.lpr?.enabled && (
+                      <ConfigSectionTemplate
+                        sectionKey="lpr"
+                        level="replay"
+                        cameraName={status.replay_camera ?? undefined}
+                        skipSave
+                        noStickyButtons
+                        requiresRestart={false}
+                        collapsible
+                        defaultCollapsed={false}
+                        showTitle
+                        showOverrideIndicator={false}
+                      />
+                    )}
                   </div>
                 )}
               </>

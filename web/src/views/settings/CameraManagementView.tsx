@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { ProfileState } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -87,7 +88,10 @@ export default function CameraManagementView({
   const enabledCameras = useMemo(() => {
     if (config) {
       return Object.keys(config.cameras)
-        .filter((camera) => config.cameras[camera].enabled_in_config)
+        .filter(
+          (camera) =>
+            config.cameras[camera].enabled_in_config && !isReplayCamera(camera),
+        )
         .sort((a, b) => {
           const orderA = config.cameras[a].ui?.order ?? 0;
           const orderB = config.cameras[b].ui?.order ?? 0;
@@ -180,7 +184,11 @@ export default function CameraManagementView({
   const disabledCameras = useMemo(() => {
     if (config) {
       return Object.keys(config.cameras)
-        .filter((camera) => !config.cameras[camera].enabled_in_config)
+        .filter(
+          (camera) =>
+            !config.cameras[camera].enabled_in_config &&
+            !isReplayCamera(camera),
+        )
         .sort();
     }
     return [];
@@ -188,7 +196,9 @@ export default function CameraManagementView({
 
   const allCameras = useMemo(() => {
     if (config) {
-      return Object.keys(config.cameras).sort();
+      return Object.keys(config.cameras)
+        .filter((camera) => !isReplayCamera(camera))
+        .sort();
     }
     return [];
   }, [config]);

@@ -100,6 +100,7 @@ import {
 } from "@/utils/configUtil";
 import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import { ProfileSectionDropdown } from "@/components/settings/ProfileSectionDropdown";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
@@ -661,7 +662,12 @@ export default function Settings() {
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
+      .filter(
+        (conf) =>
+          conf.ui.dashboard &&
+          conf.enabled_in_config &&
+          !isReplayCamera(conf.name),
+      )
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
