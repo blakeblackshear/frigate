@@ -312,6 +312,7 @@ class LlamaCppClient(GenAIClient):
         prompt: str,
         images: list[bytes],
         response_format: Optional[dict] = None,
+        enable_thinking: bool = False,
     ) -> Optional[str]:
         """Submit a request to llama.cpp server."""
         if self.provider is None:
@@ -339,7 +340,7 @@ class LlamaCppClient(GenAIClient):
                 )
 
             # Build request payload with llama.cpp native options
-            payload = {
+            payload: dict[str, Any] = {
                 "model": self.genai_config.model,
                 "messages": [
                     {
@@ -352,6 +353,9 @@ class LlamaCppClient(GenAIClient):
 
             if response_format:
                 payload["response_format"] = response_format
+
+            if self.supports_toggleable_thinking:
+                payload["chat_template_kwargs"] = {"enable_thinking": enable_thinking}
 
             response = requests.post(
                 f"{self.provider}/v1/chat/completions",

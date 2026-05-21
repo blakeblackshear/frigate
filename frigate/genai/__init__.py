@@ -222,8 +222,15 @@ class GenAIClient:
         prompt: str,
         images: list[bytes],
         response_format: Optional[dict] = None,
+        enable_thinking: bool = False,
     ) -> Optional[str]:
-        """Submit a request to the provider."""
+        """Submit a request to the provider.
+
+        ``enable_thinking`` is honored only by providers that report
+        ``supports_toggleable_thinking``. Description-style callers leave it
+        at the default (off) since synthesis tasks don't benefit from
+        reasoning traces.
+        """
         return None
 
     @property

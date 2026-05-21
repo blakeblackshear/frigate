@@ -62,6 +62,7 @@ class GeminiClient(GenAIClient):
         prompt: str,
         images: list[bytes],
         response_format: Optional[dict] = None,
+        enable_thinking: bool = False,
     ) -> Optional[str]:
         """Submit a request to Gemini."""
         contents = [prompt] + [

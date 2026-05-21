@@ -194,6 +194,7 @@ class OllamaClient(GenAIClient):
         prompt: str,
         images: list[bytes],
         response_format: Optional[dict] = None,
+        enable_thinking: bool = False,
     ) -> Optional[str]:
         """Submit a request to Ollama"""
         if self.provider is None:
@@ -210,6 +211,8 @@ class OllamaClient(GenAIClient):
                 schema = response_format.get("json_schema", {}).get("schema")
                 if schema:
                     ollama_options["format"] = self._clean_schema_for_ollama(schema)
+            if self.supports_toggleable_thinking:
+                ollama_options["think"] = enable_thinking
             logger.debug(
                 "Ollama generate request: model=%s, prompt_len=%s, image_count=%s, "
                 "has_format=%s, options=%s",

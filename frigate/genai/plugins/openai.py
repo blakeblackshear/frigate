@@ -61,6 +61,7 @@ class OpenAIClient(GenAIClient):
         prompt: str,
         images: list[bytes],
         response_format: Optional[dict] = None,
+        enable_thinking: bool = False,
     ) -> Optional[str]:
         """Submit a request to OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
