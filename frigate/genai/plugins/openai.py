@@ -188,11 +188,14 @@ class OpenAIClient(GenAIClient):
         messages: list[dict[str, Any]],
         tools: Optional[list[dict[str, Any]]] = None,
         tool_choice: Optional[str] = "auto",
+        enable_thinking: Optional[bool] = None,
     ) -> dict[str, Any]:
         """
         Send chat messages to OpenAI with optional tool definitions.
 
-        Implements function calling/tool usage for OpenAI models.
+        Implements function calling/tool usage for OpenAI models. The OpenAI
+        chat completions API does not expose a per-request thinking toggle,
+        so ``enable_thinking`` is accepted for interface parity and ignored.
         """
         try:
             openai_tool_choice = None
