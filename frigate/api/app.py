@@ -751,7 +751,9 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
                 )
 
                 # detect resize also republishes motion + objects so other
-                # processes pick up the rebuilt masks
+                # processes pick up the rebuilt masks, and fires refresh so
+                # the camera maintainer recycles the camera process to pick
+                # up the new ffmpeg cmd / SHM sizing
                 if field == "detect":
                     cam_cfg = config.cameras.get(camera)
                     if cam_cfg is not None:
@@ -767,6 +769,12 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
                                 CameraConfigUpdateEnum.objects, camera
                             ),
                             cam_cfg.objects,
+                        )
+                        request.app.config_publisher.publish_update(
+                            CameraConfigUpdateTopic(
+                                CameraConfigUpdateEnum.refresh, camera
+                            ),
+                            cam_cfg,
                         )
 
         return JSONResponse(

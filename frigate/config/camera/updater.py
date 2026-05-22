@@ -26,6 +26,7 @@ class CameraConfigUpdateEnum(str, Enum):
     object_genai = "object_genai"
     onvif = "onvif"
     record = "record"
+    refresh = "refresh"  # signals the camera maintainer to recycle the camera process
     remove = "remove"  # for removing a camera
     review = "review"
     review_genai = "review_genai"
@@ -108,7 +109,6 @@ class CameraConfigUpdateSubscriber:
             config.birdseye = updated_config
         elif update_type == CameraConfigUpdateEnum.detect:
             config.detect = updated_config
-            config.recreate_ffmpeg_cmds()
         elif update_type == CameraConfigUpdateEnum.enabled:
             config.enabled = updated_config
         elif update_type == CameraConfigUpdateEnum.object_genai:

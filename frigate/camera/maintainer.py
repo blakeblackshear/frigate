@@ -51,7 +51,7 @@ class CameraMaintainer(threading.Thread):
             [
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.remove,
-                CameraConfigUpdateEnum.detect,
+                CameraConfigUpdateEnum.refresh,
             ],
         )
         self.shm_count = self.__calculate_shm_frame_count()
@@ -281,7 +281,7 @@ class CameraMaintainer(threading.Thread):
                         self.region_grids.pop(camera, None)
                         self.camera_metrics.pop(camera, None)
                         self.ptz_metrics.pop(camera, None)
-                elif update_type == CameraConfigUpdateEnum.detect.name:
+                elif update_type == CameraConfigUpdateEnum.refresh.name:
                     # Recycle replay cameras so detect width/height/fps
                     # propagate through ffmpeg args, SHM sizing, and the
                     # region grid. Regular cameras detect change still
@@ -300,6 +300,10 @@ class CameraMaintainer(threading.Thread):
                             and camera not in self.capture_processes
                         ):
                             continue
+
+                        # rebuild ffmpeg cmds on the shared config so the
+                        # new subprocesses spawn with current args
+                        new_config.recreate_ffmpeg_cmds()
 
                         self.__stop_camera_capture_process(camera)
                         self.__stop_camera_process(camera)
