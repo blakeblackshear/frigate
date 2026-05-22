@@ -1820,7 +1820,8 @@
       "mixedTypesSuggestion": "All detectors must use the same type. Remove existing detectors or select {{type}}."
     },
     "semanticSearch": {
-      "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended."
+      "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended.",
+      "modelSizeIgnoredForProvider": "Model size only applies to the built-in Jina models. This value will be ignored when using a GenAI embedding provider."
     }
   }
 }
