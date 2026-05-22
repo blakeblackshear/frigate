@@ -1091,11 +1091,8 @@ class SharedMemoryFrameManager(FrameManager):
         try:
             required = int(np.prod(shape))
             shm = self.shm_store.get(name)
-            if shm is not None and shm.size < required:
-                # Cached reference points at an older, smaller segment
-                # that was unlinked and recreated at a larger size in a
-                # camera add/remove cycle. Drop the stale ref so we
-                # reopen the current segment.
+            if shm is not None and shm.size != required:
+                # stale cached ref from a same-name recreate — drop and reopen
                 try:
                     shm.close()
                 except Exception:
@@ -1104,12 +1101,8 @@ class SharedMemoryFrameManager(FrameManager):
                 shm = None
             if shm is None:
                 shm = UntrackedSharedMemory(name=name)
-                if shm.size < required:
-                    # Transient mid-recreate state: the OS-level segment
-                    # is still at the previous (smaller) size because the
-                    # maintainer hasn't allocated the new one yet. Don't
-                    # cache it (so the next call re-opens once the
-                    # maintainer has caught up) and skip this frame.
+                if shm.size != required:
+                    # mid-recreate: OS segment doesn't match shape yet; skip
                     try:
                         shm.close()
                     except Exception:
