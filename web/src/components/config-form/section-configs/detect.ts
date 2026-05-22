@@ -11,6 +11,50 @@ const detect: SectionConfigOverrides = {
         condition: (ctx) =>
           ctx.level === "camera" && ctx.formData?.enabled === false,
       },
+      {
+        key: "detect-resolution-not-multiple-of-four",
+        messageKey: "configMessages.detect.resolutionShouldBeMultipleOfFour",
+        severity: "warning",
+        condition: (ctx) => {
+          const width = ctx.formData?.width as number | null | undefined;
+          const height = ctx.formData?.height as number | null | undefined;
+          const isEvenButNotFour = (v: unknown) =>
+            typeof v === "number" && v % 2 === 0 && v % 4 !== 0;
+          return isEvenButNotFour(width) || isEvenButNotFour(height);
+        },
+      },
+      {
+        key: "detect-aspect-ratio-mismatch",
+        messageKey: "configMessages.detect.aspectRatioMismatch",
+        severity: "warning",
+        condition: (ctx) => {
+          const newWidth = ctx.formData?.width as number | null | undefined;
+          const newHeight = ctx.formData?.height as number | null | undefined;
+          if (typeof newWidth !== "number" || typeof newHeight !== "number") {
+            return false;
+          }
+          const saved =
+            ctx.level === "camera"
+              ? ctx.fullCameraConfig?.detect
+              : ctx.fullConfig?.detect;
+          const savedWidth = saved?.width;
+          const savedHeight = saved?.height;
+          if (
+            typeof savedWidth !== "number" ||
+            typeof savedHeight !== "number" ||
+            savedWidth <= 0 ||
+            savedHeight <= 0
+          ) {
+            return false;
+          }
+          if (newWidth === savedWidth && newHeight === savedHeight) {
+            return false;
+          }
+          const newRatio = newWidth / newHeight;
+          const savedRatio = savedWidth / savedHeight;
+          return Math.abs(newRatio - savedRatio) > 0.01;
+        },
+      },
     ],
     fieldMessages: [
       {

@@ -1543,6 +1543,9 @@
       "builtIn": "Built-in Models",
       "genaiProviders": "GenAI Providers"
     },
+    "semanticSearchModelSize": {
+      "notApplicable": "Not applicable for GenAI providers"
+    },
     "review": {
       "title": "Review Settings"
     },
@@ -1791,7 +1794,9 @@
     },
     "detect": {
       "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit.",
-      "disabled": "Object detection is disabled. Snapshots, review items, and enrichments such as face recognition, license plate recognition, and Generative AI will not function."
+      "disabled": "Object detection is disabled. Snapshots, review items, and enrichments such as face recognition, license plate recognition, and Generative AI will not function.",
+      "resolutionShouldBeMultipleOfFour": "For best results, detect width and height should be multiples of 4. Other even values may produce visual artifacts or slight distortion in the detect stream.",
+      "aspectRatioMismatch": "The width and height you've entered don't match the aspect ratio of your current detect resolution. This may produce a stretched or distorted image."
     },
     "objects": {
       "genaiNoDescriptionsProvider": "You must configure a GenAI provider with the 'descriptions' role for descriptions to be generated."
@@ -1820,8 +1825,7 @@
       "mixedTypesSuggestion": "All detectors must use the same type. Remove existing detectors or select {{type}}."
     },
     "semanticSearch": {
-      "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended.",
-      "modelSizeIgnoredForProvider": "Model size only applies to the built-in Jina models. This value will be ignored when using a GenAI embedding provider."
+      "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended."
     }
   }
 }

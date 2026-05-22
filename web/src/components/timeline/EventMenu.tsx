@@ -12,6 +12,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Event } from "@/types/event";
+import { REVIEW_PADDING } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useState } from "react";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -58,8 +59,8 @@ export default function EventMenu({
       axios
         .post("debug_replay/start", {
           camera: event.camera,
-          start_time: event.start_time,
-          end_time: event.end_time,
+          start_time: (event.start_time ?? 0) - REVIEW_PADDING,
+          end_time: (event.end_time ?? Date.now() / 1000) + REVIEW_PADDING,
         })
         .then((response) => {
           if (response.status === 202 || response.status === 200) {

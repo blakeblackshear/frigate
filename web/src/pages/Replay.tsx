@@ -27,7 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { PlatformAwareSheet } from "@/components/overlay/dialog/PlatformAwareDialog";
+import { DebugReplayConfigSheet } from "@/components/overlay/DebugReplayConfigSheet";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
@@ -40,16 +40,14 @@ import { Progress } from "@/components/ui/progress";
 import { ObjectType } from "@/types/ws";
 import { useJobStatus } from "@/api/ws";
 import WsMessageFeed from "@/components/ws/WsMessageFeed";
-import { ConfigSectionTemplate } from "@/components/config-form/sections/ConfigSectionTemplate";
 
-import { LuExternalLink, LuInfo, LuSettings } from "react-icons/lu";
+import { LuExternalLink, LuInfo } from "react-icons/lu";
 import { LuSquare } from "react-icons/lu";
 import { MdReplay } from "react-icons/md";
 import { isDesktop, isMobile } from "react-device-detect";
 import Logo from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-import { useConfigSchema } from "@/hooks/use-config-schema";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
@@ -125,7 +123,6 @@ export default function Replay() {
   });
   const { payload: replayJob } =
     useJobStatus<DebugReplayJobResults>("debug_replay");
-  const configSchema = useConfigSchema();
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Refresh status immediately on mount to avoid showing "no session" briefly
@@ -139,7 +136,6 @@ export default function Replay() {
 
   const [options, setOptions] = useState<DebugOptions>(DEFAULT_OPTIONS);
   const [isStopping, setIsStopping] = useState(false);
-  const [configDialogOpen, setConfigDialogOpen] = useState(false);
 
   const searchParams = useMemo(() => {
     const params = new URLSearchParams();
@@ -327,103 +323,8 @@ export default function Replay() {
           )}
         </Button>
         <div className="flex items-center gap-2">
-          <PlatformAwareSheet
-            trigger={
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <LuSettings className="size-4" />
-                <span className="hidden md:inline">
-                  {t("page.configuration")}
-                </span>
-              </Button>
-            }
-            title={t("page.configuration")}
-            titleClassName="text-lg font-semibold"
-            contentClassName="scrollbar-container flex flex-col gap-0 overflow-y-auto px-6 pb-6 sm:max-w-xl md:max-w-2xl xl:max-w-3xl"
-            content={
-              <>
-                <p className="mb-5 text-sm text-muted-foreground">
-                  {t("page.configurationDesc")}
-                </p>
-                {configSchema == null ? (
-                  <div className="flex h-40 items-center justify-center">
-                    <ActivityIndicator />
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <ConfigSectionTemplate
-                      sectionKey="detect"
-                      level="replay"
-                      cameraName={status.replay_camera ?? undefined}
-                      skipSave
-                      noStickyButtons
-                      requiresRestart={false}
-                      collapsible
-                      defaultCollapsed={false}
-                      showTitle
-                      showOverrideIndicator={false}
-                    />
-                    <ConfigSectionTemplate
-                      sectionKey="motion"
-                      level="replay"
-                      cameraName={status.replay_camera ?? undefined}
-                      skipSave
-                      noStickyButtons
-                      requiresRestart={false}
-                      collapsible
-                      defaultCollapsed={false}
-                      showTitle
-                      showOverrideIndicator={false}
-                    />
-                    <ConfigSectionTemplate
-                      sectionKey="objects"
-                      level="replay"
-                      cameraName={status.replay_camera ?? undefined}
-                      skipSave
-                      noStickyButtons
-                      requiresRestart={false}
-                      collapsible
-                      defaultCollapsed={false}
-                      showTitle
-                      showOverrideIndicator={false}
-                    />
-                    {config?.face_recognition?.enabled && (
-                      <ConfigSectionTemplate
-                        sectionKey="face_recognition"
-                        level="replay"
-                        cameraName={status.replay_camera ?? undefined}
-                        skipSave
-                        noStickyButtons
-                        requiresRestart={false}
-                        collapsible
-                        defaultCollapsed={false}
-                        showTitle
-                        showOverrideIndicator={false}
-                      />
-                    )}
-                    {config?.lpr?.enabled && (
-                      <ConfigSectionTemplate
-                        sectionKey="lpr"
-                        level="replay"
-                        cameraName={status.replay_camera ?? undefined}
-                        skipSave
-                        noStickyButtons
-                        requiresRestart={false}
-                        collapsible
-                        defaultCollapsed={false}
-                        showTitle
-                        showOverrideIndicator={false}
-                      />
-                    )}
-                  </div>
-                )}
-              </>
-            }
-            open={configDialogOpen}
-            onOpenChange={setConfigDialogOpen}
+          <DebugReplayConfigSheet
+            replayCamera={status.replay_camera ?? undefined}
           />
 
           <AlertDialog>

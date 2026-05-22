@@ -816,6 +816,17 @@ def apply_section_update(camera_config, section: str, update: dict) -> Optional[
                     **filt.model_dump(exclude_unset=True, exclude={"mask", "raw_mask"}),
                 )
 
+            # Regenerate zone contours and per-zone filter masks at the new
+            # frame_shape so zone outlines and membership stay relative
+            for zone in camera_config.zones.values():
+                if zone.filters:
+                    for zone_obj_name, zone_filter in zone.filters.items():
+                        zone.filters[zone_obj_name] = RuntimeFilterConfig(
+                            frame_shape=new_frame_shape,
+                            **zone_filter.model_dump(exclude_unset=True),
+                        )
+                zone.generate_contour(new_frame_shape)
+
         else:
             merged = deep_merge(current.model_dump(), update, override=True)
             setattr(camera_config, section, current.__class__.model_validate(merged))
