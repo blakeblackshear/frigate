@@ -167,8 +167,9 @@ class DetectorRunner(FrigateProcess):
 
             # detect and send the output
             self.start_time.value = datetime.datetime.now().timestamp()
+            mono_start = time.monotonic()
             detections = object_detector.detect_raw(input_frame)
-            duration = datetime.datetime.now().timestamp() - self.start_time.value
+            duration = time.monotonic() - mono_start
             frame_manager.close(connection_id)
 
             if connection_id not in self.outputs:

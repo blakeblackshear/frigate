@@ -56,6 +56,7 @@ Only one replay session can be active at a time. If a session is already running
 - The replay will not always produce identical results to the original run. Different frames may be selected on replay, which can change detections and tracking.
 - Motion detection depends on the exact frames used; small frame shifts can change motion regions and therefore what gets passed to the detector.
 - Object detection is not fully deterministic: models and post-processing can yield slightly different results across runs.
+- In cases where a detection is short and a replay may only be a small number of frames, it is recommended to manually add some padding before and after the detection so that the motion and object detectors have time to settle into the scene. Rather than starting Debug Replay from Explore, navigate to History for your camera, choose Debug Replay from the Actions menu, and click the "From Timeline" or "Custom" option.
 
 Treat the replay as a close approximation rather than an exact reproduction. Run multiple loops and examine the debug overlays and logs to understand the behavior.
 

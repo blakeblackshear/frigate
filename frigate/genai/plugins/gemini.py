@@ -1,5 +1,7 @@
 """Gemini Provider for Frigate AI."""
 
+import base64
+import binascii
 import json
 import logging
 from typing import Any, AsyncGenerator, Optional
@@ -12,6 +14,27 @@ from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
 
 logger = logging.getLogger(__name__)
+
+
+def _decode_thought_signature(value: Any) -> Optional[bytes]:
+    """Decode a base64-encoded thought_signature carried across conversation turns."""
+    if not value:
+        return None
+    if isinstance(value, bytes):
+        return value
+    if isinstance(value, str):
+        try:
+            return base64.b64decode(value)
+        except (binascii.Error, ValueError):
+            return None
+    return None
+
+
+def _encode_thought_signature(signature: Optional[bytes]) -> Optional[str]:
+    """Encode bytes thought_signature as base64 so it survives JSON-friendly transport."""
+    if not signature:
+        return None
+    return base64.b64encode(signature).decode("ascii")
 
 
 def _stats_from_gemini_usage(usage: Any) -> Optional[dict[str, Any]]:
@@ -169,11 +192,17 @@ class GeminiClient(GenAIClient):
                         if not isinstance(tc_args, dict):
                             tc_args = {}
                         if tc_name:
-                            parts.append(
-                                types.Part.from_function_call(
-                                    name=tc_name, args=tc_args
-                                )
+                            fc_part = types.Part.from_function_call(
+                                name=tc_name, args=tc_args
                             )
+                            # Thinking-capable Gemini models require the original
+                            # thought_signature to be echoed back on functionCall
+                            # parts after a tool response, or the next request
+                            # fails with INVALID_ARGUMENT.
+                            sig = _decode_thought_signature(tc.get("thought_signature"))
+                            if sig:
+                                fc_part.thought_signature = sig
+                            parts.append(fc_part)
                     if not parts:
                         parts.append(types.Part.from_text(text=" "))
                     gemini_messages.append(types.Content(role="model", parts=parts))
@@ -310,6 +339,9 @@ class GeminiClient(GenAIClient):
                                 "id": part.function_call.name or "",
                                 "name": part.function_call.name or "",
                                 "arguments": arguments,
+                                "thought_signature": _encode_thought_signature(
+                                    getattr(part, "thought_signature", None)
+                                ),
                             }
                         )
 
@@ -418,11 +450,17 @@ class GeminiClient(GenAIClient):
                         if not isinstance(tc_args, dict):
                             tc_args = {}
                         if tc_name:
-                            parts.append(
-                                types.Part.from_function_call(
-                                    name=tc_name, args=tc_args
-                                )
+                            fc_part = types.Part.from_function_call(
+                                name=tc_name, args=tc_args
                             )
+                            # Thinking-capable Gemini models require the original
+                            # thought_signature to be echoed back on functionCall
+                            # parts after a tool response, or the next request
+                            # fails with INVALID_ARGUMENT.
+                            sig = _decode_thought_signature(tc.get("thought_signature"))
+                            if sig:
+                                fc_part.thought_signature = sig
+                            parts.append(fc_part)
                     if not parts:
                         parts.append(types.Part.from_text(text=" "))
                     gemini_messages.append(types.Content(role="model", parts=parts))
@@ -588,6 +626,7 @@ class GeminiClient(GenAIClient):
                                     "id": tool_call_id,
                                     "name": tool_call_name,
                                     "arguments": "",
+                                    "thought_signature": None,
                                 }
 
                             # Accumulate arguments
@@ -597,6 +636,13 @@ class GeminiClient(GenAIClient):
                                     if isinstance(arguments, dict)
                                     else str(arguments)
                                 )
+
+                            # Capture latest thought_signature for this call
+                            chunk_sig = getattr(part, "thought_signature", None)
+                            if chunk_sig:
+                                tool_calls_by_index[found_index][
+                                    "thought_signature"
+                                ] = chunk_sig
 
             # Build final message
             full_content = "".join(content_parts).strip() or None
@@ -618,6 +664,9 @@ class GeminiClient(GenAIClient):
                             "id": tc["id"],
                             "name": tc["name"],
                             "arguments": parsed_args,
+                            "thought_signature": _encode_thought_signature(
+                                tc.get("thought_signature")
+                            ),
                         }
                     )
                 finish_reason = "tool_calls"

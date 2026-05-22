@@ -29,6 +29,22 @@ const semanticSearch: SectionConfigOverrides = {
           ctx.formData?.model === "jinav2" &&
           ctx.formData?.model_size === "small",
       },
+      {
+        key: "model-size-ignored-for-provider",
+        field: "model_size",
+        messageKey: "configMessages.semanticSearch.modelSizeIgnoredForProvider",
+        severity: "info",
+        position: "after",
+        condition: (ctx) => {
+          const model = ctx.formData?.model;
+          return (
+            typeof model === "string" &&
+            model !== "" &&
+            model !== "jinav1" &&
+            model !== "jinav2"
+          );
+        },
+      },
     ],
     uiSchema: {
       model: {

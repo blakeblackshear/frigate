@@ -86,6 +86,7 @@ import type {
 } from "../section-configs/types";
 import { useConfigMessages } from "@/hooks/use-config-messages";
 import { ConfigMessageBanner } from "../ConfigMessageBanner";
+import { FieldMessagesContext } from "../FieldMessagesContext";
 
 export interface SectionConfig {
   /** Field ordering within the section */
@@ -627,44 +628,6 @@ export function ConfigSection({
     messageContext,
   );
 
-  // Merge field-level conditional messages into uiSchema
-  const effectiveUiSchema = useMemo(() => {
-    if (activeFieldMessages.length === 0) return sectionConfig.uiSchema;
-    const merged = { ...(sectionConfig.uiSchema ?? {}) };
-    for (const msg of activeFieldMessages) {
-      const segments = msg.field.split(".");
-      // Navigate to the nested uiSchema node, shallow-cloning along the way
-      let node = merged;
-      for (let i = 0; i < segments.length - 1; i++) {
-        const seg = segments[i];
-        node[seg] = { ...(node[seg] as Record<string, unknown>) };
-        node = node[seg] as Record<string, unknown>;
-      }
-      const leafKey = segments[segments.length - 1];
-      const existing = node[leafKey] as Record<string, unknown> | undefined;
-      const existingMessages = ((existing?.["ui:messages"] as unknown[]) ??
-        []) as Array<{
-        key: string;
-        messageKey: string;
-        severity: string;
-        position?: string;
-      }>;
-      node[leafKey] = {
-        ...existing,
-        "ui:messages": [
-          ...existingMessages,
-          {
-            key: msg.key,
-            messageKey: msg.messageKey,
-            severity: msg.severity,
-            position: msg.position ?? "before",
-          },
-        ],
-      };
-    }
-    return merged;
-  }, [sectionConfig.uiSchema, activeFieldMessages]);
-
   const currentOverrides = useMemo(() => {
     if (!currentFormData || typeof currentFormData !== "object") {
       return undefined;
@@ -1034,59 +997,61 @@ export function ConfigSection({
   const sectionContent = (
     <div className="space-y-6">
       <ConfigMessageBanner messages={activeMessages} />
-      <ConfigForm
-        key={formKey}
-        schema={modifiedSchema}
-        formData={currentFormData}
-        onChange={handleChange}
-        onValidationChange={setHasValidationErrors}
-        fieldOrder={sectionConfig.fieldOrder}
-        fieldGroups={sectionConfig.fieldGroups}
-        hiddenFields={effectiveHiddenFields}
-        advancedFields={sectionConfig.advancedFields}
-        liveValidate={sectionConfig.liveValidate}
-        uiSchema={effectiveUiSchema}
-        disabled={disabled || isSaving}
-        readonly={readonly}
-        showSubmit={false}
-        i18nNamespace={configNamespace}
-        customValidate={customValidate}
-        formContext={{
-          level: effectiveLevel,
-          cameraName,
-          globalValue,
-          cameraValue,
-          hasChanges,
-          extraHasChanges,
-          setExtraHasChanges,
-          overrides: uiOverrides as JsonValue | undefined,
-          formData: currentFormData as ConfigSectionData,
-          baselineFormData: effectiveBaselineFormData as ConfigSectionData,
-          pendingDataBySection,
-          onPendingDataChange,
-          onFormDataChange: (data: ConfigSectionData) => handleChange(data),
-          // For widgets that need access to full camera config (e.g., zone names)
-          fullCameraConfig:
-            effectiveLevel === "camera" && cameraName
-              ? config?.cameras?.[cameraName]
-              : undefined,
-          fullConfig: config,
-          // When rendering camera-level sections, provide the section path so
-          // field templates can look up keys under the `config/cameras` namespace
-          // When using a consolidated global namespace, keys are nested
-          // under the section name (e.g., `audio.label`) so provide the
-          // section prefix to templates so they can attempt `${section}.${field}` lookups.
-          sectionI18nPrefix: sectionPath,
-          t,
-          renderers: wrappedRenderers,
-          sectionDocs: sectionConfig.sectionDocs,
-          fieldDocs: sectionConfig.fieldDocs,
-          hiddenFields: effectiveHiddenFields,
-          restartRequired: sectionConfig.restartRequired,
-          requiresRestart,
-          isProfile: !!profileName,
-        }}
-      />
+      <FieldMessagesContext.Provider value={activeFieldMessages}>
+        <ConfigForm
+          key={formKey}
+          schema={modifiedSchema}
+          formData={currentFormData}
+          onChange={handleChange}
+          onValidationChange={setHasValidationErrors}
+          fieldOrder={sectionConfig.fieldOrder}
+          fieldGroups={sectionConfig.fieldGroups}
+          hiddenFields={effectiveHiddenFields}
+          advancedFields={sectionConfig.advancedFields}
+          liveValidate={sectionConfig.liveValidate}
+          uiSchema={sectionConfig.uiSchema}
+          disabled={disabled || isSaving}
+          readonly={readonly}
+          showSubmit={false}
+          i18nNamespace={configNamespace}
+          customValidate={customValidate}
+          formContext={{
+            level: effectiveLevel,
+            cameraName,
+            globalValue,
+            cameraValue,
+            hasChanges,
+            extraHasChanges,
+            setExtraHasChanges,
+            overrides: uiOverrides as JsonValue | undefined,
+            formData: currentFormData as ConfigSectionData,
+            baselineFormData: effectiveBaselineFormData as ConfigSectionData,
+            pendingDataBySection,
+            onPendingDataChange,
+            onFormDataChange: (data: ConfigSectionData) => handleChange(data),
+            // For widgets that need access to full camera config (e.g., zone names)
+            fullCameraConfig:
+              effectiveLevel === "camera" && cameraName
+                ? config?.cameras?.[cameraName]
+                : undefined,
+            fullConfig: config,
+            // When rendering camera-level sections, provide the section path so
+            // field templates can look up keys under the `config/cameras` namespace
+            // When using a consolidated global namespace, keys are nested
+            // under the section name (e.g., `audio.label`) so provide the
+            // section prefix to templates so they can attempt `${section}.${field}` lookups.
+            sectionI18nPrefix: sectionPath,
+            t,
+            renderers: wrappedRenderers,
+            sectionDocs: sectionConfig.sectionDocs,
+            fieldDocs: sectionConfig.fieldDocs,
+            hiddenFields: effectiveHiddenFields,
+            restartRequired: sectionConfig.restartRequired,
+            requiresRestart,
+            isProfile: !!profileName,
+          }}
+        />
+      </FieldMessagesContext.Provider>
 
       {!embedded && (
         <div

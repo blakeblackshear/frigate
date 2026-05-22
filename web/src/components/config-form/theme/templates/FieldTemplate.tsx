@@ -5,8 +5,9 @@ import {
   getUiOptions,
   ADDITIONAL_PROPERTY_FLAG,
 } from "@rjsf/utils";
-import { ComponentType, ReactNode } from "react";
+import { ComponentType, ReactNode, useContext } from "react";
 import { isValidElement } from "react";
+import { FieldMessagesContext } from "../../FieldMessagesContext";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -95,6 +96,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
     "views/settings",
   ]);
   const { getLocaleDocUrl } = useDocDomain();
+  const allFieldMessages = useContext(FieldMessagesContext);
 
   if (hidden) {
     return <div className="hidden">{children}</div>;
@@ -384,21 +386,15 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const beforeContent = renderCustom(beforeSpec);
   const afterContent = renderCustom(afterSpec);
 
-  // Render conditional field messages from ui:messages
-  const fieldMessageSpecs = uiSchema?.["ui:messages"] as
-    | Array<{
-        key: string;
-        messageKey: string;
-        severity: string;
-        position?: string;
-      }>
-    | undefined;
-  const beforeMessages = fieldMessageSpecs?.filter(
+  // Read field-level conditional messages from FieldMessagesContext
+  const fieldPathStr = pathSegments.join(".");
+  const fieldMessageSpecs = allFieldMessages.filter(
+    (m) => m.field === fieldPathStr,
+  );
+  const beforeMessages = fieldMessageSpecs.filter(
     (m) => (m.position ?? "before") === "before",
   );
-  const afterMessages = fieldMessageSpecs?.filter(
-    (m) => m.position === "after",
-  );
+  const afterMessages = fieldMessageSpecs.filter((m) => m.position === "after");
   const beforeMessagesContent =
     beforeMessages && beforeMessages.length > 0 ? (
       <div className="space-y-2">

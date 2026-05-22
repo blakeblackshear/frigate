@@ -69,6 +69,14 @@ def build_assistant_message_for_conversation(
                     "name": tc["name"],
                     "arguments": json.dumps(tc.get("arguments") or {}),
                 },
+                # Gemini-only: opaque signature that must be echoed back on
+                # the same functionCall part in the next turn. Other providers
+                # do not set or read this.
+                **(
+                    {"thought_signature": tc["thought_signature"]}
+                    if tc.get("thought_signature")
+                    else {}
+                ),
             }
             for tc in tool_calls_raw
         ]

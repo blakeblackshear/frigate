@@ -484,11 +484,15 @@
       "reorderHandle": "Drag to reorder",
       "saving": "Saving…",
       "saved": "Saved",
-      "friendlyName": {
-        "edit": "Edit camera display name",
-        "title": "Edit Display Name",
-        "description": "Set the friendly name shown for this camera throughout the Frigate UI. Leave blank to use the camera ID.",
-        "rename": "Rename"
+      "details": {
+        "edit": "Edit camera details",
+        "title": "Edit Camera Details",
+        "description": "Update the display name and external URL used for this camera throughout the Frigate UI.",
+        "friendlyNameLabel": "Display Name",
+        "friendlyNameHelp": "Friendly name shown for this camera throughout the Frigate UI. Leave blank to use the camera ID.",
+        "webuiUrlLabel": "Camera Web UI URL",
+        "webuiUrlHelp": "URL to visit the camera's web UI directly from the Debug view. Leave blank to disable the link.",
+        "webuiUrlInvalid": "Must be a valid URL (e.g., https://example.com)."
       }
     },
     "cameraConfig": {
@@ -1816,7 +1820,8 @@
       "mixedTypesSuggestion": "All detectors must use the same type. Remove existing detectors or select {{type}}."
     },
     "semanticSearch": {
-      "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended."
+      "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended.",
+      "modelSizeIgnoredForProvider": "Model size only applies to the built-in Jina models. This value will be ignored when using a GenAI embedding provider."
     }
   }
 }

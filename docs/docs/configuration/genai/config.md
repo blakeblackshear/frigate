@@ -49,15 +49,14 @@ You should have at least 8 GB of RAM available (or VRAM if running on GPU) to ru
 
 ### Model Types: Instruct vs Thinking
 
-Most vision-language models are available as **instruct** models, which are fine-tuned to follow instructions and respond concisely to prompts. However, some models (such as certain Qwen-VL or minigpt variants) offer both **instruct** and **thinking** versions.
+Vision-language models come in **instruct** variants (fine-tuned to follow instructions and respond concisely), **thinking** variants (fine-tuned for free-form, speculative reasoning), and **hybrid** variants that support both modes per request. Most modern vision-language models are hybrid.
 
-- **Instruct models** are always recommended for use with Frigate. These models generate direct, relevant, actionable descriptions that best fit Frigate's object and event summary use case.
-- **Reasoning / Thinking models** are fine-tuned for more free-form, open-ended, and speculative outputs, which are typically not concise and may not provide the practical summaries Frigate expects. For this reason, Frigate does **not** recommend or support using thinking models.
+Frigate manages reasoning per task automatically:
 
-Some models are labeled as **hybrid** (capable of both thinking and instruct tasks). In these cases, it is recommended to disable reasoning / thinking, which is generally model specific (see your models documentation).
+- **Description tasks** (object descriptions, review descriptions, review summaries) are synthesis-only and benefit from concise, direct output, so Frigate disables thinking for these calls when the model exposes a per-request toggle.
+- **Chat** lets you toggle thinking on or off from the composer when the configured model supports it.
 
-**Recommendation:**
-Always select the `-instruct` or documented instruct/tagged variant of any model you use in your Frigate configuration. If in doubt, refer to your model provider's documentation or model library for guidance on the correct model variant to use.
+You can use a pure instruct, hybrid, or thinking-capable model with Frigate — no extra configuration is required to disable thinking for descriptions.
 
 ### llama.cpp
 
