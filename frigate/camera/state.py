@@ -304,14 +304,15 @@ class CameraState:
     def on(self, event_type: str, callback: Callable[..., Any]) -> None:
         self.callbacks[event_type].append(callback)
 
-    def update(
-        self,
-        frame_name: str,
-        frame_time: float,
-        current_detections: dict[str, dict[str, Any]],
-        motion_boxes: list[tuple[int, int, int, int]],
-        regions: list[tuple[int, int, int, int]],
-    ) -> None:
+    def _discard_stale_resolution_state(
+        self, current_detections: dict[str, dict[str, Any]]
+    ) -> bool:
+        """Drop tracked state when the camera's detect resolution has
+        changed, and signal the caller to skip this batch if it contains
+        out-of-bounds boxes from the pre-recycle detect process.
+
+        Returns True when the batch should be skipped entirely.
+        """
         # detect resolution changed — drop tracked state so old-grid
         # boxes don't leak through end-callbacks
         current_shape = self.camera_config.frame_shape_yuv
@@ -335,7 +336,20 @@ class CameraState:
                     logger.debug(
                         f"{self.name}: dropping stale-resolution detection batch (box {box} exceeds {detect.width}x{detect.height})"
                     )
-                    return
+                    return True
+
+        return False
+
+    def update(
+        self,
+        frame_name: str,
+        frame_time: float,
+        current_detections: dict[str, dict[str, Any]],
+        motion_boxes: list[tuple[int, int, int, int]],
+        regions: list[tuple[int, int, int, int]],
+    ) -> None:
+        if self._discard_stale_resolution_state(current_detections):
+            return
 
         current_frame = self.frame_manager.get(
             frame_name, self.camera_config.frame_shape_yuv
