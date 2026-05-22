@@ -108,6 +108,7 @@ class CameraConfigUpdateSubscriber:
             config.birdseye = updated_config
         elif update_type == CameraConfigUpdateEnum.detect:
             config.detect = updated_config
+            config.recreate_ffmpeg_cmds()
         elif update_type == CameraConfigUpdateEnum.enabled:
             config.enabled = updated_config
         elif update_type == CameraConfigUpdateEnum.object_genai:
