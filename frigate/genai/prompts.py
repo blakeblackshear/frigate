@@ -518,16 +518,21 @@ def get_tool_definitions(
             "function": {
                 "name": "get_live_context",
                 "description": (
-                    "Get the current live image and detection information for a camera: objects being tracked, "
+                    "Get the current live image and detection information for a single camera: objects being tracked, "
                     "zones, timestamps. Use this to understand what is visible in the live view. "
-                    "Call this when answering questions about what is happening right now on a specific camera."
+                    "Call this when answering questions about what is happening right now on a specific camera. "
+                    "Operates on one camera at a time; call the tool again for each additional camera. "
+                    "Wildcards and empty values are not accepted."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "camera": {
                             "type": "string",
-                            "description": "Camera name to get live context for.",
+                            "description": (
+                                "Exact name of a single camera to get live context for. "
+                                "Wildcards (e.g. '*', 'all') and empty strings are not accepted."
+                            ),
                         },
                     },
                     "required": ["camera"],

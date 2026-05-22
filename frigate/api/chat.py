@@ -733,7 +733,14 @@ async def _execute_tool_internal(
                 "Arguments: %s",
                 json.dumps(arguments),
             )
-            return {"error": "Camera parameter is required"}
+            return {
+                "error": (
+                    "get_live_context requires a single camera name; "
+                    "wildcards and empty values are not supported. "
+                    "Call this tool once per camera."
+                ),
+                "available_cameras": allowed_cameras,
+            }
         return await _execute_get_live_context(request, camera, allowed_cameras)
     elif tool_name == "start_camera_watch":
         return await _execute_start_camera_watch(request, arguments)
