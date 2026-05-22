@@ -478,7 +478,7 @@ def get_intel_gpu_stats(
         overall_pct = min(100.0, compute_pct + dec_pct)
 
         entry: dict[str, Any] = {
-            "name": names.get(pdev) or f"Intel GPU {pdev}",
+            "name": names.get(pdev) or "Intel iGPU",
             "vendor": "intel",
             "gpu": f"{round(overall_pct, 2)}%",
             "mem": "-%",
