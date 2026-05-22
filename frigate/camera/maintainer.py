@@ -14,6 +14,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
+from frigate.const import REPLAY_CAMERA_PREFIX
 from frigate.models import Regions
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
@@ -50,6 +51,7 @@ class CameraMaintainer(threading.Thread):
             [
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.remove,
+                CameraConfigUpdateEnum.detect,
             ],
         )
         self.shm_count = self.__calculate_shm_frame_count()
@@ -279,6 +281,34 @@ class CameraMaintainer(threading.Thread):
                         self.region_grids.pop(camera, None)
                         self.camera_metrics.pop(camera, None)
                         self.ptz_metrics.pop(camera, None)
+                elif update_type == CameraConfigUpdateEnum.detect.name:
+                    # Recycle replay cameras so detect width/height/fps
+                    # propagate through ffmpeg args, SHM sizing, and the
+                    # region grid. Regular cameras detect change still
+                    # requires a full restart.
+                    for camera in updated_cameras:
+                        if not camera.startswith(REPLAY_CAMERA_PREFIX):
+                            continue
+
+                        new_config = self.update_subscriber.camera_configs.get(camera)
+                        if new_config is None:
+                            # remove arrived in the same batch
+                            continue
+
+                        if (
+                            camera not in self.camera_processes
+                            and camera not in self.capture_processes
+                        ):
+                            continue
+
+                        self.__stop_camera_capture_process(camera)
+                        self.__stop_camera_process(camera)
+                        self.__unlink_camera_frame_slots(camera)
+                        self.capture_processes.pop(camera, None)
+                        self.camera_processes.pop(camera, None)
+
+                        self.__start_camera_processor(camera, new_config, runtime=True)
+                        self.__start_camera_capture(camera, new_config, runtime=True)
 
         # ensure the capture processes are done
         for camera in self.capture_processes.keys():
