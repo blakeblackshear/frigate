@@ -770,6 +770,13 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
                             ),
                             cam_cfg.objects,
                         )
+                        if cam_cfg.zones:
+                            request.app.config_publisher.publish_update(
+                                CameraConfigUpdateTopic(
+                                    CameraConfigUpdateEnum.zones, camera
+                                ),
+                                cam_cfg.zones,
+                            )
                         request.app.config_publisher.publish_update(
                             CameraConfigUpdateTopic(
                                 CameraConfigUpdateEnum.refresh, camera
