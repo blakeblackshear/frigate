@@ -229,7 +229,12 @@ export function buildOverrides(
 
     const result: JsonObject = {};
     for (const [key, value] of Object.entries(currentObj)) {
-      if (value === undefined && baseObj && baseObj[key] !== undefined) {
+      if (
+        (value === undefined || value === null) &&
+        baseObj &&
+        baseObj[key] !== undefined &&
+        baseObj[key] !== null
+      ) {
         result[key] = "";
         continue;
       }
