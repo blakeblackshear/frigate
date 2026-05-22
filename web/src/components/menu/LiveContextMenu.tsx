@@ -588,7 +588,6 @@ export default function LiveContextMenu({
         open={customDialogOpen}
         onOpenChange={setCustomDialogOpen}
         onConfirm={(minutes) => sendNotificationSuspend(minutes)}
-        config={config}
       />
     </div>
   );

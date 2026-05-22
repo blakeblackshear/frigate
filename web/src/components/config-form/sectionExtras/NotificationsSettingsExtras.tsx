@@ -740,9 +740,13 @@ export function CameraNotificationSwitch({
   }, [notificationSuspendUntil, notificationState]);
 
   const [customDialogOpen, setCustomDialogOpen] = useState(false);
+  // Doesn't actually represent the state of the Select
+  // Workaround for CustomSuspensionDialog (explained below at setSelectValue call site).
+  const [selectValue, setSelectValue] = useState<string>("");
 
   const handleSuspend = (duration: string) => {
     if (duration === "custom") {
+      setSelectValue("custom");
       setCustomDialogOpen(true);
       return;
     }
@@ -818,7 +822,7 @@ export function CameraNotificationSwitch({
       </div>
 
       {!isSuspended ? (
-        <Select onValueChange={handleSuspend}>
+        <Select value={selectValue} onValueChange={handleSuspend}>
           <SelectTrigger className="w-auto">
             <SelectValue placeholder={t("notification.suspendTime.suspend")} />
           </SelectTrigger>
@@ -861,9 +865,15 @@ export function CameraNotificationSwitch({
 
       <CustomSuspensionDialog
         open={customDialogOpen}
-        onOpenChange={setCustomDialogOpen}
+        onOpenChange={(open) => {
+          setCustomDialogOpen(open);
+          // Radix treats `undefined` as "uncontrolled", which keeps the last
+          // internal selection. This results in an option "Suspend for custom time..." still
+          // being selected if the CustomSuspensionDialog is closed without applying the suspension
+          // So we explicitly set "" on CustomSuspensionDialog closure
+          if (!open) setSelectValue("");
+        }}
         onConfirm={handleCustomSuspend}
-        config={config}
       />
     </div>
   );

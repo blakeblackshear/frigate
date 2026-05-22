@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isDesktop } from "react-device-detect";
 import { FaCalendarAlt } from "react-icons/fa";
@@ -20,108 +20,70 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
-import { FrigateConfig } from "@/types/frigateConfig";
-import { getUTCOffset } from "@/utils/dateUtil";
 
 type CustomSuspensionDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (minutes: number) => void;
-  config?: FrigateConfig;
 };
+
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
+function pad(n: number): string {
+  return n.toString().padStart(2, "0");
+}
+
+function isValidDate(d: Date): boolean {
+  return !Number.isNaN(d.getTime());
+}
+
+function parsePositive(value: string): number {
+  const n = Number.parseInt(value, 10);
+  if (Number.isNaN(n)) return 0;
+  return Math.max(0, n);
+}
+
+type Tabs = "duration" | "untilTime";
 
 export default function CustomSuspensionDialog({
   open,
   onOpenChange,
   onConfirm,
-  config,
 }: CustomSuspensionDialogProps) {
   const { t } = useTranslation(["views/settings"]);
 
-  const [tab, setTab] = useState<"duration" | "untilTime">("duration");
-
-  // duration tab state
+  const [tab, setTab] = useState<Tabs>("duration");
   const [hours, setHours] = useState<number>(1);
   const [minutes, setMinutes] = useState<number>(0);
-
-  // until-time tab state — epoch seconds in UI-timezone-adjusted frame,
-  // matching the pattern used by CustomTimeSelector.
-  const timezoneOffset = useMemo(
-    () =>
-      config?.ui.timezone
-        ? Math.round(getUTCOffset(new Date(), config.ui.timezone))
-        : undefined,
-    [config?.ui.timezone],
+  const [until, setUntil] = useState<Date>(
+    () => new Date(Date.now() + ONE_HOUR_MS),
   );
-  const localTimeOffset = useMemo(
-    () =>
-      Math.round(
-        getUTCOffset(
-          new Date(),
-          Intl.DateTimeFormat().resolvedOptions().timeZone,
-        ),
-      ),
-    [],
-  );
-
-  const initialUntilEpoch = () => {
-    let epoch = Math.floor(Date.now() / 1000) + 3600;
-    if (timezoneOffset !== undefined) {
-      epoch = epoch + (timezoneOffset - localTimeOffset) * 60;
-    }
-    return epoch;
-  };
-
-  const [untilEpoch, setUntilEpoch] = useState<number>(initialUntilEpoch);
   const [calendarOpen, setCalendarOpen] = useState(false);
 
+  // Reset to defaults whenever the dialog re-opens.
   useEffect(() => {
-    if (open) {
-      setTab("duration");
-      setHours(1);
-      setMinutes(0);
-      setUntilEpoch(initialUntilEpoch());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!open) return;
+    setTab("duration");
+    setHours(1);
+    setMinutes(0);
+    setUntil(new Date(Date.now() + ONE_HOUR_MS));
   }, [open]);
-
-  const clockText = useMemo(() => {
-    const date = new Date(untilEpoch * 1000);
-    return `${date.getHours().toString().padStart(2, "0")}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
-  }, [untilEpoch]);
-
-  const dateText = useMemo(() => {
-    const date = new Date(untilEpoch * 1000);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }, [untilEpoch]);
 
   const totalMinutes = useMemo(() => {
     if (tab === "duration") {
       return Math.max(0, Math.floor(hours) * 60 + Math.floor(minutes));
     }
-    // until-time: undo the TZ shift to get the real target epoch, then diff now.
-    let realEpoch = untilEpoch;
-    if (timezoneOffset !== undefined) {
-      realEpoch = untilEpoch - (timezoneOffset - localTimeOffset) * 60;
-    }
-    const nowEpoch = Math.floor(Date.now() / 1000);
-    return Math.ceil((realEpoch - nowEpoch) / 60);
-  }, [tab, hours, minutes, untilEpoch, timezoneOffset, localTimeOffset]);
+    if (!isValidDate(until)) return 0;
+    return Math.ceil((until.getTime() - Date.now()) / 60_000);
+  }, [hours, minutes, tab, until]);
 
-  const canApply = totalMinutes > 0;
+  const canApply = useMemo(() => totalMinutes > 0, [totalMinutes]);
 
-  const handleApply = () => {
+  const handleApply = useCallback(() => {
     if (!canApply) return;
     onConfirm(totalMinutes);
     onOpenChange(false);
-  };
+  }, [canApply, onConfirm, onOpenChange, totalMinutes]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -133,10 +95,7 @@ export default function CustomSuspensionDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs
-          value={tab}
-          onValueChange={(v) => setTab(v as "duration" | "untilTime")}
-        >
+        <Tabs value={tab} onValueChange={(v) => setTab(v as Tabs)}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="duration">
               {t("notification.customSuspension.tabDuration")}
@@ -156,12 +115,9 @@ export default function CustomSuspensionDialog({
                   id="suspend-hours"
                   type="number"
                   min={0}
-                  max={168}
+                  max={999}
                   value={hours}
-                  onChange={(e) => {
-                    const n = Number.parseInt(e.target.value, 10);
-                    setHours(Number.isNaN(n) ? 0 : Math.max(0, n));
-                  }}
+                  onChange={(e) => setHours(parsePositive(e.target.value))}
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -174,12 +130,7 @@ export default function CustomSuspensionDialog({
                   min={0}
                   max={59}
                   value={minutes}
-                  onChange={(e) => {
-                    const n = Number.parseInt(e.target.value, 10);
-                    setMinutes(
-                      Number.isNaN(n) ? 0 : Math.min(59, Math.max(0, n)),
-                    );
-                  }}
+                  onChange={(e) => setMinutes(parsePositive(e.target.value))}
                 />
               </div>
             </div>
@@ -197,7 +148,13 @@ export default function CustomSuspensionDialog({
                       variant={calendarOpen ? "select" : "default"}
                       size="sm"
                     >
-                      {dateText}
+                      {isValidDate(until)
+                        ? until.toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })
+                        : "—"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
@@ -206,21 +163,23 @@ export default function CustomSuspensionDialog({
                   >
                     <Calendar
                       mode="single"
-                      selected={new Date(untilEpoch * 1000)}
+                      selected={isValidDate(until) ? until : undefined}
                       disabled={{
                         before: new Date(new Date().setHours(0, 0, 0, 0)),
                       }}
                       onSelect={(day) => {
                         if (!day) return;
-                        const current = new Date(untilEpoch * 1000);
                         const next = new Date(day);
+                        // If `until` is invalid, don't propagate
+                        // NaN hours/minutes into the new date - fall back to now.
+                        const carry = isValidDate(until) ? until : new Date();
                         next.setHours(
-                          current.getHours(),
-                          current.getMinutes(),
-                          current.getSeconds(),
+                          carry.getHours(),
+                          carry.getMinutes(),
+                          carry.getSeconds(),
                           0,
                         );
-                        setUntilEpoch(Math.floor(next.getTime() / 1000));
+                        setUntil(next);
                         setCalendarOpen(false);
                       }}
                     />
@@ -230,18 +189,22 @@ export default function CustomSuspensionDialog({
                   className="text-md border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                   aria-label={t("notification.customSuspension.untilLabel")}
                   type="time"
-                  value={clockText}
+                  value={
+                    isValidDate(until)
+                      ? `${pad(until.getHours())}:${pad(until.getMinutes())}`
+                      : ""
+                  }
                   step="60"
                   onChange={(e) => {
+                    // Ignore anything that doesn't parse to a real HH:MM pair.
                     const [h, m] = e.target.value.split(":");
-                    const next = new Date(untilEpoch * 1000);
-                    next.setHours(
-                      Number.parseInt(h ?? "0", 10),
-                      Number.parseInt(m ?? "0", 10),
-                      0,
-                      0,
-                    );
-                    setUntilEpoch(Math.floor(next.getTime() / 1000));
+                    const hh = Number.parseInt(h ?? "", 10);
+                    const mm = Number.parseInt(m ?? "", 10);
+                    if (Number.isNaN(hh) || Number.isNaN(mm)) return;
+                    const base = isValidDate(until) ? until : new Date();
+                    const next = new Date(base);
+                    next.setHours(hh, mm, 0, 0);
+                    setUntil(next);
                   }}
                 />
               </div>
