@@ -87,6 +87,7 @@ import type {
 import { useConfigMessages } from "@/hooks/use-config-messages";
 import { ConfigMessageBanner } from "../ConfigMessageBanner";
 import { FieldMessagesContext } from "../FieldMessagesContext";
+import { LiveFormDataContext } from "../LiveFormDataContext";
 
 export interface SectionConfig {
   /** Field ordering within the section */
@@ -998,59 +999,63 @@ export function ConfigSection({
     <div className="space-y-6">
       <ConfigMessageBanner messages={activeMessages} />
       <FieldMessagesContext.Provider value={activeFieldMessages}>
-        <ConfigForm
-          key={formKey}
-          schema={modifiedSchema}
-          formData={currentFormData}
-          onChange={handleChange}
-          onValidationChange={setHasValidationErrors}
-          fieldOrder={sectionConfig.fieldOrder}
-          fieldGroups={sectionConfig.fieldGroups}
-          hiddenFields={effectiveHiddenFields}
-          advancedFields={sectionConfig.advancedFields}
-          liveValidate={sectionConfig.liveValidate}
-          uiSchema={sectionConfig.uiSchema}
-          disabled={disabled || isSaving}
-          readonly={readonly}
-          showSubmit={false}
-          i18nNamespace={configNamespace}
-          customValidate={customValidate}
-          formContext={{
-            level: effectiveLevel,
-            cameraName,
-            globalValue,
-            cameraValue,
-            hasChanges,
-            extraHasChanges,
-            setExtraHasChanges,
-            overrides: uiOverrides as JsonValue | undefined,
-            formData: currentFormData as ConfigSectionData,
-            baselineFormData: effectiveBaselineFormData as ConfigSectionData,
-            pendingDataBySection,
-            onPendingDataChange,
-            onFormDataChange: (data: ConfigSectionData) => handleChange(data),
-            // For widgets that need access to full camera config (e.g., zone names)
-            fullCameraConfig:
-              effectiveLevel === "camera" && cameraName
-                ? config?.cameras?.[cameraName]
-                : undefined,
-            fullConfig: config,
-            // When rendering camera-level sections, provide the section path so
-            // field templates can look up keys under the `config/cameras` namespace
-            // When using a consolidated global namespace, keys are nested
-            // under the section name (e.g., `audio.label`) so provide the
-            // section prefix to templates so they can attempt `${section}.${field}` lookups.
-            sectionI18nPrefix: sectionPath,
-            t,
-            renderers: wrappedRenderers,
-            sectionDocs: sectionConfig.sectionDocs,
-            fieldDocs: sectionConfig.fieldDocs,
-            hiddenFields: effectiveHiddenFields,
-            restartRequired: sectionConfig.restartRequired,
-            requiresRestart,
-            isProfile: !!profileName,
-          }}
-        />
+        <LiveFormDataContext.Provider
+          value={(currentFormData as ConfigSectionData | null) ?? null}
+        >
+          <ConfigForm
+            key={formKey}
+            schema={modifiedSchema}
+            formData={currentFormData}
+            onChange={handleChange}
+            onValidationChange={setHasValidationErrors}
+            fieldOrder={sectionConfig.fieldOrder}
+            fieldGroups={sectionConfig.fieldGroups}
+            hiddenFields={effectiveHiddenFields}
+            advancedFields={sectionConfig.advancedFields}
+            liveValidate={sectionConfig.liveValidate}
+            uiSchema={sectionConfig.uiSchema}
+            disabled={disabled || isSaving}
+            readonly={readonly}
+            showSubmit={false}
+            i18nNamespace={configNamespace}
+            customValidate={customValidate}
+            formContext={{
+              level: effectiveLevel,
+              cameraName,
+              globalValue,
+              cameraValue,
+              hasChanges,
+              extraHasChanges,
+              setExtraHasChanges,
+              overrides: uiOverrides as JsonValue | undefined,
+              formData: currentFormData as ConfigSectionData,
+              baselineFormData: effectiveBaselineFormData as ConfigSectionData,
+              pendingDataBySection,
+              onPendingDataChange,
+              onFormDataChange: (data: ConfigSectionData) => handleChange(data),
+              // For widgets that need access to full camera config (e.g., zone names)
+              fullCameraConfig:
+                effectiveLevel === "camera" && cameraName
+                  ? config?.cameras?.[cameraName]
+                  : undefined,
+              fullConfig: config,
+              // When rendering camera-level sections, provide the section path so
+              // field templates can look up keys under the `config/cameras` namespace
+              // When using a consolidated global namespace, keys are nested
+              // under the section name (e.g., `audio.label`) so provide the
+              // section prefix to templates so they can attempt `${section}.${field}` lookups.
+              sectionI18nPrefix: sectionPath,
+              t,
+              renderers: wrappedRenderers,
+              sectionDocs: sectionConfig.sectionDocs,
+              fieldDocs: sectionConfig.fieldDocs,
+              hiddenFields: effectiveHiddenFields,
+              restartRequired: sectionConfig.restartRequired,
+              requiresRestart,
+              isProfile: !!profileName,
+            }}
+          />
+        </LiveFormDataContext.Provider>
       </FieldMessagesContext.Provider>
 
       {!embedded && (
