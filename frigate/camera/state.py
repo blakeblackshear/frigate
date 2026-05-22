@@ -45,6 +45,7 @@ class CameraState:
         self.frame_cache: dict[float, dict[str, Any]] = {}
         self.zone_objects: defaultdict[str, list[Any]] = defaultdict(list)
         self._current_frame = np.zeros(self.camera_config.frame_shape_yuv, np.uint8)
+        self._last_frame_shape: tuple[int, int] = self.camera_config.frame_shape_yuv
         self.current_frame_lock = threading.Lock()
         self.current_frame_time = 0.0
         self.motion_boxes: list[tuple[int, int, int, int]] = []
@@ -311,6 +312,31 @@ class CameraState:
         motion_boxes: list[tuple[int, int, int, int]],
         regions: list[tuple[int, int, int, int]],
     ) -> None:
+        # detect resolution changed — drop tracked state so old-grid
+        # boxes don't leak through end-callbacks
+        current_shape = self.camera_config.frame_shape_yuv
+        if current_shape != self._last_frame_shape:
+            logger.debug(
+                f"{self.name}: detect resolution changed {self._last_frame_shape} -> {current_shape}, dropping tracked state"
+            )
+            with self.current_frame_lock:
+                self.tracked_objects.clear()
+                self.motion_boxes = []
+                self.regions = []
+            self._last_frame_shape = current_shape
+
+        # drop in-flight batches from the pre-recycle detect process
+        # whose boxes exceed the current detect resolution
+        detect = self.camera_config.detect
+        if detect.width is not None and detect.height is not None:
+            for obj in current_detections.values():
+                box = obj.get("box")
+                if box and (box[2] > detect.width or box[3] > detect.height):
+                    logger.debug(
+                        f"{self.name}: dropping stale-resolution detection batch (box {box} exceeds {detect.width}x{detect.height})"
+                    )
+                    return
+
         current_frame = self.frame_manager.get(
             frame_name, self.camera_config.frame_shape_yuv
         )
