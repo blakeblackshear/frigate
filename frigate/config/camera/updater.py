@@ -84,8 +84,8 @@ class CameraConfigUpdateSubscriber:
         self, camera: str, update_type: CameraConfigUpdateEnum, updated_config: Any
     ) -> None:
         if update_type == CameraConfigUpdateEnum.add:
-            self.config.cameras[camera] = updated_config
-            self.camera_configs[camera] = updated_config
+            shared = self.config.cameras.setdefault(camera, updated_config)
+            self.camera_configs[camera] = shared
             return
         elif update_type == CameraConfigUpdateEnum.remove:
             self.config.cameras.pop(camera, None)
