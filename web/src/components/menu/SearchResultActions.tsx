@@ -1,5 +1,6 @@
 import { useState, ReactNode, useCallback } from "react";
 import { SearchResult } from "@/types/search";
+import { REVIEW_PADDING } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { baseUrl } from "@/api/baseUrl";
 import { toast } from "sonner";
@@ -94,8 +95,8 @@ export default function SearchResultActions({
       axios
         .post("debug_replay/start", {
           camera: event.camera,
-          start_time: event.start_time,
-          end_time: event.end_time,
+          start_time: (event.start_time ?? 0) - REVIEW_PADDING,
+          end_time: (event.end_time ?? Date.now() / 1000) + REVIEW_PADDING,
         })
         .then((response) => {
           if (response.status === 202 || response.status === 200) {

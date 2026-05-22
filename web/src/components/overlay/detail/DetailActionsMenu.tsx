@@ -63,8 +63,8 @@ export default function DetailActionsMenu({
     axios
       .post("debug_replay/start", {
         camera: search.camera,
-        start_time: search.start_time,
-        end_time: search.end_time,
+        start_time: (search.start_time ?? 0) - REVIEW_PADDING,
+        end_time: (search.end_time ?? Date.now() / 1000) + REVIEW_PADDING,
       })
       .then((response) => {
         if (response.status === 202 || response.status === 200) {
