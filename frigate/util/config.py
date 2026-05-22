@@ -788,6 +788,34 @@ def apply_section_update(camera_config, section: str, update: dict) -> Optional[
                 )
             camera_config.objects = new_objects
 
+        elif section == "detect":
+            # apply detect first so frame_shape reflects the new resolution
+            # before we rebuild mask-dependent runtime configs below
+            merged = deep_merge(current.model_dump(), update, override=True)
+            camera_config.detect = current.__class__.model_validate(merged)
+
+            new_frame_shape = camera_config.frame_shape
+
+            # rebuild motion's rasterized_mask at the new frame_shape
+            if camera_config.motion is not None:
+                camera_config.motion = RuntimeMotionConfig(
+                    frame_shape=new_frame_shape,
+                    **camera_config.motion.model_dump(exclude_unset=True),
+                )
+
+            # rebuild per-object filter masks at the new frame_shape
+            for obj_name, filt in camera_config.objects.filters.items():
+                merged_mask = dict(filt.mask)
+                if camera_config.objects.mask:
+                    for gid, gmask in camera_config.objects.mask.items():
+                        merged_mask[f"global_{gid}"] = gmask
+
+                camera_config.objects.filters[obj_name] = RuntimeFilterConfig(
+                    frame_shape=new_frame_shape,
+                    mask=merged_mask,
+                    **filt.model_dump(exclude_unset=True, exclude={"mask", "raw_mask"}),
+                )
+
         else:
             merged = deep_merge(current.model_dump(), update, override=True)
             setattr(camera_config, section, current.__class__.model_validate(merged))
