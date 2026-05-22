@@ -72,6 +72,25 @@ const detect: SectionConfigOverrides = {
       "max_disappeared",
     ],
   },
+  replay: {
+    restartRequired: [],
+    fieldOrder: ["width", "height", "fps"],
+    fieldGroups: {
+      resolution: ["width", "height", "fps"],
+    },
+    hiddenFields: [
+      "enabled",
+      "enabled_in_config",
+      "min_initialized",
+      "max_disappeared",
+      "annotation_offset",
+      "stationary",
+      "interval",
+      "threshold",
+      "max_frames",
+    ],
+    advancedFields: [],
+  },
 };
 
 export default detect;

@@ -355,6 +355,18 @@ export default function Replay() {
                 ) : (
                   <div className="space-y-6">
                     <ConfigSectionTemplate
+                      sectionKey="detect"
+                      level="replay"
+                      cameraName={status.replay_camera ?? undefined}
+                      skipSave
+                      noStickyButtons
+                      requiresRestart={false}
+                      collapsible
+                      defaultCollapsed={false}
+                      showTitle
+                      showOverrideIndicator={false}
+                    />
+                    <ConfigSectionTemplate
                       sectionKey="motion"
                       level="replay"
                       cameraName={status.replay_camera ?? undefined}

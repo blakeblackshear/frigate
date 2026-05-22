@@ -1288,7 +1288,12 @@ export function ConfigSection({
             <CollapsibleTrigger asChild>
               <div className="flex cursor-pointer items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Heading as="h4">{title}</Heading>
+                  <Heading
+                    as="h4"
+                    className={level === "replay" ? "text-base" : undefined}
+                  >
+                    {title}
+                  </Heading>
                   {showOverrideIndicator &&
                     effectiveLevel === "camera" &&
                     (profileOverridesSection || isOverridden) &&
