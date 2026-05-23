@@ -242,10 +242,6 @@ export default function LiveContextMenu({
   const [customDialogOpen, setCustomDialogOpen] = useState(false);
 
   const handleSuspend = (duration: string) => {
-    if (duration === "custom") {
-      setCustomDialogOpen(true);
-      return;
-    }
     if (duration === "off") {
       sendNotification("OFF");
     } else {
@@ -545,7 +541,7 @@ export default function LiveContextMenu({
                               disabled={!isEnabled}
                               onClick={
                                 isEnabled
-                                  ? () => handleSuspend("custom")
+                                  ? () => setCustomDialogOpen(true)
                                   : undefined
                               }
                             >

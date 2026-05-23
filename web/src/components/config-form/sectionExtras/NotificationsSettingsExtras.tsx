@@ -740,16 +740,8 @@ export function CameraNotificationSwitch({
   }, [notificationSuspendUntil, notificationState]);
 
   const [customDialogOpen, setCustomDialogOpen] = useState(false);
-  // Doesn't actually represent the state of the Select
-  // Workaround for CustomSuspensionDialog (explained below at setSelectValue call site).
-  const [selectValue, setSelectValue] = useState<string>("");
 
   const handleSuspend = (duration: string) => {
-    if (duration === "custom") {
-      setSelectValue("custom");
-      setCustomDialogOpen(true);
-      return;
-    }
     setIsSuspended(true);
     if (duration == "off") {
       sendNotification("OFF");
@@ -822,37 +814,41 @@ export function CameraNotificationSwitch({
       </div>
 
       {!isSuspended ? (
-        <Select value={selectValue} onValueChange={handleSuspend}>
-          <SelectTrigger className="w-auto">
-            <SelectValue placeholder={t("notification.suspendTime.suspend")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="5">
-              {t("notification.suspendTime.5minutes")}
-            </SelectItem>
-            <SelectItem value="10">
-              {t("notification.suspendTime.10minutes")}
-            </SelectItem>
-            <SelectItem value="30">
-              {t("notification.suspendTime.30minutes")}
-            </SelectItem>
-            <SelectItem value="60">
-              {t("notification.suspendTime.1hour")}
-            </SelectItem>
-            <SelectItem value="840">
-              {t("notification.suspendTime.12hours")}
-            </SelectItem>
-            <SelectItem value="1440">
-              {t("notification.suspendTime.24hours")}
-            </SelectItem>
-            <SelectItem value="custom">
-              {t("notification.suspendTime.custom")}
-            </SelectItem>
-            <SelectItem value="off">
-              {t("notification.suspendTime.untilRestart")}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select onValueChange={handleSuspend}>
+            <SelectTrigger className="w-auto">
+              <SelectValue
+                placeholder={t("notification.suspendTime.suspend")}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">
+                {t("notification.suspendTime.5minutes")}
+              </SelectItem>
+              <SelectItem value="10">
+                {t("notification.suspendTime.10minutes")}
+              </SelectItem>
+              <SelectItem value="30">
+                {t("notification.suspendTime.30minutes")}
+              </SelectItem>
+              <SelectItem value="60">
+                {t("notification.suspendTime.1hour")}
+              </SelectItem>
+              <SelectItem value="840">
+                {t("notification.suspendTime.12hours")}
+              </SelectItem>
+              <SelectItem value="1440">
+                {t("notification.suspendTime.24hours")}
+              </SelectItem>
+              <SelectItem value="off">
+                {t("notification.suspendTime.untilRestart")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Button size="sm" onClick={() => setCustomDialogOpen(true)}>
+            {t("notification.suspendTime.custom")}
+          </Button>
+        </div>
       ) : (
         <Button
           variant="destructive"
@@ -865,14 +861,7 @@ export function CameraNotificationSwitch({
 
       <CustomSuspensionDialog
         open={customDialogOpen}
-        onOpenChange={(open) => {
-          setCustomDialogOpen(open);
-          // Radix treats `undefined` as "uncontrolled", which keeps the last
-          // internal selection. This results in an option "Suspend for custom time..." still
-          // being selected if the CustomSuspensionDialog is closed without applying the suspension
-          // So we explicitly set "" on CustomSuspensionDialog closure
-          if (!open) setSelectValue("");
-        }}
+        onOpenChange={setCustomDialogOpen}
         onConfirm={handleCustomSuspend}
       />
     </div>
