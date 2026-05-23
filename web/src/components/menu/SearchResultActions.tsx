@@ -130,9 +130,15 @@ export default function SearchResultActions({
               },
             );
           } else {
-            toast.error(t("dialog.toast.error", { error: errorMessage }), {
-              position: "top-center",
-            });
+            toast.error(
+              t("dialog.toast.error", {
+                ns: "views/replay",
+                error: errorMessage,
+              }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .finally(() => {
@@ -206,7 +212,7 @@ export default function SearchResultActions({
             <span>{t("itemMenu.addTrigger.label")}</span>
           </MenuItem>
         )}
-      {searchResult.has_clip && (
+      {isAdmin && searchResult.has_clip && (
         <MenuItem
           className="cursor-pointer"
           aria-label={t("itemMenu.debugReplay.aria")}

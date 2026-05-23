@@ -95,9 +95,15 @@ export default function DetailActionsMenu({
             ),
           });
         } else {
-          toast.error(t("dialog.toast.error", { error: errorMessage }), {
-            position: "top-center",
-          });
+          toast.error(
+            t("dialog.toast.error", {
+              ns: "views/replay",
+              error: errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
         }
       })
       .finally(() => {
@@ -229,7 +235,7 @@ export default function DetailActionsMenu({
               </DropdownMenuItem>
             )}
 
-          {search.has_clip && (
+          {isAdmin && search.has_clip && (
             <DropdownMenuItem
               className="cursor-pointer"
               aria-label={t("itemMenu.debugReplay.aria")}

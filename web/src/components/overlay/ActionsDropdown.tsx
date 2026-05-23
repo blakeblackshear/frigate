@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { FaFilm } from "react-icons/fa6";
 
 type ActionsDropdownProps = {
-  onDebugReplayClick: () => void;
+  onDebugReplayClick?: () => void;
   onExportClick: () => void;
   onShareTimestampClick: () => void;
 };
@@ -42,9 +42,11 @@ export default function ActionsDropdown({
         <DropdownMenuItem onClick={onShareTimestampClick}>
           {t("recording.shareTimestamp.label", { ns: "components/dialog" })}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onDebugReplayClick}>
-          {t("title", { ns: "views/replay" })}
-        </DropdownMenuItem>
+        {onDebugReplayClick && (
+          <DropdownMenuItem onClick={onDebugReplayClick}>
+            {t("title", { ns: "views/replay" })}
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
