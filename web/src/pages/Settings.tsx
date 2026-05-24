@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   Collapsible,
@@ -310,6 +311,8 @@ const settingsGroups = [
   {
     label: "globalConfig",
     items: [
+      { key: "profiles", component: ProfilesView },
+      { key: "cameraManagement", component: CameraManagementView },
       { key: "globalDetect", component: GlobalDetectSettingsPage },
       { key: "globalObjects", component: GlobalObjectsSettingsPage },
       { key: "globalMotion", component: GlobalMotionSettingsPage },
@@ -331,8 +334,6 @@ const settingsGroups = [
   {
     label: "cameras",
     items: [
-      { key: "profiles", component: ProfilesView },
-      { key: "cameraManagement", component: CameraManagementView },
       { key: "cameraDetect", component: CameraDetectSettingsPage },
       { key: "cameraObjects", component: CameraObjectsSettingsPage },
       { key: "cameraMotion", component: CameraMotionSettingsPage },
@@ -1651,6 +1652,8 @@ export default function Settings() {
                 const isMultiItem = filteredItems.length > 1;
                 const renderedExpanded =
                   !isMultiItem || !collapsedGroups.has(group.label);
+                const showCameraBadge =
+                  group.label === "cameras" && !!selectedCamera;
                 const items = filteredItems.map((item) => (
                   <MobileMenuItem
                     key={item.key}
@@ -1686,7 +1689,19 @@ export default function Settings() {
                             )}
                           />
                         </CollapsibleTrigger>
-                        <CollapsibleContent>{items}</CollapsibleContent>
+                        <CollapsibleContent>
+                          {showCameraBadge && (
+                            <div className="mb-2 ml-4 mr-4 mt-2">
+                              <Badge
+                                variant="outline"
+                                className="max-w-full break-words smart-capitalize"
+                              >
+                                <CameraNameLabel camera={selectedCamera} />
+                              </Badge>
+                            </div>
+                          )}
+                          {items}
+                        </CollapsibleContent>
                       </Collapsible>
                     ) : (
                       items
@@ -2027,6 +2042,22 @@ export default function Settings() {
                             </SidebarGroupLabel>
                             <CollapsibleContent>
                               <SidebarMenuSub className="mx-2 border-0 md:mx-0">
+                                {group.label === "cameras" &&
+                                  selectedCamera && (
+                                    <li
+                                      className="mb-1 ml-0 mr-3 mt-0"
+                                      aria-hidden="true"
+                                    >
+                                      <Badge
+                                        variant="outline"
+                                        className="max-w-full break-words smart-capitalize"
+                                      >
+                                        <CameraNameLabel
+                                          camera={selectedCamera}
+                                        />
+                                      </Badge>
+                                    </li>
+                                  )}
                                 {filteredItems.map((item) => (
                                   <SidebarMenuSubItem key={item.key}>
                                     <SidebarMenuSubButton
