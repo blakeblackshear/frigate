@@ -457,7 +457,7 @@
   },
   "cameraManagement": {
     "title": "Manage Cameras",
-    "description": "Add, edit, and delete cameras, control which cameras are enabled, and configure per-profile and camera type overrides. To configure streams, detection, motion, and other camera-specific settings, choose the specific section under Camera Configuration.",
+    "description": "Add, edit, and delete cameras, control the state of each camera, and configure per-profile and camera type overrides. To configure streams, detection, motion, and other camera-specific settings, choose the specific section under Camera Configuration.",
     "addCamera": "Add New Camera",
     "deleteCamera": "Delete Camera",
     "deleteCameraDialog": {
@@ -475,12 +475,17 @@
     "selectCamera": "Select a Camera",
     "backToSettings": "Back to Camera Settings",
     "streams": {
-      "title": "Enable / Disable Cameras",
-      "enableLabel": "Enabled cameras",
-      "enableDesc": "Temporarily disable an enabled camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em><br /><br />Drag the handle to reorder the cameras as they appear in the UI. The order of enabled cameras will be reflected throughout the UI including the Live dashboard and camera selection dropdowns.",
-      "disableLabel": "Disabled cameras",
-      "disableDesc": "Enable a camera that is currently not visible in the UI and disabled in the configuration. A restart of Frigate is required after enabling.",
-      "enableSuccess": "Enabled {{cameraName}} in configuration. Restart Frigate to apply the changes.",
+      "title": "Camera State",
+      "label": "Camera state",
+      "description": "Set the operating state for each camera.<br /><br /><strong>On</strong>: streams are processed normally.<br /><strong>Off</strong>: temporarily pauses processing. Does not persist across Frigate restarts.<br /><strong>Disabled</strong>: stops processing and saves the change to your configuration. A restart is required to re-enable a disabled camera.<br /><br /><em>Note: Disabling does not affect go2rtc restreams.</em><br /><br />Drag the handle to reorder active cameras as they appear throughout the UI, including the Live dashboard and camera selection dropdowns.",
+      "disabledSubheading": "Disabled in configuration",
+      "status": {
+        "on": "On",
+        "off": "Off",
+        "disabled": "Disabled"
+      },
+      "enableSuccess": "Enabled {{cameraName}}. Restart Frigate to apply.",
+      "disableSuccess": "Disabled {{cameraName}} and saved to configuration.",
       "reorderHandle": "Drag to reorder",
       "saving": "Saving…",
       "saved": "Saved",
@@ -527,10 +532,10 @@
     "profiles": {
       "title": "Profile Camera Overrides",
       "selectLabel": "Select profile",
-      "description": "Configure which cameras are enabled or disabled when a profile is activated. Cameras set to \"Inherit\" keep their base enabled state.",
+      "description": "Configure which cameras are turned on or off when a profile is activated. Cameras set to \"Inherit\" keep their default state.",
       "inherit": "Inherit",
-      "enabled": "Enabled",
-      "disabled": "Disabled"
+      "on": "On",
+      "off": "Off"
     },
     "cameraType": {
       "title": "Camera Type",

@@ -20,6 +20,7 @@ import {
   LuGripVertical,
   LuPencil,
   LuPlus,
+  LuRefreshCcw,
   LuTrash2,
 } from "react-icons/lu";
 import { Reorder, useDragControls } from "framer-motion";
@@ -28,7 +29,6 @@ import { Link } from "react-router-dom";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { isDesktop } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
-import { Switch } from "@/components/ui/switch";
 import { Trans } from "react-i18next";
 import { useEnabledState, useRestart } from "@/api/ws";
 import { Label } from "@/components/ui/label";
@@ -275,7 +275,7 @@ export default function CameraManagementView({
                   )}
                 </div>
 
-                {enabledCameras.length > 0 && (
+                {(enabledCameras.length > 0 || disabledCameras.length > 0) && (
                   <SettingsGroupCard
                     title={
                       <Trans ns="views/settings">
@@ -285,83 +285,66 @@ export default function CameraManagementView({
                   >
                     <div className={SPLIT_ROW_CLASS_NAME}>
                       <div className="space-y-1.5">
-                        <Label
-                          className="cursor-pointer"
-                          htmlFor={"enabled-cameras-switch"}
-                        >
-                          {t("cameraManagement.streams.enableLabel")}
-                          <p className="hidden text-sm text-muted-foreground md:block">
-                            <Trans ns="views/settings">
-                              cameraManagement.streams.enableDesc
-                            </Trans>
-                          </p>
-                        </Label>
+                        <Label>{t("cameraManagement.streams.label")}</Label>
+                        <p className="hidden text-sm text-muted-foreground md:block">
+                          <Trans ns="views/settings">
+                            cameraManagement.streams.description
+                          </Trans>
+                        </p>
                       </div>
                       <div className="max-w-md space-y-1.5">
-                        <Reorder.Group
-                          as="div"
-                          axis="y"
-                          values={orderedCameras}
-                          onReorder={setOrderedCameras}
-                          className="space-y-2 rounded-lg bg-secondary p-4"
-                        >
-                          {orderedCameras.map((camera) => (
-                            <EnabledCameraRow
-                              key={camera}
-                              camera={camera}
-                              onConfigChanged={updateConfig}
-                              onDragEnd={handleReorderDragEnd}
-                            />
-                          ))}
-                        </Reorder.Group>
+                        <div className="space-y-3 rounded-lg bg-secondary p-4">
+                          {orderedCameras.length > 0 && (
+                            <Reorder.Group
+                              as="div"
+                              axis="y"
+                              values={orderedCameras}
+                              onReorder={setOrderedCameras}
+                              className="space-y-2"
+                            >
+                              {orderedCameras.map((camera) => (
+                                <ActiveCameraRow
+                                  key={camera}
+                                  camera={camera}
+                                  onConfigChanged={updateConfig}
+                                  onDragEnd={handleReorderDragEnd}
+                                  setRestartDialogOpen={setRestartDialogOpen}
+                                />
+                              ))}
+                            </Reorder.Group>
+                          )}
+                          {orderedCameras.length > 0 &&
+                            disabledCameras.length > 0 && (
+                              <div className="border-t border-border/40" />
+                            )}
+                          {disabledCameras.length > 0 && (
+                            <div className="space-y-2">
+                              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                {t(
+                                  "cameraManagement.streams.disabledSubheading",
+                                )}
+                              </p>
+                              {disabledCameras.map((camera) => (
+                                <DisabledCameraRow
+                                  key={camera}
+                                  camera={camera}
+                                  onConfigChanged={updateConfig}
+                                  setRestartDialogOpen={setRestartDialogOpen}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
                         <ReorderSaveStatusIndicator
                           status={reorderSaveStatus}
                         />
                       </div>
                       <p className="text-sm text-muted-foreground md:hidden">
                         <Trans ns="views/settings">
-                          cameraManagement.streams.enableDesc
+                          cameraManagement.streams.description
                         </Trans>
                       </p>
                     </div>
-                    {disabledCameras.length > 0 && (
-                      <div className={SPLIT_ROW_CLASS_NAME}>
-                        <div className="space-y-1.5">
-                          <Label
-                            className="cursor-pointer"
-                            htmlFor={"disabled-cameras-switch"}
-                          >
-                            {t("cameraManagement.streams.disableLabel")}
-                            <RestartRequiredIndicator className="ml-1" />
-                          </Label>
-                          <p className="hidden text-sm text-muted-foreground md:block">
-                            {t("cameraManagement.streams.disableDesc")}
-                          </p>
-                        </div>
-                        <div
-                          className={`${CONTROL_COLUMN_CLASS_NAME} space-y-1.5`}
-                        >
-                          <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
-                            {disabledCameras.map((camera) => (
-                              <div
-                                key={camera}
-                                className="flex flex-row items-center justify-between"
-                              >
-                                <CameraNameLabel camera={camera} />
-                                <CameraConfigEnableSwitch
-                                  cameraName={camera}
-                                  onConfigChanged={updateConfig}
-                                  setRestartDialogOpen={setRestartDialogOpen}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                          <p className="text-sm text-muted-foreground md:hidden">
-                            {t("cameraManagement.streams.disableDesc")}
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </SettingsGroupCard>
                 )}
 
@@ -468,17 +451,19 @@ function ReorderSaveStatusIndicator({
   );
 }
 
-type EnabledCameraRowProps = {
+type ActiveCameraRowProps = {
   camera: string;
   onConfigChanged: () => Promise<unknown>;
   onDragEnd: () => void;
+  setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function EnabledCameraRow({
+function ActiveCameraRow({
   camera,
   onConfigChanged,
   onDragEnd,
-}: EnabledCameraRowProps) {
+  setRestartDialogOpen,
+}: ActiveCameraRowProps) {
   const { t } = useTranslation(["views/settings"]);
   const controls = useDragControls();
 
@@ -506,35 +491,223 @@ function EnabledCameraRow({
           onConfigChanged={onConfigChanged}
         />
       </div>
-      <CameraEnableSwitch cameraName={camera} />
+      <CameraStatusSelect
+        cameraName={camera}
+        isDisabledInConfig={false}
+        onConfigChanged={onConfigChanged}
+        setRestartDialogOpen={setRestartDialogOpen}
+      />
     </Reorder.Item>
   );
 }
 
-type CameraEnableSwitchProps = {
-  cameraName: string;
+type DisabledCameraRowProps = {
+  camera: string;
+  onConfigChanged: () => Promise<unknown>;
+  setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function CameraEnableSwitch({ cameraName }: CameraEnableSwitchProps) {
-  const { payload: enabledState, send: sendEnabled } =
-    useEnabledState(cameraName);
-  const { data: config } = useSWR<FrigateConfig>("config");
-
-  const isChecked =
-    enabledState === "ON" || enabledState === "OFF"
-      ? enabledState === "ON"
-      : (config?.cameras?.[cameraName]?.enabled ?? false);
-
+function DisabledCameraRow({
+  camera,
+  onConfigChanged,
+  setRestartDialogOpen,
+}: DisabledCameraRowProps) {
   return (
-    <div className="flex flex-row items-center">
-      <Switch
-        id={`camera-enabled-${cameraName}`}
-        checked={isChecked}
-        onCheckedChange={(isChecked) => {
-          sendEnabled(isChecked ? "ON" : "OFF");
-        }}
+    <div className="flex flex-row items-center justify-between">
+      <div className="flex items-center gap-1">
+        <CameraNameLabel camera={camera} className="text-muted-foreground" />
+        <CameraDetailsEditor
+          cameraName={camera}
+          onConfigChanged={onConfigChanged}
+        />
+      </div>
+      <CameraStatusSelect
+        cameraName={camera}
+        isDisabledInConfig={true}
+        onConfigChanged={onConfigChanged}
+        setRestartDialogOpen={setRestartDialogOpen}
       />
     </div>
+  );
+}
+
+type CameraStatus = "on" | "off" | "disabled";
+
+type CameraStatusSelectProps = {
+  cameraName: string;
+  isDisabledInConfig: boolean;
+  onConfigChanged: () => Promise<unknown>;
+  setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+function CameraStatusSelect({
+  cameraName,
+  isDisabledInConfig,
+  onConfigChanged,
+  setRestartDialogOpen,
+}: CameraStatusSelectProps) {
+  const { t } = useTranslation([
+    "views/settings",
+    "components/dialog",
+    "common",
+  ]);
+  const { payload: enabledState, send: sendEnabled } =
+    useEnabledState(cameraName);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const currentStatus: CameraStatus = isDisabledInConfig
+    ? "disabled"
+    : enabledState === "OFF"
+      ? "off"
+      : "on";
+
+  const restartLabel = t("configForm.restartRequiredField", {
+    ns: "views/settings",
+    defaultValue: "Restart required",
+  });
+
+  const handleChange = useCallback(
+    async (newStatus: string) => {
+      if (newStatus === currentStatus || isSaving) {
+        return;
+      }
+
+      if (newStatus === "on" && !isDisabledInConfig) {
+        sendEnabled("ON");
+        return;
+      }
+
+      if (newStatus === "off" && !isDisabledInConfig) {
+        sendEnabled("OFF");
+        return;
+      }
+
+      if (newStatus === "on" && isDisabledInConfig) {
+        setIsSaving(true);
+        try {
+          await axios.put("config/set", {
+            requires_restart: 1,
+            config_data: {
+              cameras: { [cameraName]: { enabled: true } },
+            },
+          });
+          await onConfigChanged();
+          toast.success(
+            t("cameraManagement.streams.enableSuccess", {
+              ns: "views/settings",
+              cameraName,
+            }),
+            {
+              position: "top-center",
+              action: (
+                <a onClick={() => setRestartDialogOpen(true)}>
+                  <Button>
+                    {t("restart.button", { ns: "components/dialog" })}
+                  </Button>
+                </a>
+              ),
+            },
+          );
+        } catch (error) {
+          const errorMessage =
+            axios.isAxiosError(error) &&
+            (error.response?.data?.message || error.response?.data?.detail)
+              ? error.response?.data?.message || error.response?.data?.detail
+              : t("toast.save.error.noMessage", { ns: "common" });
+          toast.error(
+            t("toast.save.error.title", { errorMessage, ns: "common" }),
+            { position: "top-center" },
+          );
+        } finally {
+          setIsSaving(false);
+        }
+        return;
+      }
+
+      if (newStatus === "disabled" && !isDisabledInConfig) {
+        setIsSaving(true);
+        try {
+          // Stop runtime processing immediately before persisting the
+          // disable so the camera stops working without waiting for
+          // a restart. The config write below makes the change durable.
+          sendEnabled("OFF");
+          await axios.put("config/set", {
+            requires_restart: 0,
+            config_data: {
+              cameras: { [cameraName]: { enabled: false } },
+            },
+          });
+          await onConfigChanged();
+          toast.success(
+            t("cameraManagement.streams.disableSuccess", {
+              ns: "views/settings",
+              cameraName,
+            }),
+            { position: "top-center" },
+          );
+        } catch (error) {
+          const errorMessage =
+            axios.isAxiosError(error) &&
+            (error.response?.data?.message || error.response?.data?.detail)
+              ? error.response?.data?.message || error.response?.data?.detail
+              : t("toast.save.error.noMessage", { ns: "common" });
+          toast.error(
+            t("toast.save.error.title", { errorMessage, ns: "common" }),
+            { position: "top-center" },
+          );
+        } finally {
+          setIsSaving(false);
+        }
+        return;
+      }
+    },
+    [
+      cameraName,
+      currentStatus,
+      isDisabledInConfig,
+      isSaving,
+      onConfigChanged,
+      sendEnabled,
+      setRestartDialogOpen,
+      t,
+    ],
+  );
+
+  if (isSaving) {
+    return (
+      <div className="flex h-7 w-[110px] flex-row items-center justify-end">
+        <ActivityIndicator className="size-4" size={16} />
+      </div>
+    );
+  }
+
+  return (
+    <Select value={currentStatus} onValueChange={handleChange}>
+      <SelectTrigger className="h-7 w-[110px] text-xs">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="on">
+          <div className="flex items-center gap-1.5">
+            {t("cameraManagement.streams.status.on")}
+            {isDisabledInConfig && (
+              <LuRefreshCcw
+                className="size-3 text-muted-foreground"
+                aria-label={restartLabel}
+              />
+            )}
+          </div>
+        </SelectItem>
+        {!isDisabledInConfig && (
+          <SelectItem value="off">
+            {t("cameraManagement.streams.status.off")}
+          </SelectItem>
+        )}
+        <SelectItem value="disabled">
+          {t("cameraManagement.streams.status.disabled")}
+        </SelectItem>
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -780,97 +953,6 @@ function CameraDetailsEditor({
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-type CameraConfigEnableSwitchProps = {
-  cameraName: string;
-  setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onConfigChanged: () => Promise<unknown>;
-};
-
-function CameraConfigEnableSwitch({
-  cameraName,
-  onConfigChanged,
-  setRestartDialogOpen,
-}: CameraConfigEnableSwitchProps) {
-  const { t } = useTranslation([
-    "common",
-    "views/settings",
-    "components/dialog",
-  ]);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const onCheckedChange = useCallback(
-    async (isChecked: boolean) => {
-      if (!isChecked || isSaving) {
-        return;
-      }
-
-      setIsSaving(true);
-
-      try {
-        await axios.put("config/set", {
-          requires_restart: 1,
-          config_data: {
-            cameras: {
-              [cameraName]: {
-                enabled: true,
-              },
-            },
-          },
-        });
-
-        await onConfigChanged();
-
-        toast.success(
-          t("cameraManagement.streams.enableSuccess", {
-            ns: "views/settings",
-            cameraName,
-          }),
-          {
-            position: "top-center",
-            action: (
-              <a onClick={() => setRestartDialogOpen(true)}>
-                <Button>
-                  {t("restart.button", { ns: "components/dialog" })}
-                </Button>
-              </a>
-            ),
-          },
-        );
-      } catch (error) {
-        const errorMessage =
-          axios.isAxiosError(error) &&
-          (error.response?.data?.message || error.response?.data?.detail)
-            ? error.response?.data?.message || error.response?.data?.detail
-            : t("toast.save.error.noMessage", { ns: "common" });
-
-        toast.error(
-          t("toast.save.error.title", { errorMessage, ns: "common" }),
-          {
-            position: "top-center",
-          },
-        );
-      } finally {
-        setIsSaving(false);
-      }
-    },
-    [cameraName, isSaving, onConfigChanged, setRestartDialogOpen, t],
-  );
-
-  return (
-    <div className="flex flex-row items-center">
-      {isSaving ? (
-        <ActivityIndicator className="h-5 w-8" size={16} />
-      ) : (
-        <Switch
-          id={`camera-enabled-${cameraName}`}
-          checked={false}
-          onCheckedChange={onCheckedChange}
-        />
-      )}
-    </div>
   );
 }
 
@@ -1231,12 +1313,12 @@ function ProfileCameraEnableSection({
                           })}
                         </SelectItem>
                         <SelectItem value="enabled">
-                          {t("cameraManagement.profiles.enabled", {
+                          {t("cameraManagement.profiles.on", {
                             ns: "views/settings",
                           })}
                         </SelectItem>
                         <SelectItem value="disabled">
-                          {t("cameraManagement.profiles.disabled", {
+                          {t("cameraManagement.profiles.off", {
                             ns: "views/settings",
                           })}
                         </SelectItem>
