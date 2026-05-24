@@ -475,7 +475,7 @@
     "selectCamera": "Select a Camera",
     "backToSettings": "Back to Camera Settings",
     "streams": {
-      "title": "Camera State",
+      "title": "Camera State and Details",
       "label": "Camera state",
       "description": "Set the operating state for each camera.<br /><br /><strong>On</strong>: streams are processed normally.<br /><strong>Off</strong>: temporarily pauses processing. Does not persist across Frigate restarts.<br /><strong>Disabled</strong>: stops processing and saves the change to your configuration. A restart is required to re-enable a disabled camera.<br /><br /><em>Note: Disabling does not affect go2rtc restreams.</em><br /><br />Drag the handle to reorder active cameras as they appear throughout the UI, including the Live dashboard and camera selection dropdowns.",
       "disabledSubheading": "Disabled in configuration",

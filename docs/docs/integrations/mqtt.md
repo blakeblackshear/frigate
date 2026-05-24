@@ -368,7 +368,7 @@ The published value is the detected state class name (e.g., `open`, `closed`, `o
 
 ### `frigate/<camera_name>/enabled/set`
 
-Topic to turn Frigate's processing of a camera on or off at runtime. Expected values are `ON` and `OFF`. The change is **not** persisted across Frigate restarts — the camera returns to the configured state on restart. To permanently disable a camera, use **Settings → Camera Management** in the Frigate UI. See [Camera state](/configuration/live#camera-state) for the difference between turning a camera off and disabling it.
+Topic to turn Frigate's processing of a camera on or off at runtime. Expected values are `ON` and `OFF`. The change is **not** persisted across Frigate restarts — the camera returns to the configured state on restart. To permanently disable a camera, use **Settings → Global configuration → Camera management** in the Frigate UI. See [Camera state](/configuration/live#camera-state) for the difference between turning a camera off and disabling it.
 
 ### `frigate/<camera_name>/enabled/state`
 
