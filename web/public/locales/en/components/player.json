@@ -12,7 +12,7 @@
     "title": "Stream Offline",
     "desc": "No frames have been received on the {{cameraName}} <code>detect</code> stream, check error logs"
   },
-  "cameraDisabled": "Camera is disabled",
+  "cameraOff": "Camera is off",
   "stats": {
     "streamType": {
       "title": "Stream Type:",
