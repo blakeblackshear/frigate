@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
-import CameraEditForm from "@/components/settings/CameraEditForm";
 import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import DeleteCameraDialog from "@/components/overlay/dialog/DeleteCameraDialog";
 import {
@@ -24,10 +23,8 @@ import {
   LuTrash2,
 } from "react-icons/lu";
 import { Reorder, useDragControls } from "framer-motion";
-import { IoMdArrowRoundBack } from "react-icons/io";
 import { Link } from "react-router-dom";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-import { isDesktop } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { Trans } from "react-i18next";
 import { useEnabledState, useRestart } from "@/api/ws";
@@ -78,12 +75,10 @@ const REORDER_SAVED_INDICATOR_MS = 1500;
 type ReorderSaveStatus = "idle" | "saving" | "saved";
 
 type CameraManagementViewProps = {
-  setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
   profileState?: ProfileState;
 };
 
 export default function CameraManagementView({
-  setUnsavedChanges,
   profileState,
 }: CameraManagementViewProps) {
   const { t } = useTranslation(["views/settings", "common"]);
@@ -91,12 +86,6 @@ export default function CameraManagementView({
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
-  const [viewMode, setViewMode] = useState<"settings" | "add" | "edit">(
-    "settings",
-  ); // Control view state
-  const [editCameraName, setEditCameraName] = useState<string | undefined>(
-    undefined,
-  ); // Track camera being edited
   const [showWizard, setShowWizard] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -226,14 +215,6 @@ export default function CameraManagementView({
     document.title = t("documentTitle.cameraManagement");
   }, [t]);
 
-  // Handle back navigation from add/edit form
-  const handleBack = useCallback(() => {
-    setViewMode("settings");
-    setEditCameraName(undefined);
-    setUnsavedChanges(false);
-    updateConfig();
-  }, [updateConfig, setUnsavedChanges]);
-
   return (
     <>
       <Toaster
@@ -244,157 +225,124 @@ export default function CameraManagementView({
       />
       <div className="flex size-full space-y-6">
         <div className="scrollbar-container flex-1 overflow-y-auto pb-2">
-          {viewMode === "settings" ? (
-            <>
-              <Heading as="h4" className="mb-2">
-                {t("cameraManagement.title")}
-              </Heading>
-              <p className="mb-6 max-w-5xl text-sm text-muted-foreground">
-                {t("cameraManagement.description")}
-              </p>
+          <Heading as="h4" className="mb-2">
+            {t("cameraManagement.title")}
+          </Heading>
+          <p className="mb-6 max-w-5xl text-sm text-muted-foreground">
+            {t("cameraManagement.description")}
+          </p>
 
-              <div className="w-full max-w-5xl space-y-6">
-                <div className="flex gap-2">
-                  <Button
-                    variant="select"
-                    onClick={() => setShowWizard(true)}
-                    className="mb-2 flex max-w-48 items-center gap-2"
-                  >
-                    <LuPlus className="h-4 w-4" />
-                    {t("cameraManagement.addCamera")}
-                  </Button>
-                  {enabledCameras.length + disabledCameras.length > 0 && (
-                    <Button
-                      variant="destructive"
-                      onClick={() => setShowDeleteDialog(true)}
-                      className="mb-2 flex max-w-48 items-center gap-2 text-white"
-                    >
-                      <LuTrash2 className="h-4 w-4" />
-                      {t("cameraManagement.deleteCamera")}
-                    </Button>
-                  )}
-                </div>
-
-                {(enabledCameras.length > 0 || disabledCameras.length > 0) && (
-                  <SettingsGroupCard
-                    title={
-                      <Trans ns="views/settings">
-                        cameraManagement.streams.title
-                      </Trans>
-                    }
-                  >
-                    <div className={SPLIT_ROW_CLASS_NAME}>
-                      <div className="space-y-1.5">
-                        <Label>{t("cameraManagement.streams.label")}</Label>
-                        <p className="hidden text-sm text-muted-foreground md:block">
-                          <Trans ns="views/settings">
-                            cameraManagement.streams.description
-                          </Trans>
-                        </p>
-                      </div>
-                      <div className="max-w-md space-y-1.5">
-                        <div className="space-y-3 rounded-lg bg-secondary p-4">
-                          {orderedCameras.length > 0 && (
-                            <Reorder.Group
-                              as="div"
-                              axis="y"
-                              values={orderedCameras}
-                              onReorder={setOrderedCameras}
-                              className="space-y-2"
-                            >
-                              {orderedCameras.map((camera) => (
-                                <ActiveCameraRow
-                                  key={camera}
-                                  camera={camera}
-                                  onConfigChanged={updateConfig}
-                                  onDragEnd={handleReorderDragEnd}
-                                  setRestartDialogOpen={setRestartDialogOpen}
-                                />
-                              ))}
-                            </Reorder.Group>
-                          )}
-                          {orderedCameras.length > 0 &&
-                            disabledCameras.length > 0 && (
-                              <div className="border-t border-border/40" />
-                            )}
-                          {disabledCameras.length > 0 && (
-                            <div className="space-y-2">
-                              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                                {t(
-                                  "cameraManagement.streams.disabledSubheading",
-                                )}
-                              </p>
-                              {disabledCameras.map((camera) => (
-                                <DisabledCameraRow
-                                  key={camera}
-                                  camera={camera}
-                                  onConfigChanged={updateConfig}
-                                  setRestartDialogOpen={setRestartDialogOpen}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <ReorderSaveStatusIndicator
-                          status={reorderSaveStatus}
-                        />
-                      </div>
-                      <p className="text-sm text-muted-foreground md:hidden">
-                        <Trans ns="views/settings">
-                          cameraManagement.streams.description
-                        </Trans>
-                      </p>
-                    </div>
-                  </SettingsGroupCard>
-                )}
-
-                {profileState &&
-                  profileState.allProfileNames.length > 0 &&
-                  enabledCameras.length > 0 && (
-                    <ProfileCameraEnableSection
-                      profileState={profileState}
-                      cameras={enabledCameras}
-                      config={config}
-                      onConfigChanged={updateConfig}
-                    />
-                  )}
-
-                {config?.lpr?.enabled && allCameras.length > 0 && (
-                  <CameraTypeSection
-                    cameras={allCameras}
-                    config={config}
-                    onConfigChanged={updateConfig}
-                    setRestartDialogOpen={setRestartDialogOpen}
-                  />
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="mb-4 flex items-center gap-2">
+          <div className="w-full max-w-5xl space-y-6">
+            <div className="flex gap-2">
+              <Button
+                variant="select"
+                onClick={() => setShowWizard(true)}
+                className="mb-2 flex max-w-48 items-center gap-2"
+              >
+                <LuPlus className="h-4 w-4" />
+                {t("cameraManagement.addCamera")}
+              </Button>
+              {enabledCameras.length + disabledCameras.length > 0 && (
                 <Button
-                  className={`flex items-center gap-2.5 rounded-lg`}
-                  aria-label={t("label.back", { ns: "common" })}
-                  size="sm"
-                  onClick={handleBack}
+                  variant="destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="mb-2 flex max-w-48 items-center gap-2 text-white"
                 >
-                  <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-                  {isDesktop && (
-                    <div className="text-primary">
-                      {t("button.back", { ns: "common" })}
-                    </div>
-                  )}
+                  <LuTrash2 className="h-4 w-4" />
+                  {t("cameraManagement.deleteCamera")}
                 </Button>
-              </div>
-              <div className="md:max-w-5xl">
-                <CameraEditForm
-                  cameraName={viewMode === "edit" ? editCameraName : undefined}
-                  onSave={handleBack}
-                  onCancel={handleBack}
+              )}
+            </div>
+
+            {(enabledCameras.length > 0 || disabledCameras.length > 0) && (
+              <SettingsGroupCard
+                title={
+                  <Trans ns="views/settings">
+                    cameraManagement.streams.title
+                  </Trans>
+                }
+              >
+                <div className={SPLIT_ROW_CLASS_NAME}>
+                  <div className="space-y-1.5">
+                    <Label>{t("cameraManagement.streams.label")}</Label>
+                    <p className="hidden text-sm text-muted-foreground md:block">
+                      <Trans ns="views/settings">
+                        cameraManagement.streams.description
+                      </Trans>
+                    </p>
+                  </div>
+                  <div className="max-w-md space-y-1.5">
+                    <div className="space-y-3 rounded-lg bg-secondary p-4">
+                      {orderedCameras.length > 0 && (
+                        <Reorder.Group
+                          as="div"
+                          axis="y"
+                          values={orderedCameras}
+                          onReorder={setOrderedCameras}
+                          className="space-y-2"
+                        >
+                          {orderedCameras.map((camera) => (
+                            <ActiveCameraRow
+                              key={camera}
+                              camera={camera}
+                              onConfigChanged={updateConfig}
+                              onDragEnd={handleReorderDragEnd}
+                              setRestartDialogOpen={setRestartDialogOpen}
+                            />
+                          ))}
+                        </Reorder.Group>
+                      )}
+                      {orderedCameras.length > 0 &&
+                        disabledCameras.length > 0 && (
+                          <div className="border-t border-border/40" />
+                        )}
+                      {disabledCameras.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                            {t("cameraManagement.streams.disabledSubheading")}
+                          </p>
+                          {disabledCameras.map((camera) => (
+                            <DisabledCameraRow
+                              key={camera}
+                              camera={camera}
+                              onConfigChanged={updateConfig}
+                              setRestartDialogOpen={setRestartDialogOpen}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <ReorderSaveStatusIndicator status={reorderSaveStatus} />
+                  </div>
+                  <p className="text-sm text-muted-foreground md:hidden">
+                    <Trans ns="views/settings">
+                      cameraManagement.streams.description
+                    </Trans>
+                  </p>
+                </div>
+              </SettingsGroupCard>
+            )}
+
+            {profileState &&
+              profileState.allProfileNames.length > 0 &&
+              enabledCameras.length > 0 && (
+                <ProfileCameraEnableSection
+                  profileState={profileState}
+                  cameras={enabledCameras}
+                  config={config}
+                  onConfigChanged={updateConfig}
                 />
-              </div>
-            </>
-          )}
+              )}
+
+            {config?.lpr?.enabled && allCameras.length > 0 && (
+              <CameraTypeSection
+                cameras={allCameras}
+                config={config}
+                onConfigChanged={updateConfig}
+                setRestartDialogOpen={setRestartDialogOpen}
+              />
+            )}
+          </div>
         </div>
       </div>
 
