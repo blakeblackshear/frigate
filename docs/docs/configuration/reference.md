@@ -840,8 +840,8 @@ cameras:
   # Required: name of the camera
   back:
     # Optional: Enable/Disable the camera (default: shown below).
-    # If disabled: config is used but no live stream and no capture etc.
-    # Events/Recordings are still viewable.
+    # When False, ffmpeg is not started and the camera is hidden from the UI
+    # (except Camera Management). Re-enabling requires a Frigate restart.
     enabled: True
     # Optional: camera type used for some Frigate features (default: shown below)
     # Options are "generic" and "lpr"

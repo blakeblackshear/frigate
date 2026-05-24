@@ -257,19 +257,38 @@ cameras:
 </TabItem>
 </ConfigTabs>
 
-### Disabling cameras
+### Camera state
 
-Cameras can be temporarily disabled through the Frigate UI and through [MQTT](/integrations/mqtt#frigatecamera_nameenabledset) to conserve system resources. When disabled, Frigate's ffmpeg processes are terminated — recording stops, object detection is paused, and the Live dashboard displays a blank image with a disabled message. Review items, tracked objects, and historical footage for disabled cameras can still be accessed via the UI.
+Each camera has three possible states, surfaced as a status selector in **Settings → Global configuration → Camera management**:
 
-:::note
+- **On** — streams are processed normally. Object detection, recording, and Live view are active.
+- **Off** — Frigate's ffmpeg processes are paused. Recording stops, object detection is paused, and the Live dashboard displays a blank image with a "Camera is off" message. The camera is still visible in the Live dashboard and its past review items, tracked objects, and historical footage remain accessible via the UI. This state does **not** persist across Frigate restarts; the camera returns to On after a restart.
+- **Disabled** — the change is saved to your configuration file (`enabled: False`). The camera stops immediately, Frigate stops ffmpeg processes, and all live and historical UI elements for the camera are no longer visible but remains retained on disk. The camera is still listed in **Settings → Global configuration → Camera management** so it can be re-enabled. **A restart of Frigate is required to bring a disabled camera back to On.**
 
-Disabling a camera via the Frigate UI or MQTT is temporary and does not persist through restarts of Frigate.
+#### Turning a camera on or off
 
-:::
+Turning a camera off is temporary and does not require a restart. The available controls are:
 
-For restreamed cameras, go2rtc remains active but does not use system resources for decoding or processing unless there are active external consumers (such as the Advanced Camera Card in Home Assistant using a go2rtc source).
+- The power button in the single-camera Live view header
+- The right-click context menu on a camera tile on the Live dashboard
+- The Camera management settings pane (status set to **Off**)
+- The mobile settings drawer on the single-camera Live view (admin users only)
+- The [MQTT topic](/integrations/mqtt#frigatecamera_nameenabledset) `frigate/<camera_name>/enabled/set` with payload `ON` or `OFF`
+- The Home Assistant integration via the [`camera.turn_on` / `camera.turn_off` actions](/integrations/home-assistant#camera-api)
 
-Note that disabling a camera through the config file (`enabled: False`) removes all related UI elements, including historical footage access. To retain access while disabling the camera, keep it enabled in the config and use the UI or MQTT to disable it temporarily.
+#### Disabling a camera
+
+Disabling a camera saves the change to your configuration file. Navigate to **Settings → Global configuration → Camera management** and set the camera's status to **Disabled**. Runtime processing stops immediately; the change persists across restarts.
+
+Re-enabling a disabled camera requires a restart of Frigate so that the ffmpeg processes and other camera-scoped resources can be initialized. The UI will prompt you to restart when you switch a disabled camera back to On.
+
+#### Restream behavior
+
+For both Off and Disabled cameras, go2rtc remains active but does not use system resources for decoding or processing unless there are active external consumers (such as the Advanced Camera Card in Home Assistant using a go2rtc source).
+
+#### Choosing Off versus Disabled
+
+If you want a camera's historical data (review items, tracked objects, footage) to stay accessible in the UI while you stop processing, set the camera to **Off**. If you want the camera fully removed from the Live dashboard, review filters, and other UI surfaces, set it to **Disabled**. The Disabled state still keeps the camera in Camera management so it can be re-enabled later; if you want to remove all traces of a camera including its configuration, delete it via Camera management instead.
 
 ### Live player error messages
 

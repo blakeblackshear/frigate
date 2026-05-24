@@ -33,10 +33,10 @@ The easiest way to define profiles is to use the Frigate UI. Profiles can also b
 <ConfigTabs>
 <TabItem value="ui">
 
-1. **Create a profile** — Navigate to <NavPath path="Settings > Camera configuration > Profiles" />. Click the **Add Profile** button, enter a name (and optionally a profile ID).
+1. **Create a profile** — Navigate to <NavPath path="Settings > Global configuration > Profiles" />. Click the **Add Profile** button, enter a name (and optionally a profile ID).
 2. **Configure overrides** — Navigate to a camera configuration section (e.g. Motion detection, Record, Notifications). In the top right, two buttons will appear - choose a camera and a profile from the profile selector to edit overrides for that camera and section. Only the fields you change will be stored as overrides — fields that require a restart are hidden since profiles are applied at runtime. You can click the **Remove Profile Override** button to clear overrides.
-3. **Activate a profile** — Use the **Profiles** option in Frigate's main menu to choose a profile. Alternatively, in Settings, navigate to <NavPath path="Settings > Camera configuration > Profiles" />, then choose a profile in the Active Profile dropdown to activate it. The active profile is also shown in the status bar at the bottom of the screen on desktop browsers.
-4. **Delete a profile** — Navigate to <NavPath path="Settings > Camera configuration > Profiles" />, then click the trash icon for a profile. This removes the profile definition and all camera overrides associated with it.
+3. **Activate a profile** — Use the **Profiles** option in Frigate's main menu to choose a profile. Alternatively, in Settings, navigate to <NavPath path="Settings > Global configuration > Profiles" />, then choose a profile in the Active Profile dropdown to activate it. The active profile is also shown in the status bar at the bottom of the screen on desktop browsers.
+4. **Delete a profile** — Navigate to <NavPath path="Settings > Global configuration > Profiles" />, then click the trash icon for a profile. This removes the profile definition and all camera overrides associated with it.
 
 </TabItem>
 <TabItem value="yaml">
@@ -135,10 +135,10 @@ A common use case is having different detection and notification settings based 
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Profiles" /> and create two profiles: **Home** and **Away**.
+1. Navigate to <NavPath path="Settings > Global configuration > Profiles" /> and create two profiles: **Home** and **Away**.
 2. From to the Camera configuration section in Settings, choose the **front_door** camera, and select the **Away** profile from the profile dropdown. Then, enable notifications from the Notifications pane, and set alert labels to `person` and `car` from the Review pane. Then, from the profile dropdown choose **Home** profile, then navigate to Notifications to disable notifications.
 3. For the **indoor_cam** camera, perform similar steps - configure the **Away** profile to enable the camera, detection, and recording. Configure the **Home** profile to disable the camera entirely for privacy.
-4. Activate the desired profile from <NavPath path="Settings > Camera configuration > Profiles" /> or from the **Profiles** option in Frigate's main menu.
+4. Activate the desired profile from <NavPath path="Settings > Global configuration > Profiles" /> or from the **Profiles** option in Frigate's main menu.
 
 </TabItem>
 <TabItem value="yaml">

@@ -306,7 +306,7 @@ Publishes the current health status of each role that is enabled (`audio`, `dete
 
 - `online`: Stream is running and being processed
 - `offline`: Stream is offline and is being restarted
-- `disabled`: Camera is currently disabled
+- `disabled`: Camera is currently turned off (either at runtime via the `enabled/set` topic, or persistently via the configuration file). See [Camera state](/configuration/live#camera-state) for the distinction.
 
 ### `frigate/<camera_name>/<object_name>`
 
@@ -368,11 +368,11 @@ The published value is the detected state class name (e.g., `open`, `closed`, `o
 
 ### `frigate/<camera_name>/enabled/set`
 
-Topic to turn Frigate's processing of a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn Frigate's processing of a camera on or off at runtime. Expected values are `ON` and `OFF`. The change is **not** persisted across Frigate restarts — the camera returns to the configured state on restart. To permanently disable a camera, use **Settings → Global configuration → Camera management** in the Frigate UI. See [Camera state](/configuration/live#camera-state) for the difference between turning a camera off and disabling it.
 
 ### `frigate/<camera_name>/enabled/state`
 
-Topic with current state of processing for a camera. Published values are `ON` and `OFF`.
+Topic with current runtime state of processing for a camera. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/detect/set`
 

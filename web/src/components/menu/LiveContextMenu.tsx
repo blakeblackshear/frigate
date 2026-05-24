@@ -320,7 +320,7 @@ export default function LiveContextMenu({
                   onClick={() => sendEnabled(isEnabled ? "OFF" : "ON")}
                 >
                   <div className="text-primary">
-                    {isEnabled ? t("camera.disable") : t("camera.enable")}
+                    {isEnabled ? t("camera.turnOff") : t("camera.turnOn")}
                   </div>
                 </div>
               </ContextMenuItem>

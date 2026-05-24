@@ -67,7 +67,7 @@ Additional cameras are simply added under the camera configuration section.
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > Management" /> and use the add camera button to configure each additional camera.
+Navigate to <NavPath path="Settings > Global configuration > Camera management" /> and use the add camera button to configure each additional camera.
 
 </TabItem>
 <TabItem value="yaml">
