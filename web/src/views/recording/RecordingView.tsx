@@ -44,6 +44,7 @@ import {
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import useSWR from "swr";
 import { TimeRange, TimelineType } from "@/types/timeline";
 import MobileCameraDrawer from "@/components/overlay/MobileCameraDrawer";
@@ -109,6 +110,7 @@ export function RecordingView({
 }: RecordingViewProps) {
   const { t } = useTranslation(["views/events", "components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -723,13 +725,17 @@ export function RecordingView({
                   setCustomShareTimestamp(initialTimestamp);
                   setShareTimestampOpen(true);
                 }}
-                onDebugReplayClick={() => {
-                  setDebugReplayRange({
-                    after: timeRange.before - 60,
-                    before: timeRange.before,
-                  });
-                  setDebugReplayMode("select");
-                }}
+                onDebugReplayClick={
+                  isAdmin
+                    ? () => {
+                        setDebugReplayRange({
+                          after: timeRange.before - 60,
+                          before: timeRange.before,
+                        });
+                        setDebugReplayMode("select");
+                      }
+                    : undefined
+                }
                 onExportClick={() => {
                   const now = new Date(timeRange.before * 1000);
                   now.setHours(now.getHours() - 1);

@@ -94,9 +94,15 @@ export default function EventMenu({
               },
             );
           } else {
-            toast.error(t("dialog.toast.error", { error: errorMessage }), {
-              position: "top-center",
-            });
+            toast.error(
+              t("dialog.toast.error", {
+                ns: "views/replay",
+                error: errorMessage,
+              }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .finally(() => {
@@ -177,7 +183,7 @@ export default function EventMenu({
                 {t("itemMenu.findSimilar.label")}
               </DropdownMenuItem>
             )}
-            {event.has_clip && (
+            {isAdmin && event.has_clip && (
               <DropdownMenuItem
                 className="cursor-pointer"
                 disabled={isStarting}

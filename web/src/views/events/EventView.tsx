@@ -66,6 +66,7 @@ import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
 import { TimeRange } from "@/types/timeline";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import {
   useCameraMotionNextTimestamp,
   useCameraMotionOnlyRanges,
@@ -1008,27 +1009,29 @@ function MotionReview({
   const { t } = useTranslation(["views/events", "common"]);
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
+  const allowedCameras = useAllowedCameras();
 
   const reviewCameras = useMemo(() => {
     if (!config) {
       return [];
     }
 
-    let cameras;
-    if (!filter || !filter.cameras) {
-      cameras = Object.values(config.cameras).filter(
-        (cam) => !isReplayCamera(cam.name),
-      );
-    } else {
-      const filteredCams = filter.cameras;
-
-      cameras = Object.values(config.cameras).filter(
-        (cam) => filteredCams.includes(cam.name) && !isReplayCamera(cam.name),
-      );
-    }
+    const selectedCams = filter?.cameras;
+    const cameras = Object.values(config.cameras).filter((cam) => {
+      if (isReplayCamera(cam.name)) {
+        return false;
+      }
+      if (!allowedCameras.includes(cam.name)) {
+        return false;
+      }
+      if (selectedCams && !selectedCams.includes(cam.name)) {
+        return false;
+      }
+      return true;
+    });
 
     return cameras.sort((a, b) => a.ui.order - b.ui.order);
-  }, [config, filter]);
+  }, [config, filter, allowedCameras]);
 
   const videoPlayersRef = useRef<{ [camera: string]: PreviewController }>({});
 

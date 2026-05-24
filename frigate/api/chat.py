@@ -547,9 +547,21 @@ async def _execute_get_live_context(
     camera: str,
     allowed_cameras: List[str],
 ) -> Dict[str, Any]:
+    # Reject wildcards explicitly so models retry with a real camera name
+    # instead of silently fanning out across every camera.
+    if camera in ("*", "all"):
+        return {
+            "error": (
+                "get_live_context requires a single camera name; wildcards "
+                "are not supported. Call this tool once per camera."
+            ),
+            "available_cameras": allowed_cameras,
+        }
+
     if camera not in allowed_cameras:
         return {
             "error": f"Camera '{camera}' not found or access denied",
+            "available_cameras": allowed_cameras,
         }
 
     if camera not in request.app.frigate_config.cameras:
@@ -721,7 +733,14 @@ async def _execute_tool_internal(
                 "Arguments: %s",
                 json.dumps(arguments),
             )
-            return {"error": "Camera parameter is required"}
+            return {
+                "error": (
+                    "get_live_context requires a single camera name; "
+                    "wildcards and empty values are not supported. "
+                    "Call this tool once per camera."
+                ),
+                "available_cameras": allowed_cameras,
+            }
         return await _execute_get_live_context(request, camera, allowed_cameras)
     elif tool_name == "start_camera_watch":
         return await _execute_start_camera_watch(request, arguments)

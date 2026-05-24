@@ -579,7 +579,9 @@ class RecordingExporter(threading.Thread):
         else:
             chapters_path = self._build_chapter_metadata_file(recordings)
             chapter_args = (
-                f" -i {chapters_path} -map 0 -map_metadata 1" if chapters_path else ""
+                f" -i {chapters_path} -map 0 -dn -map_metadata 1"
+                if chapters_path
+                else ""
             )
             ffmpeg_cmd = (
                 f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input}{chapter_args} -c copy -movflags +faststart"

@@ -16,6 +16,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import {
   useCallback,
@@ -589,7 +594,7 @@ function MobileMenuItem({
   return (
     <div
       className={cn(
-        "inline-flex h-10 w-full cursor-pointer items-center justify-between whitespace-nowrap rounded-md px-4 py-2 pr-2 text-sm font-medium text-primary-variant disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex h-10 w-full cursor-pointer items-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-primary-variant disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
       onClick={() => {
@@ -600,7 +605,6 @@ function MobileMenuItem({
       <div className="w-full">
         {label ?? <div>{t("menu." + item.key)}</div>}
       </div>
-      <LuChevronRight className="size-4" />
     </div>
   );
 }
@@ -613,6 +617,39 @@ export default function Settings() {
   const [sectionStatusByKey, setSectionStatusByKey] = useState<
     Partial<Record<SettingsType, SectionStatus>>
   >({});
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    () =>
+      // all collapsed by default
+      new Set(
+        settingsGroups.filter((g) => g.items.length > 1).map((g) => g.label),
+      ),
+  );
+
+  const toggleGroupCollapsed = useCallback((label: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  }, []);
+
+  // Auto-expand the group containing the active page whenever pageToggle changes
+  useEffect(() => {
+    const containingGroup = settingsGroups.find((group) =>
+      group.items.some((item) => item.key === pageToggle),
+    );
+    if (!containingGroup) return;
+    setCollapsedGroups((prev) => {
+      if (!prev.has(containingGroup.label)) return prev;
+      const next = new Set(prev);
+      next.delete(containingGroup.label);
+      return next;
+    });
+  }, [pageToggle]);
 
   const { data: config } = useSWR<FrigateConfig>("config");
   const { data: profilesData } = useSWR<ProfilesApiResponse>("profiles");
@@ -1611,34 +1648,49 @@ export default function Settings() {
                   visibleSettingsViews.includes(item.key as SettingsType),
                 );
                 if (filteredItems.length === 0) return null;
+                const isMultiItem = filteredItems.length > 1;
+                const renderedExpanded =
+                  !isMultiItem || !collapsedGroups.has(group.label);
+                const items = filteredItems.map((item) => (
+                  <MobileMenuItem
+                    key={item.key}
+                    item={item}
+                    className={cn(filteredItems.length == 1 && "pl-2")}
+                    label={renderMenuItemLabel(item.key as SettingsType)}
+                    onSelect={(key) => {
+                      if (
+                        !isAdmin &&
+                        !ALLOWED_VIEWS_FOR_VIEWER.includes(key as SettingsType)
+                      ) {
+                        setPageToggle("uiSettings");
+                      } else {
+                        setPageToggle(key as SettingsType);
+                      }
+                      setContentMobileOpen(true);
+                    }}
+                  />
+                ));
                 return (
                   <div key={group.label} className="mb-3">
-                    {filteredItems.length > 1 && (
-                      <h3 className="mb-2 ml-2 text-sm font-medium text-secondary-foreground">
-                        <div>{t("menu." + group.label)}</div>
-                      </h3>
+                    {isMultiItem ? (
+                      <Collapsible
+                        open={renderedExpanded}
+                        onOpenChange={() => toggleGroupCollapsed(group.label)}
+                      >
+                        <CollapsibleTrigger className="flex min-h-10 w-full items-center justify-between rounded-md py-2 pl-2 pr-2 text-sm font-medium text-secondary-foreground">
+                          <div>{t("menu." + group.label)}</div>
+                          <LuChevronRight
+                            className={cn(
+                              "size-4 shrink-0 transition-transform duration-200",
+                              renderedExpanded && "rotate-90",
+                            )}
+                          />
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>{items}</CollapsibleContent>
+                      </Collapsible>
+                    ) : (
+                      items
                     )}
-                    {filteredItems.map((item) => (
-                      <MobileMenuItem
-                        key={item.key}
-                        item={item}
-                        className={cn(filteredItems.length == 1 && "pl-2")}
-                        label={renderMenuItemLabel(item.key as SettingsType)}
-                        onSelect={(key) => {
-                          if (
-                            !isAdmin &&
-                            !ALLOWED_VIEWS_FOR_VIEWER.includes(
-                              key as SettingsType,
-                            )
-                          ) {
-                            setPageToggle("uiSettings");
-                          } else {
-                            setPageToggle(key as SettingsType);
-                          }
-                          setContentMobileOpen(true);
-                        }}
-                      />
-                    ))}
                   </div>
                 );
               })}
@@ -1940,48 +1992,74 @@ export default function Settings() {
                         </SidebarMenuItem>
                       </SidebarMenu>
                     ) : (
-                      <>
-                        <SidebarGroupLabel
-                          className={cn(
-                            "ml-2 cursor-default pl-0 text-sm",
-                            filteredItems.some(
-                              (item) => pageToggle === item.key,
-                            )
-                              ? "text-primary"
-                              : "text-sidebar-foreground/80",
-                          )}
-                        >
-                          <div>{t("menu." + group.label)}</div>
-                        </SidebarGroupLabel>
-                        <SidebarMenuSub className="mx-2 border-0">
-                          {filteredItems.map((item) => (
-                            <SidebarMenuSubItem key={item.key}>
-                              <SidebarMenuSubButton
-                                className="h-auto w-full py-1.5"
-                                isActive={pageToggle === item.key}
-                                onClick={() => {
-                                  if (
-                                    !isAdmin &&
-                                    !ALLOWED_VIEWS_FOR_VIEWER.includes(
-                                      item.key as SettingsType,
-                                    )
-                                  ) {
-                                    setPageToggle("uiSettings");
-                                  } else {
-                                    setPageToggle(item.key as SettingsType);
-                                  }
-                                }}
-                              >
-                                <div className="w-full cursor-pointer">
-                                  {renderMenuItemLabel(
-                                    item.key as SettingsType,
+                      (() => {
+                        const hasActiveItem = filteredItems.some(
+                          (item) => pageToggle === item.key,
+                        );
+                        const renderedExpanded = !collapsedGroups.has(
+                          group.label,
+                        );
+                        return (
+                          <Collapsible
+                            open={renderedExpanded}
+                            onOpenChange={() =>
+                              toggleGroupCollapsed(group.label)
+                            }
+                          >
+                            <SidebarGroupLabel
+                              asChild
+                              className={cn(
+                                "ml-2 pl-0 text-sm",
+                                hasActiveItem
+                                  ? "text-primary"
+                                  : "text-sidebar-foreground/80",
+                              )}
+                            >
+                              <CollapsibleTrigger className="flex w-full items-center justify-between">
+                                <div>{t("menu." + group.label)}</div>
+                                <LuChevronRight
+                                  className={cn(
+                                    "size-4 shrink-0 transition-transform duration-200",
+                                    renderedExpanded && "rotate-90",
                                   )}
-                                </div>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
-                        </SidebarMenuSub>
-                      </>
+                                />
+                              </CollapsibleTrigger>
+                            </SidebarGroupLabel>
+                            <CollapsibleContent>
+                              <SidebarMenuSub className="mx-2 border-0 md:mx-0">
+                                {filteredItems.map((item) => (
+                                  <SidebarMenuSubItem key={item.key}>
+                                    <SidebarMenuSubButton
+                                      className="h-auto w-full py-1.5"
+                                      isActive={pageToggle === item.key}
+                                      onClick={() => {
+                                        if (
+                                          !isAdmin &&
+                                          !ALLOWED_VIEWS_FOR_VIEWER.includes(
+                                            item.key as SettingsType,
+                                          )
+                                        ) {
+                                          setPageToggle("uiSettings");
+                                        } else {
+                                          setPageToggle(
+                                            item.key as SettingsType,
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      <div className="w-full cursor-pointer">
+                                        {renderMenuItemLabel(
+                                          item.key as SettingsType,
+                                        )}
+                                      </div>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                ))}
+                              </SidebarMenuSub>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        );
+                      })()
                     )}
                   </SidebarGroup>
                 );

@@ -29,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { StartExportResponse } from "@/types/export";
 import { ShareTimestampContent } from "./ShareTimestampDialog";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type DrawerMode =
   | "none"
@@ -109,6 +110,7 @@ export default function MobileReviewSettingsDrawer({
     "views/replay",
     "common",
   ]);
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
   const [exportTab, setExportTab] = useState<ExportTab>("export");
@@ -388,7 +390,7 @@ export default function MobileReviewSettingsDrawer({
             {t("filter")}
           </Button>
         )}
-        {features.includes("debug-replay") && (
+        {isAdmin && features.includes("debug-replay") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
             aria-label={t("title", { ns: "views/replay" })}
