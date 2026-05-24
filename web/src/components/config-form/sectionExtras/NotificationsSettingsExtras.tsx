@@ -42,7 +42,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { selectTriggerClassName } from "@/components/ui/select";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { use24HourTime } from "@/hooks/use-date-utils";
 import FilterSwitch from "@/components/filter/FilterSwitch";
@@ -816,11 +815,11 @@ export function CameraNotificationSwitch({
 
       {!isSuspended ? (
         <DropdownMenu>
-          <DropdownMenuTrigger
-            className={cn(selectTriggerClassName, "w-auto gap-2")}
-          >
-            {t("notification.suspendTime.suspend")}
-            <LuChevronDown className="h-4 w-4 opacity-50" />
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="outline" className="flex gap-2">
+              {t("notification.suspendTime.suspend")}
+              <LuChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => handleSuspend("5")}>

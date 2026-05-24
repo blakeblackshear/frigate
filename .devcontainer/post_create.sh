@@ -13,8 +13,12 @@ fi
 # Frigate normal container runs as root, so it have permission to create
 # the folders. But the devcontainer runs as the host user, so we need to
 # create the folders and give the host user permission to write to them.
-sudo mkdir -p /media/frigate
-sudo chown -R "$(id -u):$(id -g)" /media/frigate
+SUDO=""
+if [[ $EUID -ne 0 ]]; then
+  SUDO="sudo"
+fi
+$SUDO mkdir -p /media/frigate
+$SUDO chown -R "$(id -u):$(id -g)" /media/frigate
 
 # When started as a service, LIBAVFORMAT_VERSION_MAJOR is defined in the
 # s6 service file. For dev, where frigate is started from an interactive
