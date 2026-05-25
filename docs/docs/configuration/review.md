@@ -130,3 +130,43 @@ By default a review item will be created if any `review -> alerts -> labels` and
 Because zones don't apply to audio, audio labels will always be marked as a detection by default.
 
 :::
+
+## Reviewing Motion
+
+The Review page also can show periods of motion that didn't produce a tracked object, and provides a way to search past recordings for motion in a specific region. These tools complement the alerts and detections workflow above — see [Tuning Motion Detection](motion_detection.md) for how the underlying motion detector is configured.
+
+### Motion Previews
+
+The Motion Previews pane shows preview clips for periods of significant motion that did not produce a tracked object. It is useful for spotting things that motion detection picked up but object detection did not, which can help validate tuning or catch missed objects.
+
+On the <NavPath path="Review > Motion" /> page, click the 3-dots menu on a camera and choose **Motion Previews**. Each card represents a continuous range of motion-only activity and plays back the recorded preview for that range. A heatmap overlay dims areas of the frame with no motion so the moving regions stand out.
+
+The pane provides a few controls:
+
+- **Speed** — speeds up or slows down all of the preview clips at once.
+- **Dim** — controls how strongly non-motion areas are darkened by the heatmap overlay. Higher values increase motion area visibility.
+- **Filter** — opens a 16×16 grid overlaid on a snapshot of the camera. Select one or more cells to only show clips with motion in those regions. This is helpful for filtering out motion in areas like a busy street while keeping motion in your driveway.
+
+Clicking a preview clip seeks the recording player to that timestamp so you can review the full footage.
+
+### Motion Search
+
+Motion Search lets you scan recorded footage for changes inside a region of interest you draw on the camera. Unlike Motion Previews, which surfaces what Frigate's motion detector flagged in real time, Motion Search re-analyzes the saved recordings, so it can find changes that were missed (for example, an object that appeared while motion detection was paused by `lightning_threshold`, or in a region that is normally motion-masked).
+
+To start a search, click the 3-dots menu on a camera in the <NavPath path="Review > Motion" /> page and choose **Motion Search**. In the dialog:
+
+1. Pick the camera and time range to scan.
+2. Draw a polygon on the camera frame to define the region of interest.
+3. Adjust the search parameters if needed:
+
+| Field                     | Description                                                                                                                                                                                                                                                                                                    |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sensitivity Threshold** | Per-pixel luminance change required to count as motion inside the ROI. Behaves like Frigate's motion detection `threshold` setting.                                                                                                                                                                            |
+| **Minimum Change Area**   | Minimum percentage of the region of interest that must change for a frame to be considered significant. Raise it to ignore small movements (leaves, distant motion); lower it when the object you care about only covers a small slice of the ROI.                                                             |
+| **Frame Skip**            | Number of frames to skip between samples — at a camera recording 20 fps, a skip value of 20 takes motion samples roughly once per second. Higher values scan much faster and are usually the right choice; lower it only when you need to catch the exact appearance or disappearance of a fast-moving object. |
+| **Maximum Results**       | Maximum number of matching timestamps to return.                                                                                                                                                                                                                                                               |
+| **Parallel mode**         | Process multiple recording segments in parallel. Speeds up large time ranges at the cost of higher CPU usage.                                                                                                                                                                                                  |
+
+Once running, Frigate scans the recording segments that overlap the time range and reports timestamps where changes were detected inside the polygon, along with the percentage of the ROI that changed. Clicking a result seeks the player to that moment so you can review what happened.
+
+The status panel shows live progress and metrics such as how many segments were scanned, how many were skipped because no motion was recorded for that segment (using the stored motion heatmap), how many frames were decoded, and the total wall-clock time. Segments with no recorded motion in the selected ROI are skipped automatically, which is what makes searching long time ranges practical.

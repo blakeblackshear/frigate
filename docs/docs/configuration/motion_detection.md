@@ -197,3 +197,7 @@ This option is handy when you want to prevent large transient changes from trigg
 When the skip threshold is exceeded, **no motion is reported** for that frame, meaning **nothing is recorded** for that frame. That means you can miss something important, like a PTZ camera auto-tracking an object or activity while the camera is moving. If you prefer to guarantee that every frame is saved, leave this unset and accept occasional recordings containing scene noise — they typically only take up a few megabytes and are quick to scan in the timeline UI.
 
 :::
+
+## Reviewing Detected Motion
+
+To review what the detector picked up — or to search past recordings for motion in a specific region — see [Reviewing Motion](review.md#reviewing-motion) on the Review page.
