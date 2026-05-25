@@ -263,8 +263,9 @@ export default function ObjectMaskEditPane({
               },
             );
             updateConfig();
-            // Only publish WS state for base config when mask has a name
-            if (!editingProfile && maskName) {
+            // Only publish WS state for base config when mask has a name and
+            // wasn't renamed (the hook is bound to the old name).
+            if (!editingProfile && maskName && !renamingMask) {
               sendObjectMaskState(enabled ? "ON" : "OFF");
             }
           } else {
@@ -389,6 +390,7 @@ export default function ObjectMaskEditPane({
                 placeholderName={t(
                   "masksAndZones.objectMasks.name.placeholder",
                 )}
+                idDisabled={!!editingProfile && polygon.name.length > 0}
               />
               <FormField
                 control={form.control}

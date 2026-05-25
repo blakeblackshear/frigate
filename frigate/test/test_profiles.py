@@ -178,6 +178,141 @@ class TestCameraProfileConfig(unittest.TestCase):
         with self.assertRaises(ValidationError):
             FrigateConfig(**config_data)
 
+    def test_profile_zone_without_base_rejected(self):
+        """Profile defining a zone not present on the base camera is rejected."""
+        from pydantic import ValidationError
+
+        config_data = {
+            "mqtt": {"host": "mqtt"},
+            "profiles": {
+                "armed": {"friendly_name": "Armed"},
+            },
+            "cameras": {
+                "front": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            }
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    "zones": {
+                        "front_yard": {"coordinates": "0,0,100,0,100,100,0,100"},
+                    },
+                    "profiles": {
+                        "armed": {
+                            "zones": {
+                                "phantom": {
+                                    "coordinates": "0,0,50,0,50,50,0,50",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+        with self.assertRaises(ValidationError) as ctx:
+            FrigateConfig(**config_data)
+        self.assertIn("phantom", str(ctx.exception))
+
+    def test_profile_motion_mask_without_base_rejected(self):
+        """Profile defining a motion mask not present on the base camera is rejected."""
+        from pydantic import ValidationError
+
+        config_data = {
+            "mqtt": {"host": "mqtt"},
+            "profiles": {
+                "armed": {"friendly_name": "Armed"},
+            },
+            "cameras": {
+                "front": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            }
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    "motion": {
+                        "mask": {
+                            "base_mask": {
+                                "coordinates": "0,0,100,0,100,100,0,100",
+                            },
+                        },
+                    },
+                    "profiles": {
+                        "armed": {
+                            "motion": {
+                                "mask": {
+                                    "phantom_mask": {
+                                        "coordinates": "0,0,50,0,50,50,0,50",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+        with self.assertRaises(ValidationError) as ctx:
+            FrigateConfig(**config_data)
+        self.assertIn("phantom_mask", str(ctx.exception))
+
+    def test_profile_overrides_matching_base_accepted(self):
+        """Profile overrides that reference existing base zones/masks parse cleanly."""
+        config_data = {
+            "mqtt": {"host": "mqtt"},
+            "profiles": {
+                "armed": {"friendly_name": "Armed"},
+            },
+            "cameras": {
+                "front": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            }
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    "zones": {
+                        "front_yard": {"coordinates": "0,0,100,0,100,100,0,100"},
+                    },
+                    "motion": {
+                        "mask": {
+                            "tree": {
+                                "coordinates": "0,0,100,0,100,100,0,100",
+                            },
+                        },
+                    },
+                    "profiles": {
+                        "armed": {
+                            "zones": {
+                                "front_yard": {
+                                    "coordinates": "0,0,50,0,50,50,0,50",
+                                    "inertia": 5,
+                                },
+                            },
+                            "motion": {
+                                "mask": {
+                                    "tree": {
+                                        "coordinates": "0,0,75,0,75,75,0,75",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+        config = FrigateConfig(**config_data)
+        assert "armed" in config.cameras["front"].profiles
+
 
 class TestProfileInConfig(unittest.TestCase):
     """Test that profiles parse correctly in FrigateConfig."""

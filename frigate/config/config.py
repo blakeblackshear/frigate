@@ -326,6 +326,47 @@ def verify_required_zones_exist(camera_config: CameraConfig) -> None:
             )
 
 
+def verify_profile_overrides_match_base(camera_config: CameraConfig) -> None:
+    """Verify that profile zone and mask IDs reference entries defined on the base camera."""
+    for profile_name, profile in camera_config.profiles.items():
+        if profile.zones:
+            for zone_name in profile.zones:
+                if zone_name not in camera_config.zones:
+                    raise ValueError(
+                        f"Camera '{camera_config.name}' profile '{profile_name}' defines "
+                        f"zone '{zone_name}' that does not exist on the base config"
+                    )
+
+        if profile.motion and profile.motion.mask:
+            for mask_name in profile.motion.mask:
+                if mask_name not in camera_config.motion.mask:
+                    raise ValueError(
+                        f"Camera '{camera_config.name}' profile '{profile_name}' defines "
+                        f"motion mask '{mask_name}' that does not exist on the base config"
+                    )
+
+        if profile.objects:
+            for mask_name in profile.objects.mask or {}:
+                if mask_name not in (camera_config.objects.mask or {}):
+                    raise ValueError(
+                        f"Camera '{camera_config.name}' profile '{profile_name}' defines "
+                        f"object mask '{mask_name}' that does not exist on the base config"
+                    )
+            for label, filter_config in (profile.objects.filters or {}).items():
+                base_filter = (camera_config.objects.filters or {}).get(label)
+                profile_filter_masks = (
+                    filter_config.mask if filter_config else None
+                ) or {}
+                base_filter_masks = (base_filter.mask if base_filter else None) or {}
+                for mask_name in profile_filter_masks:
+                    if mask_name not in base_filter_masks:
+                        raise ValueError(
+                            f"Camera '{camera_config.name}' profile '{profile_name}' defines "
+                            f"object mask '{mask_name}' for '{label}' that does not exist "
+                            f"on the base config"
+                        )
+
+
 def verify_autotrack_zones(camera_config: CameraConfig) -> ValueError | None:
     """Verify that required_zones are specified when autotracking is enabled."""
     if (
@@ -952,6 +993,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
             verify_required_zones_exist(camera_config)
+            verify_profile_overrides_match_base(camera_config)
             verify_autotrack_zones(camera_config)
             verify_motion_and_detect(camera_config)
             verify_objects_track(camera_config, labelmap_objects)

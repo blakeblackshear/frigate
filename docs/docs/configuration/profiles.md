@@ -126,7 +126,9 @@ Only the fields you explicitly set in a profile override are applied. All other 
 
 ## Activating Profiles
 
-Profiles can be activated and deactivated from the Frigate UI. Open the Settings cog and select **Profiles** from the submenu to see all defined profiles. From there you can activate any profile or deactivate the current one. The active profile is indicated in the UI so you always know which profile is in effect.
+Profiles can be activated and deactivated via the Frigate UI, [MQTT](/integrations/mqtt#frigateprofileset), or the Home Assistant integration.
+
+In the Frigate UI, open the Settings cog and select **Profiles** from the submenu to see all defined profiles. From there you can activate any profile or deactivate the current one. The active profile is indicated in the UI so you always know which profile is in effect.
 
 ## Example: Home / Away Setup
 
@@ -207,3 +209,27 @@ In this example:
 - **Away profile**: The front door camera enables notifications and tracks specific alert labels. The indoor camera is fully enabled with detection and recording.
 - **Home profile**: The front door camera disables notifications. The indoor camera is completely disabled for privacy.
 - **No profile active**: All cameras use their base configuration values.
+
+## FAQ
+
+### Can I define a zone or mask in a profile but not have it in the base config?
+
+No. Profiles are pure overrides. Every zone and mask defined under a profile must reference an entry that already exists on the base camera config. Configurations that introduce profile-only zones or masks are rejected at startup.
+
+If you want a zone or mask to be active only under a specific profile, define it on the base config with `enabled: false`, then enable it in that profile's overrides.
+
+### How do I revert a profile zone or mask override back to the base configuration?
+
+Delete the override. In the Frigate UI, edit the profile and use the "Revert override" action (the trash can icon) on the zone or mask. The base entry is left untouched, and once the override is removed the profile inherits the base values for that zone or mask.
+
+### Can multiple profiles be active at the same time?
+
+No. Only one profile can be active at a time. Activating a new profile automatically deactivates the current one.
+
+### What happens to my profile overrides if I delete a zone or mask from the base?
+
+When you delete a base zone or mask in the Frigate UI, any profile overrides for that entry are deleted automatically as part of the same operation. If you remove a base entry by editing your config file directly and leave a profile override behind, the config will fail validation at startup until the orphaned override is removed as well.
+
+### Why are some settings missing when I configure a profile override?
+
+Fields that require a Frigate restart to take effect cannot be overridden by profiles, since profiles are applied at runtime without restarting. Those fields are hidden when editing a profile override and can only be changed on the base configuration.
