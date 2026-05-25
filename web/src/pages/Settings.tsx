@@ -15,7 +15,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   Collapsible,
@@ -1652,8 +1651,6 @@ export default function Settings() {
                 const isMultiItem = filteredItems.length > 1;
                 const renderedExpanded =
                   !isMultiItem || !collapsedGroups.has(group.label);
-                const showCameraBadge =
-                  group.label === "cameras" && !!selectedCamera;
                 const items = filteredItems.map((item) => (
                   <MobileMenuItem
                     key={item.key}
@@ -1681,7 +1678,16 @@ export default function Settings() {
                         onOpenChange={() => toggleGroupCollapsed(group.label)}
                       >
                         <CollapsibleTrigger className="flex min-h-10 w-full items-center justify-between rounded-md py-2 pl-2 pr-2 text-sm font-medium text-secondary-foreground">
-                          <div>{t("menu." + group.label)}</div>
+                          <div className="flex flex-col justify-start gap-0.5 text-left">
+                            {t("menu." + group.label)}
+                            {group.label === "cameras" &&
+                              renderedExpanded &&
+                              selectedCamera && (
+                                <div className="max-w-full break-words text-xs text-secondary-foreground/80 smart-capitalize">
+                                  <CameraNameLabel camera={selectedCamera} />
+                                </div>
+                              )}
+                          </div>
                           <LuChevronRight
                             className={cn(
                               "size-4 shrink-0 transition-transform duration-200",
@@ -1689,19 +1695,7 @@ export default function Settings() {
                             )}
                           />
                         </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          {showCameraBadge && (
-                            <div className="mb-2 ml-4 mr-4 mt-2">
-                              <Badge
-                                variant="outline"
-                                className="max-w-full break-words smart-capitalize"
-                              >
-                                <CameraNameLabel camera={selectedCamera} />
-                              </Badge>
-                            </div>
-                          )}
-                          {items}
-                        </CollapsibleContent>
+                        <CollapsibleContent>{items}</CollapsibleContent>
                       </Collapsible>
                     ) : (
                       items
@@ -2030,8 +2024,33 @@ export default function Settings() {
                                   : "text-sidebar-foreground/80",
                               )}
                             >
-                              <CollapsibleTrigger className="flex w-full items-center justify-between">
-                                <div>{t("menu." + group.label)}</div>
+                              <CollapsibleTrigger
+                                className={cn(
+                                  "flex w-full items-center justify-between",
+                                  renderedExpanded &&
+                                    group.label == "cameras" &&
+                                    "mb-2",
+                                )}
+                              >
+                                <div className="flex flex-col justify-start gap-0.5 text-left">
+                                  {t("menu." + group.label)}
+                                  {group.label === "cameras" &&
+                                    renderedExpanded &&
+                                    selectedCamera && (
+                                      <div
+                                        className={cn(
+                                          "max-w-full break-words text-xs smart-capitalize",
+                                          hasActiveItem
+                                            ? "text-primary/60"
+                                            : "text-sidebar-foreground/80",
+                                        )}
+                                      >
+                                        <CameraNameLabel
+                                          camera={selectedCamera}
+                                        />
+                                      </div>
+                                    )}
+                                </div>
                                 <LuChevronRight
                                   className={cn(
                                     "size-4 shrink-0 transition-transform duration-200",
@@ -2042,22 +2061,6 @@ export default function Settings() {
                             </SidebarGroupLabel>
                             <CollapsibleContent>
                               <SidebarMenuSub className="mx-2 border-0 md:mx-0">
-                                {group.label === "cameras" &&
-                                  selectedCamera && (
-                                    <li
-                                      className="mb-1 ml-0 mr-3 mt-0"
-                                      aria-hidden="true"
-                                    >
-                                      <Badge
-                                        variant="outline"
-                                        className="max-w-full break-words smart-capitalize"
-                                      >
-                                        <CameraNameLabel
-                                          camera={selectedCamera}
-                                        />
-                                      </Badge>
-                                    </li>
-                                  )}
                                 {filteredItems.map((item) => (
                                   <SidebarMenuSubItem key={item.key}>
                                     <SidebarMenuSubButton
