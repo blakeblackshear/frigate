@@ -94,6 +94,28 @@ export default function ZoneEditPane({
   const zoneName = polygon?.name || "";
   const { send: sendZoneState } = useZoneState(polygon?.camera || "", zoneName);
 
+  const isExistingZone = !!polygon && polygon.name.length > 0;
+
+  const idDisabled = useMemo(() => {
+    if (!isExistingZone || !polygon) {
+      return false;
+    }
+    if (editingProfile) {
+      return true;
+    }
+    const cam = config?.cameras[polygon.camera];
+    if (!cam) {
+      return false;
+    }
+    const inRequiredZones =
+      cam.review.alerts.required_zones.includes(polygon.name) ||
+      cam.review.detections.required_zones.includes(polygon.name);
+    const hasProfileOverride = Object.values(cam.profiles ?? {}).some(
+      (profile) => profile?.zones && polygon.name in profile.zones,
+    );
+    return inRequiredZones || hasProfileOverride;
+  }, [config, polygon, editingProfile, isExistingZone]);
+
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
       return config.cameras[polygon.camera];
@@ -419,6 +441,7 @@ export default function ZoneEditPane({
             toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
               position: "top-center",
             });
+            setIsLoading(false);
             return;
           }
 
@@ -444,6 +467,7 @@ export default function ZoneEditPane({
             toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
               position: "top-center",
             });
+            setIsLoading(false);
             return;
           }
         }
@@ -527,8 +551,9 @@ export default function ZoneEditPane({
               },
             );
             updateConfig();
-            // Only publish WS state for base config when zone has a name
-            if (!editingProfile && polygon?.name) {
+            // Only publish WS state for base config when zone has a name and
+            // wasn't renamed (the hook is bound to the old name).
+            if (!editingProfile && polygon?.name && !renamingZone) {
               sendZoneState(enabled ? "ON" : "OFF");
             }
           } else {
@@ -650,6 +675,7 @@ export default function ZoneEditPane({
             nameLabel={t("masksAndZones.zones.name.title")}
             nameDescription={t("masksAndZones.zones.name.tips")}
             placeholderName={t("masksAndZones.zones.name.inputPlaceHolder")}
+            idDisabled={idDisabled}
           />
           <FormField
             control={form.control}
