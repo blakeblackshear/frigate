@@ -12,6 +12,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
+import pytz
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
@@ -50,6 +51,14 @@ class PlaybackSourceEnum(str, Enum):
     preview = "preview"
 
 
+class ChaptersEnum(str, Enum):
+    # One chapter per recording segment, titled with the segment's
+    # wallclock start time in strict ISO 8601 form. Lets viewers map
+    # output playback time back to wallclock without reading a timestamp
+    # overlay via OCR.
+    recording_segments = "recording_segments"
+
+
 class RecordingExporter(threading.Thread):
     """Exports a specific set of recordings for a camera to storage as a single file."""
 
@@ -64,6 +73,7 @@ class RecordingExporter(threading.Thread):
         end_time: int,
         playback_factor: PlaybackFactorEnum,
         playback_source: PlaybackSourceEnum,
+        chapters: Optional[ChaptersEnum] = None,
     ) -> None:
         super().__init__()
         self.config = config
@@ -75,6 +85,7 @@ class RecordingExporter(threading.Thread):
         self.end_time = end_time
         self.playback_factor = playback_factor
         self.playback_source = playback_source
+        self.chapters = chapters
 
         # ensure export thumb dir
         Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
@@ -82,6 +93,77 @@ class RecordingExporter(threading.Thread):
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
         # return in iso format
         return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+
+    def _chapter_metadata_path(self) -> str:
+        return os.path.join(CACHE_DIR, f"export_chapters_{self.export_id}.txt")
+
+    def _build_recording_segment_chapter_metadata_file(
+        self, recordings: list
+    ) -> Optional[str]:
+        """Write an FFmpeg metadata file with one chapter per recording segment.
+
+        Each chapter's title is the segment's wallclock start time in
+        strict ISO 8601 form so a viewer can map any point in the
+        export's playback timeline back to real-world time without
+        OCR-ing a burnt-in timestamp. Chapter offsets are computed in
+        *output time*: the VOD endpoint concatenates recording clips
+        back-to-back, so wall-clock gaps between recordings collapse in
+        the produced video. Returns ``None`` when there are no
+        recordings or every segment is empty after clipping.
+        """
+        if not recordings:
+            return None
+
+        tz_name = self.config.ui.timezone
+        tz: Optional[datetime.tzinfo] = None
+        if tz_name:
+            try:
+                tz = pytz.timezone(tz_name)
+            except pytz.UnknownTimeZoneError:
+                tz = None
+        if tz is None:
+            tz = datetime.timezone.utc
+
+        chapter_blocks: list[str] = []
+        output_offset_ms = 0
+        for rec in recordings:
+            clipped_start = max(float(rec.start_time), float(self.start_time))
+            clipped_end = min(float(rec.end_time), float(self.end_time))
+            if clipped_end <= clipped_start:
+                continue
+
+            duration_ms = int(round((clipped_end - clipped_start) * 1000))
+            if duration_ms <= 0:
+                continue
+
+            title = datetime.datetime.fromtimestamp(clipped_start, tz=tz).isoformat(
+                timespec="seconds"
+            )
+            chapter_blocks.append(
+                "[CHAPTER]\n"
+                "TIMEBASE=1/1000\n"
+                f"START={output_offset_ms}\n"
+                f"END={output_offset_ms + duration_ms}\n"
+                f"title={title}"
+            )
+            output_offset_ms += duration_ms
+
+        if not chapter_blocks:
+            return None
+
+        meta_path = self._chapter_metadata_path()
+        try:
+            with open(meta_path, "w", encoding="utf-8") as f:
+                f.write(";FFMETADATA1\n")
+                f.write("\n".join(chapter_blocks))
+                f.write("\n")
+        except OSError:
+            logger.exception(
+                "Failed to write chapter metadata file for export %s", self.export_id
+            )
+            return None
+
+        return meta_path
 
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
@@ -218,9 +300,41 @@ class RecordingExporter(threading.Thread):
 
             ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"
 
+        # When chapters are requested, query the per-segment recording rows
+        # and write an FFmpeg metadata sidecar. Timelapse playback rescales
+        # time so chapter offsets would no longer match wallclock — restrict
+        # chapter injection to realtime playback.
+        chapter_args = ""
+        if (
+            self.chapters == ChaptersEnum.recording_segments
+            and self.playback_factor == PlaybackFactorEnum.realtime
+        ):
+            recordings = list(
+                Recordings.select(
+                    Recordings.start_time,
+                    Recordings.end_time,
+                )
+                .where(
+                    Recordings.start_time.between(self.start_time, self.end_time)
+                    | Recordings.end_time.between(self.start_time, self.end_time)
+                    | (
+                        (self.start_time > Recordings.start_time)
+                        & (self.end_time < Recordings.end_time)
+                    )
+                )
+                .where(Recordings.camera == self.camera)
+                .order_by(Recordings.start_time.asc())
+                .iterator()
+            )
+            chapters_path = self._build_recording_segment_chapter_metadata_file(
+                recordings
+            )
+            if chapters_path:
+                chapter_args = f" -i {chapters_path} -map 0 -dn -map_metadata 1"
+
         if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} -c copy -movflags +faststart"
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input}{chapter_args} -c copy -movflags +faststart"
             ).split(" ")
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
             ffmpeg_cmd = (
@@ -395,6 +509,8 @@ class RecordingExporter(threading.Thread):
             preexec_fn=lower_priority,
             capture_output=True,
         )
+
+        Path(self._chapter_metadata_path()).unlink(missing_ok=True)
 
         if p.returncode != 0:
             logger.error(

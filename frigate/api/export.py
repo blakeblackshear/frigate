@@ -31,6 +31,7 @@ from frigate.api.defs.tags import Tags
 from frigate.const import CLIPS_DIR, EXPORT_DIR
 from frigate.models import Export, Previews, Recordings
 from frigate.record.export import (
+    ChaptersEnum,
     PlaybackFactorEnum,
     PlaybackSourceEnum,
     RecordingExporter,
@@ -161,6 +162,7 @@ def export_recording(
             if playback_source in PlaybackSourceEnum.__members__.values()
             else PlaybackSourceEnum.recordings
         ),
+        chapters=ChaptersEnum(body.chapters) if body.chapters else None,
     )
     exporter.start()
     return JSONResponse(
