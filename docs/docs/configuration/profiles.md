@@ -216,6 +216,8 @@ In this example:
 
 No. Profiles are pure overrides. Every zone and mask defined under a profile must reference an entry that already exists on the base camera config. Configurations that introduce profile-only zones or masks are rejected at startup.
 
+If you want a zone or mask to be active only under a specific profile, define it on the base config with `enabled: false`, then enable it in that profile's overrides.
+
 ### How do I revert a profile zone or mask override back to the base configuration?
 
 Delete the override. In the Frigate UI, edit the profile and use the "Revert override" action (the trash can icon) on the zone or mask. The base entry is left untouched, and once the override is removed the profile inherits the base values for that zone or mask.
