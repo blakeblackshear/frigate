@@ -1,0 +1,665 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useTranslation } from "react-i18next";
+import useSWR, { mutate as swrMutate } from "swr";
+import axios from "axios";
+import { toast } from "sonner";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { isReplayCamera, processCameraName } from "@/utils/cameraUtil";
+import type { FrigateConfig } from "@/types/frigateConfig";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { LuTriangleAlert } from "react-icons/lu";
+import {
+  CLONE_CATEGORIES,
+  type CloneCategoryKey,
+  type CloneCategoryGroup,
+  getCategoryDefaults,
+  resolutionsMatch,
+  buildClonedCameraPayloads,
+  buildClonePreviewItems,
+} from "@/utils/cameraClone";
+import { buildConfigDataForPath } from "@/utils/configUtil";
+import { useConfigSchema } from "@/hooks/use-config-schema";
+import { useRestart } from "@/api/ws";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
+import SaveAllPreviewPopover from "@/components/overlay/detail/SaveAllPreviewPopover";
+
+type CloneCameraDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  sourceCamera: string;
+};
+
+type CloneFormValues = {
+  targetMode: "new" | "existing";
+  newName: string;
+  existingTarget: string;
+};
+
+export default function CloneCameraDialog({
+  open,
+  onClose,
+  sourceCamera,
+}: CloneCameraDialogProps) {
+  const { t } = useTranslation(["views/settings", "common"]);
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const otherCameras = useMemo(() => {
+    if (!config) return [];
+    return Object.keys(config.cameras)
+      .filter((c) => c !== sourceCamera && !isReplayCamera(c))
+      .sort();
+  }, [config, sourceCamera]);
+
+  const formSchema = useMemo(() => {
+    const reservedNames = new Set<string>([
+      ...(config ? Object.keys(config.cameras) : []),
+      ...(config?.go2rtc?.streams ? Object.keys(config.go2rtc.streams) : []),
+    ]);
+    return z
+      .object({
+        targetMode: z.enum(["new", "existing"]),
+        newName: z.string(),
+        existingTarget: z.string(),
+      })
+      .superRefine((data, ctx) => {
+        if (data.targetMode === "new") {
+          const trimmed = data.newName.trim();
+          if (!trimmed) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ["newName"],
+              message: t("cameraManagement.clone.target.newNameRequired"),
+            });
+            return;
+          }
+          const { finalCameraName } = processCameraName(trimmed);
+          if (!finalCameraName) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ["newName"],
+              message: t("cameraManagement.clone.target.newNameInvalid"),
+            });
+            return;
+          }
+          if (reservedNames.has(finalCameraName)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ["newName"],
+              message: t("cameraManagement.clone.target.newNameCollision"),
+            });
+          }
+        } else if (!data.existingTarget) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["existingTarget"],
+            message: t("cameraManagement.clone.target.existingPlaceholder"),
+          });
+        }
+      });
+  }, [config, t]);
+
+  const form = useForm<CloneFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      targetMode: "new",
+      newName: "",
+      existingTarget: "",
+    },
+  });
+
+  // Reset whenever the dialog opens.
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        targetMode: "new",
+        newName: "",
+        existingTarget: otherCameras[0] ?? "",
+      });
+    }
+  }, [open, form, otherCameras]);
+
+  const targetMode = form.watch("targetMode");
+  const existingTarget = form.watch("existingTarget");
+
+  const targetIsNew = targetMode === "new";
+
+  const srcCfg = config?.cameras?.[sourceCamera];
+  const dstCfg =
+    !targetIsNew && existingTarget
+      ? config?.cameras?.[existingTarget]
+      : undefined;
+
+  const resMatch = useMemo(
+    () => resolutionsMatch(srcCfg?.detect, dstCfg?.detect),
+    [srcCfg, dstCfg],
+  );
+
+  const [selectedCategories, setSelectedCategories] = useState<
+    Set<CloneCategoryKey>
+  >(() => getCategoryDefaults(true, true));
+
+  // Reset defaults when target mode or target identity changes.
+  useEffect(() => {
+    setSelectedCategories(getCategoryDefaults(targetIsNew, resMatch));
+  }, [targetIsNew, existingTarget, resMatch]);
+
+  const toggleCategory = useCallback((key: CloneCategoryKey) => {
+    setSelectedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const visibleCategories = useMemo(
+    () => CLONE_CATEGORIES.filter((c) => targetIsNew || !c.newCameraOnly),
+    [targetIsNew],
+  );
+
+  const groupedCategories = useMemo(() => {
+    const groups: Record<CloneCategoryGroup, typeof visibleCategories> = {
+      general: [],
+      spatial: [],
+      streams: [],
+    };
+    for (const c of visibleCategories) {
+      groups[c.group].push(c);
+    }
+    return groups;
+  }, [visibleCategories]);
+
+  const sourceFriendlyName =
+    config?.cameras?.[sourceCamera]?.friendly_name ?? sourceCamera;
+
+  const fullSchema = useConfigSchema();
+  const { send: sendRestart } = useRestart();
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+
+  const previewPayloads = useMemo(() => {
+    if (!config || !fullSchema || !srcCfg) return [];
+    const targetInput = targetIsNew
+      ? form.getValues("newName")
+      : existingTarget;
+    if (!targetInput) return [];
+    if (!targetIsNew && !config.cameras?.[targetInput]) return [];
+    return buildClonedCameraPayloads({
+      sourceCfg: srcCfg,
+      sourceName: sourceCamera,
+      targetInput,
+      targetIsNew,
+      selectedKeys: selectedCategories,
+      fullConfig: config,
+      fullSchema,
+    });
+  }, [
+    config,
+    fullSchema,
+    srcCfg,
+    targetIsNew,
+    existingTarget,
+    selectedCategories,
+    sourceCamera,
+    form,
+  ]);
+
+  const previewTarget = targetIsNew
+    ? processCameraName(form.watch("newName") || "").finalCameraName
+    : existingTarget;
+
+  const previewItems = useMemo(
+    () =>
+      previewTarget
+        ? buildClonePreviewItems(previewPayloads, previewTarget)
+        : [],
+    [previewPayloads, previewTarget],
+  );
+
+  const anyNeedsRestart = previewPayloads.some((p) => p.needsRestart);
+  const changeCount = previewItems.length;
+
+  const onSubmit = useCallback(
+    async (values: CloneFormValues) => {
+      if (!config || !srcCfg || !fullSchema) return;
+      if (previewPayloads.length === 0) {
+        toast.error(
+          t("cameraManagement.clone.toast.submitError", {
+            errorMessage: t("cameraManagement.clone.footer.changeCount", {
+              count: 0,
+            }),
+          }),
+        );
+        return;
+      }
+
+      const target = targetIsNew
+        ? processCameraName(values.newName.trim()).finalCameraName
+        : values.existingTarget;
+      const targetLabel = targetIsNew
+        ? values.newName.trim()
+        : (config.cameras?.[target]?.friendly_name ?? target);
+
+      setIsSubmitting(true);
+      let appliedCount = 0;
+      let failedSection: string | undefined;
+      let failureMessage: string | undefined;
+
+      try {
+        for (const payload of previewPayloads) {
+          try {
+            await axios.put("config/set", {
+              requires_restart: payload.needsRestart ? 1 : 0,
+              update_topic: payload.updateTopic,
+              config_data: buildConfigDataForPath(
+                payload.basePath,
+                payload.sanitizedOverrides,
+              ),
+            });
+            appliedCount += 1;
+          } catch (error) {
+            failedSection = payload.basePath;
+            failureMessage =
+              (axios.isAxiosError(error) &&
+                (error.response?.data?.message ||
+                  error.response?.data?.detail)) ||
+              (error instanceof Error ? error.message : "Unknown error");
+            break;
+          }
+        }
+      } finally {
+        await swrMutate("config");
+        setIsSubmitting(false);
+      }
+
+      if (failedSection) {
+        if (targetIsNew && appliedCount > 0) {
+          toast.error(
+            t("cameraManagement.clone.toast.newCameraPartialFailure", {
+              cameraName: targetLabel,
+              errorMessage: failureMessage,
+            }),
+            { position: "top-center" },
+          );
+        } else {
+          toast.error(
+            t("cameraManagement.clone.toast.partialFailure", {
+              successCount: appliedCount,
+              failedSection,
+              errorMessage: failureMessage,
+            }),
+            { position: "top-center" },
+          );
+        }
+        return;
+      }
+
+      if (anyNeedsRestart) {
+        toast.success(
+          t("cameraManagement.clone.toast.successWithRestart", {
+            cameraName: targetLabel,
+          }),
+          {
+            position: "top-center",
+            duration: 10000,
+            action: (
+              <a onClick={() => setRestartDialogOpen(true)}>
+                <Button>
+                  {t("restart.button", { ns: "components/dialog" })}
+                </Button>
+              </a>
+            ),
+          },
+        );
+      } else {
+        toast.success(
+          t("cameraManagement.clone.toast.success", {
+            cameraName: targetLabel,
+          }),
+          { position: "top-center" },
+        );
+      }
+
+      onClose();
+    },
+    [
+      config,
+      srcCfg,
+      fullSchema,
+      previewPayloads,
+      targetIsNew,
+      anyNeedsRestart,
+      onClose,
+      t,
+    ],
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent
+        className={cn(
+          "scrollbar-container max-h-[90dvh] max-w-3xl overflow-y-auto",
+        )}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        <DialogHeader>
+          <DialogTitle>
+            {t("cameraManagement.clone.title", {
+              cameraName: sourceFriendlyName,
+            })}
+          </DialogTitle>
+          <DialogDescription>
+            {t("cameraManagement.clone.description")}
+          </DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <fieldset className="space-y-3">
+              <legend className="text-sm font-medium">
+                {t("cameraManagement.clone.target.legend")}
+              </legend>
+              <FormField
+                control={form.control}
+                name="targetMode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        className="space-y-3"
+                      >
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="new" id="clone-target-new" />
+                            <label
+                              htmlFor="clone-target-new"
+                              className="text-sm"
+                            >
+                              {t("cameraManagement.clone.target.newRadio")}
+                            </label>
+                          </div>
+                          {targetMode === "new" && (
+                            <FormField
+                              control={form.control}
+                              name="newName"
+                              render={({ field: nameField }) => (
+                                <FormItem className="ml-6">
+                                  <FormLabel className="sr-only">
+                                    {t(
+                                      "cameraManagement.clone.target.newNameLabel",
+                                    )}
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...nameField}
+                                      placeholder={t(
+                                        "cameraManagement.clone.target.newNamePlaceholder",
+                                      )}
+                                      disabled={isSubmitting}
+                                      autoFocus
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                  <p className="text-xs text-muted-foreground">
+                                    {t(
+                                      "cameraManagement.clone.target.newStreamsForced",
+                                    )}
+                                  </p>
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem
+                              value="existing"
+                              id="clone-target-existing"
+                              disabled={otherCameras.length === 0}
+                            />
+                            <label
+                              htmlFor="clone-target-existing"
+                              className={cn(
+                                "text-sm",
+                                otherCameras.length === 0 &&
+                                  "text-muted-foreground",
+                              )}
+                            >
+                              {t("cameraManagement.clone.target.existingRadio")}
+                              {otherCameras.length === 0 && (
+                                <span className="ml-2 text-xs">
+                                  (
+                                  {t(
+                                    "cameraManagement.clone.target.existingDisabled",
+                                  )}
+                                  )
+                                </span>
+                              )}
+                            </label>
+                          </div>
+                          {targetMode === "existing" &&
+                            otherCameras.length > 0 && (
+                              <FormField
+                                control={form.control}
+                                name="existingTarget"
+                                render={({ field: tgtField }) => (
+                                  <FormItem className="ml-6">
+                                    <FormControl>
+                                      <Select
+                                        value={tgtField.value}
+                                        onValueChange={tgtField.onChange}
+                                      >
+                                        <SelectTrigger className="w-full max-w-xs">
+                                          <SelectValue
+                                            placeholder={t(
+                                              "cameraManagement.clone.target.existingPlaceholder",
+                                            )}
+                                          />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {otherCameras.map((cam) => (
+                                            <SelectItem key={cam} value={cam}>
+                                              {config?.cameras?.[cam]
+                                                ?.friendly_name ?? cam}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </fieldset>
+
+            <fieldset className="space-y-4">
+              <legend className="text-sm font-medium">
+                {t("cameraManagement.clone.categories.legend")}
+              </legend>
+
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("cameraManagement.clone.categories.general")}
+                </p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {groupedCategories.general.map((cat) => (
+                    <label
+                      key={cat.key}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <Checkbox
+                        checked={selectedCategories.has(cat.key)}
+                        onCheckedChange={() => toggleCategory(cat.key)}
+                        disabled={isSubmitting}
+                      />
+                      {t(`cameraManagement.clone.categories.items.${cat.key}`)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {groupedCategories.spatial.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t("cameraManagement.clone.categories.spatial")}
+                  </p>
+                  {!targetIsNew &&
+                    !resMatch &&
+                    srcCfg?.detect &&
+                    dstCfg?.detect && (
+                      <Alert
+                        variant="default"
+                        role="alert"
+                        className="border-warning"
+                      >
+                        <LuTriangleAlert className="size-4" />
+                        <AlertDescription>
+                          {t(
+                            "cameraManagement.clone.categories.spatialWarning",
+                            {
+                              srcWidth: srcCfg.detect.width,
+                              srcHeight: srcCfg.detect.height,
+                              dstWidth: dstCfg.detect.width,
+                              dstHeight: dstCfg.detect.height,
+                            },
+                          )}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {groupedCategories.spatial.map((cat) => (
+                      <label
+                        key={cat.key}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <Checkbox
+                          checked={selectedCategories.has(cat.key)}
+                          onCheckedChange={() => toggleCategory(cat.key)}
+                          disabled={isSubmitting}
+                        />
+                        {t(
+                          `cameraManagement.clone.categories.items.${cat.key}`,
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {targetIsNew && groupedCategories.streams.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t("cameraManagement.clone.categories.streams")}
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {groupedCategories.streams.map((cat) => (
+                      <label
+                        key={cat.key}
+                        className="flex items-center gap-2 text-sm text-muted-foreground"
+                      >
+                        <Checkbox checked disabled />
+                        {t(
+                          `cameraManagement.clone.categories.items.${cat.key}`,
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </fieldset>
+
+            <DialogFooter className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>
+                  {t("cameraManagement.clone.footer.changeCount", {
+                    count: changeCount,
+                  })}
+                </span>
+                {changeCount > 0 && (
+                  <SaveAllPreviewPopover
+                    items={previewItems}
+                    className="h-7 w-7"
+                    align="start"
+                    side="top"
+                  />
+                )}
+                <span className="ml-2 text-xs">
+                  {anyNeedsRestart
+                    ? t("cameraManagement.clone.footer.restartNeeded")
+                    : t("cameraManagement.clone.footer.liveOnly")}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Button type="button" disabled={isSubmitting} onClick={onClose}>
+                  {t("button.cancel", { ns: "common" })}
+                </Button>
+                <Button
+                  variant="select"
+                  type="submit"
+                  disabled={isSubmitting || changeCount === 0}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <ActivityIndicator className="size-4" />
+                      <span>
+                        {t("cameraManagement.clone.footer.submitting")}
+                      </span>
+                    </div>
+                  ) : (
+                    t("cameraManagement.clone.footer.submit")
+                  )}
+                </Button>
+              </div>
+            </DialogFooter>
+          </form>
+        </Form>
+        <RestartDialog
+          isOpen={restartDialogOpen}
+          onClose={() => setRestartDialogOpen(false)}
+          onRestart={() => sendRestart("restart")}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}
