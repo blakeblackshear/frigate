@@ -22,6 +22,7 @@ type SaveAllPreviewPopoverProps = {
   className?: string;
   align?: "start" | "center" | "end";
   side?: "top" | "bottom" | "left" | "right";
+  disablePortal?: boolean;
 };
 
 export default function SaveAllPreviewPopover({
@@ -29,6 +30,7 @@ export default function SaveAllPreviewPopover({
   className,
   align = "end",
   side = "bottom",
+  disablePortal = false,
 }: SaveAllPreviewPopoverProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const [open, setOpen] = useState(false);
@@ -67,6 +69,7 @@ export default function SaveAllPreviewPopover({
       <PopoverContent
         align={align}
         side={side}
+        disablePortal={disablePortal}
         className="w-[90vw] max-w-sm border bg-background p-4 shadow-lg"
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
