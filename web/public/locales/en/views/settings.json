@@ -570,7 +570,8 @@
         "general": "General",
         "spatial": "Spatial settings",
         "streams": "Streams",
-        "spatialWarning": "Source resolution {{srcWidth}}×{{srcHeight}} differs from target resolution {{dstWidth}}×{{dstHeight}}. Polygons may not align — these defaults are off; enable to copy as-is.",
+        "spatialWarningTitle": "Resolution mismatch",
+        "spatialWarning": "Source camera {{srcCamera}} detect resolution ({{srcWidth}}×{{srcHeight}}) differs from target camera {{dstCamera}} detect resolution ({{dstWidth}}×{{dstHeight}}). Polygons may not align. These defaults are off; enable to copy as-is.",
         "restartHint": "Restart required",
         "items": {
           "record": "Recording",
