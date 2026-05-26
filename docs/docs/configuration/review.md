@@ -139,7 +139,7 @@ The Review page also can show periods of motion that didn't produce a tracked ob
 
 The Motion Previews pane shows preview clips for periods of significant motion that did not produce a tracked object. It is useful for spotting things that motion detection picked up but object detection did not, which can help validate tuning or catch missed objects.
 
-On the <NavPath path="Review > Motion" /> page, click the 3-dots menu on a camera and choose **Motion Previews**. Each card represents a continuous range of motion-only activity and plays back the recorded preview for that range. A heatmap overlay dims areas of the frame with no motion so the moving regions stand out.
+On the <NavPath path="Review > Motion" /> page, click the kebab menu on a camera and choose **Motion Previews**. Each card represents a continuous range of motion-only activity and plays back the recorded preview for that range. A heatmap overlay dims areas of the frame with no motion so the moving regions stand out.
 
 The pane provides a few controls:
 
@@ -153,7 +153,7 @@ Clicking a preview clip seeks the recording player to that timestamp so you can 
 
 Motion Search lets you scan recorded footage for changes inside a region of interest you draw on the camera. Unlike Motion Previews, which surfaces what Frigate's motion detector flagged in real time, Motion Search re-analyzes the saved recordings, so it can find changes that were missed (for example, an object that appeared while motion detection was paused by `lightning_threshold`, or in a region that is normally motion-masked).
 
-To start a search, click the 3-dots menu on a camera in the <NavPath path="Review > Motion" /> page and choose **Motion Search**. In the dialog:
+To start a search, click the kebab menu on a camera in the <NavPath path="Review > Motion" /> page and choose **Motion Search**. In the dialog:
 
 1. Pick the camera and time range to scan.
 2. Draw a polygon on the camera frame to define the region of interest.
