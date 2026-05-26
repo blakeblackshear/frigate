@@ -546,7 +546,7 @@
       "saveSuccess": "Updated camera type for {{cameraName}}. Restart Frigate to apply the changes."
     },
     "clone": {
-      "trigger": "Clone...",
+      "trigger": "Clone camera or copy settings",
       "triggerAriaLabel": "Clone settings from {{cameraName}}",
       "title": "Clone settings from {{cameraName}}",
       "description": "Copy this camera's configuration to a new or existing camera. Identity (name, friendly name, web UI URL, display order) is never copied.",

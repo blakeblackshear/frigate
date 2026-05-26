@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
@@ -209,11 +209,12 @@ export default function CloneCameraDialog({
   const { send: sendRestart } = useRestart();
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
 
+  const watchedNewName =
+    useWatch({ control: form.control, name: "newName" }) ?? "";
+
   const previewPayloads = useMemo(() => {
     if (!config || !fullSchema || !srcCfg) return [];
-    const targetInput = targetIsNew
-      ? form.getValues("newName")
-      : existingTarget;
+    const targetInput = targetIsNew ? watchedNewName : existingTarget;
     if (!targetInput) return [];
     if (!targetIsNew && !config.cameras?.[targetInput]) return [];
     return buildClonedCameraPayloads({
@@ -231,13 +232,13 @@ export default function CloneCameraDialog({
     srcCfg,
     targetIsNew,
     existingTarget,
+    watchedNewName,
     selectedCategories,
     sourceCamera,
-    form,
   ]);
 
   const previewTarget = targetIsNew
-    ? processCameraName(form.watch("newName") || "").finalCameraName
+    ? processCameraName(watchedNewName || "").finalCameraName
     : existingTarget;
 
   const previewItems = useMemo(
@@ -413,35 +414,35 @@ export default function CloneCameraDialog({
                             </label>
                           </div>
                           {targetMode === "new" && (
-                            <FormField
-                              control={form.control}
-                              name="newName"
-                              render={({ field: nameField }) => (
-                                <FormItem className="ml-6">
-                                  <FormLabel className="sr-only">
-                                    {t(
-                                      "cameraManagement.clone.target.newNameLabel",
-                                    )}
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      {...nameField}
-                                      placeholder={t(
-                                        "cameraManagement.clone.target.newNamePlaceholder",
-                                      )}
-                                      disabled={isSubmitting}
-                                      autoFocus
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                  <p className="text-xs text-muted-foreground">
-                                    {t(
-                                      "cameraManagement.clone.target.newStreamsForced",
-                                    )}
-                                  </p>
-                                </FormItem>
+                            <FormItem className="ml-6">
+                              <FormLabel className="sr-only">
+                                {t(
+                                  "cameraManagement.clone.target.newNameLabel",
+                                )}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...form.register("newName")}
+                                  placeholder={t(
+                                    "cameraManagement.clone.target.newNamePlaceholder",
+                                  )}
+                                  disabled={isSubmitting}
+                                  autoFocus
+                                />
+                              </FormControl>
+                              {form.formState.errors.newName?.message && (
+                                <p className="text-sm font-medium text-destructive">
+                                  {String(
+                                    form.formState.errors.newName.message,
+                                  )}
+                                </p>
                               )}
-                            />
+                              <p className="text-xs text-muted-foreground">
+                                {t(
+                                  "cameraManagement.clone.target.newStreamsForced",
+                                )}
+                              </p>
+                            </FormItem>
                           )}
                         </div>
                         <div className="space-y-2">
