@@ -15,6 +15,7 @@ import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import DeleteCameraDialog from "@/components/overlay/dialog/DeleteCameraDialog";
 import {
   LuCheck,
+  LuCopy,
   LuExternalLink,
   LuGripVertical,
   LuPencil,
@@ -22,6 +23,7 @@ import {
   LuRefreshCcw,
   LuTrash2,
 } from "react-icons/lu";
+import CloneCameraDialog from "@/components/settings/CloneCameraDialog";
 import { Reorder, useDragControls } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useDocDomain } from "@/hooks/use-doc-domain";
@@ -88,6 +90,9 @@ export default function CameraManagementView({
 
   const [showWizard, setShowWizard] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [cloneSourceCamera, setCloneSourceCamera] = useState<string | null>(
+    null,
+  );
 
   // State for restart dialog when enabling a disabled camera
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
@@ -288,6 +293,7 @@ export default function CameraManagementView({
                               onConfigChanged={updateConfig}
                               onDragEnd={handleReorderDragEnd}
                               setRestartDialogOpen={setRestartDialogOpen}
+                              onClone={setCloneSourceCamera}
                             />
                           ))}
                         </Reorder.Group>
@@ -307,6 +313,7 @@ export default function CameraManagementView({
                               camera={camera}
                               onConfigChanged={updateConfig}
                               setRestartDialogOpen={setRestartDialogOpen}
+                              onClone={setCloneSourceCamera}
                             />
                           ))}
                         </div>
@@ -364,6 +371,11 @@ export default function CameraManagementView({
         onClose={() => setRestartDialogOpen(false)}
         onRestart={() => sendRestart("restart")}
       />
+      <CloneCameraDialog
+        open={cloneSourceCamera !== null}
+        onClose={() => setCloneSourceCamera(null)}
+        sourceCamera={cloneSourceCamera ?? ""}
+      />
     </>
   );
 }
@@ -404,6 +416,7 @@ type ActiveCameraRowProps = {
   onConfigChanged: () => Promise<unknown>;
   onDragEnd: () => void;
   setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onClone: (camera: string) => void;
 };
 
 function ActiveCameraRow({
@@ -411,6 +424,7 @@ function ActiveCameraRow({
   onConfigChanged,
   onDragEnd,
   setRestartDialogOpen,
+  onClone,
 }: ActiveCameraRowProps) {
   const { t } = useTranslation(["views/settings"]);
   const controls = useDragControls();
@@ -438,6 +452,22 @@ function ActiveCameraRow({
           cameraName={camera}
           onConfigChanged={onConfigChanged}
         />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              aria-label={t("cameraManagement.clone.triggerAriaLabel", {
+                cameraName: camera,
+              })}
+              onClick={() => onClone(camera)}
+            >
+              <LuCopy className="size-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t("cameraManagement.clone.trigger")}</TooltipContent>
+        </Tooltip>
       </div>
       <CameraStatusSelect
         cameraName={camera}
@@ -453,13 +483,17 @@ type DisabledCameraRowProps = {
   camera: string;
   onConfigChanged: () => Promise<unknown>;
   setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onClone: (camera: string) => void;
 };
 
 function DisabledCameraRow({
   camera,
   onConfigChanged,
   setRestartDialogOpen,
+  onClone,
 }: DisabledCameraRowProps) {
+  const { t } = useTranslation(["views/settings"]);
+
   return (
     <div className="flex flex-row items-center justify-between">
       <div className="flex items-center gap-1">
@@ -468,6 +502,22 @@ function DisabledCameraRow({
           cameraName={camera}
           onConfigChanged={onConfigChanged}
         />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              aria-label={t("cameraManagement.clone.triggerAriaLabel", {
+                cameraName: camera,
+              })}
+              onClick={() => onClone(camera)}
+            >
+              <LuCopy className="size-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t("cameraManagement.clone.trigger")}</TooltipContent>
+        </Tooltip>
       </div>
       <CameraStatusSelect
         cameraName={camera}
