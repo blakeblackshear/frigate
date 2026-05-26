@@ -188,6 +188,32 @@ export default function CloneCameraDialog({
     });
   }, []);
 
+  const selectAllCategories = useCallback(() => {
+    setSelectedCategories((prev) => {
+      const next = new Set(prev);
+      const includeSpatial = targetIsNew || resMatch;
+      for (const cat of CLONE_CATEGORIES) {
+        if (cat.newCameraOnly && !targetIsNew) continue;
+        if (cat.group === "spatial" && !includeSpatial) continue;
+        if (cat.group === "streams") continue;
+        next.add(cat.key);
+      }
+      return next;
+    });
+  }, [targetIsNew, resMatch]);
+
+  const selectNoneCategories = useCallback(() => {
+    setSelectedCategories((prev) => {
+      const next = new Set<CloneCategoryKey>();
+      for (const cat of CLONE_CATEGORIES) {
+        if (cat.group === "streams" && prev.has(cat.key)) {
+          next.add(cat.key);
+        }
+      }
+      return next;
+    });
+  }, []);
+
   const visibleCategories = useMemo(
     () => CLONE_CATEGORIES.filter((c) => targetIsNew || !c.newCameraOnly),
     [targetIsNew],
@@ -533,9 +559,26 @@ export default function CloneCameraDialog({
             </div>
 
             <div className="space-y-4">
-              <Label className="text-base">
-                {t("cameraManagement.clone.categories.legend")}
-              </Label>
+              <div className="flex flex-row items-center justify-between gap-2">
+                <Label className="text-base">
+                  {t("cameraManagement.clone.categories.legend")}
+                </Label>
+                <div className="flex flex-row items-center gap-2 text-right text-xs text-muted-foreground">
+                  <span
+                    className="cursor-pointer"
+                    onClick={isSubmitting ? undefined : selectAllCategories}
+                  >
+                    {t("cameraManagement.clone.categories.selectAll")}
+                  </span>
+                  <span aria-hidden="true">|</span>
+                  <span
+                    className="cursor-pointer"
+                    onClick={isSubmitting ? undefined : selectNoneCategories}
+                  >
+                    {t("cameraManagement.clone.categories.selectNone")}
+                  </span>
+                </div>
+              </div>
 
               <div className="space-y-2">
                 <Label className="font-medium">

@@ -566,6 +566,7 @@
       "categories": {
         "legend": "What to copy",
         "selectAll": "Select all",
+        "selectNone": "Select none",
         "resetDefaults": "Reset to defaults",
         "general": "General",
         "spatial": "Spatial settings",
@@ -576,9 +577,9 @@
         "items": {
           "record": "Recording",
           "snapshots": "Snapshots",
-          "review": "Review (alerts & detections)",
+          "review": "Review (alerts and detections)",
           "motion": "Motion sensitivity",
-          "objects": "Detection objects & filters",
+          "objects": "Detected objects and filters",
           "audio": "Audio detection",
           "audio_transcription": "Audio transcription",
           "notifications": "Notifications",
@@ -594,7 +595,7 @@
           "profiles": "Profiles",
           "detect": "Detect dimensions",
           "zones": "Zones",
-          "motion_mask": "Motion mask",
+          "motion_mask": "Motion masks",
           "object_masks": "Object masks",
           "ffmpeg_live": "Stream URLs and roles"
         }
