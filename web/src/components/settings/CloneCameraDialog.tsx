@@ -37,12 +37,14 @@ import { cn } from "@/lib/utils";
 import { isReplayCamera, processCameraName } from "@/utils/cameraUtil";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
 import { LuTriangleAlert } from "react-icons/lu";
 import {
   CLONE_CATEGORIES,
   type CloneCategoryKey,
   type CloneCategoryGroup,
+  type RawCameraPaths,
   getCategoryDefaults,
   resolutionsMatch,
   buildClonedCameraPayloads,
@@ -74,6 +76,7 @@ export default function CloneCameraDialog({
 }: CloneCameraDialogProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: rawPaths } = useSWR<RawCameraPaths>("config/raw_paths");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const otherCameras = useMemo(() => {
@@ -225,16 +228,18 @@ export default function CloneCameraDialog({
       selectedKeys: selectedCategories,
       fullConfig: config,
       fullSchema,
+      rawPaths,
     });
   }, [
     config,
     fullSchema,
     srcCfg,
+    sourceCamera,
     targetIsNew,
     existingTarget,
     watchedNewName,
     selectedCategories,
-    sourceCamera,
+    rawPaths,
   ]);
 
   const previewTarget = targetIsNew
@@ -388,10 +393,10 @@ export default function CloneCameraDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <fieldset className="space-y-3">
-              <legend className="text-sm font-medium">
+            <div className="space-y-3">
+              <Label className="text-base">
                 {t("cameraManagement.clone.target.legend")}
-              </legend>
+              </Label>
               <FormField
                 control={form.control}
                 name="targetMode"
@@ -404,17 +409,25 @@ export default function CloneCameraDialog({
                         className="space-y-3"
                       >
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <RadioGroupItem value="new" id="clone-target-new" />
-                            <label
+                          <div className="flex items-center space-x-3 space-y-0">
+                            <RadioGroupItem
+                              value="new"
+                              id="clone-target-new"
+                              className={
+                                targetMode === "new"
+                                  ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                                  : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                              }
+                            />
+                            <Label
                               htmlFor="clone-target-new"
-                              className="text-sm"
+                              className="font-normal"
                             >
                               {t("cameraManagement.clone.target.newRadio")}
-                            </label>
+                            </Label>
                           </div>
                           {targetMode === "new" && (
-                            <FormItem className="ml-6">
+                            <FormItem className="ml-7">
                               <FormLabel className="sr-only">
                                 {t(
                                   "cameraManagement.clone.target.newNameLabel",
@@ -446,16 +459,21 @@ export default function CloneCameraDialog({
                           )}
                         </div>
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center space-x-3 space-y-0">
                             <RadioGroupItem
                               value="existing"
                               id="clone-target-existing"
                               disabled={otherCameras.length === 0}
+                              className={
+                                targetMode === "existing"
+                                  ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                                  : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                              }
                             />
-                            <label
+                            <Label
                               htmlFor="clone-target-existing"
                               className={cn(
-                                "text-sm",
+                                "font-normal",
                                 otherCameras.length === 0 &&
                                   "text-muted-foreground",
                               )}
@@ -470,7 +488,7 @@ export default function CloneCameraDialog({
                                   )
                                 </span>
                               )}
-                            </label>
+                            </Label>
                           </div>
                           {targetMode === "existing" &&
                             otherCameras.length > 0 && (
@@ -478,7 +496,7 @@ export default function CloneCameraDialog({
                                 control={form.control}
                                 name="existingTarget"
                                 render={({ field: tgtField }) => (
-                                  <FormItem className="ml-6">
+                                  <FormItem className="ml-7">
                                     <FormControl>
                                       <Select
                                         value={tgtField.value}
@@ -512,29 +530,34 @@ export default function CloneCameraDialog({
                   </FormItem>
                 )}
               />
-            </fieldset>
+            </div>
 
-            <fieldset className="space-y-4">
-              <legend className="text-sm font-medium">
+            <div className="space-y-4">
+              <Label className="text-base">
                 {t("cameraManagement.clone.categories.legend")}
-              </legend>
+              </Label>
 
               <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <Label className="font-medium">
                   {t("cameraManagement.clone.categories.general")}
-                </p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                </Label>
+                <div className="grid grid-cols-1 gap-3 rounded-lg bg-secondary p-4 sm:grid-cols-2">
                   {groupedCategories.general.map((cat) => (
                     <label
                       key={cat.key}
-                      className="flex items-center gap-2 text-sm"
+                      className="flex flex-row items-center space-x-3 space-y-0 text-sm font-normal"
                     >
                       <Checkbox
+                        className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
                         checked={selectedCategories.has(cat.key)}
                         onCheckedChange={() => toggleCategory(cat.key)}
                         disabled={isSubmitting}
                       />
-                      {t(`cameraManagement.clone.categories.items.${cat.key}`)}
+                      <span>
+                        {t(
+                          `cameraManagement.clone.categories.items.${cat.key}`,
+                        )}
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -542,23 +565,28 @@ export default function CloneCameraDialog({
 
               {groupedCategories.spatial.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Label className="font-medium">
                     {t("cameraManagement.clone.categories.spatial")}
-                  </p>
+                  </Label>
                   {!targetIsNew &&
                     !resMatch &&
                     srcCfg?.detect &&
                     dstCfg?.detect && (
-                      <Alert
-                        variant="default"
-                        role="alert"
-                        className="border-warning"
-                      >
-                        <LuTriangleAlert className="size-4" />
+                      <Alert variant="warning">
+                        <LuTriangleAlert className="size-5" />
+                        <AlertTitle>
+                          {t(
+                            "cameraManagement.clone.categories.spatialWarningTitle",
+                          )}
+                        </AlertTitle>
                         <AlertDescription>
                           {t(
                             "cameraManagement.clone.categories.spatialWarning",
                             {
+                              srcCamera: sourceFriendlyName,
+                              dstCamera:
+                                config?.cameras?.[existingTarget]
+                                  ?.friendly_name ?? existingTarget,
                               srcWidth: srcCfg.detect.width,
                               srcHeight: srcCfg.detect.height,
                               dstWidth: dstCfg.detect.width,
@@ -568,20 +596,23 @@ export default function CloneCameraDialog({
                         </AlertDescription>
                       </Alert>
                     )}
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 rounded-lg bg-secondary p-4 sm:grid-cols-2">
                     {groupedCategories.spatial.map((cat) => (
                       <label
                         key={cat.key}
-                        className="flex items-center gap-2 text-sm"
+                        className="flex flex-row items-center space-x-3 space-y-0 text-sm font-normal"
                       >
                         <Checkbox
+                          className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
                           checked={selectedCategories.has(cat.key)}
                           onCheckedChange={() => toggleCategory(cat.key)}
                           disabled={isSubmitting}
                         />
-                        {t(
-                          `cameraManagement.clone.categories.items.${cat.key}`,
-                        )}
+                        <span>
+                          {t(
+                            `cameraManagement.clone.categories.items.${cat.key}`,
+                          )}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -590,55 +621,74 @@ export default function CloneCameraDialog({
 
               {targetIsNew && groupedCategories.streams.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Label className="font-medium">
                     {t("cameraManagement.clone.categories.streams")}
-                  </p>
-                  <div className="grid grid-cols-1 gap-2">
+                  </Label>
+                  <div className="grid grid-cols-1 gap-3 rounded-lg bg-secondary p-4">
                     {groupedCategories.streams.map((cat) => (
                       <label
                         key={cat.key}
-                        className="flex items-center gap-2 text-sm text-muted-foreground"
+                        className="flex flex-row items-center space-x-3 space-y-0 text-sm font-normal text-muted-foreground"
                       >
-                        <Checkbox checked disabled />
-                        {t(
-                          `cameraManagement.clone.categories.items.${cat.key}`,
-                        )}
+                        <Checkbox
+                          className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
+                          checked
+                          disabled
+                        />
+                        <span>
+                          {t(
+                            `cameraManagement.clone.categories.items.${cat.key}`,
+                          )}
+                        </span>
                       </label>
                     ))}
                   </div>
                 </div>
               )}
-            </fieldset>
+            </div>
 
-            <DialogFooter className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>
-                  {t("cameraManagement.clone.footer.changeCount", {
-                    count: changeCount,
-                  })}
-                </span>
+            <DialogFooter className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-x-0">
+              <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                 {changeCount > 0 && (
-                  <SaveAllPreviewPopover
-                    items={previewItems}
-                    className="h-7 w-7"
-                    align="start"
-                    side="top"
-                  />
+                  <>
+                    <div className="flex items-center gap-1">
+                      <span>
+                        {t("cameraManagement.clone.footer.changeCount", {
+                          count: changeCount,
+                        })}
+                      </span>
+                      {changeCount > 0 && (
+                        <SaveAllPreviewPopover
+                          items={previewItems}
+                          className="h-7 w-7"
+                          align="start"
+                          side="top"
+                          disablePortal
+                        />
+                      )}
+                    </div>
+                    <span className="text-xs">
+                      {anyNeedsRestart
+                        ? t("cameraManagement.clone.footer.restartNeeded")
+                        : t("cameraManagement.clone.footer.liveOnly")}
+                    </span>
+                  </>
                 )}
-                <span className="ml-2 text-xs">
-                  {anyNeedsRestart
-                    ? t("cameraManagement.clone.footer.restartNeeded")
-                    : t("cameraManagement.clone.footer.liveOnly")}
-                </span>
               </div>
-              <div className="flex gap-2">
-                <Button type="button" disabled={isSubmitting} onClick={onClose}>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <Button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={onClose}
+                  className="w-full sm:w-auto"
+                >
                   {t("button.cancel", { ns: "common" })}
                 </Button>
                 <Button
                   variant="select"
                   type="submit"
                   disabled={isSubmitting || changeCount === 0}
+                  className="w-full sm:w-auto"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
