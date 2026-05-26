@@ -544,6 +544,77 @@
       "normal": "Normal",
       "dedicatedLpr": "Dedicated LPR",
       "saveSuccess": "Updated camera type for {{cameraName}}. Restart Frigate to apply the changes."
+    },
+    "clone": {
+      "trigger": "Clone...",
+      "triggerAriaLabel": "Clone settings from {{cameraName}}",
+      "title": "Clone settings from {{cameraName}}",
+      "description": "Copy this camera's configuration to a new or existing camera. Identity (name, friendly name, web UI URL, display order) is never copied.",
+      "target": {
+        "legend": "Target",
+        "newRadio": "New camera",
+        "newNameLabel": "Camera name",
+        "newNamePlaceholder": "e.g., back_door or Back Door",
+        "newNameRequired": "Camera name is required",
+        "newNameInvalid": "Invalid camera name",
+        "newNameCollision": "A camera with this name already exists",
+        "newStreamsForced": "Streams are always copied for a new camera. You'll edit the RTSP URLs after cloning.",
+        "existingRadio": "Existing camera",
+        "existingPlaceholder": "Choose camera…",
+        "existingDisabled": "No other cameras to copy to"
+      },
+      "categories": {
+        "legend": "What to copy",
+        "selectAll": "Select all",
+        "resetDefaults": "Reset to defaults",
+        "general": "General",
+        "spatial": "Spatial settings",
+        "streams": "Streams",
+        "spatialWarning": "Source resolution {{srcWidth}}×{{srcHeight}} differs from target resolution {{dstWidth}}×{{dstHeight}}. Polygons may not align — these defaults are off; enable to copy as-is.",
+        "restartHint": "Restart required",
+        "items": {
+          "record": "Recording",
+          "snapshots": "Snapshots",
+          "review": "Review (alerts & detections)",
+          "motion": "Motion sensitivity",
+          "objects": "Detection objects & filters",
+          "audio": "Audio detection",
+          "audio_transcription": "Audio transcription",
+          "notifications": "Notifications",
+          "birdseye": "Birdseye",
+          "mqtt": "MQTT",
+          "timestamp_style": "Timestamp style",
+          "onvif": "ONVIF / PTZ",
+          "lpr": "License plate recognition",
+          "face_recognition": "Face recognition",
+          "semantic_search": "Semantic search",
+          "genai": "GenAI",
+          "type": "Camera type (normal / dedicated LPR)",
+          "profiles": "Profiles",
+          "detect": "Detect dimensions",
+          "zones": "Zones",
+          "motion_mask": "Motion mask",
+          "object_masks": "Object masks",
+          "ffmpeg_live": "Stream URLs and roles"
+        }
+      },
+      "footer": {
+        "changeCount_zero": "No changes selected",
+        "changeCount_one": "{{count}} change will be applied",
+        "changeCount_other": "{{count}} changes will be applied",
+        "restartNeeded": "Restart will be required for some changes.",
+        "liveOnly": "All changes will apply live without a restart.",
+        "submit": "Clone",
+        "submitting": "Cloning…"
+      },
+      "toast": {
+        "success": "Settings copied to {{cameraName}}",
+        "successWithRestart": "Settings copied to {{cameraName}}. Restart Frigate to fully apply.",
+        "partialFailure": "{{successCount}} sections applied; '{{failedSection}}' failed: {{errorMessage}}",
+        "newCameraPartialFailure": "Camera {{cameraName}} was created but some settings failed to copy: {{errorMessage}}",
+        "sourceMissing": "Source camera no longer exists",
+        "submitError": "Failed to clone camera: {{errorMessage}}"
+      }
     }
   },
   "cameraReview": {
