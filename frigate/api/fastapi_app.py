@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import re
 from typing import Optional
@@ -36,7 +37,7 @@ from frigate.comms.event_metadata_updater import (
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.config.profile_manager import ProfileManager
-from frigate.debug_replay import DebugReplayManager
+from frigate.debug_replay import DebugReplayManager, debug_replay_auto_stop_watchdog
 from frigate.embeddings import EmbeddingsContext
 from frigate.genai import GenAIClientManager
 from frigate.ptz.onvif import OnvifController
@@ -116,6 +117,11 @@ def create_fastapi_app(
     @app.on_event("startup")
     async def startup():
         logger.info("FastAPI started")
+        asyncio.create_task(
+            debug_replay_auto_stop_watchdog(
+                replay_manager, frigate_config, config_publisher
+            )
+        )
 
     # Rate limiter (used for login endpoint)
     if frigate_config.auth.failed_login_rate_limit is None:
