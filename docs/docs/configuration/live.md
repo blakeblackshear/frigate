@@ -88,8 +88,18 @@ Configure a "friendly name" for your stream followed by the go2rtc stream name. 
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Live playback" />, then select your camera.
-   - Under **Live stream names**, add entries mapping a friendly name to each go2rtc stream name (e.g., `Main Stream` mapped to `test_cam`, `Sub Stream` mapped to `test_cam_sub`).
+1. Navigate to <NavPath path="Settings > Camera configuration > Live playback" /> and select your camera.
+2. Under **Live stream names**, click **Add stream** to add a new entry.
+3. In the **Stream name** field, enter a friendly name that will appear in the Live UI's stream dropdown (e.g., `Main Stream`).
+4. In the **go2rtc stream** field, open the dropdown and select the go2rtc stream this name should map to (e.g., `test_cam`). The dropdown lists every stream configured under `go2rtc.streams`. If the go2rtc stream hasn't been created yet, you can type the name and choose **Use "..."** to save a custom value.
+5. Repeat for each additional stream you want to expose (e.g., `Sub Stream` → `test_cam_sub`).
+6. Use the trash icon on a row to remove a stream, then **Save** the section.
+
+:::tip
+
+Configure your go2rtc streams first under <NavPath path="Settings > System > go2rtc streams" /> so the dropdown is populated with valid options.
+
+:::
 
 </TabItem>
 <TabItem value="yaml">
