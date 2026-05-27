@@ -130,6 +130,8 @@ Profiles can be activated and deactivated via the Frigate UI, [MQTT](/integratio
 
 In the Frigate UI, open the Settings cog and select **Profiles** from the submenu to see all defined profiles. From there you can activate any profile or deactivate the current one. The active profile is indicated in the UI so you always know which profile is in effect.
 
+Activating or deactivating a profile clears any [runtime toggle overrides](/configuration/live#runtime-toggle-persistence) so the profile's settings aren't silently undone by a stale toggle from before the switch.
+
 ## Example: Home / Away Setup
 
 A common use case is having different detection and notification settings based on whether you are home or away. This example below is for a system with two cameras, `front_door` and `indoor_cam`.

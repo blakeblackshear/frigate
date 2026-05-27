@@ -124,11 +124,24 @@ class ProfileManager:
                 self.config.active_profile = None
                 self._persist_active_profile(None)
 
-    def activate_profile(self, profile_name: Optional[str]) -> Optional[str]:
+            # drop all runtime overrides so they don't replay stale values on restart
+            if self.dispatcher is not None:
+                self.dispatcher.clear_runtime_state()
+
+    def activate_profile(
+        self,
+        profile_name: Optional[str],
+        clear_runtime_overrides: bool = True,
+    ) -> Optional[str]:
         """Activate a profile by name, or deactivate if None.
 
         Args:
             profile_name: Profile name to activate, or None to deactivate.
+            clear_runtime_overrides: When True (the default, for user-initiated
+                activations) drop the dispatcher's runtime override file because
+                the layer below changed. Startup callers that are replaying a
+                persisted profile pass False so the runtime state stays
+                available for the subsequent replay step.
 
         Returns:
             None on success, or an error message string on failure.
@@ -156,6 +169,11 @@ class ProfileManager:
 
         self.config.active_profile = profile_name
         self._persist_active_profile(profile_name)
+
+        # a profile switch invalidates the steady-state runtime overrides
+        if clear_runtime_overrides and self.dispatcher is not None:
+            self.dispatcher.clear_runtime_state()
+
         logger.info(
             "Profile %s",
             f"'{profile_name}' activated" if profile_name else "deactivated",
