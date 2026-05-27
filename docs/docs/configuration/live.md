@@ -262,7 +262,7 @@ cameras:
 Each camera has three possible states, surfaced as a status selector in **Settings → Global configuration → Camera management**:
 
 - **On** — streams are processed normally. Object detection, recording, and Live view are active.
-- **Off** — Frigate's ffmpeg processes are paused. Recording stops, object detection is paused, and the Live dashboard displays a blank image with a "Camera is off" message. The camera is still visible in the Live dashboard and its past review items, tracked objects, and historical footage remain accessible via the UI. This state does **not** persist across Frigate restarts; the camera returns to On after a restart.
+- **Off** — Frigate's ffmpeg processes are paused. Recording stops, object detection is paused, and the Live dashboard displays a blank image with a "Camera is off" message. The camera is still visible in the Live dashboard and its past review items, tracked objects, and historical footage remain accessible via the UI. The Off state persists across Frigate restarts via a `.runtime_state.json` file alongside `config.yml` (see [Runtime toggle persistence](#runtime-toggle-persistence)).
 - **Disabled** — the change is saved to your configuration file (`enabled: False`). The camera stops immediately, Frigate stops ffmpeg processes, and all live and historical UI elements for the camera are no longer visible but remains retained on disk. The camera is still listed in **Settings → Global configuration → Camera management** so it can be re-enabled. **A restart of Frigate is required to bring a disabled camera back to On.**
 
 #### Turning a camera on or off
@@ -289,6 +289,15 @@ For both Off and Disabled cameras, go2rtc remains active but does not use system
 #### Choosing Off versus Disabled
 
 If you want a camera's historical data (review items, tracked objects, footage) to stay accessible in the UI while you stop processing, set the camera to **Off**. If you want the camera fully removed from the Live dashboard, review filters, and other UI surfaces, set it to **Disabled**. The Disabled state still keeps the camera in Camera management so it can be re-enabled later; if you want to remove all traces of a camera including its configuration, delete it via Camera management instead.
+
+#### Runtime toggle persistence
+
+The Live view toggles for **camera on/off**, **detect**, **recordings**, **snapshots**, and **audio detection** — along with the equivalent MQTT `/set` topics — write the new state to `.runtime_state.json` next to your `config.yml`. The file is replayed on Frigate startup so your last-known toggle states survive a restart. Two interactions worth knowing:
+
+- **Settings UI saves win.** When you save a field through **Settings → Global configuration**, the matching entry is cleared from `.runtime_state.json` so the new value in your config file is the durable source.
+- **Switching profiles clears all runtime overrides.** Activating or deactivating a [profile](/configuration/profiles) is treated as a deliberate state change, so the file is wiped to avoid stale overrides replaying on top of the new profile.
+
+If you hand-edit `config.yml` while runtime overrides exist, the overrides will still replay on restart. Delete `.runtime_state.json` to reset to the YAML-defined defaults.
 
 ### Live player error messages
 
