@@ -48,7 +48,14 @@ class RuntimeStatePersistence:
             logger.error("Timed out acquiring runtime state lock for load")
             return {}
         cameras = data.get("cameras", {})
-        return cameras if isinstance(cameras, dict) else {}
+        if not isinstance(cameras, dict):
+            return {}
+        # Filter out malformed camera entries so callers can trust the shape.
+        return {
+            name: features
+            for name, features in cameras.items()
+            if isinstance(features, dict)
+        }
 
     def set(self, camera: str, topic: str, value: bool) -> None:
         """Persist a single (camera, topic, value). No-op if topic untracked."""

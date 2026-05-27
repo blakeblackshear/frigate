@@ -412,8 +412,6 @@ class Dispatcher:
         for camera_name, features in state.items():
             if camera_name not in self.config.cameras:
                 continue
-            if not isinstance(features, dict):
-                continue
             for topic, value in features.items():
                 handler = self._camera_settings_handlers.get(topic)
                 if handler is None:
