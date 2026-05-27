@@ -109,6 +109,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
       "nb-NO": "nb",
       "yue-Hant": "yue",
       "zh-CN": "zhCN",
+      "zh-Hant": "zhHant",
       "pt-BR": "ptBR",
     };
 
