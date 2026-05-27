@@ -5,6 +5,7 @@ frigate.jobs.debug_replay. This module owns only session presence
 (active), session metadata, and post-session cleanup.
 """
 
+import asyncio
 import logging
 import os
 import shutil
@@ -40,6 +41,9 @@ from frigate.util.config import find_config_file
 
 logger = logging.getLogger(__name__)
 
+MAX_SESSION_DURATION_SECONDS = 12 * 60 * 60
+AUTO_STOP_CHECK_INTERVAL_SECONDS = 60
+
 
 class DebugReplayManager:
     """Owns the lifecycle pointers for a single debug replay session.
@@ -58,6 +62,7 @@ class DebugReplayManager:
         self.clip_path: str | None = None
         self.start_ts: float | None = None
         self.end_ts: float | None = None
+        self.session_started_at: float | None = None
         self._job_state_publisher = JobStatePublisher()
 
     @property
@@ -83,6 +88,7 @@ class DebugReplayManager:
             self.start_ts = start_ts
             self.end_ts = end_ts
             self.clip_path = None
+            self.session_started_at = time.time()
 
     def mark_session_ready(self, clip_path: str) -> None:
         """Record the on-disk clip path after the camera has been published."""
@@ -104,6 +110,7 @@ class DebugReplayManager:
         self.clip_path = None
         self.start_ts = None
         self.end_ts = None
+        self.session_started_at = None
 
     def publish_camera(
         self,
@@ -351,3 +358,41 @@ def cleanup_replay_cameras() -> None:
             shutil.rmtree(REPLAY_DIR)
         except Exception as e:
             logger.error("Failed to remove replay cache directory: %s", e)
+
+
+async def debug_replay_auto_stop_watchdog(
+    manager: DebugReplayManager,
+    frigate_config: FrigateConfig,
+    config_publisher: CameraConfigUpdatePublisher,
+) -> None:
+    """Auto-stop debug replay sessions that exceed MAX_SESSION_DURATION_SECONDS.
+
+    Backstop against a session left running for days. The cap is intentionally
+    generous so realistic tuning and overnight soak workflows aren't disrupted.
+    """
+    while True:
+        try:
+            await asyncio.sleep(AUTO_STOP_CHECK_INTERVAL_SECONDS)
+
+            started_at = manager.session_started_at
+            if not manager.active or started_at is None:
+                continue
+
+            if time.time() - started_at < MAX_SESSION_DURATION_SECONDS:
+                continue
+
+            replay_name = manager.replay_camera_name
+            await asyncio.to_thread(
+                manager.stop,
+                frigate_config=frigate_config,
+                config_publisher=config_publisher,
+            )
+            logger.info(
+                "Debug replay auto-stopped after exceeding max session duration of %d hours: %s",
+                MAX_SESSION_DURATION_SECONDS // 3600,
+                replay_name,
+            )
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("Error in debug replay auto-stop watchdog")

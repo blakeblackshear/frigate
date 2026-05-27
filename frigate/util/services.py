@@ -416,6 +416,11 @@ def get_intel_gpu_stats(
 
     snapshot_a = _read_intel_drm_fdinfo(target_pdev)
     if not snapshot_a:
+        logger.warning(
+            "Unable to collect Intel GPU stats: no DRM fdinfo entries found"
+            "%s. Check that /proc is readable and the i915/xe driver is loaded",
+            f" for pdev {target_pdev}" if target_pdev else "",
+        )
         return None
 
     start = time.monotonic()
@@ -424,6 +429,9 @@ def get_intel_gpu_stats(
 
     snapshot_b = _read_intel_drm_fdinfo(target_pdev)
     if not snapshot_b or elapsed_ns <= 0:
+        logger.warning(
+            "Unable to collect Intel GPU stats: second DRM fdinfo sample was empty"
+        )
         return None
 
     def _new_engine_pct() -> dict[str, float]:
@@ -464,6 +472,10 @@ def get_intel_gpu_stats(
         pid_pct[data_b["pid"]] = pid_pct.get(data_b["pid"], 0.0) + client_total
 
     if not per_pdev_engine_pct:
+        logger.warning(
+            "Unable to collect Intel GPU stats: no per-engine counters available "
+            "(i915 requires kernel >= 5.19)"
+        )
         return None
 
     names = intel_gpu_name_resolver.get_names()

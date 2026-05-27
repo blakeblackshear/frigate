@@ -680,6 +680,13 @@ class FrigateConfig(FrigateBaseModel):
         if self.ffmpeg.hwaccel_args == "auto":
             self.ffmpeg.hwaccel_args = auto_detect_hwaccel()
 
+        # Resolve global export hwaccel_args so it matches the per-camera
+        # resolution below. Without this, every camera reads as overriding
+        # record.export.hwaccel_args because the global stays "auto" while
+        # the camera value gets resolved to the actual args list.
+        if self.record.export.hwaccel_args == "auto":
+            self.record.export.hwaccel_args = self.ffmpeg.hwaccel_args
+
         # Populate global audio filters from listen. Existing user-defined
         # entries for labels not in listen are preserved but unused at runtime.
         if self.audio.filters is None:
