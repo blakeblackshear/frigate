@@ -727,6 +727,55 @@ class TestProfileManager(unittest.TestCase):
         # Should not raise
         json.dumps(api_base)
 
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_activate_profile_clears_dispatcher_runtime_state(self, mock_persist):
+        """User-initiated activation drops runtime overrides (steady-state rule)."""
+        dispatcher = MagicMock()
+        manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+        manager.activate_profile("armed")
+        dispatcher.clear_runtime_state.assert_called_once_with()
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_deactivate_profile_clears_dispatcher_runtime_state(self, mock_persist):
+        """Deactivating a profile also drops runtime overrides."""
+        dispatcher = MagicMock()
+        manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+        manager.activate_profile("armed")
+        dispatcher.clear_runtime_state.reset_mock()
+
+        manager.activate_profile(None)
+        dispatcher.clear_runtime_state.assert_called_once_with()
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_startup_replay_does_not_clear_runtime_state(self, mock_persist):
+        """Startup callers pass clear_runtime_overrides=False to preserve state."""
+        dispatcher = MagicMock()
+        manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+        manager.activate_profile("armed", clear_runtime_overrides=False)
+        dispatcher.clear_runtime_state.assert_not_called()
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_update_config_clears_when_active_profile_reapplies(self, mock_persist):
+        """After /api/config/set, an active-profile re-application drops state."""
+        dispatcher = MagicMock()
+        manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+        manager.activate_profile("armed")
+        dispatcher.clear_runtime_state.reset_mock()
+
+        new_config = FrigateConfig(**self.config_data)
+        manager.update_config(new_config)
+        dispatcher.clear_runtime_state.assert_called_once_with()
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_update_config_does_not_clear_when_no_active_profile(self, mock_persist):
+        """Plain /api/config/set without a profile doesn't trigger the broad clear."""
+        dispatcher = MagicMock()
+        manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+        # No activate_profile call — config.active_profile is None
+        new_config = FrigateConfig(**self.config_data)
+        manager.update_config(new_config)
+        dispatcher.clear_runtime_state.assert_not_called()
+
 
 class TestProfilePersistence(unittest.TestCase):
     """Test profile persistence to disk."""
