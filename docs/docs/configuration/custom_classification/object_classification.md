@@ -150,13 +150,12 @@ For more detail, see [Frigate Tip: Best Practices for Training Face and Custom C
 - **Problem framing**: Keep classes visually distinct and relevant to the chosen object types.
 - **Preprocessing**: Ensure examples reflect object crops similar to Frigate's boxes; keep the subject centered.
 - **Crop size**: Aim for crops of at least 100×100 pixels. Crops smaller than ~80×80 get stretched 3-7× by the model's 224×224 input resize and tend to collapse into a generic "blob" region of feature space where identity becomes unreliable. If most of your detections are small because the camera is far from the subject, consider repositioning the camera for closer crops.
-- **Labels**: Keep label names short and consistent. Always include a `none` class for sub-label models — without it, every unknown crop at inference gets forced into a named class, since the model has no "I don't recognize this" option.
 - **Class balance**: Aim to keep your largest class within ~3× the count of your smallest. Beyond that, the model becomes biased toward the dominant class and tends to default borderline predictions to it (the "everything looks like Buddy" failure mode).
 - **Threshold**: Tune `threshold` per model to reduce false assignments. Start at `0.8` and adjust based on validation.
 
 :::tip `none` works differently from named classes
 
-Named classes work best with visually uniform examples — every Buddy photo should look like Buddy. The `none` class needs the opposite: visual diversity across sizes, framings, and qualities, because at inference it has to absorb everything that isn't one of your named classes. Don't apply the same "only keep large, well-framed images" rule to `none` that you would to a named class. Mix in small crops, partial views, and other unrelated objects deliberately — otherwise the model has no signal for "small/ambiguous thing = not one of my known classes" and will force those crops into a named class by default.
+Named classes work best with visually uniform examples — every Buddy photo should look like Buddy. The `none` class needs the opposite: visual diversity across sizes, framings, and qualities, because at inference it has to absorb everything that isn't one of your named classes. Don't apply the same "only keep large, well-framed images" rule to `none` that you would to a named class. Mix in small crops, partial views, and false positives deliberately - otherwise the model has no signal for "small/ambiguous thing = not one of my known classes" and will force those crops into a named class by default.
 
 :::
 
