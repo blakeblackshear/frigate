@@ -42,8 +42,22 @@ Recommended workflow when troubleshooting misclassifications:
      them to whichever class has the most of them.
 
      Fix: quarantine every image where min(w, h) < 80 (or 100 for a
-     stricter cut) and retrain. This single step often resolves most
-     misclassifications in datasets collected from distant cameras.
+     stricter cut) and retrain. This works when the named class has
+     plenty of non-small examples to fall back on AND the small crops
+     are mostly degenerate blobs (target unrecognizable at that size).
+
+     CAVEAT — sometimes small crops ARE the signal, not the noise: if
+     your target naturally appears small at the camera distance (cats
+     indoors, distant subjects, wide-FOV setups), the small crops in
+     the named class ARE the typical inference-time input. Removing them
+     leaves the model unable to recognize the target at its natural
+     detection size, and accuracy on the named class collapses after
+     retraining. If that happens — named-class accuracy drops sharply
+     after size cut + retrain — restore the quarantine and switch to
+     visual review of just the misclassified small crops instead of
+     bulk size filtering. The size threshold is a tool for "tons of
+     accidental tiny blobs polluting a class with otherwise large
+     examples," not a universal cleanup.
 
   3. Verify the "none" class exists and is healthy. Without a strong
      "none" class, every unknown crop at inference gets forced into one of
