@@ -348,7 +348,11 @@ class FrigateApp:
             persisted in cam.profiles for cam in self.config.cameras.values()
         ):
             logger.info("Restoring persisted profile '%s'", persisted)
-            self.profile_manager.activate_profile(persisted)
+            # don't clear runtime overrides here, restore_runtime_state() later
+            # in startup replays it on top of the activated profile
+            self.profile_manager.activate_profile(
+                persisted, clear_runtime_overrides=False
+            )
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
@@ -611,6 +615,9 @@ class FrigateApp:
         self.start_event_cleanup()
         self.start_record_cleanup()
         self.start_watchdog()
+
+        # restore persisted runtime overrides on top of config
+        self.dispatcher.restore_runtime_state()
 
         self.init_auth()
 
