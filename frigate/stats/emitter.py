@@ -32,7 +32,7 @@ class StatsEmitter(threading.Thread):
         self.config = config
         self.stats_tracking = stats_tracking
         self.stop_event = stop_event
-        self.hwaccel_errors: list[str] = []
+        self.hwaccel_errors: dict[str, float] = {}
         self.stats_history: list[dict[str, Any]] = []
 
         # create communication for stats
