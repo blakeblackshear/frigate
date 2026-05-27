@@ -149,7 +149,7 @@ For more detail, see [Frigate Tip: Best Practices for Training Face and Custom C
 - **The wizard is just the starting point**: You don't need to find and label every class upfront. Missing classes will naturally appear in Recent Classifications, and those images tend to be more valuable because they represent new conditions and edge cases.
 - **Problem framing**: Keep classes visually distinct and relevant to the chosen object types.
 - **Preprocessing**: Ensure examples reflect object crops similar to Frigate's boxes; keep the subject centered.
-- **Crop size**: Aim for crops of at least 100×100 pixels. Crops smaller than ~80×80 get stretched 3-7× by the model's 224×224 input resize and tend to collapse into a generic "blob" region of feature space where identity becomes unreliable. If most of your detections are small because the camera is far from the subject, consider repositioning the camera for closer crops.
+- **Crop size**: Aim for crops of at least 100×100 pixels (a 10,000 pixel area). Crops smaller than ~80×80 get stretched 3-7× by the model's 224×224 input resize and tend to collapse into a generic "blob" region of feature space where identity becomes unreliable. If most of your detections are small because the camera is far from the subject, consider repositioning the camera for closer crops.
 - **Class balance**: Aim to keep your largest class within ~3× the count of your smallest. Beyond that, the model becomes biased toward the dominant class and tends to default borderline predictions to it (the "everything looks like Buddy" failure mode).
 - **Threshold**: Tune `threshold` per model to reduce false assignments. Start at `0.8` and adjust based on validation.
 
