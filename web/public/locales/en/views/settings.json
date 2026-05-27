@@ -1405,6 +1405,17 @@
       "namePlaceholder": "e.g., Wife's Car",
       "platePlaceholder": "Plate number or regex"
     },
+    "liveStreams": {
+      "streamNameLabel": "Stream name",
+      "streamNamePlaceholder": "e.g., Main HD Stream",
+      "go2rtcStreamLabel": "go2rtc stream",
+      "go2rtcStreamPlaceholder": "Select a go2rtc stream",
+      "go2rtcStreamSearch": "Search or enter a stream name…",
+      "noGo2rtcStreams": "No go2rtc streams configured",
+      "availableStreams": "Available streams",
+      "useCustom": "Use \"{{value}}\"",
+      "addStream": "Add stream"
+    },
     "timezone": {
       "defaultOption": "Use browser timezone"
     },
