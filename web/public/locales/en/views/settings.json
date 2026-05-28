@@ -571,7 +571,7 @@
         "existingDisabled": "No other cameras to copy to"
       },
       "categories": {
-        "legend": "What to copy",
+        "legend": "Settings to clone",
         "description": "Choose which settings to copy from the source camera.",
         "selectAll": "Select all",
         "selectNone": "Select none",
@@ -598,7 +598,7 @@
           "lpr": "License plate recognition",
           "face_recognition": "Face recognition",
           "semantic_search": "Semantic search",
-          "genai": "GenAI",
+          "genai": "Generative AI",
           "type": "Camera type (normal / dedicated LPR)",
           "profiles": "Profiles",
           "detect": "Detect dimensions",
