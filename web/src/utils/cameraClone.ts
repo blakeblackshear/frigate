@@ -53,7 +53,12 @@ function resolveDef(schema: RJSFSchema, name: string): RJSFSchema | undefined {
   return defs ? defs[name] : undefined;
 }
 
-/** Remove filter entries that exactly match the backend's auto-default. */
+/**
+ * Reduce each filter entry to the fields that differ from the backend's
+ * auto-default. An entry that is entirely auto-populated drops out; a
+ * partially-customized entry keeps only its customized fields, so cloning
+ * doesn't copy the auto-populated default for every other field.
+ */
 function stripAutoDefaultFilters(
   section: string,
   sourceSection: JsonObject,
@@ -80,20 +85,56 @@ function stripAutoDefaultFilters(
         )
       : new Set<string>();
 
+  // Ignore runtime-only `mask`/`raw_mask`: the API ships them as `{}` while the
+  // schema default omits them, which would otherwise break the equality check.
+  const withoutRuntimeFields = (entry: JsonValue): JsonValue => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return entry;
+    }
+    const copy = { ...(entry as JsonObject) };
+    delete copy.mask;
+    delete copy.raw_mask;
+    return copy;
+  };
+
   const cleaned: JsonObject = {};
   for (const [label, value] of Object.entries(filters as JsonObject)) {
     const expected = attributeSet.has(label) ? attributeDefaults : baseDefaults;
-    if (isEqual(value, expected)) continue;
-    cleaned[label] = value as JsonValue;
+    const valNorm = withoutRuntimeFields(value as JsonValue);
+    const expNorm = withoutRuntimeFields(expected as JsonValue);
+
+    // Non-object filter value: keep only if it differs from the default.
+    if (
+      !valNorm ||
+      typeof valNorm !== "object" ||
+      Array.isArray(valNorm) ||
+      !expNorm ||
+      typeof expNorm !== "object" ||
+      Array.isArray(expNorm)
+    ) {
+      if (!isEqual(valNorm, expNorm)) {
+        cleaned[label] = value as JsonValue;
+      }
+      continue;
+    }
+
+    const diff: JsonObject = {};
+    for (const [field, fieldValue] of Object.entries(valNorm as JsonObject)) {
+      if (!isEqual(fieldValue, (expNorm as JsonObject)[field])) {
+        diff[field] = fieldValue as JsonValue;
+      }
+    }
+    if (Object.keys(diff).length > 0) {
+      cleaned[label] = diff;
+    }
   }
   return { ...sourceSection, filters: cleaned };
 }
 
 /**
- * Strip named runtime-only fields from each entry in a dict-of-objects
- * (mask `enabled_in_config`/`raw_coordinates`, zone `color`). The settings
- * UI doesn't need this because BaseSection's form never exposes these
- * sub-collections; we do because clone re-injects them from the API.
+ * Strip runtime-only fields from each entry of a dict-of-objects (mask
+ * `enabled_in_config`/`raw_coordinates`, zone `color`) that clone re-injects
+ * from the API.
  */
 function stripDictEntryFields(
   dict: unknown,
@@ -135,11 +176,9 @@ function stripResetMarkers(
 }
 
 /**
- * Collapse per-section payloads into one camera-level payload + `…/add`
- * topic. New cameras are created atomically by the backend's `add`
- * handler, so a single PUT avoids the intermediate-validation ordering
- * problem (e.g. a `review` required_zone referencing zones not yet written)
- * that the per-section path is subject to.
+ * Collapse per-section payloads into one camera-level `…/add` payload. The
+ * backend's `add` handler validates atomically, avoiding the per-section
+ * ordering problem (e.g. `review.required_zones` referencing unwritten zones).
  */
 function bundleNewCameraPayload(
   payloads: SectionSavePayload[],
@@ -166,10 +205,8 @@ function bundleNewCameraPayload(
 }
 
 /**
- * Drop empty `*_args` arrays from ffmpeg inputs. Mirrors
- * `sanitizeOverridesForSection`'s ffmpeg cleanup, which we don't go
- * through here because the establishing payload uses `buildOverrides`
- * directly.
+ * Drop empty `*_args` arrays from ffmpeg inputs — the establishing payload
+ * uses `buildOverrides` directly, bypassing `sanitizeOverridesForSection`.
  */
 function cleanupFfmpegInputArgs(
   ffmpeg: JsonValue | undefined,
@@ -225,10 +262,9 @@ function restoreFfmpegPaths(
 }
 
 /**
- * Replay the backend's per-camera detect-field formulas (`frigate/config/
- * config.py`) on the synthetic side so they cancel out of the diff. The
- * global config doesn't get per-camera derivation, so without this the
- * source's computed values surface as overrides.
+ * Replay the backend's per-camera detect-field formulas on the synthetic
+ * baseline so the source's computed values cancel out of the diff (the global
+ * config has no per-camera derivation).
  */
 function applyDetectComputedDefaults(
   detect: JsonObject,
@@ -473,12 +509,9 @@ export function buildClonedCameraPayloads({
     }
   }
 
-  // Section-backed categories — flow through prepareSectionSavePayload
-  // for matching restart/update-topic behavior. Order matters for the
-  // existing-camera multi-PUT path: each PUT re-validates the whole
-  // config, so dependency providers must precede consumers — `detect`
-  // (resolution) then `zones` before sections that reference zones via
-  // `required_zones` (review, objects, snapshots, mqtt).
+  // Order matters for the existing-camera multi-PUT path (each PUT re-validates
+  // the whole config): `detect` then `zones` must precede sections that
+  // reference zones via `required_zones` (review, objects, snapshots, mqtt).
   const SECTION_KEYS: Array<{ key: CloneCategoryKey; section: string }> = [
     { key: "detect", section: "detect" },
     { key: "zones", section: "zones" },
@@ -500,14 +533,11 @@ export function buildClonedCameraPayloads({
     { key: "genai", section: "genai" },
   ];
 
-  // Synthetic target so we can reuse prepareSectionSavePayload unchanged.
-  // For new-camera target, seed sections where camera schema accepts all
-  // global fields — gives buildOverrides the right inheritance baseline.
-  // Sections with divergent per-camera Pydantic classes (mqtt, birdseye,
-  // lpr, face_recognition, semantic_search, audio_transcription, genai)
-  // are left unset so prepareSectionSavePayload's schema defaults handle
-  // filtering instead — seeding from global would emit its extra fields
-  // as Reset markers.
+  // Synthetic target reused as the diff baseline. New-camera: seed sections
+  // whose camera schema accepts all global fields (correct inheritance
+  // baseline), but leave divergent per-camera sections (mqtt, birdseye, lpr,
+  // face_recognition, semantic_search, audio_transcription, genai) unset —
+  // seeding from global would surface its extra fields as Reset markers.
   const GLOBAL_INHERITED_SECTIONS = [
     "detect",
     "objects",
@@ -531,24 +561,39 @@ export function buildClonedCameraPayloads({
           ]).filter(([, value]) => value !== undefined && value !== null),
         ),
       } as unknown as FrigateConfig["cameras"][string])
-    : (fullConfig.cameras?.[target] ??
-      ({ enabled: true } as unknown as FrigateConfig["cameras"][string]));
+    : ((fullConfig.cameras?.[target]
+        ? cloneDeep(fullConfig.cameras[target])
+        : { enabled: true }) as unknown as FrigateConfig["cameras"][string]);
 
-  // Symmetric filter strip: same treatment as the per-section source
-  // strip below, so default-only entries cancel out of the diff.
+  // Strip auto-default filters from the baseline (matching the per-section
+  // source strip) so default-only entries cancel. Includes `base_config` (the
+  // pre-profile parse getBaseCameraSectionValue reads) — otherwise its
+  // auto-populated entries become `""` resets and the backend KeyErrors
+  // deleting a key not in the YAML. Cloned above so this won't mutate the cache.
+  const syntheticCameraObj = syntheticTargetCamera as unknown as JsonObject;
+  const baseConfigObj = syntheticCameraObj.base_config as
+    | Record<string, JsonObject>
+    | undefined;
   for (const section of Object.keys(FILTER_SECTION_DEFS)) {
-    const syntheticSection = (syntheticTargetCamera as unknown as JsonObject)[
-      section
-    ];
+    const syntheticSection = syntheticCameraObj[section];
     if (syntheticSection && typeof syntheticSection === "object") {
-      (syntheticTargetCamera as unknown as JsonObject)[section] =
-        stripAutoDefaultFilters(
-          section,
-          syntheticSection as JsonObject,
-          fullSchema,
-          fullConfig,
-          syntheticTargetCamera as CameraConfig,
-        );
+      syntheticCameraObj[section] = stripAutoDefaultFilters(
+        section,
+        syntheticSection as JsonObject,
+        fullSchema,
+        fullConfig,
+        syntheticTargetCamera as CameraConfig,
+      );
+    }
+    const baseSection = baseConfigObj?.[section];
+    if (baseConfigObj && baseSection && typeof baseSection === "object") {
+      baseConfigObj[section] = stripAutoDefaultFilters(
+        section,
+        baseSection,
+        fullSchema,
+        fullConfig,
+        syntheticTargetCamera as CameraConfig,
+      );
     }
   }
 
@@ -556,7 +601,6 @@ export function buildClonedCameraPayloads({
   // so apply the formulas using source's fps to keep both sides aligned.
   // Existing-camera target already has the values from its own parse.
   if (targetIsNew && sourceCfg.detect) {
-    const syntheticCameraObj = syntheticTargetCamera as unknown as JsonObject;
     const syntheticDetect = syntheticCameraObj.detect;
     if (syntheticDetect && typeof syntheticDetect === "object") {
       syntheticCameraObj.detect = applyDetectComputedDefaults(
@@ -583,10 +627,9 @@ export function buildClonedCameraPayloads({
     )[section];
     if (sourceSectionValue == null) continue;
 
-    // Sanitize the source the same way BaseSection's form does
-    // implicitly: strips runtime/derived fields and function-resolved
-    // hidden paths (e.g. `hideAttributeFilters` removing untracked-
-    // attribute entries based on source's track list).
+    // Sanitize the source like BaseSection's form does: strip runtime/derived
+    // and hidden-path fields (e.g. `hideAttributeFilters` drops untracked
+    // attributes based on the source's track list).
     const sectionConfig = getSectionConfig(section, "camera");
     const resolvedHiddenFields = resolveHiddenFieldEntries(
       sectionConfig.hiddenFields,

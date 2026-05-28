@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -39,7 +46,12 @@ import type { FrigateConfig } from "@/types/frigateConfig";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
-import { LuTriangleAlert } from "react-icons/lu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { LuChevronDown, LuTriangleAlert } from "react-icons/lu";
 import {
   CLONE_CATEGORIES,
   type CloneCategoryKey,
@@ -53,38 +65,39 @@ import {
 import { buildConfigDataForPath } from "@/utils/configUtil";
 import { useConfigSchema } from "@/hooks/use-config-schema";
 import { useRestart } from "@/api/ws";
+import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import SaveAllPreviewPopover from "@/components/overlay/detail/SaveAllPreviewPopover";
+import FilterSwitch from "@/components/filter/FilterSwitch";
 
 type CloneCameraDialogProps = {
   open: boolean;
   onClose: () => void;
-  sourceCamera: string;
 };
 
 type CloneFormValues = {
+  sourceCamera: string;
   targetMode: "new" | "existing";
   newName: string;
-  existingTarget: string;
+  existingTargets: string[];
 };
 
 export default function CloneCameraDialog({
   open,
   onClose,
-  sourceCamera,
 }: CloneCameraDialogProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const { data: rawPaths } = useSWR<RawCameraPaths>("config/raw_paths");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const otherCameras = useMemo(() => {
+  const sourceCameras = useMemo(() => {
     if (!config) return [];
     return Object.keys(config.cameras)
-      .filter((c) => c !== sourceCamera && !isReplayCamera(c))
+      .filter((c) => !isReplayCamera(c))
       .sort();
-  }, [config, sourceCamera]);
+  }, [config]);
 
   const formSchema = useMemo(() => {
     const reservedNames = new Set<string>([
@@ -93,11 +106,19 @@ export default function CloneCameraDialog({
     ]);
     return z
       .object({
+        sourceCamera: z.string(),
         targetMode: z.enum(["new", "existing"]),
         newName: z.string(),
-        existingTarget: z.string(),
+        existingTargets: z.array(z.string()),
       })
       .superRefine((data, ctx) => {
+        if (!data.sourceCamera) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["sourceCamera"],
+            message: t("cameraManagement.clone.source.required"),
+          });
+        }
         if (data.targetMode === "new") {
           const trimmed = data.newName.trim();
           if (!trimmed) {
@@ -124,10 +145,10 @@ export default function CloneCameraDialog({
               message: t("cameraManagement.clone.target.newNameCollision"),
             });
           }
-        } else if (!data.existingTarget) {
+        } else if (data.existingTargets.length === 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            path: ["existingTarget"],
+            path: ["existingTargets"],
             message: t("cameraManagement.clone.target.existingPlaceholder"),
           });
         }
@@ -137,27 +158,40 @@ export default function CloneCameraDialog({
   const form = useForm<CloneFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      sourceCamera: "",
       targetMode: "new",
       newName: "",
-      existingTarget: "",
+      existingTargets: [],
     },
   });
 
+  const sourceCamera = form.watch("sourceCamera");
   const targetMode = form.watch("targetMode");
-  const existingTarget = form.watch("existingTarget");
+  const existingTargets = form.watch("existingTargets");
 
   const targetIsNew = targetMode === "new";
 
-  const srcCfg = config?.cameras?.[sourceCamera];
-  const dstCfg =
-    !targetIsNew && existingTarget
-      ? config?.cameras?.[existingTarget]
-      : undefined;
+  const otherCameras = useMemo(() => {
+    if (!config) return [];
+    return Object.keys(config.cameras)
+      .filter((c) => c !== sourceCamera && !isReplayCamera(c))
+      .sort();
+  }, [config, sourceCamera]);
 
-  const resMatch = useMemo(
-    () => resolutionsMatch(srcCfg?.detect, dstCfg?.detect),
-    [srcCfg, dstCfg],
-  );
+  const srcCfg = config?.cameras?.[sourceCamera];
+
+  // Existing targets whose detect resolution differs from the source. Spatial
+  // settings use detect-resolution coordinates, so cloning them to a camera
+  // with a different resolution is flagged (but still allowed).
+  const mismatchedTargets = useMemo(() => {
+    if (targetIsNew || !srcCfg?.detect) return [];
+    return existingTargets.filter((cam) => {
+      const dst = config?.cameras?.[cam];
+      return dst?.detect && !resolutionsMatch(srcCfg.detect, dst.detect);
+    });
+  }, [targetIsNew, srcCfg, existingTargets, config]);
+
+  const allResMatch = mismatchedTargets.length === 0;
 
   const [selectedCategories, setSelectedCategories] = useState<
     Set<CloneCategoryKey>
@@ -169,15 +203,28 @@ export default function CloneCameraDialog({
     if (open && !wasOpenRef.current) {
       wasOpenRef.current = true;
       form.reset({
+        sourceCamera: "",
         targetMode: "new",
         newName: "",
-        existingTarget: otherCameras[0] ?? "",
+        existingTargets: [],
       });
       setSelectedCategories(getCategoryDefaults(true));
     } else if (!open) {
       wasOpenRef.current = false;
     }
-  }, [open, form, otherCameras]);
+  }, [open, form]);
+
+  // Drop the source camera from the target selection if it gets picked.
+  useEffect(() => {
+    if (!sourceCamera) return;
+    const current = form.getValues("existingTargets");
+    if (current.includes(sourceCamera)) {
+      form.setValue(
+        "existingTargets",
+        current.filter((c) => c !== sourceCamera),
+      );
+    }
+  }, [sourceCamera, form]);
 
   // Reset selection to per-mode defaults when the user switches target mode.
   useEffect(() => {
@@ -196,7 +243,7 @@ export default function CloneCameraDialog({
   const selectAllCategories = useCallback(() => {
     setSelectedCategories((prev) => {
       const next = new Set(prev);
-      const includeSpatial = targetIsNew || resMatch;
+      const includeSpatial = targetIsNew || allResMatch;
       for (const cat of CLONE_CATEGORIES) {
         if (cat.newCameraOnly && !targetIsNew) continue;
         if (cat.group === "spatial" && !includeSpatial) continue;
@@ -205,7 +252,7 @@ export default function CloneCameraDialog({
       }
       return next;
     });
-  }, [targetIsNew, resMatch]);
+  }, [targetIsNew, allResMatch]);
 
   const selectNoneCategories = useCallback(() => {
     setSelectedCategories((prev) => {
@@ -241,48 +288,77 @@ export default function CloneCameraDialog({
 
   const fullSchema = useConfigSchema();
   const { send: sendRestart } = useRestart();
+  const statusBar = useContext(StatusBarMessagesContext);
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
 
   const watchedNewName =
     useWatch({ control: form.control, name: "newName" }) ?? "";
 
-  const previewPayloads = useMemo(() => {
-    if (!config || !fullSchema || !srcCfg) return [];
-    const targetInput = targetIsNew ? watchedNewName : existingTarget;
-    if (!targetInput) return [];
-    if (!targetIsNew && !config.cameras?.[targetInput]) return [];
-    return buildClonedCameraPayloads({
-      sourceCfg: srcCfg,
-      sourceName: sourceCamera,
-      targetInput,
-      targetIsNew,
-      selectedKeys: selectedCategories,
-      fullConfig: config,
-      fullSchema,
-      rawPaths,
-    });
+  // Payloads grouped per destination camera. New mode has a single target;
+  // existing mode fans out across every selected camera.
+  const targetPayloads = useMemo<
+    { target: string; payloads: ReturnType<typeof buildClonedCameraPayloads> }[]
+  >(() => {
+    if (!config || !fullSchema || !srcCfg) {
+      return [];
+    }
+    if (targetIsNew) {
+      const finalName = processCameraName(watchedNewName || "").finalCameraName;
+      if (!watchedNewName || !finalName) return [];
+      return [
+        {
+          target: finalName,
+          payloads: buildClonedCameraPayloads({
+            sourceCfg: srcCfg,
+            sourceName: sourceCamera,
+            targetInput: watchedNewName,
+            targetIsNew: true,
+            selectedKeys: selectedCategories,
+            fullConfig: config,
+            fullSchema,
+            rawPaths,
+          }),
+        },
+      ];
+    }
+    return existingTargets
+      .filter((cam) => config.cameras?.[cam])
+      .map((cam) => ({
+        target: cam,
+        payloads: buildClonedCameraPayloads({
+          sourceCfg: srcCfg,
+          sourceName: sourceCamera,
+          targetInput: cam,
+          targetIsNew: false,
+          selectedKeys: selectedCategories,
+          fullConfig: config,
+          fullSchema,
+          rawPaths,
+        }),
+      }));
   }, [
     config,
     fullSchema,
     srcCfg,
     sourceCamera,
     targetIsNew,
-    existingTarget,
+    existingTargets,
     watchedNewName,
     selectedCategories,
     rawPaths,
   ]);
 
-  const previewTarget = targetIsNew
-    ? processCameraName(watchedNewName || "").finalCameraName
-    : existingTarget;
+  const previewPayloads = useMemo(
+    () => targetPayloads.flatMap((tp) => tp.payloads),
+    [targetPayloads],
+  );
 
   const previewItems = useMemo(
     () =>
-      previewTarget
-        ? buildClonePreviewItems(previewPayloads, previewTarget)
-        : [],
-    [previewPayloads, previewTarget],
+      targetPayloads.flatMap((tp) =>
+        buildClonePreviewItems(tp.payloads, tp.target),
+      ),
+    [targetPayloads],
   );
 
   const anyNeedsRestart = previewPayloads.some((p) => p.needsRestart);
@@ -302,38 +378,126 @@ export default function CloneCameraDialog({
         return;
       }
 
-      const target = targetIsNew
-        ? processCameraName(values.newName.trim()).finalCameraName
-        : values.existingTarget;
-      const targetLabel = targetIsNew
-        ? values.newName.trim()
-        : (config.cameras?.[target]?.friendly_name ?? target);
+      const friendlyName = (cam: string) =>
+        config.cameras?.[cam]?.friendly_name ?? cam;
+
+      const extractError = (error: unknown) =>
+        (axios.isAxiosError(error) &&
+          (error.response?.data?.message || error.response?.data?.detail)) ||
+        (error instanceof Error ? error.message : "Unknown error");
+
+      const restartAction = (
+        <a onClick={() => setRestartDialogOpen(true)}>
+          <Button>{t("restart.button", { ns: "components/dialog" })}</Button>
+        </a>
+      );
+
+      const markRestartRequired = () =>
+        statusBar?.addMessage(
+          "config_restart_required",
+          t("configForm.restartRequiredFooter"),
+          undefined,
+          "config_restart_required",
+        );
 
       setIsSubmitting(true);
-      let appliedCount = 0;
-      let failedSection: string | undefined;
-      let failureMessage: string | undefined;
+
+      if (targetIsNew) {
+        const targetLabel = values.newName.trim();
+        const payloads = targetPayloads[0]?.payloads ?? [];
+        let appliedCount = 0;
+        let failedSection: string | undefined;
+        let failureMessage: string | undefined;
+
+        try {
+          for (const payload of payloads) {
+            try {
+              await axios.put("config/set", {
+                requires_restart: payload.needsRestart ? 1 : 0,
+                update_topic: payload.updateTopic,
+                config_data: buildConfigDataForPath(
+                  payload.basePath,
+                  payload.sanitizedOverrides,
+                ),
+              });
+              appliedCount += 1;
+            } catch (error) {
+              failedSection = payload.basePath;
+              failureMessage = extractError(error);
+              break;
+            }
+          }
+        } finally {
+          await swrMutate("config");
+          setIsSubmitting(false);
+        }
+
+        if (failedSection) {
+          toast.error(
+            appliedCount > 0
+              ? t("cameraManagement.clone.toast.newCameraPartialFailure", {
+                  cameraName: targetLabel,
+                  errorMessage: failureMessage,
+                })
+              : t("cameraManagement.clone.toast.partialFailure", {
+                  successCount: appliedCount,
+                  failedSection,
+                  errorMessage: failureMessage,
+                }),
+            { position: "top-center" },
+          );
+          return;
+        }
+
+        if (anyNeedsRestart) {
+          markRestartRequired();
+          toast.success(
+            t("cameraManagement.clone.toast.successWithRestart", {
+              cameraName: targetLabel,
+            }),
+            { position: "top-center", duration: 10000, action: restartAction },
+          );
+        } else {
+          toast.success(
+            t("cameraManagement.clone.toast.success", {
+              cameraName: targetLabel,
+            }),
+            { position: "top-center" },
+          );
+        }
+
+        onClose();
+        return;
+      }
+
+      // One or more existing cameras: keep going if a camera fails, summarize.
+      const succeeded: string[] = [];
+      const failed: string[] = [];
+      let lastError: string | undefined;
 
       try {
-        for (const payload of previewPayloads) {
-          try {
-            await axios.put("config/set", {
-              requires_restart: payload.needsRestart ? 1 : 0,
-              update_topic: payload.updateTopic,
-              config_data: buildConfigDataForPath(
-                payload.basePath,
-                payload.sanitizedOverrides,
-              ),
-            });
-            appliedCount += 1;
-          } catch (error) {
-            failedSection = payload.basePath;
-            failureMessage =
-              (axios.isAxiosError(error) &&
-                (error.response?.data?.message ||
-                  error.response?.data?.detail)) ||
-              (error instanceof Error ? error.message : "Unknown error");
-            break;
+        for (const { target, payloads } of targetPayloads) {
+          let cameraError: string | undefined;
+          for (const payload of payloads) {
+            try {
+              await axios.put("config/set", {
+                requires_restart: payload.needsRestart ? 1 : 0,
+                update_topic: payload.updateTopic,
+                config_data: buildConfigDataForPath(
+                  payload.basePath,
+                  payload.sanitizedOverrides,
+                ),
+              });
+            } catch (error) {
+              cameraError = extractError(error);
+              break;
+            }
+          }
+          if (cameraError) {
+            failed.push(friendlyName(target));
+            lastError = cameraError;
+          } else {
+            succeeded.push(friendlyName(target));
           }
         }
       } finally {
@@ -341,50 +505,41 @@ export default function CloneCameraDialog({
         setIsSubmitting(false);
       }
 
-      if (failedSection) {
-        if (targetIsNew && appliedCount > 0) {
-          toast.error(
-            t("cameraManagement.clone.toast.newCameraPartialFailure", {
-              cameraName: targetLabel,
-              errorMessage: failureMessage,
-            }),
-            { position: "top-center" },
-          );
-        } else {
-          toast.error(
-            t("cameraManagement.clone.toast.partialFailure", {
-              successCount: appliedCount,
-              failedSection,
-              errorMessage: failureMessage,
-            }),
-            { position: "top-center" },
-          );
-        }
+      if (failed.length > 0) {
+        toast.error(
+          t("cameraManagement.clone.toast.partialFailureMulti", {
+            successCount: succeeded.length,
+            failed: failed.join(", "),
+            errorMessage: lastError,
+          }),
+          { position: "top-center", duration: 10000 },
+        );
         return;
       }
 
+      const singleLabel = succeeded.length === 1 ? succeeded[0] : undefined;
+
       if (anyNeedsRestart) {
+        markRestartRequired();
         toast.success(
-          t("cameraManagement.clone.toast.successWithRestart", {
-            cameraName: targetLabel,
-          }),
-          {
-            position: "top-center",
-            duration: 10000,
-            action: (
-              <a onClick={() => setRestartDialogOpen(true)}>
-                <Button>
-                  {t("restart.button", { ns: "components/dialog" })}
-                </Button>
-              </a>
-            ),
-          },
+          singleLabel
+            ? t("cameraManagement.clone.toast.successWithRestart", {
+                cameraName: singleLabel,
+              })
+            : t("cameraManagement.clone.toast.successMultiWithRestart", {
+                count: succeeded.length,
+              }),
+          { position: "top-center", duration: 10000, action: restartAction },
         );
       } else {
         toast.success(
-          t("cameraManagement.clone.toast.success", {
-            cameraName: targetLabel,
-          }),
+          singleLabel
+            ? t("cameraManagement.clone.toast.success", {
+                cameraName: singleLabel,
+              })
+            : t("cameraManagement.clone.toast.successMulti", {
+                count: succeeded.length,
+              }),
           { position: "top-center" },
         );
       }
@@ -396,9 +551,11 @@ export default function CloneCameraDialog({
       srcCfg,
       fullSchema,
       previewPayloads,
+      targetPayloads,
       targetIsNew,
       anyNeedsRestart,
       onClose,
+      statusBar,
       t,
     ],
   );
@@ -407,16 +564,12 @@ export default function CloneCameraDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
         className={cn(
-          "scrollbar-container max-h-[90dvh] max-w-3xl overflow-y-auto",
+          "scrollbar-container max-h-[90dvh] max-w-4xl overflow-y-auto",
         )}
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>
-            {t("cameraManagement.clone.title", {
-              cameraName: sourceFriendlyName,
-            })}
-          </DialogTitle>
+          <DialogTitle>{t("cameraManagement.clone.title")}</DialogTitle>
           <DialogDescription>
             {t("cameraManagement.clone.description")}
           </DialogDescription>
@@ -424,6 +577,43 @@ export default function CloneCameraDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-3">
+              <Label className="text-base">
+                {t("cameraManagement.clone.source.label")}
+              </Label>
+              <FormField
+                control={form.control}
+                name="sourceCamera"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={isSubmitting}
+                      >
+                        <SelectTrigger className="w-full max-w-xs">
+                          <SelectValue
+                            placeholder={t(
+                              "cameraManagement.clone.source.placeholder",
+                            )}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sourceCameras.map((cam) => (
+                            <SelectItem key={cam} value={cam}>
+                              {config?.cameras?.[cam]?.friendly_name ?? cam}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <div className="space-y-3">
               <Label className="text-base">
                 {t("cameraManagement.clone.target.legend")}
@@ -467,6 +657,7 @@ export default function CloneCameraDialog({
                               <FormControl>
                                 <Input
                                   {...form.register("newName")}
+                                  className="max-w-xs"
                                   placeholder={t(
                                     "cameraManagement.clone.target.newNamePlaceholder",
                                   )}
@@ -509,7 +700,9 @@ export default function CloneCameraDialog({
                                   "text-muted-foreground",
                               )}
                             >
-                              {t("cameraManagement.clone.target.existingRadio")}
+                              {t(
+                                "cameraManagement.clone.target.existingCamerasRadio",
+                              )}
                               {otherCameras.length === 0 && (
                                 <span className="ml-2 text-xs">
                                   (
@@ -525,34 +718,102 @@ export default function CloneCameraDialog({
                             otherCameras.length > 0 && (
                               <FormField
                                 control={form.control}
-                                name="existingTarget"
-                                render={({ field: tgtField }) => (
-                                  <FormItem className="ml-7">
-                                    <FormControl>
-                                      <Select
-                                        value={tgtField.value}
-                                        onValueChange={tgtField.onChange}
-                                      >
-                                        <SelectTrigger className="w-full max-w-xs">
-                                          <SelectValue
-                                            placeholder={t(
-                                              "cameraManagement.clone.target.existingPlaceholder",
-                                            )}
-                                          />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {otherCameras.map((cam) => (
-                                            <SelectItem key={cam} value={cam}>
-                                              {config?.cameras?.[cam]
-                                                ?.friendly_name ?? cam}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
+                                name="existingTargets"
+                                render={({ field: tgtField }) => {
+                                  const selected = tgtField.value ?? [];
+                                  const allSelected =
+                                    otherCameras.length > 0 &&
+                                    otherCameras.every((c) =>
+                                      selected.includes(c),
+                                    );
+                                  const selectedNames = otherCameras
+                                    .filter((c) => selected.includes(c))
+                                    .map(
+                                      (c) =>
+                                        config?.cameras?.[c]?.friendly_name ??
+                                        c,
+                                    );
+                                  const summary = allSelected
+                                    ? t(
+                                        "cameraManagement.clone.target.allCameras",
+                                      )
+                                    : selectedNames.length > 0
+                                      ? selectedNames.join(", ")
+                                      : t(
+                                          "cameraManagement.clone.target.existingPlaceholder",
+                                        );
+                                  return (
+                                    <FormItem className="ml-7">
+                                      <Popover>
+                                        <FormControl>
+                                          <PopoverTrigger asChild>
+                                            <Button
+                                              type="button"
+                                              variant="outline"
+                                              disabled={isSubmitting}
+                                              className="w-full max-w-xs justify-between font-normal"
+                                            >
+                                              <span
+                                                className={cn(
+                                                  "truncate",
+                                                  selectedNames.length === 0 &&
+                                                    "text-muted-foreground",
+                                                )}
+                                              >
+                                                {summary}
+                                              </span>
+                                              <LuChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
+                                            </Button>
+                                          </PopoverTrigger>
+                                        </FormControl>
+                                        <PopoverContent
+                                          align="start"
+                                          disablePortal
+                                          className="w-[--radix-popover-trigger-width] p-0"
+                                        >
+                                          <div className="scrollbar-container max-h-60 space-y-2.5 overflow-y-auto p-4">
+                                            <FilterSwitch
+                                              label={t(
+                                                "cameraManagement.clone.target.allCameras",
+                                              )}
+                                              isChecked={allSelected}
+                                              disabled={isSubmitting}
+                                              onCheckedChange={(checked) =>
+                                                tgtField.onChange(
+                                                  checked
+                                                    ? [...otherCameras]
+                                                    : [],
+                                                )
+                                              }
+                                            />
+                                            <div className="border-t border-border/40" />
+                                            {otherCameras.map((cam) => (
+                                              <FilterSwitch
+                                                key={cam}
+                                                label={cam}
+                                                type="camera"
+                                                isChecked={selected.includes(
+                                                  cam,
+                                                )}
+                                                disabled={isSubmitting}
+                                                onCheckedChange={(checked) =>
+                                                  tgtField.onChange(
+                                                    checked
+                                                      ? [...selected, cam]
+                                                      : selected.filter(
+                                                          (c) => c !== cam,
+                                                        ),
+                                                  )
+                                                }
+                                              />
+                                            ))}
+                                          </div>
+                                        </PopoverContent>
+                                      </Popover>
+                                      <FormMessage />
+                                    </FormItem>
+                                  );
+                                }}
                               />
                             )}
                         </div>
@@ -617,9 +878,8 @@ export default function CloneCameraDialog({
                     {t("cameraManagement.clone.categories.spatial")}
                   </Label>
                   {!targetIsNew &&
-                    !resMatch &&
                     srcCfg?.detect &&
-                    dstCfg?.detect && (
+                    mismatchedTargets.length > 0 && (
                       <Alert variant="warning">
                         <LuTriangleAlert className="size-5" />
                         <AlertTitle>
@@ -632,13 +892,14 @@ export default function CloneCameraDialog({
                             "cameraManagement.clone.categories.spatialWarning",
                             {
                               srcCamera: sourceFriendlyName,
-                              dstCamera:
-                                config?.cameras?.[existingTarget]
-                                  ?.friendly_name ?? existingTarget,
                               srcWidth: srcCfg.detect.width,
                               srcHeight: srcCfg.detect.height,
-                              dstWidth: dstCfg.detect.width,
-                              dstHeight: dstCfg.detect.height,
+                              cameras: mismatchedTargets
+                                .map(
+                                  (c) =>
+                                    config?.cameras?.[c]?.friendly_name ?? c,
+                                )
+                                .join(", "),
                             },
                           )}
                         </AlertDescription>

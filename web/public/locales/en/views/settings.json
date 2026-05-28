@@ -546,10 +546,16 @@
       "saveSuccess": "Updated camera type for {{cameraName}}. Restart Frigate to apply the changes."
     },
     "clone": {
-      "trigger": "Clone camera or copy settings",
-      "triggerAriaLabel": "Clone settings from {{cameraName}}",
-      "title": "Clone settings from {{cameraName}}",
-      "description": "Copy this camera's configuration to a new or existing camera. Identity (name, friendly name, web UI URL, display order) is never copied.",
+      "sectionTitle": "Clone settings",
+      "sectionDescription": "Copy configuration from one camera to another camera or a new one.",
+      "button": "Clone settings",
+      "title": "Clone camera settings",
+      "description": "Copy a camera's configuration to one or more other cameras or a new camera. Identity (name, friendly name, web UI URL, display order) is never copied.",
+      "source": {
+        "label": "Source camera",
+        "placeholder": "Select a source camera",
+        "required": "Select a source camera"
+      },
       "target": {
         "legend": "Target",
         "newRadio": "New camera",
@@ -558,9 +564,10 @@
         "newNameRequired": "Camera name is required",
         "newNameInvalid": "Invalid camera name",
         "newNameCollision": "A camera with this name already exists",
-        "newStreamsForced": "Streams are always copied for a new camera. You'll edit the RTSP URLs after cloning.",
-        "existingRadio": "Existing camera",
-        "existingPlaceholder": "Choose camera…",
+        "newStreamsForced": "Streams are always copied for a new camera.",
+        "existingCamerasRadio": "Existing cameras",
+        "allCameras": "All cameras",
+        "existingPlaceholder": "Select at least one camera",
         "existingDisabled": "No other cameras to copy to"
       },
       "categories": {
@@ -572,7 +579,7 @@
         "spatial": "Spatial settings",
         "streams": "Streams",
         "spatialWarningTitle": "Resolution mismatch",
-        "spatialWarning": "Source camera {{srcCamera}} detect resolution ({{srcWidth}}×{{srcHeight}}) differs from target camera {{dstCamera}} detect resolution ({{dstWidth}}×{{dstHeight}}). Polygons may not align. These defaults are off; enable to copy as-is.",
+        "spatialWarning": "Source camera {{srcCamera}} detect resolution ({{srcWidth}}×{{srcHeight}}) differs from: {{cameras}}. Polygons may not align on those cameras. These defaults are off; enable to copy as-is.",
         "restartHint": "Restart required",
         "items": {
           "record": "Recording",
@@ -611,8 +618,13 @@
       },
       "toast": {
         "success": "Settings copied to {{cameraName}}",
-        "successWithRestart": "Settings copied to {{cameraName}}. Restart Frigate to fully apply.",
+        "successWithRestart": "Settings copied to {{cameraName}}. Restart Frigate to apply all changes.",
+        "successMulti_one": "Settings copied to {{count}} camera",
+        "successMulti_other": "Settings copied to {{count}} cameras",
+        "successMultiWithRestart_one": "Settings copied to {{count}} camera. Restart Frigate to apply all changes.",
+        "successMultiWithRestart_other": "Settings copied to {{count}} cameras. Restart Frigate to apply all changes.",
         "partialFailure": "{{successCount}} sections applied; '{{failedSection}}' failed: {{errorMessage}}",
+        "partialFailureMulti": "Copied to {{successCount}} camera(s); failed for {{failed}}: {{errorMessage}}",
         "newCameraPartialFailure": "Camera {{cameraName}} was created but some settings failed to copy: {{errorMessage}}",
         "sourceMissing": "Source camera no longer exists",
         "submitError": "Failed to clone camera: {{errorMessage}}"

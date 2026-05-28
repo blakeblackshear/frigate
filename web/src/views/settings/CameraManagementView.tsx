@@ -1,12 +1,18 @@
 import Heading from "@/components/ui/heading";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   CONTROL_COLUMN_CLASS_NAME,
   SettingsGroupCard,
   SPLIT_ROW_CLASS_NAME,
 } from "@/components/card/SettingsGroupCard";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -52,6 +58,7 @@ import {
 import type { ProfileState } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { isReplayCamera } from "@/utils/cameraUtil";
+import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -90,9 +97,7 @@ export default function CameraManagementView({
 
   const [showWizard, setShowWizard] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [cloneSourceCamera, setCloneSourceCamera] = useState<string | null>(
-    null,
-  );
+  const [showCloneDialog, setShowCloneDialog] = useState(false);
 
   // State for restart dialog when enabling a disabled camera
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
@@ -222,12 +227,6 @@ export default function CameraManagementView({
 
   return (
     <>
-      <Toaster
-        richColors
-        className="z-[1000]"
-        position="top-center"
-        closeButton
-      />
       <div className="flex size-full space-y-6">
         <div className="scrollbar-container flex-1 overflow-y-auto pb-2">
           <Heading as="h4" className="mb-2">
@@ -258,6 +257,27 @@ export default function CameraManagementView({
                 </Button>
               )}
             </div>
+
+            {enabledCameras.length + disabledCameras.length > 0 && (
+              <div className="mb-5 space-y-3">
+                <div className="space-y-0.5">
+                  <div className="text-md font-medium">
+                    {t("cameraManagement.clone.sectionTitle")}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t("cameraManagement.clone.sectionDescription")}
+                  </p>
+                </div>
+                <Button
+                  variant="select"
+                  onClick={() => setShowCloneDialog(true)}
+                  className="flex max-w-48 items-center gap-2"
+                >
+                  <LuCopy className="h-4 w-4" />
+                  {t("cameraManagement.clone.button")}
+                </Button>
+              </div>
+            )}
 
             {(enabledCameras.length > 0 || disabledCameras.length > 0) && (
               <SettingsGroupCard
@@ -293,7 +313,6 @@ export default function CameraManagementView({
                               onConfigChanged={updateConfig}
                               onDragEnd={handleReorderDragEnd}
                               setRestartDialogOpen={setRestartDialogOpen}
-                              onClone={setCloneSourceCamera}
                             />
                           ))}
                         </Reorder.Group>
@@ -313,7 +332,6 @@ export default function CameraManagementView({
                               camera={camera}
                               onConfigChanged={updateConfig}
                               setRestartDialogOpen={setRestartDialogOpen}
-                              onClone={setCloneSourceCamera}
                             />
                           ))}
                         </div>
@@ -372,9 +390,8 @@ export default function CameraManagementView({
         onRestart={() => sendRestart("restart")}
       />
       <CloneCameraDialog
-        open={cloneSourceCamera !== null}
-        onClose={() => setCloneSourceCamera(null)}
-        sourceCamera={cloneSourceCamera ?? ""}
+        open={showCloneDialog}
+        onClose={() => setShowCloneDialog(false)}
       />
     </>
   );
@@ -416,7 +433,6 @@ type ActiveCameraRowProps = {
   onConfigChanged: () => Promise<unknown>;
   onDragEnd: () => void;
   setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onClone: (camera: string) => void;
 };
 
 function ActiveCameraRow({
@@ -424,7 +440,6 @@ function ActiveCameraRow({
   onConfigChanged,
   onDragEnd,
   setRestartDialogOpen,
-  onClone,
 }: ActiveCameraRowProps) {
   const { t } = useTranslation(["views/settings"]);
   const controls = useDragControls();
@@ -452,22 +467,6 @@ function ActiveCameraRow({
           cameraName={camera}
           onConfigChanged={onConfigChanged}
         />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              aria-label={t("cameraManagement.clone.triggerAriaLabel", {
-                cameraName: camera,
-              })}
-              onClick={() => onClone(camera)}
-            >
-              <LuCopy className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{t("cameraManagement.clone.trigger")}</TooltipContent>
-        </Tooltip>
       </div>
       <CameraStatusSelect
         cameraName={camera}
@@ -483,17 +482,13 @@ type DisabledCameraRowProps = {
   camera: string;
   onConfigChanged: () => Promise<unknown>;
   setRestartDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onClone: (camera: string) => void;
 };
 
 function DisabledCameraRow({
   camera,
   onConfigChanged,
   setRestartDialogOpen,
-  onClone,
 }: DisabledCameraRowProps) {
-  const { t } = useTranslation(["views/settings"]);
-
   return (
     <div className="flex flex-row items-center justify-between">
       <div className="flex items-center gap-1">
@@ -502,22 +497,6 @@ function DisabledCameraRow({
           cameraName={camera}
           onConfigChanged={onConfigChanged}
         />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              aria-label={t("cameraManagement.clone.triggerAriaLabel", {
-                cameraName: camera,
-              })}
-              onClick={() => onClone(camera)}
-            >
-              <LuCopy className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{t("cameraManagement.clone.trigger")}</TooltipContent>
-        </Tooltip>
       </div>
       <CameraStatusSelect
         cameraName={camera}
@@ -551,6 +530,7 @@ function CameraStatusSelect({
   ]);
   const { payload: enabledState, send: sendEnabled } =
     useEnabledState(cameraName);
+  const statusBar = useContext(StatusBarMessagesContext);
   const [isSaving, setIsSaving] = useState(false);
 
   const currentStatus: CameraStatus = isDisabledInConfig
@@ -636,6 +616,12 @@ function CameraStatusSelect({
             },
           });
           await onConfigChanged();
+          statusBar?.addMessage(
+            "config_restart_required",
+            t("configForm.restartRequiredFooter", { ns: "views/settings" }),
+            undefined,
+            "config_restart_required",
+          );
           toast.success(
             t("cameraManagement.streams.disableSuccess", {
               ns: "views/settings",
@@ -667,6 +653,7 @@ function CameraStatusSelect({
       onConfigChanged,
       sendEnabled,
       setRestartDialogOpen,
+      statusBar,
       t,
     ],
   );
