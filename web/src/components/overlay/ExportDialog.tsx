@@ -287,7 +287,7 @@ export default function ExportDialog({
         <Content
           className={
             isDesktop
-              ? "sm:rounded-lg md:rounded-2xl"
+              ? "scrollbar-container max-h-[90dvh] overflow-y-auto sm:rounded-lg md:rounded-2xl"
               : "mx-4 rounded-lg px-4 pb-4 md:rounded-2xl"
           }
         >
