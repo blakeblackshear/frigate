@@ -157,6 +157,39 @@ function stripDictEntryFields(
 }
 
 /**
+ * Per-object masks (`objects.filters.<label>.mask`) for the labels that define
+ * one, stripped of runtime fields. The objects form hides `filters.*.mask`, so
+ * clone re-injects these like the camera-wide `objects.mask`.
+ */
+function extractFilterMasks(objectsSection: unknown): JsonObject | undefined {
+  if (!objectsSection || typeof objectsSection !== "object") return undefined;
+  const filters = (objectsSection as JsonObject).filters;
+  if (!filters || typeof filters !== "object" || Array.isArray(filters)) {
+    return undefined;
+  }
+  const result: JsonObject = {};
+  for (const [label, filter] of Object.entries(filters as JsonObject)) {
+    if (!filter || typeof filter !== "object" || Array.isArray(filter))
+      continue;
+    const mask = (filter as JsonObject).mask;
+    if (
+      mask &&
+      typeof mask === "object" &&
+      !Array.isArray(mask) &&
+      Object.keys(mask as JsonObject).length > 0
+    ) {
+      result[label] = {
+        mask: stripDictEntryFields(mask, [
+          "enabled_in_config",
+          "raw_coordinates",
+        ]) as JsonValue,
+      };
+    }
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+/**
  * Drop `""` (Reset) markers — meaningless for a new camera and unsafe
  * (backend `update_yaml` raises KeyError trying to `del` a missing key).
  */
@@ -671,16 +704,32 @@ export function buildClonedCameraPayloads({
       }
     }
     if (key === "objects" && selectedKeys.has("object_masks")) {
+      const next = { ...(pendingSectionValue as JsonObject) };
+      // Camera-wide object mask (applies to all objects).
       const srcMask = (sourceSectionValue as { mask?: unknown }).mask;
       if (srcMask !== undefined) {
-        pendingSectionValue = {
-          ...(pendingSectionValue as object),
-          mask: stripDictEntryFields(srcMask, [
-            "enabled_in_config",
-            "raw_coordinates",
-          ]),
-        };
+        next.mask = stripDictEntryFields(srcMask, [
+          "enabled_in_config",
+          "raw_coordinates",
+        ]) as JsonValue;
       }
+      // Per-object masks (objects.filters.<label>.mask), stripped by the
+      // section's hiddenFields above. Merge them onto the reduced filters
+      // (creating the entry when the filter was otherwise all-default).
+      const filterMasks = extractFilterMasks(sourceSectionValue);
+      if (filterMasks) {
+        const mergedFilters: JsonObject = {
+          ...((next.filters as JsonObject) ?? {}),
+        };
+        for (const [label, overlay] of Object.entries(filterMasks)) {
+          mergedFilters[label] = {
+            ...((mergedFilters[label] as JsonObject) ?? {}),
+            ...(overlay as JsonObject),
+          };
+        }
+        next.filters = mergedFilters;
+      }
+      pendingSectionValue = next;
     }
 
     // `color` is a Pydantic PrivateAttr (runtime-only).
@@ -721,16 +770,22 @@ export function buildClonedCameraPayloads({
     }
   }
   if (selectedKeys.has("object_masks") && !selectedKeys.has("objects")) {
+    const overrides: JsonObject = {};
     const srcMask = (sourceCfg.objects as { mask?: unknown } | undefined)?.mask;
     if (srcMask !== undefined) {
+      overrides.mask = stripDictEntryFields(srcMask, [
+        "enabled_in_config",
+        "raw_coordinates",
+      ]) as JsonValue;
+    }
+    const filterMasks = extractFilterMasks(sourceCfg.objects);
+    if (filterMasks) {
+      overrides.filters = filterMasks;
+    }
+    if (Object.keys(overrides).length > 0) {
       payloads.push({
         basePath: `cameras.${target}.objects`,
-        sanitizedOverrides: {
-          mask: stripDictEntryFields(srcMask, [
-            "enabled_in_config",
-            "raw_coordinates",
-          ]) as JsonValue,
-        },
+        sanitizedOverrides: overrides,
         updateTopic: `config/cameras/${target}/${cameraUpdateTopicMap.objects}`,
         needsRestart: false,
         pendingDataKey: `${target}::objects.masks`,
