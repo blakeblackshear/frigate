@@ -51,7 +51,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { LuChevronDown, LuTriangleAlert } from "react-icons/lu";
+import { LuArrowRight, LuChevronDown, LuTriangleAlert } from "react-icons/lu";
 import {
   CLONE_CATEGORIES,
   type CloneCategoryKey,
@@ -578,255 +578,270 @@ export default function CloneCameraDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-3">
-              <Label className="text-base">
-                {t("cameraManagement.clone.source.label")}
-              </Label>
-              <FormField
-                control={form.control}
-                name="sourceCamera"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={isSubmitting}
-                      >
-                        <SelectTrigger className="w-full max-w-xs">
-                          <SelectValue
-                            placeholder={t(
-                              "cameraManagement.clone.source.placeholder",
-                            )}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sourceCameras.map((cam) => (
-                            <SelectItem key={cam} value={cam}>
-                              {config?.cameras?.[cam]?.friendly_name ?? cam}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-base">
-                {t("cameraManagement.clone.target.legend")}
-              </Label>
-              <FormField
-                control={form.control}
-                name="targetMode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <RadioGroup
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        className="space-y-3"
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-3 space-y-0">
-                            <RadioGroupItem
-                              value="new"
-                              id="clone-target-new"
-                              className={
-                                targetMode === "new"
-                                  ? "bg-selected from-selected/50 to-selected/90 text-selected"
-                                  : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
-                              }
+            <div className="relative flex flex-col gap-6 md:grid md:grid-cols-2 md:items-start md:gap-12">
+              <div className="space-y-3">
+                <Label className="text-base">
+                  {t("cameraManagement.clone.source.label")}
+                </Label>
+                <FormField
+                  control={form.control}
+                  name="sourceCamera"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={isSubmitting}
+                        >
+                          <SelectTrigger className="w-full max-w-xs md:max-w-none">
+                            <SelectValue
+                              placeholder={t(
+                                "cameraManagement.clone.source.placeholder",
+                              )}
                             />
-                            <Label
-                              htmlFor="clone-target-new"
-                              className="font-normal"
-                            >
-                              {t("cameraManagement.clone.target.newRadio")}
-                            </Label>
-                          </div>
-                          {targetMode === "new" && (
-                            <FormItem className="ml-7">
-                              <FormLabel className="sr-only">
-                                {t(
-                                  "cameraManagement.clone.target.newNameLabel",
-                                )}
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  {...form.register("newName")}
-                                  className="max-w-xs"
-                                  placeholder={t(
-                                    "cameraManagement.clone.target.newNamePlaceholder",
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sourceCameras.map((cam) => (
+                              <SelectItem key={cam} value={cam}>
+                                {config?.cameras?.[cam]?.friendly_name ?? cam}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-base">
+                  {t("cameraManagement.clone.target.legend")}
+                </Label>
+                <FormField
+                  control={form.control}
+                  name="targetMode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <RadioGroup
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="space-y-3"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-3 space-y-0">
+                              <RadioGroupItem
+                                value="new"
+                                id="clone-target-new"
+                                className={
+                                  targetMode === "new"
+                                    ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                                    : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                                }
+                              />
+                              <Label
+                                htmlFor="clone-target-new"
+                                className="font-normal"
+                              >
+                                {t("cameraManagement.clone.target.newRadio")}
+                              </Label>
+                            </div>
+                            {targetMode === "new" && (
+                              <FormItem>
+                                <FormLabel className="sr-only">
+                                  {t(
+                                    "cameraManagement.clone.target.newNameLabel",
                                   )}
-                                  disabled={isSubmitting}
-                                  autoFocus
-                                />
-                              </FormControl>
-                              {form.formState.errors.newName?.message && (
-                                <p className="text-sm font-medium text-destructive">
-                                  {String(
-                                    form.formState.errors.newName.message,
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...form.register("newName")}
+                                    className="max-w-xs md:max-w-none"
+                                    placeholder={t(
+                                      "cameraManagement.clone.target.newNamePlaceholder",
+                                    )}
+                                    disabled={isSubmitting}
+                                    autoFocus
+                                  />
+                                </FormControl>
+                                {form.formState.errors.newName?.message && (
+                                  <p className="text-sm font-medium text-destructive">
+                                    {String(
+                                      form.formState.errors.newName.message,
+                                    )}
+                                  </p>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                  {t(
+                                    "cameraManagement.clone.target.newStreamsForced",
                                   )}
                                 </p>
-                              )}
-                              <p className="text-xs text-muted-foreground">
-                                {t(
-                                  "cameraManagement.clone.target.newStreamsForced",
-                                )}
-                              </p>
-                            </FormItem>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-3 space-y-0">
-                            <RadioGroupItem
-                              value="existing"
-                              id="clone-target-existing"
-                              disabled={otherCameras.length === 0}
-                              className={
-                                targetMode === "existing"
-                                  ? "bg-selected from-selected/50 to-selected/90 text-selected"
-                                  : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
-                              }
-                            />
-                            <Label
-                              htmlFor="clone-target-existing"
-                              className={cn(
-                                "font-normal",
-                                otherCameras.length === 0 &&
-                                  "text-muted-foreground",
-                              )}
-                            >
-                              {t(
-                                "cameraManagement.clone.target.existingCamerasRadio",
-                              )}
-                              {otherCameras.length === 0 && (
-                                <span className="ml-2 text-xs">
-                                  (
-                                  {t(
-                                    "cameraManagement.clone.target.existingDisabled",
-                                  )}
-                                  )
-                                </span>
-                              )}
-                            </Label>
+                              </FormItem>
+                            )}
                           </div>
-                          {targetMode === "existing" &&
-                            otherCameras.length > 0 && (
-                              <FormField
-                                control={form.control}
-                                name="existingTargets"
-                                render={({ field: tgtField }) => {
-                                  const selected = tgtField.value ?? [];
-                                  const allSelected =
-                                    otherCameras.length > 0 &&
-                                    otherCameras.every((c) =>
-                                      selected.includes(c),
-                                    );
-                                  const selectedNames = otherCameras
-                                    .filter((c) => selected.includes(c))
-                                    .map(
-                                      (c) =>
-                                        config?.cameras?.[c]?.friendly_name ??
-                                        c,
-                                    );
-                                  const summary = allSelected
-                                    ? t(
-                                        "cameraManagement.clone.target.allCameras",
-                                      )
-                                    : selectedNames.length > 0
-                                      ? selectedNames.join(", ")
-                                      : t(
-                                          "cameraManagement.clone.target.existingPlaceholder",
-                                        );
-                                  return (
-                                    <FormItem className="ml-7">
-                                      <Popover>
-                                        <FormControl>
-                                          <PopoverTrigger asChild>
-                                            <Button
-                                              type="button"
-                                              variant="outline"
-                                              disabled={isSubmitting}
-                                              className="w-full max-w-xs justify-between font-normal"
-                                            >
-                                              <span
-                                                className={cn(
-                                                  "truncate",
-                                                  selectedNames.length === 0 &&
-                                                    "text-muted-foreground",
-                                                )}
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-3 space-y-0">
+                              <RadioGroupItem
+                                value="existing"
+                                id="clone-target-existing"
+                                disabled={otherCameras.length === 0}
+                                className={
+                                  targetMode === "existing"
+                                    ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                                    : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                                }
+                              />
+                              <Label
+                                htmlFor="clone-target-existing"
+                                className={cn(
+                                  "font-normal",
+                                  otherCameras.length === 0 &&
+                                    "text-muted-foreground",
+                                )}
+                              >
+                                {t(
+                                  "cameraManagement.clone.target.existingCamerasRadio",
+                                )}
+                                {otherCameras.length === 0 && (
+                                  <span className="ml-2 text-xs">
+                                    (
+                                    {t(
+                                      "cameraManagement.clone.target.existingDisabled",
+                                    )}
+                                    )
+                                  </span>
+                                )}
+                              </Label>
+                            </div>
+                            {targetMode === "existing" &&
+                              otherCameras.length > 0 && (
+                                <FormField
+                                  control={form.control}
+                                  name="existingTargets"
+                                  render={({ field: tgtField }) => {
+                                    const selected = tgtField.value ?? [];
+                                    const allSelected =
+                                      otherCameras.length > 0 &&
+                                      otherCameras.every((c) =>
+                                        selected.includes(c),
+                                      );
+                                    const selectedNames = otherCameras
+                                      .filter((c) => selected.includes(c))
+                                      .map(
+                                        (c) =>
+                                          config?.cameras?.[c]?.friendly_name ??
+                                          c,
+                                      );
+                                    const summary = allSelected
+                                      ? t(
+                                          "cameraManagement.clone.target.allCameras",
+                                        )
+                                      : selectedNames.length > 0
+                                        ? selectedNames.join(", ")
+                                        : t(
+                                            "cameraManagement.clone.target.existingPlaceholder",
+                                          );
+                                    return (
+                                      <FormItem>
+                                        <Popover>
+                                          <FormControl>
+                                            <PopoverTrigger asChild>
+                                              <Button
+                                                type="button"
+                                                variant="outline"
+                                                disabled={isSubmitting}
+                                                className="w-full max-w-xs justify-between font-normal md:max-w-none"
                                               >
-                                                {summary}
-                                              </span>
-                                              <LuChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
-                                            </Button>
-                                          </PopoverTrigger>
-                                        </FormControl>
-                                        <PopoverContent
-                                          align="start"
-                                          disablePortal
-                                          className="w-[--radix-popover-trigger-width] p-0"
-                                        >
-                                          <div className="scrollbar-container max-h-60 space-y-2.5 overflow-y-auto p-4">
-                                            <FilterSwitch
-                                              label={t(
-                                                "cameraManagement.clone.target.allCameras",
-                                              )}
-                                              isChecked={allSelected}
-                                              disabled={isSubmitting}
-                                              onCheckedChange={(checked) =>
-                                                tgtField.onChange(
-                                                  checked
-                                                    ? [...otherCameras]
-                                                    : [],
-                                                )
-                                              }
-                                            />
-                                            <div className="border-t border-border/40" />
-                                            {otherCameras.map((cam) => (
+                                                <span
+                                                  className={cn(
+                                                    "truncate",
+                                                    selectedNames.length ===
+                                                      0 &&
+                                                      "text-muted-foreground",
+                                                  )}
+                                                >
+                                                  {summary}
+                                                </span>
+                                                <LuChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
+                                              </Button>
+                                            </PopoverTrigger>
+                                          </FormControl>
+                                          <PopoverContent
+                                            align="start"
+                                            disablePortal
+                                            className="w-[--radix-popover-trigger-width] p-0"
+                                          >
+                                            <div className="scrollbar-container max-h-60 space-y-4 overflow-y-auto p-4">
                                               <FilterSwitch
-                                                key={cam}
-                                                label={cam}
-                                                type="camera"
-                                                isChecked={selected.includes(
-                                                  cam,
+                                                label={t(
+                                                  "cameraManagement.clone.target.allCameras",
                                                 )}
+                                                isChecked={allSelected}
                                                 disabled={isSubmitting}
                                                 onCheckedChange={(checked) =>
                                                   tgtField.onChange(
                                                     checked
-                                                      ? [...selected, cam]
-                                                      : selected.filter(
-                                                          (c) => c !== cam,
-                                                        ),
+                                                      ? [...otherCameras]
+                                                      : [],
                                                   )
                                                 }
                                               />
-                                            ))}
-                                          </div>
-                                        </PopoverContent>
-                                      </Popover>
-                                      <FormMessage />
-                                    </FormItem>
-                                  );
-                                }}
-                              />
-                            )}
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+                                              <div className="space-y-2.5">
+                                                {otherCameras.map((cam) => (
+                                                  <FilterSwitch
+                                                    key={cam}
+                                                    label={cam}
+                                                    type="camera"
+                                                    isChecked={selected.includes(
+                                                      cam,
+                                                    )}
+                                                    disabled={isSubmitting}
+                                                    onCheckedChange={(
+                                                      checked,
+                                                    ) =>
+                                                      tgtField.onChange(
+                                                        checked
+                                                          ? [...selected, cam]
+                                                          : selected.filter(
+                                                              (c) => c !== cam,
+                                                            ),
+                                                      )
+                                                    }
+                                                  />
+                                                ))}
+                                              </div>
+                                            </div>
+                                          </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                      </FormItem>
+                                    );
+                                  }}
+                                />
+                              )}
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="pointer-events-none absolute left-1/2 top-0 hidden -translate-x-1/2 flex-col space-y-3 md:flex">
+                <Label className="invisible text-base" aria-hidden="true">
+                  {" "}
+                </Label>
+                <div className="flex h-10 items-center justify-center">
+                  <LuArrowRight className="size-6 text-muted-foreground" />
+                </div>
+              </div>
             </div>
 
             <div className="space-y-4">
-              <div className="flex flex-row items-start justify-between gap-2">
+              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div className="space-y-1">
                   <Label className="text-base">
                     {t("cameraManagement.clone.categories.legend")}
@@ -835,16 +850,16 @@ export default function CloneCameraDialog({
                     {t("cameraManagement.clone.categories.description")}
                   </p>
                 </div>
-                <div className="flex flex-row items-center gap-2 text-right text-xs text-muted-foreground">
+                <div className="flex flex-row items-center gap-2 text-xs text-muted-foreground">
                   <span
-                    className="cursor-pointer"
+                    className="cursor-pointer whitespace-nowrap"
                     onClick={isSubmitting ? undefined : selectAllCategories}
                   >
                     {t("cameraManagement.clone.categories.selectAll")}
                   </span>
                   <span aria-hidden="true">|</span>
                   <span
-                    className="cursor-pointer"
+                    className="cursor-pointer whitespace-nowrap"
                     onClick={isSubmitting ? undefined : selectNoneCategories}
                   >
                     {t("cameraManagement.clone.categories.selectNone")}
@@ -856,7 +871,7 @@ export default function CloneCameraDialog({
                 <Label className="font-medium">
                   {t("cameraManagement.clone.categories.general")}
                 </Label>
-                <div className="grid grid-cols-1 gap-3 rounded-lg bg-secondary p-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-x-12 gap-y-3 rounded-lg bg-secondary p-4 sm:grid-cols-2">
                   {groupedCategories.general.map((cat) => (
                     <label
                       key={cat.key}
@@ -911,7 +926,7 @@ export default function CloneCameraDialog({
                         </AlertDescription>
                       </Alert>
                     )}
-                  <div className="grid grid-cols-1 gap-3 rounded-lg bg-secondary p-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-x-12 gap-y-3 rounded-lg bg-secondary p-4 sm:grid-cols-2">
                     {groupedCategories.spatial.map((cat) => (
                       <label
                         key={cat.key}
