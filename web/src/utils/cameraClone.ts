@@ -1,5 +1,6 @@
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
+import merge from "lodash/merge";
 import type { RJSFSchema } from "@rjsf/utils";
 
 import {
@@ -131,6 +132,37 @@ function stripResetMarkers(
     if (cleaned !== undefined) result[key] = cleaned;
   }
   return Object.keys(result).length > 0 ? result : undefined;
+}
+
+/**
+ * Collapse per-section payloads into one camera-level payload + `…/add`
+ * topic. New cameras are created atomically by the backend's `add`
+ * handler, so a single PUT avoids the intermediate-validation ordering
+ * problem (e.g. a `review` required_zone referencing zones not yet written)
+ * that the per-section path is subject to.
+ */
+function bundleNewCameraPayload(
+  payloads: SectionSavePayload[],
+  target: string,
+): SectionSavePayload {
+  const prefix = `cameras.${target}`;
+  const camera: JsonObject = {};
+  for (const p of payloads) {
+    if (p.basePath === prefix) {
+      merge(camera, p.sanitizedOverrides);
+    } else if (p.basePath.startsWith(`${prefix}.`)) {
+      merge(camera, {
+        [p.basePath.slice(prefix.length + 1)]: p.sanitizedOverrides,
+      });
+    }
+  }
+  return {
+    basePath: prefix,
+    sanitizedOverrides: camera,
+    updateTopic: `config/cameras/${target}/add`,
+    needsRestart: true,
+    pendingDataKey: `${target}::add`,
+  };
 }
 
 /**
@@ -442,13 +474,19 @@ export function buildClonedCameraPayloads({
   }
 
   // Section-backed categories — flow through prepareSectionSavePayload
-  // for matching restart/update-topic behavior.
+  // for matching restart/update-topic behavior. Order matters for the
+  // existing-camera multi-PUT path: each PUT re-validates the whole
+  // config, so dependency providers must precede consumers — `detect`
+  // (resolution) then `zones` before sections that reference zones via
+  // `required_zones` (review, objects, snapshots, mqtt).
   const SECTION_KEYS: Array<{ key: CloneCategoryKey; section: string }> = [
+    { key: "detect", section: "detect" },
+    { key: "zones", section: "zones" },
+    { key: "motion", section: "motion" },
+    { key: "objects", section: "objects" },
     { key: "record", section: "record" },
     { key: "snapshots", section: "snapshots" },
     { key: "review", section: "review" },
-    { key: "motion", section: "motion" },
-    { key: "objects", section: "objects" },
     { key: "audio", section: "audio" },
     { key: "audio_transcription", section: "audio_transcription" },
     { key: "notifications", section: "notifications" },
@@ -460,8 +498,6 @@ export function buildClonedCameraPayloads({
     { key: "face_recognition", section: "face_recognition" },
     { key: "semantic_search", section: "semantic_search" },
     { key: "genai", section: "genai" },
-    { key: "detect", section: "detect" },
-    { key: "zones", section: "zones" },
   ];
 
   // Synthetic target so we can reuse prepareSectionSavePayload unchanged.
@@ -673,15 +709,19 @@ export function buildClonedCameraPayloads({
     }
   }
 
-  // Reset markers are meaningless for a new camera; see stripResetMarkers.
+  // New camera: scrub Reset markers (see stripResetMarkers), then bundle
+  // into one atomic `…/add` PUT so the backend validates the full camera
+  // at once (avoids per-section ordering issues).
   if (targetIsNew) {
-    return payloads
+    const scrubbed = payloads
       .map((p) => {
         const cleaned = stripResetMarkers(p.sanitizedOverrides as JsonValue);
-        if (cleaned === undefined) return null;
-        return { ...p, sanitizedOverrides: cleaned as JsonObject };
+        return cleaned === undefined
+          ? null
+          : { ...p, sanitizedOverrides: cleaned as JsonObject };
       })
       .filter((p): p is SectionSavePayload => p !== null);
+    return [bundleNewCameraPayload(scrubbed, target)];
   }
 
   return payloads;
@@ -695,12 +735,15 @@ export function buildClonePreviewItems(
   payloads: SectionSavePayload[],
   targetCamera: string,
 ): SaveAllPreviewItem[] {
-  const cameraPrefix = `cameras.${targetCamera}.`;
+  const cameraBase = `cameras.${targetCamera}`;
   return payloads.flatMap((p) => {
     const flattened = flattenOverrides(p.sanitizedOverrides as JsonValue);
-    const sectionRelativeBase = p.basePath.startsWith(cameraPrefix)
-      ? p.basePath.slice(cameraPrefix.length)
-      : p.basePath;
+    const sectionRelativeBase =
+      p.basePath === cameraBase
+        ? ""
+        : p.basePath.startsWith(`${cameraBase}.`)
+          ? p.basePath.slice(cameraBase.length + 1)
+          : p.basePath;
     return flattened.map(({ path, value }) => ({
       scope: "camera" as const,
       cameraName: targetCamera,
