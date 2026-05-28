@@ -103,12 +103,10 @@ test.describe("Camera clone dialog @medium @mobile", () => {
 
     await frigateApp.page.getByRole("button", { name: /^Clone$/i }).click();
 
-    // At least one PUT must be sent — the establishing add payload.
-    await expect
-      .poll(() => requests.length, { timeout: 10_000 })
-      .toBeGreaterThanOrEqual(1);
+    // New-camera clones bundle into a single atomic add PUT (avoids
+    // per-section validation ordering issues).
+    await expect.poll(() => requests.length, { timeout: 10_000 }).toBe(1);
 
-    // The establishing payload targets the add topic and requires a restart.
     const firstBody = requests[0].body as {
       requires_restart?: number;
       update_topic?: string;
