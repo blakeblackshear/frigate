@@ -81,6 +81,7 @@ export const cameraUpdateTopicMap: Record<string, string> = {
   mqtt: "mqtt",
   onvif: "onvif",
   ui: "ui",
+  zones: "zones",
 };
 
 // Sections where global config serves as the default for per-camera config.

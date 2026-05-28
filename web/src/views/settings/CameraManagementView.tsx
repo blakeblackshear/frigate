@@ -1,12 +1,18 @@
 import Heading from "@/components/ui/heading";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   CONTROL_COLUMN_CLASS_NAME,
   SettingsGroupCard,
   SPLIT_ROW_CLASS_NAME,
 } from "@/components/card/SettingsGroupCard";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -15,6 +21,7 @@ import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import DeleteCameraDialog from "@/components/overlay/dialog/DeleteCameraDialog";
 import {
   LuCheck,
+  LuCopy,
   LuExternalLink,
   LuGripVertical,
   LuPencil,
@@ -22,6 +29,7 @@ import {
   LuRefreshCcw,
   LuTrash2,
 } from "react-icons/lu";
+import CloneCameraDialog from "@/components/settings/CloneCameraDialog";
 import { Reorder, useDragControls } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useDocDomain } from "@/hooks/use-doc-domain";
@@ -50,6 +58,7 @@ import {
 import type { ProfileState } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { isReplayCamera } from "@/utils/cameraUtil";
+import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -88,6 +97,7 @@ export default function CameraManagementView({
 
   const [showWizard, setShowWizard] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCloneDialog, setShowCloneDialog] = useState(false);
 
   // State for restart dialog when enabling a disabled camera
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
@@ -217,12 +227,6 @@ export default function CameraManagementView({
 
   return (
     <>
-      <Toaster
-        richColors
-        className="z-[1000]"
-        position="top-center"
-        closeButton
-      />
       <div className="flex size-full space-y-6">
         <div className="scrollbar-container flex-1 overflow-y-auto pb-2">
           <Heading as="h4" className="mb-2">
@@ -253,6 +257,27 @@ export default function CameraManagementView({
                 </Button>
               )}
             </div>
+
+            {enabledCameras.length + disabledCameras.length > 0 && (
+              <div className="mb-5 space-y-3">
+                <div className="space-y-0.5">
+                  <div className="text-md font-medium">
+                    {t("cameraManagement.clone.sectionTitle")}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {t("cameraManagement.clone.sectionDescription")}
+                  </p>
+                </div>
+                <Button
+                  variant="select"
+                  onClick={() => setShowCloneDialog(true)}
+                  className="flex max-w-48 items-center gap-2"
+                >
+                  <LuCopy className="h-4 w-4" />
+                  {t("cameraManagement.clone.button")}
+                </Button>
+              </div>
+            )}
 
             {(enabledCameras.length > 0 || disabledCameras.length > 0) && (
               <SettingsGroupCard
@@ -363,6 +388,10 @@ export default function CameraManagementView({
         isOpen={restartDialogOpen}
         onClose={() => setRestartDialogOpen(false)}
         onRestart={() => sendRestart("restart")}
+      />
+      <CloneCameraDialog
+        open={showCloneDialog}
+        onClose={() => setShowCloneDialog(false)}
       />
     </>
   );
@@ -501,6 +530,7 @@ function CameraStatusSelect({
   ]);
   const { payload: enabledState, send: sendEnabled } =
     useEnabledState(cameraName);
+  const statusBar = useContext(StatusBarMessagesContext);
   const [isSaving, setIsSaving] = useState(false);
 
   const currentStatus: CameraStatus = isDisabledInConfig
@@ -586,6 +616,12 @@ function CameraStatusSelect({
             },
           });
           await onConfigChanged();
+          statusBar?.addMessage(
+            "config_restart_required",
+            t("configForm.restartRequiredFooter", { ns: "views/settings" }),
+            undefined,
+            "config_restart_required",
+          );
           toast.success(
             t("cameraManagement.streams.disableSuccess", {
               ns: "views/settings",
@@ -617,6 +653,7 @@ function CameraStatusSelect({
       onConfigChanged,
       sendEnabled,
       setRestartDialogOpen,
+      statusBar,
       t,
     ],
   );
