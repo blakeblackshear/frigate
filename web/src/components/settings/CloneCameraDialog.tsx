@@ -157,6 +157,7 @@ export default function CloneCameraDialog({
 
   const form = useForm<CloneFormValues>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
       sourceCamera: "",
       targetMode: "new",
@@ -825,10 +826,15 @@ export default function CloneCameraDialog({
             </div>
 
             <div className="space-y-4">
-              <div className="flex flex-row items-center justify-between gap-2">
-                <Label className="text-base">
-                  {t("cameraManagement.clone.categories.legend")}
-                </Label>
+              <div className="flex flex-row items-start justify-between gap-2">
+                <div className="space-y-1">
+                  <Label className="text-base">
+                    {t("cameraManagement.clone.categories.legend")}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t("cameraManagement.clone.categories.description")}
+                  </p>
+                </div>
                 <div className="flex flex-row items-center gap-2 text-right text-xs text-muted-foreground">
                   <span
                     className="cursor-pointer"
