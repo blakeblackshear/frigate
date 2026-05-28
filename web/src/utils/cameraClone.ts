@@ -90,9 +90,9 @@ function stripAutoDefaultFilters(
 
 /**
  * Strip named runtime-only fields from each entry in a dict-of-objects
- * (mask `enabled_in_config`, zone `color`). The settings UI doesn't need
- * this because BaseSection's form never exposes these sub-collections;
- * we do because clone re-injects them from the API response.
+ * (mask `enabled_in_config`/`raw_coordinates`, zone `color`). The settings
+ * UI doesn't need this because BaseSection's form never exposes these
+ * sub-collections; we do because clone re-injects them from the API.
  */
 function stripDictEntryFields(
   dict: unknown,
@@ -335,29 +335,18 @@ export function resolutionsMatch(
 }
 
 /**
- * Initial selection set. Spatial categories default off on existing-camera
- * targets when resolutions differ (polygons may not align); otherwise each
- * category uses its `defaultOnExisting`. `forcedForNewCamera` is always on
- * for new-camera targets.
+ * Initial selection set. Existing-camera targets start empty — copying onto
+ * a configured camera is destructive, so the user opts in explicitly.
+ * New-camera targets pre-select `defaultOnExisting` categories plus
+ * `forcedForNewCamera`.
  */
 export function getCategoryDefaults(
   targetIsNew: boolean,
-  resolutionMatches: boolean,
 ): Set<CloneCategoryKey> {
   const selected = new Set<CloneCategoryKey>();
+  if (!targetIsNew) return selected;
   for (const cat of CLONE_CATEGORIES) {
-    if (cat.newCameraOnly && !targetIsNew) continue;
-    if (targetIsNew && cat.forcedForNewCamera) {
-      selected.add(cat.key);
-      continue;
-    }
-    if (cat.group === "spatial") {
-      if (targetIsNew || resolutionMatches) {
-        if (cat.defaultOnExisting) selected.add(cat.key);
-      }
-      continue;
-    }
-    if (cat.defaultOnExisting) selected.add(cat.key);
+    if (cat.forcedForNewCamera || cat.defaultOnExisting) selected.add(cat.key);
   }
   return selected;
 }
@@ -595,7 +584,10 @@ export function buildClonedCameraPayloads({
       if (srcMask !== undefined) {
         pendingSectionValue = {
           ...(pendingSectionValue as object),
-          mask: stripDictEntryFields(srcMask, ["enabled_in_config"]),
+          mask: stripDictEntryFields(srcMask, [
+            "enabled_in_config",
+            "raw_coordinates",
+          ]),
         };
       }
     }
@@ -604,7 +596,10 @@ export function buildClonedCameraPayloads({
       if (srcMask !== undefined) {
         pendingSectionValue = {
           ...(pendingSectionValue as object),
-          mask: stripDictEntryFields(srcMask, ["enabled_in_config"]),
+          mask: stripDictEntryFields(srcMask, [
+            "enabled_in_config",
+            "raw_coordinates",
+          ]),
         };
       }
     }
@@ -637,6 +632,7 @@ export function buildClonedCameraPayloads({
         sanitizedOverrides: {
           mask: stripDictEntryFields(srcMask, [
             "enabled_in_config",
+            "raw_coordinates",
           ]) as JsonValue,
         },
         updateTopic: `config/cameras/${target}/${cameraUpdateTopicMap.motion}`,
@@ -653,6 +649,7 @@ export function buildClonedCameraPayloads({
         sanitizedOverrides: {
           mask: stripDictEntryFields(srcMask, [
             "enabled_in_config",
+            "raw_coordinates",
           ]) as JsonValue,
         },
         updateTopic: `config/cameras/${target}/${cameraUpdateTopicMap.objects}`,
