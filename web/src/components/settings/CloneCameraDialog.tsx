@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -143,17 +143,6 @@ export default function CloneCameraDialog({
     },
   });
 
-  // Reset whenever the dialog opens.
-  useEffect(() => {
-    if (open) {
-      form.reset({
-        targetMode: "new",
-        newName: "",
-        existingTarget: otherCameras[0] ?? "",
-      });
-    }
-  }, [open, form, otherCameras]);
-
   const targetMode = form.watch("targetMode");
   const existingTarget = form.watch("existingTarget");
 
@@ -172,12 +161,28 @@ export default function CloneCameraDialog({
 
   const [selectedCategories, setSelectedCategories] = useState<
     Set<CloneCategoryKey>
-  >(() => getCategoryDefaults(true, true));
+  >(() => getCategoryDefaults(true));
 
-  // Reset defaults when target mode or target identity changes.
+  // Reset form + selection only on the open transition
+  const wasOpenRef = useRef(false);
   useEffect(() => {
-    setSelectedCategories(getCategoryDefaults(targetIsNew, resMatch));
-  }, [targetIsNew, existingTarget, resMatch]);
+    if (open && !wasOpenRef.current) {
+      wasOpenRef.current = true;
+      form.reset({
+        targetMode: "new",
+        newName: "",
+        existingTarget: otherCameras[0] ?? "",
+      });
+      setSelectedCategories(getCategoryDefaults(true));
+    } else if (!open) {
+      wasOpenRef.current = false;
+    }
+  }, [open, form, otherCameras]);
+
+  // Reset selection to per-mode defaults when the user switches target mode.
+  useEffect(() => {
+    setSelectedCategories(getCategoryDefaults(targetIsNew));
+  }, [targetIsNew]);
 
   const toggleCategory = useCallback((key: CloneCategoryKey) => {
     setSelectedCategories((prev) => {
