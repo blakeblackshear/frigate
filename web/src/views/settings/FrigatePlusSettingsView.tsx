@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import useSWR from "swr";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { LuExternalLink } from "react-icons/lu";
-import { Toaster } from "@/components/ui/sonner";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
@@ -35,7 +34,6 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
 
   return (
     <div className="flex size-full flex-col md:pr-2">
-      <Toaster position="top-center" closeButton={true} />
       <div className="w-full max-w-5xl space-y-6 pt-2">
         <div className="flex flex-col gap-0">
           <Heading as="h4" className="mb-2">

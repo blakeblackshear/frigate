@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -443,7 +442,6 @@ export default function TriggerView({
 
   return (
     <div className="flex size-full flex-col md:flex-row">
-      <Toaster position="top-center" closeButton={true} />
       <div
         className={cn(
           "scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2",

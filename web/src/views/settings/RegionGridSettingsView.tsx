@@ -10,7 +10,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Toaster } from "@/components/ui/sonner";
 import { useCallback, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
@@ -59,7 +58,6 @@ export default function RegionGridSettingsView({
   return (
     <>
       <div className="flex size-full flex-col md:flex-row">
-        <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
           <Heading as="h4" className="mb-2 hidden md:block">
             {t("maintenance.regionGrid.title")}

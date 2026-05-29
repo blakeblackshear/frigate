@@ -2,7 +2,6 @@ import Heading from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Toaster } from "@/components/ui/sonner";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -105,7 +104,6 @@ export default function MediaSyncSettingsView() {
   return (
     <>
       <div className="flex size-full flex-col md:flex-row">
-        <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
           <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
             <div className="col-span-1">

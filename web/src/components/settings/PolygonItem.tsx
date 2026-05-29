@@ -24,7 +24,6 @@ import { toRGBColorString } from "@/utils/canvasUtil";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { useCallback, useMemo, useState } from "react";
 import axios from "axios";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -368,8 +367,6 @@ export default function PolygonItem({
 
   return (
     <>
-      <Toaster position="top-center" closeButton={true} />
-
       <div
         key={index}
         className="transition-background relative my-1.5 flex flex-row items-center justify-between rounded-lg p-1 duration-100"

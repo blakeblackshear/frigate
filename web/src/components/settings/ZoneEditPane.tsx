@@ -24,7 +24,6 @@ import { Label } from "../ui/label";
 import PolygonEditControls from "./PolygonEditControls";
 import { FaCheckCircle } from "react-icons/fa";
 import axios from "axios";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { flattenPoints, interpolatePoints } from "@/utils/canvasUtil";
 import ActivityIndicator from "../indicators/activity-indicator";
@@ -628,7 +627,6 @@ export default function ZoneEditPane({
 
   return (
     <>
-      <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
           ? t("masksAndZones.zones.edit")
