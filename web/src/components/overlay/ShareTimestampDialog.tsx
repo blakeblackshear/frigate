@@ -333,7 +333,7 @@ function CustomTimestampSelector({
             />
             <div className="my-3 h-px w-full bg-secondary" />
             <input
-              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+              className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
               id="shareTimestamp"
               type="time"
               value={clock}

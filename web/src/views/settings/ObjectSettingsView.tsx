@@ -415,7 +415,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                   </div>
                 </div>
                 <div className="flex w-8/12 flex-row items-center justify-end">
-                  <div className="text-md mr-2 w-1/3">
+                  <div className="mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
                         {t("debug.objectShapeFilterDrawing.score")}
@@ -426,7 +426,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                       %
                     </div>
                   </div>
-                  <div className="text-md mr-2 w-1/3">
+                  <div className="mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
                         {t("debug.objectShapeFilterDrawing.ratio")}
@@ -434,7 +434,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                       {obj.ratio ? obj.ratio.toFixed(2).toString() : "-"}
                     </div>
                   </div>
-                  <div className="text-md mr-2 w-1/3">
+                  <div className="mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
                         {t("debug.objectShapeFilterDrawing.area")}
@@ -505,7 +505,7 @@ function AudioList({ cameraConfig, audioDetections }: AudioListProps) {
                 <div className="ml-3 text-lg">{getTranslatedLabel(key)}</div>
               </div>
               <div className="flex w-8/12 flex-row items-center justify-end">
-                <div className="text-md mr-2 w-1/3">
+                <div className="mr-2 w-1/3">
                   <div className="flex flex-col items-end justify-end">
                     <p className="mb-1.5 text-sm text-primary-variant">
                       {t("debug.audio.score")}

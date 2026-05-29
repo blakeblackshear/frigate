@@ -144,18 +144,13 @@ export default function OptionAndInputDialog({
               <label className="text-sm font-medium text-secondary-foreground">
                 {nameLabel}
               </label>
-              <Input
-                className="text-md"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-secondary-foreground">
                 {descriptionLabel}
               </label>
               <Textarea
-                className="text-md"
                 value={descriptionValue}
                 onChange={(e) => setDescriptionValue(e.target.value)}
                 rows={2}

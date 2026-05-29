@@ -1706,7 +1706,7 @@ function ObjectDetailsTab({
         ) : (
           <div className="flex flex-col gap-2">
             <Textarea
-              className="text-md h-32 md:text-sm"
+              className="h-32 md:text-sm"
               placeholder={t("details.description.placeholder")}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}

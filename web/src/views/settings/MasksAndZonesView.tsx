@@ -791,7 +791,7 @@ export default function MasksAndZonesView({
                       <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
-                            <div className="text-md cursor-default">
+                            <div className="cursor-default">
                               {t("masksAndZones.zones.label")}
                             </div>
                           </HoverCardTrigger>
@@ -869,7 +869,7 @@ export default function MasksAndZonesView({
                       <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
-                            <div className="text-md cursor-default">
+                            <div className="cursor-default">
                               {t("masksAndZones.motionMasks.label")}
                             </div>
                           </HoverCardTrigger>
@@ -951,7 +951,7 @@ export default function MasksAndZonesView({
                       <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
-                            <div className="text-md cursor-default">
+                            <div className="cursor-default">
                               {t("masksAndZones.objectMasks.label")}
                             </div>
                           </HoverCardTrigger>

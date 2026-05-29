@@ -821,7 +821,7 @@ export function TrackingDetails({
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="capitalize">{label}</span>
-                  <div className="md:text-md flex items-center text-xs text-secondary-foreground">
+                  <div className="flex items-center text-xs text-secondary-foreground">
                     {formattedStart ?? ""}
                     {event.end_time != null ? (
                       <> - {formattedEnd}</>
@@ -1072,7 +1072,7 @@ function LifecycleIconRow({
 
         <div className="ml-2 flex w-full min-w-0 flex-1">
           <div className="flex flex-col">
-            <div className="text-md flex items-start break-words text-left">
+            <div className="flex items-start break-words text-left">
               {getLifecycleItemDescription(item)}
             </div>
             {/* Only show Score/Ratio/Area for object events, not for audio (heard) or manual API (external) events */}

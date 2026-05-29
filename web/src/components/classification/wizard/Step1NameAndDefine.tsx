@@ -214,7 +214,7 @@ export default function Step1NameAndDefine({
                 </FormLabel>
                 <FormControl>
                   <Input
-                    className="text-md h-8"
+                    className="h-8"
                     placeholder={t("wizard.step1.namePlaceholder")}
                     {...field}
                   />
@@ -457,7 +457,7 @@ export default function Step1NameAndDefine({
                       <FormControl>
                         <div className="flex items-center gap-2">
                           <Input
-                            className="text-md h-8"
+                            className="h-8"
                             placeholder={t("wizard.step1.classPlaceholder")}
                             {...field}
                           />

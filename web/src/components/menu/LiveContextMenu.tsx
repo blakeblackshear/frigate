@@ -276,7 +276,7 @@ export default function LiveContextMenu({
         <ContextMenuTrigger>{children}</ContextMenuTrigger>
         <ContextMenuContent>
           <div className="flex flex-col items-start gap-1 py-1 pl-2">
-            <div className="text-md text-primary-variant smart-capitalize">
+            <div className="text-primary-variant smart-capitalize">
               <CameraNameLabel camera={camera} />
             </div>
             {preferredLiveMode == "jsmpeg" && isRestreamed && (

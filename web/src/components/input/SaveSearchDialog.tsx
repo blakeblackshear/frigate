@@ -69,7 +69,6 @@ export function SaveSearchDialog({
         </DialogHeader>
         <Input
           value={searchName}
-          className="text-md"
           onChange={(e) => setSearchName(e.target.value)}
           placeholder={t("search.saveSearch.placeholder")}
         />

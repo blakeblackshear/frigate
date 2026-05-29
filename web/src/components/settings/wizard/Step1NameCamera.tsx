@@ -171,7 +171,7 @@ export default function Step1NameCamera({
                 </FormLabel>
                 <FormControl>
                   <Input
-                    className="text-md h-8"
+                    className="h-8"
                     placeholder={t("cameraWizard.step1.cameraNamePlaceholder")}
                     {...field}
                   />
@@ -192,7 +192,7 @@ export default function Step1NameCamera({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="text-md h-8"
+                      className="h-8"
                       placeholder="192.168.1.100"
                       {...field}
                     />
@@ -212,7 +212,7 @@ export default function Step1NameCamera({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="text-md h-8"
+                      className="h-8"
                       placeholder={t("cameraWizard.step1.usernamePlaceholder")}
                       {...field}
                     />
@@ -233,7 +233,7 @@ export default function Step1NameCamera({
                   <FormControl>
                     <div className="relative">
                       <Input
-                        className="text-md h-8 pr-10"
+                        className="h-8 pr-10"
                         type={showPassword ? "text" : "password"}
                         placeholder={t(
                           "cameraWizard.step1.passwordPlaceholder",
@@ -316,7 +316,7 @@ export default function Step1NameCamera({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="text-md h-8"
+                      className="h-8"
                       type="text"
                       {...field}
                       placeholder="80"
@@ -440,7 +440,7 @@ export default function Step1NameCamera({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="text-md h-8"
+                          className="h-8"
                           placeholder="rtsp://username:password@host:port/path"
                           {...field}
                         />

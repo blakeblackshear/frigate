@@ -26,7 +26,7 @@ export function TextareaWidget(props: WidgetProps) {
   return (
     <Textarea
       id={id}
-      className={cn("text-md", fieldClassName)}
+      className={cn(fieldClassName)}
       value={value ?? ""}
       disabled={disabled || readonly}
       placeholder={placeholder || (options.placeholder as string) || ""}

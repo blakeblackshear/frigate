@@ -261,7 +261,7 @@ export default function CameraManagementView({
             {enabledCameras.length + disabledCameras.length > 0 && (
               <div className="mb-5 space-y-3">
                 <div className="space-y-0.5">
-                  <div className="text-md font-medium">
+                  <div className="font-medium">
                     {t("cameraManagement.clone.sectionTitle")}
                   </div>
                   <p className="text-sm text-muted-foreground">

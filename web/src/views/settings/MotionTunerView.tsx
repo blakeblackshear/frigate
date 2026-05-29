@@ -206,7 +206,7 @@ export default function MotionTunerView({
         <div className="flex w-full flex-col space-y-6">
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
-              <Label htmlFor="motion-threshold" className="text-md">
+              <Label htmlFor="motion-threshold">
                 {t("motionDetectionTuner.Threshold.title")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
@@ -235,7 +235,7 @@ export default function MotionTunerView({
           </div>
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
-              <Label htmlFor="motion-threshold" className="text-md">
+              <Label htmlFor="motion-threshold">
                 {t("motionDetectionTuner.contourArea.title")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">

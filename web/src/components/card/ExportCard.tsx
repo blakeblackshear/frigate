@@ -257,7 +257,7 @@ export function ExportCard({
           {editName && (
             <>
               <Input
-                className="text-md mt-3"
+                className="mt-3"
                 type="search"
                 placeholder={editName?.original}
                 value={

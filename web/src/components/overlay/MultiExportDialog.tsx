@@ -290,7 +290,6 @@ export default function MultiExportDialog({
   const newCaseInputs = (
     <div className="space-y-2 pt-1">
       <Input
-        className="text-md"
         placeholder={t("export.case.newCaseNamePlaceholder")}
         value={newCaseName}
         onChange={(event) => setNewCaseName(event.target.value)}
@@ -298,7 +297,6 @@ export default function MultiExportDialog({
         autoFocus={isDesktop}
       />
       <Textarea
-        className="text-md"
         placeholder={t("export.case.newCaseDescriptionPlaceholder")}
         value={newCaseDescription}
         onChange={(event) => setNewCaseDescription(event.target.value)}

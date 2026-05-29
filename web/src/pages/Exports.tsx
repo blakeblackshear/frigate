@@ -744,7 +744,7 @@ function Exports() {
                 </Button>
               )}
               <Input
-                className="text-md w-full bg-muted md:w-1/2"
+                className="w-full bg-muted md:w-1/2"
                 placeholder={t("search")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

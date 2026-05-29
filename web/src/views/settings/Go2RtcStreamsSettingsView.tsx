@@ -533,7 +533,6 @@ function RenameStreamDialog({
         <div className="space-y-2 py-2">
           <Label>{t("go2rtcStreams.newStreamName")}</Label>
           <Input
-            className="text-md"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => {
@@ -614,7 +613,6 @@ function AddStreamDialog({
           <Label>{t("go2rtcStreams.streamName")}</Label>
           <Input
             value={name}
-            className="text-md"
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && canSubmit) {
@@ -924,7 +922,7 @@ function StreamUrlEntry({
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <Input
-              className="text-md h-8 pr-10"
+              className="h-8 pr-10"
               value={baseUrlForDisplay}
               onChange={(e) => handleBaseUrlChange(e.target.value)}
               onFocus={() => setIsFocused(true)}

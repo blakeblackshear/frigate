@@ -112,11 +112,7 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
               </span>
             </div>
             <FormControl>
-              <Input
-                className="text-md"
-                placeholder={placeholderName}
-                {...field}
-              />
+              <Input placeholder={placeholderName} {...field} />
             </FormControl>
             {nameDescription && (
               <FormDescription>{nameDescription}</FormDescription>
@@ -134,7 +130,6 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
               <FormLabel>{idLabel ?? t("label.ID")}</FormLabel>
               <FormControl>
                 <Input
-                  className="text-md"
                   placeholder={placeholderId}
                   disabled={idDisabled}
                   {...field}
