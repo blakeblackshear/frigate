@@ -547,7 +547,7 @@ function RenameStreamDialog({
             <p className="text-xs text-destructive">{nameError}</p>
           )}
         </div>
-        <DialogFooter className="gap-2 sm:justify-end md:gap-0">
+        <DialogFooter>
           <DialogClose asChild>
             <Button>{t("button.cancel", { ns: "common" })}</Button>
           </DialogClose>
@@ -628,7 +628,7 @@ function AddStreamDialog({
             <p className="text-xs text-destructive">{nameError}</p>
           )}
         </div>
-        <DialogFooter className="gap-2 sm:justify-end md:gap-0">
+        <DialogFooter>
           <DialogClose asChild>
             <Button>{t("button.cancel", { ns: "common" })}</Button>
           </DialogClose>

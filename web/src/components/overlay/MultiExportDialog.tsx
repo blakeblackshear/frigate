@@ -344,11 +344,7 @@ export default function MultiExportDialog({
 
   const footer = (
     <>
-      <Button
-        variant="outline"
-        onClick={() => handleOpenChange(false)}
-        disabled={isExporting}
-      >
+      <Button onClick={() => handleOpenChange(false)} disabled={isExporting}>
         {t("button.cancel", { ns: "common" })}
       </Button>
       <Button
@@ -380,7 +376,7 @@ export default function MultiExportDialog({
             </DialogDescription>
           </DialogHeader>
           {body}
-          <DialogFooter className="gap-2">{footer}</DialogFooter>
+          <DialogFooter>{footer}</DialogFooter>
         </DialogContent>
       </Dialog>
     );
@@ -399,7 +395,7 @@ export default function MultiExportDialog({
           </DrawerDescription>
         </DrawerHeader>
         {body}
-        <div className="mt-4 flex flex-col-reverse gap-2">{footer}</div>
+        <DialogFooter className="mt-4">{footer}</DialogFooter>
       </DrawerContent>
     </Drawer>
   );

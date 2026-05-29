@@ -977,7 +977,7 @@ export default function CloneCameraDialog({
               )}
             </div>
 
-            <DialogFooter className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-x-0">
+            <DialogFooter variant="split">
               <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                 {changeCount > 0 && (
                   <>
@@ -1005,7 +1005,7 @@ export default function CloneCameraDialog({
                   </>
                 )}
               </div>
-              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+              <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row">
                 <Button
                   type="button"
                   disabled={isSubmitting}

@@ -9,8 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 
 type TextEntryDialogProps = {
@@ -63,7 +61,7 @@ export default function TextEntryDialog({
           forbiddenPattern={forbiddenPattern}
           forbiddenErrorMessage={forbiddenErrorMessage}
         >
-          <DialogFooter className={cn("pt-4", isMobile && "gap-2")}>
+          <DialogFooter>
             <Button
               type="button"
               disabled={isSaving}

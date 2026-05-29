@@ -654,10 +654,9 @@ export default function ProfilesView({
                   ns: "views/settings",
                 })}
               />
-              <DialogFooter className="gap-2 md:gap-0">
+              <DialogFooter>
                 <Button
                   type="button"
-                  variant="outline"
                   onClick={() => setAddDialogOpen(false)}
                   disabled={addingProfile}
                 >
@@ -746,7 +745,6 @@ export default function ProfilesView({
             />
             <DialogFooter>
               <Button
-                variant="outline"
                 onClick={() => setRenameProfile(null)}
                 disabled={renaming}
               >

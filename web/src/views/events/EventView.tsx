@@ -1389,9 +1389,8 @@ function MotionReview({
                     selectedCells={pendingFilterCells}
                     onCellsChange={setPendingFilterCells}
                   />
-                  <DialogFooter className="justify-end gap-1">
+                  <DialogFooter>
                     <Button
-                      variant="outline"
                       disabled={pendingFilterCells.size === 0}
                       onClick={() => {
                         setPendingFilterCells(new Set());

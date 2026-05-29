@@ -164,10 +164,9 @@ export default function OptionAndInputDialog({
           </div>
         )}
 
-        <DialogFooter className={cn("pt-2", isMobile && "gap-2")}>
+        <DialogFooter>
           <Button
             type="button"
-            variant="outline"
             disabled={isLoading}
             onClick={() => {
               setOpen(false);

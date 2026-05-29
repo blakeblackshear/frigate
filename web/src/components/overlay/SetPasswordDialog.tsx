@@ -450,36 +450,30 @@ export default function SetPasswordDialog({
               </div>
             )}
 
-            <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <div className="flex flex-1 flex-col justify-end">
-                <div className="flex flex-row gap-2 pt-5">
-                  <Button
-                    className="flex flex-1"
-                    aria-label={t("button.cancel", { ns: "common" })}
-                    onClick={onCancel}
-                    type="button"
-                    disabled={isLoading}
-                  >
-                    {t("button.cancel", { ns: "common" })}
-                  </Button>
-                  <Button
-                    variant="select"
-                    aria-label={t("button.save", { ns: "common" })}
-                    className="flex flex-1"
-                    type="submit"
-                    disabled={isLoading || !form.formState.isValid}
-                  >
-                    {isLoading ? (
-                      <div className="flex flex-row items-center gap-2">
-                        <ActivityIndicator className="size-4" />
-                        <span>{t("button.saving", { ns: "common" })}</span>
-                      </div>
-                    ) : (
-                      t("button.save", { ns: "common" })
-                    )}
-                  </Button>
-                </div>
-              </div>
+            <DialogFooter>
+              <Button
+                aria-label={t("button.cancel", { ns: "common" })}
+                onClick={onCancel}
+                type="button"
+                disabled={isLoading}
+              >
+                {t("button.cancel", { ns: "common" })}
+              </Button>
+              <Button
+                variant="select"
+                aria-label={t("button.save", { ns: "common" })}
+                type="submit"
+                disabled={isLoading || !form.formState.isValid}
+              >
+                {isLoading ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <ActivityIndicator className="size-4" />
+                    <span>{t("button.saving", { ns: "common" })}</span>
+                  </div>
+                ) : (
+                  t("button.save", { ns: "common" })
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

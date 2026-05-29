@@ -275,7 +275,6 @@ export function ExportCard({
               <DialogFooter>
                 <Button
                   aria-label={t("editExport.saveExport")}
-                  size="sm"
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
                   onClick={() => submitRename()}
