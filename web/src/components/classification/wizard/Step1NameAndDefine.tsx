@@ -489,7 +489,7 @@ export default function Step1NameAndDefine({
         </form>
       </Form>
 
-      <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+      <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
         <Button type="button" onClick={onCancel} className="sm:flex-1">
           {t("button.cancel", { ns: "common" })}
         </Button>

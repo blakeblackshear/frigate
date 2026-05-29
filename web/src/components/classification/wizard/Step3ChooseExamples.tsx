@@ -693,7 +693,7 @@ export default function Step3ChooseExamples({
       )}
 
       {!isTraining && (
-        <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+        <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
           <Button type="button" onClick={handleBack} className="sm:flex-1">
             {t("button.back", { ns: "common" })}
           </Button>
