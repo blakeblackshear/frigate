@@ -280,7 +280,7 @@ async def create_face(request: Request, name: str):
     success response with details about the registration, or an error if face recognition
     is not enabled or the image cannot be processed.""",
 )
-async def register_face(request: Request, name: str, file: UploadFile):
+def register_face(request: Request, name: str, file: UploadFile):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
             status_code=400,
@@ -288,7 +288,7 @@ async def register_face(request: Request, name: str, file: UploadFile):
         )
 
     context: EmbeddingsContext = request.app.embeddings
-    result = None if context is None else context.register_face(name, await file.read())
+    result = None if context is None else context.register_face(name, file.file.read())
 
     if not isinstance(result, dict):
         return JSONResponse(
@@ -313,7 +313,7 @@ async def register_face(request: Request, name: str, file: UploadFile):
     registered faces in the system. Returns the recognized face name and confidence score,
     or an error if face recognition is not enabled or the image cannot be processed.""",
 )
-async def recognize_face(request: Request, file: UploadFile):
+def recognize_face(request: Request, file: UploadFile):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
             status_code=400,
@@ -321,7 +321,7 @@ async def recognize_face(request: Request, file: UploadFile):
         )
 
     context: EmbeddingsContext = request.app.embeddings
-    result = context.recognize_face(await file.read())
+    result = context.recognize_face(file.file.read())
 
     if not isinstance(result, dict):
         return JSONResponse(
