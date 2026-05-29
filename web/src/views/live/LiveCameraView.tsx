@@ -784,7 +784,7 @@ export default function LiveCameraView({
               transcription != null && (
                 <div
                   ref={transcriptionRef}
-                  className="text-md scrollbar-container absolute bottom-4 left-1/2 max-h-[15vh] w-[75%] -translate-x-1/2 overflow-y-auto rounded-lg bg-black/70 p-2 text-white md:w-[50%]"
+                  className="scrollbar-container absolute bottom-4 left-1/2 max-h-[15vh] w-[75%] -translate-x-1/2 overflow-y-auto rounded-lg bg-black/70 p-2 text-white md:w-[50%]"
                 >
                   {transcription}
                 </div>

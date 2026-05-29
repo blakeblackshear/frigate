@@ -250,7 +250,7 @@ export default function CameraManagementView({
                 <Button
                   variant="destructive"
                   onClick={() => setShowDeleteDialog(true)}
-                  className="mb-2 flex max-w-48 items-center gap-2 text-white"
+                  className="mb-2 flex max-w-48 items-center gap-2"
                 >
                   <LuTrash2 className="h-4 w-4" />
                   {t("cameraManagement.deleteCamera")}
@@ -261,7 +261,7 @@ export default function CameraManagementView({
             {enabledCameras.length + disabledCameras.length > 0 && (
               <div className="mb-5 space-y-3">
                 <div className="space-y-0.5">
-                  <div className="text-md font-medium">
+                  <div className="font-medium">
                     {t("cameraManagement.clone.sectionTitle")}
                   </div>
                   <p className="text-sm text-muted-foreground">

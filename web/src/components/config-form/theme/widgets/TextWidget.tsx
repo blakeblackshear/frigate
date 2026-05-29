@@ -26,7 +26,7 @@ export function TextWidget(props: WidgetProps) {
   return (
     <Input
       id={id}
-      className={cn("text-md", fieldClassName)}
+      className={cn(fieldClassName)}
       type="text"
       value={value ?? ""}
       disabled={disabled || readonly}

@@ -196,21 +196,16 @@ export function ShareTimestampContent({
 
       {isDesktop && <Separator className="my-4 bg-secondary" />}
 
-      <DialogFooter
-        className={cn("mt-4", !isDesktop && "flex flex-col-reverse gap-2")}
-      >
+      <DialogFooter className="mt-3 sm:mt-0">
         {onCancel && (
           <Button
-            className={cn(!isDesktop && "w-full")}
             aria-label={t("button.cancel", { ns: "common" })}
-            variant="outline"
             onClick={onCancel}
           >
             {t("button.cancel", { ns: "common" })}
           </Button>
         )}
         <Button
-          className={cn(!isDesktop && "w-full")}
           variant="select"
           onClick={() => onShareTimestamp(Math.floor(selectedTimestamp))}
         >
@@ -338,7 +333,7 @@ function CustomTimestampSelector({
             />
             <div className="my-3 h-px w-full bg-secondary" />
             <input
-              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+              className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
               id="shareTimestamp"
               type="time"
               value={clock}

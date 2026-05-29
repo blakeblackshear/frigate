@@ -70,38 +70,31 @@ export default function DeleteRoleDialog({
           </div>
         </div>
 
-        <DialogFooter className="flex gap-2 pt-2 sm:justify-end">
-          <div className="flex flex-1 flex-col justify-end">
-            <div className="flex flex-row gap-2 pt-5">
-              <Button
-                className="flex flex-1"
-                aria-label={t("button.cancel", { ns: "common" })}
-                variant="outline"
-                disabled={isLoading}
-                onClick={onCancel}
-                type="button"
-              >
-                {t("button.cancel", { ns: "common" })}
-              </Button>
-              <Button
-                className="flex flex-1"
-                aria-label={t("button.delete", { ns: "common" })}
-                variant="destructive"
-                disabled={isLoading}
-                onClick={handleDelete}
-                type="button"
-              >
-                {isLoading ? (
-                  <div className="flex flex-row items-center gap-2">
-                    <ActivityIndicator />
-                    <span>{t("roles.dialog.deleteRole.deleting")}</span>
-                  </div>
-                ) : (
-                  t("button.delete", { ns: "common" })
-                )}
-              </Button>
-            </div>
-          </div>
+        <DialogFooter>
+          <Button
+            aria-label={t("button.cancel", { ns: "common" })}
+            disabled={isLoading}
+            onClick={onCancel}
+            type="button"
+          >
+            {t("button.cancel", { ns: "common" })}
+          </Button>
+          <Button
+            aria-label={t("button.delete", { ns: "common" })}
+            variant="destructive"
+            disabled={isLoading}
+            onClick={handleDelete}
+            type="button"
+          >
+            {isLoading ? (
+              <div className="flex flex-row items-center gap-2">
+                <ActivityIndicator />
+                <span>{t("roles.dialog.deleteRole.deleting")}</span>
+              </div>
+            ) : (
+              t("button.delete", { ns: "common" })
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

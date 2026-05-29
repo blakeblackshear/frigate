@@ -176,20 +176,15 @@ export default function Step1NameAndType({
           )}
         />
 
-        <div className="flex gap-2 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            className="flex-1"
-          >
+        <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end">
+          <Button type="button" onClick={onCancel} className="sm:flex-1">
             {t("button.cancel", { ns: "common" })}
           </Button>
           <Button
             type="submit"
             variant="select"
             disabled={!form.formState.isValid}
-            className="flex-1"
+            className="sm:flex-1"
           >
             {t("button.next", { ns: "common" })}
           </Button>

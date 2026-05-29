@@ -22,7 +22,6 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { flattenPoints, interpolatePoints } from "@/utils/canvasUtil";
 import axios from "axios";
 import { toast } from "sonner";
-import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
@@ -327,7 +326,6 @@ export default function MotionMaskEditPane({
 
   return (
     <>
-      <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
           ? t("masksAndZones.motionMasks.edit")

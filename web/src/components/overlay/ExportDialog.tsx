@@ -794,7 +794,6 @@ export function ExportContent({
           )}
 
           <Input
-            className="text-md"
             type="search"
             placeholder={t("export.name.placeholder")}
             value={name}
@@ -835,13 +834,11 @@ export function ExportContent({
               {selectedCaseId === "new" && (
                 <div className="space-y-2 pt-1">
                   <Input
-                    className="text-md"
                     placeholder={t("export.case.newCaseNamePlaceholder")}
                     value={singleNewCaseName}
                     onChange={(e) => setSingleNewCaseName(e.target.value)}
                   />
                   <Textarea
-                    className="text-md"
                     placeholder={t("export.case.newCaseDescriptionPlaceholder")}
                     value={singleNewCaseDescription}
                     onChange={(e) =>
@@ -988,7 +985,6 @@ export function ExportContent({
               {t("export.multiCamera.nameLabel")}
             </Label>
             <Input
-              className="text-md"
               type="search"
               placeholder={t("export.multiCamera.namePlaceholder")}
               value={name}
@@ -1028,13 +1024,11 @@ export function ExportContent({
               {batchCaseSelection === "new" && (
                 <div className="space-y-2 pt-1">
                   <Input
-                    className="text-md"
                     placeholder={t("export.case.newCaseNamePlaceholder")}
                     value={newCaseName}
                     onChange={(event) => setNewCaseName(event.target.value)}
                   />
                   <Textarea
-                    className="text-md"
                     placeholder={t("export.case.newCaseDescriptionPlaceholder")}
                     value={newCaseDescription}
                     onChange={(event) =>
@@ -1049,20 +1043,15 @@ export function ExportContent({
       </Tabs>
 
       {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
-      <DialogFooter
-        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-2"}
-      >
+      <DialogFooter className="mt-3 sm:mt-0">
         <Button
-          className={isDesktop ? "" : "w-full"}
           aria-label={t("button.cancel", { ns: "common" })}
-          variant="outline"
           onClick={onCancel}
         >
           {t("button.cancel", { ns: "common" })}
         </Button>
         {activeTab === "export" ? (
           <Button
-            className={isDesktop ? "" : "w-full"}
             aria-label={t("export.selectOrExport")}
             variant="select"
             disabled={isStartingExport}
@@ -1086,12 +1075,10 @@ export function ExportContent({
           </Button>
         ) : (
           <Button
-            className={isDesktop ? "" : "w-full"}
             aria-label={t("export.multiCamera.exportButton", {
               count: selectedCameraCount,
             })}
             variant="select"
-            size="sm"
             disabled={!canStartBatchExport}
             onClick={() => void startBatchExport()}
           >

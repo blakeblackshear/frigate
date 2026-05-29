@@ -22,7 +22,6 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import Heading from "@/components/ui/heading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -598,7 +597,6 @@ export default function DetectorsAndModelSettingsView({
 
   return (
     <div className="flex size-full flex-col md:pr-2">
-      <Toaster position="top-center" closeButton={true} />
       <div className="mb-1 flex items-center justify-between gap-4 pt-2">
         <div className="flex max-w-5xl flex-col">
           <Heading as="h4">{t("detectorsAndModel.title")}</Heading>

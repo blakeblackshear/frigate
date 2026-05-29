@@ -14,7 +14,7 @@ type SettingsGroupCardProps = {
 export function SettingsGroupCard({ title, children }: SettingsGroupCardProps) {
   return (
     <div className="space-y-4 rounded-lg border border-border/70 bg-card/30 p-4">
-      <div className="text-md border-b border-border/60 pb-4 font-semibold text-primary-variant">
+      <div className="border-b border-border/60 pb-4 font-semibold text-primary-variant">
         {title}
       </div>
       {children}

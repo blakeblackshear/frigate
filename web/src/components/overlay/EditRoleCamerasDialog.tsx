@@ -105,13 +105,15 @@ export default function EditRoleCamerasDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-5 pt-4"
+            className="space-y-5 pt-2"
           >
-            <div className="space-y-2">
-              <FormLabel>{t("roles.dialog.form.cameras.title")}</FormLabel>
-              <FormDescription className="text-xs text-muted-foreground">
-                {t("roles.dialog.form.cameras.desc")}
-              </FormDescription>
+            <div className="space-y-3">
+              <div>
+                <FormLabel>{t("roles.dialog.form.cameras.title")}</FormLabel>
+                <FormDescription className="text-xs text-muted-foreground">
+                  {t("roles.dialog.form.cameras.desc")}
+                </FormDescription>
+              </div>
               <div className="scrollbar-container max-h-[40dvh] space-y-2 overflow-y-auto">
                 {cameras.map((camera) => (
                   <FormField
@@ -159,36 +161,30 @@ export default function EditRoleCamerasDialog({
               <FormMessage />
             </div>
 
-            <DialogFooter className="flex gap-2 pt-2 sm:justify-end">
-              <div className="flex flex-1 flex-col justify-end">
-                <div className="flex flex-row gap-2 pt-5">
-                  <Button
-                    className="flex flex-1"
-                    aria-label={t("button.cancel", { ns: "common" })}
-                    disabled={isLoading}
-                    onClick={handleCancel}
-                    type="button"
-                  >
-                    {t("button.cancel", { ns: "common" })}
-                  </Button>
-                  <Button
-                    variant="select"
-                    aria-label={t("button.save", { ns: "common" })}
-                    disabled={isLoading || !form.formState.isValid}
-                    className="flex flex-1"
-                    type="submit"
-                  >
-                    {isLoading ? (
-                      <div className="flex flex-row items-center gap-2">
-                        <ActivityIndicator className="size-4" />
-                        <span>{t("button.saving", { ns: "common" })}</span>
-                      </div>
-                    ) : (
-                      t("button.save", { ns: "common" })
-                    )}
-                  </Button>
-                </div>
-              </div>
+            <DialogFooter>
+              <Button
+                aria-label={t("button.cancel", { ns: "common" })}
+                disabled={isLoading}
+                onClick={handleCancel}
+                type="button"
+              >
+                {t("button.cancel", { ns: "common" })}
+              </Button>
+              <Button
+                variant="select"
+                aria-label={t("button.save", { ns: "common" })}
+                disabled={isLoading || !form.formState.isValid}
+                type="submit"
+              >
+                {isLoading ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <ActivityIndicator className="size-4" />
+                    <span>{t("button.saving", { ns: "common" })}</span>
+                  </div>
+                ) : (
+                  t("button.save", { ns: "common" })
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

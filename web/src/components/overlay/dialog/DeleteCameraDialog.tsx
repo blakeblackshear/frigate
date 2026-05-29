@@ -121,28 +121,22 @@ export default function DeleteCameraDialog({
                 ))}
               </SelectContent>
             </Select>
-            <DialogFooter className="flex gap-3 sm:justify-end">
-              <div className="flex flex-1 flex-col justify-end">
-                <div className="flex flex-row gap-2 pt-5">
-                  <Button
-                    className="flex flex-1"
-                    aria-label={t("button.cancel", { ns: "common" })}
-                    onClick={handleClose}
-                    type="button"
-                  >
-                    {t("button.cancel", { ns: "common" })}
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    aria-label={t("button.delete", { ns: "common" })}
-                    className="flex flex-1 text-white"
-                    onClick={handleDelete}
-                    disabled={!selectedCamera}
-                  >
-                    {t("button.delete", { ns: "common" })}
-                  </Button>
-                </div>
-              </div>
+            <DialogFooter>
+              <Button
+                aria-label={t("button.cancel", { ns: "common" })}
+                onClick={handleClose}
+                type="button"
+              >
+                {t("button.cancel", { ns: "common" })}
+              </Button>
+              <Button
+                variant="destructive"
+                aria-label={t("button.delete", { ns: "common" })}
+                onClick={handleDelete}
+                disabled={!selectedCamera}
+              >
+                {t("button.delete", { ns: "common" })}
+              </Button>
             </DialogFooter>
           </>
         ) : (
@@ -173,39 +167,31 @@ export default function DeleteCameraDialog({
                 {t("cameraManagement.deleteCameraDialog.deleteExports")}
               </Label>
             </div>
-            <DialogFooter className="flex gap-3 sm:justify-end">
-              <div className="flex flex-1 flex-col justify-end">
-                <div className="flex flex-row gap-2 pt-5">
-                  <Button
-                    className="flex flex-1"
-                    aria-label={t("button.back", { ns: "common" })}
-                    onClick={handleBack}
-                    type="button"
-                    disabled={isDeleting}
-                  >
-                    {t("button.back", { ns: "common" })}
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="flex flex-1 text-white"
-                    onClick={handleConfirmDelete}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? (
-                      <div className="flex flex-row items-center gap-2">
-                        <ActivityIndicator />
-                        <span>
-                          {t(
-                            "cameraManagement.deleteCameraDialog.confirmButton",
-                          )}
-                        </span>
-                      </div>
-                    ) : (
-                      t("cameraManagement.deleteCameraDialog.confirmButton")
-                    )}
-                  </Button>
-                </div>
-              </div>
+            <DialogFooter>
+              <Button
+                aria-label={t("button.back", { ns: "common" })}
+                onClick={handleBack}
+                type="button"
+                disabled={isDeleting}
+              >
+                {t("button.back", { ns: "common" })}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <ActivityIndicator />
+                    <span>
+                      {t("cameraManagement.deleteCameraDialog.confirmButton")}
+                    </span>
+                  </div>
+                ) : (
+                  t("cameraManagement.deleteCameraDialog.confirmButton")
+                )}
+              </Button>
             </DialogFooter>
           </>
         )}

@@ -1569,7 +1569,7 @@ function ObjectDetailsTab({
                       {t("button.yes", { ns: "common" })}
                     </Button>
                     <Button
-                      className="flex-1 text-white"
+                      className="flex-1"
                       aria-label={t("button.no", { ns: "common" })}
                       variant="destructive"
                       onClick={() => {
@@ -1706,7 +1706,7 @@ function ObjectDetailsTab({
         ) : (
           <div className="flex flex-col gap-2">
             <Textarea
-              className="text-md h-32 md:text-sm"
+              className="h-32 md:text-sm"
               placeholder={t("details.description.placeholder")}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}

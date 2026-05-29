@@ -124,7 +124,7 @@ export function CameraPathWidget(props: WidgetProps) {
     <div className={cn("relative", fieldClassName)}>
       <Input
         id={id}
-        className={cn("text-md", canToggle ? "pr-10" : undefined)}
+        className={cn(canToggle ? "pr-10" : undefined)}
         type="text"
         value={displayValue}
         disabled={disabled || readonly}

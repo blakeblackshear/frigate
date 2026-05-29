@@ -290,7 +290,6 @@ export default function MultiExportDialog({
   const newCaseInputs = (
     <div className="space-y-2 pt-1">
       <Input
-        className="text-md"
         placeholder={t("export.case.newCaseNamePlaceholder")}
         value={newCaseName}
         onChange={(event) => setNewCaseName(event.target.value)}
@@ -298,7 +297,6 @@ export default function MultiExportDialog({
         autoFocus={isDesktop}
       />
       <Textarea
-        className="text-md"
         placeholder={t("export.case.newCaseDescriptionPlaceholder")}
         value={newCaseDescription}
         onChange={(event) => setNewCaseDescription(event.target.value)}
@@ -344,11 +342,7 @@ export default function MultiExportDialog({
 
   const footer = (
     <>
-      <Button
-        variant="outline"
-        onClick={() => handleOpenChange(false)}
-        disabled={isExporting}
-      >
+      <Button onClick={() => handleOpenChange(false)} disabled={isExporting}>
         {t("button.cancel", { ns: "common" })}
       </Button>
       <Button
@@ -380,7 +374,7 @@ export default function MultiExportDialog({
             </DialogDescription>
           </DialogHeader>
           {body}
-          <DialogFooter className="gap-2">{footer}</DialogFooter>
+          <DialogFooter>{footer}</DialogFooter>
         </DialogContent>
       </Dialog>
     );
@@ -399,7 +393,7 @@ export default function MultiExportDialog({
           </DrawerDescription>
         </DrawerHeader>
         {body}
-        <div className="mt-4 flex flex-col-reverse gap-2">{footer}</div>
+        <DialogFooter className="mt-4">{footer}</DialogFooter>
       </DrawerContent>
     </Drawer>
   );

@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ReactNode, useCallback, useContext, useEffect } from "react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { Button } from "../../components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -211,7 +211,6 @@ export default function UiSettingsView() {
 
   return (
     <div className="flex size-full flex-col">
-      <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2">
         <Heading as="h4" className="mb-3">
           {t("general.title")}

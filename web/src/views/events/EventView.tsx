@@ -1389,9 +1389,8 @@ function MotionReview({
                     selectedCells={pendingFilterCells}
                     onCellsChange={setPendingFilterCells}
                   />
-                  <DialogFooter className="justify-end gap-1">
+                  <DialogFooter>
                     <Button
-                      variant="outline"
                       disabled={pendingFilterCells.size === 0}
                       onClick={() => {
                         setPendingFilterCells(new Set());
@@ -1432,9 +1431,7 @@ function MotionReview({
                   <div className="space-y-4 py-2">
                     {!isDesktop && (
                       <div className="space-y-1">
-                        <div className="text-md">
-                          {t("motionPreviews.mobileSettingsTitle")}
-                        </div>
+                        <div>{t("motionPreviews.mobileSettingsTitle")}</div>
                         <div className="text-xs text-muted-foreground">
                           {t("motionPreviews.mobileSettingsDesc")}
                         </div>
@@ -1443,9 +1440,7 @@ function MotionReview({
 
                     <div className="space-y-3">
                       <div className="space-y-0.5">
-                        <div className="text-md">
-                          {t("motionPreviews.speed")}
-                        </div>
+                        <div>{t("motionPreviews.speed")}</div>
                         <div className="text-xs text-muted-foreground">
                           {t("motionPreviews.speedDesc")}
                         </div>
@@ -1474,7 +1469,7 @@ function MotionReview({
 
                     <div className="space-y-3">
                       <div className="space-y-0.5">
-                        <div className="text-md">{t("motionPreviews.dim")}</div>
+                        <div>{t("motionPreviews.dim")}</div>
                         <div className="text-xs text-muted-foreground">
                           {t("motionPreviews.dimDesc")}
                         </div>

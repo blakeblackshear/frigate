@@ -1052,7 +1052,6 @@ export default function MotionSearchView({
               </div>
               <Button
                 variant="destructive"
-                className="text-white"
                 size="sm"
                 onClick={() => {
                   void cancelMotionSearchJob(jobId, jobCamera);

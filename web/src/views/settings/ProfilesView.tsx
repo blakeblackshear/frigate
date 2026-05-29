@@ -24,7 +24,7 @@ import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import NameAndIdFields from "@/components/input/NameAndIdFields";
@@ -654,10 +654,9 @@ export default function ProfilesView({
                   ns: "views/settings",
                 })}
               />
-              <DialogFooter className="gap-2 md:gap-0">
+              <DialogFooter>
                 <Button
                   type="button"
-                  variant="outline"
                   onClick={() => setAddDialogOpen(false)}
                   disabled={addingProfile}
                 >
@@ -709,7 +708,7 @@ export default function ProfilesView({
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className={cn(buttonVariants({ variant: "destructive" }))}
               onClick={(e) => {
                 e.preventDefault();
                 handleDeleteProfile();
@@ -746,7 +745,6 @@ export default function ProfilesView({
             />
             <DialogFooter>
               <Button
-                variant="outline"
                 onClick={() => setRenameProfile(null)}
                 disabled={renaming}
               >
