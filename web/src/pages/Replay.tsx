@@ -332,7 +332,7 @@ export default function Replay() {
               <Button
                 variant="destructive"
                 size="sm"
-                className="flex items-center gap-2 text-white"
+                className="flex items-center gap-2"
                 disabled={isStopping}
               >
                 {isStopping && <ActivityIndicator className="size-4" />}
@@ -355,10 +355,7 @@ export default function Replay() {
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleStop}
-                  className={cn(
-                    buttonVariants({ variant: "destructive" }),
-                    "text-white",
-                  )}
+                  className={cn(buttonVariants({ variant: "destructive" }))}
                 >
                   {t("page.confirmStop.confirm")}
                 </AlertDialogAction>

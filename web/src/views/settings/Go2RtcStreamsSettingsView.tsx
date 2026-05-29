@@ -446,10 +446,7 @@ export default function Go2RtcStreamsSettingsView({
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
-              className={cn(
-                buttonVariants({ variant: "destructive" }),
-                "text-white",
-              )}
+              className={cn(buttonVariants({ variant: "destructive" }))}
               onClick={() => deleteDialog && deleteStream(deleteDialog)}
             >
               {t("go2rtcStreams.deleteStream")}

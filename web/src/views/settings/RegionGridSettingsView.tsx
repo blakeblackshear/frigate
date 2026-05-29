@@ -83,7 +83,7 @@ export default function RegionGridSettingsView({
               onClick={() => setIsConfirmOpen(true)}
               disabled={isClearing}
               variant="destructive"
-              className="flex flex-1 text-white md:max-w-sm"
+              className="flex flex-1 md:max-w-sm"
             >
               {t("maintenance.regionGrid.clear")}
             </Button>
@@ -106,10 +106,7 @@ export default function RegionGridSettingsView({
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
-              className={cn(
-                buttonVariants({ variant: "destructive" }),
-                "text-white",
-              )}
+              className={cn(buttonVariants({ variant: "destructive" }))}
               onClick={handleClear}
             >
               {t("maintenance.regionGrid.clear")}

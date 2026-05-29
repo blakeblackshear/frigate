@@ -29,6 +29,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
+import { buttonVariants } from "@/components/ui/button";
 import { Trans, useTranslation } from "react-i18next";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { cn } from "@/lib/utils";
@@ -508,7 +509,7 @@ export default function PolygonItem({
                 {t("button.cancel", { ns: "common" })}
               </AlertDialogCancel>
               <AlertDialogAction
-                className="bg-destructive text-white hover:bg-destructive/90"
+                className={cn(buttonVariants({ variant: "destructive" }))}
                 onClick={handleDelete}
               >
                 {polygon.polygonSource === "override"

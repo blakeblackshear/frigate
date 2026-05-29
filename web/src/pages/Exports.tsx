@@ -608,7 +608,6 @@ function Exports() {
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <Button
-              className="text-white"
               aria-label="Delete Export"
               variant="destructive"
               onClick={() => onHandleDelete()}
@@ -658,7 +657,6 @@ function Exports() {
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <Button
-              className="text-white"
               variant="destructive"
               onClick={() => void handleDeleteCase()}
             >

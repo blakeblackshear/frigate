@@ -32,7 +32,7 @@ import { ProfileOverridesBadge } from "./ProfileOverridesBadge";
 import { useSectionSchema } from "@/hooks/use-config-schema";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import Heading from "@/components/ui/heading";
 import get from "lodash/get";
@@ -1236,7 +1236,7 @@ export function ConfigSection({
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className={cn(buttonVariants({ variant: "destructive" }))}
               onClick={() => {
                 onDeleteProfileSection?.();
                 setIsDeleteProfileDialogOpen(false);

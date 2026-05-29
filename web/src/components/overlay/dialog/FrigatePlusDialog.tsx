@@ -173,7 +173,7 @@ export function FrigatePlusDialog({
                                 {t("button.yes", { ns: "common" })}
                               </Button>
                               <Button
-                                className="flex-1 text-white"
+                                className="flex-1"
                                 aria-label={t("button.no", { ns: "common" })}
                                 variant="destructive"
                                 onClick={() => {
