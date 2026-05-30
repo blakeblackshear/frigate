@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any, Optional
 
 from pydantic import Field, field_serializer
@@ -5,7 +6,12 @@ from pydantic import Field, field_serializer
 from ..base import FrigateBaseModel
 from .mask import MotionMaskConfig
 
-__all__ = ["MotionConfig"]
+__all__ = ["MotionConfig", "MotionSourceEnum"]
+
+
+class MotionSourceEnum(str, Enum):
+    internal = "internal"
+    onvif = "onvif"
 
 
 class MotionConfig(FrigateBaseModel):
@@ -13,6 +19,11 @@ class MotionConfig(FrigateBaseModel):
         default=True,
         title="Enable motion detection",
         description="Enable or disable motion detection for all cameras; can be overridden per-camera.",
+    )
+    source: MotionSourceEnum = Field(
+        default=MotionSourceEnum.internal,
+        title="Motion source",
+        description="Where motion state comes from: Frigate's internal frame analyser, or the camera's ONVIF cell-motion events (requires onvif.events.enabled).",
     )
     threshold: int = Field(
         default=30,

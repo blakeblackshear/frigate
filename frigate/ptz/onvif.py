@@ -13,15 +13,37 @@ import numpy
 from onvif import ONVIFCamera, ONVIFError, ONVIFService
 from zeep.exceptions import Fault, TransportError
 
-from frigate.camera import PTZMetrics
+from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.config import FrigateConfig, ZoomingModeEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
+from frigate.ptz.onvif_events import run_pullpoint_subscription
+from frigate.ptz.onvif_metadata import run_metadata_stream
 from frigate.util.builtin import find_by_key
 
 logger = logging.getLogger(__name__)
+
+
+def _inject_rtsp_credentials(url: str, user: str | None, password: str | None) -> str:
+    """Insert user:password into an rtsp:// URL if not already present.
+
+    The ONVIF GetStreamUri response typically returns an rtsp URL without
+    credentials, but downstream consumers (ffmpeg, RTSP libs) need them in
+    the URL because the camera challenges Basic/Digest on DESCRIBE.
+    """
+    if not user or not password:
+        return url
+    if "@" in url.split("://", 1)[-1].split("/", 1)[0]:
+        # URL already has user:pass — don't touch it.
+        return url
+    if "://" not in url:
+        return url
+    scheme, rest = url.split("://", 1)
+    from urllib.parse import quote
+
+    return f"{scheme}://{quote(user, safe='')}:{quote(password, safe='')}@{rest}"
 
 
 class OnvifCommandEnum(str, Enum):
@@ -45,7 +67,10 @@ class OnvifController:
     ptz_metrics: dict[str, PTZMetrics]
 
     def __init__(
-        self, config: FrigateConfig, ptz_metrics: dict[str, PTZMetrics]
+        self,
+        config: FrigateConfig,
+        ptz_metrics: dict[str, PTZMetrics],
+        camera_metrics: dict[str, CameraMetrics] | None = None,
     ) -> None:
         self.cams: dict[str, dict] = {}
         self.failed_cams: dict[str, dict] = {}
@@ -53,6 +78,7 @@ class OnvifController:
         self.reset_timeout = 900  # 15 minutes
         self.config = config
         self.ptz_metrics = ptz_metrics
+        self.camera_metrics = camera_metrics or {}
 
         self.status_locks: dict[str, asyncio.Lock] = {}
 
@@ -107,7 +133,28 @@ class OnvifController:
     async def _close_camera(self, cam_name: str) -> None:
         """Close the ONVIF client session for a camera."""
         cam_state = self.cams.get(cam_name)
-        if cam_state and "onvif" in cam_state:
+        if not cam_state:
+            return
+        # Stop any long-running event-consumption tasks first so they release
+        # any resources held against the ONVIFCamera session before we close it.
+        for key in ("pullpoint", "metadata"):
+            handle = cam_state.get(key)
+            if not handle:
+                continue
+            task, stop_event = handle
+            try:
+                stop_event.set()
+            except Exception:
+                pass
+            task.cancel()
+            try:
+                await asyncio.wait_for(task, timeout=5.0)
+            except (asyncio.CancelledError, asyncio.TimeoutError):
+                pass
+            except Exception:
+                logger.debug(f"Error awaiting {key} task for {cam_name}")
+            cam_state.pop(key, None)
+        if "onvif" in cam_state:
             try:
                 await cam_state["onvif"].close()
             except Exception:
@@ -186,6 +233,172 @@ class OnvifController:
         except Exception as e:
             logger.error(f"Onvif connection failed for {camera_name}: {e}")
             return False
+
+        # Events init runs first, independent of PTZ capability. Many ONVIF
+        # cameras don't expose PTZ and would otherwise be skipped at the
+        # get_definition("ptz") check below.
+        await self._init_onvif_events(camera_name)
+
+        return await self._init_onvif_ptz(camera_name)
+
+    async def _init_onvif_events(self, camera_name: str) -> None:
+        """Subscribe to PullPoint motion events and optionally open the
+        analytics metadata stream. Failure here is non-fatal — PTZ init still
+        proceeds and the camera continues to work without external motion."""
+        cam_cfg = self.config.cameras[camera_name]
+        if not cam_cfg.onvif.events.enabled:
+            return
+
+        cm = self.camera_metrics.get(camera_name)
+        if cm is None:
+            logger.warning(
+                f"ONVIF events enabled for {camera_name} but no CameraMetrics "
+                "available; external motion will not be published"
+            )
+            return
+
+        onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
+
+        cell_layout = await self._discover_cell_layout(onvif, camera_name)
+        self.cams[camera_name]["cell_layout"] = cell_layout
+
+        def on_state(active: bool) -> None:
+            cm.external_motion_active.value = 1 if active else 0
+            if not active:
+                # Drop spatial data when motion ends — keep the consumer's
+                # snapshot consistent with the binary state.
+                try:
+                    cm.external_motion_boxes[:] = []
+                except Exception:
+                    pass
+
+        pp_stop = asyncio.Event()
+        pp_task = asyncio.create_task(
+            run_pullpoint_subscription(
+                onvif,
+                camera_name,
+                cam_cfg.onvif.events.subscription_timeout,
+                on_state,
+                pp_stop,
+            )
+        )
+        self.cams[camera_name]["pullpoint"] = (pp_task, pp_stop)
+        logger.info(f"ONVIF events: PullPoint subscriber started for {camera_name}")
+
+        if not cam_cfg.onvif.events.use_metadata_stream or cell_layout is None:
+            return
+
+        rtsp_url = await self._discover_primary_rtsp_url(onvif, camera_name)
+        if not rtsp_url:
+            logger.warning(
+                f"ONVIF events for {camera_name}: no primary RTSP URL "
+                "available; skipping metadata stream"
+            )
+            return
+        rtsp_url = _inject_rtsp_credentials(
+            rtsp_url, cam_cfg.onvif.user, cam_cfg.onvif.password
+        )
+
+        detect_size = (cam_cfg.detect.width, cam_cfg.detect.height)
+
+        def on_boxes(boxes: list[tuple[int, int, int, int]]) -> None:
+            try:
+                cm.external_motion_boxes[:] = boxes
+            except Exception:
+                logger.debug(f"Failed to publish boxes for {camera_name}")
+
+        md_stop = asyncio.Event()
+        md_task = asyncio.create_task(
+            run_metadata_stream(
+                rtsp_url,
+                camera_name,
+                cell_layout,
+                detect_size,
+                on_boxes,
+                md_stop,
+            )
+        )
+        self.cams[camera_name]["metadata"] = (md_task, md_stop)
+        logger.info(f"ONVIF events: metadata stream consumer started for {camera_name}")
+
+    async def _discover_cell_layout(
+        self, onvif: ONVIFCamera, camera_name: str
+    ) -> tuple[int, int, tuple[float, float], tuple[float, float]] | None:
+        """Query AnalyticsService.GetAnalyticsModules and extract the
+        CellMotionEngine's CellLayout (Columns, Rows, Translate, Scale).
+        Returns None on failure — caller should fall back to a full-frame box."""
+        try:
+            analytics = await onvif.create_analytics_service()
+            modules = await analytics.GetAnalyticsModules(
+                {"ConfigurationToken": "VA_CFG_000"}
+            )
+        except Exception as e:
+            logger.debug(f"ONVIF analytics service unavailable for {camera_name}: {e}")
+            return None
+
+        try:
+            for mod in modules or []:
+                mod_type = getattr(mod, "Type", None) or getattr(mod, "_attr_1", None)
+                if mod_type and "CellMotionEngine" not in str(mod_type):
+                    continue
+                element_items = getattr(mod.Parameters, "ElementItem", None) or []
+                for item in element_items:
+                    if item.Name != "Layout":
+                        continue
+                    raw = item._value_1
+                    if raw is None or not hasattr(raw, "attrib"):
+                        continue
+                    cols = int(raw.attrib.get("Columns", 0))
+                    rows = int(raw.attrib.get("Rows", 0))
+                    if cols <= 0 or rows <= 0:
+                        continue
+                    tx = ty = 0.0
+                    sx = sy = 0.0
+                    for child in raw.iter():
+                        if child.tag.endswith("}Translate"):
+                            tx = float(child.attrib.get("x", 0))
+                            ty = float(child.attrib.get("y", 0))
+                        elif child.tag.endswith("}Scale"):
+                            sx = float(child.attrib.get("x", 0))
+                            sy = float(child.attrib.get("y", 0))
+                    logger.info(
+                        f"ONVIF cell layout for {camera_name}: {cols}x{rows} "
+                        f"translate=({tx},{ty}) scale=({sx},{sy})"
+                    )
+                    return (cols, rows, (tx, ty), (sx, sy))
+        except Exception as e:
+            logger.debug(
+                f"Failed parsing CellMotionEngine layout for {camera_name}: {e}"
+            )
+        return None
+
+    async def _discover_primary_rtsp_url(
+        self, onvif: ONVIFCamera, camera_name: str
+    ) -> str | None:
+        """Return the RTSP URL for the primary profile. The ONVIF analytics
+        metadata track is typically bound to the primary media profile only
+        (sub-streams may omit it)."""
+        try:
+            media = await onvif.create_media_service()
+            profiles = await media.GetProfiles()
+            if not profiles:
+                return None
+            uri = await media.GetStreamUri(
+                {
+                    "StreamSetup": {
+                        "Stream": "RTP-Unicast",
+                        "Transport": {"Protocol": "RTSP"},
+                    },
+                    "ProfileToken": profiles[0].token,
+                }
+            )
+            return uri.Uri
+        except Exception as e:
+            logger.debug(f"GetStreamUri failed for {camera_name}: {e}")
+            return None
+
+    async def _init_onvif_ptz(self, camera_name: str) -> bool:
+        onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
 
         # create init services
         media: ONVIFService = await onvif.create_media_service()

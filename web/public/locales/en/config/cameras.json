@@ -262,6 +262,10 @@
       "label": "Enable motion detection",
       "description": "Enable or disable motion detection for this camera."
     },
+    "source": {
+      "label": "Motion source",
+      "description": "Where motion state comes from: Frigate's internal frame analyser, or the camera's ONVIF cell-motion events (requires onvif.events.enabled)."
+    },
     "threshold": {
       "label": "Motion threshold",
       "description": "Pixel difference threshold used by the motion detector; higher values reduce sensitivity (range 1-255)."
@@ -841,6 +845,22 @@
       "enabled_in_config": {
         "label": "Original autotrack state",
         "description": "Internal field to track whether autotracking was enabled in configuration."
+      }
+    },
+    "events": {
+      "label": "ONVIF events",
+      "description": "Consume camera-side ONVIF motion notifications instead of Frigate's CPU motion detector.",
+      "enabled": {
+        "label": "Enable ONVIF events",
+        "description": "Subscribe to the camera's ONVIF cell-motion notifications and use them as Frigate's motion signal."
+      },
+      "subscription_timeout": {
+        "label": "Subscription timeout",
+        "description": "Seconds before the PullPoint subscription expires and is renewed."
+      },
+      "use_metadata_stream": {
+        "label": "Use metadata stream",
+        "description": "Open the ONVIF analytics RTSP metadata stream to receive per-cell motion coordinates. Falls back to a full-frame box when disabled or when the camera does not advertise the track."
       }
     },
     "ignore_time_mismatch": {

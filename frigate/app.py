@@ -309,7 +309,9 @@ class FrigateApp:
         self.detection_proxy = DetectorProxy()
 
     def init_onvif(self) -> None:
-        self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
+        self.onvif_controller = OnvifController(
+            self.config, self.ptz_metrics, self.camera_metrics
+        )
 
     def init_dispatcher(self) -> None:
         comms: list[Communicator] = []

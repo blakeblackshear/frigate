@@ -198,6 +198,46 @@ When the skip threshold is exceeded, **no motion is reported** for that frame, m
 
 :::
 
+## Using Camera-Side ONVIF Motion Detection
+
+For cameras that publish their own ONVIF cell-motion analytics (e.g. OpenIPC firmware for HiSilicon, Ingenic and SigmaStar SoCs, plus most ONVIF Profile-M devices from Hikvision, Reolink, Foscam, Amcrest, etc.), Frigate can use the camera's hardware motion engine instead of running per-frame analysis on the host CPU. This both removes CPU load from the Frigate machine and gives a more accurate motion signal than encoded-stream analysis can produce.
+
+Frigate consumes the two standard ONVIF transports:
+
+- **PullPoint** event subscription on `tns1:RuleEngine/CellMotionDetector/Motion` carries the binary on/off state (the legacy `tns1:VideoSource/MotionAlarm` payload is also accepted).
+- **RTSP analytics metadata stream** (the `application/vnd.onvif.metadata` track on the primary RTSP profile) carries the per-frame cell grid (`tt:MotionInCells`) which Frigate decodes (base64 + PackBits) and maps through the `CellLayout` transformation into Frigate's detect-frame pixel coordinates.
+
+```yaml
+cameras:
+  back_door:
+    onvif:
+      host: 10.0.0.10
+      port: 80
+      user: root
+      password: "secret"
+      events:
+        # Subscribe to camera-side motion events.
+        enabled: true
+        # Seconds before the PullPoint subscription expires (we renew at half this).
+        subscription_timeout: 60
+        # Open the RTSP analytics metadata stream for per-cell motion coordinates.
+        # Disable if your camera only publishes the binary event topic.
+        use_metadata_stream: true
+    motion:
+      # Use the camera's ONVIF events as Frigate's motion signal. The internal
+      # CPU motion detector is skipped.
+      source: onvif
+    detect:
+      enabled: true
+```
+
+When `motion.source: onvif`:
+
+- Frigate's internal `ImprovedMotionDetector` is **not** run on the camera's frames.
+- Object detection still runs every detection frame; motion boxes are used for region clustering exactly as with the internal detector.
+- If `use_metadata_stream: true` but the camera doesn't advertise the metadata track (or PackBits decoding fails for a frame), Frigate falls back to a full-frame motion box while the binary event signal is active.
+- The validator requires `onvif.events.enabled: true` whenever `motion.source: onvif`.
+
 ## Reviewing Detected Motion
 
 To review what the detector picked up — or to search past recordings for motion in a specific region — see [Reviewing Motion](review.md#reviewing-motion) on the Review page.
