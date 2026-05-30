@@ -320,7 +320,7 @@
         "nameLength": "Camera name must be 64 characters or less",
         "invalidCharacters": "Camera name contains invalid characters",
         "nameExists": "Camera name already exists",
-        "customUrlRtspRequired": "Custom URLs must begin with \"rtsp://\". Manual configuration is required for non-RTSP camera streams."
+        "customUrlRtspRequired": "Custom URLs must begin with \"rtsp://\" or \"rtsps://\". Manual configuration is required for non-RTSP camera streams."
       }
     },
     "step2": {
