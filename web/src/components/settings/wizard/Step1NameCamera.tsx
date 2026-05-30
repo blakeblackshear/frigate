@@ -87,7 +87,8 @@ export default function Step1NameCamera({
         .string()
         .optional()
         .refine(
-          (val) => !val || val.startsWith("rtsp://"),
+          (val) =>
+            !val || val.startsWith("rtsp://") || val.startsWith("rtsps://"),
           t("cameraWizard.step1.errors.customUrlRtspRequired"),
         ),
     })
