@@ -2460,3 +2460,29 @@ ARG IMG_SIZE
 COPY --from=build /yolov9/yolov9-${MODEL_SIZE}.onnx /yolov9-${MODEL_SIZE}-${IMG_SIZE}.onnx
 EOF
 ```
+
+### Downloading NanoDet-Plus models
+Compatible with the `labelmap/coco-80.txt` labelmap
+
+```sh
+docker build . --build-arg URL_WEIGHTS=https://drive.google.com/file/d/1Dq0cTIdJDUhQxJe45z6rWncbZmOyh1Tv/view?usp=sharing --build-arg IMG_HEIGHT=320 --build-arg IMG_WIDTH=320 --build-arg CFG_PATH=config/nanodet-plus-m_320.yml --output . -f- <<'EOF'
+FROM python:3.9 AS build
+RUN apt-get update && apt-get install --no-install-recommends -y cmake libgl1 && rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+WORKDIR /nanodet_plus
+ADD https://github.com/RangiLyu/nanodet.git .
+RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier==0.4.* onnxscript
+RUN uv pip install --system "numpy<2"
+RUN uv pip install --system -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+RUN uv pip install --system -e .
+ARG URL_WEIGHTS
+RUN uv pip install --system gdown
+RUN gdown --fuzzy ${URL_WEIGHTS} -O nanodet_plus.pth
+ARG IMG_HEIGHT
+ARG IMG_WIDTH
+ARG CFG_PATH
+RUN python tools/export_onnx.py --cfg_path=${CFG_PATH} --model_path=nanodet_plus.pth --input_shape=${IMG_HEIGHT},${IMG_WIDTH} --out_path=nanodet_plus.onnx
+FROM scratch
+COPY --from=build /nanodet_plus/nanodet_plus.onnx nanodet_plus.onnx
+EOF
+```
