@@ -1133,7 +1133,7 @@
         "brands": {
           "reolink-rtsp": "不建议使用萤石 RTSP 协议。建议在摄像头设置中启用 HTTP 协议，并重新运行摄像头添加向导。"
         },
-        "customUrlRtspRequired": "自定义 URL 必须以“rtsp://”开头；对于非 RTSP 协议的摄像头流，需手动添加至配置文件。"
+        "customUrlRtspRequired": "自定义 URL 必须以“rtsp://” 或 “rtsps://”开头；对于非 RTSP 协议的摄像头流，需手动添加至配置文件。"
       },
       "docs": {
         "reolink": "https://docs.frigate-cn.video/configuration/camera_specific.html#reolink-cameras"

@@ -536,7 +536,7 @@
         "brands": {
           "reolink-rtsp": "Reolink RTSP sa neodporúča. Odporúča sa povoliť HTTP v nastavení kamery a reštartovať sprievodca kamery."
         },
-        "customUrlRtspRequired": "Vlastné URL musia začať s \"rtsp / \"\". Manuálna konfigurácia je potrebná pre non-RTSP kamerové prúdy."
+        "customUrlRtspRequired": "Vlastné URL musia začať s \"rtsp://\" alebo \"rtsps://\". Manuálna konfigurácia je potrebná pre non-RTSP kamerové prúdy."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"

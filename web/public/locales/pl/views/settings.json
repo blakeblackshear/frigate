@@ -1071,7 +1071,7 @@
         "nameLength": "Nazwa kamery musi mieć 64 lub mniej znaków",
         "invalidCharacters": "Nazwa kamery zawiera niepoprawne znaki",
         "nameExists": "Nazwa kamery jest już zajęta",
-        "customUrlRtspRequired": "Niestandardowe adresy URL muszą zaczynać się od \"rtsp://\". Ręczna konfiguracja wymagana jest dla strumieniów innych niż RTSP."
+        "customUrlRtspRequired": "Niestandardowe adresy URL muszą zaczynać się od \"rtsp://\" lub \"rtsps://\". Ręczna konfiguracja wymagana jest dla strumieniów innych niż RTSP."
       },
       "description": "Wprowadź szczegóły kamery i wybierz autodetekcję lub ręcznie wybierz firmę.",
       "probeMode": "Wykryj kamerę",

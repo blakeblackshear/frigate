@@ -1133,7 +1133,7 @@
         "brands": {
           "reolink-rtsp": "Reolink RTSP wird nicht empfohlen. Es wird empfohlen, http in den Kameraeinstellungen zu aktivieren und den Kamera-Assistenten neu zu starten."
         },
-        "customUrlRtspRequired": "Benutzerdefinierte URLs müssen mit „rtsp://“ beginnen. Für Nicht-RTSP-Kamerastreams ist eine manuelle Konfiguration erforderlich."
+        "customUrlRtspRequired": "Benutzerdefinierte URLs müssen mit „rtsp://“ oder „rtsps://“ beginnen. Für Nicht-RTSP-Kamerastreams ist eine manuelle Konfiguration erforderlich."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"

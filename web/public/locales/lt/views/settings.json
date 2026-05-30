@@ -898,7 +898,7 @@
         "nameLength": "Kameros pavadinimas privalo būti 64 ar mažiau simbolių",
         "invalidCharacters": "Kameros pavadinime yra neleistinų simbolių",
         "nameExists": "Toks kameros pavadinimas jau yra",
-        "customUrlRtspRequired": "Individualus URL turi prasidėti su \"rtsp://\". Rankinis konfiguravimas yra reikalaujas ne-RTSP kamerų transliacijoms."
+        "customUrlRtspRequired": "Individualus URL turi prasidėti su \"rtsp://\" arba \"rtsps://\". Rankinis konfiguravimas yra reikalaujas ne-RTSP kamerų transliacijoms."
       }
     },
     "step2": {

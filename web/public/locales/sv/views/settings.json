@@ -943,7 +943,7 @@
         "brands": {
           "reolink-rtsp": "Reolink RTSP rekommenderas inte. Aktivera HTTP i kamerans firmwareinställningar och starta om guiden."
         },
-        "customUrlRtspRequired": "Anpassade webbadresser måste börja med \"rtsp://\". Manuell konfiguration krävs för kameraströmmar som inte använder RTSP."
+        "customUrlRtspRequired": "Anpassade webbadresser måste börja med \"rtsp://\" eller \"rtsps://\". Manuell konfiguration krävs för kameraströmmar som inte använder RTSP."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"

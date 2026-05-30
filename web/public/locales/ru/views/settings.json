@@ -963,7 +963,7 @@
         "brands": {
           "reolink-rtsp": "RTSP от Reolink не рекомендуется. Включите HTTP в настройках камеры и перезапустите мастер настройки камеры."
         },
-        "customUrlRtspRequired": "Пользовательские URL должны начинаться с \"rtsp://\". Для потоков камер, не использующих RTSP, требуется ручная настройка."
+        "customUrlRtspRequired": "Пользовательские URL должны начинаться с \"rtsp://\" или \"rtsps://\". Для потоков камер, не использующих RTSP, требуется ручная настройка."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"

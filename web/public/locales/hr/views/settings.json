@@ -443,7 +443,7 @@
         "nameLength": "Ime kamere mora imati 64 znaka ili manje",
         "invalidCharacters": "Ime kamere sadrži nevaljane znakove",
         "nameExists": "Ime kamere već postoji",
-        "customUrlRtspRequired": "Prilagođeni URL-ovi moraju započeti s \"rtsp://\". Ručna konfiguracija potrebna je za prijenose kamera bez RTSP-a."
+        "customUrlRtspRequired": "Prilagođeni URL-ovi moraju započeti s \"rtsp://\" ili \"rtsps://\". Ručna konfiguracija potrebna je za prijenose kamera bez RTSP-a."
       }
     },
     "step2": {

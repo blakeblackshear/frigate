@@ -941,7 +941,7 @@
         "nameLength": "Kamera ismi en fazla 64 karakter olmalıdır",
         "invalidCharacters": "Kamera ismi geçersiz karakterler içeriyor",
         "nameExists": "Kamera ismi zaten mevcut",
-        "customUrlRtspRequired": "Özel URL'ler \"rtsp://\" ile başlamalıdır. RTSP olmayan kamera akışları için manuel yapılandırma gereklidir.",
+        "customUrlRtspRequired": "Özel URL'ler \"rtsp://\" veya \"rtsps://\" ile başlamalıdır. RTSP olmayan kamera akışları için manuel yapılandırma gereklidir.",
         "brandOrCustomUrlRequired": "Bir kamera markası seçip host/IP adresi girin ya da özel bir URL kullanmak için ‘Diğer’ seçeneğini tercih edin"
       },
       "useDigestAuthDescription": "ONVIF için HTTP digest kimlik doğrulamasını kullanın. Bazı kameralar, standart yönetici kullanıcısı yerine özel bir ONVIF kullanıcı adı/parola kullanılmasını gerektirebilir."

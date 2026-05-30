@@ -1137,7 +1137,7 @@
         "brands": {
           "reolink-rtsp": "Reolink RTSP wordt niet aanbevolen. Schakel HTTP in via de firmware-instellingen van de camera en start de wizard opnieuw."
         },
-        "customUrlRtspRequired": "Aangepaste URL’s moeten beginnen met “rtsp://”. Handmatige configuratie is vereist voor camera­streams die geen RTSP gebruiken."
+        "customUrlRtspRequired": "Aangepaste URL’s moeten beginnen met “rtsp://” of “rtsps://”. Handmatige configuratie is vereist voor camera­streams die geen RTSP gebruiken."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"

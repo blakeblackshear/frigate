@@ -1059,7 +1059,7 @@
         "brands": {
           "reolink-rtsp": "No es recomana Reolink RST. Es recomana habilitar HTTP a la configuració de la càmera i reiniciar l'assistent de la càmera."
         },
-        "customUrlRtspRequired": "Els URL personalitzats han de començar amb \"rtsp://\". Es requereix configuració manual per a fluxos de càmera no RTSP."
+        "customUrlRtspRequired": "Els URL personalitzats han de començar amb \"rtsp://\" o \"rtsps://\". Es requereix configuració manual per a fluxos de càmera no RTSP."
       },
       "selectBrand": "Seleccioneu la marca de la càmera per a la plantilla d'URL",
       "customUrl": "URL de flux personalitzat",

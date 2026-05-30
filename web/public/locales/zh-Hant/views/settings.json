@@ -262,7 +262,7 @@
         "nameLength": "攝影機名稱要少於64個字元",
         "invalidCharacters": "攝影機名稱內有不允許使用的字元",
         "nameExists": "該攝影機名稱已存在",
-        "customUrlRtspRequired": "自訂 URL 必須以“rtsp://”開頭；對於非 RTSP 協議的攝影機流，需手動新增至設定檔。"
+        "customUrlRtspRequired": "自訂 URL 必須以“rtsp://” 或 “rtsps://”開頭；對於非 RTSP 協議的攝影機流，需手動新增至設定檔。"
       }
     },
     "description": "請按照以下步驟新增攝影機至 Frigate 中。",

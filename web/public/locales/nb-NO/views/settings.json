@@ -1133,7 +1133,7 @@
         "brands": {
           "reolink-rtsp": "Reolink RTSP anbefales ikke. Aktiver HTTP i kameraets fastvare-innstillinger og start kameraveiviseren på nytt."
         },
-        "customUrlRtspRequired": "Egendefinerte URL-er må begynne med \"rtsp://\". Manuell konfigurering kreves for kamera­strømmer som ikke bruker RTSP."
+        "customUrlRtspRequired": "Egendefinerte URL-er må begynne med \"rtsp://\" eller \"rtsps://\". Manuell konfigurering kreves for kamera­strømmer som ikke bruker RTSP."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"

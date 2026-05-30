@@ -1254,7 +1254,7 @@
         "brands": {
           "reolink-rtsp": "Reolink RTSP non è consigliato. Abilita HTTP nelle impostazioni del firmware della telecamera e riavvia la procedura guidata."
         },
-        "customUrlRtspRequired": "Gli URL personalizzati devono iniziare con \"rtsp://\". Per i flussi di telecamere non RTSP è richiesta la configurazione manuale."
+        "customUrlRtspRequired": "Gli URL personalizzati devono iniziare con \"rtsp://\" o \"rtsps://\". Per i flussi di telecamere non RTSP è richiesta la configurazione manuale."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"

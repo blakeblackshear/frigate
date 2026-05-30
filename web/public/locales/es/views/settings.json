@@ -1091,7 +1091,7 @@
         "nameLength": "El nombre de la cámara debe tener 64 caracteres o menos",
         "invalidCharacters": "El nombre de la cámara contiene caracteres no válidos",
         "nameExists": "El nombre de la cámara ya existe",
-        "customUrlRtspRequired": "Las URL personalizadas deben comenzar con \"rtsp://\". Se requiere configuración manual para transmisiones de cámara sin RTSP.",
+        "customUrlRtspRequired": "Las URL personalizadas deben comenzar con \"rtsp://\" o \"rtsps://\". Se requiere configuración manual para transmisiones de cámara sin RTSP.",
         "brandOrCustomUrlRequired": "Seleccione una marca de cámara con host/IP o elija \"Otro\" con una URL personalizada"
       },
       "description": "Ingrese los detalles de su cámara y elija probar la cámara o seleccionar manualmente la marca.",

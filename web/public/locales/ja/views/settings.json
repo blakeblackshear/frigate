@@ -1040,7 +1040,7 @@
         "brands": {
           "reolink-rtsp": "Reolink の RTSP は推奨されません。カメラ設定で http を有効にし、カメラウィザードを再起動することを推奨します。"
         },
-        "customUrlRtspRequired": "カスタム URL は「rtsp://」で始まる必要があります。非 RTSP カメラ ストリームの場合は手動構成が必要です。"
+        "customUrlRtspRequired": "カスタム URL は「rtsp://」 または 「rtsps://」で始まる必要があります。非 RTSP カメラ ストリームの場合は手動構成が必要です。"
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"

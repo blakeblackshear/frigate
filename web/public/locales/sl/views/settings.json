@@ -514,7 +514,7 @@
         "nameLength": "Ime kamere mora imeti 64 znakov ali manj",
         "invalidCharacters": "Ime kamere vsebuje neveljavne znake",
         "nameExists": "Ime kamere že obstaja",
-        "customUrlRtspRequired": "URL-ji po meri se morajo začeti z \"rtsp://\". Za pretoke, ki niso RTSP, je potrebna ročna konfiguracija.",
+        "customUrlRtspRequired": "URL-ji po meri se morajo začeti z \"rtsp://\" ali \"rtsps://\". Za pretoke, ki niso RTSP, je potrebna ročna konfiguracija.",
         "brands": {
           "reolink-rtsp": "RTSP za Reolink ni priporočen. \nV nastavitvah kamere omogočite HTTP in znova zaženite čarovnika."
         },

@@ -1006,7 +1006,7 @@
         "brands": {
           "reolink-rtsp": "不建議使用 Reolink RTSP。建議在鏡頭設定中啟用 HTTP，並重新啟動鏡頭設定精靈。"
         },
-        "customUrlRtspRequired": "自訂 URL 必須以「rtsp://」開頭。非 RTSP 串流需手動設定。"
+        "customUrlRtspRequired": "自訂 URL 必須以「rtsp://」 或 「rtsps://」開頭。非 RTSP 串流需手動設定。"
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
