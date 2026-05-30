@@ -47,7 +47,7 @@ from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
 from .camera.genai import GenAIConfig, GenAIRoleEnum
 from .camera.mask import ObjectMaskConfig
-from .camera.motion import MotionConfig
+from .camera.motion import MotionConfig, MotionSourceEnum
 from .camera.notification import NotificationConfig
 from .camera.objects import FilterConfig, ObjectConfig
 from .camera.record import RecordConfig
@@ -380,9 +380,18 @@ def verify_autotrack_zones(camera_config: CameraConfig) -> ValueError | None:
 
 def verify_motion_and_detect(camera_config: CameraConfig) -> ValueError | None:
     """Verify that motion detection is not disabled and object detection is enabled."""
-    if camera_config.detect.enabled and not camera_config.motion.enabled:
+    motion_via_onvif = camera_config.motion.source == MotionSourceEnum.onvif
+    if (
+        camera_config.detect.enabled
+        and not camera_config.motion.enabled
+        and not motion_via_onvif
+    ):
         raise ValueError(
             f"Camera {camera_config.name} has motion detection disabled and object detection enabled but object detection requires motion detection."
+        )
+    if motion_via_onvif and not camera_config.onvif.events.enabled:
+        raise ValueError(
+            f"Camera {camera_config.name} has motion.source=onvif but onvif.events.enabled is false; enable ONVIF events to use them as the motion source."
         )
 
 

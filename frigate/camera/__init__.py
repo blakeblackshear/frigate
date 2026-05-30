@@ -1,6 +1,6 @@
 import multiprocessing as mp
 import queue
-from multiprocessing.managers import SyncManager, ValueProxy
+from multiprocessing.managers import ListProxy, SyncManager, ValueProxy
 from multiprocessing.sharedctypes import Synchronized
 from multiprocessing.synchronize import Event
 
@@ -23,6 +23,14 @@ class CameraMetrics:
     reconnects_last_hour: ValueProxy[int]
     stalls_last_hour: ValueProxy[int]
 
+    # External motion published by OnvifController when motion.source=onvif.
+    # external_motion_active mirrors the PullPoint IsMotion state.
+    # external_motion_boxes carries the per-frame cell-derived rectangles in
+    # detect-frame pixel coordinates; empty list means no current spatial
+    # data (consumer should fall back to a full-frame box when active=1).
+    external_motion_active: ValueProxy[int]
+    external_motion_boxes: ListProxy
+
     def __init__(self, manager: SyncManager):
         self.camera_fps = manager.Value("d", 0)
         self.detection_fps = manager.Value("d", 0)
@@ -40,6 +48,9 @@ class CameraMetrics:
         self.ffmpeg_pid = manager.Value("i", 0)
         self.reconnects_last_hour = manager.Value("i", 0)
         self.stalls_last_hour = manager.Value("i", 0)
+
+        self.external_motion_active = manager.Value("b", 0)
+        self.external_motion_boxes = manager.list()
 
 
 class PTZMetrics:

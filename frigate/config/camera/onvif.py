@@ -7,7 +7,12 @@ from ..base import FrigateBaseModel
 from ..env import EnvString
 from .objects import DEFAULT_TRACKED_OBJECTS
 
-__all__ = ["OnvifConfig", "PtzAutotrackConfig", "ZoomingModeEnum"]
+__all__ = [
+    "OnvifConfig",
+    "OnvifEventsConfig",
+    "PtzAutotrackConfig",
+    "ZoomingModeEnum",
+]
 
 
 class ZoomingModeEnum(str, Enum):
@@ -91,6 +96,26 @@ class PtzAutotrackConfig(FrigateBaseModel):
         return weights
 
 
+class OnvifEventsConfig(FrigateBaseModel):
+    enabled: bool = Field(
+        default=False,
+        title="Enable ONVIF events",
+        description="Subscribe to the camera's ONVIF cell-motion notifications and use them as Frigate's motion signal.",
+    )
+    subscription_timeout: int = Field(
+        default=60,
+        ge=10,
+        le=600,
+        title="Subscription timeout",
+        description="Seconds before the PullPoint subscription expires and is renewed.",
+    )
+    use_metadata_stream: bool = Field(
+        default=True,
+        title="Use metadata stream",
+        description="Open the ONVIF analytics RTSP metadata stream to receive per-cell motion coordinates. Falls back to a full-frame box when disabled or when the camera does not advertise the track.",
+    )
+
+
 class OnvifConfig(FrigateBaseModel):
     host: EnvString = Field(
         default="",
@@ -126,6 +151,11 @@ class OnvifConfig(FrigateBaseModel):
         default_factory=PtzAutotrackConfig,
         title="Autotracking",
         description="Automatically track moving objects and keep them centered in the frame using PTZ camera movements.",
+    )
+    events: OnvifEventsConfig = Field(
+        default_factory=OnvifEventsConfig,
+        title="ONVIF events",
+        description="Consume camera-side ONVIF motion notifications instead of Frigate's CPU motion detector.",
     )
     ignore_time_mismatch: bool = Field(
         default=False,

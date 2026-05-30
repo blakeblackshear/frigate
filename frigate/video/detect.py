@@ -14,6 +14,7 @@ from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, LoggerConfig, ModelConfig
 from frigate.config.camera.camera import CameraTypeEnum
+from frigate.config.camera.motion import MotionSourceEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
@@ -300,7 +301,22 @@ def process_frames(
             continue
 
         # look for motion if enabled
-        motion_boxes = motion_detector.detect(frame)
+        if camera_config.motion.source == MotionSourceEnum.onvif:
+            # Motion is supplied by an external ONVIF cell-motion subscriber
+            # writing to camera_metrics. Skip the per-frame internal detector.
+            if camera_metrics.external_motion_active.value:
+                boxes = list(camera_metrics.external_motion_boxes)
+                if boxes:
+                    motion_boxes = [tuple(b) for b in boxes]
+                else:
+                    # Active but no spatial data yet — fall back to full frame
+                    # so downstream region clustering still has something to
+                    # scan.
+                    motion_boxes = [(0, 0, frame_shape[1] - 1, frame_shape[0] - 1)]
+            else:
+                motion_boxes = []
+        else:
+            motion_boxes = motion_detector.detect(frame)
 
         regions = []
         consolidated_detections = []
