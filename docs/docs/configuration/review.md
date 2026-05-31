@@ -170,3 +170,22 @@ To start a search, click the kebab menu on a camera in the <NavPath path="Review
 Once running, Frigate scans the recording segments that overlap the time range and reports timestamps where changes were detected inside the polygon, along with the percentage of the ROI that changed. Clicking a result seeks the player to that moment so you can review what happened.
 
 The status panel shows live progress and metrics such as how many segments were scanned, how many were skipped because no motion was recorded for that segment (using the stored motion heatmap), how many frames were decoded, and the total wall-clock time. Segments with no recorded motion in the selected ROI are skipped automatically, which is what makes searching long time ranges practical.
+
+#### Common use cases
+
+Frigate already records and surfaces tracked objects, so Motion Search is most useful for the cases where object detection produced nothing — there is no object to find in Explore, but you suspect something happened.
+
+- **Locating an unattributed change.** You know something appeared, disappeared, or moved in a window of footage — a package now gone, a gate left open — but no detection points to it. A search returns the candidate timestamps instead of scrubbing the timeline by hand.
+- **An object that was never detected.** Something Frigate doesn't have a model label for, an object too small or distant to be detected, or movement in a region where detection isn't running. The activity left no tracked object but did change the pixels, so a search can still find it.
+- **Activity while detection was effectively paused.** Changes that occurred while motion was suppressed by `lightning_threshold`, or inside an area covered by a motion mask, won't appear as review items or tracked objects but can be recovered by searching the recordings directly.
+
+#### Expected performance
+
+Motion Search analyzes the saved recordings on demand rather than reading a pre-built index, so a search over a long range takes longer than browsing Motion Previews. Cost scales mainly with how much footage has to be examined: segments with no recorded motion in your ROI are skipped using the stored motion heatmap (shown as "segments skipped" in the status panel), so a quiet range finishes quickly while a busy one takes longer.
+
+To keep searches fast:
+
+- Keep the time range focused.
+- Draw a tight ROI.
+- Keep Frame Skip high.
+- Use Parallel mode to shorten wall-clock time on multi-core systems, at the cost of higher CPU usage while it runs.
