@@ -618,6 +618,16 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
         new_config["cameras"][name] = camera_config
 
+    # Remove deprecated date_style and time_style from global ui config
+    global_ui = new_config.get("ui", {})
+    if global_ui.get("date_style") is not None:
+        del new_config["ui"]["date_style"]
+    if global_ui.get("time_style") is not None:
+        del new_config["ui"]["time_style"]
+    # Remove ui section if empty
+    if "ui" in new_config and not new_config["ui"]:
+        del new_config["ui"]
+
     new_config["version"] = "0.18-0"
     return new_config
 
