@@ -143,6 +143,11 @@ If your ONVIF camera does not require authentication credentials, you may still 
 
 :::
 
+If a camera connects but fails to authenticate, two optional fields can help:
+
+- `tls_insecure`: Skips TLS certificate verification and sends the ONVIF password as plaintext (`PasswordText`) instead of a hashed digest (`PasswordDigest`). Some cameras reject the digest token and only accept plaintext. This weakens connection security, so only enable it on a trusted local network.
+- `ignore_time_mismatch`: ONVIF authentication tokens include a timestamp, and a camera will reject the token if its clock differs too much from Frigate's. Enabling this makes Frigate compensate for the time offset so authentication can still succeed. Running NTP on both the camera and the Frigate host is the recommended fix; only use this in a "safe" environment, as it slightly weakens token validation.
+
 If your camera has multiple ONVIF profiles, you can specify which one to use for PTZ control with the `profile` option, matched by token or name. When not set, Frigate selects the first profile with a valid PTZ configuration. Check the Frigate debug logs (`frigate.ptz.onvif: debug`) to see available profile names and tokens for your camera.
 
 An ONVIF-capable camera that supports relative movement within the field of view (FOV) can also be configured to automatically track moving objects and keep them in the center of the frame. For autotracking setup, see the [autotracking](autotracking.md) docs.
