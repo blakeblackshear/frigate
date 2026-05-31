@@ -6,6 +6,7 @@ import { MdOutlineRestartAlt, MdUndo } from "react-icons/md";
 
 import { FrigateConfig } from "@/types/frigateConfig";
 import { TimeRange } from "@/types/timeline";
+import { ASPECT_PORTRAIT_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -119,6 +120,27 @@ export default function MotionSearchDialog({
     return config.cameras[selectedCamera];
   }, [config, selectedCamera]);
 
+  const aspectRatio = useMemo(() => {
+    if (!cameraConfig) {
+      return 16 / 9;
+    }
+
+    return cameraConfig.detect.width / cameraConfig.detect.height;
+  }, [cameraConfig]);
+
+  // Determine camera aspect ratio category
+  const cameraAspect = useMemo(() => {
+    if (!aspectRatio) {
+      return "normal";
+    } else if (aspectRatio > ASPECT_WIDE_LAYOUT) {
+      return "wide";
+    } else if (aspectRatio < ASPECT_PORTRAIT_LAYOUT) {
+      return "tall";
+    } else {
+      return "normal";
+    }
+  }, [aspectRatio]);
+
   const polygonClosed = useMemo(
     () => !isDrawingROI && polygonPoints.length >= 3,
     [isDrawingROI, polygonPoints.length],
@@ -231,7 +253,15 @@ export default function MotionSearchDialog({
                       height: "100%",
                     }}
                   >
-                    <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg border bg-secondary">
+                    <div
+                      className={cn(
+                        "relative mx-auto flex items-center justify-center overflow-hidden rounded-lg border bg-secondary",
+                        cameraAspect === "tall"
+                          ? "max-h-[50dvh] lg:max-h-[60dvh]"
+                          : "w-full",
+                      )}
+                      style={{ aspectRatio }}
+                    >
                       {selectedCamera && cameraConfig ? (
                         <div className="relative h-full w-full">
                           <img
@@ -370,7 +400,7 @@ export default function MotionSearchDialog({
                       <Slider
                         id="frameSkip"
                         min={1}
-                        max={60}
+                        max={120}
                         step={1}
                         value={[frameSkip]}
                         onValueChange={([value]) => setFrameSkip(value)}
