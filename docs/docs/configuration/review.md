@@ -183,9 +183,8 @@ Frigate's main use case is to record and surface tracked objects, so Motion Sear
 
 Motion Search analyzes the saved recordings on demand rather than reading a pre-built index, so a search over a long range takes longer than browsing Motion Previews. Cost scales mainly with how much footage has to be examined: segments with no recorded motion in your ROI are skipped using the stored motion heatmap (shown as "segments skipped" in the status panel), so a quiet range finishes quickly while a busy one takes longer.
 
-To keep searches fast:
+To increase the speed of searches:
 
-- Keep the time range focused.
-- Draw a tight ROI.
-- Keep Frame Skip high.
+- Draw a tight ROI. Because **Minimum Change Area** is measured as a percentage of the region you draw, a tight ROI around where you expect the change makes the object fill a larger share of the area, so it clears the threshold more easily. A loose ROI makes the same object a small fraction of the region, so it can fall below the threshold and be missed — forcing you to lower Minimum Change Area, which lets in more noise.
+- Keep Frame Skip high. A higher value samples fewer frames and speeds up the search considerably, while still landing within a few seconds of when the motion or object appeared — close enough to seek to in the recording. Only lower it when you need to pinpoint the exact frame something appears or disappears.
 - Use Parallel mode to shorten wall-clock time on multi-core systems, at the cost of higher CPU usage while it runs.
