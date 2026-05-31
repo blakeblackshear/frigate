@@ -112,34 +112,7 @@ export default function MotionSearchDialog({
 }: MotionSearchDialogProps) {
   const { t } = useTranslation(["views/motionSearch", "common"]);
   const apiHost = useApiHost();
-  const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(
-    null,
-  );
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const containerWidth = containerSize.width;
-  const containerHeight = containerSize.height;
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  useEffect(() => {
-    if (!containerNode) {
-      return;
-    }
-
-    const measure = () => {
-      const rect = containerNode.getBoundingClientRect();
-      setContainerSize((prev) =>
-        prev.width === rect.width && prev.height === rect.height
-          ? prev
-          : { width: rect.width, height: rect.height },
-      );
-    };
-
-    measure();
-
-    const observer = new ResizeObserver(() => measure());
-    observer.observe(containerNode);
-    return () => observer.disconnect();
-  }, [containerNode]);
 
   const cameraConfig = useMemo(() => {
     if (!selectedCamera) return undefined;
@@ -168,28 +141,6 @@ export default function MotionSearchDialog({
     setPolygonPoints([]);
     setIsDrawingROI(true);
   }, [isSearching, polygonPoints.length, setIsDrawingROI, setPolygonPoints]);
-
-  const imageSize = useMemo(() => {
-    if (!containerWidth || !containerHeight || !cameraConfig) {
-      return { width: 0, height: 0 };
-    }
-
-    const cameraAspectRatio =
-      cameraConfig.detect.width / cameraConfig.detect.height;
-    const availableAspectRatio = containerWidth / containerHeight;
-
-    if (availableAspectRatio >= cameraAspectRatio) {
-      return {
-        width: containerHeight * cameraAspectRatio,
-        height: containerHeight,
-      };
-    }
-
-    return {
-      width: containerWidth,
-      height: containerWidth / cameraAspectRatio,
-    };
-  }, [containerWidth, containerHeight, cameraConfig]);
 
   useEffect(() => {
     setImageLoaded(false);
@@ -280,19 +231,9 @@ export default function MotionSearchDialog({
                       height: "100%",
                     }}
                   >
-                    <div
-                      ref={setContainerNode}
-                      className="relative flex w-full items-center justify-center overflow-hidden rounded-lg border bg-secondary"
-                      style={{ aspectRatio: "16 / 9" }}
-                    >
+                    <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg border bg-secondary">
                       {selectedCamera && cameraConfig ? (
-                        <div
-                          className="relative"
-                          style={{
-                            width: imageSize.width || "100%",
-                            height: imageSize.height || "100%",
-                          }}
-                        >
+                        <div className="relative h-full w-full">
                           <img
                             alt={t("dialog.previewAlt", {
                               camera: selectedCamera,

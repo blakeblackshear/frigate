@@ -95,6 +95,7 @@ type RecordingViewProps = {
   filter?: ReviewFilter;
   updateFilter: (newFilter: ReviewFilter) => void;
   refreshData?: () => void;
+  onMotionSearch?: (camera: string) => void;
 };
 export function RecordingView({
   startCamera,
@@ -107,6 +108,7 @@ export function RecordingView({
   filter,
   updateFilter,
   refreshData,
+  onMotionSearch,
 }: RecordingViewProps) {
   const { t } = useTranslation(["views/events", "components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -725,6 +727,9 @@ export function RecordingView({
                   setCustomShareTimestamp(initialTimestamp);
                   setShareTimestampOpen(true);
                 }}
+                onMotionSearchClick={
+                  onMotionSearch ? () => onMotionSearch(mainCamera) : undefined
+                }
                 onDebugReplayClick={
                   isAdmin
                     ? () => {
@@ -807,6 +812,9 @@ export function RecordingView({
                 }
               }}
               onShareTimestamp={onShareReviewLink}
+              onMotionSearch={
+                onMotionSearch ? () => onMotionSearch(mainCamera) : undefined
+              }
               onUpdateFilter={updateFilter}
               setRange={setExportRange}
               setMode={setExportMode}

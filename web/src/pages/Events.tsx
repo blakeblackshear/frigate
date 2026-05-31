@@ -56,11 +56,9 @@ export default function Events() {
     false,
   );
 
-  const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
-    "recording",
-    undefined,
-    false,
-  );
+  const [recording, setRecording] = useOverlayState<
+    RecordingStartingPoint | undefined
+  >("recording", undefined, false);
   const [motionPreviewsCamera, setMotionPreviewsCamera] = useOverlayState<
     string | undefined
   >("motionPreviewsCamera", undefined);
@@ -668,6 +666,10 @@ export default function Events() {
           filter={reviewFilter}
           updateFilter={onUpdateFilter}
           refreshData={reloadData}
+          onMotionSearch={(camera) => {
+            setMotionSearchCamera(camera);
+            setRecording(undefined);
+          }}
         />
       );
     }
