@@ -484,7 +484,7 @@ export default function TriggerView({
         ) : (
           <>
             <div className="mb-5 flex flex-row items-center justify-between gap-2">
-              <div className="flex flex-col items-start">
+              <div className="flex max-w-5xl flex-col items-start">
                 <Heading as="h4" className="mb-1">
                   {t("triggers.management.title")}
                 </Heading>
