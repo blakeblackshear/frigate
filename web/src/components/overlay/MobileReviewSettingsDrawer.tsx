@@ -348,6 +348,32 @@ export default function MobileReviewSettingsDrawer({
             {t("export")}
           </Button>
         )}
+        {features.includes("calendar") && (
+          <Button
+            className="flex w-full items-center justify-center gap-2"
+            aria-label={t("calendar")}
+            variant={filter?.after ? "select" : "default"}
+            onClick={() => setDrawerMode("calendar")}
+          >
+            <FaCalendarAlt
+              className={`${filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
+            />
+            {t("calendar")}
+          </Button>
+        )}
+        {features.includes("filter") && (
+          <Button
+            className="flex w-full items-center justify-center gap-2"
+            aria-label={t("filter")}
+            variant={filter?.labels || filter?.zones ? "select" : "default"}
+            onClick={() => setDrawerMode("filter")}
+          >
+            <FaFilter
+              className={`${filter?.labels || filter?.zones ? "text-selected-foreground" : "text-secondary-foreground"}`}
+            />
+            {t("filter")}
+          </Button>
+        )}
         {features.includes("share-timestamp") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
@@ -380,32 +406,6 @@ export default function MobileReviewSettingsDrawer({
           >
             <LuSearch className="size-5 rounded-md bg-secondary-foreground stroke-secondary p-1" />
             {t("motionSearch.menuItem", { ns: "views/events" })}
-          </Button>
-        )}
-        {features.includes("calendar") && (
-          <Button
-            className="flex w-full items-center justify-center gap-2"
-            aria-label={t("calendar")}
-            variant={filter?.after ? "select" : "default"}
-            onClick={() => setDrawerMode("calendar")}
-          >
-            <FaCalendarAlt
-              className={`${filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
-            />
-            {t("calendar")}
-          </Button>
-        )}
-        {features.includes("filter") && (
-          <Button
-            className="flex w-full items-center justify-center gap-2"
-            aria-label={t("filter")}
-            variant={filter?.labels || filter?.zones ? "select" : "default"}
-            onClick={() => setDrawerMode("filter")}
-          >
-            <FaFilter
-              className={`${filter?.labels || filter?.zones ? "text-selected-foreground" : "text-secondary-foreground"}`}
-            />
-            {t("filter")}
           </Button>
         )}
         {isAdmin && features.includes("debug-replay") && (
