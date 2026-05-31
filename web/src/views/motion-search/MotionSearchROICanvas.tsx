@@ -14,6 +14,7 @@ type MotionSearchROICanvasProps = {
   isDrawing: boolean;
   setIsDrawing: React.Dispatch<React.SetStateAction<boolean>>;
   isInteractive?: boolean;
+  panMode?: boolean;
   motionHeatmap?: Record<string, number> | null;
   showMotionHeatmap?: boolean;
 };
@@ -26,6 +27,7 @@ export default function MotionSearchROICanvas({
   isDrawing,
   setIsDrawing,
   isInteractive = true,
+  panMode = false,
   motionHeatmap,
   showMotionHeatmap = false,
 }: MotionSearchROICanvasProps) {
@@ -341,7 +343,9 @@ export default function MotionSearchROICanvas({
       ref={setContainerNode}
       className={cn(
         "absolute inset-0 z-10",
-        isInteractive ? "pointer-events-auto" : "pointer-events-none",
+        isInteractive && !panMode
+          ? "pointer-events-auto"
+          : "pointer-events-none",
       )}
       style={{ cursor: isDrawing ? "crosshair" : "default" }}
     >

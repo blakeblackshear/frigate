@@ -146,7 +146,7 @@ export default function MotionSearchView({
   const [parallelMode, setParallelMode] = useState(false);
   const [threshold, setThreshold] = useState(30);
   const [minArea, setMinArea] = useState(20);
-  const [frameSkip, setFrameSkip] = useState(10);
+  const [frameSkip, setFrameSkip] = useState(30);
   const [maxResults, setMaxResults] = useState(25);
 
   // Job state
@@ -846,7 +846,13 @@ export default function MotionSearchView({
             responseData.errors;
 
           if (Array.isArray(apiMessage)) {
-            errorMessage = apiMessage.join(", ");
+            errorMessage = apiMessage
+              .map((item) =>
+                typeof item === "string"
+                  ? item
+                  : ((item as { msg?: string })?.msg ?? JSON.stringify(item)),
+              )
+              .join(", ");
           } else if (typeof apiMessage === "string") {
             errorMessage = apiMessage;
           } else if (apiMessage) {

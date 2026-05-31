@@ -42,9 +42,9 @@ class MotionSearchRequest(BaseModel):
         description="Minimum change area as a percentage of the ROI",
     )
     frame_skip: int = Field(
-        default=5,
+        default=30,
         ge=1,
-        le=30,
+        le=120,
         description="Process every Nth frame (1=all frames, 5=every 5th frame)",
     )
     parallel: bool = Field(

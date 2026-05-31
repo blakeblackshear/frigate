@@ -24,7 +24,9 @@
     "points_one": "{{count}} point",
     "points_other": "{{count}} points",
     "undo": "Undo last point",
-    "reset": "Reset polygon"
+    "reset": "Reset polygon",
+    "drawMode": "Draw",
+    "moveMode": "Move"
   },
   "motionHeatmapLabel": "Motion Heatmap",
   "dialog": {
