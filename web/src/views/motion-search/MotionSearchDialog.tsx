@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { isDesktop, isIOS, isMobile } from "react-device-detect";
 import { FaArrowRight, FaCalendarAlt, FaCheckCircle } from "react-icons/fa";
 import { MdOutlineRestartAlt, MdUndo } from "react-icons/md";
+import { LuHand, LuPencil } from "react-icons/lu";
 
 import { FrigateConfig } from "@/types/frigateConfig";
 import { TimeRange } from "@/types/timeline";
@@ -114,6 +115,7 @@ export default function MotionSearchDialog({
   const { t } = useTranslation(["views/motionSearch", "common"]);
   const apiHost = useApiHost();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [panMode, setPanMode] = useState(false);
 
   const cameraConfig = useMemo(() => {
     if (!selectedCamera) return undefined;
@@ -166,6 +168,7 @@ export default function MotionSearchDialog({
 
   useEffect(() => {
     setImageLoaded(false);
+    setPanMode(false);
   }, [selectedCamera]);
 
   const Overlay = isDesktop ? Dialog : Drawer;
@@ -240,7 +243,13 @@ export default function MotionSearchDialog({
                 </div>
               )}
 
-              <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
+              <TransformWrapper
+                minScale={1.0}
+                wheel={{ smoothStep: 0.005 }}
+                panning={{ disabled: !isDesktop && !panMode }}
+                pinch={{ disabled: !isDesktop && !panMode }}
+                doubleClick={{ disabled: !isDesktop && !panMode }}
+              >
                 <div className="flex flex-col gap-2">
                   <TransformComponent
                     wrapperStyle={{
@@ -291,6 +300,7 @@ export default function MotionSearchDialog({
                             isDrawing={isDrawingROI}
                             setIsDrawing={setIsDrawingROI}
                             isInteractive={true}
+                            panMode={panMode}
                           />
                         </div>
                       ) : (
@@ -312,11 +322,41 @@ export default function MotionSearchDialog({
                     {polygonClosed && <FaCheckCircle className="ml-2 size-5" />}
                   </div>
                   <div className="flex flex-row justify-center gap-2">
+                    {!isDesktop && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant={panMode ? "select" : "default"}
+                            className="size-8 rounded-md p-1.5"
+                            aria-label={
+                              panMode
+                                ? t("polygonControls.moveMode")
+                                : t("polygonControls.drawMode")
+                            }
+                            onClick={() => setPanMode((prev) => !prev)}
+                          >
+                            {panMode ? (
+                              <LuHand className="text-selected-foreground" />
+                            ) : (
+                              <LuPencil className="text-secondary-foreground" />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {panMode
+                            ? t("polygonControls.moveMode")
+                            : t("polygonControls.drawMode")}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="default"
-                          className="size-6 rounded-md p-1"
+                          className={cn(
+                            "rounded-md",
+                            isDesktop ? "size-6 p-1" : "size-8 p-1.5",
+                          )}
                           aria-label={t("polygonControls.undo")}
                           disabled={polygonPoints.length === 0 || isSearching}
                           onClick={undoPolygonPoint}
@@ -332,7 +372,10 @@ export default function MotionSearchDialog({
                       <TooltipTrigger asChild>
                         <Button
                           variant="default"
-                          className="size-6 rounded-md p-1"
+                          className={cn(
+                            "rounded-md",
+                            isDesktop ? "size-6 p-1" : "size-8 p-1.5",
+                          )}
                           aria-label={t("polygonControls.reset")}
                           disabled={polygonPoints.length === 0 || isSearching}
                           onClick={resetPolygon}
