@@ -1674,6 +1674,17 @@
       "refresh": "Refresh models",
       "probeFailed": "Failed to probe models",
       "fetchedModels": "Successfully fetched model list"
+    },
+    "ptzPresets": {
+      "placeholder": "Select or enter a preset...",
+      "search": "Search or enter a preset...",
+      "noPresets": "No presets available",
+      "available": "Camera presets",
+      "useCustom": "Use \"{{value}}\""
+    },
+    "defaultRole": {
+      "admin": "Admin",
+      "viewer": "Viewer"
     }
   },
   "globalConfig": {
@@ -1763,7 +1774,7 @@
     "addStream": "Add stream",
     "addStreamDesc": "Enter a name for the new stream. This name will be used to reference the stream in your camera configuration.",
     "addUrl": "Add URL",
-    "streamNumber": "Stream {{index}}",
+    "sourceNumber": "Source {{index}}",
     "streamName": "Stream name",
     "streamNamePlaceholder": "e.g., front_door",
     "streamUrlPlaceholder": "e.g., rtsp://user:pass@192.168.1.100/stream",
@@ -1928,6 +1939,9 @@
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended."
+    },
+    "onvif": {
+      "autotrackingNoZones": "Autotracking requires at least one zone. Define a zone for this camera in Masks / Zones, then set it as a required zone below."
     }
   }
 }
