@@ -1852,12 +1852,6 @@
       "12hour": "12 hour",
       "24hour": "24 hour"
     },
-    "TimeOrDateStyle": {
-      "full": "Full",
-      "long": "Long",
-      "medium": "Medium",
-      "short": "Short"
-    },
     "unitSystem": {
       "metric": "Metric",
       "imperial": "Imperial"

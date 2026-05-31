@@ -270,14 +270,6 @@
       "label": "Time format",
       "description": "Time format to use in the UI (browser, 12hour, or 24hour)."
     },
-    "date_style": {
-      "label": "Date style",
-      "description": "Date style to use in the UI (full, long, medium, short)."
-    },
-    "time_style": {
-      "label": "Time style",
-      "description": "Time style to use in the UI (full, long, medium, short)."
-    },
     "unit_system": {
       "label": "Unit system",
       "description": "Unit system for display (metric or imperial) used in the UI and MQTT."
