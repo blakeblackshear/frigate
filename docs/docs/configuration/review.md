@@ -173,11 +173,11 @@ The status panel shows live progress and metrics such as how many segments were 
 
 #### Common use cases
 
-Frigate already records and surfaces tracked objects, so Motion Search is most useful for the cases where object detection produced nothing — there is no object to find in Explore, but you suspect something happened.
+Frigate's main use case is to record and surface tracked objects, so Motion Search is most useful for the cases where object detection produced nothing — there is no object to find in Explore, but you suspect something happened.
 
 - **Locating an unattributed change.** You know something appeared, disappeared, or moved in a window of footage — a package now gone, a gate left open — but no detection points to it. A search returns the candidate timestamps instead of scrubbing the timeline by hand.
 - **An object that was never detected.** Something Frigate doesn't have a model label for, an object too small or distant to be detected, or movement in a region where detection isn't running. The activity left no tracked object but did change the pixels, so a search can still find it.
-- **Activity while detection was effectively paused.** Changes that occurred while motion was suppressed by `lightning_threshold`, or inside an area covered by a motion mask, won't appear as review items or tracked objects but can be recovered by searching the recordings directly.
+- **Activity while detection was effectively paused.** Changes that occurred while object detection was disabled, motion was suppressed by `skip_motion_threshold`, or inside an area covered by a motion mask, won't appear as review items or tracked objects but can be recovered by searching the recordings directly.
 
 #### Expected performance
 
