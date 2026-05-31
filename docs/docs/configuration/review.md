@@ -153,7 +153,7 @@ Clicking a preview clip seeks the recording player to that timestamp so you can 
 
 Motion Search lets you scan recorded footage for changes inside a region of interest you draw on the camera. Unlike Motion Previews, which surfaces what Frigate's motion detector flagged in real time, Motion Search re-analyzes the saved recordings, so it can find changes that were missed (for example, an object that appeared while motion detection was paused by `lightning_threshold`, or in a region that is normally motion-masked).
 
-To start a search, click the kebab menu on a camera in the <NavPath path="Review > Motion" /> page and choose **Motion Search**. In the dialog:
+To start a search, open the Actions menu in History or click the kebab menu on a camera in the <NavPath path="Review > Motion" /> page and choose **Motion Search**. In the dialog:
 
 1. Pick the camera and time range to scan.
 2. Draw a polygon on the camera frame to define the region of interest.
