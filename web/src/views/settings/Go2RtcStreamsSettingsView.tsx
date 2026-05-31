@@ -902,7 +902,7 @@ function StreamUrlEntry({
   return (
     <div className="pb-4">
       <div className="flex h-7 flex-row items-center justify-start gap-2 text-sm text-primary-variant">
-        {t("go2rtcStreams.streamNumber", { index: urlIndex + 1 })}
+        {t("go2rtcStreams.sourceNumber", { index: urlIndex + 1 })}
         {canRemove && (
           <Button
             variant="ghost"
