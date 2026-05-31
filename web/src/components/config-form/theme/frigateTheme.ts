@@ -33,6 +33,8 @@ import { OptionalFieldWidget } from "./widgets/OptionalFieldWidget";
 import { SemanticSearchModelWidget } from "./widgets/SemanticSearchModelWidget";
 import { SemanticSearchModelSizeWidget } from "./widgets/SemanticSearchModelSizeWidget";
 import { OnvifProfileWidget } from "./widgets/OnvifProfileWidget";
+import { PTZPresetsWidget } from "./widgets/PTZPresetsWidget";
+import { DefaultRoleWidget } from "./widgets/DefaultRoleWidget";
 
 import { FieldTemplate } from "./templates/FieldTemplate";
 import { ObjectFieldTemplate } from "./templates/ObjectFieldTemplate";
@@ -90,6 +92,8 @@ export const frigateTheme: FrigateTheme = {
     semanticSearchModel: SemanticSearchModelWidget,
     semanticSearchModelSize: SemanticSearchModelSizeWidget,
     onvifProfile: OnvifProfileWidget,
+    ptzPresets: PTZPresetsWidget,
+    defaultRole: DefaultRoleWidget,
   },
   templates: {
     FieldTemplate: FieldTemplate as React.ComponentType<FieldTemplateProps>,

@@ -4,8 +4,6 @@ import { TriggerAction, TriggerType } from "./trigger";
 export interface UiConfig {
   timezone?: string;
   time_format?: "browser" | "12hour" | "24hour";
-  date_style?: "full" | "long" | "medium" | "short";
-  time_style?: "full" | "long" | "medium" | "short";
   dashboard: boolean;
   order: number;
   unit_system?: "metric" | "imperial";

@@ -1083,22 +1083,6 @@ ui:
   # Optional: Set the time format used.
   # Options are browser, 12hour, or 24hour (default: shown below)
   time_format: browser
-  # Optional: Set the date style for a specified length.
-  # Options are: full, long, medium, short
-  # Examples:
-  #    short: 2/11/23
-  #    medium: Feb 11, 2023
-  #    full: Saturday, February 11, 2023
-  # (default: shown below).
-  date_style: short
-  # Optional: Set the time style for a specified length.
-  # Options are: full, long, medium, short
-  # Examples:
-  #    short: 8:14 PM
-  #    medium: 8:15:22 PM
-  #    full: 8:15:22 PM Mountain Standard Time
-  # (default: shown below).
-  time_style: medium
   # Optional: Set the unit system to either "imperial" or "metric" (default: metric)
   # Used in the UI and in MQTT topics
   unit_system: metric

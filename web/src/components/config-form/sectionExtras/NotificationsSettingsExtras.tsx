@@ -48,6 +48,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Trans, useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { isPWA } from "@/utils/isPWA";
+import { isIOS } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { cn } from "@/lib/utils";
@@ -437,6 +439,12 @@ export default function NotificationsSettingsExtras({
   }
 
   if (!("Notification" in window) || !window.isSecureContext) {
+    // iOS only exposes web push to apps installed to the Home Screen, so a
+    // secure-context iOS browser tab that isn't an installed PWA has no
+    // Notification API. Android supports web push in a normal tab, so it never
+    // reaches this case and keeps the generic secure-context message.
+    const requiresPwaInstall = isIOS && window.isSecureContext && !isPWA;
+
     return (
       <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
         <div className="w-full max-w-5xl">
@@ -465,12 +473,21 @@ export default function NotificationsSettingsExtras({
                   {t("notification.notificationUnavailable.title")}
                 </AlertTitle>
                 <AlertDescription>
-                  <Trans ns="views/settings">
-                    notification.notificationUnavailable.desc
-                  </Trans>
+                  <Trans
+                    ns="views/settings"
+                    i18nKey={
+                      requiresPwaInstall
+                        ? "notification.notificationUnavailable.descPwa"
+                        : "notification.notificationUnavailable.desc"
+                    }
+                  />
                   <div className="mt-3 flex items-center">
                     <Link
-                      to={getLocaleDocUrl("configuration/authentication")}
+                      to={getLocaleDocUrl(
+                        requiresPwaInstall
+                          ? "configuration/notifications"
+                          : "configuration/authentication",
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline"

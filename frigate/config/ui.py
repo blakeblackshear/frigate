@@ -5,20 +5,13 @@ from pydantic import Field
 
 from .base import FrigateBaseModel
 
-__all__ = ["TimeFormatEnum", "DateTimeStyleEnum", "UnitSystemEnum", "UIConfig"]
+__all__ = ["TimeFormatEnum", "UnitSystemEnum", "UIConfig"]
 
 
 class TimeFormatEnum(str, Enum):
     browser = "browser"
     hours12 = "12hour"
     hours24 = "24hour"
-
-
-class DateTimeStyleEnum(str, Enum):
-    full = "full"
-    long = "long"
-    medium = "medium"
-    short = "short"
 
 
 class UnitSystemEnum(str, Enum):
@@ -36,16 +29,6 @@ class UIConfig(FrigateBaseModel):
         default=TimeFormatEnum.browser,
         title="Time format",
         description="Time format to use in the UI (browser, 12hour, or 24hour).",
-    )
-    date_style: DateTimeStyleEnum = Field(
-        default=DateTimeStyleEnum.short,
-        title="Date style",
-        description="Date style to use in the UI (full, long, medium, short).",
-    )
-    time_style: DateTimeStyleEnum = Field(
-        default=DateTimeStyleEnum.medium,
-        title="Time style",
-        description="Time style to use in the UI (full, long, medium, short).",
     )
     unit_system: UnitSystemEnum = Field(
         default=UnitSystemEnum.metric,
