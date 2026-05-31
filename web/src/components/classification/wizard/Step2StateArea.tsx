@@ -51,6 +51,7 @@ export default function Step2StateArea({
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const popoverContainerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const rectRef = useRef<Konva.Rect>(null);
@@ -224,7 +225,7 @@ export default function Step2StateArea({
   const canContinue = cameraAreas.length > 0;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div ref={popoverContainerRef} className="flex flex-col gap-4">
       <div
         className={cn(
           "flex gap-4 overflow-hidden",
@@ -255,6 +256,7 @@ export default function Step2StateArea({
                   className="scrollbar-container w-64 border bg-background p-3 shadow-lg"
                   align="start"
                   sideOffset={5}
+                  container={popoverContainerRef.current}
                   onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                   <div className="flex flex-col gap-2">
