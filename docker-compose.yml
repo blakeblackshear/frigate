@@ -1,6 +1,11 @@
 services:
   devcontainer:
     container_name: frigate-devcontainer
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     # Check host system's actual render/video/plugdev group IDs with 'getent group render', 'getent group video', and 'getent group plugdev'
     # Must add these exact IDs in container's group_add section or OpenVINO GPU acceleration will fail
     group_add:
@@ -39,6 +44,11 @@ services:
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto:2.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     command: mosquitto -c /mosquitto-no-auth.conf # enable no-auth mode
     ports:
       - "1883:1883"
