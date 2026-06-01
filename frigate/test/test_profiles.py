@@ -1,5 +1,6 @@
 """Tests for the profiles system."""
 
+import copy
 import json
 import os
 import unittest
@@ -745,6 +746,36 @@ class TestProfileManager(unittest.TestCase):
 
         manager.activate_profile(None)
         dispatcher.clear_runtime_state.assert_called_once_with()
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_profile_change_republishes_switch_states(self, mock_persist):
+        """Profile changes republish MQTT switch states so HA stays in sync.
+
+        Regression: activating/deactivating a profile updated the in-memory
+        config (and Frigate's behavior) but left the retained MQTT state
+        topics stale, so external integrations like Home Assistant kept
+        showing the pre-profile toggle position.
+        """
+        config_data = copy.deepcopy(self.config_data)
+        config_data["cameras"]["front"]["profiles"]["disarmed"]["review"] = {
+            "alerts": {"enabled": False},
+        }
+        config = FrigateConfig(**config_data)
+        dispatcher = MagicMock()
+        manager = ProfileManager(config, self.mock_updater, dispatcher)
+
+        # Activating disarmed turns alerts off -> MQTT state must follow
+        manager.activate_profile("disarmed")
+        dispatcher.publish.assert_any_call(
+            "front/review_alerts/state", "OFF", retain=True
+        )
+
+        # Deactivating restores the base (alerts on) -> MQTT state must follow
+        dispatcher.publish.reset_mock()
+        manager.activate_profile(None)
+        dispatcher.publish.assert_any_call(
+            "front/review_alerts/state", "ON", retain=True
+        )
 
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_startup_replay_does_not_clear_runtime_state(self, mock_persist):
