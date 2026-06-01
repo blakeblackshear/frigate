@@ -12,10 +12,12 @@ import { ExportMode } from "@/types/filter";
 import {
   MotionSearchRequest,
   MotionSearchStartResponse,
-  MotionSearchStatusResponse,
   MotionSearchResult,
   MotionSearchMetrics,
+  MotionSearchJobResults,
+  MotionSearchJobPayload,
 } from "@/types/motionSearch";
+import { useJobStatus } from "@/api/ws";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -25,6 +27,11 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
 import { DynamicVideoController } from "@/components/player/dynamic/DynamicVideoController";
@@ -52,14 +59,17 @@ import {
   RecordingSegment,
 } from "@/types/record";
 import { VideoResolutionType } from "@/types/live";
-import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
+import {
+  useFormattedTimestamp,
+  useFormattedRange,
+  use24HourTime,
+} from "@/hooks/use-date-utils";
 import MotionSearchROICanvas from "./MotionSearchROICanvas";
 import MotionSearchDialog from "./MotionSearchDialog";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFire } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { LuSearch } from "react-icons/lu";
-import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { LuSearch, LuChevronRight, LuX } from "react-icons/lu";
 
 type MotionSearchViewProps = {
   config: FrigateConfig;
@@ -118,10 +128,11 @@ export default function MotionSearchView({
     "actions" | "calendar"
   >("actions");
 
-  // Recordings summary for calendar – defer until dialog is closed
-  // so the preview image in the dialog loads without competing requests
+  // Recordings summary for the calendars (main view + search dialog). Fetched
+  // whenever a camera is selected so it is cached and ready by the time the
+  // dialog's date pickers render, regardless of open/closed state.
   const { data: recordingsSummary } = useSWR<RecordingsSummary>(
-    selectedCamera && !isSearchDialogOpen
+    selectedCamera
       ? [
           "recordings/summary",
           {
@@ -146,17 +157,18 @@ export default function MotionSearchView({
   const [parallelMode, setParallelMode] = useState(false);
   const [threshold, setThreshold] = useState(30);
   const [minArea, setMinArea] = useState(20);
-  const [frameSkip, setFrameSkip] = useState(30);
   const [maxResults, setMaxResults] = useState(25);
 
   // Job state
   const [jobId, setJobId] = useState<string | null>(null);
   const [jobCamera, setJobCamera] = useState<string | null>(null);
-
-  // Job polling with SWR
-  const { data: jobStatus } = useSWR<MotionSearchStatusResponse>(
-    jobId && jobCamera ? [`${jobCamera}/search/motion/${jobId}`] : null,
-    { refreshInterval: 1000 },
+  const { payload: jobPayload } =
+    useJobStatus<MotionSearchJobResults>("motion_search");
+  const jobStatus = jobPayload as MotionSearchJobPayload | null;
+  const formattedScanningTimestamp = useFormattedTimestamp(
+    jobStatus?.scanning_timestamp ?? 0,
+    resultTimestampFormat,
+    timezone,
   );
 
   // Search state
@@ -170,6 +182,14 @@ export default function MotionSearchView({
     undefined,
   );
   const [pendingSeekTime, setPendingSeekTime] = useState<number | null>(null);
+
+  // Formatted search window shown above the results (same date+time convention).
+  const formattedSearchRange = useFormattedRange(
+    searchRange?.after ?? 0,
+    searchRange?.before ?? 0,
+    resultTimestampFormat,
+    timezone,
+  );
 
   // Export state
   const [exportMode, setExportMode] = useState<ExportMode>("none");
@@ -802,7 +822,6 @@ export default function MotionSearchView({
         parallel: parallelMode,
         threshold,
         min_area: minArea,
-        frame_skip: frameSkip,
         max_results: maxResults,
       };
 
@@ -877,7 +896,6 @@ export default function MotionSearchView({
     parallelMode,
     threshold,
     minArea,
-    frameSkip,
     maxResults,
     t,
   ]);
@@ -888,23 +906,27 @@ export default function MotionSearchView({
       return;
     }
 
+    if (!jobId || jobStatus.id !== jobId) {
+      return;
+    }
+
+    const resultList = jobStatus.results?.results;
+
     if (jobStatus.status === "success") {
-      setSearchResults(jobStatus.results ?? []);
+      setSearchResults(resultList ?? []);
       setSearchMetrics(jobStatus.metrics ?? null);
       setIsSearching(false);
       setJobId(null);
       setJobCamera(null);
-      toast.success(
-        t("changesFound", { count: jobStatus.results?.length ?? 0 }),
-      );
+      toast.success(t("changesFound", { count: resultList?.length ?? 0 }));
     } else if (
       jobStatus.status === "queued" ||
       jobStatus.status === "running"
     ) {
       setSearchMetrics(jobStatus.metrics ?? null);
       // Stream partial results as they arrive
-      if (jobStatus.results && jobStatus.results.length > 0) {
-        setSearchResults(jobStatus.results);
+      if (resultList && resultList.length > 0) {
+        setSearchResults(resultList);
       }
     } else if (jobStatus.status === "failed") {
       setIsSearching(false);
@@ -912,7 +934,7 @@ export default function MotionSearchView({
       setJobCamera(null);
       toast.error(
         t("errors.searchFailed", {
-          message: jobStatus.error_message || jobStatus.message,
+          message: jobStatus.error_message || t("errors.unknown"),
         }),
       );
     } else if (jobStatus.status === "cancelled") {
@@ -921,7 +943,7 @@ export default function MotionSearchView({
       setJobCamera(null);
       toast.message(t("searchCancelled"));
     }
-  }, [jobStatus, t]);
+  }, [jobStatus, jobId, t]);
 
   // Handle result click
   const handleResultClick = useCallback(
@@ -1028,6 +1050,9 @@ export default function MotionSearchView({
 
   const progressMetrics = jobStatus?.metrics ?? searchMetrics;
   const progressValue = (() => {
+    if (jobStatus?.progress != null) {
+      return Math.min(100, Math.max(0, jobStatus.progress * 100));
+    }
     if (!progressMetrics || progressMetrics.segments_scanned <= 0) {
       return 0;
     }
@@ -1042,23 +1067,48 @@ export default function MotionSearchView({
     return Math.min(100, Math.max(0, (doneWork / totalWork) * 100));
   })();
 
+  const wallTimeLabel = searchMetrics
+    ? searchMetrics.wall_time_seconds >= 60
+      ? t("metrics.minutesSeconds", {
+          minutes: Math.floor(searchMetrics.wall_time_seconds / 60),
+          seconds: Math.round(searchMetrics.wall_time_seconds % 60),
+        })
+      : t("metrics.seconds", {
+          seconds: searchMetrics.wall_time_seconds.toFixed(1),
+        })
+    : "";
+
   const resultsPanel = (
     <>
-      <div className="p-2">
-        <h3 className="font-medium">{t("results")}</h3>
-      </div>
+      {(hasSearched || isSearching) && (
+        <div className="flex flex-col gap-0.5 p-2">
+          <h3 className="font-medium">
+            {t("results")}
+            {searchResults.length > 0 && (
+              <span className="ml-1.5 font-normal text-muted-foreground">
+                · {searchResults.length}
+              </span>
+            )}
+          </h3>
+          {searchRange && (
+            <div className="text-xs text-muted-foreground">
+              {formattedSearchRange}
+            </div>
+          )}
+        </div>
+      )}
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 [&>[data-radix-scroll-area-viewport]>div]:!block">
         {isSearching && (
-          <div className="flex flex-col gap-2 border-b p-3 text-sm text-muted-foreground">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex flex-col gap-1 text-wrap">
-                <ActivityIndicator className="mr-2 size-4" />
-                <div>{t("searching")}</div>
-              </div>
+          <div className="flex flex-col gap-1.5 border-b p-3">
+            <div className="flex items-center gap-2">
+              <Progress className="h-1.5 flex-1" value={progressValue} />
               <Button
-                variant="destructive"
-                size="sm"
+                variant="ghost"
+                size="icon"
+                className="size-6 shrink-0 text-muted-foreground"
+                aria-label={t("cancelSearch")}
+                title={t("cancelSearch")}
                 onClick={() => {
                   void cancelMotionSearchJob(jobId, jobCamera);
                   setIsSearching(false);
@@ -1067,78 +1117,89 @@ export default function MotionSearchView({
                   toast.success(t("searchCancelled"));
                 }}
               >
-                {t("cancelSearch")}
+                <LuX className="size-4" />
               </Button>
             </div>
-            <Progress className="h-1" value={progressValue} />
-          </div>
-        )}
-        {searchMetrics && (isSearching || searchResults.length > 0) && (
-          <div className="mx-2 my-3 rounded-lg border bg-secondary p-2">
-            <div className="space-y-0.5 text-xs text-muted-foreground">
-              <div className="flex justify-between">
-                <span>{t("metrics.segmentsScanned")}</span>
-                <span className="text-primary-variant">
-                  {searchMetrics.segments_scanned}
-                </span>
-              </div>
-              {searchMetrics.segments_processed > 0 && (
-                <div className="flex justify-between font-medium">
-                  <span>{t("metrics.segmentsProcessed")}</span>
-                  <span className="text-primary-variant">
-                    {searchMetrics.segments_processed}
-                  </span>
-                </div>
-              )}
-              {searchMetrics.metadata_inactive_segments > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("metrics.segmentsSkippedInactive")}</span>
-                  <span className="text-primary-variant">
-                    {searchMetrics.metadata_inactive_segments}
-                  </span>
-                </div>
-              )}
-              {searchMetrics.heatmap_roi_skip_segments > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("metrics.segmentsSkippedHeatmap")}</span>
-                  <span className="text-primary-variant">
-                    {searchMetrics.heatmap_roi_skip_segments}
-                  </span>
-                </div>
-              )}
-              {searchMetrics.fallback_full_range_segments > 0 && (
-                <div className="flex justify-between">
-                  <span>{t("metrics.fallbackFullRange")}</span>
-                  <span className="text-primary-variant">
-                    {searchMetrics.fallback_full_range_segments}
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span>{t("metrics.framesDecoded")}</span>
-                <span className="text-primary-variant">
-                  {searchMetrics.frames_decoded}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>{t("metrics.wallTime")}</span>
-                <span className="text-primary-variant">
-                  {t("metrics.seconds", {
-                    seconds: searchMetrics.wall_time_seconds.toFixed(1),
-                  })}
-                </span>
-              </div>
-              {searchMetrics.segments_with_errors > 0 && (
-                <div className="flex justify-between text-destructive">
-                  <span>{t("metrics.segmentErrors")}</span>
-                  <span className="text-primary-variant">
-                    {searchMetrics.segments_with_errors}
-                  </span>
-                </div>
-              )}
+            <div className="text-xs text-muted-foreground">
+              {jobStatus?.scanning_timestamp != null
+                ? t("scanning", { time: formattedScanningTimestamp })
+                : t("searching")}
             </div>
           </div>
         )}
+        {searchMetrics &&
+          (isSearching || searchResults.length > 0 || hasSearched) && (
+            <Collapsible className="border-b">
+              <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 p-3 text-xs text-muted-foreground hover:bg-accent">
+                <span className="flex shrink-0 items-center gap-1">
+                  <LuChevronRight className="size-3 shrink-0 transition-transform group-data-[state=open]:rotate-90" />
+                  {t("metrics.title")}
+                </span>
+                <span className="min-w-0 truncate text-right text-primary-variant">
+                  {t("metrics.scanSummary", {
+                    segments: searchMetrics.segments_scanned,
+                    time: wallTimeLabel,
+                  })}
+                </span>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="space-y-0.5 px-3 pb-3 text-xs text-muted-foreground">
+                  {searchMetrics.segments_processed > 0 && (
+                    <div className="flex justify-between font-medium">
+                      <span>{t("metrics.segmentsProcessed")}</span>
+                      <span className="text-primary-variant">
+                        {searchMetrics.segments_processed}
+                      </span>
+                    </div>
+                  )}
+                  {searchMetrics.metadata_inactive_segments > 0 && (
+                    <div className="flex justify-between">
+                      <span>{t("metrics.segmentsSkippedInactive")}</span>
+                      <span className="text-primary-variant">
+                        {searchMetrics.metadata_inactive_segments}
+                      </span>
+                    </div>
+                  )}
+                  {searchMetrics.heatmap_roi_skip_segments > 0 && (
+                    <div className="flex justify-between">
+                      <span>{t("metrics.segmentsSkippedHeatmap")}</span>
+                      <span className="text-primary-variant">
+                        {searchMetrics.heatmap_roi_skip_segments}
+                      </span>
+                    </div>
+                  )}
+                  {searchMetrics.fallback_full_range_segments > 0 && (
+                    <div className="flex justify-between">
+                      <span>{t("metrics.fallbackFullRange")}</span>
+                      <span className="text-primary-variant">
+                        {searchMetrics.fallback_full_range_segments}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>{t("metrics.framesDecoded")}</span>
+                    <span className="text-primary-variant">
+                      {searchMetrics.frames_decoded}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t("metrics.wallTime")}</span>
+                    <span className="text-primary-variant">
+                      {wallTimeLabel}
+                    </span>
+                  </div>
+                  {searchMetrics.segments_with_errors > 0 && (
+                    <div className="flex justify-between text-destructive">
+                      <span>{t("metrics.segmentErrors")}</span>
+                      <span className="text-primary-variant">
+                        {searchMetrics.segments_with_errors}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
 
         {searchResults.length === 0 && !isSearching ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
@@ -1187,8 +1248,6 @@ export default function MotionSearchView({
           setThreshold={setThreshold}
           minArea={minArea}
           setMinArea={setMinArea}
-          frameSkip={frameSkip}
-          setFrameSkip={setFrameSkip}
           maxResults={maxResults}
           setMaxResults={setMaxResults}
           searchRange={searchRange}
@@ -1516,15 +1575,20 @@ function SearchResultItem({
 
   return (
     <button
-      className="flex w-full flex-col rounded-md p-2 text-left hover:bg-accent"
+      className="flex w-full items-center justify-between gap-2 rounded-md p-2 text-left hover:bg-accent"
       onClick={onClick}
       title={t("jumpToTime")}
     >
-      <span className="text-sm font-medium">{formattedTime}</span>
-      <span className="text-xs text-muted-foreground">
-        {t("changePercentage", {
+      <span className="min-w-0 truncate text-sm font-medium">
+        {formattedTime}
+      </span>
+      <span
+        className="shrink-0 text-xs tabular-nums text-muted-foreground"
+        title={t("changePercentage", {
           percentage: result.change_percentage.toFixed(1),
         })}
+      >
+        {result.change_percentage.toFixed(1)}%
       </span>
     </button>
   );

@@ -8,6 +8,7 @@
   "searchCancelled": "Search cancelled",
   "cancelSearch": "Cancel",
   "searching": "Search in progress.",
+  "scanning": "Scanning {{time}}",
   "searchComplete": "Search complete",
   "noResultsYet": "Run a search to find motion changes in the selected region",
   "noChangesFound": "No pixel changes detected in the selected region",
@@ -42,13 +43,11 @@
   "settings": {
     "title": "Search Settings",
     "parallelMode": "Parallel mode",
-    "parallelModeDesc": "Scan multiple recording segments at the same time (faster, but significantly more CPU intensive)",
+    "parallelModeDesc": "Scan multiple recording ranges at the same time (faster; uses more decoding resources)",
     "threshold": "Sensitivity Threshold",
     "thresholdDesc": "Lower values detect smaller changes (1-255)",
     "minArea": "Minimum Change Area",
-    "minAreaDesc": "Minimum percentage of the region of interest that must change to be considered significant",
-    "frameSkip": "Frame Skip",
-    "frameSkipDesc": "Process every Nth frame. Set this to your camera's frame rate to process one frame per second (e.g. 5 for a 5 FPS camera, 30 for a 30 FPS camera). Higher values will be faster, but may miss short motion events.",
+    "minAreaDesc": "Minimum size of a single moving region, as a percentage of the region of interest",
     "maxResults": "Maximum Results",
     "maxResultsDesc": "Stop after this many matching timestamps"
   },
@@ -72,6 +71,8 @@
     "framesDecoded": "Frames decoded",
     "wallTime": "Search time",
     "segmentErrors": "Segment errors",
-    "seconds": "{{seconds}}s"
+    "seconds": "{{seconds}}s",
+    "minutesSeconds": "{{minutes}}m {{seconds}}s",
+    "scanSummary": "{{segments}} segments · {{time}}"
   }
 }

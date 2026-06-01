@@ -155,21 +155,22 @@ Motion Search lets you scan recorded footage for changes inside a region of inte
 
 To start a search, open the Actions menu in History or click the kebab menu on a camera in the <NavPath path="Review > Motion" /> page and choose **Motion Search**. In the dialog:
 
-1. Pick the camera and time range to scan.
+1. Pick the camera and time range to scan. In the date pickers, days that have recordings available are underlined.
 2. Draw a polygon on the camera frame to define the region of interest.
 3. Adjust the search parameters if needed:
 
-| Field                     | Description                                                                                                                                                                                                                                                                                                    |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sensitivity Threshold** | Per-pixel luminance change required to count as motion inside the ROI. Behaves like Frigate's motion detection `threshold` setting.                                                                                                                                                                            |
-| **Minimum Change Area**   | Minimum percentage of the region of interest that must change for a frame to be considered significant. Raise it to ignore small movements (leaves, distant motion); lower it when the object you care about only covers a small slice of the ROI.                                                             |
-| **Frame Skip**            | Number of frames to skip between samples — at a camera recording 20 fps, a skip value of 20 takes motion samples roughly once per second. Higher values scan much faster and are usually the right choice; lower it only when you need to catch the exact appearance or disappearance of a fast-moving object. |
-| **Maximum Results**       | Maximum number of matching timestamps to return.                                                                                                                                                                                                                                                               |
-| **Parallel mode**         | Process multiple recording segments in parallel. Speeds up large time ranges at the cost of higher CPU usage.                                                                                                                                                                                                  |
+| Field                     | Description                                                                                                                                                                                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sensitivity Threshold** | Per-pixel luminance change required to count as motion inside the ROI. Behaves like Frigate's motion detection `threshold` setting.                                                                                                              |
+| **Minimum Change Area**   | Minimum size of a single moving region, as a percentage of the ROI, for a frame to count as significant. Raise it to ignore small movements (leaves, distant motion); lower it when your subject covers only a small slice of the ROI. Every result shows the percentage it scored, so you can use those values to tune this. |
+| **Maximum Results**       | Maximum number of matching timestamps to return. The search stops once it reaches this many results, so a lower value finishes sooner while a higher value scans further into the range.                                                          |
+| **Parallel mode**         | Decode multiple recording ranges at the same time. Speeds up large time ranges at the cost of higher decoding and CPU usage.                                                                                                                     |
+
+Motion Search samples each recording's keyframes automatically, so there is no frame-rate or sampling setting to tune.
 
 Once running, Frigate scans the recording segments that overlap the time range and reports timestamps where changes were detected inside the polygon, along with the percentage of the ROI that changed. Clicking a result seeks the player to that moment so you can review what happened.
 
-The status panel shows live progress and metrics such as how many segments were scanned, how many were skipped because no motion was recorded for that segment (using the stored motion heatmap), how many frames were decoded, and the total wall-clock time. Segments with no recorded motion in the selected ROI are skipped automatically, which is what makes searching long time ranges practical.
+The results panel shows the time range being scanned, a live progress bar with the timestamp currently being analyzed, and the running result count. A collapsible **Search Metrics** section reports how many segments were scanned and processed, how many were skipped because no motion was recorded in the ROI (using the stored motion heatmap), how many frames were decoded, and the total search time. Skipping segments with no recorded motion in the selected ROI is what makes searching long time ranges practical.
 
 #### Common use cases
 
@@ -179,6 +180,15 @@ Frigate's main use case is to record and surface tracked objects, so Motion Sear
 - **An object that was never detected.** Something Frigate doesn't have a model label for, an object too small or distant to be detected, or movement in a region where detection isn't running. The activity left no tracked object but did change the pixels, so a search can still find it.
 - **Activity while detection was effectively paused.** Changes that occurred while object detection was disabled, motion was suppressed by `skip_motion_threshold`, or inside an area covered by a motion mask, won't appear as review items or tracked objects but can be recovered by searching the recordings directly.
 
+#### Examples
+
+These show how to choose the ROI and **Minimum Change Area** for two common goals. Minimum Change Area is the size of a single moving region as a percentage of the ROI you draw, so the right value depends on how much of the ROI your subject — and its movement between samples — covers.
+
+Because samples are a second or more apart, a moving subject usually appears in two places at once in the comparison, so even ordinary motion often scores tens of percent and a low threshold lets in almost everything. The most reliable approach is to **run a search, look at the percentage each result scored, and set Minimum Change Area just below the values for the events you care about.** The default is 20%; the suggestions below are starting points.
+
+- **When did this item first appear (or disappear)?** A package was dropped off, a car parked, or a trash can was moved, and you want the exact moment. Draw a **tight ROI** around the spot the item occupies and **raise Minimum Change Area** (start around 40–60%). Because the item fills most of a tight ROI, its arrival or removal is a large change, while smaller nearby motion (shadows, a passing pedestrian) stays below the threshold. The **earliest result** is when it appeared; if you only care about that moment, a low Maximum Results finishes faster. If you get no hits, the ROI is probably looser than the item — lower the threshold or tighten the ROI.
+- **What's been getting into the garden?** Something has been trampling a flower bed overnight and no object was ever tracked. Draw a **looser ROI** covering the whole bed and use a **lower Minimum Change Area than the case above** — start near the 20% default and lower it (toward 5–10%) only if a small or distant subject is missed, since it covers just a slice of a large region. Expect more results to scan through — step through the timestamps and jump to each to see what triggered it. If wind-blown plants add noise, raise Minimum Change Area or the Sensitivity Threshold.
+
 #### Expected performance
 
 Motion Search analyzes the saved recordings on demand rather than reading a pre-built index, so a search over a long range takes longer than browsing Motion Previews. Cost scales mainly with how much footage has to be examined: segments with no recorded motion in your ROI are skipped using the stored motion heatmap (shown as "segments skipped" in the status panel), so a quiet range finishes quickly while a busy one takes longer.
@@ -186,5 +196,6 @@ Motion Search analyzes the saved recordings on demand rather than reading a pre-
 To increase the speed of searches:
 
 - Draw a tight ROI. Because **Minimum Change Area** is measured as a percentage of the region you draw, a tight ROI around where you expect the change makes the object fill a larger share of the area, so it clears the threshold more easily. A loose ROI makes the same object a small fraction of the region, so it can fall below the threshold and be missed — forcing you to lower Minimum Change Area, which lets in more noise.
-- Keep Frame Skip high. A higher value samples fewer frames and speeds up the search considerably, while still landing within a few seconds of when the motion or object appeared — close enough to seek to in the recording. Only lower it when you need to pinpoint the exact frame something appears or disappears.
-- Use Parallel mode to shorten wall-clock time on multi-core systems, at the cost of higher CPU usage while it runs.
+- Narrow the time range to the window you care about, so there is less footage to examine.
+- Lower **Maximum Results** when you only need the first few hits. Because the search stops once it reaches that many results, a smaller value lets a busy range finish early instead of scanning the whole window.
+- Use Parallel mode to shorten wall-clock time on multi-core systems, at the cost of higher decoding and CPU usage while it runs.
