@@ -27,7 +27,6 @@ from frigate.jobs.motion_search_batch import (
     stream_time_to_absolute,
 )
 from frigate.jobs.motion_search_decode import (
-    _ffprobe_path,
     iter_vod_frames,
     keyframe_sampling_eligible,
     probe_video_dimensions,
@@ -361,6 +360,7 @@ class MotionSearchRunner(threading.Thread):
 
         # Resolved once per job in _execute_search
         self.ffmpeg_path: str = "ffmpeg"
+        self.ffprobe_path: str = "ffprobe"
         self.decode_args: list[str] = []
         # Keyframe sampling decision, decided once per job from the first run's
         # GOP. The fallback cadence is a fixed rate (see FALLBACK_SAMPLE_FPS).
@@ -451,6 +451,7 @@ class MotionSearchRunner(threading.Thread):
             raise ValueError(f"Camera {camera_name} detect dimensions not configured")
 
         self.ffmpeg_path = camera_config.ffmpeg.ffmpeg_path
+        self.ffprobe_path = camera_config.ffmpeg.ffprobe_path
 
         # Create polygon mask
         polygon_mask = create_polygon_mask(
@@ -561,7 +562,7 @@ class MotionSearchRunner(threading.Thread):
         # what we decode, so crop/scale/mask are computed against it.
         self.internal_port = resolve_internal_port(self.config)
         self.decode_args = resolve_motion_decode_args(camera_config)
-        ffprobe_path = _ffprobe_path(self.ffmpeg_path)
+        ffprobe_path = self.ffprobe_path
 
         runs = coalesce_runs(filtered_recordings, MAX_RUN_SECONDS, RUN_GAP_EPSILON)
         if not runs:
@@ -651,7 +652,7 @@ class MotionSearchRunner(threading.Thread):
         time_map = build_segment_time_map(run)
 
         if self.use_keyframe:
-            kf_pts = probe_vod_keyframe_pts(_ffprobe_path(self.ffmpeg_path), vod_url)
+            kf_pts = probe_vod_keyframe_pts(self.ffprobe_path, vod_url)
             frames = list(
                 iter_vod_frames(
                     self.ffmpeg_path,

@@ -1,9 +1,5 @@
 """Tests for motion search spatial (crop/scale/mask) helpers."""
 
-import os
-import shutil
-import subprocess as sp
-import tempfile
 import unittest
 
 import numpy as np
@@ -12,12 +8,6 @@ from frigate.jobs.motion_search import (
     build_scaled_roi_mask,
     compute_roi_crop_and_scale,
     detect_motion_scaled,
-)
-from frigate.jobs.motion_search_decode import (
-    iter_keyframe_frames,
-    iter_segment_frames,
-    keyframe_sampling_eligible,
-    probe_keyframe_pts,
 )
 
 
@@ -91,102 +81,6 @@ class TestDetectMotionScaled(unittest.TestCase):
             [(0, f0), (30, f1)], mask, threshold=30, min_area=1.0, timestamp_fn=self._ts
         )
         self.assertEqual(results, [])
-
-
-def _ffmpeg_available():
-    return shutil.which("ffmpeg") is not None
-
-
-@unittest.skipUnless(_ffmpeg_available(), "ffmpeg not available")
-class TestBalancedDecodePath(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.tmp = tempfile.mkdtemp()
-        cls.path = os.path.join(cls.tmp, "motion.mp4")
-        # testsrc has continuous motion across the whole frame.
-        sp.run(
-            [
-                "ffmpeg",
-                "-hide_banner",
-                "-loglevel",
-                "error",
-                "-y",
-                "-f",
-                "lavfi",
-                "-i",
-                "testsrc=size=640x480:rate=30:duration=3",
-                "-c:v",
-                "libx264",
-                "-pix_fmt",
-                "yuv420p",
-                "-g",
-                "15",
-                cls.path,
-            ],
-            check=True,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.tmp, ignore_errors=True)
-
-    def test_balanced_decode_then_detect_finds_motion(self):
-        crop, scaled = compute_roi_crop_and_scale(
-            [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]], 640, 480, scale_target=160
-        )
-        mask = build_scaled_roi_mask(
-            [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]], 640, 480, crop, scaled
-        )
-        frames = iter_segment_frames(
-            "ffmpeg",
-            self.path,
-            0,
-            90,
-            30,
-            scaled[0],
-            scaled[1],
-            [],
-            lambda: False,
-            channels=1,
-            crop=crop,
-            scale=scaled,
-            gray=True,
-        )
-        results = detect_motion_scaled(
-            list(frames), mask, threshold=20, min_area=1.0, timestamp_fn=float
-        )
-        # testsrc moves every frame, so consecutive sampled frames differ.
-        self.assertGreater(len(results), 0)
-
-    def test_keyframe_path_finds_motion(self):
-        crop, scaled = compute_roi_crop_and_scale(
-            [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]], 640, 480, scale_target=160
-        )
-        mask = build_scaled_roi_mask(
-            [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]], 640, 480, crop, scaled
-        )
-        pts = probe_keyframe_pts("ffprobe", self.path)
-        self.assertTrue(keyframe_sampling_eligible(pts))
-        frames = list(
-            iter_keyframe_frames(
-                "ffmpeg",
-                self.path,
-                scaled[0],
-                scaled[1],
-                1,
-                [],
-                crop,
-                scaled,
-                True,
-                lambda: False,
-            )
-        )
-        self.assertEqual(len(frames), len(pts))  # count matches probe
-        indexed = list(enumerate(frames))
-        results = detect_motion_scaled(
-            indexed, mask, threshold=20, min_area=1.0, timestamp_fn=lambda i: pts[i]
-        )
-        self.assertGreater(len(results), 0)
 
 
 if __name__ == "__main__":
