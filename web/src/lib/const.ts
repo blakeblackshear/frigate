@@ -12,7 +12,7 @@ export const JINA_EMBEDDING_MODELS = ["jinav1", "jinav2"] as const;
 export const REDACTED_CREDENTIAL_SENTINEL = "__FRIGATE_SAVED_CREDENTIAL__";
 
 export const ANNOTATION_OFFSET_MIN = -10000;
-export const ANNOTATION_OFFSET_MAX = 5000;
+export const ANNOTATION_OFFSET_MAX = 10000;
 export const ANNOTATION_OFFSET_STEP = 50;
 
 export const supportedLanguageKeys = [
