@@ -13,6 +13,13 @@ import { useTimezone } from "@/hooks/use-date-utils";
 
 type WeekStartsOnType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+function formatCalendarDay(day: Date): string {
+  const y = day.getFullYear();
+  const m = String(day.getMonth() + 1).padStart(2, "0");
+  const d = String(day.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 type ReviewActivityCalendarProps = {
   reviewSummary?: ReviewSummary;
   recordingsSummary?: RecordingsSummary;
@@ -62,17 +69,10 @@ export default function ReviewActivityCalendar({
       }
     }
 
-    const formatDay = (day: Date) => {
-      const y = day.getFullYear();
-      const m = String(day.getMonth() + 1).padStart(2, "0");
-      const d = String(day.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    };
-
     return {
-      recordings: (day: Date) => recordingsSet.has(formatDay(day)),
-      alerts: (day: Date) => alertsSet.has(formatDay(day)),
-      detections: (day: Date) => detectionsSet.has(formatDay(day)),
+      recordings: (day: Date) => recordingsSet.has(formatCalendarDay(day)),
+      alerts: (day: Date) => alertsSet.has(formatCalendarDay(day)),
+      detections: (day: Date) => detectionsSet.has(formatCalendarDay(day)),
     };
   }, [reviewSummary, recordingsSummary]);
 
@@ -156,13 +156,31 @@ type TimezoneAwareCalendarProps = {
   timezone?: string;
   selectedDay?: Date;
   onSelect: (day?: Date) => void;
+  recordingsSummary?: RecordingsSummary;
 };
 export function TimezoneAwareCalendar({
   timezone,
   selectedDay,
   onSelect,
+  recordingsSummary,
 }: TimezoneAwareCalendarProps) {
   const [weekStartsOn] = useUserPersistence("weekStartsOn", 0);
+
+  // When a recordings summary is supplied, underline days that have footage
+  const recordingsModifier = useMemo(() => {
+    if (!recordingsSummary) {
+      return undefined;
+    }
+    const recordingsSet = new Set<string>();
+    for (const date of Object.keys(recordingsSummary)) {
+      if (date !== LAST_24_HOURS_KEY) {
+        recordingsSet.add(date);
+      }
+    }
+    return {
+      recordings: (day: Date) => recordingsSet.has(formatCalendarDay(day)),
+    };
+  }, [recordingsSummary]);
 
   const timezoneOffset = useMemo(
     () =>
@@ -217,6 +235,10 @@ export function TimezoneAwareCalendar({
       onSelect={onSelect}
       defaultMonth={selectedDay ?? new Date()}
       weekStartsOn={(weekStartsOn ?? 0) as WeekStartsOnType}
+      modifiers={recordingsModifier}
+      components={
+        recordingsModifier ? { DayButton: ReviewActivityDay } : undefined
+      }
     />
   );
 }

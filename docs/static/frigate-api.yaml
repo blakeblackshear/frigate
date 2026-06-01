@@ -7288,13 +7288,6 @@ components:
           title: Min Area
           description: Minimum change area as a percentage of the ROI
           default: 5
-        frame_skip:
-          type: integer
-          maximum: 30
-          minimum: 1
-          title: Frame Skip
-          description: "Process every Nth frame (1=all frames, 5=every 5th frame)"
-          default: 5
         parallel:
           type: boolean
           title: Parallel
@@ -7380,6 +7373,16 @@ components:
           anyOf:
             - $ref: "#/components/schemas/MotionSearchMetricsResponse"
             - type: "null"
+        scanning_timestamp:
+          anyOf:
+            - type: number
+            - type: "null"
+          title: Scanning Timestamp
+        progress:
+          anyOf:
+            - type: number
+            - type: "null"
+          title: Progress
       type: object
       required:
         - success

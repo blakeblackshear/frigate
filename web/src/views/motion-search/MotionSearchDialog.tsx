@@ -7,6 +7,7 @@ import { LuHand, LuPencil } from "react-icons/lu";
 
 import { FrigateConfig } from "@/types/frigateConfig";
 import { TimeRange } from "@/types/timeline";
+import { RecordingsSummary } from "@/types/review";
 import { ASPECT_PORTRAIT_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,11 @@ import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { TimezoneAwareCalendar } from "@/components/overlay/ReviewActivityCalendar";
 
 import { useApiHost } from "@/api";
-import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
+import {
+  useFormattedTimestamp,
+  use24HourTime,
+  useTimezone,
+} from "@/hooks/use-date-utils";
 import { getUTCOffset } from "@/utils/dateUtil";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
@@ -69,8 +74,6 @@ type MotionSearchDialogProps = {
   setThreshold: React.Dispatch<React.SetStateAction<number>>;
   minArea: number;
   setMinArea: React.Dispatch<React.SetStateAction<number>>;
-  frameSkip: number;
-  setFrameSkip: React.Dispatch<React.SetStateAction<number>>;
   maxResults: number;
   setMaxResults: React.Dispatch<React.SetStateAction<number>>;
   searchRange?: TimeRange;
@@ -100,8 +103,6 @@ export default function MotionSearchDialog({
   setThreshold,
   minArea,
   setMinArea,
-  frameSkip,
-  setFrameSkip,
   maxResults,
   setMaxResults,
   searchRange,
@@ -116,6 +117,16 @@ export default function MotionSearchDialog({
   const apiHost = useApiHost();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [panMode, setPanMode] = useState(false);
+
+  const recordingsTimezone = useTimezone(config);
+  const { data: recordingsSummary } = useSWR<RecordingsSummary>(
+    selectedCamera
+      ? [
+          "recordings/summary",
+          { timezone: recordingsTimezone, cameras: selectedCamera },
+        ]
+      : null,
+  );
 
   const cameraConfig = useMemo(() => {
     if (!selectedCamera) return undefined;
@@ -438,23 +449,6 @@ export default function MotionSearchDialog({
                     </p>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="frameSkip">{t("settings.frameSkip")}</Label>
-                    <div className="flex items-center gap-2">
-                      <Slider
-                        id="frameSkip"
-                        min={1}
-                        max={120}
-                        step={1}
-                        value={[frameSkip]}
-                        onValueChange={([value]) => setFrameSkip(value)}
-                      />
-                      <span className="w-12 text-sm">{frameSkip}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {t("settings.frameSkipDesc")}
-                    </p>
-                  </div>
-                  <div className="grid gap-2">
                     <div className="flex items-center justify-between gap-2">
                       <Label htmlFor="parallelMode">
                         {t("settings.parallelMode")}
@@ -496,6 +490,7 @@ export default function MotionSearchDialog({
                 setRange={setSearchRange}
                 defaultRange={defaultRange}
                 timezone={timezone}
+                recordingsSummary={recordingsSummary}
               />
 
               <Button
@@ -519,6 +514,7 @@ type SearchRangeSelectorProps = {
   setRange: React.Dispatch<React.SetStateAction<TimeRange | undefined>>;
   defaultRange: TimeRange;
   timezone?: string;
+  recordingsSummary?: RecordingsSummary;
 };
 
 function SearchRangeSelector({
@@ -526,6 +522,7 @@ function SearchRangeSelector({
   setRange,
   defaultRange,
   timezone,
+  recordingsSummary,
 }: SearchRangeSelectorProps) {
   const { t } = useTranslation(["views/motionSearch", "common"]);
   const [startOpen, setStartOpen] = useState(false);
@@ -630,6 +627,7 @@ function SearchRangeSelector({
             <PopoverContent className="flex flex-col items-center">
               <TimezoneAwareCalendar
                 timezone={timezone}
+                recordingsSummary={recordingsSummary}
                 selectedDay={new Date(startTime * 1000)}
                 onSelect={(day) => {
                   if (!day) {
@@ -696,6 +694,7 @@ function SearchRangeSelector({
             <PopoverContent className="flex flex-col items-center">
               <TimezoneAwareCalendar
                 timezone={timezone}
+                recordingsSummary={recordingsSummary}
                 selectedDay={new Date(endTime * 1000)}
                 onSelect={(day) => {
                   if (!day) {
