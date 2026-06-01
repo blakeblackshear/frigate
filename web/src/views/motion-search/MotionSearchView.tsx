@@ -753,10 +753,9 @@ export default function MotionSearchView({
 
   useEffect(() => {
     return () => {
-      cancelMotionSearchJobViaBeacon(jobIdRef.current, jobCameraRef.current);
       void cancelMotionSearchJob(jobIdRef.current, jobCameraRef.current);
     };
-  }, [cancelMotionSearchJob, cancelMotionSearchJobViaBeacon]);
+  }, [cancelMotionSearchJob]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -1081,18 +1080,18 @@ export default function MotionSearchView({
   const resultsPanel = (
     <>
       {(hasSearched || isSearching) && (
-        <div className="flex flex-col gap-0.5 p-2">
-          <h3 className="font-medium">
-            {t("results")}
-            {searchResults.length > 0 && (
-              <span className="ml-1.5 font-normal text-muted-foreground">
-                · {searchResults.length}
-              </span>
-            )}
-          </h3>
+        <div className="flex flex-col gap-1 px-3 py-2.5">
           {searchRange && (
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm font-medium text-foreground">
               {formattedSearchRange}
+            </div>
+          )}
+          {searchMetrics && (
+            <div className="text-xs text-muted-foreground">
+              {t("metrics.scanSummary", {
+                segments: searchMetrics.segments_scanned,
+                time: wallTimeLabel,
+              })}
             </div>
           )}
         </div>
@@ -1129,18 +1128,10 @@ export default function MotionSearchView({
         )}
         {searchMetrics &&
           (isSearching || searchResults.length > 0 || hasSearched) && (
-            <Collapsible className="border-b">
-              <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 p-3 text-xs text-muted-foreground hover:bg-accent">
-                <span className="flex shrink-0 items-center gap-1">
-                  <LuChevronRight className="size-3 shrink-0 transition-transform group-data-[state=open]:rotate-90" />
-                  {t("metrics.title")}
-                </span>
-                <span className="min-w-0 truncate text-right text-primary-variant">
-                  {t("metrics.scanSummary", {
-                    segments: searchMetrics.segments_scanned,
-                    time: wallTimeLabel,
-                  })}
-                </span>
+            <Collapsible>
+              <CollapsibleTrigger className="group flex w-full items-center gap-1 px-3 py-2.5 text-left text-xs text-muted-foreground hover:bg-accent">
+                <LuChevronRight className="size-3 shrink-0 transition-transform group-data-[state=open]:rotate-90" />
+                {t("metrics.title")}
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="space-y-0.5 px-3 pb-3 text-xs text-muted-foreground">
@@ -1201,12 +1192,23 @@ export default function MotionSearchView({
             </Collapsible>
           )}
 
+        {(searchResults.length > 0 || (hasSearched && !isSearching)) && (
+          <div className="border-t px-1.5 pb-1.5 pt-3">
+            <h3 className="text-sm font-medium tracking-wide text-muted-foreground">
+              {searchResults.length > 0 && (
+                <span className="ml-1.5">{searchResults.length}</span>
+              )}{" "}
+              {t("results")}
+            </h3>
+          </div>
+        )}
+
         {searchResults.length === 0 && !isSearching ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
             {hasSearched ? t("noChangesFound") : t("noResultsYet")}
           </div>
         ) : searchResults.length > 0 ? (
-          <div className="flex flex-col gap-1 p-2">
+          <div className="flex flex-col gap-1 px-1 pb-2">
             {searchResults.map((result, index) => (
               <SearchResultItem
                 key={index}
