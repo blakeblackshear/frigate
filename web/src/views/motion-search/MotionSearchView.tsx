@@ -182,6 +182,7 @@ export default function MotionSearchView({
     undefined,
   );
   const [pendingSeekTime, setPendingSeekTime] = useState<number | null>(null);
+  const pendingSeekTimeRef = useRef<number | null>(null);
 
   // Formatted search window shown above the results (same date+time convention).
   const formattedSearchRange = useFormattedRange(
@@ -642,7 +643,7 @@ export default function MotionSearchView({
   ]);
 
   useEffect(() => {
-    if (pendingSeekTime != null) {
+    if (pendingSeekTimeRef.current != null) {
       return;
     }
 
@@ -656,7 +657,7 @@ export default function MotionSearchView({
     setPlaybackStart(nextTime);
     setSelectedRangeIdx(index === -1 ? chunkedTimeRange.length - 1 : index);
     mainControllerRef.current?.seekToTimestamp(nextTime, true);
-  }, [pendingSeekTime, timeRange, chunkedTimeRange]);
+  }, [timeRange, chunkedTimeRange]);
 
   useEffect(() => {
     if (!scrubbing) {
@@ -951,6 +952,7 @@ export default function MotionSearchView({
         result.timestamp < timeRange.after ||
         result.timestamp > timeRange.before
       ) {
+        pendingSeekTimeRef.current = result.timestamp;
         setPendingSeekTime(result.timestamp);
         onDaySelect(new Date(result.timestamp * 1000));
         return;
@@ -972,6 +974,7 @@ export default function MotionSearchView({
     ) {
       manuallySetCurrentTime(pendingSeekTime, true);
       setPendingSeekTime(null);
+      pendingSeekTimeRef.current = null;
     }
   }, [pendingSeekTime, timeRange, manuallySetCurrentTime]);
 
