@@ -658,6 +658,11 @@ def motion_activity(
         else:
             df.iloc[i : i + chunk, 0] = 0.0
 
+    # Drop resample gap-fill buckets. The resample above emits a row for every
+    # {scale}s bucket spanning the range, and buckets with no recording get a
+    # motion of 0 (from fillna) and an empty camera (from joining an empty set).
+    df = df[df["camera"] != ""]
+
     # change types for output
     df.index = df.index.astype(int) // (10**9)
     normalized = df.reset_index().to_dict("records")
