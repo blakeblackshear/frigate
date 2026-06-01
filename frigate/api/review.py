@@ -605,9 +605,10 @@ def motion_activity(
         if not filtered:
             return JSONResponse(content=[])
         camera_list = list(filtered)
-        clauses.append((Recordings.camera << camera_list))
     else:
-        clauses.append((Recordings.camera << allowed_cameras))
+        camera_list = list(allowed_cameras)
+
+    clauses.append((Recordings.camera << camera_list))
 
     data: list[Recordings] = (
         Recordings.select(
@@ -635,14 +636,12 @@ def motion_activity(
     df.set_index(["start_time"], inplace=True)
 
     # normalize data
-    motion = (
-        df["motion"]
-        .resample(f"{scale}s")
-        .apply(lambda x: max(x, key=abs, default=0.0))
-        .fillna(0.0)
-        .to_frame()
-    )
-    cameras = df["camera"].resample(f"{scale}s").agg(lambda x: ",".join(set(x)))
+    motion = df["motion"].resample(f"{scale}s").max().fillna(0.0).to_frame()
+
+    if len(camera_list) == 1:
+        cameras = df["camera"].resample(f"{scale}s").first().fillna("")
+    else:
+        cameras = df["camera"].resample(f"{scale}s").agg(lambda x: ",".join(set(x)))
     df = motion.join(cameras)
 
     length = df.shape[0]
