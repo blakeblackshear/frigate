@@ -53,6 +53,7 @@ export default function MasksAndZonesView({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
+  const [polygonsInitialized, setPolygonsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPolygonIndex, setLoadingPolygonIndex] = useState<
     number | undefined
@@ -609,6 +610,7 @@ export default function MasksAndZonesView({
         ...globalObjectMasks,
         ...objectMasks,
       ]);
+      setPolygonsInitialized(true);
       // Don't overwrite editingPolygons during editing – layout shifts
       // from switching to the edit pane can trigger a resize which
       // recalculates scaledWidth/scaledHeight and would discard the
@@ -676,7 +678,7 @@ export default function MasksAndZonesView({
   }, [currentEditingProfile]);
 
   useSearchEffect("object_mask", (coordinates: string) => {
-    if (!scaledWidth || !scaledHeight || isLoading) {
+    if (!scaledWidth || !scaledHeight || isLoading || !polygonsInitialized) {
       return false;
     }
     // convert box points string to points array

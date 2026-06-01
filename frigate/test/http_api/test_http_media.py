@@ -403,3 +403,75 @@ class TestHttpMedia(BaseTestHttp):
             assert len(summary) == 1
             assert "2024-03-10" in summary
             assert summary["2024-03-10"] is True
+
+    def test_recordings_unavailable_reports_gap_between_recordings(self):
+        """A gap between two recordings is reported as an unavailable segment."""
+        with AuthTestClient(self.app) as client:
+            # Two recordings with a 20s gap (1010-1030) between them.
+            Recordings.insert(
+                id="rec_a",
+                path="/media/recordings/a.mp4",
+                camera="front_door",
+                start_time=1000,
+                end_time=1010,
+                duration=10,
+                motion=0,
+            ).execute()
+            Recordings.insert(
+                id="rec_b",
+                path="/media/recordings/b.mp4",
+                camera="front_door",
+                start_time=1030,
+                end_time=1040,
+                duration=10,
+                motion=0,
+            ).execute()
+
+            response = client.get(
+                "/recordings/unavailable",
+                params={
+                    "after": 1000,
+                    "before": 1040,
+                    "scale": 5,
+                    "cameras": "front_door",
+                },
+            )
+
+            assert response.status_code == 200
+            assert response.json() == [{"start_time": 1010, "end_time": 1030}]
+
+    def test_recordings_unavailable_merges_overlapping_recordings(self):
+        """Overlapping recordings are merged so no false gap is reported."""
+        with AuthTestClient(self.app) as client:
+            # Overlapping recordings spanning the whole requested range.
+            Recordings.insert(
+                id="rec_a",
+                path="/media/recordings/a.mp4",
+                camera="front_door",
+                start_time=1000,
+                end_time=1020,
+                duration=20,
+                motion=0,
+            ).execute()
+            Recordings.insert(
+                id="rec_b",
+                path="/media/recordings/b.mp4",
+                camera="front_door",
+                start_time=1010,
+                end_time=1030,
+                duration=20,
+                motion=0,
+            ).execute()
+
+            response = client.get(
+                "/recordings/unavailable",
+                params={
+                    "after": 1000,
+                    "before": 1030,
+                    "scale": 5,
+                    "cameras": "front_door",
+                },
+            )
+
+            assert response.status_code == 200
+            assert response.json() == []
