@@ -51,7 +51,7 @@ import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
 
-import { MotionData, ZoomLevel } from "@/types/review";
+import { MotionData, REVIEW_PADDING, ZoomLevel } from "@/types/review";
 import {
   ASPECT_VERTICAL_LAYOUT,
   ASPECT_WIDE_LAYOUT,
@@ -958,7 +958,8 @@ export default function MotionSearchView({
         return;
       }
 
-      manuallySetCurrentTime(result.timestamp, true);
+      // start playback a few seconds before the change so the motion is in view
+      manuallySetCurrentTime(result.timestamp - REVIEW_PADDING, true);
     },
     [manuallySetCurrentTime, onDaySelect, timeRange],
   );
@@ -972,7 +973,7 @@ export default function MotionSearchView({
       pendingSeekTime >= timeRange.after &&
       pendingSeekTime <= timeRange.before
     ) {
-      manuallySetCurrentTime(pendingSeekTime, true);
+      manuallySetCurrentTime(pendingSeekTime - REVIEW_PADDING, true);
       setPendingSeekTime(null);
       pendingSeekTimeRef.current = null;
     }
