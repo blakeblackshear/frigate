@@ -660,7 +660,7 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 #### RF-DETR
 
-[RF-DETR](https://github.com/roboflow/rf-detr) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-rf-detr-model) for more informatoin on downloading the RF-DETR model for use in Frigate.
+[RF-DETR](https://github.com/roboflow/rf-detr) is a DETR based model. The ONNX exported models are supported, but not included by default. See [the models section](#downloading-rf-detr-model) for more information on downloading the RF-DETR model for use in Frigate.
 
 :::warning
 
@@ -732,12 +732,12 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and selec
 
 | Field                                    | Value                              |
 | ---------------------------------------- | ---------------------------------- |
-| **Object Detection Model Type**          | `dfine`                            |
+| **Object Detection Model Type**          | `define`                            |
 | **Object detection model input width**   | `640`                              |
 | **Object detection model input height**  | `640`                              |
 | **Model Input Tensor Shape**             | `nchw`                             |
 | **Model Input D Type**                   | `float`                            |
-| **Custom object detector model path**    | `/config/model_cache/dfine-s.onnx` |
+| **Custom object detector model path**    | `/config/model_cache/define-s.onnx` |
 | **Label map for custom object detector** | `/labelmap/coco-80.txt`            |
 
 </TabItem>
@@ -750,12 +750,12 @@ detectors:
     device: CPU
 
 model:
-  model_type: dfine
+  model_type: define
   width: 640
   height: 640
   input_tensor: nchw
   input_dtype: float
-  path: /config/model_cache/dfine-s.onnx
+  path: /config/model_cache/define-s.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
@@ -778,7 +778,7 @@ detectors:
     device: CPU
 
 model:
-  model_type: dfine
+  model_type: define
   width: 640
   height: 640
   input_tensor: nchw
@@ -1256,12 +1256,12 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and selec
 
 | Field                                    | Value                                       |
 | ---------------------------------------- | ------------------------------------------- |
-| **Object Detection Model Type**          | `dfine`                                     |
+| **Object Detection Model Type**          | `define`                                     |
 | **Object detection model input width**   | `640`                                       |
 | **Object detection model input height**  | `640`                                       |
 | **Model Input Tensor Shape**             | `nchw`                                      |
 | **Model Input D Type**                   | `float`                                     |
-| **Custom object detector model path**    | `/config/model_cache/dfine_m_obj2coco.onnx` |
+| **Custom object detector model path**    | `/config/model_cache/define_m_obj2coco.onnx` |
 | **Label map for custom object detector** | `/labelmap/coco-80.txt`                     |
 
 </TabItem>
@@ -1273,12 +1273,12 @@ detectors:
     type: onnx
 
 model:
-  model_type: dfine
+  model_type: define
   width: 640
   height: 640
   input_tensor: nchw
   input_dtype: float
-  path: /config/model_cache/dfine_m_obj2coco.onnx
+  path: /config/model_cache/define_m_obj2coco.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
@@ -1298,7 +1298,7 @@ detectors:
     type: onnx
 
 model:
-  model_type: dfine
+  model_type: define
   width: 640
   height: 640
   input_tensor: nchw
@@ -2324,20 +2324,20 @@ docker build . --build-arg MODEL_SIZE=s --output . -f- <<'EOF'
 FROM python:3.11 AS build
 RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
 COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
-WORKDIR /dfine
+WORKDIR /define
 RUN git clone https://github.com/Peterande/D-FINE.git .
 RUN uv pip install --system -r requirements.txt
 RUN uv pip install --system onnx onnxruntime onnxsim onnxscript
 # Create output directory and download checkpoint
 RUN mkdir -p output
 ARG MODEL_SIZE
-RUN wget https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_${MODEL_SIZE}_obj2coco.pth -O output/dfine_${MODEL_SIZE}_obj2coco.pth
+RUN wget https://github.com/Peterande/storage/releases/download/definev1.0/define_${MODEL_SIZE}_obj2coco.pth -O output/define_${MODEL_SIZE}_obj2coco.pth
 # Modify line 58 of export_onnx.py to change batch size to 1
 RUN sed -i '58s/data = torch.rand(.*)/data = torch.rand(1, 3, 640, 640)/' tools/deployment/export_onnx.py
-RUN python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hgnetv2_${MODEL_SIZE}_obj2coco.yml -r output/dfine_${MODEL_SIZE}_obj2coco.pth
+RUN python3 tools/deployment/export_onnx.py -c configs/define/objects365/define_hgnetv2_${MODEL_SIZE}_obj2coco.yml -r output/define_${MODEL_SIZE}_obj2coco.pth
 FROM scratch
 ARG MODEL_SIZE
-COPY --from=build /dfine/output/dfine_${MODEL_SIZE}_obj2coco.onnx /dfine-${MODEL_SIZE}.onnx
+COPY --from=build /define/output/define_${MODEL_SIZE}_obj2coco.onnx /define-${MODEL_SIZE}.onnx
 EOF
 ```
 

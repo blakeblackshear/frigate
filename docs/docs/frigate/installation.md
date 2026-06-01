@@ -749,7 +749,7 @@ Failure to remap port 5000 on the host will result in the WebUI and all API endp
 
 :::
 
-Docker containers on macOS can be orchestrated by either [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) or [OrbStack](https://orbstack.dev) (native swift app). The difference in inference speeds is negligable, however CPU, power consumption and container start times will be lower on OrbStack because it is a native Swift application.
+Docker containers on macOS can be orchestrated by either [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) or [OrbStack](https://orbstack.dev) (native swift app). The difference in inference speeds is negligible, however CPU, power consumption and container start times will be lower on OrbStack because it is a native Swift application.
 
 To allow Frigate to use the Apple Silicon Neural Engine / Processing Unit (NPU) the host must be running [Apple Silicon Detector](../configuration/object_detectors.md#apple-silicon-detector) on the host (outside Docker)
 
@@ -768,7 +768,7 @@ services:
       - /path/to/your/recordings:/recordings
     ports:
       - "8971:8971"
-      # If exposing on macOS map to a diffent host port like 5001 or any orher port with no conflicts
+      # If exposing on macOS map to a different host port like 5001 or any orher port with no conflicts
       # - "5001:5000" # Internal unauthenticated access. Expose carefully.
       - "8554:8554" # RTSP feeds
     extra_hosts:
