@@ -492,12 +492,16 @@
       "details": {
         "edit": "Edit camera details",
         "title": "Edit Camera Details",
-        "description": "Update the display name and external URL used for this camera throughout the Frigate UI.",
+        "description": "Update the display name, external URL, and visibility used for this camera throughout the Frigate UI.",
         "friendlyNameLabel": "Display Name",
         "friendlyNameHelp": "Friendly name shown for this camera throughout the Frigate UI. Leave blank to use the camera ID.",
         "webuiUrlLabel": "Camera Web UI URL",
         "webuiUrlHelp": "URL to visit the camera's web UI directly from the Debug view. Leave blank to disable the link.",
-        "webuiUrlInvalid": "Must be a valid URL (e.g., https://example.com)."
+        "webuiUrlInvalid": "Must be a valid URL (e.g., https://example.com).",
+        "dashboardLabel": "Show on Live dashboard",
+        "dashboardHelp": "Show this camera on the Live dashboard.",
+        "reviewLabel": "Show in Review",
+        "reviewHelp": "Show this camera in Review, including the camera filter, motion review, and the history view."
       }
     },
     "cameraConfig": {
