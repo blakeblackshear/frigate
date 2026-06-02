@@ -768,7 +768,7 @@ services:
       - /path/to/your/recordings:/recordings
     ports:
       - "8971:8971"
-      # If exposing on macOS map to a different host port like 5001 or any orher port with no conflicts
+      # If exposing on macOS map to a different host port like 5001 or any other port with no conflicts
       # - "5001:5000" # Internal unauthenticated access. Expose carefully.
       - "8554:8554" # RTSP feeds
     extra_hosts:
