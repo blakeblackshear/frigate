@@ -5,6 +5,7 @@ export interface UiConfig {
   timezone?: string;
   time_format?: "browser" | "12hour" | "24hour";
   dashboard: boolean;
+  review: boolean;
   order: number;
   unit_system?: "metric" | "imperial";
 }

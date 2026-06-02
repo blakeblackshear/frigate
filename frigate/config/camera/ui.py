@@ -16,3 +16,8 @@ class CameraUiConfig(FrigateBaseModel):
         title="Show in UI",
         description="Toggle whether this camera is visible everywhere in the Frigate UI. Disabling this will require manually editing the config to view this camera in the UI again.",
     )
+    review: bool = Field(
+        default=True,
+        title="Show in review",
+        description="Toggle whether this camera is visible in review (the review page and its camera filter, motion review, and the history view).",
+    )

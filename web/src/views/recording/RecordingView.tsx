@@ -123,8 +123,13 @@ export function RecordingView({
 
   const allowedCameras = useAllowedCameras();
   const effectiveCameras = useMemo(
-    () => allCameras.filter((camera) => allowedCameras.includes(camera)),
-    [allCameras, allowedCameras],
+    () =>
+      allCameras.filter(
+        (camera) =>
+          allowedCameras.includes(camera) &&
+          config?.cameras[camera]?.ui?.review !== false,
+      ),
+    [allCameras, allowedCameras, config?.cameras],
   );
   const [mainCamera, setMainCamera] = useState(startCamera);
 
