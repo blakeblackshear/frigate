@@ -75,6 +75,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -704,6 +705,8 @@ type CameraDetailsEditorProps = {
 type CameraDetailsFormValues = {
   friendlyName: string;
   webuiUrl: string;
+  dashboard: boolean;
+  review: boolean;
 };
 
 function CameraDetailsEditor({
@@ -717,11 +720,15 @@ function CameraDetailsEditor({
 
   const currentFriendlyName = config?.cameras?.[cameraName]?.friendly_name;
   const currentWebuiUrl = config?.cameras?.[cameraName]?.webui_url;
+  const currentDashboard = config?.cameras?.[cameraName]?.ui?.dashboard ?? true;
+  const currentReview = config?.cameras?.[cameraName]?.ui?.review ?? true;
 
   const formSchema = useMemo(
     () =>
       z.object({
         friendlyName: z.string(),
+        dashboard: z.boolean(),
+        review: z.boolean(),
         webuiUrl: z.string().refine(
           (val) => {
             const trimmed = val.trim();
@@ -748,6 +755,8 @@ function CameraDetailsEditor({
     defaultValues: {
       friendlyName: currentFriendlyName ?? "",
       webuiUrl: currentWebuiUrl ?? "",
+      dashboard: currentDashboard,
+      review: currentReview,
     },
   });
 
@@ -757,9 +766,18 @@ function CameraDetailsEditor({
       form.reset({
         friendlyName: currentFriendlyName ?? "",
         webuiUrl: currentWebuiUrl ?? "",
+        dashboard: currentDashboard,
+        review: currentReview,
       });
     }
-  }, [open, currentFriendlyName, currentWebuiUrl, form]);
+  }, [
+    open,
+    currentFriendlyName,
+    currentWebuiUrl,
+    currentDashboard,
+    currentReview,
+    form,
+  ]);
 
   const onSubmit = useCallback(
     async (values: CameraDetailsFormValues) => {
@@ -768,12 +786,23 @@ function CameraDetailsEditor({
       // only send fields the user actually changed
       const newFriendly = values.friendlyName.trim() || null;
       const newWebui = values.webuiUrl.trim() || null;
-      const cameraUpdate: Record<string, string | null> = {};
+      const cameraUpdate: Record<string, unknown> = {};
       if (newFriendly !== (currentFriendlyName ?? null)) {
         cameraUpdate.friendly_name = newFriendly;
       }
       if (newWebui !== (currentWebuiUrl ?? null)) {
         cameraUpdate.webui_url = newWebui;
+      }
+
+      const uiUpdate: Record<string, boolean> = {};
+      if (values.dashboard !== currentDashboard) {
+        uiUpdate.dashboard = values.dashboard;
+      }
+      if (values.review !== currentReview) {
+        uiUpdate.review = values.review;
+      }
+      if (Object.keys(uiUpdate).length > 0) {
+        cameraUpdate.ui = uiUpdate;
       }
 
       if (Object.keys(cameraUpdate).length === 0) {
@@ -818,6 +847,8 @@ function CameraDetailsEditor({
       cameraName,
       currentFriendlyName,
       currentWebuiUrl,
+      currentDashboard,
+      currentReview,
       isSaving,
       onConfigChanged,
       t,
@@ -911,6 +942,60 @@ function CameraDetailsEditor({
                       })}
                     </p>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="dashboard"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>
+                        {t("cameraManagement.streams.details.dashboardLabel", {
+                          ns: "views/settings",
+                        })}
+                      </FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        {t("cameraManagement.streams.details.dashboardHelp", {
+                          ns: "views/settings",
+                        })}
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSaving}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="review"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>
+                        {t("cameraManagement.streams.details.reviewLabel", {
+                          ns: "views/settings",
+                        })}
+                      </FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        {t("cameraManagement.streams.details.reviewHelp", {
+                          ns: "views/settings",
+                        })}
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSaving}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />
