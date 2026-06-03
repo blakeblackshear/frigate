@@ -266,7 +266,7 @@ RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_de
     /deps/install_deps.sh
 
 ENV DEFAULT_FFMPEG_VERSION="8.0"
-ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:5.0"
+ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:7.0:5.0"
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
