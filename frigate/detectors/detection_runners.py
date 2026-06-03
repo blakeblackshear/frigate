@@ -340,13 +340,6 @@ class OpenVINOModelRunner(BaseModelRunner):
 
         self.input_tensor: ov.Tensor | None = None
 
-        # Shared, process-wide lock serializing inference across all OpenVINO
-        # runners in this process. Needed both for the JinaV2 case (one runner
-        # shared between text and vision threads) and to prevent two *different*
-        # runners (e.g. an ArcFace face-model build thread and the LPR detector)
-        # from inferring concurrently and corrupting shared OpenVINO state.
-        self._inference_lock = _OPENVINO_LOCK
-
         if not self.complex_model:
             try:
                 input_shape = self.compiled_model.inputs[0].get_shape()
@@ -394,7 +387,7 @@ class OpenVINOModelRunner(BaseModelRunner):
         # process — both the shared-runner JinaV2 case (genai text thread +
         # embeddings vision thread) and distinct runners running on separate
         # threads (e.g. the ArcFace face-model build vs the LPR detector).
-        with self._inference_lock:
+        with _OPENVINO_LOCK:
             from frigate.embeddings.types import EnrichmentModelTypeEnum
 
             if self.model_type in [EnrichmentModelTypeEnum.arcface.value]:
