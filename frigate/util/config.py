@@ -8,7 +8,13 @@ from typing import Any, Optional, Union
 
 from ruamel.yaml import YAML
 
-from frigate.const import CONFIG_DIR, EXPORT_DIR, REDACTED_CREDENTIAL_SENTINEL
+from frigate.const import (
+    CONFIG_DIR,
+    DEFAULT_FFMPEG_VERSION,
+    EXPORT_DIR,
+    INCLUDED_FFMPEG_VERSIONS,
+    REDACTED_CREDENTIAL_SENTINEL,
+)
 from frigate.util.builtin import deep_merge
 from frigate.util.services import get_video_properties
 
@@ -16,6 +22,26 @@ logger = logging.getLogger(__name__)
 
 CURRENT_CONFIG_VERSION = "0.18-0"
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
+
+
+def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
+    """Resolve an ffmpeg version alias or custom path to a binary path.
+
+    A bare version alias that is no longer bundled (for example one that was
+    dropped when the default version changed) falls back to the default
+    bundled version so existing configs keep working across an upgrade or a
+    revert. Custom install paths (anything absolute) are used as-is.
+    """
+    if path == "default" or (
+        not path.startswith("/") and path not in INCLUDED_FFMPEG_VERSIONS
+    ):
+        version = DEFAULT_FFMPEG_VERSION
+    elif path in INCLUDED_FFMPEG_VERSIONS:
+        version = path
+    else:
+        return f"{path}/bin/{binary}"
+
+    return f"/usr/lib/ffmpeg/{version}/bin/{binary}"
 
 
 def redact_credential(obj: dict[str, Any], key: str) -> None:

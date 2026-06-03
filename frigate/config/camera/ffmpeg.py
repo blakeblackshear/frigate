@@ -3,7 +3,7 @@ from typing import Union
 
 from pydantic import Field, field_validator
 
-from frigate.const import DEFAULT_FFMPEG_VERSION, INCLUDED_FFMPEG_VERSIONS
+from frigate.util.config import resolve_ffmpeg_path
 
 from ..base import FrigateBaseModel
 from ..env import EnvString
@@ -49,7 +49,7 @@ class FfmpegConfig(FrigateBaseModel):
     path: str = Field(
         default="default",
         title="FFmpeg path",
-        description='Path to the FFmpeg binary to use or a version alias ("5.0" or "7.0").',
+        description='Path to the FFmpeg binary to use or a version alias ("5.0" or "8.0").',
     )
     global_args: Union[str, list[str]] = Field(
         default=FFMPEG_GLOBAL_ARGS_DEFAULT,
@@ -90,21 +90,11 @@ class FfmpegConfig(FrigateBaseModel):
 
     @property
     def ffmpeg_path(self) -> str:
-        if self.path == "default":
-            return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
-        elif self.path in INCLUDED_FFMPEG_VERSIONS:
-            return f"/usr/lib/ffmpeg/{self.path}/bin/ffmpeg"
-        else:
-            return f"{self.path}/bin/ffmpeg"
+        return resolve_ffmpeg_path(self.path, "ffmpeg")
 
     @property
     def ffprobe_path(self) -> str:
-        if self.path == "default":
-            return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
-        elif self.path in INCLUDED_FFMPEG_VERSIONS:
-            return f"/usr/lib/ffmpeg/{self.path}/bin/ffprobe"
-        else:
-            return f"{self.path}/bin/ffprobe"
+        return resolve_ffmpeg_path(self.path, "ffprobe")
 
 
 class CameraRoleEnum(str, Enum):
