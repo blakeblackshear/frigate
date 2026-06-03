@@ -394,7 +394,7 @@ def collect_state_classification_examples(
 
     # Step 3: Extract keyframes from recordings with crops applied
     keyframes = _extract_keyframes(
-        "/usr/lib/ffmpeg/7.0/bin/ffmpeg", timestamps, temp_dir, cameras
+        "/usr/lib/ffmpeg/8.0/bin/ffmpeg", timestamps, temp_dir, cameras
     )
 
     # Step 4: Select 24 most visually distinct images (they're already cropped)
@@ -566,7 +566,7 @@ def _extract_keyframes(
         relative_time = timestamp - recording.start_time
 
         try:
-            config = FfmpegConfig(path="/usr/lib/ffmpeg/7.0")
+            config = FfmpegConfig(path="/usr/lib/ffmpeg/8.0")
             image_data = get_image_from_recording(
                 config,
                 recording.path,
