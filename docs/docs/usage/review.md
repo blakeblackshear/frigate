@@ -19,11 +19,11 @@ Review items are only created for a camera when **recording is enabled** for tha
 
 The toggle at the top of the page switches between three severities. One is always selected.
 
-| Tab            | Indicator color | What it shows                                                                                     |
-| -------------- | --------------- | ------------------------------------------------------------------------------------------------- |
-| **Alerts**     | dark red        | The activity you most want to see. By default, all `person` and `car` tracked objects are alerts. |
-| **Detections** | orange          | Everything else Frigate tracked that wasn't promoted to an alert.                                 |
-| **Motion**     | yellow          | Periods of significant motion that did **not** produce a tracked object.                          |
+| Tab            | Indicator color | What it shows                                                                                                    |
+| -------------- | --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Alerts**     | dark red        | The activity you most want to see. By default, all `person` and `car` tracked objects are alerts.                |
+| **Detections** | orange          | Everything else Frigate tracked that wasn't promoted to an alert.                                                |
+| **Motion**     | yellow          | Periods of significant motion, with the ability to filter to periods which did **not** produce a tracked object. |
 
 This same color coding is used for the ring around a selected item and the dots on the calendar. How an object is categorized as an alert vs. a detection — and how required zones refine that — is covered in [Alerts and Detections](/configuration/review#alerts-and-detections).
 
@@ -31,12 +31,11 @@ The **Alerts** and **Detections** tabs show a count next to their label. With **
 
 ## Marking items as reviewed
 
-Review items are shown as a grid of thumbnail cards next to a vertical activity timeline. Hovering a card (desktop) plays a short preview inline.
+Review items are shown as a grid of thumbnail cards next to a vertical activity timeline. Hovering a card (desktop) or swiping to the right (mobile) plays a short preview inline.
 
 - **Clicking** a card opens its recording in [History](/usage/history) and marks the item as reviewed.
 - The object chip on each card is **gray** when the item is unreviewed and turns **green** once it has been reviewed.
 - The **Mark these items as reviewed** button marks everything currently shown as reviewed at once.
-- On mobile, **swipe** a card left to mark it reviewed or right to play its preview.
 
 Reviewed state is tracked per user, so marking an item reviewed does not hide it for other users.
 
@@ -135,3 +134,5 @@ To increase the speed of searches:
 ## AI review summaries
 
 When [Generative AI review](/configuration/genai/genai_review) is configured, Frigate can generate a title, description, and threat classification for review items and surface them automatically in Review and History. Clicking the summary chip opens an **AI Analysis** dialog with the generated detail and any flagged concerns.
+
+In Review, an additional icon appears on unreviewed items that the AI classified as **suspicious** (Level 1) or **critical** (Level 2), so the activity that most warrants attention stands out before you open it. The icon goes away once the item has been reviewed.
