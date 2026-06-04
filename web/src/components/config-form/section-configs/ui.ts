@@ -2,7 +2,7 @@ import type { SectionConfigOverrides } from "./types";
 
 const ui: SectionConfigOverrides = {
   base: {
-    sectionDocs: "/configuration/reference",
+    sectionDocs: "/configuration/advanced/reference",
     restartRequired: [],
     fieldOrder: ["dashboard", "order"],
     hiddenFields: ["order"],

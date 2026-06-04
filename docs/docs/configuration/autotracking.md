@@ -167,7 +167,7 @@ A fast [detector](object_detectors.md) is recommended. CPU detectors will not pe
 
 A full-frame zone in `required_zones` is not recommended, especially if you've calibrated your camera and there are `movement_weights` defined in the configuration file. Frigate will continue to autotrack an object that has entered one of the `required_zones`, even if it moves outside of that zone.
 
-Some users have found it helpful to adjust the zone `inertia` value. See the [configuration reference](index.md).
+Some users have found it helpful to adjust the zone `inertia` value. See the [configuration reference](advanced/reference.md).
 
 ## Zooming
 

@@ -55,7 +55,7 @@ If you see repeated "On connect called" messages in your logs, check for another
 
 ### Error: Database Is Locked
 
-SQLite does not work well on a network share, if the `/media` folder is mapped to a network share then [this guide](../configuration/advanced.md#database) should be used to move the database to a location on the internal drive.
+SQLite does not work well on a network share, if the `/media` folder is mapped to a network share then [this guide](../configuration/advanced/system.md#database) should be used to move the database to a location on the internal drive.
 
 ### Unable to publish to MQTT: client is not connected
 

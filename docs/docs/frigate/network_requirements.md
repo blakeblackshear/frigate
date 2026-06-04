@@ -32,7 +32,7 @@ The following models are downloaded automatically the first time their associate
 | [License plate recognition](/configuration/license_plate_recognition)                         | PaddleOCR (detection, classification, recognition) + YOLOv9 plate detector | GitHub               |
 | [Bird classification](/configuration/bird_classification)                                     | MobileNetV2 bird model + label map                                         | GitHub               |
 | [Custom classification](/configuration/custom_classification/state_classification) (training) | MobileNetV2 ImageNet base weights (via Keras)                              | Google storage       |
-| [Audio transcription](/configuration/advanced)                                                | Whisper or Sherpa-ONNX streaming model                                     | HuggingFace / OpenAI |
+| [Audio transcription](/configuration/advanced/system)                                                | Whisper or Sherpa-ONNX streaming model                                     | HuggingFace / OpenAI |
 
 ### Hardware-Specific Detector Models
 

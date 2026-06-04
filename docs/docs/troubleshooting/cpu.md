@@ -24,7 +24,7 @@ Video decoding is one of the most CPU-intensive tasks in Frigate. While an AI ac
 
 ### Configuration
 
-Frigate provides preset configurations for common hardware acceleration scenarios. Set up `hwaccel_args` based on your hardware in your [configuration](../configuration/reference) as described in the [getting started guide](../guides/getting_started).
+Frigate provides preset configurations for common hardware acceleration scenarios. Set up `hwaccel_args` based on your hardware in your [configuration](../configuration/advanced/reference) as described in the [getting started guide](../guides/getting_started).
 
 ### Troubleshooting Hardware Acceleration
 

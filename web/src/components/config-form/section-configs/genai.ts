@@ -2,7 +2,7 @@ import type { SectionConfigOverrides } from "./types";
 
 const genai: SectionConfigOverrides = {
   base: {
-    sectionDocs: "/configuration/genai/config",
+    sectionDocs: "/configuration/genai/genai_config",
     advancedFields: ["*.base_url", "*.provider_options", "*.runtime_options"],
     hiddenFields: ["genai.enabled_in_config"],
     restartRequired: [],

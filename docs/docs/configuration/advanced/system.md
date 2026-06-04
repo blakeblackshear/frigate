@@ -1,7 +1,6 @@
 ---
-id: advanced
-title: Advanced Options
-sidebar_label: Advanced Options
+id: system
+title: System
 ---
 
 import ConfigTabs from "@site/src/components/ConfigTabs";
@@ -202,7 +201,7 @@ model:
 
 :::warning
 
-If the labelmap is customized then the labels used for alerts will need to be adjusted as well. See [alert labels](../configuration/review.md#restricting-alerts-to-specific-labels) for more info.
+If the labelmap is customized then the labels used for alerts will need to be adjusted as well. See [alert labels](../review.md#restricting-alerts-to-specific-labels) for more info.
 
 :::
 
@@ -234,26 +233,16 @@ Some labels have special handling and modifications can disable functionality.
 
 ## Network Configuration
 
-Changes to Frigate's internal network configuration can be made by bind mounting nginx.conf into the container. For example:
-
-```yaml
-services:
-  frigate:
-    container_name: frigate
-    ...
-    volumes:
-      ...
-      - /path/to/your/nginx.conf:/usr/local/nginx/conf/nginx.conf
-```
+Frigate exposes a few networking options. IPv6 and the listen ports are set in the `networking` configuration (or from the Settings UI); more advanced changes require [customizing the bundled Nginx configuration](#customizing-the-nginx-configuration).
 
 ### Enabling IPv6
 
-IPv6 is disabled by default. Enable it in the Frigate configuration.
+By default Frigate listens on IPv4 only. To also listen on IPv6 — on port `5000`, and on `8971` when TLS is configured — enable it in the `networking` configuration.
 
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Networking" /> and expand **IPv6 configuration**, then enable **Enable IPv6**.
+Navigate to <NavPath path="Settings > System > Networking" /> and enable **IPv6**.
 
 </TabItem>
 <TabItem value="yaml">
@@ -261,7 +250,7 @@ Navigate to <NavPath path="Settings > System > Networking" /> and expand **IPv6 
 ```yaml
 networking:
   ipv6:
-    enabled: True
+    enabled: true
 ```
 
 </TabItem>
@@ -299,6 +288,20 @@ networking:
 This setting is for advanced users. For the majority of use cases it's recommended to change the `ports` section of your Docker compose file or use the Docker `run` `--publish` option instead, e.g. `-p 443:8971`. Changing Frigate's ports may break some integrations.
 
 :::
+
+### Customizing the Nginx configuration
+
+More advanced changes to Frigate's internal network configuration can be made by bind mounting your own `nginx.conf` into the container. For example:
+
+```yaml
+services:
+  frigate:
+    container_name: frigate
+    ...
+    volumes:
+      ...
+      - /path/to/your/nginx.conf:/usr/local/nginx/conf/nginx.conf
+```
 
 ## Base path
 
