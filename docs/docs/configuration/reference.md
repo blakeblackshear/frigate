@@ -147,6 +147,13 @@ auth:
   # NOTE: changing this value will not automatically update password hashes, you
   #       will need to change each user password for it to apply
   hash_iterations: 600000
+  # Optional: Map roles to the list of cameras each role can access (default: none)
+  # NOTE: An empty list grants the role access to all cameras. Roles defined here can be
+  #       referenced by proxy header role mapping or assigned to native users.
+  roles:
+    viewer:
+      - front_door
+      - back_yard
 
 # Optional: model modifications
 # NOTE: The default values are for the EdgeTPU detector.
@@ -166,6 +173,9 @@ model:
   # Required: Object detection model input tensor format
   # Valid values are nhwc or nchw (default: shown below)
   input_tensor: nhwc
+  # Optional: Data type of the model input tensor
+  # Valid values are float, float_denorm, or int (default: shown below)
+  input_dtype: int
   # Required: Object detection model type, currently only used with the OpenVINO detector
   # Valid values are ssd, yolox, yolonas (default: shown below)
   model_type: ssd
@@ -196,6 +206,8 @@ audio:
   #  - 500 - medium sensitivity
   #  - 1000 - low sensitivity
   min_volume: 500
+  # Optional: Number of threads to use for audio detection (default: shown below)
+  num_threads: 2
   # Optional: Types of audio to listen for (default: shown below)
   listen:
     - bark
@@ -469,6 +481,8 @@ review:
       - Animals in the garden
     # Optional: Preferred response language (default: English)
     preferred_language: English
+    # Optional: Save thumbnails sent to the GenAI provider for review/debugging purposes (default: shown below)
+    debug_save_thumbnails: False
 
 # Optional: Motion configuration
 # NOTE: Can be overridden at the camera level
@@ -500,6 +514,8 @@ motion:
   #  - 30 - medium sensitivity
   #  - 50 - low sensitivity
   contour_area: 10
+  # Optional: Alpha blending factor used in frame differencing for motion calculation (default: shown below)
+  delta_alpha: 0.2
   # Optional: Alpha value passed to cv2.accumulateWeighted when averaging frames to determine the background (default: shown below)
   # Higher values mean the current frame impacts the average a lot, and a new object will be averaged into the background faster.
   # Low values will cause things like moving shadows to be detected as motion for longer.
@@ -572,6 +588,8 @@ record:
     timelapse_args: "-vf setpts=0.04*PTS -r 30"
     # Optional: Global hardware acceleration settings for timelapse exports. (default: inherit)
     hwaccel_args: auto
+    # Optional: Maximum number of export jobs to process at the same time (default: shown below)
+    max_concurrent: 3
   # Optional: Recording Preview Settings
   preview:
     # Optional: Quality of recording preview (default: shown below).
@@ -638,6 +656,11 @@ snapshots:
   retain:
     # Required: Default retention days (default: shown below)
     default: 10
+    # Optional: Mode for retention. (default: shown below)
+    #   all - save all snapshots regardless of activity
+    #   motion - save snapshots for any detected motion
+    #   active_objects - save snapshots for active/moving objects
+    mode: motion
     # Optional: Per object retention days
     objects:
       person: 15
@@ -714,28 +737,42 @@ lpr:
   enhancement: 0
   # Optional: Save plate images to /media/frigate/clips/lpr for debugging purposes (default: shown below)
   debug_save_plates: False
-  # Optional: List of regex replacement rules to normalize detected plates (default: shown below)
-  replace_rules: {}
+  # Optional: List of regex replacement rules to normalize detected plates before matching (default: none)
+  replace_rules:
+    # Required: regex pattern to match in the detected plate
+    - pattern: "O"
+      # Required: string to replace the matched pattern with
+      replacement: "0"
 
-# Optional: Configuration for AI / LLM provider
+# Optional: Configuration for AI / LLM providers
 # WARNING: Depending on the provider, this will send thumbnails over the internet
 # to Google or OpenAI's LLMs to generate descriptions. GenAI features can be configured at
 # the camera level to enhance privacy for indoor cameras.
+# NOTE: genai is a map of named providers. Each key is a name you choose for the provider,
+#       and each role (chat, descriptions, embeddings) may be assigned to exactly one provider.
 genai:
-  # Required: Provider must be one of ollama, gemini, or openai
-  provider: ollama
-  # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
-  base_url: http://localhost::11434
-  # Required if gemini or openai
-  api_key: "{FRIGATE_GENAI_API_KEY}"
-  # Required: The model to use with the provider.
-  model: gemini-1.5-flash
-  # Optional additional args to pass to the GenAI Provider (default: None)
-  provider_options:
-    keep_alive: -1
-  # Optional: Options to pass during inference calls (default: {})
-  runtime_options:
-    temperature: 0.7
+  # Required: name of the provider (chosen by you, used to reference it elsewhere)
+  my_provider:
+    # Required: Provider must be one of ollama, openai, azure_openai, gemini, or llamacpp
+    provider: ollama
+    # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
+    base_url: http://localhost::11434
+    # Required if gemini or openai
+    api_key: "{FRIGATE_GENAI_API_KEY}"
+    # Required: The model to use with the provider.
+    model: gemini-1.5-flash
+    # Optional: Roles this provider handles (default: shown below)
+    # Each role (chat, descriptions, embeddings) must be assigned to exactly one provider.
+    roles:
+      - chat
+      - descriptions
+      - embeddings
+    # Optional additional args to pass to the GenAI Provider (default: None)
+    provider_options:
+      keep_alive: -1
+    # Optional: Options to pass during inference calls (default: {})
+    runtime_options:
+      temperature: 0.7
 
 # Optional: Configuration for audio transcription
 # NOTE: only the enabled option can be overridden at the camera level
@@ -908,6 +945,9 @@ cameras:
         inertia: 3
         # Optional: Number of seconds that an object must loiter to be considered in the zone (default: shown below)
         loitering_time: 0
+        # Optional: Minimum speed required for an object to be considered present in the zone (default: none)
+        # In real-world units if distances are set. Used for speed-based zone triggers.
+        speed_threshold: 2.5
         # Optional: List of objects that can trigger this zone (default: all tracked objects)
         objects:
           - person
@@ -945,6 +985,9 @@ cameras:
       order: 0
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
+      # Optional: Whether this camera is visible in review (the review page and its camera
+      # filter, motion review, and the history view) (default: shown below)
+      review: True
 
     # Optional: connect to ONVIF camera
     # to enable PTZ controls.
