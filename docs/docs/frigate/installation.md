@@ -600,7 +600,7 @@ There are several variants of the App available:
 
 If you are using hardware acceleration for ffmpeg, you **may** need to use the _Full Access_ variant of the App. This is because the Frigate App runs in a container with limited access to the host system. The _Full Access_ variant allows you to disable _Protection mode_ and give Frigate full access to the host system.
 
-You can also edit the Frigate configuration file through the [VS Code App](https://github.com/hassio-addons/addon-vscode) or similar. In that case, the configuration file will be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate App you are running. See the list of directories [here](../configuration/index.md#accessing-app-config-dir).
+You can also edit the Frigate configuration file through the [VS Code App](https://github.com/hassio-addons/addon-vscode) or similar. In that case, the configuration file will be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate App you are running. See the list of directories [here](../configuration/advanced/config.md#accessing-app-config-dir).
 
 ## Kubernetes
 

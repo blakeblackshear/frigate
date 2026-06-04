@@ -301,7 +301,7 @@ cameras:
 
 More details on available detectors can be found [here](../configuration/object_detectors.md).
 
-Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they can be configured in <NavPath path="Settings > Global configuration > Objects" /> or via the [configuration file reference](../configuration/reference.md).
+Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they can be configured in <NavPath path="Settings > Global configuration > Objects" /> or via the [configuration file reference](../configuration/advanced/reference.md).
 
 ### Step 5: Setup motion masks
 
@@ -388,14 +388,14 @@ If you only plan to use Frigate for recording, it is still recommended to define
 
 :::
 
-By default, Frigate will retain video of all tracked objects for 10 days. The full set of options for recording can be found [here](../configuration/reference.md).
+By default, Frigate will retain video of all tracked objects for 10 days. The full set of options for recording can be found [here](../configuration/advanced/reference.md).
 
 ### Step 7: Complete config
 
 At this point you have a complete config with basic functionality.
 
-- View [common configuration examples](../configuration/index.md#common-configuration-examples) for a list of common configuration examples.
-- View [full config reference](../configuration/reference.md) for a complete list of configuration options.
+- View [common configuration examples](../configuration/advanced/config.md#common-configuration-examples) for a list of common configuration examples.
+- View [full config reference](../configuration/advanced/reference.md) for a complete list of configuration options.
 
 ### Follow up
 

@@ -1,5 +1,5 @@
 ---
-id: index
+id: config
 title: Frigate Configuration
 ---
 

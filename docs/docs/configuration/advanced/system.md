@@ -1,7 +1,6 @@
 ---
-id: advanced
-title: Advanced Options
-sidebar_label: Advanced Options
+id: system
+title: System
 ---
 
 import ConfigTabs from "@site/src/components/ConfigTabs";
@@ -202,7 +201,7 @@ model:
 
 :::warning
 
-If the labelmap is customized then the labels used for alerts will need to be adjusted as well. See [alert labels](../configuration/review.md#restricting-alerts-to-specific-labels) for more info.
+If the labelmap is customized then the labels used for alerts will need to be adjusted as well. See [alert labels](../review.md#restricting-alerts-to-specific-labels) for more info.
 
 :::
 
