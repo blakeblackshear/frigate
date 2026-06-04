@@ -245,27 +245,6 @@ services:
       - /path/to/your/nginx.conf:/usr/local/nginx/conf/nginx.conf
 ```
 
-### Enabling IPv6
-
-IPv6 is disabled by default. Enable it in the Frigate configuration.
-
-<ConfigTabs>
-<TabItem value="ui">
-
-Navigate to <NavPath path="Settings > System > Networking" /> and expand **IPv6 configuration**, then enable **Enable IPv6**.
-
-</TabItem>
-<TabItem value="yaml">
-
-```yaml
-networking:
-  ipv6:
-    enabled: True
-```
-
-</TabItem>
-</ConfigTabs>
-
 ### Listen on different ports
 
 You can change the ports Nginx uses for listening. The internal port (unauthenticated) and external port (authenticated) can be changed independently. You can also specify an IP address using the format `ip:port` if you wish to bind the port to a specific interface. This may be useful for example to prevent exposing the internal port outside the container.
