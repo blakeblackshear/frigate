@@ -82,9 +82,13 @@ import { MdCategory } from "react-icons/md";
 
 type GeneralSettingsProps = {
   className?: string;
+  large?: boolean;
 };
 
-export default function GeneralSettings({ className }: GeneralSettingsProps) {
+export default function GeneralSettings({
+  className,
+  large,
+}: GeneralSettingsProps) {
   const { t } = useTranslation(["common", "views/settings"]);
   const { getLocaleDocUrl } = useDocDomain();
   const { data: profile } = useSWR("profile");
@@ -225,10 +229,13 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   isDesktop
                     ? "cursor-pointer rounded-lg bg-secondary text-secondary-foreground hover:bg-muted"
                     : "text-secondary-foreground",
+                  large && "size-12",
                   className,
                 )}
               >
-                <LuSettings className="size-5 md:m-[6px]" />
+                <LuSettings
+                  className={cn("md:m-[6px]", large ? "size-6" : "size-5")}
+                />
               </div>
             </TooltipTrigger>
             <TooltipPortal>

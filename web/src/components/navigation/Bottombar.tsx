@@ -4,7 +4,14 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
 import { useEmbeddingsReindexProgress, useFrigateStats } from "@/api/ws";
-import { useContext, useEffect, useMemo } from "react";
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import useStats from "@/hooks/use-stats";
 import GeneralSettings from "../menu/GeneralSettings";
 import useNavigation from "@/hooks/use-navigation";
@@ -21,8 +28,47 @@ import { useTranslation } from "react-i18next";
 function Bottombar() {
   const navItems = useNavigation("secondary");
 
+  // Render 48px touch targets when they fit with even spacing, otherwise fall
+  // back to the compact size. Measured against the live bar width and icon
+  // count (which varies with enabled nav items and the status alert).
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [large, setLarge] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) {
+      return;
+    }
+
+    const TARGET = 48; // standard bottom-nav touch target (px)
+    const MIN_GAP = 8; // minimum spacing between targets (px)
+
+    const compute = () => {
+      const count = el.children.length;
+      if (count === 0) {
+        return;
+      }
+      const needed = count * TARGET + Math.max(count - 1, 0) * MIN_GAP;
+      setLarge(needed <= el.clientWidth);
+    };
+
+    compute();
+
+    const resize = new ResizeObserver(compute);
+    resize.observe(el);
+    // recompute when items are added/removed (e.g. the status alert appears)
+    const mutation = new MutationObserver(compute);
+    mutation.observe(el, { childList: true });
+
+    return () => {
+      resize.disconnect();
+      mutation.disconnect();
+    };
+  }, [navItems]);
+
   return (
     <div
+      ref={containerRef}
       className={cn(
         "absolute inset-x-4 bottom-0 flex h-16 flex-row items-center justify-between",
         isMobile &&
@@ -32,18 +78,25 @@ function Bottombar() {
       )}
     >
       {navItems.map((item) => (
-        <NavItem key={item.id} className="p-2" item={item} Icon={item.icon} />
+        <NavItem
+          key={item.id}
+          large={large}
+          className="p-2"
+          item={item}
+          Icon={item.icon}
+        />
       ))}
-      <GeneralSettings className="p-2" />
-      <StatusAlertNav className="p-2" />
+      <GeneralSettings large={large} className="p-2" />
+      <StatusAlertNav large={large} className="p-2" />
     </div>
   );
 }
 
 type StatusAlertNavProps = {
   className?: string;
+  large?: boolean;
 };
-function StatusAlertNav({ className }: StatusAlertNavProps) {
+function StatusAlertNav({ className, large }: StatusAlertNavProps) {
   const { t } = useTranslation(["views/system"]);
   const { data: initialStats } = useSWR<FrigateStats>("stats", {
     revalidateOnFocus: false,
@@ -105,8 +158,18 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <div className="p-2">
-          <IoIosWarning className="size-5 text-danger md:m-[6px]" />
+        <div
+          className={cn(
+            "flex flex-col items-center justify-center p-2",
+            large && "size-12",
+          )}
+        >
+          <IoIosWarning
+            className={cn(
+              "text-danger md:m-[6px]",
+              large ? "size-6" : "size-5",
+            )}
+          />
         </div>
       </DrawerTrigger>
       <DrawerContent
