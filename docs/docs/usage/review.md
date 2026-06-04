@@ -17,7 +17,9 @@ Review items are only created for a camera when **recording is enabled** for tha
 
 ## Alerts, Detections, and Motion
 
-The toggle at the top of the page switches between three severities. One is always selected.
+Not every segment of video captured by Frigate is of the same level of interest. The people who enter your property may be a higher priority than those just walking by on the sidewalk. For this reason, Frigate sorts **review items** by importance into **alerts** and **detections**, with a separate **Motion** category for significant motion that never became a tracked object.
+
+The toggle at the top of the page switches between these three severities. One is always selected.
 
 | Tab            | Indicator color | What it shows                                                                                                    |
 | -------------- | --------------- | ---------------------------------------------------------------------------------------------------------------- |
