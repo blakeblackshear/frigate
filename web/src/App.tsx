@@ -78,7 +78,9 @@ function DefaultAppView() {
         className={cn(
           "absolute right-0 top-0 overflow-hidden",
           isMobile
-            ? `bottom-${isPWA ? 16 : 12} left-0 md:bottom-16 landscape:bottom-14 landscape:md:bottom-16`
+            ? isPWA
+              ? "bottom-[calc(3rem+env(safe-area-inset-bottom))] left-0 pt-[env(safe-area-inset-top)] md:bottom-[calc(4rem+env(safe-area-inset-bottom))] landscape:pl-[env(safe-area-inset-left)] landscape:pr-[env(safe-area-inset-right)]"
+              : "bottom-12 left-0 md:bottom-16"
             : "bottom-8 left-[52px]",
         )}
       >
