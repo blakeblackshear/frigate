@@ -151,7 +151,7 @@ auth:
   # NOTE: An empty list grants the role access to all cameras. Roles defined here can be
   #       referenced by proxy header role mapping or assigned to native users.
   roles:
-    viewer:
+    my_custom_role:
       - front_door
       - back_yard
 
