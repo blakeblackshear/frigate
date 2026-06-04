@@ -200,4 +200,4 @@ When the skip threshold is exceeded, **no motion is reported** for that frame, m
 
 ## Reviewing Detected Motion
 
-To review what the detector picked up — or to search past recordings for motion in a specific region — see [Reviewing Motion](review.md#reviewing-motion) on the Review page.
+To review what the detector picked up — or to search past recordings for motion in a specific region — see [Reviewing Motion](/usage/review#reviewing-motion) on the Review page.

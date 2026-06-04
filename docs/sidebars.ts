@@ -21,6 +21,12 @@ const sidebars: SidebarsConfig = {
       "guides/ha_network_storage",
       "guides/reverse_proxy",
     ],
+    Usage: [
+      "usage/live",
+      "usage/review",
+      "usage/history",
+      "usage/explore",
+    ],
     Configuration: [
       "configuration/config",
       {
