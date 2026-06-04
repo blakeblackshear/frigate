@@ -25,7 +25,7 @@ A toggle (a drawer on mobile) switches the side panel between three modes:
 
 - **Timeline** — a scrubbable vertical timeline of the selected camera, annotated with a motion line, review-item markers, and gaps where no recording exists.
 - **Events** — a scrollable list of the camera's review items for the time range; clicking one seeks the player to it.
-- **Detail** — the [tracking details inspector](#the-detail-stream) for the objects in view.
+- **Detail** — the [tracking details inspector](#the-detail-view) for the objects in view.
 
 While you are selecting a range to export, the panel temporarily switches to Timeline.
 

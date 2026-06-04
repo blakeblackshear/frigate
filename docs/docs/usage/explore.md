@@ -81,7 +81,7 @@ Deleting a tracked object removes its snapshot, embeddings, and tracking-details
 
 To act on many objects at once, Ctrl/Cmd-click or right-click to start a selection (selected tiles gain a blue ring), then use the toolbar to select all, clear the selection, or delete (admins).
 
-## Semantic Search - Usage and best practices
+## Semantic Search - Usage and best practices {#usage-and-best-practices}
 
 1. Semantic Search is used in conjunction with the other filters available on the Explore page. Use a combination of traditional filtering and Semantic Search for the best results.
 2. Use the thumbnail search type when searching for particular objects in the scene. Use the description search type when attempting to discern the intent of your object.
