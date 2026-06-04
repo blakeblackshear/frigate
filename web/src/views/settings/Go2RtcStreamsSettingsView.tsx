@@ -332,7 +332,7 @@ export default function Go2RtcStreamsSettingsView({
           </div>
           <div className="flex items-center text-sm text-primary-variant">
             <Link
-              to={getLocaleDocUrl("guides/configuring_go2rtc")}
+              to={getLocaleDocUrl("troubleshooting/go2rtc")}
               target="_blank"
               rel="noopener noreferrer"
               className="inline"

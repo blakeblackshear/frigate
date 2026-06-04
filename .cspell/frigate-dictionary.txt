@@ -162,6 +162,7 @@ mpegts
 mqtt
 mse
 msenc
+muxing
 namedtuples
 nbytes
 nchw
@@ -197,6 +198,8 @@ OWASP
 paddleocr
 paho
 passwordless
+PCMA
+PCMU
 popleft
 posthog
 postprocess
@@ -222,7 +225,9 @@ radeontop
 rawvideo
 rcond
 RDONLY
+realmonitor
 rebranded
+recvonly
 referer
 reindex
 Reolink
@@ -239,8 +244,11 @@ rocminfo
 rootfs
 rtmp
 RTSP
+rtsps
+rtspx
 ruamel
 scroller
+sendonly
 setproctitle
 setpts
 shms
@@ -251,6 +259,7 @@ SNDMORE
 socs
 sqliteq
 sqlitevecq
+Srtp
 ssdlite
 statm
 stimeout

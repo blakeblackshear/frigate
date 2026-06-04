@@ -17,7 +17,6 @@ const sidebars: SidebarsConfig = {
     ],
     Guides: [
       "guides/getting_started",
-      "guides/configuring_go2rtc",
       "guides/ha_notifications",
       "guides/ha_network_storage",
       "guides/reverse_proxy",
@@ -96,6 +95,7 @@ const sidebars: SidebarsConfig = {
         "configuration/authentication",
         "configuration/notifications",
         "configuration/profiles",
+        "configuration/go2rtc",
         "configuration/ffmpeg_presets",
         "configuration/pwa",
         "configuration/tls",
@@ -130,6 +130,7 @@ const sidebars: SidebarsConfig = {
     ],
     Troubleshooting: [
       "troubleshooting/faqs",
+      "troubleshooting/go2rtc",
       "troubleshooting/recordings",
       "troubleshooting/dummy-camera",
       {

@@ -401,8 +401,7 @@ At this point you have a complete config with basic functionality.
 
 Now that you have a working install, you can use the following documentation for additional features:
 
-1. [Configuring go2rtc](configuring_go2rtc.md) - Additional live view options and RTSP relay
-2. [Zones](../configuration/zones.md)
-3. [Review](../configuration/review.md)
-4. [Masks](../configuration/masks.md)
-5. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
+1. [Zones](../configuration/zones.md)
+2. [Review](../configuration/review.md)
+3. [Masks](../configuration/masks.md)
+4. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
