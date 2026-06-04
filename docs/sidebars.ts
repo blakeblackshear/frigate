@@ -26,6 +26,7 @@ const sidebars: SidebarsConfig = {
       "usage/review",
       "usage/history",
       "usage/explore",
+      "usage/exports",
     ],
     Configuration: [
       "configuration/config",
@@ -81,7 +82,6 @@ const sidebars: SidebarsConfig = {
           "configuration/cameras",
           "configuration/review",
           "configuration/record",
-          "configuration/exports",
           "configuration/snapshots",
           "configuration/motion_detection",
           "configuration/birdseye",

@@ -13,7 +13,7 @@ New recording segments are written from the camera stream to cache, they are onl
 
 :::tip
 
-To keep a specific clip beyond your retention window, [export](/configuration/exports) it rather than increasing retention for the whole camera. Exports are saved separately and are never removed by retention.
+To keep a specific clip beyond your retention window, [export](/usage/exports) it rather than increasing retention for the whole camera. Exports are saved separately and are never removed by retention.
 
 :::
 

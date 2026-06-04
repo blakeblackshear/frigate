@@ -51,7 +51,7 @@ The **Detail View Settings** at the bottom let you toggle whether the active ite
 
 On desktop, the **Actions** menu (the film icon) collects the things you can do with the footage you are viewing:
 
-- **Export** — save a clip of a chosen time range so it is never removed by retention. The dialog pre-selects the last hour; adjust the range or drag the timeline handles, then export. See [Exports](/configuration/exports) for managing and downloading exports.
+- **Export** — save a clip of a chosen time range so it is never removed by retention. The dialog pre-selects the last hour; adjust the range or drag the timeline handles, then export. See [Exports](/usage/exports) for managing and downloading exports.
 - **Share Timestamp** — generate a link to the current moment (or a custom timestamp) to share with another Frigate user. This is an internal link, not a public share URL.
 - **Motion Search** — scan this camera's recordings for changes in a region you draw. This is the same tool documented under [Reviewing Motion](/usage/review#motion-search).
 - **Debug Replay** (admins) — replay a recorded range back through Frigate's detection pipeline to see how it would be processed.

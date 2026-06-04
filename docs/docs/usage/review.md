@@ -46,7 +46,7 @@ To act on several items at once, start a selection by **Ctrl/Cmd-clicking** a ca
 
 With items selected, an action bar appears with options to:
 
-- **Export** the selected items (a single item exports directly; multiple items open the batch [export](/configuration/exports) dialog),
+- **Export** the selected items (a single item exports directly; multiple items open the batch [export](/usage/exports) dialog),
 - **Mark as reviewed** or **Mark as unreviewed**, and
 - **Delete** them (admins only).
 

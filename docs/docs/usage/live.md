@@ -109,7 +109,7 @@ The single-camera view can capture footage on demand:
 - **Start on-demand recording** begins a manual recording based on the camera's recording retention settings (the button pulses while active). If recording is disabled for the camera, only a snapshot is saved. Use **End on-demand recording** to stop.
 - **Download instant snapshot** saves a still image of the current frame.
 
-See [Recording](/configuration/record) and [Snapshots](/configuration/snapshots) for how retention is configured, and [Exports](/configuration/exports) for keeping a clip permanently.
+See [Recording](/configuration/record) and [Snapshots](/configuration/snapshots) for how retention is configured, and [Exports](/usage/exports) for keeping a clip permanently.
 
 ## PTZ controls
 
