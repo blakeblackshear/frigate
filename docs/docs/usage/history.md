@@ -58,4 +58,12 @@ On desktop, the **Actions** menu (the film icon) collects the things you can do 
 
 You can also capture an instant snapshot of the current frame, and submit a frame to [Frigate+](/integrations/plus) directly from the player (admins only).
 
-When a review item that has an [AI summary](/configuration/genai/genai_review) is on screen, a sparkle chip appears over the video; clicking it opens the **AI Analysis** dialog for that item.
+## AI review summaries
+
+When [Generative AI review](/configuration/genai/genai_review) is configured, Frigate can generate a title, description, and threat classification for review items and surface them as you scrub through History. A review item that has an AI summary exposes its details in a few places:
+
+- **Over the video** — when the item is on screen, a popup appears over the player.
+- **In the Events side panel** — items with a summary show the title below the thumbnail.
+- **In the Detail side panel** — the item's card shows the title alongside its tracking details.
+
+Clicking any of these opens the **AI Analysis** dialog with the generated detail and any flagged concerns for that item.
