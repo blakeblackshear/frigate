@@ -14,7 +14,7 @@ import {
 } from "@/context/statusbar-provider";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { isIOS, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { isPWA } from "@/utils/isPWA";
 import { useTranslation } from "react-i18next";
 
@@ -24,11 +24,11 @@ function Bottombar() {
   return (
     <div
       className={cn(
-        "absolute inset-x-4 bottom-0 flex h-16 flex-row justify-between",
-        isPWA && isIOS
-          ? "portrait:items-start portrait:pt-1 landscape:items-center"
-          : "items-center",
-        isMobile && !isPWA && "h-12 md:h-16",
+        "absolute inset-x-4 bottom-0 flex h-16 flex-row items-center justify-between",
+        isMobile &&
+          (isPWA
+            ? "h-[calc(3rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] md:h-[calc(4rem+env(safe-area-inset-bottom))]"
+            : "h-12 md:h-16 md:pb-2"),
       )}
     >
       {navItems.map((item) => (
