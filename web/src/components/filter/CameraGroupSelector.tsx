@@ -283,7 +283,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
             afterSelect?.();
           }}
         >
-          <LuPlus className="size-5 text-primary" />
+          <LuPencil className="size-5 text-primary" />
         </Button>,
       );
     }
@@ -366,14 +366,25 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
           })}
 
           {isAdmin && (
-            <Button
-              className="bg-secondary text-muted-foreground"
-              aria-label={t("group.add")}
-              size="xs"
-              onClick={() => setAddGroup(true)}
-            >
-              <LuPlus className="size-4 text-primary" />
-            </Button>
+            <Tooltip open={tooltip == "edit"}>
+              <TooltipTrigger asChild>
+                <Button
+                  className="bg-secondary text-muted-foreground"
+                  aria-label={t("group.editGroups")}
+                  size="xs"
+                  onClick={() => setAddGroup(true)}
+                  onMouseEnter={() => showTooltip("edit")}
+                  onMouseLeave={() => showTooltip(undefined)}
+                >
+                  <LuPencil className="size-4 text-primary" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipPortal>
+                <TooltipContent side="right">
+                  {t("group.editGroups")}
+                </TooltipContent>
+              </TooltipPortal>
+            </Tooltip>
           )}
         </div>
       ) : (
