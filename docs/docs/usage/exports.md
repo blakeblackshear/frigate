@@ -3,7 +3,7 @@ id: exports
 title: Exports
 ---
 
-Exports are how you keep a specific piece of footage permanently.
+**Exports** are how you keep a specific piece of footage permanently.
 
 Frigate's recordings are governed by your [retention settings](/configuration/record): once footage ages past its retention window — or, depending on your configuration, once it is only kept where motion, alerts, or detections occurred — it is deleted to free up disk space. An **export** saves a copy of a chosen time range to a separate location that is **never removed by retention**, so it stays available until you delete it yourself.
 

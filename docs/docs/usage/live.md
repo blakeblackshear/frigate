@@ -5,7 +5,7 @@ title: Live View
 
 import NavPath from "@site/src/components/NavPath";
 
-The **Live** view is Frigate's real-time dashboard and the page you land on by default. It shows all of your cameras at a glance, streams your most recent alerts across the top, and lets you open any camera in a full-resolution single-camera view with audio, two-way talk, PTZ, and on-demand recording controls.
+**Live view** is Frigate's real-time dashboard and the page you land on by default. It shows all of your cameras at a glance, streams your most recent alerts across the top, and lets you open any camera in a full-resolution single-camera view with audio, two-way talk, PTZ, and on-demand recording controls.
 
 This page describes how to _use_ the Live view. For how to _configure_ live streaming — go2rtc, stream selection, smart streaming, WebRTC, and audio — see the [Live View configuration](/configuration/live) docs.
 

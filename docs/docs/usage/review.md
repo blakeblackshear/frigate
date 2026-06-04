@@ -5,7 +5,7 @@ title: Review
 
 import NavPath from "@site/src/components/NavPath";
 
-The **Review** view is where you triage what happened on your cameras. It groups activity into **review items** — segments of time on a single camera that bundle together the objects and audio that were active at once — and sorts them into **Alerts**, **Detections**, and **Motion**. From here you can scrub through activity, mark items as reviewed, filter, export, and jump to the full recording in [History](/usage/history).
+**Review** is where you triage what happened on your cameras. It groups activity into **review items** — segments of time on a single camera that bundle together the objects and audio that were active at once — and sorts them into **Alerts**, **Detections**, and **Motion**. From here you can scrub through activity, mark items as reviewed, filter, export, and jump to the full recording in [History](/usage/history).
 
 This page describes how to _use_ the Review view. For how alerts and detections are _configured_ (labels, zones, required zones, retention), see the [Review configuration](/configuration/review) docs.
 
