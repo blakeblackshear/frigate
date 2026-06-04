@@ -394,7 +394,7 @@ By default, Frigate will retain video of all tracked objects for 10 days. The fu
 
 At this point you have a complete config with basic functionality.
 
-- View [common configuration examples](../configuration/advanced/config.md#common-configuration-examples) for a list of common configuration examples.
+- View [common configuration examples](../configuration/config.md#common-configuration-examples) for a list of common configuration examples.
 - View [full config reference](../configuration/advanced/reference.md) for a complete list of configuration options.
 
 ### Follow up

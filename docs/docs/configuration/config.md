@@ -57,7 +57,7 @@ VS Code supports JSON schemas for automatically validating configuration files. 
 
 ## Environment Variable Substitution
 
-Frigate supports the use of environment variables starting with `FRIGATE_` **only** where specifically indicated in the [reference config](./reference.md). For example, the following values can be replaced at runtime by using environment variables:
+Frigate supports the use of environment variables starting with `FRIGATE_` **only** where specifically indicated in the [reference config](./advanced/reference.md). For example, the following values can be replaced at runtime by using environment variables:
 
 ```yaml
 mqtt:
@@ -92,7 +92,7 @@ genai:
 
 ## Common configuration examples
 
-Here are some common starter configuration examples. These can be configured through the Settings UI or via YAML. Refer to the [reference config](./reference.md) for detailed information about all config values.
+Here are some common starter configuration examples. These can be configured through the Settings UI or via YAML. Refer to the [reference config](./advanced/reference.md) for detailed information about all config values.
 
 ### Raspberry Pi Home Assistant App with USB Coral
 

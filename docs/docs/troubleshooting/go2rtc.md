@@ -7,7 +7,7 @@ import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
-This page covers common problems with the bundled [go2rtc](/configuration/advanced/go2rtc) and how to resolve them, whether your cameras were added with the setup wizard or configured by hand.
+This page covers common problems with the bundled [go2rtc](/configuration/go2rtc) and how to resolve them, whether your cameras were added with the setup wizard or configured by hand.
 
 When a stream won't play or behaves oddly, the most important first step is to figure out **where** in the pipeline it breaks. Frigate's live view is a chain — _camera → go2rtc → your browser_ — and each stage fails for different reasons. Work through the checks below in order, then jump to the matching problem category.
 
