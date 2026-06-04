@@ -2,6 +2,8 @@
   "group": {
     "label": "Camera Groups",
     "add": "Add Camera Group",
+    "showAll": "Show all camera groups",
+    "showLess": "Show less",
     "edit": "Edit Camera Group",
     "delete": {
       "label": "Delete Camera Group",

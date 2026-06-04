@@ -404,34 +404,38 @@ export default function LiveDashboardView({
       {isMobile && (
         <div className="relative flex h-11 items-center justify-between">
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
-          <div className="max-w-[45%]">
+          <div className="w-[45%]">
             <CameraGroupSelector />
           </div>
           {(!cameraGroup || cameraGroup == "default" || isMobileOnly) && (
             <div className="flex items-center gap-1">
               <Button
-                className={`p-1 ${
+                className={
                   mobileLayout == "grid"
                     ? "bg-blue-900 bg-opacity-60 focus:bg-blue-900 focus:bg-opacity-60"
                     : "bg-secondary"
-                }`}
+                }
                 aria-label="Use mobile grid layout"
-                size="xs"
+                size="sm"
                 onClick={() => setMobileLayout("grid")}
               >
-                <LiveGridIcon layout={mobileLayout} />
+                <div className="size-5">
+                  <LiveGridIcon layout={mobileLayout} />
+                </div>
               </Button>
               <Button
-                className={`p-1 ${
+                className={
                   mobileLayout == "list"
                     ? "bg-blue-900 bg-opacity-60 focus:bg-blue-900 focus:bg-opacity-60"
                     : "bg-secondary"
-                }`}
+                }
                 aria-label="Use mobile list layout"
-                size="xs"
+                size="sm"
                 onClick={() => setMobileLayout("list")}
               >
-                <LiveListIcon layout={mobileLayout} />
+                <div className="size-5">
+                  <LiveListIcon layout={mobileLayout} />
+                </div>
               </Button>
             </div>
           )}
@@ -439,18 +443,21 @@ export default function LiveDashboardView({
             <div className="flex items-center gap-1">
               <Button
                 className={cn(
-                  "p-1",
                   isEditMode
                     ? "bg-selected text-primary"
                     : "bg-secondary text-secondary-foreground",
                 )}
                 aria-label="Enter layout editing mode"
-                size="xs"
+                size="sm"
                 onClick={() =>
                   setIsEditMode((prevIsEditMode) => !prevIsEditMode)
                 }
               >
-                {isEditMode ? <IoClose /> : <LuLayoutDashboard />}
+                {isEditMode ? (
+                  <IoClose className="size-5" />
+                ) : (
+                  <LuLayoutDashboard className="size-5" />
+                )}
               </Button>
             </div>
           )}
