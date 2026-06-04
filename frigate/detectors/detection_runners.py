@@ -15,6 +15,9 @@ from frigate.util.rknn_converter import auto_convert_model, is_rknn_compatible
 
 logger = logging.getLogger(__name__)
 
+# Process-wide lock serializing all OpenVINO compile/inference calls
+_OPENVINO_LOCK = threading.Lock()
+
 
 def is_arm64_platform() -> bool:
     """Check if we're running on an ARM platform."""
@@ -326,18 +329,16 @@ class OpenVINOModelRunner(BaseModelRunner):
             except Exception as e:
                 logger.debug(f"NPU_TURBO not supported by driver: {e}")
 
-        # Compile model
-        self.compiled_model = self.ov_core.compile_model(
-            model=model_path, device_name=device
-        )
+        # Compile model under the shared lock
+        with _OPENVINO_LOCK:
+            self.compiled_model = self.ov_core.compile_model(
+                model=model_path, device_name=device
+            )
 
-        # Create reusable inference request
-        self.infer_request = self.compiled_model.create_infer_request()
+            # Create reusable inference request
+            self.infer_request = self.compiled_model.create_infer_request()
+
         self.input_tensor: ov.Tensor | None = None
-
-        # Thread lock to prevent concurrent inference (needed for JinaV2 which shares
-        # one runner between text and vision embeddings called from different threads)
-        self._inference_lock = threading.Lock()
 
         if not self.complex_model:
             try:
@@ -382,9 +383,11 @@ class OpenVINOModelRunner(BaseModelRunner):
         Returns:
             List of output tensors
         """
-        # Lock prevents concurrent access to infer_request
-        # Needed for JinaV2: genai thread (text) + embeddings thread (vision)
-        with self._inference_lock:
+        # Shared lock serializes inference across every OpenVINO runner in this
+        # process — both the shared-runner JinaV2 case (genai text thread +
+        # embeddings vision thread) and distinct runners running on separate
+        # threads (e.g. the ArcFace face-model build vs the LPR detector).
+        with _OPENVINO_LOCK:
             from frigate.embeddings.types import EnrichmentModelTypeEnum
 
             if self.model_type in [EnrichmentModelTypeEnum.arcface.value]:

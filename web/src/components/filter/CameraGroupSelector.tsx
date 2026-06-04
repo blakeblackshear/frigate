@@ -283,7 +283,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
             afterSelect?.();
           }}
         >
-          <LuPencil className="size-5 text-primary" />
+          <LuPencil className="size-5 text-primary-variant" />
         </Button>,
       );
     }
@@ -376,7 +376,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                   onMouseEnter={() => showTooltip("edit")}
                   onMouseLeave={() => showTooltip(undefined)}
                 >
-                  <LuPencil className="size-4 text-primary" />
+                  <LuPencil className="size-4 text-primary-variant" />
                 </Button>
               </TooltipTrigger>
               <TooltipPortal>
