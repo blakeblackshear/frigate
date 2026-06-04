@@ -2,7 +2,7 @@ import type { SectionConfigOverrides } from "./types";
 
 const logger: SectionConfigOverrides = {
   base: {
-    sectionDocs: "/configuration/advanced#logger",
+    sectionDocs: "/configuration/advanced/system#frigate-logger",
     restartRequired: ["default", "logs"],
     fieldOrder: ["default", "logs"],
     advancedFields: ["logs"],
