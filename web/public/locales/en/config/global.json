@@ -683,7 +683,7 @@
     "description": "FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
     "path": {
       "label": "FFmpeg path",
-      "description": "Path to the FFmpeg binary to use or a version alias (\"5.0\" or \"8.0\")."
+      "description": "Path to the FFmpeg binary to use or a version alias (\"7.0\" or \"8.0\")."
     },
     "global_args": {
       "label": "FFmpeg global arguments",
