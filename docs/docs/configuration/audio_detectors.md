@@ -174,7 +174,7 @@ Some labels cover several related sounds: `yell` is triggered by shouting, yelli
 
 :::tip
 
-Each label you listen for adds CPU work and can generate more events, so start with a focused set — the defaults (`bark`, `fire_alarm`, `speech`, `yell`) plus a few of the safety labels above cover most needs — and expand from there. See the [full audio labelmap](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) or the Frigate UI for every available type.
+Frequently-heard labels like `speech` can generate a lot of events, and each event could save a snapshot and recording based on your configuration, so start with a focused set — the defaults (`bark`, `fire_alarm`, `speech`, `yell`) plus a few of the safety labels above cover most needs — and expand from there. See the [full audio labelmap](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) or the Frigate UI for every available type.
 
 :::
 
