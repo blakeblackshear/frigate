@@ -88,7 +88,7 @@ Volume is considered motion for recordings, this means when the `record -> retai
 
 ### Configuring Audio Events
 
-The included audio model has over [500 different types](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) of audio that can be detected, many of which are not practical. By default `bark`, `fire_alarm`, `scream`, `speech`, and `yell` are enabled but these can be customized.
+The included audio model has over [500 different types](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) of audio that can be detected, many of which are not practical. By default `bark`, `fire_alarm`, `speech`, and `yell` are enabled but these can be customized.
 
 <ConfigTabs>
 <TabItem value="ui">
@@ -107,7 +107,6 @@ audio:
   listen:
     - bark
     - fire_alarm
-    - scream
     - speech
     - yell
 ```

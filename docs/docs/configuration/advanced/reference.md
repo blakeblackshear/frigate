@@ -212,7 +212,6 @@ audio:
   listen:
     - bark
     - fire_alarm
-    - scream
     - speech
     - yell
   # Optional: Filters to configure detection.
