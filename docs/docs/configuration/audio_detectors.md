@@ -114,6 +114,70 @@ audio:
 </TabItem>
 </ConfigTabs>
 
+### Common Audio Labels
+
+The labelmap includes hundreds of sound types. The labels below are the ones most users may find practical, grouped by what they're typically used for. Use the exact label string from the left column in your `listen` config, or search for the label in the Frigate UI directly.
+
+Some labels cover several related sounds: `yell` is triggered by shouting, yelling, children shouting, and screaming; `crying` covers baby cries, sobbing, and whimpering; and `speech` covers ordinary talking and conversation.
+
+**Safety and security**
+
+| Label            | Detects                            |
+| ---------------- | ---------------------------------- |
+| `yell`           | Shouting, yelling, screaming       |
+| `fire_alarm`     | Fire and smoke alarm sirens        |
+| `smoke_detector` | Smoke detector beeps               |
+| `alarm`          | General alarm sounds               |
+| `car_alarm`      | Car alarms                         |
+| `siren`          | Emergency vehicle and civil sirens |
+| `glass`          | Glass clinking                     |
+| `shatter`        | Breaking glass                     |
+| `breaking`       | Something breaking                 |
+| `gunshot`        | Gunshots                           |
+| `explosion`      | Explosions                         |
+
+**People and activity**
+
+| Label       | Detects                  |
+| ----------- | ------------------------ |
+| `speech`    | Talking and conversation |
+| `laughter`  | Laughing                 |
+| `crying`    | Baby crying and sobbing  |
+| `cough`     | Coughing                 |
+| `footsteps` | Footsteps and walking    |
+| `knock`     | Knocking on a door       |
+| `doorbell`  | Doorbell                 |
+| `ding-dong` | Doorbell chime           |
+
+**Pets and animals**
+
+| Label      | Detects          |
+| ---------- | ---------------- |
+| `bark`     | Dog barking      |
+| `dog`      | Other dog sounds |
+| `howl`     | Howling          |
+| `growling` | Growling         |
+| `meow`     | Cat meowing      |
+| `cat`      | Other cat sounds |
+| `hiss`     | Hissing          |
+
+**Vehicles and driveway**
+
+| Label             | Detects              |
+| ----------------- | -------------------- |
+| `car`             | Passing cars         |
+| `honk`            | Car horns            |
+| `truck`           | Trucks               |
+| `reversing_beeps` | Vehicle backup beeps |
+| `motorcycle`      | Motorcycles          |
+| `engine_starting` | Engines starting     |
+
+:::tip
+
+Each label you listen for adds CPU work and can generate more events, so start with a focused set — the defaults (`bark`, `fire_alarm`, `speech`, `yell`) plus a few of the safety labels above cover most needs — and expand from there. See the [full audio labelmap](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) or the Frigate UI for every available type.
+
+:::
+
 ### Audio Transcription
 
 Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI's open-source Whisper models via `faster-whisper`. The goal of this feature is to support Semantic Search for `speech` audio events. Frigate is not intended to act as a continuous, fully-automatic speech transcription service — automatically transcribing all speech (or queuing many audio events for transcription) requires substantial CPU (or GPU) resources and is impractical on most systems. For this reason, transcriptions for events are initiated manually from the UI or the API rather than being run continuously in the background.
