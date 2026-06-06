@@ -386,11 +386,14 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const beforeContent = renderCustom(beforeSpec);
   const afterContent = renderCustom(afterSpec);
 
-  // Read field-level conditional messages from FieldMessagesContext
+  // Read field-level conditional messages from FieldMessagesContext.
+  // For multi-schema fields (anyOf/oneOf), FieldTemplate renders twice for
+  // the same path (wrapper + inner branch); skip the wrapper pass so the
+  // message isn't shown twice, mirroring how labels/descriptions dedupe.
   const fieldPathStr = pathSegments.join(".");
-  const fieldMessageSpecs = allFieldMessages.filter(
-    (m) => m.field === fieldPathStr,
-  );
+  const fieldMessageSpecs = isMultiSchemaWrapper
+    ? []
+    : allFieldMessages.filter((m) => m.field === fieldPathStr);
   const beforeMessages = fieldMessageSpecs.filter(
     (m) => (m.position ?? "before") === "before",
   );
