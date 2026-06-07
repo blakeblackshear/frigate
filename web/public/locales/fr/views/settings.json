@@ -1377,6 +1377,54 @@
       "inherit": "Hériter",
       "enabled": "Activé",
       "disabled": "Désactivé"
+    },
+    "clone": {
+      "target": {
+        "newNameLabel": "Nom de la caméra",
+        "newNamePlaceholder": "p.ex., porte_arriere ou Porte arrière",
+        "newNameRequired": "Le nom de la caméra est requis",
+        "newNameInvalid": "Nom de caméra invalide",
+        "newNameCollision": "Une caméra avec ce nom existe déjà",
+        "newStreamsForced": "Les flux sont toujours copiés pour une nouvelle caméra.",
+        "existingCamerasRadio": "Caméras existantes",
+        "allCameras": "Toutes les caméras",
+        "existingPlaceholder": "Sélectionnez au moins une caméra",
+        "existingDisabled": "Aucune autre caméra à copier vers"
+      },
+      "categories": {
+        "legend": "Paramètres à cloner",
+        "description": "Choisissez quels paramètres copier depuis la caméra source.",
+        "selectAll": "Sélectionner tout",
+        "selectNone": "Sélectionner aucun",
+        "resetDefaults": "Rétablir à la configuration d'usine",
+        "general": "Général",
+        "spatial": "Paramètres spatiaux",
+        "streams": "Flux",
+        "spatialWarning": "La résolution détectée ({{srcWidth}}x{{srcHeight}}) de la caméra source {{srcCamera}} diffère de : {{cameras}}. Les polygones peuvent ne pas être alignés sur ces caméras. Ces paramètres sont désactivés ; activer pour copier tel quel.",
+        "restartHint": "Redémarrage requis",
+        "items": {
+          "record": "En cours d'enregistrement",
+          "objects": "Objets",
+          "audio": "Détection audio",
+          "audio_transcription": "Transcription audio",
+          "notifications": "Notifications",
+          "mqtt": "MQTT",
+          "onvif": "ONVIF",
+          "face_recognition": "Reconnaissance faciale",
+          "semantic_search": "Recherche sémantique"
+        }
+      },
+      "footer": {
+        "submit": "Cloner",
+        "submitting": "Clonage…"
+      },
+      "toast": {
+        "success": "Paramètres copiés vers {{cameraName}}",
+        "successWithRestart": "Paramètres copiés vers {{cameraName}}. Redémarrez Frigate afin d'appliquer tous les changements.",
+        "successMulti_one": "Paramètres copiés vers {{count}} caméra",
+        "successMulti_many": "Paramètres copiés vers {{count}} caméras",
+        "successMulti_other": "Paramètres copiés vers {{count}} caméras"
+      }
     }
   },
   "cameraReview": {
