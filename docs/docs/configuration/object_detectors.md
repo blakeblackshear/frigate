@@ -494,7 +494,7 @@ detectors:
 | [YOLO-NAS](#yolo-nas)                 | ✅  | ✅  |                                                              |
 | [MobileNet v2](#ssdlite-mobilenet-v2) | ✅  | ✅  | Fast and lightweight model, less accurate than larger models |
 | [YOLOX](#yolox)                       | ✅  | ?   |                                                              |
-| [D-FINE](#d-fine)                     | ❌  | ❌  |                                                              |
+| [D-FINE / DEIMv2](#d-fine--deimv2)    | ❌  | ❌  |                                                              |
 | [NanoDet-Plus](#nanodet-plus)         | ?   | ?   |                                                              |
 
 #### SSDLite MobileNet v2
