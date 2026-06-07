@@ -921,6 +921,41 @@
                 "label": "Opprinnelig GenAI-status",
                 "description": "Indikerer om GenAI var aktivert i den opprinnelige statiske konfigurasjonen."
             }
+        },
+        "filters_attribute": {
+            "label": "Attributtfiltre",
+            "description": "Filtre som brukes på detekterte attributter for å redusere falske positiver (område, sideforhold, konfidens).",
+            "min_area": {
+                "label": "Minimum attributtområde",
+                "description": "Minimum areal for markeringsrammen(piksler eller prosent) som kreves for dette attributtet. Kan oppgis i piksler (heltall) eller prosent (desimaltall mellom 0.000001 og 0.99)."
+            },
+            "max_area": {
+                "label": "Maksimum attributtområde",
+                "description": "Maksimum areal for markeringsrammen (piksler eller prosent) tillatt for dette attributtet. Kan oppgis i piksler (heltall) eller prosent (desimaltall mellom 0.000001 og 0.99)."
+            },
+            "min_ratio": {
+                "label": "Minimum sideforhold",
+                "description": "Minimum bredde-/høydeforhold som kreves for at markeringsrammen skal kvalifisere."
+            },
+            "max_ratio": {
+                "label": "Maksimum sideforhold",
+                "description": "Maksimum bredde-/høydeforhold tillatt for at markeringsrammen skal kvalifisere."
+            },
+            "threshold": {
+                "label": "Konfidensterskel",
+                "description": "Gjennomsnittlig terskel for deteksjonskonfidens som kreves for at attributtet skal anses som en ekte positiv."
+            },
+            "min_score": {
+                "label": "Minimum konfidens",
+                "description": "Minimum deteksjonskonfidens i et enkeltbilde som kreves for å knytte dette attributtet til sitt hovedobjekt."
+            },
+            "mask": {
+                "label": "Filtermaske",
+                "description": "Polygonkoordinater som definerer hvor denne masken gjelder innenfor bildet."
+            },
+            "raw_mask": {
+                "label": "Råmaske"
+            }
         }
     },
     "record": {
@@ -970,7 +1005,7 @@
                 },
                 "mode": {
                     "label": "Bevaringsmodus",
-                    "description": "Modus for bevaring: all (alle), motion (bevegelse) eller active_objects (aktive objekter)."
+                    "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
                 }
             }
         },
@@ -994,7 +1029,7 @@
                 },
                 "mode": {
                     "label": "Bevaringsmodus",
-                    "description": "Modus for bevaring: all (lagre alle segmenter), motion (lagre segmenter med bevegelse) eller active_objects (lagre segmenter med aktive objekter)."
+                    "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
                 }
             }
         },
@@ -1151,7 +1186,7 @@
             },
             "mode": {
                 "label": "Bevaringsmodus",
-                "description": "Modus for bevaring: all (lagre alle segmenter), motion (lagre segmenter med bevegelse) eller active_objects (lagre segmenter med aktive objekter)."
+                "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
             },
             "objects": {
                 "label": "Objektbevaring",

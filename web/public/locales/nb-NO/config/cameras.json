@@ -446,7 +446,7 @@
                 },
                 "mode": {
                     "label": "Bevaringsmodus",
-                    "description": "Modus for bevaring: all (alle), motion (bevegelse) eller active_objects (aktive objekter)."
+                    "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
                 }
             }
         },
@@ -470,7 +470,7 @@
                 },
                 "mode": {
                     "label": "Bevaringsmodus",
-                    "description": "Modus for bevaring: all (lagre alle segmenter), motion (lagre segmenter med bevegelse) eller active_objects (lagre segmenter med aktive objekter)."
+                    "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
                 }
             }
         },
@@ -627,7 +627,7 @@
             },
             "mode": {
                 "label": "Bevaringsmodus",
-                "description": "Modus for bevaring: all (lagre alle segmenter), motion (lagre segmenter med bevegelse) eller active_objects (lagre segmenter med aktive objekter)."
+                "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
             },
             "objects": {
                 "label": "Objektbevaring",

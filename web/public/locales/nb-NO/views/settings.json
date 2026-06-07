@@ -16,7 +16,8 @@
     "globalConfig": "Global konfigurasjon - Frigate",
     "cameraConfig": "Kamerakonfigurasjon - Frigate",
     "profiles": "Profiler - Frigate",
-    "maintenance": "Vedlikehold - Frigate"
+    "maintenance": "Vedlikehold - Frigate",
+    "detectorsAndModel": "Detektorer og modell - Frigate"
   },
   "menu": {
     "classification": "Klassifisering",
@@ -91,7 +92,8 @@
     "system": "System",
     "systemTelemetry": "Telemetri",
     "systemTls": "TLS",
-    "maintenance": "Vedlikehold"
+    "maintenance": "Vedlikehold",
+    "systemDetectorsAndModel": "Detektorer og modell"
   },
   "dialog": {
     "unsavedChanges": {
@@ -786,7 +788,7 @@
       "supportedDetectors": "Støttede detektorer",
       "dimensions": "Dimensjoner",
       "cameras": "Kameraer",
-      "availableModels": "Tilgjengelige modeller",
+      "availableModels": "Tilgjengelige Frigate+ modeller",
       "modelSelect": "Dine tilgjengelige modeller på Frigate+ kan velges her. Merk at bare modeller som er kompatible med din nåværende detektorkonfigurasjon kan velges.",
       "plusModelType": {
         "userModel": "Finjustert",
@@ -825,7 +827,8 @@
       "currentModel": "Gjeldende modell",
       "configuration": "Konfigurasjon"
     },
-    "description": "Frigate+ er en abonnementstjeneste som gir tilgang til tilleggsfunksjoner og kapasiteter for Frigate-instansen din, inkludert muligheten til å bruke egendefinerte objektdeteksjonsmodeller trent på dine egne data. Du kan administrere innstillingene for Frigate+-modellen din her."
+    "description": "Frigate+ er en abonnementstjeneste som gir tilgang til tilleggsfunksjoner og kapasiteter for Frigate-instansen din, inkludert muligheten til å bruke egendefinerte objektdeteksjonsmodeller trent på dine egne data. Du kan administrere innstillingene for Frigate+-modellen din her.",
+    "changeInDetectorsAndModel": "Endre modell"
   },
   "enrichments": {
     "title": "Innstillinger for utvidelser",
@@ -1366,14 +1369,17 @@
       "disableDesc": "Aktiver et kamera som for øyeblikket ikke er synlig i grensesnittet og deaktivert i konfigurasjonen. En omstart av Frigate kreves etter aktivering.",
       "enableSuccess": "Aktiverte {{cameraName}} i konfigurasjonen. Start Frigate på nytt for å ta i bruk endringene.",
       "enableLabel": "Aktiverte kameraer",
-      "enableDesc": "Deaktiver et aktivert kamera midlertidig frem til Frigate starter på nytt. Deaktivering av et kamera stopper all prosessering av kameraets strømmer. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke videreformidling (restream) i go2rtc.</em>",
+      "enableDesc": "Deaktiver et aktivert kamera midlertidig frem til Frigate starter på nytt. Deaktivering av et kamera stopper all prosessering av kameraets strømmer. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke videreformidling (restream) i go2rtc.</em><br /><br />Dra i feltet for å endre rekkefølgen på kameraene slik de vises i grensesnittet. Rekkefølgen på de aktiverte kameraene vil gjenspeiles i hele grensesnittet, inkludert Live-dashbordet og rullegardinmenyene for kameravalg.",
       "disableLabel": "Deaktiverte kameraer",
       "friendlyName": {
         "edit": "Rediger visningsnavn for kamera",
         "title": "Rediger visningsnavn",
         "description": "Angi visningsnavnet som skal brukes for dette kameraet i Frigate-grensesnittet. La feltet stå tomt for å bruke kamera-ID.",
         "rename": "Omdøp"
-      }
+      },
+      "reorderHandle": "Dra for å endre rekkefølge",
+      "saving": "Lagrer…",
+      "saved": "Lagret"
     },
     "cameraConfig": {
       "add": "Legg til kamera",
@@ -1432,7 +1438,7 @@
       "dedicatedLpr": "Dedikert LPR (lesing av kjennemerker)",
       "saveSuccess": "Kameratype oppdatert for {{cameraName}}. Start Frigate på nytt for å bruke endringene."
     },
-    "description": "Legg til, rediger og slett kameraer, kontroller hvilke kameraer som er aktivert, og konfigurer overstyringer for hver profil og kameratype. For å konfigurere strømmer, deteksjon, bevegelse og andre kameraspesifikke innstillinger, velg den aktuelle seksjonen under Kamerakonfigurasjon."
+    "description": "Legg til, rediger og slett kameraer. Kontroller hvilke kameraer som er aktivert og konfigurer overstyringer for hver profil og kameratype. For å konfigurere strømmer, deteksjon, bevegelse og andre kameraspesifikke innstillinger, velg den aktuelle seksjonen under Kamerakonfigurasjon."
   },
   "cameraReview": {
     "title": "Innstillinger for kamerainspeksjon",
@@ -1702,7 +1708,7 @@
   "go2rtcStreams": {
     "description": "Administrer go2rtc-strømkonfigurasjoner for videreformidling av kamera-strømmer. Hver strøm har ett navn og én eller flere kilde-URL-er.",
     "ffmpeg": {
-      "hardwareAuto": "Automatisk maskinvareakselerasjon",
+      "hardwareAuto": "Automatisk (anbefalt)",
       "useFfmpegModule": "Bruk kompatibilitetsmodus (ffmpeg)",
       "audioExclude": "Ekskluder",
       "videoExclude": "Ekskluder",
@@ -1719,7 +1725,15 @@
       "audioPcma": "Transkod til PCM A-law",
       "audioPcmu": "Transkod til PCM μ-law",
       "audioAac": "Transkod til AAC",
-      "video": "Video"
+      "video": "Video",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "Legg til videokodek",
+      "addAudioCodec": "Legg til lydkodek",
+      "removeCodec": "Fjern kodek"
     },
     "validation": {
       "nameDuplicate": "En strøm med dette navnet eksisterer allerede",
@@ -1739,7 +1753,8 @@
     "addStreamDesc": "Skriv inn et navn for den nye strømmen. Dette navnet vil bli brukt til å referere til strømmen i kamerakonfigurasjonen din.",
     "renameStreamDesc": "Skriv inn et nytt navn for denne strømmen. Endring av navn kan ødelegge for kameraer eller andre strømmer som refererer til den ved navn.",
     "deleteStream": "Slett strøm",
-    "streamName": "Strømnavn"
+    "streamName": "Strømnavn",
+    "streamNumber": "Strøm {{index}}"
   },
   "profiles": {
     "active": "Aktiv",
@@ -1946,7 +1961,9 @@
     "saveAllPartial_one": "{{successCount}} av {{totalCount}} seksjoner lagret. {{failCount}} feilet.",
     "saveAllPartial_other": "{{successCount}} av {{totalCount}} seksjoner lagret. {{failCount}} feilet.",
     "saveAllSuccess_one": "{{count}} seksjon ble lagret.",
-    "saveAllSuccess_other": "{{count}} seksjoner ble lagret."
+    "saveAllSuccess_other": "{{count}} seksjoner ble lagret.",
+    "saveAllSuccessRestartRequired_one": "Lagret {{count}} seksjon. Start Frigate på nytt for å aktivere endringene.",
+    "saveAllSuccessRestartRequired_other": "Alle {{count}} seksjoner ble lagret. Start Frigate på nytt for å aktivere endringene."
   },
   "cameraConfig": {
     "toast": {
@@ -1969,6 +1986,13 @@
       "objects": "Objekter",
       "motion": "Bevegelse",
       "continuous": "Kontinuerlig"
+    },
+    "cameraOrder": {
+      "label": "Kamerarekkefølge",
+      "description": "Dra kameraene for å angi rekkefølgen deres i Fugleperspektiv-oppsettet.",
+      "reorderHandle": "Dra for å endre rekkefølge",
+      "saving": "Lagrer…",
+      "saved": "Lagret"
     }
   },
   "snapshot": {
@@ -2025,5 +2049,35 @@
     "medium": "Middels",
     "low": "Lav",
     "very_low": "Svært lav"
+  },
+  "menuDot": {
+    "overrideGlobal": "Denne seksjonen overstyrer den globale konfigurasjonen",
+    "overrideProfile": "Denne seksjonen overstyres av {{profile}}-profilen",
+    "unsaved": "Denne seksjonen har ulagrede endringer"
+  },
+  "detectorsAndModel": {
+    "title": "Detektorer og modell",
+    "description": "Konfigurer detektor-bakenden som kjører objektdeteksjon, og modellen den bruker. Endringer lagres sammen slik at detektoren og modellen forblir synkronisert.",
+    "cardTitles": {
+      "detector": "Detektor-maskinvare",
+      "model": "Deteksjonsmodell"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Egendefinert modell"
+    },
+    "mismatch": {
+      "warning": "Den gjeldende Frigate+-modellen \"{{model}}\" krever {{required}}-detektoren. Velg en kompatibel modell nedenfor eller bytt til Egendefinert modell før du lagrer."
+    },
+    "plusModel": {
+      "requiresDetector": "Krever: {{detector}}",
+      "noModelSelected": "Velg en Frigate+ modell"
+    },
+    "toast": {
+      "saveSuccess": "Innstillinger for detektorer og modell er lagret. Start Frigate på nytt for å aktivere endringene.",
+      "saveError": "Kunne ikke lagre innstillinger for detektorer og modell"
+    },
+    "unsavedChanges": "Ulagrede endringer for detektorer og modell",
+    "restartRequired": "Omstart kreves (detektor eller modell er endret)"
   }
 }
