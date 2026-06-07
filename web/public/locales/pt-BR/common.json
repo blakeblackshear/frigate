@@ -158,7 +158,9 @@
     "resetToDefault": "Redefinir para o Padrão",
     "saveAll": "Salvar Tudo",
     "savingAll": "Salvando Tudo…",
-    "undoAll": "Desfazer Tudo"
+    "undoAll": "Desfazer Tudo",
+    "applying": "Aplicando…",
+    "retry": "Tente novamente"
   },
   "menu": {
     "system": "Sistema",
@@ -207,7 +209,8 @@
       "gl": "Galego (Galego)",
       "id": "Bahasa Indonesia (Indonésio)",
       "ur": "اردو (Urdu)",
-      "hr": "Hrvatski (Croata)"
+      "hr": "Hrvatski (Croata)",
+      "bs": "Bosanski (Bósnio)"
     },
     "systemLogs": "Logs de sistema",
     "settings": "Configurações",
@@ -263,7 +266,9 @@
     },
     "classification": "Classificação",
     "chat": "Chat",
-    "profiles": "Perfis"
+    "profiles": "Perfis",
+    "actions": "Ações",
+    "features": "Funcionalidades"
   },
   "toast": {
     "copyUrlToClipboard": "URL copiada para a área de transferência.",
@@ -272,7 +277,8 @@
       "error": {
         "title": "Falha ao salvar as alterações de configuração: {{errorMessage}}",
         "noMessage": "Falha ao salvar as alterações de configuração"
-      }
+      },
+      "success": "Alterações salvas com sucesso."
     }
   },
   "role": {
@@ -315,5 +321,10 @@
   "field": {
     "optional": "Opcional",
     "internalID": "O ID interno que o Frigate usa na configuração e banco de dados"
+  },
+  "no_items": "Sem itens",
+  "validation_errors": "Erros de validação",
+  "credentialField": {
+    "savedPlaceholder": "Salvo - deixar em branco para manter a atual"
   }
 }
