@@ -13,15 +13,15 @@
         "description": "Geactiveerd"
     },
     "audio": {
-        "label": "Geluiddetectie",
-        "description": "Audio-instellingen voor gebeurtenisdetectie van deze camera.",
+        "label": "Audio events",
+        "description": "Instellingen voor audio-gebaseerde detectie voor deze camera.",
         "enabled": {
             "label": "Geluiddetectie inschakelen",
-            "description": "Audio‑gebeurtenisdetectie voor deze camera in- of uitschakelen."
+            "description": "Schakel de detectie van audio-events voor deze camera in of uit."
         },
         "max_not_heard": {
-            "label": "Einde timeout",
-            "description": "Aantal seconden zonder het geconfigureerde audiotype, voordat de geluidsgebeurtenis is beëindigd."
+            "label": "Einde time-out",
+            "description": "Aantal seconden zonder het geconfigureerde audiotype voordat de audio-event wordt beëindigd."
         },
         "min_volume": {
             "label": "Minimumvolume",

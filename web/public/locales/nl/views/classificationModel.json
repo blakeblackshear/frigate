@@ -33,7 +33,8 @@
       "deleteModelFailed": "Model verwijderen mislukt: {{errorMessage}}",
       "updateModelFailed": "Bijwerken van model mislukt: {{errorMessage}}",
       "renameCategoryFailed": "Hernoemen van klasse mislukt: {{errorMessage}}",
-      "trainingFailedToStart": "Het is niet gelukt om het model te trainen: {{errorMessage}}"
+      "trainingFailedToStart": "Het is niet gelukt om het model te trainen: {{errorMessage}}",
+      "reclassifyFailed": "Opnieuw classificeren van afbeelding mislukt: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -155,8 +156,13 @@
       "allImagesRequired_other": "Classificeer alle afbeeldingen. {{count}} afbeeldingen resterend.",
       "modelCreated": "Model succesvol aangemaakt. Gebruik de weergave Recente classificaties om afbeeldingen voor ontbrekende statussen toe te voegen en train vervolgens het model.",
       "missingStatesWarning": {
-        "title": "Voorbeelden van ontbrekende staten",
-        "description": "Het wordt aanbevolen om voor alle staten voorbeelden te selecteren voor het beste resultaat. Je kunt doorgaan zonder alle staten te selecteren, maar het model wordt pas getraind zodra alle staten afbeeldingen hebben. Na het doorgaan kun je in de weergave ‘Recente Classificaties’ de ontbrekende staten van afbeeldingen voorzien, en daarna het model trainen."
+        "title": "Ontbrekende klassevoorbeelden",
+        "description": "Niet alle klassen hebben voorbeelden. Probeer nieuwe voorbeelden te genereren om de ontbrekende klasse te vinden, of ga verder en gebruik de weergave 'Recente classificaties' om later afbeeldingen toe te voegen."
+      },
+      "refreshExamples": "Nieuwe voorbeelden genereren",
+      "refreshConfirm": {
+        "title": "Nieuwe voorbeelden genereren?",
+        "description": "Dit genereert een nieuwe set afbeeldingen en wist alle selecties, inclusief eerdere klassen. Je moet opnieuw voorbeelden selecteren voor alle klassen."
       }
     }
   },
@@ -187,5 +193,7 @@
     "modelNotReady": "Model is niet klaar voor training",
     "noChanges": "Geen wijzigingen in de dataset sinds de laatste training."
   },
-  "none": "Geen overeenkomst"
+  "none": "Geen overeenkomst",
+  "reclassifyImageAs": "Afbeelding opnieuw classificeren als:",
+  "reclassifyImage": "Afbeelding opnieuw classificeren"
 }

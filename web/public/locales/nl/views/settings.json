@@ -546,7 +546,7 @@
     "objectList": "Objectenlijst",
     "noObjects": "Geen objecten",
     "boundingBoxes": {
-      "title": "Bewegingskaders",
+      "title": "Objectkaders",
       "desc": "Toon objectkaders rond gevolgde objecten",
       "colors": {
         "label": "Kleuren van objectkaders",
@@ -692,14 +692,14 @@
         "desc": "Machtigingen bijwerken voor <strong>{{username}}</strong>",
         "title": "Gebruikersrol wijzigen",
         "roleInfo": {
-          "intro": "Selectereneer een gepaste rol voor deze gebruiker:",
+          "intro": "Selecteer een gepaste rol voor deze gebruiker:",
           "admin": "Beheerder",
           "adminDesc": "Volledige toegang tot alle functies.",
           "viewer": "Kijker",
           "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports.",
           "customDesc": "Aangepaste rol met specifieke cameratoegang."
         },
-        "select": "Selectereneer een rol"
+        "select": "Selecteer een rol"
       },
       "passwordSetting": {
         "setPassword": "Wachtwoord instellen",
@@ -737,7 +737,7 @@
     },
     "cameras": {
       "noCameras": "Geen camera's beschikbaar",
-      "desc": "Selectereneer voor welke camera's je meldingen wilt inschakelen.",
+      "desc": "Selecteer voor welke camera's je meldingen wilt inschakelen.",
       "title": "Camera's"
     },
     "deviceSpecific": "Apparaatspecifieke instellingen",
@@ -950,13 +950,13 @@
         },
         "type": {
           "title": "Type",
-          "placeholder": "Selectereneer het type trigger",
+          "placeholder": "Selecteer het type trigger",
           "description": "Activeer wanneer een vergelijkbare beschrijving van een gevolgd object wordt gedetecteerd",
           "thumbnail": "Activeer wanneer een vergelijkbare thumbnail van een gevolgd object wordt gedetecteerd"
         },
         "content": {
           "title": "Inhoud",
-          "imagePlaceholder": "Selectereneer een thumbnail",
+          "imagePlaceholder": "Selecteer een thumbnail",
           "textPlaceholder": "Tekst invoeren",
           "imageDesc": "Alleen de meest recente 100 thumbnails worden weergegeven. Als je de gewenste thumbnail niet kunt vinden, bekijk dan eerdere objecten in Verkennen en stel daar een trigger in via het menu.",
           "textDesc": "Voer tekst in om deze actie te activeren wanneer een vergelijkbare beschrijving van een gevolgd object wordt gedetecteerd.",
@@ -1075,7 +1075,7 @@
         },
         "cameras": {
           "title": "Camera's",
-          "desc": "Selectereneer de camera's waartoe deze rol toegang heeft. Er is minimaal één camera vereist.",
+          "desc": "Selecteer de camera's waartoe deze rol toegang heeft. Er is minimaal één camera vereist.",
           "required": "Er moet minimaal één camera worden geselecteerd."
         }
       }
@@ -1114,9 +1114,9 @@
       "usernamePlaceholder": "Optioneel",
       "password": "Wachtwoord",
       "passwordPlaceholder": "Optioneel",
-      "selectTransport": "Selectereneer transportprotocol",
+      "selectTransport": "Selecteer transportprotocol",
       "cameraBrand": "Cameramerk",
-      "selectBrand": "Selectereneer cameramerk voor URL-sjabloon",
+      "selectBrand": "Selecteer cameramerk voor URL-sjabloon",
       "customUrl": "Aangepaste stream-URL",
       "brandInformation": "Merkinformatie",
       "brandUrlFormat": "Voor camera's met het RTSP URL-formaat als: {{exampleUrl}}",
@@ -1129,7 +1129,7 @@
         "noSnapshot": "Er kan geen snapshot worden opgehaald uit de geconfigureerde stream."
       },
       "errors": {
-        "brandOrCustomUrlRequired": "Selectereneer een cameramerk met host/IP of kies 'Overig' voor een aangepaste URL",
+        "brandOrCustomUrlRequired": "Selecteer een cameramerk met host/IP of kies 'Overig' voor een aangepaste URL",
         "nameRequired": "Cameranaam is vereist",
         "nameLength": "De cameranaam mag maximaal 64 tekens lang zijn",
         "invalidCharacters": "Cameranaam bevat ongeldige tekens",
@@ -1199,7 +1199,7 @@
       "retry": "Opnieuw proberen",
       "testing": {
         "probingMetadata": "Camera-metadata onderzoeken...",
-        "fetchingSnapshot": "Camera'snapshot ophalen..."
+        "fetchingSnapshot": "Camerasnapshot ophalen..."
       },
       "probeFailed": "Het testen van de camera is mislukt: {{error}}",
       "probingDevice": "Onderzoekapparaat...",
@@ -1270,19 +1270,19 @@
       },
       "ffmpegModule": "Gebruik stream-compatibiliteitsmodus",
       "ffmpegModuleDescription": "Als de stream na meerdere pogingen niet wordt geladen, probeer dit dan in te schakelen. Wanneer deze optie is ingeschakeld, gebruikt Frigate de ffmpeg-module samen met go2rtc. Dit kan zorgen voor een betere compatibiliteit met sommige camerastreams.",
-      "streamsTitle": "Camera'streams",
+      "streamsTitle": "Camerastreams",
       "addStream": "Stream toevoegen",
       "addAnotherStream": "Voeg een extra stream toe",
       "streamUrl": "Stream-URL",
       "streamUrlPlaceholder": "rtsp://gebruikersnaam:wachtwoord@host:poort/pad",
-      "selectStream": "Selectereneer een stream",
+      "selectStream": "Selecteer een stream",
       "searchCandidates": "Zoek kandidaten...",
       "noStreamFound": "Geen stream gevonden",
       "url": "URL",
       "resolution": "Resolutie",
-      "selectResolution": "Selectereneer resolutie",
+      "selectResolution": "Selecteer resolutie",
       "quality": "Kwaliteit",
-      "selectQuality": "Selectereneer kwaliteit",
+      "selectQuality": "Selecteer kwaliteit",
       "roleLabels": {
         "detect": "Objectdetectie",
         "record": "Opname",
@@ -1362,7 +1362,7 @@
     "title": "Camera’s beheren",
     "addCamera": "Nieuwe camera toevoegen",
     "editCamera": "Camera bewerken:",
-    "selectCamera": "Selectereneer een camera",
+    "selectCamera": "Selecteer een camera",
     "backToSettings": "Terug naar camera-instellingen",
     "streams": {
       "title": "Camera's in-/uitschakelen",
@@ -1468,7 +1468,7 @@
       },
       "unsavedChanges": "Niet-opgeslagen classificatie-instellingen voor {{camera}}",
       "selectAlertsZones": "Zones selecteren voor meldingen",
-      "selectDetectionsZones": "Selectereneer zones voor detecties",
+      "selectDetectionsZones": "Selecteer zones voor detecties",
       "limitDetections": "Beperk detecties tot specifieke zones",
       "toast": {
         "success": "Configuratie voor beoordelingsclassificatie is opgeslagen. Herstart Frigate om de wijzigingen toe te passen."

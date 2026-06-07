@@ -28,5 +28,8 @@
         "header_map": {
             "roleHeaderRequired": "Rol titel is vereist wanneer rol bindingen zijn geconfigureerd."
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Het moet een even getal zijn."
     }
 }

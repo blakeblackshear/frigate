@@ -54,7 +54,9 @@
   },
   "camera": {
     "enable": "Camera inschakelen",
-    "disable": "Camera uitschakelen"
+    "disable": "Camera uitschakelen",
+    "turnOn": "Camera inschakelen",
+    "turnOff": "Camera uitschakelen"
   },
   "muteCameras": {
     "enable": "Alle camera's dempen",
@@ -108,7 +110,8 @@
   },
   "recording": {
     "disable": "Opname uitschakelen",
-    "enable": "Opname inschakelen"
+    "enable": "Opname inschakelen",
+    "disabledInConfig": "De opnamefunctie moet eerst worden ingeschakeld in de instellingen van deze camera."
   },
   "suspend": {
     "forTime": "Onderbreken voor: "
@@ -150,7 +153,8 @@
     "autotracking": "Automatisch volgen",
     "snapshots": "Momentopnames",
     "cameraEnabled": "Camera ingeschakeld",
-    "transcription": "Audiotranscriptie"
+    "transcription": "Audiotranscriptie",
+    "camera": "Camera"
   },
   "history": {
     "label": "Historische beelden weergeven"
