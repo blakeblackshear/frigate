@@ -53,16 +53,29 @@
   "export": {
     "toast": {
       "error": {
-        "failed": "Не вдалося розпочати експорт: {{error}}",
+        "failed": "Не вдалося додати до черги експорт: {{error}}",
         "endTimeMustAfterStartTime": "Час закінчення повинен бути після часу початку",
         "noVaildTimeSelected": "Не вибрано допустимий діапазон часу"
       },
       "success": "Експорт успішно розпочато. Перегляньте файл на сторінці експорту.",
-      "view": "Переглянути"
+      "view": "Переглянути",
+      "queued": "Експорт додано до черги. Дивіться прогрес на сторінці експортів.",
+      "batchSuccess_one": "Розпочинаю {{count}} експорт. Відкриваю справу зараз.",
+      "batchSuccess_few": "Розпочинаю {{count}} експортів. Відкриваю справу зараз.",
+      "batchSuccess_many": "Розпочинаю {{count}} експортів. Відкриваю справу зараз.",
+      "batchPartial": "Розпочато {{successful}} з {{total}} експортів. Невдалі камери: {{failedCameras}}",
+      "batchFailed": "Не зміг розпочати {{total}} експортів. Невдалі камери: {{failedCameras}}",
+      "batchQueuedSuccess_one": "Додав до черги {{count}} експорт. Відкриваю справу зараз.",
+      "batchQueuedSuccess_few": "Додав до черги {{count}} експортів. Відкриваю справу зараз.",
+      "batchQueuedSuccess_many": "Додав до черги {{count}} експортів. Відкриваю справу зараз.",
+      "batchQueuedPartial": "Додав до черги {{successful}} з {{total}} експортів. Невдалі камери: {{failedCameras}}",
+      "batchQueueFailed": "Не зміг додати до черги {{total}} експортів. Невдалі камери: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Зберегти експорт",
-      "previewExport": "Попередній перегляд експорту"
+      "previewExport": "Попередній перегляд експорту",
+      "queueingExport": "Додаю до черги експорт...",
+      "useThisRange": "Використовуй цей діапазон"
     },
     "time": {
       "fromTimeline": "Вибір шкали часу",
@@ -84,7 +97,59 @@
     },
     "select": "Вибрати",
     "export": "Експорт",
-    "selectOrExport": "Выбiр або експорт"
+    "selectOrExport": "Выбiр або експорт",
+    "case": {
+      "newCaseOption": "Створити новий випадок",
+      "newCaseNamePlaceholder": "Ім'я для нового випадку",
+      "newCaseDescriptionPlaceholder": "Опис випадку",
+      "label": "Випадок",
+      "nonAdminHelp": "Новий випадок буде створено для цих експортів.",
+      "placeholder": "Оберіть випадок"
+    },
+    "queueing": "Додаю експорт у чергу...",
+    "tabs": {
+      "export": "Одна камера",
+      "multiCamera": "Мульті-камера"
+    },
+    "multiCamera": {
+      "timeRange": "Діапазон часу",
+      "selectFromTimeline": "Оберіть з шкали часу",
+      "cameraSelection": "Камери",
+      "cameraSelectionHelp": "Камери з відстежуваними об'єктами у цьому часовому діапазоні є попередньо обраними",
+      "checkingActivity": "Перевіряю активність камери...",
+      "noCameras": "Доступні камери відсутні",
+      "detectionCount_one": "{{count}} відстежувана камера",
+      "detectionCount_few": "{{count}} відстежувані камери",
+      "detectionCount_many": "{{count}} відстежуваних камер",
+      "nameLabel": "Ім'я для експорту",
+      "namePlaceholder": "Необов'язкове базове ім'я для цих експортів",
+      "queueingButton": "Додаю експорти у чергу...",
+      "exportButton_one": "Експорт {{count}} камери",
+      "exportButton_few": "Експорт {{count}} камер",
+      "exportButton_many": "Експорт {{count}} камер"
+    },
+    "multi": {
+      "title_one": "Експорт {{count}} рецензії",
+      "title_few": "Експорт {{count}} рецензій",
+      "title_many": "Експорт {{count}} рецензій",
+      "description": "Експорт всіх обраних рецензій. Всі експорти будуть згруповані під спільною справою.",
+      "descriptionNoCase": "Експорт всіх обраних рецензій.",
+      "caseNamePlaceholder": "Переглянути експорт - {{date}}",
+      "exportButton_one": "Переглянути {{count}} рецензію",
+      "exportButton_few": "Переглянути {{count}} рецензії",
+      "exportButton_many": "Переглянути {{count}} рецензій",
+      "exportingButton": "Експортую...",
+      "toast": {
+        "started_one": "Розпочинаю {{count}} експорт. Відкриваю справу зараз.",
+        "started_few": "Розпочинаю {{count}} експортів. Відкриваю справу зараз.",
+        "started_many": "Розпочинаю {{count}} експортів. Відкриваю справу зараз.",
+        "startedNoCase_one": "Розпочинаю {{count}} експорт.",
+        "startedNoCase_few": "Розпочинаю {{count}} експортів.",
+        "startedNoCase_many": "Розпочинаю {{count}} експортів.",
+        "partial": "Розпочато {{successful}} з {{total}} експортів. Невдало: {{failedItems}}",
+        "failed": "Не зміг розпочати {{total}} експортів. Невдало: {{failedItems}}"
+      }
+    }
   },
   "recording": {
     "button": {
@@ -96,12 +161,20 @@
     "confirmDelete": {
       "title": "Підтвердити вилучення",
       "desc": {
-        "selected": "Ви впевнені, що хочете видалити все записане відео, пов'язане з цим пунктом огляду? <br /><br /> Утримуйте клавішу <em>Shift</em>, щоб обійти це діалогове вікно в майбутньому."
+        "selected": "Ви впевнені, що хочете видалити все записане відео, пов'язане з цим пунктом огляду?<br /><br />Утримуйте клавішу <em>Shift</em>, щоб обійти це діалогове вікно в майбутньому."
       },
       "toast": {
         "error": "Не вдалося видалити: {{error}}",
         "success": "Відеозаписи, пов’язані з вибраними елементами огляду, успішно видалено."
       }
+    },
+    "shareTimestamp": {
+      "label": "Поділитися позначкою часу",
+      "title": "Поділитися позначкою часу",
+      "description": "Поділитися URL з позначкою часу поточної позиції плеєру або оберіть довільну позначку часу. Зверніть увагу, що це не публічна URL і вона доступна тільки для користувачів з доступом до Frigate та цієї камери.",
+      "custom": "Довільна позначка часу",
+      "button": "Поділитися URL з позначкою часу",
+      "shareTitle": "Позначка часу для Frigate рецензії: {{camera}}"
     }
   },
   "restart": {
@@ -111,7 +184,8 @@
       "title": "Frigate перезапускається",
       "content": "Цю сторінку буде перезавантажено за {{countdown}} секунд.",
       "button": "Примусово перезавантажити"
-    }
+    },
+    "description": "Це призупинить роботу Frigate на час перезавантаження."
   },
   "imagePicker": {
     "selectImage": "Вибір мініатюри відстежуваного об'єкта",
