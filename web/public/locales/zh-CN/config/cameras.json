@@ -718,7 +718,7 @@
             "label": "时间戳效果",
             "description": "时间戳文本的视觉效果（none、solid、shadow）。"
         },
-        "description": "应用于录像和快照的实时监控流中时间戳的样式选项。"
+        "description": "快照与调试视图的时间戳样式设置。"
     },
     "semantic_search": {
         "label": "语义搜索",
@@ -858,6 +858,10 @@
         "dashboard": {
             "label": "在页面中显示",
             "description": "切换此摄像头在 Frigate 页面的所有位置是否可见。禁用此项将需要手动编辑配置才能在页面中再次查看此摄像头。"
+        },
+        "review": {
+            "label": "在核查中显示",
+            "description": "切换该摄像头是否在核查页面可见（包含核查页、摄像头筛选栏、画面变动核查与历史视图）。"
         }
     },
     "best_image_timeout": {

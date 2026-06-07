@@ -496,7 +496,7 @@
         },
         "default_role": {
             "label": "默认权限组",
-            "description": "当没有权限组映射适用时分配给代理认证用户的默认权限组（admin 或 viewer）。"
+            "description": "当没有权限组映射适用时分配给代理认证用户的默认权限组。"
         },
         "separator": {
             "label": "分隔符",
@@ -1656,6 +1656,41 @@
                 "label": "原配置生成式 AI 状态",
                 "description": "表示在原始静态配置中是否已启用生成式 AI。"
             }
+        },
+        "filters_attribute": {
+            "label": "属性筛选",
+            "description": "对检测到的属性进行筛选，以此减少误报（包含面积、比例、置信度）。",
+            "min_area": {
+                "label": "最小属性区域",
+                "description": "该属性所需的最小边框框面积，支持像素值（整数）或百分比数值（范围 0.000001 至 0.99）。"
+            },
+            "max_area": {
+                "label": "最大属性区域",
+                "description": "该属性所需的最大边框框面积，支持像素值（整数）或百分比数值（范围 0.000001 至 0.99）。"
+            },
+            "min_ratio": {
+                "label": "最小纵横比",
+                "description": "边界框所需的最小宽高比。"
+            },
+            "max_ratio": {
+                "label": "最大纵横比",
+                "description": "边界框允许的最大宽高比。"
+            },
+            "threshold": {
+                "label": "置信度阈值",
+                "description": "判定该属性为有效目标所需的平均检测置信度阈值。"
+            },
+            "min_score": {
+                "label": "最小置信度",
+                "description": "将该属性关联至所属父目标所需的单帧最低检测置信度。"
+            },
+            "mask": {
+                "label": "过滤器遮罩",
+                "description": "定义此过滤器在帧内应用位置的多边形坐标。"
+            },
+            "raw_mask": {
+                "label": "原始遮罩"
+            }
         }
     },
     "record": {
@@ -2178,6 +2213,10 @@
         "dashboard": {
             "label": "在页面中显示",
             "description": "切换此摄像头在 Frigate 页面中是否可见。禁用后需要手动编辑配置才能再次在页面中查看此摄像头。"
+        },
+        "review": {
+            "label": "在核查中显示",
+            "description": "切换该摄像头是否在核查页面可见（包含核查页、摄像头筛选栏、画面变动核查与历史视图）。"
         }
     },
     "onvif": {
