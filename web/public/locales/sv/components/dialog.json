@@ -17,9 +17,9 @@
       },
       "review": {
         "question": {
-          "ask_a": "Är detta objektet <code>{{label}}</code>?",
-          "ask_an": "Är detta objektet en <code>{{label}}</code>?",
-          "ask_full": "Är detta objektet <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
+          "ask_a": "Är detta objektet en/ett <code>{{label}}</code>?",
+          "ask_an": "Är detta objekt en/ett <code>{{label}}</code>?",
+          "ask_full": "Är detta objektet en/ett <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
           "label": "Bekräfta denna etikett för Frigate Plus"
         },
         "state": {
