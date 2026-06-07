@@ -2,45 +2,262 @@
   "documentTitle": "Jelajahi - Frigate",
   "generativeAI": "AI Generatif",
   "exploreIsUnavailable": {
-    "title": "Penelusuran tidak tersedia",
+    "title": "Jelajah Tidak Tersedia",
     "embeddingsReindexing": {
-      "context": "Jelajahi dapat digunakan setelah embedding objek yang dilacak selesai di-reindex.",
+      "context": "Jelajah dapat digunakan setelah embedding objek terlacak selesai diindeks ulang.",
       "startingUp": "Sedang memulai…",
       "estimatedTime": "Perkiraan waktu tersisa:",
-      "finishingShortly": "Selesai sesaat lagi",
+      "finishingShortly": "Segera selesai",
       "step": {
-        "thumbnailsEmbedded": "Keluku dilampirkan ",
-        "descriptionsEmbedded": "Deskripsi terlampir: ",
-        "trackedObjectsProcessed": "Objek yang dilacak diproses: "
+        "thumbnailsEmbedded": "Thumbnail yang disematkan: ",
+        "descriptionsEmbedded": "Deskripsi yang disematkan: ",
+        "trackedObjectsProcessed": "Objek terlacak yang diproses: "
       }
     },
     "downloadingModels": {
-      "context": "Frigate sedang mengunduh model embedding yang diperlukan untuk mendukung fitur Pencarian Semantik. Proses ini mungkin memakan waktu beberapa menit tergantung pada kecepatan koneksi jaringan Anda.",
+      "context": "Frigate sedang mengunduh model embedding yang diperlukan untuk mendukung fitur Pencarian Semantik. Ini mungkin memerlukan beberapa menit tergantung pada kecepatan koneksi jaringan Anda.",
       "setup": {
-        "visionModel": "Model vision",
-        "visionModelFeatureExtractor": "Ekstraktor fitur model visi",
+        "visionModel": "Model visi",
+        "visionModelFeatureExtractor": "Pengekstrak fitur model visi",
         "textModel": "Model teks",
-        "textTokenizer": "Teks tokenizer"
+        "textTokenizer": "Tokenizer teks"
       },
       "tips": {
-        "context": "Anda mungkin ingin mengindeks ulang embeddings dari objek yang Anda lacak setelah model-model tersebut diunduh."
+        "context": "Anda mungkin ingin mengindeks ulang embedding objek terlacak Anda setelah model selesai diunduh."
       },
-      "error": "Terjadi eror. Periksa log Frigate."
+      "error": "Terjadi kesalahan. Periksa log Frigate."
     }
   },
   "details": {
-    "timestamp": "Stempel waktu"
+    "timestamp": "Cap waktu",
+    "item": {
+      "title": "Detail Item Tinjauan",
+      "desc": "Detail item tinjauan",
+      "button": {
+        "share": "Bagikan item tinjauan ini",
+        "viewInExplore": "Lihat di Jelajah"
+      },
+      "tips": {
+        "mismatch_other": "{{count}} objek yang tidak tersedia terdeteksi dan disertakan dalam item tinjauan ini. Objek-objek tersebut tidak memenuhi syarat sebagai peringatan atau deteksi, atau sudah dibersihkan/dihapus.",
+        "hasMissingObjects": "Sesuaikan konfigurasi Anda jika Anda ingin Frigate menyimpan objek terlacak untuk label berikut: <em>{{objects}}</em>"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "Deskripsi baru telah diminta dari {{provider}}. Tergantung pada kecepatan penyedia Anda, deskripsi baru mungkin memerlukan waktu untuk dibuat ulang.",
+          "updatedSublabel": "Berhasil memperbarui sublabel.",
+          "updatedLPR": "Berhasil memperbarui pelat nomor.",
+          "updatedAttributes": "Berhasil memperbarui atribut.",
+          "audioTranscription": "Berhasil meminta transkripsi audio. Tergantung pada kecepatan server Frigate Anda, transkripsi mungkin memerlukan waktu untuk selesai."
+        },
+        "error": {
+          "regenerate": "Gagal memanggil {{provider}} untuk deskripsi baru: {{errorMessage}}",
+          "updatedSublabelFailed": "Gagal memperbarui sublabel: {{errorMessage}}",
+          "updatedLPRFailed": "Gagal memperbarui pelat nomor: {{errorMessage}}",
+          "updatedAttributesFailed": "Gagal memperbarui atribut: {{errorMessage}}",
+          "audioTranscription": "Gagal meminta transkripsi audio: {{errorMessage}}"
+        }
+      }
+    },
+    "label": "Label",
+    "editSubLabel": {
+      "title": "Edit sublabel",
+      "desc": "Masukkan sublabel baru untuk {{label}} ini",
+      "descNoLabel": "Masukkan sublabel baru untuk objek terlacak ini"
+    },
+    "editLPR": {
+      "title": "Edit pelat nomor",
+      "desc": "Masukkan nilai pelat nomor baru untuk {{label}} ini",
+      "descNoLabel": "Masukkan nilai pelat nomor baru untuk objek terlacak ini"
+    },
+    "editAttributes": {
+      "title": "Edit atribut",
+      "desc": "Pilih atribut klasifikasi untuk {{label}} ini"
+    },
+    "snapshotScore": {
+      "label": "Skor Snapshot"
+    },
+    "topScore": {
+      "label": "Skor Tertinggi",
+      "info": "Skor tertinggi adalah skor median tertinggi untuk objek terlacak, jadi ini mungkin berbeda dari skor yang ditampilkan pada thumbnail hasil pencarian."
+    },
+    "score": {
+      "label": "Skor"
+    },
+    "recognizedLicensePlate": "Pelat Nomor yang Diakui",
+    "attributes": "Atribut Klasifikasi",
+    "estimatedSpeed": "Perkiraan Kecepatan",
+    "objects": "Objek",
+    "camera": "Kamera",
+    "zones": "Zona",
+    "button": {
+      "findSimilar": "Cari yang Serupa",
+      "regenerate": {
+        "title": "Buat Ulang",
+        "label": "Buat ulang deskripsi objek terlacak"
+      }
+    },
+    "description": {
+      "label": "Deskripsi",
+      "placeholder": "Deskripsi objek terlacak",
+      "aiTips": "Frigate tidak akan meminta deskripsi dari penyedia AI Generatif Anda sampai siklus hidup objek terlacak berakhir."
+    },
+    "expandRegenerationMenu": "Perluas menu pembuatan ulang",
+    "regenerateFromSnapshot": "Buat Ulang dari Snapshot",
+    "regenerateFromThumbnails": "Buat Ulang dari Thumbnail",
+    "tips": {
+      "descriptionSaved": "Berhasil menyimpan deskripsi",
+      "saveDescriptionFailed": "Gagal memperbarui deskripsi: {{errorMessage}}"
+    },
+    "title": {
+      "label": "Judul"
+    },
+    "scoreInfo": "Informasi Skor"
   },
-  "exploreMore": "Eksplor lebih jauh objek-objek {{label}}",
+  "exploreMore": "Jelajahi lebih banyak objek {{label}}",
   "trackedObjectDetails": "Detail Objek Terlacak",
   "type": {
     "details": "detail",
-    "snapshot": "tangkapan layar",
+    "snapshot": "snapshot",
     "thumbnail": "thumbnail",
     "video": "video",
     "tracking_details": "detail pelacakan"
   },
   "trackingDetails": {
-    "title": "Detail Pelacakan"
+    "title": "Detail Pelacakan",
+    "noImageFound": "Tidak ada gambar yang ditemukan untuk cap waktu ini.",
+    "createObjectMask": "Buat Masker Objek",
+    "adjustAnnotationSettings": "Sesuaikan pengaturan anotasi",
+    "scrollViewTips": "Klik untuk melihat momen-momen penting dalam siklus hidup objek ini.",
+    "autoTrackingTips": "Posisi kotak pembatas tidak akan akurat untuk kamera dengan pelacakan otomatis.",
+    "count": "{{first}} dari {{second}}",
+    "trackedPoint": "Titik Terlacak",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} terdeteksi",
+      "entered_zone": "{{label}} memasuki {{zones}}",
+      "active": "{{label}} menjadi aktif",
+      "stationary": "{{label}} menjadi diam",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} terdeteksi untuk {{label}}",
+        "other": "{{label}} dikenali sebagai {{attribute}}"
+      },
+      "gone": "{{label}} pergi",
+      "heard": "{{label}} terdengar",
+      "external": "{{label}} terdeteksi",
+      "header": {
+        "zones": "Zona",
+        "ratio": "Rasio",
+        "area": "Area",
+        "score": "Skor",
+        "computedScore": "Skor Terhitung",
+        "topScore": "Skor Tertinggi",
+        "toggleAdvancedScores": "Alihkan skor lanjutan"
+      }
+    },
+    "annotationSettings": {
+      "title": "Pengaturan Anotasi",
+      "showAllZones": {
+        "title": "Tampilkan Semua Zona",
+        "desc": "Selalu tampilkan zona pada frame tempat objek telah memasuki suatu zona."
+      },
+      "offset": {
+        "label": "Offset Anotasi",
+        "desc": "Data ini berasal dari feed deteksi kamera Anda tetapi ditumpangkan pada gambar dari feed rekaman. Sangat mungkin kedua stream tersebut tidak sinkron sepenuhnya. Akibatnya, kotak pembatas dan rekaman tidak akan sejajar dengan sempurna. Anda dapat menggunakan pengaturan ini untuk menggeser anotasi maju atau mundur dalam waktu agar lebih selaras dengan rekaman video.",
+        "millisecondsToOffset": "Milidetik untuk menggeser anotasi deteksi. <em>Default: 0</em>",
+        "tips": "Turunkan nilainya jika pemutaran video berada di depan kotak dan titik jalur, dan naikkan nilainya jika pemutaran video berada di belakangnya. Nilai ini bisa negatif.",
+        "toast": {
+          "success": "Offset anotasi untuk {{camera}} telah disimpan ke file konfigurasi."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Slide sebelumnya",
+      "next": "Slide berikutnya"
+    }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Unduh video",
+      "aria": "Unduh video"
+    },
+    "downloadSnapshot": {
+      "label": "Unduh snapshot",
+      "aria": "Unduh snapshot"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Unduh snapshot bersih",
+      "aria": "Unduh snapshot bersih"
+    },
+    "viewTrackingDetails": {
+      "label": "Lihat detail pelacakan",
+      "aria": "Tampilkan detail pelacakan"
+    },
+    "findSimilar": {
+      "label": "Cari yang serupa",
+      "aria": "Cari objek terlacak yang serupa"
+    },
+    "addTrigger": {
+      "label": "Tambahkan pemicu",
+      "aria": "Tambahkan pemicu untuk objek terlacak ini"
+    },
+    "audioTranscription": {
+      "label": "Transkripsikan",
+      "aria": "Minta transkripsi audio"
+    },
+    "submitToPlus": {
+      "label": "Kirim ke Frigate+",
+      "aria": "Kirim ke Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "Lihat di Riwayat",
+      "aria": "Lihat di Riwayat"
+    },
+    "deleteTrackedObject": {
+      "label": "Hapus objek terlacak ini"
+    },
+    "showObjectDetails": {
+      "label": "Tampilkan jalur objek"
+    },
+    "hideObjectDetails": {
+      "label": "Sembunyikan jalur objek"
+    },
+    "debugReplay": {
+      "label": "Pemutaran Ulang Debug",
+      "aria": "Lihat objek terlacak ini dalam tampilan pemutaran ulang debug"
+    },
+    "more": {
+      "aria": "Lainnya"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Konfirmasi Hapus",
+      "desc": "Menghapus objek terlacak ini akan menghapus snapshot, embedding yang tersimpan, dan entri detail pelacakan terkait. Rekaman video dari objek terlacak ini di tampilan Riwayat <em>TIDAK</em> akan dihapus.<br /><br />Anda yakin ingin melanjutkan?"
+    },
+    "toast": {
+      "error": "Kesalahan saat menghapus objek terlacak ini: {{errorMessage}}"
+    }
+  },
+  "noTrackedObjects": "Tidak Ada Objek Terlacak Ditemukan",
+  "fetchingTrackedObjectsFailed": "Kesalahan saat mengambil objek terlacak: {{errorMessage}}",
+  "trackedObjectsCount_other": "{{count}} objek terlacak ",
+  "searchResult": {
+    "tooltip": "Cocok dengan {{type}} pada {{confidence}}%",
+    "previousTrackedObject": "Objek terlacak sebelumnya",
+    "nextTrackedObject": "Objek terlacak berikutnya",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Objek terlacak berhasil dihapus.",
+        "error": "Gagal menghapus objek terlacak: {{errorMessage}}"
+      }
+    }
+  },
+  "aiAnalysis": {
+    "title": "Analisis AI"
+  },
+  "concerns": {
+    "label": "Kekhawatiran"
+  },
+  "objectLifecycle": {
+    "noImageFound": "Tidak ada gambar yang ditemukan untuk objek terlacak ini."
   }
 }
