@@ -116,5 +116,14 @@
   "nzpost": "NZPost",
   "postnord": "PostNord",
   "gls": "GLS",
-  "dpd": "DPD"
+  "dpd": "DPD",
+  "canada_post": "カナダポスト",
+  "royal_mail": "ロイヤルメール",
+  "school_bus": "スクールバス",
+  "skunk": "スカンク",
+  "kangaroo": "カンガルー",
+  "baby": "赤ちゃん",
+  "baby_stroller": "ベビーカー",
+  "rickshaw": "人力車",
+  "rodent": "齧歯類"
 }

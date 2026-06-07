@@ -69,13 +69,14 @@
     "noDescription": "説明がありません",
     "exportCount_one": "1 件のエクスポート",
     "exportCount_other": "{{count}} エクスポート",
-    "cameraCount_other": "{{count}} カメラ",
+    "cameraCount_other": "{{count}} 台のカメラ",
     "showMore": "さらに表示",
     "showLess": "表示を減らす",
     "emptyTitle": "このケースは空です",
     "emptyDescription": "既存の分類されていないエクスポートを追加して、ケースを整理しましょう。",
     "emptyDescriptionNoExports": "まだ追加可能な未分類のエクスポートはありません。",
-    "createdAt": "作成日 {{value}}"
+    "createdAt": "作成日 {{value}}",
+    "cameraCount_one": "1 台のカメラ"
   },
   "caseEditor": {
     "createTitle": "ケースを作成",

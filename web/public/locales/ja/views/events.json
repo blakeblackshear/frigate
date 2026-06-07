@@ -1,12 +1,12 @@
 {
-  "detections": "検出",
+  "detections": "検知",
   "motion": {
     "label": "モーション",
     "only": "モーションのみ"
   },
   "alerts": "アラート",
   "empty": {
-    "detection": "レビューする検出はありません",
+    "detection": "レビューする検知はありません",
     "alert": "レビューするアラートはありません",
     "motion": "モーションデータは見つかりません",
     "recordingsDisabled": {
@@ -42,7 +42,7 @@
   },
   "selected_one": "{{count}} 選択済み",
   "selected_other": "{{count}} 選択済み",
-  "detected": "検出",
+  "detected": "検知",
   "suspiciousActivity": "不審なアクティビティ",
   "threateningActivity": "脅威となるアクティビティ",
   "zoomIn": "ズームイン",
@@ -71,5 +71,24 @@
   "motionSearch": {
     "menuItem": "モーション検索",
     "openMenu": "カメラオプション"
+  },
+  "motionPreviews": {
+    "menuItem": "モーションプレビューを表示",
+    "title": "モーションプレビュー: {{camera}}",
+    "mobileSettingsTitle": "モーションプレビュー設定",
+    "mobileSettingsDesc": "再生速度と暗転具合を調整し、確認したい日付を選んでモーションのみのクリップを再生します。",
+    "dim": "暗転",
+    "dimAria": "暗転の強さを調整",
+    "dimDesc": "暗転を強くするとモーション領域が見やすくなります。",
+    "speed": "速度",
+    "speedAria": "プレビューの再生速度を選択",
+    "speedDesc": "プレビュークリップの再生速度を選びます。",
+    "back": "戻る",
+    "empty": "利用可能なプレビューがありません",
+    "noPreview": "プレビューを利用できません",
+    "seekAria": "{{camera}} のプレーヤーを {{time}} までシーク",
+    "filter": "フィルター",
+    "filterDesc": "領域を選択すると、その領域でモーションが発生したクリップのみが表示されます。",
+    "filterClear": "クリア"
   }
 }

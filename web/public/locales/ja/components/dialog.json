@@ -13,7 +13,7 @@
     "plus": {
       "submitToPlus": {
         "label": "Frigate+ に送信",
-        "desc": "回避したい場所でのオブジェクトは誤検出ではありません。誤検出として送信するとモデルが混乱します。"
+        "desc": "回避したい場所でのオブジェクトは誤検知ではありません。誤検知として送信するとモデルが混乱します。"
       },
       "review": {
         "question": {
@@ -62,12 +62,16 @@
       "queued": "エクスポートがキューに追加されました。進捗状況はエクスポートページで確認できます。",
       "batchQueuedSuccess_other": "{{count}} 件のエクスポートがキューに登録されました。現在ケースをオープンしています。",
       "batchQueuedPartial": "{{total}} 件中 {{successful}} 件のエクスポートがキューに追加されました。失敗したカメラ: {{failedCameras}}",
-      "batchQueueFailed": "{{total}} 件のエクスポートをキューに追加できませんでした。失敗したカメラ: {{failedCameras}}"
+      "batchQueueFailed": "{{total}} 件のエクスポートをキューに追加できませんでした。失敗したカメラ: {{failedCameras}}",
+      "batchSuccess_other": "{{count}} 件のエクスポートを開始しました。ケースを開きます。",
+      "batchPartial": "{{total}} 件中 {{successful}} 件のエクスポートを開始しました。失敗したカメラ: {{failedCameras}}",
+      "batchFailed": "{{total}} 件のエクスポートを開始できませんでした。失敗したカメラ: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "エクスポートを保存",
       "previewExport": "エクスポートをプレビュー",
-      "queueingExport": "エクスポートをキューイングしています..."
+      "queueingExport": "エクスポートをキューイングしています...",
+      "useThisRange": "この範囲を使用"
     },
     "queueing": "エクスポートをキューイングしています...",
     "multiCamera": {
@@ -84,7 +88,7 @@
       "exportButton_other": "{{count}} 台のカメラをエクスポート"
     },
     "case": {
-      "newCaseOption": "新しいケースを作成する",
+      "newCaseOption": "新しいケースを作成",
       "newCaseNamePlaceholder": "新しいケース名",
       "newCaseDescriptionPlaceholder": "ケースの説明",
       "label": "ケース",
@@ -96,7 +100,18 @@
       "multiCamera": "マルチカメラ"
     },
     "multi": {
-      "title_other": "{{count}} 件のレビューをエクスポート"
+      "title_other": "{{count}} 件のレビューをエクスポート",
+      "description": "選択した各レビューをエクスポートします。すべてのエクスポートは 1 つのケースにまとめられます。",
+      "descriptionNoCase": "選択した各レビューをエクスポートします。",
+      "caseNamePlaceholder": "レビューエクスポート - {{date}}",
+      "exportButton_other": "{{count}} 件のレビューをエクスポート",
+      "exportingButton": "エクスポート中...",
+      "toast": {
+        "started_other": "{{count}} 件のエクスポートを開始しました。ケースを開きます。",
+        "startedNoCase_other": "{{count}} 件のエクスポートを開始しました。",
+        "partial": "{{total}} 件中 {{successful}} 件のエクスポートを開始しました。失敗: {{failedItems}}",
+        "failed": "{{total}} 件のエクスポートを開始できませんでした。失敗: {{failedItems}}"
+      }
     }
   },
   "streaming": {
@@ -143,6 +158,14 @@
       "markAsReviewed": "レビュー済みにする",
       "deleteNow": "今すぐ削除",
       "markAsUnreviewed": "未レビューに戻す"
+    },
+    "shareTimestamp": {
+      "label": "タイムスタンプを共有",
+      "title": "タイムスタンプを共有",
+      "description": "現在のプレーヤー位置をタイムスタンプ付き URL で共有するか、任意のタイムスタンプを指定できます。これは公開リンクではなく、Frigate とこのカメラへのアクセス権を持つユーザーのみアクセスできます。",
+      "custom": "カスタムタイムスタンプ",
+      "button": "タイムスタンプ URL を共有",
+      "shareTitle": "Frigate レビュータイムスタンプ: {{camera}}"
     }
   },
   "imagePicker": {
