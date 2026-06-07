@@ -48,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "Het is niet gelukt om een frame naar Frigate+ te sturen"
     }
-  }
+  },
+  "cameraOff": "De camera staat uit"
 }

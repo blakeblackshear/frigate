@@ -1,13 +1,13 @@
 {
     "audio": {
-        "label": "Geluiddetectie",
+        "label": "Audio events",
         "enabled": {
             "label": "Geluiddetectie inschakelen",
             "description": "Audioeventdetectie voor alle camera's in- of uitschakelen; kan per camera worden overschreven."
         },
         "max_not_heard": {
-            "label": "Einde timeout",
-            "description": "Aantal seconden zonder het geconfigureerde audiotype, voordat de geluidsgebeurtenis is beëindigd."
+            "label": "Einde time-out",
+            "description": "Aantal seconden zonder het geconfigureerde audiotype voordat de audio-event wordt beëindigd."
         },
         "min_volume": {
             "label": "Minimumvolume",
