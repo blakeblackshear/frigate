@@ -26,7 +26,9 @@
         "points_many": "{{count}} punti",
         "points_other": "{{count}} punti",
         "undo": "Annulla ultimo punto",
-        "reset": "Reimposta poligono"
+        "reset": "Reimposta poligono",
+        "drawMode": "Disegna",
+        "moveMode": "Sposta"
     },
     "motionHeatmapLabel": "Mappa di calore del movimento",
     "dialog": {
@@ -42,11 +44,11 @@
     "settings": {
         "title": "Impostazioni di ricerca",
         "parallelMode": "Modalità parallela",
-        "parallelModeDesc": "Scansiona più segmenti di registrazione contemporaneamente (più veloce, ma richiede un utilizzo della CPU significativamente maggiore)",
+        "parallelModeDesc": "Esegui la scansione simultanea di più intervalli di registrazione (più veloce; utilizza più risorse di decodifica)",
         "threshold": "Soglia di sensibilità",
         "thresholdDesc": "Valori più bassi indicano cambiamenti minori (1-255)",
         "minArea": "Area di cambio minimo",
-        "minAreaDesc": "Percentuale minima della regione di interesse che deve cambiare per essere considerata significativa",
+        "minAreaDesc": "Dimensione minima di una singola regione mobile, espressa in percentuale della regione di interesse",
         "frameSkip": "Salta fotogrammi",
         "frameSkipDesc": "Elabora ogni N-esimo fotogramma. Imposta questo valore sulla frequenza dei fotogrammi della tua telecamera per elaborare un fotogramma al secondo (ad esempio, 5 per una telecamera a 5 FPS, 30 per una telecamera a 30 FPS). Valori più alti saranno più veloci, ma potrebbero perdere eventi di movimento brevi.",
         "maxResults": "Risultati massimi",
@@ -72,6 +74,9 @@
         "framesDecoded": "Fotogrammi decodificati",
         "wallTime": "Tempo di ricerca",
         "segmentErrors": "Errori di segmento",
-        "seconds": "{{seconds}}s"
-    }
+        "seconds": "{{seconds}}s",
+        "minutesSeconds": "{{minutes}}m {{seconds}}s",
+        "scanSummary": "{{segments}} segmenti · {{time}}"
+    },
+    "scanning": "Scansione {{time}}"
 }

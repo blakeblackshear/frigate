@@ -222,7 +222,8 @@
       "id": "Bahasa Indonesia (Indonesiano)",
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Croato)",
-      "bs": "Bosanski (Bosniaco)"
+      "bs": "Bosanski (Bosniaco)",
+      "zhHant": "繁體中文 (Cinese Tradizionale)"
     },
     "darkMode": {
       "label": "Modalità scura",
@@ -333,5 +334,8 @@
     "internalID": "L'ID interno che Frigate utilizza nella configurazione e nel database"
   },
   "no_items": "Nessun elemento",
-  "validation_errors": "Errori di convalida"
+  "validation_errors": "Errori di convalida",
+  "credentialField": {
+    "savedPlaceholder": "Salvato — lascia vuoto per mantenere aggiornato"
+  }
 }
