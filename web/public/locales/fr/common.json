@@ -188,7 +188,8 @@
       "gl": "Galego (Galicien)",
       "id": "Bahasa Indonesia (Indonésien)",
       "ur": "اردو (Ourdou)",
-      "hr": "Hrvatski (Croate)"
+      "hr": "Hrvatski (Croate)",
+      "bs": "Bosanski (Bosnien)"
     },
     "appearance": "Apparence",
     "darkMode": {
@@ -332,5 +333,8 @@
     "separatorWithSpace": ", "
   },
   "no_items": "Aucun élément",
-  "validation_errors": "Erreurs de validation"
+  "validation_errors": "Erreurs de validation",
+  "credentialField": {
+    "savedPlaceholder": "Enregistré — laissez vide pour conserver la version actuelle"
+  }
 }

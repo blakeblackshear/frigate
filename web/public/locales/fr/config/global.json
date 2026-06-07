@@ -112,5 +112,8 @@
                 "label": "Rapport d'aspect minimal"
             }
         }
+    },
+    "audio_transcription": {
+        "label": "Transcription audio"
     }
 }
