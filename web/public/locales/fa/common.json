@@ -102,7 +102,8 @@
     "all": "همه",
     "back": "برگشت به قبل",
     "show": "نمایش {{item}}",
-    "none": "هیچ‌کدام"
+    "none": "هیچ‌کدام",
+    "other": "دیگر"
   },
   "list": {
     "many": "{{items}}، و {{last}}",
@@ -136,7 +137,7 @@
     "enabled": "فعال",
     "disable": "غیرفعال کردن",
     "save": "ذخیره",
-    "saving": "در حال ذخیره…",
+    "saving": "در حال ذخیره‌سازی…",
     "copy": "کپی",
     "history": "تاریخچه",
     "pictureInPicture": "تصویر در تصویر",
@@ -149,7 +150,18 @@
     "continue": "ادامه",
     "on": "روشن",
     "edit": "ویرایش",
-    "suspended": "تعلیق‌شده"
+    "suspended": "تعلیق‌شده",
+    "add": "افزودن",
+    "applying": "در حال اعمال…",
+    "undo": "برگرداندن",
+    "copiedToClipboard": "در کلیپ‌بورد کپی شد",
+    "modified": "اصلاح شده",
+    "retry": "تلاش دوباره",
+    "resetToGlobal": "بازنشانی به حالت جهانی",
+    "resetToDefault": "بازنشانی به پیش‌فرض",
+    "saveAll": "ذخیره همه",
+    "savingAll": "ذخیره‌سازی همه…",
+    "undoAll": "بازگردانی همه"
   },
   "menu": {
     "systemMetrics": "شاخص‌های سیستم",
@@ -197,7 +209,9 @@
       "ur": "اردو (زبان اردو)",
       "withSystem": {
         "label": "برای زبان از تنظیمات سامانه استفاده کنید"
-      }
+      },
+      "zhHant": "چینی سنتی",
+      "hr": "کرواسیایی"
     },
     "system": "سامانه",
     "systemLogs": "لاگ‌های سامانه",
@@ -250,7 +264,11 @@
       "anonymous": "ناشناس",
       "logout": "خروج",
       "setPassword": "تنظیم گذرواژه"
-    }
+    },
+    "profiles": "پروفایل‌ها",
+    "actions": "اقدام‌ها",
+    "features": "ویژگی‌ها",
+    "chat": "چت"
   },
   "toast": {
     "copyUrlToClipboard": "نشانی اینترنتی در کلیپ‌بورد کپی شد.",
@@ -259,7 +277,8 @@
       "error": {
         "title": "ذخیرهٔ تغییرات پیکربندی ناموفق بود: {{errorMessage}}",
         "noMessage": "ذخیرهٔ تغییرات پیکربندی ناموفق بود"
-      }
+      },
+      "success": "تغییرات پیکربندی با موفقیت ذخیره شد."
     }
   },
   "role": {
@@ -294,5 +313,10 @@
   "readTheDocumentation": "مستندات را بخوانید",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "no_items": "هیچ چیزی یافت نشد",
+  "validation_errors": "خطاهای اعتبارسنجی",
+  "credentialField": {
+    "savedPlaceholder": "ذخیره شد — برای نگه‌داشت وضعیت کنونی، خالی بگذارید"
   }
 }
