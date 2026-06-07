@@ -67,7 +67,8 @@
         "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide."
       },
       "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations.",
-      "view": "Vue"
+      "view": "Vue",
+      "queued": "Exportation en attente. Consultez la progression sur la page des exportations."
     },
     "select": "Sélectionner",
     "name": {
@@ -112,7 +113,7 @@
       "title_one": "Export {{count}} revue",
       "title_many": "Export {{count}} revues",
       "title_other": "Export {{count}} revues",
-      "description": "Export chaque revue sélectionnée. Tous les exports sont regroupés sous un cas unique.",
+      "description": "Exporter chaque revue sélectionnée. Tous les exports sont regroupés sous un cas unique.",
       "descriptionNoCase": "Exporter chaque revue sélectionnée.",
       "caseNamePlaceholder": "Vérification de l'export – {{date}}",
       "exportButton_one": "Exporter {{count}} revue",
@@ -120,12 +121,14 @@
       "exportButton_other": "Exporter {{count}} revues",
       "exportingButton": "Exportation...",
       "toast": {
-        "started_one": "Un export a démarré. Ouverture du dossier en cours",
-        "started_many": "{{count}} exports ont démarré. Ouverture du dossier en cours",
-        "started_other": "",
+        "started_one": "Un export a démarré. Ouverture du dossier en cours.",
+        "started_many": "{{count}} exports ont démarré. Ouverture du dossier en cours.",
+        "started_other": "{{count}} exports ont démarré. Ouverture du dossier en cours.",
         "startedNoCase_one": "Un export a démarré.",
         "startedNoCase_many": "{{count}} exports ont démarré.",
-        "startedNoCase_other": "{{count}} exports ont démarré."
+        "startedNoCase_other": "{{count}} exports ont démarré.",
+        "partial": "{{successful}} exportations sur {{total}} lancées. Échecs : {{failedItems}}",
+        "failed": "Échec du démarrage des exports {{total}}. Échec : {{failedItems}}"
       }
     }
   },

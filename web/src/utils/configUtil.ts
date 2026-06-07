@@ -11,6 +11,7 @@ import isEqual from "lodash/isEqual";
 import mergeWith from "lodash/mergeWith";
 import set from "lodash/set";
 import { isJsonObject } from "@/lib/utils";
+import { REDACTED_CREDENTIAL_SENTINEL } from "@/lib/const";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { normalizeConfigValue } from "@/hooks/use-config-override";
 import {
@@ -19,14 +20,42 @@ import {
   sanitizeOverridesForSection,
 } from "@/components/config-form/sections/section-special-cases";
 import type { RJSFSchema } from "@rjsf/utils";
-import type { FrigateConfig } from "@/types/frigateConfig";
+import type { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import type {
   ConfigSectionData,
+  HiddenFieldContext,
   JsonObject,
   JsonValue,
 } from "@/types/configForm";
 import type { SectionConfig } from "../components/config-form/sections/BaseSection";
 import { sectionConfigs } from "../components/config-form/sectionConfigs";
+
+/**
+ * Recursively strip any key whose value is the redaction sentinel from a
+ * config_data payload. Use just before sending to /config/set so untouched
+ * credential placeholder fields don't clobber the saved YAML value. Mutates
+ * and returns the input.
+ */
+export function stripRedactedCredentials<T>(value: T): T {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      stripRedactedCredentials(item);
+    }
+    return value;
+  }
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    for (const key of Object.keys(obj)) {
+      const v = obj[key];
+      if (v === REDACTED_CREDENTIAL_SENTINEL) {
+        delete obj[key];
+      } else if (v && typeof v === "object") {
+        stripRedactedCredentials(v);
+      }
+    }
+  }
+  return value;
+}
 
 // ---------------------------------------------------------------------------
 // cameraUpdateTopicMap — maps config section paths to MQTT/WS update topics
@@ -52,6 +81,7 @@ export const cameraUpdateTopicMap: Record<string, string> = {
   mqtt: "mqtt",
   onvif: "onvif",
   ui: "ui",
+  zones: "zones",
 };
 
 // Sections where global config serves as the default for per-camera config.
@@ -200,7 +230,12 @@ export function buildOverrides(
 
     const result: JsonObject = {};
     for (const [key, value] of Object.entries(currentObj)) {
-      if (value === undefined && baseObj && baseObj[key] !== undefined) {
+      if (
+        (value === undefined || value === null) &&
+        baseObj &&
+        baseObj[key] !== undefined &&
+        baseObj[key] !== null
+      ) {
         result[key] = "";
         continue;
       }
@@ -568,6 +603,17 @@ export function prepareSectionSavePayload(opts: {
     schemaSection,
     level,
     sectionSchema,
+    config
+      ? {
+          fullConfig: config,
+          fullCameraConfig:
+            level === "camera" && cameraName
+              ? config.cameras?.[cameraName]
+              : undefined,
+          level,
+          cameraName,
+        }
+      : undefined,
   );
 
   // Compute rawFormData (the current stored value for this section)
@@ -615,10 +661,16 @@ export function prepareSectionSavePayload(opts: {
   // For profile sections, also hide restart-required fields to match
   // effectiveHiddenFields in BaseSection (prevents spurious deletion markers
   // for fields that are hidden from the form during profile editing).
-  const resolvedHidden = resolveHiddenFieldEntries(
-    sectionConfig.hiddenFields,
-    config,
-  );
+  const resolvedHidden = resolveHiddenFieldEntries(sectionConfig.hiddenFields, {
+    fullConfig: config,
+    fullCameraConfig:
+      level === "camera" && cameraName
+        ? config.cameras?.[cameraName]
+        : undefined,
+    level,
+    cameraName,
+    formData: rawFormData as ConfigSectionData,
+  });
   const hiddenFieldsForSanitize =
     profileInfo.isProfile && sectionConfig.restartRequired?.length
       ? [...new Set([...resolvedHidden, ...sectionConfig.restartRequired])]
@@ -732,31 +784,76 @@ export function getSectionConfig(
 }
 
 /**
+ * Resolve the effective attribute label set at a given scope. At camera
+ * (and replay) scope on a dedicated LPR camera (`camera.type === "lpr"`),
+ * `license_plate` is treated as a regular tracked object — not an
+ * attribute — to match the backend's per-camera carve-out in
+ * `frigate/video/detect.py`. Returns the full attribute list at global
+ * scope and for non-LPR cameras.
+ */
+export function getEffectiveAttributeLabels(
+  fullConfig: FrigateConfig | undefined,
+  fullCameraConfig: CameraConfig | undefined,
+  level: "global" | "camera" | "replay" | undefined,
+): string[] {
+  const all = fullConfig?.model?.all_attributes ?? [];
+  if (level !== "global" && fullCameraConfig?.type === "lpr") {
+    return all.filter((attr) => attr !== "license_plate");
+  }
+  return all;
+}
+
+/**
+ * Build a `HiddenFieldContext` for the common case where a callsite has
+ * `config`, an optional `cameraName`, and a level, but no per-section
+ * saved form data to thread through. Resolvers that don't read `formData`
+ * (which is most of them) just fall through to `fullCameraConfig` /
+ * `fullConfig`.
+ */
+export function buildHiddenFieldContext(
+  config: FrigateConfig | undefined,
+  level: "global" | "camera" | "replay",
+  cameraName?: string,
+): HiddenFieldContext | undefined {
+  if (!config) return undefined;
+  return {
+    fullConfig: config,
+    fullCameraConfig:
+      level !== "global" && cameraName
+        ? config.cameras?.[cameraName]
+        : undefined,
+    level,
+    cameraName,
+  };
+}
+
+/**
  * Resolve the effective hidden-field patterns for a section. Each entry in
  * `hiddenFields` is either a literal pattern or a function that produces
- * patterns from the loaded config (e.g. `filters.<attr>` for each
- * `model.all_attributes` entry on the objects section).
+ * patterns from the loaded config and scope (e.g. `filters.<attr>` for each
+ * `model.all_attributes` entry on the objects section, gated by the
+ * effective `objects.track` list at the current scope).
  */
 export function getEffectiveHiddenFields(
   sectionKey: string,
   level: "global" | "camera" | "replay",
-  config: FrigateConfig | undefined,
+  ctx: HiddenFieldContext | undefined,
 ): string[] {
   return resolveHiddenFieldEntries(
     getSectionConfig(sectionKey, level).hiddenFields,
-    config,
+    ctx,
   );
 }
 
 export function resolveHiddenFieldEntries(
   entries: SectionConfig["hiddenFields"] | undefined,
-  config: FrigateConfig | undefined,
+  ctx: HiddenFieldContext | undefined,
 ): string[] {
   if (!entries || entries.length === 0) return [];
   const result: string[] = [];
   for (const entry of entries) {
     if (typeof entry === "function") {
-      if (config) result.push(...entry(config));
+      if (ctx) result.push(...entry(ctx));
     } else {
       result.push(entry);
     }

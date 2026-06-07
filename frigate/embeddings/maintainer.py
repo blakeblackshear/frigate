@@ -98,10 +98,17 @@ class EmbeddingMaintainer(threading.Thread):
             [
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.remove,
+                CameraConfigUpdateEnum.detect,
+                CameraConfigUpdateEnum.face_recognition,
+                CameraConfigUpdateEnum.ffmpeg,
+                CameraConfigUpdateEnum.lpr,
+                CameraConfigUpdateEnum.motion,
+                CameraConfigUpdateEnum.objects,
                 CameraConfigUpdateEnum.object_genai,
                 CameraConfigUpdateEnum.review,
                 CameraConfigUpdateEnum.review_genai,
                 CameraConfigUpdateEnum.semantic_search,
+                CameraConfigUpdateEnum.zones,
             ],
         )
         self.enrichment_config_subscriber = ConfigSubscriber("config/")
@@ -232,7 +239,7 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        if self.config.audio_transcription.enabled and any(
+        if any(
             c.enabled_in_config and c.audio_transcription.enabled
             for c in self.config.cameras.values()
         ):

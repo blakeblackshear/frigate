@@ -97,17 +97,27 @@ export function downloadSnapshot(dataUrl: string, filename: string): void {
   }
 }
 
-export function generateSnapshotFilename(cameraName: string): string {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+export function generateSnapshotFilename(
+  cameraName: string,
+  timestampSeconds?: number,
+): string {
+  // Live snapshots use the current time, while History snapshots pass the
+  // playback timestamp so the filename matches the moment being viewed.
+  const date =
+    typeof timestampSeconds === "number" && Number.isFinite(timestampSeconds)
+      ? new Date(timestampSeconds * 1000)
+      : new Date();
+  const timestamp = date.toISOString().replace(/[:.]/g, "-").slice(0, -5);
   return `${cameraName}_snapshot_${timestamp}.jpg`;
 }
 
-export async function grabVideoSnapshot(): Promise<SnapshotResult> {
+export async function grabVideoSnapshot(
+  targetVideo?: HTMLVideoElement | null,
+): Promise<SnapshotResult> {
   try {
-    // Find the video element in the player
-    const videoElement = document.querySelector(
-      "#player-container video",
-    ) as HTMLVideoElement;
+    const videoElement =
+      targetVideo ??
+      (document.querySelector("#player-container video") as HTMLVideoElement);
 
     if (!videoElement) {
       return {

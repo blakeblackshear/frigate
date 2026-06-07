@@ -71,6 +71,14 @@ class TestDebugReplayManagerSession(unittest.TestCase):
 
 
 class TestDebugReplayManagerStop(unittest.TestCase):
+    def setUp(self) -> None:
+        # stop() publishes a terminal job_state via a real JobStatePublisher,
+        # which opens a ZMQ REQ socket and blocks on REP. No dispatcher runs
+        # in unit tests, so substitute a no-op publisher.
+        patcher = patch("frigate.debug_replay.JobStatePublisher")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_stop_when_inactive_is_a_noop(self) -> None:
         from frigate.debug_replay import DebugReplayManager
 

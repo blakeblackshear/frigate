@@ -4,9 +4,8 @@ import { TriggerAction, TriggerType } from "./trigger";
 export interface UiConfig {
   timezone?: string;
   time_format?: "browser" | "12hour" | "24hour";
-  date_style?: "full" | "long" | "medium" | "short";
-  time_style?: "full" | "long" | "medium" | "short";
   dashboard: boolean;
+  review: boolean;
   order: number;
   unit_system?: "metric" | "imperial";
 }
@@ -522,8 +521,8 @@ export interface FrigateConfig {
     path: string | null;
     width: number;
     colormap: { [key: string]: [number, number, number] };
-    attributes_map: { [key: string]: [string] };
-    all_attributes: [string];
+    attributes_map: { [key: string]: string[] };
+    all_attributes: string[];
     plus?: {
       name: string;
       id: string;

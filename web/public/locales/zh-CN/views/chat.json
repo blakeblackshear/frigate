@@ -42,5 +42,31 @@
         "show_camera_status": "我的摄像头当前状态如何？",
         "recap": "我不在的时候发生了什么事？",
         "watch_camera": "监控前门，有人出现就通知我"
+    },
+    "new_chat": "新对话",
+    "settings": {
+        "title": "对话设置",
+        "show_stats": {
+            "title": "显示统计数据",
+            "desc": "显示对话回复的生成速率和上下文大小。",
+            "while_generating": "生成过程中",
+            "always": "始终"
+        },
+        "auto_scroll": {
+            "title": "自动滚动",
+            "desc": "自动滚动到最新消息。"
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} 词元（tokens）",
+        "tokens_per_second": "{{rate}} 词元/秒"
+    },
+    "reasoning": {
+        "active": "思考中…",
+        "show": "显示推理过程",
+        "hide": "隐藏推理过程"
+    },
+    "thinking": {
+        "toggle": "切换思考"
     }
 }

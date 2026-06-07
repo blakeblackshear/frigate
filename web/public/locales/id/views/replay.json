@@ -1,1 +1,59 @@
-{}
+{
+    "title": "Pemutaran Ulang Debug",
+    "description": "Putar ulang rekaman kamera untuk debugging. Daftar objek menampilkan ringkasan objek terdeteksi yang tertunda waktu, dan tab Pesan menampilkan aliran pesan internal Frigate dari rekaman pemutaran ulang.",
+    "websocket_messages": "Pesan",
+    "dialog": {
+        "title": "Mulai Pemutaran Ulang Debug",
+        "description": "Buat kamera pemutaran ulang sementara yang memutar berulang rekaman historis untuk men-debug masalah deteksi dan pelacakan objek. Kamera pemutaran ulang akan memiliki konfigurasi deteksi yang sama dengan kamera sumber. Pilih rentang waktu untuk memulai.",
+        "camera": "Kamera Sumber",
+        "timeRange": "Rentang Waktu",
+        "preset": {
+            "1m": "1 Menit Terakhir",
+            "5m": "5 Menit Terakhir",
+            "timeline": "Dari Linimasa",
+            "custom": "Kustom"
+        },
+        "startButton": "Mulai Pemutaran Ulang",
+        "selectFromTimeline": "Pilih",
+        "starting": "Memulai pemutaran ulang...",
+        "startLabel": "Mulai",
+        "endLabel": "Selesai",
+        "toast": {
+            "error": "Gagal memulai pemutaran ulang debug: {{error}}",
+            "alreadyActive": "Sesi pemutaran ulang sudah aktif",
+            "stopError": "Gagal menghentikan pemutaran ulang debug: {{error}}",
+            "goToReplay": "Buka Pemutaran Ulang"
+        }
+    },
+    "page": {
+        "noSession": "Tidak Ada Sesi Pemutaran Ulang Debug Aktif",
+        "noSessionDesc": "Mulai Pemutaran Ulang Debug dari tampilan Riwayat dengan mengeklik tombol Aksi di bilah alat dan memilih Pemutaran Ulang Debug.",
+        "goToRecordings": "Buka Riwayat",
+        "preparingClip": "Menyiapkan klip…",
+        "preparingClipDesc": "Frigate sedang menggabungkan rekaman untuk rentang waktu yang dipilih. Ini dapat memakan waktu satu menit untuk rentang yang lebih panjang.",
+        "startingCamera": "Memulai Pemutaran Ulang Debug…",
+        "startError": {
+            "title": "Gagal memulai Pemutaran Ulang Debug",
+            "back": "Kembali ke Riwayat"
+        },
+        "sourceCamera": "Kamera Sumber",
+        "replayCamera": "Kamera Pemutaran Ulang",
+        "initializingReplay": "Menginisialisasi Pemutaran Ulang Debug...",
+        "stoppingReplay": "Menghentikan Pemutaran Ulang Debug...",
+        "stopReplay": "Hentikan Pemutaran Ulang",
+        "confirmStop": {
+            "title": "Hentikan Pemutaran Ulang Debug?",
+            "description": "Ini akan menghentikan sesi dan membersihkan semua data sementara. Anda yakin?",
+            "confirm": "Hentikan Pemutaran Ulang",
+            "cancel": "Batal"
+        },
+        "activity": "Aktivitas",
+        "objects": "Daftar Objek",
+        "audioDetections": "Deteksi Audio",
+        "noActivity": "Tidak ada aktivitas terdeteksi",
+        "activeTracking": "Pelacakan aktif",
+        "noActiveTracking": "Tidak ada pelacakan aktif",
+        "configuration": "Konfigurasi",
+        "configurationDesc": "Sesuaikan secara halus pengaturan deteksi gerakan dan pelacakan objek untuk kamera Pemutaran Ulang Debug. Tidak ada perubahan yang disimpan ke file konfigurasi Frigate Anda."
+    }
+}

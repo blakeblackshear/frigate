@@ -55,5 +55,5 @@
             "goToReplay": "Ves a la repetició"
         }
     },
-    "description": "Reprodueix els enregistraments de la càmera per a la depuració. La llista d'objectes mostra un resum retardat en el temps dels objectes detectats i la pestanya Missatges mostra un flux de missatges interns de la fragata a partir del metratge de reproducció."
+    "description": "Reprodueix els enregistraments de la càmera per a la depuració. La llista d'objectes mostra un resum retardat en el temps dels objectes detectats i la pestanya Missatges mostra un flux de missatges interns de frigate a partir del metratge de reproducció."
 }

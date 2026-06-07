@@ -258,6 +258,41 @@
         },
         "raw_mask": {
             "label": "Màscara en brut"
+        },
+        "filters_attribute": {
+            "label": "Filtres d'atribut",
+            "description": "Filtres aplicats als atributs detectats per reduir falsos positius (àrea, relació, confiança).",
+            "min_area": {
+                "label": "Àrea mínima de l'atribut",
+                "description": "Es requereix una àrea de caixa contenidora mínima (píxels o percentatge) per a aquest atribut. Pot ser píxels (int) o percentatge (float entre 0,000001 i 0.99)."
+            },
+            "max_area": {
+                "label": "Àrea màxima de l'atribut",
+                "description": "Es permet l'àrea màxima del contenidor (píxels o percentatge) per a aquest atribut. Pot ser píxels (int) o percentatge (float entre 0,000001 i 0.99)."
+            },
+            "min_ratio": {
+                "label": "Relació mínima d'aspecte",
+                "description": "Relació mínima d'amplada/alçada requerida per a la casella contenidora a qualificar."
+            },
+            "max_ratio": {
+                "label": "Relació màxima d'aspecte",
+                "description": "Es permet la relació màxima d'amplada/alçada per a la casella contenidora a qualificar."
+            },
+            "threshold": {
+                "label": "Llindar de confiança",
+                "description": "Es requereix un llindar de confiança mitjà per a la detecció perquè l'atribut es consideri un veritable positiu."
+            },
+            "min_score": {
+                "label": "Confiança mínima",
+                "description": "Es requereix una confiança mínima de detecció d'un sol fotograma per a associar aquest atribut amb el seu objecte pare."
+            },
+            "mask": {
+                "label": "Màscara de filtre",
+                "description": "Coordenades de polígon que defineixen on s'aplica aquest filtre dins del marc."
+            },
+            "raw_mask": {
+                "label": "Màscara en brut"
+            }
         }
     },
     "record": {
@@ -489,11 +524,11 @@
         },
         "reindex": {
             "label": "Reindexa en iniciar",
-            "description": "Activa un reíndex complet d'objectes rastrejats històrics a la base de dades d'incrustacions."
+            "description": "Activa un reindexat complet d'objectes rastrejats històrics a la base de dades d'incrustacions."
         },
         "model": {
             "label": "Model de cerca semàntica o nom del proveïdor GenAI",
-            "description": "El model d'incrustació a utilitzar per a la cerca semàntica (per exemple 'jinav1'), o el nom d'un proveïdor de GenAI amb el rol d'incrustació."
+            "description": "El model de vectors a utilitzar per a la cerca semàntica (per exemple 'jinav1'), o el nom d'un proveïdor de GenAI amb el rol de vectors."
         },
         "model_size": {
             "label": "Mida del model",
@@ -773,7 +808,7 @@
         },
         "model_size": {
             "label": "Mida del model",
-            "description": "Mida del model a utilitzar per a incrustacions facials (petit/gran); més gran pot requerir GPU."
+            "description": "Mida del model a utilitzar per als vectors facials (petit/gran); més gran pot requerir GPU."
         },
         "unknown_score": {
             "label": "Llindar de puntuació desconegut",
@@ -949,7 +984,7 @@
         },
         "default_role": {
             "label": "Rol predeterminat",
-            "description": "Rol predeterminat assignat als usuaris intermediaris autenticats quan no s'aplica cap mapatge de rols (administrador o visor)."
+            "description": "Rol predeterminat assignat als usuaris intermediaris autenticats quan no s'aplica cap mapatge de rols."
         },
         "separator": {
             "label": "Caràcter separador",
@@ -1987,7 +2022,11 @@
         },
         "filters": {
             "label": "Filtres d'àudio",
-            "description": "Paràmetres de filtre per-àudio-tipus, com ara llindars de confiança utilitzats per reduir falsos positius."
+            "description": "Paràmetres de filtre per-àudio-tipus, com ara llindars de confiança utilitzats per reduir falsos positius.",
+            "threshold": {
+                "label": "Confiança mínima de l'àudio",
+                "description": "Llindar mínim de confiança per a l'esdeveniment d'àudio a comptar."
+            }
         },
         "enabled_in_config": {
             "label": "Estat d'àudio original",
@@ -2207,7 +2246,7 @@
         },
         "match_distance": {
             "label": "Distància de la coincidència",
-            "description": "Nombre de desajustos de caràcters permesos quan es comparen les plaques detectades amb les plaques conegudes."
+            "description": "Nombre de discrepàncies de caràcters permesos en comparar les plaques detectades amb les plaques conegudes."
         },
         "known_plates": {
             "label": "Matricules conegudes",
@@ -2298,6 +2337,10 @@
         "dashboard": {
             "label": "Mostra a la interfície",
             "description": "Estableix si aquesta càmera és visible a tot arreu a la interfície d'usuari de Frigate. Desactivar això requerirà editar manualment la configuració per tornar a veure aquesta càmera a la interfície d'usuari."
+        },
+        "review": {
+            "label": "Mostra en la revisió",
+            "description": "Alterna si aquesta càmera és visible a la revisió (la pàgina de revisió i el seu filtre de càmera, la revisió de moviment i la vista de l'historial)."
         }
     },
     "profiles": {

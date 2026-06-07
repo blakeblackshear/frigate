@@ -145,7 +145,7 @@ export function AnnotationSettingsPane({
 
   return (
     <div className="p-4">
-      <div className="text-md mb-2">
+      <div className="mb-2">
         {t("trackingDetails.annotationSettings.title")}
       </div>
 

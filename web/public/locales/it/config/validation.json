@@ -28,5 +28,8 @@
             "detectRequired": "Ad almeno un flusso di ingresso deve essere assegnato il ruolo di 'rilevamento'.",
             "hwaccelDetectOnly": "Solo il flusso di ingresso con il ruolo di rilevamento può definire argomenti di accelerazione hardware."
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Deve essere un numero pari."
     }
 }

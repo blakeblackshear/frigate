@@ -1089,10 +1089,25 @@ class SharedMemoryFrameManager(FrameManager):
 
     def get(self, name: str, shape) -> Optional[np.ndarray]:
         try:
-            if name in self.shm_store:
-                shm = self.shm_store[name]
-            else:
+            required = int(np.prod(shape))
+            shm = self.shm_store.get(name)
+            if shm is not None and shm.size != required:
+                # stale cached ref from a same-name recreate — drop and reopen
+                try:
+                    shm.close()
+                except Exception:
+                    pass
+                self.shm_store.pop(name, None)
+                shm = None
+            if shm is None:
                 shm = UntrackedSharedMemory(name=name)
+                if shm.size != required:
+                    # mid-recreate: OS segment doesn't match shape yet; skip
+                    try:
+                        shm.close()
+                    except Exception:
+                        pass
+                    return None
                 self.shm_store[name] = shm
             return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
         except FileNotFoundError:

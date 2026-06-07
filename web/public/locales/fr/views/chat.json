@@ -16,5 +16,7 @@
     "attach_event_aria": "Attacher l'événement {{eventId}}",
     "attachment_picker_paste_label": "Ou coller l'event ID",
     "attachment_picker_placeholder": "Attacher un événement",
-    "quick_reply_find_similar": "Trouver des observations similaires"
+    "quick_reply_find_similar": "Trouver des observations similaires",
+    "no_similar_objects_found": "Aucun objet similaire trouvé.",
+    "semantic_search_required": "La recherche sémantique doit être activée afin de trouver un objet similaire."
 }

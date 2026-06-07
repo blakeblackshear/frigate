@@ -16,7 +16,9 @@
     }
   },
   "timeline.aria": "Pilih timeline",
-  "timeline": "Linimasa",
+  "timeline": {
+    "label": "Linimasa"
+  },
   "zoomIn": "Perbesar",
   "zoomOut": "Perkecil",
   "events": {
@@ -43,7 +45,9 @@
   },
   "documentTitle": "Tinjauan - Frigate",
   "recordings": {
-    "documentTitle": "Rekaman - Frigate"
+    "documentTitle": "Rekaman - Frigate",
+    "invalidSharedLink": "Tidak dapat membuka tautan rekaman bertanda waktu karena kesalahan penguraian.",
+    "invalidSharedCamera": "Tidak dapat membuka tautan rekaman bertanda waktu karena kamera tidak dikenal atau tidak berwenang."
   },
   "calendarFilter": {
     "last24Hours": "24 Jam Terakhir"
@@ -54,10 +58,37 @@
     "button": "Item Batu Untuk Ditinjau",
     "label": "Lihat item ulasan baru"
   },
-  "selected_one": "{{count}} terpilih",
-  "selected_other": "{{count}} terpilih",
+  "selected_one": "{{count}} dipilih",
+  "selected_other": "{{count}} dipilih",
   "camera": "Kamera",
   "detected": "terdeteksi",
   "suspiciousActivity": "Aktivitas Mencurigakan",
-  "threateningActivity": "Aktivitas yang Mengancam"
+  "threateningActivity": "Aktivitas yang Mengancam",
+  "select_all": "Semua",
+  "normalActivity": "Normal",
+  "needsReview": "Perlu ditinjau",
+  "securityConcern": "Kendala keamanan",
+  "motionSearch": {
+    "menuItem": "Pencarian gerakan",
+    "openMenu": "Opsi kamera"
+  },
+  "motionPreviews": {
+    "menuItem": "Lihat pratinjau gerakan",
+    "title": "Pratinjau gerakan: {{camera}}",
+    "mobileSettingsTitle": "Setelan Pratinjau Gerakan",
+    "mobileSettingsDesc": "Sesuaikan kecepatan pemutaran dan peredupan, serta pilih tanggal untuk meninjau klip hanya gerakan.",
+    "dim": "Redup",
+    "dimAria": "Sesuaikan intensitas peredupan",
+    "dimDesc": "Tingkatkan peredupan untuk meningkatkan visibilitas area gerakan.",
+    "speed": "Kecepatan",
+    "speedAria": "Pilih kecepatan pemutaran pratinjau",
+    "speedDesc": "Pilih seberapa cepat klip pratinjau diputar.",
+    "back": "Kembali",
+    "empty": "Tidak ada pratinjau tersedia",
+    "noPreview": "Pratinjau tidak tersedia",
+    "seekAria": "Pindahkan {{camera}} pemain ke {{time}}",
+    "filter": "Filter",
+    "filterDesc": "Pilih area untuk hanya menampilkan klip dengan gerakan di wilayah tersebut.",
+    "filterClear": "Hapus"
+  }
 }

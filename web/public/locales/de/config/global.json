@@ -8,7 +8,7 @@
         "description": "Wenn aktiviert, startet Frigate im abgesicherten Modus mit reduzierten Features für die Fehlersuche."
     },
     "audio": {
-        "label": "Audioerkennung",
+        "label": "Audioereignisse",
         "enabled": {
             "label": "Aktivieren der Audioerkennung",
             "description": "Aktivieren oder deaktivieren Sie die Erkennung von Audioereignissen für alle Kameras; diese Einstellung kann für jede Kamera individuell überschrieben werden."
@@ -23,7 +23,11 @@
         },
         "filters": {
             "label": "Audiofilter",
-            "description": "Filtereinstellungen pro Audiotyp, wie z. B. Konfidenzschwellenwerte, die zur Reduzierung von Fehlalarmen verwendet werden."
+            "description": "Filtereinstellungen pro Audiotyp, wie z. B. Konfidenzschwellenwerte, die zur Reduzierung von Fehlalarmen verwendet werden.",
+            "threshold": {
+                "label": "Mindestvertrauensgrad für Audio",
+                "description": "Mindestschwellenwert für die Zuverlässigkeit, damit das Audioereignis gezählt wird."
+            }
         },
         "max_not_heard": {
             "label": "Ende Timeout",
@@ -492,7 +496,7 @@
         },
         "default_role": {
             "label": "Standardrolle",
-            "description": "Standardrolle, die proxy-authentifizierten Benutzern zugewiesen wird, wenn keine Rollenzuordnung gilt (Admin oder Betrachter)."
+            "description": "Standardrolle, die proxy-authentifizierten Benutzern zugewiesen wird, wenn keine Rollenzuordnung vorliegt."
         },
         "separator": {
             "label": "Trennzeichen",
@@ -1275,6 +1279,41 @@
         },
         "raw_mask": {
             "label": "Rohmaske"
+        },
+        "filters_attribute": {
+            "label": "Attributfilter",
+            "description": "Auf erkannte Attribute angewendete Filter zur Reduzierung von Fehlalarmen (Fläche, Verhältnis, Konfidenz).",
+            "min_area": {
+                "label": "Mindestfläche des Attributs",
+                "description": "Für dieses Attribut erforderliche Mindestfläche des Begrenzungsrahmens (in Pixeln oder Prozent). Kann als Pixelwert (Ganzzahl) oder als Prozentwert (Gleitkommawert zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "max_area": {
+                "label": "Maximale Attributfläche",
+                "description": "Maximal zulässige Fläche des Begrenzungsrahmens (in Pixeln oder Prozent) für dieses Attribut. Kann als Pixelwert (Ganzzahl) oder als Prozentwert (Gleitkommawert zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "min_ratio": {
+                "label": "Mindestseitenverhältnis",
+                "description": "Erforderliches Mindestverhältnis von Breite zu Höhe, damit die Begrenzungsbox die Anforderungen erfüllt."
+            },
+            "max_ratio": {
+                "label": "Maximales Seitenverhältnis",
+                "description": "Maximal zulässiges Verhältnis von Breite zu Höhe für die Begrenzungsbox, damit diese die Anforderungen erfüllt."
+            },
+            "threshold": {
+                "label": "Konfidenzschwelle",
+                "description": "Durchschnittlicher Schwellenwert für die Erkennungssicherheit, der erforderlich ist, damit das Merkmal als echtes Positiv gewertet wird."
+            },
+            "min_score": {
+                "label": "Mindestvertrauen",
+                "description": "Mindestwert für die Erkennungssicherheit eines einzelnen Bildes, der erforderlich ist, um dieses Attribut seinem übergeordneten Objekt zuzuordnen."
+            },
+            "mask": {
+                "label": "Filtermaske",
+                "description": "Polygonkoordinaten, die festlegen, wo dieser Filter innerhalb des Bildausschnitts angewendet wird."
+            },
+            "raw_mask": {
+                "label": "Rohmaske"
+            }
         }
     },
     "record": {

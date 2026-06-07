@@ -35,7 +35,9 @@
         "zones": "Tsoonid",
         "ratio": "Suhtarv",
         "area": "Ala",
-        "score": "Punktiskoor"
+        "score": "Punktiskoor",
+        "computedScore": "Arvutatud punktiskoor",
+        "topScore": "Suuremad punktiskoorid"
       },
       "external": "{{label}} on tuvastatud",
       "heard": "{{label}} on kuuldud",
@@ -79,13 +81,34 @@
         "mismatch_other": "Tuvastasin {{count}} võõrast objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud."
       },
       "title": "Vaata objekti üksikasju",
-      "desc": "Vaata objekti üksikasju"
+      "desc": "Vaata objekti üksikasju",
+      "toast": {
+        "success": {
+          "updatedLPR": "Sõiduki numbrimärgi uuendamine õnnestus."
+        },
+        "error": {
+          "updatedLPRFailed": "Sõiduki numbrimärgi uuendamine ei õnnestunud: {{errorMessage}}"
+        }
+      }
     },
     "snapshotScore": {
-      "label": "Hetkvõttete punktiskoor"
+      "label": "Hetkvõtete punktiskoor"
     },
     "regenerateFromSnapshot": "Loo uuesti hetkvõttest",
-    "timestamp": "Ajatampel"
+    "timestamp": "Ajatampel",
+    "score": {
+      "label": "Punktiskoor"
+    },
+    "scoreInfo": "Punktiskoori teave",
+    "editLPR": {
+      "title": "Muuda sõiduki numbrimärki",
+      "desc": "Sisesta sõiduki numbrimärgi uus väärtus: {{label}}",
+      "descNoLabel": "Sisesta sõiduki numbrimärgi uus väärtus selle jälgitava objekti jaoks"
+    },
+    "recognizedLicensePlate": "Tuvastatud sõiduki numbrimärk",
+    "description": {
+      "aiTips": "Frigate ei küsi sinu generatiivse tehisaru teenusepakkujalt kirjeldust enne, kui jälgitava objekti elutsükkel on lõppenud."
+    }
   },
   "trackedObjectDetails": "Jälgitava objekti üksikasjad"
 }

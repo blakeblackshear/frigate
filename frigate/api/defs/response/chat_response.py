@@ -20,6 +20,10 @@ class ChatMessageResponse(BaseModel):
     content: Optional[str] = Field(
         default=None, description="Message content (None if tool calls present)"
     )
+    reasoning: Optional[str] = Field(
+        default=None,
+        description="Separated reasoning/thinking trace if the model emitted one",
+    )
     tool_calls: Optional[list[ToolCallInvocation]] = Field(
         default=None, description="Tool calls if LLM wants to call tools"
     )

@@ -25,6 +25,7 @@ import useSWR from "swr";
 import { useTranslation } from "react-i18next";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
 type CameraMetricsProps = {
   lastUpdated: number;
@@ -316,7 +317,7 @@ export default function CameraMetrics({
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {config &&
           Object.values(config.cameras).map((camera) => {
-            if (camera.enabled) {
+            if (camera.enabled && !isReplayCamera(camera.name)) {
               return (
                 <Fragment key={camera.name}>
                   {probeCameraName == camera.name && (

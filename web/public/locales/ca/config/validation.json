@@ -28,5 +28,8 @@
             "detectRequired": "Almenys un flux d'entrada ha de tenir assignat el rol «detecta».",
             "hwaccelDetectOnly": "Només el flux d'entrada amb el rol detect pot definir arguments d'acceleració del maquinari."
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Ha de ser un nombre parell."
     }
 }

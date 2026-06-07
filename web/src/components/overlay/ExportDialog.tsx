@@ -54,6 +54,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -163,7 +164,11 @@ export default function ExportDialog({
       toast.success(t("export.toast.queued"), {
         position: "top-center",
         action: (
-          <a href="/export" target="_blank" rel="noopener noreferrer">
+          <a
+            href={`${baseUrl}export`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button>{t("export.toast.view")}</Button>
           </a>
         ),
@@ -282,7 +287,7 @@ export default function ExportDialog({
         <Content
           className={
             isDesktop
-              ? "sm:rounded-lg md:rounded-2xl"
+              ? "scrollbar-container max-h-[90dvh] overflow-y-auto sm:rounded-lg md:rounded-2xl"
               : "mx-4 rounded-lg px-4 pb-4 md:rounded-2xl"
           }
         >
@@ -444,7 +449,9 @@ export function ExportContent({
   );
 
   const cameraActivities = useMemo<CameraActivity[]>(() => {
-    const allCameraIds = Object.keys(config?.cameras ?? {});
+    const allCameraIds = Object.keys(config?.cameras ?? {}).filter(
+      (name) => !isReplayCamera(name),
+    );
     const byCamera = new Map<string, Event[]>();
 
     events?.forEach((event) => {
@@ -787,7 +794,6 @@ export function ExportContent({
           )}
 
           <Input
-            className="text-md"
             type="search"
             placeholder={t("export.name.placeholder")}
             value={name}
@@ -828,13 +834,11 @@ export function ExportContent({
               {selectedCaseId === "new" && (
                 <div className="space-y-2 pt-1">
                   <Input
-                    className="text-md"
                     placeholder={t("export.case.newCaseNamePlaceholder")}
                     value={singleNewCaseName}
                     onChange={(e) => setSingleNewCaseName(e.target.value)}
                   />
                   <Textarea
-                    className="text-md"
                     placeholder={t("export.case.newCaseDescriptionPlaceholder")}
                     value={singleNewCaseDescription}
                     onChange={(e) =>
@@ -981,7 +985,6 @@ export function ExportContent({
               {t("export.multiCamera.nameLabel")}
             </Label>
             <Input
-              className="text-md"
               type="search"
               placeholder={t("export.multiCamera.namePlaceholder")}
               value={name}
@@ -1021,13 +1024,11 @@ export function ExportContent({
               {batchCaseSelection === "new" && (
                 <div className="space-y-2 pt-1">
                   <Input
-                    className="text-md"
                     placeholder={t("export.case.newCaseNamePlaceholder")}
                     value={newCaseName}
                     onChange={(event) => setNewCaseName(event.target.value)}
                   />
                   <Textarea
-                    className="text-md"
                     placeholder={t("export.case.newCaseDescriptionPlaceholder")}
                     value={newCaseDescription}
                     onChange={(event) =>
@@ -1042,20 +1043,15 @@ export function ExportContent({
       </Tabs>
 
       {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
-      <DialogFooter
-        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-2"}
-      >
+      <DialogFooter className="mt-3 sm:mt-0">
         <Button
-          className={isDesktop ? "" : "w-full"}
           aria-label={t("button.cancel", { ns: "common" })}
-          variant="outline"
           onClick={onCancel}
         >
           {t("button.cancel", { ns: "common" })}
         </Button>
         {activeTab === "export" ? (
           <Button
-            className={isDesktop ? "" : "w-full"}
             aria-label={t("export.selectOrExport")}
             variant="select"
             disabled={isStartingExport}
@@ -1079,12 +1075,10 @@ export function ExportContent({
           </Button>
         ) : (
           <Button
-            className={isDesktop ? "" : "w-full"}
             aria-label={t("export.multiCamera.exportButton", {
               count: selectedCameraCount,
             })}
             variant="select"
-            size="sm"
             disabled={!canStartBatchExport}
             onClick={() => void startBatchExport()}
           >

@@ -37,7 +37,11 @@
         },
         "filters": {
             "label": "音频过滤器",
-            "description": "按音频类型的过滤器设置，如用于减少误报的置信度阈值。"
+            "description": "按音频类型的过滤器设置，如用于减少误报的置信度阈值。",
+            "threshold": {
+                "label": "最低音频置信度",
+                "description": "设置音频事件所需的最低置信度阈值。"
+            }
         },
         "enabled_in_config": {
             "label": "原始音频状态",
@@ -68,7 +72,7 @@
         },
         "mode": {
             "label": "追踪模式",
-            "description": "在鸟瞰视图中包含摄像头的模式：'objects'（目标）、'motion'（动作）或 'continuous'（持续）。"
+            "description": "在鸟瞰视图中包含摄像头的模式有：“基于目标”、“基于画面变动”或“连续”。"
         },
         "order": {
             "label": "排序位置",
@@ -603,7 +607,7 @@
             },
             "image_source": {
                 "label": "核查图像来源",
-                "description": "发送给生成式 AI 的画面来源（'preview' 或 'recordings'）；'recordings' 使用更高质量的画面帧，但会消耗更多的 token。"
+                "description": "发送给生成式 AI 的画面来源（“预览” 或 “录制”）；“录制”将使用更高质量的画面帧，但会消耗更多的 token。"
             },
             "additional_concerns": {
                 "label": "额外关注事项",
@@ -714,7 +718,7 @@
             "label": "时间戳效果",
             "description": "时间戳文本的视觉效果（none、solid、shadow）。"
         },
-        "description": "应用于录像和快照的实时监控流中时间戳的样式选项。"
+        "description": "快照与调试视图的时间戳样式设置。"
     },
     "semantic_search": {
         "label": "语义搜索",
@@ -723,7 +727,7 @@
             "description": "摄像头特定语义搜索触发器的操作和匹配条件。",
             "friendly_name": {
                 "label": "友好名称",
-                "description": "在 UI 中为此触发器显示的可选友好名称。"
+                "description": "可选友好名称，用于在界面上为触发器显示此名称。"
             },
             "enabled": {
                 "label": "开启此触发器",
@@ -852,8 +856,12 @@
             "description": "用于在页面中排序摄像头的顺序（只会影响默认仪表板和列表）；数值越大则在越后面。"
         },
         "dashboard": {
-            "label": "在 UI 中显示",
+            "label": "在页面中显示",
             "description": "切换此摄像头在 Frigate 页面的所有位置是否可见。禁用此项将需要手动编辑配置才能在页面中再次查看此摄像头。"
+        },
+        "review": {
+            "label": "在核查中显示",
+            "description": "切换该摄像头是否在核查页面可见（包含核查页、摄像头筛选栏、画面变动核查与历史视图）。"
         }
     },
     "best_image_timeout": {
@@ -873,7 +881,7 @@
         "description": "区域允许您定义帧的特定区域，以便确定目标是否在特定区域内。",
         "friendly_name": {
             "label": "区域名称",
-            "description": "区域的友好名称，显示在 Frigate UI 中。如果未设置，将使用区域名称的格式化版本。"
+            "description": "区域的友好名称，显示在 Frigate 页面中。如果未设置，将使用区域名称的格式化版本。"
         },
         "enabled": {
             "label": "开启",

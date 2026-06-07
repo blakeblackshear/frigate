@@ -1,1 +1,82 @@
-{}
+{
+    "documentTitle": "Búsqueda por movimiento - Frigate",
+    "title": "Búsqueda por movimiento",
+    "description": "Dibuja un polígono para definir la región de interés y especifica un intervalo de tiempo para buscar cambios de movimiento dentro de esa región.",
+    "selectCamera": "Búsqueda por movimiento se está cargando",
+    "startSearch": "Iniciar búsqueda",
+    "searchStarted": "Búsqueda iniciada",
+    "searchCancelled": "Búsqueda cancelada",
+    "cancelSearch": "Cancelar",
+    "searching": "Búsqueda en progreso.",
+    "searchComplete": "Búsqueda completada",
+    "noResultsYet": "Ejecuta una búsqueda para encontrar cambios de movimiento en la región seleccionada",
+    "noChangesFound": "No se detectaron cambios de píxeles en la región seleccionada",
+    "changesFound_one": "Encontrado {{count}} cambio de movimiento",
+    "changesFound_many": "Encontrados {{count}} cambios de movimiento",
+    "changesFound_other": "Encontrados {{count}} cambios de movimiento",
+    "framesProcessed": "{{count}} fotogramas procesados",
+    "jumpToTime": "Saltar a este tiempo",
+    "results": "Resultados",
+    "showSegmentHeatmap": "Mapa de calor",
+    "newSearch": "Nueva búsqueda",
+    "clearResults": "Borrar resultados",
+    "clearROI": "Borrar polígono",
+    "polygonControls": {
+        "points_one": "{{count}} punto",
+        "points_many": "{{count}} puntos",
+        "points_other": "{{count}} puntos",
+        "undo": "Deshacer el último punto",
+        "reset": "Restablecer polígono",
+        "drawMode": "Dibujar",
+        "moveMode": "Mover"
+    },
+    "motionHeatmapLabel": "Mapa de calor de movimiento",
+    "dialog": {
+        "title": "Búsqueda de movimiento",
+        "cameraLabel": "Cámara",
+        "previewAlt": "Vista previa de la cámara {{camera}}"
+    },
+    "timeRange": {
+        "title": "Rango de búsqueda",
+        "start": "Hora de inicio",
+        "end": "Hora de finalización"
+    },
+    "settings": {
+        "title": "Ajustes de búsqueda",
+        "parallelMode": "Modo paralelo",
+        "parallelModeDesc": "Analiza varios intervalos de grabación al mismo tiempo (más rápido, pero utiliza más recursos de decodificación)",
+        "threshold": "Umbral de sensibilidad",
+        "thresholdDesc": "Los valores más bajos detectan cambios más pequeños (1-255)",
+        "minArea": "Área mínima de cambio",
+        "minAreaDesc": "Tamaño mínimo de una única región en movimiento, expresado como porcentaje de la región de interés",
+        "frameSkip": "Salto de fotogramas",
+        "frameSkipDesc": "Procesa cada N fotogramas. Establécelo según la tasa de FPS de tu cámara para procesar un fotograma por segundo (p. ej., 5 para una cámara de 5 FPS, 30 para una cámara de 30 FPS). Los valores más altos serán más rápidos, pero pueden omitir eventos de movimiento breves.",
+        "maxResults": "Resultados máximos",
+        "maxResultsDesc": "Detener después de esta cantidad de marcas de tiempo coincidentes"
+    },
+    "errors": {
+        "noCamera": "Selecciona una cámara",
+        "noROI": "Dibuja una región de interés",
+        "noTimeRange": "Selecciona un rango de tiempo",
+        "invalidTimeRange": "La hora de fin debe ser posterior a la hora de inicio",
+        "searchFailed": "La búsqueda falló: {{message}}",
+        "polygonTooSmall": "El polígono debe tener al menos 3 puntos",
+        "unknown": "Error desconocido"
+    },
+    "changePercentage": "{{percentage}}% cambiado",
+    "metrics": {
+        "title": "Métricas de búsqueda",
+        "segmentsScanned": "Segmentos analizados",
+        "segmentsProcessed": "Procesado",
+        "segmentsSkippedInactive": "Omitido (sin actividad)",
+        "segmentsSkippedHeatmap": "Omitido (sin superposición de ROI)",
+        "fallbackFullRange": "Análisis completo de respaldo",
+        "framesDecoded": "Fotogramas decodificados",
+        "wallTime": "Tiempo de búsqueda",
+        "segmentErrors": "Errores de segmento",
+        "seconds": "{{seconds}} s",
+        "minutesSeconds": "{{minutes}}m {{seconds}}s",
+        "scanSummary": "{{segments}} segmentos · {{time}}"
+    },
+    "scanning": "Escaneando {{time}}"
+}

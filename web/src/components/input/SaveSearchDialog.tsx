@@ -69,7 +69,6 @@ export function SaveSearchDialog({
         </DialogHeader>
         <Input
           value={searchName}
-          className="text-md"
           onChange={(e) => setSearchName(e.target.value)}
           placeholder={t("search.saveSearch.placeholder")}
         />
@@ -88,7 +87,6 @@ export function SaveSearchDialog({
           <Button
             onClick={handleSave}
             variant="select"
-            className="mb-2 md:mb-0"
             aria-label={t("search.saveSearch.button.save.label")}
           >
             {t("button.save", { ns: "common" })}

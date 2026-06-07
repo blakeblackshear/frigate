@@ -10,6 +10,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { JsonObject, JsonValue } from "@/types/configForm";
 import { isJsonObject } from "@/lib/utils";
 import {
+  buildHiddenFieldContext,
   getBaseCameraSectionValue,
   getEffectiveHiddenFields,
   pathMatchesHiddenPattern,
@@ -17,6 +18,7 @@ import {
 } from "@/utils/configUtil";
 import { extractSectionSchema } from "@/hooks/use-config-schema";
 import { applySchemaDefaults } from "@/lib/config-schema";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
 const INTERNAL_FIELD_SUFFIXES = ["enabled_in_config", "raw_mask"];
 
@@ -57,6 +59,64 @@ function stripHiddenPaths(value: JsonValue, hiddenFields: string[]): JsonValue {
     unsetWithWildcard(cloned as Record<string, unknown>, path);
   }
   return cloned;
+}
+
+/**
+ * Field paths that the backend resolves per-camera at runtime (from `fps`,
+ * stream introspection, or other camera-local state) but defaults to `None`
+ * in the global Pydantic model. Because the `/config` endpoint serializes
+ * with `exclude_none=True`, these paths are absent from the global section
+ * yet always populated on cameras, which would otherwise make every camera
+ * appear to override fields the user never set globally.
+ */
+const AUTO_DERIVED_FIELDS: Record<string, readonly string[]> = {
+  detect: [
+    "width",
+    "height",
+    "min_initialized",
+    "max_disappeared",
+    "stationary.interval",
+    "stationary.threshold",
+  ],
+};
+
+/**
+ * Drop auto-derived field paths from the camera value when the global value
+ * has no explicit setting for that path. If the user later sets one of these
+ * fields globally, the path will be present in `globalValue` and normal
+ * comparison resumes.
+ */
+function stripAutoDerivedMissingFromGlobal(
+  sectionPath: string,
+  globalValue: JsonValue,
+  cameraValue: JsonValue,
+): JsonValue {
+  const fields = AUTO_DERIVED_FIELDS[sectionPath];
+  if (!fields || !isJsonObject(cameraValue)) return cameraValue;
+  const cloned = cloneDeep(cameraValue) as JsonObject;
+  for (const path of fields) {
+    if (get(globalValue, path) === undefined) {
+      unsetWithWildcard(cloned as Record<string, unknown>, path);
+    }
+  }
+  return cloned;
+}
+
+/**
+ * Whether the given field is auto-derived for `sectionPath` and the global
+ * value at that path is missing — in which case a per-camera value should
+ * not be treated as an override.
+ */
+function isAutoDerivedMissingFromGlobal(
+  sectionPath: string,
+  fieldPath: string,
+  globalValue: unknown,
+): boolean {
+  const fields = AUTO_DERIVED_FIELDS[sectionPath];
+  if (!fields) return false;
+  if (!fields.includes(fieldPath)) return false;
+  const value = get(globalValue as JsonObject, fieldPath);
+  return value === undefined || value === null;
 }
 
 /**
@@ -228,15 +288,20 @@ export function useConfigOverride({
     const hiddenFields = getEffectiveHiddenFields(
       sectionPath,
       "camera",
-      config,
+      buildHiddenFieldContext(config, "camera", cameraName),
     );
     const collapsedGlobal = stripHiddenPaths(
       collapseEmpty(normalizedGlobalValue),
       hiddenFields,
     );
-    const collapsedCamera = stripHiddenPaths(
+    const collapsedCameraRaw = stripHiddenPaths(
       collapseEmpty(normalizedCameraValue),
       hiddenFields,
+    );
+    const collapsedCamera = stripAutoDerivedMissingFromGlobal(
+      sectionPath,
+      collapsedGlobal,
+      collapsedCameraRaw,
     );
 
     const comparisonGlobal = compareFields
@@ -257,6 +322,20 @@ export function useConfigOverride({
     const getFieldOverride = (fieldPath: string): OverrideStatus => {
       const globalFieldValue = get(normalizedGlobalValue, fieldPath);
       const cameraFieldValue = get(normalizedCameraValue, fieldPath);
+
+      if (
+        isAutoDerivedMissingFromGlobal(
+          sectionPath,
+          fieldPath,
+          normalizedGlobalValue,
+        )
+      ) {
+        return {
+          isOverridden: false,
+          globalValue: globalFieldValue,
+          cameraValue: cameraFieldValue,
+        };
+      }
 
       return {
         isOverridden: !isEqual(
@@ -362,14 +441,23 @@ export function useAllCameraOverrides(
         getBaseCameraSectionValue(config, cameraName, key),
       );
 
-      const hiddenFields = getEffectiveHiddenFields(key, "camera", config);
+      const hiddenFields = getEffectiveHiddenFields(
+        key,
+        "camera",
+        buildHiddenFieldContext(config, "camera", cameraName),
+      );
       const collapsedGlobal = stripHiddenPaths(
         collapseEmpty(globalValue),
         hiddenFields,
       );
-      const collapsedCamera = stripHiddenPaths(
+      const collapsedCameraRaw = stripHiddenPaths(
         collapseEmpty(cameraValue),
         hiddenFields,
+      );
+      const collapsedCamera = stripAutoDerivedMissingFromGlobal(
+        key,
+        collapsedGlobal,
+        collapsedCameraRaw,
       );
       const comparisonGlobal = compareFields
         ? pickFields(collapsedGlobal, compareFields)
@@ -515,9 +603,13 @@ function getEffectiveGlobalBaseline(
       return normalizeConfigValue(defaults as JsonValue);
     }
   }
-  const cameraSectionValues = Object.keys(config.cameras ?? {}).map((name) =>
-    normalizeConfigValue(getBaseCameraSectionValue(config, name, sectionPath)),
-  );
+  const cameraSectionValues = Object.keys(config.cameras ?? {})
+    .filter((name) => !isReplayCamera(name))
+    .map((name) =>
+      normalizeConfigValue(
+        getBaseCameraSectionValue(config, name, sectionPath),
+      ),
+    );
   return deriveSyntheticGlobalValue(cameraSectionValues, compareFields);
 }
 
@@ -597,7 +689,9 @@ export function useCamerasOverridingSection(
     const sectionMeta = OVERRIDABLE_SECTIONS.find((s) => s.key === sectionPath);
     const compareFields = sectionMeta?.compareFields;
 
-    const cameraNames = Object.keys(config.cameras);
+    const cameraNames = Object.keys(config.cameras).filter(
+      (name) => !isReplayCamera(name),
+    );
     const cameraSectionValues = cameraNames.map((name) =>
       normalizeConfigValue(
         getBaseCameraSectionValue(config, name, sectionPath),
@@ -615,7 +709,11 @@ export function useCamerasOverridingSection(
       const deltasByPath = new Map<string, FieldDelta>();
 
       // 1. Camera-level overrides (uses base_config when a profile is active)
-      const cameraValue = collapseEmpty(cameraSectionValues[idx]);
+      const cameraValue = stripAutoDerivedMissingFromGlobal(
+        sectionPath,
+        globalValue,
+        collapseEmpty(cameraSectionValues[idx]),
+      );
       for (const delta of collectFieldDeltas(
         globalValue,
         cameraValue,
@@ -696,16 +794,20 @@ export function useCameraSectionDeltas(
     const globalValue = collapseEmpty(
       getEffectiveGlobalBaseline(config, sectionPath, compareFields, schema),
     );
-    const cameraValue = collapseEmpty(
-      normalizeConfigValue(
-        getBaseCameraSectionValue(config, cameraName, sectionPath),
+    const cameraValue = stripAutoDerivedMissingFromGlobal(
+      sectionPath,
+      globalValue,
+      collapseEmpty(
+        normalizeConfigValue(
+          getBaseCameraSectionValue(config, cameraName, sectionPath),
+        ),
       ),
     );
 
     const hiddenFields = getEffectiveHiddenFields(
       sectionPath,
       "camera",
-      config,
+      buildHiddenFieldContext(config, "camera", cameraName),
     );
 
     const deltas: FieldDelta[] = [];
@@ -774,7 +876,7 @@ export function useProfileSectionDeltas(
     const hiddenFields = getEffectiveHiddenFields(
       sectionPath,
       "camera",
-      config,
+      buildHiddenFieldContext(config, "camera", cameraName),
     );
 
     const deltas: FieldDelta[] = [];

@@ -144,11 +144,13 @@ export default function ReviewFilterGroup({
 
   const filterValues = useMemo(
     () => ({
-      cameras: allowedCameras.sort(
-        (a, b) =>
-          (config?.cameras[a]?.ui?.order ?? 0) -
-          (config?.cameras[b]?.ui?.order ?? 0),
-      ),
+      cameras: allowedCameras
+        .filter((cam) => config?.cameras[cam]?.ui?.review !== false)
+        .sort(
+          (a, b) =>
+            (config?.cameras[a]?.ui?.order ?? 0) -
+            (config?.cameras[b]?.ui?.order ?? 0),
+        ),
       labels: Object.values(allLabels || {}),
       zones: Object.values(allZones || {}),
     }),

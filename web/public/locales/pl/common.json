@@ -156,7 +156,18 @@
     "off": "WYŁĄCZ",
     "edit": "Edytuj",
     "copyCoordinates": "Kopiuj współrzędne",
-    "continue": "Kontynuuj"
+    "continue": "Kontynuuj",
+    "add": "Dodaj",
+    "applying": "Zastosowywanie…",
+    "undo": "Cofnij",
+    "copiedToClipboard": "Skopiowano do schowka",
+    "modified": "Zmodyfikowane",
+    "overridden": "Nadpisany",
+    "resetToDefault": "Przywróć do domyślnych",
+    "saveAll": "Zapisz wszystkie",
+    "savingAll": "Zapisywanie wszystkich…",
+    "undoAll": "Cofnij wszystko",
+    "retry": "Powtórz"
   },
   "menu": {
     "system": "System",
@@ -207,7 +218,9 @@
       "gl": "Galego (Galicyjski)",
       "id": "Bahasa Indonesia (Indonezyjski)",
       "ur": "اردو (Urdu)",
-      "hr": "Hrvatski (Chorwacki)"
+      "hr": "Hrvatski (Chorwacki)",
+      "zhHant": "繁體中文 (Chiński Tradycyjny)",
+      "bs": "Bosanski (Bośniacki)"
     },
     "appearance": "Wygląd",
     "darkMode": {
@@ -260,7 +273,8 @@
     "help": "Pomoc",
     "settings": "Ustawienia",
     "export": "Eksportuj",
-    "classification": "Klasyfikacja"
+    "classification": "Klasyfikacja",
+    "profiles": "Profile"
   },
   "role": {
     "viewer": "Przeglądający",
@@ -298,7 +312,8 @@
         "title": "Nie udało się zapisać zmian konfiguracji: {{errorMessage}}",
         "noMessage": "Nie udało się zapisać zmian konfiguracji"
       },
-      "title": "Zapisz"
+      "title": "Zapisz",
+      "success": "Konfiguracja zapisana."
     }
   },
   "readTheDocumentation": "Przeczytaj dokumentację",

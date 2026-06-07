@@ -3,6 +3,7 @@ import SemanticSearchReindex from "./SemanticSearchReindex.tsx";
 import CameraReviewStatusToggles from "./CameraReviewStatusToggles";
 import ProxyRoleMap from "./ProxyRoleMap";
 import NotificationsSettingsExtras from "./NotificationsSettingsExtras";
+import BirdseyeCameraReorder from "./BirdseyeCameraReorder";
 import type { ConfigFormContext } from "@/types/configForm";
 
 // Props that will be injected into all section renderers
@@ -51,6 +52,9 @@ export const sectionRenderers: SectionRenderers = {
   },
   notifications: {
     NotificationsSettingsExtras,
+  },
+  birdseye: {
+    BirdseyeCameraReorder,
   },
 };
 

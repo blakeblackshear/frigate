@@ -768,5 +768,35 @@
     },
     "mqtt": {
         "label": "MQTT یک پروتکل تبادل پیام سبک ."
+    },
+    "version": {
+        "label": "نسخه فعلی config"
+    },
+    "safe_mode": {
+        "label": "حالت امن"
+    },
+    "environment_vars": {
+        "label": "متغیر های محیطی"
+    },
+    "logger": {
+        "label": "گزارش گیری",
+        "default": {
+            "label": "سطح گزارش گیری"
+        }
+    },
+    "auth": {
+        "label": "احراز هویت",
+        "enabled": {
+            "label": "فعال سازی احراز هویت"
+        },
+        "reset_admin_password": {
+            "label": "بازنشانی رمز ادمین"
+        },
+        "trusted_proxies": {
+            "label": "پراکسی های مورد اعتماد"
+        }
+    },
+    "database": {
+        "label": "پایگاه داده"
     }
 }

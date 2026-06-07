@@ -32,6 +32,7 @@ import {
   ZoomLevel,
 } from "@/types/review";
 import { getChunkedTimeRange } from "@/utils/timelineUtil";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import axios from "axios";
 import {
@@ -49,6 +50,7 @@ import { FiMoreVertical } from "react-icons/fi";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import useSWR from "swr";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
+import { baseUrl } from "@/api/baseUrl";
 import { Button } from "@/components/ui/button";
 import BlurredIconButton from "@/components/button/BlurredIconButton";
 import {
@@ -64,6 +66,7 @@ import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
 import { TimeRange } from "@/types/timeline";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import {
   useCameraMotionNextTimestamp,
   useCameraMotionOnlyRanges,
@@ -284,7 +287,11 @@ export default function EventView({
               {
                 position: "top-center",
                 action: (
-                  <a href="/export" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`${baseUrl}export`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button>
                       {t("export.toast.view", { ns: "components/dialog" })}
                     </Button>
@@ -1002,25 +1009,29 @@ function MotionReview({
   const { t } = useTranslation(["views/events", "common"]);
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
+  const allowedCameras = useAllowedCameras();
 
   const reviewCameras = useMemo(() => {
     if (!config) {
       return [];
     }
 
-    let cameras;
-    if (!filter || !filter.cameras) {
-      cameras = Object.values(config.cameras);
-    } else {
-      const filteredCams = filter.cameras;
-
-      cameras = Object.values(config.cameras).filter((cam) =>
-        filteredCams.includes(cam.name),
-      );
-    }
+    const selectedCams = filter?.cameras;
+    const cameras = Object.values(config.cameras).filter((cam) => {
+      if (isReplayCamera(cam.name)) {
+        return false;
+      }
+      if (!allowedCameras.includes(cam.name)) {
+        return false;
+      }
+      if (selectedCams && !selectedCams.includes(cam.name)) {
+        return false;
+      }
+      return true;
+    });
 
     return cameras.sort((a, b) => a.ui.order - b.ui.order);
-  }, [config, filter]);
+  }, [config, filter, allowedCameras]);
 
   const videoPlayersRef = useRef<{ [camera: string]: PreviewController }>({});
 
@@ -1378,9 +1389,8 @@ function MotionReview({
                     selectedCells={pendingFilterCells}
                     onCellsChange={setPendingFilterCells}
                   />
-                  <DialogFooter className="justify-end gap-1">
+                  <DialogFooter>
                     <Button
-                      variant="outline"
                       disabled={pendingFilterCells.size === 0}
                       onClick={() => {
                         setPendingFilterCells(new Set());
@@ -1421,9 +1431,7 @@ function MotionReview({
                   <div className="space-y-4 py-2">
                     {!isDesktop && (
                       <div className="space-y-1">
-                        <div className="text-md">
-                          {t("motionPreviews.mobileSettingsTitle")}
-                        </div>
+                        <div>{t("motionPreviews.mobileSettingsTitle")}</div>
                         <div className="text-xs text-muted-foreground">
                           {t("motionPreviews.mobileSettingsDesc")}
                         </div>
@@ -1432,9 +1440,7 @@ function MotionReview({
 
                     <div className="space-y-3">
                       <div className="space-y-0.5">
-                        <div className="text-md">
-                          {t("motionPreviews.speed")}
-                        </div>
+                        <div>{t("motionPreviews.speed")}</div>
                         <div className="text-xs text-muted-foreground">
                           {t("motionPreviews.speedDesc")}
                         </div>
@@ -1463,7 +1469,7 @@ function MotionReview({
 
                     <div className="space-y-3">
                       <div className="space-y-0.5">
-                        <div className="text-md">{t("motionPreviews.dim")}</div>
+                        <div>{t("motionPreviews.dim")}</div>
                         <div className="text-xs text-muted-foreground">
                           {t("motionPreviews.dimDesc")}
                         </div>

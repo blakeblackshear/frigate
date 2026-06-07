@@ -1,4 +1,5 @@
 import { useApiHost } from "@/api";
+import { baseUrl } from "@/api/baseUrl";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
@@ -79,7 +80,7 @@ export function ChatAttachmentChip({
       <Tooltip>
         <TooltipTrigger asChild>
           <a
-            href={`/explore?event_id=${eventId}`}
+            href={`${baseUrl}explore?event_id=${eventId}`}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

@@ -79,7 +79,7 @@ export function ArrayAsTextWidget(props: WidgetProps) {
     return (
       <Textarea
         id={id}
-        className={cn("text-md", fieldClassName)}
+        className={cn(fieldClassName)}
         value={text}
         disabled={disabled || readonly}
         rows={(options.rows as number) || 3}

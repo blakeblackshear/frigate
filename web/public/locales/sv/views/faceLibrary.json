@@ -7,7 +7,7 @@
     "faceDesc": "Detaljer om det spårade objektet som genererade detta ansikte",
     "unknown": "Okänd",
     "subLabelScore": "Underetikettpoäng",
-    "scoreInfo": "Underetikettpoängen är den viktade poängen för alla igenkända ansiktskonfidenser, så detta kan skilja sig från poängen som visas på ögonblicksbilden."
+    "scoreInfo": "Poängen är ett viktat genomsnitt av alla ansiktspoäng, viktat efter ansiktets storlek i varje bild."
   },
   "description": {
     "placeholder": "Ange ett namn för denna samling",
@@ -75,7 +75,7 @@
       "deletedName_other": "{{count}} ansikten har raderats.",
       "renamedFace": "Ansiktet har bytt namn till {{name}}",
       "trainedFace": "Ansikte är tränant.",
-      "updatedFaceScore": "Ansikts poängen har uppdaterats."
+      "updatedFaceScore": "Ansiktspoängen för {{name}} har uppdaterats till {{score}}."
     },
     "error": {
       "uploadingImageFailed": "Misslyckades med att ladda upp bilden: {{errorMessage}}",

@@ -343,12 +343,24 @@ class FrigateApp:
         )
         self.dispatcher.profile_manager = self.profile_manager
 
+    def restore_active_profile(self) -> None:
+        """Re-activate the persisted profile after subscribers are connected.
+
+        ZMQ PUB/SUB drops messages with no subscribers, so activation must
+        run after every config_updater subscriber is up.
+        """
+        if self.profile_manager is None:
+            return
+
         persisted = ProfileManager.load_persisted_profile()
         if persisted and any(
             persisted in cam.profiles for cam in self.config.cameras.values()
         ):
             logger.info("Restoring persisted profile '%s'", persisted)
-            self.profile_manager.activate_profile(persisted)
+            # runtime overrides are layered on top via restore_runtime_state()
+            self.profile_manager.activate_profile(
+                persisted, clear_runtime_overrides=False
+            )
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
@@ -611,6 +623,10 @@ class FrigateApp:
         self.start_event_cleanup()
         self.start_record_cleanup()
         self.start_watchdog()
+
+        # restore persisted runtime overrides on top of config
+        self.restore_active_profile()
+        self.dispatcher.restore_runtime_state()
 
         self.init_auth()
 

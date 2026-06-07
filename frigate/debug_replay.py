@@ -5,10 +5,12 @@ frigate.jobs.debug_replay. This module owns only session presence
 (active), session metadata, and post-session cleanup.
 """
 
+import asyncio
 import logging
 import os
 import shutil
 import threading
+import time
 
 from ruamel.yaml import YAML
 
@@ -25,11 +27,22 @@ from frigate.const import (
     REPLAY_DIR,
     THUMB_DIR,
 )
-from frigate.jobs.debug_replay import cancel_debug_replay_job, wait_for_runner
+from frigate.jobs.debug_replay import (
+    JOB_TYPE as DEBUG_REPLAY_JOB_TYPE,
+)
+from frigate.jobs.debug_replay import (
+    cancel_debug_replay_job,
+    wait_for_runner,
+)
+from frigate.jobs.export import JobStatePublisher
+from frigate.types import JobStatusTypesEnum
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
 
 logger = logging.getLogger(__name__)
+
+MAX_SESSION_DURATION_SECONDS = 12 * 60 * 60
+AUTO_STOP_CHECK_INTERVAL_SECONDS = 60
 
 
 class DebugReplayManager:
@@ -49,6 +62,8 @@ class DebugReplayManager:
         self.clip_path: str | None = None
         self.start_ts: float | None = None
         self.end_ts: float | None = None
+        self.session_started_at: float | None = None
+        self._job_state_publisher = JobStatePublisher()
 
     @property
     def active(self) -> bool:
@@ -73,6 +88,7 @@ class DebugReplayManager:
             self.start_ts = start_ts
             self.end_ts = end_ts
             self.clip_path = None
+            self.session_started_at = time.time()
 
     def mark_session_ready(self, clip_path: str) -> None:
         """Record the on-disk clip path after the camera has been published."""
@@ -94,6 +110,7 @@ class DebugReplayManager:
         self.clip_path = None
         self.start_ts = None
         self.end_ts = None
+        self.session_started_at = None
 
     def publish_camera(
         self,
@@ -150,6 +167,7 @@ class DebugReplayManager:
                 return
 
             replay_name = self.replay_camera_name
+            source_camera = self.source_camera
 
             # Only publish remove if the camera was actually added to the live
             # config (i.e. the runner reached the starting_camera phase).
@@ -158,10 +176,26 @@ class DebugReplayManager:
                     CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, replay_name),
                     frigate_config.cameras[replay_name],
                 )
+                frigate_config.cameras.pop(replay_name, None)
 
             if replay_name is not None:
                 self._cleanup_db(replay_name)
                 self._cleanup_files(replay_name)
+
+            self._job_state_publisher.publish(
+                {
+                    "id": "stopped",
+                    "job_type": DEBUG_REPLAY_JOB_TYPE,
+                    "status": JobStatusTypesEnum.cancelled,
+                    "start_time": None,
+                    "end_time": time.time(),
+                    "error_message": None,
+                    "results": {
+                        "source_camera": source_camera,
+                        "replay_camera_name": replay_name,
+                    },
+                }
+            )
 
             self._clear_locked()
 
@@ -211,6 +245,10 @@ class DebugReplayManager:
             zone_dump.setdefault("coordinates", zone_config.coordinates)
             zones_dict[zone_name] = zone_dump
 
+        # Extract LPR and face recognition configs
+        lpr_dict = source_config.lpr.model_dump()
+        face_recognition_dict = source_config.face_recognition.model_dump()
+
         # Extract motion config (exclude runtime fields)
         motion_dict = {}
         if source_config.motion is not None:
@@ -219,10 +257,22 @@ class DebugReplayManager:
                     "frame_shape",
                     "raw_mask",
                     "mask",
-                    "improved_contrast_enabled",
+                    "enabled_in_config",
                     "rasterized_mask",
                 }
             )
+
+            if source_config.motion.mask:
+                motion_dict["mask"] = {
+                    mask_id: (
+                        mask_cfg.model_dump(
+                            exclude={"raw_coordinates", "enabled_in_config"}
+                        )
+                        if mask_cfg is not None
+                        else None
+                    )
+                    for mask_id, mask_cfg in source_config.motion.mask.items()
+                }
 
         return {
             "enabled": True,
@@ -248,8 +298,8 @@ class DebugReplayManager:
             },
             "birdseye": {"enabled": False},
             "audio": {"enabled": False},
-            "lpr": {"enabled": False},
-            "face_recognition": {"enabled": False},
+            "lpr": lpr_dict,
+            "face_recognition": face_recognition_dict,
         }
 
     def _cleanup_db(self, camera_name: str) -> None:
@@ -308,3 +358,41 @@ def cleanup_replay_cameras() -> None:
             shutil.rmtree(REPLAY_DIR)
         except Exception as e:
             logger.error("Failed to remove replay cache directory: %s", e)
+
+
+async def debug_replay_auto_stop_watchdog(
+    manager: DebugReplayManager,
+    frigate_config: FrigateConfig,
+    config_publisher: CameraConfigUpdatePublisher,
+) -> None:
+    """Auto-stop debug replay sessions that exceed MAX_SESSION_DURATION_SECONDS.
+
+    Backstop against a session left running for days. The cap is intentionally
+    generous so realistic tuning and overnight soak workflows aren't disrupted.
+    """
+    while True:
+        try:
+            await asyncio.sleep(AUTO_STOP_CHECK_INTERVAL_SECONDS)
+
+            started_at = manager.session_started_at
+            if not manager.active or started_at is None:
+                continue
+
+            if time.time() - started_at < MAX_SESSION_DURATION_SECONDS:
+                continue
+
+            replay_name = manager.replay_camera_name
+            await asyncio.to_thread(
+                manager.stop,
+                frigate_config=frigate_config,
+                config_publisher=config_publisher,
+            )
+            logger.info(
+                "Debug replay auto-stopped after exceeding max session duration of %d hours: %s",
+                MAX_SESSION_DURATION_SECONDS // 3600,
+                replay_name,
+            )
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("Error in debug replay auto-stop watchdog")

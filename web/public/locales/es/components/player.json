@@ -48,5 +48,6 @@
     }
   },
   "livePlayerRequiredIOSVersion": "Se requiere iOS 17.1 o superior para este tipo de transmisión en vivo.",
-  "noRecordingsFoundForThisTime": "No se encontraron grabaciones para este momento"
+  "noRecordingsFoundForThisTime": "No se encontraron grabaciones para este momento",
+  "cameraOff": "La cámara está apagada"
 }

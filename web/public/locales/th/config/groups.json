@@ -1,1 +1,18 @@
-{}
+{
+    "audio": {
+        "cameras": {
+            "detection": "การตรวจจับ",
+            "sensitivity": "ความอ่อนไหว"
+        }
+    },
+    "snapshots": {
+        "cameras": {
+            "display": "แสดงผล"
+        }
+    },
+    "detect": {
+        "cameras": {
+            "resolution": "ความละเอียด"
+        }
+    }
+}

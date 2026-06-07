@@ -221,7 +221,9 @@
       "gl": "加利西亚语 (Galego)",
       "id": "印度尼西亚语 (Bahasa Indonesia)",
       "ur": "乌尔都语 (اردو)",
-      "hr": "克罗地亚语 (Hrvatski)"
+      "hr": "克罗地亚语 (Hrvatski)",
+      "bs": "波斯尼亚语（Bosanski）",
+      "zhHant": "繁体中文 (Traditional Chinese)"
     },
     "appearance": "外观",
     "darkMode": {
@@ -318,5 +320,8 @@
     "internalID": "Frigate 在配置与数据库中使用的内部 ID"
   },
   "no_items": "没有项目",
-  "validation_errors": "验证错误"
+  "validation_errors": "验证错误",
+  "credentialField": {
+    "savedPlaceholder": "已保存 — 留空则保留当前设置"
+  }
 }

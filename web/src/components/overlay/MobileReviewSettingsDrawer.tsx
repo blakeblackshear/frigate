@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react";
+import { baseUrl } from "@/api/baseUrl";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
-import { LuBug, LuShare2 } from "react-icons/lu";
+import { LuBug, LuSearch, LuShare2 } from "react-icons/lu";
 import { TimeRange } from "@/types/timeline";
 import { ExportContent, ExportPreviewDialog, ExportTab } from "./ExportDialog";
 import {
@@ -28,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { StartExportResponse } from "@/types/export";
 import { ShareTimestampContent } from "./ShareTimestampDialog";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type DrawerMode =
   | "none"
@@ -44,6 +46,7 @@ const DRAWER_FEATURES = [
   "filter",
   "debug-replay",
   "share-timestamp",
+  "motion-search",
 ] as const;
 export type DrawerFeatures = (typeof DRAWER_FEATURES)[number];
 const DEFAULT_DRAWER_FEATURES: DrawerFeatures[] = [
@@ -52,6 +55,7 @@ const DEFAULT_DRAWER_FEATURES: DrawerFeatures[] = [
   "filter",
   "debug-replay",
   "share-timestamp",
+  "motion-search",
 ];
 
 type MobileReviewSettingsDrawerProps = {
@@ -73,6 +77,7 @@ type MobileReviewSettingsDrawerProps = {
   setDebugReplayMode?: (mode: ExportMode) => void;
   setDebugReplayRange?: (range: TimeRange | undefined) => void;
   onShareTimestamp?: (timestamp: number) => void;
+  onMotionSearch?: () => void;
   onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
@@ -97,6 +102,7 @@ export default function MobileReviewSettingsDrawer({
   setDebugReplayMode = () => {},
   setDebugReplayRange = () => {},
   onShareTimestamp = () => {},
+  onMotionSearch,
   onUpdateFilter,
   setRange,
   setMode,
@@ -106,8 +112,10 @@ export default function MobileReviewSettingsDrawer({
     "views/recording",
     "components/dialog",
     "views/replay",
+    "views/events",
     "common",
   ]);
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
   const [exportTab, setExportTab] = useState<ExportTab>("export");
@@ -190,7 +198,11 @@ export default function MobileReviewSettingsDrawer({
       toast.success(t("export.toast.queued", { ns: "components/dialog" }), {
         position: "top-center",
         action: (
-          <a href="/export" target="_blank" rel="noopener noreferrer">
+          <a
+            href={`${baseUrl}export`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button>
               {t("export.toast.view", { ns: "components/dialog" })}
             </Button>
@@ -336,27 +348,6 @@ export default function MobileReviewSettingsDrawer({
             {t("export")}
           </Button>
         )}
-        {features.includes("share-timestamp") && (
-          <Button
-            className="flex w-full items-center justify-center gap-2"
-            aria-label={t("recording.shareTimestamp.label", {
-              ns: "components/dialog",
-            })}
-            onClick={() => {
-              const initialTimestamp = Math.floor(currentTime);
-
-              setShareTimestampAtOpen(initialTimestamp);
-              setCustomShareTimestamp(initialTimestamp);
-              setSelectedShareOption("current");
-              setDrawerMode("share-timestamp");
-            }}
-          >
-            <LuShare2 className="size-5 rounded-md bg-secondary-foreground stroke-secondary p-1" />
-            {t("recording.shareTimestamp.label", {
-              ns: "components/dialog",
-            })}
-          </Button>
-        )}
         {features.includes("calendar") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
@@ -383,7 +374,41 @@ export default function MobileReviewSettingsDrawer({
             {t("filter")}
           </Button>
         )}
-        {features.includes("debug-replay") && (
+        {features.includes("share-timestamp") && (
+          <Button
+            className="flex w-full items-center justify-center gap-2"
+            aria-label={t("recording.shareTimestamp.label", {
+              ns: "components/dialog",
+            })}
+            onClick={() => {
+              const initialTimestamp = Math.floor(currentTime);
+
+              setShareTimestampAtOpen(initialTimestamp);
+              setCustomShareTimestamp(initialTimestamp);
+              setSelectedShareOption("current");
+              setDrawerMode("share-timestamp");
+            }}
+          >
+            <LuShare2 className="size-5 rounded-md bg-secondary-foreground stroke-secondary p-1" />
+            {t("recording.shareTimestamp.label", {
+              ns: "components/dialog",
+            })}
+          </Button>
+        )}
+        {features.includes("motion-search") && onMotionSearch && (
+          <Button
+            className="flex w-full items-center justify-center gap-2"
+            aria-label={t("motionSearch.menuItem", { ns: "views/events" })}
+            onClick={() => {
+              onMotionSearch();
+              setDrawerMode("none");
+            }}
+          >
+            <LuSearch className="size-5 rounded-md bg-secondary-foreground stroke-secondary p-1" />
+            {t("motionSearch.menuItem", { ns: "views/events" })}
+          </Button>
+        )}
+        {isAdmin && features.includes("debug-replay") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
             aria-label={t("title", { ns: "views/replay" })}

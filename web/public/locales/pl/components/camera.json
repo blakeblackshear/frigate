@@ -68,7 +68,10 @@
         "stream": "Strumień"
       },
       "birdseye": "Widok z lotu ptaka"
-    }
+    },
+    "showAll": "Pokaż wszystkie grupy kamer",
+    "showLess": "Pokaż mniej",
+    "editGroups": "Edytuj grupy kamer"
   },
   "debug": {
     "options": {

@@ -68,7 +68,45 @@
     },
     "case": {
       "label": "Caso",
-      "placeholder": "Selecione um caso"
+      "placeholder": "Selecione um caso",
+      "newCaseOption": "Criar novo caso de uso",
+      "newCaseNamePlaceholder": "Novo caso de uso",
+      "newCaseDescriptionPlaceholder": "Descrição do caso de uso",
+      "nonAdminHelp": "Um novo caso de uso será criado para estas exportações."
+    },
+    "queueing": "Exportação na fila...",
+    "tabs": {
+      "export": "Câmera única",
+      "multiCamera": "Multi-Câmera"
+    },
+    "multiCamera": {
+      "timeRange": "Intervalo de tempo",
+      "selectFromTimeline": "Selecione do intervale de tempo",
+      "cameraSelection": "Câmeras",
+      "cameraSelectionHelp": "Câmeras com objetos localizados neste intervalo de tempo estão pré-selecionados",
+      "checkingActivity": "Verificando se a câmera está ativa...",
+      "noCameras": "Sem câmeras disponíveis",
+      "detectionCount_one": "Objeto localizado",
+      "detectionCount_many": "{{count}} objetos localizados",
+      "detectionCount_other": "{{count}} objetos localizados",
+      "nameLabel": "Nome do arquivo exportado",
+      "namePlaceholder": "Padrão de nome para exportação",
+      "queueingButton": "Exportações na fila...",
+      "exportButton_one": "Exportar câmera",
+      "exportButton_many": "Exportar {{count}} câmeras",
+      "exportButton_other": "Exportar {{count}} câmeras"
+    },
+    "multi": {
+      "title_one": "Exportar análise",
+      "title_many": "Exportar {{count}} análises",
+      "title_other": "Exportar {{count}} análises",
+      "description": "Exportar cada análise selecionada. Todas as exportações serão agrupadas em um único caso.",
+      "descriptionNoCase": "Exportar cada análise selecionada.",
+      "caseNamePlaceholder": "Exportar análise - {{date}}",
+      "exportButton_one": "Exportar análise",
+      "exportButton_many": "Exportar {{count}} análises",
+      "exportButton_other": "Exportar {{count}} análises",
+      "exportingButton": "Exportando..."
     }
   },
   "streaming": {

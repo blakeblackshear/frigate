@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
 import { Event } from "@/types/event";
 import { baseUrl } from "@/api/baseUrl";
 import { ReviewSegment, REVIEW_PADDING } from "@/types/review";
@@ -12,6 +14,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { SearchResult } from "@/types/search";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -33,9 +36,14 @@ export default function DetailActionsMenu({
   setSearch,
   setSimilarity,
 }: Props) {
-  const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
+  const { t } = useTranslation([
+    "views/explore",
+    "views/faceLibrary",
+    "views/replay",
+  ]);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const isAdmin = useIsAdmin();
 
   const clipTimeRange = useMemo(() => {
@@ -48,6 +56,60 @@ export default function DetailActionsMenu({
   const { data: reviewItem } = useSWR<ReviewSegment>(
     search.data?.type === "audio" ? null : [`review/event/${search.id}`],
   );
+
+  const handleDebugReplay = useCallback(() => {
+    setIsStarting(true);
+
+    axios
+      .post("debug_replay/start", {
+        camera: search.camera,
+        start_time: (search.start_time ?? 0) - REVIEW_PADDING,
+        end_time: (search.end_time ?? Date.now() / 1000) + REVIEW_PADDING,
+      })
+      .then((response) => {
+        if (response.status === 202 || response.status === 200) {
+          navigate("/replay");
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+
+        if (error.response?.status === 409) {
+          toast.error(t("dialog.toast.alreadyActive", { ns: "views/replay" }), {
+            position: "top-center",
+            closeButton: true,
+            dismissible: false,
+            action: (
+              <a
+                href={`${baseUrl}replay`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button>
+                  {t("dialog.toast.goToReplay", { ns: "views/replay" })}
+                </Button>
+              </a>
+            ),
+          });
+        } else {
+          toast.error(
+            t("dialog.toast.error", {
+              ns: "views/replay",
+              error: errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
+        }
+      })
+      .finally(() => {
+        setIsStarting(false);
+      });
+  }, [navigate, search.camera, search.start_time, search.end_time, t]);
 
   // don't render menu at all if no options are available
   const hasSemanticSearchOption =
@@ -172,6 +234,24 @@ export default function DetailActionsMenu({
                 </div>
               </DropdownMenuItem>
             )}
+
+          {isAdmin && search.has_clip && (
+            <DropdownMenuItem
+              className="cursor-pointer"
+              aria-label={t("itemMenu.debugReplay.aria")}
+              disabled={isStarting}
+              onSelect={() => {
+                setIsOpen(false);
+                handleDebugReplay();
+              }}
+            >
+              <span>
+                {isStarting
+                  ? t("dialog.starting", { ns: "views/replay" })
+                  : t("itemMenu.debugReplay.label")}
+              </span>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>

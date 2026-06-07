@@ -299,22 +299,36 @@ async def no_recordings(
         .iterator()
     )
 
-    # Convert recordings to list of (start, end) tuples
+    # Convert recordings to list of (start, end) tuples, ordered by start_time
     recordings = [(r["start_time"], r["end_time"]) for r in data]
+
+    # Merge overlapping/adjacent recordings into covered intervals. The query
+    # orders by start_time, so a single pass merges them
+    covered: list[tuple[float, float]] = []
+    for rec_start, rec_end in recordings:
+        if covered and rec_start <= covered[-1][1]:
+            covered[-1] = (covered[-1][0], max(covered[-1][1], rec_end))
+        else:
+            covered.append((rec_start, rec_end))
 
     # Iterate through time segments and check if each has any recording
     no_recording_segments = []
     current = after
     current_gap_start = None
+    idx = 0
+    covered_count = len(covered)
 
     while current < before:
         segment_end = min(current + scale, before)
 
-        # Check if this segment overlaps with any recording
-        has_recording = any(
-            rec_start < segment_end and rec_end > current
-            for rec_start, rec_end in recordings
-        )
+        # Advance past covered intervals that end before this segment begins;
+        # they cannot overlap this or any later segment.
+        while idx < covered_count and covered[idx][1] <= current:
+            idx += 1
+
+        # A covered interval overlaps the segment when it starts before the
+        # segment ends (its end is already known to be > current).
+        has_recording = idx < covered_count and covered[idx][0] < segment_end
 
         if not has_recording:
             # This segment has no recordings

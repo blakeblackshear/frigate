@@ -9,7 +9,7 @@
         "description": "Aktiviert"
     },
     "audio": {
-        "label": "Audioerkennung",
+        "label": "Audioereignisse",
         "description": "Einstellungen für audiobasierte Ereigniserkennung für diese Kamera.",
         "enabled": {
             "label": "Aktivieren der Audioerkennung",
@@ -25,7 +25,11 @@
         },
         "filters": {
             "label": "Audiofilter",
-            "description": "Filtereinstellungen pro Audiotyp, wie z. B. Konfidenzschwellenwerte, die zur Reduzierung von Fehlalarmen verwendet werden."
+            "description": "Filtereinstellungen pro Audiotyp, wie z. B. Konfidenzschwellenwerte, die zur Reduzierung von Fehlalarmen verwendet werden.",
+            "threshold": {
+                "label": "Mindestvertrauensgrad für Audio",
+                "description": "Mindestschwellenwert für die Zuverlässigkeit, damit das Audioereignis gezählt wird."
+            }
         },
         "max_not_heard": {
             "label": "Ende Timeout",
@@ -822,7 +826,7 @@
     },
     "timestamp_style": {
         "label": "Format für Zeitstempel",
-        "description": "Gestaltungsmöglichkeiten für Zeitstempel im Feed, die auf Aufzeichnungen und Momentaufnahmen angewendet werden.",
+        "description": "Gestaltungsoptionen für Zeitstempel, die auf Momentaufnahmen und die Debug-Ansicht angewendet werden.",
         "position": {
             "label": "Position des Zeitstempels",
             "description": "Position des Zeitstempels auf dem Bild (tl/tr/bl/br)."

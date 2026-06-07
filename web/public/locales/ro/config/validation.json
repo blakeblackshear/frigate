@@ -28,5 +28,8 @@
             "detectRequired": "Cel puțin un stream trebuie să aibă atribuit rolul 'detect'.",
             "hwaccelDetectOnly": "Doar stream-ul cu rolul 'detect' poate defini argumente pentru accelerare hardware."
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Trebuie să fie un număr par."
     }
 }

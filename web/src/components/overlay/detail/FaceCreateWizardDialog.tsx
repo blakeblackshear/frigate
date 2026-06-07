@@ -131,7 +131,7 @@ export default function CreateFaceWizardDialog({
             forbiddenPattern={/#/}
             forbiddenErrorMessage={t("description.nameCannotContainHash")}
           >
-            <div className="flex justify-end py-2">
+            <div className="flex flex-col-reverse gap-2 py-2 sm:flex-row sm:justify-end">
               <Button variant="select" type="submit">
                 {t("button.next", { ns: "common" })}
               </Button>
@@ -144,7 +144,7 @@ export default function CreateFaceWizardDialog({
               {t("steps.description.uploadFace", { name })}
             </div>
             <ImageEntry onSave={onUploadImage}>
-              <div className="flex justify-end py-2">
+              <div className="flex flex-col-reverse gap-2 py-2 sm:flex-row sm:justify-end">
                 <Button variant="select" type="submit">
                   {t("button.next", { ns: "common" })}
                 </Button>
@@ -173,7 +173,7 @@ export default function CreateFaceWizardDialog({
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
             </div>
-            <div className="flex justify-end">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
                 variant="select"
                 onClick={() => {

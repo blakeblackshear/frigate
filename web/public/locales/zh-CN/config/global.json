@@ -48,7 +48,11 @@
         },
         "filters": {
             "label": "音频过滤器",
-            "description": "按音频类型的过滤器设置，如用于减少误报的置信度阈值。"
+            "description": "按音频类型的过滤器设置，如用于减少误报的置信度阈值。",
+            "threshold": {
+                "label": "最低音频置信度",
+                "description": "设置音频事件所需的最低置信度阈值。"
+            }
         },
         "enabled_in_config": {
             "label": "原始音频状态",
@@ -136,7 +140,7 @@
         },
         "mode": {
             "label": "追踪模式",
-            "description": "在鸟瞰视图中包含摄像头的模式：'objects'（目标）、'motion'（动作）或 'continuous'（持续）。"
+            "description": "在鸟瞰视图中包含摄像头的模式有：“基于目标”、“基于画面变动”或“连续”。"
         },
         "order": {
             "label": "排序位置",
@@ -252,7 +256,7 @@
         "description": "所有摄像头的人脸检测和识别设置；可按摄像头覆盖。",
         "model_size": {
             "label": "模型大小",
-            "description": "用于人脸嵌入的模型大小（small/large）；较大的可能需要 GPU。"
+            "description": "用于人脸嵌入的模型大小（小型/大型）；较大的可能需要 GPU。"
         },
         "unknown_score": {
             "label": "未知分数阈值",
@@ -492,7 +496,7 @@
         },
         "default_role": {
             "label": "默认权限组",
-            "description": "当没有权限组映射适用时分配给代理认证用户的默认权限组（admin 或 viewer）。"
+            "description": "当没有权限组映射适用时分配给代理认证用户的默认权限组。"
         },
         "separator": {
             "label": "分隔符",
@@ -544,19 +548,19 @@
         "description": "用户界面偏好设置，如时区、时间/日期格式和单位。",
         "timezone": {
             "label": "时区",
-            "description": "UI 中显示的可选时区（如果未设置，则默认为浏览器本地时间）。"
+            "description": "可选时区，用于整个界面展示时间（如果未设置，则默认为浏览器本地时间的时区）。"
         },
         "time_format": {
             "label": "时间格式",
-            "description": "UI 中使用的时间格式（browser、12hour 或 24hour）。"
+            "description": "页面中将使用的时间格式（浏览器、12小时制 或 24小时制）。"
         },
         "date_style": {
             "label": "日期样式",
-            "description": "UI 中使用的日期样式（full、long、medium、short）。"
+            "description": "页面中将使用的日期样式（完整、长、中等、短）。"
         },
         "time_style": {
             "label": "时间样式",
-            "description": "UI 中使用的时间样式（full、long、medium、short）。"
+            "description": "页面中将使用的时间样式（完整、长、中等、短）。"
         },
         "unit_system": {
             "label": "单位系统",
@@ -1652,6 +1656,41 @@
                 "label": "原配置生成式 AI 状态",
                 "description": "表示在原始静态配置中是否已启用生成式 AI。"
             }
+        },
+        "filters_attribute": {
+            "label": "属性筛选",
+            "description": "对检测到的属性进行筛选，以此减少误报（包含面积、比例、置信度）。",
+            "min_area": {
+                "label": "最小属性区域",
+                "description": "该属性所需的最小边框框面积，支持像素值（整数）或百分比数值（范围 0.000001 至 0.99）。"
+            },
+            "max_area": {
+                "label": "最大属性区域",
+                "description": "该属性所需的最大边框框面积，支持像素值（整数）或百分比数值（范围 0.000001 至 0.99）。"
+            },
+            "min_ratio": {
+                "label": "最小纵横比",
+                "description": "边界框所需的最小宽高比。"
+            },
+            "max_ratio": {
+                "label": "最大纵横比",
+                "description": "边界框允许的最大宽高比。"
+            },
+            "threshold": {
+                "label": "置信度阈值",
+                "description": "判定该属性为有效目标所需的平均检测置信度阈值。"
+            },
+            "min_score": {
+                "label": "最小置信度",
+                "description": "将该属性关联至所属父目标所需的单帧最低检测置信度。"
+            },
+            "mask": {
+                "label": "过滤器遮罩",
+                "description": "定义此过滤器在帧内应用位置的多边形坐标。"
+            },
+            "raw_mask": {
+                "label": "原始遮罩"
+            }
         }
     },
     "record": {
@@ -1756,7 +1795,7 @@
     },
     "review": {
         "label": "核查",
-        "description": "控制 UI 和存储使用的警报、检测和 GenAI 核查摘要的设置。",
+        "description": "控制界面与存储所使用的警报、检测和生成式 AI 核查总结的相关设置。",
         "alerts": {
             "label": "警报配置",
             "description": "哪些追踪目标生成警报以及如何保留警报的设置。",
@@ -1822,7 +1861,7 @@
             },
             "image_source": {
                 "label": "核查图像来源",
-                "description": "发送给生成式 AI 的画面来源（'preview' 或 'recordings'）；'recordings' 使用更高质量的画面帧，但会消耗更多的 token。"
+                "description": "发送给生成式 AI 的画面来源（“预览” 或 “录制”）；“录制”将使用更高质量的画面帧，但会消耗更多的 token。"
             },
             "additional_concerns": {
                 "label": "额外关注事项",
@@ -2015,7 +2054,7 @@
         },
         "model_size": {
             "label": "模型大小",
-            "description": "选择模型大小；'small' 在 CPU 上运行，'large' 通常需要 GPU。"
+            "description": "选择模型大小；“小型”模型一般在 CPU 上运行，而“大型”模型通常需要 GPU。"
         },
         "device": {
             "label": "设备",
@@ -2026,7 +2065,7 @@
             "description": "摄像头特定语义搜索触发器的操作和匹配条件。",
             "friendly_name": {
                 "label": "友好名称",
-                "description": "在 UI 中为此触发器显示的可选友好名称。"
+                "description": "可选友好名称，用于在界面上为触发器显示此名称。"
             },
             "enabled": {
                 "label": "开启此触发器",
@@ -2059,7 +2098,7 @@
         },
         "model_size": {
             "label": "模型大小",
-            "description": "用于文本检测/识别的模型大小，大多数用户应使用 'small'，只有'small'模型支持中文。"
+            "description": "用于文本检测/识别的模型大小，大多数用户应使用“小型”模型，而且只有“小型”模型支持中文车牌。"
         },
         "detection_threshold": {
             "label": "检测阈值",
@@ -2172,8 +2211,12 @@
             "description": "用于在页面中排序摄像头的顺序（只会影响默认仪表板和列表）；数值越大则在越后面。"
         },
         "dashboard": {
-            "label": "在 UI 中显示",
+            "label": "在页面中显示",
             "description": "切换此摄像头在 Frigate 页面中是否可见。禁用后需要手动编辑配置才能再次在页面中查看此摄像头。"
+        },
+        "review": {
+            "label": "在核查中显示",
+            "description": "切换该摄像头是否在核查页面可见（包含核查页、摄像头筛选栏、画面变动核查与历史视图）。"
         }
     },
     "onvif": {

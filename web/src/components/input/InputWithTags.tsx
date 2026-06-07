@@ -696,7 +696,7 @@ export default function InputWithTags({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
-            className="text-md h-9 pr-32"
+            className="h-9 pr-32"
             placeholder={t("placeholder.search")}
           />
           <div className="absolute right-3 top-0 flex h-full flex-row items-center justify-center gap-5">

@@ -22,7 +22,9 @@
     "polygonControls": {
         "points_other": "{{count}} 个点位",
         "undo": "撤销上一个点位",
-        "reset": "重置多边形"
+        "reset": "重置多边形",
+        "drawMode": "绘制",
+        "moveMode": "移动"
     },
     "motionHeatmapLabel": "画面变动热力图",
     "dialog": {
@@ -38,11 +40,11 @@
     "settings": {
         "title": "搜索设置",
         "parallelMode": "并行模式",
-        "parallelModeDesc": "同时扫描多个录制片段（速度更快，但 CPU 占用会显著升高）",
+        "parallelModeDesc": "同时扫描多个录制片段（速度更快，将使用更多解码资源）",
         "threshold": "灵敏度阈值",
         "thresholdDesc": "数值越低，可检测到越小的变化（取值范围 1-255）",
         "minArea": "最小变化区域",
-        "minAreaDesc": "最小感兴趣区域变化占比，达到该比例才会判定为有效变动",
+        "minAreaDesc": "单个移动区域的最小尺寸，占目标区域的百分比",
         "frameSkip": "帧跳过",
         "frameSkipDesc": "每隔 N 帧进行一次处理。将该值设置为摄像头的帧率，即可实现每秒处理一帧画面（例如：5 帧 / 秒的摄像头设为 5，30 帧 / 秒的摄像头设为 30）。数值越高处理速度越快，但有可能遗漏短时移动侦测事件。",
         "maxResults": "最大结果数",
@@ -68,6 +70,9 @@
         "framesDecoded": "画面已解码",
         "wallTime": "搜索时间",
         "segmentErrors": "片段异常",
-        "seconds": "{{seconds}} 秒"
-    }
+        "seconds": "{{seconds}} 秒",
+        "minutesSeconds": "{{minutes}}分 {{seconds}}秒",
+        "scanSummary": "{{segments}} 分段 · {{time}}"
+    },
+    "scanning": "扫描中 {{time}}"
 }

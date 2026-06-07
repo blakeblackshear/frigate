@@ -56,11 +56,9 @@ export default function Events() {
     false,
   );
 
-  const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
-    "recording",
-    undefined,
-    false,
-  );
+  const [recording, setRecording] = useOverlayState<
+    RecordingStartingPoint | undefined
+  >("recording", undefined, false);
   const [motionPreviewsCamera, setMotionPreviewsCamera] = useOverlayState<
     string | undefined
   >("motionPreviewsCamera", undefined);
@@ -72,13 +70,15 @@ export default function Events() {
     undefined,
   );
 
-  const motionSearchCameras = useMemo(() => {
+  const reviewCameras = useMemo(() => {
     if (!config?.cameras) {
       return [] as string[];
     }
 
-    return Object.keys(config.cameras).filter((cam) =>
-      allowedCameras.includes(cam),
+    return Object.keys(config.cameras).filter(
+      (cam) =>
+        allowedCameras.includes(cam) &&
+        config.cameras[cam]?.ui?.review !== false,
     );
   }, [allowedCameras, config?.cameras]);
 
@@ -87,12 +87,12 @@ export default function Events() {
       return null;
     }
 
-    if (motionSearchCameras.includes(motionSearchCamera)) {
+    if (reviewCameras.includes(motionSearchCamera)) {
       return motionSearchCamera;
     }
 
-    return motionSearchCameras[0] ?? null;
-  }, [motionSearchCamera, motionSearchCameras]);
+    return reviewCameras[0] ?? null;
+  }, [motionSearchCamera, reviewCameras]);
 
   const motionSearchTimeRange = useMemo(() => {
     if (motionSearchDay) {
@@ -359,6 +359,10 @@ export default function Events() {
     const motion: ReviewSegment[] = [];
 
     reviews?.forEach((segment) => {
+      if (config?.cameras[segment.camera]?.ui?.review === false) {
+        return;
+      }
+
       all.push(segment);
 
       switch (segment.severity) {
@@ -380,7 +384,7 @@ export default function Events() {
       detection: detections,
       significant_motion: motion,
     };
-  }, [reviews]);
+  }, [reviews, config?.cameras]);
 
   // update review items in place when a review segment ends
   const reviewUpdate = useFrigateReviews();
@@ -637,7 +641,7 @@ export default function Events() {
     }
 
     setStartTime(recording.startTime);
-    const allCameras = reviewFilter?.cameras ?? Object.keys(config.cameras);
+    const allCameras = reviewFilter?.cameras ?? reviewCameras;
 
     return {
       camera: recording.camera,
@@ -668,6 +672,10 @@ export default function Events() {
           filter={reviewFilter}
           updateFilter={onUpdateFilter}
           refreshData={reloadData}
+          onMotionSearch={(camera) => {
+            setMotionSearchCamera(camera);
+            setRecording(undefined);
+          }}
         />
       );
     }
@@ -678,7 +686,7 @@ export default function Events() {
       ) : (
         <MotionSearchView
           config={config}
-          cameras={motionSearchCameras}
+          cameras={reviewCameras}
           selectedCamera={selectedMotionSearchCamera}
           onCameraSelect={handleMotionSearchCameraSelect}
           cameraLocked={true}

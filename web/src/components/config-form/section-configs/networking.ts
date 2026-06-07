@@ -2,10 +2,12 @@ import type { SectionConfigOverrides } from "./types";
 
 const networking: SectionConfigOverrides = {
   base: {
-    sectionDocs: "/configuration/advanced",
+    sectionDocs: "/configuration/advanced/system#network-configuration",
     fieldDocs: {
-      "listen.internal": "/configuration/advanced#listen-on-different-ports",
-      "listen.external": "/configuration/advanced#listen-on-different-ports",
+      "listen.internal":
+        "/configuration/advanced/system#listen-on-different-ports",
+      "listen.external":
+        "/configuration/advanced/system#listen-on-different-ports",
     },
     restartRequired: ["ipv6.enabled", "listen.internal", "listen.external"],
     fieldOrder: [],

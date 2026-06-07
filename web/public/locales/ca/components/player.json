@@ -48,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "Error al enviar fotograma a Frigate+"
     }
-  }
+  },
+  "cameraOff": "La càmera està apagada"
 }

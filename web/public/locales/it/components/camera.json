@@ -68,7 +68,10 @@
       "label": "Telecamere"
     },
     "icon": "Icona",
-    "success": "Il gruppo di telecamere ({{name}}) è stato salvato."
+    "success": "Il gruppo di telecamere ({{name}}) è stato salvato.",
+    "showAll": "Mostra tutti i gruppi di telecamere",
+    "showLess": "Mostra meno",
+    "editGroups": "Modifica gruppi di telecamere"
   },
   "debug": {
     "options": {

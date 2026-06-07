@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -540,7 +540,7 @@ export default function Step3ChooseExamples({
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={doRefresh}
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {t("button.continue", { ns: "common" })}
             </AlertDialogAction>
@@ -693,7 +693,7 @@ export default function Step3ChooseExamples({
       )}
 
       {!isTraining && (
-        <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+        <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
           <Button type="button" onClick={handleBack} className="sm:flex-1">
             {t("button.back", { ns: "common" })}
           </Button>

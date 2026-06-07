@@ -23,7 +23,7 @@
       "error": "ログをクリップボードにコピーできませんでした"
     },
     "type": {
-      "label": "種類",
+      "label": "タイプ",
       "timestamp": "タイムスタンプ",
       "tag": "タグ",
       "message": "メッセージ"
@@ -70,7 +70,7 @@
       "inferenceSpeed": "ディテクタ推論速度",
       "temperature": "ディテクタ温度",
       "cpuUsage": "ディテクタの CPU 使用率",
-      "cpuUsageInformation": "検出モデルへの入力／出力データの準備に使用される CPU。GPU やアクセラレータを使用していても、この値は推論の使用量を測定しません。",
+      "cpuUsageInformation": "検知モデルへの入力／出力データの準備に使用される CPU。GPU やアクセラレータを使用していても、この値は推論の使用量を測定しません。",
       "memoryUsage": "ディテクタのメモリ使用量"
     },
     "hardwareInfo": {
@@ -108,8 +108,11 @@
       "intelGpuWarning": {
         "title": "Intel GPU 統計情報の警告",
         "message": "GPU の統計情報を取得できません",
-        "description": "これは Intel の GPU 統計取得ツール（intel_gpu_top）における既知の不具合です。ハードウェアアクセラレーションやオブジェクト検出が (i)GPU 上で正しく動作している場合でも、GPU 使用率が 0% と繰り返し表示されることがあります。これは Frigate の不具合ではありません。ホストを再起動することで一時的に解消し、GPU が正常に動作していることを確認できます。本問題はパフォーマンスには影響しません。"
-      }
+        "description": "これは Intel の GPU 統計取得ツール（intel_gpu_top）における既知の不具合です。ハードウェアアクセラレーションやオブジェクト検知が (i)GPU 上で正しく動作している場合でも、GPU 使用率が 0% と繰り返し表示されることがあります。これは Frigate の不具合ではありません。ホストを再起動することで一時的に解消し、GPU が正常に動作していることを確認できます。本問題はパフォーマンスには影響しません。"
+      },
+      "gpuCompute": "GPU 演算 / エンコード",
+      "gpuTemperature": "GPU 温度",
+      "npuTemperature": "NPU 温度"
     },
     "otherProcesses": {
       "title": "その他のプロセス",
@@ -134,7 +137,11 @@
     },
     "shm": {
       "title": "SHM（共有メモリ）の割り当て",
-      "warning": "現在の SHM サイズ {{total}}MB は小さすぎます。少なくとも {{min_shm}}MB に増やしてください。"
+      "warning": "現在の SHM サイズ {{total}}MB は小さすぎます。少なくとも {{min_shm}}MB に増やしてください。",
+      "frameLifetime": {
+        "title": "フレーム保持時間",
+        "description": "各カメラは共有メモリ内に {{frames}} 個のフレームスロットを持ちます。最も高速なカメラのフレームレートでは、各フレームは上書きされるまで約 {{lifetime}} 秒間利用可能です。"
+      }
     },
     "cameraStorage": {
       "title": "カメラストレージ",
@@ -169,22 +176,23 @@
         "title": "カメラプローブ情報"
       }
     },
-    "framesAndDetections": "フレーム / 検出",
+    "framesAndDetections": "フレーム / 検知",
     "label": {
       "camera": "カメラ",
-      "detect": "検出",
+      "detect": "検知",
       "skipped": "スキップ",
       "ffmpeg": "FFmpeg",
       "capture": "キャプチャ",
       "overallFramesPerSecond": "全体フレーム/秒",
-      "overallDetectionsPerSecond": "全体検出/秒",
-      "overallSkippedDetectionsPerSecond": "全体スキップ検出/秒",
+      "overallDetectionsPerSecond": "全体検知/秒",
+      "overallSkippedDetectionsPerSecond": "全体スキップ検知/秒",
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraCapture": "{{camName}} キャプチャ",
-      "cameraDetect": "{{camName}} 検出",
+      "cameraDetect": "{{camName}} 検知",
       "cameraFramesPerSecond": "{{camName}} フレーム/秒",
-      "cameraDetectionsPerSecond": "{{camName}} 検出/秒",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} スキップ検出/秒"
+      "cameraDetectionsPerSecond": "{{camName}} 検知/秒",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} スキップ検知/秒",
+      "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
       "success": {
@@ -193,18 +201,33 @@
       "error": {
         "unableToProbeCamera": "カメラをプローブできません: {{errorMessage}}"
       }
+    },
+    "noCameras": {
+      "title": "カメラが見つかりません"
+    },
+    "connectionQuality": {
+      "title": "接続品質",
+      "excellent": "非常に良好",
+      "fair": "普通",
+      "poor": "不良",
+      "unusable": "使用不可",
+      "fps": "FPS",
+      "expectedFps": "想定 FPS",
+      "reconnectsLastHour": "再接続回数 (直近1時間)",
+      "stallsLastHour": "ストール回数 (直近1時間)"
     }
   },
   "lastRefreshed": "最終更新: ",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} の FFmpeg の CPU 使用率が高い（{{ffmpegAvg}}%）",
-    "detectHighCpuUsage": "{{camera}} の検出の CPU 使用率が高い（{{detectAvg}}%）",
+    "detectHighCpuUsage": "{{camera}} の検知の CPU 使用率が高い（{{detectAvg}}%）",
     "healthy": "システムは正常です",
     "reindexingEmbeddings": "埋め込みを再インデックス中（{{processed}}% 完了）",
     "cameraIsOffline": "{{camera}} はオフラインです",
     "detectIsSlow": "{{detect}} が遅い（{{speed}} ms）",
     "detectIsVerySlow": "{{detect}} が非常に遅い（{{speed}} ms）",
-    "shmTooLow": "/dev/shm の割り当て（{{total}} MB）は少なくとも {{min}} MB に増やす必要があります。"
+    "shmTooLow": "/dev/shm の割り当て（{{total}} MB）は少なくとも {{min}} MB に増やす必要があります。",
+    "debugReplayActive": "デバッグリプレイセッションが実行中です"
   },
   "enrichments": {
     "title": "高度解析",
@@ -219,8 +242,8 @@
       "face_recognition_speed": "顔認識速度",
       "plate_recognition_speed": "ナンバープレート認識速度",
       "text_embedding_speed": "テキスト埋め込み速度",
-      "yolov9_plate_detection_speed": "YOLOv9 ナンバープレート検出速度",
-      "yolov9_plate_detection": "YOLOv9 ナンバープレート検出",
+      "yolov9_plate_detection_speed": "YOLOv9 ナンバープレート検知速度",
+      "yolov9_plate_detection": "YOLOv9 ナンバープレート検知",
       "review_description": "レビュー説明",
       "review_description_speed": "レビュー説明の処理速度",
       "review_description_events_per_second": "レビュー説明",

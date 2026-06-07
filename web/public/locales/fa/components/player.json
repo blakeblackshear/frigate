@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "هیچ پیش‌نمایشی برای {{cameraName}} پیدا نشد",
   "submitFrigatePlus": {
     "title": "این فریم به فریگیت+ ارسال شود؟",
-    "submit": "ارسال"
+    "submit": "ارسال",
+    "previewError": "نمی توان پیش نمایش عکس فوری را بارگذاری کرد. ممکن است ضبط در این زمان در دسترس نباشد."
   },
   "livePlayerRequiredIOSVersion": "برای این نوع پخش زنده، iOS 17.1 یا بالاتر لازم است.",
   "streamOffline": {
@@ -47,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "ارسال فریم به Frigate+ ناموفق بود"
     }
-  }
+  },
+  "cameraOff": "دوربین خاموش است"
 }

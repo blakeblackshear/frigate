@@ -8,7 +8,13 @@ from typing import Any, Optional, Union
 
 from ruamel.yaml import YAML
 
-from frigate.const import CONFIG_DIR, EXPORT_DIR
+from frigate.const import (
+    CONFIG_DIR,
+    DEFAULT_FFMPEG_VERSION,
+    EXPORT_DIR,
+    INCLUDED_FFMPEG_VERSIONS,
+    REDACTED_CREDENTIAL_SENTINEL,
+)
 from frigate.util.builtin import deep_merge
 from frigate.util.services import get_video_properties
 
@@ -16,6 +22,41 @@ logger = logging.getLogger(__name__)
 
 CURRENT_CONFIG_VERSION = "0.18-0"
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
+
+
+def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
+    """Resolve an ffmpeg version alias or custom path to a binary path.
+
+    A bare version alias that is no longer bundled (for example one that was
+    dropped when the default version changed) falls back to the default
+    bundled version so existing configs keep working across an upgrade or a
+    revert. Custom install paths (anything absolute) are used as-is.
+    """
+    if path == "default" or (
+        not path.startswith("/") and path not in INCLUDED_FFMPEG_VERSIONS
+    ):
+        version = DEFAULT_FFMPEG_VERSION
+    elif path in INCLUDED_FFMPEG_VERSIONS:
+        version = path
+    else:
+        return f"{path}/bin/{binary}"
+
+    return f"/usr/lib/ffmpeg/{version}/bin/{binary}"
+
+
+def redact_credential(obj: dict[str, Any], key: str) -> None:
+    """Replace obj[key] with the redaction sentinel if a value is saved, else drop.
+
+    Used when shaping the /config response so saved credentials never leave
+    the server. The frontend recognizes REDACTED_CREDENTIAL_SENTINEL, renders
+    the field as empty with a "saved — leave blank to keep" placeholder, and
+    /config/set strips it from any incoming payload so the YAML value is
+    preserved when the user doesn't touch the field.
+    """
+    if obj.get(key):
+        obj[key] = REDACTED_CREDENTIAL_SENTINEL
+    else:
+        obj.pop(key, None)
 
 
 def find_config_file() -> str:
@@ -603,6 +644,16 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
         new_config["cameras"][name] = camera_config
 
+    # Remove deprecated date_style and time_style from global ui config
+    global_ui = new_config.get("ui", {})
+    if global_ui.get("date_style") is not None:
+        del new_config["ui"]["date_style"]
+    if global_ui.get("time_style") is not None:
+        del new_config["ui"]["time_style"]
+    # Remove ui section if empty
+    if "ui" in new_config and not new_config["ui"]:
+        del new_config["ui"]
+
     new_config["version"] = "0.18-0"
     return new_config
 
@@ -772,6 +823,45 @@ def apply_section_update(camera_config, section: str, update: dict) -> Optional[
                     **filt.model_dump(exclude_unset=True, exclude={"mask", "raw_mask"}),
                 )
             camera_config.objects = new_objects
+
+        elif section == "detect":
+            # apply detect first so frame_shape reflects the new resolution
+            # before we rebuild mask-dependent runtime configs below
+            merged = deep_merge(current.model_dump(), update, override=True)
+            camera_config.detect = current.__class__.model_validate(merged)
+
+            new_frame_shape = camera_config.frame_shape
+
+            # rebuild motion's rasterized_mask at the new frame_shape
+            if camera_config.motion is not None:
+                camera_config.motion = RuntimeMotionConfig(
+                    frame_shape=new_frame_shape,
+                    **camera_config.motion.model_dump(exclude_unset=True),
+                )
+
+            # rebuild per-object filter masks at the new frame_shape
+            for obj_name, filt in camera_config.objects.filters.items():
+                merged_mask = dict(filt.mask)
+                if camera_config.objects.mask:
+                    for gid, gmask in camera_config.objects.mask.items():
+                        merged_mask[f"global_{gid}"] = gmask
+
+                camera_config.objects.filters[obj_name] = RuntimeFilterConfig(
+                    frame_shape=new_frame_shape,
+                    mask=merged_mask,
+                    **filt.model_dump(exclude_unset=True, exclude={"mask", "raw_mask"}),
+                )
+
+            # Regenerate zone contours and per-zone filter masks at the new
+            # frame_shape so zone outlines and membership stay relative
+            for zone in camera_config.zones.values():
+                if zone.filters:
+                    for zone_obj_name, zone_filter in zone.filters.items():
+                        zone.filters[zone_obj_name] = RuntimeFilterConfig(
+                            frame_shape=new_frame_shape,
+                            **zone_filter.model_dump(exclude_unset=True),
+                        )
+                zone.generate_contour(new_frame_shape)
 
         else:
             merged = deep_merge(current.model_dump(), update, override=True)

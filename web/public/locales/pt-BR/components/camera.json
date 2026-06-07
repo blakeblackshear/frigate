@@ -82,6 +82,7 @@
     "motion": "Movimento",
     "regions": "Regiões",
     "boundingBox": "Caixa Delimitadora",
-    "timestamp": "Timestamp"
+    "timestamp": "Timestamp",
+    "paths": "Caminhos"
   }
 }

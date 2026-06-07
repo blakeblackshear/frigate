@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "找不到 {{cameraName}} 的預覽",
   "submitFrigatePlus": {
     "title": "提交此畫面至 Frigate+？",
-    "submit": "提交"
+    "submit": "提交",
+    "previewError": "無法載入快照預覽。該錄製當前可能不可用。"
   },
   "streamOffline": {
     "desc": "{{cameraName}} 的 <code>detect</code> 串流未接收到任何畫面，請檢查錯誤日誌",
@@ -47,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "提交畫面至 Frigate+ 失敗"
     }
-  }
+  },
+  "cameraOff": "攝影機關機"
 }

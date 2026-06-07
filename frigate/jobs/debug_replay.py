@@ -1,4 +1,4 @@
-"""Debug replay startup job: ffmpeg concat + camera config publish.
+"""Debug replay startup job: ffmpeg remux + camera config publish.
 
 The runner orchestrates the async portion of starting a debug replay
 session. The DebugReplayManager (in frigate.debug_replay) owns session
@@ -12,6 +12,7 @@ import os
 import subprocess as sp
 import threading
 import time
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional, cast
 
@@ -23,7 +24,7 @@ from frigate.const import REPLAY_CAMERA_PREFIX, REPLAY_DIR
 from frigate.jobs.export import JobStatePublisher
 from frigate.jobs.job import Job
 from frigate.jobs.manager import job_is_running, set_current_job
-from frigate.models import Recordings
+from frigate.models import Export, Recordings
 from frigate.types import JobStatusTypesEnum
 from frigate.util.ffmpeg import run_ffmpeg_with_progress
 
@@ -114,6 +115,130 @@ def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> Mode
     return cast(ModelSelect, query)
 
 
+class DebugReplaySource(ABC):
+    """Abstract source for a debug replay session.
+
+    Provides the camera identity and time range the replay represents,
+    validates that usable content exists, and supplies the ffmpeg input
+    args used to build the replay clip.
+    """
+
+    @property
+    @abstractmethod
+    def source_camera(self) -> str:
+        """Camera name the replay is derived from."""
+
+    @property
+    @abstractmethod
+    def start_ts(self) -> float:
+        """Unix timestamp marking the start of the replay range."""
+
+    @property
+    @abstractmethod
+    def end_ts(self) -> float:
+        """Unix timestamp marking the end of the replay range."""
+
+    @abstractmethod
+    def validate(self) -> None:
+        """Raise ValueError if the source has no usable content."""
+
+    @abstractmethod
+    def ffmpeg_input_args(self, working_dir: str) -> list[str]:
+        """Return ffmpeg input args (including -i). May write temp files in working_dir."""
+
+    def cleanup(self, working_dir: str) -> None:
+        """Remove any temp files the source created in working_dir. Default no-op."""
+
+
+class RecordingDebugReplaySource(DebugReplaySource):
+    """Replay source backed by the Recordings table.
+
+    Feeds ffmpeg the internal VOD endpoint so segments with mismatched
+    SPS/PPS (e.g. across day/night transitions) stitch cleanly via HLS
+    discontinuities.
+    """
+
+    def __init__(
+        self,
+        source_camera: str,
+        start_ts: float,
+        end_ts: float,
+        internal_port: int,
+    ) -> None:
+        self._camera = source_camera
+        self._start_ts = start_ts
+        self._end_ts = end_ts
+        self._internal_port = internal_port
+
+    @property
+    def source_camera(self) -> str:
+        return self._camera
+
+    @property
+    def start_ts(self) -> float:
+        return self._start_ts
+
+    @property
+    def end_ts(self) -> float:
+        return self._end_ts
+
+    def validate(self) -> None:
+        if self._end_ts <= self._start_ts:
+            raise ValueError("End time must be after start time")
+
+        if not query_recordings(self._camera, self._start_ts, self._end_ts).count():
+            raise ValueError(
+                f"No recordings found for camera '{self._camera}' in the specified time range"
+            )
+
+    def ffmpeg_input_args(self, working_dir: str) -> list[str]:
+        playlist_url = (
+            f"http://127.0.0.1:{self._internal_port}/vod/{self._camera}"
+            f"/start/{self._start_ts}/end/{self._end_ts}/index.m3u8"
+        )
+        return [
+            "-protocol_whitelist",
+            "pipe,file,http,tcp",
+            "-i",
+            playlist_url,
+        ]
+
+
+class ExportDebugReplaySource(DebugReplaySource):
+    """Replay source backed by an existing Export.
+
+    Uses the export's video file directly as the ffmpeg input — does not
+    require recordings to still exist for the time range.
+    """
+
+    def __init__(self, export: Export, duration: float) -> None:
+        self._camera = cast(str, export.camera)
+        # Export.date is declared DateTimeField but Frigate writes raw unix
+        # timestamps to the column.
+        self._start_ts = float(cast(Any, export.date))
+        self._video_path = cast(str, export.video_path)
+        self._duration = duration
+
+    @property
+    def source_camera(self) -> str:
+        return self._camera
+
+    @property
+    def start_ts(self) -> float:
+        return self._start_ts
+
+    @property
+    def end_ts(self) -> float:
+        return self._start_ts + self._duration
+
+    def validate(self) -> None:
+        if not os.path.exists(self._video_path):
+            raise ValueError(f"Export video file not found: {self._video_path}")
+
+    def ffmpeg_input_args(self, working_dir: str) -> list[str]:
+        return ["-i", self._video_path]
+
+
 class DebugReplayJobRunner(threading.Thread):
     """Worker thread that drives the startup job to completion.
 
@@ -126,6 +251,7 @@ class DebugReplayJobRunner(threading.Thread):
     def __init__(
         self,
         job: DebugReplayJob,
+        source: DebugReplaySource,
         frigate_config: FrigateConfig,
         config_publisher: CameraConfigUpdatePublisher,
         replay_manager: "DebugReplayManager",
@@ -133,6 +259,7 @@ class DebugReplayJobRunner(threading.Thread):
     ) -> None:
         super().__init__(daemon=True, name=f"debug_replay_{job.id}")
         self.job = job
+        self.source = source
         self.frigate_config = frigate_config
         self.config_publisher = config_publisher
         self.replay_manager = replay_manager
@@ -183,7 +310,6 @@ class DebugReplayJobRunner(threading.Thread):
     def run(self) -> None:
         replay_name = self.job.replay_camera_name
         os.makedirs(REPLAY_DIR, exist_ok=True)
-        concat_file = os.path.join(REPLAY_DIR, f"{replay_name}_concat.txt")
         clip_path = os.path.join(REPLAY_DIR, f"{replay_name}.mp4")
 
         self.job.status = JobStatusTypesEnum.running
@@ -192,23 +318,13 @@ class DebugReplayJobRunner(threading.Thread):
         self._broadcast(force=True)
 
         try:
-            recordings = query_recordings(
-                self.job.source_camera, self.job.start_ts, self.job.end_ts
-            )
-            with open(concat_file, "w") as f:
-                for recording in recordings:
-                    f.write(f"file '{recording.path}'\n")
+            input_args = self.source.ffmpeg_input_args(REPLAY_DIR)
 
             ffmpeg_cmd = [
                 self.frigate_config.ffmpeg.ffmpeg_path,
                 "-hide_banner",
                 "-y",
-                "-f",
-                "concat",
-                "-safe",
-                "0",
-                "-i",
-                concat_file,
+                *input_args,
                 "-c",
                 "copy",
                 "-movflags",
@@ -285,7 +401,7 @@ class DebugReplayJobRunner(threading.Thread):
             self.replay_manager.clear_session()
             _remove_silent(clip_path)
         finally:
-            _remove_silent(concat_file)
+            self.source.cleanup(REPLAY_DIR)
             _set_active_runner(None)
 
     def _finalize_cancelled(self, clip_path: str) -> None:
@@ -309,52 +425,43 @@ def _remove_silent(path: str) -> None:
 
 def start_debug_replay_job(
     *,
-    source_camera: str,
-    start_ts: float,
-    end_ts: float,
+    source: DebugReplaySource,
     frigate_config: FrigateConfig,
     config_publisher: CameraConfigUpdatePublisher,
     replay_manager: "DebugReplayManager",
 ) -> str:
     """Validate, create job, start runner. Returns the job id.
 
-    Raises ValueError for bad params (camera missing, time range
-    invalid, no recordings) and RuntimeError if a session is already
-    active.
+    Raises ValueError for an invalid source (camera missing, source has
+    no usable content) and RuntimeError if a session is already active.
     """
     if job_is_running(JOB_TYPE) or replay_manager.active:
         raise RuntimeError("A replay session is already active")
 
-    if source_camera not in frigate_config.cameras:
-        raise ValueError(f"Camera '{source_camera}' not found")
+    if source.source_camera not in frigate_config.cameras:
+        raise ValueError(f"Camera '{source.source_camera}' not found")
 
-    if end_ts <= start_ts:
-        raise ValueError("End time must be after start time")
+    source.validate()
 
-    recordings = query_recordings(source_camera, start_ts, end_ts)
-    if not recordings.count():
-        raise ValueError(
-            f"No recordings found for camera '{source_camera}' in the specified time range"
-        )
-
-    replay_name = f"{REPLAY_CAMERA_PREFIX}{source_camera}"
+    replay_name = f"{REPLAY_CAMERA_PREFIX}{source.source_camera}"
     replay_manager.mark_starting(
-        source_camera=source_camera,
+        source_camera=source.source_camera,
         replay_camera_name=replay_name,
-        start_ts=start_ts,
-        end_ts=end_ts,
+        start_ts=source.start_ts,
+        end_ts=source.end_ts,
     )
 
     job = DebugReplayJob(
-        source_camera=source_camera,
+        source_camera=source.source_camera,
         replay_camera_name=replay_name,
-        start_ts=start_ts,
-        end_ts=end_ts,
+        start_ts=source.start_ts,
+        end_ts=source.end_ts,
     )
     set_current_job(job)
 
     runner = DebugReplayJobRunner(
         job=job,
+        source=source,
         frigate_config=frigate_config,
         config_publisher=config_publisher,
         replay_manager=replay_manager,

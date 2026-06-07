@@ -1,17 +1,17 @@
 {
   "time": {
-    "untilForRestart": "Hingga Frigate memulai ulang.",
-    "untilRestart": "Sampai memulai ulang",
-    "ago": "{{timeAgo}} Lalu",
-    "justNow": "Sekarang",
+    "untilForRestart": "Sampai Frigate dimulai ulang.",
+    "untilRestart": "Sampai dimulai ulang",
+    "ago": "{{timeAgo}} yang lalu",
+    "justNow": "Baru saja",
     "today": "Hari ini",
     "yesterday": "Kemarin",
-    "untilForTime": "Sampai",
+    "untilForTime": "Sampai {{time}}",
     "last7": "7 hari terakhir",
     "last14": "14 hari terakhir",
     "last30": "30 hari terakhir",
     "thisWeek": "Minggu Ini",
-    "never": "Tidak Pernah",
+    "never": "Tidak pernah",
     "lastWeek": "Minggu Lalu",
     "thisMonth": "Bulan Ini",
     "lastMonth": "Bulan Lalu",
@@ -21,11 +21,296 @@
     "1hour": "1 jam",
     "12hours": "12 jam",
     "24hours": "24 jam",
-    "pm": "pm",
-    "am": "am",
-    "yr": "{{time}} tahun",
+    "pm": "PM",
+    "am": "AM",
+    "yr": "{{time}} th",
     "year_other": "{{time}} tahun",
-    "mo": "{{time}} bulan"
+    "mo": "{{time}} bln",
+    "month_other": "{{time}} bulan",
+    "d": "{{time}} hr",
+    "day_other": "{{time}} hari",
+    "h": "{{time}} jam",
+    "hour_other": "{{time}} jam",
+    "m": "{{time}} mnt",
+    "minute_other": "{{time}} menit",
+    "s": "{{time}} dtk",
+    "second_other": "{{time}} detik",
+    "formattedTimestamp": {
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "inProgress": "Sedang berlangsung",
+    "invalidStartTime": "Waktu mulai tidak valid",
+    "invalidEndTime": "Waktu selesai tidak valid"
   },
-  "readTheDocumentation": "Baca dokumentasi"
+  "readTheDocumentation": "Baca dokumentasi",
+  "menu": {
+    "system": "Sistem",
+    "profiles": "Profil",
+    "systemMetrics": "Metrik sistem",
+    "configuration": "Konfigurasi",
+    "systemLogs": "Log sistem",
+    "settings": "Pengaturan",
+    "configurationEditor": "Editor Konfigurasi",
+    "languages": "Bahasa",
+    "language": {
+      "en": "English (Inggris)",
+      "es": "Español (Spanyol)",
+      "zhCN": "简体中文 (Tionghoa Sederhana)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (Prancis)",
+      "ar": "العربية (Arab)",
+      "pt": "Português (Portugis)",
+      "ptBR": "Português brasileiro (Portugis Brasil)",
+      "ru": "Русский (Rusia)",
+      "de": "Deutsch (Jerman)",
+      "ja": "日本語 (Jepang)",
+      "tr": "Türkçe (Turki)",
+      "it": "Italiano (Italia)",
+      "nl": "Nederlands (Belanda)",
+      "sv": "Svenska (Swedia)",
+      "cs": "Čeština (Ceko)",
+      "nb": "Norsk Bokmål (Norwegia Bokmål)",
+      "ko": "한국어 (Korea)",
+      "vi": "Tiếng Việt (Vietnam)",
+      "fa": "فارسی (Persia)",
+      "pl": "Polski (Polandia)",
+      "uk": "Українська (Ukraina)",
+      "he": "עברית (Ibrani)",
+      "el": "Ελληνικά (Yunani)",
+      "ro": "Română (Rumania)",
+      "hu": "Magyar (Hungaria)",
+      "fi": "Suomi (Finlandia)",
+      "da": "Dansk (Denmark)",
+      "sk": "Slovenčina (Slovakia)",
+      "yue": "粵語 (Kanton)",
+      "th": "ไทย (Thai)",
+      "ca": "Català (Katalan)",
+      "hr": "Hrvatski (Kroasia)",
+      "bs": "Bosanski (Bosnia)",
+      "sr": "Српски (Serbia)",
+      "sl": "Slovenščina (Slovenia)",
+      "lt": "Lietuvių (Lituania)",
+      "bg": "Български (Bulgaria)",
+      "gl": "Galego (Galisia)",
+      "id": "Bahasa Indonesia (Indonesia)",
+      "ur": "اردو (Urdu)",
+      "withSystem": {
+        "label": "Gunakan pengaturan sistem untuk bahasa"
+      }
+    },
+    "appearance": "Tampilan",
+    "darkMode": {
+      "label": "Mode Gelap",
+      "light": "Terang",
+      "dark": "Gelap",
+      "withSystem": {
+        "label": "Gunakan pengaturan sistem untuk mode terang atau gelap"
+      }
+    },
+    "withSystem": "Sistem",
+    "theme": {
+      "label": "Tema",
+      "blue": "Biru",
+      "green": "Hijau",
+      "nord": "Nord",
+      "red": "Merah",
+      "highcontrast": "Kontras Tinggi",
+      "default": "Default"
+    },
+    "help": "Bantuan",
+    "documentation": {
+      "title": "Dokumentasi",
+      "label": "Dokumentasi Frigate"
+    },
+    "restart": "Mulai Ulang Frigate",
+    "live": {
+      "title": "Live",
+      "allCameras": "Semua Kamera",
+      "cameras": {
+        "title": "Kamera",
+        "count_other": "{{count}} Kamera"
+      }
+    },
+    "review": "Tinjauan",
+    "explore": "Jelajah",
+    "export": "Ekspor",
+    "actions": "Tindakan",
+    "uiPlayground": "UI Playground",
+    "features": "Fitur",
+    "faceLibrary": "Pustaka Wajah",
+    "classification": "Klasifikasi",
+    "chat": "Chat",
+    "user": {
+      "title": "Pengguna",
+      "account": "Akun",
+      "current": "Pengguna Saat Ini: {{user}}",
+      "anonymous": "anonim",
+      "logout": "Keluar",
+      "setPassword": "Atur Kata Sandi"
+    }
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "kph"
+    },
+    "length": {
+      "feet": "kaki",
+      "meters": "meter"
+    },
+    "data": {
+      "kbps": "kB/dtk",
+      "mbps": "MB/dtk",
+      "gbps": "GB/dtk",
+      "kbph": "kB/jam",
+      "mbph": "MB/jam",
+      "gbph": "GB/jam"
+    }
+  },
+  "label": {
+    "back": "Kembali",
+    "hide": "Sembunyikan {{item}}",
+    "show": "Tampilkan {{item}}",
+    "ID": "ID",
+    "none": "Tidak ada",
+    "all": "Semua",
+    "other": "Lainnya"
+  },
+  "list": {
+    "two": "{{0}} dan {{1}}",
+    "many": "{{items}}, dan {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Opsional",
+    "internalID": "ID Internal yang digunakan Frigate dalam konfigurasi dan basis data"
+  },
+  "button": {
+    "add": "Tambah",
+    "apply": "Terapkan",
+    "applying": "Menerapkan…",
+    "reset": "Atur Ulang",
+    "undo": "Urungkan",
+    "done": "Selesai",
+    "enabled": "Diaktifkan",
+    "enable": "Aktifkan",
+    "disabled": "Dinonaktifkan",
+    "disable": "Nonaktifkan",
+    "save": "Simpan",
+    "saving": "Menyimpan…",
+    "cancel": "Batal",
+    "close": "Tutup",
+    "copy": "Salin",
+    "copiedToClipboard": "Disalin ke papan klip",
+    "back": "Kembali",
+    "history": "Riwayat",
+    "fullscreen": "Layar Penuh",
+    "exitFullscreen": "Keluar dari Layar Penuh",
+    "pictureInPicture": "Gambar dalam Gambar",
+    "twoWayTalk": "Audio Dua Arah",
+    "cameraAudio": "Audio Kamera",
+    "on": "AKTIF",
+    "off": "NONAKTIF",
+    "edit": "Edit",
+    "copyCoordinates": "Salin koordinat",
+    "delete": "Hapus",
+    "yes": "Ya",
+    "no": "Tidak",
+    "download": "Unduh",
+    "info": "Info",
+    "suspended": "Ditangguhkan",
+    "unsuspended": "Batalkan penangguhan",
+    "play": "Putar",
+    "unselect": "Batalkan pilihan",
+    "export": "Ekspor",
+    "deleteNow": "Hapus Sekarang",
+    "next": "Berikutnya",
+    "continue": "Lanjutkan",
+    "modified": "Diubah",
+    "overridden": "Ditimpa",
+    "resetToGlobal": "Atur Ulang ke Global",
+    "resetToDefault": "Atur Ulang ke Default",
+    "saveAll": "Simpan Semua",
+    "savingAll": "Menyimpan Semua…",
+    "undoAll": "Urungkan Semua",
+    "retry": "Coba Lagi"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL disalin ke papan klip.",
+    "save": {
+      "title": "Simpan",
+      "error": {
+        "title": "Gagal menyimpan perubahan konfigurasi: {{errorMessage}}",
+        "noMessage": "Gagal menyimpan perubahan konfigurasi"
+      },
+      "success": "Berhasil menyimpan perubahan konfigurasi."
+    }
+  },
+  "role": {
+    "title": "Peran",
+    "admin": "Admin",
+    "viewer": "Penampil",
+    "desc": "Admin memiliki akses penuh ke semua fitur di UI Frigate. Penampil terbatas hanya untuk melihat kamera, item tinjauan, dan rekaman historis di UI."
+  },
+  "pagination": {
+    "label": "paginasi",
+    "previous": {
+      "title": "Sebelumnya",
+      "label": "Buka halaman sebelumnya"
+    },
+    "next": {
+      "title": "Berikutnya",
+      "label": "Buka halaman berikutnya"
+    },
+    "more": "Halaman lainnya"
+  },
+  "accessDenied": {
+    "documentTitle": "Akses Ditolak - Frigate",
+    "title": "Akses Ditolak",
+    "desc": "Anda tidak memiliki izin untuk melihat halaman ini."
+  },
+  "notFound": {
+    "documentTitle": "Tidak Ditemukan - Frigate",
+    "title": "404",
+    "desc": "Halaman tidak ditemukan"
+  },
+  "selectItem": "Pilih {{item}}",
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "no_items": "Tidak ada item",
+  "validation_errors": "Kesalahan Validasi",
+  "credentialField": {
+    "savedPlaceholder": "Tersimpan — biarkan kosong untuk mempertahankan yang saat ini"
+  }
 }

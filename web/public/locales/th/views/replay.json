@@ -1,1 +1,13 @@
-{}
+{
+    "websocket_messages": "ข้อความ",
+    "dialog": {
+        "camera": "ภาพจากกล้อง",
+        "timeRange": "ช่วงเวลา",
+        "preset": {
+            "1m": "1 นาทีสุดท้าย"
+        },
+        "startButton": "เริ่มเล่นภาพย้อนหลัง",
+        "selectFromTimeline": "เลือก",
+        "startLabel": "เริ่ม"
+    }
+}

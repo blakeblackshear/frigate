@@ -13,7 +13,62 @@
     "triggers": "Wyzwalacze",
     "roles": "Role",
     "cameraManagement": "Zarządzanie",
-    "cameraReview": "Przegląd"
+    "cameraReview": "Przegląd",
+    "integrations": "Integracje",
+    "uiSettings": "Ustawienia interfejsu użytkownika",
+    "profiles": "Profile",
+    "globalDetect": "Detekcja obiektów",
+    "globalRecording": "Nagrywanie",
+    "globalSnapshots": "Snapshoty",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Detekcja ruchu",
+    "globalObjects": "Obiekty",
+    "globalReview": "Recenzja",
+    "globalAudioEvents": "Detekcja dźwięku",
+    "globalLivePlayback": "Podgląd na żywo",
+    "globalTimestampStyle": "Styl znacznika czasu",
+    "systemDatabase": "Baza danych",
+    "systemTls": "TLS",
+    "systemAuthentication": "Autentykacja",
+    "systemNetworking": "Sieć",
+    "systemProxy": "Proxy",
+    "systemUi": "UI",
+    "systemLogging": "Logowanie",
+    "systemEnvironmentVariables": "Zmienne środowiskowe",
+    "systemTelemetry": "Telemetria",
+    "systemBirdseye": "Podgląd obrazu",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorsAndModel": "Detektory i model",
+    "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "strumienie go2rtc",
+    "integrationSemanticSearch": "Wyszukiwanie semantyczne",
+    "integrationGenerativeAi": "Generatywna sztuczna inteligencja",
+    "integrationFaceRecognition": "Rozpoznawanie twarzy",
+    "integrationLpr": "Rozpoznawanie tablic rejestracyjnych",
+    "integrationObjectClassification": "Klasyfikacja obiektów",
+    "integrationAudioTranscription": "Transkrypcja dźwięku",
+    "cameraDetect": "Detekcja obiektów",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "Nagrywanie",
+    "cameraBirdseye": "Podgląd obrazu",
+    "cameraFaceRecognition": "Rozpoznawanie twarzy",
+    "cameraLpr": "Rozpoznawanie tablic rejestracyjnych",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraAudioTranscription": "Transkrypcja dźwięku",
+    "cameraNotifications": "Powiadomienia",
+    "cameraLivePlayback": "Podgląd na żywo",
+    "cameraSnapshots": "Snapshoty",
+    "cameraMotion": "Detekcja ruchu",
+    "cameraObjects": "Obiekty",
+    "cameraConfigReview": "Recenzja",
+    "cameraAudioEvents": "Detekcja dźwięku",
+    "cameraUi": "Interfejs użytkownika kamery",
+    "cameraTimestampStyle": "Styl znacznika czasu",
+    "cameraMqtt": "MQTT kamery",
+    "maintenance": "Utrzymanie",
+    "mediaSync": "Synchronizacja mediów",
+    "regionGrid": "Siatka regionalna"
   },
   "dialog": {
     "unsavedChanges": {
@@ -100,7 +155,8 @@
     "globalConfig": "Konfiguracja globalna - Frigate",
     "cameraConfig": "Konfiguracja kamery - Frigate",
     "maintenance": "Konserwacja – Frigate",
-    "profiles": "Profile - Frigate"
+    "profiles": "Profile - Frigate",
+    "detectorsAndModel": "Detektory i model"
   },
   "classification": {
     "title": "Ustawienia Klasyfikacji",
@@ -1231,5 +1287,47 @@
       "title": "Opisy generatywnej sztucznej inteligencji",
       "desc": "Tymczasowo włącz/wyłącz generatywne opisy AI dla tej kamery. Po wyłączeniu opisy generowane przez AI nie będą wymagane dla elementów przeglądu w tej kamerze."
     }
+  },
+  "button": {
+    "overriddenGlobal": "Nadpisane (globalnie)",
+    "overriddenGlobalTooltip": "Ta kamera nadpisuje globalną konfigurację w tej sekcji",
+    "overriddenGlobalHeading_one": "Ta kamera nadpisuje pole {{count}} z globalnej konfiguracji:",
+    "overriddenGlobalHeading_few": "Ta kamera nadpisuje pola {{count}} z globalnej konfiguracji:",
+    "overriddenGlobalHeading_many": "Ta kamera nadpisuje pola {{count}} z globalnej konfiguracji:",
+    "overriddenGlobalNoDeltas": "Ta kamera nadpisuje ustawienia globalne, ale żadne wartości pól się nie różnią.",
+    "overriddenBaseConfig": "Nadpisane (bazowa konfiguracja)",
+    "overriddenBaseConfigTooltip": "Profil {{profile}} zastępuje ustawienia konfiguracyjne w tej sekcji",
+    "overriddenBaseConfigHeading_one": "Profil {{profile}} zastępuje pole {{count}} z konfiguracji podstawowej:",
+    "overriddenBaseConfigHeading_few": "Profile {{profile}} zastępują pola {{count}} z konfiguracji podstawowej:",
+    "overriddenBaseConfigHeading_many": "Profile {{profile}} zastępują pola {{count}} z konfiguracji podstawowej:",
+    "overriddenBaseConfigNoDeltas": "Profil {{profile}} zastępuje tę sekcję, ale żadne wartości pól nie różnią się od konfiguracji podstawowej.",
+    "overriddenInCameras": {
+      "label_one": "Zastąpiono w kamerze {{count}}",
+      "label_few": "Zastąpiono w kamerach {{count}}",
+      "label_many": "Zastąpiono w kamerach {{count}}",
+      "tooltip_one": "Kamera {{count}} zastępuje wartości w tej sekcji. Kliknij, aby wyświetlić szczegóły.",
+      "tooltip_few": "Kamery {{count}} zastępują wartości w tej sekcji. Kliknij, aby wyświetlić szczegóły.",
+      "tooltip_many": "Kamery {{count}} zastępują wartości w tej sekcji. Kliknij, aby wyświetlić szczegóły."
+    }
+  },
+  "saveAllPreview": {
+    "scope": {
+      "label": "Zakres",
+      "global": "Globalne",
+      "camera": "Kamera: {{cameraName}}"
+    },
+    "profile": {
+      "label": "Profil"
+    },
+    "field": {
+      "label": "Pole"
+    },
+    "value": {
+      "label": "Nowa wartość",
+      "reset": "Reset"
+    },
+    "title": "Zmiany do zapisania",
+    "triggerLabel": "Przejrzyj oczekujące zmiany",
+    "empty": "Brak oczekujących zmian."
   }
 }

@@ -41,12 +41,6 @@ class MotionSearchRequest(BaseModel):
         le=100.0,
         description="Minimum change area as a percentage of the ROI",
     )
-    frame_skip: int = Field(
-        default=5,
-        ge=1,
-        le=30,
-        description="Process every Nth frame (1=all frames, 5=every 5th frame)",
-    )
     parallel: bool = Field(
         default=False,
         description="Enable parallel scanning across segments",
@@ -97,6 +91,8 @@ class MotionSearchStatusResponse(BaseModel):
     total_frames_processed: Optional[int] = None
     error_message: Optional[str] = None
     metrics: Optional[MotionSearchMetricsResponse] = None
+    scanning_timestamp: Optional[float] = None
+    progress: Optional[float] = None
 
 
 @router.post(
@@ -151,7 +147,6 @@ async def start_motion_search(
         polygon_points=body.polygon_points,
         threshold=body.threshold,
         min_area=body.min_area,
-        frame_skip=body.frame_skip,
         parallel=body.parallel,
         max_results=body.max_results,
     )
@@ -230,6 +225,9 @@ async def get_motion_search_status_endpoint(
     # Include metrics if available
     if job.metrics:
         response_content["metrics"] = job.metrics.to_dict()
+
+    response_content["scanning_timestamp"] = job.scanning_timestamp
+    response_content["progress"] = job.progress
 
     return JSONResponse(content=response_content)
 

@@ -221,5 +221,30 @@
             "label": "Transkrypcja na żywo",
             "description": "Włącz transkrypcję strumieniową audio na żywo w momencie jego odbierania."
         }
+    },
+    "birdseye": {
+        "mode": {
+            "label": "Tryb śledzenia"
+        },
+        "order": {
+            "label": "Pozycja"
+        }
+    },
+    "detect": {
+        "enabled": {
+            "label": "Włącz wykrywanie obiektów",
+            "description": "Włącza lub wyłącza wykrywanie obiektów dla tej kamery."
+        },
+        "stationary": {
+            "label": "Konfiguracja obiektów stacjonarnych"
+        }
+    },
+    "face_recognition": {
+        "label": "Rozpoznawanie twarzy",
+        "description": "Ustawienia wykrywania i rozpoznawania twarzy dla tej kamery.",
+        "enabled": {
+            "label": "Włącz rozpoznawanie twarzy",
+            "description": "Włącz lub wyłącz rozpoznawanie twarzy."
+        }
     }
 }

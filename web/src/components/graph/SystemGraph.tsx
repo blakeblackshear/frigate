@@ -61,6 +61,11 @@ export function ThresholdBarGraph({
     });
   }, [t, timeFormat]);
 
+  const updateTimesRef = useRef(updateTimes);
+  useEffect(() => {
+    updateTimesRef.current = updateTimes;
+  }, [updateTimes]);
+
   const formatTime = useCallback(
     (val: unknown) => {
       const dateIndex = Math.round(val as number);
@@ -69,16 +74,18 @@ export function ThresholdBarGraph({
       if (dateIndex < 0) {
         timeOffset = 5 * Math.abs(dateIndex);
       }
-      return formatUnixTimestampToDateTime(
-        updateTimes[Math.max(1, dateIndex) - 1] - timeOffset,
-        {
-          timezone: config?.ui.timezone,
-          date_format: format,
-          locale,
-        },
-      );
+      const times = updateTimesRef.current;
+      const ts = times[Math.max(1, dateIndex) - 1] - timeOffset;
+      if (isNaN(ts)) {
+        return "";
+      }
+      return formatUnixTimestampToDateTime(ts, {
+        timezone: config?.ui.timezone,
+        date_format: format,
+        locale,
+      });
     },
-    [config?.ui.timezone, format, locale, updateTimes],
+    [config?.ui.timezone, format, locale],
   );
 
   const options = useMemo(() => {

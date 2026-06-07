@@ -11,6 +11,12 @@ Recordings can be enabled and are stored at `/media/frigate/recordings`. The fol
 
 New recording segments are written from the camera stream to cache, they are only moved to disk if they match the setup recording retention policy.
 
+:::tip
+
+To keep a specific clip beyond your retention window, [export](/usage/exports) it rather than increasing retention for the whole camera. Exports are saved separately and are never removed by retention.
+
+:::
+
 H265 recordings can be viewed in Chrome 108+, Edge and Safari only. All other browsers require recordings to be encoded with H264.
 
 ## Common recording configurations

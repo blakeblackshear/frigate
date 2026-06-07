@@ -26,7 +26,9 @@
         "points_many": "{{count}} punts",
         "points_other": "{{count}} punts",
         "undo": "Desfés l'últim punt",
-        "reset": "Restableix el polígon"
+        "reset": "Restableix el polígon",
+        "drawMode": "Dibuxa",
+        "moveMode": "Moure"
     },
     "motionHeatmapLabel": "Mapa de calor del moviment",
     "dialog": {
@@ -42,11 +44,11 @@
     "settings": {
         "title": "Configuració de la cerca",
         "parallelMode": "Mode paral·lel",
-        "parallelModeDesc": "Escaneja múltiples segments d'enregistrament al mateix temps (més ràpid, però significativament més intensiu en CPU)",
+        "parallelModeDesc": "Escaneja múltiples intervals d'enregistrament al mateix temps (més ràpid; utilitza més recursos de descodificació)",
         "threshold": "Llindar de la sensibilitat",
         "thresholdDesc": "Els valors més baixos detecten canvis més petits (1-255)",
         "minArea": "Àrea de canvi mínim",
-        "minAreaDesc": "Percentatge mínim de la regió d'interès que s'ha de canviar per considerar-se significatiu",
+        "minAreaDesc": "Mida mínima d'una sola regió en moviment, com a percentatge de la regió d'interès",
         "frameSkip": "Omet el fotograma",
         "frameSkipDesc": "Processa cada N fotograma. Establiu això a la velocitat de fotogrames de la càmera per processar un fotograma per segon (p. ex. 5 per a una càmera de 5 FPS, 30 per a una càmera de 30 FPS). Els valors més alts seran més ràpids, però poden perdre els esdeveniments de curt moviment.",
         "maxResults": "Resultats màxims",
@@ -72,6 +74,9 @@
         "framesDecoded": "Fotogrames descodificats",
         "wallTime": "Temps de cerca",
         "segmentErrors": "Errors del segment",
-        "seconds": "{{seconds}}s"
-    }
+        "seconds": "{{seconds}}s",
+        "scanSummary": "{{segments}} segments · {{time}}",
+        "minutesSeconds": "{{minutes}}m {{seconds}}s"
+    },
+    "scanning": "S'està analitzant {{time}}"
 }

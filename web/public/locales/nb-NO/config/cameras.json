@@ -52,7 +52,7 @@
         "description": "Innstillinger for å aktivere og kontrollere varslinger for dette kameraet."
     },
     "audio": {
-        "label": "Lydhendelser",
+        "label": "Lyddeteksjon",
         "enabled": {
             "label": "Aktiver lyddeteksjon",
             "description": "Aktiver eller deaktiver deteksjon av lydhendelser for dette kameraet."
@@ -71,7 +71,11 @@
         },
         "filters": {
             "label": "Lydfiltre",
-            "description": "Filterinnstillinger per lydtype, som konfidensterskler for å redusere falske positive."
+            "description": "Filterinnstillinger per lydtype, som konfidensterskler for å redusere falske positive.",
+            "threshold": {
+                "description": "Minimum konfidens-terskel for at lydhendelsen skal bli registrert.",
+                "label": "Minimum konfidens for lyd"
+            }
         },
         "enabled_in_config": {
             "label": "Opprinnelig lydstatus",
@@ -442,7 +446,7 @@
                 },
                 "mode": {
                     "label": "Bevaringsmodus",
-                    "description": "Modus for bevaring: all (alle), motion (bevegelse) eller active_objects (aktive objekter)."
+                    "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
                 }
             }
         },
@@ -466,7 +470,7 @@
                 },
                 "mode": {
                     "label": "Bevaringsmodus",
-                    "description": "Modus for bevaring: all (lagre alle segmenter), motion (lagre segmenter med bevegelse) eller active_objects (lagre segmenter med aktive objekter)."
+                    "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
                 }
             }
         },
@@ -476,6 +480,10 @@
             "hwaccel_args": {
                 "label": "Argumenter for maskinvareakselerasjon ved eksport",
                 "description": "Argumenter for maskinvareakselerasjon som skal brukes ved eksport og transkoding."
+            },
+            "max_concurrent": {
+                "description": "Maksimalt antall eksportjobber som kan behandles samtidig.",
+                "label": "Maksimalt antall samtidige eksporter"
             }
         },
         "preview": {
@@ -619,7 +627,7 @@
             },
             "mode": {
                 "label": "Bevaringsmodus",
-                "description": "Modus for bevaring: all (lagre alle segmenter), motion (lagre segmenter med bevegelse) eller active_objects (lagre segmenter med aktive objekter)."
+                "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
             },
             "objects": {
                 "label": "Objektbevaring",

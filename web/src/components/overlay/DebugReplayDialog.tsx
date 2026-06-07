@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { baseUrl } from "@/api/baseUrl";
 import {
   Dialog,
   DialogContent,
@@ -112,19 +113,14 @@ export function DebugReplayContent({
 
       {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
 
-      <DialogFooter
-        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-2"}
-      >
+      <DialogFooter className="mt-3 sm:mt-0">
         <Button
-          className={isDesktop ? "" : "w-full"}
           aria-label={t("button.cancel", { ns: "common" })}
-          variant="outline"
           onClick={onCancel}
         >
           {t("button.cancel", { ns: "common" })}
         </Button>
         <Button
-          className={isDesktop ? "" : "w-full"}
           variant="select"
           disabled={isStarting}
           onClick={() => {
@@ -227,7 +223,11 @@ export default function DebugReplayDialog({
             closeButton: true,
             dismissible: false,
             action: (
-              <a href="/replay" target="_blank" rel="noopener noreferrer">
+              <a
+                href={`${baseUrl}replay`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button>{t("dialog.toast.goToReplay")}</Button>
               </a>
             ),

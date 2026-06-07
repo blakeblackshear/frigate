@@ -119,7 +119,7 @@ export default function IconPicker({
             placeholder={t("iconPicker.search.placeholder", {
               ns: "components/icons",
             })}
-            className="text-md mb-3 md:text-sm"
+            className="mb-3 md:text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

@@ -456,7 +456,7 @@ class RecordingExporter(threading.Thread):
 
             diff = max(0.0, float(self.start_time) - float(preview.start_time))
             ffmpeg_cmd = [
-                "/usr/lib/ffmpeg/7.0/bin/ffmpeg",  # hardcode path for exports thumbnail due to missing libwebp support
+                "/usr/lib/ffmpeg/8.0/bin/ffmpeg",  # hardcode path for exports thumbnail due to missing libwebp support
                 "-hide_banner",
                 "-loglevel",
                 "warning",
@@ -579,7 +579,9 @@ class RecordingExporter(threading.Thread):
         else:
             chapters_path = self._build_chapter_metadata_file(recordings)
             chapter_args = (
-                f" -i {chapters_path} -map 0 -map_metadata 1" if chapters_path else ""
+                f" -i {chapters_path} -map 0 -dn -map_metadata 1"
+                if chapters_path
+                else ""
             )
             ffmpeg_cmd = (
                 f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input}{chapter_args} -c copy -movflags +faststart"

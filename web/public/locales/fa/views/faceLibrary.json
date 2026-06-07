@@ -3,7 +3,7 @@
     "addFace": "با بارگزاری اولین عکستان، یک مجموعه جدید به کتابخانه چهره اضافه کنید.",
     "placeholder": "نامی برای این مجموعه وارد کنید",
     "invalidName": "نام نامعتبر، نام ها فقط می توانند شامل حروف، اعداد، فاصله، آپستروف، زیرخط و خط فاصله باشند.",
-    "nameCannotContainHash": "نام نمی‌تواند شامل # باشد ."
+    "nameCannotContainHash": "نام نمی‌تواند شامل # باشد."
   },
   "details": {
     "timestamp": "زمان دقیق",
@@ -48,7 +48,11 @@
     "title": "تشخیص‌های اخیر",
     "titleShort": "اخیر",
     "aria": "تشخیص‌های اخیر را انتخاب کنید",
-    "empty": "تلاشِ اخیر برای تشخیص چهره وجود ندارد"
+    "empty": "تلاشِ اخیر برای تشخیص چهره وجود ندارد",
+    "emptyNoLibrary": {
+      "title": "یک صورت را آپلود کنید",
+      "description": "شما باید حداقل یک چهره به کتابخانه اضافه کنید تا عملکرد تشخیص چهره کار کند."
+    }
   },
   "deleteFaceLibrary": {
     "title": "حذف نام",
@@ -76,7 +80,8 @@
       "deletedName_other": "{{count}} چهره با موفقیت حذف شدند.",
       "renamedFace": "نام چهره با موفقیت به {{name}} تغییر یافت",
       "trainedFace": "آموزش چهره با موفقیت انجام شد.",
-      "updatedFaceScore": "امتیاز چهره با موفقیت به {{name}} ( {{score}}) به‌روزرسانی شد."
+      "updatedFaceScore": "امتیاز چهره با موفقیت به {{name}} ( {{score}}) به‌روزرسانی شد.",
+      "reclassifiedFace": "کلاسه بندی مجدد چهره با موفقیت انجام شد."
     },
     "error": {
       "uploadingImageFailed": "آپلود تصویر ناموفق بود: {{errorMessage}}",
@@ -85,7 +90,10 @@
       "deleteNameFailed": "حذف نام ناموفق بود: {{errorMessage}}",
       "renameFaceFailed": "تغییر نام چهره ناموفق بود: {{errorMessage}}",
       "trainFailed": "آموزش ناموفق بود: {{errorMessage}}",
-      "updateFaceScoreFailed": "به‌روزرسانی امتیاز چهره ناموفق بود: {{errorMessage}}"
+      "updateFaceScoreFailed": "به‌روزرسانی امتیاز چهره ناموفق بود: {{errorMessage}}",
+      "reclassifyFailed": "کلاسه بندی مجدد برای چهره: {{errorMessage}} دچار مشکل شد"
     }
-  }
+  },
+  "reclassifyFaceAs": "کلاسه بندی مجدد چهره به عنوان:",
+  "reclassifyFace": "کلاسه بندی مجدد چهره"
 }

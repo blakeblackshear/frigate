@@ -608,7 +608,6 @@ function Exports() {
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <Button
-              className="text-white"
               aria-label="Delete Export"
               variant="destructive"
               onClick={() => onHandleDelete()}
@@ -658,7 +657,6 @@ function Exports() {
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <Button
-              className="text-white"
               variant="destructive"
               onClick={() => void handleDeleteCase()}
             >
@@ -744,7 +742,7 @@ function Exports() {
                 </Button>
               )}
               <Input
-                className="text-md w-full bg-muted md:w-1/2"
+                className="w-full bg-muted md:w-1/2"
                 placeholder={t("search")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -1277,8 +1275,8 @@ function CaseEditorDialog({
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
+          <DialogFooter>
+            <Button onClick={onClose}>
               {t("button.cancel", { ns: "common" })}
             </Button>
             <Button
@@ -1295,7 +1293,7 @@ function CaseEditorDialog({
                 ? t("button.save", { ns: "common" })
                 : t("toolbar.newCase")}
             </Button>
-          </div>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>
@@ -1427,13 +1425,12 @@ function CaseAddExportDialog({
             )}
           </div>
         </div>
-        <DialogFooter className="flex-row justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={onClose}>
+        <DialogFooter>
+          <Button onClick={onClose}>
             {t("button.cancel", { ns: "common" })}
           </Button>
           <Button
             variant="select"
-            size="sm"
             disabled={selectedIds.length === 0 || isAdding}
             onClick={() => void handleAdd()}
           >

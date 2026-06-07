@@ -3,6 +3,8 @@
 import logging
 import os
 import threading
+import time
+from collections.abc import Callable, Generator, Iterable
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
@@ -19,6 +21,18 @@ from frigate.jobs.manager import (
     get_job_by_id,
     set_current_job,
 )
+from frigate.jobs.motion_search_batch import (
+    build_segment_time_map,
+    coalesce_runs,
+    stream_time_to_absolute,
+)
+from frigate.jobs.motion_search_decode import (
+    iter_vod_frames,
+    keyframe_sampling_eligible,
+    probe_video_dimensions,
+    probe_vod_keyframe_pts,
+    resolve_motion_decode_args,
+)
 from frigate.models import Recordings
 from frigate.types import JobStatusTypesEnum
 
@@ -26,6 +40,18 @@ logger = logging.getLogger(__name__)
 
 # Constants
 HEATMAP_GRID_SIZE = 16
+# Max wall-clock span of one VOD run request (seconds). Bounds per-request size
+# and gives streaming/cancel/early-exit granularity.
+MAX_RUN_SECONDS = 600.0
+# Treat segments within this many seconds end-to-start as time-contiguous.
+RUN_GAP_EPSILON = 1.0
+# Longest-side pixels for the ROI downscale before motion detection.
+SCALE_TARGET = 400
+# Minimum wall seconds between intra-run progress broadcasts.
+PROGRESS_BROADCAST_INTERVAL = 1.0
+# Output frame rate for the fixed-cadence fallback used on long-GOP cameras
+# (where keyframe sampling is too sparse). Keyframe cameras ignore this.
+FALLBACK_SAMPLE_FPS = 2.0
 
 
 @dataclass
@@ -69,12 +95,15 @@ class MotionSearchJob(Job):
     polygon_points: list[list[float]] = field(default_factory=list)
     threshold: int = 30
     min_area: float = 5.0
-    frame_skip: int = 5
     parallel: bool = False
     max_results: int = 25
 
     # Track progress
     total_frames_processed: int = 0
+
+    # Live progress (ride the existing to_dict() websocket broadcast)
+    scanning_timestamp: Optional[float] = None
+    progress: float = 0.0
 
     # Metrics for observability
     metrics: Optional[MotionSearchMetrics] = None
@@ -98,6 +127,113 @@ def create_polygon_mask(
     mask = np.zeros((frame_height, frame_width), dtype=np.uint8)
     cv2.fillPoly(mask, [motion_points], (255,))
     return mask
+
+
+def compute_roi_crop_and_scale(
+    polygon_points: list[list[float]],
+    frame_width: int,
+    frame_height: int,
+    scale_target: int,
+) -> tuple[tuple[int, int, int, int], tuple[int, int]]:
+    """Compute the ROI crop box and never-upscale scaled dimensions.
+
+    Returns ((crop_w, crop_h, crop_x, crop_y), (scaled_w, scaled_h)) in pixels.
+    The crop is the polygon's bounding box in frame pixels; the scaled size fits
+    the crop's longest side to ``scale_target`` without ever enlarging it.
+    """
+    xs = [p[0] for p in polygon_points]
+    ys = [p[1] for p in polygon_points]
+    # nv12 (4:2:0) hwdownload requires even crop offsets and even crop/scale
+    # dimensions; otherwise ffmpeg rounds the chroma planes and the raw byte
+    # stream stops matching the expected frame size. Force even values, and the
+    # mask is built from these same values so the two stay aligned.
+    crop_x = int(min(xs) * frame_width)
+    crop_y = int(min(ys) * frame_height)
+    crop_x -= crop_x % 2
+    crop_y -= crop_y % 2
+    crop_w = max(2, int(max(xs) * frame_width) - crop_x)
+    crop_h = max(2, int(max(ys) * frame_height) - crop_y)
+    crop_w -= crop_w % 2
+    crop_h -= crop_h % 2
+
+    longest = max(crop_w, crop_h)
+    factor = min(1.0, scale_target / longest)
+    scaled_w = max(2, round(crop_w * factor))
+    scaled_h = max(2, round(crop_h * factor))
+    scaled_w -= scaled_w % 2
+    scaled_h -= scaled_h % 2
+    return (crop_w, crop_h, crop_x, crop_y), (scaled_w, scaled_h)
+
+
+def build_scaled_roi_mask(
+    polygon_points: list[list[float]],
+    frame_width: int,
+    frame_height: int,
+    crop: tuple[int, int, int, int],
+    scaled: tuple[int, int],
+) -> np.ndarray:
+    """Rasterize the polygon mask at the scaled ROI size.
+
+    Builds the full-resolution mask, crops it to the ROI box, and nearest-
+    neighbor resizes it to the scaled dimensions so it lines up exactly with the
+    frames ffmpeg crops and scales.
+    """
+    crop_w, crop_h, crop_x, crop_y = crop
+    scaled_w, scaled_h = scaled
+    full_mask = create_polygon_mask(polygon_points, frame_width, frame_height)
+    cropped = full_mask[crop_y : crop_y + crop_h, crop_x : crop_x + crop_w]
+    return cv2.resize(cropped, (scaled_w, scaled_h), interpolation=cv2.INTER_NEAREST)
+
+
+def detect_motion_scaled(
+    frames: Iterable[tuple[int, np.ndarray]],
+    mask: np.ndarray,
+    threshold: int,
+    min_area: float,
+    timestamp_fn: Callable[[int], float],
+) -> list[MotionSearchResult]:
+    """Detect motion across pre-cropped, pre-scaled gray frames.
+
+    ``frames`` yields (absolute_frame_index, gray_roi_frame); ``mask`` is the
+    scaled ROI mask. ``min_area`` is a percentage of the masked ROI. Mirrors the
+    full-res detection math (absdiff -> blur -> threshold -> dilate -> contours)
+    on the already-reduced frames.
+    """
+    results: list[MotionSearchResult] = []
+    mask_area = np.count_nonzero(mask)
+    if mask_area == 0:
+        return results
+    min_area_pixels = int((min_area / 100.0) * mask_area)
+
+    prev: np.ndarray | None = None
+    for frame_idx, gray in frames:
+        masked = cv2.bitwise_and(gray, gray, mask=mask)
+        if prev is not None:
+            diff = cv2.absdiff(prev, masked)
+            diff_blurred = cv2.GaussianBlur(diff, (3, 3), 0)
+            _, thresh = cv2.threshold(diff_blurred, threshold, 255, cv2.THRESH_BINARY)
+            thresh_dilated = cv2.dilate(thresh, None, iterations=1)  # type: ignore[call-overload]
+            thresh_masked = cv2.bitwise_and(thresh_dilated, thresh_dilated, mask=mask)
+            change_pixels = cv2.countNonZero(thresh_masked)
+            if change_pixels > min_area_pixels:
+                contours, _ = cv2.findContours(
+                    thresh_masked, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+                )
+                total_change_area = sum(
+                    cv2.contourArea(c)
+                    for c in contours
+                    if cv2.contourArea(c) >= min_area_pixels
+                )
+                if total_change_area > 0:
+                    change_percentage = (total_change_area / mask_area) * 100
+                    results.append(
+                        MotionSearchResult(
+                            timestamp=timestamp_fn(frame_idx),
+                            change_percentage=round(change_percentage, 2),
+                        )
+                    )
+        prev = masked
+    return results
 
 
 def compute_roi_bbox_normalized(
@@ -184,6 +320,22 @@ def segment_passes_heatmap_gate(
     return heatmap_overlaps_roi(heatmap, roi_bbox)
 
 
+def resolve_internal_port(config: FrigateConfig) -> int:
+    """Return the unauthenticated internal nginx port for VOD requests."""
+    listen = config.networking.listen.internal
+    if isinstance(listen, str):
+        return int(listen.split(":")[-1])
+    return int(listen)
+
+
+def build_vod_url(internal_port: int, camera: str, start: float, end: float) -> str:
+    """Build the internal VOD HLS URL for a camera time range."""
+    return (
+        f"http://127.0.0.1:{internal_port}/vod/{camera}"
+        f"/start/{start}/end/{end}/index.m3u8"
+    )
+
+
 class MotionSearchRunner(threading.Thread):
     """Thread-based runner for motion search jobs with parallel verification."""
 
@@ -205,6 +357,23 @@ class MotionSearchRunner(threading.Thread):
         # Worker cap: min(4, cpu_count)
         cpu_count = os.cpu_count() or 1
         self.max_workers = min(4, cpu_count)
+
+        # Resolved once per job in _execute_search
+        self.ffmpeg_path: str = "ffmpeg"
+        self.ffprobe_path: str = "ffprobe"
+        self.decode_args: list[str] = []
+        # Keyframe sampling decision, decided once per job from the first run's
+        # GOP. The fallback cadence is a fixed rate (see FALLBACK_SAMPLE_FPS).
+        self.use_keyframe: bool = True
+        self.fps_rate: float = FALLBACK_SAMPLE_FPS
+        # ROI crop/scale + scaled mask, computed once from the VOD-stream
+        # dimensions (which can differ from the detect resolution).
+        self.crop: tuple[int, int, int, int] = (0, 0, 0, 0)
+        self.scaled: tuple[int, int] = (0, 0)
+        self.scaled_mask: np.ndarray = np.zeros((0, 0), dtype=np.uint8)
+        self.channels: int = 1
+        self.internal_port: int = 5000
+        self._last_progress_broadcast: float = 0.0
 
     def run(self) -> None:
         """Execute the motion search job."""
@@ -280,6 +449,9 @@ class MotionSearchRunner(threading.Thread):
 
         if frame_width is None or frame_height is None:
             raise ValueError(f"Camera {camera_name} detect dimensions not configured")
+
+        self.ffmpeg_path = camera_config.ffmpeg.ffmpeg_path
+        self.ffprobe_path = camera_config.ffmpeg.ffprobe_path
 
         # Create polygon mask
         polygon_mask = create_polygon_mask(
@@ -384,205 +556,274 @@ class MotionSearchRunner(threading.Thread):
             self.metrics.heatmap_roi_skip_segments,
         )
 
-        if self.job.parallel:
-            return self._search_motion_parallel(filtered_recordings, polygon_mask)
+        # Resolve decode backend (allowlisted hwaccel or software), coalesce the
+        # gate-passing segments into time-contiguous runs, and probe the first
+        # run's VOD stream once for dimensions + keyframe layout. VOD output is
+        # what we decode, so crop/scale/mask are computed against it.
+        self.internal_port = resolve_internal_port(self.config)
+        self.decode_args = resolve_motion_decode_args(camera_config)
+        ffprobe_path = self.ffprobe_path
 
-        return self._search_motion_sequential(filtered_recordings, polygon_mask)
+        runs = coalesce_runs(filtered_recordings, MAX_RUN_SECONDS, RUN_GAP_EPSILON)
+        if not runs:
+            return []
 
-    def _search_motion_parallel(
-        self,
-        recordings: list[Recordings],
-        polygon_mask: np.ndarray,
-    ) -> list[MotionSearchResult]:
-        """Search for motion in parallel across segments, streaming results."""
-        all_results: list[MotionSearchResult] = []
-        total_frames = 0
-        next_recording_idx_to_merge = 0
+        first_run = runs[0]
+        first_url = build_vod_url(
+            self.internal_port,
+            camera_name,
+            float(first_run[0].start_time),
+            float(first_run[-1].end_time),
+        )
+        dims = probe_video_dimensions(ffprobe_path, first_url)
+        if dims is None:
+            raise ValueError(f"Could not probe VOD dimensions for camera {camera_name}")
+        rec_width, rec_height, _rec_fps = dims
+
+        self.crop, self.scaled = compute_roi_crop_and_scale(
+            self.job.polygon_points, rec_width, rec_height, SCALE_TARGET
+        )
+        self.scaled_mask = build_scaled_roi_mask(
+            self.job.polygon_points, rec_width, rec_height, self.crop, self.scaled
+        )
+        self.channels = 1  # always gray output
+
+        # Decide keyframe vs fixed-cadence sampling once from the first run's GOP
+        # (keyframe structure is a per-camera constant).
+        first_pts = probe_vod_keyframe_pts(ffprobe_path, first_url)
+        self.use_keyframe = keyframe_sampling_eligible(first_pts)
 
         logger.debug(
-            "Motion search job %s: starting motion search with %d workers "
-            "across %d segments",
+            "Motion search job %s: %d runs, sampling=%s, hwaccel=%s, vod=%dx%d",
             self.job.id,
-            self.max_workers,
-            len(recordings),
+            len(runs),
+            "keyframe" if self.use_keyframe else "cadence",
+            bool(self.decode_args),
+            rec_width,
+            rec_height,
         )
 
-        # Initialize partial results on the job so they stream to the frontend
+        return self._search_runs(runs)
+
+    def _emit_progress(self, abs_ts: float) -> None:
+        """Throttled intra-run progress broadcast (scanning cursor)."""
+        now = time.monotonic()
+        if now - self._last_progress_broadcast < PROGRESS_BROADCAST_INTERVAL:
+            return
+        self._last_progress_broadcast = now
+        self.job.scanning_timestamp = abs_ts
+        self._broadcast_status()
+
+    def _detect_with_progress(
+        self,
+        indexed_frames: list[tuple[int, np.ndarray]],
+        timestamp_fn: Callable[[int], float],
+    ) -> list[MotionSearchResult]:
+        """Run detection while firing throttled progress as frames are scanned."""
+
+        def _gen() -> Generator[tuple[int, np.ndarray], None, None]:
+            for i, frame in indexed_frames:
+                if not self._should_stop():
+                    self._emit_progress(timestamp_fn(i))
+                yield i, frame
+
+        return detect_motion_scaled(
+            _gen(),
+            self.scaled_mask,
+            self.job.threshold,
+            self.job.min_area,
+            timestamp_fn,
+        )
+
+    def _process_run(
+        self, run: list[Recordings]
+    ) -> tuple[list[MotionSearchResult], int]:
+        """Decode one run's VOD stream and detect motion.
+
+        Keyframe mode compares every decoded keyframe (free recall, since they
+        are all decoded anyway) paired with its probed PTS; if the decoded and
+        probed counts disagree (the decoder ignored ``-skip_frame nokey`` or the
+        stream is corrupt) this run re-runs in the fixed-cadence fallback.
+        Returns ``(results, frame_count)``.
+        """
+        run_start: float = run[0].start_time  # type: ignore[assignment]
+        run_end: float = run[-1].end_time  # type: ignore[assignment]
+        vod_url = build_vod_url(self.internal_port, self.job.camera, run_start, run_end)
+        time_map = build_segment_time_map(run)
+
+        if self.use_keyframe:
+            kf_pts = probe_vod_keyframe_pts(self.ffprobe_path, vod_url)
+            frames = list(
+                iter_vod_frames(
+                    self.ffmpeg_path,
+                    vod_url,
+                    self.scaled[0],
+                    self.scaled[1],
+                    self.channels,
+                    self.decode_args,
+                    self.crop,
+                    self.scaled,
+                    True,
+                    self._should_stop,
+                    skip_nonkey=True,
+                    fps_rate=None,
+                )
+            )
+            if kf_pts and len(frames) == len(kf_pts):
+                abs_times = [stream_time_to_absolute(time_map, p) for p in kf_pts]
+                indexed = list(enumerate(frames))
+
+                def _ts_kf(i: int) -> float:
+                    return abs_times[i]
+
+                results = self._detect_with_progress(indexed, _ts_kf)
+                return results, len(frames)
+
+            logger.debug(
+                "Keyframe count mismatch (%d decoded vs %d probed), using cadence",
+                len(frames),
+                len(kf_pts),
+            )
+
+        return self._process_run_cadence(vod_url, time_map)
+
+    def _process_run_cadence(
+        self, vod_url: str, time_map: list[tuple[float, float, float]]
+    ) -> tuple[list[MotionSearchResult], int]:
+        """Fixed-cadence fallback: fps-filtered VOD decode, evenly spaced times."""
+        frames = list(
+            iter_vod_frames(
+                self.ffmpeg_path,
+                vod_url,
+                self.scaled[0],
+                self.scaled[1],
+                self.channels,
+                self.decode_args,
+                self.crop,
+                self.scaled,
+                True,
+                self._should_stop,
+                skip_nonkey=False,
+                fps_rate=self.fps_rate,
+            )
+        )
+        indexed = list(enumerate(frames))
+
+        def _ts_fps(i: int) -> float:
+            return stream_time_to_absolute(time_map, i / self.fps_rate)
+
+        results = self._detect_with_progress(indexed, _ts_fps)
+        return results, len(frames)
+
+    def _merge_run(
+        self,
+        run: list[Recordings],
+        run_results: list[MotionSearchResult],
+        frames: int,
+        state: dict[str, Any],
+    ) -> bool:
+        """Fold one run's output into the running results; stream + dedup.
+
+        Returns True once ``max_results`` deduped hits have accumulated.
+        """
+        state["completed_runs"] += 1
+        state["all_results"].extend(run_results)
+        state["total_frames"] += frames
+        self.job.total_frames_processed = state["total_frames"]
+        self.metrics.frames_decoded = state["total_frames"]
+        self.metrics.segments_processed += len(run)
+        self.job.progress = state["completed_runs"] / state["total_runs"]
+
+        state["all_results"].sort(key=lambda r: r.timestamp)
+        deduped = self._deduplicate_results(state["all_results"])[
+            : self.job.max_results
+        ]
+        self.job.results = {
+            "results": [r.to_dict() for r in deduped],
+            "total_frames_processed": state["total_frames"],
+        }
+        self._broadcast_status()
+        return len(deduped) >= self.job.max_results
+
+    def _search_runs(self, runs: list[list[Recordings]]) -> list[MotionSearchResult]:
+        """Decode runs (parallel pool when enabled), merge in order, stream."""
+        state: dict[str, Any] = {
+            "all_results": [],
+            "total_frames": 0,
+            "completed_runs": 0,
+            "total_runs": len(runs),
+        }
         self.job.results = {"results": [], "total_frames_processed": 0}
 
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures: dict[Future, int] = {}
-            completed_segments: dict[int, tuple[list[MotionSearchResult], int]] = {}
+        logger.debug(
+            "Motion search job %s: searching %d runs (parallel=%s, workers=%d)",
+            self.job.id,
+            len(runs),
+            self.job.parallel,
+            self.max_workers,
+        )
 
-            for idx, recording in enumerate(recordings):
-                if self._should_stop():
-                    break
+        if self.job.parallel and len(runs) > 1:
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                futures: dict[Future, int] = {}
+                for idx, run in enumerate(runs):
+                    if self._should_stop():
+                        break
+                    futures[executor.submit(self._process_run, run)] = idx
 
-                rec_start: float = recording.start_time  # type: ignore[assignment]
-                rec_end: float = recording.end_time  # type: ignore[assignment]
-                future = executor.submit(
-                    self._process_recording_for_motion,
-                    str(recording.path),
-                    rec_start,
-                    rec_end,
-                    self.job.start_time_range,
-                    self.job.end_time_range,
-                    polygon_mask,
-                    self.job.threshold,
-                    self.job.min_area,
-                    self.job.frame_skip,
-                )
-                futures[future] = idx
+                completed: dict[int, tuple[list[MotionSearchResult], int]] = {}
+                next_idx = 0
+                for future in as_completed(futures):
+                    if self._should_stop():
+                        break
+                    run_idx = futures[future]
+                    try:
+                        completed[run_idx] = future.result()
+                    except Exception as e:
+                        self.metrics.segments_with_errors += 1
+                        logger.warning("Error processing run %d: %s", run_idx, e)
+                        completed[run_idx] = ([], 0)
 
-            for future in as_completed(futures):
-                if self._should_stop():
-                    # Cancel remaining futures
-                    for f in futures:
-                        f.cancel()
-                    break
-
-                recording_idx = futures[future]
-                recording = recordings[recording_idx]
-
-                try:
-                    results, frames = future.result()
-                    self.metrics.segments_processed += 1
-                    completed_segments[recording_idx] = (results, frames)
-
-                    while next_recording_idx_to_merge in completed_segments:
-                        segment_results, segment_frames = completed_segments.pop(
-                            next_recording_idx_to_merge
-                        )
-
-                        all_results.extend(segment_results)
-                        total_frames += segment_frames
-                        self.job.total_frames_processed = total_frames
-                        self.metrics.frames_decoded = total_frames
-
-                        if segment_results:
-                            deduped = self._deduplicate_results(all_results)
-                            self.job.results = {
-                                "results": [
-                                    r.to_dict() for r in deduped[: self.job.max_results]
-                                ],
-                                "total_frames_processed": total_frames,
-                            }
-
-                        self._broadcast_status()
-
-                        if segment_results and len(deduped) >= self.job.max_results:
+                    while next_idx in completed:
+                        run_results, frames = completed.pop(next_idx)
+                        if self._merge_run(runs[next_idx], run_results, frames, state):
                             self.internal_stop_event.set()
-                            for pending_future in futures:
-                                pending_future.cancel()
+                            for pending in futures:
+                                pending.cancel()
                             break
-
-                        next_recording_idx_to_merge += 1
+                        next_idx += 1
 
                     if self.internal_stop_event.is_set():
                         break
-
+        else:
+            for run in runs:
+                if self._should_stop():
+                    break
+                try:
+                    run_results, frames = self._process_run(run)
                 except Exception as e:
-                    self.metrics.segments_processed += 1
                     self.metrics.segments_with_errors += 1
+                    self.metrics.segments_processed += len(run)
                     self._broadcast_status()
-                    logger.warning(
-                        "Error processing segment %s: %s",
-                        recording.path,
-                        e,
-                    )
-
-        self.job.total_frames_processed = total_frames
-        self.metrics.frames_decoded = total_frames
-
-        logger.debug(
-            "Motion search job %s: motion search complete, "
-            "found %d raw results, decoded %d frames, %d segment errors",
-            self.job.id,
-            len(all_results),
-            total_frames,
-            self.metrics.segments_with_errors,
-        )
-
-        # Sort and deduplicate results
-        all_results.sort(key=lambda x: x.timestamp)
-        return self._deduplicate_results(all_results)[: self.job.max_results]
-
-    def _search_motion_sequential(
-        self,
-        recordings: list[Recordings],
-        polygon_mask: np.ndarray,
-    ) -> list[MotionSearchResult]:
-        """Search for motion sequentially across segments, streaming results."""
-        all_results: list[MotionSearchResult] = []
-        total_frames = 0
-
-        logger.debug(
-            "Motion search job %s: starting sequential motion search across %d segments",
-            self.job.id,
-            len(recordings),
-        )
-
-        self.job.results = {"results": [], "total_frames_processed": 0}
-
-        for recording in recordings:
-            if self.cancel_event.is_set():
-                break
-
-            try:
-                rec_start: float = recording.start_time  # type: ignore[assignment]
-                rec_end: float = recording.end_time  # type: ignore[assignment]
-                results, frames = self._process_recording_for_motion(
-                    str(recording.path),
-                    rec_start,
-                    rec_end,
-                    self.job.start_time_range,
-                    self.job.end_time_range,
-                    polygon_mask,
-                    self.job.threshold,
-                    self.job.min_area,
-                    self.job.frame_skip,
-                )
-                all_results.extend(results)
-                total_frames += frames
-
-                self.job.total_frames_processed = total_frames
-                self.metrics.frames_decoded = total_frames
-                self.metrics.segments_processed += 1
-
-                if results:
-                    all_results.sort(key=lambda x: x.timestamp)
-                    deduped = self._deduplicate_results(all_results)[
-                        : self.job.max_results
-                    ]
-                    self.job.results = {
-                        "results": [r.to_dict() for r in deduped],
-                        "total_frames_processed": total_frames,
-                    }
-
-                self._broadcast_status()
-
-                if results and len(deduped) >= self.job.max_results:
+                    logger.warning("Error processing run: %s", e)
+                    continue
+                if self._merge_run(run, run_results, frames, state):
                     break
 
-            except Exception as e:
-                self.metrics.segments_processed += 1
-                self.metrics.segments_with_errors += 1
-                self._broadcast_status()
-                logger.warning("Error processing segment %s: %s", recording.path, e)
-
-        self.job.total_frames_processed = total_frames
-        self.metrics.frames_decoded = total_frames
+        all_results: list[MotionSearchResult] = state["all_results"]
+        self.job.total_frames_processed = state["total_frames"]
+        self.metrics.frames_decoded = state["total_frames"]
+        self.job.progress = 1.0
 
         logger.debug(
-            "Motion search job %s: sequential motion search complete, "
-            "found %d raw results, decoded %d frames, %d segment errors",
+            "Motion search job %s: complete, %d raw results, %d frames, %d errors",
             self.job.id,
             len(all_results),
-            total_frames,
+            state["total_frames"],
             self.metrics.segments_with_errors,
         )
 
-        all_results.sort(key=lambda x: x.timestamp)
+        all_results.sort(key=lambda r: r.timestamp)
         return self._deduplicate_results(all_results)[: self.job.max_results]
 
     def _deduplicate_results(
@@ -601,160 +842,6 @@ class MotionSearchRunner(threading.Thread):
                 last_timestamp = result.timestamp
 
         return deduplicated
-
-    def _process_recording_for_motion(
-        self,
-        recording_path: str,
-        recording_start: float,
-        recording_end: float,
-        search_start: float,
-        search_end: float,
-        polygon_mask: np.ndarray,
-        threshold: int,
-        min_area: float,
-        frame_skip: int,
-    ) -> tuple[list[MotionSearchResult], int]:
-        """Process a single recording file for motion detection.
-
-        This method is designed to be called from a thread pool.
-
-        Args:
-            min_area: Minimum change area as a percentage of the ROI (0-100).
-        """
-        results: list[MotionSearchResult] = []
-        frames_processed = 0
-
-        if not os.path.exists(recording_path):
-            logger.warning("Recording file not found: %s", recording_path)
-            return results, frames_processed
-
-        cap = cv2.VideoCapture(recording_path)
-        if not cap.isOpened():
-            logger.error("Could not open recording: %s", recording_path)
-            return results, frames_processed
-
-        try:
-            fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            recording_duration = recording_end - recording_start
-
-            # Calculate frame range
-            start_offset = max(0, search_start - recording_start)
-            end_offset = min(recording_duration, search_end - recording_start)
-            start_frame = int(start_offset * fps)
-            end_frame = int(end_offset * fps)
-            start_frame = max(0, min(start_frame, total_frames - 1))
-            end_frame = max(0, min(end_frame, total_frames))
-
-            if start_frame >= end_frame:
-                return results, frames_processed
-
-            cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
-
-            # Get ROI bounding box
-            roi_bbox = cv2.boundingRect(polygon_mask)
-            roi_x, roi_y, roi_w, roi_h = roi_bbox
-
-            prev_frame_gray = None
-            frame_step = max(frame_skip, 1)
-            frame_idx = start_frame
-
-            while frame_idx < end_frame:
-                if self._should_stop():
-                    break
-
-                ret, frame = cap.read()
-                if not ret:
-                    frame_idx += 1
-                    continue
-
-                if (frame_idx - start_frame) % frame_step != 0:
-                    frame_idx += 1
-                    continue
-
-                frames_processed += 1
-
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-                # Handle frame dimension changes
-                if gray.shape != polygon_mask.shape:
-                    resized_mask = cv2.resize(
-                        polygon_mask,
-                        (gray.shape[1], gray.shape[0]),
-                        interpolation=cv2.INTER_NEAREST,
-                    )
-                    current_bbox = cv2.boundingRect(resized_mask)
-                else:
-                    resized_mask = polygon_mask
-                    current_bbox = roi_bbox
-
-                roi_x, roi_y, roi_w, roi_h = current_bbox
-                cropped_gray = gray[roi_y : roi_y + roi_h, roi_x : roi_x + roi_w]
-                cropped_mask = resized_mask[
-                    roi_y : roi_y + roi_h, roi_x : roi_x + roi_w
-                ]
-
-                cropped_mask_area = np.count_nonzero(cropped_mask)
-                if cropped_mask_area == 0:
-                    frame_idx += 1
-                    continue
-
-                # Convert percentage to pixel count for this ROI
-                min_area_pixels = int((min_area / 100.0) * cropped_mask_area)
-
-                masked_gray = cv2.bitwise_and(
-                    cropped_gray, cropped_gray, mask=cropped_mask
-                )
-
-                if prev_frame_gray is not None:
-                    diff = cv2.absdiff(prev_frame_gray, masked_gray)  # type: ignore[unreachable]
-                    diff_blurred = cv2.GaussianBlur(diff, (3, 3), 0)
-                    _, thresh = cv2.threshold(
-                        diff_blurred, threshold, 255, cv2.THRESH_BINARY
-                    )
-                    thresh_dilated = cv2.dilate(thresh, None, iterations=1)
-                    thresh_masked = cv2.bitwise_and(
-                        thresh_dilated, thresh_dilated, mask=cropped_mask
-                    )
-
-                    change_pixels = cv2.countNonZero(thresh_masked)
-                    if change_pixels > min_area_pixels:
-                        contours, _ = cv2.findContours(
-                            thresh_masked, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-                        )
-                        total_change_area = sum(
-                            cv2.contourArea(c)
-                            for c in contours
-                            if cv2.contourArea(c) >= min_area_pixels
-                        )
-                        if total_change_area > 0:
-                            frame_time_offset = (frame_idx - start_frame) / fps
-                            timestamp = (
-                                recording_start + start_offset + frame_time_offset
-                            )
-                            change_percentage = (
-                                total_change_area / cropped_mask_area
-                            ) * 100
-                            results.append(
-                                MotionSearchResult(
-                                    timestamp=timestamp,
-                                    change_percentage=round(change_percentage, 2),
-                                )
-                            )
-
-                prev_frame_gray = masked_gray
-                frame_idx += 1
-
-        finally:
-            cap.release()
-
-        logger.debug(
-            "Motion search segment complete: %s, %d frames processed, %d results found",
-            recording_path,
-            frames_processed,
-            len(results),
-        )
-        return results, frames_processed
 
 
 # Module-level state for managing per-camera jobs
@@ -779,7 +866,6 @@ def start_motion_search_job(
     polygon_points: list[list[float]],
     threshold: int = 30,
     min_area: float = 5.0,
-    frame_skip: int = 5,
     parallel: bool = False,
     max_results: int = 25,
 ) -> str:
@@ -794,7 +880,6 @@ def start_motion_search_job(
         polygon_points=polygon_points,
         threshold=threshold,
         min_area=min_area,
-        frame_skip=frame_skip,
         parallel=parallel,
         max_results=max_results,
     )
@@ -812,14 +897,13 @@ def start_motion_search_job(
     logger.debug(
         "Started motion search job %s for camera %s: "
         "time_range=%.1f-%.1f, threshold=%d, min_area=%.1f%%, "
-        "frame_skip=%d, parallel=%s, max_results=%d, polygon_points=%d vertices",
+        "parallel=%s, max_results=%d, polygon_points=%d vertices",
         job.id,
         camera_name,
         start_time,
         end_time,
         threshold,
         min_area,
-        frame_skip,
         parallel,
         max_results,
         len(polygon_points),

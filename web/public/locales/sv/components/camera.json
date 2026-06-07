@@ -17,7 +17,7 @@
       "errorMessage": {
         "mustLeastCharacters": "Gruppnamnet för kameror måste vara minst 2 tecken.",
         "nameMustNotPeriod": "Kameragruppnamnet får inte innehålla en punkt.",
-        "invalid": "Ogiltligt kameragruppnamn.",
+        "invalid": "Ogiltigt kameragruppnamn.",
         "exists": "Kameragruppnamnet finns redan."
       }
     },
@@ -28,7 +28,7 @@
         "title": "{{cameraName}} Streaminginställningar",
         "desc": "Ändra alternativen för livestreaming för den här kameragruppens instrumentpanel. <em>Dessa inställningar är enhets-/webbläsarspecifika.</em>",
         "audioIsAvailable": "Ljud är tillgängligt för denna kameraström",
-        "audioIsUnavailable": "Ljud är otillgängligt för denna kameraström",
+        "audioIsUnavailable": "Ljud är inte tillgängligt för den här kameraströmmen",
         "audio": {
           "tips": {
             "title": "Ljud måste sändas från din kamera och konfigureras i go2rtc för den här strömmen.",

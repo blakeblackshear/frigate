@@ -5,7 +5,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
@@ -32,6 +32,45 @@ PROFILE_SECTION_UPDATES: dict[str, CameraConfigUpdateEnum] = {
     "review": CameraConfigUpdateEnum.review,
     "snapshots": CameraConfigUpdateEnum.snapshots,
     "zones": CameraConfigUpdateEnum.zones,
+}
+
+# Retained MQTT switch topics per profile section, with a payload getter.
+# Republished on profile change so MQTT/HA don't show a stale toggle.
+SECTION_STATE_TOPICS: dict[str, list[tuple[str, Callable[[Any], Any]]]] = {
+    "audio": [("audio", lambda c: "ON" if c.audio.enabled else "OFF")],
+    "birdseye": [
+        ("birdseye", lambda c: "ON" if c.birdseye.enabled else "OFF"),
+        (
+            "birdseye_mode",
+            lambda c: c.birdseye.mode.value.upper() if c.birdseye.enabled else "OFF",
+        ),
+    ],
+    "detect": [("detect", lambda c: "ON" if c.detect.enabled else "OFF")],
+    "motion": [
+        ("motion", lambda c: "ON" if c.motion.enabled else "OFF"),
+        ("improve_contrast", lambda c: "ON" if c.motion.improve_contrast else "OFF"),
+        ("motion_threshold", lambda c: c.motion.threshold),
+        ("motion_contour_area", lambda c: c.motion.contour_area),
+    ],
+    "notifications": [
+        ("notifications", lambda c: "ON" if c.notifications.enabled else "OFF"),
+    ],
+    "objects": [
+        ("object_descriptions", lambda c: "ON" if c.objects.genai.enabled else "OFF"),
+    ],
+    "record": [("recordings", lambda c: "ON" if c.record.enabled else "OFF")],
+    "review": [
+        ("review_alerts", lambda c: "ON" if c.review.alerts.enabled else "OFF"),
+        (
+            "review_detections",
+            lambda c: "ON" if c.review.detections.enabled else "OFF",
+        ),
+        (
+            "review_descriptions",
+            lambda c: "ON" if c.review.genai.enabled else "OFF",
+        ),
+    ],
+    "snapshots": [("snapshots", lambda c: "ON" if c.snapshots.enabled else "OFF")],
 }
 
 PERSISTENCE_FILE = Path(CONFIG_DIR) / ".profiles"
@@ -124,11 +163,24 @@ class ProfileManager:
                 self.config.active_profile = None
                 self._persist_active_profile(None)
 
-    def activate_profile(self, profile_name: Optional[str]) -> Optional[str]:
+            # drop all runtime overrides so they don't replay stale values on restart
+            if self.dispatcher is not None:
+                self.dispatcher.clear_runtime_state()
+
+    def activate_profile(
+        self,
+        profile_name: Optional[str],
+        clear_runtime_overrides: bool = True,
+    ) -> Optional[str]:
         """Activate a profile by name, or deactivate if None.
 
         Args:
             profile_name: Profile name to activate, or None to deactivate.
+            clear_runtime_overrides: When True (the default, for user-initiated
+                activations) drop the dispatcher's runtime override file because
+                the layer below changed. Startup callers that are replaying a
+                persisted profile pass False so the runtime state stays
+                available for the subsequent replay step.
 
         Returns:
             None on success, or an error message string on failure.
@@ -156,6 +208,11 @@ class ProfileManager:
 
         self.config.active_profile = profile_name
         self._persist_active_profile(profile_name)
+
+        # a profile switch invalidates the steady-state runtime overrides
+        if clear_runtime_overrides and self.dispatcher is not None:
+            self.dispatcher.clear_runtime_state()
+
         logger.info(
             "Profile %s",
             f"'{profile_name}' activated" if profile_name else "deactivated",
@@ -291,6 +348,15 @@ class ProfileManager:
                         CameraConfigUpdateTopic(update_enum, cam_name),
                         settings,
                     )
+
+                # republish MQTT switch states
+                if self.dispatcher is not None:
+                    for suffix, get_payload in SECTION_STATE_TOPICS.get(section, ()):
+                        self.dispatcher.publish(
+                            f"{cam_name}/{suffix}/state",
+                            get_payload(cam_config),
+                            retain=True,
+                        )
 
     def _persist_active_profile(self, profile_name: Optional[str]) -> None:
         """Persist the active profile state to disk as JSON."""

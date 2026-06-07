@@ -16,7 +16,8 @@
     "globalConfig": "Configurazione globale - Frigate",
     "cameraConfig": "Configurazione telecamera - Frigate",
     "maintenance": "Manutenzione - Frigate",
-    "profiles": "Profili - Frigate"
+    "profiles": "Profili - Frigate",
+    "detectorsAndModel": "Rilevatori e modelli - Frigate"
   },
   "frigatePlus": {
     "snapshotConfig": {
@@ -45,14 +46,22 @@
         "userModel": "Messa a punto fine",
         "baseModel": "Modello base"
       },
-      "availableModels": "Modelli disponibili",
+      "availableModels": "Modelli Frigate+ disponibili",
       "loadingAvailableModels": "Caricamento dei modelli disponibili…",
       "supportedDetectors": "Rilevatori supportati",
       "error": "Impossibile caricare le informazioni sul modello",
       "modelType": "Tipo di modello",
       "modelSelect": "Qui puoi selezionare i modelli disponibili su Frigate+. Nota: puoi selezionare solo i modelli compatibili con la configurazione attuale del tuo rilevatore.",
       "title": "Informazioni sul modello",
-      "loading": "Caricamento informazioni sul modello…"
+      "loading": "Caricamento informazioni sul modello…",
+      "noModelsAvailable": "Nessun modello disponibile",
+      "noModelLoaded": "Al momento non è caricato alcun modello di Frigate+.",
+      "selectModel": "Seleziona un modello",
+      "filter": {
+        "ariaLabel": "Filtra i modelli per tipo",
+        "baseModels": "Modelli base",
+        "fineTunedModels": "Modelli ottimizzati"
+      }
     },
     "toast": {
       "error": "Impossibile salvare le modifiche alla configurazione: {{errorMessage}}",
@@ -67,7 +76,8 @@
       "currentModel": "Modello attuale",
       "otherModels": "Altri modelli",
       "configuration": "Configurazione"
-    }
+    },
+    "changeInDetectorsAndModel": "Cambia modello"
   },
   "debug": {
     "timestamp": {
@@ -161,7 +171,7 @@
       "defaultName": "Maschera di movimento {{number}}",
       "name": {
         "title": "Nome",
-        "description": "Un nome amichevole opzionale per questa maschera di movimento.",
+        "description": "Un nome descrittivo opzionale per questa maschera di movimento.",
         "placeholder": "Inserisci un nome..."
       }
     },
@@ -203,6 +213,10 @@
           "zone": "zona",
           "motion_mask": "maschera di movimento",
           "object_mask": "maschera di oggetto"
+        },
+        "revertOverride": {
+          "title": "Ripristina la configurazione di base",
+          "desc": "Questo rimuoverà la sovrascrittura del profilo per {{type}} <em>{{name}}</em> e ripristinerà la configurazione di base."
         }
       },
       "inertia": {
@@ -218,6 +232,17 @@
       "speed": {
         "error": {
           "mustBeGreaterOrEqualTo": "La soglia di velocità deve essere maggiore o uguale a 0,1."
+        }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "L'ID non deve essere vuoto.",
+          "alreadyExists": "Esiste già una maschera con questo ID per questa telecamera."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Il nome non deve essere vuoto."
         }
       }
     },
@@ -318,7 +343,7 @@
       "name": {
         "title": "Nome",
         "placeholder": "Inserisci un nome...",
-        "description": "Un nome amichevole facoltativo per questa maschera oggetto."
+        "description": "Un nome descrittivo facoltativo per questa maschera oggetto."
       }
     },
     "restart_required": "Riavvio richiesto (maschere/zone modificate)",
@@ -329,7 +354,11 @@
         "title": "Abilitata",
         "description": "Indica se questa maschera è abilitata nel file di configurazione. Se disabilitata, non può essere abilitata tramite MQTT. Le maschere disabilitate vengono ignorate in fase di esecuzione."
       }
-    }
+    },
+    "disabledInConfig": "L'elemento è disabilitato nel file di configurazione",
+    "addDisabledProfile": "Aggiungi prima alla configurazione di base, poi sovrascrivi nel profilo",
+    "profileBase": "(base)",
+    "profileOverride": "(sovrascrivi)"
   },
   "cameraSetting": {
     "camera": "Telecamera",
@@ -420,7 +449,7 @@
     "enrichments": "Miglioramenti",
     "triggers": "Inneschi",
     "roles": "Ruoli",
-    "cameraManagement": "Gestione",
+    "cameraManagement": "Gestione della telecamera",
     "cameraReview": "Revisiona",
     "profiles": "Profili",
     "general": "Generale",
@@ -477,7 +506,11 @@
     "cameraOnvif": "ONVIF",
     "cameraTimestampStyle": "Stile orario",
     "cameraUi": "Interfaccia utente telecamera",
-    "mediaSync": "Sincronizzazione multimediale"
+    "mediaSync": "Sincronizzazione multimediale",
+    "cameraMqtt": "MQTT telecamera",
+    "maintenance": "Manutenzione",
+    "regionGrid": "Griglia di regioni",
+    "systemDetectorsAndModel": "Rilevatori e modelli"
   },
   "users": {
     "dialog": {
@@ -777,7 +810,8 @@
     "notificationUnavailable": {
       "desc": "Le notifiche push web richiedono un contesto sicuro (<code>https://...</code>). Questa è una limitazione del browser. Accedi a Frigate in modo sicuro per utilizzare le notifiche.",
       "documentation": "Leggi la documentazione",
-      "title": "Notifiche non disponibili"
+      "title": "Notifiche non disponibili",
+      "descPwa": "Su iOS, le notifiche push web sono disponibili solo se Frigate è installato sulla schermata Home. Apri il menu <strong>Condividi</strong>, scegli <strong>Aggiungi alla schermata Home</strong>, quindi apri Frigate dalla nuova icona per registrare questo dispositivo per le notifiche."
     },
     "deviceSpecific": "Impostazioni specifiche del dispositivo",
     "toast": {
@@ -1224,7 +1258,7 @@
         "brands": {
           "reolink-rtsp": "Reolink RTSP non è consigliato. Abilita HTTP nelle impostazioni del firmware della telecamera e riavvia la procedura guidata."
         },
-        "customUrlRtspRequired": "Gli URL personalizzati devono iniziare con \"rtsp://\". Per i flussi di telecamere non RTSP è richiesta la configurazione manuale."
+        "customUrlRtspRequired": "Gli URL personalizzati devono iniziare con \"rtsp://\" o \"rtsps://\". La configurazione manuale è necessaria per i flussi video non RTSP."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
@@ -1359,7 +1393,8 @@
         },
         "hikvision": {
           "substreamWarning": "Il sottoflusso 1 è bloccato a bassa risoluzione. Molte telecamere Hikvision supportano sottoflussi aggiuntivi che devono essere abilitati nelle impostazioni della telecamera. Si consiglia di controllare e utilizzare tali flussi, se disponibili."
-        }
+        },
+        "resolutionUnknown": "Non è stato possibile rilevare la risoluzione di questo flusso. È necessario impostare manualmente la risoluzione di rilevamento nelle Impostazioni o nella configurazione."
       }
     }
   },
@@ -1370,19 +1405,45 @@
     "selectCamera": "Seleziona una telecamera",
     "backToSettings": "Torna alle impostazioni della telecamera",
     "streams": {
-      "title": "Abilita/Disabilita telecamere",
+      "title": "Stato e dettagli della telecamera",
       "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi di questa telecamera da parte di Frigate. Rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disattiva le ritrasmissioni di go2rtc.</em>",
       "enableLabel": "Telecamere abilitate",
-      "enableDesc": "Disabilita temporaneamente una telecamera abilitata fino al riavvio di Frigate. La disabilitazione completa di una telecamera interrompe l'elaborazione dei flussi video di tale telecamera da parte di Frigate. Le funzioni di rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disabilita le ritrasmissioni go2rtc.</em>",
+      "enableDesc": "Disabilita temporaneamente una telecamera abilitata fino al riavvio di Frigate. La disabilitazione completa di una telecamera interrompe l'elaborazione dei flussi video di tale telecamera da parte di Frigate. Le funzioni di rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disabilita le ritrasmissioni go2rtc.</em><br /><br />Trascina le schede per riordinare le telecamere nell'interfaccia utente. L'ordine delle telecamere abilitate verrà visualizzato in tutta l'interfaccia utente inclusa la schermata Dal vivo e i menu a tendina di selezione delle telecamere.",
       "disableLabel": "Telecamere disabilitate",
       "disableDesc": "Abilita una telecamera attualmente non visibile nell'interfaccia utente e disabilitata nella configurazione. Dopo l'abilitazione è necessario riavviare Frigate.",
-      "enableSuccess": "{{cameraName}} abilitata nella configurazione. Riavvia Frigate per applicare le modifiche.",
+      "enableSuccess": "{{cameraName}} abilitata. Riavvia Frigate per applicare le modifiche.",
       "friendlyName": {
         "edit": "Modifica il nome visualizzato della telecamera",
         "title": "Modifica il nome visualizzato",
         "description": "Imposta il nome amichevole visualizzato per questa telecamera nell'interfaccia utente di Frigate. Lascia vuoto per utilizzare l'ID della telecamera.",
         "rename": "Rinomina"
-      }
+      },
+      "reorderHandle": "Trascina per riordinare",
+      "saving": "Salvataggio…",
+      "saved": "Salvato",
+      "details": {
+        "edit": "Modifica i dettagli della telecamera",
+        "title": "Modifica i dettagli della telecamera",
+        "description": "Aggiorna il nome visualizzato, l'URL esterno e la visibilità utilizzati per questa telecamera nell'interfaccia utente di Frigate.",
+        "friendlyNameLabel": "Nome da visualizzare",
+        "friendlyNameHelp": "Nome descrittivo visualizzato per questa telecamera nell'interfaccia utente di Frigate. Lasciare vuoto per utilizzare l'ID della telecamera.",
+        "webuiUrlLabel": "URL dell'interfaccia web della telecamera",
+        "webuiUrlHelp": "URL per accedere direttamente all'interfaccia web della telecamera dalla vista Correzioni. Lasciare vuoto per disabilitare il collegamento.",
+        "webuiUrlInvalid": "Deve essere un URL valido (ad esempio, https://esempio.com).",
+        "dashboardLabel": "Mostra nella schermata Dal vivo",
+        "dashboardHelp": "Mostra questa telecamera nella schermata Dal vivo.",
+        "reviewLabel": "Mostra in Revisiona",
+        "reviewHelp": "Mostra questa telecamera in Revisiona, incluso il filtro della telecamera, la revisione del movimento e la visualizzazione della cronologia."
+      },
+      "label": "Stato della telecamera",
+      "description": "Imposta lo stato operativo per ciascuna telecamera.<br /><br /><strong>Accesa</strong>: i flussi vengono elaborati normalmente.<br /><strong>Spenta</strong>: mette temporaneamente in pausa l'elaborazione. Non viene mantenuta dopo il riavvio di Frigate.<br /><strong>Disabilitata</strong>: interrompe l'elaborazione e salva la modifica nella configurazione. È necessario riavviare Frigate per riattivare una telecamera disabilitata.<br /><br /><em>Nota: la disabilitazione non influisce sulle ritrasmissioni go2rtc.</em><br /><br />Trascina la maniglia per riordinare le telecamere attive nell'interfaccia utente, inclusi il pannello di controllo Dal vivo e i menu a tendina di selezione della telecamera.",
+      "disabledSubheading": "Disabilitata nella configurazione",
+      "status": {
+        "on": "Accesa",
+        "off": "Spenta",
+        "disabled": "Disabilitata"
+      },
+      "disableSuccess": "{{cameraName}} disabilitata e salvata nella configurazione."
     },
     "cameraConfig": {
       "add": "Aggiungi telecamera",
@@ -1414,7 +1475,123 @@
       "addGo2rtcStream": "Aggiungi flusso go2rtc"
     },
     "profiles": {
-      "enabled": "Abilitato"
+      "enabled": "Abilitato",
+      "title": "Sovrascritture della telecamera del profilo",
+      "selectLabel": "Seleziona il profilo",
+      "description": "Configura quali telecamere vengono accese o spente all'attivazione di un profilo. Le telecamere impostate su \"Eredita\" mantengono il loro stato predefinito.",
+      "inherit": "Eredita",
+      "disabled": "Disabilitato",
+      "on": "Attivato",
+      "off": "Disattivato"
+    },
+    "description": "Aggiungi, modifica ed elimina le telecamere, controlla lo stato di ciascuna telecamera e configura le impostazioni personalizzate per profilo e tipo di telecamera. Per configurare flussi video, rilevamento, movimento e altre impostazioni specifiche per ciascuna telecamera, seleziona la sezione corrispondente in Configurazione telecamera.",
+    "deleteCamera": "Elimina telecamera",
+    "deleteCameraDialog": {
+      "title": "Elimina telecamera",
+      "description": "L'eliminazione di una telecamera rimuoverà in modo permanente tutte le registrazioni, gli oggetti tracciati e la configurazione relativi a tale telecamera. Potrebbe essere comunque necessario rimuovere manualmente gli eventuali flussi go2rtc associati a questa telecamera.",
+      "selectPlaceholder": "Scegli telecamera...",
+      "confirmTitle": "Sei sicuro?",
+      "confirmWarning": "L'eliminazione di <strong>{{cameraName}}</strong> è irreversibile.",
+      "deleteExports": "Elimina anche le esportazioni per questa telecamera",
+      "confirmButton": "Elimina definitivamente",
+      "success": "Telecamera {{cameraName}} eliminata con successo",
+      "error": "Impossibile eliminare la telecamera {{cameraName}}"
+    },
+    "cameraType": {
+      "title": "Tipo di telecamera",
+      "label": "Tipo di telecamera",
+      "description": "Imposta il tipo per ogni telecamera. Le telecamere LPR dedicate sono telecamere monouso con un potente zoom ottico per acquisire le targhe dei veicoli distanti. La maggior parte delle telecamere dovrebbe utilizzare il tipo di telecamera normale, a meno che non siano specificamente progettate per il riconoscimento delle targhe e abbiano una visuale molto ravvicinata sulle targhe.",
+      "normal": "Normale",
+      "dedicatedLpr": "LPR dedicata",
+      "saveSuccess": "Tipo di telecamera aggiornato per {{cameraName}}. Riavviare Frigate per applicare le modifiche."
+    },
+    "clone": {
+      "sectionTitle": "Clona impostazioni",
+      "button": "Clona impostazioni",
+      "sectionDescription": "Copia la configurazione da una telecamera ad un'altra telecamera o a una nuova.",
+      "title": "Clona impostazioni della telecamera",
+      "description": "Copia la configurazione di una telecamera su una o altre telecamere o su una nuova telecamera. L'identità (nome, nome descrittivo, URL dell'interfaccia web, ordine di visualizzazione) non viene mai copiata.",
+      "source": {
+        "label": "Telecamera sorgente",
+        "placeholder": "Seleziona una telecamera sorgente",
+        "required": "Seleziona una telecamera sorgente"
+      },
+      "target": {
+        "legend": "Destinazione",
+        "newRadio": "Nuova telecamera",
+        "newNameLabel": "Nome telecamera",
+        "newNamePlaceholder": "p.es., porta_posteriore o Porta Posteriore",
+        "newNameRequired": "Il nome della telecamera è obbligatorio",
+        "newNameInvalid": "Nome della telecamera non valido",
+        "newNameCollision": "Esiste già una telecamera con questo nome",
+        "newStreamsForced": "I flussi video vengono sempre copiati per ogni nuova telecamera.",
+        "existingCamerasRadio": "Telecamere esistenti",
+        "allCameras": "Tutte le telecamere",
+        "existingPlaceholder": "Seleziona almeno una telecamera",
+        "existingDisabled": "Nessun'altra telecamera da copiare"
+      },
+      "categories": {
+        "legend": "Impostazioni da clonare",
+        "description": "Scegli quali impostazioni copiare dalla telecamera sorgente.",
+        "selectAll": "Seleziona tutto",
+        "selectNone": "Nessuna selezione",
+        "resetDefaults": "Ripristina le impostazioni predefinite",
+        "general": "Generale",
+        "spatial": "Impostazioni spaziali",
+        "streams": "Flussi",
+        "spatialWarningTitle": "Risoluzione non coincidente",
+        "spatialWarning": "La risoluzione di rilevamento della telecamera sorgente {{srcCamera}} ({{srcWidth}}×{{srcHeight}}) è diversa da quella di {{cameras}}. I poligoni potrebbero non allinearsi su queste telecamere. Queste impostazioni predefinite sono disattivate; abilitale per copiare così come sono.",
+        "restartHint": "Riavvio richiesto",
+        "items": {
+          "record": "Registrazione",
+          "snapshots": "Istantanee",
+          "review": "Revisiona",
+          "motion": "Rilevamento movimento",
+          "objects": "Oggetti",
+          "audio": "Rilevamento audio",
+          "audio_transcription": "Trascrizione audio",
+          "notifications": "Notifiche",
+          "birdseye": "Birdseye",
+          "mqtt": "MQTT",
+          "timestamp_style": "Stile orario",
+          "onvif": "ONVIF",
+          "lpr": "Riconoscimento targhe",
+          "face_recognition": "Riconoscimento facciale",
+          "semantic_search": "Ricerca semantica",
+          "genai": "IA Generativa",
+          "type": "Tipo di telecamera (normale / dedicata al riconoscimento targhe)",
+          "profiles": "Profili",
+          "detect": "Rileva le dimensioni",
+          "zones": "Zone",
+          "motion_mask": "Maschere di movimento",
+          "object_masks": "Maschere di oggetti",
+          "ffmpeg_live": "URL e ruoli del flusso"
+        }
+      },
+      "footer": {
+        "changeCount_one": "{{count}} modifica verrà applicata",
+        "changeCount_many": "{{count}} modifiche verranno applicate",
+        "changeCount_other": "{{count}} modifiche verranno applicate",
+        "restartNeeded": "Per alcune modifiche sarà necessario riavviare il sistema.",
+        "liveOnly": "Tutte le modifiche verranno applicate immediatamente, senza bisogno di riavviare il sistema.",
+        "submit": "Clona",
+        "submitting": "Clonazione…"
+      },
+      "toast": {
+        "success": "Impostazioni copiate in {{cameraName}}",
+        "successWithRestart": "Impostazioni copiate in {{cameraName}}. Riavvia Frigate per applicare tutte le modifiche.",
+        "successMulti_one": "Impostazioni copiate su {{count}} telecamera",
+        "successMulti_many": "Impostazioni copiate su {{count}} telecamere",
+        "successMulti_other": "Impostazioni copiate su {{count}} telecamere",
+        "successMultiWithRestart_one": "Impostazioni copiate su {{count}} telecamera. Riavvia Frigate per applicare tutte le modifiche.",
+        "successMultiWithRestart_many": "Impostazioni copiate su {{count}} telecamere. Riavvia Frigate per applicare tutte le modifiche.",
+        "successMultiWithRestart_other": "Impostazioni copiate su {{count}} telecamere. Riavvia Frigate per applicare tutte le modifiche.",
+        "partialFailure": "{{successCount}} sezioni applicate; '{{failedSection}}' non riuscita: {{errorMessage}}",
+        "partialFailureMulti": "Copiato su {{successCount}} telecamera(e); errore per {{failed}}: {{errorMessage}}",
+        "newCameraPartialFailure": "La telecamera {{cameraName}} è stata creata, ma alcune impostazioni non sono state copiate: {{errorMessage}}",
+        "sourceMissing": "La telecamera sorgente non esiste più",
+        "submitError": "Impossibile clonare la telecamera: {{errorMessage}}"
+      }
     }
   },
   "button": {
@@ -1436,7 +1613,15 @@
       "othersField_many": "{{count}} altri",
       "othersField_other": "{{count}} altri",
       "profilePrefix": "Profilo {{profile}}: {{fields}}"
-    }
+    },
+    "overriddenGlobalHeading_one": "Questa telecamera sovrascrive il campo {{count}} dalla configurazione globale:",
+    "overriddenGlobalHeading_many": "Questa telecamera sovrascrive i campi {{count}} della configurazione globale:",
+    "overriddenGlobalHeading_other": "Questa telecamera sovrascrive i campi {{count}} della configurazione globale:",
+    "overriddenGlobalNoDeltas": "Questa telecamera sovrascrive la configurazione globale, ma nessun valore dei campi risulta diverso.",
+    "overriddenBaseConfigHeading_one": "Il profilo {{profile}} sovrascrive il campo {{count}} della configurazione di base:",
+    "overriddenBaseConfigHeading_many": "Il profilo {{profile}} sovrascrive i campi {{count}} della configurazione di base:",
+    "overriddenBaseConfigHeading_other": "Il profilo {{profile}} sovrascrive i campi {{count}} della configurazione di base:",
+    "overriddenBaseConfigNoDeltas": "Il profilo {{profile}} sovrascrive questa sezione, ma nessun valore di campo differisce dalla configurazione di base."
   },
   "go2rtcStreams": {
     "title": "Flussi go2rtc",
@@ -1447,8 +1632,48 @@
       "videoCopy": "Copia",
       "hardware": "Accelerazione hardware",
       "hardwareNone": "Nessuna accelerazione hardware",
-      "hardwareAuto": "Accelerazione hardware automatica"
-    }
+      "hardwareAuto": "Automatico (consigliato)",
+      "useFfmpegModule": "Utilizza la modalità di compatibilità (ffmpeg)",
+      "videoH264": "Transcodifica in H.264",
+      "videoH265": "Transcodifica in H.265",
+      "videoExclude": "Escludi",
+      "audioAac": "Transcodifica in AAC",
+      "audioOpus": "Transcodifica in Opus",
+      "audioPcmu": "Transcodifica in PCM μ-law",
+      "audioPcma": "Transcodifica in PCM A-law",
+      "audioPcm": "Transcodifica in PCM",
+      "audioMp3": "Transcodifica in MP3",
+      "audioExclude": "Escludi",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "Aggiungi codec video",
+      "addAudioCodec": "Aggiungi codec audio",
+      "removeCodec": "Rimuovi codec"
+    },
+    "description": "Gestisci le configurazioni del flusso go2rtc per la ritrasmissione delle immagini della telecamera. Ogni flusso ha un nome e uno o più URL sorgente.",
+    "addStream": "Aggiungi flusso",
+    "addStreamDesc": "Inserisci un nome per il nuovo flusso. Questo nome verrà utilizzato per identificare il flusso nella configurazione della telecamera.",
+    "addUrl": "Aggiungi URL",
+    "streamName": "Nome flusso",
+    "streamNamePlaceholder": "p. es., porta_ingresso",
+    "streamUrlPlaceholder": "p. es., rtsp://utente:password@192.168.1.100/flusso",
+    "deleteStream": "Elimina flusso",
+    "deleteStreamConfirm": "Sei sicuro di voler eliminare il flusso \"{{streamName}}\"? Le telecamere che fanno riferimento a questo flusso potrebbero smettere di funzionare.",
+    "noStreams": "Nessun flusso go2rtc configurato. Aggiungi un flusso per iniziare.",
+    "validation": {
+      "nameRequired": "Il nome del flusso è obbligatorio",
+      "nameDuplicate": "Esiste già un flusso con questo nome",
+      "nameInvalid": "Il nome del flusso può contenere solo lettere, numeri, trattini bassi e trattini",
+      "urlRequired": "È richiesto almeno un URL"
+    },
+    "renameStream": "Rinomina flusso",
+    "renameStreamDesc": "Inserisci un nuovo nome per questo flusso. Rinominare un flusso potrebbe causare problemi alle telecamere o ad altri flussi che lo referenziano tramite il suo nome.",
+    "newStreamName": "Nuovo nome del flusso",
+    "streamNumber": "Flusso {{index}}",
+    "sourceNumber": "Sorgente {{index}}"
   },
   "configForm": {
     "sections": {
@@ -1470,7 +1695,14 @@
       "face_recognition": "Riconoscimento facciale",
       "masksAndZones": "Maschere / Zone",
       "audio": "Audio",
-      "model": "Modello"
+      "model": "Modello",
+      "detect": "Rilevamento",
+      "motion": "Movimento",
+      "live": "Vista dal vivo",
+      "timestamp_style": "Orari",
+      "go2rtc": "go2rtc",
+      "detectors": "Rivelatori",
+      "genai": "GenAI"
     },
     "tabs": {
       "system": "Sistema",
@@ -1479,12 +1711,19 @@
     },
     "inputRoles": {
       "options": {
-        "audio": "Audio"
-      }
+        "audio": "Audio",
+        "detect": "Rileva",
+        "record": "Registra"
+      },
+      "summary": "{{count}} ruoli selezionati",
+      "empty": "Nessun ruolo disponibile"
     },
     "roleMap": {
       "roleLabel": "Ruolo",
-      "remove": "Rimuovi"
+      "remove": "Rimuovi",
+      "empty": "Nessuna mappatura dei ruoli",
+      "groupsLabel": "Gruppi",
+      "addMapping": "Aggiungi la mappatura dei ruoli"
     },
     "notifications": {
       "title": "Impostazioni di notifica"
@@ -1518,19 +1757,209 @@
       "presetLabels": {
         "preset-rpi-64-h264": "Raspberry Pi (H.264)",
         "preset-rpi-64-h265": "Raspberry Pi (H.265)",
-        "preset-vaapi": "VAAPI (GPU Intel/AMD)"
+        "preset-vaapi": "VAAPI (GPU Intel/AMD)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "GPU NVIDIA",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (Generico)",
+        "preset-http-mjpeg-generic": "HTTP JPEG (Generico)",
+        "preset-http-reolink": "HTTP - Telecamere Reolink",
+        "preset-rtmp-generic": "RTMP (Generico)",
+        "preset-rtsp-generic": "RTSP (Generico)",
+        "preset-rtsp-restream": "RTSP - Ritrasmissione da go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - Ritrasmissione da go2rtc (bassa latenza)",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "Registrazione (Generica, senza audio)",
+        "preset-record-generic-audio-copy": "Registrazione (generica + copia audio)",
+        "preset-record-generic-audio-aac": "Registrazione (generica + audio in AAC)",
+        "preset-record-mjpeg": "Registrazione - Telecamere MJPEG",
+        "preset-record-jpeg": "Registrazione - Telecamere JPEG",
+        "preset-record-ubiquiti": "Registrazione - Telecamere Ubiquiti"
       }
+    },
+    "cameraInputs": {
+      "itemTitle": "Flusso {{index}}"
+    },
+    "restartRequiredField": "Riavvio richiesto",
+    "restartRequiredFooter": "Configurazione modificata - Riavvio necessario",
+    "detect": {
+      "title": "Impostazioni di rilevamento"
+    },
+    "detectors": {
+      "title": "Impostazioni del rilevatore",
+      "singleType": "È consentito un solo rilevatore di tipo {{type}}.",
+      "keyRequired": "Il nome del rilevatore è obbligatorio.",
+      "keyDuplicate": "Il nome del rilevatore esiste già.",
+      "noSchema": "Non sono disponibili schemi di rilevamento.",
+      "none": "Nessuna istanza del rilevatore configurata.",
+      "add": "Aggiungi rilevatore",
+      "addCustomKey": "Aggiungi chiave personalizzata"
+    },
+    "record": {
+      "title": "Impostazioni di registrazione"
+    },
+    "snapshots": {
+      "title": "Impostazioni istantanea"
+    },
+    "motion": {
+      "title": "Impostazioni di movimento"
+    },
+    "objects": {
+      "title": "Impostazioni oggetto"
+    },
+    "audioLabels": {
+      "summary": "{{count}} etichette audio selezionate",
+      "empty": "Nessuna etichetta audio disponibile"
+    },
+    "objectLabels": {
+      "summary": "{{count}} tipi di oggetto selezionati",
+      "empty": "Non sono disponibili etichette per gli oggetti"
+    },
+    "reviewLabels": {
+      "summary": "{{count}} etichette selezionate",
+      "empty": "Nessuna etichetta disponibile"
+    },
+    "filters": {
+      "objectFieldLabel": "{{field}} per {{label}}"
+    },
+    "zoneNames": {
+      "summary": "{{count}} selezionati",
+      "empty": "Nessuna zona disponibile"
+    },
+    "genaiRoles": {
+      "options": {
+        "embeddings": "Incorporamento",
+        "descriptions": "Descrizioni",
+        "chat": "Chat"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "Seleziona il modello…",
+      "builtIn": "Modelli integrati",
+      "genaiProviders": "Fornitori di GenAI"
+    },
+    "genaiModel": {
+      "placeholder": "Seleziona o inserisci un modello…",
+      "search": "Cerca o inserisci un modello…",
+      "noModels": "Nessun modello disponibile",
+      "available": "Modelli disponibili",
+      "useCustom": "Utilizza \"{{value}}\"",
+      "refresh": "Aggiorna modelli",
+      "probeFailed": "Impossibile rilevare i modelli",
+      "fetchedModels": "Elenco dei modelli recuperato con successo"
+    },
+    "review": {
+      "title": "Impostazioni di revisione"
+    },
+    "audio": {
+      "title": "Impostazioni audio"
+    },
+    "live": {
+      "title": "Impostazioni della visualizzazione dal vivo"
+    },
+    "timestamp_style": {
+      "title": "Impostazioni orario"
+    },
+    "searchPlaceholder": "Ricerca...",
+    "addCustomLabel": "Aggiungi etichetta personalizzata...",
+    "knownPlates": {
+      "namePlaceholder": "p. es., auto della moglie",
+      "platePlaceholder": "Numero di targa o espressione regolare"
+    },
+    "timezone": {
+      "defaultOption": "Utilizza il fuso orario del browser"
+    },
+    "semanticSearchModelSize": {
+      "notApplicable": "Non applicabile ai fornitori GenAI"
+    },
+    "liveStreams": {
+      "streamNameLabel": "Nome flusso",
+      "streamNamePlaceholder": "p.es., flusso HD principale",
+      "go2rtcStreamLabel": "flusso go2rtc",
+      "go2rtcStreamPlaceholder": "Seleziona un flusso go2rtc",
+      "go2rtcStreamSearch": "Cerca o inserisci il nome di un flusso…",
+      "noGo2rtcStreams": "Nessun flusso go2rtc configurato",
+      "availableStreams": "Flussi disponibili",
+      "useCustom": "Utilizza \"{{value}}\"",
+      "addStream": "Aggiungi flusso"
+    },
+    "ptzPresets": {
+      "placeholder": "Seleziona o inserisci un valore preimpostato...",
+      "search": "Cerca o inserisci un valore preimpostato...",
+      "noPresets": "Nessun valore preimpostato disponibile",
+      "available": "Preimpostazioni della telecamera",
+      "useCustom": "Utilizza \"{{value}}\""
+    },
+    "defaultRole": {
+      "admin": "Amministratore",
+      "viewer": "Visualizzatore"
     }
   },
   "globalConfig": {
-    "title": "Configurazione globale"
+    "title": "Configurazione globale",
+    "description": "Configura le impostazioni globali che si applicano a tutte le telecamere, a meno che non vengano sovrascritte.",
+    "toast": {
+      "success": "Impostazioni globali salvate correttamente",
+      "error": "Impossibile salvare le impostazioni globali",
+      "validationError": "Validazione fallita"
+    }
   },
   "cameraConfig": {
-    "title": "Configurazione telecamera"
+    "title": "Configurazione telecamera",
+    "description": "Configura le impostazioni per le singole telecamere. Le impostazioni personalizzate sovrascrivono le impostazioni predefinite globali.",
+    "overriddenBadge": "Sovrascritto",
+    "resetToGlobal": "Ripristina impostazioni globali",
+    "toast": {
+      "success": "Impostazioni della telecamera salvate correttamente",
+      "error": "Impossibile salvare le impostazioni della telecamera"
+    }
   },
   "profiles": {
     "title": "Profili",
-    "columnCamera": "Telecamera"
+    "columnCamera": "Telecamera",
+    "activeProfile": "Profilo attivo",
+    "noActiveProfile": "Nessun profilo attivo",
+    "active": "Attivo",
+    "activated": "Profilo '{{profile}}' attivato",
+    "activateFailed": "Impossibile impostare il profilo",
+    "deactivated": "Profilo disattivato",
+    "noProfiles": "Nessun profilo definito.",
+    "noOverrides": "Nessuna sovrascrittura",
+    "cameraCount_one": "{{count}} telecamera",
+    "cameraCount_many": "{{count}} telecamere",
+    "cameraCount_other": "{{count}} telecamere",
+    "columnOverrides": "Sovrascritture del profilo",
+    "baseConfig": "Configurazione di base",
+    "addProfile": "Aggiungi profilo",
+    "newProfile": "Nuovo profilo",
+    "profileNamePlaceholder": "p. es., Inserita, Assente, Modalità notturna",
+    "friendlyNameLabel": "Nome profilo",
+    "profileIdLabel": "ID profilo",
+    "profileIdDescription": "Identificativo interno utilizzato nella configurazione e nelle automazioni",
+    "nameInvalid": "Sono consentite solo lettere minuscole, numeri e trattini bassi",
+    "nameDuplicate": "Esiste già un profilo con questo nome",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Deve contenere almeno 2 caratteri",
+      "mustNotContainPeriod": "Non deve contenere punti",
+      "alreadyExists": "Esiste già un profilo con questo ID"
+    },
+    "renameProfile": "Rinomina profilo",
+    "renameSuccess": "Profilo rinominato in '{{profile}}'",
+    "deleteProfile": "Elimina profilo",
+    "deleteProfileConfirm": "Eliminare il profilo \"{{profile}}\" da tutte le telecamere? Questa operazione non può essere annullata.",
+    "deleteSuccess": "Profilo '{{profile}}' eliminato",
+    "createSuccess": "Profilo '{{profile}}' creato",
+    "removeOverride": "Rimuovi la sovrascrittura del profilo",
+    "deleteSection": "Elimina le sostituzioni della sezione",
+    "deleteSectionConfirm": "Rimuovere le sovrascritture {{section}} per il profilo {{profile}} su {{camera}}?",
+    "deleteSectionSuccess": "Rimosse le sovrascritture di {{section}} per {{profile}}",
+    "enableSwitch": "Abilita profili",
+    "enabledDescription": "I profili sono abilitati. Crea un nuovo profilo qui sotto, vai alla sezione di configurazione della telecamera per apportare le modifiche e salva affinché le modifiche abbiano effetto.",
+    "disabledDescription": "I profili consentono di definire insiemi denominati di impostazioni di configurazione della telecamera (p.es., inserita, assente, notturna) che possono essere attivate su richiesta."
   },
   "timestampPosition": {
     "tl": "In alto a sinistra",
@@ -1564,14 +1993,37 @@
       "errorLabel": "Errore",
       "resultsFields": {
         "error": "Errore",
-        "totals": "Totali"
+        "totals": "Totali",
+        "filesChecked": "File controllati",
+        "orphansFound": "Orfani trovati",
+        "orphansDeleted": "Orfani eliminati",
+        "aborted": "Interrotto. La cancellazione supererebbe la soglia di sicurezza."
       },
       "event_snapshots": "Istantanee degli oggetti tracciati",
       "event_thumbnails": "Miniature degli oggetti tracciati",
       "review_thumbnails": "Anteprima delle miniature",
       "previews": "Anteprime",
       "exports": "Esportazioni",
-      "recordings": "Registrazioni"
+      "recordings": "Registrazioni",
+      "mediaTypes": "Tipi di supporto",
+      "allMedia": "Tutti i supporti",
+      "dryRun": "Prova a secco",
+      "dryRunEnabled": "Nessun file verrà eliminato",
+      "dryRunDisabled": "I file verranno eliminati",
+      "force": "Forza",
+      "forceDesc": "Ignora la soglia di sicurezza e completa la sincronizzazione anche se più del 50% dei file verrebbe eliminato.",
+      "verbose": "Dettagliato",
+      "verboseDesc": "Scrivi un elenco completo dei file orfani su disco per la revisione.",
+      "running": "Sincronizzazione in corso...",
+      "start": "Avvia sincronizzazione",
+      "inProgress": "Sincronizzazione in corso. Questa pagina è disabilitata.",
+      "status": {
+        "queued": "In coda",
+        "running": "In corso",
+        "completed": "Completata",
+        "failed": "Fallita",
+        "notRunning": "Non in esecuzione"
+      }
     },
     "regionGrid": {
       "title": "Griglia di regioni",
@@ -1583,5 +2035,207 @@
       "clearError": "Impossibile pulire la griglia di regioni",
       "restartRequired": "È necessario riavviare il sistema affinché le modifiche alla griglia di regioni abbiano effetto"
     }
+  },
+  "retainMode": {
+    "motion": "Movimento",
+    "all": "Tutti",
+    "active_objects": "Oggetti attivi"
+  },
+  "birdseye": {
+    "trackingMode": {
+      "motion": "Movimento",
+      "objects": "Oggetti",
+      "continuous": "Continuo"
+    },
+    "cameraOrder": {
+      "reorderHandle": "Trascina per riordinare",
+      "saving": "Salvataggio…",
+      "saved": "Salvato",
+      "label": "Ordine delle telecamere",
+      "description": "Trascina le telecamere per impostarne l'ordine nella visualizzazione Birdseye."
+    }
+  },
+  "toast": {
+    "success": "Impostazioni salvate correttamente",
+    "applied": "Impostazioni applicate correttamente",
+    "successRestartRequired": "Impostazioni salvate correttamente. Riavvia Frigate per applicare le modifiche.",
+    "error": "Impossibile salvare le impostazioni",
+    "validationError": "Validazione non riuscita: {{message}}",
+    "resetSuccess": "Ripristina le impostazioni predefinite globali",
+    "resetError": "Impossibile ripristinare le impostazioni",
+    "saveAllSuccess_one": "Salvata {{count}} sezione correttamente.",
+    "saveAllSuccess_many": "Tutte le {{count}} sezioni sono state salvate correttamente.",
+    "saveAllSuccess_other": "Tutte le {{count}} sezioni sono state salvate correttamente.",
+    "saveAllPartial_one": "{{successCount}} sezione su {{totalCount}} salvata. {{failCount}} errore.",
+    "saveAllPartial_many": "{{successCount}} sezioni su {{totalCount}} salvate. {{failCount}} errori.",
+    "saveAllPartial_other": "{{successCount}} sezioni su {{totalCount}} salvate. {{failCount}} errori.",
+    "saveAllFailure": "Impossibile salvare tutte le sezioni.",
+    "saveAllSuccessRestartRequired_one": "Salvata {{count}} sezione correttamente. Riavvia Frigate per applicare le modifiche.",
+    "saveAllSuccessRestartRequired_many": "Salvate {{count}} sezioni correttamente. Riavvia Frigate per applicare le modifiche.",
+    "saveAllSuccessRestartRequired_other": "Salvate {{count}} sezioni correttamente. Riavvia Frigate per applicare le modifiche."
+  },
+  "unsavedChanges": "Hai delle modifiche non salvate",
+  "confirmReset": "Conferma il ripristino",
+  "resetToDefaultDescription": "Questa operazione ripristinerà tutte le impostazioni di questa sezione ai valori predefiniti. Tale azione è irreversibile.",
+  "resetToGlobalDescription": "Questa operazione ripristinerà le impostazioni di questa sezione ai valori predefiniti globali. Tale azione è irreversibile.",
+  "previewQuality": {
+    "very_high": "Molto alta",
+    "high": "Alta",
+    "medium": "Media",
+    "low": "Bassa",
+    "very_low": "Molto bassa"
+  },
+  "ui": {
+    "TimeOrDateStyle": {
+      "medium": "Medio",
+      "full": "Completo",
+      "long": "Lungo",
+      "short": "Corto"
+    },
+    "timeFormat": {
+      "browser": "Navigatore",
+      "12hour": "12 ore",
+      "24hour": "24 ore"
+    },
+    "unitSystem": {
+      "metric": "Metrico",
+      "imperial": "Imperiale"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "Registrazioni",
+      "previews": "Anteprime"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "Correzioni",
+      "info": "Informazioni",
+      "warning": "Avviso",
+      "error": "Errore",
+      "critical": "Critico"
+    }
+  },
+  "onvif": {
+    "profileAuto": "Automatico",
+    "profileLoading": "Caricamento profili...",
+    "autotracking": {
+      "zooming": {
+        "disabled": "Disabilitato",
+        "absolute": "Assoluto",
+        "relative": "Relativo"
+      }
+    }
+  },
+  "modelSize": {
+    "small": "Piccolo",
+    "large": "Grande"
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "La registrazione è disabilitata, pertanto non verranno generati elementi di revisione.",
+      "detectDisabled": "Il rilevamento degli oggetti è disabilitato. Gli elementi di revisione richiedono la presenza di oggetti rilevati per poter classificare avvisi e rilevamenti.",
+      "allNonAlertDetections": "Tutte le attività non di avviso saranno incluse tra i rilevamenti.",
+      "genaiImageSourceRecordingsRecordDisabled": "La sorgente dell'immagine è impostata su 'registrazioni', ma la registrazione è disabilitata. Frigate utilizzerà le immagini di anteprima."
+    },
+    "audio": {
+      "noAudioRole": "Nessun flusso ha il ruolo audio definito. È necessario abilitare il ruolo audio affinché il rilevamento audio funzioni."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "Il rilevamento audio non è abilitato per questa telecamera. La trascrizione audio richiede che il rilevamento audio sia attivo."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Impostare il valore di FPS rilevato su un valore superiore a 5 non è consigliabile. Valori più elevati potrebbero causare problemi di prestazioni e non apporteranno alcun vantaggio.",
+      "disabled": "Il rilevamento degli oggetti è disabilitato. Le istantanee, gli elementi di revisione e le funzionalità aggiuntive come il riconoscimento facciale, il riconoscimento delle targhe e l'intelligenza artificiale generativa non funzioneranno.",
+      "resolutionShouldBeMultipleOfFour": "Per ottenere risultati ottimali, la larghezza e l'altezza di rilevamento dovrebbero essere multipli di 4. Altri valori pari potrebbero produrre artefatti visivi o una leggera distorsione nel flusso di rilevamento.",
+      "aspectRatioMismatch": "La larghezza e l'altezza inserite non corrispondono al rapporto d'aspetto della risoluzione di rilevamento corrente. Ciò potrebbe produrre un'immagine allungata o distorta.",
+      "maxFramesSet": "L'impostazione del numero massimo di fotogrammi sovrascrive il comportamento predefinito e disabilita il tracciamento degli oggetti statici. Sono rare le situazioni in cui ciò è necessario, quindi si consiglia cautela nell'utilizzarlo.",
+      "squareResolution": "Una risoluzione di rilevamento quadrata è insolita. La larghezza e l'altezza di rilevamento devono corrispondere al rapporto d'aspetto della telecamera (ad esempio, 16:9), non alle dimensioni del modello di rilevamento degli oggetti. Un rapporto d'aspetto non corrispondente può distorcere l'immagine e ridurre la precisione del rilevamento.",
+      "resolutionHigh": "Questa risoluzione di rilevamento è superiore a quella consigliata e potrebbe causare un maggiore utilizzo delle risorse senza migliorare la precisione del rilevamento. Per la maggior parte delle telecamere si consiglia una risoluzione di rilevamento pari o inferiore a 1080p.",
+      "globalResolutionMultipleCameras": "Quando si configurano più telecamere, viene impostata una risoluzione di rilevamento globale. A meno che tutte le telecamere non condividano la stessa risoluzione e lo stesso rapporto d'aspetto, la larghezza e l'altezza di rilevamento devono essere definite per ciascuna telecamera in modo da corrispondere al rapporto d'aspetto nativo di ciascuna."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "Per generare le descrizioni è necessario configurare un provider GenAI con il ruolo 'descrizioni'."
+    },
+    "faceRecognition": {
+      "globalDisabled": "Perché le funzionalità di riconoscimento facciale funzionino correttamente su questa telecamera, è necessario abilitare l'arricchimento del riconoscimento facciale.",
+      "personNotTracked": "Il riconoscimento facciale richiede che l'oggetto 'persona' venga tracciato. Abilita 'persona' nella sezione ogggetti di questa telecamera.",
+      "modelSizeLarge": "Il modello 'grande' richiede una GPU o una NPU per prestazioni accettabili. Utilizzare il modello 'piccolo' su sistemi dotati solo di CPU."
+    },
+    "lpr": {
+      "globalDisabled": "Per il corretto funzionamento delle funzioni LPR (riconoscimento targhe) su questa telecamera, è necessario abilitare la funzione di arricchimento del riconoscimento delle targhe.",
+      "vehicleNotTracked": "Il riconoscimento della targa richiede che venga tracciato 'automobile' o 'moto'. Abilita 'automobile' o 'moto' nella sezione oggetti per questa telecamera.",
+      "modelSizeLarge": "Il modello 'grande' è ottimizzato per le targhe multilinea. Il modello 'piccolo' offre prestazioni migliori rispetto al modello 'grande' e dovrebbe essere utilizzato a meno che nella vostra regione non siano in vigore formati di targa multilinea."
+    },
+    "record": {
+      "noRecordRole": "Nessun flusso ha il ruolo di registrazione definito. La registrazione non funzionerà."
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "Birdseye è impostato sulla modalità 'oggetti', ma il rilevamento degli oggetti è disabilitato per questa telecamera. La telecamera non verrà visualizzata in Birdseye."
+    },
+    "snapshots": {
+      "detectDisabled": "Il rilevamento degli oggetti è disabilitato. Le istantanee vengono generate dagli oggetti tracciati e non verranno create."
+    },
+    "detectors": {
+      "mixedTypes": "Tutti i rilevatori devono essere dello stesso tipo. Rimuovi i rilevatori esistenti per poter utilizzare un tipo diverso.",
+      "mixedTypesSuggestion": "Tutti i rilevatori devono essere dello stesso tipo. Rimuovi i rilevatori esistenti oppure seleziona {{type}}."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "Il modello 'piccolo' Jina V2 presenta elevati consumi di RAM e di inferenza. Si consiglia il modello 'grande' con GPU dedicata."
+    },
+    "onvif": {
+      "autotrackingNoZones": "Il tracciamento automatico richiede almeno una zona. Definisci una zona per questa telecamera in Maschere/Zone, quindi impostala come zona obbligatoria qui sotto."
+    }
+  },
+  "saveAllPreview": {
+    "title": "Modifiche da salvare",
+    "triggerLabel": "Revisione delle modifiche in sospeso",
+    "empty": "Nessuna modifica in sospeso.",
+    "scope": {
+      "label": "Ambito",
+      "global": "Globale",
+      "camera": "Telecamera: {{cameraName}}"
+    },
+    "profile": {
+      "label": "Profilo"
+    },
+    "field": {
+      "label": "Campo"
+    },
+    "value": {
+      "label": "Nuovo valore",
+      "reset": "Reimposta"
+    }
+  },
+  "menuDot": {
+    "overrideGlobal": "Questa sezione sovrascrive la configurazione globale",
+    "overrideProfile": "Questa sezione viene sovrascritta dal profilo {{profile}}",
+    "unsaved": "Questa sezione contiene modifiche non salvate"
+  },
+  "detectorsAndModel": {
+    "title": "Rilevatori e modelli",
+    "description": "Configura il backend del rilevatore che esegue il rilevamento degli oggetti e il modello che utilizza. Le modifiche vengono salvate insieme in modo che il rilevatore e il modello rimangano sincronizzati.",
+    "cardTitles": {
+      "detector": "Dispositivo di rilevamento",
+      "model": "Modello di rilevamento"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Modello personalizzato"
+    },
+    "mismatch": {
+      "warning": "Il modello Frigate+ attuale \"{{model}}\" richiede il rilevatore {{required}}. Seleziona un modello compatibile qui sotto oppure passa a Modello personalizzato prima di salvare."
+    },
+    "plusModel": {
+      "requiresDetector": "Richiede: {{detector}}",
+      "noModelSelected": "Seleziona un modello Frigate+"
+    },
+    "toast": {
+      "saveSuccess": "Rilevatori e impostazioni del modello salvati. Riavviare Frigate per applicare le modifiche.",
+      "saveError": "Impossibile salvare le impostazioni del rilevatore e del modello"
+    },
+    "unsavedChanges": "Modifiche al rilevatore e al modello non salvate",
+    "restartRequired": "Riavvio richiesto (rilevatore o modello modificato)"
   }
 }

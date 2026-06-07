@@ -35,6 +35,7 @@ const semanticSearch: SectionConfigOverrides = {
         "ui:widget": "semanticSearchModel",
       },
       model_size: {
+        "ui:widget": "semanticSearchModelSize",
         "ui:options": { size: "xs", enumI18nPrefix: "modelSize" },
       },
     },

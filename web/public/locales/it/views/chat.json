@@ -42,5 +42,31 @@
         "show_camera_status": "Qual è lo stato attuale delle mie telecamere?",
         "recap": "Cosa è successo mentre ero via?",
         "watch_camera": "Controlla la porta d'ingresso e fammi sapere se arriva qualcuno"
+    },
+    "new_chat": "Nuova chat",
+    "settings": {
+        "title": "Impostazioni chat",
+        "show_stats": {
+            "title": "Mostra statistiche",
+            "desc": "Mostra la frequenza di generazione e la dimensione del contesto per le risposte in chat.",
+            "while_generating": "Durante la generazione",
+            "always": "Sempre"
+        },
+        "auto_scroll": {
+            "title": "Scorrimento automatico",
+            "desc": "Segui i nuovi messaggi non appena arrivano."
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} token",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Ragionamento…",
+        "show": "Mostra il ragionamento",
+        "hide": "Nascondi il ragionamento"
+    },
+    "thinking": {
+        "toggle": "Alterna ragionamento"
     }
 }

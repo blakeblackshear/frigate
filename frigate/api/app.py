@@ -34,15 +34,18 @@ from frigate.api.auth import (
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import (
     AppConfigSetBody,
+    GenAIProbeBody,
     MediaSyncBody,
 )
 from frigate.api.defs.tags import Tags
-from frigate.config import FrigateConfig
+from frigate.config import FrigateConfig, GenAIConfig, GenAIProviderEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
+from frigate.const import REDACTED_CREDENTIAL_SENTINEL
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
+from frigate.genai import PROVIDERS, load_providers
 from frigate.jobs.media_sync import (
     get_current_media_sync_job,
     get_media_sync_job_by_id,
@@ -59,7 +62,11 @@ from frigate.util.builtin import (
     process_config_query_string,
     update_yaml_file_bulk,
 )
-from frigate.util.config import apply_section_update, find_config_file
+from frigate.util.config import (
+    apply_section_update,
+    find_config_file,
+    redact_credential,
+)
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
     get_nvidia_driver_info,
@@ -74,6 +81,14 @@ logger = logging.getLogger(__name__)
 
 
 router = APIRouter(tags=[Tags.app])
+
+# Short timeout for the /genai/probe path. The probe is interactive — fail
+# fast on hung providers rather than holding an API worker thread.
+_PROBE_TIMEOUT_SECONDS = 10
+# Outer cap that returns control to the caller even if the underlying sync
+# HTTP call ignores its timeout. The sync work continues in the background
+# thread; only the response is bounded.
+_PROBE_OUTER_TIMEOUT_SECONDS = 15
 
 
 @router.get(
@@ -170,6 +185,95 @@ def genai_models(request: Request):
     return JSONResponse(content=request.app.genai_manager.list_models())
 
 
+@router.post(
+    "/genai/probe",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Probe a GenAI provider without saving config",
+    description=(
+        "Builds a transient client from the request body and returns its "
+        "available models. Used to validate provider credentials in the UI "
+        "before saving the configuration."
+    ),
+)
+async def genai_probe(body: GenAIProbeBody):
+    load_providers()
+
+    provider_cls = PROVIDERS.get(body.provider)
+    if not provider_cls:
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "message": "Unknown provider"},
+        )
+
+    # The OpenAI-compatible SDKs accept "timeout" as a constructor kwarg via
+    # provider_options; other plugins use GenAIClient.timeout passed below.
+    # Don't inject timeout for Gemini — its HttpOptions interprets the value
+    # in milliseconds and would clash with the plugin's own default.
+    probe_provider_options: dict[str, Any] = dict(body.provider_options or {})
+    if body.provider in (GenAIProviderEnum.openai, GenAIProviderEnum.azure_openai):
+        probe_provider_options.setdefault("timeout", _PROBE_TIMEOUT_SECONDS)
+
+    try:
+        transient_cfg = GenAIConfig(
+            provider=body.provider,
+            api_key=body.api_key,
+            base_url=body.base_url,
+            provider_options=probe_provider_options,
+            # model is required by the schema but irrelevant for listing.
+            model="probe",
+            roles=[],
+        )
+    except ValidationError:
+        logger.exception("GenAI probe: invalid configuration")
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "message": "Invalid provider configuration"},
+        )
+
+    try:
+        client = provider_cls(
+            transient_cfg,
+            timeout=_PROBE_TIMEOUT_SECONDS,
+            validate_model=False,
+        )
+    except Exception:
+        logger.exception("GenAI probe: failed to construct client")
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Failed to connect to provider",
+            },
+        )
+
+    try:
+        models = await asyncio.wait_for(
+            asyncio.to_thread(client.list_models),
+            timeout=_PROBE_OUTER_TIMEOUT_SECONDS,
+        )
+    except asyncio.TimeoutError:
+        return JSONResponse(
+            content={"success": False, "message": "Probe timed out"},
+        )
+    except Exception:
+        logger.exception("GenAI probe: list_models failed")
+        return JSONResponse(
+            content={"success": False, "message": "Provider returned no models"},
+        )
+
+    if not models:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": (
+                    "No models returned. Check the API key, base URL, and "
+                    "that the provider is reachable."
+                ),
+            },
+        )
+
+    return JSONResponse(content={"success": True, "models": models})
+
+
 @router.get("/config", dependencies=[Depends(allow_any_authenticated())])
 def config(request: Request):
     config_obj: FrigateConfig = request.app.frigate_config
@@ -185,26 +289,24 @@ def config(request: Request):
     if request.headers.get("remote-role") != "admin":
         config.pop("environment_vars", None)
 
-    # remove mqtt credentials
-    config["mqtt"].pop("password", None)
-    config["mqtt"].pop("user", None)
+    # redact mqtt credentials
+    redact_credential(config["mqtt"], "password")
 
-    # remove the proxy secret
-    config["proxy"].pop("auth_secret", None)
+    # redact proxy secret
+    redact_credential(config["proxy"], "auth_secret")
 
-    # remove genai api keys
-    for genai_name, genai_cfg in config.get("genai", {}).items():
+    # redact genai api keys
+    for _genai_name, genai_cfg in config.get("genai", {}).items():
         if isinstance(genai_cfg, dict):
-            genai_cfg.pop("api_key", None)
+            redact_credential(genai_cfg, "api_key")
 
     for camera_name, camera in request.app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
 
-        # remove onvif credentials
+        # redact onvif credentials
         onvif_dict = camera_dict.get("onvif", {})
         if onvif_dict:
-            onvif_dict.pop("user", None)
-            onvif_dict.pop("password", None)
+            redact_credential(onvif_dict, "password")
 
         # clean paths
         for input in camera_dict.get("ffmpeg", {}).get("inputs", []):
@@ -581,6 +683,10 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
             _restore_masked_camera_paths(body.config_data, request.app.frigate_config)
             updates = flatten_config_data(body.config_data)
             updates = {k: ("" if v is None else v) for k, v in updates.items()}
+            # Drop any field whose value is still the redaction sentinel
+            updates = {
+                k: v for k, v in updates.items() if v != REDACTED_CREDENTIAL_SENTINEL
+            }
 
         if not updates:
             return JSONResponse(
@@ -644,6 +750,40 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
                     settings,
                 )
 
+                # detect resize also republishes motion + objects so other
+                # processes pick up the rebuilt masks, and fires refresh so
+                # the camera maintainer recycles the camera process to pick
+                # up the new ffmpeg cmd / SHM sizing
+                if field == "detect":
+                    cam_cfg = config.cameras.get(camera)
+                    if cam_cfg is not None:
+                        if cam_cfg.motion is not None:
+                            request.app.config_publisher.publish_update(
+                                CameraConfigUpdateTopic(
+                                    CameraConfigUpdateEnum.motion, camera
+                                ),
+                                cam_cfg.motion,
+                            )
+                        request.app.config_publisher.publish_update(
+                            CameraConfigUpdateTopic(
+                                CameraConfigUpdateEnum.objects, camera
+                            ),
+                            cam_cfg.objects,
+                        )
+                        if cam_cfg.zones:
+                            request.app.config_publisher.publish_update(
+                                CameraConfigUpdateTopic(
+                                    CameraConfigUpdateEnum.zones, camera
+                                ),
+                                cam_cfg.zones,
+                            )
+                        request.app.config_publisher.publish_update(
+                            CameraConfigUpdateTopic(
+                                CameraConfigUpdateEnum.refresh, camera
+                            ),
+                            cam_cfg,
+                        )
+
         return JSONResponse(
             content={"success": True, "message": "Config applied in-memory"},
             status_code=200,
@@ -691,6 +831,13 @@ def config_set(request: Request, body: AppConfigSetBody):
                     updates = flatten_config_data(body.config_data)
                     # Convert None values to empty strings for deletion (e.g., when deleting masks)
                     updates = {k: ("" if v is None else v) for k, v in updates.items()}
+                    # Drop sentinel-valued fields so untouched credential
+                    # placeholders don't clobber the saved YAML value.
+                    updates = {
+                        k: v
+                        for k, v in updates.items()
+                        if v != REDACTED_CREDENTIAL_SENTINEL
+                    }
 
                 if not updates:
                     return JSONResponse(
@@ -761,6 +908,11 @@ def config_set(request: Request, body: AppConfigSetBody):
                     status_code=500,
                 )
 
+            # drop runtime overrides for any fields the user just rewrote in
+            # yaml so a stale override doesn't silently win after restart
+            if request.app.dispatcher is not None:
+                request.app.dispatcher.clear_runtime_state_for_yaml_keys(updates.keys())
+
             if body.requires_restart == 0 or body.update_topic:
                 old_config: FrigateConfig = request.app.frigate_config
                 request.app.frigate_config = config
@@ -774,6 +926,8 @@ def config_set(request: Request, body: AppConfigSetBody):
 
                 if request.app.dispatcher is not None:
                     request.app.dispatcher.config = config
+                    for comm in request.app.dispatcher.comms:
+                        comm.config = config
 
                 if body.update_topic:
                     if body.update_topic.startswith("config/cameras/"):

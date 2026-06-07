@@ -192,7 +192,9 @@
       "bg": "Български (bulgarisch)",
       "gl": "Galego (Galicisch)",
       "id": "Bahasa Indonesia (Indonesisch)",
-      "hr": "Hrvatski (Kroatisch)"
+      "hr": "Hrvatski (Kroatisch)",
+      "bs": "Bosnisch",
+      "zhHant": "Traditional Chinese"
     },
     "appearance": "Erscheinung",
     "theme": {
@@ -325,5 +327,8 @@
     "separatorWithSpace": ", "
   },
   "no_items": "Keine Artikel",
-  "validation_errors": "Validierungsfehler"
+  "validation_errors": "Validierungsfehler",
+  "credentialField": {
+    "savedPlaceholder": "Gespeichert – leer lassen, um den aktuellen Stand beizubehalten"
+  }
 }

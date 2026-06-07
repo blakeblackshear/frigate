@@ -32,6 +32,9 @@ import { FaFolder, FaVideo } from "react-icons/fa";
 import { HiSquare2Stack } from "react-icons/hi2";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import useContextMenu from "@/hooks/use-contextmenu";
+import axios from "axios";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 type CaseCardProps = {
   className: string;
@@ -123,11 +126,63 @@ export function ExportCard({
   onAssignToCase,
   onRemoveFromCase,
 }: ExportCardProps) {
-  const { t } = useTranslation(["views/exports"]);
+  const { t } = useTranslation(["views/exports", "views/replay"]);
+  const navigate = useNavigate();
   const isAdmin = useIsAdmin();
   const [loading, setLoading] = useState(
     exportedRecording.thumb_path.length > 0,
   );
+  const [isStartingReplay, setIsStartingReplay] = useState(false);
+
+  const handleDebugReplay = useCallback(() => {
+    setIsStartingReplay(true);
+
+    axios
+      .post("debug_replay/start_from_export", {
+        export_id: exportedRecording.id,
+      })
+      .then((response) => {
+        if (response.status === 202 || response.status === 200) {
+          navigate("/replay");
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+
+        if (error.response?.status === 409) {
+          toast.error(t("dialog.toast.alreadyActive", { ns: "views/replay" }), {
+            position: "top-center",
+            closeButton: true,
+            dismissible: false,
+            action: (
+              <a
+                href={`${baseUrl}replay`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button>
+                  {t("dialog.toast.goToReplay", { ns: "views/replay" })}
+                </Button>
+              </a>
+            ),
+          });
+        } else {
+          toast.error(
+            t("dialog.toast.error", {
+              ns: "views/replay",
+              error: errorMessage,
+            }),
+            { position: "top-center" },
+          );
+        }
+      })
+      .finally(() => {
+        setIsStartingReplay(false);
+      });
+  }, [exportedRecording.id, navigate, t]);
 
   // Resync the skeleton state whenever the backing export changes. The
   // list keys by id now, so in practice the component remounts instead
@@ -202,7 +257,7 @@ export function ExportCard({
           {editName && (
             <>
               <Input
-                className="text-md mt-3"
+                className="mt-3"
                 type="search"
                 placeholder={editName?.original}
                 value={
@@ -220,7 +275,6 @@ export function ExportCard({
               <DialogFooter>
                 <Button
                   aria-label={t("editExport.saveExport")}
-                  size="sm"
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
                   onClick={() => submitRename()}
@@ -301,6 +355,21 @@ export function ExportCard({
                     {t("tooltip.downloadVideo")}
                   </a>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    aria-label={t("title", { ns: "views/replay" })}
+                    disabled={isStartingReplay}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDebugReplay();
+                    }}
+                  >
+                    {isStartingReplay
+                      ? t("dialog.starting", { ns: "views/replay" })
+                      : t("title", { ns: "views/replay" })}
+                  </DropdownMenuItem>
+                )}
                 {isAdmin && onAssignToCase && (
                   <DropdownMenuItem
                     className="cursor-pointer"

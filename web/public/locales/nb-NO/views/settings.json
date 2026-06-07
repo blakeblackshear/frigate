@@ -16,7 +16,8 @@
     "globalConfig": "Global konfigurasjon - Frigate",
     "cameraConfig": "Kamerakonfigurasjon - Frigate",
     "profiles": "Profiler - Frigate",
-    "maintenance": "Vedlikehold - Frigate"
+    "maintenance": "Vedlikehold - Frigate",
+    "detectorsAndModel": "Detektorer og modell - Frigate"
   },
   "menu": {
     "classification": "Klassifisering",
@@ -61,8 +62,8 @@
     "cameraLpr": "Kjennemerke-gjenkjenning",
     "integrationLpr": "Kjennemerke-gjenkjenning",
     "systemLogging": "Logging",
-    "cameraAudioEvents": "Lydhendelser",
-    "globalAudioEvents": "Lydhendelser",
+    "cameraAudioEvents": "Lyd-deteksjon",
+    "globalAudioEvents": "Lyd-deteksjon",
     "cameraAudioTranscription": "Lydtranskripsjon",
     "integrationAudioTranscription": "Lydtranskripsjon",
     "systemDetectorHardware": "Maskinvare for detektor",
@@ -91,7 +92,8 @@
     "system": "System",
     "systemTelemetry": "Telemetri",
     "systemTls": "TLS",
-    "maintenance": "Vedlikehold"
+    "maintenance": "Vedlikehold",
+    "systemDetectorsAndModel": "Detektorer og modell"
   },
   "dialog": {
     "unsavedChanges": {
@@ -786,11 +788,19 @@
       "supportedDetectors": "Støttede detektorer",
       "dimensions": "Dimensjoner",
       "cameras": "Kameraer",
-      "availableModels": "Tilgjengelige modeller",
+      "availableModels": "Tilgjengelige Frigate+ modeller",
       "modelSelect": "Dine tilgjengelige modeller på Frigate+ kan velges her. Merk at bare modeller som er kompatible med din nåværende detektorkonfigurasjon kan velges.",
       "plusModelType": {
         "userModel": "Finjustert",
         "baseModel": "Basismodell"
+      },
+      "noModelLoaded": "Ingen Frigate+-modell er lastet inn for øyeblikket.",
+      "selectModel": "Velg en modell",
+      "noModelsAvailable": "Ingen modeller tilgjengelig",
+      "filter": {
+        "ariaLabel": "Filtrer modeller etter type",
+        "baseModels": "Basismodeller",
+        "fineTunedModels": "Finjusterte modeller"
       }
     },
     "title": "Frigate+ Innstillinger",
@@ -817,7 +827,8 @@
       "currentModel": "Gjeldende modell",
       "configuration": "Konfigurasjon"
     },
-    "description": "Frigate+ er en abonnementstjeneste som gir tilgang til tilleggsfunksjoner og kapasiteter for Frigate-instansen din, inkludert muligheten til å bruke egendefinerte objektdeteksjonsmodeller trent på dine egne data. Du kan administrere innstillingene for Frigate+-modellen din her."
+    "description": "Frigate+ er en abonnementstjeneste som gir tilgang til tilleggsfunksjoner og kapasiteter for Frigate-instansen din, inkludert muligheten til å bruke egendefinerte objektdeteksjonsmodeller trent på dine egne data. Du kan administrere innstillingene for Frigate+-modellen din her.",
+    "changeInDetectorsAndModel": "Endre modell"
   },
   "enrichments": {
     "title": "Innstillinger for utvidelser",
@@ -1341,7 +1352,8 @@
         },
         "hikvision": {
           "substreamWarning": "Substrøm 1 er låst til lav oppløsning. Mange Hikvision-kameraer støtter flere substrømmer som må aktiveres i kameraets innstillinger. Det anbefales å sjekke og benytte disse strømmene hvis de er tilgjengelige."
-        }
+        },
+        "resolutionUnknown": "Oppløsningen for denne strømmen kunne ikke fastslås. Du bør angi deteksjonsoppløsningen manuelt i innstillingene eller i konfigurasjonen din."
       }
     }
   },
@@ -1357,8 +1369,17 @@
       "disableDesc": "Aktiver et kamera som for øyeblikket ikke er synlig i grensesnittet og deaktivert i konfigurasjonen. En omstart av Frigate kreves etter aktivering.",
       "enableSuccess": "Aktiverte {{cameraName}} i konfigurasjonen. Start Frigate på nytt for å ta i bruk endringene.",
       "enableLabel": "Aktiverte kameraer",
-      "enableDesc": "Deaktiver et aktivert kamera midlertidig frem til Frigate starter på nytt. Deaktivering av et kamera stopper all prosessering av kameraets strømmer. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke videreformidling (restream) i go2rtc.</em>",
-      "disableLabel": "Deaktiverte kameraer"
+      "enableDesc": "Deaktiver et aktivert kamera midlertidig frem til Frigate starter på nytt. Deaktivering av et kamera stopper all prosessering av kameraets strømmer. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke videreformidling (restream) i go2rtc.</em><br /><br />Dra i feltet for å endre rekkefølgen på kameraene slik de vises i grensesnittet. Rekkefølgen på de aktiverte kameraene vil gjenspeiles i hele grensesnittet, inkludert Live-dashbordet og rullegardinmenyene for kameravalg.",
+      "disableLabel": "Deaktiverte kameraer",
+      "friendlyName": {
+        "edit": "Rediger visningsnavn for kamera",
+        "title": "Rediger visningsnavn",
+        "description": "Angi visningsnavnet som skal brukes for dette kameraet i Frigate-grensesnittet. La feltet stå tomt for å bruke kamera-ID.",
+        "rename": "Omdøp"
+      },
+      "reorderHandle": "Dra for å endre rekkefølge",
+      "saving": "Lagrer…",
+      "saved": "Lagret"
     },
     "cameraConfig": {
       "add": "Legg til kamera",
@@ -1408,7 +1429,16 @@
       "description": "Sletting av et kamera vil fjerne alle opptak, sporede objekter og konfigurasjon for dette kameraet permanent. Eventuelle go2rtc-strømmer tilknyttet kameraet må eventuelt fjernes manuelt.",
       "selectPlaceholder": "Velg kamera..."
     },
-    "deleteCamera": "Slett kamera"
+    "deleteCamera": "Slett kamera",
+    "cameraType": {
+      "title": "Kameratype",
+      "label": "Kameratype",
+      "description": "Angi type for hvert kamera. Dedikerte LPR-kameraer er spesialkameraer med kraftig optisk zoom for å fange opp kjennemerker på kjøretøy langt unna. De fleste kameraer bør bruke typen \"Normal\", med mindre kameraet er spesifikt for gjenkjenning av kjennemerker og har et snevert fokus på kjennemerker.",
+      "normal": "Normal",
+      "dedicatedLpr": "Dedikert LPR (lesing av kjennemerker)",
+      "saveSuccess": "Kameratype oppdatert for {{cameraName}}. Start Frigate på nytt for å bruke endringene."
+    },
+    "description": "Legg til, rediger og slett kameraer. Kontroller hvilke kameraer som er aktivert og konfigurer overstyringer for hver profil og kameratype. For å konfigurere strømmer, deteksjon, bevegelse og andre kameraspesifikke innstillinger, velg den aktuelle seksjonen under Kamerakonfigurasjon."
   },
   "cameraReview": {
     "title": "Innstillinger for kamerainspeksjon",
@@ -1572,7 +1602,9 @@
       "options": {
         "embeddings": "Vektorrepresentasjoner",
         "tools": "Verktøy",
-        "vision": "Bildegjenkjenning"
+        "vision": "Bildegjenkjenning",
+        "descriptions": "Beskrivelser",
+        "chat": "Chat"
       }
     },
     "additionalProperties": {
@@ -1645,7 +1677,24 @@
     "overriddenBaseConfigTooltip": "{{profile}}-profilen overstyrer konfigurasjonsinnstillinger i denne seksjonen",
     "overriddenGlobalTooltip": "Dette kameraet overstyrer globale konfigurasjonsinnstillinger i denne seksjonen",
     "overriddenBaseConfig": "Overstyrt (Basiskonfigurasjon)",
-    "overriddenGlobal": "Overstyrt (Global)"
+    "overriddenGlobal": "Overstyrt (Global)",
+    "overriddenInCameras": {
+      "label_one": "Overstyrt i {{count}} kamera",
+      "label_other": "Overstyrt i {{count}} kameraer",
+      "tooltip_one": "{{count}} kamera overstyrer verdier i denne seksjonen. Klikk for å se detaljer.",
+      "tooltip_other": "{{count}} kameraer overstyrer verdier i denne seksjonen. Klikk for å se detaljer.",
+      "heading_one": "Denne globale seksjonen har felt som er overstyrt i {{count}} kamera.",
+      "heading_other": "Denne globale seksjonen har felt som er overstyrt i {{count}} kameraer.",
+      "othersField_one": "{{count}} annen",
+      "othersField_other": "{{count}} andre",
+      "profilePrefix": "{{profile}}-profil: {{fields}}"
+    },
+    "overriddenGlobalHeading_one": "Dette kameraet overstyrer {{count}} felt fra den globale konfigurasjonen:",
+    "overriddenGlobalHeading_other": "Dette kameraet overstyrer {{count}} felt fra den globale konfigurasjonen:",
+    "overriddenGlobalNoDeltas": "Dette kameraet overstyrer den globale konfigurasjonen, men ingen feltverdier er forskjellige.",
+    "overriddenBaseConfigHeading_one": "{{profile}}-profilen overstyrer {{count}} felt fra basiskonfigurasjonen:",
+    "overriddenBaseConfigHeading_other": "{{profile}}-profilen overstyrer {{count}} felt fra basiskonfigurasjonen:",
+    "overriddenBaseConfigNoDeltas": "{{profile}}-profilen overstyrer denne seksjonen, men ingen feltverdier er forskjellige fra basiskonfigurasjonen."
   },
   "detectionModel": {
     "plusActive": {
@@ -1659,7 +1708,7 @@
   "go2rtcStreams": {
     "description": "Administrer go2rtc-strømkonfigurasjoner for videreformidling av kamera-strømmer. Hver strøm har ett navn og én eller flere kilde-URL-er.",
     "ffmpeg": {
-      "hardwareAuto": "Automatisk maskinvareakselerasjon",
+      "hardwareAuto": "Automatisk (anbefalt)",
       "useFfmpegModule": "Bruk kompatibilitetsmodus (ffmpeg)",
       "audioExclude": "Ekskluder",
       "videoExclude": "Ekskluder",
@@ -1676,7 +1725,15 @@
       "audioPcma": "Transkod til PCM A-law",
       "audioPcmu": "Transkod til PCM μ-law",
       "audioAac": "Transkod til AAC",
-      "video": "Video"
+      "video": "Video",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "Legg til videokodek",
+      "addAudioCodec": "Legg til lydkodek",
+      "removeCodec": "Fjern kodek"
     },
     "validation": {
       "nameDuplicate": "En strøm med dette navnet eksisterer allerede",
@@ -1696,7 +1753,8 @@
     "addStreamDesc": "Skriv inn et navn for den nye strømmen. Dette navnet vil bli brukt til å referere til strømmen i kamerakonfigurasjonen din.",
     "renameStreamDesc": "Skriv inn et nytt navn for denne strømmen. Endring av navn kan ødelegge for kameraer eller andre strømmer som refererer til den ved navn.",
     "deleteStream": "Slett strøm",
-    "streamName": "Strømnavn"
+    "streamName": "Strømnavn",
+    "streamNumber": "Strøm {{index}}"
   },
   "profiles": {
     "active": "Aktiv",
@@ -1744,18 +1802,21 @@
     "review": {
       "allNonAlertDetections": "All aktivitet som ikke er et varsel, vil bli inkludert som deteksjoner.",
       "detectDisabled": "Objektdeteksjon er deaktivert. Inspeksjonselementer krever detekterte objekter for å kategorisere varsler og deteksjoner.",
-      "recordDisabled": "Opptak er deaktivert, inspeksjonselementer vil ikke bli generert."
+      "recordDisabled": "Opptak er deaktivert, inspeksjonselementer vil ikke bli generert.",
+      "genaiImageSourceRecordingsRecordDisabled": "Bildekilde er satt til \"opptak\", men opptak er deaktivert. Frigate vil falle tilbake til forhåndsvisningsbilder."
     },
     "detectors": {
       "mixedTypesSuggestion": "Alle detektorer må bruke samme type. Fjern eksisterende detektorer eller velg {{type}}.",
       "mixedTypes": "Alle detektorer må bruke samme type. Fjern eksisterende detektorer for å bruke en annen type."
     },
     "faceRecognition": {
-      "globalDisabled": "Ansiktsgjenkjenning er ikke aktivert på globalt nivå. Aktiver det i globale innstillinger for at ansiktsgjenkjenning på kameranivå skal fungere.",
-      "personNotTracked": "Ansiktsgjenkjenning krever at objektet 'person' spores. Sørg for at 'person' er i listen over objektsporing."
+      "globalDisabled": "Utvidelse for ansiktsgjenkjenning må være aktivert for at funksjoner for ansiktsgjenkjenning skal fungere på dette kameraet.",
+      "personNotTracked": "Ansiktsgjenkjenning krever at objektet 'person' spores. Aktiver 'person' under Objekter for dette kameraet.",
+      "modelSizeLarge": "Den store (large) modellen krever GPU eller NPU for akseptabel ytelse. Bruk liten (small) på systemer med kun CPU."
     },
     "detect": {
-      "fpsGreaterThanFive": "Det anbefales ikke å sette FPS for deteksjon høyere enn 5."
+      "fpsGreaterThanFive": "Det anbefales ikke å sette FPS for deteksjon høyere enn 5. Høyere verdier kan føre til ytelsesproblemer uten å gi noen fordeler.",
+      "disabled": "Objektdeteksjon er deaktivert. Stillbilder, inspeksjonselementer og utvidelser som ansiktsgjenkjenning, lesing av kjennemerker og generativ AI vil ikke fungere."
     },
     "birdseye": {
       "objectsModeDetectDisabled": "Fugleperspektiv er satt til 'objekter'-modus, men objektdeteksjon er deaktivert for dette kameraet. Kameraet vil ikke vises i Fugleperspektiv."
@@ -1773,8 +1834,15 @@
       "detectDisabled": "Objektdeteksjon er deaktivert. Stillbilder genereres fra sporede objekter og vil ikke bli opprettet."
     },
     "lpr": {
-      "globalDisabled": "Identifisering av kjennemerker er ikke aktivert på globalt nivå. Aktiver det i globale innstillinger for at identifisering på kameranivå skal fungere.",
-      "vehicleNotTracked": "Identifisering av kjnnemerker krever at 'bil' eller 'motorsykkel' spores."
+      "globalDisabled": "Utvidelse for identifisering av kjennemerker må være aktivert for at LPR-funksjoner skal fungere på dette kameraet.",
+      "vehicleNotTracked": "Identifisering av kjennemerker krever at 'bil' eller 'motorsykkel' spores. Aktiver 'bil' eller 'motorsykkel' under Objekter for dette kameraet.",
+      "modelSizeLarge": "Den store (large) modellen er optimalisert for kjennemerker over flere linjer. Den lille (small) modellen gir bedre ytelse og bør brukes med mindre din region bruker skiltformater med flere linjer."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "Du må konfigurere en GenAI-leverandør med rollen \"beskrivelser\" for at beskrivelser skal kunne genereres."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "Størrelsen \"liten\" med Jina V2-modellen har høyt minnebruk og beregningskostnad. Den \"store\" modellen med en dedikert GPU anbefales."
     }
   },
   "maintenance": {
@@ -1839,7 +1907,14 @@
   },
   "onvif": {
     "profileAuto": "Auto",
-    "profileLoading": "Laster profiler..."
+    "profileLoading": "Laster profiler...",
+    "autotracking": {
+      "zooming": {
+        "disabled": "Deaktivert",
+        "absolute": "Absolutt",
+        "relative": "Relativ"
+      }
+    }
   },
   "confirmReset": "Bekreft nullstilling",
   "resetToDefaultDescription": "Dette vil nullstille alle innstillinger i denne seksjonen til standardverdiene. Denne handlingen kan ikke angres.",
@@ -1886,7 +1961,9 @@
     "saveAllPartial_one": "{{successCount}} av {{totalCount}} seksjoner lagret. {{failCount}} feilet.",
     "saveAllPartial_other": "{{successCount}} av {{totalCount}} seksjoner lagret. {{failCount}} feilet.",
     "saveAllSuccess_one": "{{count}} seksjon ble lagret.",
-    "saveAllSuccess_other": "{{count}} seksjoner ble lagret."
+    "saveAllSuccess_other": "{{count}} seksjoner ble lagret.",
+    "saveAllSuccessRestartRequired_one": "Lagret {{count}} seksjon. Start Frigate på nytt for å aktivere endringene.",
+    "saveAllSuccessRestartRequired_other": "Alle {{count}} seksjoner ble lagret. Start Frigate på nytt for å aktivere endringene."
   },
   "cameraConfig": {
     "toast": {
@@ -1903,5 +1980,104 @@
     "bl": "Nederst til venstre",
     "tr": "Øverst til høyre",
     "tl": "Øverst til venstre"
+  },
+  "birdseye": {
+    "trackingMode": {
+      "objects": "Objekter",
+      "motion": "Bevegelse",
+      "continuous": "Kontinuerlig"
+    },
+    "cameraOrder": {
+      "label": "Kamerarekkefølge",
+      "description": "Dra kameraene for å angi rekkefølgen deres i Fugleperspektiv-oppsettet.",
+      "reorderHandle": "Dra for å endre rekkefølge",
+      "saving": "Lagrer…",
+      "saved": "Lagret"
+    }
+  },
+  "snapshot": {
+    "retainMode": {
+      "all": "Alle",
+      "motion": "Bevegelse",
+      "active_objects": "Aktive objekter"
+    }
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "Nettleser",
+      "12hour": "12 timer",
+      "24hour": "24 timer"
+    },
+    "TimeOrDateStyle": {
+      "full": "Full",
+      "long": "Lang",
+      "medium": "Middels",
+      "short": "Kort"
+    },
+    "unitSystem": {
+      "metric": "Metrisk",
+      "imperial": "Imperial"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "Opptak",
+      "previews": "Forhåndsvisninger"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "Debug",
+      "info": "Info",
+      "warning": "Advarsel",
+      "error": "Feil",
+      "critical": "Kritisk"
+    }
+  },
+  "modelSize": {
+    "small": "Liten",
+    "large": "Stor"
+  },
+  "retainMode": {
+    "all": "Alle",
+    "motion": "Bevegelse",
+    "active_objects": "Aktive objekter"
+  },
+  "previewQuality": {
+    "very_high": "Svært høy",
+    "high": "Høy",
+    "medium": "Middels",
+    "low": "Lav",
+    "very_low": "Svært lav"
+  },
+  "menuDot": {
+    "overrideGlobal": "Denne seksjonen overstyrer den globale konfigurasjonen",
+    "overrideProfile": "Denne seksjonen overstyres av {{profile}}-profilen",
+    "unsaved": "Denne seksjonen har ulagrede endringer"
+  },
+  "detectorsAndModel": {
+    "title": "Detektorer og modell",
+    "description": "Konfigurer detektor-bakenden som kjører objektdeteksjon, og modellen den bruker. Endringer lagres sammen slik at detektoren og modellen forblir synkronisert.",
+    "cardTitles": {
+      "detector": "Detektor-maskinvare",
+      "model": "Deteksjonsmodell"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Egendefinert modell"
+    },
+    "mismatch": {
+      "warning": "Den gjeldende Frigate+-modellen \"{{model}}\" krever {{required}}-detektoren. Velg en kompatibel modell nedenfor eller bytt til Egendefinert modell før du lagrer."
+    },
+    "plusModel": {
+      "requiresDetector": "Krever: {{detector}}",
+      "noModelSelected": "Velg en Frigate+ modell"
+    },
+    "toast": {
+      "saveSuccess": "Innstillinger for detektorer og modell er lagret. Start Frigate på nytt for å aktivere endringene.",
+      "saveError": "Kunne ikke lagre innstillinger for detektorer og modell"
+    },
+    "unsavedChanges": "Ulagrede endringer for detektorer og modell",
+    "restartRequired": "Omstart kreves (detektor eller modell er endret)"
   }
 }

@@ -3,5 +3,14 @@
   "bicycle": "साइकल",
   "car": "कार",
   "motorcycle": "मोटरसाइकल",
-  "airplane": "हवाइजहाज"
+  "airplane": "हवाइजहाज",
+  "bus": "बस",
+  "train": "रेल",
+  "boat": "डुङ्गा",
+  "traffic_light": "ट्राफिक लाइट",
+  "fire_hydrant": "आगो निभाउने यन्त्र",
+  "street_sign": "सडक चिन्ह",
+  "stop_sign": "रोक चिन्ह",
+  "parking_meter": "पार्किङ मिटर",
+  "bench": "बेन्च"
 }

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 import Heading from "@/components/ui/heading";
 import { User } from "@/types/user";
@@ -790,7 +789,6 @@ export default function AuthenticationView({
 
   return (
     <div className="flex size-full flex-col">
-      <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mr-3 md:mt-0">
         {section === "users" && UsersSection}
         {section === "roles" && RolesSection}

@@ -56,18 +56,25 @@ export function CameraLineGraph({
     });
   }, [t, timeFormat]);
 
+  const updateTimesRef = useRef(updateTimes);
+  useEffect(() => {
+    updateTimesRef.current = updateTimes;
+  }, [updateTimes]);
+
   const formatTime = useCallback(
     (val: unknown) => {
-      return formatUnixTimestampToDateTime(
-        updateTimes[Math.round(val as number)],
-        {
-          timezone: config?.ui.timezone,
-          date_format: format,
-          locale,
-        },
-      );
+      const times = updateTimesRef.current;
+      const ts = times[Math.round(val as number)];
+      if (isNaN(ts)) {
+        return "";
+      }
+      return formatUnixTimestampToDateTime(ts, {
+        timezone: config?.ui.timezone,
+        date_format: format,
+        locale,
+      });
     },
-    [config?.ui.timezone, format, locale, updateTimes],
+    [config?.ui.timezone, format, locale],
   );
 
   const options = useMemo(() => {
@@ -211,18 +218,25 @@ export function EventsPerSecondsLineGraph({
     });
   }, [t, timeFormat]);
 
+  const updateTimesRef = useRef(updateTimes);
+  useEffect(() => {
+    updateTimesRef.current = updateTimes;
+  }, [updateTimes]);
+
   const formatTime = useCallback(
     (val: unknown) => {
-      return formatUnixTimestampToDateTime(
-        updateTimes[Math.round(val as number) - 1],
-        {
-          timezone: config?.ui.timezone,
-          date_format: format,
-          locale,
-        },
-      );
+      const times = updateTimesRef.current;
+      const ts = times[Math.round(val as number) - 1];
+      if (isNaN(ts)) {
+        return "";
+      }
+      return formatUnixTimestampToDateTime(ts, {
+        timezone: config?.ui.timezone,
+        date_format: format,
+        locale,
+      });
     },
-    [config?.ui.timezone, format, locale, updateTimes],
+    [config?.ui.timezone, format, locale],
   );
 
   const options = useMemo(() => {

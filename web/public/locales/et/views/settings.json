@@ -115,11 +115,13 @@
           "placeholder": "Sisesta oma senine salasõna"
         },
         "user": {
-          "title": "Kasutajanimi"
+          "title": "Kasutajanimi",
+          "desc": "Lubatud on vaid tähed, numbrid, punktid ja alakriipsud."
         }
       },
       "createUser": {
-        "confirmPassword": "Palun kinnita oma uus salasõna"
+        "confirmPassword": "Palun kinnita oma uus salasõna",
+        "usernameOnlyInclude": "Kasutajanimes võivad olla vaid tähed, numbrid, punkt (.) või alakriips (_)"
       },
       "passwordSetting": {
         "cannotBeEmpty": "Salasõna ei või jääda tühjaks",
@@ -212,6 +214,14 @@
       "ffmpeg": {
         "pathPlaceholder": "rtsp://...",
         "roles": "Rollid"
+      }
+    },
+    "clone": {
+      "categories": {
+        "items": {
+          "lpr": "Sõidukite numbrimärkide tuvastus",
+          "genai": "Generatiivne tehisaru"
+        }
       }
     }
   },
@@ -315,6 +325,10 @@
       "form": {
         "cameras": {
           "title": "Kaamerad"
+        },
+        "role": {
+          "desc": "Lubatud on vaid tähed, numbrid, punktid ja alakriipsud.",
+          "roleOnlyInclude": "Rolli nimes võivad olla vaid tähed, numbrid, punkt (.) või alakriips (_)"
         }
       }
     }
@@ -330,7 +344,36 @@
     "notifications": "Teavitused",
     "frigateplus": "Frigate+",
     "cameraReview": "Ülevaatamine",
-    "profiles": "Profiilid"
+    "profiles": "Profiilid",
+    "integrationLpr": "Sõidukite numbrimärkide tuvastus",
+    "cameraLpr": "Sõidukite numbrimärkide tuvastus",
+    "uiSettings": "Kasutajaliidese seadistused",
+    "globalDetect": "Objektide tuvastamine",
+    "globalRecording": "Salvestamine",
+    "globalSnapshots": "Hetkvõtted",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Liikumise tuvastus",
+    "globalObjects": "Objektid",
+    "globalReview": "Ülevaatamine",
+    "globalAudioEvents": "Heli tuvastus",
+    "globalLivePlayback": "Reaalajas sisu taasesitus",
+    "globalTimestampStyle": "Ajatempli stiil",
+    "systemDatabase": "Andmebaas",
+    "systemTls": "TLS",
+    "systemAuthentication": "Autentimine",
+    "systemNetworking": "Võrgundus",
+    "systemProxy": "Proksiserver",
+    "systemUi": "Kasutajaliides",
+    "systemLogging": "Logimine",
+    "systemEnvironmentVariables": "Keskkonnamuutujad",
+    "systemTelemetry": "Telemeetria",
+    "systemBirdseye": "Vaade linnulennult",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorsAndModel": "Tuvastamine ja mudelid",
+    "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "go2rtc voogedastus",
+    "integrationSemanticSearch": "Semantiline otsing",
+    "integrationGenerativeAi": "Generatiivne tehisaru"
   },
   "dialog": {
     "unsavedChanges": {
@@ -370,6 +413,9 @@
     },
     "birdClassification": {
       "title": "Lindude klassifikatsioon"
+    },
+    "licensePlateRecognition": {
+      "title": "Sõidukite numbrimärkide tuvastus"
     }
   },
   "cameraReview": {
@@ -377,6 +423,13 @@
       "title": "Ülevaatamine",
       "alerts": "Hoiatused ",
       "detections": "Tuvastamise tulemused "
+    },
+    "object_descriptions": {
+      "title": "Generatiivse tehisaru objektikirjeldused",
+      "desc": "Luba/keela ajutiselt selle kaamera jaoks generatiivse tehisaru objektikirjeldused kuni Frigate'i taaskäivitamiseni. Kui see on keelatud, ei küsita selle kaamera jälgitavate objektide kohta tehisintellekti poolt loodud kirjeldusi."
+    },
+    "review_descriptions": {
+      "title": "Generatiivne tehisaru ülevaatamisele kuuluva sisu kirjedlused"
     }
   },
   "motionDetectionTuner": {
@@ -404,7 +457,10 @@
     "dialog": {
       "form": {
         "name": {
-          "title": "Nimi"
+          "title": "Nimi",
+          "error": {
+            "invalidCharacters": "Välja nimes võivad olla vaid tähed, numbrid, alakriipsud (_) või sidekriipsud (-)."
+          }
         },
         "type": {
           "title": "Tüüp"
@@ -419,6 +475,27 @@
           "title": "Tegevused"
         }
       }
+    }
+  },
+  "profiles": {
+    "nameInvalid": "Lubatud on vaid väiketähed, numbrid ja alakriipsud"
+  },
+  "go2rtcStreams": {
+    "validation": {
+      "nameInvalid": "Voogedastuse nimes on lubatud vaid tähed, numbrid alakriipsud ja sidekriipsud"
+    }
+  },
+  "configForm": {
+    "sections": {
+      "lpr": "Sõidukite numbrimärkide tuvastus"
+    }
+  },
+  "configMessages": {
+    "detect": {
+      "disabled": "Objektide tuvastamine on lülitatud välja. Hetkepildid, läbivaatamisele kuuluvad objektid ja täiendavad funktsioonid, nagu näotuvastus, sõidukite numbrimärkide tuvastus ja generatiivne tehisintellekt, ei tööta."
+    },
+    "lpr": {
+      "vehicleNotTracked": "Sõidukite numbrimärkide tuvastus eeldab, et auto või mootorratas on jälgitav. Lülita menüüst Objektid sell kaamera jaoks sisse valikud „auto“ või „mootorratas“."
     }
   }
 }

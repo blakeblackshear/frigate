@@ -9,35 +9,39 @@
         "description": "有効"
     },
     "audio": {
-        "label": "音声検出",
+        "label": "音声検知",
         "enabled": {
             "label": "音声検知を有効化",
-            "description": "このカメラのオーディオイベント検出を有効または無効にします。"
+            "description": "このカメラの音声イベント検知を有効または無効にします。"
         },
         "min_volume": {
             "label": "最小ボリューム",
-            "description": "オーディオ検出を実行するために必要な最小RMS音量閾値。値を小さくすると感度が高くなります（例：200=高、500=中、1000=低）。"
+            "description": "音声検知を実行するために必要な最小RMS音量閾値。値を小さくすると感度が高くなります（例：200=高、500=中、1000=低）。"
         },
         "filters": {
             "label": "音声フィルタ",
-            "description": "誤検出を減らすために使用される信頼度閾値などのフィルタ設定（オーディオタイプごと）。"
+            "description": "誤検知を減らすために使用される信頼度閾値などのフィルタ設定（オーディオタイプごと）。",
+            "threshold": {
+                "label": "音声の最低信頼度",
+                "description": "音声イベントとしてカウントするために必要な最低信頼度しきい値。"
+            }
         },
-        "description": "このカメラの音声ベースのイベント検出設定。",
+        "description": "このカメラの音声ベースのイベント検知設定。",
         "max_not_heard": {
             "label": "タイムアウト終了",
-            "description": "オーディオイベントが終了するまでの残り秒数（設定されたオーディオタイプを除く）。"
+            "description": "音声検知が終了するまでの残り秒数（設定されたオーディオタイプを除く）。"
         },
         "listen": {
             "label": "リスニングタイプ",
-            "description": "検出対象の音声イベントの種類一覧（例：吠え声、火災報知器、悲鳴、会話、叫び声）。"
+            "description": "検知対象の音声イベントの種類一覧（例：吠え声、火災報知器、悲鳴、会話、叫び声）。"
         },
         "enabled_in_config": {
             "label": "元の音声状態",
-            "description": "静的設定ファイルで、音声検出が当初有効にされていたかどうかを示します。"
+            "description": "静的設定ファイルで、音声検知が当初有効にされていたかどうかを示します。"
         },
         "num_threads": {
-            "label": "検出スレッド",
-            "description": "音声検出処理に使用するスレッド数。"
+            "label": "検知スレッド",
+            "description": "音声検知処理に使用するスレッド数。"
         }
     },
     "friendly_name": {
@@ -76,21 +80,874 @@
         }
     },
     "detect": {
-        "label": "物体検出",
-        "description": "物体検出の実行やトラッカーの初期化に使用される、検出や検出ロールの設定。",
+        "label": "物体検知",
+        "description": "物体検知の実行やトラッカーの初期化に使用される、検知や検知ロールの設定。",
         "enabled": {
             "label": "物体検知を有効にする",
             "description": "このカメラの物体検知機能を有効または無効にします。"
         },
         "height": {
-            "label": "高さを検出",
-            "description": "検出ストリームに使用するフレーム高さ（ピクセル）。ネイティブストリーム解像度を使用する場合は、空欄のままにしてください。"
+            "label": "高さを検知",
+            "description": "検知ストリームに使用するフレーム高さ（ピクセル）。ネイティブストリーム解像度を使用する場合は、空欄のままにしてください。"
         },
         "width": {
-            "label": "幅を検出"
+            "label": "幅を検知",
+            "description": "検知ストリームで使用するフレーム幅 (ピクセル)。空欄でストリームのネイティブ解像度を使用。"
+        },
+        "fps": {
+            "label": "検知 FPS",
+            "description": "検知を実行する目標 FPS。低くするほど CPU 使用率が下がります（推奨値は 5、極めて高速な物体を追跡する場合のみ最大 10 まで上げてください）。"
+        },
+        "min_initialized": {
+            "label": "最小初期化フレーム数",
+            "description": "追跡オブジェクトを生成するために必要な連続検知ヒット数。値を大きくすると誤初期化が減ります。デフォルトは fps の半分。"
+        },
+        "max_disappeared": {
+            "label": "最大消失フレーム数",
+            "description": "追跡オブジェクトが消失したと判断するまでの未検知フレーム数。"
+        },
+        "stationary": {
+            "label": "静止オブジェクト設定",
+            "description": "一定時間静止しているオブジェクトを検知・管理するための設定。",
+            "interval": {
+                "label": "静止チェック間隔",
+                "description": "静止オブジェクトを確認するための検知を、何フレームおきに実行するか。"
+            },
+            "threshold": {
+                "label": "静止しきい値",
+                "description": "オブジェクトを静止状態とみなすために必要な位置変化のないフレーム数。"
+            },
+            "max_frames": {
+                "label": "最大追跡フレーム",
+                "description": "静止オブジェクトを破棄するまでの追跡フレーム数の上限。",
+                "default": {
+                    "label": "デフォルト最大フレーム",
+                    "description": "静止オブジェクトの追跡を停止するまでのデフォルト最大フレーム数。"
+                },
+                "objects": {
+                    "label": "オブジェクト別最大フレーム",
+                    "description": "静止オブジェクト追跡の最大フレーム数をオブジェクトごとに上書きします。"
+                }
+            },
+            "classifier": {
+                "label": "ビジュアル分類器を有効化",
+                "description": "バウンディングボックスが揺らいでも真に静止しているオブジェクトを検知するため、ビジュアル分類器を使用します。"
+            }
+        },
+        "annotation_offset": {
+            "label": "注釈オフセット",
+            "description": "タイムライン上のバウンディングボックスを録画と揃えるため、検知注釈を時間方向にずらすミリ秒数。正負どちらも指定可能。"
         }
     },
     "mqtt": {
-        "label": "MQTT"
+        "label": "MQTT",
+        "description": "MQTT 画像配信の設定。",
+        "enabled": {
+            "label": "画像送信",
+            "description": "このカメラのオブジェクト画像スナップショットを MQTT トピックに配信する機能を有効にします。"
+        },
+        "timestamp": {
+            "label": "タイムスタンプを追加",
+            "description": "MQTT に配信する画像にタイムスタンプを重ねて表示します。"
+        },
+        "bounding_box": {
+            "label": "バウンディングボックスを追加",
+            "description": "MQTT に配信する画像にバウンディングボックスを描画します。"
+        },
+        "crop": {
+            "label": "画像を切り抜き",
+            "description": "MQTT に配信する画像を検知オブジェクトのバウンディングボックスで切り抜きます。"
+        },
+        "height": {
+            "label": "画像の高さ",
+            "description": "MQTT 配信時に画像をリサイズする高さ (ピクセル)。"
+        },
+        "required_zones": {
+            "label": "必須ゾーン",
+            "description": "MQTT 画像を配信するためにオブジェクトが進入する必要があるゾーン。"
+        },
+        "quality": {
+            "label": "JPEG 品質",
+            "description": "MQTT に配信する画像の JPEG 品質 (0-100)。"
+        }
+    },
+    "notifications": {
+        "label": "通知",
+        "enabled": {
+            "label": "通知を有効化",
+            "description": "このカメラの通知を有効または無効にします。"
+        },
+        "email": {
+            "label": "通知メールアドレス",
+            "description": "プッシュ通知用、または特定の通知プロバイダで必要となるメールアドレス。"
+        },
+        "cooldown": {
+            "label": "クールダウン期間",
+            "description": "受信者への通知連投を避けるための通知間隔（秒）。"
+        },
+        "enabled_in_config": {
+            "label": "元の通知状態",
+            "description": "元の静的設定で通知が有効化されていたかを示します。"
+        },
+        "description": "このカメラの通知を有効化・制御する設定。"
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "FFmpeg の設定。バイナリパス、引数、ハードウェアアクセラレーション、ロール別の出力引数を含みます。",
+        "path": {
+            "label": "FFmpeg パス",
+            "description": "使用する FFmpeg バイナリのパス、またはバージョンエイリアス（「5.0」または「7.0」）。"
+        },
+        "global_args": {
+            "label": "FFmpeg グローバル引数",
+            "description": "FFmpeg プロセスに渡されるグローバル引数。"
+        },
+        "hwaccel_args": {
+            "label": "ハードウェアアクセラレーション引数",
+            "description": "FFmpeg のハードウェアアクセラレーション引数。プロバイダ固有のプリセットの使用を推奨。"
+        },
+        "input_args": {
+            "label": "入力引数",
+            "description": "FFmpeg の入力ストリームに適用される引数。"
+        },
+        "output_args": {
+            "label": "出力引数",
+            "description": "detect や record など、FFmpeg のロール別に使用されるデフォルト出力引数。",
+            "detect": {
+                "label": "検知ロールの出力引数",
+                "description": "detect ロールのストリームに使用されるデフォルト出力引数。"
+            },
+            "record": {
+                "label": "録画ロールの出力引数",
+                "description": "record ロールのストリームに使用されるデフォルト出力引数。"
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg 再試行間隔",
+            "description": "カメラストリームの失敗後、再接続を試みるまでの待機秒数。デフォルトは 10 秒。"
+        },
+        "apple_compatibility": {
+            "label": "Apple 互換性",
+            "description": "H.265 録画時に Apple プレーヤーとの互換性向上のため HEVC タグ付けを有効化します。"
+        },
+        "gpu": {
+            "label": "GPU インデックス",
+            "description": "ハードウェアアクセラレーションで使用するデフォルト GPU インデックス。"
+        },
+        "inputs": {
+            "label": "カメラ入力",
+            "description": "このカメラの入力ストリーム定義（パスとロール）のリスト。",
+            "path": {
+                "label": "入力パス",
+                "description": "カメラ入力ストリームの URL またはパス。"
+            },
+            "roles": {
+                "label": "入力ロール",
+                "description": "この入力ストリームのロール。"
+            },
+            "global_args": {
+                "label": "FFmpeg グローバル引数",
+                "description": "この入力ストリームに対する FFmpeg グローバル引数。"
+            },
+            "hwaccel_args": {
+                "label": "ハードウェアアクセラレーション引数",
+                "description": "この入力ストリームのハードウェアアクセラレーション引数。"
+            },
+            "input_args": {
+                "label": "入力引数",
+                "description": "このストリーム固有の入力引数。"
+            }
+        }
+    },
+    "live": {
+        "label": "ライブ再生",
+        "streams": {
+            "label": "ライブストリーム名",
+            "description": "設定済みのストリーム名と、ライブ再生で使用する restream/go2rtc 名のマッピング。"
+        },
+        "height": {
+            "label": "ライブの高さ",
+            "description": "Web UI で jsmpeg ライブストリームを描画する高さ (ピクセル)。検知ストリーム高さ以下である必要があります。"
+        },
+        "quality": {
+            "label": "ライブ品質",
+            "description": "jsmpeg ストリームのエンコード品質 (1 が最高、31 が最低)。"
+        },
+        "description": "ライブストリームの選択・解像度・品質を Web UI から制御する設定。"
+    },
+    "motion": {
+        "label": "モーション検知",
+        "enabled": {
+            "label": "モーション検知を有効化",
+            "description": "このカメラのモーション検知を有効または無効にします。"
+        },
+        "threshold": {
+            "label": "モーションしきい値",
+            "description": "モーション検出器が使用するピクセル差分しきい値。値を大きくすると感度が下がります (範囲 1-255)。"
+        },
+        "lightning_threshold": {
+            "label": "雷検知しきい値",
+            "description": "短時間の照明スパイクを検知して無視するしきい値（値が小さいほど感度が高く、0.3 〜 1.0 が目安）。これはモーション検知を完全に止めるものではなく、しきい値超過後に検出器が追加フレームの解析を停止するだけです。モーションベースの録画はこれらのイベント中も作成されます。"
+        },
+        "skip_motion_threshold": {
+            "label": "モーションスキップしきい値",
+            "description": "0.0 〜 1.0 の値を指定し、1 フレームでそれ以上の割合が変化した場合、検出器はモーションボックスを返さず即座に再キャリブレーションします。雷や嵐などの誤検知を減らし CPU を節約できますが、PTZ カメラのオート追跡などの実イベントを取りこぼす可能性があります。数 MB の録画を捨てるか、数本の短いクリップを確認するかのトレードオフです。無効化するには未設定 (None) のままにします。"
+        },
+        "improve_contrast": {
+            "label": "コントラスト強調",
+            "description": "モーション解析前にフレームのコントラストを強調して検知を補助します。"
+        },
+        "contour_area": {
+            "label": "輪郭面積",
+            "description": "モーション輪郭としてカウントするために必要な最小ピクセル数。"
+        },
+        "delta_alpha": {
+            "label": "デルタアルファ",
+            "description": "モーション計算のフレーム差分で使用されるアルファブレンディング係数。"
+        },
+        "frame_alpha": {
+            "label": "フレームアルファ",
+            "description": "モーション前処理でフレームをブレンドする際に使用するアルファ値。"
+        },
+        "frame_height": {
+            "label": "フレーム高さ",
+            "description": "モーション計算時にフレームをスケーリングする高さ (ピクセル)。"
+        },
+        "mask": {
+            "label": "マスク座標",
+            "description": "領域を含める／除外するモーションマスクポリゴンを定義する x,y 座標の順序付きリスト。"
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT オフ遅延",
+            "description": "最後のモーション検知後、MQTT で「off」状態を発行するまでの待機秒数。"
+        },
+        "enabled_in_config": {
+            "label": "元のモーション状態",
+            "description": "元の静的設定でモーション検知が有効化されていたかを示します。"
+        },
+        "raw_mask": {
+            "label": "Raw マスク"
+        },
+        "description": "このカメラのモーション検知のデフォルト設定。"
+    },
+    "objects": {
+        "label": "オブジェクト",
+        "description": "追跡するラベルとオブジェクト別フィルタを含む、オブジェクト追跡のデフォルト設定。",
+        "track": {
+            "label": "追跡するオブジェクト",
+            "description": "このカメラで追跡するオブジェクトラベルのリスト。"
+        },
+        "filters": {
+            "label": "オブジェクトフィルタ",
+            "description": "誤検知を減らすために検知オブジェクトに適用するフィルタ（面積、比率、信頼度）。",
+            "min_area": {
+                "label": "最小オブジェクト面積",
+                "description": "このオブジェクト種別に必要なバウンディングボックスの最小面積（ピクセルまたは割合）。ピクセル (int) または割合 (0.000001 〜 0.99 の float) を指定可能。"
+            },
+            "max_area": {
+                "label": "最大オブジェクト面積",
+                "description": "このオブジェクト種別に許容されるバウンディングボックスの最大面積（ピクセルまたは割合）。ピクセル (int) または割合 (0.000001 〜 0.99 の float) を指定可能。"
+            },
+            "min_ratio": {
+                "label": "最小アスペクト比",
+                "description": "対象となるバウンディングボックスに必要な最小の幅／高さ比。"
+            },
+            "max_ratio": {
+                "label": "最大アスペクト比",
+                "description": "対象となるバウンディングボックスに許容される最大の幅／高さ比。"
+            },
+            "threshold": {
+                "label": "信頼度しきい値",
+                "description": "オブジェクトを真陽性とみなすために必要な平均検知信頼度。"
+            },
+            "min_score": {
+                "label": "最低信頼度",
+                "description": "オブジェクトをカウントするために必要な単一フレームでの最低検知信頼度。"
+            },
+            "mask": {
+                "label": "フィルタマスク",
+                "description": "フレーム内でこのフィルタが適用される範囲を定義するポリゴン座標。"
+            },
+            "raw_mask": {
+                "label": "Raw マスク"
+            }
+        },
+        "mask": {
+            "label": "オブジェクトマスク",
+            "description": "指定領域でオブジェクト検知を行わないようにするためのマスクポリゴン。"
+        },
+        "raw_mask": {
+            "label": "Raw マスク"
+        },
+        "genai": {
+            "label": "GenAI オブジェクト設定",
+            "description": "追跡オブジェクトの説明生成や、生成 AI へのフレーム送信に関する GenAI オプション。",
+            "enabled": {
+                "label": "GenAI を有効化",
+                "description": "追跡オブジェクトの説明を GenAI で生成する機能を既定で有効にします。"
+            },
+            "use_snapshot": {
+                "label": "スナップショットを使用",
+                "description": "GenAI 説明生成にサムネイルではなくオブジェクトスナップショットを使用します。"
+            },
+            "prompt": {
+                "label": "キャプションプロンプト",
+                "description": "GenAI で説明を生成する際に使用するデフォルトのプロンプトテンプレート。"
+            },
+            "object_prompts": {
+                "label": "オブジェクト別プロンプト",
+                "description": "特定のラベルに対する GenAI 出力をカスタマイズするためのオブジェクト別プロンプト。"
+            },
+            "objects": {
+                "label": "GenAI 対象オブジェクト",
+                "description": "GenAI に既定で送信するオブジェクトラベルのリスト。"
+            },
+            "required_zones": {
+                "label": "必須ゾーン",
+                "description": "GenAI 説明生成の対象となるためにオブジェクトが進入する必要があるゾーン。"
+            },
+            "debug_save_thumbnails": {
+                "label": "サムネイルを保存",
+                "description": "デバッグや確認のため、GenAI に送信したサムネイルを保存します。"
+            },
+            "send_triggers": {
+                "label": "GenAI 送信トリガー",
+                "description": "フレームを GenAI に送るタイミング（終了時、更新後など）を定義します。",
+                "tracked_object_end": {
+                    "label": "終了時に送信",
+                    "description": "追跡オブジェクトが終了した時点で GenAI にリクエストを送信します。"
+                },
+                "after_significant_updates": {
+                    "label": "早期 GenAI トリガー",
+                    "description": "追跡オブジェクトに対して指定回数の重要な更新があった後、GenAI にリクエストを送信します。"
+                }
+            },
+            "enabled_in_config": {
+                "label": "元の GenAI 状態",
+                "description": "元の静的設定で GenAI が有効化されていたかを示します。"
+            }
+        }
+    },
+    "record": {
+        "label": "録画",
+        "enabled": {
+            "label": "録画を有効化",
+            "description": "このカメラの録画を有効または無効にします。"
+        },
+        "expire_interval": {
+            "label": "録画クリーンアップ間隔",
+            "description": "期限切れ録画セグメントを削除するクリーンアップを実行する間隔 (分)。"
+        },
+        "continuous": {
+            "label": "常時保持",
+            "description": "追跡オブジェクトやモーションに関係なく録画を保持する日数。アラートと検知の録画のみを保持したい場合は 0 を指定します。",
+            "days": {
+                "label": "保持日数",
+                "description": "録画を保持する日数。"
+            }
+        },
+        "motion": {
+            "label": "モーション録画保持",
+            "description": "追跡オブジェクトに関係なくモーションでトリガーされた録画を保持する日数。アラートと検知の録画のみを保持したい場合は 0 を指定します。",
+            "days": {
+                "label": "保持日数",
+                "description": "録画を保持する日数。"
+            }
+        },
+        "detections": {
+            "label": "検知録画保持",
+            "description": "検知イベントの録画保持設定。前後の撮影時間を含みます。",
+            "pre_capture": {
+                "label": "イベント前秒数",
+                "description": "検知イベントの前に録画に含める秒数。"
+            },
+            "post_capture": {
+                "label": "イベント後秒数",
+                "description": "検知イベントの後に録画に含める秒数。"
+            },
+            "retain": {
+                "label": "イベント保持",
+                "description": "検知イベントの録画保持設定。",
+                "days": {
+                    "label": "保持日数",
+                    "description": "検知イベント録画を保持する日数。"
+                },
+                "mode": {
+                    "label": "保持モード",
+                    "description": "保持モード: all（全セグメントを保存）、motion（モーションがあるセグメントを保存）、active_objects（アクティブなオブジェクトを含むセグメントを保存）。"
+                }
+            }
+        },
+        "alerts": {
+            "label": "アラート録画保持",
+            "description": "アラートイベントの録画保持設定。前後の撮影時間を含みます。",
+            "pre_capture": {
+                "label": "イベント前秒数",
+                "description": "アラートイベントの前に録画に含める秒数。"
+            },
+            "post_capture": {
+                "label": "イベント後秒数",
+                "description": "アラートイベントの後に録画に含める秒数。"
+            },
+            "retain": {
+                "label": "イベント保持",
+                "description": "アラートイベントの録画保持設定。",
+                "days": {
+                    "label": "保持日数",
+                    "description": "アラートイベント録画を保持する日数。"
+                },
+                "mode": {
+                    "label": "保持モード",
+                    "description": "保持モード: all（全セグメントを保存）、motion（モーションがあるセグメントを保存）、active_objects（アクティブなオブジェクトを含むセグメントを保存）。"
+                }
+            }
+        },
+        "export": {
+            "label": "エクスポート設定",
+            "description": "タイムラプスやハードウェアアクセラレーションなど、録画をエクスポートする際に使用する設定。",
+            "hwaccel_args": {
+                "label": "エクスポート用 hwaccel 引数",
+                "description": "エクスポート／トランスコード処理で使用するハードウェアアクセラレーション引数。"
+            },
+            "max_concurrent": {
+                "label": "同時エクスポート数の上限",
+                "description": "同時に処理するエクスポートジョブの最大数。"
+            }
+        },
+        "preview": {
+            "label": "プレビュー設定",
+            "description": "UI に表示される録画プレビューの品質を制御する設定。",
+            "quality": {
+                "label": "プレビュー品質",
+                "description": "プレビュー品質レベル (very_low, low, medium, high, very_high)。"
+            }
+        },
+        "enabled_in_config": {
+            "label": "元の録画状態",
+            "description": "元の静的設定で録画が有効化されていたかを示します。"
+        },
+        "description": "このカメラの録画と保持に関する設定。"
+    },
+    "review": {
+        "label": "レビュー",
+        "alerts": {
+            "label": "アラート設定",
+            "description": "どの追跡オブジェクトがアラートを生成するか、およびアラートの保持方法に関する設定。",
+            "enabled": {
+                "label": "アラートを有効化",
+                "description": "このカメラのアラート生成を有効または無効にします。"
+            },
+            "labels": {
+                "label": "アラートラベル",
+                "description": "アラート対象となるオブジェクトラベルのリスト（例: car, person）。"
+            },
+            "required_zones": {
+                "label": "必須ゾーン",
+                "description": "アラートとみなされるためにオブジェクトが進入する必要があるゾーン。空欄ですべてのゾーンを許可。"
+            },
+            "enabled_in_config": {
+                "label": "元のアラート状態",
+                "description": "元の静的設定でアラートが有効化されていたかを記録します。"
+            },
+            "cutoff_time": {
+                "label": "アラート打ち切り時間",
+                "description": "アラートを引き起こすアクティビティが途絶えてからアラートを打ち切るまでの待機秒数。"
+            }
+        },
+        "detections": {
+            "label": "検知設定",
+            "description": "どの追跡オブジェクトが（アラートではない）検知を生成するか、および検知の保持方法に関する設定。",
+            "enabled": {
+                "label": "検知を有効化",
+                "description": "このカメラの検知イベントを有効または無効にします。"
+            },
+            "labels": {
+                "label": "検知ラベル",
+                "description": "検知イベントの対象となるオブジェクトラベルのリスト。"
+            },
+            "required_zones": {
+                "label": "必須ゾーン",
+                "description": "検知とみなされるためにオブジェクトが進入する必要があるゾーン。空欄ですべてのゾーンを許可。"
+            },
+            "cutoff_time": {
+                "label": "検知打ち切り時間",
+                "description": "検知を引き起こすアクティビティが途絶えてから検知を打ち切るまでの待機秒数。"
+            },
+            "enabled_in_config": {
+                "label": "元の検知状態",
+                "description": "元の静的設定で検知が有効化されていたかを記録します。"
+            }
+        },
+        "genai": {
+            "label": "GenAI 設定",
+            "description": "レビュー項目の説明やサマリーを生成 AI で作成する機能の制御。",
+            "enabled": {
+                "label": "GenAI 説明を有効化",
+                "description": "レビュー項目の GenAI 生成説明やサマリーを有効または無効にします。"
+            },
+            "alerts": {
+                "label": "アラートに GenAI を使用",
+                "description": "アラート項目の説明を GenAI で生成します。"
+            },
+            "detections": {
+                "label": "検知に GenAI を使用",
+                "description": "検知項目の説明を GenAI で生成します。"
+            },
+            "image_source": {
+                "label": "レビュー画像ソース",
+                "description": "GenAI に送信する画像のソース（「preview」または「recordings」）。「recordings」は高品質ですがトークン消費が増えます。"
+            },
+            "additional_concerns": {
+                "label": "追加の懸念事項",
+                "description": "このカメラのアクティビティ評価時に GenAI に考慮させる追加の懸念や注意事項のリスト。"
+            },
+            "debug_save_thumbnails": {
+                "label": "サムネイルを保存",
+                "description": "デバッグや確認のため、GenAI プロバイダに送信したサムネイルを保存します。"
+            },
+            "enabled_in_config": {
+                "label": "元の GenAI 状態",
+                "description": "元の静的設定で GenAI レビューが有効化されていたかを記録します。"
+            },
+            "preferred_language": {
+                "label": "希望言語",
+                "description": "GenAI プロバイダに生成応答で要求する言語。"
+            },
+            "activity_context_prompt": {
+                "label": "活動コンテキストプロンプト",
+                "description": "GenAI サマリーの文脈として、何が不審な活動で何がそうでないかを記述するカスタムプロンプト。"
+            }
+        },
+        "description": "このカメラの UI 表示・保存で使用するアラート、検知、GenAI レビューサマリーの設定。"
+    },
+    "snapshots": {
+        "label": "スナップショット",
+        "enabled": {
+            "label": "スナップショットを有効化",
+            "description": "このカメラのスナップショット保存を有効または無効にします。"
+        },
+        "timestamp": {
+            "label": "タイムスタンプ重ね合わせ",
+            "description": "API スナップショットにタイムスタンプを重ねて表示します。"
+        },
+        "bounding_box": {
+            "label": "バウンディングボックス重ね合わせ",
+            "description": "API スナップショットに追跡オブジェクトのバウンディングボックスを描画します。"
+        },
+        "crop": {
+            "label": "スナップショットを切り抜き",
+            "description": "API スナップショットを検知オブジェクトのバウンディングボックスで切り抜きます。"
+        },
+        "required_zones": {
+            "label": "必須ゾーン",
+            "description": "スナップショットを保存するためにオブジェクトが進入する必要があるゾーン。"
+        },
+        "height": {
+            "label": "スナップショット高さ",
+            "description": "API スナップショットをリサイズする高さ (ピクセル)。空欄で元のサイズを維持。"
+        },
+        "retain": {
+            "label": "スナップショット保持",
+            "description": "デフォルト保持日数とオブジェクト別上書きを含む、スナップショット保持設定。",
+            "default": {
+                "label": "デフォルト保持期間",
+                "description": "スナップショットを保持するデフォルト日数。"
+            },
+            "mode": {
+                "label": "保持モード",
+                "description": "保持モード: all（全セグメントを保存）、motion（モーションがあるセグメントを保存）、active_objects（アクティブなオブジェクトを含むセグメントを保存）。"
+            },
+            "objects": {
+                "label": "オブジェクト別保持",
+                "description": "オブジェクトごとのスナップショット保持日数の上書き。"
+            }
+        },
+        "quality": {
+            "label": "スナップショット品質",
+            "description": "保存するスナップショットのエンコード品質 (0-100)。"
+        },
+        "description": "このカメラの追跡オブジェクトに対する API 生成スナップショットの設定。"
+    },
+    "timestamp_style": {
+        "label": "タイムスタンプスタイル",
+        "position": {
+            "label": "タイムスタンプ位置",
+            "description": "画像内のタイムスタンプ位置 (tl/tr/bl/br)。"
+        },
+        "format": {
+            "label": "タイムスタンプ書式",
+            "description": "タイムスタンプに使用する日時書式文字列 (Python datetime 書式コード)。"
+        },
+        "color": {
+            "label": "タイムスタンプ色",
+            "description": "タイムスタンプ文字色の RGB 値 (各 0-255)。",
+            "red": {
+                "label": "赤",
+                "description": "タイムスタンプ色の赤成分 (0-255)。"
+            },
+            "green": {
+                "label": "緑",
+                "description": "タイムスタンプ色の緑成分 (0-255)。"
+            },
+            "blue": {
+                "label": "青",
+                "description": "タイムスタンプ色の青成分 (0-255)。"
+            }
+        },
+        "thickness": {
+            "label": "タイムスタンプ太さ",
+            "description": "タイムスタンプ文字の線の太さ。"
+        },
+        "effect": {
+            "label": "タイムスタンプエフェクト",
+            "description": "タイムスタンプ文字の視覚効果 (none, solid, shadow)。"
+        },
+        "description": "スナップショットおよびデバッグビューに適用されるタイムスタンプの表示設定。"
+    },
+    "semantic_search": {
+        "label": "セマンティック検索",
+        "triggers": {
+            "label": "トリガー",
+            "description": "カメラ別のセマンティック検索トリガーの動作と一致条件。",
+            "friendly_name": {
+                "label": "表示名",
+                "description": "このトリガーの UI 表示用の任意の名前。"
+            },
+            "enabled": {
+                "label": "このトリガーを有効化",
+                "description": "このセマンティック検索トリガーを有効または無効にします。"
+            },
+            "type": {
+                "label": "トリガー種別",
+                "description": "トリガー種別: 「thumbnail」（画像に対する一致）または「description」（テキストに対する一致）。"
+            },
+            "data": {
+                "label": "トリガー内容",
+                "description": "追跡オブジェクトと照合するテキストフレーズまたはサムネイル ID。"
+            },
+            "threshold": {
+                "label": "トリガーしきい値",
+                "description": "このトリガーを発火させるために必要な最低類似度スコア (0-1)。"
+            },
+            "actions": {
+                "label": "トリガーアクション",
+                "description": "トリガー一致時に実行するアクションのリスト (notification, sub_label, attribute)。"
+            }
+        },
+        "description": "オブジェクト埋め込みを構築・クエリして類似項目を見つけるセマンティック検索の設定。"
+    },
+    "face_recognition": {
+        "label": "顔認識",
+        "enabled": {
+            "label": "顔認識を有効化",
+            "description": "顔認識を有効または無効にします。"
+        },
+        "min_area": {
+            "label": "顔の最小面積",
+            "description": "認識を試みるために必要な顔ボックスの最小面積 (ピクセル)。"
+        },
+        "description": "このカメラの顔検知と顔認識の設定。"
+    },
+    "lpr": {
+        "label": "ナンバープレート認識",
+        "description": "ナンバープレート認識の設定。検知しきい値、書式整形、既知ナンバーなどを含みます。",
+        "enabled": {
+            "label": "LPR を有効化",
+            "description": "このカメラで LPR を有効または無効にします。"
+        },
+        "min_area": {
+            "label": "プレート最小面積",
+            "description": "認識を試みるために必要なプレート最小面積 (ピクセル)。"
+        },
+        "enhancement": {
+            "label": "強調レベル",
+            "description": "OCR 前にプレート切り出し画像に適用する強調レベル (0-10)。値を大きくしても常に改善するとは限らず、5 を超えると夜間プレートでのみ有効な場合があるため注意が必要です。"
+        },
+        "expire_time": {
+            "label": "失効秒数",
+            "description": "未検知ナンバーをトラッカーから失効させるまでの秒数（専用 LPR カメラのみ）。"
+        }
+    },
+    "profiles": {
+        "label": "プロファイル",
+        "description": "実行時に有効化できる部分上書きを持つ、名前付きの設定プロファイル。"
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "このカメラの ONVIF 接続および PTZ オート追跡の設定。",
+        "host": {
+            "label": "ONVIF ホスト",
+            "description": "このカメラの ONVIF サービスのホスト（オプションでスキーマも）。"
+        },
+        "port": {
+            "label": "ONVIF ポート",
+            "description": "ONVIF サービスのポート番号。"
+        },
+        "user": {
+            "label": "ONVIF ユーザー名",
+            "description": "ONVIF 認証用のユーザー名。ONVIF に admin ユーザーが必要なデバイスもあります。"
+        },
+        "password": {
+            "label": "ONVIF パスワード",
+            "description": "ONVIF 認証用のパスワード。"
+        },
+        "tls_insecure": {
+            "label": "TLS 検証を無効化",
+            "description": "ONVIF の TLS 検証をスキップし、ダイジェスト認証も無効化します（安全でないため、信頼できるネットワークでのみ使用）。"
+        },
+        "profile": {
+            "label": "ONVIF プロファイル",
+            "description": "PTZ 制御に使用する ONVIF メディアプロファイル（トークンまたは名前で指定）。未設定の場合、有効な PTZ 設定を持つ最初のプロファイルが自動選択されます。"
+        },
+        "autotracking": {
+            "label": "オートトラッキング",
+            "description": "PTZ カメラの動作で移動中のオブジェクトを自動追跡し、フレーム中央に保ちます。",
+            "enabled": {
+                "label": "オートトラッキングを有効化",
+                "description": "検知オブジェクトの PTZ オート追跡を有効または無効にします。"
+            },
+            "calibrate_on_startup": {
+                "label": "起動時にキャリブレーション",
+                "description": "追跡精度を向上させるため、起動時に PTZ モーター速度を測定します。キャリブレーション後に movement_weights が設定に書き込まれます。"
+            },
+            "zooming": {
+                "label": "ズームモード",
+                "description": "ズーム動作の制御: disabled (パン／チルトのみ)、absolute (互換性が最も高い)、relative (パン／チルト／ズーム同時)。"
+            },
+            "zoom_factor": {
+                "label": "ズーム倍率",
+                "description": "追跡対象オブジェクトのズームレベルを制御します。値が小さいほど広い範囲を保ち、大きいほどズームインしますが追跡を失う可能性があります。0.1 〜 0.75 の範囲で指定。"
+            },
+            "track": {
+                "label": "追跡対象オブジェクト",
+                "description": "オートトラッキングを発動させるオブジェクト種別のリスト。"
+            },
+            "required_zones": {
+                "label": "必須ゾーン",
+                "description": "オートトラッキング開始前にオブジェクトが進入する必要があるゾーン。"
+            },
+            "return_preset": {
+                "label": "復帰プリセット",
+                "description": "追跡終了後にカメラが戻る、ファームウェアに設定されている ONVIF プリセット名。"
+            },
+            "timeout": {
+                "label": "復帰タイムアウト",
+                "description": "追跡を失ってからカメラをプリセット位置に戻すまでの待機秒数。"
+            },
+            "movement_weights": {
+                "label": "動作重み",
+                "description": "カメラキャリブレーションによって自動生成される値。手動で変更しないでください。"
+            },
+            "enabled_in_config": {
+                "label": "元のオート追跡状態",
+                "description": "オートトラッキングが設定で有効化されていたかを追跡する内部フィールド。"
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "時刻差異を無視",
+            "description": "ONVIF 通信時に、カメラと Frigate サーバー間の時刻同期差異を無視します。"
+        }
+    },
+    "best_image_timeout": {
+        "label": "ベストイメージタイムアウト",
+        "description": "最高信頼度スコアの画像を取得するまでの待機時間。"
+    },
+    "type": {
+        "label": "カメラタイプ",
+        "description": "カメラタイプ"
+    },
+    "ui": {
+        "label": "カメラ UI",
+        "description": "UI 内でのこのカメラの表示順と表示設定。順序はデフォルトダッシュボードに影響します。より細かい制御にはカメラグループを使用してください。",
+        "order": {
+            "label": "UI 表示順",
+            "description": "UI 内でのカメラの並び順に使用される数値（デフォルトダッシュボードとリスト）。値が大きいほど後ろに表示されます。"
+        },
+        "dashboard": {
+            "label": "UI に表示",
+            "description": "このカメラを Frigate UI 全体に表示するかを切り替えます。無効化した場合、再表示するには設定ファイルを手動編集する必要があります。"
+        }
+    },
+    "webui_url": {
+        "label": "カメラ URL",
+        "description": "システムページからカメラに直接アクセスするための URL"
+    },
+    "zones": {
+        "label": "ゾーン",
+        "description": "ゾーンを使うとフレーム内の特定領域を定義でき、オブジェクトがその領域内にあるかを判定できます。",
+        "friendly_name": {
+            "label": "ゾーン名",
+            "description": "Frigate UI に表示されるユーザー向けのゾーン名。未設定の場合、ゾーン名の整形版が使用されます。"
+        },
+        "enabled": {
+            "label": "有効",
+            "description": "このゾーンを有効または無効にします。無効化したゾーンは実行時に無視されます。"
+        },
+        "enabled_in_config": {
+            "label": "ゾーンの元の状態を保持する。"
+        },
+        "filters": {
+            "label": "ゾーンフィルタ",
+            "description": "このゾーン内のオブジェクトに適用するフィルタ。誤検知を減らすか、ゾーン内に存在するとみなすオブジェクトを制限するために使用します。",
+            "min_area": {
+                "label": "最小オブジェクト面積",
+                "description": "このオブジェクト種別に必要なバウンディングボックスの最小面積（ピクセルまたは割合）。ピクセル (int) または割合 (0.000001 〜 0.99 の float) を指定可能。"
+            },
+            "max_area": {
+                "label": "最大オブジェクト面積",
+                "description": "このオブジェクト種別に許容されるバウンディングボックスの最大面積（ピクセルまたは割合）。ピクセル (int) または割合 (0.000001 〜 0.99 の float) を指定可能。"
+            },
+            "min_ratio": {
+                "label": "最小アスペクト比",
+                "description": "対象となるバウンディングボックスに必要な最小の幅／高さ比。"
+            },
+            "max_ratio": {
+                "label": "最大アスペクト比",
+                "description": "対象となるバウンディングボックスに許容される最大の幅／高さ比。"
+            },
+            "threshold": {
+                "label": "信頼度しきい値",
+                "description": "オブジェクトを真陽性とみなすために必要な平均検知信頼度。"
+            },
+            "min_score": {
+                "label": "最低信頼度",
+                "description": "オブジェクトをカウントするために必要な単一フレームでの最低検知信頼度。"
+            },
+            "mask": {
+                "label": "フィルタマスク",
+                "description": "フレーム内でこのフィルタが適用される範囲を定義するポリゴン座標。"
+            },
+            "raw_mask": {
+                "label": "Raw マスク"
+            }
+        },
+        "coordinates": {
+            "label": "座標",
+            "description": "ゾーン領域を定義するポリゴン座標。カンマ区切り文字列または座標文字列のリスト。座標は相対値 (0-1) または絶対値 (旧形式) で指定。"
+        },
+        "distances": {
+            "label": "実世界の距離",
+            "description": "ゾーン四辺形の各辺に対応する実世界の距離（任意）。速度や距離計算に使用します。設定する場合は必ず 4 つの値が必要です。"
+        },
+        "inertia": {
+            "label": "慣性フレーム数",
+            "description": "オブジェクトをゾーン内に存在するとみなすために、連続して検知される必要があるフレーム数。一時的な検知を除外するのに役立ちます。"
+        },
+        "loitering_time": {
+            "label": "うろつき秒数",
+            "description": "うろつきとみなされるためにオブジェクトがゾーン内にとどまる必要がある秒数。0 でうろつき検知を無効化。"
+        },
+        "speed_threshold": {
+            "label": "最低速度",
+            "description": "ゾーン内に存在するとみなされるためにオブジェクトに必要な最低速度（distances 設定時は実世界単位）。速度ベースのゾーントリガーに使用。"
+        },
+        "objects": {
+            "label": "トリガーオブジェクト",
+            "description": "このゾーンをトリガーできるオブジェクト種別のリスト（labelmap から）。文字列または文字列リストで指定。空ですべてのオブジェクトが対象。"
+        }
+    },
+    "enabled_in_config": {
+        "label": "元のカメラ状態",
+        "description": "カメラの元の状態を保持する。"
     }
 }

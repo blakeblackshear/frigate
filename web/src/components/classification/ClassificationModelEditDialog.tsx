@@ -485,7 +485,7 @@ export default function ClassificationModelEditDialog({
                             <FormControl>
                               <div className="flex items-center gap-2">
                                 <Input
-                                  className="text-md h-8"
+                                  className="h-8"
                                   placeholder={t(
                                     "wizard.step1.classPlaceholder",
                                   )}

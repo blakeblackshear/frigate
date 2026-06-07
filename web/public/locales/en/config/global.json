@@ -212,7 +212,7 @@
     },
     "default_role": {
       "label": "Default role",
-      "description": "Default role assigned to proxy-authenticated users when no role mapping applies (admin or viewer)."
+      "description": "Default role assigned to proxy-authenticated users when no role mapping applies."
     },
     "separator": {
       "label": "Separator character",
@@ -269,14 +269,6 @@
     "time_format": {
       "label": "Time format",
       "description": "Time format to use in the UI (browser, 12hour, or 24hour)."
-    },
-    "date_style": {
-      "label": "Date style",
-      "description": "Date style to use in the UI (full, long, medium, short)."
-    },
-    "time_style": {
-      "label": "Time style",
-      "description": "Time style to use in the UI (full, long, medium, short)."
     },
     "unit_system": {
       "label": "Unit system",
@@ -921,6 +913,41 @@
         "label": "Original GenAI state",
         "description": "Indicates whether GenAI was enabled in the original static config."
       }
+    },
+    "filters_attribute": {
+      "label": "Attribute filters",
+      "description": "Filters applied to detected attributes to reduce false positives (area, ratio, confidence).",
+      "min_area": {
+        "label": "Minimum attribute area",
+        "description": "Minimum bounding box area (pixels or percentage) required for this attribute. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+      },
+      "max_area": {
+        "label": "Maximum attribute area",
+        "description": "Maximum bounding box area (pixels or percentage) allowed for this attribute. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+      },
+      "min_ratio": {
+        "label": "Minimum aspect ratio",
+        "description": "Minimum width/height ratio required for the bounding box to qualify."
+      },
+      "max_ratio": {
+        "label": "Maximum aspect ratio",
+        "description": "Maximum width/height ratio allowed for the bounding box to qualify."
+      },
+      "threshold": {
+        "label": "Confidence threshold",
+        "description": "Average detection confidence threshold required for the attribute to be considered a true positive."
+      },
+      "min_score": {
+        "label": "Minimum confidence",
+        "description": "Minimum single-frame detection confidence required to associate this attribute with its parent object."
+      },
+      "mask": {
+        "label": "Filter mask",
+        "description": "Polygon coordinates defining where this filter applies within the frame."
+      },
+      "raw_mask": {
+        "label": "Raw Mask"
+      }
     }
   },
   "record": {
@@ -1519,6 +1546,10 @@
     "dashboard": {
       "label": "Show in UI",
       "description": "Toggle whether this camera is visible everywhere in the Frigate UI. Disabling this will require manually editing the config to view this camera in the UI again."
+    },
+    "review": {
+      "label": "Show in review",
+      "description": "Toggle whether this camera is visible in review (the review page and its camera filter, motion review, and the history view)."
     }
   },
   "onvif": {

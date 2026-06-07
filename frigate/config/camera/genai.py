@@ -37,7 +37,7 @@ class GenAIConfig(FrigateBaseModel):
         description="Base URL for self-hosted or compatible providers (for example an Ollama instance).",
     )
     model: str = Field(
-        default="gpt-4o",
+        default="",
         title="Model",
         description="The model to use from the provider for generating descriptions or summaries.",
     )

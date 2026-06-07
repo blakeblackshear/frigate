@@ -94,13 +94,28 @@ class AudioProcessor(FrigateProcess):
         self.camera_metrics = camera_metrics
         self.config = config
 
+    def __stop_audio_thread(self, camera: str) -> None:
+        thread = self.audio_threads.pop(camera, None)
+        if thread is None:
+            return
+
+        thread.stop()
+        thread.join(10)
+        if thread.is_alive():
+            self.logger.warning(f"Audio maintainer thread for {camera} is still alive")
+        else:
+            self.logger.info(f"Audio maintainer stopped for {camera}")
+
     def run(self) -> None:
         self.pre_run_setup(self.config.logger)
-        audio_threads: dict[str, AudioEventMaintainer] = {}
+        self.audio_threads: dict[str, AudioEventMaintainer] = {}
 
         threading.current_thread().name = "process:audio_manager"
 
-        if self.config.audio_transcription.enabled:
+        if any(
+            c.enabled_in_config and c.audio_transcription.enabled
+            for c in self.config.cameras.values()
+        ):
             self.transcription_model_runner: AudioTranscriptionModelRunner | None = (
                 AudioTranscriptionModelRunner(
                     self.config.audio_transcription.device or "AUTO",
@@ -117,12 +132,13 @@ class AudioProcessor(FrigateProcess):
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.audio,
                 CameraConfigUpdateEnum.ffmpeg,
+                CameraConfigUpdateEnum.remove,
             ],
         )
 
         def spawn_if_needed(camera: CameraConfig) -> None:
             name = camera.name
-            if name is None or name in audio_threads:
+            if name is None or name in self.audio_threads:
                 return
             if not camera.enabled or not camera.audio.enabled:
                 return
@@ -136,7 +152,7 @@ class AudioProcessor(FrigateProcess):
                 self.transcription_model_runner,
                 self.stop_event,  # type: ignore[arg-type]
             )
-            audio_threads[name] = thread
+            self.audio_threads[name] = thread
             thread.start()
             self.logger.info(f"Audio maintainer started for {name}")
 
@@ -145,21 +161,31 @@ class AudioProcessor(FrigateProcess):
 
         self.logger.info(f"Audio processor started (pid: {self.pid})")
 
-        # poll for newly added cameras or cameras flipped to audio.enabled at runtime
+        # poll for newly added/removed cameras or cameras flipped to
+        # audio.enabled at runtime
         while not self.stop_event.wait(timeout=1.0):
-            config_subscriber.check_for_updates()
+            updated_topics = config_subscriber.check_for_updates()
+
+            # stop maintainers for removed cameras so their ffmpeg process is
+            # torn down and they stop touching camera_metrics (which the camera
+            # maintainer has already popped for the removed camera)
+            for removed_camera in updated_topics.get(
+                CameraConfigUpdateEnum.remove.name, []
+            ):
+                self.__stop_audio_thread(removed_camera)
+
             for camera in self.config.cameras.values():
                 spawn_if_needed(camera)
 
         config_subscriber.stop()
 
-        for thread in audio_threads.values():
+        for thread in self.audio_threads.values():
             thread.join(1)
             if thread.is_alive():
                 self.logger.info(f"Waiting for thread {thread.name:s} to exit")
                 thread.join(10)
 
-        for thread in audio_threads.values():
+        for thread in self.audio_threads.values():
             if thread.is_alive():
                 self.logger.warning(f"Thread {thread.name} is still alive")
 
@@ -181,6 +207,9 @@ class AudioEventMaintainer(threading.Thread):
         self.camera_config = camera
         self.camera_metrics = camera_metrics
         self.stop_event = stop_event
+        # per-camera stop signal so a single maintainer can be torn down at
+        # runtime (e.g. on camera removal) without stopping the whole process
+        self.camera_stop_event = threading.Event()
         self.detector = AudioTfl(stop_event, self.camera_config.audio.num_threads)
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
         self.chunk_size = int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE * 2))
@@ -206,7 +235,7 @@ class AudioEventMaintainer(threading.Thread):
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio.value)
 
         if (
-            self.config.audio_transcription.enabled
+            self.camera_config.audio_transcription.enabled
             and self.audio_transcription_model_runner is not None
         ):
             # init the transcription processor for this camera
@@ -230,7 +259,11 @@ class AudioEventMaintainer(threading.Thread):
         self.was_audio_enabled = camera.audio.enabled
 
     def detect_audio(self, audio: np.ndarray) -> None:
-        if not self.camera_config.audio.enabled or self.stop_event.is_set():
+        if (
+            not self.camera_config.audio.enabled
+            or self.stop_event.is_set()
+            or self.camera_stop_event.is_set()
+        ):
             return
 
         audio_as_float: np.ndarray = audio.astype(np.float32)
@@ -349,11 +382,15 @@ class AudioEventMaintainer(threading.Thread):
             self.logger.error(f"Error reading audio data from ffmpeg process: {e}")
             log_and_restart()
 
+    def stop(self) -> None:
+        """Signal this maintainer to exit its run loop and clean up."""
+        self.camera_stop_event.set()
+
     def run(self) -> None:
         if self.camera_config.enabled:
             self.start_or_restart_ffmpeg()
 
-        while not self.stop_event.is_set():
+        while not self.stop_event.is_set() and not self.camera_stop_event.is_set():
             # check if there is an updated config
             self.config_subscriber.check_for_updates()
 

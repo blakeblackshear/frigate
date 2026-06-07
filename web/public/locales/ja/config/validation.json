@@ -28,5 +28,8 @@
             "detectRequired": "少なくとも1つの入力ストリームに「detect」ロールを割り当てる必要があります。",
             "hwaccelDetectOnly": "ハードウェアアクセラレーション引数を定義できるのは、detect ロールを持つ入力ストリームのみです。"
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "偶数を指定してください。"
     }
 }

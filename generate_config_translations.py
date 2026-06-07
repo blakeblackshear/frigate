@@ -364,6 +364,64 @@ def main():
                     continue
                 section_data.pop(key, None)
 
+        if field_name == "objects":
+            # Produce a parallel `filters_attribute` block alongside `filters`,
+            # with object-wording rewritten for attribute filters (face,
+            # license_plate, courier logos). The frontend's
+            # buildTranslationPath routes `filters.<attr>.<field>` lookups to
+            # `filters_attribute.<field>` when `<attr>` is in
+            # `model.all_attributes`. Keep this rewrite list explicit rather
+            # than running a blanket s/object/attribute/ so unrelated
+            # descriptions (e.g. "JSON object") never accidentally flip.
+            filters_block = section_data.get("filters")
+            if isinstance(filters_block, dict):
+                attribute_rewrites = [
+                    ("Object filters", "Attribute filters"),
+                    ("detected objects", "detected attributes"),
+                    ("object area", "attribute area"),
+                    ("object type", "attribute"),
+                    ("the object", "the attribute"),
+                ]
+
+                # Per-field overrides for cases where the generic rewrite
+                # doesn't capture the attribute-specific semantics. Keys
+                # match the FilterConfig field name; values are partial
+                # overrides applied AFTER the generic rewrites.
+                attribute_field_overrides: Dict[str, Dict[str, str]] = {
+                    "min_score": {
+                        "description": (
+                            "Minimum single-frame detection confidence required "
+                            "to associate this attribute with its parent object."
+                        ),
+                    },
+                }
+
+                def rewrite(text: str) -> str:
+                    for source, replacement in attribute_rewrites:
+                        text = text.replace(source, replacement)
+                    return text
+
+                attribute_variant: Dict[str, Any] = {}
+                for key, value in filters_block.items():
+                    if key in ("label", "description"):
+                        if isinstance(value, str):
+                            attribute_variant[key] = rewrite(value)
+                        continue
+                    if not isinstance(value, dict):
+                        continue
+                    field_trans: Dict[str, str] = {}
+                    if isinstance(value.get("label"), str):
+                        field_trans["label"] = rewrite(value["label"])
+                    if isinstance(value.get("description"), str):
+                        field_trans["description"] = rewrite(value["description"])
+                    overrides = attribute_field_overrides.get(key)
+                    if overrides:
+                        field_trans.update(overrides)
+                    if field_trans:
+                        attribute_variant[key] = field_trans
+                if attribute_variant:
+                    section_data["filters_attribute"] = attribute_variant
+
         if not section_data:
             logger.warning(f"No translations found for section: {field_name}")
             continue

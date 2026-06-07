@@ -23,7 +23,7 @@ In 0.14 and later, all of that is bundled into a single review item which starts
 
 ## Alerts and Detections
 
-Not every segment of video captured by Frigate may be of the same level of interest to you. Video of people who enter your property may be a different priority than those walking by on the sidewalk. For this reason, Frigate 0.14 categorizes review items as _alerts_ and _detections_. By default, all person and car objects are considered alerts. You can refine categorization of your review items by configuring required zones for them.
+Not every segment of video captured by Frigate may be of the same level of interest to you. Video of people who enter your property may be a different priority than those walking by on the sidewalk. For this reason, Frigate categorizes review items as _alerts_ and _detections_. By default, all person and car objects are considered alerts. You can refine categorization of your review items by configuring required zones for them.
 
 :::note
 
@@ -130,3 +130,7 @@ By default a review item will be created if any `review -> alerts -> labels` and
 Because zones don't apply to audio, audio labels will always be marked as a detection by default.
 
 :::
+
+## Reviewing Motion
+
+The Review page can also surface periods of motion that didn't produce a tracked object, and lets you search past recordings for motion in a region you draw. See [Reviewing Motion](/usage/review#reviewing-motion) in the Usage docs for how to use **Motion Previews** and **Motion Search**, and [Tuning Motion Detection](motion_detection.md) for configuring the underlying motion detector.

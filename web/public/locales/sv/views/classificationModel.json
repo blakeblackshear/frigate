@@ -12,10 +12,10 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Borttagen klass",
-      "deletedCategory_other": "",
-      "deletedImage_one": "Raderade bilder",
-      "deletedImage_other": "",
+      "deletedCategory_one": "Tog bort {{count}} klass",
+      "deletedCategory_other": "Tog bort {{count}} klasser",
+      "deletedImage_one": "Tog bort {{count}} bild",
+      "deletedImage_other": "Tog bort {{count}} bilder",
       "categorizedImage": "Lyckades klassificera bilden",
       "trainedModel": "Modellen har tränats.",
       "trainingModel": "Modellträning har startat.",
@@ -28,7 +28,7 @@
       "deleteImageFailed": "Misslyckades med att ta bort: {{errorMessage}}",
       "deleteCategoryFailed": "Misslyckades med att ta bort klassen: {{errorMessage}}",
       "categorizeFailed": "Misslyckades med att kategorisera bilden: {{errorMessage}}",
-      "trainingFailed": "Modellträningen misslyckades. Kontrollera Frigate loggarna för mer information.",
+      "trainingFailed": "Modellträningen misslyckades. Kontrollera Frigate-loggarna för mer information.",
       "deleteModelFailed": "Misslyckades med att ta bort modellen: {{errorMessage}}",
       "updateModelFailed": "Misslyckades med att uppdatera modell: {{errorMessage}}",
       "trainingFailedToStart": "Misslyckades med att starta modellträning: {{errorMessage}}",

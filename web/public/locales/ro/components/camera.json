@@ -68,7 +68,10 @@
         }
       },
       "birdseye": "Birdseye"
-    }
+    },
+    "showAll": "Arată toate grupurile de camere",
+    "showLess": "Arată mai puțin",
+    "editGroups": "Editează grupurile de camere"
   },
   "debug": {
     "options": {

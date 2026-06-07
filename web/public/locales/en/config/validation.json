@@ -28,5 +28,8 @@
       "detectRequired": "At least one input stream must be assigned the 'detect' role.",
       "hwaccelDetectOnly": "Only the input stream with the detect role can define hardware acceleration arguments."
     }
+  },
+  "detect": {
+    "dimensionMustBeEven": "Must be an even number."
   }
 }

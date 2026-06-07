@@ -58,7 +58,9 @@
   },
   "camera": {
     "enable": "开启摄像头",
-    "disable": "关闭摄像头"
+    "disable": "关闭摄像头",
+    "turnOn": "开启摄像头",
+    "turnOff": "关闭摄像头"
   },
   "muteCameras": {
     "enable": "屏蔽所有摄像头",
@@ -151,7 +153,8 @@
     "snapshots": "快照",
     "audioDetection": "音频检测",
     "autotracking": "自动追踪",
-    "transcription": "音频转录"
+    "transcription": "音频转录",
+    "camera": "摄像头"
   },
   "history": {
     "label": "显示历史录像"

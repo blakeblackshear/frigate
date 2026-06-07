@@ -14,7 +14,6 @@ export interface MotionSearchRequest {
   parallel?: boolean;
   threshold?: number;
   min_area?: number;
-  frame_skip?: number;
   max_results?: number;
 }
 
@@ -43,4 +42,21 @@ export interface MotionSearchStatusResponse {
   total_frames_processed?: number;
   error_message?: string;
   metrics?: MotionSearchMetrics;
+  scanning_timestamp?: number;
+  progress?: number;
+}
+
+export interface MotionSearchJobResults {
+  results: MotionSearchResult[];
+  total_frames_processed: number;
+}
+
+export interface MotionSearchJobPayload {
+  id?: string;
+  status: "queued" | "running" | "success" | "failed" | "cancelled";
+  results?: MotionSearchJobResults;
+  metrics?: MotionSearchMetrics;
+  scanning_timestamp?: number;
+  progress?: number;
+  error_message?: string;
 }

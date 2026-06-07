@@ -178,6 +178,7 @@
       "en": "English (English)",
       "es": "Español (Spanish)",
       "zhCN": "简体中文 (Simplified Chinese)",
+      "zhHant": "繁體中文 (Traditional Chinese)",
       "hi": "हिन्दी (Hindi)",
       "fr": "Français (French)",
       "ar": "العربية (Arabic)",
@@ -317,5 +318,8 @@
     "pixels": "{{area}}px"
   },
   "no_items": "No items",
-  "validation_errors": "Validation Errors"
+  "validation_errors": "Validation Errors",
+  "credentialField": {
+    "savedPlaceholder": "Saved — leave blank to keep current"
+  }
 }

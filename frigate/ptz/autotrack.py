@@ -1331,6 +1331,8 @@ class PtzAutoTracker:
         return self.tracked_object[camera]["region"]
 
     def autotrack_object(self, camera: str, obj: TrackedObject):
+        if camera not in self.config.cameras:
+            return
         camera_config = self.config.cameras[camera]
 
         if camera_config.onvif.autotracking.enabled:

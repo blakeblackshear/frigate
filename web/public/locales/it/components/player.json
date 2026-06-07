@@ -48,5 +48,6 @@
       "submitFrigatePlusFailed": "Impossibile inviare il fotogramma a Frigate+"
     }
   },
-  "cameraDisabled": "La telecamera è disabilita"
+  "cameraDisabled": "La telecamera è disabilita",
+  "cameraOff": "La telecamera è spenta"
 }

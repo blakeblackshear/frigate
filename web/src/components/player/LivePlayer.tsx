@@ -443,7 +443,7 @@ export default function LivePlayer({
           <div className="absolute inset-0 rounded-lg bg-black/50 md:rounded-2xl" />
           <div className="absolute inset-0 left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 p-3 text-center">
-              <div className="text-md">{t("streamOffline.title")}</div>
+              <div>{t("streamOffline.title")}</div>
               <TbExclamationCircle className="size-6" />
               {!isCompact && (
                 <p className="text-center text-sm">
@@ -488,7 +488,7 @@ export default function LivePlayer({
           <div className="flex h-32 flex-col items-center justify-center rounded-lg p-4 md:h-48 md:w-48">
             <LuVideoOff className="mb-2 size-8 md:size-10" />
             <p className="max-w-32 text-center text-sm md:max-w-40 md:text-base">
-              {t("cameraDisabled")}
+              {t("cameraOff")}
             </p>
           </div>
         </div>

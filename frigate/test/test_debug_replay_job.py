@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 from frigate.debug_replay import DebugReplayManager
 from frigate.jobs.debug_replay import (
     DebugReplayJob,
+    RecordingDebugReplaySource,
     cancel_debug_replay_job,
     get_active_runner,
     start_debug_replay_job,
@@ -99,9 +100,12 @@ class TestStartDebugReplayJob(unittest.TestCase):
     def test_rejects_unknown_camera(self) -> None:
         with self.assertRaises(ValueError):
             start_debug_replay_job(
-                source_camera="missing",
-                start_ts=100.0,
-                end_ts=200.0,
+                source=RecordingDebugReplaySource(
+                    source_camera="missing",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
+                ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
                 replay_manager=self.manager,
@@ -110,9 +114,12 @@ class TestStartDebugReplayJob(unittest.TestCase):
     def test_rejects_invalid_time_range(self) -> None:
         with self.assertRaises(ValueError):
             start_debug_replay_job(
-                source_camera="front",
-                start_ts=200.0,
-                end_ts=100.0,
+                source=RecordingDebugReplaySource(
+                    source_camera="front",
+                    start_ts=200.0,
+                    end_ts=100.0,
+                    internal_port=5000,
+                ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
                 replay_manager=self.manager,
@@ -124,9 +131,12 @@ class TestStartDebugReplayJob(unittest.TestCase):
         with patch("frigate.jobs.debug_replay.query_recordings", return_value=empty_qs):
             with self.assertRaises(ValueError):
                 start_debug_replay_job(
-                    source_camera="front",
-                    start_ts=100.0,
-                    end_ts=200.0,
+                    source=RecordingDebugReplaySource(
+                        source_camera="front",
+                        start_ts=100.0,
+                        end_ts=200.0,
+                        internal_port=5000,
+                    ),
                     frigate_config=self.frigate_config,
                     config_publisher=self.publisher,
                     replay_manager=self.manager,
@@ -154,9 +164,12 @@ class TestStartDebugReplayJob(unittest.TestCase):
             patch("builtins.open", unittest.mock.mock_open()),
         ):
             job_id = start_debug_replay_job(
-                source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
+                source=RecordingDebugReplaySource(
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
+                ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
                 replay_manager=self.manager,
@@ -191,9 +204,12 @@ class TestStartDebugReplayJob(unittest.TestCase):
             patch("builtins.open", unittest.mock.mock_open()),
         ):
             start_debug_replay_job(
-                source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
+                source=RecordingDebugReplaySource(
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
+                ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
                 replay_manager=self.manager,
@@ -201,9 +217,12 @@ class TestStartDebugReplayJob(unittest.TestCase):
 
             with self.assertRaises(RuntimeError):
                 start_debug_replay_job(
-                    source_camera="front",
-                    start_ts=100.0,
-                    end_ts=200.0,
+                    source=RecordingDebugReplaySource(
+                        source_camera="front",
+                        start_ts=100.0,
+                        end_ts=200.0,
+                        internal_port=5000,
+                    ),
                     frigate_config=self.frigate_config,
                     config_publisher=self.publisher,
                     replay_manager=self.manager,
@@ -269,9 +288,12 @@ class TestRunnerHappyPath(unittest.TestCase):
             patch("builtins.open", unittest.mock.mock_open()),
         ):
             start_debug_replay_job(
-                source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
+                source=RecordingDebugReplaySource(
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
+                ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
                 replay_manager=self.manager,
@@ -340,9 +362,12 @@ class TestRunnerFailurePath(unittest.TestCase):
             patch("builtins.open", unittest.mock.mock_open()),
         ):
             start_debug_replay_job(
-                source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
+                source=RecordingDebugReplaySource(
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
+                ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
                 replay_manager=self.manager,
@@ -418,9 +443,12 @@ class TestRunnerCancellation(unittest.TestCase):
             patch("builtins.open", unittest.mock.mock_open()),
         ):
             start_debug_replay_job(
-                source_camera="front",
-                start_ts=100.0,
-                end_ts=200.0,
+                source=RecordingDebugReplaySource(
+                    source_camera="front",
+                    start_ts=100.0,
+                    end_ts=200.0,
+                    internal_port=5000,
+                ),
                 frigate_config=self.frigate_config,
                 config_publisher=self.publisher,
                 replay_manager=self.manager,

@@ -68,7 +68,7 @@
       "classification_speed": "Швидкість класифікації {{name}}",
       "classification_events_per_second": "{{name}} Подій класифікації за секунду"
     },
-    "title": "Збагаченням",
+    "title": "Збагачення",
     "infPerSecond": "Висновки за секунду",
     "averageInf": "Середній час висновування"
   },

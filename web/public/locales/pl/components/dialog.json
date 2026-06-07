@@ -68,7 +68,7 @@
     "toast": {
       "success": "Pomyślnie rozpoczęto eksport. Zobacz plik na stronie eksportów.",
       "error": {
-        "failed": "Nie udało się rozpocząć eksportu: {{error}}",
+        "failed": "Nie udało się zakolejkować eksportu: {{error}}",
         "endTimeMustAfterStartTime": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia",
         "noVaildTimeSelected": "Nie wybrano prawidłowego zakresu czasu"
       },
@@ -77,6 +77,18 @@
     "fromTimeline": {
       "saveExport": "Zapisz Eksport",
       "previewExport": "Podgląd Eksportu"
+    },
+    "multiCamera": {
+      "timeRange": "Zakres czasu",
+      "selectFromTimeline": "Wybierz z osi czasu",
+      "cameraSelection": "Kamery",
+      "cameraSelectionHelp": "Kamery ze śledzonymi obiektami w tym przedziale czasowym są wstępnie wybierane",
+      "checkingActivity": "Sprawdzanie aktywności kamery...",
+      "noCameras": "Brak dostępnych kamer",
+      "detectionCount_one": "{{count}} śledzony obiekt",
+      "detectionCount_few": "{{count}} śledzone obiekty",
+      "detectionCount_many": "{{count}} śledzonych obiektów",
+      "nameLabel": "Wyeksportuj nazwę"
     }
   },
   "recording": {

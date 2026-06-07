@@ -27,13 +27,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { DebugReplayConfigSheet } from "@/components/overlay/DebugReplayConfigSheet";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
@@ -46,16 +40,14 @@ import { Progress } from "@/components/ui/progress";
 import { ObjectType } from "@/types/ws";
 import { useJobStatus } from "@/api/ws";
 import WsMessageFeed from "@/components/ws/WsMessageFeed";
-import { ConfigSectionTemplate } from "@/components/config-form/sections/ConfigSectionTemplate";
 
-import { LuExternalLink, LuInfo, LuSettings } from "react-icons/lu";
+import { LuExternalLink, LuInfo } from "react-icons/lu";
 import { LuSquare } from "react-icons/lu";
 import { MdReplay } from "react-icons/md";
 import { isDesktop, isMobile } from "react-device-detect";
 import Logo from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-import { useConfigSchema } from "@/hooks/use-config-schema";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
@@ -127,11 +119,10 @@ export default function Replay() {
     mutate: refreshStatus,
     isLoading,
   } = useSWR<DebugReplayStatus>("debug_replay/status", {
-    refreshInterval: 1000,
+    refreshInterval: (latestData) => (latestData?.live_ready ? 0 : 1000),
   });
   const { payload: replayJob } =
     useJobStatus<DebugReplayJobResults>("debug_replay");
-  const configSchema = useConfigSchema();
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Refresh status immediately on mount to avoid showing "no session" briefly
@@ -145,7 +136,6 @@ export default function Replay() {
 
   const [options, setOptions] = useState<DebugOptions>(DEFAULT_OPTIONS);
   const [isStopping, setIsStopping] = useState(false);
-  const [configDialogOpen, setConfigDialogOpen] = useState(false);
 
   const searchParams = useMemo(() => {
     const params = new URLSearchParams();
@@ -333,22 +323,16 @@ export default function Replay() {
           )}
         </Button>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            onClick={() => setConfigDialogOpen(true)}
-          >
-            <LuSettings className="size-4" />
-            <span className="hidden md:inline">{t("page.configuration")}</span>
-          </Button>
+          <DebugReplayConfigSheet
+            replayCamera={status.replay_camera ?? undefined}
+          />
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
                 variant="destructive"
                 size="sm"
-                className="flex items-center gap-2 text-white"
+                className="flex items-center gap-2"
                 disabled={isStopping}
               >
                 {isStopping && <ActivityIndicator className="size-4" />}
@@ -371,10 +355,7 @@ export default function Replay() {
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleStop}
-                  className={cn(
-                    buttonVariants({ variant: "destructive" }),
-                    "text-white",
-                  )}
+                  className={cn(buttonVariants({ variant: "destructive" }))}
                 >
                   {t("page.confirmStop.confirm")}
                 </AlertDialogAction>
@@ -644,49 +625,6 @@ export default function Replay() {
           </Tabs>
         </div>
       </div>
-
-      <Dialog open={configDialogOpen} onOpenChange={setConfigDialogOpen}>
-        <DialogContent className="scrollbar-container max-h-[90dvh] overflow-y-auto sm:max-w-xl md:max-w-3xl lg:max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{t("page.configuration")}</DialogTitle>
-            <DialogDescription className="mb-5">
-              {t("page.configurationDesc")}
-            </DialogDescription>
-          </DialogHeader>
-          {configSchema == null ? (
-            <div className="flex h-40 items-center justify-center">
-              <ActivityIndicator />
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <ConfigSectionTemplate
-                sectionKey="motion"
-                level="replay"
-                cameraName={status.replay_camera ?? undefined}
-                skipSave
-                noStickyButtons
-                requiresRestart={false}
-                collapsible
-                defaultCollapsed={false}
-                showTitle
-                showOverrideIndicator={false}
-              />
-              <ConfigSectionTemplate
-                sectionKey="objects"
-                level="replay"
-                cameraName={status.replay_camera ?? undefined}
-                skipSave
-                noStickyButtons
-                requiresRestart={false}
-                collapsible
-                defaultCollapsed={false}
-                showTitle
-                showOverrideIndicator={false}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
@@ -746,7 +684,7 @@ function ObjectList({ cameraConfig, objects, config }: ObjectListProps) {
                 </div>
               </div>
               <div className="flex w-8/12 flex-row items-center justify-end">
-                <div className="text-md mr-2 w-1/3">
+                <div className="mr-2 w-1/3">
                   <div className="flex flex-col items-end justify-end">
                     <p className="mb-1.5 text-sm text-primary-variant">
                       {t("debug.objectShapeFilterDrawing.score", {
@@ -756,7 +694,7 @@ function ObjectList({ cameraConfig, objects, config }: ObjectListProps) {
                     {obj.score ? (obj.score * 100).toFixed(1).toString() : "-"}%
                   </div>
                 </div>
-                <div className="text-md mr-2 w-1/3">
+                <div className="mr-2 w-1/3">
                   <div className="flex flex-col items-end justify-end">
                     <p className="mb-1.5 text-sm text-primary-variant">
                       {t("debug.objectShapeFilterDrawing.ratio", {
@@ -766,7 +704,7 @@ function ObjectList({ cameraConfig, objects, config }: ObjectListProps) {
                     {obj.ratio ? obj.ratio.toFixed(2).toString() : "-"}
                   </div>
                 </div>
-                <div className="text-md mr-2 w-1/3">
+                <div className="mr-2 w-1/3">
                   <div className="flex flex-col items-end justify-end">
                     <p className="mb-1.5 text-sm text-primary-variant">
                       {t("debug.objectShapeFilterDrawing.area", {

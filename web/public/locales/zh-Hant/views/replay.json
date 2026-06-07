@@ -1,1 +1,59 @@
-{}
+{
+    "title": "除錯回放",
+    "description": "回放攝影機錄影以供除錯。目標清單會延時展示已偵測目標的彙總資訊，訊息分頁則即時展示回放錄影對應的 Frigate 內部日誌資訊流。",
+    "websocket_messages": "訊息",
+    "dialog": {
+        "title": "開始除錯回放",
+        "description": "建立臨時回放攝影機，迴圈播放歷史錄製影片，用於除錯目標偵測與追蹤相關問題。臨時回放的攝影機將沿用原攝影機的偵測配置。請選擇一個時間範圍開始。",
+        "camera": "原攝影機",
+        "timeRange": "時間範圍",
+        "preset": {
+            "1m": "最後 1 分鐘",
+            "5m": "最後 5 分鐘",
+            "timeline": "從時間線",
+            "custom": "自訂"
+        },
+        "startButton": "開始回放",
+        "selectFromTimeline": "選擇",
+        "starting": "開始回放…",
+        "startLabel": "開始",
+        "endLabel": "結束",
+        "toast": {
+            "error": "除錯回放啟動失敗：{{error}}",
+            "alreadyActive": "已有回放工作階段正在執行",
+            "stopError": "除錯回放停止失敗：{{error}}",
+            "goToReplay": "進入回放"
+        }
+    },
+    "page": {
+        "noSession": "沒有正在進行的除錯回放工作階段",
+        "noSessionDesc": "從歷史回放頁面啟動除錯回放：點選工具列中的操作按鈕，選擇除錯回放即可。",
+        "goToRecordings": "檢視歷史記錄",
+        "preparingClip": "正在準備片段…",
+        "preparingClipDesc": "Frigate 正在拼接所選時間範圍的錄影片段。時間跨度較大時，該過程可能需要一分鐘左右。",
+        "startingCamera": "開始除錯回放中…",
+        "startError": {
+            "title": "除錯回放啟動失敗",
+            "back": "返回歷史記錄"
+        },
+        "sourceCamera": "源攝影機",
+        "replayCamera": "回放攝影機",
+        "initializingReplay": "初始化除錯回放中…",
+        "stoppingReplay": "正在停止除錯回放…",
+        "stopReplay": "停止回放",
+        "confirmStop": {
+            "title": "要停止除錯回放嗎？",
+            "description": "這將終止工作階段並清除所有臨時資料。是否確定？",
+            "confirm": "停止回放",
+            "cancel": "取消"
+        },
+        "activity": "活動",
+        "objects": "目標清單",
+        "audioDetections": "音訊偵測",
+        "noActivity": "未偵測到活動",
+        "activeTracking": "活動追蹤中",
+        "noActiveTracking": "沒有活動追蹤",
+        "configuration": "配置",
+        "configurationDesc": "微調除錯回放攝影機的移動偵測與目標追蹤引數。本次調整不會儲存到你的 Frigate 設定檔中。"
+    }
+}

@@ -156,7 +156,15 @@
     "export": "Eksportēt",
     "deleteNow": "Izdzēst tagad",
     "next": "Nākamais",
-    "continue": "Turpināt"
+    "continue": "Turpināt",
+    "add": "Pievienot",
+    "applying": "Apstiprina…",
+    "copiedToClipboard": "Nokopēts atmiņā",
+    "undo": "Atsaukt",
+    "undoAll": "Atsaukt visu",
+    "saveAll": "Saglabāt visu",
+    "retry": "Mēģināt vēlreiz",
+    "savingAll": "Saglabā visu…"
   },
   "menu": {
     "system": "Sistēma",
@@ -208,7 +216,8 @@
       "ur": "اردو (urdu)",
       "withSystem": {
         "label": "Izmantojiet sistēmas iestatījumus valodai"
-      }
+      },
+      "zhHant": "繁體中文 (Tradicionālā ķīniešu)"
     },
     "appearance": "Izskats",
     "darkMode": {
@@ -258,7 +267,8 @@
       "anonymous": "anonīms",
       "logout": "Iziet",
       "setPassword": "Izveidot paroli"
-    }
+    },
+    "profiles": "Profili"
   },
   "toast": {
     "copyUrlToClipboard": "Adrese nokopēta.",

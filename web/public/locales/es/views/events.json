@@ -32,7 +32,9 @@
   },
   "camera": "Cámara",
   "recordings": {
-    "documentTitle": "Grabaciones - Frigate"
+    "documentTitle": "Grabaciones - Frigate",
+    "invalidSharedLink": "No se puede abrir el enlace de la grabación con marca de tiempo debido a un error de análisis.",
+    "invalidSharedCamera": "No se puede abrir el enlace de la grabación con marca de tiempo debido a una cámara desconocida o no autorizada."
   },
   "calendarFilter": {
     "last24Hours": "Últimas 24 horas"
@@ -66,5 +68,28 @@
   "select_all": "Todas",
   "normalActivity": "Normal",
   "needsReview": "Necesita revisión",
-  "securityConcern": "Aviso de seguridad"
+  "securityConcern": "Aviso de seguridad",
+  "motionSearch": {
+    "menuItem": "Búsqueda de movimiento",
+    "openMenu": "Opciones de cámara"
+  },
+  "motionPreviews": {
+    "menuItem": "Ver vistas previas de movimiento",
+    "title": "Vistas previas de movimiento: {{camera}}",
+    "mobileSettingsTitle": "Ajustes de vistas previas de movimiento",
+    "mobileSettingsDesc": "Ajusta la velocidad de reproducción y el atenuado, y elige una fecha para revisar clips solo de movimiento.",
+    "dim": "Atenuar",
+    "dimAria": "Ajustar intensidad de atenuado",
+    "dimDesc": "Aumenta el atenuado para mejorar la visibilidad de las áreas con movimiento.",
+    "speed": "Velocidad",
+    "speedAria": "Seleccionar velocidad de reproducción de las vistas previas",
+    "speedDesc": "Elige la velocidad a la que se reproducen los clips de vista previa.",
+    "back": "Atrás",
+    "empty": "No hay vistas previas disponibles",
+    "noPreview": "Vista previa no disponible",
+    "seekAria": "Mover el reproductor de {{camera}} a {{time}}",
+    "filter": "Filtrar",
+    "filterDesc": "Selecciona áreas para mostrar solo clips con movimiento en esas regiones.",
+    "filterClear": "Limpiar"
+  }
 }

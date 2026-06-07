@@ -1,19 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FaArrowUpLong, FaStop } from "react-icons/fa6";
 import { LuCircleAlert, LuMessageSquarePlus } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import axios from "axios";
+import useSWR from "swr";
 import { ChatEventThumbnailsRow } from "@/components/chat/ChatEventThumbnailsRow";
 import { MessageBubble } from "@/components/chat/ChatMessage";
+import { ReasoningBubble } from "@/components/chat/ReasoningBubble";
 import { ToolCallsGroup } from "@/components/chat/ToolCallsGroup";
 import { ChatStartingState } from "@/components/chat/ChatStartingState";
-import { ChatAttachmentChip } from "@/components/chat/ChatAttachmentChip";
-import { ChatQuickReplies } from "@/components/chat/ChatQuickReplies";
-import { ChatPaperclipButton } from "@/components/chat/ChatPaperclipButton";
+import { ChatComposer } from "@/components/chat/ChatComposer";
 import ChatSettings from "@/components/chat/ChatSettings";
-import type { ChatMessage, ShowStatsMode } from "@/types/chat";
+import type {
+  ChatMessage,
+  GenAIModelsResponse,
+  ShowStatsMode,
+} from "@/types/chat";
 import { usePersistence } from "@/hooks/use-persistence";
 import {
   getEventIdsFromSearchObjectsToolCalls,
@@ -37,8 +39,25 @@ export default function ChatPage() {
     "chat-auto-scroll",
     true,
   );
+  const [thinkingEnabled, setThinkingEnabled] = usePersistence<boolean>(
+    "chat-thinking-enabled",
+    false,
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  const { data: genaiInfo } = useSWR<GenAIModelsResponse>("genai/models", {
+    revalidateOnFocus: false,
+  });
+  const supportsThinking = useMemo(() => {
+    if (!genaiInfo) return false;
+    for (const entry of Object.values(genaiInfo)) {
+      if (entry.roles?.includes("chat") && entry.supports_toggleable_thinking) {
+        return true;
+      }
+    }
+    return false;
+  }, [genaiInfo]);
 
   useEffect(() => {
     document.title = t("documentTitle");
@@ -99,9 +118,10 @@ export default function ChatPage() {
           defaultErrorMessage: t("error"),
         },
         controller.signal,
+        supportsThinking ? { enableThinking: !!thinkingEnabled } : {},
       );
     },
-    [isLoading, t],
+    [isLoading, supportsThinking, t, thinkingEnabled],
   );
 
   const recentEventIds = useMemo(() => {
@@ -200,15 +220,21 @@ export default function ChatPage() {
                   const hasToolCalls =
                     msg.toolCalls && msg.toolCalls.length > 0;
                   const hasContent = !!msg.content?.trim();
+                  const hasReasoning = !!msg.reasoning?.trim();
                   const showProcessing =
-                    isLastAssistant && isLoading && !hasContent;
+                    isLastAssistant &&
+                    isLoading &&
+                    !hasContent &&
+                    !hasReasoning;
 
-                  // Hide empty placeholder only when there are no tool calls yet
+                  // Hide empty placeholder only when there are no tool calls
+                  // and no reasoning streaming yet
                   if (
                     isLastAssistant &&
                     isLoading &&
                     !hasContent &&
-                    !hasToolCalls
+                    !hasToolCalls &&
+                    !hasReasoning
                   )
                     return (
                       <div
@@ -226,13 +252,22 @@ export default function ChatPage() {
                       {msg.role === "assistant" && hasToolCalls && (
                         <ToolCallsGroup toolCalls={msg.toolCalls!} />
                       )}
+                      {msg.role === "assistant" && hasReasoning && (
+                        <ReasoningBubble
+                          reasoning={msg.reasoning!}
+                          answerStarted={hasContent}
+                        />
+                      )}
                       {showProcessing ? (
                         <div className="flex items-center gap-2 self-start rounded-2xl bg-muted px-5 py-4">
                           <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.3s]" />
                           <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.15s]" />
                           <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60" />
                         </div>
-                      ) : (
+                      ) : msg.role === "assistant" &&
+                        !hasContent &&
+                        hasReasoning &&
+                        !isComplete ? null : (
                         <MessageBubble
                           role={msg.role}
                           content={msg.content}
@@ -289,6 +324,9 @@ export default function ChatPage() {
                   setInput("");
                   submitConversation([{ role: "user", content: message }]);
                 }}
+                supportsThinking={supportsThinking}
+                thinkingEnabled={!!thinkingEnabled}
+                setThinkingEnabled={setThinkingEnabled}
               />
             )}
           </div>
@@ -297,7 +335,7 @@ export default function ChatPage() {
       {hasStarted && (
         <div className="flex shrink-0 justify-center p-2 md:px-4 md:pb-4">
           <div className="flex w-full xl:w-[50%] 3xl:w-[35%]">
-            <ChatEntry
+            <ChatComposer
               input={input}
               setInput={setInput}
               sendMessage={sendMessage}
@@ -308,96 +346,13 @@ export default function ChatPage() {
               onAttach={setAttachedEventId}
               onStop={stopGeneration}
               recentEventIds={recentEventIds}
+              supportsThinking={supportsThinking}
+              thinkingEnabled={!!thinkingEnabled}
+              setThinkingEnabled={setThinkingEnabled}
             />
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-type ChatEntryProps = {
-  input: string;
-  setInput: (value: string) => void;
-  sendMessage: (textOverride?: string) => void;
-  isLoading: boolean;
-  placeholder: string;
-  attachedEventId: string | null;
-  onClearAttachment: () => void;
-  onAttach: (eventId: string) => void;
-  onStop: () => void;
-  recentEventIds: string[];
-};
-
-function ChatEntry({
-  input,
-  setInput,
-  sendMessage,
-  isLoading,
-  placeholder,
-  attachedEventId,
-  onClearAttachment,
-  onAttach,
-  onStop,
-  recentEventIds,
-}: ChatEntryProps) {
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  return (
-    <div className="flex w-full flex-col items-stretch justify-center gap-2 rounded-xl bg-secondary p-3">
-      {attachedEventId && (
-        <div className="flex items-center">
-          <ChatAttachmentChip
-            eventId={attachedEventId}
-            mode="composer"
-            onRemove={onClearAttachment}
-          />
-        </div>
-      )}
-      {attachedEventId && (
-        <ChatQuickReplies
-          onSend={(text) => sendMessage(text)}
-          disabled={isLoading}
-        />
-      )}
-      <div className="flex w-full flex-row items-center gap-2">
-        <ChatPaperclipButton
-          recentEventIds={recentEventIds}
-          onAttach={onAttach}
-          disabled={isLoading || attachedEventId != null}
-        />
-        <Input
-          className="w-full flex-1 border-transparent bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
-          placeholder={placeholder}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          aria-busy={isLoading}
-        />
-        {isLoading ? (
-          <Button
-            variant="destructive"
-            className="size-10 shrink-0 rounded-full"
-            onClick={onStop}
-          >
-            <FaStop className="size-3" />
-          </Button>
-        ) : (
-          <Button
-            variant="select"
-            className="size-10 shrink-0 rounded-full"
-            disabled={!input.trim()}
-            onClick={() => sendMessage()}
-          >
-            <FaArrowUpLong className="size-4" />
-          </Button>
-        )}
-      </div>
     </div>
   );
 }

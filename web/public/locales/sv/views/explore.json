@@ -6,11 +6,11 @@
       "startingUp": "Startar upp…",
       "estimatedTime": "Beräknad återstående tid:",
       "finishingShortly": "Snart klar",
-      "context": "Utforskaren kan användas efter inbäddade spårade objekt har slutat återindexerat.",
+      "context": "Utforskaren kan användas när inbäddningarna för spårade objekt har indexerats om.",
       "step": {
-        "thumbnailsEmbedded": "Miniatyrbilder inbäddad: ",
+        "thumbnailsEmbedded": "Inbäddade miniatyrbilder: ",
         "descriptionsEmbedded": "Beskrivningar inbäddade: ",
-        "trackedObjectsProcessed": "Spårade objekt bearbetad: "
+        "trackedObjectsProcessed": "Bearbetade spårade objekt: "
       }
     },
     "title": "Utforska är inte tillgänglig",
@@ -68,8 +68,8 @@
     },
     "editLPR": {
       "title": "Redigera nummerplåt",
-      "desc": "Ange ett nytt nummerplåt för denna {{label}}",
-      "descNoLabel": "Ange ett nytt nummerplåt för detta spårade objekt"
+      "desc": "Ange ett nytt registreringsnummer för detta {{label}}-objekt",
+      "descNoLabel": "Ange ett nytt registreringsnummer för det här spårade objektet"
     },
     "snapshotScore": {
       "label": "Ögonblicksbildspoäng"
@@ -81,7 +81,7 @@
     "score": {
       "label": "Poäng"
     },
-    "recognizedLicensePlate": "Erkänd nummerplåt",
+    "recognizedLicensePlate": "Identifierad registreringsskylt",
     "estimatedSpeed": "Uppskattad hastighet",
     "objects": "Objekt",
     "camera": "Kamera",

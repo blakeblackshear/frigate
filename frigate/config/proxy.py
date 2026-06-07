@@ -45,7 +45,7 @@ class ProxyConfig(FrigateBaseModel):
     default_role: Optional[str] = Field(
         default="viewer",
         title="Default role",
-        description="Default role assigned to proxy-authenticated users when no role mapping applies (admin or viewer).",
+        description="Default role assigned to proxy-authenticated users when no role mapping applies.",
     )
     separator: Optional[str] = Field(
         default=",",
