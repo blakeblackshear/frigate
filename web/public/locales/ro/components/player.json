@@ -48,5 +48,6 @@
     "success": {
       "submittedFrigatePlus": "Cadru trimis cu Succes catre Frigate+"
     }
-  }
+  },
+  "cameraOff": "Camera este oprită"
 }

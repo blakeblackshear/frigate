@@ -686,7 +686,7 @@
     },
     "timestamp_style": {
         "label": "Stil timestamp",
-        "description": "Opțiuni de stilizare pentru timestamp-ul din flux, aplicate înregistrărilor și snapshot-urilor.",
+        "description": "Opțiuni de stilizare pentru marcajele de timp aplicate snapshot-urilor și vizualizării Debug.",
         "position": {
             "label": "Poziție timestamp",
             "description": "Unde apare data/ora pe imagine (stânga-sus/dreapta-sus etc.)."
@@ -866,6 +866,10 @@
         "dashboard": {
             "label": "Arată în interfață",
             "description": "Comută vizibilitatea acestei camere peste tot în interfața Frigate. Dezactivarea acestei opțiuni va necesita editarea manuală a configurației pentru a vedea din nou camera în interfață."
+        },
+        "review": {
+            "label": "Arată în Revizuire",
+            "description": "Comută dacă această cameră este vizibilă în Rrevizuire (pagina de revizuire și filtrul ei de camere, revizuirea mișcărilor și vizualizarea istoricului)."
         }
     },
     "webui_url": {

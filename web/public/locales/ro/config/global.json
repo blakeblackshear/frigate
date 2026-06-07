@@ -516,6 +516,41 @@
                 "label": "Stare GenAI originală",
                 "description": "Indică dacă GenAI a fost activat în configurația inițială."
             }
+        },
+        "filters_attribute": {
+            "label": "Filtre de atribute",
+            "description": "Filtre aplicate atributelor detectate pentru a reduce rezultatele fals pozitive (arie, raport, încredere).",
+            "min_area": {
+                "label": "Aria minimă a atributului",
+                "description": "Aria minimă a casetei de încadrare (pixeli sau procentaj) necesară pentru acest atribut. Poate fi în pixeli (int) sau procentaj (între 0.000001 și 0.99)."
+            },
+            "max_area": {
+                "label": "Aria maximă a atributului",
+                "description": "Aria minimă a casetei de încadrare (pixeli sau procentaj) necesară pentru acest atribut. Poate fi în pixeli (int) sau procentaj (între 0.000001 și 0.99)."
+            },
+            "min_ratio": {
+                "label": "Raport de aspect minim",
+                "description": "Raportul minim lățime/înălțime necesar pentru ca o casetă de încadrare să fie validă."
+            },
+            "max_ratio": {
+                "label": "Raport de aspect maxim",
+                "description": "Raportul maxim lățime/înălțime permis pentru ca o casetă de încadrare să fie validă."
+            },
+            "threshold": {
+                "label": "Prag de încredere",
+                "description": "Pragul mediu de încredere a detecției necesar pentru ca atributul să fie considerat un rezultat adevărat pozitiv."
+            },
+            "min_score": {
+                "label": "Încredere minimă",
+                "description": "Încrederea minimă de detecție pe un singur cadru necesară pentru a asocia acest atribut cu obiectul său părinte."
+            },
+            "mask": {
+                "label": "Mască de filtrare",
+                "description": "Coordonatele poligonului care definesc unde se aplică acest filtru în cadru."
+            },
+            "raw_mask": {
+                "label": "Mască brută"
+            }
         }
     },
     "record": {
@@ -1139,7 +1174,7 @@
         },
         "default_role": {
             "label": "Rol implicit",
-            "description": "Rolul implicit atribuit utilizatorilor autentificați prin proxy când nu se aplică nicio mapare de rol (admin sau viewer)."
+            "description": "Rolul implicit atribuit utilizatorilor autentificați prin proxy când nu se aplică nicio mapare de rol."
         },
         "separator": {
             "label": "Caracter separator",
@@ -2302,6 +2337,10 @@
         "dashboard": {
             "label": "Arată în interfață",
             "description": "Comută dacă această cameră este vizibilă peste tot în interfața Frigate. Dezactivarea acestei opțiuni va necesita editarea manuală a config-ului pentru a vedea din nou camera în interfață."
+        },
+        "review": {
+            "label": "Arată în Revizuire",
+            "description": "Comută dacă această cameră este vizibilă în Revizuire (pagina de revizuire și filtrul ei de camere, revizuirea mișcărilor și vizualizarea istoricului)."
         }
     },
     "profiles": {

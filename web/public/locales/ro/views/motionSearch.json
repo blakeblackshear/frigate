@@ -26,7 +26,9 @@
         "points_few": "{{count}} puncte",
         "points_other": "{{count}} de puncte",
         "undo": "Anulează ultimul punct",
-        "reset": "Resetează poligonul"
+        "reset": "Resetează poligonul",
+        "moveMode": "Mută",
+        "drawMode": "Desenează"
     },
     "motionHeatmapLabel": "Harta termică a mișcării",
     "dialog": {
@@ -42,11 +44,11 @@
     "settings": {
         "title": "Setări de căutare",
         "parallelMode": "Mod paralel",
-        "parallelModeDesc": "Scanează mai multe segmente de înregistrare în același timp (mai rapid, dar consumă semnificativ mai mult procesorul)",
+        "parallelModeDesc": "Scanează mai multe intervale de înregistrare în același timp (mai rapid; utilizează mai multe resurse de decodare)",
         "threshold": "Prag de sensibilitate",
         "thresholdDesc": "Valorile mai mici detectează schimbări mai mici (1-255)",
         "minArea": "Arie minimă de schimbare",
-        "minAreaDesc": "Procentul minim din regiunea de interes care trebuie să se schimbe pentru a fi considerat semnificativ",
+        "minAreaDesc": "Dimensiunea minimă a unei singure regiuni în mișcare, ca procent din regiunea de interes",
         "frameSkip": "Omitere cadre",
         "frameSkipDesc": "Procesează fiecare al N-lea cadru. Setează asta la rata de cadre a camerei tale pentru a procesa un cadru pe secundă (ex. 5 pentru o cameră de 5 FPS, 30 pentru o cameră de 30 FPS). Valorile mai mari vor fi mai rapide, dar pot rata evenimente scurte de mișcare.",
         "maxResults": "Rezultate maxime",
@@ -72,6 +74,9 @@
         "framesDecoded": "Cadre decodate",
         "wallTime": "Timp de căutare",
         "segmentErrors": "Erori segment",
-        "seconds": "{{seconds}}s"
-    }
+        "seconds": "{{seconds}}s",
+        "minutesSeconds": "{{minutes}}m {{seconds}}s",
+        "scanSummary": "{{segments}} segmente · {{time}}"
+    },
+    "scanning": "Scanare {{time}}"
 }
