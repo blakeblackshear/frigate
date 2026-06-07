@@ -68,7 +68,10 @@
     },
     "success": "El grup de càmeres ({{name}}) ha estat guardat.",
     "icon": "Icona",
-    "label": "Grups de Càmeres"
+    "label": "Grups de Càmeres",
+    "showAll": "Mostra tots els grups de càmeres",
+    "showLess": "Mostra menys",
+    "editGroups": "Edita els grups de la càmera"
   },
   "debug": {
     "options": {

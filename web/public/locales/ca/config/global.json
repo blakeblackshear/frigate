@@ -524,11 +524,11 @@
         },
         "reindex": {
             "label": "Reindexa en iniciar",
-            "description": "Activa un reíndex complet d'objectes rastrejats històrics a la base de dades d'incrustacions."
+            "description": "Activa un reindexat complet d'objectes rastrejats històrics a la base de dades d'incrustacions."
         },
         "model": {
             "label": "Model de cerca semàntica o nom del proveïdor GenAI",
-            "description": "El model d'incrustació a utilitzar per a la cerca semàntica (per exemple 'jinav1'), o el nom d'un proveïdor de GenAI amb el rol d'incrustació."
+            "description": "El model de vectors a utilitzar per a la cerca semàntica (per exemple 'jinav1'), o el nom d'un proveïdor de GenAI amb el rol de vectors."
         },
         "model_size": {
             "label": "Mida del model",
@@ -808,7 +808,7 @@
         },
         "model_size": {
             "label": "Mida del model",
-            "description": "Mida del model a utilitzar per a incrustacions facials (petit/gran); més gran pot requerir GPU."
+            "description": "Mida del model a utilitzar per als vectors facials (petit/gran); més gran pot requerir GPU."
         },
         "unknown_score": {
             "label": "Llindar de puntuació desconegut",
@@ -984,7 +984,7 @@
         },
         "default_role": {
             "label": "Rol predeterminat",
-            "description": "Rol predeterminat assignat als usuaris intermediaris autenticats quan no s'aplica cap mapatge de rols (administrador o visor)."
+            "description": "Rol predeterminat assignat als usuaris intermediaris autenticats quan no s'aplica cap mapatge de rols."
         },
         "separator": {
             "label": "Caràcter separador",
@@ -2337,6 +2337,10 @@
         "dashboard": {
             "label": "Mostra a la interfície",
             "description": "Estableix si aquesta càmera és visible a tot arreu a la interfície d'usuari de Frigate. Desactivar això requerirà editar manualment la configuració per tornar a veure aquesta càmera a la interfície d'usuari."
+        },
+        "review": {
+            "label": "Mostra en la revisió",
+            "description": "Alterna si aquesta càmera és visible a la revisió (la pàgina de revisió i el seu filtre de càmera, la revisió de moviment i la vista de l'historial)."
         }
     },
     "profiles": {

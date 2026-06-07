@@ -65,5 +65,8 @@
         "active": "Raonant…",
         "show": "Mostra el raonament",
         "hide": "Amaga el raonament"
+    },
+    "thinking": {
+        "toggle": "Commuta el pensament"
     }
 }

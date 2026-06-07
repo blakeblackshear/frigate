@@ -58,7 +58,9 @@
   },
   "camera": {
     "enable": "Habilitar la càmera",
-    "disable": "Deshabilita la càmera"
+    "disable": "Deshabilita la càmera",
+    "turnOn": "Activa la càmera",
+    "turnOff": "Apaga la càmera"
   },
   "muteCameras": {
     "enable": "Silencia totes les càmeres",
@@ -151,7 +153,8 @@
     "autotracking": "Seguiment automàtic",
     "objectDetection": "Detecció d'objectes",
     "audioDetection": "Detecció d'àudio",
-    "transcription": "Transcripció d'audio"
+    "transcription": "Transcripció d'audio",
+    "camera": "Càmera"
   },
   "history": {
     "label": "Mostrar gravacions històriques"
