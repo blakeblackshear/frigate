@@ -60,5 +60,10 @@
     "stats": {
         "context": "{{tokens}} tokens",
         "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Resonnerer…",
+        "show": "Vis resonnering",
+        "hide": "Skjul resonnering"
     }
 }
