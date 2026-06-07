@@ -74,7 +74,8 @@
     },
     "fromTimeline": {
       "saveExport": "Dışa Aktarımı Kaydet",
-      "previewExport": "Dışa Aktarımı Önizle"
+      "previewExport": "Dışa Aktarımı Önizle",
+      "useThisRange": "Use This Range"
     },
     "name": {
       "placeholder": "Dışa Aktarımı Adlandırın"
