@@ -686,7 +686,7 @@
     },
     "timestamp_style": {
         "label": "Estil de la marca horària",
-        "description": "Opcions d'estilització per a marques de temps d'alimentació aplicades a enregistraments i instantànies.",
+        "description": "Opcions d'estilització per a marques de temps aplicades instantànies i la vista de depuració.",
         "position": {
             "label": "Posició de la marca horària",
             "description": "Posició de la marca horària a la imatge (tl/tr/bl/br)."
@@ -866,6 +866,10 @@
         "dashboard": {
             "label": "Mostra a l'interfície d'usuari",
             "description": "Estableix si aquesta càmera és visible a tot arreu a la interfície d'usuari de la Frigate. Desactivar això requerirà editar manualment la configuració per tornar a veure aquesta càmera a la interfície d'usuari."
+        },
+        "review": {
+            "label": "Mostra en la revisió",
+            "description": "Alterna si aquesta càmera és visible a la revisió (la pàgina de revisió i el seu filtre de càmera, la revisió de moviment i la vista de l'historial)."
         }
     },
     "webui_url": {

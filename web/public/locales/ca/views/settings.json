@@ -29,7 +29,7 @@
     "frigateplus": "Frigate+",
     "enrichments": "Enriquiments",
     "triggers": "Disparadors",
-    "cameraManagement": "Gestió",
+    "cameraManagement": "Gestió de la càmera",
     "cameraReview": "Revisió",
     "roles": "Rols",
     "general": "General",
@@ -136,7 +136,7 @@
       "clearAll": "Esborra tots els paràmetres de transmissió"
     },
     "recordingsViewer": {
-      "title": "Visor d'enregistraments",
+      "title": "Visualitzador d'enregistraments",
       "defaultPlaybackRate": {
         "label": "Velocitat de reproducció predeterminada",
         "desc": "Velocitat de reproducció predeterminada per a la reproducció de gravacions."
@@ -426,7 +426,8 @@
     "notificationUnavailable": {
       "title": "Notificacions no disponibles",
       "documentation": "Llegir la documentació",
-      "desc": "Les notificacions push web requereixen un context segur (<code>https://…</code>). Aquesta és una limitació del navegador. Accedeix a Frigate de manera segura per utilitzar les notificacions."
+      "desc": "Les notificacions push web requereixen un context segur (<code>https://…</code>). Aquesta és una limitació del navegador. Accedeix a Frigate de manera segura per utilitzar les notificacions.",
+      "descPwa": "A iOS, les notificacions push web només estàn disponibles quan Frigate està instalat a la pantalla principal. Obre el menú <strong>Compartir</strong> , selecciona <strong>Afegir a la pantalla</strong>, i obre Frigate des del nou icona per registrar les notificacions en aquest dispositiu."
     },
     "unsavedChanges": "Canvis de notificació no desats",
     "globalSettings": {
@@ -773,22 +774,22 @@
       "modelSize": {
         "small": {
           "title": "petit",
-          "desc": "L’opció <em>small</em> fa servir una versió quantitzada del model que consumeix menys RAM i s’executa més ràpidament a la CPU, amb una diferència gairebé inapreciable en la qualitat de les incrustacions (embeddings)."
+          "desc": "Si s'utilitza <em>small</em>, s'empra una versió quantitzada del model que consumeix menys memòria RAM i s'executa més ràpidament a la CPU, amb una diferència inapreciable en la qualitat dels vectors."
         },
         "label": "Mida del model",
         "large": {
           "title": "gran",
           "desc": "L’opció <em>large</em> fa servir el model complet de Jina i s’executarà automàticament a la GPU si està disponible."
         },
-        "desc": "La mida del model utilitzat per incrustacions de cerca semàntica."
+        "desc": "La mida del model utilitzat per als vectors de la cerca semàntica."
       },
       "reindexNow": {
         "confirmButton": "Reindexar",
         "success": "La reindexació ha començat amb èxit.",
         "label": "Reindexar ara",
         "confirmTitle": "Confirmar la reindexació",
-        "desc": "La reindexació regenerarà les incrustacions per a tots els objectes rastrejats. Aquest procés s'executa en segon pla i pot treure el màxim de la CPU i prendre una quantitat de temps raonable depenent del nombre d'objectes rastrejats que tingueu.",
-        "confirmDesc": "Estàs segur que vols reindexar totes les incrustacions (embeddings) dels objectes seguits? Aquest procés s’executarà en segon pla, però pot arribar a saturar la CPU i trigar bastant temps. Pots seguir-ne el progrés a la pàgina d’Explora.",
+        "desc": "La reindexació tornarà a generar els vectors de tots els objectes detectats. Aquest procés s'executa en segon pla, pot posar la CPU al màxim i trigar una bona estona segons el nombre d'objectes detectats que tingueu.",
+        "confirmDesc": "Segur que voleu tornar a indexar els vectors de tots els objectes detectats? Aquest procés s'executa en segon pla, però pot posar la CPU al màxim i trigar una bona estona. En podeu veure el progrés a la pàgina Explora.",
         "alreadyInProgress": "La reindexació ja està en curs.",
         "error": "Error en iniciar la reindexació: {{errorMessage}}"
       },
@@ -1059,7 +1060,7 @@
         "brands": {
           "reolink-rtsp": "No es recomana Reolink RST. Es recomana habilitar HTTP a la configuració de la càmera i reiniciar l'assistent de la càmera."
         },
-        "customUrlRtspRequired": "Els URL personalitzats han de començar amb \"rtsp://\". Es requereix configuració manual per a fluxos de càmera no RTSP."
+        "customUrlRtspRequired": "Els URL personalitzats han de començar amb \"rtsp://\" o \"rtsps://\". Es requereix configuració manual per a fluxos de càmera no RTSP."
       },
       "selectBrand": "Seleccioneu la marca de la càmera per a la plantilla d'URL",
       "customUrl": "URL de flux personalitzat",
@@ -1303,13 +1304,13 @@
     "selectCamera": "Selecciona una càmera",
     "backToSettings": "Torna a la configuració de la càmera",
     "streams": {
-      "title": "Habilita / Inhabilita les càmeres",
+      "title": "Estat i detalls de la càmera",
       "desc": "Inhabilita temporalment una càmera fins que es reiniciï la fragata. La inhabilitació d'una càmera atura completament el processament de Frigate dels fluxos d'aquesta càmera. La detecció, l'enregistrament i la depuració no estaran disponibles.<br /> <em>Nota: això no desactiva les retransmissions de go2rtc.</em>",
       "enableLabel": "Càmeres habilitades",
       "enableDesc": "Inhabilita temporalment una càmera habilitada fins que es reiniciï Frigate. La inhabilitació d'una càmera atura completament el processament de Frigate dels fluxos d'aquesta càmera. La detecció, l'enregistrament i la depuració no estaran disponibles.<br /> <em>Nota: això no inhabilita els restreams go2rtc.</em><br /><br />Drag el handle per reordenar les càmeres tal com apareixen a la interfície d'usuari. L'ordre de les càmeres habilitades es reflectirà en tota la interfície d'usuari, incloent el tauler en viu i els desplegables de selecció de càmeres.",
       "disableLabel": "Càmeres inhabilitades",
       "disableDesc": "Habilita una càmera que actualment no és visible a la interfície d'usuari i està desactivada a la configuració. Es requereix un reinici de Frigate després d'activar-la.",
-      "enableSuccess": "{{cameraName}} activat a la configuració. Reinicia Frigate per aplicar els canvis.",
+      "enableSuccess": "{{cameraName}} activat. Reinicia Frigate a aplicar.",
       "friendlyName": {
         "edit": "Edita el nom de la pantalla de la càmera",
         "title": "Edita el nom de la pantalla",
@@ -1318,7 +1319,30 @@
       },
       "reorderHandle": "Arrossega per reordenar",
       "saving": "S'està desant…",
-      "saved": "Desat"
+      "saved": "Desat",
+      "details": {
+        "edit": "Edita els detalls de la càmera",
+        "title": "Edita els detalls de la càmera",
+        "description": "Actualitza el nom de visualització, l'URL extern i la visibilitat utilitzada per a aquesta càmera a tota la interfície d'usuari de la Fragata.",
+        "friendlyNameLabel": "Nom a mostrar",
+        "friendlyNameHelp": "Nom amistós que es mostra per a aquesta càmera a tota la interfície d'usuari de Frigate. Deixeu-ho en blanc per utilitzar l'ID de la càmera.",
+        "webuiUrlLabel": "URL de la interfície web de la càmera",
+        "webuiUrlHelp": "URL per a visitar la interfície d'usuari web de la càmera directament des de la vista de depuració. Deixeu-ho en blanc per desactivar l'enllaç.",
+        "webuiUrlInvalid": "Ha de ser un URL vàlid (p. ex., https://example.com).",
+        "dashboardLabel": "Mostra al tauler en directe",
+        "dashboardHelp": "Mostra aquesta càmera al Tauler en viu.",
+        "reviewLabel": "Mostra a la ressenya",
+        "reviewHelp": "Mostra aquesta càmera a Revisió, incloent el filtre de càmera, la revisió de moviment i la vista de l'historial."
+      },
+      "label": "Estat de la càmera",
+      "description": "Estableix l'estat operatiu de cada càmera.<br /><br /><strong>A</strong>: els fluxos es processen normalment.<br /><strong>Off</strong>: pausa temporalment el processament. No persisteix a través de reinicis de Frigate.<br /><strong>Inhabilitat</strong>: deixa de processar i desa el canvi a la configuració. Es requereix un reinici per a tornar a habilitar una càmera inhabilitada.<br /><br /><em>Nota: La inhabilitació no afecta els restreams de go2rtc.</em><br /><br />Arrossegueu l'ansa per a reordenar les càmeres actives a mesura que apareguin a tota la interfície d'usuari, inclosos els desplegables de selecció de quadres en viu i de càmera.",
+      "disabledSubheading": "Desactivat en la configuració",
+      "status": {
+        "on": "Engegat",
+        "off": "Apagat",
+        "disabled": "Desactivat"
+      },
+      "disableSuccess": "{{cameraName}} desactivat i desat a la configuració."
     },
     "cameraConfig": {
       "add": "Afegeix una càmera",
@@ -1364,20 +1388,110 @@
     "profiles": {
       "title": "Sobreescriu la càmera de perfil",
       "selectLabel": "Seleccioneu el perfil",
-      "description": "Configura quines càmeres estan habilitades o desactivades quan s'activa un perfil. Les càmeres establertes a «Inherit» mantenen el seu estat base habilitat.",
+      "description": "Configura quines càmeres estan activades o desactivades quan s'activa un perfil. Les càmeres establertes a «herit» mantenen el seu estat per defecte.",
       "inherit": "Hereta",
       "enabled": "Habilitat",
-      "disabled": "Desactivat"
+      "disabled": "Desactivat",
+      "on": "Engegat",
+      "off": "Apagat"
     },
     "cameraType": {
       "title": "Tipus de càmera",
       "label": "Tipus de càmera",
       "description": "Estableix el tipus per a cada càmera. Les càmeres LPR dedicades són càmeres d'un sol ús amb un potent zoom òptic per capturar matrícules en vehicles distants. La majoria de les càmeres haurien d'utilitzar el tipus de càmera normal llevat que la càmera sigui específicament per a LPR i tingui una vista molt centrada en les matrícules.",
       "dedicatedLpr": "LPR dedicat",
-      "saveSuccess": "Tipus de càmera actualitzat per {{cameraName}}. Reinicia la fragata per aplicar els canvis.",
+      "saveSuccess": "Tipus de càmera actualitzat per {{cameraName}}. Reinicia Frigate per aplicar els canvis.",
       "normal": "Normal"
     },
-    "description": "Afegiu, editeu i suprimiu les càmeres, controleu quines càmeres estan habilitades, i configureu les superposicions per perfil i tipus de càmera. Per a configurar fluxos, detecció, moviment i altres paràmetres específics de la càmera, trieu la secció específica a Configuració de la càmera."
+    "description": "Afegiu, editeu i suprimiu les càmeres, controleu l'estat de cada càmera, i configureu les superposicions per perfil i tipus de càmera. Per a configurar fluxos, detecció, moviment i altres paràmetres específics de la càmera, trieu la secció específica a Configuració de la càmera.",
+    "clone": {
+      "sectionTitle": "Clona la configuració",
+      "sectionDescription": "Copia la configuració d'una càmera a una altra càmera o una de nova.",
+      "button": "Clona la configuració",
+      "title": "Clona la configuració de la càmera",
+      "description": "Copia la configuració d'una càmera a una o més càmeres o a una càmera nova. La identitat (nom, nom amigable, URL de la interfície d'usuari web, ordre de visualització) no es copia mai.",
+      "source": {
+        "label": "Càmera d'origen",
+        "placeholder": "Seleccioneu una càmera d'origen",
+        "required": "Seleccioneu una càmera d'origen"
+      },
+      "target": {
+        "legend": "Objectiu",
+        "newRadio": "Càmara nova",
+        "newNameLabel": "Nom de la càmera",
+        "newNamePlaceholder": "p. ex., porta enrere orporta o porta posterior",
+        "newNameInvalid": "Es requereix el nom de la càmera",
+        "newNameCollision": "Ja existeix una càmera amb aquest nom",
+        "newStreamsForced": "Els fluxos sempre es copien per a una càmera nova.",
+        "existingCamerasRadio": "Càmeres existents",
+        "allCameras": "Totes les càmeres",
+        "existingPlaceholder": "Selecciona almenys una càmera",
+        "existingDisabled": "No hi ha cap altra càmera a la qual copiar",
+        "newNameRequired": "Es requereix el nom de la càmera"
+      },
+      "categories": {
+        "legend": "Configuració per clonar",
+        "description": "Trieu quina configuració voleu copiar de la càmera d'origen.",
+        "selectAll": "Selecciona-ho tot",
+        "selectNone": "No en seleccioneu cap",
+        "resetDefaults": "Restableix als valors predeterminats",
+        "general": "General",
+        "spatial": "Paràmetres espacials",
+        "streams": "Fluxos",
+        "spatialWarningTitle": "La resolució no coincideix",
+        "spatialWarning": "La càmera d'origen {{srcCamera}} detecta la resolució ({{srcWidth}}.{{srcHeight}}) difereix de: {{cameras}}. És possible que els polígons no s'alineïn en aquestes càmeres. Aquests valors predeterminats estan desactivats; habiliteu-ho per a copiar tal qual.",
+        "restartHint": "Reinicia requerit",
+        "items": {
+          "record": "Enregistrament",
+          "snapshots": "Instantànies",
+          "review": "Revisió",
+          "motion": "Detecció de moviment",
+          "objects": "Objectes",
+          "audio": "Detecció d'àudio",
+          "audio_transcription": "Transcripció d'àudio",
+          "notifications": "Notificacions",
+          "birdseye": "Birdseye",
+          "timestamp_style": "Estil de la marca horària",
+          "lpr": "Reconeixement de la matrícula",
+          "face_recognition": "Reconeixement de cares",
+          "semantic_search": "Cerca semàntica",
+          "genai": "IA generativa",
+          "type": "Tipus de càmera (LPR normal / dedicat)",
+          "profiles": "Perfils",
+          "detect": "Detecta les dimensions",
+          "zones": "Zones",
+          "motion_mask": "Màscares de moviment",
+          "object_masks": "Màscares d'objecte",
+          "ffmpeg_live": "URL i rols de flux",
+          "mqtt": "MQTT",
+          "onvif": "ONVIF"
+        }
+      },
+      "footer": {
+        "changeCount_one": "{{count}} s'aplicarà el canvi",
+        "changeCount_many": "{{count}} canvis s'aplicaran",
+        "changeCount_other": "{{count}} canvis s'aplicaran",
+        "restartNeeded": "Es requerirà reiniciar per a alguns canvis.",
+        "liveOnly": "Tots els canvis s'aplicaran en viu sense reiniciar.",
+        "submit": "Clona",
+        "submitting": "S'està clonant…"
+      },
+      "toast": {
+        "success": "Configuració copiada a {{cameraName}}",
+        "successWithRestart": "Configuració copiada a {{cameraName}}. Reinicia Frigate per aplicar tots els canvis.",
+        "successMulti_one": "Configuració copiada a la càmera {{count}}",
+        "successMulti_many": "Configuració copiada a {{count}} càmeres",
+        "successMulti_other": "Configuració copiada a {{count}} càmeres",
+        "successMultiWithRestart_one": "Configuració copiada a la càmera {{count}}. Reinicia Frigate per aplicar tots els canvis.",
+        "successMultiWithRestart_many": "Configuració copiada a {{count}} càmeres. Reinicia Frigate per aplicar tots els canvis.",
+        "successMultiWithRestart_other": "Configuració copiada a {{count}} càmeres. Reinicia la fragata per aplicar tots els canvis.",
+        "partialFailure": "{{successCount}} seccions aplicades; «{{failedSection}}» ha fallat: {{errorMessage}}",
+        "partialFailureMulti": "S'ha copiat a {{successCount}} càmera(es); ha fallat {{failed}}: {{errorMessage}}",
+        "newCameraPartialFailure": "S'ha creat la càmera {{cameraName}} però no s'han pogut copiar alguns paràmetres: {{errorMessage}}",
+        "sourceMissing": "La càmera d'origen ja no existeix",
+        "submitError": "No s'ha pogut clonar la càmera: {{errorMessage}}"
+      }
+    }
   },
   "cameraReview": {
     "object_descriptions": {
@@ -1499,7 +1613,7 @@
       "desc": "La quadrícula de regions és una optimització que aprèn on solen aparèixer objectes de diferents mides en el camp de visió de cada càmera. Frigate utilitza aquestes dades per detectar regions de mida eficient. La quadrícula es construeix automàticament amb el temps a partir de dades d'objectes rastrejats.",
       "clear": "Neteja la quadrícula de la regió",
       "clearConfirmTitle": "Neteja la quadrícula de la regió",
-      "clearConfirmDesc": "No es recomana netejar la quadrícula de la regió tret que hagi canviat recentment la mida del model del detector o hagi canviat la posició física de la càmera i tingui problemes de seguiment d'objectes. La quadrícula es reconstruirà automàticament amb el temps a mesura que els objectes siguin rastrejats. Es requereix un reinici de la fragata perquè els canvis tinguin efecte.",
+      "clearConfirmDesc": "No es recomana netejar la quadrícula de la regió tret que hagi canviat recentment la mida del model del detector o hagi canviat la posició física de la càmera i tingui problemes de seguiment d'objectes. La quadrícula es reconstruirà automàticament amb el temps a mesura que els objectes siguin rastrejats. Es requereix un reinici de Frigate perquè els canvis tinguin efecte.",
       "clearSuccess": "La quadrícula de la regió s'ha netejat correctament",
       "clearError": "Ha fallat en netejar la graella de la regió",
       "restartRequired": "Cal reiniciar per a que els canvis de la quadrícula de la regió tinguin efecte"
@@ -1674,7 +1788,7 @@
     "searchPlaceholder": "Cerca...",
     "genaiRoles": {
       "options": {
-        "embeddings": "Incrustació",
+        "embeddings": "Vectors",
         "vision": "Visió",
         "tools": "Eines",
         "descriptions": "Descripcions",
@@ -1693,13 +1807,43 @@
     },
     "addCustomLabel": "Afegeix una etiqueta personalitzada...",
     "genaiModel": {
-      "placeholder": "Selecciona el model…",
-      "search": "Cerca models…",
-      "noModels": "No hi ha models disponibles"
+      "placeholder": "Seleccioneu o introduïu un model…",
+      "search": "Cerca o introdueix un model…",
+      "noModels": "No hi ha models disponibles",
+      "available": "Models disponibles",
+      "useCustom": "Utilitza \"{{value}}\"",
+      "refresh": "Actualitza els models",
+      "probeFailed": "No s'han pogut investigar els models",
+      "fetchedModels": "S'ha obtingut correctament la llista de models"
     },
     "knownPlates": {
       "namePlaceholder": "per exemple. Cotxe de la parella",
       "platePlaceholder": "Matricula o regex"
+    },
+    "semanticSearchModelSize": {
+      "notApplicable": "No aplicable als proveïdors de GenAI"
+    },
+    "liveStreams": {
+      "streamNameLabel": "Nom del flux",
+      "streamNamePlaceholder": "p. ex., corrent HD principal",
+      "go2rtcStreamLabel": "flux go2rtc",
+      "go2rtcStreamPlaceholder": "Selecciona un flux go2rtc",
+      "go2rtcStreamSearch": "Cerca o introdueix un nom de flux…",
+      "noGo2rtcStreams": "No s'ha configurat cap flux go2rtc",
+      "availableStreams": "Fluxos disponibles",
+      "useCustom": "Utilitza \"{{value}}\"",
+      "addStream": "Afegeix un flux"
+    },
+    "ptzPresets": {
+      "placeholder": "Selecciona o entra una configuració...",
+      "search": "Busca o entra una configuració...",
+      "noPresets": "No hi ha configuracions disponibles",
+      "available": "Parámetres de Cámera",
+      "useCustom": "Usa \"{{value}}\""
+    },
+    "defaultRole": {
+      "admin": "Administrar",
+      "viewer": "Visor"
     }
   },
   "globalConfig": {
@@ -1736,9 +1880,9 @@
     "saveAllPartial_other": "{{successCount}} de {{totalCount}} seccions desades. {{failCount}} ha fallat.",
     "saveAllFailure": "Ha fallat en desar totes les seccions.",
     "applied": "La configuració s'ha aplicat correctament",
-    "saveAllSuccessRestartRequired_one": "S'ha desat la secció {{count}} correctament. Reinicia la fragata per aplicar els canvis.",
-    "saveAllSuccessRestartRequired_many": "Totes les {{count}} seccions s'han desat correctament. Reinicia la fragata per aplicar els canvis.",
-    "saveAllSuccessRestartRequired_other": "Totes les {{count}} seccions s'han desat correctament. Reinicia la fragata per aplicar els canvis."
+    "saveAllSuccessRestartRequired_one": "S'ha desat la secció {{count}} correctament. Reinicia Frigate per aplicar els canvis.",
+    "saveAllSuccessRestartRequired_many": "Totes les {{count}} seccions s'han desat correctament. Reinicia Frigate per aplicar els canvis.",
+    "saveAllSuccessRestartRequired_other": "Totes les {{count}} seccions s'han desat correctament. Reinicia Frigate per aplicar els canvis."
   },
   "unsavedChanges": "Teniu canvis sense desar",
   "confirmReset": "Confirma el restabliment",
@@ -1865,7 +2009,8 @@
       "hardwareDxva2": "DXVA2",
       "hardwareVideotoolbox": "VideoToolbox"
     },
-    "streamNumber": "Flux {{index}}"
+    "streamNumber": "Flux {{index}}",
+    "sourceNumber": "Font {{index}}"
   },
   "timestampPosition": {
     "tl": "A dalt a l'esquerra",
@@ -1889,7 +2034,7 @@
       "recordDisabled": "L'enregistrament està desactivat, els elements de revisió no es generaran.",
       "detectDisabled": "La detecció d'objectes està desactivada. Els elements de revisió requereixen objectes detectats per categoritzar alertes i deteccions.",
       "allNonAlertDetections": "Totes les activitats no alertes s'inclouran com a deteccions.",
-      "genaiImageSourceRecordingsRecordDisabled": "La font d'imatges està configurada com a 'enregistraments', però l'enregistrament està desactivat. La fragata tornarà a la vista prèvia de les imatges."
+      "genaiImageSourceRecordingsRecordDisabled": "La font d'imatges està configurada com a 'enregistraments', però l'enregistrament està desactivat. Frigate tornarà a la vista prèvia de les imatges."
     },
     "audio": {
       "noAudioRole": "Cap flux té definit el rol d'àudio. Heu d'habilitar el rol d'àudio per a la detecció d'àudio perquè funcioni."
@@ -1899,7 +2044,13 @@
     },
     "detect": {
       "fpsGreaterThanFive": "No es recomana establir el detect FPS superior a 5. Els valors més alts poden causar problemes de rendiment i no proporcionaran cap benefici.",
-      "disabled": "La detecció d'objectes està desactivada. Les instantànies, articles de revisió i enriquiments com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran."
+      "disabled": "La detecció d'objectes està desactivada. Les instantànies, articles de revisió i enriquiments com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran.",
+      "resolutionShouldBeMultipleOfFour": "Per obtenir els millors resultats, detectar l'amplada i l'alçada han de ser múltiples de 4. Altres valors parells poden produir artefactes visuals o una lleugera distorsió en el flux de detecció.",
+      "aspectRatioMismatch": "L'amplada i alçada que heu introduït no coincideixen amb la relació d'aspecte de la resolució de detecció actual. Això pot produir una imatge estirada o distorsionada.",
+      "maxFramesSet": "La configuració dels fotogrames màxims anul·la el comportament predeterminat i desactiva el seguiment d'objectes estacionaris. Hi ha molt poques situacions en què això sigui necessari, utilitzeu-lo amb precaució.",
+      "squareResolution": "Una resolució de detecció quadrada és inusual. L'amplada i l'alçada de la detecció han de coincidir amb la relació d'aspecte de la càmera (per exemple, 16:9), no amb les dimensions del model de detecció d'objectes. Una relació d'aspecte no coincident pot estirar la imatge i reduir la precisió de detecció.",
+      "resolutionHigh": "Aquesta resolució de detecció és més alta del recomanat i pot causar un ús més elevat dels recursos sense millorar la precisió de detecció. Es recomana una resolució de detecció a o per sota de 1080p per a la majoria de les càmeres.",
+      "globalResolutionMultipleCameras": "S'estableix una resolució de detecció global mentre es configuren diverses càmeres. Tret que totes les càmeres comparteixin la mateixa resolució i relació d'aspecte, l'amplada i l'alçada de la detecció s'haurien de definir per càmera perquè coincideixi amb la relació d'aspecte nativa de cada càmera."
     },
     "faceRecognition": {
       "globalDisabled": "L'enriquiment del reconeixement facial s'ha d'habilitar perquè les funcions de reconeixement facial funcionin en aquesta càmera.",
@@ -1928,7 +2079,11 @@
       "genaiNoDescriptionsProvider": "Heu de configurar un proveïdor de GenAI amb el rol 'descripcions' per a les descripcions que es generaran."
     },
     "semanticSearch": {
-      "jinav2SmallModelSize": "La mida 'petita' amb el model Jina V2 té un alt cost de RAM i d'inferència. Es recomana el model 'gran' amb una GPU discreta."
+      "jinav2SmallModelSize": "La mida 'petita' amb el model Jina V2 té un alt cost de RAM i d'inferència. Es recomana el model 'gran' amb una GPU discreta.",
+      "modelSizeIgnoredForProvider": "La mida del model només s'aplica als models de Jina incorporats. Aquest valor s'ignorarà quan s'utilitzi un proveïdor d'incrustació GenAI."
+    },
+    "onvif": {
+      "autotrackingNoZones": "Autotraquejar requereix al menys una zona. Defineix una zona per aquesta cámera a Mascares/Zones, després usa'l com a requerit a la part inferior."
     }
   },
   "modelSize": {

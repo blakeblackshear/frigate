@@ -50,7 +50,8 @@
       "id": "Bahasa Indonesia (Indonesi)",
       "ur": "اردو (Urdú)",
       "hr": "Hrvatski (croat)",
-      "bs": "Bosanski (Bosni)"
+      "bs": "Bosanski (Bosni)",
+      "zhHant": "繁體中文 (Xinès Tradicional)"
     },
     "system": "Sistema",
     "systemMetrics": "Mètriques del sistema",
@@ -323,5 +324,8 @@
     "internalID": "L'ID intern que Frigate s'utilitza a la configuració i a la base de dades"
   },
   "no_items": "Sense elements",
-  "validation_errors": "Errors de validació"
+  "validation_errors": "Errors de validació",
+  "credentialField": {
+    "savedPlaceholder": "Desat — deixa en blanc per mantenir l'actual"
+  }
 }
