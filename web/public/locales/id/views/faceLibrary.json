@@ -9,7 +9,7 @@
     "subLabelScore": "Skor Sub Label",
     "face": "Detail Wajah",
     "scoreInfo": "Skor sub label adalah nilai gabungan dari tingkat keyakinan sistem dalam mengenali wajah. Nilai ini bisa berbeda dengan skor yang terlihat pada gambar cuplikan.",
-    "timestamp": "Stempel waktu",
+    "timestamp": "Cap waktu",
     "unknown": "Tidak diketahui",
     "faceDesc": "Detail objek terlacak yang menghasilkan wajah ini"
   },

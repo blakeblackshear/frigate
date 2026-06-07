@@ -1,13 +1,14 @@
 {
   "documentTitle": {
-    "cameras": "Status kamera - Frigate",
-    "storage": "Status Penyimpanan - Frigate",
-    "general": "Status umum - Frigate",
+    "cameras": "Statistik Kamera - Frigate",
+    "storage": "Statistik Penyimpanan - Frigate",
+    "general": "Statistik Umum - Frigate",
     "enrichments": "Statistik Enrichment - Frigate",
     "logs": {
       "frigate": "Log Frigate - Frigate",
       "go2rtc": "Log Go2RTC - Frigate",
-      "nginx": "Log NGINX - Frigate"
+      "nginx": "Log Nginx - Frigate",
+      "websocket": "Log Pesan - Frigate"
     }
   },
   "title": "Sistem",
@@ -17,32 +18,242 @@
       "label": "Unduh Log"
     },
     "copy": {
-      "label": "Salin ke Clipboard",
-      "success": "Log tersalin ke clipboard",
-      "error": "Tidak dapat menyalin ke clipboard"
+      "label": "Salin ke Papan Klip",
+      "success": "Log berhasil disalin ke papan klip",
+      "error": "Tidak dapat menyalin log ke papan klip"
     },
     "type": {
-      "label": "Tipe",
-      "timestamp": "Waktu",
+      "label": "Jenis",
+      "timestamp": "Stempel waktu",
       "tag": "Tag",
       "message": "Pesan"
     },
-    "tips": "Logs sedang berjalan dari server",
+    "tips": "Log sedang dialirkan dari server",
     "toast": {
       "error": {
-        "fetchingLogsFailed": "Error saat mengambil log: {{errorMessage}}",
-        "whileStreamingLogs": "Eror saat streaming logs: {{errorMessage}}"
+        "fetchingLogsFailed": "Kesalahan saat mengambil log: {{errorMessage}}",
+        "whileStreamingLogs": "Kesalahan saat mengalirkan log: {{errorMessage}}"
+      }
+    },
+    "websocket": {
+      "label": "Pesan",
+      "pause": "Jeda",
+      "resume": "Lanjutkan",
+      "clear": "Bersihkan",
+      "filter": {
+        "all": "Semua topik",
+        "topics": "Topik",
+        "events": "Peristiwa",
+        "reviews": "Tinjauan",
+        "classification": "Klasifikasi",
+        "face_recognition": "Pengenalan Wajah",
+        "lpr": "LPR",
+        "camera_activity": "Aktivitas kamera",
+        "system": "Sistem",
+        "camera": "Kamera",
+        "all_cameras": "Semua kamera",
+        "cameras_count_one": "{{count}} Kamera",
+        "cameras_count_other": "{{count}} Kamera"
+      },
+      "empty": "Belum ada pesan yang ditangkap",
+      "count_one": "{{count}} pesan",
+      "count_other": "{{count}} pesan",
+      "expanded": {
+        "payload": "Payload"
       }
     }
   },
   "general": {
     "title": "Umum",
     "detector": {
-      "title": "Pendeteksi",
-      "inferenceSpeed": "Pendeteksi Kecepatan Inferensi",
-      "temperature": "Pendeteksi Suhu",
-      "cpuUsage": "Pendeteksi penggunaan CPU",
-      "cpuUsageInformation": "CPU yang digunakan dalam mempersiapkan data masukan dan keluaran ke/dari model deteksi. Nilai ini tidak mengukur penggunaan inferensi, bahkan jika menggunakan GPU atau akselerator."
+      "title": "Detektor",
+      "inferenceSpeed": "Kecepatan Inferensi Detektor",
+      "temperature": "Suhu Detektor",
+      "cpuUsage": "Penggunaan CPU Detektor",
+      "cpuUsageInformation": "CPU yang digunakan untuk menyiapkan data input dan output ke/dari model deteksi. Nilai ini tidak mengukur penggunaan inferensi, meskipun menggunakan GPU atau akselerator.",
+      "memoryUsage": "Penggunaan Memori Detektor"
+    },
+    "hardwareInfo": {
+      "title": "Info Perangkat Keras",
+      "gpuUsage": "Penggunaan GPU",
+      "gpuMemory": "Memori GPU",
+      "gpuEncoder": "Encoder GPU",
+      "gpuCompute": "Komputasi / Enkode GPU",
+      "gpuDecoder": "Decoder GPU",
+      "gpuTemperature": "Suhu GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Output Vainfo",
+          "returnCode": "Kode Pengembalian: {{code}}",
+          "processOutput": "Output Proses:",
+          "processError": "Kesalahan Proses:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Output Nvidia SMI",
+          "name": "Nama: {{name}}",
+          "driver": "Driver: {{driver}}",
+          "cudaComputerCapability": "Kemampuan Komputasi CUDA: {{cuda_compute}}",
+          "vbios": "Info VBios: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Tutup info GPU"
+        },
+        "copyInfo": {
+          "label": "Salin info GPU"
+        },
+        "toast": {
+          "success": "Info GPU berhasil disalin ke papan klip"
+        }
+      },
+      "npuUsage": "Penggunaan NPU",
+      "npuMemory": "Memori NPU",
+      "npuTemperature": "Suhu NPU",
+      "intelGpuWarning": {
+        "title": "Peringatan Statistik GPU Intel",
+        "message": "Statistik GPU tidak tersedia",
+        "description": "Ini adalah bug yang sudah diketahui pada alat pelaporan statistik GPU Intel (intel_gpu_top) yang dapat rusak dan berulang kali mengembalikan penggunaan GPU sebesar 0% bahkan ketika akselerasi perangkat keras dan deteksi objek berjalan dengan benar pada (i)GPU. Ini bukan bug Frigate. Anda dapat memulai ulang host untuk memperbaiki masalah ini sementara dan memastikan GPU berfungsi dengan benar. Ini tidak memengaruhi kinerja."
+      }
+    },
+    "otherProcesses": {
+      "title": "Proses Lainnya",
+      "processCpuUsage": "Penggunaan CPU Proses",
+      "processMemoryUsage": "Penggunaan Memori Proses",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "perekaman",
+        "review_segment": "segmen tinjauan",
+        "embeddings": "embedding",
+        "audio_detector": "detektor audio"
+      }
+    }
+  },
+  "storage": {
+    "title": "Penyimpanan",
+    "overview": "Ringkasan",
+    "recordings": {
+      "title": "Rekaman",
+      "tips": "Nilai ini menunjukkan total penyimpanan yang digunakan oleh rekaman di basis data Frigate. Frigate tidak melacak penggunaan penyimpanan untuk semua file di disk Anda.",
+      "earliestRecording": "Rekaman paling awal yang tersedia:"
+    },
+    "shm": {
+      "title": "Alokasi SHM (memori bersama)",
+      "warning": "Ukuran SHM saat ini sebesar {{total}}MB terlalu kecil. Tingkatkan menjadi setidaknya {{min_shm}}MB.",
+      "frameLifetime": {
+        "title": "Masa hidup frame",
+        "description": "Setiap kamera memiliki {{frames}} slot frame di memori bersama. Pada laju frame kamera tercepat, setiap frame tersedia selama sekitar {{lifetime}} dtk sebelum ditimpa."
+      }
+    },
+    "cameraStorage": {
+      "title": "Penyimpanan Kamera",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Informasi Penyimpanan Tidak Terpakai",
+      "storageUsed": "Penyimpanan",
+      "percentageOfTotalUsed": "Persentase dari Total",
+      "bandwidth": "Bandwidth",
+      "unused": {
+        "title": "Tidak Terpakai",
+        "tips": "Nilai ini mungkin tidak secara akurat merepresentasikan ruang kosong yang tersedia untuk Frigate jika Anda memiliki file lain yang disimpan di drive selain rekaman Frigate. Frigate tidak melacak penggunaan penyimpanan di luar rekamannya."
+      }
+    }
+  },
+  "cameras": {
+    "title": "Kamera",
+    "overview": "Ringkasan",
+    "info": {
+      "aspectRatio": "rasio aspek",
+      "cameraProbeInfo": "Info Probe Kamera {{camera}}",
+      "streamDataFromFFPROBE": "Data stream diperoleh dengan <code>ffprobe</code>.",
+      "fetching": "Mengambil Data Kamera",
+      "stream": "Stream {{idx}}",
+      "video": "Video:",
+      "codec": "Codec:",
+      "resolution": "Resolusi:",
+      "fps": "FPS:",
+      "unknown": "Tidak diketahui",
+      "audio": "Audio:",
+      "error": "Kesalahan: {{error}}",
+      "tips": {
+        "title": "Info Probe Kamera"
+      }
+    },
+    "framesAndDetections": "Frame / Deteksi",
+    "noCameras": {
+      "title": "Tidak Ada Kamera Ditemukan"
+    },
+    "label": {
+      "camera": "kamera",
+      "detect": "deteksi",
+      "skipped": "dilewati",
+      "ffmpeg": "FFmpeg",
+      "capture": "penangkapan",
+      "overallFramesPerSecond": "jumlah frame per detik keseluruhan",
+      "overallDetectionsPerSecond": "jumlah deteksi per detik keseluruhan",
+      "overallSkippedDetectionsPerSecond": "jumlah deteksi yang dilewati per detik keseluruhan",
+      "cameraFfmpeg": "FFmpeg {{camName}}",
+      "cameraCapture": "penangkapan {{camName}}",
+      "cameraDetect": "deteksi {{camName}}",
+      "cameraGpu": "GPU {{camName}}",
+      "cameraFramesPerSecond": "frame per detik {{camName}}",
+      "cameraDetectionsPerSecond": "deteksi per detik {{camName}}",
+      "cameraSkippedDetectionsPerSecond": "deteksi yang dilewati per detik {{camName}}"
+    },
+    "connectionQuality": {
+      "title": "Kualitas Koneksi",
+      "excellent": "Sangat Baik",
+      "fair": "Cukup",
+      "poor": "Buruk",
+      "unusable": "Tidak Dapat Digunakan",
+      "fps": "FPS",
+      "expectedFps": "FPS yang Diharapkan",
+      "reconnectsLastHour": "Penyambungan ulang (1 jam terakhir)",
+      "stallsLastHour": "Macet (1 jam terakhir)"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Data probe berhasil disalin ke papan klip."
+      },
+      "error": {
+        "unableToProbeCamera": "Tidak dapat memeriksa kamera: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Terakhir diperbarui: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} memiliki penggunaan CPU FFmpeg yang tinggi ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} memiliki penggunaan CPU deteksi yang tinggi ({{detectAvg}}%)",
+    "healthy": "Sistem sehat",
+    "reindexingEmbeddings": "Mengindeks ulang embedding ({{processed}}% selesai)",
+    "cameraIsOffline": "{{camera}} sedang offline",
+    "detectIsSlow": "{{detect}} lambat ({{speed}} md)",
+    "detectIsVerySlow": "{{detect}} sangat lambat ({{speed}} md)",
+    "shmTooLow": "Alokasi /dev/shm ({{total}} MB) harus ditingkatkan menjadi setidaknya {{min}} MB.",
+    "debugReplayActive": "Sesi pemutaran ulang debug sedang aktif"
+  },
+  "enrichments": {
+    "title": "Enrichment",
+    "infPerSecond": "Inferensi Per Detik",
+    "averageInf": "Waktu Inferensi Rata-rata",
+    "embeddings": {
+      "image_embedding": "Embedding Gambar",
+      "text_embedding": "Embedding Teks",
+      "face_recognition": "Pengenalan Wajah",
+      "plate_recognition": "Pengenalan Plat",
+      "image_embedding_speed": "Kecepatan Embedding Gambar",
+      "face_embedding_speed": "Kecepatan Embedding Wajah",
+      "face_recognition_speed": "Kecepatan Pengenalan Wajah",
+      "plate_recognition_speed": "Kecepatan Pengenalan Plat",
+      "text_embedding_speed": "Kecepatan Embedding Teks",
+      "yolov9_plate_detection_speed": "Kecepatan Deteksi Plat YOLOv9",
+      "yolov9_plate_detection": "Deteksi Plat YOLOv9",
+      "review_description": "Deskripsi Tinjauan",
+      "review_description_speed": "Kecepatan Deskripsi Tinjauan",
+      "review_description_events_per_second": "Deskripsi Tinjauan",
+      "object_description": "Deskripsi Objek",
+      "object_description_speed": "Kecepatan Deskripsi Objek",
+      "object_description_events_per_second": "Deskripsi Objek",
+      "classification": "Klasifikasi {{name}}",
+      "classification_speed": "Kecepatan Klasifikasi {{name}}",
+      "classification_events_per_second": "Peristiwa Klasifikasi {{name}} Per Detik"
     }
   }
 }

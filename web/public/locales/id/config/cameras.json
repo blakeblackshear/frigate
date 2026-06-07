@@ -1,3 +1,62 @@
 {
-    "label": "Pengaturan Kamera"
+    "label": "Pengaturan Kamera",
+    "name": {
+        "label": "Nama Kamera",
+        "description": "Nama Kamera diwajibkan"
+    },
+    "friendly_name": {
+        "label": "Nama Singkat",
+        "description": "Nama Singkat kamera digunakan pada tampilan UI Frigate"
+    },
+    "audio": {
+        "label": "Deteksi Suara",
+        "description": "Pengaturan untuk Deteksi Kejadian berdasarkan Suara pada kamera ini.",
+        "enabled": {
+            "label": "Nyalakan Deteksi Suara",
+            "description": "Nyalakan atau matikan deteksi kejadian suara pada kamera ini."
+        },
+        "filters": {
+            "threshold": {
+                "label": "Keyakinan-Suara Minimum"
+            }
+        },
+        "min_volume": {
+            "label": "Volume-Suara Minimum"
+        }
+    },
+    "audio_transcription": {
+        "label": "Transkripsi Suara",
+        "enabled": {
+            "label": "Nyalakan Transkripsi"
+        },
+        "live_enabled": {
+            "label": "Transkripsi Langsung (Live)"
+        }
+    },
+    "detect": {
+        "label": "Deteksi Objek",
+        "enabled": {
+            "label": "Nyalakan Deteksi Objek"
+        },
+        "stationary": {
+            "classifier": {
+                "label": "Nyalakan Klasifikasi-Visual",
+                "description": "Menggunakan pengklasifikasi visual untuk membedakan objek-objek diam (benar-benar tidak bergerak), meskipun bounding-box kurang stabil atau bergetar (jitter)."
+            }
+        },
+        "fps": {
+            "label": "Kecepatan (FPS) Deteksi",
+            "description": "Kecepatan yang ditargetkan untuk menjalankan Deteksi Objek, dalam satuan frame per second (FPS); nilai lebih rendah mengurangi intensitas proses dan dapat meringangkan beban kerja CPU. Nilai 5 direkomendasikan, sedangakan nilai 10 dianggap sangat tinggi dan hanya digunakan untuk pelacakan (tracking) benda yang bergerak dengan benar-benar cepat."
+        }
+    },
+    "enabled": {
+        "label": "Dinyalakan",
+        "description": "Dinyalakan (Enabled)"
+    },
+    "birdseye": {
+        "enabled": {
+            "description": "Nyalakan atau matikan fitur Penglihatan Atas (Birdseye View).",
+            "label": "Nyalakan Birdseye"
+        }
+    }
 }
