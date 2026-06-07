@@ -58,15 +58,17 @@
   },
   "camera": {
     "enable": "カメラを有効化",
-    "disable": "カメラを無効化"
+    "disable": "カメラを無効化",
+    "turnOn": "カメラをオンにする",
+    "turnOff": "カメラをオフにする"
   },
   "muteCameras": {
     "enable": "全カメラをミュート",
     "disable": "全カメラのミュートを解除"
   },
   "detect": {
-    "enable": "検出を有効化",
-    "disable": "検出を無効化"
+    "enable": "検知を有効化",
+    "disable": "検知を無効化"
   },
   "recording": {
     "enable": "録画を有効化",
@@ -78,8 +80,8 @@
     "disable": "スナップショットを無効化"
   },
   "audioDetect": {
-    "enable": "音声検出を有効化",
-    "disable": "音声検出を無効化"
+    "enable": "音声検知を有効化",
+    "disable": "音声検知を無効化"
   },
   "transcription": {
     "enable": "ライブ音声文字起こしを有効化",
@@ -142,18 +144,19 @@
       "tips": "プレーヤーが非表示でもストリーミングを継続するにはこのオプションを有効にします。"
     },
     "debug": {
-      "picker": "デバッグモードではストリームの選択はできません。デバッグビューは常に 検出ロールに割り当てられたストリームを使用します。"
+      "picker": "デバッグモードではストリームの選択はできません。デバッグビューは常に 検知ロールに割り当てられたストリームを使用します。"
     }
   },
   "cameraSettings": {
     "title": "{{camera}} の設定",
     "cameraEnabled": "カメラ有効",
-    "objectDetection": "物体検出",
+    "objectDetection": "物体検知",
     "recording": "録画",
     "snapshots": "スナップショット",
-    "audioDetection": "音声検出",
+    "audioDetection": "音声検知",
     "transcription": "音声文字起こし",
-    "autotracking": "オートトラッキング"
+    "autotracking": "オートトラッキング",
+    "camera": "カメラ"
   },
   "history": {
     "label": "履歴映像を表示"

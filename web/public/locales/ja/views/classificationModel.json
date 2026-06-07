@@ -12,7 +12,7 @@
   },
   "toast": {
     "success": {
-      "deletedImage_other": "{{count}} 件の削除された画像",
+      "deletedImage_other": "{{count}} 枚の画像を削除しました",
       "categorizedImage": "画像の分類に成功しました",
       "trainedModel": "モデルを正常に学習させました。",
       "trainingModel": "モデルのトレーニングを正常に開始しました。",
@@ -35,15 +35,15 @@
     }
   },
   "train": {
-    "titleShort": "Classifications,最近の分類結果を選択,,False,train.aria,,",
+    "titleShort": "最近の分類",
     "title": "最近の分類結果",
     "aria": "最近の分類結果を選択"
   },
   "wizard": {
     "step1": {
-      "typeObject": "Classification",
-      "typeState": "Classification",
-      "description": "状態モデルは固定カメラ領域の状態変化（例：ドアの開閉）を監視し、オブジェクトモデルは検出されたオブジェクトに分類（例：既知の動物や配達員など）を追加します。",
+      "typeObject": "オブジェクト",
+      "typeState": "状態",
+      "description": "状態モデルは固定カメラ領域の状態変化（例：ドアの開閉）を監視し、オブジェクトモデルは検知されたオブジェクトに分類（例：既知の動物や配達員など）を追加します。",
       "name": "名前",
       "namePlaceholder": "モデル名を入力...",
       "type": "タイプ",
@@ -58,7 +58,7 @@
       "states": "状態",
       "classesTip": "クラスについて",
       "classesStateDesc": "カメラ領域の状態を定義します。例: ガレージドアの「開」「閉」。",
-      "classesObjectDesc": "検出されたオブジェクトを分類するための、異なるカテゴリを定義します。例：人物の分類として「delivery_person」「resident」「stranger」など。",
+      "classesObjectDesc": "検知されたオブジェクトを分類するための、異なるカテゴリを定義します。例：人物の分類として「delivery_person」「resident」「stranger」など。",
       "classPlaceholder": "クラス名を入力...",
       "errors": {
         "nameRequired": "モデル名は必須です",
@@ -113,11 +113,16 @@
       "missingStatesWarning": {
         "title": "状態の例が不足しています",
         "description": "最良の結果を得るため、すべての状態の例を選択することを推奨します。すべてを選択しなくても続行できますが、全状態に画像が揃うまでモデルは学習されません。続行後、「最近の分類」から不足分を分類し、学習を行ってください。"
+      },
+      "refreshExamples": "新しい例を生成",
+      "refreshConfirm": {
+        "title": "新しい例を生成しますか？",
+        "description": "この操作により、新しい画像セットが生成され、選択済みのものも含めすべての選択がクリアされます。すべてのクラスについて、再度例を選び直す必要があります。"
       }
     }
   },
   "details": {
-    "scoreInfo": "このスコアは、このオブジェクトに対するすべての検出結果の分類信頼度の平均を表します。",
+    "scoreInfo": "このスコアは、このオブジェクトに対するすべての検知結果の分類信頼度の平均を表します。",
     "none": "なし",
     "unknown": "不明"
   },
@@ -172,7 +177,7 @@
   "noModels": {
     "object": {
       "title": "オブジェクト分類モデルがありません",
-      "description": "検出されたオブジェクトを分類するためのカスタムモデルを作成します。",
+      "description": "検知されたオブジェクトを分類するためのカスタムモデルを作成します。",
       "buttonText": "オブジェクトモデルを作成"
     },
     "state": {
@@ -180,5 +185,7 @@
       "description": "特定のカメラ領域の状態変化を監視・分類するためのカスタムモデルを作成します。",
       "buttonText": "状態モデルを作成"
     }
-  }
+  },
+  "reclassifyImageAs": "画像を次として再分類:",
+  "reclassifyImage": "画像を再分類"
 }

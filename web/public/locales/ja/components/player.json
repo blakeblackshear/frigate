@@ -20,7 +20,7 @@
     },
     "bandwidth": {
       "title": "帯域:",
-      "short": "帯域"
+      "short": "帯域幅"
     },
     "latency": {
       "title": "遅延:",
@@ -48,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "フレームの Frigate+ への送信に失敗しました"
     }
-  }
+  },
+  "cameraOff": "カメラはオフです"
 }

@@ -15,13 +15,14 @@
     "maintenance": "メンテナンス - Frigate",
     "profiles": "プロファイル - Frigate",
     "globalConfig": "グローバル設定 - Frigate",
-    "cameraConfig": "カメラ設定 - Frigate"
+    "cameraConfig": "カメラ設定 - Frigate",
+    "detectorsAndModel": "検出器とモデル - Frigate"
   },
   "menu": {
     "ui": "UI",
     "enrichments": "高度解析",
     "cameras": "カメラ設定",
-    "masksAndZones": "マスク／ゾーン",
+    "masksAndZones": "マスク / ゾーン",
     "motionTuner": "モーションチューナー",
     "triggers": "トリガー",
     "debug": "デバッグ",
@@ -30,23 +31,23 @@
     "frigateplus": "Frigate+",
     "cameraManagement": "管理",
     "cameraReview": "レビュー",
-    "roles": "区分",
-    "general": "一般",
+    "roles": "ロール",
+    "general": "全般",
     "globalConfig": "グローバル設定",
     "system": "システム",
-    "integrations": "統合",
+    "integrations": "連携",
     "uiSettings": "UI設定",
     "profiles": "プロファイル",
-    "globalDetect": "物体検出",
+    "globalDetect": "物体検知",
     "globalRecording": "録画",
     "globalSnapshots": "スナップショット",
     "globalFfmpeg": "FFmpeg",
-    "globalMotion": "動体検出",
+    "globalMotion": "モーション検知",
     "globalObjects": "オブジェクト",
     "globalReview": "レビュー",
-    "globalAudioEvents": "オーディオイベント",
+    "globalAudioEvents": "音声検知",
     "globalLivePlayback": "ライブ再生",
-    "globalTimestampStyle": "タイムスタンプ形式",
+    "globalTimestampStyle": "タイムスタンプスタイル",
     "systemDatabase": "データベース",
     "systemTls": "TLS",
     "systemAuthentication": "認証",
@@ -55,7 +56,40 @@
     "systemUi": "UI",
     "systemLogging": "ロギング",
     "systemEnvironmentVariables": "環境変数",
-    "systemTelemetry": "テレメトリー"
+    "systemTelemetry": "テレメトリ",
+    "systemBirdseye": "バードアイ",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorsAndModel": "検出器とモデル",
+    "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "go2rtc ストリーム",
+    "integrationSemanticSearch": "セマンティック検索",
+    "integrationGenerativeAi": "生成AI",
+    "integrationFaceRecognition": "顔認識",
+    "integrationLpr": "ナンバープレート認識",
+    "integrationObjectClassification": "オブジェクト分類",
+    "integrationAudioTranscription": "音声文字起こし",
+    "cameraDetect": "物体検知",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "録画",
+    "cameraSnapshots": "スナップショット",
+    "cameraMotion": "モーション検知",
+    "cameraObjects": "オブジェクト",
+    "cameraConfigReview": "レビュー",
+    "cameraAudioEvents": "音声検知",
+    "cameraAudioTranscription": "音声文字起こし",
+    "cameraNotifications": "通知",
+    "cameraLivePlayback": "ライブ再生",
+    "cameraBirdseye": "バードアイ",
+    "cameraFaceRecognition": "顔認識",
+    "cameraLpr": "ナンバープレート認識",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "カメラ UI",
+    "cameraTimestampStyle": "タイムスタンプスタイル",
+    "cameraMqtt": "カメラ MQTT",
+    "maintenance": "メンテナンス",
+    "mediaSync": "メディア同期",
+    "regionGrid": "リージョングリッド"
   },
   "dialog": {
     "unsavedChanges": {
@@ -85,7 +119,7 @@
       },
       "liveFallbackTimeout": {
         "label": "ライブプレイヤーのフォールバック タイムアウト",
-        "desc": "カメラの高画質ライブストリームが利用できない場合、指定した秒数後に低帯域モードへ切り替えます。デフォルト：3 秒"
+        "desc": "カメラの高画質ライブストリームが利用できない場合、指定した秒数後に低帯域モードへ切り替えます。デフォルトは 3 秒。"
       }
     },
     "storedLayouts": {
@@ -117,7 +151,7 @@
     "toast": {
       "success": {
         "clearStoredLayout": "{{cameraName}} の保存済みレイアウトをクリアしました",
-        "clearStreamingSettings": "すべてのカメラグループのストリーミング設定をクリアしました。"
+        "clearStreamingSettings": "全カメラグループのストリーミング設定をクリアしました。"
       },
       "error": {
         "clearStoredLayoutFailed": "保存済みレイアウトのクリアに失敗しました: {{errorMessage}}",
@@ -176,7 +210,7 @@
     },
     "licensePlateRecognition": {
       "title": "ナンバープレート認識",
-      "desc": "車両のナンバープレートを認識し、検出文字列を recognized_license_plate フィールドへ、または既知の名称を car タイプのオブジェクトの sub_label として自動追加できます。一般的な用途として、私道に入ってくる車や道路を通過する車のナンバー読み取りがあります。"
+      "desc": "車両のナンバープレートを認識し、検知文字列を recognized_license_plate フィールドへ、または既知の名称を car タイプのオブジェクトの sub_label として自動追加できます。一般的な用途として、私道に入ってくる車や道路を通過する車のナンバー読み取りがあります。"
     },
     "restart_required": "再起動が必要です（高度解析設定を変更）",
     "toast": {
@@ -322,6 +356,21 @@
           "zone": "ゾーン",
           "motion_mask": "モーションマスク",
           "object_mask": "オブジェクトマスク"
+        },
+        "revertOverride": {
+          "title": "ベース設定に戻す",
+          "desc": "{{type}} <em>{{name}}</em> のプロファイル上書きを削除し、ベース設定に戻します。"
+        }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID は空にできません。",
+          "alreadyExists": "この ID のマスクはこのカメラに既に存在します。"
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "名前は空にできません。"
         }
       }
     },
@@ -337,7 +386,7 @@
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "画像上をクリックして多角形を描画します。",
       "name": {
-        "title": "名称",
+        "title": "名前",
         "inputPlaceHolder": "名前を入力…",
         "tips": "名前は2文字以上で、少なくとも1文字のアルファベットを含み、このカメラ上の他のゾーン名やカメラ名と同一であってはなりません。"
       },
@@ -374,43 +423,53 @@
       },
       "toast": {
         "success": "ゾーン（{{zoneName}}）を保存しました。"
+      },
+      "enabled": {
+        "title": "有効",
+        "description": "このゾーンを設定ファイルで有効化するかどうか。無効化すると MQTT からも有効化できず、実行時には無視されます。"
       }
     },
     "motionMasks": {
       "label": "モーションマスク",
       "documentTitle": "モーションマスクを編集 - Frigate",
       "desc": {
-        "title": "モーションマスクは、望ましくない種類の動きで検出がトリガーされるのを防ぎます。過度なマスクはオブジェクト追跡を困難にします。",
+        "title": "モーションマスクは、望ましくない種類の動きで検知がトリガーされるのを防ぎます。過度なマスクはオブジェクト追跡を困難にします。",
         "documentation": "ドキュメント"
       },
       "add": "新しいモーションマスク",
       "edit": "モーションマスクを編集",
       "context": {
-        "title": "モーションマスクは、望ましくない動き（例: 木の枝、カメラのタイムスタンプ）で検出がトリガーされるのを防ぐために使用します。<em>ごく控えめ</em>に使用してください。過度なマスクはオブジェクト追跡を困難にします。"
+        "title": "モーションマスクは、望ましくない動き（例: 木の枝、カメラのタイムスタンプ）で検知がトリガーされるのを防ぐために使用します。<em>ごく控えめ</em>に使用してください。過度なマスクはオブジェクト追跡を困難にします。"
       },
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "画像上をクリックして多角形を描画します。",
       "polygonAreaTooLarge": {
         "title": "モーションマスクがカメラフレームの {{polygonArea}}% を覆っています。大きなモーションマスクは推奨されません。",
-        "tips": "モーションマスクはオブジェクトの検出自体を防ぎません。代わりに必須ゾーンを使用してください。"
+        "tips": "モーションマスクはオブジェクトの検知自体を防ぎません。代わりに必須ゾーンを使用してください。"
       },
       "toast": {
         "success": {
           "title": "{{polygonName}} を保存しました。",
           "noName": "モーションマスクを保存しました。"
         }
+      },
+      "defaultName": "モーションマスク {{number}}",
+      "name": {
+        "title": "名前",
+        "description": "このモーションマスクの任意の表示名です。",
+        "placeholder": "名前を入力..."
       }
     },
     "objectMasks": {
       "label": "オブジェクトマスク",
       "documentTitle": "オブジェクトマスクを編集 - Frigate",
       "desc": {
-        "title": "オブジェクトフィルタマスクは、位置に基づいて特定のオブジェクトタイプの誤検出を除外するために使用します。",
+        "title": "オブジェクトフィルタマスクは、位置に基づいて特定のオブジェクトタイプの誤検知を除外するために使用します。",
         "documentation": "ドキュメント"
       },
       "add": "オブジェクトマスクを追加",
       "edit": "オブジェクトマスクを編集",
-      "context": "オブジェクトフィルタマスクは、位置に基づいて特定のオブジェクトタイプの誤検出を除外するために使用します。",
+      "context": "オブジェクトフィルタマスクは、位置に基づいて特定のオブジェクトタイプの誤検知を除外するために使用します。",
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "画像上をクリックして多角形を描画します。",
       "objects": {
@@ -423,14 +482,29 @@
           "title": "{{polygonName}} を保存しました。",
           "noName": "オブジェクトマスクを保存しました。"
         }
+      },
+      "name": {
+        "title": "名前",
+        "description": "このオブジェクトマスクの任意の表示名です。",
+        "placeholder": "名前を入力..."
+      }
+    },
+    "disabledInConfig": "この項目は設定ファイルで無効化されています",
+    "addDisabledProfile": "まずベース設定に追加してから、プロファイルで上書きしてください",
+    "profileBase": "（ベース）",
+    "profileOverride": "（上書き）",
+    "masks": {
+      "enabled": {
+        "title": "有効",
+        "description": "このマスクを設定ファイルで有効化するかどうか。無効化すると MQTT からも有効化できず、実行時には無視されます。"
       }
     }
   },
   "motionDetectionTuner": {
-    "title": "モーション検出チューナー",
+    "title": "モーション検知チューナー",
     "unsavedChanges": "未保存のモーションチューナーの変更（{{camera}}）",
     "desc": {
-      "title": "Frigate は、フレーム内に物体検出で確認すべき動きがあるかの一次チェックとしてモーション検出を使用します。",
+      "title": "Frigate は、フレーム内に物体検知で確認すべき動きがあるかの一次チェックとしてモーション検知を使用します。",
       "documentation": "モーション調整ガイドを読む"
     },
     "Threshold": {
@@ -451,15 +525,15 @@
   },
   "debug": {
     "title": "デバッグ",
-    "detectorDesc": "Frigate は検出器（{{detectors}}）を使用して、カメラの映像ストリーム内のオブジェクトを検出します。",
-    "desc": "デバッグビューは、追跡オブジェクトとその統計をリアルタイムに表示します。オブジェクト一覧には、検出オブジェクトの時差サマリが表示されます。",
+    "detectorDesc": "Frigate は検出器（{{detectors}}）を使用して、カメラの映像ストリーム内のオブジェクトを検知します。",
+    "desc": "デバッグビューは、追跡オブジェクトとその統計をリアルタイムに表示します。オブジェクト一覧には、検知オブジェクトの時差サマリが表示されます。",
     "openCameraWebUI": "{{camera}} の Web UI を開く",
     "debugging": "デバッグ",
     "objectList": "オブジェクト一覧",
     "noObjects": "オブジェクトなし",
     "audio": {
       "title": "音声",
-      "noAudioDetections": "音声検出なし",
+      "noAudioDetections": "音声検知なし",
       "score": "スコア",
       "currentRMS": "現在の RMS",
       "currentdbFS": "現在の dBFS"
@@ -469,7 +543,7 @@
       "desc": "追跡オブジェクトの周囲にバウンディングボックスを表示します",
       "colors": {
         "label": "オブジェクトのボックス色",
-        "info": "<li>起動時に、各オブジェクトラベルへ異なる色が割り当てられます</li><li>細い濃青線は、現在時点では未検出であることを示します</li><li>細い灰線は、静止していると検出されたことを示します</li><li>太線は、（有効時）オートトラッキングの対象であることを示します</li>"
+        "info": "<li>起動時に、各オブジェクトラベルへ異なる色が割り当てられます</li><li>細い濃青線は、現在時点では未検知であることを示します</li><li>細い灰線は、静止していると検知されたことを示します</li><li>太線は、（有効時）オートトラッキングの対象であることを示します</li>"
       }
     },
     "timestamp": {
@@ -486,8 +560,8 @@
     },
     "motion": {
       "title": "モーションボックス",
-      "desc": "モーションが検出された領域のボックスを表示します",
-      "tips": "<p><strong>モーションボックス</strong></p><br><p>現在モーションが検出されている領域に赤いボックスが重ねて表示されます</p>"
+      "desc": "モーションが検知された領域のボックスを表示します",
+      "tips": "<p><strong>モーションボックス</strong></p><br><p>現在モーションが検知されている領域に赤いボックスが重ねて表示されます</p>"
     },
     "regions": {
       "title": "領域",
@@ -643,7 +717,7 @@
         "createRole": "ロール {{role}} を作成しました",
         "updateCameras": "ロール {{role}} のカメラを更新しました",
         "deleteRole": "ロール {{role}} を削除しました",
-        "userRolesUpdated_other": "このロールに割り当てられていた {{count}} ユーザーは「viewer」に更新され、すべてのカメラへの閲覧アクセスが付与されました。"
+        "userRolesUpdated_other": "このロールに割り当てられていた {{count}} ユーザーは「viewer」に更新され、全カメラへの閲覧アクセスが付与されました。"
       },
       "error": {
         "createRoleFailed": "ロールの作成に失敗しました: {{errorMessage}}",
@@ -663,7 +737,7 @@
       },
       "deleteRole": {
         "title": "ロールを削除",
-        "desc": "この操作は元に戻せません。ロールは完全に削除され、このロールを持っていたユーザーは「viewer」ロールに再割り当てされ、すべてのカメラへの閲覧アクセスが付与されます。",
+        "desc": "この操作は元に戻せません。ロールは完全に削除され、このロールを持っていたユーザーは「viewer」ロールに再割り当てされ、全カメラへの閲覧アクセスが付与されます。",
         "warn": "<strong>{{role}}</strong> を削除してもよろしいですか？",
         "deleting": "削除中…"
       },
@@ -692,7 +766,8 @@
     },
     "notificationUnavailable": {
       "title": "通知は利用できません",
-      "desc": "Web プッシュ通知にはセキュアコンテキスト（<code>https://…</code>）が必要です。これはブラウザの制限です。通知を利用するには、セキュアに Frigate へアクセスしてください。"
+      "desc": "Web プッシュ通知にはセキュアコンテキスト（<code>https://…</code>）が必要です。これはブラウザの制限です。通知を利用するには、セキュアに Frigate へアクセスしてください。",
+      "descPwa": "iOSでは、Frigateをホーム画面に追加した場合にのみ、Webプッシュ通知を利用できます。<strong>共有</strong>メニューを開き、<strong>ホーム画面に追加</strong>を選択してから、新しいアイコンからFrigateを起動し、このデバイスを通知対象として登録してください。"
     },
     "globalSettings": {
       "title": "グローバル設定",
@@ -748,7 +823,7 @@
     },
     "snapshotConfig": {
       "title": "スナップショット設定",
-      "desc": "Frigate+ への送信には、設定でスナップショットと <code>clean_copy</code> スナップショットの両方を有効にする必要があります。",
+      "desc": "Frigate+ への送信には、設定でスナップショットを有効にする必要があります。",
       "cleanCopyWarning": "一部のカメラではスナップショット機能が無効になっています",
       "table": {
         "camera": "カメラ",
@@ -771,14 +846,30 @@
       "error": "モデル情報の読み込みに失敗しました",
       "availableModels": "利用可能なモデル",
       "loadingAvailableModels": "利用可能なモデルを読み込み中…",
-      "modelSelect": "ここで Frigate+ 上の利用可能なモデルを選択できます。現在の検出器構成と互換性のあるモデルのみ選択可能です。"
+      "modelSelect": "ここで Frigate+ 上の利用可能なモデルを選択できます。現在の検出器構成と互換性のあるモデルのみ選択可能です。",
+      "noModelLoaded": "Frigate+ モデルは現在読み込まれていません。",
+      "selectModel": "モデルを選択",
+      "noModelsAvailable": "利用可能なモデルがありません",
+      "filter": {
+        "ariaLabel": "モデルをタイプで絞り込み",
+        "baseModels": "ベースモデル",
+        "fineTunedModels": "ファインチューニング済みモデル"
+      }
     },
     "unsavedChanges": "未保存の Frigate+ 設定の変更",
     "restart_required": "再起動が必要です（Frigate+ モデルを変更）",
     "toast": {
       "success": "Frigate+ 設定を保存しました。変更を適用するには Frigate を再起動してください。",
       "error": "設定変更の保存に失敗しました: {{errorMessage}}"
-    }
+    },
+    "description": "Frigate+ はサブスクリプションサービスで、独自データで学習させたカスタム物体検知モデルなど、Frigate インスタンスに追加機能を提供します。Frigate+ モデルの設定はここから管理できます。",
+    "cardTitles": {
+      "api": "API",
+      "currentModel": "現在のモデル",
+      "otherModels": "その他のモデル",
+      "configuration": "設定"
+    },
+    "changeInDetectorsAndModel": "モデルを変更"
   },
   "triggers": {
     "documentTitle": "トリガー",
@@ -788,7 +879,7 @@
     },
     "addTrigger": "トリガーを追加",
     "table": {
-      "name": "名称",
+      "name": "名前",
       "type": "タイプ",
       "content": "コンテンツ",
       "threshold": "しきい値",
@@ -823,7 +914,7 @@
       },
       "form": {
         "name": {
-          "title": "名称",
+          "title": "名前",
           "placeholder": "トリガー名を入力",
           "error": {
             "minLength": "この項目は2文字以上で入力してください。",
@@ -838,15 +929,15 @@
         "type": {
           "title": "タイプ",
           "placeholder": "トリガータイプを選択",
-          "description": "類似した追跡オブジェクトの説明が検出されたときにトリガー",
-          "thumbnail": "類似した追跡オブジェクトのサムネイルが検出されたときにトリガー"
+          "description": "類似した追跡オブジェクトの説明が検知されたときにトリガー",
+          "thumbnail": "類似した追跡オブジェクトのサムネイルが検知されたときにトリガー"
         },
         "content": {
           "title": "コンテンツ",
           "imagePlaceholder": "サムネイルを選択",
           "textPlaceholder": "テキストを入力",
           "imageDesc": "最新のサムネイル100件のみが表示されます。目的のサムネイルが見つからない場合は、探索で過去のオブジェクトを確認し、そこのメニューからトリガーを設定してください。",
-          "textDesc": "類似する追跡オブジェクトの説明が検出されたときにこのアクションをトリガーするためのテキストを入力します。",
+          "textDesc": "類似する追跡オブジェクトの説明が検知されたときにこのアクションをトリガーするためのテキストを入力します。",
           "error": {
             "required": "コンテンツは必須です。"
           }
@@ -860,7 +951,7 @@
           "desc": "このトリガーの類似度しきい値を設定します。値が高いほど、より近い一致が必要になります。"
         },
         "actions": {
-          "title": "アクション",
+          "title": "操作",
           "desc": "デフォルトでは、Frigate はすべてのトリガーに対して MQTT メッセージを送信します。サブラベルは、トリガー名をオブジェクトのラベルに追加します。属性（Attributes）は、追跡オブジェクトのメタデータとは別に保存される検索可能なメタデータです。",
           "error": {
             "min": "少なくとも1つのアクションを選択してください。"
@@ -961,7 +1052,7 @@
       "quality": "品質",
       "selectQuality": "品質を選択",
       "roleLabels": {
-        "detect": "物体検出",
+        "detect": "物体検知",
         "record": "録画",
         "audio": "音声"
       },
@@ -973,12 +1064,12 @@
       "notConnected": "未接続",
       "featuresTitle": "機能",
       "go2rtc": "カメラへの接続数を削減",
-      "detectRoleWarning": "続行するには、少なくとも 1 つのストリームに「検出」ロールが必要です。",
+      "detectRoleWarning": "続行するには、少なくとも 1 つのストリームに「検知」ロールが必要です。",
       "rolesPopover": {
         "title": "ストリーム ロール",
-        "detect": "物体検出用のメイン フィードです。",
+        "detect": "物体検知用のメイン フィードです。",
         "record": "設定に基づいて映像フィードのセグメントを保存します。",
-        "audio": "音声ベース検出用のフィードです。"
+        "audio": "音声ベース検知用のフィードです。"
       },
       "featuresPopover": {
         "title": "ストリーム機能",
@@ -999,8 +1090,8 @@
     },
     "testResultLabels": {
       "resolution": "解像度",
-      "video": "ビデオ",
-      "audio": "オーディオ",
+      "video": "映像",
+      "audio": "音声",
       "fps": "FPS"
     },
     "commonErrors": {
@@ -1008,7 +1099,7 @@
       "testFailed": "ストリームテストに失敗しました: {{error}}"
     },
     "step1": {
-      "description": "カメラの詳細を入力し、カメラを自動検出するか、メーカーを手動で選択してください。",
+      "description": "カメラの詳細を入力し、カメラを自動検知するか、メーカーを手動で選択してください。",
       "cameraName": "カメラ名",
       "cameraNamePlaceholder": "例: front_door または Back Yard Overview",
       "host": "ホスト／IP アドレス",
@@ -1040,23 +1131,23 @@
         "brands": {
           "reolink-rtsp": "Reolink の RTSP は推奨されません。カメラ設定で http を有効にし、カメラウィザードを再起動することを推奨します。"
         },
-        "customUrlRtspRequired": "カスタム URL は「rtsp://」で始まる必要があります。非 RTSP カメラ ストリームの場合は手動構成が必要です。"
+        "customUrlRtspRequired": "カスタムURLは「rtsp://」または「rtsps://」で始まる必要があります。RTSP以外のカメラストリームについては、手動での設定が必要です。"
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
       },
       "connectionSettings": "接続設定",
-      "detectionMethod": "ストリーム検出方法",
+      "detectionMethod": "ストリーム検知方法",
       "onvifPort": "ONVIF ポート",
       "probeMode": "カメラをプローブ",
       "manualMode": "手動選択",
       "useDigestAuth": "ダイジェスト認証を使用",
       "useDigestAuthDescription": "ONVIF に HTTP ダイジェスト認証を使用します。一部のカメラでは、通常の管理者ユーザーではなく専用の ONVIF ユーザー名／パスワードが必要な場合があります。",
-      "detectionMethodDescription": "（対応している場合）ONVIF を使用してカメラを自動設定し、カメラのストリーム URL を検出するか、カメラのブランドを手動で選択して事前定義された URL を使用します。カスタム RTSP URL を入力する場合は、手動設定を選択し、「その他」を選んでください。",
+      "detectionMethodDescription": "（対応している場合）ONVIF を使用してカメラを自動設定し、カメラのストリーム URL を検知するか、カメラのブランドを手動で選択して事前定義された URL を使用します。カスタム RTSP URL を入力する場合は、手動設定を選択し、「その他」を選んでください。",
       "onvifPortDescription": "ONVIF に対応しているカメラの場合、通常は 80 または 8080 です。"
     },
     "step2": {
-      "description": "選択した検出方法に応じて、カメラから利用可能なストリームを自動検出するか、手動で設定してください。",
+      "description": "選択した検知方法に応じて、カメラから利用可能なストリームを自動検知するか、手動で設定してください。",
       "streamsTitle": "カメラストリーム",
       "addStream": "ストリームを追加",
       "addAnotherStream": "ストリームをさらに追加",
@@ -1156,9 +1247,9 @@
         "videoCodecGood": "ビデオ コーデックは {{codec}} です。",
         "audioCodecGood": "オーディオ コーデックは {{codec}} です。",
         "resolutionHigh": "解像度 {{resolution}} はリソース使用量が増加する可能性があります。",
-        "resolutionLow": "解像度 {{resolution}} は小さなオブジェクトを確実に検出するには低すぎる可能性があります。",
+        "resolutionLow": "解像度 {{resolution}} は小さなオブジェクトを確実に検知するには低すぎる可能性があります。",
         "audioCodecRecordError": "録画で音声をサポートするには AAC オーディオ コーデックが必要です。",
-        "audioCodecRequired": "音声検出をサポートするには音声ストリームが必要です。",
+        "audioCodecRequired": "音声検知をサポートするには音声ストリームが必要です。",
         "restreamingWarning": "録画用ストリームでカメラへの接続数を削減すると、CPU 使用率がわずかに増加する場合があります。",
         "brands": {
           "reolink-rtsp": "Reolink の RTSP は推奨されません。カメラのファームウェア設定で HTTP を有効にし、ウィザードを再起動してください。",
@@ -1170,7 +1261,8 @@
         "hikvision": {
           "substreamWarning": "サブストリーム 1 は低解像度に固定されています。多くの Hikvision カメラは追加のサブストリームをサポートしており、カメラ設定で有効化する必要があります。利用可能であればそれらのストリームを使用することを推奨します。"
         },
-        "noAudioWarning": "このストリームでは音声が検出されていません。録画には音声が含まれません。"
+        "noAudioWarning": "このストリームでは音声が検知されていません。録画には音声が含まれません。",
+        "resolutionUnknown": "このストリームの解像度を取得できませんでした。設定画面または設定ファイルで検知解像度を手動で指定してください。"
       },
       "ffmpegModuleDescription": "何度か試してもストリームが読み込まれない場合は、このオプションを有効にしてください。有効にすると、Frigate は go2rtc と併用して ffmpeg モジュールを使用します。一部のカメラストリームでは、互換性が向上する場合があります。"
     }
@@ -1183,7 +1275,30 @@
     "backToSettings": "カメラ設定に戻る",
     "streams": {
       "title": "カメラの有効化／無効化",
-      "desc": "Frigate を再起動するまで一時的にカメラを無効化します。無効化すると、このカメラのストリーム処理は完全に停止し、検出・録画・デバッグは利用できません。<br /> <em>注: これは go2rtc のリストリームを無効にはしません。</em>"
+      "desc": "Frigate を再起動するまで一時的にカメラを無効化します。無効化すると、このカメラのストリーム処理は完全に停止し、検出・録画・デバッグは利用できません。<br /> <em>注: これは go2rtc のリストリームを無効にはしません。</em>",
+      "label": "カメラの状態",
+      "description": "各カメラの動作状態を設定します。<br /><br /><strong>オン</strong>: ストリームを通常通り処理します。<br /><strong>オフ</strong>: 処理を一時停止します。Frigate の再起動後は保持されません。<br /><strong>無効</strong>: 処理を停止し、設定ファイルに保存されます。再有効化には再起動が必要です。<br /><br /><em>注: 無効化しても go2rtc のリストリームには影響しません。</em><br /><br />ハンドルをドラッグすると、ライブダッシュボードやカメラ選択ドロップダウンなど、UI 内のアクティブなカメラの並び順を変更できます。",
+      "disabledSubheading": "設定で無効化されています",
+      "status": {
+        "on": "オン",
+        "off": "オフ",
+        "disabled": "無効"
+      },
+      "enableSuccess": "{{cameraName}} を有効にしました。適用するには Frigate を再起動してください。",
+      "disableSuccess": "{{cameraName}} を無効化し、設定に保存しました。",
+      "reorderHandle": "ドラッグで並び替え",
+      "saving": "保存中…",
+      "saved": "保存しました",
+      "details": {
+        "edit": "カメラ詳細を編集",
+        "title": "カメラ詳細を編集",
+        "description": "このカメラの表示名と外部 URL を更新します。Frigate UI 全体で使用されます。",
+        "friendlyNameLabel": "表示名",
+        "friendlyNameHelp": "Frigate UI 全体でこのカメラに表示される名前です。空欄にするとカメラ ID が使用されます。",
+        "webuiUrlLabel": "カメラ Web UI の URL",
+        "webuiUrlHelp": "デバッグビューからカメラの Web UI に直接アクセスするための URL です。空欄にするとリンクが無効になります。",
+        "webuiUrlInvalid": "有効な URL を入力してください (例: https://example.com)。"
+      }
     },
     "cameraConfig": {
       "add": "カメラを追加",
@@ -1213,6 +1328,117 @@
       "toast": {
         "success": "カメラ {{cameraName}} を保存しました"
       }
+    },
+    "description": "カメラの追加・編集・削除、各カメラの状態管理、プロファイル別やカメラタイプ別の上書き設定を行えます。ストリーム、検知、モーションなどカメラ固有の設定は、カメラ設定セクション内の各項目から行ってください。",
+    "deleteCamera": "カメラを削除",
+    "deleteCameraDialog": {
+      "title": "カメラを削除",
+      "description": "カメラを削除すると、そのカメラのすべての録画、追跡オブジェクト、設定が完全に削除されます。このカメラに関連する go2rtc ストリームは手動で削除が必要な場合があります。",
+      "selectPlaceholder": "カメラを選択...",
+      "confirmTitle": "本当によろしいですか？",
+      "confirmWarning": "<strong>{{cameraName}}</strong> の削除は元に戻せません。",
+      "deleteExports": "このカメラのエクスポートも削除する",
+      "confirmButton": "完全に削除",
+      "success": "カメラ {{cameraName}} を削除しました",
+      "error": "カメラ {{cameraName}} の削除に失敗しました"
+    },
+    "profiles": {
+      "title": "プロファイル別カメラ上書き設定",
+      "selectLabel": "プロファイルを選択",
+      "description": "プロファイルが有効化されたときに、各カメラをオン／オフのどちらにするかを設定します。「継承」に設定されたカメラはデフォルトの状態を維持します。",
+      "inherit": "継承",
+      "on": "オン",
+      "off": "オフ"
+    },
+    "cameraType": {
+      "title": "カメラタイプ",
+      "label": "カメラタイプ",
+      "description": "各カメラのタイプを設定します。専用 LPR カメラは、遠方の車両のナンバープレートを捉えるために強力な光学ズームを備えた専用カメラです。LPR 専用かつナンバープレートに焦点を絞った設置でない限り、通常は「Normal」を使用してください。",
+      "normal": "通常",
+      "dedicatedLpr": "専用 LPR",
+      "saveSuccess": "{{cameraName}} のカメラタイプを更新しました。変更を適用するには Frigate を再起動してください。"
+    },
+    "clone": {
+      "sectionTitle": "設定を複製",
+      "sectionDescription": "あるカメラの設定を、別のカメラまたは新しいカメラにコピーします。",
+      "button": "設定を複製",
+      "title": "カメラ設定を複製",
+      "description": "あるカメラの設定を、1台以上の他のカメラまたは新しいカメラにコピーします。識別情報（名前、フレンドリーネーム、Web UI URL、表示順序）はコピーされません。",
+      "source": {
+        "label": "ソースカメラ",
+        "placeholder": "ソースカメラを選択",
+        "required": "ソースカメラを選択"
+      },
+      "target": {
+        "legend": "ターゲット",
+        "newRadio": "新しいカメラ",
+        "newNameLabel": "カメラ名",
+        "newNamePlaceholder": "例：back_door または Back Door",
+        "newNameRequired": "カメラ名は必須です",
+        "newNameInvalid": "無効なカメラ名です",
+        "newNameCollision": "この名前のカメラは既に存在します",
+        "newStreamsForced": "新しいカメラには、常にストリームがコピーされます。",
+        "existingCamerasRadio": "既存のカメラ",
+        "allCameras": "すべてのカメラ",
+        "existingPlaceholder": "少なくとも1台のカメラを選択",
+        "existingDisabled": "コピー先のカメラがありません"
+      },
+      "categories": {
+        "legend": "クローンする設定",
+        "description": "ソースカメラからコピーする設定を選択します。",
+        "selectAll": "すべて選択",
+        "selectNone": "選択解除",
+        "resetDefaults": "デフォルトにリセット",
+        "general": "一般",
+        "spatial": "空間設定",
+        "streams": "ストリーム",
+        "spatialWarningTitle": "解像度の不一致",
+        "spatialWarning": "ソースカメラ {{srcCamera}} の検出解像度 ({{srcWidth}}×{{srcHeight}}) は {{cameras}} と異なります。これらのカメラではポリゴンが一致しない可能性があります。これらのデフォルト設定はオフになっています。そのままコピーするには有効にしてください。",
+        "restartHint": "再起動が必要",
+        "items": {
+          "record": "録画",
+          "snapshots": "スナップショット",
+          "review": "再生",
+          "motion": "動体検知",
+          "objects": "物体",
+          "audio": "音声検知",
+          "audio_transcription": "音声文字起こし",
+          "notifications": "通知",
+          "birdseye": "バードアイ",
+          "mqtt": "MQTT",
+          "timestamp_style": "タイムスタンプ形式",
+          "onvif": "ONVIF",
+          "lpr": "ナンバープレート認識",
+          "face_recognition": "顔認識",
+          "semantic_search": "セマンティック検索",
+          "genai": "生成AI",
+          "type": "カメラタイプ（通常 / 専用LPR）",
+          "profiles": "プロファイル",
+          "detect": "サイズ検出",
+          "zones": "ゾーン",
+          "motion_mask": "動きマスク",
+          "object_masks": "オブジェクトマスク",
+          "ffmpeg_live": "ストリームURLとロール"
+        }
+      },
+      "footer": {
+        "changeCount_other": "{{count}}件の変更が適用されます",
+        "restartNeeded": "一部の変更には再起動が必要です。",
+        "liveOnly": "すべての変更は再起動なしで即時適用されます。",
+        "submit": "クローン",
+        "submitting": "クローン作成中…"
+      },
+      "toast": {
+        "success": "設定が {{cameraName}} にコピーされました",
+        "successWithRestart": "設定が {{cameraName}} にコピーされました。すべての変更を適用するには、Frigate を再起動してください。",
+        "successMulti_other": "設定が {{count}} 台のカメラにコピーされました",
+        "successMultiWithRestart_other": "設定が {{count}} 台のカメラにコピーされました。すべての変更を適用するには、Frigate を再起動してください。",
+        "partialFailure": "{{successCount}} セクションが適用されました。「{{failedSection}}」で失敗しました: {{errorMessage}}",
+        "partialFailureMulti": "{{successCount}} 台のカメラにコピーされました。{{failed}} で失敗しました: {{errorMessage}}",
+        "newCameraPartialFailure": "カメラ {{cameraName}} が作成されましたが、一部の設定のコピーに失敗しました: {{errorMessage}}",
+        "sourceMissing": "ソースカメラが存在しません",
+        "submitError": "カメラのクローン作成に失敗しました: {{errorMessage}}"
+      }
     }
   },
   "cameraReview": {
@@ -1227,26 +1453,26 @@
     },
     "review": {
       "title": "レビュー",
-      "desc": "Frigate を再起動するまで、このカメラのアラートと検出を一時的に有効／無効にします。無効にすると、新しいレビュー項目は生成されません。 ",
+      "desc": "Frigate を再起動するまで、このカメラのアラートと検知を一時的に有効／無効にします。無効にすると、新しいレビュー項目は生成されません。 ",
       "alerts": "アラート ",
-      "detections": "検出 "
+      "detections": "検知 "
     },
     "reviewClassification": {
       "title": "レビュー分類",
-      "desc": "Frigate はレビュー項目をアラートと検出に分類します。既定では、すべての <em>person</em> と <em>car</em> オブジェクトはアラートとして扱われます。必須ゾーンを設定することで、分類をより細かく調整できます。",
+      "desc": "Frigate はレビュー項目をアラートと検知に分類します。既定では、すべての <em>person</em> と <em>car</em> オブジェクトはアラートとして扱われます。必須ゾーンを設定することで、分類をより細かく調整できます。",
       "noDefinedZones": "このカメラにはゾーンが定義されていません。",
       "objectAlertsTips": "すべての {{alertsLabels}} オブジェクトは {{cameraName}} でアラートとして表示されます。",
-      "zoneObjectAlertsTips": "{{cameraName}} の {{zone}} で検出されたすべての {{alertsLabels}} オブジェクトはアラートとして表示されます。",
-      "objectDetectionsTips": "{{cameraName}} で分類されていないすべての {{detectionsLabels}} オブジェクトは、どのゾーンにあっても検出として表示されます。",
+      "zoneObjectAlertsTips": "{{cameraName}} の {{zone}} で検知されたすべての {{alertsLabels}} オブジェクトはアラートとして表示されます。",
+      "objectDetectionsTips": "{{cameraName}} で分類されていないすべての {{detectionsLabels}} オブジェクトは、どのゾーンにあっても検知として表示されます。",
       "zoneObjectDetectionsTips": {
-        "text": "{{cameraName}} の {{zone}} で分類されていないすべての {{detectionsLabels}} オブジェクトは検出として表示されます。",
-        "notSelectDetections": "{{cameraName}} の {{zone}} で検出され、アラートに分類されなかったすべての {{detectionsLabels}} オブジェクトは、ゾーンに関係なく検出として表示されます。",
-        "regardlessOfZoneObjectDetectionsTips": "{{cameraName}} で分類されていないすべての {{detectionsLabels}} オブジェクトは、どのゾーンにあっても検出として表示されます。"
+        "text": "{{cameraName}} の {{zone}} で分類されていないすべての {{detectionsLabels}} オブジェクトは検知として表示されます。",
+        "notSelectDetections": "{{cameraName}} の {{zone}} で検知され、アラートに分類されなかったすべての {{detectionsLabels}} オブジェクトは、ゾーンに関係なく検知として表示されます。",
+        "regardlessOfZoneObjectDetectionsTips": "{{cameraName}} で分類されていないすべての {{detectionsLabels}} オブジェクトは、どのゾーンにあっても検知として表示されます。"
       },
       "unsavedChanges": "未保存のレビュー分類設定（{{camera}}）",
       "selectAlertsZones": "アラート用のゾーンを選択",
-      "selectDetectionsZones": "検出用のゾーンを選択",
-      "limitDetections": "特定のゾーンに検出を限定する",
+      "selectDetectionsZones": "検知用のゾーンを選択",
+      "limitDetections": "特定のゾーンに検知を限定する",
       "toast": {
         "success": "レビュー分類の設定を保存しました。変更を適用するには Frigate を再起動してください。"
       }
@@ -1255,8 +1481,61 @@
   "maintenance": {
     "sync": {
       "status": {
-        "queued": "キューに追加済み"
-      }
+        "queued": "キューに追加済み",
+        "running": "実行中",
+        "completed": "完了",
+        "failed": "失敗",
+        "notRunning": "実行されていません"
+      },
+      "title": "メディア同期",
+      "desc": "Frigate は保持設定に従って定期的にメディアを整理します。動作中に孤立ファイルが少数発生するのは正常です。この機能を使うと、データベース上で参照されなくなった孤立メディアファイルをディスクから削除できます。",
+      "started": "メディア同期を開始しました。",
+      "alreadyRunning": "同期ジョブはすでに実行中です",
+      "error": "同期の開始に失敗しました",
+      "currentStatus": "ステータス",
+      "jobId": "ジョブ ID",
+      "startTime": "開始時刻",
+      "endTime": "終了時刻",
+      "statusLabel": "ステータス",
+      "results": "結果",
+      "errorLabel": "エラー",
+      "mediaTypes": "メディアタイプ",
+      "allMedia": "すべてのメディア",
+      "dryRun": "ドライラン",
+      "dryRunEnabled": "ファイルは削除されません",
+      "dryRunDisabled": "ファイルは削除されます",
+      "force": "強制実行",
+      "forceDesc": "安全しきい値を無視して、削除対象がファイル全体の 50% を超えても同期を完了します。",
+      "verbose": "詳細出力",
+      "verboseDesc": "孤立ファイルの全リストを確認用にディスクに書き出します。",
+      "running": "同期実行中...",
+      "start": "同期を開始",
+      "inProgress": "同期実行中です。このページは現在操作できません。",
+      "resultsFields": {
+        "filesChecked": "確認済みファイル数",
+        "orphansFound": "検知された孤立ファイル数",
+        "orphansDeleted": "削除した孤立ファイル数",
+        "aborted": "中断しました。削除が安全しきい値を超過するためです。",
+        "error": "エラー",
+        "totals": "合計"
+      },
+      "event_snapshots": "追跡オブジェクトのスナップショット",
+      "event_thumbnails": "追跡オブジェクトのサムネイル",
+      "review_thumbnails": "レビューのサムネイル",
+      "previews": "プレビュー",
+      "exports": "エクスポート",
+      "recordings": "録画"
+    },
+    "title": "メンテナンス",
+    "regionGrid": {
+      "title": "リージョングリッド",
+      "desc": "リージョングリッドは、各カメラの画角内でさまざまなサイズのオブジェクトが通常出現する位置を学習する最適化機能です。Frigate はこのデータをもとに検知領域のサイズを効率化します。グリッドは追跡オブジェクトのデータから時間をかけて自動的に構築されます。",
+      "clear": "リージョングリッドをクリア",
+      "clearConfirmTitle": "リージョングリッドをクリア",
+      "clearConfirmDesc": "リージョングリッドのクリアは、検出器のモデルサイズを最近変更した場合や、カメラの物理的な位置を変更してオブジェクト追跡に問題がある場合を除き、推奨されません。追跡が進むにつれて自動的に再構築されます。変更を反映するには Frigate の再起動が必要です。",
+      "clearSuccess": "リージョングリッドをクリアしました",
+      "clearError": "リージョングリッドのクリアに失敗しました",
+      "restartRequired": "リージョングリッドの変更を反映するには再起動が必要です"
     }
   },
   "button": {
@@ -1270,6 +1549,544 @@
       "heading_other": "このグローバルセクションには、{{count}} 台のカメラで上書きされているフィールドがあります。",
       "othersField_other": "{{count}} その他",
       "profilePrefix": "{{profile}} プロファイル: {{fields}}"
+    },
+    "overriddenGlobalHeading_other": "このカメラはグローバル設定のうち {{count}} 項目を上書きしています:",
+    "overriddenGlobalNoDeltas": "このカメラはグローバル設定を上書きしていますが、値が異なる項目はありません。",
+    "overriddenBaseConfigHeading_other": "{{profile}} プロファイルはベース設定のうち {{count}} 項目を上書きしています:",
+    "overriddenBaseConfigNoDeltas": "{{profile}} プロファイルはこのセクションを上書きしていますが、ベース設定と異なる値はありません。"
+  },
+  "menuDot": {
+    "overrideGlobal": "このセクションはグローバル設定を上書きします",
+    "overrideProfile": "このセクションは {{profile}} プロファイルによって上書きされます",
+    "unsaved": "このセクションには未保存の変更があります"
+  },
+  "saveAllPreview": {
+    "title": "保存対象の変更",
+    "triggerLabel": "保留中の変更を確認",
+    "empty": "保留中の変更はありません。",
+    "scope": {
+      "label": "対象範囲",
+      "global": "グローバル",
+      "camera": "カメラ: {{cameraName}}"
+    },
+    "profile": {
+      "label": "プロファイル"
+    },
+    "field": {
+      "label": "項目"
+    },
+    "value": {
+      "label": "新しい値",
+      "reset": "リセット"
+    }
+  },
+  "timestampPosition": {
+    "tl": "左上",
+    "tr": "右上",
+    "bl": "左下",
+    "br": "右下"
+  },
+  "detectorsAndModel": {
+    "title": "検出器とモデル",
+    "description": "物体検知を実行する検出器のバックエンドと、使用するモデルを設定します。検出器とモデルが同期するよう、変更は一括で保存されます。",
+    "cardTitles": {
+      "detector": "検出器ハードウェア",
+      "model": "検知モデル"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "カスタムモデル"
+    },
+    "mismatch": {
+      "warning": "現在の Frigate+ モデル「{{model}}」は {{required}} 検出器が必要です。下から対応するモデルを選ぶか、保存前にカスタムモデルへ切り替えてください。"
+    },
+    "plusModel": {
+      "requiresDetector": "必要な検出器: {{detector}}",
+      "noModelSelected": "Frigate+ モデルを選択"
+    },
+    "toast": {
+      "saveSuccess": "検出器とモデルの設定を保存しました。変更を適用するには Frigate を再起動してください。",
+      "saveError": "検出器とモデルの設定の保存に失敗しました"
+    },
+    "unsavedChanges": "検出器・モデルに未保存の変更があります",
+    "restartRequired": "再起動が必要です（検出器またはモデルが変更されました）"
+  },
+  "configForm": {
+    "global": {
+      "title": "グローバル設定",
+      "description": "これらの設定は、カメラ固有の設定で上書きされない限り、全カメラに適用されます。"
+    },
+    "camera": {
+      "title": "カメラ設定",
+      "description": "これらの設定はこのカメラにのみ適用され、グローバル設定を上書きします。",
+      "noCameras": "利用可能なカメラがありません"
+    },
+    "advancedSettingsCount": "詳細設定 ({{count}})",
+    "advancedCount": "詳細 ({{count}})",
+    "showAdvanced": "詳細設定を表示",
+    "tabs": {
+      "sharedDefaults": "共通デフォルト",
+      "system": "システム",
+      "integrations": "連携"
+    },
+    "additionalProperties": {
+      "keyLabel": "キー",
+      "valueLabel": "値",
+      "keyPlaceholder": "新しいキー",
+      "remove": "削除"
+    },
+    "knownPlates": {
+      "namePlaceholder": "例: 妻の車",
+      "platePlaceholder": "ナンバーまたは正規表現"
+    },
+    "timezone": {
+      "defaultOption": "ブラウザのタイムゾーンを使用"
+    },
+    "roleMap": {
+      "empty": "ロールマッピングがありません",
+      "roleLabel": "ロール",
+      "groupsLabel": "グループ",
+      "addMapping": "ロールマッピングを追加",
+      "remove": "削除"
+    },
+    "ffmpegArgs": {
+      "preset": "プリセット",
+      "manual": "手動で引数指定",
+      "inherit": "カメラ設定から継承",
+      "none": "なし",
+      "useGlobalSetting": "グローバル設定から継承",
+      "selectPreset": "プリセットを選択",
+      "manualPlaceholder": "FFmpeg 引数を入力",
+      "presetLabels": {
+        "preset-rpi-64-h264": "Raspberry Pi (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi (H.265)",
+        "preset-vaapi": "VAAPI (Intel/AMD GPU)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "NVIDIA GPU",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (汎用)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (汎用)",
+        "preset-http-reolink": "HTTP - Reolink カメラ",
+        "preset-rtmp-generic": "RTMP (汎用)",
+        "preset-rtsp-generic": "RTSP (汎用)",
+        "preset-rtsp-restream": "RTSP - go2rtc からのリストリーム",
+        "preset-rtsp-restream-low-latency": "RTSP - go2rtc からのリストリーム (低遅延)",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "録画 (汎用、音声なし)",
+        "preset-record-generic-audio-copy": "録画 (汎用 + 音声コピー)",
+        "preset-record-generic-audio-aac": "録画 (汎用 + 音声を AAC に変換)",
+        "preset-record-mjpeg": "録画 - MJPEG カメラ",
+        "preset-record-jpeg": "録画 - JPEG カメラ",
+        "preset-record-ubiquiti": "録画 - Ubiquiti カメラ"
+      }
+    },
+    "cameraInputs": {
+      "itemTitle": "ストリーム {{index}}"
+    },
+    "restartRequiredField": "再起動が必要",
+    "restartRequiredFooter": "設定が変更されました - 再起動が必要です",
+    "sections": {
+      "detect": "検知",
+      "record": "録画",
+      "snapshots": "スナップショット",
+      "motion": "モーション",
+      "objects": "オブジェクト",
+      "review": "レビュー",
+      "audio": "音声",
+      "notifications": "通知",
+      "live": "ライブビュー",
+      "timestamp_style": "タイムスタンプ",
+      "mqtt": "MQTT",
+      "database": "データベース",
+      "telemetry": "テレメトリ",
+      "auth": "認証",
+      "tls": "TLS",
+      "proxy": "プロキシ",
+      "go2rtc": "go2rtc",
+      "ffmpeg": "FFmpeg",
+      "detectors": "検出器",
+      "model": "モデル",
+      "semantic_search": "セマンティック検索",
+      "genai": "生成AI",
+      "face_recognition": "顔認識",
+      "lpr": "ナンバープレート認識",
+      "birdseye": "バードアイ",
+      "masksAndZones": "マスク / ゾーン"
+    },
+    "detect": {
+      "title": "検知設定"
+    },
+    "detectors": {
+      "title": "検出器設定",
+      "singleType": "{{type}} 検出器は 1 つしか追加できません。",
+      "keyRequired": "検出器名は必須です。",
+      "keyDuplicate": "この検出器名は既に存在します。",
+      "noSchema": "利用可能な検出器スキーマがありません。",
+      "none": "検出器インスタンスが設定されていません。",
+      "add": "検出器を追加",
+      "addCustomKey": "カスタムキーを追加"
+    },
+    "record": {
+      "title": "録画設定"
+    },
+    "snapshots": {
+      "title": "スナップショット設定"
+    },
+    "motion": {
+      "title": "モーション設定"
+    },
+    "objects": {
+      "title": "オブジェクト設定"
+    },
+    "audioLabels": {
+      "summary": "{{count}} 件の音声ラベルが選択されています",
+      "empty": "利用可能な音声ラベルがありません"
+    },
+    "objectLabels": {
+      "summary": "{{count}} 種類のオブジェクトタイプが選択されています",
+      "empty": "利用可能なオブジェクトラベルがありません"
+    },
+    "reviewLabels": {
+      "summary": "{{count}} 件のラベルが選択されています",
+      "empty": "利用可能なラベルがありません"
+    },
+    "filters": {
+      "objectFieldLabel": "{{label}} の {{field}}"
+    },
+    "zoneNames": {
+      "summary": "{{count}} 件選択",
+      "empty": "利用可能なゾーンがありません"
+    },
+    "inputRoles": {
+      "summary": "{{count}} 件のロールが選択されています",
+      "empty": "利用可能なロールがありません",
+      "options": {
+        "detect": "検知",
+        "record": "録画",
+        "audio": "音声"
+      }
+    },
+    "genaiRoles": {
+      "options": {
+        "embeddings": "埋め込み",
+        "descriptions": "説明",
+        "chat": "チャット"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "モデルを選択…",
+      "builtIn": "組み込みモデル",
+      "genaiProviders": "生成AIプロバイダ"
+    },
+    "semanticSearchModelSize": {
+      "notApplicable": "生成AIプロバイダには適用されません"
+    },
+    "review": {
+      "title": "レビュー設定"
+    },
+    "audio": {
+      "title": "音声設定"
+    },
+    "notifications": {
+      "title": "通知設定"
+    },
+    "live": {
+      "title": "ライブビュー設定"
+    },
+    "timestamp_style": {
+      "title": "タイムスタンプ設定"
+    },
+    "searchPlaceholder": "検索...",
+    "addCustomLabel": "カスタムラベルを追加...",
+    "genaiModel": {
+      "placeholder": "モデルを選択または入力…",
+      "search": "モデルを検索または入力…",
+      "noModels": "利用可能なモデルがありません",
+      "available": "利用可能なモデル",
+      "useCustom": "「{{value}}」を使用",
+      "refresh": "モデルを更新",
+      "probeFailed": "モデルの取得に失敗しました",
+      "fetchedModels": "モデル一覧を取得しました"
+    },
+    "liveStreams": {
+      "streamNameLabel": "ストリーム名",
+      "streamNamePlaceholder": "例: Main HD Stream",
+      "go2rtcStreamLabel": "go2rtc ストリーム",
+      "go2rtcStreamPlaceholder": "go2rtc ストリームを選択してください",
+      "go2rtcStreamSearch": "ストリーム名を検索または入力してください…",
+      "noGo2rtcStreams": "設定済みの go2rtc ストリームはありません",
+      "availableStreams": "利用可能なストリーム",
+      "useCustom": "\"{{value}}\"を使用",
+      "addStream": "ストリームを追加"
+    },
+    "ptzPresets": {
+      "placeholder": "プリセットを選択または入力してください...",
+      "search": "検索またはプリセットを入力してください...",
+      "noPresets": "プリセットはありません",
+      "available": "カメラプリセット",
+      "useCustom": "\"{{value}}\" を使用してください"
+    },
+    "defaultRole": {
+      "admin": "管理者",
+      "viewer": "閲覧者"
+    }
+  },
+  "globalConfig": {
+    "title": "グローバル設定",
+    "description": "上書きされない限り全カメラに適用されるグローバル設定を行います。",
+    "toast": {
+      "success": "グローバル設定を保存しました",
+      "error": "グローバル設定の保存に失敗しました",
+      "validationError": "入力検証に失敗しました"
+    }
+  },
+  "cameraConfig": {
+    "title": "カメラ設定",
+    "description": "個別のカメラの設定を行います。グローバルのデフォルトを上書きします。",
+    "overriddenBadge": "上書き済み",
+    "resetToGlobal": "グローバル設定にリセット",
+    "toast": {
+      "success": "カメラ設定を保存しました",
+      "error": "カメラ設定の保存に失敗しました"
+    }
+  },
+  "toast": {
+    "success": "設定を保存しました",
+    "applied": "設定を適用しました",
+    "successRestartRequired": "設定を保存しました。変更を適用するには Frigate を再起動してください。",
+    "error": "設定の保存に失敗しました",
+    "validationError": "入力検証に失敗しました: {{message}}",
+    "resetSuccess": "グローバルのデフォルトにリセットしました",
+    "resetError": "設定のリセットに失敗しました",
+    "saveAllSuccess_other": "{{count}} 件のセクションをすべて保存しました。",
+    "saveAllSuccessRestartRequired_other": "{{count}} 件のセクションをすべて保存しました。変更を適用するには Frigate を再起動してください。",
+    "saveAllPartial_other": "{{totalCount}} 件中 {{successCount}} 件のセクションを保存しました。{{failCount}} 件失敗。",
+    "saveAllFailure": "すべてのセクションの保存に失敗しました。"
+  },
+  "profiles": {
+    "title": "プロファイル",
+    "activeProfile": "アクティブなプロファイル",
+    "noActiveProfile": "アクティブなプロファイルなし",
+    "active": "アクティブ",
+    "activated": "プロファイル「{{profile}}」を有効化しました",
+    "activateFailed": "プロファイルの設定に失敗しました",
+    "deactivated": "プロファイルを無効化しました",
+    "noProfiles": "プロファイルが定義されていません。",
+    "noOverrides": "上書きなし",
+    "cameraCount_other": "{{count}} 台のカメラ",
+    "columnCamera": "カメラ",
+    "columnOverrides": "プロファイルの上書き",
+    "baseConfig": "ベース設定",
+    "addProfile": "プロファイルを追加",
+    "newProfile": "新しいプロファイル",
+    "profileNamePlaceholder": "例: 在宅、外出、夜間モード",
+    "friendlyNameLabel": "プロファイル名",
+    "profileIdLabel": "プロファイル ID",
+    "profileIdDescription": "設定や自動化で使用される内部 ID です",
+    "nameInvalid": "使用できるのは小文字、数字、アンダースコアのみです",
+    "nameDuplicate": "この名前のプロファイルは既に存在します",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "2 文字以上で入力してください",
+      "mustNotContainPeriod": "ピリオドは使用できません",
+      "alreadyExists": "この ID のプロファイルは既に存在します"
+    },
+    "renameProfile": "プロファイル名を変更",
+    "renameSuccess": "プロファイル名を「{{profile}}」に変更しました",
+    "deleteProfile": "プロファイルを削除",
+    "deleteProfileConfirm": "プロファイル「{{profile}}」を全カメラから削除しますか？この操作は元に戻せません。",
+    "deleteSuccess": "プロファイル「{{profile}}」を削除しました",
+    "createSuccess": "プロファイル「{{profile}}」を作成しました",
+    "removeOverride": "プロファイル上書きを解除",
+    "deleteSection": "セクション上書きを削除",
+    "deleteSectionConfirm": "{{camera}} の {{profile}} プロファイルから {{section}} の上書きを削除しますか？",
+    "deleteSectionSuccess": "{{profile}} の {{section}} 上書きを削除しました",
+    "enableSwitch": "プロファイルを有効にする",
+    "enabledDescription": "プロファイルが有効化されています。下から新しいプロファイルを作成し、カメラ設定セクションで変更を加えて保存すると反映されます。",
+    "disabledDescription": "プロファイルを使うと、名前付きのカメラ設定上書きセット（例: 在宅、外出、夜間）を定義し、必要に応じて有効化できます。"
+  },
+  "unsavedChanges": "未保存の変更があります",
+  "confirmReset": "リセットの確認",
+  "resetToDefaultDescription": "このセクションのすべての設定をデフォルト値にリセットします。この操作は元に戻せません。",
+  "resetToGlobalDescription": "このセクションの設定をグローバルのデフォルトにリセットします。この操作は元に戻せません。",
+  "go2rtcStreams": {
+    "title": "go2rtc ストリーム",
+    "description": "カメラのリストリーム用に go2rtc のストリーム設定を管理します。各ストリームは名前と 1 つ以上のソース URL を持ちます。",
+    "addStream": "ストリームを追加",
+    "addStreamDesc": "新しいストリームの名前を入力してください。この名前はカメラ設定でストリームを参照する際に使用されます。",
+    "addUrl": "URL を追加",
+    "streamNumber": "ストリーム {{index}}",
+    "streamName": "ストリーム名",
+    "streamNamePlaceholder": "例: front_door",
+    "streamUrlPlaceholder": "例: rtsp://user:pass@192.168.1.100/stream",
+    "deleteStream": "ストリームを削除",
+    "deleteStreamConfirm": "ストリーム「{{streamName}}」を削除してもよろしいですか？このストリームを参照しているカメラは動作しなくなる可能性があります。",
+    "noStreams": "go2rtc ストリームが設定されていません。ストリームを追加して始めてください。",
+    "validation": {
+      "nameRequired": "ストリーム名は必須です",
+      "nameDuplicate": "この名前のストリームは既に存在します",
+      "nameInvalid": "ストリーム名には英字、数字、アンダースコア、ハイフンのみ使用できます",
+      "urlRequired": "URL を少なくとも 1 つ指定してください"
+    },
+    "renameStream": "ストリーム名を変更",
+    "renameStreamDesc": "このストリームの新しい名前を入力してください。名前を変更すると、この名前で参照しているカメラや他のストリームが動作しなくなる可能性があります。",
+    "newStreamName": "新しいストリーム名",
+    "ffmpeg": {
+      "useFfmpegModule": "互換モード (ffmpeg) を使用",
+      "video": "映像",
+      "audio": "音声",
+      "hardware": "ハードウェアアクセラレーション",
+      "videoCopy": "コピー",
+      "videoH264": "H.264 にトランスコード",
+      "videoH265": "H.265 にトランスコード",
+      "videoExclude": "除外",
+      "audioCopy": "コピー",
+      "audioAac": "AAC にトランスコード",
+      "audioOpus": "Opus にトランスコード",
+      "audioPcmu": "PCM μ-law にトランスコード",
+      "audioPcma": "PCM A-law にトランスコード",
+      "audioPcm": "PCM にトランスコード",
+      "audioMp3": "MP3 にトランスコード",
+      "audioExclude": "除外",
+      "hardwareNone": "ハードウェアアクセラレーションなし",
+      "hardwareAuto": "自動 (推奨)",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "ビデオコーデックを追加",
+      "addAudioCodec": "音声コーデックを追加",
+      "removeCodec": "コーデックを削除"
+    },
+    "sourceNumber": "ソース {{index}}"
+  },
+  "birdseye": {
+    "trackingMode": {
+      "objects": "オブジェクト",
+      "motion": "モーション",
+      "continuous": "常時"
+    },
+    "cameraOrder": {
+      "label": "カメラ順序",
+      "description": "カメラをドラッグしてバードアイレイアウト内の順序を設定します。",
+      "reorderHandle": "ドラッグで並び替え",
+      "saving": "保存中…",
+      "saved": "保存しました"
+    }
+  },
+  "retainMode": {
+    "all": "すべて",
+    "motion": "モーション",
+    "active_objects": "アクティブなオブジェクト"
+  },
+  "previewQuality": {
+    "very_high": "非常に高",
+    "high": "高",
+    "medium": "中",
+    "low": "低",
+    "very_low": "非常に低"
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "ブラウザ設定",
+      "12hour": "12 時間表示",
+      "24hour": "24 時間表示"
+    },
+    "TimeOrDateStyle": {
+      "full": "完全表示",
+      "long": "長い形式",
+      "medium": "中程度",
+      "short": "短い形式"
+    },
+    "unitSystem": {
+      "metric": "メートル法",
+      "imperial": "ヤード・ポンド法"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "録画",
+      "previews": "プレビュー"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "デバッグ",
+      "info": "情報",
+      "warning": "警告",
+      "error": "エラー",
+      "critical": "重大"
+    }
+  },
+  "onvif": {
+    "profileAuto": "自動",
+    "profileLoading": "プロファイルを読み込み中...",
+    "autotracking": {
+      "zooming": {
+        "disabled": "無効",
+        "absolute": "絶対値",
+        "relative": "相対値"
+      }
+    }
+  },
+  "modelSize": {
+    "small": "小",
+    "large": "大"
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "録画が無効化されているため、レビュー項目は生成されません。",
+      "detectDisabled": "物体検知が無効化されています。レビュー項目はアラートと検知を分類するために検知オブジェクトが必要です。",
+      "allNonAlertDetections": "アラート以外のすべてのアクティビティが検知として含まれます。",
+      "genaiImageSourceRecordingsRecordDisabled": "画像ソースが「録画」に設定されていますが、録画は無効化されています。Frigate はプレビュー画像を代わりに使用します。"
+    },
+    "audio": {
+      "noAudioRole": "audio ロールが定義されたストリームがありません。音声検知を機能させるには audio ロールを有効にする必要があります。"
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "このカメラでは音声検知が有効化されていません。音声文字起こしには音声検知が必要です。"
+    },
+    "detect": {
+      "fpsGreaterThanFive": "検知 FPS を 5 より高く設定することは推奨されません。値を大きくしてもパフォーマンス上の問題を引き起こすだけで、メリットはありません。",
+      "disabled": "物体検知が無効化されています。スナップショット、レビュー項目、顔認識、ナンバープレート認識、生成AI などのエンリッチメントは機能しません。",
+      "resolutionShouldBeMultipleOfFour": "最良の結果を得るため、検知の幅と高さは 4 の倍数にしてください。他の偶数値でも動作しますが、検知ストリームに視覚的なノイズや軽微な歪みが生じる可能性があります。",
+      "aspectRatioMismatch": "入力した幅と高さは現在の検知解像度のアスペクト比と一致していません。映像が引き伸ばされたり歪んだりする可能性があります。"
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "説明を生成するには「descriptions」ロールを持つ生成AIプロバイダを設定する必要があります。"
+    },
+    "faceRecognition": {
+      "globalDisabled": "このカメラで顔認識機能を使うには、顔認識のエンリッチメントを有効にする必要があります。",
+      "personNotTracked": "顔認識には「person」オブジェクトの追跡が必要です。このカメラのオブジェクト設定で「person」を有効にしてください。",
+      "modelSizeLarge": "「large」モデルは合理的な性能を発揮するために GPU または NPU が必要です。CPU のみのシステムでは「small」を使用してください。"
+    },
+    "lpr": {
+      "globalDisabled": "このカメラで LPR 機能を使うには、ナンバープレート認識のエンリッチメントを有効にする必要があります。",
+      "vehicleNotTracked": "ナンバープレート認識には「car」または「motorcycle」の追跡が必要です。このカメラのオブジェクト設定でいずれかを有効にしてください。",
+      "modelSizeLarge": "「large」モデルは複数行のナンバープレート向けに最適化されています。お住まいの地域で複数行プレートが使われていない限り、「small」モデルの方が性能が良いためそちらを使用してください。"
+    },
+    "record": {
+      "noRecordRole": "record ロールが定義されたストリームがありません。録画は機能しません。"
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "バードアイが「objects」モードに設定されていますが、このカメラの物体検知は無効化されています。このカメラはバードアイに表示されません。"
+    },
+    "snapshots": {
+      "detectDisabled": "物体検知が無効化されています。スナップショットは追跡オブジェクトから生成されるため、作成されません。"
+    },
+    "detectors": {
+      "mixedTypes": "すべての検出器は同じタイプである必要があります。別のタイプを使うには既存の検出器を削除してください。",
+      "mixedTypesSuggestion": "すべての検出器は同じタイプである必要があります。既存の検出器を削除するか、{{type}} を選択してください。"
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "Jina V2 モデルの「small」サイズは RAM と推論コストが高くなります。専用 GPU と「large」モデルの組み合わせを推奨します。"
+    },
+    "onvif": {
+      "autotrackingNoZones": "オートトラッキング機能を使用するには、少なくとも1つのゾーンが必要です。「マスク / ゾーン」でこのカメラ用のゾーンを定義し、以下でそれを必須ゾーンとして設定してください。"
     }
   }
 }

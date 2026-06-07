@@ -2,7 +2,7 @@
     "audio": {
         "global": {
             "sensitivity": "グローバル感度",
-            "detection": "グローバル検出"
+            "detection": "グローバル検知"
         },
         "cameras": {
             "detection": "検知",

@@ -11,7 +11,7 @@
         "viewInExplore": "探索で表示"
       },
       "tips": {
-        "mismatch_other": "利用不可のオブジェクトが {{count}} 件、このレビュー項目に含まれています。これらはアラートまたは検出の条件を満たしていないか、既にクリーンアップ／削除されています。",
+        "mismatch_other": "利用不可のオブジェクトが {{count}} 件、このレビュー項目に含まれています。これらはアラートまたは検知の条件を満たしていないか、既にクリーンアップ／削除されています。",
         "hasMissingObjects": "次のラベルの追跡オブジェクトを保存したい場合は設定を調整してください: <em>{{objects}}</em>"
       },
       "toast": {
@@ -83,7 +83,8 @@
     "attributes": "分類属性",
     "title": {
       "label": "タイトル"
-    }
+    },
+    "scoreInfo": "スコア情報"
   },
   "exploreMore": "{{label}} のオブジェクトをさらに探索",
   "exploreIsUnavailable": {
@@ -219,12 +220,22 @@
     },
     "hideObjectDetails": {
       "label": "オブジェクトの移動経路を非表示"
+    },
+    "debugReplay": {
+      "label": "デバッグリプレイ",
+      "aria": "この追跡オブジェクトをデバッグリプレイビューで表示"
+    },
+    "more": {
+      "aria": "その他"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "削除の確認",
       "desc": "この追跡オブジェクトを削除すると、スナップショット、保存された埋め込み、および関連する追跡詳細項目が削除されます。履歴ビューの録画映像は<em>削除されません。</em><br /><br />続行してもよろしいですか？"
+    },
+    "toast": {
+      "error": "この追跡オブジェクトの削除に失敗しました: {{errorMessage}}"
     }
   },
   "noTrackedObjects": "追跡オブジェクトは見つかりませんでした",
@@ -257,22 +268,25 @@
     "count": "{{second}} 件中 {{first}} 件目",
     "trackedPoint": "追跡ポイント",
     "lifecycleItemDesc": {
-      "visible": "{{label}} が検出されました",
+      "visible": "{{label}} が検知されました",
       "entered_zone": "{{label}} が {{zones}} に入りました",
       "active": "{{label}} がアクティブになりました",
       "stationary": "{{label}} が静止状態になりました",
       "attribute": {
-        "faceOrLicense_plate": "{{label}} に {{attribute}} が検出されました",
+        "faceOrLicense_plate": "{{label}} に {{attribute}} が検知されました",
         "other": "{{label}} は {{attribute}} と認識されました"
       },
       "gone": "{{label}} が離脱しました",
-      "heard": "{{label}} の音が検出されました",
-      "external": "{{label}} が検出されました",
+      "heard": "{{label}} の音が検知されました",
+      "external": "{{label}} が検知されました",
       "header": {
         "zones": "ゾーン",
         "ratio": "比率",
         "area": "面積",
-        "score": "スコア"
+        "score": "スコア",
+        "computedScore": "計算スコア",
+        "topScore": "トップスコア",
+        "toggleAdvancedScores": "詳細スコアを切替"
       }
     },
     "annotationSettings": {
@@ -283,7 +297,7 @@
       },
       "offset": {
         "label": "注釈オフセット",
-        "millisecondsToOffset": "検出アノテーションをオフセットするミリ秒数です。<em>デフォルト: 0</em>",
+        "millisecondsToOffset": "検知アノテーションをオフセットするミリ秒数です。<em>デフォルト: 0</em>",
         "toast": {
           "success": "{{camera}} のアノテーションオフセットが設定ファイルに保存されました。"
         },

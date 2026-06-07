@@ -32,6 +32,41 @@
     "send": "送信",
     "suggested_requests": "質問してみてください：",
     "starting_requests": {
-        "show_recent_events": "最近のイベントを表示"
+        "show_recent_events": "最近のイベントを表示",
+        "show_camera_status": "カメラの状態を表示",
+        "recap": "留守中に何が起きた？",
+        "watch_camera": "カメラの動きを監視"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "直近1時間のイベントを見せて",
+        "show_camera_status": "現在のカメラの状態はどうなっていますか？",
+        "recap": "留守中に何が起きた？",
+        "watch_camera": "玄関のカメラを監視して、誰か来たら教えて"
+    },
+    "new_chat": "新しいチャット",
+    "settings": {
+        "title": "チャット設定",
+        "show_stats": {
+            "title": "統計を表示",
+            "desc": "チャット応答の生成速度とコンテキストサイズを表示します。",
+            "while_generating": "生成中のみ",
+            "always": "常に表示"
+        },
+        "auto_scroll": {
+            "title": "自動スクロール",
+            "desc": "新しいメッセージが届いたら自動でスクロールします。"
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} トークン",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "推論中…",
+        "show": "推論を表示",
+        "hide": "推論を非表示"
+    },
+    "thinking": {
+        "toggle": "思考の表示を切替"
     }
 }
