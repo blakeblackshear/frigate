@@ -4,12 +4,13 @@
   "noPreviewFoundFor": "{{cameraName}} nav atrasts priekšskatījums",
   "submitFrigatePlus": {
     "title": "Nosūtīt šo kadru uz Frigate+?",
-    "submit": "Iesniegt"
+    "submit": "Iesniegt",
+    "previewError": "Nevar ielādēt atēla priekškatījumu. Ieraksts var nebūt pieejams, šōbrīd."
   },
   "livePlayerRequiredIOSVersion": "Šāda veida straumēšanai nepieciešama iOS 17.1 vai jaunāka versija.",
   "streamOffline": {
     "title": "Bezsaistes straume",
-    "desc": "No kameras {{cameraName}} <code>detect</code> straumes netika saņemti kadri, pārbaudiet kļūdu žurnālus."
+    "desc": "No kameras {{cameraName}} <code>detect</code> straumes netika saņemti kadri, pārbaudiet kļūdu žurnālus"
   },
   "cameraDisabled": "Kamera ir izslēgta",
   "stats": {
@@ -47,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "Neizdevās iesniegt kadru Frigate+"
     }
-  }
+  },
+  "cameraOff": "Kamera ir izslēgta"
 }
