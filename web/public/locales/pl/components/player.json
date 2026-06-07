@@ -48,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "Nie udało się wysłać klatki do Frigate+"
     }
-  }
+  },
+  "cameraOff": "Kamera jest wyłączona"
 }

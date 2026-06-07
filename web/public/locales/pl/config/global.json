@@ -68,5 +68,27 @@
             "label": "Włącz uwierzytelnianie",
             "description": "Włącz natywne uwierzytelnianie dla interfejsu Frigate."
         }
+    },
+    "birdseye": {
+        "mode": {
+            "label": "Tryb śledzenia"
+        },
+        "order": {
+            "label": "Pozycja"
+        }
+    },
+    "detect": {
+        "enabled": {
+            "label": "Włącz wykrywanie obiektów"
+        },
+        "stationary": {
+            "label": "Konfiguracja obiektów stacjonarnych"
+        }
+    },
+    "face_recognition": {
+        "label": "Rozpoznawanie twarzy",
+        "enabled": {
+            "label": "Włącz rozpoznawanie twarzy"
+        }
     }
 }
