@@ -866,6 +866,10 @@
         "dashboard": {
             "label": "在 UI 中顯示",
             "description": "切換此攝影機在 Frigate 頁面的所有位置是否可見。停用此項將需要手動編輯配置才能在頁面中再次檢視此攝影機。"
+        },
+        "review": {
+            "label": "在Review中顯示",
+            "description": "切換此攝影機在Rewiew中是否可見 (包含Review 頁面、該攝影機的過濾器、移動檢視、歷史畫面)。"
         }
     },
     "webui_url": {

@@ -68,7 +68,10 @@
         }
       },
       "birdseye": "鳥瞰"
-    }
+    },
+    "showAll": "顯示所有鏡頭群組",
+    "showLess": "顯示更少",
+    "editGroups": "編輯鏡頭群組"
   },
   "debug": {
     "options": {
