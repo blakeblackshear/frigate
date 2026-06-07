@@ -48,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "提交帧到 Frigate+ 失败"
     }
-  }
+  },
+  "cameraOff": "摄像头已关闭"
 }

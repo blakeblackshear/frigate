@@ -49,7 +49,7 @@
         "show_stats": {
             "title": "显示统计数据",
             "desc": "显示对话回复的生成速率和上下文大小。",
-            "while_generating": "正在生成中",
+            "while_generating": "生成过程中",
             "always": "始终"
         },
         "auto_scroll": {
@@ -60,5 +60,13 @@
     "stats": {
         "context": "{{tokens}} 词元（tokens）",
         "tokens_per_second": "{{rate}} 词元/秒"
+    },
+    "reasoning": {
+        "active": "思考中…",
+        "show": "显示推理过程",
+        "hide": "隐藏推理过程"
+    },
+    "thinking": {
+        "toggle": "切换思考"
     }
 }
