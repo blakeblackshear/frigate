@@ -60,5 +60,13 @@
     "stats": {
         "context": "{{tokens}} tokens",
         "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Begründung…",
+        "show": "Begründung anzeigen",
+        "hide": "Begründung ausblenden"
+    },
+    "thinking": {
+        "toggle": "Umschalten"
     }
 }

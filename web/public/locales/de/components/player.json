@@ -48,5 +48,6 @@
       "submittedFrigatePlus": "Bild erfolgreich an Frigate+ gesendet"
     }
   },
-  "noPreviewFoundFor": "Keine Vorschau für {{cameraName}} gefunden"
+  "noPreviewFoundFor": "Keine Vorschau für {{cameraName}} gefunden",
+  "cameraOff": "Kamera ist ausgeschaltet"
 }
