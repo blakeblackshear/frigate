@@ -43,19 +43,19 @@
         },
         "filters": {
             "label": "Filtros de audio",
-            "description": "Ajustes de filtrado por tipo de audio, como umbrales de confianza utilizados para reducir los falsos positivos.",
+            "description": "Ajustes de filtro por tipo de audio, como umbrales de confianza utilizados para reducir los falsos positivos.",
             "threshold": {
                 "label": "Confianza mínima de audio",
                 "description": "Umbral mínimo de confianza para que se cuente el evento de audio."
             }
         },
         "enabled_in_config": {
-            "description": "Indica si la detección de audio estaba habilitada originalmente en el archivo de configuración estática.",
-            "label": "Estado original del audio"
+            "description": "Indica si la detección de audio estaba habilitada originalmente en el archivo de configuración estático.",
+            "label": "Estado de audio original"
         },
         "num_threads": {
             "label": "Hilos de detección",
-            "description": "Número de hilos que se utilizarán para el procesamiento de la detección de audio."
+            "description": "Número de hilos a usar para procesamiento de detección de audio."
         },
         "description": "Ajustes para la detección de eventos basada en audio en todas las cámaras; se pueden sobrescribir por cámara."
     },
@@ -610,7 +610,7 @@
             "description": "Carácter usado para separar varios valores proporcionados en las cabeceras del proxy."
         },
         "default_role": {
-            "description": "Rol predeterminado asignado a los usuarios autenticados por proxy cuando no se aplica ningún mapeo de roles (administrador o espectador).",
+            "description": "Rol predeterminado asignado a los usuarios autenticados mediante proxy cuando no se aplica ninguna asignación de roles.",
             "label": "Rol predeterminado"
         },
         "description": "Configuración para integrar Frigate detrás de un proxy inverso que transmite encabezados de usuario autenticados.",
@@ -696,7 +696,7 @@
         }
     },
     "audio_transcription": {
-        "description": "Configuración para la transcripción de audio en vivo y de voz, utilizada para eventos y subtítulos en tiempo real.",
+        "description": "Configuración para la transcripción de audio en directo y de voz utilizada para eventos y subtítulos en directo.",
         "language": {
             "description": "Código de idioma utilizado para la transcripción/traducción (por ejemplo, 'es' para Español). Consulte https://whisper-api.com/docs/languages/ para ver los códigos de idioma compatibles.",
             "label": "Idioma de transcripción"
@@ -708,7 +708,7 @@
         "label": "Transcripción de audio",
         "live_enabled": {
             "label": "Transcripción en directo",
-            "description": "Activar la transcripción en directo del audio a medida que se recibe."
+            "description": "Habilitar la transcripción en directo del audio a medida que se recibe."
         },
         "device": {
             "label": "Dispositivo de transcripción",
@@ -1010,6 +1010,10 @@
         "order": {
             "label": "Orden en la interfaz",
             "description": "Orden numérico usado para ordenar la cámara en la interfaz (panel predeterminado y listas); los números más altos aparecen más tarde."
+        },
+        "review": {
+            "label": "Mostrar en Revisión",
+            "description": "Activa o desactiva si esta cámara se muestra en Revisión (la página de Revisión y su filtro de cámaras, la revisión de movimiento y la vista de historial)."
         }
     },
     "live": {
@@ -1190,7 +1194,7 @@
                 "description": "Factor de escala usado por el calculador de diseño (rango de 1.0 a 5.0)."
             }
         },
-        "label": "Vista general",
+        "label": "Birdseye",
         "enabled": {
             "label": "Habilitar Birdseye",
             "description": "Habilita o deshabilita la función de vista Birdseye."

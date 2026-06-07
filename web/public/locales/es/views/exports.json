@@ -13,7 +13,7 @@
   "toast": {
     "error": {
       "renameExportFailed": "No se pudo renombrar la exportación: {{errorMessage}}",
-      "assignCaseFailed": "Fallo en la actualización de la asignación de caso: {{errorMessage}}",
+      "assignCaseFailed": "No se pudo actualizar la asignación al caso: {{errorMessage}}",
       "caseSaveFailed": "No se pudo guardar el caso: {{errorMessage}}",
       "caseDeleteFailed": "No se pudo eliminar el caso: {{errorMessage}}"
     }
@@ -25,11 +25,11 @@
     "editName": "Editar nombre",
     "deleteExport": "Eliminar exportación",
     "assignToCase": "Añadir al caso",
-    "removeFromCase": "Remover del contenedor"
+    "removeFromCase": "Eliminar del caso"
   },
   "headings": {
     "cases": "Casos",
-    "uncategorizedExports": "Exportaciones sin Categorizar"
+    "uncategorizedExports": "Exportaciones sin categorización"
   },
   "caseDialog": {
     "title": "Añadir al caso",
@@ -40,7 +40,7 @@
     "descriptionLabel": "Descripción"
   },
   "toolbar": {
-    "addExport": "Añadir Exportación",
+    "addExport": "Agregar exportación",
     "newCase": "Nuevo caso",
     "editCase": "Editar caso",
     "deleteCase": "Eliminar caso"

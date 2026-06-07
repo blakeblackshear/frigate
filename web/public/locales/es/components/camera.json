@@ -68,7 +68,10 @@
         "stream": "Transmitir"
       },
       "birdseye": "Vista Aérea"
-    }
+    },
+    "showAll": "Mostrar todos los grupos de cámaras",
+    "showLess": "Mostrar menos",
+    "editGroups": "Editar grupos de cámaras"
   },
   "debug": {
     "options": {

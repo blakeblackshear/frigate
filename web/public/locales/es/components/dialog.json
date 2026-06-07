@@ -71,7 +71,7 @@
         "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio"
       },
       "success": "Exportación iniciada con éxito. Ver el archivo en la página exportaciones.",
-      "view": "Ver",
+      "view": "Vista",
       "queued": "Exportación en cola. Consulta el progreso en la página de exportaciones.",
       "batchSuccess_one": "Se inició 1 exportación. Abriendo el caso ahora.",
       "batchSuccess_many": "Se iniciaron {{count}} exportaciones. Abriendo el caso ahora.",
@@ -101,7 +101,7 @@
     },
     "queueing": "Poniendo la exportación en cola…",
     "tabs": {
-      "export": "Cámara única",
+      "export": "Una Cámara",
       "multiCamera": "Multicámara"
     },
     "multiCamera": {

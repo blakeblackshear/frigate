@@ -26,7 +26,9 @@
         "points_many": "{{count}} puntos",
         "points_other": "{{count}} puntos",
         "undo": "Deshacer el último punto",
-        "reset": "Restablecer polígono"
+        "reset": "Restablecer polígono",
+        "drawMode": "Dibujar",
+        "moveMode": "Mover"
     },
     "motionHeatmapLabel": "Mapa de calor de movimiento",
     "dialog": {
@@ -42,11 +44,11 @@
     "settings": {
         "title": "Ajustes de búsqueda",
         "parallelMode": "Modo paralelo",
-        "parallelModeDesc": "Analiza varios segmentos de grabación al mismo tiempo (más rápido, pero consume significativamente más CPU)",
+        "parallelModeDesc": "Analiza varios intervalos de grabación al mismo tiempo (más rápido, pero utiliza más recursos de decodificación)",
         "threshold": "Umbral de sensibilidad",
         "thresholdDesc": "Los valores más bajos detectan cambios más pequeños (1-255)",
         "minArea": "Área mínima de cambio",
-        "minAreaDesc": "Porcentaje mínimo de la región de interés que debe cambiar para considerarse significativo",
+        "minAreaDesc": "Tamaño mínimo de una única región en movimiento, expresado como porcentaje de la región de interés",
         "frameSkip": "Salto de fotogramas",
         "frameSkipDesc": "Procesa cada N fotogramas. Establécelo según la tasa de FPS de tu cámara para procesar un fotograma por segundo (p. ej., 5 para una cámara de 5 FPS, 30 para una cámara de 30 FPS). Los valores más altos serán más rápidos, pero pueden omitir eventos de movimiento breves.",
         "maxResults": "Resultados máximos",
@@ -72,6 +74,9 @@
         "framesDecoded": "Fotogramas decodificados",
         "wallTime": "Tiempo de búsqueda",
         "segmentErrors": "Errores de segmento",
-        "seconds": "{{seconds}} s"
-    }
+        "seconds": "{{seconds}} s",
+        "minutesSeconds": "{{minutes}}m {{seconds}}s",
+        "scanSummary": "{{segments}} segmentos · {{time}}"
+    },
+    "scanning": "Escaneando {{time}}"
 }

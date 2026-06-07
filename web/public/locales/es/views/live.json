@@ -57,7 +57,9 @@
   },
   "camera": {
     "enable": "Habilitar cámara",
-    "disable": "Deshabilitar cámara"
+    "disable": "Deshabilitar cámara",
+    "turnOn": "Encender cámara",
+    "turnOff": "Apagar cámara"
   },
   "muteCameras": {
     "enable": "Silenciar todas las cámaras",
@@ -151,7 +153,8 @@
     "snapshots": "Capturas de pantalla",
     "autotracking": "Seguimiento automático",
     "cameraEnabled": "Cámara habilitada",
-    "transcription": "Transcripción de Audio"
+    "transcription": "Transcripción de Audio",
+    "camera": "Cámara"
   },
   "history": {
     "label": "Mostrar grabaciones históricas"

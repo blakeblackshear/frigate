@@ -208,7 +208,7 @@
     },
     "addTrigger": {
       "label": "Añadir disparador",
-      "aria": "Añadir disparador para el objeto seguido"
+      "aria": "Añadir disparador para este objeto rastreado"
     },
     "downloadCleanSnapshot": {
       "label": "Descargue instantánea limpia",
@@ -273,8 +273,8 @@
     "count": "{{first}} de {{second}}",
     "lifecycleItemDesc": {
       "visible": "{{label}} detectado",
-      "active": "{{label}} ha sido activado/a",
-      "stationary": "{{label}} se volvió estacionaria",
+      "active": "{{label}} está activo",
+      "stationary": "{{label}} se volvió estacionario",
       "attribute": {
         "faceOrLicense_plate": "{{attribute}} detectado para {{label}}",
         "other": "{{label}} reconocido como {{attribute}}"
