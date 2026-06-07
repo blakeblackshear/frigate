@@ -137,7 +137,8 @@
       "id": "Bahasa Indonesia (Indoneziană)",
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Croată)",
-      "bs": "Bosanski (Bosniacă)"
+      "bs": "Bosanski (Bosniacă)",
+      "zhHant": "繁體中文 (Chineză tradițională)"
     },
     "theme": {
       "default": "Implicit",
@@ -323,5 +324,8 @@
     "internalID": "ID-ul Intern pe care Frigate îl folosește în configurație și în baza de date"
   },
   "no_items": "Niciun element",
-  "validation_errors": "Erori de validare"
+  "validation_errors": "Erori de validare",
+  "credentialField": {
+    "savedPlaceholder": "Salvat — lasă necompletat pentru a păstra valoarea curentă"
+  }
 }

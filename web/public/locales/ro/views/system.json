@@ -68,7 +68,7 @@
       "series": {
         "go2rtc": "go2rtc",
         "recording": "înregistrare",
-        "review_segment": "segment recenzie",
+        "review_segment": "segment revizuire",
         "embeddings": "înglobări",
         "audio_detector": "detector audio"
       }
@@ -172,9 +172,9 @@
       "yolov9_plate_detection_speed": "Viteză Detecție Numere YOLOv9",
       "text_embedding_speed": "Viteză înglobări de text",
       "yolov9_plate_detection": "Detecție Numere YOLOv9",
-      "review_description": "Descriere Recenzie",
-      "review_description_speed": "Viteză Descriere Recenzie",
-      "review_description_events_per_second": "Descriere Recenzie",
+      "review_description": "Descriere revizuire",
+      "review_description_speed": "Viteză descriere revizuire",
+      "review_description_events_per_second": "Descriere revizuire",
       "object_description": "Descriere Obiect",
       "object_description_speed": "Viteză Descriere Obiect",
       "object_description_events_per_second": "Descriere Obiect",
