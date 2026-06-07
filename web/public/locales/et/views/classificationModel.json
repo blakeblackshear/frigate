@@ -7,7 +7,7 @@
   },
   "documentTitle": "Klassifitseerimise mudelid - Frigate",
   "details": {
-    "scoreInfo": "Skoor näitab selle objekti kõigi tuvastuste keskmist klassifitseerimise usaldusväärsust.",
+    "scoreInfo": "Punktiskoor näitab selle objekti kõigi tuvastuste keskmist klassifitseerimise usaldusväärsust.",
     "none": "Puudub",
     "unknown": "Pole teada"
   },

@@ -48,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "Kaadri saatmine Frigate+ teenusesse ei õnnestunud"
     }
-  }
+  },
+  "cameraOff": "Kaamera on lülitatud välja"
 }

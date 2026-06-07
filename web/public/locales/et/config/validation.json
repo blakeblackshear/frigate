@@ -28,5 +28,8 @@
             "detectRequired": "„Tuvasta“ rollile pead määrama vähemalt ühe sisendvoo.",
             "hwaccelDetectOnly": "Vaid „Tuvasta“ rolliga sisendvoog võib määratleda raudvaralise kiirenduse argumente."
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Peab olema paarisarv."
     }
 }
