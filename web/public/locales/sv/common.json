@@ -114,7 +114,12 @@
     "download": "Ladda ner",
     "info": "Info",
     "export": "Exportera",
-    "continue": "Fortsätta"
+    "continue": "Fortsätta",
+    "add": "Lägg till",
+    "applying": "Verkställer…",
+    "undo": "Ångra",
+    "copiedToClipboard": "Kopieras till urklipp",
+    "modified": "Modifiera"
   },
   "menu": {
     "language": {
@@ -207,7 +212,7 @@
     "help": "Hjälp",
     "documentation": {
       "title": "Dokumentation",
-      "label": "Frigate dokumentation"
+      "label": "Frigate-dokumentation"
     },
     "uiPlayground": "UI Testmiljö",
     "restart": "Starta om Frigate",
