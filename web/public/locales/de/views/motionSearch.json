@@ -24,7 +24,9 @@
         "points_one": "{{count}} Punkt",
         "points_other": "{{count}} Punkte",
         "undo": "Letzten Schritt rückgängig machen",
-        "reset": "Polygon zurücksetzen"
+        "reset": "Polygon zurücksetzen",
+        "drawMode": "ziehen",
+        "moveMode": "bewegen"
     },
     "motionHeatmapLabel": "Bewegungs-Heatmap",
     "dialog": {

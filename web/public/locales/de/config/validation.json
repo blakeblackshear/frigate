@@ -28,5 +28,8 @@
             "detectRequired": "Es muss mindestens ein input stream die Rolle 'erkennen' tragen.",
             "hwaccelDetectOnly": "Nur der input-stream mit der Rolle 'erkennen' kann Hardwarebeschleunigungs Argumente definieren."
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Es muss eine gerade Zahl sein."
     }
 }
