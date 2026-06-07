@@ -28,5 +28,8 @@
         "header_map": {
             "roleHeaderRequired": "Se requiere el encabezado de rol cuando hay mapeos de roles configurados."
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Debe ser un número par."
     }
 }

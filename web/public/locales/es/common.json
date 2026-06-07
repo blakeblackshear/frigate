@@ -155,7 +155,8 @@
       "id": "Bahasa Indonesia (Indonesio)",
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Croata)",
-      "bs": "Bosanski (Bosnio)"
+      "bs": "Bosanski (Bosnio)",
+      "zhHant": "繁體中文 (Chino Tradicional)"
     },
     "appearance": "Apariencia",
     "darkMode": {
@@ -333,5 +334,8 @@
     "internalID": "La ID interna que usa Frigate en la configuración y en la base de datos"
   },
   "no_items": "No hay elementos",
-  "validation_errors": "Errores de validación"
+  "validation_errors": "Errores de validación",
+  "credentialField": {
+    "savedPlaceholder": "Guardado — déjalo en blanco para mantener el actual"
+  }
 }

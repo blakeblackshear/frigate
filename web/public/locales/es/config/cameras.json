@@ -1,6 +1,6 @@
 {
     "name": {
-        "label": "Nombre de cámara",
+        "label": "Nombre de Cámara",
         "description": "El nombre de la cámara es necesario"
     },
     "enabled": {
@@ -28,19 +28,19 @@
         },
         "filters": {
             "label": "Filtros de audio",
-            "description": "Ajustes de filtrado por tipo de audio, como umbrales de confianza utilizados para reducir los falsos positivos.",
+            "description": "Ajustes de filtro por tipo de audio, como umbrales de confianza utilizados para reducir los falsos positivos.",
             "threshold": {
                 "label": "Confianza mínima de audio",
                 "description": "Umbral mínimo de confianza para que se cuente el evento de audio."
             }
         },
         "enabled_in_config": {
-            "description": "Indica si la detección de audio estaba habilitada originalmente en el archivo de configuración estática.",
-            "label": "Estado original del audio"
+            "description": "Indica si la detección de audio estaba habilitada originalmente en el archivo de configuración estático.",
+            "label": "Estado de audio original"
         },
         "num_threads": {
             "label": "Hilos de detección",
-            "description": "Número de hilos que se utilizarán para el procesamiento de la detección de audio."
+            "description": "Número de hilos a usar para procesamiento de detección de audio."
         }
     },
     "friendly_name": {
@@ -349,10 +349,10 @@
         }
     },
     "audio_transcription": {
-        "description": "Configuración para la transcripción de audio en vivo y de voz, utilizada para eventos y subtítulos en tiempo real.",
+        "description": "Configuración para la transcripción de audio en directo y de voz utilizada para eventos y subtítulos en directo.",
         "enabled": {
             "label": "Habilitar transcripción",
-            "description": "Activar o desactivar la transcripción de eventos de audio activados manualmente."
+            "description": "Habilitar o deshabilitar la transcripción de eventos de audio activados manualmente."
         },
         "label": "Transcripción de audio",
         "enabled_in_config": {
@@ -360,7 +360,7 @@
         },
         "live_enabled": {
             "label": "Transcripción en directo",
-            "description": "Activar la transcripción en directo del audio a medida que se recibe."
+            "description": "Habilitar la transcripción en directo del audio a medida que se recibe."
         }
     },
     "motion": {
@@ -608,6 +608,10 @@
         "order": {
             "label": "Orden en la interfaz",
             "description": "Orden numérico usado para ordenar la cámara en la interfaz (panel predeterminado y listas); los números más altos aparecen más tarde."
+        },
+        "review": {
+            "label": "Mostrar en Revisión",
+            "description": "Activa o desactiva si esta cámara es visible en Revisión (la página de Revisión y su filtro de cámaras, la revisión de movimiento y la vista de historial)."
         }
     },
     "live": {
@@ -720,7 +724,7 @@
     },
     "birdseye": {
         "description": "Configuración para la vista compuesta Birdseye, que combina las transmisiones de múltiples cámaras en una sola vista.",
-        "label": "Vista general",
+        "label": "Birdseye",
         "enabled": {
             "label": "Habilitar Birdseye",
             "description": "Habilita o deshabilita la función de vista Birdseye."
@@ -896,7 +900,7 @@
     },
     "timestamp_style": {
         "label": "Estilo de marca de tiempo",
-        "description": "Opciones de estilo para marcas de tiempo integradas aplicadas a grabaciones e instantáneas.",
+        "description": "Opciones de estilo para las marcas de tiempo aplicadas a las instantáneas y a la vista de depuración.",
         "position": {
             "label": "Posición de marca de tiempo",
             "description": "Posición de la marca de tiempo en la imagen (tl/tr/bl/br)."

@@ -65,5 +65,8 @@
         "active": "Razonando…",
         "show": "Mostrar razonamiento",
         "hide": "Ocultar razonamiento"
+    },
+    "thinking": {
+        "toggle": "Alternar razonamiento"
     }
 }
