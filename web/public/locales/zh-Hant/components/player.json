@@ -48,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "提交畫面至 Frigate+ 失敗"
     }
-  }
+  },
+  "cameraOff": "攝影機關機"
 }

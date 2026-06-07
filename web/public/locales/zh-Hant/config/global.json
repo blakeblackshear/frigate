@@ -921,6 +921,33 @@
                 "label": "原配置生成式 AI 狀態",
                 "description": "表示在原始靜態配置中是否已啟用生成式 AI。"
             }
+        },
+        "filters_attribute": {
+            "label": "屬性篩選器",
+            "description": "篩選器用來篩選屬性，以此降低誤報（區域、比例、置信度）。",
+            "min_area": {
+                "label": "最小屬性區域",
+                "description": "此屬性允許的最小邊界框區域（像素或百分比）。可以是像素（整數）或百分比（0.000001 到 0.99 之間的浮點數）。"
+            },
+            "max_area": {
+                "label": "最大屬性區域",
+                "description": "此屬性允許的最大邊界框區域（像素或百分比）。可以是像素（整數）或百分比（0.000001 到 0.99 之間的浮點數）。"
+            },
+            "min_ratio": {
+                "label": "最小長寬比",
+                "description": "邊界框所需的最小長寬比。"
+            },
+            "max_ratio": {
+                "label": "最大長寬比",
+                "description": "邊界框允許的最大長寬比。"
+            },
+            "threshold": {
+                "label": "置信度門檻",
+                "description": "判定屬性有效所需的平均偵測置信度門檻。"
+            },
+            "min_score": {
+                "label": "最小置信度"
+            }
         }
     },
     "record": {

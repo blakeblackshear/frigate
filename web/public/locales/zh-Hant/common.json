@@ -201,7 +201,8 @@
       "id": "Bahasa Indonesia (印尼文)",
       "ur": "اردو (烏爾都文)",
       "hr": "Hrvatski（克羅地亞語）",
-      "bs": "Bosanski (波士尼亞語)"
+      "bs": "Bosanski (波士尼亞語)",
+      "zhHant": "繁體中文 (繁體中文)"
     },
     "appearance": "外觀",
     "darkMode": {
@@ -306,8 +307,11 @@
     "internalID": "在Frigate 設定檔和資料庫使用的內部ID"
   },
   "information": {
-    "pixels": "{{area}}px"
+    "pixels": "{area}}像素"
   },
   "no_items": "沒有項目",
-  "validation_errors": "驗證錯誤"
+  "validation_errors": "驗證錯誤",
+  "credentialField": {
+    "savedPlaceholder": "已儲存 — 留空以保留當前設定"
+  }
 }
