@@ -6,8 +6,19 @@
   "initializeCommand": ".devcontainer/initialize.sh",
   "postCreateCommand": ".devcontainer/post_create.sh",
   "overrideCommand": false,
-  "remoteUser": "root",
-  "features": {},
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+    // Uncomment the following lines to use ONNX Runtime with CUDA support
+    // "ghcr.io/devcontainers/features/nvidia-cuda:1": {
+    //   "installCudnn": true,
+    //   "installNvtx": true,
+    //   "installToolkit": true,
+    //   "cudaVersion": "12.5",
+    //   "cudnnVersion": "9.4.0.58"
+    // },
+    // "./features/onnxruntime-gpu": {}
+  },
   "forwardPorts": [
     8971,
     5000,
