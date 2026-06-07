@@ -67,7 +67,10 @@
       "desc": "Vali kaamerad selle grupi jaoks."
     },
     "icon": "Ikoon",
-    "success": "Kaameragrupp ({{name}}) on salvestatud."
+    "success": "Kaameragrupp ({{name}}) on salvestatud.",
+    "showAll": "Näita kõiki kaameragruppe",
+    "showLess": "Näita vähem",
+    "editGroups": "Muuda kaameragruppe"
   },
   "debug": {
     "options": {

@@ -10,7 +10,30 @@
     },
     "copy": {
       "label": "Kopeeri lõikelauale",
-      "success": "Logid on kopeeritud lõikelauale"
+      "success": "Logid on kopeeritud lõikelauale",
+      "error": "Logide kopeerimine lõikelauale ei õnnestunud"
+    },
+    "websocket": {
+      "filter": {
+        "cameras_count_one": "{{count}} kaamera",
+        "cameras_count_other": "{{count}} kaamerat"
+      },
+      "empty": "Ühtegi sõnumit pole veel hõivatud",
+      "count_one": "{{count}} sõnum",
+      "count_other": "{{count}} sõnumit"
+    },
+    "type": {
+      "label": "Tüüp",
+      "timestamp": "Ajatempel",
+      "tag": "Silt",
+      "message": "Sõnum"
+    },
+    "tips": "Logid on serverist voogedastamisel",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Viga logide laadimisel: {{errorMessage}}",
+        "whileStreamingLogs": "Viga logide voogedastamisel: {{errorMessage}}"
+      }
     }
   },
   "title": "Süsteem"

@@ -141,7 +141,8 @@
       "id": "Bahasa Indonesia (indoneesia keel)",
       "ur": "اردو (urdu keel)",
       "hr": "Hrvatski (horvaadi keel)",
-      "bs": "Bosanski (bosnia keel)"
+      "bs": "Bosanski (bosnia keel)",
+      "zhHant": "繁體中文 (hiina keel traditsiooniliste hieroglüüfidega)"
     },
     "system": "Süsteem",
     "systemMetrics": "Süsteemi meetrika",
@@ -316,5 +317,8 @@
     "pixels": "{{area}} px"
   },
   "no_items": "Objekte pole",
-  "validation_errors": "Valideerimise vead"
+  "validation_errors": "Valideerimise vead",
+  "credentialField": {
+    "savedPlaceholder": "Salvestatud - senise kasutamiseks jäta tühjaks"
+  }
 }
