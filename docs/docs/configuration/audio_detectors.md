@@ -88,7 +88,7 @@ Volume is considered motion for recordings, this means when the `record -> retai
 
 ### Configuring Audio Events
 
-The included audio model has over [500 different types](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) of audio that can be detected, many of which are not practical. By default `bark`, `fire_alarm`, `scream`, `speech`, and `yell` are enabled but these can be customized.
+The included audio model has over [500 different types](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) of audio that can be detected, many of which are not practical. By default `bark`, `fire_alarm`, `speech`, and `yell` are enabled but these can be customized.
 
 <ConfigTabs>
 <TabItem value="ui">
@@ -107,13 +107,76 @@ audio:
   listen:
     - bark
     - fire_alarm
-    - scream
     - speech
     - yell
 ```
 
 </TabItem>
 </ConfigTabs>
+
+### Common Audio Labels
+
+The labelmap includes hundreds of sound types. The labels below are the ones most users may find practical, grouped by what they're typically used for. Use the exact label string from the left column in your `listen` config, or search for the label in the Frigate UI directly.
+
+Some labels cover several related sounds: `yell` is triggered by shouting, yelling, children shouting, and screaming; `crying` covers baby cries, sobbing, and whimpering; and `speech` covers ordinary talking and conversation.
+
+**Safety and security**
+
+| Label            | Detects                            |
+| ---------------- | ---------------------------------- |
+| `yell`           | Shouting, yelling, screaming       |
+| `fire_alarm`     | Fire and smoke alarm sirens        |
+| `smoke_detector` | Smoke detector beeps               |
+| `alarm`          | General alarm sounds               |
+| `car_alarm`      | Car alarms                         |
+| `siren`          | Emergency vehicle and civil sirens |
+| `glass`          | Glass clinking                     |
+| `shatter`        | Breaking glass                     |
+| `breaking`       | Something breaking                 |
+| `gunshot`        | Gunshots                           |
+| `explosion`      | Explosions                         |
+
+**People and activity**
+
+| Label       | Detects                  |
+| ----------- | ------------------------ |
+| `speech`    | Talking and conversation |
+| `laughter`  | Laughing                 |
+| `crying`    | Baby crying and sobbing  |
+| `cough`     | Coughing                 |
+| `footsteps` | Footsteps and walking    |
+| `knock`     | Knocking on a door       |
+| `doorbell`  | Doorbell                 |
+| `ding-dong` | Doorbell chime           |
+
+**Pets and animals**
+
+| Label      | Detects          |
+| ---------- | ---------------- |
+| `bark`     | Dog barking      |
+| `dog`      | Other dog sounds |
+| `howl`     | Howling          |
+| `growling` | Growling         |
+| `meow`     | Cat meowing      |
+| `cat`      | Other cat sounds |
+| `hiss`     | Hissing          |
+
+**Vehicles and driveway**
+
+| Label             | Detects              |
+| ----------------- | -------------------- |
+| `car`             | Passing cars         |
+| `honk`            | Car horns            |
+| `truck`           | Trucks               |
+| `reversing_beeps` | Vehicle backup beeps |
+| `motorcycle`      | Motorcycles          |
+| `engine_starting` | Engines starting     |
+
+:::tip
+
+Frequently-heard labels like `speech` can generate a lot of events, and each event could save a snapshot and recording based on your configuration, so start with a focused set — the defaults (`bark`, `fire_alarm`, `speech`, `yell`) plus a few of the safety labels above cover most needs — and expand from there. See the [full audio labelmap](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) or the Frigate UI for every available type.
+
+:::
 
 ### Audio Transcription
 
