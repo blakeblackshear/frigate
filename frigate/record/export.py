@@ -16,6 +16,7 @@ import pytz
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
+from frigate.config.camera.record import ChaptersEnum
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -49,14 +50,6 @@ class PlaybackFactorEnum(str, Enum):
 class PlaybackSourceEnum(str, Enum):
     recordings = "recordings"
     preview = "preview"
-
-
-class ChaptersEnum(str, Enum):
-    # One chapter per recording segment, titled with the segment's
-    # wallclock start time in strict ISO 8601 form. Lets viewers map
-    # output playback time back to wallclock without reading a timestamp
-    # overlay via OCR.
-    recording_segments = "recording_segments"
 
 
 class RecordingExporter(threading.Thread):
