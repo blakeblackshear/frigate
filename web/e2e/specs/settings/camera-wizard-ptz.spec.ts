@@ -29,6 +29,7 @@ const PTZ_PROBE = {
   firmware_version: "1.0",
   profiles_count: 1,
   ptz_supported: true,
+  pan_tilt_supported: true,
   presets_count: 2,
   autotrack_supported: false,
   rtsp_candidates: [
@@ -62,8 +63,11 @@ async function gotoStep3(page: Page, host = "192.168.1.100") {
   await expect(next).toBeEnabled({ timeout: 10_000 });
   await next.click();
 
-  // Step 3 renders the stream-configuration description.
-  await expect(dialog.getByText(/Configure stream roles/i)).toBeVisible();
+  // Step 3 is the stream-configuration step; key off a stable control rather
+  // than the description text (which has been reworded).
+  await expect(
+    dialog.getByRole("button", { name: /Add Another Stream/i }),
+  ).toBeVisible();
   return dialog;
 }
 
@@ -83,6 +87,10 @@ async function expandOnvifDetails(dialog: Locator) {
 
 test.describe("Camera wizard PTZ pane @medium @mobile", () => {
   test.beforeEach(async ({ frigateApp }) => {
+    // not in the default mock; unmocked it 500s and trips the error collector
+    await frigateApp.page.route("**/api/config/raw_paths", (route) =>
+      route.fulfill({ json: {} }),
+    );
     await frigateApp.goto("/settings?page=cameraManagement");
     await expect(
       frigateApp.page.getByRole("heading", { name: /Manage Cameras/i }),
@@ -148,10 +156,14 @@ test.describe("Camera wizard PTZ pane @medium @mobile", () => {
     ).toBeDisabled();
   });
 
-  test("shows the pane but leaves the switch off when no presets are found", async ({
+  test("shows the pane but leaves the switch off without continuous pan/tilt", async ({
     frigateApp,
   }) => {
-    await mockProbe(frigateApp.page, { ...PTZ_PROBE, presets_count: 0 });
+    // e.g. a varifocal camera: PTZ service present, but zoom/focus only
+    await mockProbe(frigateApp.page, {
+      ...PTZ_PROBE,
+      pan_tilt_supported: false,
+    });
     const dialog = await gotoStep3(frigateApp.page);
 
     await expect(
