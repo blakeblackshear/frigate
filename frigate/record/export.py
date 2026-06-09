@@ -358,6 +358,8 @@ class RecordingExporter(threading.Thread):
                 f"title={title}",
                 "-metadata",
                 f"creation_time={creation_time}",
+                "-metadata",
+                f"comment=Camera: {self.camera}",
             ]
         )
 
@@ -435,7 +437,7 @@ class RecordingExporter(threading.Thread):
 
         if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart {video_path}"
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart"
             ).split(" ")
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
             ffmpeg_cmd = (
@@ -443,7 +445,7 @@ class RecordingExporter(threading.Thread):
                     self.config.ffmpeg.ffmpeg_path,
                     self.config.ffmpeg.hwaccel_args,
                     f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
-                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {video_path}",
+                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart",
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
@@ -459,8 +461,12 @@ class RecordingExporter(threading.Thread):
                 f"title={title}",
                 "-metadata",
                 f"creation_time={creation_time}",
+                "-metadata",
+                f"comment=Camera: {self.camera}",
             ]
         )
+
+        ffmpeg_cmd.append(video_path)
 
         return ffmpeg_cmd, playlist_lines
 
