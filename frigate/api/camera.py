@@ -591,6 +591,32 @@ async def _connect_onvif_camera(
     raise first_error
 
 
+def _supports_continuous_pan_tilt(nodes) -> bool:
+    """Whether any PTZ node advertises continuous pan/tilt velocity.
+
+    The web UI's directional controls issue ContinuousMove with a PanTilt
+    velocity, so continuous pan/tilt is what makes those controls usable. This
+    is intentionally narrower than ptz_supported, which is true for any device
+    exposing the ONVIF PTZ service - including zoom/focus-only varifocal lenses.
+    """
+    for node in nodes or []:
+        spaces = getattr(node, "SupportedPTZSpaces", None) or (
+            node.get("SupportedPTZSpaces") if isinstance(node, dict) else None
+        )
+        if spaces is None:
+            continue
+
+        continuous = getattr(spaces, "ContinuousPanTiltVelocitySpace", None) or (
+            spaces.get("ContinuousPanTiltVelocitySpace")
+            if isinstance(spaces, dict)
+            else None
+        )
+        if continuous:
+            return True
+
+    return False
+
+
 @router.get(
     "/onvif/probe",
     dependencies=[Depends(require_role(["admin"]))],
@@ -748,6 +774,7 @@ async def onvif_probe(
 
         # Check PTZ support and capabilities
         ptz_supported = False
+        pan_tilt_supported = False
         presets_count = 0
         autotrack_supported = False
 
@@ -780,6 +807,15 @@ async def onvif_probe(
                 except Exception as e:
                     logger.debug(f"Failed to get presets: {e}")
                     presets_count = 0
+
+            # Check for real (continuous) pan/tilt, which the UI controls need
+            if ptz_supported:
+                try:
+                    nodes = await ptz_service.GetNodes()
+                    pan_tilt_supported = _supports_continuous_pan_tilt(nodes)
+                    logger.debug(f"Continuous pan/tilt supported: {pan_tilt_supported}")
+                except Exception as e:
+                    logger.debug(f"Failed to read PTZ nodes for pan/tilt support: {e}")
 
             # Check for autotracking support - requires both FOV relative movement and MoveStatus
             if ptz_supported and first_profile_token and ptz_config_token:
@@ -900,6 +936,7 @@ async def onvif_probe(
             "firmware_version": device_info["firmware_version"],
             "profiles_count": profiles_count,
             "ptz_supported": ptz_supported,
+            "pan_tilt_supported": pan_tilt_supported,
             "presets_count": presets_count,
             "autotrack_supported": autotrack_supported,
         }

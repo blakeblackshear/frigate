@@ -78,7 +78,7 @@ export default function Step3StreamConfig({
 
   const onvif = wizardData.onvif;
   const ptzSupported = wizardData.probeResult?.ptz_supported === true;
-  const hasPresets = (wizardData.probeResult?.presets_count ?? 0) > 0;
+  const panTiltSupported = wizardData.probeResult?.pan_tilt_supported === true;
   const onvifInvalid = !!onvif?.enabled && (!onvif.host?.trim() || !onvif.port);
 
   // Seed the PTZ pane once from the successful ONVIF probe
@@ -87,7 +87,7 @@ export default function Step3StreamConfig({
     if (ptzSupported && wizardData.onvif === undefined) {
       onUpdate({
         onvif: {
-          enabled: hasPresets,
+          enabled: panTiltSupported,
           host: wizardData.host ?? "",
           port: wizardData.onvifPort ?? 8000,
           user: wizardData.username ?? "",
@@ -97,7 +97,7 @@ export default function Step3StreamConfig({
     }
   }, [
     ptzSupported,
-    hasPresets,
+    panTiltSupported,
     wizardData.onvif,
     wizardData.host,
     wizardData.onvifPort,

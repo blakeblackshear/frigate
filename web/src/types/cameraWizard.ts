@@ -212,6 +212,7 @@ export type OnvifProbeResponse = {
   firmware_version?: string;
   profiles_count?: number;
   ptz_supported?: boolean;
+  pan_tilt_supported?: boolean;
   presets_count?: number;
   autotrack_supported?: boolean;
   move_status_supported?: boolean;
