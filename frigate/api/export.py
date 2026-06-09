@@ -31,7 +31,6 @@ from frigate.api.defs.tags import Tags
 from frigate.const import CLIPS_DIR, EXPORT_DIR
 from frigate.models import Export, Previews, Recordings
 from frigate.record.export import (
-    ChaptersEnum,
     PlaybackFactorEnum,
     PlaybackSourceEnum,
     RecordingExporter,
@@ -93,6 +92,14 @@ def export_recording(
     playback_source = body.source
     friendly_name = body.name
     existing_image = sanitize_filepath(body.image_path) if body.image_path else None
+
+    # a chapters value in the request body overrides the camera's export config
+    camera_config = request.app.frigate_config.cameras[camera_name]
+    chapters = (
+        body.chapters
+        if body.chapters is not None
+        else camera_config.record.export.chapters
+    )
 
     # Ensure that existing_image is a valid path
     if existing_image and not existing_image.startswith(CLIPS_DIR):
@@ -162,7 +169,7 @@ def export_recording(
             if playback_source in PlaybackSourceEnum.__members__.values()
             else PlaybackSourceEnum.recordings
         ),
-        chapters=ChaptersEnum(body.chapters) if body.chapters else None,
+        chapters=chapters,
     )
     exporter.start()
     return JSONResponse(

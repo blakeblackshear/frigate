@@ -16,6 +16,7 @@ import pytz
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
+from frigate.config.camera.record import ChaptersEnum
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -49,14 +50,6 @@ class PlaybackFactorEnum(str, Enum):
 class PlaybackSourceEnum(str, Enum):
     recordings = "recordings"
     preview = "preview"
-
-
-class ChaptersEnum(str, Enum):
-    # One chapter per recording segment, titled with the segment's
-    # wallclock start time in strict ISO 8601 form. Lets viewers map
-    # output playback time back to wallclock without reading a timestamp
-    # overlay via OCR.
-    recording_segments = "recording_segments"
 
 
 class RecordingExporter(threading.Thread):
@@ -358,6 +351,8 @@ class RecordingExporter(threading.Thread):
                 f"title={title}",
                 "-metadata",
                 f"creation_time={creation_time}",
+                "-metadata",
+                f"comment=Camera: {self.camera}",
             ]
         )
 
@@ -435,7 +430,7 @@ class RecordingExporter(threading.Thread):
 
         if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart {video_path}"
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart"
             ).split(" ")
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
             ffmpeg_cmd = (
@@ -443,7 +438,7 @@ class RecordingExporter(threading.Thread):
                     self.config.ffmpeg.ffmpeg_path,
                     self.config.ffmpeg.hwaccel_args,
                     f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
-                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {video_path}",
+                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart",
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
@@ -459,8 +454,12 @@ class RecordingExporter(threading.Thread):
                 f"title={title}",
                 "-metadata",
                 f"creation_time={creation_time}",
+                "-metadata",
+                f"comment=Camera: {self.camera}",
             ]
         )
+
+        ffmpeg_cmd.append(video_path)
 
         return ffmpeg_cmd, playlist_lines
 
