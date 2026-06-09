@@ -119,6 +119,13 @@ export type WizardFormData = {
   probeCandidates?: string[]; // candidate URLs from probe
   candidateTests?: CandidateTestMap; // test results for candidates
   hasBackchannel?: boolean; // true if camera supports backchannel audio
+  onvif?: {
+    enabled: boolean;
+    host: string;
+    port: number;
+    user?: string;
+    password?: string;
+  };
 };
 
 // API Response Types
@@ -168,6 +175,12 @@ export type CameraConfigData = {
       };
       live?: {
         streams: Record<string, string>;
+      };
+      onvif?: {
+        host: string;
+        port: number;
+        user?: string;
+        password?: string;
       };
     };
   };

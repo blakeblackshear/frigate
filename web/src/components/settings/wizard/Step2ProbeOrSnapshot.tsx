@@ -204,6 +204,7 @@ export default function Step2ProbeOrSnapshot({
           .map((c: { uri: string }) => c.uri);
         onUpdate({
           probeMode: true,
+          probeResult: response.data,
           probeCandidates: candidateUris,
           candidateTests: {},
         });

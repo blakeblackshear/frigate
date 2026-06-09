@@ -115,13 +115,19 @@ export default function CameraWizardDialog({
       case 1:
         // Step 2: Can proceed if at least one stream exists (from probe or manual test)
         return (state.wizardData.streams?.length ?? 0) > 0;
-      case 2:
-        // Step 3: Can proceed if at least one stream has 'detect' role
-        return !!(
+      case 2: {
+        // Step 3: requires a detect stream; if PTZ is enabled, also require
+        // ONVIF host + port (fields are pre-filled but the user may clear them)
+        const hasDetect = !!(
           state.wizardData.streams?.some((stream) =>
             stream.roles.includes("detect"),
           ) ?? false
         );
+        const onvif = state.wizardData.onvif;
+        const onvifOk =
+          !onvif?.enabled || (!!onvif.host?.trim() && !!onvif.port);
+        return hasDetect && onvifOk;
+      }
       case 3:
         // Step 4: Always can proceed from final step (save will be handled there)
         return true;
@@ -239,6 +245,20 @@ export default function CameraWizardDialog({
             `Stream ${index + 1}`
           ] = go2rtcStreamName;
         });
+      }
+
+      // Write the ONVIF section when PTZ controls are enabled
+      if (wizardData.onvif?.enabled && wizardData.onvif.host.trim()) {
+        configData.cameras[finalCameraName].onvif = {
+          host: wizardData.onvif.host.trim(),
+          port: wizardData.onvif.port,
+          ...(wizardData.onvif.user?.trim() && {
+            user: wizardData.onvif.user.trim(),
+          }),
+          ...(wizardData.onvif.password && {
+            password: wizardData.onvif.password,
+          }),
+        };
       }
 
       const requestBody: ConfigSetBody = {
