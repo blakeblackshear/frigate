@@ -148,6 +148,20 @@ test.describe("Camera wizard PTZ pane @medium @mobile", () => {
     ).toBeDisabled();
   });
 
+  test("shows the pane but leaves the switch off when no presets are found", async ({
+    frigateApp,
+  }) => {
+    await mockProbe(frigateApp.page, { ...PTZ_PROBE, presets_count: 0 });
+    const dialog = await gotoStep3(frigateApp.page);
+
+    await expect(
+      dialog.getByText("Enable PTZ Controls", { exact: true }),
+    ).toBeVisible();
+    await expect(ptzSwitch(dialog)).not.toBeChecked();
+    // with the switch off, the connection fields are not shown
+    await expect(dialog.getByPlaceholder("192.168.1.100")).toHaveCount(0);
+  });
+
   test("hides the PTZ pane when the probe reports no PTZ support", async ({
     frigateApp,
   }) => {

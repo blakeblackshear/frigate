@@ -406,7 +406,7 @@
       },
       "ptz": {
         "title": "Enable PTZ Controls",
-        "detectedNote": "PTZ support has been detected via ONVIF.",
+        "detectedNote": "PTZ support has been detected via ONVIF. If this is a PTZ camera, enabling this option will allow you to control the camera's pan/tilt/zoom functions from the UI.",
         "connectionDetails": "ONVIF connection details",
         "host": "ONVIF Host",
         "port": "ONVIF Port",
