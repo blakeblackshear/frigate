@@ -364,7 +364,7 @@
       }
     },
     "step3": {
-      "description": "Configure stream roles and add additional streams for your camera.",
+      "description": "Configure features, stream roles, and add additional streams for your camera.",
       "streamsTitle": "Camera Streams",
       "addStream": "Add Stream",
       "addAnotherStream": "Add Another Stream",
@@ -403,6 +403,16 @@
       "featuresPopover": {
         "title": "Stream Features",
         "description": "Use go2rtc restreaming to reduce connections to your camera."
+      },
+      "ptz": {
+        "title": "Enable PTZ Controls",
+        "detectedNote": "PTZ support has been detected via ONVIF.",
+        "connectionDetails": "ONVIF connection details",
+        "host": "ONVIF Host",
+        "port": "ONVIF Port",
+        "username": "ONVIF Username",
+        "password": "ONVIF Password",
+        "hostRequiredWarning": "An ONVIF host and port are required when PTZ controls are enabled."
       }
     },
     "step4": {
