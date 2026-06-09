@@ -73,7 +73,12 @@ class CameraConfigUpdateSubscriber:
 
         base_topic = "config/cameras"
 
-        if len(self.camera_configs) == 1:
+        # global subscribers must hear every camera; only narrow per-camera workers
+        is_global_subscriber = (
+            CameraConfigUpdateEnum.add in self.topics
+            or CameraConfigUpdateEnum.remove in self.topics
+        )
+        if not is_global_subscriber and len(self.camera_configs) == 1:
             base_topic += f"/{list(self.camera_configs.keys())[0]}"
 
         self.subscriber = ConfigSubscriber(
