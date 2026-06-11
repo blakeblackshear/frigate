@@ -174,6 +174,21 @@
       "error": "Error: {{error}}",
       "tips": {
         "title": "Camera Probe Info"
+      },
+      "keyframes": {
+        "title": "Keyframe analysis",
+        "analyzing": "Analyzing keyframes... {{seconds}} seconds remaining",
+        "stillAnalyzing": "Still analyzing keyframes...",
+        "recordStream": "Record stream:",
+        "keyframeCount": "Keyframes observed:",
+        "observedDuration": "Observed duration:",
+        "gap": "Keyframe gap (min / avg / max):",
+        "segmentLength": "Recording segment length:",
+        "ok": "Keyframes every ~{{seconds}}s, good for recording and playback.",
+        "warning": "Sparse or variable keyframes (longest gap ~{{seconds}}s), likely a smart codec (H.264+/H.265+), this is not recommended.",
+        "error": "Keyframe gap (~{{seconds}}s) exceeds the recording segment length ({{segmentTime}}s). Some segments may have no keyframe, which breaks playback. Disable the smart/+ codec on the camera or shorten its keyframe interval.",
+        "unknown": "Couldn't determine keyframe spacing.",
+        "recordDisabled": "Recording is disabled for this camera."
       }
     },
     "framesAndDetections": "Frames / Detections",
