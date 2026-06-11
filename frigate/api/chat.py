@@ -1336,9 +1336,9 @@ async def chat_completion(
 
                     async def stream_body() -> Any:
                         yield (
-                            json.dumps(
-                                {"type": "messages", "messages": chain}
-                            ).encode("utf-8")
+                            json.dumps({"type": "messages", "messages": chain}).encode(
+                                "utf-8"
+                            )
                             + b"\n"
                         )
                         # Emit the full reasoning trace up front when the
