@@ -1138,19 +1138,23 @@ async def chat_completion(
     )
     conversation = []
 
-    system_prompt = build_chat_system_prompt(
-        config=config,
-        allowed_cameras=allowed_cameras,
-        semantic_search_enabled=semantic_search_enabled,
-        attribute_classifications=attribute_classifications,
-    )
-
-    conversation.append(
-        {
-            "role": "system",
-            "content": system_prompt,
-        }
-    )
+    # Build the system message only when the client hasn't already pinned one.
+    # The first turn has no system message; we generate it (with the current
+    # timestamp) and return the whole chain so the client persists it. Later
+    # turns send it back verbatim, freezing the timestamp so the prompt prefix
+    # stays byte-identical and the model server's prompt cache keeps hitting.
+    if not body.messages or body.messages[0].role != "system":
+        conversation.append(
+            {
+                "role": "system",
+                "content": build_chat_system_prompt(
+                    config=config,
+                    allowed_cameras=allowed_cameras,
+                    semantic_search_enabled=semantic_search_enabled,
+                    attribute_classifications=attribute_classifications,
+                ),
+            }
+        )
 
     for msg in body.messages:
         msg_dict = {
@@ -1165,9 +1169,6 @@ async def chat_completion(
             msg_dict["tool_calls"] = msg.tool_calls
 
         conversation.append(msg_dict)
-
-    # Messages appended past this point form this turn's replay record.
-    turn_start_len = len(conversation)
 
     tool_iterations = 0
     tool_calls: list[ToolCall] = []
@@ -1185,12 +1186,12 @@ async def chat_completion(
         async def stream_body_llm():
             nonlocal conversation, stream_iterations
 
-            def _emit_replay_messages(extra: Optional[list[dict[str, Any]]] = None):
-                turn_messages = conversation[turn_start_len:] + (extra or [])
+            def _emit_chain(extra: Optional[list[dict[str, Any]]] = None):
+                # Return the full conversation (including the system message) so
+                # the client persists and replays it verbatim next turn.
+                chain = conversation + (extra or [])
                 return (
-                    json.dumps({"type": "messages", "messages": turn_messages}).encode(
-                        "utf-8"
-                    )
+                    json.dumps({"type": "messages", "messages": chain}).encode("utf-8")
                     + b"\n"
                 )
 
@@ -1266,14 +1267,14 @@ async def chat_completion(
                             )
                             conversation.extend(tool_results)
                             conversation.extend(extra_msgs)
-                            # Running turn slice: lets the client render tool
+                            # Emit the running chain so the client can render tool
                             # calls live and replay them verbatim next turn.
-                            yield _emit_replay_messages()
+                            yield _emit_chain()
                             break
                         else:
                             # Streaming never appends the final assistant message
-                            # to the conversation, so add it to the replay slice.
-                            yield _emit_replay_messages(
+                            # to the conversation, so add it to the chain.
+                            yield _emit_chain(
                                 extra=[
                                     {
                                         "role": "assistant",
@@ -1284,7 +1285,7 @@ async def chat_completion(
                             yield (json.dumps({"type": "done"}).encode("utf-8") + b"\n")
                             return
             else:
-                yield _emit_replay_messages()
+                yield _emit_chain()
                 yield json.dumps({"type": "done"}).encode("utf-8") + b"\n"
 
         return StreamingResponse(
@@ -1331,12 +1332,12 @@ async def chat_completion(
                 if body.stream:
                     final_reasoning = response.get("reasoning")
 
-                    turn_messages = conversation[turn_start_len:]
+                    chain = list(conversation)
 
                     async def stream_body() -> Any:
                         yield (
                             json.dumps(
-                                {"type": "messages", "messages": turn_messages}
+                                {"type": "messages", "messages": chain}
                             ).encode("utf-8")
                             + b"\n"
                         )
@@ -1375,7 +1376,7 @@ async def chat_completion(
                         finish_reason=response.get("finish_reason", "stop"),
                         tool_iterations=tool_iterations,
                         tool_calls=tool_calls,
-                        messages=conversation[turn_start_len:],
+                        messages=list(conversation),
                     ).model_dump(),
                 )
 
@@ -1408,7 +1409,7 @@ async def chat_completion(
                 finish_reason="length",
                 tool_iterations=tool_iterations,
                 tool_calls=tool_calls,
-                messages=conversation[turn_start_len:],
+                messages=list(conversation),
             ).model_dump(),
         )
 

@@ -5,9 +5,10 @@ export type StreamChatCallbacks = {
   onContentDelta: (delta: string) => void;
   /** Streamed delta of the assistant's reasoning trace. */
   onReasoningDelta: (delta: string) => void;
-  /** The exact wire messages appended for this turn so far (tool-call turns,
-   * tool results, and — on the final emission — the final assistant message). */
-  onTurnMessages: (messages: ChatMessage[]) => void;
+  /** The full conversation chain so far (system message, history, this turn's
+   * tool-call turns, tool results, and — on the final emission — the final
+   * assistant message). */
+  onChain: (chain: ChatMessage[]) => void;
   /** Token/timing stats for the turn. */
   onStats: (stats: ChatStats) => void;
   /** Called when the stream sends an error or fetch fails. */
@@ -52,7 +53,7 @@ export async function streamChatCompletion(
   const {
     onContentDelta,
     onReasoningDelta,
-    onTurnMessages,
+    onChain,
     onStats,
     onError,
     onDone,
@@ -99,7 +100,7 @@ export async function streamChatCompletion(
         return "break";
       }
       if (data.type === "messages") {
-        onTurnMessages(data.messages ?? []);
+        onChain(data.messages ?? []);
         return "continue";
       }
       if (data.type === "content" && data.delta !== undefined) {

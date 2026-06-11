@@ -30,7 +30,7 @@ import {
 type StreamingTurn = {
   content: string;
   reasoning: string;
-  turn: ChatMessage[];
+  chain: ChatMessage[];
   stats?: ChatStats;
 };
 
@@ -99,7 +99,7 @@ export default function ChatPage() {
 
       setError(null);
       setMessages(messagesToSend);
-      setStreaming({ content: "", reasoning: "", turn: [] });
+      setStreaming({ content: "", reasoning: "", chain: [] });
       setIsLoading(true);
 
       const baseURL = axios.defaults.baseURL ?? "";
@@ -112,7 +112,7 @@ export default function ChatPage() {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      let turn: ChatMessage[] = [];
+      let chain: ChatMessage[] = [];
       let stats: ChatStats | undefined;
       let reasoning = "";
       let hadError = false;
@@ -130,9 +130,9 @@ export default function ChatPage() {
               s ? { ...s, reasoning: s.reasoning + delta } : s,
             );
           },
-          onTurnMessages: (turnMessages) => {
-            turn = turnMessages;
-            setStreaming((s) => (s ? { ...s, turn: turnMessages } : s));
+          onChain: (fullChain) => {
+            chain = fullChain;
+            setStreaming((s) => (s ? { ...s, chain: fullChain } : s));
           },
           onStats: (s) => {
             stats = s;
@@ -146,14 +146,15 @@ export default function ChatPage() {
             abortRef.current = null;
             setIsLoading(false);
             setStreaming(null);
-            const lastMsg = turn[turn.length - 1];
+            const lastMsg = chain[chain.length - 1];
             if (!hadError && lastMsg?.role === "assistant") {
-              const committed = turn.map((m, i) =>
-                i === turn.length - 1
-                  ? { ...m, reasoning: reasoning || undefined, stats }
-                  : m,
+              setMessages(
+                chain.map((m, i) =>
+                  i === chain.length - 1
+                    ? { ...m, reasoning: reasoning || undefined, stats }
+                    : m,
+                ),
               );
-              setMessages((prev) => [...prev, ...committed]);
             }
           },
           defaultErrorMessage: t("error"),
@@ -228,15 +229,17 @@ export default function ChatPage() {
 
   const hasStarted = messages.length > 0 || streaming != null;
 
-  // The conversation plus any in-flight turn, rendered as one flat list.
-  const renderList = streaming ? [...messages, ...streaming.turn] : messages;
+  // While streaming, the backend's in-flight chain is the source of truth;
+  // otherwise the committed conversation is.
+  const renderList =
+    streaming && streaming.chain.length ? streaming.chain : messages;
   const responses = toolResponsesById(renderList);
-  const streamingTail = streaming?.turn[streaming.turn.length - 1];
+  const renderTail = renderList[renderList.length - 1];
   const finalShown =
-    streamingTail?.role === "assistant" && hasText(streamingTail.content);
+    renderTail?.role === "assistant" && hasText(renderTail.content);
 
   const renderMessage = (msg: ChatMessage, i: number) => {
-    if (msg.role === "tool") return null;
+    if (msg.role === "system" || msg.role === "tool") return null;
 
     if (msg.role === "user") {
       if (!hasText(msg.content)) return null;

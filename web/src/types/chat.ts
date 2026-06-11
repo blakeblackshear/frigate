@@ -10,7 +10,7 @@ export type WireToolCall = {
 };
 
 export type ChatMessage = {
-  role: "user" | "assistant" | "tool";
+  role: "system" | "user" | "assistant" | "tool";
   content: unknown;
   tool_call_id?: string;
   name?: string;
