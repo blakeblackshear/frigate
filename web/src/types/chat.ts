@@ -1,15 +1,28 @@
+export type ToolCallFunction = {
+  name: string;
+  arguments: string;
+};
+
+export type WireToolCall = {
+  id: string;
+  type?: string;
+  function: ToolCallFunction;
+};
+
+export type ChatMessage = {
+  role: "user" | "assistant" | "tool";
+  content: unknown;
+  tool_call_id?: string;
+  name?: string;
+  tool_calls?: WireToolCall[];
+  reasoning?: string;
+  stats?: ChatStats;
+};
+
 export type ToolCall = {
   name: string;
   arguments?: Record<string, unknown>;
   response?: string;
-};
-
-export type ChatMessage = {
-  role: "user" | "assistant";
-  content: string;
-  reasoning?: string;
-  toolCalls?: ToolCall[];
-  stats?: ChatStats;
 };
 
 export type StartingRequest = {
