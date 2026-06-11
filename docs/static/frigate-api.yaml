@@ -400,6 +400,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /keyframe_analysis:
+    get:
+      tags:
+        - Camera
+      summary: Keyframe Analysis
+      description: >-
+        Probe a camera's record stream and classify its keyframe spacing.
+        Detects smart/+ codecs and long/variable GOPs that degrade recording.
+      operationId: keyframe_analysis_keyframe_analysis_get
+      parameters:
+        - name: camera
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ""
+            title: Camera
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
   /ffprobe/snapshot:
     get:
       tags:
