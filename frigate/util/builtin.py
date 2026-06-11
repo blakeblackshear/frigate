@@ -14,12 +14,15 @@ import urllib.parse
 from collections.abc import Mapping
 from multiprocessing.managers import ValueProxy
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 from ruamel.yaml import YAML
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
+
+if TYPE_CHECKING:
+    from frigate.config import CameraConfig
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +133,24 @@ def escape_special_characters(path: str) -> str:
 def get_ffmpeg_arg_list(arg: Any) -> list:
     """Use arg if list or convert to list format."""
     return arg if isinstance(arg, list) else shlex.split(arg)
+
+
+# all built-in record presets use this segment_time
+DEFAULT_RECORD_SEGMENT_TIME = 10
+
+
+def get_record_segment_time(config: "CameraConfig") -> int:
+    """Extract -segment_time from the camera's record output args."""
+    record_args = get_ffmpeg_arg_list(config.ffmpeg.output_args.record)
+
+    if record_args and record_args[0].startswith("preset"):
+        return DEFAULT_RECORD_SEGMENT_TIME
+
+    try:
+        idx = record_args.index("-segment_time")
+        return int(record_args[idx + 1])
+    except (ValueError, IndexError):
+        return DEFAULT_RECORD_SEGMENT_TIME
 
 
 def load_labels(

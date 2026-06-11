@@ -24,7 +24,7 @@ from frigate.config.camera.updater import (
 )
 from frigate.const import PROCESS_PRIORITY_HIGH
 from frigate.log import LogPipe
-from frigate.util.builtin import EventsPerSecond, get_ffmpeg_arg_list
+from frigate.util.builtin import EventsPerSecond, get_record_segment_time
 from frigate.util.ffmpeg import start_or_restart_ffmpeg, stop_ffmpeg
 from frigate.util.image import (
     FrameManager,
@@ -33,23 +33,6 @@ from frigate.util.image import (
 from frigate.util.process import FrigateProcess
 
 logger = logging.getLogger(__name__)
-
-# all built-in record presets use this segment_time
-DEFAULT_RECORD_SEGMENT_TIME = 10
-
-
-def _get_record_segment_time(config: CameraConfig) -> int:
-    """Extract -segment_time from the camera's record output args."""
-    record_args = get_ffmpeg_arg_list(config.ffmpeg.output_args.record)
-
-    if record_args and record_args[0].startswith("preset"):
-        return DEFAULT_RECORD_SEGMENT_TIME
-
-    try:
-        idx = record_args.index("-segment_time")
-        return int(record_args[idx + 1])
-    except (ValueError, IndexError):
-        return DEFAULT_RECORD_SEGMENT_TIME
 
 
 def capture_frames(
@@ -185,7 +168,7 @@ class CameraWatchdog(threading.Thread):
         # `valid` segments are published with the segment's start time, so the
         # gap between consecutive publishes can reach 2 * segment_time. Pad the
         # staleness threshold so it's never tighter than that worst case.
-        segment_time = _get_record_segment_time(self.config)
+        segment_time = get_record_segment_time(self.config)
         self.record_stale_threshold = max(120, 2 * segment_time + 30)
 
         # Stall tracking (based on last processed frame)
