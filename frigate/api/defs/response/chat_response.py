@@ -56,3 +56,12 @@ class ChatCompletionResponse(BaseModel):
         default_factory=list,
         description="List of tool calls that were executed during this completion",
     )
+    messages: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description=(
+            "The exact conversation messages appended for this assistant turn "
+            "(assistant tool-call turns, tool results, and the final assistant "
+            "message). Replay these verbatim as conversation history on the next "
+            "request to keep the model server's prompt cache prefix intact."
+        ),
+    )
