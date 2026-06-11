@@ -34,11 +34,15 @@ from frigate.config.camera.updater import (
 )
 from frigate.config.env import substitute_frigate_vars
 from frigate.models import User
-from frigate.util.builtin import clean_camera_user_pass
+from frigate.util.builtin import clean_camera_user_pass, get_record_segment_time
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
 from frigate.util.image import run_ffmpeg_snapshot
-from frigate.util.services import ffprobe_stream, is_restricted_go2rtc_source
+from frigate.util.services import (
+    analyze_record_keyframes,
+    ffprobe_stream,
+    is_restricted_go2rtc_source,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -360,6 +364,48 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
         output.append(result)
 
     return JSONResponse(content=output)
+
+
+@router.get("/keyframe_analysis", dependencies=[Depends(require_role(["admin"]))])
+async def keyframe_analysis(request: Request, camera: str = ""):
+    """Probe a camera's record stream and classify its keyframe spacing.
+
+    Detects smart/+ codecs and long/variable GOPs that degrade recording.
+    """
+    config: FrigateConfig = request.app.frigate_config
+
+    if camera not in config.cameras:
+        return JSONResponse(
+            content={"success": False, "message": f"{camera} is not a valid camera."},
+            status_code=404,
+        )
+
+    camera_config = config.cameras[camera]
+
+    if not camera_config.enabled:
+        return JSONResponse(
+            content={"success": False, "message": f"{camera} is not enabled."},
+            status_code=404,
+        )
+
+    # keyframe spacing only matters when this camera is recording
+    if not camera_config.record.enabled:
+        return JSONResponse(content={"severity": "record_disabled"})
+
+    # recording guarantees an input carries the record role; its index matches
+    # the "Stream N" numbering the ffprobe endpoint surfaces (same input order)
+    record_index, record_input = next(
+        (idx, i)
+        for idx, i in enumerate(camera_config.ffmpeg.inputs)
+        if "record" in i.roles
+    )
+
+    segment_time = get_record_segment_time(camera_config)
+    result = await analyze_record_keyframes(
+        config.ffmpeg, record_input.path, segment_time
+    )
+    result["stream_index"] = record_index
+    return JSONResponse(content=result)
 
 
 @router.get("/ffprobe/snapshot", dependencies=[Depends(require_role(["admin"]))])

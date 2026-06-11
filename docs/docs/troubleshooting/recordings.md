@@ -121,6 +121,12 @@ If segments are only ~1 second instead of ~10 seconds, the camera is sending cor
 - **Changing codec, bitrate, or resolution mid-stream** — Any encoding changes during an active stream can cause unpredictable segment splitting.
 - **Camera firmware bugs** — Check for firmware updates from your camera manufacturer.
 
+:::tip
+
+You don't have to run `ffprobe` by hand to catch this. Open a camera's **Camera Probe Info** dialog (the info icon on the System → Metrics → Cameras page) and check the **Keyframe analysis** section. It probes the record stream and flags sparse or variable keyframes, which is what smart/"+" codecs (H.264+/H.265+) and long keyframe intervals produce.
+
+:::
+
 ### Step 4: Check for a stuck detector
 
 If the detect stream is not processing frames, segments will accumulate. Common causes:
