@@ -9,6 +9,7 @@ from collections import deque
 from datetime import datetime, timedelta, timezone
 from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
+from pathlib import Path
 from typing import Any
 
 from frigate.camera import CameraMetrics
@@ -22,7 +23,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
-from frigate.const import PROCESS_PRIORITY_HIGH
+from frigate.const import CACHE_DIR, PROCESS_PRIORITY_HIGH
 from frigate.log import LogPipe
 from frigate.util.builtin import EventsPerSecond, get_record_segment_time
 from frigate.util.ffmpeg import start_or_restart_ffmpeg, stop_ffmpeg
@@ -453,6 +454,38 @@ class CameraWatchdog(threading.Thread):
                     invalid_stale = invalid_stale_condition
 
                     if cache_stale or valid_stale or invalid_stale:
+                        # The staleness above is measured from the recording
+                        # maintainer's IPC heartbeat, which lags whenever the
+                        # maintainer falls behind (e.g. "Unable to keep up with
+                        # recording segments in cache"). A late message is not
+                        # a dead recorder: corroborate against the cache dir
+                        # before restarting, otherwise every camera restarts
+                        # together on maintainer lag and the resulting segment
+                        # churn makes the overload worse.
+                        if not invalid_stale:
+                            newest_on_disk = max(
+                                (
+                                    f.stat().st_mtime
+                                    for f in Path(CACHE_DIR).glob(
+                                        f"{self.config.name}@*"
+                                    )
+                                ),
+                                default=0.0,
+                            )
+                            if (
+                                newest_on_disk > 0
+                                and now_utc.timestamp() - newest_on_disk
+                                < self.record_stale_threshold
+                            ):
+                                self.logger.warning(
+                                    f"Recording heartbeat for {self.config.name} is stale but a cache "
+                                    f"segment is only {now_utc.timestamp() - newest_on_disk:.0f}s old — "
+                                    "skipping the record process restart (maintainer heartbeat lag, "
+                                    "not a recording failure)."
+                                )
+                                self.latest_cache_segment_time = newest_on_disk
+                                continue
+
                         if cache_stale:
                             reason = "No new recording segments were created"
                         elif valid_stale:
