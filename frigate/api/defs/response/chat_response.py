@@ -56,3 +56,12 @@ class ChatCompletionResponse(BaseModel):
         default_factory=list,
         description="List of tool calls that were executed during this completion",
     )
+    messages: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description=(
+            "The full conversation chain, including the system message. Persist "
+            "and replay this verbatim on the next request so the prompt prefix "
+            "stays byte-identical and the model server's prompt cache keeps "
+            "hitting."
+        ),
+    )

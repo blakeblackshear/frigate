@@ -92,6 +92,15 @@ test.describe("Chat — streaming @medium", () => {
     await installChatStreamOverride(frigateApp, [
       { type: "content", delta: "Hel" },
       { type: "content", delta: "lo" },
+      {
+        type: "messages",
+        messages: [
+          { role: "system", content: "sys" },
+          { role: "user", content: "hello chat" },
+          { role: "assistant", content: "Hello" },
+        ],
+      },
+      { type: "done" },
     ]);
     await frigateApp.goto("/chat");
     const input = frigateApp.page.getByPlaceholder(/ask/i);
@@ -137,6 +146,15 @@ test.describe("Chat — streaming @medium", () => {
         { type: "content", delta: "Hel" },
         { type: "content", delta: "lo, " },
         { type: "content", delta: "world!" },
+        {
+          type: "messages",
+          messages: [
+            { role: "system", content: "sys" },
+            { role: "user", content: "greet me" },
+            { role: "assistant", content: "Hello, world!" },
+          ],
+        },
+        { type: "done" },
       ],
       { chunkDelayMs: 50 },
     );
@@ -151,19 +169,39 @@ test.describe("Chat — streaming @medium", () => {
     });
   });
 
-  test("tool_calls chunks render a ToolCallsGroup", async ({ frigateApp }) => {
-    await installChatStreamOverride(frigateApp, [
+  test("tool calls in the chain render a ToolCallsGroup", async ({
+    frigateApp,
+  }) => {
+    const toolTurn = [
+      { role: "system", content: "sys" },
+      { role: "user", content: "find people" },
       {
-        type: "tool_calls",
+        role: "assistant",
+        content: null,
         tool_calls: [
           {
             id: "call_1",
-            name: "search_objects",
-            arguments: { label: "person" },
+            type: "function",
+            function: {
+              name: "search_objects",
+              arguments: '{"label":"person"}',
+            },
           },
         ],
       },
+      { role: "tool", tool_call_id: "call_1", content: "[]" },
+    ];
+    await installChatStreamOverride(frigateApp, [
+      { type: "messages", messages: toolTurn },
       { type: "content", delta: "Searching for people." },
+      {
+        type: "messages",
+        messages: [
+          ...toolTurn,
+          { role: "assistant", content: "Searching for people." },
+        ],
+      },
+      { type: "done" },
     ]);
     await frigateApp.goto("/chat");
     const input = frigateApp.page.getByPlaceholder(/ask/i);
@@ -253,6 +291,15 @@ test.describe("Chat — attachment chip @medium", () => {
     // We use the stream override so the first message completes quickly.
     await installChatStreamOverride(frigateApp, [
       { type: "content", delta: "Done." },
+      {
+        type: "messages",
+        messages: [
+          { role: "system", content: "sys" },
+          { role: "user", content: "hello" },
+          { role: "assistant", content: "Done." },
+        ],
+      },
+      { type: "done" },
     ]);
     await frigateApp.goto("/chat");
 

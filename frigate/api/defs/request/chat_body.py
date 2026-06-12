@@ -1,6 +1,6 @@
 """Chat API request models."""
 
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -11,12 +11,28 @@ class ChatMessage(BaseModel):
     role: str = Field(
         description="Message role: 'user', 'assistant', 'system', or 'tool'"
     )
-    content: str = Field(description="Message content")
+    content: Optional[Any] = Field(
+        default=None,
+        description=(
+            "Message content. Usually a string, but may be a multimodal content "
+            "list (e.g. text + image_url) or null for assistant turns that only "
+            "request tool calls."
+        ),
+    )
     tool_call_id: Optional[str] = Field(
         default=None, description="For tool messages, the ID of the tool call"
     )
     name: Optional[str] = Field(
         default=None, description="For tool messages, the tool name"
+    )
+    tool_calls: Optional[list[dict[str, Any]]] = Field(
+        default=None,
+        description=(
+            "For assistant messages replayed from prior turns, the OpenAI-format "
+            "tool calls the model previously requested. Replaying these verbatim "
+            "keeps the conversation prefix byte-for-byte identical so the model "
+            "server's prompt cache hits on follow-up turns."
+        ),
     )
 
 
