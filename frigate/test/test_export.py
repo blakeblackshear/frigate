@@ -64,6 +64,12 @@ class TestValidateFfmpegArgs(unittest.TestCase):
         # marker embedded as an option of an otherwise-allowed filter name
         self.assertRejected("-vf scale=movie=/etc/passwd")
 
+    def test_filtergraph_brackets_rejected(self):
+        # link labels aren't needed for safe filters; rejecting "[" / "]" keeps
+        # filtergraph validation linear (no ReDoS on attacker input)
+        self.assertRejected("-vf [in]scale=640:480[out]")
+        self.assertRejected("-vf " + "[" * 5000)
+
     def test_preset_file_read_rejected(self):
         # cwd-anchored traversal slipped past the old startswith() path check
         self.assertRejected("-fpre frigate/../../../etc/passwd")

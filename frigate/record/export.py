@@ -124,8 +124,8 @@ def _base_flag(token: str) -> str:
 
 def _validate_filtergraph(value: str) -> tuple[bool, str]:
     """Validate a filtergraph value, allowing only filters in _SAFE_FILTERS."""
-    # No safe filter needs these; they only show up in read/exfil payloads.
-    if "://" in value or ".." in value:
+    # None of the safe filters need any of these
+    if any(token in value for token in ("://", "..", "[", "]")):
         return False, "Invalid filter graph in custom ffmpeg arguments"
 
     lowered = value.lower()
@@ -136,9 +136,7 @@ def _validate_filtergraph(value: str) -> tuple[bool, str]:
     # filters never use unescaped "," or ";" in their arguments, so splitting on
     # them to recover filter names cannot hide a disallowed filter.
     for spec in re.split(r"[;,]", value):
-        # Strip leading/trailing [link] labels (e.g. "[in]scale=...[out]").
-        spec = re.sub(r"^(\[[^\]]*\])+", "", spec.strip())
-        spec = re.sub(r"(\[[^\]]*\])+$", "", spec).strip()
+        spec = spec.strip()
         if not spec:
             continue
 
