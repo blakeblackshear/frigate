@@ -48,6 +48,22 @@ def ptz_moving_at_frame_time(frame_time, ptz_start_time, ptz_stop_time):
     )
 
 
+def transform_is_finite(coord_transformations) -> bool:
+    """Return True if a norfair coordinate transform contains only finite values.
+
+    A near-singular homography (common when the motion estimator can't find
+    enough stable features during zoom on a low-texture scene) can produce
+    inf/nan matrix entries. norfair accumulates the homography across frames, so
+    a single bad transform poisons every subsequent one and propagates nan into
+    the tracker's distance function, crashing the camera process.
+    """
+    for attr in ("homography_matrix", "inverse_homography_matrix", "movement_vector"):
+        value = getattr(coord_transformations, attr, None)
+        if value is not None and not np.all(np.isfinite(value)):
+            return False
+    return True
+
+
 class PtzMotionEstimator:
     def __init__(self, config: CameraConfig, ptz_metrics: PTZMetrics) -> None:
         self.frame_manager = SharedMemoryFrameManager()
@@ -134,6 +150,19 @@ class PtzMotionEstimator:
                     f"Autotracker: motion estimator couldn't get transformations for {camera} at frame time {frame_time}"
                 )
                 self.coord_transformations = None
+
+            # A degenerate homography can yield non-finite transform values that
+            # norfair would accumulate and feed to the tracker as nan estimates.
+            # Drop the bad transform and request a reset so the estimator rebuilds
+            # a fresh reference frame instead of poisoning every following frame.
+            if self.coord_transformations is not None and not transform_is_finite(
+                self.coord_transformations
+            ):
+                logger.warning(
+                    f"Autotracker: motion estimator produced a non-finite transform for {camera} at frame time {frame_time}, resetting"
+                )
+                self.coord_transformations = None
+                self.ptz_metrics.reset.set()
 
             try:
                 logger.debug(
