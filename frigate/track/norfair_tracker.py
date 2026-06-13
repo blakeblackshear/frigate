@@ -42,8 +42,13 @@ def distance(detection: np.ndarray, estimate: np.ndarray) -> float:
     # ultimately, this should try and estimate distance in 3-dimensional space
     # consider change in location, width, and height
 
-    estimate_dim = np.diff(estimate, axis=0).flatten()
-    detection_dim = np.diff(detection, axis=0).flatten()
+    # Guard against degenerate (zero-area) boxes: a collapsed Kalman estimate or
+    # a zero-dimension detection makes the divisions below produce NaN, which
+    # norfair rejects by raising ValueError ("Received nan values from distance
+    # function") and crashes the camera process. Clamp dims to >= 1px (these are
+    # pixel coordinates, so a dimension < 1 is meaningless).
+    estimate_dim = np.maximum(np.abs(np.diff(estimate, axis=0).flatten()), 1.0)
+    detection_dim = np.maximum(np.abs(np.diff(detection, axis=0).flatten()), 1.0)
 
     # get bottom center positions
     detection_position = np.array(
