@@ -80,7 +80,7 @@ class GenAIClientManager:
             return None
 
         try:
-            client: "GenAIClient" = provider_cls(genai_cfg)
+            client = provider_cls(genai_cfg)
         except Exception as e:
             logger.exception(
                 "Failed to create GenAI client for provider %s: %s",
