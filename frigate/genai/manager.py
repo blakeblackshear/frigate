@@ -62,7 +62,9 @@ class GenAIClientManager:
     def _get_client(self, name: str) -> "Optional[GenAIClient]":
         """Return the client for *name*, creating it on first access."""
         if name in self._clients:
-            return self._clients[name]
+            client = self._clients[name]
+            client.ensure_provider()
+            return client
 
         from frigate.genai import PROVIDERS
 

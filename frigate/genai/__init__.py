@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import re
+import time
 from typing import Any, AsyncGenerator, Callable, Optional
 
 import numpy as np
@@ -50,6 +51,10 @@ def register_genai_provider(key: GenAIProviderEnum) -> Callable:
 class GenAIClient:
     """Generative AI client for Frigate."""
 
+    # Minimum seconds between re-initialization attempts when the provider was
+    # offline at startup
+    REINIT_INTERVAL = 60.0
+
     def __init__(
         self,
         genai_config: GenAIConfig,
@@ -60,6 +65,34 @@ class GenAIClient:
         self.timeout = timeout
         self.validate_model = validate_model
         self.provider = self._init_provider()
+        self._last_init_attempt = time.monotonic()
+
+    def ensure_provider(self) -> bool:
+        """Ensure a provider is available, retrying initialization if needed.
+
+        Providers can fail to initialize at startup when their backing service
+        isn't online yet (common when both are started together). This retries
+        ``_init_provider`` lazily — throttled to ``REINIT_INTERVAL`` — so the
+        client recovers on its own once the service is reachable, without a
+        config reload.
+
+        Returns True if a provider is available.
+        """
+        if self.provider is not None:
+            return True
+
+        now = time.monotonic()
+        if now - self._last_init_attempt < self.REINIT_INTERVAL:
+            return False
+
+        self._last_init_attempt = now
+        self.provider = self._init_provider()
+        if self.provider is not None:
+            logger.info(
+                "GenAI provider %s is now available",
+                self.genai_config.provider,
+            )
+        return self.provider is not None
 
     def generate_review_description(
         self,
