@@ -62,7 +62,9 @@ class GenAIClientManager:
     def _get_client(self, name: str) -> "Optional[GenAIClient]":
         """Return the client for *name*, creating it on first access."""
         if name in self._clients:
-            return self._clients[name]
+            client = self._clients[name]
+            client.ensure_provider()
+            return client
 
         from frigate.genai import PROVIDERS
 
@@ -78,7 +80,7 @@ class GenAIClientManager:
             return None
 
         try:
-            client: "GenAIClient" = provider_cls(genai_cfg)
+            client = provider_cls(genai_cfg)
         except Exception as e:
             logger.exception(
                 "Failed to create GenAI client for provider %s: %s",
