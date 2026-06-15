@@ -592,6 +592,7 @@ export default function LiveDashboardView({
                         resetPreferredLiveMode(camera.name)
                       }
                       config={config}
+                      streamMetadata={streamMetadata}
                     >
                       <LivePlayer
                         cameraRef={cameraRef}
