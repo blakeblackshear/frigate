@@ -11,7 +11,7 @@ This page describes how to _use_ the Live view. For how to _configure_ live stre
 
 ## The dashboard at a glance
 
-The default **All Cameras** dashboard shows every camera, with a filmstrip of recent **alerts** scrolling across the top. Clicking an alert opens it in [Review](/usage/review); each card also has a check button to mark it reviewed without leaving the dashboard.
+The default **All Cameras** dashboard shows every camera, with a filmstrip of recent **alerts** scrolling across the top. Clicking an alert opens it in [Review](/usage/review); each card also has a check button to mark it reviewed without leaving the dashboard. Only **alerts** appear in the filmstrip — to suppress a label or zone from showing there, configure it as a detection instead (see [Alerts and Detections](/configuration/review#alerts-and-detections)).
 
 By default Frigate uses **smart streaming**: a camera's image updates roughly once per minute while nothing is happening, and switches to a full live stream the moment activity is detected. This conserves bandwidth and resources. You can change this per camera or per group (see [Streaming settings](#streaming-settings-and-the-right-click-menu) below), and the behavior is explained in detail under [Live view technologies](/configuration/live#live-view-technologies).
 
@@ -58,7 +58,7 @@ You can optionally overlay live streaming statistics (stream type, bandwidth, la
 
 ## Streaming settings and the right-click menu
 
-Right-clicking (or long-pressing) a camera tile opens a context menu with quick controls: an **audio volume** control for streams that support audio, **Mute / Unmute all cameras**, **show or hide streaming statistics**, the **debug view**, **notification** options, and — for admins — turning the camera on or off.
+Right-clicking (or long-pressing) a camera tile opens a context menu with quick controls: an **audio volume** control for streams that support audio, **Mute / Unmute all cameras**, **show or hide streaming statistics**, the **debug view**, **notification** options, and — for admins — turning the camera on or off. If the audio control doesn't appear, see [Audio Support](/configuration/live#audio-support) — audio requires go2rtc configured with a compatible codec.
 
 A **Low-bandwidth mode** notice may also appear in the context menu with a **Reset** option appears when Frigate has fallen back to the lower-quality jsmpeg stream — see the [Live view FAQ](/configuration/live#live-view-faq) for why this happens.
 

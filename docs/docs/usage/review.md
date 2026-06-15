@@ -11,7 +11,7 @@ This page describes how to _use_ the Review view. For how alerts and detections 
 
 :::info
 
-Review items are only created for a camera when **recording is enabled** for that camera. See [Recording](/configuration/record).
+Review items are only created for a camera when **object tracking and recording are enabled** for that camera. See [Recording](/configuration/record).
 
 :::
 
@@ -39,7 +39,7 @@ Review items are shown as a grid of thumbnail cards next to a vertical activity 
 - The object chip on each card is **gray** when the item is unreviewed and turns **green** once it has been reviewed.
 - The **Mark these items as reviewed** button marks everything currently shown as reviewed at once.
 
-Reviewed state is tracked per user, so marking an item reviewed does not hide it for other users.
+Reviewed state is tracked per user, so marking an item reviewed does not hide it for other users. Marking an item reviewed does not delete anything — the footage and the review item itself remain until they expire via retention.
 
 ## Selecting and acting on multiple items
 

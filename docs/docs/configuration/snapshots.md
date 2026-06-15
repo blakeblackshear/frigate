@@ -7,13 +7,17 @@ import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
-Frigate can save a snapshot image to `/media/frigate/clips` for each object that is detected named as `<camera>-<id>-clean.webp`. They are also accessible [via the api](../integrations/api/event-snapshot-events-event-id-snapshot-jpg-get.api.mdx)
+A snapshot is a single still image that captures a tracked object at its best moment — the clearest frame Frigate saw while following that object across the scene. Unlike a [recording](./record.md), which is continuous video, a snapshot is one representative image saved per tracked object once tracking ends.
 
-Snapshots are accessible in the UI in the Explore pane. This allows for quick submission to the Frigate+ service.
+When snapshots are enabled, Frigate saves one image to `/media/frigate/clips` for each tracked object, named `<camera>-<id>-clean.webp`. A clean image is always stored without any annotations (no timestamp, bounding boxes, or cropping) so you have an unmodified copy of the original frame. Annotations like bounding boxes and timestamps are applied on demand when a snapshot is requested [via the HTTP API](../integrations/api/event-snapshot-events-event-id-snapshot-jpg-get.api.mdx) — see [Rendering](#rendering) below.
 
-To only save snapshots for objects that enter a specific zone, [see the zone docs](./zones.md#restricting-snapshots-to-specific-zones)
+A few things to keep in mind:
 
-Snapshots sent via MQTT are configured separately under the camera MQTT settings, not here.
+- Snapshots are saved per tracked object, so a camera with no detected objects produces no snapshots even if recording is enabled.
+- Snapshots and recordings are configured and retained independently — enabling one does not enable the other.
+- Snapshots are accessible in the UI in the Explore pane, which allows for quick submission to the Frigate+ service.
+- To only save snapshots for objects that enter a specific zone, [see the zone docs](./zones.md#restricting-snapshots-to-specific-zones).
+- Snapshots sent via MQTT are configured separately under the camera MQTT settings, not here.
 
 ## Enabling Snapshots
 
