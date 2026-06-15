@@ -8,7 +8,7 @@ import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
-### Understanding object detection
+### Supported hardware
 
 Object detection is what allows Frigate to identify _what_ is in your camera's view — people, cars, animals, and more — rather than just reacting to pixel changes. When Frigate's motion detection finds activity in a frame, that region is sent to an **object detector**, which returns the objects it recognizes along with their location and a confidence score. These detections are what drive tracked objects, alerts, detections, and notifications.
 
