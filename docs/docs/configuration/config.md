@@ -9,11 +9,54 @@ import NavPath from "@site/src/components/NavPath";
 
 Frigate can be configured through the **Settings UI** or by editing the YAML configuration file directly. The Settings UI is the recommended approach — it provides validation and a guided experience for all configuration options.
 
-It is recommended to start with a minimal configuration and add to it as described in [the getting started guide](../guides/getting_started.md).
+## Using the Settings UI
+
+The Settings UI groups every configuration option into sections that are listed in the left-hand menu. Each section presents a guided form with validation, so you don't need to remember the structure of the YAML or look up option names by hand.
+
+### Global vs. camera-level configuration
+
+Settings are organized into two scopes:
+
+- **Global configuration** — values under <NavPath path="Settings > Global configuration" /> apply to every camera by default. This is where you set the baseline behavior for object detection, recording, snapshots, motion, and so on.
+- **Camera configuration** — values under <NavPath path="Settings > Camera configuration" /> apply to a single camera. Use the camera selector button at the top of these pages to choose which camera you are editing.
+
+When a camera-level section is left untouched, the camera simply inherits the global values. Changing a value on a camera page **overrides** the global value for that camera only — the global setting and every other camera are unaffected. This mirrors how the YAML works, where a value set under `cameras.<name>` takes precedence over the same value set at the top level.
+
+To undo an override and go back to inheriting from the parent scope, use the reset button at the bottom of the section:
+
+- On a camera section, the button is labeled **Reset to Global** and restores the camera to the global value.
+- On a global section, the button is labeled **Reset to Default** and restores Frigate's built-in default.
+
+Resetting asks for confirmation and cannot be undone once applied.
+
+### Saving changes and the Save All button
+
+Edits are not applied until you save them. As soon as you change a value, the UI tracks it as a pending change:
+
+- The edited section shows a **Modified** badge, and the changed fields are highlighted.
+- A **You have unsaved changes** notice appears above the section's **Save** and **Undo** buttons. **Save** commits just that section; **Undo** discards its pending edits.
+
+Because pending changes can span multiple sections — and multiple cameras — the header provides a **Save All** button that writes every pending change at once. Next to it, **Review pending changes** opens a summary that lists each pending edit with its scope (Global or a specific camera), the affected field, and the new value, so you can confirm exactly what will be written before committing. **Undo All** discards every pending change across all sections.
+
+### Restart-required indicators
+
+Most settings take effect immediately, but some require Frigate to restart before they apply. Fields that require a restart are marked with a small restart icon and a **Restart required** tooltip next to the field label.
+
+When you save a change that touches one of these fields, Frigate confirms the save and reminds you that a restart is needed (for example, _"Settings saved successfully. Restart Frigate to apply your changes."_). The notification includes a one-click **Restart Frigate** action so you can apply the change right away, or you can continue editing and restart later.
+
+### The colored dots in the camera configuration menu
+
+When you are working under <NavPath path="Settings > Camera configuration" />, small colored dots can appear next to a section's name in the menu. They give you an at-a-glance summary of that section's state for the selected camera:
+
+- **Blue dot** — this section **overrides the global configuration**. One or more values in the section have been set specifically for this camera and differ from the global defaults.
+- **Profile-colored dot** — when you are viewing a [camera profile](./profiles.md), a dot in that profile's assigned color indicates the section is **overridden by that profile**. Each profile is given its own distinct color so you can tell at a glance which sections it changes.
+- **Amber dot** — this section has **unsaved changes**. It appears alongside the **Modified** badge whenever you have pending edits in the section that haven't been saved yet.
+
+Hover over any dot to see a tooltip describing what it means. Open a section to see exactly which fields are overridden — the section header indicates how many fields differ from the global (or base) configuration.
 
 ## Configuration File Location
 
-For users who prefer to edit the YAML configuration file directly:
+For users who prefer to edit the YAML configuration file directly, it is recommended to start with a minimal configuration and add to it as described in [the getting started guide](../guides/getting_started.md).
 
 - **Home Assistant App:** `/addon_configs/<addon_directory>/config.yml` — see [directory list](#accessing-app-config-dir)
 - **All other installations:** Map to `/config/config.yml` inside the container

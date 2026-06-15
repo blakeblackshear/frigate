@@ -19,6 +19,12 @@ You can open History from several places:
 
 Use the **Back** button to return where you came from, or the **Live** button to jump to the current camera's live view.
 
+:::tip
+
+If you see **"No recordings found for this time"**, the most common causes are: recording was not enabled for that camera at the time of the event; the retention window has since expired and those segments were removed; or storage ran low and Frigate deleted them early to free space. See [Recording](/configuration/record) to verify your retention settings.
+
+:::
+
 ## Timeline, Events, and Detail
 
 A toggle (a drawer on mobile) switches the side panel between three modes:

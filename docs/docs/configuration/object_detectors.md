@@ -8,10 +8,13 @@ import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
-# Supported Hardware
+### Supported hardware
+
+Object detection is what allows Frigate to identify _what_ is in your camera's view — people, cars, animals, and more — rather than just reacting to pixel changes. When Frigate's motion detection finds activity in a frame, that region is sent to an **object detector**, which returns the objects it recognizes along with their location and a confidence score. These detections are what drive tracked objects, alerts, detections, and notifications.
+
+Object detection is computationally intensive, so Frigate is designed to run it on a dedicated AI accelerator or GPU rather than the CPU. A **detector** is the specific hardware-and-model backend Frigate uses to run inference. Choosing a detector that matches your hardware is one of the most important steps in getting good performance, and the right choice depends on what device Frigate is running on.
 
 :::info
-
 Frigate supports multiple different detectors that work on different types of hardware:
 
 **Most Hardware**
