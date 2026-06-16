@@ -17,7 +17,10 @@ from frigate.const import (
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 from frigate.util.config import find_config_file
-from frigate.util.services import is_restricted_go2rtc_source
+from frigate.util.services import (
+    is_go2rtc_arbitrary_exec_allowed,
+    is_restricted_go2rtc_source,
+)
 
 sys.path.remove("/opt/frigate")
 
@@ -158,6 +161,20 @@ for name in list(go2rtc_config.get("streams", {})):
                 f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
             )
             del go2rtc_config["streams"][name]
+
+    elif isinstance(stream, dict):
+        # The map form ({"url": ...}) lets go2rtc resolve the source
+        # recursively, so it is effectively a dynamic way to generate the URL
+        # for a stream. That can only be backed by an exec source, so it cannot
+        # be allowed unless arbitrary exec is explicitly enabled. When it is
+        # enabled, leave the map untouched for go2rtc to resolve.
+        if not is_go2rtc_arbitrary_exec_allowed():
+            print(
+                f"[ERROR] Stream '{name}' uses a dynamic source format which is disabled by default for security. "
+                f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
+            )
+            del go2rtc_config["streams"][name]
+            continue
 
 # add birdseye restream stream if enabled
 if config.get("birdseye", {}).get("restream", False):

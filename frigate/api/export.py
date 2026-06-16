@@ -91,6 +91,16 @@ def export_recording(
     playback_factor = body.playback
     playback_source = body.source
     friendly_name = body.name
+
+    # sanitize_filepath normalizes "\" to "/" but leaves ".." intact, so a path
+    # like "clips\..\..\etc/passwd" passes the CLIPS_DIR prefix check yet still
+    # escapes the directory once resolved. A valid snapshot path never uses "..".
+    if body.image_path and ".." in body.image_path:
+        return JSONResponse(
+            content=({"success": False, "message": "Invalid image path"}),
+            status_code=400,
+        )
+
     existing_image = sanitize_filepath(body.image_path) if body.image_path else None
 
     # a chapters value in the request body overrides the camera's export config
