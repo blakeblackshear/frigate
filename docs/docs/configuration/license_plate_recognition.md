@@ -363,7 +363,7 @@ An example configuration for a dedicated LPR camera using a `license_plate`-dete
 
 Navigate to <NavPath path="Settings > Enrichments > License plate recognition" /> and set **Enable LPR** to on. Set **Device** to `CPU` (can also be `GPU` if available).
 
-Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and add your camera streams.
+Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> and add your camera streams.
 
 Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
 
@@ -475,7 +475,7 @@ Navigate to <NavPath path="Settings > Camera configuration > License plate recog
 | **Enable LPR**        | Set to on                                                                        |
 | **Enhancement level** | Set to `3` (optional — enhances the image before trying to recognize characters) |
 
-Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and add your camera streams.
+Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> and add your camera streams.
 
 Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
 

@@ -24,7 +24,7 @@ Each role can only be assigned to one input per camera. The options for roles ar
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" />.
 
 | Field             | Description                                                         |
 | ----------------- | ------------------------------------------------------------------- |

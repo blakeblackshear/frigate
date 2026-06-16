@@ -33,7 +33,7 @@ Select the appropriate hwaccel preset for your hardware.
 <TabItem value="ui">
 
 1. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to the appropriate preset for your hardware.
-2. To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and set **Hardware acceleration arguments** for that camera.
+2. To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> and set **Hardware acceleration arguments** for that camera.
 
 </TabItem>
 <TabItem value="yaml">

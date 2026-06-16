@@ -348,7 +348,7 @@ In order to review activity in the Frigate UI, recordings need to be enabled.
 <ConfigTabs>
 <TabItem value="ui">
 
-1. If you have separate streams for detect and record, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />, select your camera, and add a second input with the `record` role pointing to your high-resolution stream
+1. If you have separate streams for detect and record, navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" />, select your camera, and add a second input with the `record` role pointing to your high-resolution stream
 2. Navigate to <NavPath path="Settings > Global configuration > Recording" /> (or <NavPath path="Settings > Camera configuration > Recording" /> for a specific camera) and set **Enable recording** to on
 
 </TabItem>
