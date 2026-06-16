@@ -100,8 +100,8 @@ class CameraConfig(FrigateBaseModel):
         description="Settings for face detection and recognition for this camera.",
     )
     ffmpeg: CameraFfmpegConfig = Field(
-        title="FFmpeg",
-        description="FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
+        title="Streams (FFmpeg)",
+        description="Camera stream inputs and FFmpeg options, including binary path, args, hwaccel, and per-role output args.",
     )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig,

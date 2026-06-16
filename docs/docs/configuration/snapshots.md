@@ -111,7 +111,6 @@ Navigate to <NavPath path="Settings > Global configuration > Snapshots" />.
 | Field                                              | Description                                                                         |
 | -------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | **Snapshot retention > Default retention**         | Number of days to retain snapshots (default: 10)                                    |
-| **Snapshot retention > Retention mode**            | Retention mode: `all`, `motion`, or `active_objects`                                |
 | **Snapshot retention > Object retention > Person** | Per-object overrides for retention days (e.g., keep `person` snapshots for 15 days) |
 
 </TabItem>
@@ -122,7 +121,6 @@ snapshots:
   enabled: True
   retain:
     default: 10
-    mode: motion
     objects:
       person: 15
 ```

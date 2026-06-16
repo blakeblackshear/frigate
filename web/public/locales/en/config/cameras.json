@@ -152,8 +152,8 @@
     }
   },
   "ffmpeg": {
-    "label": "FFmpeg",
-    "description": "FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
+    "label": "Streams (FFmpeg)",
+    "description": "Camera stream inputs and FFmpeg options, including binary path, args, hwaccel, and per-role output args.",
     "path": {
       "label": "FFmpeg path",
       "description": "Path to the FFmpeg binary to use or a version alias (\"7.0\" or \"8.0\")."
@@ -665,10 +665,6 @@
       "default": {
         "label": "Default retention",
         "description": "Default number of days to retain snapshots."
-      },
-      "mode": {
-        "label": "Retention mode",
-        "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
       },
       "objects": {
         "label": "Object retention",

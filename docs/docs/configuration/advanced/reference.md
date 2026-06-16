@@ -655,11 +655,6 @@ snapshots:
   retain:
     # Required: Default retention days (default: shown below)
     default: 10
-    # Optional: Mode for retention. (default: shown below)
-    #   all - save all snapshots regardless of activity
-    #   motion - save snapshots for any detected motion
-    #   active_objects - save snapshots for active/moving objects
-    mode: motion
     # Optional: Per object retention days
     objects:
       person: 15

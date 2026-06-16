@@ -1176,10 +1176,6 @@
         "label": "Default retention",
         "description": "Default number of days to retain snapshots."
       },
-      "mode": {
-        "label": "Retention mode",
-        "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
-      },
       "objects": {
         "label": "Object retention",
         "description": "Per-object overrides for snapshot retention days."
