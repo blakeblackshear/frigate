@@ -1553,7 +1553,17 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "Stream {{index}}"
+      "itemTitle": "Stream {{index}}",
+      "sourceMode": {
+        "restream": "Restream (go2rtc)",
+        "manual": "Manual input path",
+        "go2rtcStreamLabel": "go2rtc stream",
+        "go2rtcStreamPlaceholder": "Select a go2rtc stream",
+        "noGo2rtcStreams": "No go2rtc streams configured",
+        "go2rtcStreamSearch": "Search streams...",
+        "availableStreams": "Available streams",
+        "noMatchingStreams": "No matching streams"
+      }
     },
     "restartRequiredField": "Restart required",
     "restartRequiredFooter": "Configuration changed - Restart required",
