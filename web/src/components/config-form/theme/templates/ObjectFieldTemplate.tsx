@@ -156,7 +156,8 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   };
 
   const hasModifiedDescendants = checkSubtreeModified(fieldPath);
-  const [isOpen, setIsOpen] = useState(hasModifiedDescendants);
+  const defaultOpen = uiSchema?.["ui:options"]?.defaultOpen === true;
+  const [isOpen, setIsOpen] = useState(hasModifiedDescendants || defaultOpen);
   const resetKey = `${formContext?.level ?? "global"}::${
     formContext?.cameraName ?? "global"
   }`;
@@ -192,6 +193,8 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     (uiSchema?.["ui:groups"] as Record<string, string[]> | undefined) || {};
   const disableNestedCard =
     uiSchema?.["ui:options"]?.disableNestedCard === true;
+  const disableCollapsible =
+    uiSchema?.["ui:options"]?.disableCollapsible === true;
 
   const isHiddenProp = (prop: (typeof properties)[number]) =>
     (prop.content.props as RjsfElementProps).uiSchema?.["ui:widget"] ===
@@ -228,10 +231,10 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   useEffect(() => {
     if (lastResetKeyRef.current !== resetKey) {
       lastResetKeyRef.current = resetKey;
-      setIsOpen(hasModifiedDescendants);
+      setIsOpen(hasModifiedDescendants || defaultOpen);
       setShowAdvanced(hasModifiedAdvanced);
     }
-  }, [resetKey, hasModifiedDescendants, hasModifiedAdvanced]);
+  }, [resetKey, hasModifiedDescendants, hasModifiedAdvanced, defaultOpen]);
   const { children } = props as ObjectFieldTemplateProps & {
     children?: ReactNode;
   };
@@ -458,6 +461,75 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     );
   }
 
+  // Label/description/docs header shared by the collapsible and static layouts.
+  const cardHeaderContent = (
+    <div className="min-w-0 pr-3">
+      <CardTitle
+        className={cn(
+          "flex items-center text-sm",
+          hasModifiedDescendants && "text-unsaved",
+        )}
+      >
+        {inferredLabel}
+        {objectRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
+      </CardTitle>
+      {inferredDescription && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          {inferredDescription}
+        </p>
+      )}
+      {fieldDocsUrl && (
+        <div className="mt-1 flex items-center text-xs text-primary-variant">
+          <Link
+            to={fieldDocsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {t("readTheDocumentation", { ns: "common" })}
+            <LuExternalLink className="ml-2 inline-flex size-3" />
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+
+  // Body shared by the collapsible and static layouts.
+  const cardBody = hasCustomChildren ? (
+    children
+  ) : (
+    <>
+      {renderGroupedFields(regularProps)}
+      <AddPropertyButton
+        onAddProperty={onAddProperty}
+        schema={schema}
+        uiSchema={uiSchema}
+        formData={formData}
+        disabled={disabled}
+        readonly={readonly}
+      />
+
+      <AdvancedCollapsible
+        count={advancedProps.length}
+        open={showAdvanced}
+        onOpenChange={setShowAdvanced}
+      >
+        {renderGroupedFields(advancedProps)}
+      </AdvancedCollapsible>
+    </>
+  );
+
+  // Static (non-collapsible) card: keep the labeled header, always show content.
+  if (disableCollapsible) {
+    return (
+      <Card className="w-full">
+        <CardHeader className="p-4">{cardHeaderContent}</CardHeader>
+        <CardContent className="space-y-6 p-4 pt-0">{cardBody}</CardContent>
+      </Card>
+    );
+  }
+
   // Nested objects render as collapsible cards
   return (
     <Card className="w-full">
@@ -465,38 +537,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer p-4 transition-colors hover:bg-muted/50">
             <div className="flex items-center justify-between">
-              <div className="min-w-0 pr-3">
-                <CardTitle
-                  className={cn(
-                    "flex items-center text-sm",
-                    hasModifiedDescendants && "text-unsaved",
-                  )}
-                >
-                  {inferredLabel}
-                  {objectRequiresRestart && (
-                    <RestartRequiredIndicator className="ml-2" />
-                  )}
-                </CardTitle>
-                {inferredDescription && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {inferredDescription}
-                  </p>
-                )}
-                {fieldDocsUrl && (
-                  <div className="mt-1 flex items-center text-xs text-primary-variant">
-                    <Link
-                      to={fieldDocsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {t("readTheDocumentation", { ns: "common" })}
-                      <LuExternalLink className="ml-2 inline-flex size-3" />
-                    </Link>
-                  </div>
-                )}
-              </div>
+              {cardHeaderContent}
               {isOpen ? (
                 <LuChevronDown className="h-4 w-4 shrink-0" />
               ) : (
@@ -506,31 +547,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-6 p-4 pt-0">
-            {hasCustomChildren ? (
-              children
-            ) : (
-              <>
-                {renderGroupedFields(regularProps)}
-                <AddPropertyButton
-                  onAddProperty={onAddProperty}
-                  schema={schema}
-                  uiSchema={uiSchema}
-                  formData={formData}
-                  disabled={disabled}
-                  readonly={readonly}
-                />
-
-                <AdvancedCollapsible
-                  count={advancedProps.length}
-                  open={showAdvanced}
-                  onOpenChange={setShowAdvanced}
-                >
-                  {renderGroupedFields(advancedProps)}
-                </AdvancedCollapsible>
-              </>
-            )}
-          </CardContent>
+          <CardContent className="space-y-6 p-4 pt-0">{cardBody}</CardContent>
         </CollapsibleContent>
       </Collapsible>
     </Card>
