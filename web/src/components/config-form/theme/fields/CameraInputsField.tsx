@@ -29,11 +29,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { StreamSourceSelector } from "./StreamSourceSelector";
+import {
+  buildRestreamPath,
+  parseRestreamStreamName,
+  RESTREAM_PRESET,
+  type StreamSourceMode,
+} from "./streamSource";
 
 type FfmpegInput = {
   path?: string;
   roles?: string[];
   hwaccel_args?: unknown;
+  input_args?: unknown;
 };
 
 const asInputList = (formData: unknown): FfmpegInput[] => {
@@ -137,7 +145,30 @@ export function CameraInputsField(props: FieldProps) {
   );
   const SchemaField = registry.fields.SchemaField;
 
+  const go2rtcStreamNames = useMemo<string[]>(() => {
+    const streams = formContext?.fullConfig?.go2rtc?.streams;
+    if (!streams || typeof streams !== "object") {
+      return [];
+    }
+    return Object.keys(streams).sort();
+  }, [formContext?.fullConfig?.go2rtc?.streams]);
+
   const [openByIndex, setOpenByIndex] = useState<Record<number, boolean>>({});
+  const [sourceModeByIndex, setSourceModeByIndex] = useState<
+    Record<number, StreamSourceMode>
+  >({});
+
+  // Detect whether an existing input path points at a known go2rtc restream so
+  // the source toggle can default to the right mode for existing configs.
+  const detectMode = useCallback(
+    (path: string | undefined): StreamSourceMode => {
+      const streamName = parseRestreamStreamName(path);
+      return streamName && go2rtcStreamNames.includes(streamName)
+        ? "restream"
+        : "manual";
+    },
+    [go2rtcStreamNames],
+  );
 
   useEffect(() => {
     setOpenByIndex((previous) => {
@@ -171,6 +202,55 @@ export function CameraInputsField(props: FieldProps) {
     [fieldPathId.path, inputs, onChange],
   );
 
+  // Update several fields of one input in a single change so that path and
+  // input_args never race on a stale snapshot of inputs.
+  const handleFieldValuesChange = useCallback(
+    (index: number, partial: Record<string, unknown>) => {
+      const nextInputs = cloneDeep(inputs);
+      const item =
+        (nextInputs[index] as Record<string, unknown> | undefined) ??
+        ({} as Record<string, unknown>);
+
+      Object.assign(item, partial);
+      nextInputs[index] = item;
+
+      onChange(normalizeNonDetectHwaccel(nextInputs), fieldPathId.path);
+    },
+    [fieldPathId.path, inputs, onChange],
+  );
+
+  const handleSourceModeChange = useCallback(
+    (index: number, nextMode: StreamSourceMode) => {
+      const input = inputs[index];
+      const currentPath =
+        typeof input?.path === "string" ? input.path : undefined;
+
+      if (nextMode === "manual") {
+        // Only revert the preset we set ourselves; never clobber custom args.
+        if (input?.input_args === RESTREAM_PRESET) {
+          handleFieldValuesChange(index, { input_args: undefined });
+        }
+      } else if (!parseRestreamStreamName(currentPath)) {
+        // Entering restream with a non-restream path: clear it so the dropdown
+        // shows its placeholder until a stream is chosen.
+        handleFieldValuesChange(index, { path: undefined });
+      }
+
+      setSourceModeByIndex((previous) => ({ ...previous, [index]: nextMode }));
+    },
+    [inputs, handleFieldValuesChange],
+  );
+
+  const handleSelectRestreamStream = useCallback(
+    (index: number, streamName: string) => {
+      handleFieldValuesChange(index, {
+        path: buildRestreamPath(streamName),
+        input_args: RESTREAM_PRESET,
+      });
+    },
+    [handleFieldValuesChange],
+  );
+
   const handleAddInput = useCallback(() => {
     const base = itemSchema
       ? (applySchemaDefaults(itemSchema) as FfmpegInput)
@@ -186,8 +266,9 @@ export function CameraInputsField(props: FieldProps) {
         (_, currentIndex) => currentIndex !== index,
       );
       onChange(nextInputs, fieldPathId.path);
-      setOpenByIndex((previous) => {
-        const next: Record<number, boolean> = {};
+
+      const reindex = <T,>(previous: Record<number, T>): Record<number, T> => {
+        const next: Record<number, T> = {};
         Object.entries(previous).forEach(([key, value]) => {
           const current = Number(key);
           if (Number.isNaN(current) || current === index) {
@@ -197,7 +278,10 @@ export function CameraInputsField(props: FieldProps) {
           next[current > index ? current - 1 : current] = value;
         });
         return next;
-      });
+      };
+
+      setOpenByIndex(reindex);
+      setSourceModeByIndex(reindex);
     },
     [fieldPathId.path, inputs, onChange],
   );
@@ -354,16 +438,32 @@ export function CameraInputsField(props: FieldProps) {
               <CollapsibleContent>
                 <CardContent className="space-y-4 p-4 pt-0">
                   <div className="w-full">
-                    {renderField(index, "path", {
-                      extraUiSchema: {
-                        "ui:widget": "CameraPathWidget",
-                        "ui:options": {
-                          size: "full",
-                          splitLayout: false,
+                    <StreamSourceSelector
+                      idPrefix={`${baseId}-${index}`}
+                      mode={sourceModeByIndex[index] ?? detectMode(input.path)}
+                      onModeChange={(nextMode) =>
+                        handleSourceModeChange(index, nextMode)
+                      }
+                      streamNames={go2rtcStreamNames}
+                      selectedStreamName={
+                        parseRestreamStreamName(input.path) ?? ""
+                      }
+                      onSelectStream={(streamName) =>
+                        handleSelectRestreamStream(index, streamName)
+                      }
+                      manualField={renderField(index, "path", {
+                        extraUiSchema: {
+                          "ui:widget": "CameraPathWidget",
+                          "ui:options": {
+                            size: "full",
+                            splitLayout: false,
+                          },
                         },
-                      },
-                      showSchemaDescription: true,
-                    })}
+                        showSchemaDescription: true,
+                      })}
+                      disabled={disabled}
+                      readonly={readonly}
+                    />
                   </div>
 
                   <div className="w-full">{renderField(index, "roles")}</div>
