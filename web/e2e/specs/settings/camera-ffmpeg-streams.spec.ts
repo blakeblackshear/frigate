@@ -134,7 +134,7 @@ test.describe("camera ffmpeg input source toggle @medium", () => {
 
     // The dropdown is searchable: typing narrows the list to matches only,
     // with no option to enter a custom stream name.
-    await frigateApp.page.getByPlaceholder("Search streams…").fill("sub");
+    await frigateApp.page.getByPlaceholder("Search streams...").fill("sub");
     await expect(
       frigateApp.page.getByRole("option", { name: "dome_main" }),
     ).toBeHidden();
