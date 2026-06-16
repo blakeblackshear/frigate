@@ -85,7 +85,7 @@
     "integrationObjectClassification": "Object classification",
     "integrationAudioTranscription": "Audio transcription",
     "cameraDetect": "Object detection",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "Streams (FFmpeg)",
     "cameraRecording": "Recording",
     "cameraSnapshots": "Snapshots",
     "cameraMotion": "Motion detection",
