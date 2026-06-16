@@ -54,7 +54,7 @@ The ffmpeg process for capturing audio will be a separate connection to the came
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> and add an input with the `audio` role pointing to a stream that includes audio.
+Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> and add an input with the `audio` role pointing to a stream that includes audio.
 
 </TabItem>
 <TabItem value="yaml">

@@ -61,7 +61,7 @@ Configure the go2rtc stream and point the camera inputs at the local restream.
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > go2rtc streams" /> and add stream entries for each camera. Then navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> for each camera and set the input paths to use the local restream URL (`rtsp://127.0.0.1:8554/<camera_name>`).
+Navigate to <NavPath path="Settings > System > go2rtc streams" /> and add stream entries for each camera. Then navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> for each camera and set the input paths to use the local restream URL (`rtsp://127.0.0.1:8554/<camera_name>`).
 
 </TabItem>
 <TabItem value="yaml">
@@ -111,7 +111,7 @@ Two connections are made to the camera. One for the sub stream, one for the rest
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > go2rtc streams" /> and add stream entries for each camera and its sub stream. Then navigate to <NavPath path="Settings > Camera configuration > FFmpeg" /> for each camera and configure separate inputs for the main and sub streams using the local restream URLs.
+Navigate to <NavPath path="Settings > System > go2rtc streams" /> and add stream entries for each camera and its sub stream. Then navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> for each camera and configure separate inputs for the main and sub streams using the local restream URLs.
 
 </TabItem>
 <TabItem value="yaml">
