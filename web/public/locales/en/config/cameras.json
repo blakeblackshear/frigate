@@ -152,8 +152,8 @@
     }
   },
   "ffmpeg": {
-    "label": "FFmpeg",
-    "description": "FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
+    "label": "Streams (FFmpeg)",
+    "description": "Camera stream inputs and FFmpeg options, including binary path, args, hwaccel, and per-role output args.",
     "path": {
       "label": "FFmpeg path",
       "description": "Path to the FFmpeg binary to use or a version alias (\"7.0\" or \"8.0\")."
