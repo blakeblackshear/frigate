@@ -36,11 +36,6 @@ const snapshots: SectionConfigOverrides = {
           suppressMultiSchema: true,
         },
       },
-      "retain.mode": {
-        "ui:options": {
-          enumI18nPrefix: "retainMode",
-        },
-      },
     },
   },
   global: {
