@@ -34,6 +34,8 @@ import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import type { ConfigSectionData, JsonObject } from "@/types/configForm";
+import isEqual from "lodash/isEqual";
+import { maskCredentials } from "@/utils/credentialMask";
 import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
@@ -660,6 +662,11 @@ export default function Settings() {
 
   const isAdmin = useIsAdmin();
 
+  // for unmasked go2rtc stream sources
+  const { data: rawPaths } = useSWR<{
+    go2rtc: { streams: Record<string, string | string[]> };
+  }>(isAdmin ? "config/raw_paths" : null);
+
   const visibleSettingsViews = !isAdmin
     ? ALLOWED_VIEWS_FOR_VIEWER
     : allSettingsViews;
@@ -788,6 +795,40 @@ export default function Settings() {
       },
     );
 
+    // go2rtc streams aren't schema-backed, so build their preview items directly
+    if ("go2rtc_streams" in pendingDataBySection) {
+      const live =
+        (pendingDataBySection["go2rtc_streams"] as Record<string, string[]>) ??
+        {};
+      const saved: Record<string, string[]> = {};
+      for (const [name, urls] of Object.entries(
+        rawPaths?.go2rtc?.streams ?? {},
+      )) {
+        saved[name] = Array.isArray(urls) ? urls : [urls];
+      }
+
+      // Added or changed streams
+      for (const [name, urls] of Object.entries(live)) {
+        if (name in saved && isEqual(urls, saved[name])) continue;
+        const masked = urls.map((url) => maskCredentials(url));
+        items.push({
+          scope: "global",
+          fieldPath: `go2rtc.streams.${name}`,
+          value: masked.length === 1 ? masked[0] : masked,
+        });
+      }
+
+      // Deleted streams (present in saved config, absent from pending)
+      for (const name of Object.keys(saved)) {
+        if (name in live) continue;
+        items.push({
+          scope: "global",
+          fieldPath: `go2rtc.streams.${name}`,
+          value: "",
+        });
+      }
+    }
+
     return items.sort((left, right) => {
       const scopeCompare = left.scope.localeCompare(right.scope);
       if (scopeCompare !== 0) return scopeCompare;
@@ -797,7 +838,13 @@ export default function Settings() {
       if (cameraCompare !== 0) return cameraCompare;
       return left.fieldPath.localeCompare(right.fieldPath);
     });
-  }, [config, fullSchema, pendingDataBySection, profileFriendlyNames]);
+  }, [
+    config,
+    fullSchema,
+    pendingDataBySection,
+    profileFriendlyNames,
+    rawPaths,
+  ]);
 
   // Map a pendingDataKey to SettingsType menu key for clearing section status
   const pendingKeyToMenuKey = useCallback(
@@ -869,10 +916,7 @@ export default function Settings() {
     // after `mutate("config")` resolves
     const keysToClear: string[] = [];
 
-    // `detectors` and `model` are owned by DetectorsAndModelSettingsView,
-    // which saves them atomically (single combined PUT with a pre-clear when
-    // detector keys change or the Plus/Custom tab flips). Doing the same here
-    // keeps Save All consistent with the page's own Save button
+    // `detectors` and `model` are owned by DetectorsAndModelSettingsView
     const hasPendingDetectors = "detectors" in pendingDataBySection;
     const hasPendingModel = "model" in pendingDataBySection;
     if (hasPendingDetectors || hasPendingModel) {
@@ -975,8 +1019,58 @@ export default function Settings() {
       }
     }
 
+    // go2rtc streams are owned by Go2RtcStreamsSettingsView
+    if ("go2rtc_streams" in pendingDataBySection) {
+      try {
+        const liveStreams =
+          (pendingDataBySection["go2rtc_streams"] as Record<
+            string,
+            string[]
+          >) ?? {};
+        const streamsPayload: Record<string, string[] | string> = {
+          ...liveStreams,
+        };
+        const deletedStreamNames = Object.keys(
+          config.go2rtc?.streams ?? {},
+        ).filter((name) => !(name in liveStreams));
+        for (const deleted of deletedStreamNames) {
+          streamsPayload[deleted] = "";
+        }
+
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: { go2rtc: { streams: streamsPayload } },
+        });
+
+        // Update the running go2rtc instance to match
+        const go2rtcUpdates: Promise<unknown>[] = [];
+        for (const [streamName, urls] of Object.entries(liveStreams)) {
+          if (urls[0]) {
+            go2rtcUpdates.push(
+              axios.put(
+                `go2rtc/streams/${streamName}?src=${encodeURIComponent(urls[0])}`,
+              ),
+            );
+          }
+        }
+        for (const deleted of deletedStreamNames) {
+          go2rtcUpdates.push(axios.delete(`go2rtc/streams/${deleted}`));
+        }
+        await Promise.allSettled(go2rtcUpdates);
+
+        keysToClear.push("go2rtc_streams");
+        savedKeys.push("go2rtc_streams");
+        successCount++;
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Save All – error saving go2rtc streams", error);
+        failCount++;
+      }
+    }
+
     const pendingKeys = Object.keys(pendingDataBySection).filter(
-      (key) => key !== "detectors" && key !== "model",
+      (key) =>
+        key !== "detectors" && key !== "model" && key !== "go2rtc_streams",
     );
 
     for (const key of pendingKeys) {
