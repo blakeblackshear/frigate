@@ -12,6 +12,7 @@ __all__ = ["GenAIConfig", "GenAIProviderEnum", "GenAIRoleEnum"]
 class GenAIProviderEnum(str, Enum):
     openai = "openai"
     azure_openai = "azure_openai"
+    atlas = "atlas"
     gemini = "gemini"
     ollama = "ollama"
     llamacpp = "llamacpp"

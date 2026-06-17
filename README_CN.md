@@ -12,6 +12,43 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+---
+
+<p align="center">
+  <a href="https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=frigate">
+    <img src="docs/static/img/branding/atlas-cloud-logo.png" alt="Atlas Cloud" width="200">
+  </a>
+</p>
+
+<p align="center">
+  <b><a href="https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=frigate">Atlas Cloud</a></b> 是一个兼容 OpenAI 接口的推理平台，可作为即插即用的多模态 LLM 后端，
+  为 Frigate 的<a href="https://docs.frigate.video/configuration/genai/">生成式 AI（Generative AI）</a>功能提供算力支持。
+  只需将 <code>atlas</code> provider 指向 Atlas Cloud，并选用一个支持视觉的模型
+  （例如 <code>qwen/qwen3-vl-235b-a22b-thinking</code> 或 <code>Qwen/Qwen3-VL-235B-A22B-Instruct</code>），
+  即可基于检测帧画面生成自然语言的物体描述与审查摘要，无需本地 GPU。
+  请参阅 <a href="https://docs.frigate.video/configuration/genai/">GenAI 配置文档</a>开始使用，
+  或了解 <a href="https://www.atlascloud.ai/console/coding-plan">coding plan</a>。
+</p>
+
+<details>
+<summary>适合做 GenAI 描述的 Atlas Cloud 多模态模型</summary>
+
+Frigate 的 GenAI 功能要求使用**支持视觉**的模型。Atlas Cloud 上推荐的多模态模型包括：
+
+- `qwen/qwen3-vl-235b-a22b-thinking`
+- `Qwen/Qwen3-VL-235B-A22B-Instruct`
+- `qwen/qwen3-vl-30b-a3b-instruct`
+- `qwen/qwen3-vl-30b-a3b-thinking`
+- `qwen/qwen3-vl-8b-instruct`
+- `google/gemini-3.5-flash`
+- `google/gemini-3.1-pro-preview`
+
+完整且实时更新的模型列表请见 [Atlas Cloud 控制台](https://www.atlascloud.ai/console)。
+
+</details>
+
+---
+
 一个完整的本地网络视频录像机（NVR），专为[Home Assistant](https://www.home-assistant.io)设计，具备 AI 目标/物体检测功能。使用 OpenCV 和 TensorFlow 在本地为 IP 摄像头执行实时物体检测。
 
 强烈推荐使用 GPU 或者 AI 加速器（例如[Google Coral 加速器](https://coral.ai/products/) 或者 [Hailo](https://hailo.ai/)等）。它们的运行效率远远高于现在的顶级 CPU，并且功耗也极低。

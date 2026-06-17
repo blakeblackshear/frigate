@@ -12,6 +12,44 @@
 
 \[English\] | [简体中文](https://github.com/blakeblackshear/frigate/blob/dev/README_CN.md)
 
+---
+
+<p align="center">
+  <a href="https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=frigate">
+    <img src="docs/static/img/branding/atlas-cloud-logo.png" alt="Atlas Cloud" width="200">
+  </a>
+</p>
+
+<p align="center">
+  <b><a href="https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=frigate">Atlas Cloud</a></b> is an OpenAI-compatible inference platform that can power Frigate's
+  <a href="https://docs.frigate.video/configuration/genai/">Generative AI</a> features as a drop-in multimodal LLM backend.
+  Point the <code>atlas</code> provider at Atlas Cloud and use a vision-capable model
+  (such as <code>qwen/qwen3-vl-235b-a22b-thinking</code> or <code>Qwen/Qwen3-VL-235B-A22B-Instruct</code>)
+  to generate natural-language object and review descriptions from detection frames —
+  no local GPU required. See the <a href="https://docs.frigate.video/configuration/genai/">GenAI configuration docs</a>
+  to get started, or grab a <a href="https://www.atlascloud.ai/console/coding-plan">coding plan</a>.
+</p>
+
+<details>
+<summary>Vision-capable Atlas Cloud models for GenAI descriptions</summary>
+
+Frigate's GenAI features require a **vision-capable** model. Good multimodal choices on Atlas Cloud include:
+
+- `qwen/qwen3-vl-235b-a22b-thinking`
+- `Qwen/Qwen3-VL-235B-A22B-Instruct`
+- `qwen/qwen3-vl-30b-a3b-instruct`
+- `qwen/qwen3-vl-30b-a3b-thinking`
+- `qwen/qwen3-vl-8b-instruct`
+- `google/gemini-3.5-flash`
+- `google/gemini-3.1-pro-preview`
+
+The full, always-current model catalog is available at the
+[Atlas Cloud console](https://www.atlascloud.ai/console).
+
+</details>
+
+---
+
 A complete and local NVR designed for [Home Assistant](https://www.home-assistant.io) with AI object detection. Uses OpenCV and Tensorflow to perform realtime object detection locally for IP cameras.
 
 Use of a GPU or AI accelerator is highly recommended. AI accelerators will outperform even the best CPUs with very little overhead. See Frigate's supported [object detectors](https://docs.frigate.video/configuration/object_detectors/).
