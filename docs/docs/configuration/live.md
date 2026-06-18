@@ -432,3 +432,5 @@ When your browser runs into problems playing back your camera streams, it will l
              roles:
                - detect
    ```
+
+   The same applies to your `record` stream: if its aspect ratio differs from your `detect` stream, your recordings will appear in a different shape than the live view. For consistent framing across live view and recordings, use the same aspect ratio for all of a camera's streams (the resolution can still differ).
