@@ -29,8 +29,8 @@ function getZoneDisplayName(zoneName: string, context?: FormContext): string {
       }
     }
   }
-  // Fallback to cleaning up the zone name
-  return String(zoneName).replace(/_/g, " ");
+  // Fallback to the raw zone id verbatim (no friendly_name available)
+  return String(zoneName);
 }
 
 export function ZoneSwitchesWidget(props: WidgetProps) {

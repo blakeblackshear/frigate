@@ -1197,14 +1197,7 @@ function LifecycleIconRow({
                           backgroundColor: `rgb(${color})`,
                         }}
                       />
-                      <span
-                        className={cn(
-                          item.data?.zones_friendly_names?.[zidx] === zone &&
-                            "smart-capitalize",
-                        )}
-                      >
-                        {item.data?.zones_friendly_names?.[zidx]}
-                      </span>
+                      <span>{item.data?.zones_friendly_names?.[zidx]}</span>
                     </Badge>
                   );
                 })}
