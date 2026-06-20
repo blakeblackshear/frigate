@@ -3,6 +3,21 @@ import unittest
 from frigate.track.tracked_object import TrackedObjectAttribute
 
 
+class TestAttributeSlots(unittest.TestCase):
+    def test_attribute_uses_slots(self) -> None:
+        attribute = TrackedObjectAttribute(
+            ("amazon", 0.8, (847, 242, 883, 255), 468, 2.77, (702, 134, 1050, 482))
+        )
+        # __slots__ means no per-instance __dict__
+        self.assertFalse(hasattr(attribute, "__dict__"))
+        # all declared fields are still populated and readable
+        self.assertEqual(attribute.label, "amazon")
+        self.assertEqual(attribute.region, (702, 134, 1050, 482))
+        # setting an undeclared attribute must raise (catches accidental drift)
+        with self.assertRaises(AttributeError):
+            attribute.unexpected = 1
+
+
 class TestAttribute(unittest.TestCase):
     def test_overlapping_object_selection(self) -> None:
         attribute = TrackedObjectAttribute(

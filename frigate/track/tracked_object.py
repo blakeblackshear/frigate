@@ -574,6 +574,8 @@ def zone_filtered(obj: TrackedObject, object_config: dict[str, FilterConfig]) ->
 
 
 class TrackedObjectAttribute:
+    __slots__ = ("label", "score", "box", "area", "ratio", "region")
+
     def __init__(self, raw_data: tuple) -> None:
         self.label = raw_data[0]
         self.score = raw_data[1]
