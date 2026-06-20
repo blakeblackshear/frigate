@@ -401,13 +401,13 @@ def get_cluster_candidates(frame_shape, min_region, boxes):
     # determined by the max_region size minus half the box + 20%
     # TODO: see if we can do this with numpy
     cluster_candidates = []
-    used_boxes = []
+    used_boxes = set()
     # loop over each box
     for current_index, b in enumerate(boxes):
         if current_index in used_boxes:
             continue
         cluster = [current_index]
-        used_boxes.append(current_index)
+        used_boxes.add(current_index)
         cluster_boundary = get_cluster_boundary(b, min_region)
         # find all other boxes that fit inside the boundary
         for compare_index, compare_box in enumerate(boxes):
@@ -436,7 +436,7 @@ def get_cluster_candidates(frame_shape, min_region, boxes):
 
             if should_cluster:
                 cluster.append(compare_index)
-                used_boxes.append(compare_index)
+                used_boxes.add(compare_index)
         cluster_candidates.append(cluster)
 
     # return the unique clusters only
@@ -558,6 +558,7 @@ def reduce_detections(
                 current_detection = sorted_by_area[current_detection_idx]
                 current_label = current_detection[0]
                 current_box = current_detection[2]
+                current_area = area(current_box)
                 overlap = 0
                 for to_check_idx in range(
                     min(current_detection_idx + 1, len(sorted_by_area)),
@@ -568,14 +569,14 @@ def reduce_detections(
                     # if area of current detection / area of check < 5% they should not be compared
                     # this covers cases where a large car parked in a driveway doesn't block detections
                     # of cars in the street behind it
-                    if area(current_box) / area(to_check) < 0.05:
+                    if current_area / area(to_check) < 0.05:
                         continue
 
                     intersect_box = intersection(current_box, to_check)
                     # if % of smaller detection is inside of another detection, consolidate
-                    if intersect_box is not None and area(intersect_box) / area(
-                        current_box
-                    ) > LABEL_CONSOLIDATION_MAP.get(
+                    if intersect_box is not None and area(
+                        intersect_box
+                    ) / current_area > LABEL_CONSOLIDATION_MAP.get(
                         current_label, LABEL_CONSOLIDATION_DEFAULT
                     ):
                         overlap = 1
