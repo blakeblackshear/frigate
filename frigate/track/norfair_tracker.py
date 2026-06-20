@@ -641,9 +641,11 @@ class NorfairTracker(ObjectTracker):
             self.deregister(self.track_id_map[e_id], e_id)
 
         # update list of object boxes that don't have a tracked object yet
-        tracked_object_boxes = [obj["box"] for obj in self.tracked_objects.values()]
+        tracked_object_boxes = {
+            tuple(obj["box"]) for obj in self.tracked_objects.values()
+        }
         self.untracked_object_boxes = [
-            o[2] for o in detections if o[2] not in tracked_object_boxes
+            o[2] for o in detections if tuple(o[2]) not in tracked_object_boxes
         ]
 
     def print_objects_as_table(self, tracked_objects: Sequence) -> None:
