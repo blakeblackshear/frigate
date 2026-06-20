@@ -27,7 +27,11 @@ from frigate.util.image import (
     get_histogram,
     intersection_over_union,
 )
-from frigate.util.object import average_boxes, median_of_boxes
+from frigate.util.object import (
+    average_boxes,
+    interpolated_percentile,
+    median_of_boxes,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -428,10 +432,10 @@ class NorfairTracker(ObjectTracker):
             position["xmaxs"].append(xmax)
             position["ymaxs"].append(ymax)
             # by using percentiles here, we hopefully remove outliers
-            position["xmin"] = np.percentile(position["xmins"], 15)
-            position["ymin"] = np.percentile(position["ymins"], 15)
-            position["xmax"] = np.percentile(position["xmaxs"], 85)
-            position["ymax"] = np.percentile(position["ymaxs"], 85)
+            position["xmin"] = interpolated_percentile(position["xmins"], 15)
+            position["ymin"] = interpolated_percentile(position["ymins"], 15)
+            position["xmax"] = interpolated_percentile(position["xmaxs"], 85)
+            position["ymax"] = interpolated_percentile(position["ymaxs"], 85)
 
         return True
 

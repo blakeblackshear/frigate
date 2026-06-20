@@ -339,24 +339,38 @@ def reduce_boxes(boxes, iou_threshold=0.0):
 
 def average_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, int]:
     """Return a box that is the average of a list of boxes."""
-    x_mins = []
-    y_mins = []
-    x_max = []
-    y_max = []
-
-    for box in boxes:
-        x_mins.append(box[0])
-        y_mins.append(box[1])
-        x_max.append(box[2])
-        y_max.append(box[3])
-
-    return [np.mean(x_mins), np.mean(y_mins), np.mean(x_max), np.mean(y_max)]
+    n = len(boxes)
+    return [
+        sum(box[0] for box in boxes) / n,
+        sum(box[1] for box in boxes) / n,
+        sum(box[2] for box in boxes) / n,
+        sum(box[3] for box in boxes) / n,
+    ]
 
 
 def median_of_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, int]:
     """Return a box that is the median of a list of boxes."""
     sorted_boxes = sorted(boxes, key=lambda x: area(x))
     return sorted_boxes[int(len(sorted_boxes) / 2.0)]
+
+
+def interpolated_percentile(values: list[int], q: float) -> float:
+    """Linear-interpolated percentile, matching numpy.percentile for the small
+    lists used in position smoothing without the per-call numpy overhead."""
+    ordered = sorted(values)
+    n = len(ordered)
+    if n == 1:
+        return float(ordered[0])
+    rank = (q / 100.0) * (n - 1)
+    lo = int(rank)
+    frac = rank - lo
+    if frac == 0.0:
+        return float(ordered[lo])
+    diff = ordered[lo + 1] - ordered[lo]
+    # numpy's lerp switches sides at frac >= 0.5 to limit rounding error
+    if frac < 0.5:
+        return ordered[lo] + diff * frac
+    return ordered[lo + 1] - diff * (1.0 - frac)
 
 
 def intersects_any(box_a, boxes):
