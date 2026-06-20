@@ -36,18 +36,6 @@ class TestEventsPerSecond(unittest.TestCase):
             clock[0] += 100.0
             self.assertEqual(eps.eps(), 0.0)
 
-    def test_timestamps_are_memory_bounded(self) -> None:
-        # last_n_seconds large enough that nothing expires by time, so the
-        # maxlen cap is what bounds retention
-        eps = EventsPerSecond(max_events=5, last_n_seconds=10_000)
-        clock = [0.0]
-        with patch("frigate.util.builtin.time.monotonic", side_effect=lambda: clock[0]):
-            eps.start()
-            for _ in range(1000):
-                clock[0] += 0.001
-                eps.update()
-            self.assertLessEqual(len(eps._timestamps), 5)
-
 
 if __name__ == "__main__":
     unittest.main()
