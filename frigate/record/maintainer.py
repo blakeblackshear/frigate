@@ -42,6 +42,8 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
+STALE_RECORDINGS_INFO_TTL = MAX_SEGMENTS_IN_CACHE * MAX_SEGMENT_DURATION * 2
+
 
 class SegmentInfo:
     def __init__(
@@ -301,6 +303,8 @@ class RecordingMaintainer(threading.Thread):
                 RecordingsDataTypeEnum.saved.value,
             )
 
+        self._expire_stale_recordings_info(grouped_recordings)
+
         recordings_to_insert: list[Optional[dict[str, Any]]] = await asyncio.gather(
             *tasks
         )
@@ -310,6 +314,21 @@ class RecordingMaintainer(threading.Thread):
             INSERT_MANY_RECORDINGS,
             [r for r in recordings_to_insert if r is not None],
         )
+
+    def _expire_stale_recordings_info(
+        self, grouped_recordings: defaultdict[str, list[dict[str, Any]]]
+    ) -> None:
+        expire_before = datetime.datetime.now().timestamp() - STALE_RECORDINGS_INFO_TTL
+        for recordings_info in (
+            self.object_recordings_info,
+            self.audio_recordings_info,
+        ):
+            for camera in list(recordings_info.keys()):
+                if camera in grouped_recordings:
+                    continue
+                info = recordings_info[camera]
+                while info and info[0][0] < expire_before:
+                    info.pop(0)
 
     def drop_segment(self, cache_path: str) -> None:
         Path(cache_path).unlink(missing_ok=True)
