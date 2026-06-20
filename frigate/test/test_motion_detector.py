@@ -3,7 +3,29 @@ import unittest
 import numpy as np
 
 from frigate.config.camera.motion import MotionConfig
-from frigate.motion.improved_motion import ImprovedMotionDetector
+from frigate.motion.improved_motion import (
+    ImprovedMotionDetector,
+    percentiles_from_uint8,
+)
+
+
+class TestPercentilesFromUint8(unittest.TestCase):
+    def test_matches_numpy_percentile(self) -> None:
+        rng = np.random.default_rng(0)
+        for trial in range(2000):
+            shape = (int(rng.integers(60, 200)), int(rng.integers(60, 260)))
+            kind = trial % 4
+            if kind == 0:
+                frame = rng.integers(0, 256, size=shape, dtype=np.uint8)
+            elif kind == 1:  # low contrast
+                frame = rng.integers(100, 140, size=shape, dtype=np.uint8)
+            elif kind == 2:  # single color
+                frame = np.full(shape, 7, dtype=np.uint8)
+            else:  # bimodal
+                frame = (rng.random(shape) * 40 + rng.choice([0, 200])).astype(np.uint8)
+            lo, hi = percentiles_from_uint8(frame, (4, 96))
+            self.assertEqual(int(lo), int(np.percentile(frame, 4)))
+            self.assertEqual(int(hi), int(np.percentile(frame, 96)))
 
 
 class TestImprovedMotionDetector(unittest.TestCase):

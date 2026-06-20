@@ -13,6 +13,25 @@ from frigate.util.image import grab_cv2_contours
 logger = logging.getLogger(__name__)
 
 
+def percentiles_from_uint8(
+    frame: np.ndarray, quantiles: tuple[float, ...]
+) -> tuple[np.uint8, ...]:
+    """Linear-interpolated percentiles of a uint8 image, matching
+    numpy.percentile, but computed from a 256-bin histogram so the frame is
+    scanned once instead of being partitioned once per quantile."""
+    csum = np.cumsum(cv2.calcHist([frame], [0], None, [256], [0, 256]).ravel())
+    n = csum[-1]
+    results = []
+    for q in quantiles:
+        rank = q / 100.0 * (n - 1)
+        lo = int(np.floor(rank))
+        hi = int(np.ceil(rank))
+        v_lo = float(np.searchsorted(csum, lo, side="right"))
+        v_hi = float(np.searchsorted(csum, hi, side="right"))
+        results.append(np.uint8(v_lo + (rank - lo) * (v_hi - v_lo)))
+    return tuple(results)
+
+
 class ImprovedMotionDetector(MotionDetector):
     def __init__(
         self,
@@ -87,8 +106,7 @@ class ImprovedMotionDetector(MotionDetector):
         # Improve contrast
         if self.config.improve_contrast:
             # TODO tracking moving average of min/max to avoid sudden contrast changes
-            min_value = np.percentile(resized_frame, 4).astype(np.uint8)
-            max_value = np.percentile(resized_frame, 96).astype(np.uint8)
+            min_value, max_value = percentiles_from_uint8(resized_frame, (4, 96))
             # skip contrast calcs if the image is a single color
             if min_value < max_value:
                 # keep track of the last 50 contrast values
