@@ -1,7 +1,9 @@
 """Preview apis."""
 
+import bisect
 import logging
 import os
+import threading
 from datetime import datetime, timedelta, timezone
 
 import pytz
@@ -133,6 +135,32 @@ def preview_hour(
     return preview_ts(camera_name, start_ts, end_ts, allowed_cameras)
 
 
+# cache one sorted listing of the shared preview_frames dir
+_preview_listing_lock = threading.Lock()
+_preview_listing_cache: tuple[float, list[str]] = (-1.0, [])
+
+
+def _get_preview_frame_listing(preview_dir: str) -> list[str]:
+    """Return the sorted preview_frames listing, cached until the dir changes."""
+    global _preview_listing_cache
+
+    # mtime bumps when a frame is added or removed, invalidating the cache
+    mtime = os.stat(preview_dir).st_mtime
+    cached_mtime, files = _preview_listing_cache
+    if mtime == cached_mtime:
+        return files
+
+    with _preview_listing_lock:
+        # another thread may have refreshed the cache while we waited
+        cached_mtime, files = _preview_listing_cache
+        if mtime == cached_mtime:
+            return files
+
+        files = sorted(entry.name for entry in os.scandir(preview_dir))
+        _preview_listing_cache = (mtime, files)
+        return files
+
+
 @router.get(
     "/preview/{camera_name}/start/{start_ts}/end/{end_ts}/frames",
     response_model=PreviewFramesResponse,
@@ -149,23 +177,15 @@ def get_preview_frames_from_cache(camera_name: str, start_ts: float, end_ts: flo
     start_file = f"{file_start}{start_ts}.{PREVIEW_FRAME_TYPE}"
     end_file = f"{file_start}{end_ts}.{PREVIEW_FRAME_TYPE}"
 
-    camera_files = [
-        entry.name
-        for entry in os.scandir(preview_dir)
-        if entry.name.startswith(file_start)
+    files = _get_preview_frame_listing(preview_dir)
+
+    # a camera's frames form a contiguous slice of the sorted listing;
+    # bisect locates it without scanning the whole directory
+    left = bisect.bisect_left(files, start_file)
+    right = bisect.bisect_right(files, end_file)
+    selected_previews = [
+        file for file in files[left:right] if file.startswith(file_start)
     ]
-    camera_files.sort()
-
-    selected_previews = []
-
-    for file in camera_files:
-        if file < start_file:
-            continue
-
-        if file > end_file:
-            break
-
-        selected_previews.append(file)
 
     return JSONResponse(
         content=selected_previews,
