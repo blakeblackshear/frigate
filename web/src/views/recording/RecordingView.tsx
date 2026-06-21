@@ -336,6 +336,16 @@ export function RecordingView({
     [currentTimeRange, updateSelectedSegment],
   );
 
+  const onClipPrevious = useCallback(
+    (diff: number) => {
+      manuallySetCurrentTime(
+        currentTime + diff,
+        mainControllerRef.current?.isPlaying() ?? false,
+      );
+    },
+    [currentTime, manuallySetCurrentTime],
+  );
+
   const onShareReviewLink = useCallback(
     (timestamp: number) => {
       const reviewUrl = createRecordingReviewUrl(location.pathname, {
@@ -902,6 +912,7 @@ export function RecordingView({
                     );
                   }}
                   onClipEnded={onClipEnded}
+                  onClipPrevious={onClipPrevious}
                   onSeekToTime={manuallySetCurrentTime}
                   onControllerReady={(controller) => {
                     mainControllerRef.current = controller;
