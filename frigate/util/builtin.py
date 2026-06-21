@@ -2,7 +2,6 @@
 
 import ast
 import copy
-import datetime
 import logging
 import math
 import multiprocessing.queues
@@ -10,7 +9,9 @@ import queue
 import re
 import shlex
 import struct
+import time
 import urllib.parse
+from collections import deque
 from collections.abc import Mapping
 from multiprocessing.managers import ValueProxy
 from pathlib import Path
@@ -32,23 +33,20 @@ class EventsPerSecond:
         self._start = None
         self._max_events = max_events
         self._last_n_seconds = last_n_seconds
-        self._timestamps = []
+        self._timestamps: deque[float] = deque(maxlen=max_events)
 
     def start(self) -> None:
-        self._start = datetime.datetime.now().timestamp()
+        self._start = time.monotonic()
 
     def update(self) -> None:
-        now = datetime.datetime.now().timestamp()
+        now = time.monotonic()
         if self._start is None:
             self._start = now
         self._timestamps.append(now)
-        # truncate the list when it goes 100 over the max_size
-        if len(self._timestamps) > self._max_events + 100:
-            self._timestamps = self._timestamps[(1 - self._max_events) :]
         self.expire_timestamps(now)
 
     def eps(self) -> float:
-        now = datetime.datetime.now().timestamp()
+        now = time.monotonic()
         if self._start is None:
             self._start = now
         # compute the (approximate) events in the last n seconds
@@ -63,7 +61,7 @@ class EventsPerSecond:
     def expire_timestamps(self, now: float) -> None:
         threshold = now - self._last_n_seconds
         while self._timestamps and self._timestamps[0] < threshold:
-            del self._timestamps[0]
+            self._timestamps.popleft()
 
 
 class InferenceSpeed:
