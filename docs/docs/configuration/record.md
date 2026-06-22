@@ -214,7 +214,7 @@ The disk **total** shown beside it, and the free-space figure Frigate uses to de
 Only **recording segments** (`/media/frigate/recordings`) are included in the recordings storage total. Plenty of other things consume real disk space but are **not** part of that number:
 
 - **Snapshots and thumbnails** (`/media/frigate/clips`) — see [Snapshots](/configuration/snapshots). These are retained independently of recordings.
-- **Preview images** and **review thumbnails** (also under `/media/frigate/clips`).
+- **Preview videos** and **review thumbnails** (also under `/media/frigate/clips`).
 - **Exported clips and timelapses** (`/media/frigate/exports`) — exports are never removed by retention.
 - **The database, downloaded detection models, and face / license plate training images** (stored under `/config`).
 - **Debug images from enrichments** (`/media/frigate/clips`) — when enabled, License Plate Recognition's `debug_save_plates` and GenAI's `debug_save_thumbnails` save plate crops and request images for troubleshooting.
