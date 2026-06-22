@@ -215,7 +215,7 @@ Only **recording segments** (`/media/frigate/recordings`) are included in the re
 
 - **Snapshots and thumbnails** (`/media/frigate/clips`) — see [Snapshots](/configuration/snapshots). These are retained independently of recordings.
 - **Preview videos** and **review thumbnails** (also under `/media/frigate/clips`).
-- **Exported clips and timelapses** (`/media/frigate/exports`) — exports are never removed by retention.
+- **Exports** (`/media/frigate/exports`) — exports are never removed by retention.
 - **The database, downloaded detection models, and face / license plate training images** (stored under `/config`).
 - **Debug images from enrichments** (`/media/frigate/clips`) — when enabled, License Plate Recognition's `debug_save_plates` and GenAI's `debug_save_thumbnails` save plate crops and request images for troubleshooting.
 
