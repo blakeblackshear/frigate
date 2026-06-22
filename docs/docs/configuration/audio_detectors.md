@@ -178,6 +178,20 @@ Frequently-heard labels like `speech` can generate a lot of events, and each eve
 
 :::
 
+### Recording
+
+Audio events will not automatically start a recording. If you want to record specific audio events, you need to add them to the recoding configuration:
+
+```yaml
+review:
+  alerts:
+    labels:
+      - person
+      - car
+      - speech
+      - fire_alarm
+```
+
 ### Audio Transcription
 
 Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI's open-source Whisper models via `faster-whisper`. The goal of this feature is to support Semantic Search for `speech` audio events. Frigate is not intended to act as a continuous, fully-automatic speech transcription service — automatically transcribing all speech (or queuing many audio events for transcription) requires substantial CPU (or GPU) resources and is impractical on most systems. For this reason, transcriptions for events are initiated manually from the UI or the API rather than being run continuously in the background.
