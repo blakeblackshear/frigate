@@ -115,6 +115,46 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(result)
         maintainer.drop_segment.assert_called_once_with(cache_path)
 
+    async def test_expire_stale_recordings_info_drops_only_absent_cameras(self):
+        config = MagicMock(spec=FrigateConfig)
+        config.cameras = {}
+        stop_event = MagicMock()
+        maintainer = RecordingMaintainer(config, stop_event)
+
+        now = datetime.datetime.now().timestamp()
+        ancient = now - 86400
+        recent = now - 1
+
+        maintainer.object_recordings_info["present_cam"] = [(ancient, [], [], [])]
+        maintainer.audio_recordings_info["present_cam"] = [(ancient, 0, [])]
+
+        maintainer.object_recordings_info["absent_cam"] = [
+            (ancient, [], [], []),
+            (recent, [], [], []),
+        ]
+        maintainer.audio_recordings_info["absent_cam"] = [
+            (ancient, 0, []),
+            (recent, 0, []),
+        ]
+
+        grouped_recordings = {"present_cam": [{"start_time": ancient}]}
+
+        maintainer._expire_stale_recordings_info(grouped_recordings)
+
+        self.assertEqual(
+            maintainer.object_recordings_info["present_cam"], [(ancient, [], [], [])]
+        )
+        self.assertEqual(
+            maintainer.audio_recordings_info["present_cam"], [(ancient, 0, [])]
+        )
+
+        self.assertEqual(
+            maintainer.object_recordings_info["absent_cam"], [(recent, [], [], [])]
+        )
+        self.assertEqual(
+            maintainer.audio_recordings_info["absent_cam"], [(recent, 0, [])]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
