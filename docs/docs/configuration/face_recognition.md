@@ -86,7 +86,7 @@ Navigate to <NavPath path="Settings > Enrichments > Face recognition" />.
 - **Detection threshold**: Face detection confidence score required before recognition runs. This field only applies to the standalone face detection model; `min_score` should be used to filter for models that have face detection built in.
   - Default: `0.7`
 - **Minimum face area**: Minimum size (in pixels) a face must be before recognition runs. Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant faces.
-  - Default: `500` pixels
+  - Default: `750` pixels
 
 </TabItem>
 <TabItem value="yaml">
@@ -95,7 +95,7 @@ Navigate to <NavPath path="Settings > Enrichments > Face recognition" />.
 face_recognition:
   enabled: true
   detection_threshold: 0.7
-  min_area: 500
+  min_area: 750
 ```
 
 </TabItem>
