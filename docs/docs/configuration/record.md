@@ -199,10 +199,6 @@ Because recording segments are written in 10 second chunks, pre-capture timing d
 
 Pre and post capture footage is included in the **recording timeline**, visible in the History view. Note that pre/post capture settings only affect which recording segments are **retained on disk** — they do not change the start and end points shown in the UI. The History view will still center on the review item's actual time range, but you can scrub backward and forward through the retained pre/post capture footage on the timeline. The Explore view shows object-specific clips that are trimmed to when the tracked object was actually visible, so pre/post capture time will not be reflected there.
 
-## Will Frigate delete old recordings if my storage runs out?
-
-If there is less than an hour left of storage, the oldest hour of recordings will be deleted and a message will be printed in the Frigate logs. This emergency cleanup deletes the oldest recordings first regardless of retention settings to reclaim space as quickly as possible.
-
 ## Configuring Recording Retention
 
 Frigate supports both continuous and tracked object based recordings with separate retention modes and retention periods.
@@ -355,3 +351,63 @@ Setting `verbose: true` writes a detailed report of every orphaned file and data
 This operation uses considerable CPU resources and includes a safety threshold that aborts if more than 50% of files would be deleted. Only run when necessary. If you set `force: true` the safety threshold will be bypassed; do not use `force` unless you are certain the deletions are intended.
 
 :::
+
+## Understanding storage usage
+
+The storage usage Frigate reports will not exactly match what the operating system reports with `df` or `du`. This is expected, not a bug. The sections below explain how Frigate derives its storage figures and why they differ from the disk's own accounting.
+
+### How Frigate measures recording usage
+
+The **Recordings** value on the Storage Metrics page (<NavPath path="System > Storage" />) — and the per-camera **Camera Storage** breakdown — is the sum of the recording segment sizes Frigate has written, taken from Frigate's database. It is **not** computed by a scan of the disk. Frigate tracks usage this way by design: repeatedly walking the entire drive to total its size would keep hard drives spun up and add unnecessary I/O.
+
+The disk **total** shown beside it, and the free-space figure Frigate uses to decide when to delete recordings, instead come from the operating system's report for the whole filesystem mounted at `/media/frigate`. As a result, the **Unused** value on the page is _total disk capacity minus Frigate's recordings_ — not the drive's real free space, which will be lower whenever anything else is stored on the disk.
+
+### What counts toward usage — and why it won't match `df`
+
+Only **recording segments** (`/media/frigate/recordings`) are included in the recordings storage total. Plenty of other things consume real disk space but are **not** part of that number:
+
+- **Snapshots and thumbnails** (`/media/frigate/clips`) — see [Snapshots](/configuration/snapshots). These are retained independently of recordings.
+- **Preview videos** and **review thumbnails** (also under `/media/frigate/clips`).
+- **Exports** (`/media/frigate/exports`) — exports are never removed by retention.
+- **The database, downloaded detection models, and face / license plate training images** (stored under `/config`).
+- **Debug images from enrichments** (`/media/frigate/clips`) — when enabled, License Plate Recognition's `debug_save_plates` and GenAI's `debug_save_thumbnails` save plate crops and request images for troubleshooting.
+
+These files are the usual explanation for an "other" or seemingly unaccounted bucket of space — it is real, it is Frigate's, and it simply isn't part of the _recordings_ total. They are also why comparing the **Recordings** figure to `df -h` always shows a gap: `df` additionally counts any non-Frigate data on the disk, filesystem overhead and reserved blocks (ext4 reserves ~5% for root by default, so a disk can read "full" before recordings approach the total), and recently deleted recordings whose space has not yet been reclaimed.
+
+:::tip
+
+The Storage page is not intended to be a system-wide disk monitor — it shows how much space _Frigate's recordings_ use. To see true disk usage, use `df -h` (free space) and `du -sh` (per-directory usage) on the host.
+
+:::
+
+### Free space and the `/media/frigate` mount
+
+Frigate reports the capacity and free space of whatever filesystem is actually mounted at `/media/frigate` **inside the container**. If an external drive or network share isn't truly mounted there — a missing `/etc/fstab` entry, a share that was offline when the container started, or a host that doesn't pass the path through — the container falls back to the host's OS disk, and Frigate will correctly report that smaller disk instead of the drive you intended.
+
+If the reported capacity doesn't match your drive, the mount is the place to look, not Frigate. Verify what is actually mounted from inside the container:
+
+```bash
+docker exec -it frigate df -h /media/frigate
+docker exec -it frigate mount | grep media
+```
+
+See the [storage mount layout](/frigate/installation#storage) for how the volumes are expected to be configured.
+
+### The `/tmp/cache` area is separate
+
+Recording segments are first written to `/tmp/cache` — a small, in-memory (`tmpfs`) area — before being checked and moved to `/media/frigate/recordings`. Because it is separate and small, `/tmp/cache` can fill up and produce `No space left on device` errors even when the recordings disk has plenty of room — they are different storage areas. See [Recordings troubleshooting](/troubleshooting/recordings) for diagnosing cache and slow-storage issues.
+
+### When the metrics don't match what's on disk
+
+Because usage is tracked in the database, deleting recording files directly on disk — or files left behind after an upgrade — will not update the reported usage, and can even push it above 100%. Frigate is unaware of files it didn't record and won't count or remove them automatically. Use [Syncing Media Files With Disk](#syncing-media-files-with-disk) to reconcile the database with what is actually on disk.
+
+## Will Frigate delete old recordings if my storage runs out?
+
+Yes. Frigate continuously checks the **free space of the disk** holding `/media/frigate/recordings`. This is different from adding up the size of every recording: free space is a single number the operating system already tracks, so Frigate can ask for it instantly without reading through your files or spinning up the disk — which is exactly why it relies on this check rather than scanning the drive. When less than roughly one hour of recording space remains — estimated from the current recording bitrate, **not** a fixed percentage — Frigate deletes the oldest recordings to reclaim space and logs a message. This emergency cleanup removes the oldest recordings first **regardless of retention settings**.
+
+Two consequences follow from this being based on whole-disk free space:
+
+- Because the check uses the disk's real free space, **anything** filling the drive — including non-Frigate files — can trigger deletion of your oldest recordings.
+- Cleanup can run while a meaningful percentage of the disk is still free (for example, with high bitrates or many cameras), because the threshold is "less than ~1 hour of recording headroom," not "X% full."
+
+Frequent emergency cleanups usually mean your configured retention exceeds what the disk can hold. Reduce your retention days so the normal retention cleanup keeps up and the emergency path rarely triggers.

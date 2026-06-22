@@ -42,6 +42,8 @@ Frigate requires a CPU with AVX + AVX2 instructions. Most modern CPUs (post-2011
 
 Storage is an important consideration when planning a new installation. To get a more precise estimate of your storage requirements, you can use an IP camera storage calculator. Websites like [IPConfigure Storage Calculator](https://calculator.ipconfigure.com/) can help you determine the necessary disk space based on your camera settings.
 
+Once running, see [Understanding storage usage](/configuration/record#understanding-storage-usage) for how Frigate measures and reports disk usage — and why its numbers won't exactly match `df` or `du`.
+
 #### SSDs (Solid State Drives)
 
 SSDs are an excellent choice for Frigate, offering high speed and responsiveness. The older concern that SSDs would quickly "wear out" from constant video recording is largely no longer valid for modern consumer and enterprise-grade SSDs.
