@@ -175,15 +175,15 @@ export default function LocalDatasetView() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t("button.deleteImage")}
+              {t("deleteImage.title")}
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            {t("empty.description")}
+            {t("deleteImage.description")}
           </AlertDialogDescription>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              {t("annotator.cancel")}
+              {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground"
@@ -385,7 +385,7 @@ function DatasetImageCard({ item, onAnnotate, onDelete }: DatasetImageCardProps)
       <img
         src={thumbUrl}
         className="aspect-square w-full object-cover"
-        alt={item.label ?? "dataset image"}
+        alt={t("image.alt")}
         loading="lazy"
       />
 
@@ -417,7 +417,7 @@ function DatasetImageCard({ item, onAnnotate, onDelete }: DatasetImageCardProps)
           )}
           <div>
             {annotationCount > 0
-              ? t("image.annotations_other", { count: annotationCount })
+              ? t("image.annotations", { count: annotationCount })
               : t("image.noAnnotations")}
           </div>
         </div>

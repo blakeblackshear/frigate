@@ -6,6 +6,10 @@
     "title": "No images yet",
     "description": "Save event snapshots or recording frames to the local dataset using the submit button on events or the video player."
   },
+  "deleteImage": {
+    "title": "Delete image",
+    "description": "This will permanently remove the image and its annotations from the local dataset. This cannot be undone."
+  },
   "filter": {
     "all": "All",
     "annotated": "Annotated",
@@ -14,15 +18,15 @@
     "camera": "Camera"
   },
   "image": {
+    "alt": "Dataset image thumbnail",
     "noAnnotations": "No annotations",
     "annotations_one": "{{count}} annotation",
-    "annotations_other": "{{count}} annotations",
-    "camera": "Camera: {{camera}}",
-    "label": "Label: {{label}}"
+    "annotations_other": "{{count}} annotations"
   },
   "annotator": {
     "title": "Annotate Image",
     "instructions": "Click and drag on the image to draw a bounding box. Click an existing box to select it.",
+    "imageAlt": "Image to annotate",
     "addLabel": "Label",
     "labelPlaceholder": "Enter label (e.g. person, car)",
     "deleteSelected": "Delete selected box",
@@ -44,8 +48,6 @@
     "saveToDatasetFailed": "Failed to save to local dataset: {{errorMessage}}"
   },
   "stats": {
-    "total": "{{count}} image",
-    "total_other": "{{count}} images",
     "showing": "Showing {{shown}} of {{total}}"
   }
 }

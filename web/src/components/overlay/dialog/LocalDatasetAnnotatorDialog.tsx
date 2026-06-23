@@ -232,7 +232,7 @@ export function LocalDatasetAnnotatorDialog({
               ref={imgRef}
               src={imageUrl}
               className="block w-full object-contain"
-              alt="annotation target"
+              alt={t("annotator.imageAlt")}
               onLoad={measureImage}
               draggable={false}
             />
@@ -332,7 +332,7 @@ export function LocalDatasetAnnotatorDialog({
 
             <div className="mt-auto text-xs text-muted-foreground">
               {boxes.length > 0
-                ? t("image.annotations_other", { count: boxes.length })
+                ? t("image.annotations", { count: boxes.length })
                 : t("image.noAnnotations")}
             </div>
           </div>
