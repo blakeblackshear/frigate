@@ -386,3 +386,44 @@ genai:
 
 </TabItem>
 </ConfigTabs>
+
+### Atlas Cloud
+
+[Atlas Cloud](https://www.atlascloud.ai/?utm_source=github&utm_medium=link&utm_campaign=frigate) is an OpenAI-compatible inference platform that serves a range of vision-capable models, so it can act as a drop-in multimodal backend for Frigate's Generative AI features. The `atlas` provider defaults its base URL to the Atlas Cloud endpoint, so a minimal config only needs your API key and a model.
+
+#### Supported Models
+
+You must use a vision capable model with Frigate. Recommended multimodal models on Atlas Cloud include `qwen/qwen3-vl-235b-a22b-thinking`, `Qwen/Qwen3-VL-235B-A22B-Instruct`, `qwen/qwen3-vl-30b-a3b-instruct`, and `google/gemini-3.5-flash`. The full, always-current catalog is available in the [Atlas Cloud console](https://www.atlascloud.ai/console).
+
+#### Get API Key
+
+To start using Atlas Cloud, create an API key from the [Atlas Cloud console](https://www.atlascloud.ai/console/api-keys).
+
+#### Configuration
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `atlas`
+   - Set **API key** to your Atlas Cloud API key (or use an environment variable such as `{FRIGATE_ATLAS_API_KEY}`)
+   - Set **Model** to a vision-capable model (e.g., `qwen/qwen3-vl-235b-a22b-thinking`)
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+genai:
+  provider: atlas
+  api_key: "{FRIGATE_ATLAS_API_KEY}"
+  model: qwen/qwen3-vl-235b-a22b-thinking
+```
+
+</TabItem>
+</ConfigTabs>
+
+:::note
+
+The `atlas` provider points to `https://api.atlascloud.ai/v1` by default. To target a different OpenAI-compatible endpoint, set `base_url` explicitly.
+
+:::
