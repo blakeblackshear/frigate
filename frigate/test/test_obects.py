@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from frigate.track.tracked_object import TrackedObjectAttribute
-from frigate.util.object import average_boxes, interpolated_percentile
+from frigate.util.object import average_boxes
 
 
 class TestBoxStatistics(unittest.TestCase):
@@ -17,19 +17,6 @@ class TestBoxStatistics(unittest.TestCase):
             ]
             expected = [float(np.mean([b[i] for b in boxes])) for i in range(4)]
             self.assertEqual(average_boxes(boxes), expected)
-
-    def test_interpolated_percentile_matches_numpy(self) -> None:
-        rng = random.Random(1)
-        for _ in range(5000):
-            values = [rng.randint(0, 5000) for _ in range(rng.randint(1, 10))]
-            for q in (15, 85, 50):
-                self.assertEqual(
-                    interpolated_percentile(values, q),
-                    float(np.percentile(values, q)),
-                )
-
-    def test_interpolated_percentile_single_value(self) -> None:
-        self.assertEqual(interpolated_percentile([42], 15), 42.0)
 
 
 class TestAttribute(unittest.TestCase):

@@ -354,25 +354,6 @@ def median_of_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int
     return sorted_boxes[int(len(sorted_boxes) / 2.0)]
 
 
-def interpolated_percentile(values: list[int], q: float) -> float:
-    """Linear-interpolated percentile, matching numpy.percentile for the small
-    lists used in position smoothing without the per-call numpy overhead."""
-    ordered = sorted(values)
-    n = len(ordered)
-    if n == 1:
-        return float(ordered[0])
-    rank = (q / 100.0) * (n - 1)
-    lo = int(rank)
-    frac = rank - lo
-    if frac == 0.0:
-        return float(ordered[lo])
-    diff = ordered[lo + 1] - ordered[lo]
-    # numpy's lerp switches sides at frac >= 0.5 to limit rounding error
-    if frac < 0.5:
-        return ordered[lo] + diff * frac
-    return ordered[lo + 1] - diff * (1.0 - frac)
-
-
 def intersects_any(box_a, boxes):
     for box in boxes:
         if box_overlaps(box_a, box):
