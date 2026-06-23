@@ -339,18 +339,13 @@ def reduce_boxes(boxes, iou_threshold=0.0):
 
 def average_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, int]:
     """Return a box that is the average of a list of boxes."""
-    x_mins = []
-    y_mins = []
-    x_max = []
-    y_max = []
-
-    for box in boxes:
-        x_mins.append(box[0])
-        y_mins.append(box[1])
-        x_max.append(box[2])
-        y_max.append(box[3])
-
-    return [np.mean(x_mins), np.mean(y_mins), np.mean(x_max), np.mean(y_max)]
+    n = len(boxes)
+    return [
+        sum(box[0] for box in boxes) / n,
+        sum(box[1] for box in boxes) / n,
+        sum(box[2] for box in boxes) / n,
+        sum(box[3] for box in boxes) / n,
+    ]
 
 
 def median_of_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, int]:
