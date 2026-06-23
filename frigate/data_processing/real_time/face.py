@@ -161,11 +161,16 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             if potential_face[-1] < threshold:
                 continue
 
-            raw_bbox = potential_face[0:4].astype(np.uint16)
-            x: int = int(max(raw_bbox[0], 0) / scale_factor)
-            y: int = int(max(raw_bbox[1], 0) / scale_factor)
-            w: int = int(raw_bbox[2] / scale_factor)
-            h: int = int(raw_bbox[3] / scale_factor)
+            # YuNet can return slightly negative x/y when the face extends to the
+            # image border. Clamp to zero BEFORE any integer cast: casting a
+            # negative float to np.uint16 wraps it (e.g. -5.5 → 65530), and the
+            # subsequent max(…, 0) never has a chance to correct it. The wrapped
+            # value is used as a slice index, producing an empty crop that crashes
+            # cv2.cvtColor with "!_src.empty()" in align_face / classify.
+            x: int = int(max(potential_face[0], 0) / scale_factor)
+            y: int = int(max(potential_face[1], 0) / scale_factor)
+            w: int = int(max(potential_face[2], 0) / scale_factor)
+            h: int = int(max(potential_face[3], 0) / scale_factor)
             bbox = (x, y, x + w, y + h)
 
             if face is None or area(bbox) > area(face):  # type: ignore[unreachable]
