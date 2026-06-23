@@ -208,6 +208,11 @@
       "label": "Submit to Frigate+",
       "aria": "Submit to Frigate Plus"
     },
+    "saveToLocalDataset": {
+      "label": "Save to Local Dataset",
+      "saved": "Saved to local dataset",
+      "failed": "Failed to save to local dataset"
+    },
     "viewInHistory": {
       "label": "View in History",
       "aria": "View in History"

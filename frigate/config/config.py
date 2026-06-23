@@ -65,6 +65,7 @@ from .classification import (
 )
 from .database import DatabaseConfig
 from .env import EnvVars
+from .local_dataset import LocalDatasetConfig
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .network import NetworkingConfig
@@ -597,6 +598,11 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=LicensePlateRecognitionConfig,
         title="License Plate Recognition",
         description="License plate recognition settings including detection thresholds, formatting, and known plates.",
+    )
+    local_dataset: LocalDatasetConfig = Field(
+        default_factory=LocalDatasetConfig,
+        title="Local dataset",
+        description="Settings for the local dataset feature, which allows saving snapshots and recording frames locally for annotation and model training without Frigate+.",
     )
 
     camera_groups: Dict[str, CameraGroupConfig] = Field(

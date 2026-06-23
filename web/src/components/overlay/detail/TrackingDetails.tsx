@@ -648,6 +648,10 @@ export function TrackingDetails({
     return axios.post(`/${event.camera}/plus/${currentTime}`);
   }, [event.camera, currentTime]);
 
+  const onSaveFrameToLocalDataset = useCallback(() => {
+    return axios.post(`/${event.camera}/save_to_local_dataset/${currentTime}`);
+  }, [event.camera, currentTime]);
+
   const getSnapshotUrlForPlus = useCallback(() => {
     if (!currentTime) {
       return undefined;
@@ -702,6 +706,7 @@ export function TrackingDetails({
                 onTimeUpdate={handleTimeUpdate}
                 onSeekToTime={handleSeekToTime}
                 onUploadFrame={onUploadFrameToPlus}
+                onSaveToLocalDataset={onSaveFrameToLocalDataset}
                 getSnapshotUrl={getSnapshotUrlForPlus}
                 onPlaying={() => setIsVideoLoading(false)}
                 setFullResolution={setFullResolution}
@@ -1208,7 +1213,7 @@ function LifecycleIconRow({
         <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
           <div className="flex flex-row items-center gap-3">
             <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
-            {isAdmin && (config?.plus?.enabled || item.data.box) && (
+            {isAdmin && (config?.plus?.enabled || config?.local_dataset?.enabled || item.data.box) && (
               <DropdownMenu
                 modal={false}
                 open={isOpen}
@@ -1251,6 +1256,30 @@ function LifecycleIconRow({
                         }}
                       >
                         {t("itemMenu.submitToPlus.label")}
+                      </DropdownMenuItem>
+                    )}
+
+                    {config?.local_dataset?.enabled && (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={async () => {
+                          try {
+                            await axios.post(
+                              `/${item.camera}/save_to_local_dataset/${item.timestamp + annotationOffset / 1000}`,
+                            );
+                            toast.success(
+                              t("itemMenu.saveToLocalDataset.saved"),
+                              { position: "top-center" },
+                            );
+                          } catch {
+                            toast.error(
+                              t("itemMenu.saveToLocalDataset.failed"),
+                              { position: "top-center" },
+                            );
+                          }
+                        }}
+                      >
+                        {t("itemMenu.saveToLocalDataset.label")}
                       </DropdownMenuItem>
                     )}
                     {item.data.box && (

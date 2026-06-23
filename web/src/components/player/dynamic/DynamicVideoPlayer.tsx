@@ -187,6 +187,18 @@ export default function DynamicVideoPlayer({
     [camera, controller],
   );
 
+  const onSaveFrameToLocalDataset = useCallback(
+    (playTime: number) => {
+      if (!controller) {
+        return;
+      }
+
+      const time = controller.getProgress(playTime);
+      return axios.post(`/${camera}/save_to_local_dataset/${time}`);
+    },
+    [camera, controller],
+  );
+
   const getSnapshotUrlForPlus = useCallback(
     (playTime: number) => {
       if (!controller) {
@@ -361,6 +373,7 @@ export default function DynamicVideoPlayer({
           }}
           setFullResolution={setFullResolution}
           onUploadFrame={onUploadFrameToPlus}
+          onSaveToLocalDataset={onSaveFrameToLocalDataset}
           getSnapshotUrl={getSnapshotUrlForPlus}
           onSnapshot={onDownloadSnapshot}
           toggleFullscreen={toggleFullscreen}

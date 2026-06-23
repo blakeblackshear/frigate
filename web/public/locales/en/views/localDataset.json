@@ -1,0 +1,51 @@
+{
+  "documentTitle": "Local Dataset - Frigate",
+  "title": "Local Dataset",
+  "description": "Store and annotate images locally as an alternative to Frigate+.",
+  "empty": {
+    "title": "No images yet",
+    "description": "Save event snapshots or recording frames to the local dataset using the submit button on events or the video player."
+  },
+  "filter": {
+    "all": "All",
+    "annotated": "Annotated",
+    "unannotated": "Unannotated",
+    "label": "Label",
+    "camera": "Camera"
+  },
+  "image": {
+    "noAnnotations": "No annotations",
+    "annotations_one": "{{count}} annotation",
+    "annotations_other": "{{count}} annotations",
+    "camera": "Camera: {{camera}}",
+    "label": "Label: {{label}}"
+  },
+  "annotator": {
+    "title": "Annotate Image",
+    "instructions": "Click and drag on the image to draw a bounding box. Click an existing box to select it.",
+    "addLabel": "Label",
+    "labelPlaceholder": "Enter label (e.g. person, car)",
+    "deleteSelected": "Delete selected box",
+    "noBoxSelected": "No box selected",
+    "save": "Save annotations",
+    "cancel": "Cancel"
+  },
+  "button": {
+    "export": "Export COCO zip",
+    "deleteImage": "Delete image",
+    "annotate": "Annotate"
+  },
+  "toast": {
+    "saved": "Annotations saved.",
+    "saveFailed": "Failed to save annotations: {{errorMessage}}",
+    "deleted": "Image deleted.",
+    "deleteFailed": "Failed to delete image: {{errorMessage}}",
+    "savedToDataset": "Saved to local dataset.",
+    "saveToDatasetFailed": "Failed to save to local dataset: {{errorMessage}}"
+  },
+  "stats": {
+    "total": "{{count}} image",
+    "total_other": "{{count}} images",
+    "showing": "Showing {{shown}} of {{total}}"
+  }
+}

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { LuFolderX } from "react-icons/lu";
+import { LuFolderX, LuDatabase } from "react-icons/lu";
 import { isMobileOnly, isSafari } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
@@ -42,6 +42,7 @@ type VideoControls = {
   seek?: boolean;
   playbackRate?: boolean;
   plusUpload?: boolean;
+  localDatasetSave?: boolean;
   snapshot?: boolean;
   fullscreen?: boolean;
 };
@@ -51,6 +52,7 @@ const CONTROLS_DEFAULT: VideoControls = {
   seek: true,
   playbackRate: true,
   plusUpload: false,
+  localDatasetSave: false,
   snapshot: false,
   fullscreen: false,
 };
@@ -75,6 +77,7 @@ type VideoControlsProps = {
   onSeek: (diff: number) => void;
   onSetPlaybackRate: (rate: number) => void;
   onUploadFrame?: () => void;
+  onSaveToLocalDataset?: () => void;
   getSnapshotUrl?: () => string | undefined;
   onSnapshot?: () => void;
   snapshotLoading?: boolean;
@@ -99,6 +102,7 @@ export default function VideoControls({
   onSeek,
   onSetPlaybackRate,
   onUploadFrame,
+  onSaveToLocalDataset,
   getSnapshotUrl,
   onSnapshot,
   snapshotLoading = false,
@@ -302,6 +306,27 @@ export default function VideoControls({
           fullscreen={fullscreen}
         />
       )}
+      {features.localDatasetSave && onSaveToLocalDataset && (
+        <LocalDatasetSaveButton
+          video={video}
+          onClose={() => {
+            if (setControlsOpen) {
+              setControlsOpen(false);
+            }
+          }}
+          onOpen={() => {
+            onPlayPause(false);
+
+            if (setControlsOpen) {
+              setControlsOpen(true);
+            }
+          }}
+          onSaveFrame={onSaveToLocalDataset}
+          getSnapshotUrl={getSnapshotUrl}
+          containerRef={containerRef}
+          fullscreen={fullscreen}
+        />
+      )}
       {features.snapshot && onSnapshot && (
         <TbCameraDown
           className={cn(
@@ -423,6 +448,108 @@ function FrigatePlusUploadButton({
             disabled={previewError}
           >
             {t("submitFrigatePlus.submit")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+type LocalDatasetSaveButtonProps = {
+  video?: HTMLVideoElement | null;
+  onOpen: () => void;
+  onClose: () => void;
+  onSaveFrame: () => void;
+  getSnapshotUrl?: () => string | undefined;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  fullscreen?: boolean;
+};
+function LocalDatasetSaveButton({
+  video,
+  onOpen,
+  onClose,
+  onSaveFrame,
+  getSnapshotUrl,
+  containerRef,
+  fullscreen,
+}: LocalDatasetSaveButtonProps) {
+  const { t } = useTranslation(["components/player"]);
+
+  const [previewUrl, setPreviewUrl] = useState<string>();
+  const [previewError, setPreviewError] = useState(false);
+
+  return (
+    <AlertDialog
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
+      <AlertDialogTrigger asChild>
+        <LuDatabase
+          className="size-5 cursor-pointer"
+          onClick={() => {
+            onOpen();
+            setPreviewError(false);
+
+            const snapshotUrl = getSnapshotUrl?.();
+            if (snapshotUrl) {
+              setPreviewUrl(snapshotUrl);
+              return;
+            }
+
+            if (video) {
+              const videoSize = [video.clientWidth, video.clientHeight];
+              const canvas = document.createElement("canvas");
+              canvas.width = videoSize[0];
+              canvas.height = videoSize[1];
+
+              const context = canvas?.getContext("2d");
+
+              if (context) {
+                context.drawImage(video, 0, 0, videoSize[0], videoSize[1]);
+                setPreviewUrl(canvas.toDataURL("image/webp"));
+              }
+            }
+          }}
+        />
+      </AlertDialogTrigger>
+      <AlertDialogContent
+        portalProps={
+          fullscreen && containerRef?.current
+            ? { container: containerRef.current }
+            : undefined
+        }
+        className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl"
+      >
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {t("saveToLocalDataset.title")}
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        {previewError ? (
+          <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
+            <LuFolderX className="size-12" />
+            <span>{t("submitFrigatePlus.previewError")}</span>
+          </div>
+        ) : (
+          <img
+            className="aspect-video w-full object-contain"
+            src={previewUrl}
+            onError={() => setPreviewError(true)}
+          />
+        )}
+        <AlertDialogFooter>
+          <AlertDialogCancel>
+            {t("button.cancel", { ns: "common" })}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-selected text-white"
+            onClick={onSaveFrame}
+            disabled={previewError}
+          >
+            {t("saveToLocalDataset.button")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

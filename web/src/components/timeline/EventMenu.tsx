@@ -169,6 +169,38 @@ export default function EventMenu({
                 </DropdownMenuItem>
               )}
 
+            {isAdmin &&
+              event.has_snapshot &&
+              event.end_time &&
+              event.data.type == "object" &&
+              config?.local_dataset?.enabled && (
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onSelect={() => {
+                    setIsOpen(false);
+                    axios
+                      .post(
+                        `events/${event.id}/save_to_local_dataset`,
+                        { include_annotation: 1 },
+                      )
+                      .then(() =>
+                        toast.success(
+                          t("itemMenu.saveToLocalDataset.saved"),
+                          { position: "top-center" },
+                        ),
+                      )
+                      .catch(() =>
+                        toast.error(
+                          t("itemMenu.saveToLocalDataset.failed"),
+                          { position: "top-center" },
+                        ),
+                      );
+                  }}
+                >
+                  {t("itemMenu.saveToLocalDataset.label")}
+                </DropdownMenuItem>
+              )}
+
             {event.has_snapshot && config?.semantic_search?.enabled && (
               <DropdownMenuItem
                 className="cursor-pointer"

@@ -263,6 +263,7 @@
     "faceLibrary": "Face Library",
     "classification": "Classification",
     "chat": "Chat",
+    "localDataset": "Local Dataset",
     "user": {
       "title": "User",
       "account": "Account",

@@ -1277,6 +1277,29 @@ function ObjectDetailsTab({
     [search, mutate, mapSearchResults, setSearch, isEventsKey],
   );
 
+  // local dataset submission
+
+  const [localSaved, setLocalSaved] = useState(false);
+
+  const onSaveToLocalDataset = useCallback(async () => {
+    if (!search) return;
+    try {
+      await axios.post(`events/${search.id}/save_to_local_dataset`, {
+        include_annotation: 1,
+      });
+      setLocalSaved(true);
+      toast.success(
+        t("explore.plus.saveToLocalDataset.saved", { ns: "components/dialog" }),
+        { position: "top-center" },
+      );
+    } catch {
+      toast.error(
+        t("explore.plus.saveToLocalDataset.saved", { ns: "components/dialog" }),
+        { position: "top-center" },
+      );
+    }
+  }, [search, t]);
+
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);
   const canRegenerate = !!(
     config?.cameras[search.camera].objects.genai.enabled && search.end_time
@@ -1594,6 +1617,42 @@ function ObjectDetailsTab({
             </div>
           </div>
         )}
+
+      {/* Save to Local Dataset — only when local_dataset is enabled */}
+      {isAdmin &&
+        search.data.type === "object" &&
+        config?.local_dataset?.enabled &&
+        search.end_time != undefined &&
+        search.has_snapshot && (
+          <div className="my-2 flex w-full flex-col justify-between gap-1.5">
+            <div className="text-sm text-primary/40">
+              {t("explore.plus.saveToLocalDataset.label", {
+                ns: "components/dialog",
+              })}
+            </div>
+            <div className="flex flex-row items-center gap-2 text-sm">
+              {localSaved ? (
+                <div className="flex flex-row items-center gap-2">
+                  <FaCheckCircle className="size-4 text-success" />
+                  {t("explore.plus.saveToLocalDataset.saved", {
+                    ns: "components/dialog",
+                  })}
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onSaveToLocalDataset}
+                >
+                  {t("explore.plus.saveToLocalDataset.button", {
+                    ns: "components/dialog",
+                  })}
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-start gap-3">
           <div className="text-sm text-primary/40">

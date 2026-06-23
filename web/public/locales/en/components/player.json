@@ -7,6 +7,11 @@
     "submit": "Submit",
     "previewError": "Could not load snapshot preview. The recording may not be available at this time."
   },
+  "saveToLocalDataset": {
+    "title": "Save this frame to local dataset?",
+    "button": "Save to Local Dataset",
+    "saved": "Saved to local dataset"
+  },
   "livePlayerRequiredIOSVersion": "iOS 17.1 or greater is required for this live stream type.",
   "streamOffline": {
     "title": "Stream Offline",

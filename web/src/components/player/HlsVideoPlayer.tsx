@@ -53,6 +53,7 @@ type HlsVideoPlayerProps = {
   onSeekToTime?: (timestamp: number, play?: boolean) => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
+  onSaveToLocalDataset?: (playTime: number) => Promise<AxiosResponse> | undefined;
   getSnapshotUrl?: (playTime: number) => string | undefined;
   onSnapshot?: (playTime: number) => Promise<void> | void;
   toggleFullscreen?: () => void;
@@ -80,6 +81,7 @@ export default function HlsVideoPlayer({
   onSeekToTime,
   setFullResolution,
   onUploadFrame,
+  onSaveToLocalDataset,
   getSnapshotUrl,
   onSnapshot,
   toggleFullscreen,
@@ -328,6 +330,7 @@ export default function HlsVideoPlayer({
             seek: true,
             playbackRate: true,
             plusUpload: isAdmin && config?.plus?.enabled == true,
+            localDatasetSave: isAdmin && config?.local_dataset?.enabled == true,
             snapshot: !!onSnapshot,
             fullscreen: supportsFullscreen,
           }}
@@ -376,6 +379,21 @@ export default function HlsVideoPlayer({
               }
             }
           }}
+          onSaveToLocalDataset={
+            onSaveToLocalDataset
+              ? async () => {
+                  const frameTime = getVideoTime();
+                  if (frameTime) {
+                    const resp = await onSaveToLocalDataset(frameTime);
+                    if (resp && resp.status === 200) {
+                      toast.success(t("saveToLocalDataset.saved"), {
+                        position: "top-center",
+                      });
+                    }
+                  }
+                }
+              : undefined
+          }
           onSnapshot={onSnapshot ? handleSnapshot : undefined}
           snapshotLoading={isSnapshotLoading}
           fullscreen={fullscreen}

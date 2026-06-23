@@ -25,6 +25,12 @@
         "state": {
           "submitted": "Submitted"
         }
+      },
+      "saveToLocalDataset": {
+        "label": "Save to Local Dataset",
+        "desc": "Save this snapshot locally for annotation and training without Frigate+.",
+        "saved": "Saved to local dataset",
+        "button": "Save Locally"
       }
     },
     "video": {

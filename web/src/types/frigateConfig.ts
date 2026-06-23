@@ -577,6 +577,10 @@ export interface FrigateConfig {
     enabled: boolean;
   };
 
+  local_dataset: {
+    enabled: boolean;
+  };
+
   proxy: {
     logout_url?: string;
   };

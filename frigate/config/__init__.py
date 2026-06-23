@@ -6,6 +6,7 @@ from .camera_group import *  # noqa: F403
 from .classification import *  # noqa: F403
 from .config import *  # noqa: F403
 from .database import *  # noqa: F403
+from .local_dataset import *  # noqa: F403
 from .logger import *  # noqa: F403
 from .mqtt import *  # noqa: F403
 from .network import *  # noqa: F403
