@@ -59,6 +59,19 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.media])
 
 
+def _resolve_cache_age(max_cache_age: int) -> int:
+    """Return max_cache_age as an int.
+
+    When a media handler is invoked directly by another handler instead of
+    through its route, FastAPI doesn't resolve the Query() default and
+    max_cache_age arrives as the Query object; fall back to its int default.
+    """
+    if isinstance(max_cache_age, int):
+        return max_cache_age
+
+    return max_cache_age.default
+
+
 @router.get("/{camera_name}", dependencies=[Depends(require_camera_access)])
 async def mjpeg_feed(
     request: Request,
@@ -1215,7 +1228,7 @@ async def event_thumbnail(
         thumbnail_bytes,
         media_type=extension.get_mime_type(),
         headers={
-            "Cache-Control": f"private, max-age={max_cache_age}"
+            "Cache-Control": f"private, max-age={_resolve_cache_age(max_cache_age)}"
             if event_complete
             else "no-store",
         },
@@ -1677,7 +1690,7 @@ async def preview_gif(
         gif_bytes,
         media_type="image/gif",
         headers={
-            "Cache-Control": f"private, max-age={max_cache_age}",
+            "Cache-Control": f"private, max-age={_resolve_cache_age(max_cache_age)}",
             "Content-Type": "image/gif",
         },
     )
@@ -1848,7 +1861,7 @@ async def preview_mp4(
 
     headers = {
         "Content-Description": "File Transfer",
-        "Cache-Control": f"private, max-age={max_cache_age}",
+        "Cache-Control": f"private, max-age={_resolve_cache_age(max_cache_age)}",
         "Content-Type": "video/mp4",
         "Content-Length": str(os.path.getsize(path)),
         # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
