@@ -11,6 +11,9 @@ import useSWR from "swr";
 import { useTimeFormat } from "@/hooks/use-date-utils";
 
 const GRAPH_COLORS = ["#5C7CFA", "#ED5CFA", "#FAD75C"];
+// Distinct palette so the Frames / Detections graphs are easy to tell apart
+// from the CPU graphs at a glance.
+export const FPS_GRAPH_COLORS = ["#2DD4BF", "#818CFF", "#D17B88"];
 
 type CameraLineGraphProps = {
   graphId: string;
@@ -19,6 +22,7 @@ type CameraLineGraphProps = {
   updateTimes: number[];
   data: ApexAxisChartSeries;
   isActive?: boolean;
+  colors?: string[];
 };
 export function CameraLineGraph({
   graphId,
@@ -27,6 +31,7 @@ export function CameraLineGraph({
   updateTimes,
   data,
   isActive = true,
+  colors = GRAPH_COLORS,
 }: CameraLineGraphProps) {
   const { t } = useTranslation(["views/system", "common"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -91,7 +96,7 @@ export function CameraLineGraph({
           enabled: false,
         },
       },
-      colors: GRAPH_COLORS,
+      colors,
       grid: {
         show: false,
       },
@@ -138,7 +143,7 @@ export function CameraLineGraph({
         min: 0,
       },
     } as ApexCharts.ApexOptions;
-  }, [graphId, systemTheme, theme, formatTime]);
+  }, [graphId, colors, systemTheme, theme, formatTime]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
@@ -162,7 +167,7 @@ export function CameraLineGraph({
             <div key={label} className="flex items-center gap-1">
               <MdCircle
                 className="size-2"
-                style={{ color: GRAPH_COLORS[labelIdx] }}
+                style={{ color: colors[labelIdx] }}
               />
               <div className="text-xs text-secondary-foreground">
                 {t("cameras.label." + label)}

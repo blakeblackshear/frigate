@@ -1,5 +1,8 @@
 import { useFrigateStats } from "@/api/ws";
-import { CameraLineGraph } from "@/components/graph/LineGraph";
+import {
+  CameraLineGraph,
+  FPS_GRAPH_COLORS,
+} from "@/components/graph/LineGraph";
 import CameraInfoDialog from "@/components/overlay/CameraInfoDialog";
 import { ConnectionQualityIndicator } from "@/components/camera/ConnectionQualityIndicator";
 import { EmptyCard } from "@/components/card/EmptyCard";
@@ -308,6 +311,7 @@ export default function CameraMetrics({
               updateTimes={updateTimes}
               data={overallFpsSeries}
               isActive={isActive}
+              colors={FPS_GRAPH_COLORS}
             />
           </div>
         ) : (
@@ -411,6 +415,7 @@ export default function CameraMetrics({
                               cameraFpsSeries[camera.name] || {},
                             )}
                             isActive={isActive}
+                            colors={FPS_GRAPH_COLORS}
                           />
                         </div>
                       ) : (
