@@ -29,7 +29,7 @@ If you see **"No recordings found for this time"**, the most common causes are: 
 
 A toggle (a drawer on mobile) switches the side panel between three modes:
 
-- **Timeline** — a scrubbable vertical timeline of the selected camera, annotated with a motion line, review-item markers, and gaps where no recording exists.
+- **Timeline** — a scrubbable vertical timeline of the selected camera. Horizontal lines down the center represent motion, with longer lines indicating more motion at that moment. Review items are marked as shaded areas (**red** for alerts, **orange** for detections), and sections with no colored background are times when no recording exists.
 - **Events** — a scrollable list of the camera's review items for the time range; clicking one seeks the player to it.
 - **Detail** — the [tracking details inspector](#the-detail-view) for the objects in view.
 
