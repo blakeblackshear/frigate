@@ -1924,6 +1924,10 @@
       "resolutionHigh": "This detect resolution is higher than recommended and may cause increased resource usage without improving detection accuracy. A detect resolution at or below 1080p is recommended for most cameras.",
       "globalResolutionMultipleCameras": "A global detect resolution is set while multiple cameras are configured. Unless all cameras share the same resolution and aspect ratio, the detect width and height should be defined per camera to match each camera's native aspect ratio."
     },
+    "model": {
+      "optimizedFor320": "Frigate is optimized for a 320x320 model, which is the best choice for most setups. A 640x640 model is slower and only helps in specific scenarios.",
+      "inputDimensionsNotDetectResolution": "Model input width and height are the input dimensions of the object detection model, not your camera's detect resolution. They should match the dimensions of the model you're using — typically a square size like 320x320 or 640x640."
+    },
     "ffmpeg": {
       "hwaccelManualNotRecommended": "Manual hardware acceleration arguments are not recommended. Unless a specific requirement exists, select the preset that matches your hardware."
     },
