@@ -3,7 +3,7 @@
 import io
 import os
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 
@@ -24,91 +24,85 @@ def _make_config(model: str = "") -> GenAIConfig:
     )
 
 
-def _segment(values):
-    """Mimic the SDK BaseSegment shape (a `float_` list per segment)."""
-    seg = MagicMock()
-    seg.float_ = values
-    return seg
+def _response(key: str, values):
+    """Mimic the Marengo REST JSON: ``{<key>: {segments: [{float: [...]}]}}``."""
+    resp = MagicMock()
+    resp.raise_for_status.return_value = None
+    resp.json.return_value = {key: {"segments": [{"float": values}]}}
+    return resp
 
 
 class TestTwelveLabsEmbedNoNetwork(unittest.TestCase):
-    """Unit tests with the SDK client mocked — no network access."""
+    """Unit tests with ``requests`` mocked — no network access, no SDK."""
 
-    def _client_with_provider(self, provider) -> TwelveLabsClient:
+    def _client(self) -> TwelveLabsClient:
         client = TwelveLabsClient.__new__(TwelveLabsClient)
         client.genai_config = _make_config()
         client.timeout = 120
-        client.provider = provider
+        client.provider = "test-key"
         return client
 
-    def test_text_embedding_returns_vector(self):
-        provider = MagicMock()
-        response = MagicMock()
-        response.text_embedding.segments = [_segment([0.1, 0.2, 0.3])]
-        provider.embed.create.return_value = response
+    @patch("frigate.genai.plugins.twelvelabs.requests.post")
+    def test_text_embedding_returns_vector(self, post):
+        post.return_value = _response("text_embedding", [0.1, 0.2, 0.3])
 
-        client = self._client_with_provider(provider)
-        out = client.embed(texts=["a person walking a dog"])
+        out = self._client().embed(texts=["a person walking a dog"])
 
         self.assertEqual(len(out), 1)
         self.assertIsInstance(out[0], np.ndarray)
         self.assertEqual(out[0].dtype, np.float32)
         np.testing.assert_allclose(out[0], [0.1, 0.2, 0.3], rtol=1e-6)
 
-        _, kwargs = provider.embed.create.call_args
-        self.assertEqual(kwargs["model_name"], DEFAULT_MODEL)
-        self.assertEqual(kwargs["text"], "a person walking a dog")
+        _, kwargs = post.call_args
+        self.assertEqual(kwargs["files"]["model_name"][1], DEFAULT_MODEL)
+        self.assertEqual(kwargs["files"]["text"][1], "a person walking a dog")
+        self.assertEqual(kwargs["headers"]["x-api-key"], "test-key")
+        self.assertNotIn("image_file", kwargs["files"])
 
-    def test_image_embedding_uses_image_file(self):
-        provider = MagicMock()
-        response = MagicMock()
-        response.image_embedding.segments = [_segment([1.0, 2.0])]
-        provider.embed.create.return_value = response
+    @patch("frigate.genai.plugins.twelvelabs.requests.post")
+    def test_image_embedding_uses_image_file(self, post):
+        post.return_value = _response("image_embedding", [1.0, 2.0])
 
-        client = self._client_with_provider(provider)
-        out = client.embed(images=[b"\xff\xd8\xff jpeg bytes"])
+        out = self._client().embed(images=[b"\xff\xd8\xff jpeg bytes"])
 
         self.assertEqual(len(out), 1)
-        _, kwargs = provider.embed.create.call_args
-        self.assertEqual(kwargs["image_file"], b"\xff\xd8\xff jpeg bytes")
-        self.assertNotIn("text", kwargs)
+        _, kwargs = post.call_args
+        self.assertEqual(kwargs["files"]["image_file"][1], b"\xff\xd8\xff jpeg bytes")
+        self.assertNotIn("text", kwargs["files"])
 
-    def test_custom_model_name_is_used(self):
-        provider = MagicMock()
-        response = MagicMock()
-        response.text_embedding.segments = [_segment([0.0])]
-        provider.embed.create.return_value = response
+    @patch("frigate.genai.plugins.twelvelabs.requests.post")
+    def test_custom_model_name_is_used(self, post):
+        post.return_value = _response("text_embedding", [0.0])
 
-        client = self._client_with_provider(provider)
+        client = self._client()
         client.genai_config = _make_config(model="marengo-custom")
         client.embed(texts=["x"])
 
-        _, kwargs = provider.embed.create.call_args
-        self.assertEqual(kwargs["model_name"], "marengo-custom")
+        _, kwargs = post.call_args
+        self.assertEqual(kwargs["files"]["model_name"][1], "marengo-custom")
 
-    def test_empty_segments_are_skipped(self):
-        provider = MagicMock()
-        response = MagicMock()
-        response.text_embedding = None
-        provider.embed.create.return_value = response
+    @patch("frigate.genai.plugins.twelvelabs.requests.post")
+    def test_empty_segments_are_skipped(self, post):
+        resp = MagicMock()
+        resp.raise_for_status.return_value = None
+        resp.json.return_value = {"text_embedding": {"segments": []}}
+        post.return_value = resp
 
-        client = self._client_with_provider(provider)
-        self.assertEqual(client.embed(texts=["x"]), [])
+        self.assertEqual(self._client().embed(texts=["x"]), [])
 
-    def test_api_error_is_swallowed(self):
-        provider = MagicMock()
-        provider.embed.create.side_effect = RuntimeError("boom")
+    @patch("frigate.genai.plugins.twelvelabs.requests.post")
+    def test_api_error_is_swallowed(self, post):
+        post.side_effect = RuntimeError("boom")
 
-        client = self._client_with_provider(provider)
-        self.assertEqual(client.embed(texts=["x"]), [])
+        self.assertEqual(self._client().embed(texts=["x"]), [])
 
     def test_no_provider_returns_empty(self):
-        client = self._client_with_provider(None)
+        client = self._client()
+        client.provider = None
         self.assertEqual(client.embed(texts=["x"]), [])
 
     def test_no_inputs_returns_empty(self):
-        client = self._client_with_provider(MagicMock())
-        self.assertEqual(client.embed(), [])
+        self.assertEqual(self._client().embed(), [])
 
 
 @unittest.skipUnless(
