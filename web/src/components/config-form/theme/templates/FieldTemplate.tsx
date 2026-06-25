@@ -406,6 +406,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
             key={m.key}
             messageKey={m.messageKey}
             severity={m.severity}
+            values={m.values}
+            docLink={m.docLink}
           />
         ))}
       </div>
@@ -418,6 +420,8 @@ export function FieldTemplate(props: FieldTemplateProps) {
             key={m.key}
             messageKey={m.messageKey}
             severity={m.severity}
+            values={m.values}
+            docLink={m.docLink}
           />
         ))}
       </div>
