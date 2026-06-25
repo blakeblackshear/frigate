@@ -50,6 +50,7 @@ transformers == 4.45.*
 google-genai == 1.58.*
 ollama == 0.6.*
 openai == 1.65.*
+twelvelabs == 1.2.*
 # push notifications
 py-vapid == 1.9.*
 pywebpush == 2.0.*
