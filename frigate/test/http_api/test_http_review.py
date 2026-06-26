@@ -497,6 +497,43 @@ class TestHttpReview(BaseTestHttp):
             )
             assert user_review.has_been_reviewed == True
 
+    def test_post_reviews_viewed_concurrent_duplicate_does_not_raise(self):
+        """Regression: concurrent requests marking the same review must not 500.
+
+        Two requests can both SELECT and find no existing status, then both try
+        to INSERT, hitting the unique (user_id, review_segment) constraint.
+        on_conflict_ignore() must silently skip the duplicate instead of raising
+        an IntegrityError (which was previously caught with try/except).
+        """
+        id = "123456.random"
+        with AuthTestClient(self.app):
+            super().insert_mock_review_segment(id)
+
+            # Simulate the first request having already committed its insert.
+            self._insert_user_review_status(id, reviewed=True)
+
+            # Simulate the second concurrent request attempting the same insert.
+            UserReviewStatus.insert_many(
+                [
+                    {
+                        "user_id": self.user_id,
+                        "review_segment_id": id,
+                        "has_been_reviewed": True,
+                    }
+                ]
+            ).on_conflict_ignore().execute()
+
+            # Exactly one row should exist; no exception should have been raised.
+            count = (
+                UserReviewStatus.select()
+                .where(
+                    (UserReviewStatus.user_id == self.user_id)
+                    & (UserReviewStatus.review_segment == id)
+                )
+                .count()
+            )
+            assert count == 1
+
     ####################################################################################################################
     ###################################  POST reviews/delete Endpoint   ################################################
     ####################################################################################################################
