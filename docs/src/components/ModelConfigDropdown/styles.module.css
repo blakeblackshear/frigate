@@ -1,0 +1,275 @@
+/* ===================================================================
+   ModelConfigDropdown — styles
+   =================================================================== */
+
+.wrapper {
+  margin: 1.5rem 0;
+}
+
+/* --- Dropdown button --- */
+
+.dropdown {
+  display: inline-block;
+  width: 360px;
+  max-width: 100%;
+  text-align: left;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 8px;
+  background: var(--ifm-background-color);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+[data-theme="light"] .dropdown {
+  border: 1px solid #d0d7de;
+  background: #fff;
+}
+
+[data-theme="dark"] .dropdown {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: #21262d;
+}
+
+.dropdown:hover {
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
+}
+
+[data-theme="dark"] .dropdown:hover {
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
+}
+
+.dropdown.open {
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
+}
+
+[data-theme="dark"] .dropdown.open {
+  border-color: var(--ifm-color-primary);
+}
+
+/* Single-model detectors render the label without a clickable menu. */
+.dropdown.static {
+  cursor: default;
+}
+
+.dropdown.static:hover {
+  border-color: var(--ifm-color-emphasis-400);
+  box-shadow: none;
+}
+
+[data-theme="light"] .dropdown.static:hover {
+  border-color: #d0d7de;
+}
+
+[data-theme="dark"] .dropdown.static:hover {
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+.dropdownContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+}
+
+/* --- Model menu --- */
+
+.menu {
+  margin-top: 0.25rem;
+  width: 360px;
+  max-width: 100%;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ifm-background-color);
+}
+
+[data-theme="light"] .menu {
+  border: 1px solid #d0d7de;
+  background: #fff;
+}
+
+[data-theme="dark"] .menu {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: #21262d;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--ifm-font-color-base);
+  transition: background 0.15s;
+}
+
+.menuItem:not(:last-child) {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.menuItem:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.menuItemActive {
+  font-weight: var(--ifm-font-weight-semibold);
+  background: var(--ifm-color-primary-lightest);
+}
+
+[data-theme="dark"] .menuItem:hover {
+  background: #2b3139;
+}
+
+[data-theme="dark"] .menuItemActive {
+  background: #2b3139;
+}
+
+.modelName {
+  font-weight: var(--ifm-font-weight-semibold);
+  color: var(--ifm-font-color-base);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.recommendedBadge {
+  display: inline-block;
+  background: var(--ifm-color-success);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.arrow {
+  font-size: 0.7rem;
+  color: var(--ifm-font-color-secondary);
+  transition: transform 0.2s;
+}
+
+.dropdown.open .arrow {
+  transform: rotate(180deg);
+}
+
+/* --- Panel --- */
+
+.panel {
+  margin-top: 0.5rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ifm-background-color);
+}
+
+[data-theme="light"] .panel {
+  border: 1px solid #d0d7de;
+  background: #fff;
+}
+
+[data-theme="dark"] .panel {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: #21262d;
+}
+
+/* --- Steps --- */
+
+.step {
+  padding: 1rem;
+}
+
+.step:not(:last-child) {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.stepTitle {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ifm-font-color-base);
+}
+
+/* Rendered markdown (download + Frigate UI instructions). */
+
+.markdown {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown a {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.markdown table {
+  display: table;
+  width: 100%;
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+}
+
+/* Docusaurus-style admonitions rendered from markdown. */
+
+.admonition {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--ifm-color-info);
+  border-radius: 4px;
+  background: var(--ifm-color-info-contrast-background);
+  font-size: 0.85rem;
+}
+
+.admonition > :last-child {
+  margin-bottom: 0;
+}
+
+.admonitionTitle {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  margin-bottom: 0.4rem;
+  color: var(--ifm-color-info);
+}
+
+.admonition_warning {
+  border-left-color: var(--ifm-color-warning);
+  background: var(--ifm-color-warning-contrast-background);
+}
+
+.admonition_warning .admonitionTitle {
+  color: var(--ifm-color-warning-dark);
+}
+
+.admonition_danger {
+  border-left-color: var(--ifm-color-danger);
+  background: var(--ifm-color-danger-contrast-background);
+}
+
+.admonition_danger .admonitionTitle {
+  color: var(--ifm-color-danger-dark);
+}
+
+.admonition_tip {
+  border-left-color: var(--ifm-color-success);
+  background: var(--ifm-color-success-contrast-background);
+}
+
+.admonition_tip .admonitionTitle {
+  color: var(--ifm-color-success-dark);
+}

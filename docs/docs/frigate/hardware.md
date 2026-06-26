@@ -68,26 +68,26 @@ Frigate supports multiple different detectors that work on different types of ha
 **AMD**
 
 - [ROCm](#rocm---amd-gpu): ROCm can run on AMD Discrete GPUs to provide efficient object detection
-  - [Supports limited model architectures](../../configuration/object_detectors#rocm-supported-models)
+  - [Supports limited model architectures](../../configuration/object_detectors#amdrocm-gpu-detector)
   - Runs best on discrete AMD GPUs
 
 **Apple Silicon**
 
 - [Apple Silicon](#apple-silicon): Apple Silicon is usable on all M1 and newer Apple Silicon devices to provide efficient and fast object detection
-  - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#apple-silicon-supported-models)
+  - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#apple-silicon-detector)
   - Runs well with any size models including large
   - Runs via ZMQ proxy which adds some latency, only recommended for local connection
 
 **Intel**
 
 - [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel NPUs to provide efficient object detection.
-  - [Supports majority of model architectures](../../configuration/object_detectors#openvino-supported-models)
+  - [Supports majority of model architectures](../../configuration/object_detectors#openvino-detector)
   - Runs best with tiny, small, or medium models
 
 **Nvidia**
 
 - [Nvidia GPU](#nvidia-gpus): Nvidia GPUs can provide efficient object detection.
-  - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#onnx-supported-models)
+  - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#onnx)
   - Runs well with any size models including large
 
 - <CommunityBadge /> [Jetson](#nvidia-jetson): Jetson devices are supported via the TensorRT or ONNX detectors when running Jetpack 6.
