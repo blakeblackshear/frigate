@@ -13,7 +13,7 @@ This page describes how to _use_ the Live view. For how to _configure_ live stre
 
 The default **All Cameras** dashboard shows every camera, with a filmstrip of recent **alerts** scrolling across the top. Clicking an alert opens it in [Review](/usage/review); each card also has a check button to mark it reviewed without leaving the dashboard. Only **alerts** appear in the filmstrip — to suppress a label or zone from showing there, configure it as a detection instead (see [Alerts and Detections](/configuration/review#alerts-and-detections)).
 
-By default Frigate uses **smart streaming**: a camera's image updates roughly once per minute while nothing is happening, and switches to a full live stream the moment activity is detected. This conserves bandwidth and resources. You can change this per camera or per group (see [Streaming settings](#streaming-settings-and-the-right-click-menu) below), and the behavior is explained in detail under [Live view technologies](/configuration/live#live-view-technologies).
+By default Frigate uses **smart streaming**: a camera's image updates roughly once per minute while nothing is happening, and switches to a full live stream the moment activity is detected. This conserves bandwidth and resources. You can change this for each camera when using a camera group (see [Streaming settings](#streaming-settings-and-the-right-click-menu) below), and the behavior is explained in detail under [Live view technologies](/configuration/live#live-view-technologies).
 
 On mobile, a toggle in the header switches between a **grid** layout and a single-column **list** layout. On desktop a **fullscreen** button is available in the lower-right corner.
 
@@ -24,7 +24,7 @@ The icon rail (top-left on desktop, a horizontal strip on mobile) switches betwe
 - The **home** icon is the **All Cameras** dashboard, which shows every camera enabled for the dashboard.
 - Each **camera group** you create appears as its own icon. Selecting a group shows only that group's cameras.
 
-Camera groups are useful for organizing cameras by location (for example, _Front of House_ or _Backyard_) and for giving each group its own dashboard layout and streaming preferences.
+Camera groups are useful for organizing cameras by location (for example, _Front of House_ or _Backyard_) and for giving each group its own dashboard layout and camera streaming preferences.
 
 You can also view [Birdseye](/configuration/birdseye) on the dashboard, or open it directly at `http://<frigate_host>:5000/#birdseye`. Clicking a camera inside the Birdseye view jumps to that camera's live feed.
 

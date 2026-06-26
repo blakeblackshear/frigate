@@ -9,6 +9,12 @@ import NavPath from "@site/src/components/NavPath";
 
 This page describes how to _use_ the Explore view. For how the underlying features are _configured_, see [Semantic Search](/configuration/semantic_search) and [Generative AI descriptions](/configuration/genai/genai_objects).
 
+:::tip
+
+If you just want to quickly see what happened on your cameras, it's recommended to use [Review](/usage/review) rather than Explore. Review groups overlapping and adjacent activity on a camera into **review items** and sorts them into Alerts, Detections, and Motion, so you can scan and play back footage in a few clicks instead of sifting through individual objects. Reach for Explore when you need to find a _specific_ tracked object after the fact — by label, time, zone, or description.
+
+:::
+
 ## Browsing tracked objects
 
 The default view shows your most recent tracked objects grouped into rows by label — _Person_, _Car_, _Dog_, and so on — each row labeled with the object type and a count. The arrow at the end of a row opens the full, filterable grid for that label.
