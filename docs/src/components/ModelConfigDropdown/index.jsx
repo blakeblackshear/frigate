@@ -1,0 +1,104 @@
+import React, { useState } from "react";
+import CodeBlock from "@theme/CodeBlock";
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import { marked } from "marked";
+import styles from "./styles.module.css";
+
+marked.setOptions({ gfm: true });
+
+/**
+ * @typedef {Object} Model
+ * @property {string} key
+ * @property {string} label
+ * @property {boolean} recommended
+ * @property {string} download Markdown for the "download the model" step.
+ * @property {string} ui Markdown for the Frigate UI configuration step.
+ * @property {string} yaml Raw YAML for the configuration step.
+ */
+
+function Markdown({ children }) {
+  return (
+    <div
+      className={styles.markdown}
+      dangerouslySetInnerHTML={{ __html: marked.parse(children || "") }}
+    />
+  );
+}
+
+/**
+ * @param {{ models: Model[] }} props
+ */
+export default function ModelConfigDropdown({ models }) {
+  const [selectedModelIndex, setSelectedModelIndex] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const selectedModel = models[selectedModelIndex];
+  const hasChoices = models.length > 1;
+
+  const handleModelSelect = (index) => {
+    setSelectedModelIndex(index);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className={styles.wrapper}>
+      <div
+        className={`${styles.dropdown} ${isOpen ? styles.open : ""} ${
+          hasChoices ? "" : styles.static
+        }`}
+        onClick={hasChoices ? () => setIsOpen(!isOpen) : undefined}
+      >
+        <div className={styles.dropdownContent}>
+          <span className={styles.modelName}>
+            {selectedModel.recommended && (
+              <span className={styles.recommendedBadge}>Recommended</span>
+            )}
+            {selectedModel.label}
+          </span>
+          {hasChoices && (
+            <span className={styles.arrow}>{isOpen ? "▲" : "▼"}</span>
+          )}
+        </div>
+      </div>
+
+      {isOpen && hasChoices && (
+        <div className={styles.menu}>
+          {models.map((model, index) => (
+            <div
+              key={model.key}
+              className={`${styles.menuItem} ${
+                index === selectedModelIndex ? styles.menuItemActive : ""
+              }`}
+              onClick={() => handleModelSelect(index)}
+            >
+              {model.recommended && (
+                <span className={styles.recommendedBadge}>Recommended</span>
+              )}
+              {model.label}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className={styles.panel}>
+        <div className={styles.step}>
+          <h4 className={styles.stepTitle}>Step 1 — Download the model</h4>
+          <Markdown>{selectedModel.download}</Markdown>
+        </div>
+
+        <div className={styles.step}>
+          <h4 className={styles.stepTitle}>Step 2 — Configure the detector</h4>
+          <ConfigTabs>
+            <TabItem value="ui">
+              <Markdown>{selectedModel.ui}</Markdown>
+            </TabItem>
+            <TabItem value="yaml">
+              <CodeBlock language="yaml">{selectedModel.yaml}</CodeBlock>
+            </TabItem>
+          </ConfigTabs>
+        </div>
+      </div>
+    </div>
+  );
+}

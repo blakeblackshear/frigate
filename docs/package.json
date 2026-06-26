@@ -29,6 +29,7 @@
     "docusaurus-plugin-openapi-docs": "^4.5.1",
     "docusaurus-theme-openapi-docs": "^4.5.1",
     "js-yaml": "^4.1.1",
+    "marked": "^16.4.2",
     "prism-react-renderer": "^2.4.1",
     "raw-loader": "^4.0.2",
     "react": "^18.3.1",
