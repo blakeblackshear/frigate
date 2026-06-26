@@ -4,6 +4,9 @@ title: Object Detectors
 ---
 
 import CommunityBadge from '@site/src/components/CommunityBadge';
+import ConfigTabs from '@site/src/components/ConfigTabs';
+import TabItem from '@theme/TabItem';
+import NavPath from '@site/src/components/NavPath';
 import ModelConfigDropdown from '@site/src/components/ModelConfigDropdown';
 import objectDetectorsModels from '@site/data/object_detectors_models.json';
 
@@ -106,29 +109,134 @@ See [common Edge TPU troubleshooting steps](/troubleshooting/edgetpu) if the Edg
 
 ### Single USB Coral
 
-Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`.
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+detectors:
+  coral:
+    type: edgetpu
+    device: usb
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Multiple USB Corals
 
-Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `usb:0` and `usb:1` as the device for each.
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `usb:0` and `usb:1` as the device for each.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+detectors:
+  coral1:
+    type: edgetpu
+    device: usb:0
+  coral2:
+    type: edgetpu
+    device: usb:1
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Native Coral (Dev Board)
 
 _warning: may have [compatibility issues](https://github.com/blakeblackshear/frigate/issues/1706) after `v0.9.x`_
 
-Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add**, then leave the device field empty.
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then leave the device field empty.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+detectors:
+  coral:
+    type: edgetpu
+    device: ""
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Single PCIE/M.2 Coral
 
-Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `pci`.
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `pci`.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+detectors:
+  coral:
+    type: edgetpu
+    device: pci
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Multiple PCIE/M.2 Corals
 
-Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `pci:0` and `pci:1` as the device for each.
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `pci:0` and `pci:1` as the device for each.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+detectors:
+  coral1:
+    type: edgetpu
+    device: pci:0
+  coral2:
+    type: edgetpu
+    device: pci:1
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Mixing Corals
 
-Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors with different device types (e.g., `usb` and `pci`).
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors with different device types (e.g., `usb` and `pci`).
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+detectors:
+  coral_usb:
+    type: edgetpu
+    device: usb
+  coral_pci:
+    type: edgetpu
+    device: pci
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Configuration
 

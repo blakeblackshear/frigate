@@ -193,7 +193,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--ifm-color-primary);
+  color: var(--ifm-font-color-base);
 }
 
 /* Rendered markdown (download + Frigate UI instructions). */

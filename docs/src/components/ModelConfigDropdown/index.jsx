@@ -26,6 +26,10 @@ function Markdown({ children }) {
   );
 }
 
+function RecommendedBadge() {
+  return <span className={styles.recommendedBadge}>Recommended</span>;
+}
+
 /**
  * @param {{ models: Model[] }} props
  */
@@ -43,52 +47,51 @@ export default function ModelConfigDropdown({ models }) {
 
   return (
     <div className={styles.wrapper}>
-      <div
-        className={`${styles.dropdown} ${isOpen ? styles.open : ""} ${
-          hasChoices ? "" : styles.static
-        }`}
-        onClick={hasChoices ? () => setIsOpen(!isOpen) : undefined}
-      >
-        <div className={styles.dropdownContent}>
-          <span className={styles.modelName}>
-            {selectedModel.recommended && (
-              <span className={styles.recommendedBadge}>Recommended</span>
-            )}
-            {selectedModel.label}
-          </span>
-          {hasChoices && (
-            <span className={styles.arrow}>{isOpen ? "▲" : "▼"}</span>
-          )}
-        </div>
-      </div>
-
-      {isOpen && hasChoices && (
-        <div className={styles.menu}>
-          {models.map((model, index) => (
-            <div
-              key={model.key}
-              className={`${styles.menuItem} ${
-                index === selectedModelIndex ? styles.menuItemActive : ""
-              }`}
-              onClick={() => handleModelSelect(index)}
-            >
-              {model.recommended && (
-                <span className={styles.recommendedBadge}>Recommended</span>
-              )}
-              {model.label}
-            </div>
-          ))}
-        </div>
-      )}
-
       <div className={styles.panel}>
         <div className={styles.step}>
-          <h4 className={styles.stepTitle}>Step 1 — Download the model</h4>
+          <h4 className={styles.stepTitle}>Step 1 — Choose a model</h4>
+          <div
+            className={`${styles.dropdown} ${isOpen ? styles.open : ""} ${
+              hasChoices ? "" : styles.static
+            }`}
+            onClick={hasChoices ? () => setIsOpen(!isOpen) : undefined}
+          >
+            <div className={styles.dropdownContent}>
+              <span className={styles.modelName}>
+                {selectedModel.label}
+                {selectedModel.recommended && <RecommendedBadge />}
+              </span>
+              {hasChoices && (
+                <span className={styles.arrow}>{isOpen ? "▲" : "▼"}</span>
+              )}
+            </div>
+          </div>
+
+          {isOpen && hasChoices && (
+            <div className={styles.menu}>
+              {models.map((model, index) => (
+                <div
+                  key={model.key}
+                  className={`${styles.menuItem} ${
+                    index === selectedModelIndex ? styles.menuItemActive : ""
+                  }`}
+                  onClick={() => handleModelSelect(index)}
+                >
+                  {model.label}
+                  {model.recommended && <RecommendedBadge />}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className={styles.step}>
+          <h4 className={styles.stepTitle}>Step 2 — Download the model</h4>
           <Markdown>{selectedModel.download}</Markdown>
         </div>
 
         <div className={styles.step}>
-          <h4 className={styles.stepTitle}>Step 2 — Configure the detector</h4>
+          <h4 className={styles.stepTitle}>Step 3 — Configure the detector</h4>
           <ConfigTabs>
             <TabItem value="ui">
               <Markdown>{selectedModel.ui}</Markdown>
