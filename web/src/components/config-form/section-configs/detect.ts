@@ -116,6 +116,7 @@ const detect: SectionConfigOverrides = {
         messageKey: "configMessages.detect.fpsGreaterThanFive",
         severity: "info",
         position: "after",
+        docLink: "/frigate/camera_setup#choosing-a-detect-frame-rate",
         condition: (ctx) => {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
           if (ctx.fullCameraConfig.type === "lpr") return false;

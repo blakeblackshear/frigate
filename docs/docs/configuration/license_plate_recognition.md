@@ -671,7 +671,7 @@ lpr:
 3. Ensure your plates are being _detected_.
 
    If you are using a Frigate+ or `license_plate` detecting model:
-   - Watch the debug view (Settings --> Debug) to ensure that `license_plate` is being detected.
+   - Watch the [Debug view](/usage/live#the-single-camera-view) to ensure that `license_plate` is being detected.
    - View MQTT messages for `frigate/events` to verify detected plates.
    - You may need to adjust your `min_score` and/or `threshold` for the `license_plate` object if your plates are not being detected.
 
