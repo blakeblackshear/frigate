@@ -223,3 +223,54 @@
 .markdown pre {
   font-size: 0.8rem;
 }
+
+/* Docusaurus-style admonitions rendered from markdown. */
+
+.admonition {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--ifm-color-info);
+  border-radius: 4px;
+  background: var(--ifm-color-info-contrast-background);
+  font-size: 0.85rem;
+}
+
+.admonition > :last-child {
+  margin-bottom: 0;
+}
+
+.admonitionTitle {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  margin-bottom: 0.4rem;
+  color: var(--ifm-color-info);
+}
+
+.admonition_warning {
+  border-left-color: var(--ifm-color-warning);
+  background: var(--ifm-color-warning-contrast-background);
+}
+
+.admonition_warning .admonitionTitle {
+  color: var(--ifm-color-warning-dark);
+}
+
+.admonition_danger {
+  border-left-color: var(--ifm-color-danger);
+  background: var(--ifm-color-danger-contrast-background);
+}
+
+.admonition_danger .admonitionTitle {
+  color: var(--ifm-color-danger-dark);
+}
+
+.admonition_tip {
+  border-left-color: var(--ifm-color-success);
+  background: var(--ifm-color-success-contrast-background);
+}
+
+.admonition_tip .admonitionTitle {
+  color: var(--ifm-color-success-dark);
+}

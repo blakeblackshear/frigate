@@ -17,11 +17,34 @@ marked.setOptions({ gfm: true });
  * @property {string} yaml Raw YAML for the configuration step.
  */
 
+// marked does not understand Docusaurus admonitions (:::warning ... :::), so
+// render those blocks ourselves and marked-parse everything around them.
+function renderMarkdown(md) {
+  if (!md) return "";
+  const admonition = /:::(\w+)[ \t]*([^\n]*)\n([\s\S]*?)\n:::/g;
+  let html = "";
+  let lastIndex = 0;
+  let match;
+  while ((match = admonition.exec(md)) !== null) {
+    html += marked.parse(md.slice(lastIndex, match.index));
+    const [, type, title, body] = match;
+    const heading = (title || type).trim();
+    html +=
+      `<div class="${styles.admonition} ${styles[`admonition_${type}`] || ""}">` +
+      `<div class="${styles.admonitionTitle}">${heading}</div>` +
+      marked.parse(body) +
+      `</div>`;
+    lastIndex = admonition.lastIndex;
+  }
+  html += marked.parse(md.slice(lastIndex));
+  return html;
+}
+
 function Markdown({ children }) {
   return (
     <div
       className={styles.markdown}
-      dangerouslySetInnerHTML={{ __html: marked.parse(children || "") }}
+      dangerouslySetInnerHTML={{ __html: renderMarkdown(children) }}
     />
   );
 }
