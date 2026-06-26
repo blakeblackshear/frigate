@@ -392,6 +392,15 @@ def events_explore(
     if not allowed_cameras:
         return JSONResponse(content=[])
 
+    distinct_labels = (
+        Event.select(Event.label)
+        .where(Event.camera << allowed_cameras)
+        .distinct()
+        .order_by(Event.label)
+    )
+
+    label_counts = {}
+
     explore_columns = (
         Event.id,
         Event.camera,
@@ -410,85 +419,72 @@ def events_explore(
         Event.data,
     )
 
-    # Single query: per-label COUNT and top-N ranking by start_time computed
-    # via window functions in a CTE, then filtered to rn <= limit
-    event_count = (
-        fn.COUNT(Event.id).over(partition_by=[Event.label]).alias("event_count")
-    )
-    rn = (
-        fn.ROW_NUMBER()
-        .over(partition_by=[Event.label], order_by=[Event.start_time.desc()])
-        .alias("rn")
-    )
+    def event_generator():
+        for label_obj in distinct_labels.iterator():
+            label = label_obj.label
 
-    base_query = Event.select(
-        *explore_columns,
-        event_count,
-        rn,
-    ).where(Event.camera << allowed_cameras)
-    ranked = base_query.cte("ranked")
-    query = (
-        Event.select(
-            ranked.c.id,
-            ranked.c.camera,
-            ranked.c.label,
-            ranked.c.sub_label,
-            ranked.c.zones,
-            ranked.c.start_time,
-            ranked.c.end_time,
-            ranked.c.has_clip,
-            ranked.c.has_snapshot,
-            ranked.c.plus_id,
-            ranked.c.retain_indefinitely,
-            ranked.c.top_score,
-            ranked.c.false_positive,
-            ranked.c.box,
-            ranked.c.data,
-            ranked.c.event_count,
-        )
-        .from_(ranked)
-        .with_cte(ranked)
-        .where(ranked.c.rn <= limit)
-        .order_by(ranked.c.event_count.desc(), ranked.c.start_time.desc())
-        .objects()
+            # get most recent events for this label
+            label_events = (
+                Event.select(*explore_columns)
+                .where((Event.label == label) & (Event.camera << allowed_cameras))
+                .order_by(Event.start_time.desc())
+                .limit(limit)
+                .iterator()
+            )
+
+            # count total events for this label
+            label_counts[label] = (
+                Event.select()
+                .where((Event.label == label) & (Event.camera << allowed_cameras))
+                .count()
+            )
+
+            yield from label_events
+
+    def process_events():
+        for event in event_generator():
+            processed_event = {
+                "id": event.id,
+                "camera": event.camera,
+                "label": event.label,
+                "zones": event.zones,
+                "start_time": event.start_time,
+                "end_time": event.end_time,
+                "has_clip": event.has_clip,
+                "has_snapshot": event.has_snapshot,
+                "plus_id": event.plus_id,
+                "retain_indefinitely": event.retain_indefinitely,
+                "sub_label": event.sub_label,
+                "top_score": event.top_score,
+                "false_positive": event.false_positive,
+                "box": event.box,
+                "data": {
+                    k: v
+                    for k, v in event.data.items()
+                    if k
+                    in [
+                        "type",
+                        "score",
+                        "top_score",
+                        "description",
+                        "sub_label_score",
+                        "average_estimated_speed",
+                        "velocity_angle",
+                        "path_data",
+                        "recognized_license_plate",
+                        "recognized_license_plate_score",
+                    ]
+                },
+                "event_count": label_counts[event.label],
+            }
+            yield processed_event
+
+    # convert iterator to list and sort
+    processed_events = sorted(
+        process_events(),
+        key=lambda x: (x["event_count"], x["start_time"]),
+        reverse=True,
     )
-
-    allowed_data_keys = {
-        "type",
-        "score",
-        "top_score",
-        "description",
-        "sub_label_score",
-        "average_estimated_speed",
-        "velocity_angle",
-        "path_data",
-        "recognized_license_plate",
-        "recognized_license_plate_score",
-    }
-
-    processed_events = [
-        {
-            "id": event.id,
-            "camera": event.camera,
-            "label": event.label,
-            "zones": event.zones,
-            "start_time": event.start_time,
-            "end_time": event.end_time,
-            "has_clip": event.has_clip,
-            "has_snapshot": event.has_snapshot,
-            "plus_id": event.plus_id,
-            "retain_indefinitely": event.retain_indefinitely,
-            "sub_label": event.sub_label,
-            "top_score": event.top_score,
-            "false_positive": event.false_positive,
-            "box": event.box,
-            "data": {
-                k: v for k, v in (event.data or {}).items() if k in allowed_data_keys
-            },
-            "event_count": event.event_count,
-        }
-        for event in query
-    ]
 
     return JSONResponse(content=processed_events)
 
