@@ -1,14 +1,8 @@
 """Peewee migrations -- 036_add_perf_indexes.py.
 
-Adds composite/single-column indexes to speed up the most common queries
-issued by the web UI on initial page load:
+Adds composite/single-column indexes to speed up single-camera queries
+issued by the web UI.
 
-- event(camera, start_time DESC): /events list filtered by camera + time range
-- reviewsegment(camera, start_time DESC): /api/review filtered by camera + time range
-- reviewsegment(end_time): supports the end_time > after half of /api/review's range
-
-The existing event(label, start_time DESC) index from migration 027 already
-covers /events/explore, so it is intentionally not duplicated here.
 """
 
 import peewee as pw
