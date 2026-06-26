@@ -537,7 +537,7 @@ async def set_multiple_reviewed(
             )
 
         if to_create:
-            UserReviewStatus.insert_many(to_create).execute()
+            UserReviewStatus.insert_many(to_create).on_conflict_ignore().execute()
 
     return JSONResponse(
         content=(
