@@ -17,36 +17,77 @@ marked.setOptions({ gfm: true });
  * @property {string} yaml Raw YAML for the configuration step.
  */
 
+// Render a markdown string to React nodes. Fenced code blocks become Docusaurus
+// CodeBlock components (so they get syntax highlighting and a copy button);
+// everything else is marked-parsed to HTML.
+function renderBlocks(md, keyPrefix) {
+  if (!md.trim()) return [];
+  const tokens = marked.lexer(md);
+  const nodes = [];
+  let buffer = [];
+  let idx = 0;
+
+  const flush = () => {
+    if (buffer.length) {
+      buffer.links = tokens.links;
+      nodes.push(
+        <div
+          key={`${keyPrefix}-h${idx++}`}
+          dangerouslySetInnerHTML={{ __html: marked.parser(buffer) }}
+        />,
+      );
+      buffer = [];
+    }
+  };
+
+  tokens.forEach((token) => {
+    if (token.type === "code") {
+      flush();
+      const language = (token.lang || "text").split(/\s+/)[0];
+      nodes.push(
+        <CodeBlock key={`${keyPrefix}-c${idx++}`} language={language}>
+          {token.text}
+        </CodeBlock>,
+      );
+    } else {
+      buffer.push(token);
+    }
+  });
+  flush();
+  return nodes;
+}
+
 // marked does not understand Docusaurus admonitions (:::warning ... :::), so
-// render those blocks ourselves and marked-parse everything around them.
+// render those blocks ourselves and render everything around them normally.
 function renderMarkdown(md) {
-  if (!md) return "";
+  if (!md) return null;
   const admonition = /:::(\w+)[ \t]*([^\n]*)\n([\s\S]*?)\n:::/g;
-  let html = "";
+  const nodes = [];
   let lastIndex = 0;
   let match;
+  let k = 0;
   while ((match = admonition.exec(md)) !== null) {
-    html += marked.parse(md.slice(lastIndex, match.index));
+    nodes.push(...renderBlocks(md.slice(lastIndex, match.index), `seg${k}`));
     const [, type, title, body] = match;
     const heading = (title || type).trim();
-    html +=
-      `<div class="${styles.admonition} ${styles[`admonition_${type}`] || ""}">` +
-      `<div class="${styles.admonitionTitle}">${heading}</div>` +
-      marked.parse(body) +
-      `</div>`;
+    nodes.push(
+      <div
+        key={`adm${k}`}
+        className={`${styles.admonition} ${styles[`admonition_${type}`] || ""}`}
+      >
+        <div className={styles.admonitionTitle}>{heading}</div>
+        {renderBlocks(body, `adm${k}`)}
+      </div>,
+    );
     lastIndex = admonition.lastIndex;
+    k++;
   }
-  html += marked.parse(md.slice(lastIndex));
-  return html;
+  nodes.push(...renderBlocks(md.slice(lastIndex), `seg${k}`));
+  return nodes;
 }
 
 function Markdown({ children }) {
-  return (
-    <div
-      className={styles.markdown}
-      dangerouslySetInnerHTML={{ __html: renderMarkdown(children) }}
-    />
-  );
+  return <div className={styles.markdown}>{renderMarkdown(children)}</div>;
 }
 
 function RecommendedBadge() {

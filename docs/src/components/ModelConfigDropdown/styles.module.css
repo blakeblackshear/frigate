@@ -9,8 +9,9 @@
 /* --- Dropdown button --- */
 
 .dropdown {
-  display: block;
-  width: 100%;
+  display: inline-block;
+  width: 360px;
+  max-width: 100%;
   text-align: left;
   border: 1px solid var(--ifm-color-emphasis-400);
   border-radius: 8px;
@@ -71,13 +72,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
 }
 
 /* --- Model menu --- */
 
 .menu {
   margin-top: 0.25rem;
+  width: 360px;
+  max-width: 100%;
   border: 1px solid var(--ifm-color-emphasis-400);
   border-radius: 8px;
   overflow: hidden;
@@ -133,6 +137,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .recommendedBadge {
@@ -189,10 +194,8 @@
 
 .stepTitle {
   margin: 0 0 0.75rem 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--ifm-font-color-base);
 }
 
@@ -218,10 +221,6 @@
   width: 100%;
   margin: 0.75rem 0;
   font-size: 0.85rem;
-}
-
-.markdown pre {
-  font-size: 0.8rem;
 }
 
 /* Docusaurus-style admonitions rendered from markdown. */
