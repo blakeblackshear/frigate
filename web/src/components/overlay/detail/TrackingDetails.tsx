@@ -1225,11 +1225,15 @@ function LifecycleIconRow({
                       <DropdownMenuItem
                         className="cursor-pointer"
                         onSelect={async () => {
-                          const resp = await axios.post(
-                            `/${item.camera}/plus/${item.timestamp + annotationOffset / 1000}`,
-                          );
+                          try {
+                            const resp = await axios.post(
+                              `/${item.camera}/plus/${item.timestamp + annotationOffset / 1000}`,
+                            );
 
-                          if (resp && resp.status == 200) {
+                            if (resp.status !== 200) {
+                              throw new Error();
+                            }
+
                             toast.success(
                               t("toast.success.submittedFrigatePlus", {
                                 ns: "components/player",
@@ -1238,8 +1242,8 @@ function LifecycleIconRow({
                                 position: "top-center",
                               },
                             );
-                          } else {
-                            toast.success(
+                          } catch {
+                            toast.error(
                               t("toast.error.submitFrigatePlusFailed", {
                                 ns: "components/player",
                               }),

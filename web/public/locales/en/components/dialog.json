@@ -24,6 +24,9 @@
         },
         "state": {
           "submitted": "Submitted"
+        },
+        "toast": {
+          "error": "Failed to submit to Frigate+. Please check your network connection and try again."
         }
       }
     },
