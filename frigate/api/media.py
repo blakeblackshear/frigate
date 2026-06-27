@@ -16,6 +16,7 @@ import cv2
 import numpy as np
 import pytz
 from fastapi import APIRouter, Depends, Path, Query, Request, Response
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pathvalidate import sanitize_filename
 from peewee import DoesNotExist, fn
@@ -1270,7 +1271,7 @@ async def event_preview(request: Request, event_id: str):
     end_ts = start_ts + (
         min(event.end_time - event.start_time, 20) if event.end_time else 20
     )
-    return preview_gif(request, event.camera, start_ts, end_ts)
+    return await run_in_threadpool(preview_gif, request, event.camera, start_ts, end_ts)
 
 
 @router.get(
@@ -1657,9 +1658,13 @@ async def review_preview(
     )
 
     if format == "gif":
-        return preview_gif(request, review.camera, start_ts, end_ts)
+        return await run_in_threadpool(
+            preview_gif, request, review.camera, start_ts, end_ts
+        )
     else:
-        return preview_mp4(request, review.camera, start_ts, end_ts)
+        return await run_in_threadpool(
+            preview_mp4, request, review.camera, start_ts, end_ts
+        )
 
 
 @router.get(
