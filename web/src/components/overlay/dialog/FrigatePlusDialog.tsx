@@ -10,6 +10,7 @@ import { isDesktop, isMobile, isSafari } from "react-device-detect";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "sonner";
 import { useTranslation, Trans } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -48,13 +49,28 @@ export function FrigatePlusDialog({
   const onSubmitToPlus = useCallback(
     async (falsePositive: boolean) => {
       if (!upload) return;
-      falsePositive
-        ? axios.put(`events/${upload.id}/false_positive`)
-        : axios.post(`events/${upload.id}/plus`, { include_annotation: 1 });
-      setState("submitted");
-      onEventUploaded();
+
+      try {
+        const resp = falsePositive
+          ? await axios.put(`events/${upload.id}/false_positive`)
+          : await axios.post(`events/${upload.id}/plus`, {
+              include_annotation: 1,
+            });
+
+        if (resp.status !== 200 || !resp.data?.success) {
+          throw new Error();
+        }
+
+        setState("submitted");
+        onEventUploaded();
+      } catch {
+        setState("reviewing");
+        toast.error(t("explore.plus.review.toast.error"), {
+          position: "top-center",
+        });
+      }
     },
-    [upload, onEventUploaded],
+    [upload, onEventUploaded, t],
   );
 
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
