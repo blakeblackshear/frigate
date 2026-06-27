@@ -274,7 +274,7 @@ async def no_recordings(
             return JSONResponse(content=[])
         cameras = ",".join(filtered)
     else:
-        cameras = allowed_cameras
+        cameras = "all"
 
     before = params.before or datetime.datetime.now().timestamp()
     after = (
@@ -283,7 +283,11 @@ async def no_recordings(
     )
     scale = params.scale
 
-    clauses = [(Recordings.end_time >= after) & (Recordings.start_time <= before)]
+    clauses = [
+        (Recordings.start_time >= after - 3600)
+        & (Recordings.start_time <= before)
+        & (Recordings.end_time >= after)
+    ]
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((Recordings.camera << camera_list))
