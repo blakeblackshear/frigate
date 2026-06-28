@@ -17,6 +17,7 @@ import pytz  # type: ignore[import-untyped]
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
+from frigate.config.camera.record import ChaptersEnum
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -217,6 +218,7 @@ class RecordingExporter(threading.Thread):
         ffmpeg_input_args: Optional[str] = None,
         ffmpeg_output_args: Optional[str] = None,
         cpu_fallback: bool = False,
+        chapters: Optional[ChaptersEnum] = None,
         on_progress: Optional[Callable[[str, float], None]] = None,
     ) -> None:
         super().__init__()
@@ -232,6 +234,7 @@ class RecordingExporter(threading.Thread):
         self.ffmpeg_input_args = ffmpeg_input_args
         self.ffmpeg_output_args = ffmpeg_output_args
         self.cpu_fallback = cpu_fallback
+        self.chapters = chapters
         self.on_progress = on_progress
 
         # ensure export thumb dir
@@ -509,6 +512,74 @@ class RecordingExporter(threading.Thread):
 
         return meta_path
 
+    def _build_recording_segment_chapter_metadata_file(
+        self, recordings: list
+    ) -> Optional[str]:
+        """Write an FFmpeg metadata file with one chapter per recording segment.
+
+        Each chapter's title is the segment's wallclock start time in
+        strict ISO 8601 form so a viewer can map any point in the
+        export's playback timeline back to real-world time without
+        OCR-ing a burnt-in timestamp. Chapter offsets are computed in
+        *output time*: the VOD endpoint concatenates recording clips
+        back-to-back, so wall-clock gaps between recordings collapse in
+        the produced video. Returns ``None`` when there are no
+        recordings or every segment is empty after clipping.
+        """
+        if not recordings:
+            return None
+
+        tz_name = self.config.ui.timezone
+        tz: Optional[datetime.tzinfo] = None
+        if tz_name:
+            try:
+                tz = pytz.timezone(tz_name)
+            except pytz.UnknownTimeZoneError:
+                tz = None
+        if tz is None:
+            tz = datetime.timezone.utc
+
+        chapter_blocks: list[str] = []
+        output_offset_ms = 0
+        for rec in recordings:
+            clipped_start = max(float(rec.start_time), float(self.start_time))
+            clipped_end = min(float(rec.end_time), float(self.end_time))
+            if clipped_end <= clipped_start:
+                continue
+
+            duration_ms = int(round((clipped_end - clipped_start) * 1000))
+            if duration_ms <= 0:
+                continue
+
+            title = datetime.datetime.fromtimestamp(clipped_start, tz=tz).isoformat(
+                timespec="seconds"
+            )
+            chapter_blocks.append(
+                "[CHAPTER]\n"
+                "TIMEBASE=1/1000\n"
+                f"START={output_offset_ms}\n"
+                f"END={output_offset_ms + duration_ms}\n"
+                f"title={title}"
+            )
+            output_offset_ms += duration_ms
+
+        if not chapter_blocks:
+            return None
+
+        meta_path = self._chapter_metadata_path()
+        try:
+            with open(meta_path, "w", encoding="utf-8") as f:
+                f.write(";FFMETADATA1\n")
+                f.write("\n".join(chapter_blocks))
+                f.write("\n")
+        except OSError:
+            logger.exception(
+                "Failed to write chapter metadata file for export %s", self.export_id
+            )
+            return None
+
+        return meta_path
+
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
 
@@ -672,7 +743,18 @@ class RecordingExporter(threading.Thread):
                 )
             ).split(" ")
         else:
-            chapters_path = self._build_chapter_metadata_file(recordings)
+            # Realtime/stream-copy export. Embed chapter metadata according to
+            # the camera's configured chapter mode: per-recording-segment
+            # timestamps or per-review-item titles.
+            if self.chapters == ChaptersEnum.recording_segments:
+                chapters_path = self._build_recording_segment_chapter_metadata_file(
+                    recordings
+                )
+            elif self.chapters == ChaptersEnum.review_items:
+                chapters_path = self._build_chapter_metadata_file(recordings)
+            else:
+                chapters_path = None
+
             chapter_args = (
                 f" -i {chapters_path} -map 0 -dn -map_metadata 1"
                 if chapters_path
@@ -684,7 +766,19 @@ class RecordingExporter(threading.Thread):
 
         # add metadata
         title = f"Frigate Recording for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
-        ffmpeg_cmd.extend(["-metadata", f"title={title}"])
+        creation_time = datetime.datetime.fromtimestamp(
+            self.start_time, tz=datetime.timezone.utc
+        ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        ffmpeg_cmd.extend(
+            [
+                "-metadata",
+                f"title={title}",
+                "-metadata",
+                f"creation_time={creation_time}",
+                "-metadata",
+                f"comment=Camera: {self.camera}",
+            ]
+        )
 
         ffmpeg_cmd.append(video_path)
 
@@ -770,18 +864,32 @@ class RecordingExporter(threading.Thread):
                     self.config.ffmpeg.ffmpeg_path,
                     hwaccel_args,
                     f"{self.ffmpeg_input_args} {TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}".strip(),
-                    f"{self.ffmpeg_output_args} -movflags +faststart {video_path}".strip(),
+                    f"{self.ffmpeg_output_args} -movflags +faststart".strip(),
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
         else:
             ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart {video_path}"
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart"
             ).split(" ")
 
         # add metadata
         title = f"Frigate Preview for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
-        ffmpeg_cmd.extend(["-metadata", f"title={title}"])
+        creation_time = datetime.datetime.fromtimestamp(
+            self.start_time, tz=datetime.timezone.utc
+        ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        ffmpeg_cmd.extend(
+            [
+                "-metadata",
+                f"title={title}",
+                "-metadata",
+                f"creation_time={creation_time}",
+                "-metadata",
+                f"comment=Camera: {self.camera}",
+            ]
+        )
+
+        ffmpeg_cmd.append(video_path)
 
         return ffmpeg_cmd, playlist_lines
 

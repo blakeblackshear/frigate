@@ -9,6 +9,7 @@ from frigate.review.types import SeverityEnum
 from ..base import FrigateBaseModel
 
 __all__ = [
+    "ChaptersEnum",
     "RecordConfig",
     "RecordExportConfig",
     "RecordPreviewConfig",
@@ -86,6 +87,12 @@ class RecordPreviewConfig(FrigateBaseModel):
     )
 
 
+class ChaptersEnum(str, Enum):
+    none = "none"
+    recording_segments = "recording_segments"
+    review_items = "review_items"
+
+
 class RecordExportConfig(FrigateBaseModel):
     hwaccel_args: Union[str, list[str]] = Field(
         default="auto",
@@ -97,6 +104,10 @@ class RecordExportConfig(FrigateBaseModel):
         ge=1,
         title="Maximum concurrent exports",
         description="Maximum number of export jobs to process at the same time.",
+    )
+    chapters: ChaptersEnum = Field(
+        default=ChaptersEnum.review_items,
+        title="Chapter metadata to embed in exported recordings",
     )
 
 

@@ -7393,6 +7393,13 @@ components:
       required:
         - value
       title: CameraSetBody
+    ChaptersEnum:
+      type: string
+      enum:
+        - none
+        - recording_segments
+        - review_items
+      title: ChaptersEnum
     ChatCompletionRequest:
       properties:
         messages:
@@ -8119,6 +8126,13 @@ components:
             - type: 'null'
           title: Export case ID
           description: ID of the export case to assign this export to
+        chapters:
+          anyOf:
+            - $ref: '#/components/schemas/ChaptersEnum'
+            - type: 'null'
+          title: Chapter mode
+          description: Optional chapter metadata to embed in the export. When 
+            omitted, the camera's configured export chapter mode is used.
       type: object
       title: ExportRecordingsBody
     ExportRecordingsCustomBody:

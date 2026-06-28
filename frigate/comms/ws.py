@@ -72,11 +72,16 @@ _WS_VIEWER_TOPICS = frozenset(
     }
 )
 
+# Camera-scoped command topics a camera-authorized (non-admin) user may send.
+_WS_CAMERA_COMMAND_TOPICS = frozenset({"ptz"})
+
 
 def _check_ws_authorization(
     topic: str,
     role_header: str | None,
     separator: str,
+    roles_config: dict[str, list[str]] | None = None,
+    camera_names: set[str] | None = None,
 ) -> bool:
     """Check if a WebSocket message is authorized.
 
@@ -84,6 +89,10 @@ def _check_ws_authorization(
         topic: The message topic.
         role_header: The HTTP_REMOTE_ROLE header value, or None.
         separator: The role separator character from proxy config.
+        roles_config: The auth.roles mapping (role -> allowed cameras), used to
+            authorize camera-scoped commands for non-admin users.
+        camera_names: All configured camera names, used to resolve a role's
+            allowed cameras.
 
     Returns:
         True if authorized, False if blocked.
@@ -93,16 +102,33 @@ def _check_ws_authorization(
         return False
 
     # No role header: default to viewer (fail-closed)
-    if role_header is None:
-        return topic in _WS_VIEWER_TOPICS
+    roles = [r.strip() for r in role_header.split(separator)] if role_header else []
 
-    # Check if any role is admin
-    roles = [r.strip() for r in role_header.split(separator)]
+    # Admin can send anything
     if "admin" in roles:
         return True
 
-    # Non-admin: only viewer topics allowed
-    return topic in _WS_VIEWER_TOPICS
+    # Read-only topics any authenticated user can send
+    if topic in _WS_VIEWER_TOPICS:
+        return True
+
+    # Camera-scoped command like "<camera>/ptz": allow when the user's role(s)
+    # grant access to that camera.
+    parts = topic.split("/")
+    if (
+        roles_config is not None
+        and len(parts) == 2
+        and parts[1] in _WS_CAMERA_COMMAND_TOPICS
+    ):
+        allowed: set[str] = set()
+        # No role header maps to the default viewer role (e.g. proxy-only setups)
+        for role in roles or ["viewer"]:
+            allowed.update(
+                User.get_allowed_cameras(role, roles_config, camera_names or set())
+            )
+        return parts[0] in allowed
+
+    return False
 
 
 # ---- Outbound filtering ---------------------------------------------------
@@ -449,6 +475,8 @@ class WebSocketClient(Communicator):
         class _WebSocketHandler(WebSocket):
             receiver = self._dispatcher
             role_separator = self.config.proxy.separator or ","
+            roles_config = self.config.auth.roles
+            camera_names = set(self.config.cameras.keys())
 
             def received_message(self, message: WebSocket.received_message) -> None:  # type: ignore[name-defined]
                 try:
@@ -470,7 +498,11 @@ class WebSocketClient(Communicator):
                     self.environ.get("HTTP_REMOTE_ROLE") if self.environ else None
                 )
                 if self.environ is not None and not _check_ws_authorization(
-                    topic, role_header, self.role_separator
+                    topic,
+                    role_header,
+                    self.role_separator,
+                    self.roles_config,
+                    self.camera_names,
                 ):
                     logger.warning(
                         "Blocked unauthorized WebSocket message: topic=%s, role=%s",

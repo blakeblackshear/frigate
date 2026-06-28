@@ -13,6 +13,7 @@ from peewee import DoesNotExist
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.config.camera.record import ChaptersEnum
 from frigate.const import UPDATE_JOB_STATE
 from frigate.jobs.job import Job
 from frigate.models import Export
@@ -55,6 +56,7 @@ class ExportJob(Job):
     ffmpeg_input_args: Optional[str] = None
     ffmpeg_output_args: Optional[str] = None
     cpu_fallback: bool = False
+    chapters: Optional[ChaptersEnum] = None
     current_step: str = "queued"
     progress_percent: float = 0.0
 
@@ -343,6 +345,7 @@ class ExportJobManager:
             job.ffmpeg_input_args,
             job.ffmpeg_output_args,
             job.cpu_fallback,
+            job.chapters,
             on_progress=self._make_progress_callback(job),
         )
 

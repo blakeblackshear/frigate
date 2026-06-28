@@ -3,7 +3,10 @@ from typing import Optional, Union
 from pydantic import BaseModel, Field
 from pydantic.json_schema import SkipJsonSchema
 
-from frigate.record.export import PlaybackSourceEnum
+from frigate.record.export import (
+    ChaptersEnum,
+    PlaybackSourceEnum,
+)
 
 
 class ExportRecordingsBody(BaseModel):
@@ -17,6 +20,14 @@ class ExportRecordingsBody(BaseModel):
         title="Export case ID",
         max_length=30,
         description="ID of the export case to assign this export to",
+    )
+    chapters: Optional[ChaptersEnum] = Field(
+        default=None,
+        title="Chapter mode",
+        description=(
+            "Optional chapter metadata to embed in the export. When omitted, "
+            "the camera's configured export chapter mode is used."
+        ),
     )
 
 

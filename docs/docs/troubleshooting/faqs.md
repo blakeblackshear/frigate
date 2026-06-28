@@ -124,3 +124,19 @@ cameras:
       width: 1280
       height: 720
 ```
+
+### Why does Frigate keep creating new events for my parked car?
+
+Stationary tracking is designed to _prevent_ this — a parked car should stay one tracked object and not generate new events. If you're getting repeated events for the same car, it's likely that Frigate is losing the tracked object and re-detecting it as a new one.
+
+Open one of the events in Explore → **Tracking Details**. If the detection scores are low (< 70% or so), the model isn't confident the parked car is a car. This is common with the free [COCO-trained](https://cocodataset.org/#explore) object detection models on steep/top-down angles, partially occluded cars, foliage, or low-light footage. When detections fall below `min_score` for too many frames the tracker loses the object, and the next confident frame creates a brand new one.
+
+What helps:
+
+- **Improve the view** — even a small angle change that gets more of the car visible could lift scores enough to stabilize tracking.
+- **Use a more accurate model** — switching from `mobiledet` to `yolov9`, or stepping up to a larger variant like `yolov9-s` over `yolov9-t`, can help (at the cost of inference time, and still on the COCO dataset). The biggest gains usually come from fine-tuning a model on images from your own cameras so it learns your specific scene. [Frigate+](https://frigate.video/plus) is a paid option that does this - models are trained on security-camera footage and can be fine-tuned on images you submit from your own setup.
+- **Don't set `detect -> stationary -> max_frames` for `car`** — it artificially ends tracking and forces re-detection as a new object. See [Stationary Objects](../configuration/stationary_objects.md).
+- **Restrict alerts to the areas you care about** with `required_zones` — see [Zones](../configuration/zones.md#restricting-alerts-and-detections-to-specific-zones). Make sure those zones use the default `loitering_time: 0` unless you specifically want the review item to stay open until the car leaves.
+- **Filter impossible locations** with [object filter masks](../configuration/masks.md#object-filter-masks) if cars are being detected on rooftops, treetops, etc.
+
+See [Object Filters](../configuration/object_filters.md) for more on tuning `min_score` and `threshold` — note that raising them too high will make this exact problem worse.

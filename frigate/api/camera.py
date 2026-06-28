@@ -147,6 +147,19 @@ def go2rtc_camera_stream(request: Request, stream_name: str):
 )
 def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
     """Add or update a go2rtc stream configuration."""
+    if src and is_restricted_go2rtc_source(src):
+        logger.warning(
+            "Rejected go2rtc stream '%s' with restricted source type (echo/expr/exec)",
+            stream_name,
+        )
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Restricted stream source type",
+            },
+            status_code=400,
+        )
+
     try:
         params = {"name": stream_name}
         if src:

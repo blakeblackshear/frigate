@@ -68,6 +68,7 @@ from frigate.jobs.export import (
 from frigate.models import Export, ExportCase, Previews, Recordings
 from frigate.record.export import (
     DEFAULT_TIME_LAPSE_FFMPEG_ARGS,
+    ChaptersEnum,
     PlaybackSourceEnum,
     validate_ffmpeg_args,
 )
@@ -128,6 +129,15 @@ def _validate_export_case(export_case_id: Optional[str]) -> Optional[JSONRespons
 def _sanitize_existing_image(
     image_path: Optional[str],
 ) -> tuple[Optional[str], Optional[JSONResponse]]:
+    # sanitize_filepath normalizes "\" to "/" but leaves ".." intact, so a path
+    # like "clips\..\..\etc/passwd" passes the CLIPS_DIR prefix check yet still
+    # escapes the directory once resolved. A valid snapshot path never uses "..".
+    if image_path and ".." in image_path:
+        return None, JSONResponse(
+            content={"success": False, "message": "Invalid image path"},
+            status_code=400,
+        )
+
     existing_image = sanitize_filepath(image_path) if image_path else None
 
     if existing_image and not existing_image.startswith(CLIPS_DIR):
@@ -254,6 +264,7 @@ def _build_export_job(
     ffmpeg_input_args: Optional[str] = None,
     ffmpeg_output_args: Optional[str] = None,
     cpu_fallback: bool = False,
+    chapters: Optional[ChaptersEnum] = None,
 ) -> ExportJob:
     return ExportJob(
         id=_generate_export_id(camera_name),
@@ -267,6 +278,7 @@ def _build_export_job(
         ffmpeg_input_args=ffmpeg_input_args,
         ffmpeg_output_args=ffmpeg_output_args,
         cpu_fallback=cpu_fallback,
+        chapters=chapters,
     )
 
 
@@ -725,6 +737,9 @@ def export_recordings_batch(
             sanitized_images[index],
             PlaybackSourceEnum.recordings,
             export_case_id,
+            chapters=request.app.frigate_config.cameras[
+                item.camera
+            ].record.export.chapters,
         )
         try:
             start_export_job(request.app.frigate_config, export_job)
@@ -803,6 +818,14 @@ def export_recording(
 
     export_case_id = body.export_case_id
 
+    # a chapters value in the request body overrides the camera's export config
+    camera_config = request.app.frigate_config.cameras[camera_name]
+    chapters = (
+        body.chapters
+        if body.chapters is not None
+        else camera_config.record.export.chapters
+    )
+
     # Attaching to an existing case requires admin. Single-export for
     # cameras the user can access is otherwise non-admin; we only gate
     # the case-attachment side effect.
@@ -839,6 +862,7 @@ def export_recording(
         existing_image,
         playback_source,
         export_case_id,
+        chapters=chapters,
     )
     try:
         start_export_job(request.app.frigate_config, export_job)

@@ -1035,6 +1035,9 @@
       "max_concurrent": {
         "label": "Maximum concurrent exports",
         "description": "Maximum number of export jobs to process at the same time."
+      },
+      "chapters": {
+        "label": "Chapter metadata to embed in exported recordings"
       }
     },
     "preview": {
