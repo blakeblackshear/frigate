@@ -4,6 +4,12 @@
 ARG DEBIAN_FRONTEND=noninteractive
 ARG BASE_IMAGE
 ARG TRT_BASE=nvcr.io/nvidia/tensorrt:23.12-py3
+ARG BUILD_ONNXRUNTIME_FROM_SOURCE=0
+ARG ONNXRUNTIME_VERSION=1.25.1
+ARG ONNXRUNTIME_BRANCH=rel-1.25.1
+ARG TENSORRT_PYTHON_BRANCH=release/8.6
+ARG L4T_APT_RELEASE=
+ARG JETSON_SOC_REPO=
 
 # Build TensorRT-specific library
 FROM ${TRT_BASE} AS trt-deps
@@ -12,7 +18,9 @@ ARG TARGETARCH
 ARG COMPUTE_LEVEL
 
 RUN apt-get update \
-    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvparsers-dev libnvonnxparsers-dev \
+    && TRT_DEV_PACKAGES="git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvonnxparsers-dev" \
+    && if apt-cache show libnvparsers-dev > /dev/null 2>&1; then TRT_DEV_PACKAGES="${TRT_DEV_PACKAGES} libnvparsers-dev"; fi \
+    && apt-get install -y ${TRT_DEV_PACKAGES} \
     && rm -rf /var/lib/apt/lists/*
 RUN --mount=type=bind,source=docker/tensorrt/detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
     /tensorrt_libyolo.sh
@@ -58,6 +66,12 @@ HEALTHCHECK --start-period=600s --start-interval=5s --interval=15s --timeout=5s 
 
 FROM ${BASE_IMAGE} AS build-wheels
 ARG DEBIAN_FRONTEND
+ARG BUILD_ONNXRUNTIME_FROM_SOURCE
+ARG ONNXRUNTIME_VERSION
+ARG ONNXRUNTIME_BRANCH
+ARG TENSORRT_PYTHON_BRANCH
+ARG L4T_APT_RELEASE
+ARG JETSON_SOC_REPO
 
 # Add deadsnakes PPA for python3.11
 RUN apt-get -qq update && \
@@ -69,41 +83,66 @@ RUN apt-get -qq update && \
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends \
     python3.11 python3.11-dev \
-    wget build-essential cmake git \
+    wget curl build-essential cmake git ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
 # Ensure python3 defaults to python3.11
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
+# --ignore-installed: on the JP7 Ubuntu 24.04 (noble) base the deadsnakes python3.11 ships a
+# distro-packaged pip 24.0 with no RECORD file, so get-pip.py's default reinstall fails with
+# "uninstall-no-record-file". Installing over it without uninstalling avoids that; harmless on JP6.
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
-    && python3 get-pip.py "pip"
+    && python3 get-pip.py --ignore-installed "pip"
 
 FROM build-wheels AS trt-wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
+ARG BUILD_ONNXRUNTIME_FROM_SOURCE
+ARG ONNXRUNTIME_VERSION
+ARG ONNXRUNTIME_BRANCH
+ARG TENSORRT_PYTHON_BRANCH
 
 # python-tensorrt build deps are 3.4 GB!
 RUN apt-get update \
-    && apt-get install -y ccache cuda-cudart-dev-* cuda-nvcc-* libnvonnxparsers-dev libnvparsers-dev libnvinfer-plugin-dev \
+    && TRT_DEV_PACKAGES="ccache cuda-cudart-dev-* cuda-nvcc-* libnvonnxparsers-dev libnvinfer-plugin-dev" \
+    && if apt-cache show libnvparsers-dev > /dev/null 2>&1; then TRT_DEV_PACKAGES="${TRT_DEV_PACKAGES} libnvparsers-dev"; fi \
+    && apt-get install -y ${TRT_DEV_PACKAGES} \
     && ([ -e /usr/local/cuda ] || ln -s /usr/local/cuda-* /usr/local/cuda) \
     && rm -rf /var/lib/apt/lists/*;
 
+# The JP7 base image ships a stale cmake 3.24 at /usr/local/bin/cmake that shadows apt's 3.28.
+# TensorRT 10.11's python CMakeLists (and the ONNX Runtime source build) require cmake >= 3.27,
+# so install a current cmake from pip into /usr/local/bin ahead of the stale one. No-op risk on
+# JP6 where the bundled cmake already satisfies the minimum.
+RUN pip3 install --no-cache-dir --upgrade "cmake>=3.27"
+
 # Determine version of tensorrt already installed in base image, e.g. "Version: 8.4.1-1+cuda11.4"
-RUN NVINFER_VER=$(dpkg -s libnvinfer8 | grep -Po "Version: \K.*") \
-    && echo $NVINFER_VER | grep -Po "^\d+\.\d+\.\d+" > /etc/TENSORRT_VER
+RUN NVINFER_VER="$(dpkg-query -W -f='${Version}\n' 'libnvinfer*' 2>/dev/null | grep -E '^[0-9]+[.][0-9]+[.][0-9]+' | sort -V | tail -n1)" \
+    && test -n "$NVINFER_VER" \
+    && TENSORRT_VER="$(echo "$NVINFER_VER" | grep -Eo '^[0-9]+[.][0-9]+[.][0-9]+')" \
+    && TENSORRT_MAJOR="$(echo "$TENSORRT_VER" | cut -d. -f1)" \
+    && echo "$TENSORRT_VER" > /etc/TENSORRT_VER \
+    && echo "$TENSORRT_MAJOR" > /etc/TENSORRT_MAJOR
 
 RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,target=/deps/build_python_tensorrt.sh \
     --mount=type=cache,target=/root/.ccache \
     export PATH="/usr/lib/ccache:$PATH" CCACHE_DIR=/root/.ccache CCACHE_MAXSIZE=2G \
-    && TENSORRT_VER=$(cat /etc/TENSORRT_VER) /deps/build_python_tensorrt.sh
+    && TENSORRT_VER=$(cat /etc/TENSORRT_VER) TENSORRT_PYTHON_BRANCH="${TENSORRT_PYTHON_BRANCH}" /deps/build_python_tensorrt.sh
 
 COPY docker/tensorrt/requirements-arm64.txt /requirements-tensorrt.txt
 
 RUN pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
 
 # See https://elinux.org/Jetson_Zoo#ONNX_Runtime
-ADD https://nvidia.box.com/shared/static/9yvw05k6u343qfnkhdv2x6xhygze0aq1.whl /trt-wheels/onnxruntime_gpu-1.19.0-cp311-cp311-linux_aarch64.whl
+RUN --mount=type=bind,source=docker/tensorrt/detector/build_onnxruntime_arm64.sh,target=/deps/build_onnxruntime_arm64.sh \
+    mkdir -p /trt-wheels \
+    && if [ "${BUILD_ONNXRUNTIME_FROM_SOURCE}" = "1" ]; then \
+        ONNXRUNTIME_VERSION="${ONNXRUNTIME_VERSION}" ONNXRUNTIME_BRANCH="${ONNXRUNTIME_BRANCH}" /deps/build_onnxruntime_arm64.sh; \
+    else \
+        wget -q https://nvidia.box.com/shared/static/9yvw05k6u343qfnkhdv2x6xhygze0aq1.whl -O /trt-wheels/onnxruntime_gpu-1.19.0-cp311-cp311-linux_aarch64.whl; \
+    fi
 
 FROM build-wheels AS trt-model-wheels
 ARG DEBIAN_FRONTEND
@@ -116,16 +155,20 @@ RUN --mount=type=bind,source=docker/tensorrt/requirements-models-arm64.txt,targe
 
 FROM wget AS jetson-ffmpeg
 ARG DEBIAN_FRONTEND
+ARG L4T_APT_RELEASE
+ARG JETSON_SOC_REPO
 ENV CCACHE_DIR /root/.ccache
 ENV CCACHE_MAXSIZE 2G
 RUN --mount=type=bind,source=docker/tensorrt/build_jetson_ffmpeg.sh,target=/deps/build_jetson_ffmpeg.sh \
     --mount=type=cache,target=/root/.ccache \
-    /deps/build_jetson_ffmpeg.sh
+    L4T_APT_RELEASE="${L4T_APT_RELEASE}" JETSON_SOC_REPO="${JETSON_SOC_REPO}" /deps/build_jetson_ffmpeg.sh
 
 # Frigate w/ TensorRT for NVIDIA Jetson platforms
 FROM tensorrt-base AS frigate-tensorrt
 RUN apt-get update \
-    && apt-get install -y python-is-python3 libprotobuf23  \
+    && pick_package() { for package in "$@"; do if apt-cache show "$package" > /dev/null 2>&1; then echo "$package"; return 0; fi; done; return 1; } \
+    && PROTOBUF_RUNTIME="$(pick_package libprotobuf23 libprotobuf32t64 libprotobuf32)" \
+    && apt-get install -y python-is-python3 "${PROTOBUF_RUNTIME}" \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=jetson-ffmpeg /rootfs /
@@ -134,19 +177,26 @@ ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:${INCLUDED_FFMPEG_VERSIO
 
 # ffmpeg runtime dependencies
 RUN apt-get -qq update \
+    && pick_package() { for package in "$@"; do if apt-cache show "$package" > /dev/null 2>&1; then echo "$package"; return 0; fi; done; return 1; } \
+    && X264_RUNTIME="$(pick_package libx264-163 libx264-164)" \
+    && X265_RUNTIME="$(pick_package libx265-199 libx265-209)" \
     && apt-get -qq install -y --no-install-recommends \
-    libx264-163 libx265-199 libegl1 \
+    "${X264_RUNTIME}" "${X265_RUNTIME}" libegl1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Fixes "Error loading shared libs"
 RUN mkdir -p /etc/ld.so.conf.d && echo /usr/lib/ffmpeg/jetson/lib/ > /etc/ld.so.conf.d/ffmpeg.conf
 
 COPY --from=trt-wheels /etc/TENSORRT_VER /etc/TENSORRT_VER
+COPY --from=trt-wheels /etc/TENSORRT_MAJOR /etc/TENSORRT_MAJOR
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     --mount=type=bind,from=trt-model-wheels,source=/trt-model-wheels,target=/deps/trt-model-wheels \
     pip3 uninstall -y onnxruntime \
-    && pip3 install -U /deps/trt-wheels/*.whl \
-    && pip3 install -U /deps/trt-model-wheels/*.whl \
+    # --ignore-installed: on the noble JP7 base, `-U` would try to upgrade distro-managed deps that
+    # lack a RECORD file (e.g. wheel/setuptools), failing with "uninstall-no-record-file". Install
+    # the TRT/ORT GPU wheels over them into /usr/local instead. Harmless on JP6.
+    && pip3 install -U --ignore-installed /deps/trt-wheels/*.whl \
+    && pip3 install -U --ignore-installed /deps/trt-model-wheels/*.whl \
     && ldconfig
 
 WORKDIR /opt/frigate/

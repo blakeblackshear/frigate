@@ -46,8 +46,8 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Nvidia Jetson** <CommunityBadge />
 
-- [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Jetson devices, using one of many default models.
-- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt-jp6` Frigate image when a supported ONNX model is configured.
+- [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on JetPack 6 / L4T R36 Jetson devices, using one of many default models.
+- [ONNX](#onnx): Jetson GPU acceleration will automatically be detected and used by the ONNX detector in the `-tensorrt-jp6` image on JetPack 6 / L4T R36 or the `-tensorrt-jp7` image on JetPack 7.2 / L4T R39.2 when a supported ONNX model is configured.
 
 **Rockchip** <CommunityBadge />
 
@@ -437,7 +437,7 @@ If the correct build is used for your GPU then the GPU will be detected and used
 
 - **Nvidia**
   - Nvidia GPUs will automatically be detected and used with the ONNX detector in the `-tensorrt` Frigate image.
-  - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp6` Frigate image.
+  - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp6` Frigate image on JetPack 6 / L4T R36 or the `-tensorrt-jp7` Frigate image on JetPack 7.2 / L4T R39.2.
 
 :::
 
@@ -567,7 +567,9 @@ For detailed instructions on compiling models, refer to the [MemryX Compiler](ht
 
 ## NVidia TensorRT Detector
 
-Nvidia Jetson devices may be used for object detection using the TensorRT libraries. Due to the size of the additional libraries, this detector is only provided in images with the `-tensorrt-jp6` tag suffix, e.g. `ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp6`. This detector is designed to work with Yolo models for object detection.
+Nvidia Jetson devices may be used for object detection using the TensorRT libraries on JetPack 6 / L4T R36. Due to the size of the additional libraries, this detector is only provided in images with the `-tensorrt-jp6` tag suffix, e.g. `ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp6`. This detector is designed to work with Yolo models for object detection.
+
+On JetPack 7.2 / L4T R39.2, the `-tensorrt-jp7` image initially supports ONNX detector GPU acceleration. Native `type: tensorrt` engine generation on JP7 is pending hardware validation.
 
 ### Generate Models
 

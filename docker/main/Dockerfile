@@ -87,7 +87,9 @@ RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
-    && python3 get-pip.py "pip" \
+    # --ignore-installed: the Ubuntu 24.04 (noble) JP7 base ships a distro pip with no RECORD
+    # file, so get-pip.py's default reinstall dies with "uninstall-no-record-file". Harmless on JP6.
+    && python3 get-pip.py --ignore-installed "pip" \
     && pip3 install -r /requirements-ov.txt
 
 # Get OpenVino Model
@@ -181,9 +183,11 @@ RUN apt-get -qq update \
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
+# --ignore-installed: the Ubuntu 24.04 (noble) JP7 base ships a distro pip with no RECORD file,
+# so get-pip.py's default reinstall dies with "uninstall-no-record-file". Harmless on JP6.
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
-    && python3 get-pip.py "pip"
+    && python3 get-pip.py --ignore-installed "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
 COPY docker/main/requirements-dev.txt /requirements-dev.txt
@@ -268,12 +272,18 @@ RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_de
 ENV DEFAULT_FFMPEG_VERSION="8.0"
 ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:7.0:5.0"
 
+# --ignore-installed: the Ubuntu 24.04 (noble) JP7 base ships a distro pip with no RECORD file,
+# so get-pip.py's default reinstall dies with "uninstall-no-record-file". Harmless on JP6.
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
-    && python3 get-pip.py "pip"
+    && python3 get-pip.py --ignore-installed "pip"
 
+# --ignore-installed: on the Ubuntu 24.04 (noble) JP7 base, `pip3 install -U` tries to upgrade
+# distro-managed packages (e.g. wheel 0.42.0) that ship without a RECORD file, which fails with
+# "uninstall-no-record-file". Installing over them into /usr/local without uninstalling avoids
+# that; harmless on JP6 where these come from pip and have RECORD files.
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    pip3 install -U /deps/wheels/*.whl
+    pip3 install -U --ignore-installed /deps/wheels/*.whl
 
 # Install Axera Engine
 RUN pip3 install https://github.com/AXERA-TECH/pyaxengine/releases/download/0.1.3-frigate/axengine-0.1.3-py3-none-any.whl

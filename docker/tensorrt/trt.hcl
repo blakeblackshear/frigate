@@ -13,6 +13,24 @@ variable "TRT_BASE" {
 variable "COMPUTE_LEVEL" {
   default = ""
 }
+variable "BUILD_ONNXRUNTIME_FROM_SOURCE" {
+  default = "0"
+}
+variable "ONNXRUNTIME_VERSION" {
+  default = "1.25.1"
+}
+variable "ONNXRUNTIME_BRANCH" {
+  default = "rel-1.25.1"
+}
+variable "TENSORRT_PYTHON_BRANCH" {
+  default = "release/8.6"
+}
+variable "L4T_APT_RELEASE" {
+  default = ""
+}
+variable "JETSON_SOC_REPO" {
+  default = ""
+}
 variable "BASE_HOOK" {
   # Ensure an up-to-date python 3.11 is available in jetson images
   default = <<EOT
@@ -35,6 +53,12 @@ target "_build_args" {
     SLIM_BASE = SLIM_BASE,
     TRT_BASE = TRT_BASE,
     COMPUTE_LEVEL = COMPUTE_LEVEL,
+    BUILD_ONNXRUNTIME_FROM_SOURCE = BUILD_ONNXRUNTIME_FROM_SOURCE,
+    ONNXRUNTIME_VERSION = ONNXRUNTIME_VERSION,
+    ONNXRUNTIME_BRANCH = ONNXRUNTIME_BRANCH,
+    TENSORRT_PYTHON_BRANCH = TENSORRT_PYTHON_BRANCH,
+    L4T_APT_RELEASE = L4T_APT_RELEASE,
+    JETSON_SOC_REPO = JETSON_SOC_REPO,
     BASE_HOOK = BASE_HOOK
   }
   platforms = ["linux/${ARCH}"]

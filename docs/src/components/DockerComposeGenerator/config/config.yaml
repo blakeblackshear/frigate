@@ -35,9 +35,10 @@ devices:
     helpType: "warning"
     needsNvidiaConfig: true
 
-  - id: "stable-tensorrt-jp6"
-    name: "NVIDIA Jetson"
-    description: "Jetson development board"
+  - &jetsonDevice
+    id: "stable-tensorrt-jp6"
+    name: "NVIDIA Jetson JP6"
+    description: "JetPack 6 / L4T R36"
     icon: '<svg viewBox="0 0 32 33" xmlns="http://www.w3.org/2000/svg"><path d="M11.6925 17.7697V15.8762C11.8738 15.8633 12.0563 15.8528 12.2422 15.847C17.3372 15.6837 20.68 20.2978 20.68 20.2978C20.68 20.2978 17.0699 25.3962 13.1992 25.3962C12.6415 25.3962 12.1423 25.3052 11.6925 25.1511V19.4077C13.6766 19.6515 14.0748 20.5417 15.2671 22.5623L17.919 20.2885C17.919 20.2885 15.9831 17.7067 12.7195 17.7067C12.3649 17.7067 12.0253 17.7323 11.6913 17.7685L11.6925 17.7697ZM11.6913 11.5128V14.342C11.8738 14.3268 12.0574 14.3152 12.241 14.3082C19.3259 14.0655 23.9425 20.2162 23.9425 20.2162C23.9425 20.2162 18.6408 26.7705 13.1166 26.7705C12.6105 26.7705 12.1366 26.7227 11.6913 26.6433V28.3922C12.0723 28.4412 12.4671 28.4703 12.8779 28.4703C18.0177 28.4703 21.7358 25.8021 25.3356 22.6428C25.9323 23.1281 28.3754 24.31 28.8781 24.828C25.4549 27.7412 17.4795 30.0885 12.9571 30.0885C12.521 30.0885 12.1022 30.0617 11.6913 30.022V32.479H31.2282V11.514H11.6925L11.6913 11.5128ZM11.6913 25.15V26.6433C6.93708 25.7812 5.6174 20.7575 5.6174 20.7575C5.6174 20.7575 7.89986 18.1862 11.6913 17.7697V19.4077C11.6913 19.4077 11.6867 19.4077 11.6845 19.4077C9.69462 19.165 8.14085 21.055 8.14085 21.055C8.14085 21.055 9.01183 24.2365 11.6925 25.1523L11.6913 25.15ZM3.24888 20.5417C3.24888 20.5417 6.06609 16.3148 11.6925 15.8773V14.3443C5.46134 14.853 0.0644531 20.2185 0.0644531 20.2185C0.0644531 20.2185 3.12036 29.2018 11.6925 30.0243V28.3945C5.40167 27.5895 3.24888 20.5417 3.24888 20.5417Z" fill="#76B900"></path></svg>'
     svgStyle:
       width: 50px
@@ -46,9 +47,16 @@ devices:
       padding-bottom: 15px
     imageTag: "stable-tensorrt-jp6"
     autoHardware: []
-    helpText: "NVIDIA Jetson devices automatically configure runtime: nvidia."
+    helpText: "JetPack 6 / L4T R36 Jetson devices automatically configure runtime: nvidia."
     helpType: "info"
     runtime: "nvidia"
+
+  - <<: *jetsonDevice
+    id: "stable-tensorrt-jp7"
+    name: "NVIDIA Jetson JP7"
+    description: "JetPack 7.2 / L4T R39.2"
+    imageTag: "stable-tensorrt-jp7"
+    helpText: "JetPack 7.2 / L4T R39.2 Jetson devices automatically configure runtime: nvidia."
 
   - id: "stable-rocm"
     name: "AMD GPU"
@@ -176,6 +184,7 @@ hardware:
     description: "Pass through /dev/dri for GPU hardware acceleration (Intel/AMD)."
     disabledWhen:
       - "stable-tensorrt-jp6"
+      - "stable-tensorrt-jp7"
       - "apple-silicon"
     devices:
       - host: "/dev/dri"
@@ -187,6 +196,7 @@ hardware:
     description: "Pass through /dev/accel for Intel NPU acceleration."
     disabledWhen:
       - "stable-tensorrt-jp6"
+      - "stable-tensorrt-jp7"
       - "apple-silicon"
       - "stable-rocm"
       - "stable-rk"
@@ -247,6 +257,7 @@ hardware:
     disabledWhen:
       - "stable-tensorrt"
       - "stable-tensorrt-jp6"
+      - "stable-tensorrt-jp7"
       - "stable-rocm"
       - "stable-rk"
       - "stable-synaptics"

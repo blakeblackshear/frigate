@@ -20,7 +20,7 @@ Object detection and enrichments (like Semantic Search, Face Recognition, and Li
 
 - **Nvidia**
   - Nvidia GPUs will automatically be detected and used for enrichments in the `-tensorrt` Frigate image.
-  - Jetson devices will automatically be detected and used for enrichments in the `-tensorrt-jp6` Frigate image.
+  - Jetson devices will automatically be detected and used for enrichments in the `-tensorrt-jp6` Frigate image on JetPack 6 / L4T R36. JetPack 7 enrichment acceleration is documented after separate hardware validation.
 
 - **RockChip**
   - RockChip NPU will automatically be detected and used for semantic search v1 and face recognition in the `-rk` Frigate image.

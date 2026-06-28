@@ -556,7 +556,8 @@ The official docker image tags for the current stable version are:
 
 The community supported docker image tags for the current stable version are:
 
-- `stable-tensorrt-jp6` - Frigate build optimized for Nvidia Jetson devices running Jetpack 6
+- `stable-tensorrt-jp6` - Frigate build optimized for Nvidia Jetson devices running JetPack 6 / L4T R36
+- `stable-tensorrt-jp7` - Frigate build optimized for Nvidia Jetson devices running JetPack 7.2 / L4T R39.2
 - `stable-rk` - Frigate build for SBCs with Rockchip SoC
 
 ## Home Assistant App

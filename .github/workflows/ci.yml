@@ -106,6 +106,41 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp6
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6,mode=max
+  jetson_jp7_build:
+    runs-on: ubuntu-22.04-arm
+    name: Jetson Jetpack 7
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push TensorRT (Jetson, Jetpack 7)
+        env:
+          ARCH: arm64
+          BASE_IMAGE: nvcr.io/nvidia/tensorrt:26.02-py3-igpu
+          SLIM_BASE: nvcr.io/nvidia/tensorrt:26.02-py3-igpu
+          TRT_BASE: nvcr.io/nvidia/tensorrt:26.02-py3-igpu
+          BUILD_ONNXRUNTIME_FROM_SOURCE: "1"
+          ONNXRUNTIME_VERSION: "1.25.1"
+          ONNXRUNTIME_BRANCH: rel-1.25.1
+          TENSORRT_PYTHON_BRANCH: auto
+          L4T_APT_RELEASE: r39.2
+          JETSON_SOC_REPO: som
+        uses: docker/bake-action@v7
+        with:
+          source: .
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp7
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp7
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp7,mode=max
   amd64_extra_builds:
     runs-on: ubuntu-22.04
     name: AMD64 Extra Build

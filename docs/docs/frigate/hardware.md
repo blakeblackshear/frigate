@@ -90,7 +90,7 @@ Frigate supports multiple different detectors that work on different types of ha
   - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#onnx)
   - Runs well with any size models including large
 
-- <CommunityBadge /> [Jetson](#nvidia-jetson): Jetson devices are supported via the TensorRT or ONNX detectors when running Jetpack 6.
+- <CommunityBadge /> [Jetson](#nvidia-jetson): Jetson devices are supported via the TensorRT or ONNX detectors when running JetPack 6 / L4T R36. On JetPack 7.2 / L4T R39.2, the initial supported path is ONNX detector GPU acceleration.
 
 **Rockchip** <CommunityBadge />
 
@@ -258,9 +258,9 @@ Inference speeds may vary depending on the host platform. The above data was mea
 
 ### Nvidia Jetson
 
-Jetson devices are supported via the TensorRT or ONNX detectors when running Jetpack 6. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration_video#nvidia-jetson) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
+Jetson devices running JetPack 6 / L4T R36 are supported via the TensorRT or ONNX detectors. Jetson devices running JetPack 7.2 / L4T R39.2 use the `stable-tensorrt-jp7` image and initially support ONNX detector GPU acceleration; native `type: tensorrt` engine generation on JP7 is pending hardware validation. The Jetson images will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration_video#nvidia-jetson) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets). The JetPack 6 image will also make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
 
-Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
+For JetPack 6 TensorRT detector usage, inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
 
 ### Rockchip platform
 

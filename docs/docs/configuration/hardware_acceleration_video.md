@@ -359,7 +359,7 @@ Or map in all the `/dev/video*` devices.
 
 ## NVIDIA Jetson
 
-A separate set of docker images is available for Jetson devices. They come with an `ffmpeg` build with codecs that use the Jetson's dedicated media engine. If your Jetson host is running Jetpack 6.0+ use the `stable-tensorrt-jp6` tagged image. Note that the Orin Nano has no video encoder, so frigate will use software encoding on this platform, but the image will still allow hardware decoding and tensorrt object detection.
+A separate set of docker images is available for Jetson devices. They come with an `ffmpeg` build with codecs that use the Jetson's dedicated media engine. If your Jetson host is running JetPack 6 / L4T R36, use the `stable-tensorrt-jp6` tagged image. If your Jetson host is running JetPack 7.2 / L4T R39.2, use the `stable-tensorrt-jp7` tagged image. Note that the Orin Nano has no video encoder, so Frigate will use software encoding on this platform, but the Jetson TensorRT images will still allow hardware decoding and ONNX detector GPU acceleration.
 
 You will need to use the image with the nvidia container runtime:
 
@@ -369,7 +369,7 @@ You will need to use the image with the nvidia container runtime:
 docker run -d \
   ...
   --runtime nvidia
-  ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp6
+  ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp7
 ```
 
 ### Docker Compose - Jetson
@@ -378,9 +378,11 @@ docker run -d \
 services:
   frigate:
     ...
-    image: ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp6
+    image: ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp7
     runtime: nvidia   # Add this
 ```
+
+Use `stable-tensorrt-jp6` instead when the Jetson host is running JetPack 6 / L4T R36. JetPack 7.0/7.1 on L4T R38.x are not covered by the initial `stable-tensorrt-jp7` guidance unless separately validated.
 
 :::note
 
