@@ -475,3 +475,55 @@ class TestHttpMedia(BaseTestHttp):
 
             assert response.status_code == 200
             assert response.json() == []
+
+    def test_recordings_unavailable_cameras_all_scopes_to_allowed_cameras(self):
+        """cameras=all must not error and must only consider allowed cameras.
+
+        allowed_cameras is mocked to ["front_door"]. A back_door recording that
+        would otherwise fill the gap must be ignored, and the request must not
+        500 the way it did when cameras was reassigned to a list.
+        """
+        with AuthTestClient(self.app) as client:
+            # front_door has a 20s gap (1010-1030).
+            Recordings.insert(
+                id="front_a",
+                path="/media/recordings/front_a.mp4",
+                camera="front_door",
+                start_time=1000,
+                end_time=1010,
+                duration=10,
+                motion=0,
+            ).execute()
+            Recordings.insert(
+                id="front_b",
+                path="/media/recordings/front_b.mp4",
+                camera="front_door",
+                start_time=1030,
+                end_time=1040,
+                duration=10,
+                motion=0,
+            ).execute()
+            # back_door is not in allowed_cameras; its full-window coverage must
+            # not mask the front_door gap.
+            Recordings.insert(
+                id="back_a",
+                path="/media/recordings/back_a.mp4",
+                camera="back_door",
+                start_time=1000,
+                end_time=1040,
+                duration=40,
+                motion=0,
+            ).execute()
+
+            response = client.get(
+                "/recordings/unavailable",
+                params={
+                    "after": 1000,
+                    "before": 1040,
+                    "scale": 5,
+                    "cameras": "all",
+                },
+            )
+
+            assert response.status_code == 200
+            assert response.json() == [{"start_time": 1010, "end_time": 1030}]

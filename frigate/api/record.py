@@ -269,12 +269,12 @@ async def no_recordings(
     cameras = params.cameras
     if cameras != "all":
         requested = set(unquote(cameras).split(","))
-        filtered = requested.intersection(allowed_cameras)
-        if not filtered:
-            return JSONResponse(content=[])
-        cameras = ",".join(filtered)
+        camera_list = list(requested.intersection(allowed_cameras))
     else:
-        cameras = allowed_cameras
+        camera_list = list(allowed_cameras)
+
+    if not camera_list:
+        return JSONResponse(content=[])
 
     before = params.before or datetime.datetime.now().timestamp()
     after = (
@@ -283,12 +283,10 @@ async def no_recordings(
     )
     scale = params.scale
 
-    clauses = [(Recordings.end_time >= after) & (Recordings.start_time <= before)]
-    if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((Recordings.camera << camera_list))
-    else:
-        camera_list = allowed_cameras
+    clauses = [
+        (Recordings.end_time >= after) & (Recordings.start_time <= before),
+        (Recordings.camera << camera_list),
+    ]
 
     # Get recording start times
     data: list[Recordings] = (
