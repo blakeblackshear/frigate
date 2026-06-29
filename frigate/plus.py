@@ -15,6 +15,10 @@ from frigate.const import PLUS_API_HOST, PLUS_ENV_VAR
 
 logger = logging.getLogger(__name__)
 
+# (connect, read) timeout in seconds for all Frigate+ HTTP calls. Without it a
+# stalled request blocks the calling thread indefinitely.
+PLUS_API_TIMEOUT = (10, 60)
+
 
 def get_jpg_bytes(image: ndarray, max_dim: int, quality: int) -> bytes:
     if image.shape[1] >= image.shape[0]:
@@ -72,7 +76,11 @@ class PlusApi:
                     "Plus API key not set. See https://docs.frigate.video/integrations/plus#set-your-api-key"
                 )
             parts = self.key.split(":")
-            r = requests.get(f"{self.host}/v1/auth/token", auth=(parts[0], parts[1]))
+            r = requests.get(
+                f"{self.host}/v1/auth/token",
+                auth=(parts[0], parts[1]),
+                timeout=PLUS_API_TIMEOUT,
+            )
             if not r.ok:
                 raise Exception(f"Unable to refresh API token: {r.text}")
             self._token_data = r.json()
@@ -83,7 +91,9 @@ class PlusApi:
 
     def _get(self, path: str) -> Response:
         return requests.get(
-            f"{self.host}/v1/{path}", headers=self._get_authorization_header()
+            f"{self.host}/v1/{path}",
+            headers=self._get_authorization_header(),
+            timeout=PLUS_API_TIMEOUT,
         )
 
     def _post(self, path: str, data: dict) -> Response:
@@ -91,6 +101,7 @@ class PlusApi:
             f"{self.host}/v1/{path}",
             headers=self._get_authorization_header(),
             json=data,
+            timeout=PLUS_API_TIMEOUT,
         )
 
     def _put(self, path: str, data: dict) -> Response:
@@ -98,6 +109,7 @@ class PlusApi:
             f"{self.host}/v1/{path}",
             headers=self._get_authorization_header(),
             json=data,
+            timeout=PLUS_API_TIMEOUT,
         )
 
     def is_active(self) -> bool:
@@ -113,7 +125,12 @@ class PlusApi:
         files = {"file": get_jpg_bytes(image, 1920, 85)}
         data = presigned_urls["original"]["fields"]
         data["content-type"] = "image/jpeg"
-        r = requests.post(presigned_urls["original"]["url"], files=files, data=data)
+        r = requests.post(
+            presigned_urls["original"]["url"],
+            files=files,
+            data=data,
+            timeout=PLUS_API_TIMEOUT,
+        )
         if not r.ok:
             logger.error(f"Failed to upload original: {r.status_code} {r.text}")
             raise Exception(r.text)
@@ -122,7 +139,12 @@ class PlusApi:
         files = {"file": get_jpg_bytes(image, 200, 70)}
         data = presigned_urls["thumbnail"]["fields"]
         data["content-type"] = "image/jpeg"
-        r = requests.post(presigned_urls["thumbnail"]["url"], files=files, data=data)
+        r = requests.post(
+            presigned_urls["thumbnail"]["url"],
+            files=files,
+            data=data,
+            timeout=PLUS_API_TIMEOUT,
+        )
         if not r.ok:
             logger.error(f"Failed to upload thumbnail: {r.status_code} {r.text}")
             raise Exception(r.text)
