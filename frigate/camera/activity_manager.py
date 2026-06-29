@@ -13,6 +13,10 @@ from frigate.comms.event_metadata_updater import (
     EventMetadataTypeEnum,
 )
 from frigate.config import CameraConfig, FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +33,11 @@ class CameraActivityManager:
         self.zone_all_object_counts: dict[str, Counter] = {}
         self.zone_active_object_counts: dict[str, Counter] = {}
         self.all_zone_labels: dict[str, set[str]] = {}
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            config,
+            config.cameras,
+            [CameraConfigUpdateEnum.zones, CameraConfigUpdateEnum.objects],
+        )
 
         for camera_config in config.cameras.values():
             if not camera_config.enabled_in_config:
@@ -56,7 +65,40 @@ class CameraActivityManager:
                 else camera_config.objects.track
             )
 
+    def __rebuild_zone_labels(self) -> None:
+        """Rebuild zone label tracking after a runtime zones/objects change."""
+        new_zone_labels: dict[str, set[str]] = {}
+
+        for camera_config in self.config.cameras.values():
+            if not camera_config.enabled_in_config or camera_config.name is None:
+                continue
+
+            for zone, zone_config in camera_config.zones.items():
+                new_zone_labels.setdefault(zone, set()).update(
+                    zone_config.objects
+                    if zone_config.objects
+                    else camera_config.objects.track
+                )
+
+        # drop counters for zones that no longer exist
+        for zone in list(self.zone_all_object_counts.keys()):
+            if zone not in new_zone_labels:
+                self.zone_all_object_counts.pop(zone, None)
+                self.zone_active_object_counts.pop(zone, None)
+
+        # ensure counters exist for new zones so the first count is published
+        for zone in new_zone_labels:
+            self.zone_all_object_counts.setdefault(zone, Counter())
+            self.zone_active_object_counts.setdefault(zone, Counter())
+
+        self.all_zone_labels = new_zone_labels
+
     def update_activity(self, new_activity: dict[str, dict[str, Any]]) -> None:
+        updated_topics = self.config_subscriber.check_for_updates()
+
+        if "zones" in updated_topics or "objects" in updated_topics:
+            self.__rebuild_zone_labels()
+
         all_objects: list[dict[str, Any]] = []
 
         for camera in new_activity.keys():
@@ -160,6 +202,9 @@ class CameraActivityManager:
         if any_changed:
             self.publish(f"{camera}/all", sum(list(all_objects.values())))
             self.publish(f"{camera}/all/active", sum(list(active_objects.values())))
+
+    def stop(self) -> None:
+        self.config_subscriber.stop()
 
 
 class AudioActivityManager:
