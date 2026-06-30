@@ -51,6 +51,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
 
+**Qualcomm** <CommunityBadge />
+
+- [Qualcomm](#qualcomm): TFLite models can run on Qualcomm SoCs with a Hexagon NPU (e.g. IQ9100, QCS6490) via the QNN TFLite delegate.
+
 **Synaptics** <CommunityBadge />
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs.
@@ -1872,6 +1876,53 @@ model: # required
 
 </TabItem>
 </ConfigTabs>
+
+## Qualcomm
+
+Hardware accelerated object detection is supported on the following Qualcomm SoCs with a Hexagon NPU:
+
+- IQ9100 / IQ-9075 EVK
+- QCS6490 / RB3 Gen 2 Vision Kit / Rubik Pi 3
+
+This implementation uses the QNN TFLite delegate (`libQnnTFLiteDelegate.so`) to accelerate TFLite model inference on the Qualcomm Hexagon Tensor Processor (HTP / NPU). The delegate library and device drivers are provided by the host operating system and made available to the container via [CDI (Container Device Interface)](https://docs.docker.com/build/building/cdi/).
+
+See the [installation docs](../frigate/installation.md#qualcomm) for information on setting up CDI and configuring the hardware.
+
+### Supported Boards
+
+| Board | SoC | CDI Config File |
+| ----- | --- | --------------- |
+| IQ-9075 EVK | IQ9100 | `cdi-hw-acc-9100.json` |
+| RB3 Gen 2 Vision Kit / Rubik Pi 3 | QCS6490 | `cdi-hw-acc-6490.json` |
+
+### Configuration
+
+The default SSD MobileDet TFLite model (`/cpu_model.tflite`) bundled with the Frigate container is used automatically. This model is INT8 quantized and compatible with the QNN HTP backend.
+
+```yaml
+detectors:
+  qualcomm_npu:
+    type: qualcomm_tfl
+```
+
+To use a custom model, specify the path at the top-level `model` config:
+
+```yaml
+detectors:
+  qualcomm_npu:
+    type: qualcomm_tfl
+
+model:
+  path: /config/your_custom_model.tflite
+  width: 320
+  height: 320
+```
+
+:::note
+
+Only `.tflite` models are supported with this detector. The model must be quantized (INT8) for optimal performance on the Hexagon NPU.
+
+:::
 
 ## Rockchip platform
 

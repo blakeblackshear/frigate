@@ -346,6 +346,9 @@ COPY web/package.json web/package-lock.json ./
 RUN npm install
 
 COPY web/ ./
+# Raise V8 heap ceiling so the vite/monaco production build doesn't OOM on
+# low-memory build hosts (e.g. 7 GB arm64 SBCs).
+ENV NODE_OPTIONS=--max-old-space-size=4096
 RUN npm run build \
     && mv dist/BASE_PATH/monacoeditorwork/* dist/assets/ \
     && rm -rf dist/BASE_PATH
