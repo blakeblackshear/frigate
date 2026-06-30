@@ -53,6 +53,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
 
+**Qualcomm** <CommunityBadge />
+
+- [Qualcomm](#qualcomm): TFLite models can run on Qualcomm SoCs with a Hexagon NPU (e.g. IQ9100, QCS6490) via the QNN TFLite delegate.
+
 **Synaptics** <CommunityBadge />
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs.
@@ -651,6 +655,21 @@ See the [installation docs](../frigate/installation.md#synaptics) for informatio
 When configuring the Synap detector, you have to specify the model: a local **path**.
 
 <ModelConfigDropdown detectorTitle="Synaptics" models={objectDetectorsModels.synaptics.models} />
+
+## Qualcomm
+
+Hardware accelerated object detection is supported on the following Qualcomm SoCs with a Hexagon NPU:
+
+- IQ9100 / IQ-9075 EVK
+- QCS6490 / RB3 Gen 2 Vision Kit / Rubik Pi 3
+
+This implementation uses the QNN TFLite delegate (`libQnnTFLiteDelegate.so`) to accelerate TFLite model inference on the Qualcomm Hexagon Tensor Processor (HTP / NPU). The delegate library and device drivers are provided by the host operating system and made available to the container via [CDI (Container Device Interface)](https://docs.docker.com/build/building/cdi/).
+
+See the [installation docs](../frigate/installation.md#qualcomm) for information on setting up CDI and configuring the hardware.
+
+### Configuration
+
+<ModelConfigDropdown detectorTitle="Qualcomm" models={objectDetectorsModels.qualcomm.models} />
 
 ## Rockchip platform
 

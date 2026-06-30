@@ -265,6 +265,19 @@
       }
     ]
   },
+  "qualcomm": {
+    "title": "Qualcomm",
+    "models": [
+      {
+        "key": "ssd_mobiledet",
+        "label": "SSD MobileDet",
+        "recommended": true,
+        "download": "The default SSD MobileDet TFLite model (`/cpu_model.tflite`) bundled with the Frigate container is used automatically. This model is INT8 quantized and compatible with the QNN HTP backend.\n\nOnly `.tflite` models are supported with this detector. A custom model must be INT8 quantized for the Hexagon NPU.",
+        "ui": "Navigate to **Settings > System > Detectors and model** and select **Qualcomm** from the detector type dropdown and click **Add**. The bundled SSD MobileDet model is used automatically.\n\nTo use a custom model, configure in the **Custom Model** tab:\n\n| Field                                    | Value                              |\n| ---------------------------------------- | ---------------------------------- |\n| **Custom object detector model path**    | `/config/your_custom_model.tflite` |\n| **Object detection model input width**   | `320`                              |\n| **Object detection model input height**  | `320`                              |\n| **Label map for custom object detector** | `/labelmap/coco-80.txt`            |",
+        "yaml": "detectors:\n  qualcomm_npu:\n    type: qualcomm_tfl"
+      }
+    ]
+  },
   "rknn": {
     "title": "RKNN",
     "models": [

@@ -472,6 +472,117 @@ If you are using `docker run`, add this option to your command `--device /dev/ax
 #### Configuration
 
 Finally, configure [hardware object detection](/configuration/object_detectors#axera) to complete the setup.
+### Qualcomm
+
+Hardware accelerated object detection is supported on the following Qualcomm SoCs:
+
+| Board | SoC | CDI Config File |
+| ----- | --- | --------------- |
+| IQ-9075 EVK | IQ9100 | `cdi-hw-acc-9100.json` |
+| RB3 Gen 2 Vision Kit / Rubik Pi 3 | QCS6490 | `cdi-hw-acc-6490.json` |
+
+The Qualcomm integration uses [CDI (Container Device Interface)](https://docs.docker.com/build/building/cdi/) to provide the container with access to the NPU device nodes and the QNN delegate libraries from the host.
+
+#### Prerequisites
+
+- **Qualcomm Linux BSP**: Your board must be running the official Qualcomm Linux Board Support Package image. The QNN runtime libraries (including `libQnnTFLiteDelegate.so` and `libQnnHtp.so`) and NPU device nodes (`/dev/fastrpc-cdsp`) are provided by the BSP and are bind-mounted into the container via CDI.
+- **Docker 25.0+**: CDI device support requires Docker 25.0 or later. Check with `docker --version`.
+- **arm64 architecture**: The Qualcomm Docker image is built for `linux/arm64` only. If building locally, you must run the build on the target board itself.
+
+#### CDI Installation
+
+1. Download or copy the CDI setup files from the [Frigate repository](https://github.com/blakeblackshear/frigate/tree/dev/docker/qualcomm/cdi).
+
+2. Install the CDI configuration for your board:
+
+   ```bash
+   # IQ9100 / IQ-9075 EVK
+   sudo python3 install_cdi.py --file cdi-hw-acc-9100.json
+
+   # QCS6490 / RB3 Gen 2 Vision Kit / Rubik Pi 3
+   sudo python3 install_cdi.py --file cdi-hw-acc-6490.json
+   ```
+
+   This writes a CDI descriptor to `/etc/cdi/cdi-hw-acc.json`. The script will automatically skip any host paths that do not exist on your system.
+
+3. Verify CDI is set up by checking the file exists:
+
+   ```bash
+   ls -l /etc/cdi/cdi-hw-acc.json
+   ```
+
+#### Setup
+
+Follow Frigate's default installation instructions, but use a docker image with `-qualcomm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-qualcomm`.
+
+:::note
+
+The pre-built `stable-qualcomm` image is not yet published. Until it is available, you must build the image locally:
+
+```bash
+git clone https://github.com/blakeblackshear/frigate.git
+cd frigate
+make local-qualcomm
+```
+
+This builds `frigate:latest-qualcomm` on your device. Use `frigate:latest-qualcomm` as the image name in the examples below instead of the `ghcr.io` URL.
+
+:::
+
+Grant Docker access to your Qualcomm hardware by passing the CDI device. In your `docker-compose.yml`:
+
+```yaml
+services:
+  frigate:
+    container_name: frigate
+    restart: unless-stopped
+    image: ghcr.io/blakeblackshear/frigate:stable-qualcomm
+    devices:
+      - qualcomm.com/device=cdi-hw-acc
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /path/to/your/config:/config
+      - /path/to/your/storage:/media/frigate
+      - type: tmpfs
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ports:
+      - "8971:8971"
+      - "8554:8554"
+      - "8555:8555/tcp"
+      - "8555:8555/udp"
+```
+
+If using `docker run`, pass the CDI device with:
+
+```bash
+docker run -d \
+  --name frigate \
+  --restart=unless-stopped \
+  --device qualcomm.com/device=cdi-hw-acc \
+  --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
+  --shm-size=256m \
+  -v /path/to/your/storage:/media/frigate \
+  -v /path/to/your/config:/config \
+  -v /etc/localtime:/etc/localtime:ro \
+  -e FRIGATE_RTSP_PASSWORD='password' \
+  -p 8971:8971 \
+  -p 8554:8554 \
+  -p 8555:8555/tcp \
+  -p 8555:8555/udp \
+  ghcr.io/blakeblackshear/frigate:stable-qualcomm
+```
+
+:::tip
+
+Unlike other hardware integrations that pass individual `/dev/` device nodes, the Qualcomm CDI approach bundles all required device nodes, library bind mounts, and environment variables into a single `--device qualcomm.com/device=cdi-hw-acc` flag.
+
+:::
+
+#### Configuration
+
+Next, you should configure [hardware object detection](/configuration/object_detectors#qualcomm).
 
 ## Docker
 
@@ -558,6 +669,7 @@ The community supported docker image tags for the current stable version are:
 
 - `stable-tensorrt-jp6` - Frigate build optimized for Nvidia Jetson devices running Jetpack 6
 - `stable-rk` - Frigate build for SBCs with Rockchip SoC
+- `stable-qualcomm` - Frigate build for Qualcomm SoCs with Hexagon NPU (IQ9100, QCS6490)
 
 ## Home Assistant App
 
