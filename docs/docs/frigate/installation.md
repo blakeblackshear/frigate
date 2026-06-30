@@ -485,7 +485,9 @@ The Qualcomm integration uses [CDI (Container Device Interface)](https://docs.do
 
 #### Prerequisites
 
-- **Qualcomm Linux BSP**: Your board must be running the official Qualcomm Linux Board Support Package image. The QNN runtime libraries (including `libQnnTFLiteDelegate.so` and `libQnnHtp.so`) and NPU device nodes (`/dev/fastrpc-cdsp`) are provided by the BSP and are bind-mounted into the container via CDI.
+- **QNN runtime on the host**: The QNN runtime libraries (including `libQnnTFLiteDelegate.so` and `libQnnHtp.so`), the Hexagon "skel" files, and the NPU device nodes (`/dev/fastrpc-cdsp`) must be present on the host; they are bind-mounted into the container via CDI. Both officially-supported images for these boards provide them:
+  - **Qualcomm Linux BSP** — ships them under the layout the bundled CDI descriptors target (`/usr/lib`, `/usr/lib/rfsa/adsp`).
+  - **Ubuntu for RB3 Gen 2 / Rubik Pi 3** — install the `qairt-libs` and `qairt-tools` packages from the Qualcomm IoT PPA. These board-select the Hexagon skels into a different directory (`/usr/lib/dsp/cdsp`), and `/usr/lib/rfsa/adsp` may contain self-referential symlink loops; `install_cdi.py` detects this and rewrites the affected mounts to the real files automatically (see below).
 - **Docker 25.0+**: CDI device support requires Docker 25.0 or later. Check with `docker --version`.
 - **arm64 architecture**: The Qualcomm Docker image is built for `linux/arm64` only. If building locally, you must run the build on the target board itself.
 
@@ -503,12 +505,13 @@ The Qualcomm integration uses [CDI (Container Device Interface)](https://docs.do
    sudo python3 install_cdi.py --file cdi-hw-acc-6490.json
    ```
 
-   This writes a CDI descriptor to `/etc/cdi/cdi-hw-acc.json`. The script will automatically skip any host paths that do not exist on your system.
+   This writes a CDI descriptor to `/etc/cdi/cdi-hw-acc.json`. For any mount whose default (BSP) path is absent or a broken symlink, the script first tries to resolve the file from the QAIRT layout (e.g. `/usr/lib/dsp/cdsp`) and rewrites the mount to the real file; paths it cannot resolve anywhere are skipped with a warning. If a **critical** QNN/HTP library is missing it prints a prominent warning — and, with `--strict`, exits non-zero — so a misconfigured host fails at install time instead of silently falling back to CPU at runtime.
 
-3. Verify CDI is set up by checking the file exists:
+3. Verify the descriptor was written and that it contains the QNN delegate and Hexagon skel mounts (their absence means the QNN runtime is not installed on the host):
 
    ```bash
    ls -l /etc/cdi/cdi-hw-acc.json
+   grep -oE 'libQnn(TFLiteDelegate|HtpV[0-9]+Skel|System)\.so' /etc/cdi/cdi-hw-acc.json | sort -u
    ```
 
 #### Setup
