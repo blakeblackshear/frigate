@@ -397,6 +397,8 @@ class Dispatcher:
             comm.publish(topic, payload, retain)
 
     def stop(self) -> None:
+        self.camera_activity.stop()
+
         for comm in self.comms:
             comm.stop()
 

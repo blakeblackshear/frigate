@@ -1263,7 +1263,6 @@ function ObjectDetailsTab({
         }
 
         setState("submitted");
-        setSearch({ ...search, plus_id: "new_upload" });
         mutate(
           (key) => isEventsKey(key),
           (currentData: SearchResult[][] | SearchResult[] | undefined) =>
@@ -1286,7 +1285,7 @@ function ObjectDetailsTab({
         );
       }
     },
-    [search, mutate, mapSearchResults, setSearch, isEventsKey, t],
+    [search, mutate, mapSearchResults, isEventsKey, t],
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);

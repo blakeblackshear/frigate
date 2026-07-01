@@ -47,6 +47,7 @@ type HlsVideoPlayerProps = {
   frigateControls?: boolean;
   inpointOffset?: number;
   onClipEnded?: (currentTime: number) => void;
+  onClipPrevious?: (diff: number) => void;
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
@@ -74,6 +75,7 @@ export default function HlsVideoPlayer({
   frigateControls = true,
   inpointOffset = 0,
   onClipEnded,
+  onClipPrevious,
   onPlayerLoaded,
   onTimeUpdate,
   onPlaying,
@@ -339,11 +341,17 @@ export default function HlsVideoPlayer({
           onSeek={(diff) => {
             const currentTime = videoRef.current?.currentTime;
 
-            if (!videoRef.current || !currentTime) {
+            if (!videoRef.current || currentTime == undefined) {
               return;
             }
 
-            videoRef.current.currentTime = Math.max(0, currentTime + diff);
+            const newTime = currentTime + diff;
+
+            if (newTime < 0 && onClipPrevious) {
+              onClipPrevious(diff);
+            } else {
+              videoRef.current.currentTime = Math.max(0, newTime);
+            }
           }}
           onSetPlaybackRate={(rate) => {
             setPlaybackRate(rate, true);
