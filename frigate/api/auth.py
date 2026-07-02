@@ -418,6 +418,12 @@ def create_encoded_jwt(user, role, expiration, secret):
 
 def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, expiration, secure):
     # TODO: ideally this would set secure as well, but that requires TLS
+    # SameSite is intentionally left unset (browsers default to Lax). Setting
+    # SameSite=Lax/Strict would stop the cookie from being sent in cross-origin
+    # iframes, breaking embedded views such as the Home Assistant Frigate card.
+    # CSRF is instead mitigated by requiring a custom X-CSRF-TOKEN header, which
+    # cross-origin pages cannot set without a CORS preflight that Frigate never
+    # grants (see check_csrf in api/fastapi_app.py).
     response.set_cookie(
         key=cookie_name,
         value=encoded_jwt,
