@@ -18,7 +18,7 @@ jobs:
         with:
           string: ${{ github.repository }}
       - name: Log in to the Container registry
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1
+        uses: docker/login-action@c99871dec2022cc055c062a10cc1a1310835ceb4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
