@@ -254,7 +254,14 @@ rateLimiter = RateLimiter()
 
 
 def get_remote_addr(request: Request):
-    route = list(reversed(request.headers.get("x-forwarded-for").split(",")))
+    # fall back to the direct TCP peer when no proxy chain is present
+    direct_addr = request.client.host if request.client else None
+
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if not forwarded_for:
+        return direct_addr or "127.0.0.1"
+
+    route = list(reversed(forwarded_for.split(",")))
     logger.debug(f"IP Route: {[r for r in route]}")
     trusted_proxies = []
     for proxy in request.app.frigate_config.auth.trusted_proxies:
@@ -291,13 +298,8 @@ def get_remote_addr(request: Request):
             logger.debug(f"First untrusted IP: {str(ip)}")
             return str(ip)
 
-    # if there wasn't anything in the route, just return the default
-    remote_addr = None
-
-    if hasattr(request, "remote_addr"):
-        remote_addr = request.remote_addr
-
-    return remote_addr or "127.0.0.1"
+    # every hop in the route was trusted, so fall back to the direct peer
+    return direct_addr or "127.0.0.1"
 
 
 def _cleanup_first_load_seen() -> None:
@@ -416,6 +418,12 @@ def create_encoded_jwt(user, role, expiration, secret):
 
 def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, expiration, secure):
     # TODO: ideally this would set secure as well, but that requires TLS
+    # SameSite is intentionally left unset (browsers default to Lax). Setting
+    # SameSite=Lax/Strict would stop the cookie from being sent in cross-origin
+    # iframes, breaking embedded views such as the Home Assistant Frigate card.
+    # CSRF is instead mitigated by requiring a custom X-CSRF-TOKEN header, which
+    # cross-origin pages cannot set without a CORS preflight that Frigate never
+    # grants (see check_csrf in api/fastapi_app.py).
     response.set_cookie(
         key=cookie_name,
         value=encoded_jwt,
