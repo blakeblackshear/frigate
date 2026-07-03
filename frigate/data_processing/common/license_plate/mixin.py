@@ -86,13 +86,15 @@ class LicensePlateProcessingMixin:
         self.similarity_threshold = 0.8
         self.cluster_threshold = 0.85
 
-    def _detect(self, image: np.ndarray) -> List[np.ndarray]:
+    def _detect(self, image: np.ndarray, debug_frame_id: int) -> List[np.ndarray]:
         """
         Detect possible areas of text in the input image by first resizing and normalizing it,
         running a detection model, and filtering out low-probability regions.
 
         Args:
             image (np.ndarray): The input image in which license plates will be detected.
+            debug_frame_id (int): Shared id used to name debug images so all artifacts
+                from a single LPR pass share the same filename suffix.
 
         Returns:
             List[np.ndarray]: A list of bounding box coordinates representing detected license plates.
@@ -106,9 +108,8 @@ class LicensePlateProcessingMixin:
         normalized_image = self._normalize_image(resized_image)
 
         if WRITE_DEBUG_IMAGES:
-            current_time = int(datetime.datetime.now().timestamp())
             cv2.imwrite(
-                f"debug/frames/license_plate_resized_{current_time}.jpg",
+                f"debug/frames/license_plate_resized_{debug_frame_id}.jpg",
                 resized_image,
             )
 
@@ -203,7 +204,7 @@ class LicensePlateProcessingMixin:
         return self.ctc_decoder(outputs)
 
     def _process_license_plate(
-        self, camera: str, id: str, image: np.ndarray
+        self, camera: str, id: str, image: np.ndarray, debug_frame_id: int
     ) -> Tuple[List[str], List[List[float]], List[int]]:
         """
         Complete pipeline for detecting, classifying, and recognizing license plates in the input image.
@@ -214,6 +215,8 @@ class LicensePlateProcessingMixin:
             camera (str): Camera identifier.
             id (str): Event identifier.
             image (np.ndarray): The input image in which to detect, classify, and recognize license plates.
+            debug_frame_id (int): Shared id used to name debug images so all artifacts
+                from a single LPR pass share the same filename suffix.
 
         Returns:
             Tuple[List[str], List[List[float]], List[int]]: Detected license plate texts, character-level confidence scores for each plate (flattened into a single list per plate), and areas of the plates.
@@ -227,7 +230,7 @@ class LicensePlateProcessingMixin:
             logger.debug("Model runners not loaded")
             return [], [], []
 
-        boxes = self._detect(image)
+        boxes = self._detect(image, debug_frame_id)
         if len(boxes) == 0:
             logger.debug(f"{camera}: No boxes found by OCR detector model")
             return [], [], []
@@ -243,7 +246,6 @@ class LicensePlateProcessingMixin:
             boxes, plate_width=plate_width, gap_fraction=0.1
         )
 
-        current_time = int(datetime.datetime.now().timestamp())
         if WRITE_DEBUG_IMAGES:
             debug_image = image.copy()
             for box in boxes:
@@ -259,7 +261,7 @@ class LicensePlateProcessingMixin:
                 )
 
             cv2.imwrite(
-                f"debug/frames/license_plate_boxes_{current_time}.jpg", debug_image
+                f"debug/frames/license_plate_boxes_{debug_frame_id}.jpg", debug_image
             )
 
         boxes = self._sort_boxes(list(boxes))
@@ -322,7 +324,7 @@ class LicensePlateProcessingMixin:
             if WRITE_DEBUG_IMAGES:
                 for i, img in enumerate(group_plate_images):
                     cv2.imwrite(
-                        f"debug/frames/license_plate_cropped_{current_time}_{group_indices[i] + 1}.jpg",
+                        f"debug/frames/license_plate_cropped_{debug_frame_id}_{group_indices[i] + 1}.jpg",
                         img,
                     )
 
@@ -335,7 +337,7 @@ class LicensePlateProcessingMixin:
                     cv2.imwrite(
                         os.path.join(
                             CLIPS_DIR,
-                            f"lpr/{camera}/{id}/{current_time}_{group_indices[i] + 1}.jpg",
+                            f"lpr/{camera}/{id}/{debug_frame_id}_{group_indices[i] + 1}.jpg",
                         ),
                         img,
                     )
@@ -1199,6 +1201,7 @@ class LicensePlateProcessingMixin:
         self.metrics.yolov9_lpr_pps.value = self.plates_det_second.eps()
         camera = obj_data if dedicated_lpr else obj_data["camera"]
         current_time = int(datetime.datetime.now().timestamp())
+        debug_frame_id = int(datetime.datetime.now().timestamp() * 1000)
 
         if not self.config.cameras[camera].lpr.enabled:
             return
@@ -1214,7 +1217,7 @@ class LicensePlateProcessingMixin:
 
             if WRITE_DEBUG_IMAGES:
                 cv2.imwrite(
-                    f"debug/frames/dedicated_lpr_masked_{current_time}.jpg",
+                    f"debug/frames/dedicated_lpr_masked_{debug_frame_id}.jpg",
                     rgb,
                 )
 
@@ -1326,7 +1329,7 @@ class LicensePlateProcessingMixin:
 
                 if WRITE_DEBUG_IMAGES:
                     cv2.imwrite(
-                        f"debug/frames/car_frame_{current_time}.jpg",
+                        f"debug/frames/car_frame_{debug_frame_id}.jpg",
                         car,
                     )
 
@@ -1454,7 +1457,7 @@ class LicensePlateProcessingMixin:
 
             if WRITE_DEBUG_IMAGES:
                 cv2.imwrite(
-                    f"debug/frames/license_plate_frame_{current_time}.jpg",
+                    f"debug/frames/license_plate_frame_{debug_frame_id}.jpg",
                     license_plate_frame,
                 )
 
@@ -1464,7 +1467,7 @@ class LicensePlateProcessingMixin:
         # run detection, returns results sorted by confidence, best first
         start = datetime.datetime.now().timestamp()
         license_plates, confidences, areas = self._process_license_plate(
-            camera, id, license_plate_frame
+            camera, id, license_plate_frame, debug_frame_id
         )
         self.plates_rec_second.update()
         self.plate_rec_speed.update(datetime.datetime.now().timestamp() - start)
