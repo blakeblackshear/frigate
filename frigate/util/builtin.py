@@ -300,9 +300,9 @@ def update_yaml(data, key_path, new_value):
     for key in key_path[:-1]:
         if isinstance(key, tuple):
             if key[0] not in temp:
-                temp[key[0]] = [{}] * max(1, key[1] + 1)
+                temp[key[0]] = [{} for _ in range(max(1, key[1] + 1))]
             elif len(temp[key[0]]) <= key[1]:
-                temp[key[0]] += [{}] * (key[1] - len(temp[key[0]]) + 1)
+                temp[key[0]].extend({} for _ in range(key[1] - len(temp[key[0]]) + 1))
             parent, parent_key = temp[key[0]], key[1]
             temp = temp[key[0]][key[1]]
         else:
@@ -320,13 +320,13 @@ def update_yaml(data, key_path, new_value):
             # Deleting a key whose entry carried comments orphans the comment
             # tokens; once the mapping is empty ruamel emits them above a
             # flow-style `{}` at column 0, producing unparseable yaml. Drop
-            # the stale comment metadata so the dump stays valid.
-            if hasattr(temp, "ca"):
-                temp.ca.items.pop(last_key, None)
-                if len(temp) == 0:
-                    temp.ca.comment = None
-                    if parent is not None and hasattr(parent, "ca"):
-                        parent.ca.items.pop(parent_key, None)
+            # the stale comment metadata so the dump stays valid. Non-empty
+            # mappings are left alone so sibling comments are preserved.
+            if hasattr(temp, "ca") and len(temp) == 0:
+                temp.ca.items.clear()
+                temp.ca.comment = None
+                if parent is not None and hasattr(parent, "ca"):
+                    parent.ca.items.pop(parent_key, None)
     else:
         if isinstance(last_key, tuple):
             if last_key[0] not in temp:
