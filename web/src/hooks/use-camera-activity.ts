@@ -57,7 +57,13 @@ export function useCameraActivity(
   );
   useEffect(() => {
     if (updatedCameraState) {
-      setObjects(updatedCameraState.objects);
+      // functional updater keeps `objects` out of the deps: this effect must
+      // only run on snapshot arrival, or it would re-assert a stale snapshot
+      // over newer event-driven state
+      const newObjects = updatedCameraState.objects ?? [];
+      setObjects((currentObjects) =>
+        isEqual(currentObjects, newObjects) ? currentObjects : newObjects,
+      );
     }
   }, [updatedCameraState, camera]);
 
