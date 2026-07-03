@@ -194,7 +194,7 @@ Camera groups let you organize cameras together with a shared name and icon, mak
 <ConfigTabs>
 <TabItem value="ui">
 
-On the Live dashboard, press the **+** icon in the main navigation to add a new camera group. Configure the group name, select which cameras to include, choose an icon, and set the display order.
+On the Live dashboard, press the **pencil icon** in the main navigation to add a new camera group. Configure the group name, select which cameras to include, choose an icon, and set the display order.
 
 </TabItem>
 <TabItem value="yaml">
