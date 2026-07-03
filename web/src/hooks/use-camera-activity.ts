@@ -7,7 +7,7 @@ import {
 } from "@/api/ws";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { MotionData, ReviewSegment } from "@/types/review";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AudioDetection, ObjectType } from "@/types/ws";
 import { useTimelineUtils } from "./use-timeline-utils";
 import useDeepMemo from "./use-deep-memo";
@@ -88,15 +88,6 @@ export function useCameraActivity(
   const { payload: event } = useFrigateEvents();
   const updatedEvent = useDeepMemo(event);
 
-  const handleSetObjects = useCallback(
-    (newObjects: ObjectType[]) => {
-      if (!isEqual(objects, newObjects)) {
-        setObjects(newObjects);
-      }
-    },
-    [objects],
-  );
-
   useEffect(() => {
     if (!updatedEvent) {
       return;
@@ -106,53 +97,71 @@ export function useCameraActivity(
       return;
     }
 
-    const updatedEventIndex =
-      objects?.findIndex((obj) => obj.id === updatedEvent.after.id) ?? -1;
+    // functional updater keeps `objects` out of the deps: each event applies
+    // exactly once against the true current list, so events arriving close
+    // together cannot clobber each other's changes with a stale write-back
+    setObjects((currentObjects) => {
+      const existingObjects = currentObjects ?? [];
+      const updatedEventIndex = existingObjects.findIndex(
+        (obj) => obj.id === updatedEvent.after.id,
+      );
 
-    let newObjects: ObjectType[] = [...(objects ?? [])];
-
-    if (updatedEvent.type === "end") {
-      if (updatedEventIndex !== -1) {
+      if (updatedEvent.type === "end") {
+        if (updatedEventIndex === -1) {
+          return currentObjects;
+        }
+        const newObjects = [...existingObjects];
         newObjects.splice(updatedEventIndex, 1);
+        return newObjects;
       }
-    } else {
+
+      let label = updatedEvent.after.label;
+
+      if (updatedEvent.after.sub_label) {
+        const sub_label = updatedEvent.after.sub_label[0];
+
+        if (attributeLabels.includes(sub_label)) {
+          label = sub_label;
+        } else {
+          label = `${label}-verified`;
+        }
+      }
+
       if (updatedEventIndex === -1) {
         // add unknown updatedEvent to list if not stationary
-        if (!updatedEvent.after.stationary) {
-          const newActiveObject: ObjectType = {
-            id: updatedEvent.after.id,
-            label: updatedEvent.after.label,
-            stationary: updatedEvent.after.stationary,
-            area: updatedEvent.after.area,
-            ratio: updatedEvent.after.ratio,
-            score: updatedEvent.after.score,
-            sub_label: updatedEvent.after.sub_label?.[0] ?? "",
-          };
-          newObjects = [...(objects ?? []), newActiveObject];
+        if (updatedEvent.after.stationary) {
+          return currentObjects;
         }
-      } else {
-        let label = updatedEvent.after.label;
-
-        if (updatedEvent.after.sub_label) {
-          const sub_label = updatedEvent.after.sub_label[0];
-
-          if (attributeLabels.includes(sub_label)) {
-            label = sub_label;
-          } else {
-            label = `${label}-verified`;
-          }
-        }
-
-        newObjects[updatedEventIndex] = {
-          ...newObjects[updatedEventIndex],
+        const newActiveObject: ObjectType = {
+          id: updatedEvent.after.id,
           label,
           stationary: updatedEvent.after.stationary,
+          area: updatedEvent.after.area,
+          ratio: updatedEvent.after.ratio,
+          score: updatedEvent.after.score,
+          sub_label: updatedEvent.after.sub_label?.[0] ?? "",
         };
+        return [...existingObjects, newActiveObject];
       }
-    }
 
-    handleSetObjects(newObjects);
-  }, [attributeLabels, camera, updatedEvent, objects, handleSetObjects]);
+      const existing = existingObjects[updatedEventIndex];
+
+      if (
+        existing.label === label &&
+        existing.stationary === updatedEvent.after.stationary
+      ) {
+        return currentObjects;
+      }
+
+      const newObjects = [...existingObjects];
+      newObjects[updatedEventIndex] = {
+        ...existing,
+        label,
+        stationary: updatedEvent.after.stationary,
+      };
+      return newObjects;
+    });
+  }, [attributeLabels, camera, updatedEvent]);
 
   // determine if camera is offline
 
