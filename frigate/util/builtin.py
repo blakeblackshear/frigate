@@ -295,16 +295,20 @@ def update_yaml_file_bulk(file_path: str, updates: Dict[str, Any]):
 
 def update_yaml(data, key_path, new_value):
     temp = data
+    parent = None
+    parent_key = None
     for key in key_path[:-1]:
         if isinstance(key, tuple):
             if key[0] not in temp:
                 temp[key[0]] = [{}] * max(1, key[1] + 1)
             elif len(temp[key[0]]) <= key[1]:
                 temp[key[0]] += [{}] * (key[1] - len(temp[key[0]]) + 1)
+            parent, parent_key = temp[key[0]], key[1]
             temp = temp[key[0]][key[1]]
         else:
             if key not in temp or temp[key] is None:
                 temp[key] = {}
+            parent, parent_key = temp, key
             temp = temp[key]
 
     last_key = key_path[-1]
@@ -313,6 +317,16 @@ def update_yaml(data, key_path, new_value):
             del temp[last_key[0]][last_key[1]]
         else:
             del temp[last_key]
+            # Deleting a key whose entry carried comments orphans the comment
+            # tokens; once the mapping is empty ruamel emits them above a
+            # flow-style `{}` at column 0, producing unparseable yaml. Drop
+            # the stale comment metadata so the dump stays valid.
+            if hasattr(temp, "ca"):
+                temp.ca.items.pop(last_key, None)
+                if len(temp) == 0:
+                    temp.ca.comment = None
+                    if parent is not None and hasattr(parent, "ca"):
+                        parent.ca.items.pop(parent_key, None)
     else:
         if isinstance(last_key, tuple):
             if last_key[0] not in temp:
