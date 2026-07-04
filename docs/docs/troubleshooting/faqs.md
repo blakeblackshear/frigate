@@ -49,9 +49,9 @@ This almost always means that the width/height defined for your camera are not c
 
 These messages in the logs are expected in certain situations. Frigate checks the integrity of the recordings before storing. Occasionally these cached files will be invalid and cleaned up automatically.
 
-### "On connect called"
+### "MQTT connected" repeats in the logs
 
-If you see repeated "On connect called" messages in your logs, check for another instance of Frigate. This happens when multiple Frigate containers are trying to connect to MQTT with the same `client_id`.
+If you see repeated "MQTT connected" messages in your logs, check for another instance of Frigate. This happens when multiple Frigate containers are trying to connect to MQTT with the same `client_id`.
 
 ### Error: Database Is Locked
 

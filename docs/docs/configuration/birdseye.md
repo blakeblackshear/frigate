@@ -126,12 +126,12 @@ birdseye:
 
 ### Sorting cameras in the Birdseye view
 
-It is possible to override the order of cameras that are being shown in the Birdseye view. The order is set at the camera level.
+It is possible to override the order of cameras that are being shown in the Birdseye view. The order is set at the camera level (when using YAML).
 
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > Birdseye" /> for each camera and set the **Position** field to control the display order.
+Navigate to <NavPath path="Settings > System > Birdseye" /> and in the **Camera order** field, use the drag handle next to each camera name to control the display order.
 
 </TabItem>
 <TabItem value="yaml">

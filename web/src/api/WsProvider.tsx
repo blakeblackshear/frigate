@@ -2,7 +2,11 @@ import { baseUrl } from "./baseUrl";
 import { ReactNode, useCallback, useEffect, useRef } from "react";
 import { WsSendContext } from "./wsContext";
 import type { Update } from "./wsContext";
-import { processWsMessage, resetWsStore } from "./ws";
+import {
+  invalidateCameraActivityCache,
+  processWsMessage,
+  resetWsStore,
+} from "./ws";
 
 export function WsProvider({ children }: { children: ReactNode }) {
   const wsUrl = `${baseUrl.replace(/^http/, "ws")}ws`;
@@ -34,6 +38,9 @@ export function WsProvider({ children }: { children: ReactNode }) {
 
       ws.onopen = () => {
         reconnectAttempt.current = 0;
+        // events may have been missed while disconnected — the snapshot
+        // requested below must fully apply even if byte-identical
+        invalidateCameraActivityCache();
         ws.send(
           JSON.stringify({ topic: "onConnect", message: "", retain: false }),
         );
