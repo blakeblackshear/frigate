@@ -15,7 +15,7 @@ OUTPUT_FOLDER="${MODEL_CACHE_DIR}/${TRT_VER}"
 YOLO_MODELS=${YOLO_MODELS:-""}
 
 # Create output folder
-mkdir -p "${OUTPUT_FOLDER}"
+mkdir -p ${OUTPUT_FOLDER}
 
 FIRST_MODEL=true
 MODEL_DOWNLOAD=""
@@ -29,9 +29,9 @@ fi
 for model in ${YOLO_MODELS//,/ }
 do
     # Remove old link in case path/version changed
-    rm -f "${MODEL_CACHE_DIR}/${model}.trt"
+    rm -f ${MODEL_CACHE_DIR}/${model}.trt
 
-    if [[ ! -f "${OUTPUT_FOLDER}/${model}.trt" ]]; then
+    if [[ ! -f ${OUTPUT_FOLDER}/${model}.trt ]]; then
         if [[ ${FIRST_MODEL} = true ]]; then
             MODEL_DOWNLOAD="${model%-dla}";
             MODEL_CONVERT="${model}"
@@ -41,7 +41,7 @@ do
             MODEL_CONVERT+=",${model}";
         fi
     else
-        ln -s "${OUTPUT_FOLDER}/${model}.trt" "${MODEL_CACHE_DIR}/${model}.trt"
+        ln -s ${OUTPUT_FOLDER}/${model}.trt ${MODEL_CACHE_DIR}/${model}.trt
     fi
 done
 
@@ -51,8 +51,8 @@ if [[ -z ${MODEL_CONVERT} ]]; then
 fi
 
 # Setup ENV to select GPU for conversion
-if [ -n "${TRT_MODEL_PREP_DEVICE+x}" ]; then
-    if [ -n "${CUDA_VISIBLE_DEVICES+x}" ]; then
+if [ ! -z ${TRT_MODEL_PREP_DEVICE+x} ]; then
+    if [ ! -z ${CUDA_VISIBLE_DEVICES+x} ]; then
         PREVIOUS_CVD="$CUDA_VISIBLE_DEVICES"
         unset CUDA_VISIBLE_DEVICES
     fi
@@ -70,30 +70,20 @@ if [[ "$(arch)" == "aarch64" ]]; then
         exit 1
     fi
 
-    TRT_LIB_DIR=/usr/lib/aarch64-linux-gnu
-    REQUIRED_TRT_LIBS=(
-        "${TRT_LIB_DIR}/libnvinfer.so.${TRT_MAJOR}"
-        "${TRT_LIB_DIR}/libnvinfer_plugin.so.${TRT_MAJOR}"
-        "${TRT_LIB_DIR}/libnvonnxparser.so.${TRT_MAJOR}"
-    )
-
-    if (( TRT_MAJOR < 10 )) || [[ -e "${TRT_LIB_DIR}/libnvparsers.so.${TRT_MAJOR}" ]]; then
-        REQUIRED_TRT_LIBS+=("${TRT_LIB_DIR}/libnvparsers.so.${TRT_MAJOR}")
+    # Library sonames are versioned by the TensorRT major (.so.8 on JP6, .so.10 on JP7). libnvparsers
+    # was removed in TensorRT 10, so only require it on older majors.
+    REQUIRED_TRT_LIBS=(libnvinfer libnvinfer_plugin libnvonnxparser)
+    if (( TRT_MAJOR < 10 )); then
+        REQUIRED_TRT_LIBS+=(libnvparsers)
     fi
 
-    MISSING_TRT_LIBS=()
-    for TRT_LIB in "${REQUIRED_TRT_LIBS[@]}"; do
-        if [[ ! -e "${TRT_LIB}" ]]; then
-            MISSING_TRT_LIBS+=("${TRT_LIB}")
+    for lib in "${REQUIRED_TRT_LIBS[@]}"; do
+        if [[ ! -e /usr/lib/aarch64-linux-gnu/${lib}.so.${TRT_MAJOR} ]]; then
+            echo "ERROR: Missing TensorRT ${TRT_MAJOR} runtime library ${lib}.so.${TRT_MAJOR}"
+            echo "  Install the matching TensorRT ${TRT_MAJOR} runtime packages and nvidia-container on the HOST"
+            exit 1
         fi
     done
-
-    if (( ${#MISSING_TRT_LIBS[@]} > 0 )); then
-        echo "ERROR: Missing TensorRT runtime libraries:"
-        printf '  %s\n' "${MISSING_TRT_LIBS[@]}"
-        echo "ERROR: Install the matching TensorRT ${TRT_MAJOR} runtime packages and nvidia-container on the HOST."
-        exit 1
-    fi
 fi
 
 echo "Generating the following TRT Models: ${MODEL_CONVERT}"
@@ -102,33 +92,33 @@ echo "Generating the following TRT Models: ${MODEL_CONVERT}"
 cd /usr/local/src/tensorrt_demos/yolo
 
 echo "Downloading yolo weights"
-./download_yolo.sh "${MODEL_DOWNLOAD}" 2> /dev/null
+./download_yolo.sh $MODEL_DOWNLOAD 2> /dev/null
 
 for model in ${MODEL_CONVERT//,/ }
 do
-    python3 yolo_to_onnx.py -m "${model%-dla}" > /dev/null
+    python3 yolo_to_onnx.py -m ${model%-dla} > /dev/null
 
     echo -e "\nGenerating ${model}.trt. This may take a few minutes.\n"; start=$(date +%s)
     if [[ $model == *-dla ]]; then
-        cmd=(python3 onnx_to_tensorrt.py -m "${model%-dla}" --dla_core 0)
+        cmd="python3 onnx_to_tensorrt.py -m ${model%-dla} --dla_core 0"
     else
-        cmd=(python3 onnx_to_tensorrt.py -m "${model}")
+        cmd="python3 onnx_to_tensorrt.py -m ${model}"
     fi
-    "${cmd[@]}" > /tmp/onnx_to_tensorrt.log || { cat /tmp/onnx_to_tensorrt.log && continue; }
+    $cmd > /tmp/onnx_to_tensorrt.log || { cat /tmp/onnx_to_tensorrt.log && continue; }
 
-    mv "${model%-dla}.trt" "${OUTPUT_FOLDER}/${model}.trt";
-    ln -s "${OUTPUT_FOLDER}/${model}.trt" "${MODEL_CACHE_DIR}/${model}.trt"
+    mv ${model%-dla}.trt ${OUTPUT_FOLDER}/${model}.trt;
+    ln -s ${OUTPUT_FOLDER}/${model}.trt ${MODEL_CACHE_DIR}/${model}.trt
     echo "Generated ${model}.trt in $(($(date +%s)-start)) seconds"
 done
 
 # Restore ENV after conversion
-if [ -n "${TRT_MODEL_PREP_DEVICE+x}" ]; then
+if [ ! -z ${TRT_MODEL_PREP_DEVICE+x} ]; then
     unset CUDA_VISIBLE_DEVICES
-    if [ -n "${PREVIOUS_CVD+x}" ]; then
+    if [ ! -z ${PREVIOUS_CVD+x} ]; then
         export CUDA_VISIBLE_DEVICES="$PREVIOUS_CVD"
     fi
 fi
 
 # Print which models exist in output folder
 echo "Available tensorrt models:"
-cd "${OUTPUT_FOLDER}" && ls -- *.trt;
+cd ${OUTPUT_FOLDER} && ls *.trt;

@@ -12,6 +12,11 @@ ARG SLIM_BASE=debian:12-slim
 # A hook that allows us to inject commands right after the base images
 ARG BASE_HOOK=
 
+# Extra flags for pip/get-pip. Empty for every stock image; set to --ignore-installed only for
+# the JetPack 7 / Ubuntu 24.04 (noble) TensorRT base, whose distro pip/setuptools/wheel ship with
+# no RECORD file and would otherwise abort get-pip/`pip install -U` with "uninstall-no-record-file".
+ARG PIP_IGNORE_INSTALLED=
+
 FROM ${BASE_IMAGE} AS base
 ARG PIP_BREAK_SYSTEM_PACKAGES
 ARG BASE_HOOK
@@ -87,9 +92,7 @@ RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
-    # --ignore-installed: the Ubuntu 24.04 (noble) JP7 base ships a distro pip with no RECORD
-    # file, so get-pip.py's default reinstall dies with "uninstall-no-record-file". Harmless on JP6.
-    && python3 get-pip.py --ignore-installed "pip" \
+    && python3 get-pip.py "pip" \
     && pip3 install -r /requirements-ov.txt
 
 # Get OpenVino Model
@@ -159,6 +162,7 @@ FROM base AS wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
 ARG DEBUG=false
+ARG PIP_IGNORE_INSTALLED
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
@@ -183,11 +187,9 @@ RUN apt-get -qq update \
 
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
-# --ignore-installed: the Ubuntu 24.04 (noble) JP7 base ships a distro pip with no RECORD file,
-# so get-pip.py's default reinstall dies with "uninstall-no-record-file". Harmless on JP6.
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
-    && python3 get-pip.py --ignore-installed "pip"
+    && python3 get-pip.py ${PIP_IGNORE_INSTALLED} "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
 COPY docker/main/requirements-dev.txt /requirements-dev.txt
@@ -226,6 +228,7 @@ COPY docker/main/rootfs/ /
 FROM slim-base AS deps
 ARG TARGETARCH
 ARG BASE_IMAGE
+ARG PIP_IGNORE_INSTALLED
 
 ARG DEBIAN_FRONTEND
 # http://stackoverflow.com/questions/48162574/ddg#49462622
@@ -272,18 +275,12 @@ RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_de
 ENV DEFAULT_FFMPEG_VERSION="8.0"
 ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:7.0:5.0"
 
-# --ignore-installed: the Ubuntu 24.04 (noble) JP7 base ships a distro pip with no RECORD file,
-# so get-pip.py's default reinstall dies with "uninstall-no-record-file". Harmless on JP6.
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
-    && python3 get-pip.py --ignore-installed "pip"
+    && python3 get-pip.py ${PIP_IGNORE_INSTALLED} "pip"
 
-# --ignore-installed: on the Ubuntu 24.04 (noble) JP7 base, `pip3 install -U` tries to upgrade
-# distro-managed packages (e.g. wheel 0.42.0) that ship without a RECORD file, which fails with
-# "uninstall-no-record-file". Installing over them into /usr/local without uninstalling avoids
-# that; harmless on JP6 where these come from pip and have RECORD files.
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    pip3 install -U --ignore-installed /deps/wheels/*.whl
+    pip3 install -U ${PIP_IGNORE_INSTALLED} /deps/wheels/*.whl
 
 # Install Axera Engine
 RUN pip3 install https://github.com/AXERA-TECH/pyaxengine/releases/download/0.1.3-frigate/axengine-0.1.3-py3-none-any.whl

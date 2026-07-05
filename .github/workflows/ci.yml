@@ -131,6 +131,7 @@ jobs:
           TENSORRT_PYTHON_BRANCH: auto
           L4T_APT_RELEASE: r39.2
           JETSON_SOC_REPO: som
+          PIP_IGNORE_INSTALLED: "--ignore-installed"
         uses: docker/bake-action@v7
         with:
           source: .
