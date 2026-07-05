@@ -202,11 +202,31 @@ export default function Step2ProbeOrSnapshot({
         const candidateUris = (response.data.rtsp_candidates || [])
           .filter((c: { source: string }) => c.source === "GetStreamUri")
           .map((c: { uri: string }) => c.uri);
-        onUpdate({
+
+        const update: Partial<WizardFormData> = {
           probeMode: true,
           probeCandidates: candidateUris,
           candidateTests: {},
-        });
+        };
+
+        const manufacturer: string = response.data.manufacturer || "";
+        if (
+          manufacturer.toLowerCase().includes("reolink") &&
+          wizardData.host &&
+          wizardData.username &&
+          wizardData.password
+        ) {
+          const protocol = await detectReolinkCamera(
+            wizardData.host,
+            wizardData.username,
+            wizardData.password,
+          );
+          if (protocol === "http-flv") {
+            update.brandTemplate = "reolink";
+          }
+        }
+
+        onUpdate(update);
       } else {
         setProbeError(response.data?.message || "Probe failed");
       }
