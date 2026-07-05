@@ -125,11 +125,11 @@ cameras:
       height: 720
 ```
 
-### Why does Frigate keep creating new events for my parked car?
+### Why does Frigate keep creating new tracked objects for my parked car?
 
-Stationary tracking is designed to _prevent_ this — a parked car should stay one tracked object and not generate new events. If you're getting repeated events for the same car, it's likely that Frigate is losing the tracked object and re-detecting it as a new one.
+Stationary tracking is designed to _prevent_ this — a parked car should remain a single tracked object rather than generating new ones. If you're repeatedly getting new tracked objects for the same car, it's likely that Frigate is losing the object and re-detecting it as a new one.
 
-Open one of the events in Explore → **Tracking Details**. If the detection scores are low (< 70% or so), the model isn't confident the parked car is a car. This is common with the free [COCO-trained](https://cocodataset.org/#explore) object detection models on steep/top-down angles, partially occluded cars, foliage, or low-light footage. When detections fall below `min_score` for too many frames the tracker loses the object, and the next confident frame creates a brand new one.
+Open one of the tracked objects in Explore → **Tracking Details**. If the detection scores are low (< 70% or so), the model isn't confident the parked car is a car. This is common with the free [COCO-trained](https://cocodataset.org/#explore) object detection models on steep/top-down angles, partially occluded cars, foliage, or low-light footage. When detections fall below `min_score` for too many frames the tracker loses the object, and the next confident frame creates a brand new one.
 
 What helps:
 

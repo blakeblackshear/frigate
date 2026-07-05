@@ -23,7 +23,7 @@ In 0.14 and later, all of that is bundled into a single review item which starts
 
 ## Alerts and Detections
 
-Not every segment of video captured by Frigate may be of the same level of interest to you. Video of people who enter your property may be a different priority than those walking by on the sidewalk. For this reason, Frigate categorizes review items as _alerts_ and _detections_. By default, all person and car objects are considered alerts. You can refine categorization of your review items by configuring required zones for them.
+Not every segment of video captured by Frigate may be of the same level of interest to you. Video of people who enter your property may be a different priority than those walking by on the sidewalk. For this reason, Frigate categorizes review items as _alerts_ and _detections_. By default, all person and car objects are considered alerts. You can refine categorization of your review items by configuring [required zones](/configuration/zones#restricting-alerts-and-detections-to-specific-zones) for them.
 
 :::note
 

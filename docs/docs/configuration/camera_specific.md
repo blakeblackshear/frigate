@@ -3,6 +3,8 @@ id: camera_specific
 title: Camera Specific Configurations
 ---
 
+import NavPath from "@site/src/components/NavPath";
+
 :::note
 
 This page makes use of presets of FFmpeg args. For more information on presets, see the [FFmpeg Presets](/configuration/ffmpeg_presets) page.
@@ -161,6 +163,21 @@ If available, recommended settings are:
 - `On, fluency first` this sets the camera to CBR (constant bit rate)
 - `Interframe Space 1x` this sets the iframe interval to the same as the frame rate
 
+#### Setup via the Add Camera Wizard
+
+The Add Camera Wizard is the recommended way to add a standard Reolink camera. Before starting, make sure HTTP is enabled in the camera's advanced network settings — the wizard uses the camera's HTTP API to determine its resolution and choose the recommended stream type from the table above.
+
+1. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />.
+2. Choose **Manual selection** as the stream detection method and select **Reolink** as the camera brand.
+3. The wizard queries the camera and automatically uses an http-flv stream for cameras 5MP and lower, or an RTSP stream for higher resolution cameras.
+4. In the validation step, enable **Use stream compatibility mode** for http-flv streams when the wizard recommends it.
+
+If you use the **Probe camera** method instead, the discovered stream URLs will be RTSP. For Reolink cameras where http-flv is recommended, the wizard will show a warning in the validation step.
+
+The wizard covers standard single-camera setups. For two way talk, cameras connected through a Reolink NVR, or audio transcoding for WebRTC live view, configure the camera manually as shown below.
+
+#### Manual configuration
+
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
 Cameras connected via a Reolink NVR can be connected with the http stream, use `channel[0..15]` in the stream url for the additional channels.
@@ -225,11 +242,12 @@ cameras:
           roles:
             - detect
 ```
+
 </details>
 
 ### Unifi Protect Cameras
 
-:::note 
+:::note
 
 Unifi G5s cameras and newer need a Unifi Protect server to enable rtsps stream, it's not posible to enable it in standalone mode.
 
@@ -269,7 +287,6 @@ Some community members have found better performance on Wyze cameras by using an
 To use a USB camera (webcam) with Frigate, the recommendation is to use go2rtc's [FFmpeg Device](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg-device) support:
 
 - Preparation outside of Frigate:
-
   - Get USB camera path. Run `v4l2-ctl --list-devices` to get a listing of locally-connected cameras available. (You may need to install `v4l-utils` in a way appropriate for your Linux distribution). In the sample configuration below, we use `video=0` to correlate with a detected device path of `/dev/video0`
   - Get USB camera formats & resolutions. Run `ffmpeg -f v4l2 -list_formats all -i /dev/video0` to get an idea of what formats and resolutions the USB Camera supports. In the sample configuration below, we use a width of 1024 and height of 576 in the stream and detection settings based on what was reported back.
   - If using Frigate in a container (e.g. Docker on TrueNAS), ensure you have USB Passthrough support enabled, along with a specific Host Device (`/dev/video0`) + Container Device (`/dev/video0`) listed.

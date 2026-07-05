@@ -144,7 +144,7 @@ cameras:
 
 ### Zones
 
-[Required zones](/configuration/zones.md) can be a great tool to reduce false positives that may be detected in the sky or other areas that are not of interest. The required zones will only create tracked objects for objects that enter the zone.
+[Required zones](/configuration/zones.md#restricting-alerts-and-detections-to-specific-zones) can be a great tool to reduce false positives that may be detected in the sky or other areas that are not of interest. The required zones will only create tracked objects for objects that enter the zone.
 
 ### Object Masks
 

@@ -17,8 +17,6 @@ Some types of hardware acceleration are detected and used automatically, but you
 - Check the logs: A message will either say that hardware acceleration was automatically detected, or there will be a warning that no hardware acceleration was automatically detected
 - If hardware acceleration is specified in the config, verification can be done by ensuring the logs are free from errors. There is no CPU fallback for hardware acceleration.
 
-:::info
-
 Frigate supports presets for optimal hardware accelerated video decoding:
 
 **AMD**
@@ -49,13 +47,9 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 Depending on your system, these presets may not be compatible, and you may need to use manual hwaccel args to take advantage of your hardware. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
 
-:::
-
 ## Intel-based CPUs
 
 Frigate can utilize most Intel integrated GPUs and Arc GPUs to accelerate video decoding.
-
-:::info
 
 **Recommended hwaccel Preset**
 
@@ -67,8 +61,6 @@ Frigate can utilize most Intel integrated GPUs and Arc GPUs to accelerate video 
 | gen13+             | iHD / Xe     | preset-intel-qsv-\* |                                             |
 | Intel Arc A-series | iHD / Xe     | preset-intel-qsv-\* |                                             |
 | Intel Arc B-series | iHD / Xe     | preset-intel-qsv-\* | Requires host kernel 6.12+                  |
-
-:::
 
 :::note
 

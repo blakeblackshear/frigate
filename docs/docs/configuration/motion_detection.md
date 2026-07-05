@@ -11,7 +11,7 @@ import NavPath from "@site/src/components/NavPath";
 
 Frigate uses motion detection as a first line check to see if there is anything happening in the frame worth checking with object detection.
 
-Once motion is detected, it tries to group up nearby areas of motion together in hopes of identifying a rectangle in the image that will capture the area worth inspecting. These are the red "motion boxes" you see in the debug viewer.
+Once motion is detected, it tries to group up nearby areas of motion together in hopes of identifying a rectangle in the image that will capture the area worth inspecting. These are the red "motion boxes" you see in the [debug viewer](/usage/live#the-single-camera-view).
 
 ## The Goal
 

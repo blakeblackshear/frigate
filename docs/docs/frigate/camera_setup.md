@@ -31,7 +31,7 @@ Larger resolutions **do** improve performance if the objects are very small in t
 
 :::warning
 
-Most users who raise `detect.fps` above the default don't need to. Increasing it consumes more CPU/GPU (detection load scales directly with the frame rate) while providing **no benefit to tracking** once objects are already being followed smoothly. Leave it at **5** unless you have a specific scene that fails the test below, and confirm any change actually helps in the debug view.
+Most users who raise `detect.fps` above the default don't need to. Increasing it consumes more CPU/GPU (detection load scales directly with the frame rate) while providing **no benefit to tracking** once objects are already being followed smoothly. Leave it at **5** unless you have a specific scene that fails the test below, and confirm any change actually helps in the [debug view](/usage/live#the-single-camera-view).
 
 :::
 

@@ -109,7 +109,7 @@ cameras:
 2. Add the temporary camera to `config/config.yml` (example above). Use a unique name such as `test` or `replay_camera` so it's easy to remove later.
    - If you're debugging a specific camera, copy the settings from that camera (frame rate, model/enrichment settings, zones, etc.) into the temporary camera so the replay closely matches the original environment. Leave `record` and `snapshots` disabled unless you are specifically debugging recording or snapshot behavior.
 3. Restart Frigate.
-4. Observe the Debug view in the UI and logs as the clip is replayed. Watch detections, zones, or any feature you're looking to debug, and note any errors in the logs to reproduce the issue.
+4. Observe the [Debug view](/usage/live#the-single-camera-view) in the UI and logs as the clip is replayed. Watch detections, zones, or any feature you're looking to debug, and note any errors in the logs to reproduce the issue.
 5. Iterate on camera or enrichment settings (model, fps, zones, filters) and re-check the replay until the behavior is resolved.
 6. Remove the temporary camera from your config after debugging to avoid spurious telemetry or recordings.
 
