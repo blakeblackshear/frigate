@@ -1,6 +1,5 @@
 # this uses the base model because the color is an extra attribute
 import logging
-from typing import Optional, Union
 
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
@@ -13,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class ZoneConfig(BaseModel):
-    friendly_name: Optional[str] = Field(
+    friendly_name: str | None = Field(
         None,
         title="Zone name",
         description="A user-friendly name for the zone, displayed in the Frigate UI. If not set, a formatted version of the zone name will be used.",
@@ -23,7 +22,7 @@ class ZoneConfig(BaseModel):
         title="Enabled",
         description="Enable or disable this zone. Disabled zones are ignored at runtime.",
     )
-    enabled_in_config: Optional[bool] = Field(
+    enabled_in_config: bool | None = Field(
         default=None, title="Keep track of original state of zone."
     )
     filters: dict[str, FilterConfig] = Field(
@@ -31,11 +30,11 @@ class ZoneConfig(BaseModel):
         title="Zone filters",
         description="Filters to apply to objects within this zone. Used to reduce false positives or restrict which objects are considered present in the zone.",
     )
-    coordinates: Union[str, list[str]] = Field(
+    coordinates: str | list[str] = Field(
         title="Coordinates",
         description="Polygon coordinates that define the zone area. Can be a comma-separated string or a list of coordinate strings. Coordinates should be relative (0-1) or absolute (legacy).",
     )
-    distances: Optional[Union[str, list[str]]] = Field(
+    distances: str | list[str] | None = Field(
         default_factory=list,
         title="Real-world distances",
         description="Optional real-world distances for each side of the zone quadrilateral, used for speed or distance calculations. Must have exactly 4 values if set.",
@@ -52,18 +51,18 @@ class ZoneConfig(BaseModel):
         title="Loitering seconds",
         description="Number of seconds an object must remain in the zone to be considered as loitering. Set to 0 to disable loitering detection.",
     )
-    speed_threshold: Optional[float] = Field(
+    speed_threshold: float | None = Field(
         default=None,
         ge=0.1,
         title="Minimum speed",
         description="Minimum speed (in real-world units if distances are set) required for an object to be considered present in the zone. Used for speed-based zone triggers.",
     )
-    objects: Union[str, list[str]] = Field(
+    objects: str | list[str] = Field(
         default_factory=list,
         title="Trigger objects",
         description="List of object types (from labelmap) that can trigger this zone. Can be a string or a list of strings. If empty, all objects are considered.",
     )
-    _color: Optional[tuple[int, int, int]] = PrivateAttr()
+    _color: tuple[int, int, int] | None = PrivateAttr()
     _contour: np.ndarray = PrivateAttr()
 
     @property
@@ -147,7 +146,7 @@ class ZoneConfig(BaseModel):
             except ValueError:
                 raise ValueError(
                     f"Invalid coordinates found in configuration file. Coordinates must be relative (between 0-1): {coordinates}"
-                )
+                ) from None
 
             if explicit:
                 self.coordinates = ",".join(
@@ -176,7 +175,7 @@ class ZoneConfig(BaseModel):
             except ValueError:
                 raise ValueError(
                     f"Invalid coordinates found in configuration file. Coordinates must be relative (between 0-1): {coordinates}"
-                )
+                ) from None
 
             if explicit:
                 self.coordinates = ",".join(

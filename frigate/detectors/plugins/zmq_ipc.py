@@ -1,12 +1,11 @@
 import json
 import logging
 import os
-from typing import Any, List
+from typing import Any, Literal
 
 import numpy as np
 import zmq
 from pydantic import ConfigDict, Field
-from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
@@ -274,7 +273,7 @@ class ZmqIpcDetector(DetectionApi):
         }
         return json.dumps(header).encode("utf-8")
 
-    def _decode_response(self, frames: List[bytes]) -> np.ndarray:
+    def _decode_response(self, frames: list[bytes]) -> np.ndarray:
         try:
             if len(frames) == 1:
                 # Single-frame raw float32 (20x6)

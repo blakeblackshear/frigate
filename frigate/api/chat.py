@@ -7,7 +7,7 @@ import operator
 import time
 from datetime import datetime
 from functools import reduce
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
@@ -201,7 +201,7 @@ async def _execute_search_objects(
         # Return it as-is for the LLM
         return response
     except Exception as e:
-        logger.error(f"Error executing search_objects: {e}", exc_info=True)
+        logger.exception(f"Error executing search_objects: {e}")
         return JSONResponse(
             content={
                 "success": False,
@@ -611,7 +611,7 @@ async def _execute_get_live_context(
         return result
 
     except Exception as e:
-        logger.error(f"Error executing get_live_context: {e}", exc_info=True)
+        logger.exception(f"Error executing get_live_context: {e}")
         return {
             "error": "Error getting live context",
         }
@@ -621,7 +621,7 @@ async def _get_live_frame_image_url(
     request: Request,
     camera: str,
     allowed_cameras: list[str],
-) -> Optional[str]:
+) -> str | None:
     """
     Fetch the current live frame for a camera as a base64 data URL.
 
@@ -801,7 +801,7 @@ async def _execute_start_camera_watch(
             zones=zones,
         )
     except RuntimeError as e:
-        logger.error("Failed to start VLM watch job: %s", e, exc_info=True)
+        logger.exception("Failed to start VLM watch job: %s", e)
         return {"error": "Failed to start VLM watch job."}
 
     return {
@@ -979,7 +979,7 @@ def _execute_get_recap(
 
         return {"events": events}
     except Exception as e:
-        logger.error("Error executing get_recap: %s", e, exc_info=True)
+        logger.exception("Error executing get_recap: %s", e)
         return {"error": "Failed to fetch recap data."}
 
 
@@ -1072,13 +1072,12 @@ async def _execute_pending_tools(
                 }
             )
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "Error executing tool %s (id: %s): %s. Arguments: %s",
                 tool_name,
                 tool_call_id,
                 e,
                 json.dumps(tool_args),
-                exc_info=True,
             )
             error_content = json.dumps({"error": f"Tool execution failed: {str(e)}"})
             tool_calls_out.append(
@@ -1186,7 +1185,7 @@ async def chat_completion(
         async def stream_body_llm():
             nonlocal conversation, stream_iterations
 
-            def _emit_chain(extra: Optional[list[dict[str, Any]]] = None):
+            def _emit_chain(extra: list[dict[str, Any]] | None = None):
                 # Return the full conversation (including the system message) so
                 # the client persists and replays it verbatim next turn.
                 chain = conversation + (extra or [])
@@ -1414,7 +1413,7 @@ async def chat_completion(
         )
 
     except Exception as e:
-        logger.error(f"Error in chat completion: {e}", exc_info=True)
+        logger.exception(f"Error in chat completion: {e}")
         return JSONResponse(
             content={
                 "error": "An error occurred while processing your request.",
@@ -1477,7 +1476,7 @@ async def start_vlm_monitor(
             username=request.headers.get("remote-user", ""),
         )
     except RuntimeError as e:
-        logger.error("Failed to start VLM watch job: %s", e, exc_info=True)
+        logger.exception("Failed to start VLM watch job: %s", e)
         return JSONResponse(
             content={"success": False, "message": "Failed to start VLM watch job."},
             status_code=409,

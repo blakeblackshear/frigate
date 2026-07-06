@@ -1,14 +1,13 @@
 """Generic job management for long-running background tasks."""
 
 import threading
-from typing import Optional
 
 from frigate.jobs.job import Job
 from frigate.types import JobStatusTypesEnum
 
 # Global state and locks for enforcing single concurrent job per job type
 _job_locks: dict[str, threading.Lock] = {}
-_current_jobs: dict[str, Optional[Job]] = {}
+_current_jobs: dict[str, Job | None] = {}
 # Keep completed jobs for retrieval, keyed by (job_type, job_id)
 _completed_jobs: dict[tuple[str, str], Job] = {}
 
@@ -35,7 +34,7 @@ def set_current_job(job: Job) -> None:
         _current_jobs[job.job_type] = job
 
 
-def clear_current_job(job_type: str, job_id: Optional[str] = None) -> None:
+def clear_current_job(job_type: str, job_id: str | None = None) -> None:
     """Clear the current job for a given job type, optionally checking the ID."""
     lock = _get_lock(job_type)
     with lock:
@@ -45,14 +44,14 @@ def clear_current_job(job_type: str, job_id: Optional[str] = None) -> None:
                 _current_jobs[job_type] = None
 
 
-def get_current_job(job_type: str) -> Optional[Job]:
+def get_current_job(job_type: str) -> Job | None:
     """Get the current running/queued job for a given job type, if any."""
     lock = _get_lock(job_type)
     with lock:
         return _current_jobs.get(job_type)
 
 
-def get_job_by_id(job_type: str, job_id: str) -> Optional[Job]:
+def get_job_by_id(job_type: str, job_id: str) -> Job | None:
     """Get job by ID. Checks current job first, then completed jobs."""
     lock = _get_lock(job_type)
     with lock:

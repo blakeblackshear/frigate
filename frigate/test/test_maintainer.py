@@ -93,7 +93,7 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         stop_event = MagicMock()
         maintainer = RecordingMaintainer(config, stop_event)
 
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.now(datetime.UTC)
         start_time = now - datetime.timedelta(seconds=20)
         end_time = now - datetime.timedelta(seconds=10)
         cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"

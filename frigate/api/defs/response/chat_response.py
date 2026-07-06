@@ -1,6 +1,6 @@
 """Chat API response models."""
 
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -17,14 +17,14 @@ class ChatMessageResponse(BaseModel):
     """A message in the chat response."""
 
     role: str = Field(description="Message role")
-    content: Optional[str] = Field(
+    content: str | None = Field(
         default=None, description="Message content (None if tool calls present)"
     )
-    reasoning: Optional[str] = Field(
+    reasoning: str | None = Field(
         default=None,
         description="Separated reasoning/thinking trace if the model emitted one",
     )
-    tool_calls: Optional[list[ToolCallInvocation]] = Field(
+    tool_calls: list[ToolCallInvocation] | None = Field(
         default=None, description="Tool calls if LLM wants to call tools"
     )
 

@@ -756,7 +756,7 @@ class PtzAutoTracker:
             try:
                 # Asynchronously wait for move data with a timeout
                 move_data = await asyncio.wait_for(move_queue.get(), timeout=0.1)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
 
             async with self.move_queue_locks[camera]:
@@ -948,8 +948,8 @@ class PtzAutoTracker:
 
         if invalid:
             logger.debug(
-                f"{camera}: Invalid velocity: {tuple(np.round(velocities, 2).flatten().astype(int))}: Invalid because: "
-                + ", ".join(
+                f"{camera}: Invalid velocity: {tuple(np.round(velocities, 2).flatten().astype(int))}: Invalid because: %s",
+                ", ".join(
                     [
                         var_name
                         for var_name, is_invalid in [
@@ -961,7 +961,7 @@ class PtzAutoTracker:
                         ]
                         if is_invalid
                     ]
-                )
+                ),
             )
             # invalid velocity
             return False, np.zeros((4,))

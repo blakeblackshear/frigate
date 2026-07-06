@@ -1,6 +1,6 @@
 """Chat API request models."""
 
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -11,7 +11,7 @@ class ChatMessage(BaseModel):
     role: str = Field(
         description="Message role: 'user', 'assistant', 'system', or 'tool'"
     )
-    content: Optional[Any] = Field(
+    content: Any | None = Field(
         default=None,
         description=(
             "Message content. Usually a string, but may be a multimodal content "
@@ -19,13 +19,13 @@ class ChatMessage(BaseModel):
             "request tool calls."
         ),
     )
-    tool_call_id: Optional[str] = Field(
+    tool_call_id: str | None = Field(
         default=None, description="For tool messages, the ID of the tool call"
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         default=None, description="For tool messages, the tool name"
     )
-    tool_calls: Optional[list[dict[str, Any]]] = Field(
+    tool_calls: list[dict[str, Any]] | None = Field(
         default=None,
         description=(
             "For assistant messages replayed from prior turns, the OpenAI-format "
@@ -52,7 +52,7 @@ class ChatCompletionRequest(BaseModel):
         default=False,
         description="If true, stream the final assistant response in the body as newline-delimited JSON.",
     )
-    enable_thinking: Optional[bool] = Field(
+    enable_thinking: bool | None = Field(
         default=None,
         description=(
             "Per-request thinking toggle. None means use the provider default. "

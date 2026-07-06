@@ -39,8 +39,7 @@ class Axengine(DetectionApi):
         try:
             import axengine as axe
         except ModuleNotFoundError:
-            raise ImportError("AXEngine is not installed.")
-            return
+            raise ImportError("AXEngine is not installed.") from None
 
         logger.info("__init__ axengine")
         super().__init__(config)

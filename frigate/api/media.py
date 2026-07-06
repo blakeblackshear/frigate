@@ -7,7 +7,7 @@ import math
 import os
 import subprocess as sp
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path as FilePath
 from typing import Any
 from urllib.parse import unquote
@@ -314,10 +314,8 @@ async def get_snapshot_from_recording(
                 Recordings.start_time,
             )
             .where(
-                (
-                    (frame_time >= Recordings.start_time)
-                    & (frame_time <= Recordings.end_time)
-                )
+                (frame_time >= Recordings.start_time)
+                & (frame_time <= Recordings.end_time)
             )
             .where(Recordings.camera == camera_name)
             .order_by(Recordings.start_time.desc())
@@ -335,10 +333,8 @@ async def get_snapshot_from_recording(
                     Recordings.start_time,
                 )
                 .where(
-                    (
-                        (frame_time >= Recordings.start_time)
-                        & (frame_time <= Recordings.end_time)
-                    )
+                    (frame_time >= Recordings.start_time)
+                    & (frame_time <= Recordings.end_time)
                 )
                 .where(Recordings.camera == camera_name)
                 .order_by(Recordings.start_time.desc())
@@ -398,10 +394,7 @@ async def submit_recording_snapshot_to_plus(
             Recordings.start_time,
         )
         .where(
-            (
-                (frame_time >= Recordings.start_time)
-                & (frame_time <= Recordings.end_time)
-            )
+            (frame_time >= Recordings.start_time) & (frame_time <= Recordings.end_time)
         )
         .where(Recordings.camera == camera_name)
         .order_by(Recordings.start_time.desc())
@@ -719,7 +712,7 @@ async def vod_hour(
 ):
     parts = year_month.split("-")
     start_date = (
-        datetime(int(parts[0]), int(parts[1]), day, hour, tzinfo=timezone.utc)
+        datetime(int(parts[0]), int(parts[1]), day, hour, tzinfo=UTC)
         - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
     )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)

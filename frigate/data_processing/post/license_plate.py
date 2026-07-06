@@ -102,10 +102,8 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi): 
                 Recordings.start_time,
             )
             .where(
-                (
-                    (frame_time >= Recordings.start_time)
-                    & (frame_time <= Recordings.end_time)
-                )
+                (frame_time >= Recordings.start_time)
+                & (frame_time <= Recordings.end_time)
             )
             .where(Recordings.camera == camera_name)
             .order_by(Recordings.start_time.desc())

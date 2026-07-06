@@ -55,7 +55,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
 
         # load stats from disk
         try:
-            with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "r") as f:
+            with open(os.path.join(CONFIG_DIR, ".search_stats.json")) as f:
                 data = json.loads(f.read())
                 self.thumb_stats.from_dict(data["thumb_stats"])
                 self.desc_stats.from_dict(data["desc_stats"])

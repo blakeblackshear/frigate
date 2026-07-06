@@ -6,9 +6,10 @@ import logging
 import os
 import queue
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Callable
+from typing import Any
 
 from py_vapid import Vapid01
 from pywebpush import WebPusher

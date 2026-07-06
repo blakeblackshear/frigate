@@ -5,7 +5,6 @@ import logging
 from datetime import datetime, timedelta
 from functools import reduce
 from pathlib import Path
-from typing import List
 from urllib.parse import unquote
 
 from fastapi import APIRouter, Depends, Request
@@ -63,7 +62,7 @@ def get_recordings_storage_usage(request: Request):
 def all_recordings_summary(
     request: Request,
     params: MediaRecordingsSummaryQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Returns true/false by day indicating if recordings exist"""
 
@@ -263,7 +262,7 @@ async def recordings(
 async def no_recordings(
     request: Request,
     params: MediaRecordingsAvailabilityQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Get time ranges with no recordings."""
     cameras = params.cameras
@@ -365,7 +364,7 @@ async def delete_recordings(
     start: float = PathParam(..., description="Start timestamp (unix)"),
     end: float = PathParam(..., description="End timestamp (unix)"),
     params: RecordingsDeleteQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Delete recordings in the specified time range."""
     if start >= end:

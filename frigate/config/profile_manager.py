@@ -3,9 +3,10 @@
 import copy
 import json
 import logging
-from datetime import datetime, timezone
+from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
@@ -169,9 +170,9 @@ class ProfileManager:
 
     def activate_profile(
         self,
-        profile_name: Optional[str],
+        profile_name: str | None,
         clear_runtime_overrides: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Activate a profile by name, or deactivate if None.
 
         Args:
@@ -256,7 +257,7 @@ class ProfileManager:
 
     def _apply_profile_overrides(
         self, profile_name: str, changed: dict[str, set[str]]
-    ) -> Optional[str]:
+    ) -> str | None:
         """Apply profile overrides for all cameras that have the named profile."""
         for cam_name, cam_config in self.config.cameras.items():
             profile = cam_config.profiles.get(profile_name)
@@ -358,14 +359,14 @@ class ProfileManager:
                             retain=True,
                         )
 
-    def _persist_active_profile(self, profile_name: Optional[str]) -> None:
+    def _persist_active_profile(self, profile_name: str | None) -> None:
         """Persist the active profile state to disk as JSON."""
         try:
             data = self._load_persisted_data()
             data["active"] = profile_name
             if profile_name is not None:
                 data.setdefault("last_activated", {})[profile_name] = datetime.now(
-                    timezone.utc
+                    UTC
                 ).timestamp()
             PERSISTENCE_FILE.write_text(json.dumps(data))
         except OSError:
@@ -384,7 +385,7 @@ class ProfileManager:
         return {"active": None, "last_activated": {}}
 
     @staticmethod
-    def load_persisted_profile() -> Optional[str]:
+    def load_persisted_profile() -> str | None:
         """Load the persisted active profile name from disk."""
         data = ProfileManager._load_persisted_data()
         name = data.get("active")

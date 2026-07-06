@@ -4,7 +4,8 @@ import base64
 import binascii
 import json
 import logging
-from typing import Any, AsyncGenerator, Optional
+from collections.abc import AsyncGenerator
+from typing import Any
 
 from httpx import RemoteProtocolError, TimeoutException
 from ollama import AsyncClient as OllamaAsyncClient
@@ -18,7 +19,7 @@ from frigate.genai.utils import parse_tool_calls_from_message
 logger = logging.getLogger(__name__)
 
 
-def _extract_ollama_stats(response: Any) -> Optional[dict[str, Any]]:
+def _extract_ollama_stats(response: Any) -> dict[str, Any] | None:
     """Build a stats dict from Ollama's response metadata.
 
     Ollama reports eval_count/eval_duration (generation) and
@@ -51,7 +52,7 @@ def _extract_ollama_stats(response: Any) -> Optional[dict[str, Any]]:
 
 def _normalize_multimodal_content(
     content: Any,
-) -> tuple[Optional[str], Optional[list[bytes]]]:
+) -> tuple[str | None, list[bytes] | None]:
     """Convert OpenAI-style multimodal content to Ollama's (text, images) shape.
 
     The chat API constructs user messages with content as a list of
@@ -98,7 +99,7 @@ class OllamaClient(GenAIClient):
 
     provider: ApiClient | None
     provider_options: dict[str, Any]
-    _supports_thinking_cache: Optional[bool] = None
+    _supports_thinking_cache: bool | None = None
 
     @property
     def supports_toggleable_thinking(self) -> bool:
@@ -193,9 +194,9 @@ class OllamaClient(GenAIClient):
         self,
         prompt: str,
         images: list[bytes],
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
         enable_thinking: bool = False,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Submit a request to Ollama"""
         if self.provider is None:
             logger.warning(
@@ -290,10 +291,10 @@ class OllamaClient(GenAIClient):
     def _build_request_params(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]],
-        tool_choice: Optional[str],
+        tools: list[dict[str, Any]] | None,
+        tool_choice: str | None,
         stream: bool = False,
-        enable_thinking: Optional[bool] = None,
+        enable_thinking: bool | None = None,
     ) -> dict[str, Any]:
         """Build request_messages and params for chat (sync or stream)."""
         request_messages = []
@@ -385,9 +386,9 @@ class OllamaClient(GenAIClient):
     def chat_with_tools(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> dict[str, Any]:
         if self.provider is None:
             logger.warning(
@@ -426,9 +427,9 @@ class OllamaClient(GenAIClient):
     async def chat_with_tools_stream(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """Stream chat with tools; yields content deltas then final message.
 

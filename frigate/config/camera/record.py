@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Optional, Union
 
 from pydantic import Field
 
@@ -94,7 +93,7 @@ class ChaptersEnum(str, Enum):
 
 
 class RecordExportConfig(FrigateBaseModel):
-    hwaccel_args: Union[str, list[str]] = Field(
+    hwaccel_args: str | list[str] = Field(
         default="auto",
         title="Export hwaccel args",
         description="Hardware acceleration args to use for export/transcode operations.",
@@ -152,7 +151,7 @@ class RecordConfig(FrigateBaseModel):
         title="Preview config",
         description="Settings controlling the quality of recording previews shown in the UI.",
     )
-    enabled_in_config: Optional[bool] = Field(
+    enabled_in_config: bool | None = Field(
         default=None,
         title="Original recording state",
         description="Indicates whether recording was enabled in the original static configuration.",

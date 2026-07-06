@@ -3,7 +3,7 @@
 import logging
 import os
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from frigate.const import (
     FFMPEG_HVC1_ARGS,
@@ -215,7 +215,7 @@ def parse_preset_hardware_acceleration_decode(
     width: int,
     height: int,
     gpu: int,
-) -> Optional[list[str]]:
+) -> list[str] | None:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
@@ -420,7 +420,7 @@ PRESETS_INPUT = {
 }
 
 
-def parse_preset_input(arg: Any, detect_fps: int) -> Optional[list[str]]:
+def parse_preset_input(arg: Any, detect_fps: int) -> list[str] | None:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
@@ -530,9 +530,7 @@ PRESETS_RECORD_OUTPUT = {
 }
 
 
-def parse_preset_output_record(
-    arg: Any, force_record_hvc1: bool
-) -> Optional[list[str]]:
+def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str] | None:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None

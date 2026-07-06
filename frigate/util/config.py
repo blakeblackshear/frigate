@@ -4,7 +4,7 @@ import asyncio
 import logging
 import os
 import shutil
-from typing import Any, Optional, Union
+from typing import Any
 
 from ruamel.yaml import YAML
 
@@ -78,7 +78,7 @@ def migrate_frigate_config(config_file: str):
 
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
-    with open(config_file, "r") as f:
+    with open(config_file) as f:
         config: dict[str, dict[str, Any]] = yaml.load(f)
 
     if config is None:
@@ -477,7 +477,7 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
 
 def _convert_legacy_mask_to_dict(
-    mask: Optional[Union[str, list]], mask_type: str = "motion_mask", label: str = ""
+    mask: str | list | None, mask_type: str = "motion_mask", label: str = ""
 ) -> dict[str, dict[str, Any]]:
     """Convert legacy mask format (str or list[str]) to new dict format.
 
@@ -659,10 +659,10 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
 
 def get_relative_coordinates(
-    mask: Optional[Union[str, list]],
+    mask: str | list | None,
     frame_shape: tuple[int, int],
     camera_name: str = "",
-) -> Union[str, list]:
+) -> str | list:
     # masks and zones are saved as relative coordinates
     # we know if any points are > 1 then it is using the
     # old native resolution coordinates
@@ -720,7 +720,7 @@ def get_relative_coordinates(
 
 
 def convert_area_to_pixels(
-    area_value: Union[int, float], frame_shape: tuple[int, int]
+    area_value: int | float, frame_shape: tuple[int, int]
 ) -> int:
     """
     Convert area specification to pixels.
@@ -762,7 +762,7 @@ class StreamInfoRetriever:
         return info
 
 
-def apply_section_update(camera_config, section: str, update: dict) -> Optional[str]:
+def apply_section_update(camera_config, section: str, update: dict) -> str | None:
     """Merge an update dict into a camera config section and rebuild runtime variants.
 
     For motion and object filter sections, the plain Pydantic models are rebuilt

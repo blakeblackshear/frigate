@@ -66,7 +66,7 @@ class DebugReplayJob(Job):
     replay_camera_name: str = ""
     start_ts: float = 0.0
     end_ts: float = 0.0
-    current_step: Optional[str] = None
+    current_step: str | None = None
     progress_percent: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
@@ -255,7 +255,7 @@ class DebugReplayJobRunner(threading.Thread):
         frigate_config: FrigateConfig,
         config_publisher: CameraConfigUpdatePublisher,
         replay_manager: "DebugReplayManager",
-        publisher: Optional[JobStatePublisher] = None,
+        publisher: JobStatePublisher | None = None,
     ) -> None:
         super().__init__(daemon=True, name=f"debug_replay_{job.id}")
         self.job = job

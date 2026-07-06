@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any
 
 from pydantic import Field, PrivateAttr, field_serializer, field_validator
 
@@ -12,12 +12,12 @@ DEFAULT_TRACKED_OBJECTS = ["person"]
 
 
 class FilterConfig(FrigateBaseModel):
-    min_area: Union[int, float] = Field(
+    min_area: int | float = Field(
         default=0,
         title="Minimum object area",
         description="Minimum bounding box area (pixels or percentage) required for this object type. Can be pixels (int) or percentage (float between 0.000001 and 0.99).",
     )
-    max_area: Union[int, float] = Field(
+    max_area: int | float = Field(
         default=24000000,
         title="Maximum object area",
         description="Maximum bounding box area (pixels or percentage) allowed for this object type. Can be pixels (int) or percentage (float between 0.000001 and 0.99).",
@@ -42,12 +42,12 @@ class FilterConfig(FrigateBaseModel):
         title="Minimum confidence",
         description="Minimum single-frame detection confidence required for the object to be counted.",
     )
-    mask: dict[str, Optional[ObjectMaskConfig]] = Field(
+    mask: dict[str, ObjectMaskConfig | None] = Field(
         default_factory=dict,
         title="Filter mask",
         description="Polygon coordinates defining where this filter applies within the frame.",
     )
-    raw_mask: dict[str, Optional[ObjectMaskConfig]] = Field(
+    raw_mask: dict[str, ObjectMaskConfig | None] = Field(
         default_factory=dict, exclude=True
     )
 
@@ -68,7 +68,7 @@ class GenAIObjectTriggerConfig(FrigateBaseModel):
         title="Send on end",
         description="Send a request to GenAI when the tracked object ends.",
     )
-    after_significant_updates: Optional[int] = Field(
+    after_significant_updates: int | None = Field(
         default=None,
         title="Early GenAI trigger",
         description="Send a request to GenAI after a specified number of significant updates for the tracked object.",
@@ -98,12 +98,12 @@ class GenAIObjectConfig(FrigateBaseModel):
         description="Per-object prompts to customize GenAI outputs for specific labels.",
     )
 
-    objects: Union[str, list[str]] = Field(
+    objects: str | list[str] = Field(
         default_factory=list,
         title="GenAI objects",
         description="List of object labels to send to GenAI by default.",
     )
-    required_zones: Union[str, list[str]] = Field(
+    required_zones: str | list[str] = Field(
         default_factory=list,
         title="Required zones",
         description="Zones that must be entered for objects to qualify for GenAI description generation.",
@@ -118,7 +118,7 @@ class GenAIObjectConfig(FrigateBaseModel):
         title="GenAI triggers",
         description="Defines when frames should be sent to GenAI (on end, after updates, etc.).",
     )
-    enabled_in_config: Optional[bool] = Field(
+    enabled_in_config: bool | None = Field(
         default=None,
         title="Original GenAI state",
         description="Indicates whether GenAI was enabled in the original static config.",
@@ -144,12 +144,12 @@ class ObjectConfig(FrigateBaseModel):
         title="Object filters",
         description="Filters applied to detected objects to reduce false positives (area, ratio, confidence).",
     )
-    mask: dict[str, Optional[ObjectMaskConfig]] = Field(
+    mask: dict[str, ObjectMaskConfig | None] = Field(
         default_factory=dict,
         title="Object mask",
         description="Mask polygon used to prevent object detection in specified areas.",
     )
-    raw_mask: dict[str, Optional[ObjectMaskConfig]] = Field(
+    raw_mask: dict[str, ObjectMaskConfig | None] = Field(
         default_factory=dict, exclude=True
     )
     genai: GenAIObjectConfig = Field(

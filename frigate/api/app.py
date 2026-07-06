@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
 from pathlib import Path as FilePath
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import aiofiles
 import ruamel.yaml
@@ -113,7 +113,7 @@ def version():
 @router.get("/stats", dependencies=[Depends(allow_any_authenticated())])
 def stats(
     request: Request,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     stats_data = request.app.stats_emitter.get_latest_stats()
 
@@ -164,7 +164,7 @@ def metrics(request: Request):
     # Retrieve the latest statistics and update the Prometheus metrics
     stats = request.app.stats_emitter.get_latest_stats()
     # query DB for count of events by camera, label
-    event_counts: List[Dict[str, Any]] = (
+    event_counts: list[dict[str, Any]] = (
         Event.select(Event.camera, Event.label, fn.Count())
         .group_by(Event.camera, Event.label)
         .dicts()
@@ -250,7 +250,7 @@ async def genai_probe(body: GenAIProbeBody):
             asyncio.to_thread(client.list_models),
             timeout=_PROBE_OUTER_TIMEOUT_SECONDS,
         )
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return JSONResponse(
             content={"success": False, "message": "Probe timed out"},
         )
@@ -374,7 +374,7 @@ def config(request: Request):
         if model_path:
             model_json_path = FilePath(model_path).with_suffix(".json")
             try:
-                with open(model_json_path, "r") as f:
+                with open(model_json_path) as f:
                     model_plus_data = json.load(f)
                 config["model"]["plus"] = model_plus_data
             except FileNotFoundError:
@@ -502,7 +502,7 @@ def config_raw():
             status_code=404,
         )
 
-    with open(config_file, "r") as f:
+    with open(config_file) as f:
         raw_config = f.read()
         f.close()
 
@@ -807,7 +807,7 @@ def config_set(request: Request, body: AppConfigSetBody):
 
     try:
         with lock:
-            with open(config_file, "r") as f:
+            with open(config_file) as f:
                 old_raw_config = f.read()
 
             try:
@@ -854,7 +854,7 @@ def config_set(request: Request, body: AppConfigSetBody):
                 update_yaml_file_bulk(config_file, updates)
 
                 # validate the updated config
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     new_raw_config = f.read()
 
                 try:
@@ -1028,16 +1028,16 @@ def nvinfo():
 )
 async def logs(
     service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
-    download: Optional[str] = None,
-    stream: Optional[bool] = False,
-    start: Optional[int] = 0,
-    end: Optional[int] = None,
+    download: str | None = None,
+    stream: bool | None = False,
+    start: int | None = 0,
+    end: int | None = None,
 ):
     """Get logs for the requested service (frigate/nginx/go2rtc)"""
 
     def download_logs(service_location: str):
         try:
-            file = open(service_location, "r")
+            file = open(service_location)
             contents = file.read()
             file.close()
             return JSONResponse(jsonable_encoder(contents))
@@ -1052,7 +1052,7 @@ async def logs(
         """Asynchronously stream log lines."""
         buffer = ""
         try:
-            async with aiofiles.open(file_path, "r") as file:
+            async with aiofiles.open(file_path) as file:
                 await file.seek(0, 2)
                 while True:
                     line = await file.readline()
@@ -1090,7 +1090,7 @@ async def logs(
 
     # For full logs initially
     try:
-        async with aiofiles.open(service_location, "r") as file:
+        async with aiofiles.open(service_location) as file:
             contents = await file.read()
 
         total_lines, log_lines = process_logs(contents, service, start, end)
@@ -1231,7 +1231,7 @@ def get_media_sync_status(job_id: str):
 @router.get("/labels", dependencies=[Depends(allow_any_authenticated())])
 def get_labels(
     camera: str = "",
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     try:
         if camera:
@@ -1263,8 +1263,8 @@ def get_labels(
 
 @router.get("/sub_labels", dependencies=[Depends(allow_any_authenticated())])
 def get_sub_labels(
-    split_joined: Optional[int] = None,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    split_joined: int | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     try:
         events = (
@@ -1351,8 +1351,8 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
     "/recognized_license_plates", dependencies=[Depends(allow_any_authenticated())]
 )
 def get_recognized_license_plates(
-    split_joined: Optional[int] = None,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    split_joined: int | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     try:
         query = (
@@ -1393,8 +1393,8 @@ def get_recognized_license_plates(
 def timeline(
     camera: str = "all",
     limit: int = 100,
-    source_id: Optional[str] = None,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    source_id: str | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     clauses = []
 
@@ -1408,20 +1408,20 @@ def timeline(
     ]
 
     if camera != "all":
-        clauses.append((Timeline.camera == camera))
+        clauses.append(Timeline.camera == camera)
 
     if source_id:
         source_ids = [sid.strip() for sid in source_id.split(",")]
         if len(source_ids) == 1:
-            clauses.append((Timeline.source_id == source_ids[0]))
+            clauses.append(Timeline.source_id == source_ids[0])
         else:
-            clauses.append((Timeline.source_id.in_(source_ids)))
+            clauses.append(Timeline.source_id.in_(source_ids))
 
     # Enforce per-camera access control
-    clauses.append((Timeline.camera << allowed_cameras))
+    clauses.append(Timeline.camera << allowed_cameras)
 
     if len(clauses) == 0:
-        clauses.append((True))
+        clauses.append(True)
 
     timeline = (
         Timeline.select(*selected_columns)
@@ -1437,7 +1437,7 @@ def timeline(
 @router.get("/timeline/hourly", dependencies=[Depends(allow_any_authenticated())])
 def hourly_timeline(
     params: AppTimelineHourlyQueryParameters = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Get hourly summary for timeline."""
     cameras = params.cameras
@@ -1454,23 +1454,23 @@ def hourly_timeline(
 
     if cameras != "all":
         camera_list = cameras.split(",")
-        clauses.append((Timeline.camera << camera_list))
+        clauses.append(Timeline.camera << camera_list)
 
     # Enforce per-camera access control
-    clauses.append((Timeline.camera << allowed_cameras))
+    clauses.append(Timeline.camera << allowed_cameras)
 
     if labels != "all":
         label_list = labels.split(",")
-        clauses.append((Timeline.data["label"] << label_list))
+        clauses.append(Timeline.data["label"] << label_list)
 
     if before:
-        clauses.append((Timeline.timestamp < before))
+        clauses.append(Timeline.timestamp < before)
 
     if after:
-        clauses.append((Timeline.timestamp > after))
+        clauses.append(Timeline.timestamp > after)
 
     if len(clauses) == 0:
-        clauses.append((True))
+        clauses.append(True)
 
     timeline = (
         Timeline.select(

@@ -1,11 +1,11 @@
 """JSON schema utilities for Frigate."""
 
-from typing import Any, Dict, Type
+from typing import Any
 
 from pydantic import BaseModel, TypeAdapter
 
 
-def get_config_schema(config_class: Type[BaseModel]) -> Dict[str, Any]:
+def get_config_schema(config_class: type[BaseModel]) -> dict[str, Any]:
     """
     Returns the JSON schema for FrigateConfig with polymorphic detectors.
 

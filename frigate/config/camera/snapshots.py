@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import Field
 
 from ..base import FrigateBaseModel
@@ -46,7 +44,7 @@ class SnapshotsConfig(FrigateBaseModel):
         title="Required zones",
         description="Zones an object must enter for a snapshot to be saved.",
     )
-    height: Optional[int] = Field(
+    height: int | None = Field(
         default=None,
         title="Snapshot height",
         description="Height (pixels) to resize snapshots from API to; leave empty to preserve original size.",

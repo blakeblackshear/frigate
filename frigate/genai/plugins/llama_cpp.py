@@ -4,7 +4,8 @@ import base64
 import io
 import json
 import logging
-from typing import Any, AsyncGenerator, Optional, cast
+from collections.abc import AsyncGenerator
+from typing import Any, cast
 
 import httpx
 import numpy as np
@@ -18,7 +19,7 @@ from frigate.genai.utils import parse_tool_calls_from_message
 logger = logging.getLogger(__name__)
 
 
-def _stats_from_llama_cpp_chunk(data: dict[str, Any]) -> Optional[dict[str, Any]]:
+def _stats_from_llama_cpp_chunk(data: dict[str, Any]) -> dict[str, Any] | None:
     """Build a stats dict from a llama.cpp streaming chunk.
 
     Final-chunk `usage` carries authoritative token counts. Per-chunk
@@ -311,9 +312,9 @@ class LlamaCppClient(GenAIClient):
         self,
         prompt: str,
         images: list[bytes],
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
         enable_thinking: bool = False,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Submit a request to llama.cpp server."""
         if self.provider is None:
             logger.warning(
@@ -521,10 +522,10 @@ class LlamaCppClient(GenAIClient):
     def _build_payload(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]],
-        tool_choice: Optional[str],
+        tools: list[dict[str, Any]] | None,
+        tool_choice: str | None,
         stream: bool = False,
-        enable_thinking: Optional[bool] = None,
+        enable_thinking: bool | None = None,
     ) -> dict[str, Any]:
         """Build request payload for chat completions (sync or stream)."""
         openai_tool_choice = None
@@ -588,7 +589,7 @@ class LlamaCppClient(GenAIClient):
     @staticmethod
     def _streamed_tool_calls_to_list(
         tool_calls_by_index: dict[int, dict[str, Any]],
-    ) -> Optional[list[dict[str, Any]]]:
+    ) -> list[dict[str, Any]] | None:
         """Convert streamed tool_calls index map to list of {id, name, arguments}."""
         if not tool_calls_by_index:
             return None
@@ -758,9 +759,9 @@ class LlamaCppClient(GenAIClient):
     def chat_with_tools(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> dict[str, Any]:
         """
         Send chat messages to llama.cpp server with optional tool definitions.
@@ -830,9 +831,9 @@ class LlamaCppClient(GenAIClient):
     async def chat_with_tools_stream(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """Stream chat with tools via OpenAI-compatible streaming API."""
         if self.provider is None:

@@ -1,6 +1,7 @@
 import logging
 import threading
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
@@ -214,8 +215,8 @@ class MqttClient(Communicator):
                 logger.error("Unable to connect to MQTT server: MQTT Not authorized")
             else:
                 logger.error(
-                    "Unable to connect to MQTT server: Connection refused. Error code: "
-                    + reason_code.getName()
+                    "Unable to connect to MQTT server: Connection refused. Error code: %s",
+                    reason_code.getName(),
                 )
 
         self.connected = True

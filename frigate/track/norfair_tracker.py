@@ -1,7 +1,8 @@
 import logging
 import random
 import string
-from typing import Any, Sequence, cast
+from collections.abc import Sequence
+from typing import Any, cast
 
 import cv2
 import numpy as np

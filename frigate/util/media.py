@@ -5,9 +5,9 @@ import errno
 import logging
 import os
 import subprocess as sp
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
 
 from peewee import DatabaseError, chunked
 
@@ -110,7 +110,7 @@ def sync_recordings(
         # start checking on the hour 36 hours ago
         check_point = datetime.datetime.now().replace(
             minute=0, second=0, microsecond=0
-        ).astimezone(datetime.timezone.utc) - datetime.timedelta(hours=36)
+        ).astimezone(datetime.UTC) - datetime.timedelta(hours=36)
 
         # Gather DB recordings to inspect
         if limited:
@@ -793,7 +793,7 @@ def write_orphan_report(
             f.write("# Media Sync Orphan Report\n")
             f.write(f"# Job: {job_id}\n")
             f.write(
-                f"# Date: {datetime.datetime.now().astimezone(datetime.timezone.utc).isoformat()}\n"
+                f"# Date: {datetime.datetime.now().astimezone(datetime.UTC).isoformat()}\n"
             )
             f.write(f"# Mode: dry_run={dry_run}\n\n")
 

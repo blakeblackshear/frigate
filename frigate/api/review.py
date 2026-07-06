@@ -4,7 +4,6 @@ import datetime
 import logging
 from functools import reduce
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 from fastapi import APIRouter, Request
@@ -51,7 +50,7 @@ router = APIRouter(tags=[Tags.review])
 async def review(
     params: ReviewQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     if isinstance(current_user, JSONResponse):
         return current_user
@@ -83,7 +82,7 @@ async def review(
         camera_list = list(filtered)
     else:
         camera_list = allowed_cameras
-    clauses.append((ReviewSegment.camera << camera_list))
+    clauses.append(ReviewSegment.camera << camera_list)
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -106,12 +105,12 @@ async def review(
 
         for zone in filtered_zones:
             zone_clauses.append(
-                (ReviewSegment.data["zones"].cast("text") % f'*"{zone}"*')
+                ReviewSegment.data["zones"].cast("text") % f'*"{zone}"*'
             )
         clauses.append(reduce(operator.or_, zone_clauses))
 
     if severity:
-        clauses.append((ReviewSegment.severity == severity))
+        clauses.append(ReviewSegment.severity == severity)
 
     # Join with UserReviewStatus to get per-user review status
     review_query = (
@@ -204,7 +203,7 @@ async def review_ids(request: Request, ids: str):
 async def review_summary(
     params: ReviewSummaryQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     if isinstance(current_user, JSONResponse):
         return current_user
@@ -227,7 +226,7 @@ async def review_summary(
         camera_list = list(filtered)
     else:
         camera_list = allowed_cameras
-    clauses.append((ReviewSegment.camera << camera_list))
+    clauses.append(ReviewSegment.camera << camera_list)
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -328,7 +327,7 @@ async def review_summary(
         camera_list = list(filtered)
     else:
         camera_list = allowed_cameras
-    clauses.append((ReviewSegment.camera << camera_list))
+    clauses.append(ReviewSegment.camera << camera_list)
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -584,7 +583,7 @@ def delete_reviews(body: ReviewModifyMultipleBody):
 )
 def motion_activity(
     params: ReviewActivityMotionQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Get motion and audio activity."""
     cameras = params.cameras
@@ -597,7 +596,7 @@ def motion_activity(
     scale = params.scale
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
-    clauses.append((Recordings.motion > 0))
+    clauses.append(Recordings.motion > 0)
 
     if cameras != "all":
         requested = set(cameras.split(","))
@@ -608,7 +607,7 @@ def motion_activity(
     else:
         camera_list = list(allowed_cameras)
 
-    clauses.append((Recordings.camera << camera_list))
+    clauses.append(Recordings.camera << camera_list)
 
     data: list[Recordings] = (
         Recordings.select(
