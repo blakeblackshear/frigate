@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, cast
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-import pytz
 from pathvalidate import sanitize_filename
 from peewee import DoesNotExist
 
@@ -862,8 +862,8 @@ class RecordingExporter(threading.Thread):
         tz_name = self.config.ui.timezone
         if tz_name:
             try:
-                tz = pytz.timezone(tz_name)
-            except pytz.UnknownTimeZoneError:
+                tz = ZoneInfo(tz_name)
+            except (ValueError, ZoneInfoNotFoundError):
                 tz = None
             if tz is not None:
                 return datetime.datetime.fromtimestamp(timestamp, tz=tz).strftime(
@@ -1026,8 +1026,8 @@ class RecordingExporter(threading.Thread):
         tz: datetime.tzinfo | None = None
         if tz_name:
             try:
-                tz = pytz.timezone(tz_name)
-            except pytz.UnknownTimeZoneError:
+                tz = ZoneInfo(tz_name)
+            except (ValueError, ZoneInfoNotFoundError):
                 tz = None
         if tz is None:
             tz = datetime.UTC
