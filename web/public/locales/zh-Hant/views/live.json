@@ -58,7 +58,9 @@
   },
   "camera": {
     "enable": "啟用鏡頭",
-    "disable": "停用鏡頭"
+    "disable": "停用鏡頭",
+    "turnOn": "開啟攝影機",
+    "turnOff": "關閉攝影機"
   },
   "muteCameras": {
     "enable": "所有鏡頭靜音",
@@ -151,7 +153,8 @@
     "snapshots": "截圖",
     "audioDetection": "音訊偵測",
     "autotracking": "自動追蹤",
-    "transcription": "音訊轉錄"
+    "transcription": "音訊轉錄",
+    "camera": "攝影機"
   },
   "history": {
     "label": "顯示歷史影像"

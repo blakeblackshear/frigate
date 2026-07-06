@@ -20,6 +20,9 @@
         },
         "state": {
           "submitted": "已提交"
+        },
+        "toast": {
+          "error": "無法提交至 Frigate+，請檢查您的網路連線並再試一次。"
         }
       },
       "submitToPlus": {
@@ -97,7 +100,14 @@
       "nameLabel": "匯出名稱",
       "namePlaceholder": "這些匯出檔案的可選基礎名稱",
       "queueingButton": "正在加入匯出佇列…",
-      "exportButton_other": "匯出 {{count}} 個攝影機"
+      "exportButton_other": "匯出 {{count}} 個攝影機",
+      "searchOrSelectGroup": "搜尋或選擇一個攝影機群組…",
+      "selectAll": "選擇所有攝影機",
+      "clearSelection": "清除選擇",
+      "selectWithActivity": "有追蹤物件的攝影機",
+      "selectGroup": "選擇群組",
+      "noMatchingCameras": "找不到符合您搜尋條件的攝影機",
+      "selectedCount": "已選取 {{selected}} / {{total}}"
     },
     "multi": {
       "title_other": "匯出 {{count}} 個審閱",
@@ -147,7 +157,7 @@
     "confirmDelete": {
       "title": "確認刪除",
       "desc": {
-        "selected": "你確定要刪除所有與此查核項目有關的錄影檔案嗎？<br /><br />按住<em>Shift</em>以在未來跳過此確認步驟。"
+        "selected": "您確定要刪除所有與此審查項目相關的錄影檔案嗎？<br /><br />按住 <em>Shift</em> 鍵可在未來跳過此確認步驟。"
       },
       "toast": {
         "success": "已成功刪除與選擇的審核物件有關的影片片段。",

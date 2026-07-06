@@ -697,7 +697,7 @@
             "description": "在接收到音訊時開啟即時監控持續轉寫。"
         },
         "enabled": {
-            "label": "開啟轉錄",
+            "label": "啟用語音轉文字",
             "description": "開啟或關閉手動觸發的音訊事件轉寫。"
         },
         "enabled_in_config": {
@@ -857,7 +857,7 @@
         "description": "攝影機型別"
     },
     "ui": {
-        "label": "攝影機頁面",
+        "label": "攝影機介面",
         "description": "此攝影機在頁面中的顯示順序和可見性。顯示順序僅影響預設儀表板。如需更精細的控制，請使用“攝影機組”。",
         "order": {
             "label": "UI 順序",

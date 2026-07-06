@@ -53,7 +53,7 @@
     "systemAuthentication": "驗證",
     "systemNetworking": "網路",
     "systemProxy": "代理",
-    "systemUi": "介面",
+    "systemUi": "使用者介面",
     "systemLogging": "日誌",
     "systemEnvironmentVariables": "環境變數",
     "systemTelemetry": "遙測",
@@ -167,12 +167,12 @@
         "label": "模型大小",
         "small": {
           "title": "小",
-          "desc": "將使用 <strong>小</strong>模型。該模型使用的記憶體較少，在 CPU 上也能較快的執行，品質較好。"
+          "desc": "使用 <em>small</em> 將採用量化版本的模型。該模型佔用的記憶體（RAM）較少，在 CPU 上的執行速度也較快，且在嵌入向量品質上的差異微乎其微。"
         },
         "desc": "用於語意搜尋的語言模型大小。",
         "large": {
           "title": "大",
-          "desc": "將使用 <strong>大</strong>模型。該選項使用了完整的 Jina 模型，條件允許的情況下將自動使用 GPU 執行。"
+          "desc": "使用 <em>large</em> 將採用完整的 Jina 模型，並在支援的情況下自動於 GPU 上執行。"
         }
       },
       "title": "語意搜尋",
@@ -196,11 +196,11 @@
         "desc": "用於人臉辨識的模型大小。",
         "small": {
           "title": "小",
-          "desc": "將使用<strong>小</strong>模型。該選項採用 FaceNet 人臉特徵提取模型，可在大多數 CPU 上高效執行。"
+          "desc": "使用 <em>小</em> 模型將採用 FaceNet 臉部嵌入模型，可在大多數 CPU 上高效執行。"
         },
         "large": {
           "title": "大",
-          "desc": "將使用<strong>大</strong>模型。該選項使用 ArcFace 人臉特徵提取模型，條件允許的情況下將自動使用 GPU 執行。"
+          "desc": "使用 <em>大</em> 模型將採用 ArcFace 臉部嵌入模型，並在適用情況下自動於 GPU 上執行。"
         }
       }
     },
@@ -246,7 +246,7 @@
       "customUrl": "自訂影片流地址",
       "brandInformation": "品牌資訊",
       "brandUrlFormat": "對於採用RTSP URL格式的攝影機，其格式為：{{exampleUrl}}",
-      "customUrlPlaceholder": "rtsp://使用者名稱:密碼@主機或IP地址:埠/路徑",
+      "customUrlPlaceholder": "rtsp://使用者名稱:密碼@主機或ip位址:通訊埠/路徑",
       "connectionSettings": "連線設定",
       "detectionMethod": "影片流偵測方法",
       "onvifPort": "ONVIF 埠",
@@ -597,6 +597,32 @@
         "title": "修改顯示名稱",
         "description": "設定該攝像機在 Frigate 使用者介面中顯示的名稱。若留空，則使用攝像機 ID。",
         "rename": "重新命名"
+      },
+      "label": "攝影機狀態",
+      "description": "設定各攝影機的運作狀態。<br /><br /><strong>開啟</strong>：正常處理串流。<br /><strong>關閉</strong>：暫時暫停處理。重啟 Frigate 後不會保留此狀態。<br /><strong>停用</strong>：停止處理並將變更儲存至您的設定中。需要重新啟動才能重新啟用已停用的攝影機。<br /><br /><em>備註：停用不會影響 go2rtc 的轉流功能。</em><br /><br />拖曳控制鍵可調整現用攝影機在整個 UI 中顯示的順序，包括即時儀表板和攝影機選擇下拉選單。",
+      "disabledSubheading": "在設定中禁用",
+      "status": {
+        "on": "開啟",
+        "off": "關閉",
+        "disabled": "已停用"
+      },
+      "disableSuccess": "已停用 {{cameraName}} 並儲存至設定。",
+      "reorderHandle": "拖曳以重新排序",
+      "saving": "儲存中…",
+      "saved": "已儲存",
+      "details": {
+        "edit": "編輯攝影機詳細資料",
+        "title": "編輯攝影機詳細資料",
+        "description": "更新此攝影機在整個 Frigate UI 中使用的顯示名稱、外部 URL 和可見性。",
+        "friendlyNameLabel": "顯示名稱",
+        "friendlyNameHelp": "在整個 Frigate UI 中顯示此攝影機的顯示名稱。留空則會使用攝影機 ID。",
+        "webuiUrlLabel": "攝影機網頁介面網址",
+        "webuiUrlHelp": "可從「偵錯」檢視中直接造訪攝影機網頁介面的網址。留空以停用此連結。",
+        "webuiUrlInvalid": "必須是有效的網址（例如：https://example.com）。",
+        "dashboardLabel": "在即時儀表板上顯示",
+        "dashboardHelp": "在即時儀表板上顯示此攝影機。",
+        "reviewLabel": "在審查中顯示",
+        "reviewHelp": "在「審查」中顯示此攝影機，包括攝影機篩選器、移動審查以及歷史檢視。"
       }
     },
     "cameraConfig": {
@@ -634,7 +660,9 @@
       "description": "配置在啟用某個設定檔時，哪些攝影機應被開啟或關閉。設定為“繼承”的攝影機會沿用它原本的啟用/停用狀態。",
       "inherit": "繼承",
       "enabled": "開啟",
-      "disabled": "關閉"
+      "disabled": "關閉",
+      "on": "開啟",
+      "off": "關閉"
     },
     "cameraType": {
       "title": "攝影機型別",
@@ -643,6 +671,88 @@
       "normal": "通用",
       "dedicatedLpr": "車牌辨識專用",
       "saveSuccess": "已更新 {{cameraName}} 的攝影機型別，請重啟 Frigate 以使更改生效。"
+    },
+    "clone": {
+      "sectionTitle": "複製設定",
+      "sectionDescription": "將攝影機的設定複製到另一台攝影機或新攝影機。",
+      "button": "複製設定",
+      "title": "複製攝影機設定",
+      "description": "將攝影機的設定複製到一或多台其他攝影機，或是新攝影機。識別資料（名稱、顯示名稱、網頁介面網址、顯示順序）將不會被複製。",
+      "source": {
+        "label": "來源攝影機",
+        "placeholder": "選擇一個來源攝影機",
+        "required": "選擇一個來源攝影機"
+      },
+      "target": {
+        "legend": "目標",
+        "newRadio": "新攝影機",
+        "newNameLabel": "攝影機名稱",
+        "newNamePlaceholder": "例如：back_door 或 Back Door",
+        "newNameRequired": "必須填寫攝影機名稱",
+        "newNameInvalid": "無效的攝影機名稱",
+        "newNameCollision": "已存在相同名稱的攝影機",
+        "newStreamsForced": "建立新攝影機時，一律會複製串流設定。",
+        "existingCamerasRadio": "現有攝影機",
+        "allCameras": "所有攝影機",
+        "existingPlaceholder": "請至少選擇一台攝影機",
+        "existingDisabled": "沒有其他攝影機可供複製"
+      },
+      "categories": {
+        "legend": "要複製的設定",
+        "description": "選擇要從來源攝影機複製哪些設定。",
+        "selectAll": "全選",
+        "selectNone": "取消全選",
+        "resetDefaults": "重設為預設值",
+        "general": "一般",
+        "spatial": "空間設定",
+        "streams": "串流",
+        "spatialWarningTitle": "解析度不符",
+        "spatialWarning": "來源攝影機 {{srcCamera}} 的偵測解析度 ({{srcWidth}}×{{srcHeight}}) 與以下攝影機不符：{{cameras}}。這些攝影機上的多邊形（偵測區域）可能無法對齊。此為預設關閉；啟用即可按原樣複製。",
+        "restartHint": "需要重新啟動",
+        "items": {
+          "record": "錄影",
+          "snapshots": "快照",
+          "review": "審核",
+          "motion": "移動偵測",
+          "objects": "物件",
+          "audio": "聲音偵測",
+          "audio_transcription": "語音轉文字",
+          "notifications": "通知",
+          "birdseye": "鳥瞰圖",
+          "mqtt": "MQTT",
+          "timestamp_style": "時間戳記樣式",
+          "onvif": "ONVIF",
+          "lpr": "車牌辨識",
+          "face_recognition": "人臉辨識",
+          "semantic_search": "語意搜尋",
+          "genai": "生成式 AI",
+          "type": "攝影機類型（一般 / 車牌識別專用）",
+          "profiles": "設定檔",
+          "detect": "偵測解析度",
+          "zones": "區域",
+          "motion_mask": "移動偵測遮罩",
+          "object_masks": "物件遮罩",
+          "ffmpeg_live": "串流網址與用途"
+        }
+      },
+      "footer": {
+        "changeCount_other": "將套用 {{count}} 項變更",
+        "restartNeeded": "部分變更需要重新啟動。",
+        "liveOnly": "所有變更將即時生效，無需重新啟動。",
+        "submit": "複製",
+        "submitting": "複製中…"
+      },
+      "toast": {
+        "success": "設定已複製到 {{cameraName}}",
+        "successWithRestart": "設定已複製到 {{cameraName}}。請重新啟動 Frigate 以套用所有變更。",
+        "successMulti_other": "設定已複製到 {{count}} 台攝影機",
+        "successMultiWithRestart_other": "設定已複製到 {{count}} 台攝影機。請重新啟動 Frigate 以套用所有變更。",
+        "partialFailure": "已套用 {{successCount}} 個區段；「{{failedSection}}」失敗：{{errorMessage}}",
+        "partialFailureMulti": "設定已複製到 {{successCount}} 台攝影機；{{failed}} 失敗：{{errorMessage}}",
+        "newCameraPartialFailure": "攝影機 {{cameraName}} 已建立，但部分設定複製失敗：{{errorMessage}}",
+        "sourceMissing": "來源攝影機已不存在",
+        "submitError": "無法複製攝影機：{{errorMessage}}"
+      }
     }
   },
   "cameraReview": {
@@ -663,7 +773,7 @@
     },
     "reviewClassification": {
       "title": "審閱分類",
-      "desc": "Frigate 將審閱項的嚴重程度分為“警報”和“偵測”兩個等級。預設情況下，所有的<strong>人</strong>、<strong>汽車</strong> 目標都將視為警報。你可以透過修改設定檔配置區域來細分。",
+      "desc": "Frigate 將審查項目分類為警報與偵測。預設情況下，所有 <em>人</em> 與 <em>汽車</em> 物件都會被視為警報。您可以透過為其設定所需的區域，來進一步精確分類您的審查項目。",
       "noDefinedZones": "此攝影機未設定任何監控區。",
       "objectAlertsTips": "所有 {{alertsLabels}} 類目標或物體在 {{cameraName}} 下都將視為警報。",
       "zoneObjectAlertsTips": "所有 {{alertsLabels}} 類目標或物體在 {{cameraName}} 下的 {{zone}} 區域內都將視為警報。",
@@ -760,7 +870,7 @@
         },
         "delete": {
           "title": "確認刪除",
-          "desc": "你確定要刪除{{type}} “<strong>{{name}}</strong>” 嗎？",
+          "desc": "你確定要刪除 {{type}} <em> {{name}} </em> 嗎？",
           "success": "{{name}} 已被刪除。"
         },
         "revertOverride": {
@@ -838,7 +948,7 @@
       "edit": "編輯畫面變動遮罩",
       "defaultName": "畫面變動遮罩 {{number}}",
       "context": {
-        "title": "畫面變動遮罩用於防止不需要的畫面變動觸發偵測（例如：容易被風吹動的樹枝、攝影機畫面上顯示的時間等）。畫面變動遮罩應<strong>謹慎使用</strong>，過度的遮罩會導致追蹤目標變得更加困難。"
+        "title": "移動遮罩用於防止不需要的移動觸發偵測（例如：樹枝搖晃、攝影機時間戳記等）。移動遮罩應 <em>非常謹慎地使用</em>，過度的遮罩會導致物件追蹤變得更加困難。"
       },
       "point_other": "{{count}} 點",
       "clickDrawPolygon": "在影像上點選新增點繪製多邊形區域。",
@@ -937,7 +1047,7 @@
       "desc": "將在被追蹤的目標周圍顯示邊界框",
       "colors": {
         "label": "目標邊界框顏色定義",
-        "info": "<li>啟用後，將會為每個目標的標籤分配不同的顏色</li><li>深藍色細線代表該目標或物體在當前時間點未被偵測到</li><li>灰色細線代表偵測到的目標或物體靜止不動</li><li>粗線表示在啟動自動追蹤時，該目標為自動追蹤的主體</li>"
+        "info": "<li>啟動時，系統會為每個物件標籤指派不同的顏色</li><li>深藍色細線代表該物件目前未被偵測到</li><li>灰色細線代表該物件被偵測為靜止狀態</li><li>粗線代表該物件正被自動追蹤（若已啟用）</li>"
       }
     },
     "timestamp": {
@@ -1163,7 +1273,8 @@
     },
     "notificationUnavailable": {
       "title": "通知功能不可用",
-      "desc": "網頁推送通知需要安全連線（<code>https://…</code>）。這是瀏覽器的限制。請透過安全方式存取 Frigate 以使用通知功能。"
+      "desc": "網頁推送通知需要安全連線（<code>https://…</code>）。這是瀏覽器的限制。請透過安全方式存取 Frigate 以使用通知功能。",
+      "descPwa": "在 iOS 上，只有將 Frigate 加到主畫面後，才能使用網頁推播通知。請開啟 <strong>分享</strong> 選單，選擇 <strong>加入主畫面</strong>，然後從新圖示開啟 Frigate，即可為此裝置註冊通知功能。"
     },
     "globalSettings": {
       "title": "全域性設定",
@@ -1425,7 +1536,17 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "影片流 {{index}}"
+      "itemTitle": "影片流 {{index}}",
+      "sourceMode": {
+        "restream": "重新串流 (go2rtc)",
+        "manual": "手動輸入路徑",
+        "go2rtcStreamLabel": "go2rtc 串流",
+        "go2rtcStreamPlaceholder": "選擇一個 go2rtc 串流",
+        "noGo2rtcStreams": "未設定 go2rtc 串流",
+        "go2rtcStreamSearch": "搜尋串流...",
+        "availableStreams": "可用串流",
+        "noMatchingStreams": "沒有符合的串流"
+      }
     },
     "restartRequiredField": "需要重啟",
     "restartRequiredFooter": "配置已更改 - 需要重啟",
@@ -1542,7 +1663,37 @@
     "genaiModel": {
       "placeholder": "選擇模型…",
       "search": "搜尋模型…",
-      "noModels": "暫無模型"
+      "noModels": "暫無模型",
+      "available": "可用模型",
+      "useCustom": "使用 \"{{value}}\"",
+      "refresh": "重新整理模型清單",
+      "probeFailed": "無法取得模型清單",
+      "fetchedModels": "已成功取得模型清單"
+    },
+    "liveStreams": {
+      "streamNameLabel": "串流名稱",
+      "streamNamePlaceholder": "例如：主高畫質串流",
+      "go2rtcStreamLabel": "go2rtc 串流",
+      "go2rtcStreamPlaceholder": "選擇一個 go2rtc 串流",
+      "go2rtcStreamSearch": "搜尋或輸入串流名稱…",
+      "noGo2rtcStreams": "未設定 go2rtc 串流",
+      "availableStreams": "可用串流",
+      "useCustom": "使用 \"{{value}}\"",
+      "addStream": "新增串流"
+    },
+    "semanticSearchModelSize": {
+      "notApplicable": "不適用於生成式 AI 服務"
+    },
+    "ptzPresets": {
+      "placeholder": "選擇或輸入預設...",
+      "search": "選擇或輸入預設...",
+      "noPresets": "沒有可用的預設",
+      "available": "攝影機預設",
+      "useCustom": "使用 \"{{value}}\""
+    },
+    "defaultRole": {
+      "admin": "管理員",
+      "viewer": "檢視者"
     }
   },
   "globalConfig": {
@@ -1574,7 +1725,8 @@
     "resetError": "重設設定失敗",
     "saveAllSuccess_other": "所有 {{count}} 個部分儲存成功。",
     "saveAllPartial_other": "已儲存 {{successCount}} / {{totalCount}} 個部分。{{failCount}} 個失敗。",
-    "saveAllFailure": "儲存所有部分失敗。"
+    "saveAllFailure": "儲存所有部分失敗。",
+    "saveAllSuccessRestartRequired_other": "已成功儲存 {{count}} 個區塊。請重新啟動 Frigate 以套用變更。"
   },
   "profiles": {
     "title": "設定檔",
@@ -1660,14 +1812,30 @@
       "audioMp3": "轉碼為 MP3",
       "audioExclude": "排除",
       "hardwareNone": "無硬體加速",
-      "hardwareAuto": "自動選擇硬體加速"
-    }
+      "hardwareAuto": "自動選擇硬體加速",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "新增視訊編碼器",
+      "addAudioCodec": "新增音訊編碼器",
+      "removeCodec": "移除編碼器"
+    },
+    "sourceNumber": "來源 {{index}}"
   },
   "birdseye": {
     "trackingMode": {
       "objects": "目標",
       "motion": "動作",
       "continuous": "持續"
+    },
+    "cameraOrder": {
+      "label": "攝影機排序",
+      "description": "拖曳攝影機以設定它們在鳥瞰佈局中的順序。",
+      "reorderHandle": "拖曳以重新排序",
+      "saving": "儲存中…",
+      "saved": "已儲存"
     }
   },
   "retainMode": {
@@ -1709,9 +1877,9 @@
     "logLevel": {
       "debug": "Debug",
       "info": "Info",
-      "warning": "Warning",
+      "warning": "警告",
       "error": "Error",
-      "critical": "Critical"
+      "critical": "嚴重"
     }
   },
   "onvif": {
@@ -1744,7 +1912,13 @@
     },
     "detect": {
       "fpsGreaterThanFive": "不建議設定偵測幀率高於 5，數值設定過高可能引發效能問題，且不會帶來任何增益。",
-      "disabled": "目標偵測已停用。快照、回放條目以及人臉辨識、車牌辨識、生成式 AI 等增強功能都將無法使用。"
+      "disabled": "目標偵測已停用。快照、回放條目以及人臉辨識、車牌辨識、生成式 AI 等增強功能都將無法使用。",
+      "resolutionShouldBeMultipleOfFour": "為了獲得最佳效果，偵測的寬度與高度應為 4 的倍數。其他偶數值可能會在偵測串流中產生畫面殘影或輕微失真。",
+      "aspectRatioMismatch": "您輸入的寬度與高度與目前的偵測解析度長寬比不符。這可能會導致影像被拉伸或失真。",
+      "maxFramesSet": "設定最大影格數將會覆蓋預設行為，並停用靜態物件追蹤。極少有情況需要使用此功能，請謹慎使用。",
+      "squareResolution": "正方形的偵測解析度並不常見。偵測的寬度與高度應符合攝影機的長寬比（例如 16:9），而不是物件偵測模型的尺寸。不相符的長寬比可能會拉伸影像並降低偵測準確率度。",
+      "resolutionHigh": "此偵測解析度高於建議值，可能會增加資源消耗，但不會提高偵測準確度。對於大多數攝影機，建議使用 1080p 或更低的偵測解析度。",
+      "globalResolutionMultipleCameras": "在設定多台攝影機的情況下設定了全域偵測解析度。除非所有攝影機都具有相同的解析度和長寬比，否則應針對每台攝影機單獨定義偵測寬度與高度，以符合各台攝影機的原生長寬比。"
     },
     "objects": {
       "genaiNoDescriptionsProvider": "必須配置具備“描述”功能的生成式 AI 服務商，才能自動生成事件描述。"
@@ -1774,6 +1948,21 @@
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Jina V2 的大型模型版本記憶體佔用與推理開銷較高，建議搭配獨立顯示卡使用大型模型。"
+    },
+    "model": {
+      "optimizedFor320": "Frigate 已針對 320x320 模型進行最佳化，這是大多數環境下的最佳選擇。640x640 模型速度較慢，且僅在特定情境下有所幫助。",
+      "inputDimensionsNotDetectResolution": "模型輸入的寬度與高度是物件偵測模型的輸入尺寸，而不是攝影機的偵測解析度。它們應該與您使用的模型尺寸相符 — 通常是像 320x320 或 640x640 這樣的正方形尺寸。"
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "不建議手動設定硬體加速參數。除非有特殊需求，否則請選擇符合您硬體的預設組態。"
+    },
+    "onvif": {
+      "autotrackingNoZones": "自動追蹤至少需要一個區域。請先在「遮罩 / 區域」中為此攝影機定義一個區域，然後在下方將其設定為必要區域。"
     }
+  },
+  "menuDot": {
+    "overrideGlobal": "此區段會覆蓋全域設定",
+    "overrideProfile": "此區段已被 {{profile}} 設定檔覆蓋",
+    "unsaved": "此區段有未儲存的變更"
   }
 }
