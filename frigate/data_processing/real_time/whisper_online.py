@@ -1053,7 +1053,7 @@ if __name__ == "__main__":
 
     SAMPLING_RATE = 16000
     duration = len(load_audio(audio_path)) / SAMPLING_RATE
-    logger.info("Audio duration is: %2.2f seconds" % duration)
+    logger.info("Audio duration is: %2.2f seconds", duration)
 
     asr, online = asr_factory(args, logfile=logfile)
     if args.vac:

@@ -948,8 +948,8 @@ class PtzAutoTracker:
 
         if invalid:
             logger.debug(
-                f"{camera}: Invalid velocity: {tuple(np.round(velocities, 2).flatten().astype(int))}: Invalid because: "
-                + ", ".join(
+                f"{camera}: Invalid velocity: {tuple(np.round(velocities, 2).flatten().astype(int))}: Invalid because: %s",
+                ", ".join(
                     [
                         var_name
                         for var_name, is_invalid in [
@@ -961,7 +961,7 @@ class PtzAutoTracker:
                         ]
                         if is_invalid
                     ]
-                )
+                ),
             )
             # invalid velocity
             return False, np.zeros((4,))

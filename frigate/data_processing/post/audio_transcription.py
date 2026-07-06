@@ -168,8 +168,9 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
                 return None
 
             logger.debug(
-                "Detected language '%s' with probability %f"
-                % (info.language, info.language_probability)
+                "Detected language '%s' with probability %f",
+                info.language,
+                info.language_probability,
             )
 
             return text

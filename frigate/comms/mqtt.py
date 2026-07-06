@@ -215,8 +215,8 @@ class MqttClient(Communicator):
                 logger.error("Unable to connect to MQTT server: MQTT Not authorized")
             else:
                 logger.error(
-                    "Unable to connect to MQTT server: Connection refused. Error code: "
-                    + reason_code.getName()
+                    "Unable to connect to MQTT server: Connection refused. Error code: %s",
+                    reason_code.getName(),
                 )
 
         self.connected = True
