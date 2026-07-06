@@ -2,7 +2,7 @@ import importlib
 import logging
 import pkgutil
 from enum import Enum
-from typing import Annotated
+from typing import Annotated, Union
 
 from pydantic import Field
 
@@ -36,6 +36,6 @@ class StrEnum(str, Enum):
 DetectorTypeEnum = StrEnum("DetectorTypeEnum", {k: k for k in api_types})
 
 DetectorConfig = Annotated[
-    tuple(BaseDetectorConfig.__subclasses__()),
+    Union[tuple(BaseDetectorConfig.__subclasses__())],  # noqa: UP007
     Field(discriminator="type"),
 ]
