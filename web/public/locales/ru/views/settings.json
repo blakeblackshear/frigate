@@ -16,7 +16,8 @@
     "globalConfig": "Глобальная конфигурация - Frigate",
     "cameraConfig": "Настройки камеры - Frigate",
     "maintenance": "Обслуживание - Frigate",
-    "profiles": "Профили - Frigate"
+    "profiles": "Профили - Frigate",
+    "detectorsAndModel": "Обнаружения и модель - Frigate"
   },
   "menu": {
     "cameras": "Настройки камеры",
@@ -39,7 +40,37 @@
     "integrations": "Интеграции",
     "uiSettings": "Настройки интерфейса",
     "profiles": "Профили",
-    "globalDetect": "Обнаружение объектов"
+    "globalDetect": "Обнаружение объектов",
+    "globalReview": "Обзор событий",
+    "globalAudioEvents": "Обнаружение аудио",
+    "systemAuthentication": "Аутентификация",
+    "systemNetworking": "Сеть",
+    "systemProxy": "Прокси",
+    "systemUi": "Интерфейс",
+    "systemLogging": "Логирование",
+    "systemEnvironmentVariables": "Переменные окружения",
+    "systemTelemetry": "Телеметрия",
+    "systemBirdseye": "Режим Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorsAndModel": "Детекторы и модель",
+    "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "потоки go2rtc",
+    "integrationSemanticSearch": "Семантический поиск",
+    "integrationGenerativeAi": "Генеративный ИИ",
+    "integrationFaceRecognition": "Распознавание лиц",
+    "integrationLpr": "Распознавание номерных знаков",
+    "integrationObjectClassification": "Классификация объектов",
+    "integrationAudioTranscription": "Расшифровка аудиозаписи",
+    "cameraDetect": "Обнаружение объектов",
+    "cameraFfmpeg": "Потоки (FFmpeg)",
+    "cameraRecording": "Запись",
+    "cameraSnapshots": "Снимки",
+    "cameraMotion": "Обнаружение движения",
+    "cameraObjects": "Объекты",
+    "cameraConfigReview": "Обзор событий",
+    "cameraAudioEvents": "Обнаружение аудио",
+    "cameraAudioTranscription": "Расшифровка аудиозаписи",
+    "cameraNotifications": "Уведомления"
   },
   "dialog": {
     "unsavedChanges": {
@@ -1201,7 +1232,28 @@
     "backToSettings": "Вернуться к настройкам камеры",
     "streams": {
       "title": "Включить / Отключить камеры",
-      "desc": "Временно отключить камеру до перезапуска Frigate. Отключение камеры полностью останавливает обработку потоков этой камеры в Frigate. Обнаружение, запись и отладка будут недоступны.<br /> <em>Примечание: Это не отключает рестриминг go2rtc.</em>"
+      "desc": "Временно отключить камеру до перезапуска Frigate. Отключение камеры полностью останавливает обработку потоков этой камеры в Frigate. Обнаружение, запись и отладка будут недоступны.<br /> <em>Примечание: Это не отключает рестриминг go2rtc.</em>",
+      "label": "Состояние камеры",
+      "status": {
+        "disabled": "Отключено"
+      },
+      "enableSuccess": "Включена {{cameraName}}. Перезапустите Frigate для применения изменений.",
+      "disableSuccess": "Отключено {{cameraName}} и сохранено в конфигурации.",
+      "reorderHandle": "Перетяните для изменения порядка",
+      "saving": "Сохранение…",
+      "saved": "Сохранено",
+      "details": {
+        "edit": "Редактировать детали камеры",
+        "title": "Редактировать детали камеры",
+        "description": "Обновите отображаемое имя, внешний URL и видимость для этой камеры в пользовательском интерфейсе Frigate.",
+        "friendlyNameLabel": "Отображаемое Имя",
+        "friendlyNameHelp": "Дружественное имя, которое отображается для этой камеры в пользовательском интерфейсе Frigate. Оставьте пустым для использования идентификатора камеры.",
+        "webuiUrlLabel": "Ссылка на Web интерфейс камеры",
+        "webuiUrlHelp": "URL-адрес для посещения веб-UI камеры непосредственно с отладочного меню. Оставьте пустым, чтобы отключить ссылку.",
+        "webuiUrlInvalid": "Должен быть действительный URL (например, https://example.com).",
+        "dashboardLabel": "Показывать на Live dashboard",
+        "dashboardHelp": "Показывать эту камеру на Live dashboard."
+      }
     },
     "cameraConfig": {
       "add": "Добавить камеру",
@@ -1231,6 +1283,11 @@
       "toast": {
         "success": "Камера {{cameraName}} успешно сохранена"
       }
+    },
+    "deleteCameraDialog": {
+      "confirmWarning": "Удаление <strong>{{cameraName}}</strong> не может быть отменено.",
+      "success": "Камера {{cameraName}} успешно удалена",
+      "error": "Не удалось удалить камеру {{cameraName}}"
     }
   },
   "cameraReview": {

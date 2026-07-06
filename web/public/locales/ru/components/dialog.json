@@ -36,6 +36,9 @@
           "label": "Подтвердить эту метку для Frigate Plus",
           "ask_a": "Это объект — <code>{{label}}</code>?",
           "ask_full": "Это объект — <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "toast": {
+          "error": "Не удалось подключиться к Frigate+. Пожалуйста, проверьте настройки сети и попробуйте еще раз."
         }
       }
     },
@@ -72,7 +75,16 @@
         "noVaildTimeSelected": "Не выбран допустимый временной диапазон",
         "endTimeMustAfterStartTime": "Время окончания должно быть после времени начала"
       },
-      "view": "Просмотр"
+      "view": "Просмотр",
+      "queued": "Экспорт поставлен в очередь. Следите за ходом выполнения на странице экспорта.",
+      "batchSuccess_one": "Начат {{count}} экспорт. Открываем случай.",
+      "batchSuccess_few": "Начато {{count}} экспорта. Открываем случай.",
+      "batchSuccess_many": "Начато {{count}} экспортов. Открываем случай.",
+      "batchPartial": "Начато {{successful}} из {{total}} экспортов. Неудавшиеся камеры: {{failedCameras}}",
+      "batchFailed": "Неудавшихся экспортов: {{total}}. Неудавшиеся камеры: {{failedCameras}}",
+      "batchQueuedSuccess_one": "1 экспорт поставлен в очередь. Открываем случай.",
+      "batchQueuedSuccess_few": "{{count}} экспорта поставлено в очередь. Открываем случай.",
+      "batchQueuedSuccess_many": "{{count}} экспортов поставлены в очередь. Открываем случай."
     },
     "fromTimeline": {
       "saveExport": "Сохранить экспорт",
@@ -80,7 +92,34 @@
     },
     "case": {
       "label": "Случай",
-      "placeholder": "Выберите случай"
+      "placeholder": "Выберите случай",
+      "newCaseOption": "Создайте новый случай",
+      "newCaseNamePlaceholder": "Имя нового случая",
+      "newCaseDescriptionPlaceholder": "Описание Случая",
+      "nonAdminHelp": "Для этих экспортов будет создан новый случай."
+    },
+    "queueing": "Помещаем Экспорт в очередь...",
+    "tabs": {
+      "export": "Одиночная Камера",
+      "multiCamera": "Мульти-Камера"
+    },
+    "multiCamera": {
+      "timeRange": "Временной промежуток",
+      "selectFromTimeline": "Выбрать на таймлайне",
+      "cameraSelection": "Камеры",
+      "cameraSelectionHelp": "Камеры с отслеживаемыми объектами в этом временном диапазоне выбраны заранее",
+      "searchOrSelectGroup": "Найдите или выберите группу камер...",
+      "selectAll": "Выберите все камеры",
+      "clearSelection": "Очистить выбор",
+      "selectWithActivity": "Камеры с отслеживаемыми объектами",
+      "selectGroup": "Выбрать группу",
+      "noMatchingCameras": "Камеры по вашему запросу не найдены",
+      "selectedCount": "{{selected}} / {{total}} выбрано",
+      "checkingActivity": "Проверка доступности камеры...",
+      "noCameras": "Нет доступных камер",
+      "detectionCount_one": "{{count}} отслеживаемый объект",
+      "detectionCount_few": "{{count}} отслеживаемых объекта",
+      "detectionCount_many": "{{count}} отслеживаемых объектов"
     }
   },
   "streaming": {
