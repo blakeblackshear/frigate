@@ -34,11 +34,15 @@
         },
         "listen": {
             "label": "Tipos de escuta",
-            "description": "Lista de tipos de eventos de áudio a serem detectados (por exemplo: latido, alarme de incêndio, grito, fala, berro)."
+            "description": "Lista de tipos de eventos de áudio a serem detectados (por exemplo: latido, alarme de incêndio, fala, grito)."
         },
         "filters": {
             "label": "Filtros de áudio",
-            "description": "Configurações de filtro por tipo de áudio, como limites de confiança, usadas para reduzir falsos positivos."
+            "description": "Configurações de filtro por tipo de áudio, como limites de confiança, usadas para reduzir falsos positivos.",
+            "threshold": {
+                "label": "Confiança mínima do áudio",
+                "description": "Limite mínimo de confiança para que o evento de áudio seja contabilizado."
+            }
         },
         "enabled_in_config": {
             "label": "Estado de áudio original",
@@ -47,7 +51,8 @@
         "num_threads": {
             "label": "Threads de detecção",
             "description": "Número de threads a serem usadas para o processamento de detecção de áudio."
-        }
+        },
+        "label": "Detecção de áudio"
     },
     "auth": {
         "label": "Autenticação",
@@ -82,8 +87,473 @@
     "audio_transcription": {
         "label": "Transcrição de áudio",
         "live_enabled": {
-            "label": "Transcrição em tempo real"
+            "label": "Transcrição em tempo real",
+            "description": "Ative a transcrição ao vivo por streaming para o áudio à medida que ele é recebido."
         },
         "description": "Configurações de transcrição de áudio e voz ao vivo para eventos e legendas em tempo real."
+    },
+    "detect": {
+        "enabled": {
+            "label": "Ativar detecção de objetos"
+        },
+        "height": {
+            "label": "Detectar altura",
+            "description": "Altura (em pixels) dos quadros usados para o fluxo de detecção; deixe em branco para usar a resolução nativa do fluxo."
+        },
+        "width": {
+            "label": "Detectar largura",
+            "description": "Largura (em pixels) dos quadros usados para o fluxo de detecção; deixe em branco para usar a resolução nativa do fluxo."
+        },
+        "fps": {
+            "label": "Detectar FPS",
+            "description": "Taxa de quadros por segundo desejada para a execução da detecção; valores mais baixos reduzem o uso da CPU (o valor recomendado é 5; defina um valor mais alto — no máximo 10 — apenas se estiver rastreando objetos que se movem extremamente rápido)."
+        },
+        "min_initialized": {
+            "label": "Quadros de inicialização mínimos",
+            "description": "Número de detecções consecutivas necessárias antes de criar um objeto rastreado. Aumente esse valor para reduzir inicializações falsas. O valor padrão é o fps dividido por 2."
+        },
+        "max_disappeared": {
+            "label": "Máximo de quadros perdidos",
+            "description": "Número de quadros sem detecção antes que um objeto rastreado seja considerado desaparecido."
+        },
+        "stationary": {
+            "label": "Configuração de objetos estáticos",
+            "description": "Configurações para detectar e gerenciar objetos que permanecem parados por um período de tempo.",
+            "interval": {
+                "label": "Intervalo estacionário",
+                "description": "Com que frequência (em quadros) realizar uma verificação de detecção para confirmar um objeto estacionário."
+            },
+            "threshold": {
+                "label": "Limiar estacionário",
+                "description": "Número de quadros sem alteração de posição necessários para marcar um objeto como estacionário."
+            },
+            "max_frames": {
+                "label": "Quadros máximos",
+                "description": "Limita por quanto tempo objetos estacionários são rastreados antes de serem descartados.",
+                "default": {
+                    "label": "Máximo de quadros padrão",
+                    "description": "Número máximo padrão de quadros para rastrear um objeto estacionário antes de parar."
+                },
+                "objects": {
+                    "label": "Quadros máximos do objeto",
+                    "description": "Substituições por objeto para o número máximo de quadros de rastreamento de objetos estacionários."
+                }
+            },
+            "classifier": {
+                "label": "Ativar classificador visual",
+                "description": "Use um classificador visual para detectar objetos verdadeiramente estacionários, mesmo quando as caixas delimitadoras oscilam."
+            }
+        },
+        "annotation_offset": {
+            "label": "Deslocamento da anotação",
+            "description": "Milissegundos para deslocar as anotações de detecção, a fim de alinhar melhor as caixas delimitadoras da linha do tempo com as gravações; pode ser um valor positivo ou negativo."
+        },
+        "label": "Detecção de Objetos",
+        "description": "Configurações para a função de detecção (*detect*) usada para executar a detecção de objetos e inicializar rastreadores."
+    },
+    "face_recognition": {
+        "label": "Reconhecimento facial",
+        "enabled": {
+            "label": "Ativar reconhecimento facial"
+        },
+        "min_area": {
+            "label": "Área mínima do rosto",
+            "description": "Área mínima (em pixels) da caixa delimitadora de um rosto detectado necessária para tentar o reconhecimento."
+        }
+    },
+    "ffmpeg": {
+        "path": {
+            "label": "Caminho do FFmpeg",
+            "description": "Caminho para o binário do FFmpeg a ser utilizado ou um alias de versão (\"7.0\" ou \"8.0\")."
+        },
+        "global_args": {
+            "label": "Argumentos globais do FFmpeg",
+            "description": "Argumentos globais passados para processos do FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Argumentos de aceleração de hardware",
+            "description": "Argumentos de aceleração de hardware para o FFmpeg. Recomenda-se o uso de predefinições específicas do provedor."
+        },
+        "input_args": {
+            "label": "Argumentos de entrada",
+            "description": "Argumentos de entrada aplicados aos fluxos de entrada do FFmpeg."
+        },
+        "output_args": {
+            "label": "Argumentos de saída",
+            "description": "Argumentos de saída padrão utilizados para diferentes funções do FFmpeg, como detecção e gravação.",
+            "detect": {
+                "label": "Detectar argumentos de saída",
+                "description": "Argumentos de saída padrão para fluxos de detecção de função."
+            },
+            "record": {
+                "label": "Registrar argumentos de saída",
+                "description": "Argumentos de saída padrão para fluxos de função de registro."
+            }
+        },
+        "retry_interval": {
+            "label": "Tempo de nova tentativa do FFmpeg",
+            "description": "Segundos de espera antes de tentar reconectar um fluxo de câmera após uma falha. O padrão é 10."
+        },
+        "apple_compatibility": {
+            "label": "Compatibilidade com a Apple",
+            "description": "Ative a marcação HEVC para melhor compatibilidade com reprodutores da Apple ao gravar em H.265."
+        },
+        "gpu": {
+            "label": "Índice da GPU",
+            "description": "Índice da GPU padrão usado para aceleração de hardware, se disponível."
+        },
+        "inputs": {
+            "label": "Entradas de câmera",
+            "description": "Lista de definições de fluxo de entrada (caminhos e funções) para esta câmera.",
+            "path": {
+                "label": "Caminho de entrada",
+                "description": "URL ou caminho do fluxo de entrada da câmera."
+            },
+            "roles": {
+                "label": "Funções de entrada",
+                "description": "Funções para este fluxo de entrada."
+            },
+            "global_args": {
+                "label": "Argumentos globais do FFmpeg",
+                "description": "Argumentos globais do FFmpeg para este fluxo de entrada."
+            },
+            "hwaccel_args": {
+                "label": "Argumentos de aceleração de hardware",
+                "description": "Argumentos de aceleração de hardware para este fluxo de entrada."
+            },
+            "input_args": {
+                "label": "Argumentos de entrada",
+                "description": "Argumentos de entrada específicos para este fluxo."
+            }
+        }
+    },
+    "birdseye": {
+        "mode": {
+            "label": "Modo de rastreamento",
+            "description": "Modo de inclusão de câmeras no Birdseye: 'objetos', 'movimento' ou 'contínuo'."
+        },
+        "order": {
+            "label": "Posição",
+            "description": "Posição numérica que controla a ordem da câmera no layout de vista aérea (Birdseye)."
+        },
+        "label": "Birdseye",
+        "description": "Configurações para a visualização composta \"Birdseye\", que combina múltiplas transmissões de câmera em um único layout.",
+        "enabled": {
+            "label": "Ativar Birdseye"
+        }
+    },
+    "live": {
+        "label": "Reprodução ao vivo",
+        "streams": {
+            "label": "Nomes de transmissões ao vivo",
+            "description": "Mapeamento de nomes de fluxos configurados para nomes de restream/go2rtc usados na reprodução ao vivo."
+        },
+        "height": {
+            "description": "Altura (em pixels) para renderizar a transmissão ao vivo jsmpeg na interface web; deve ser menor ou igual à altura da transmissão de detecção."
+        },
+        "quality": {
+            "description": "Qualidade de codificação para o fluxo jsmpeg (1 para a mais alta, 31 para a mais baixa)."
+        }
+    },
+    "motion": {
+        "enabled": {
+            "label": "Ativar detecção de movimento"
+        },
+        "threshold": {
+            "label": "Limiar de movimento",
+            "description": "Limiar de diferença de pixels utilizado pelo detector de movimento; valores mais altos reduzem a sensibilidade (faixa de 1 a 255)."
+        },
+        "lightning_threshold": {
+            "label": "Limiar de relâmpago",
+            "description": "Limite para detectar e ignorar picos breves de luminosidade (valores mais baixos indicam maior sensibilidade; valores entre 0,3 e 1,0). Isso não impede totalmente a detecção de movimento; apenas faz com que o detector pare de analisar quadros adicionais assim que o limite é excedido. Gravações baseadas em movimento continuam sendo geradas durante esses eventos."
+        },
+        "skip_motion_threshold": {
+            "label": "Limite de movimento para pular",
+            "description": "Se definido para um valor entre 0,0 e 1,0, e se uma proporção da imagem superior a esse valor sofrer alterações em um único quadro, o detector não retornará caixas de detecção de movimento e será recalibrado imediatamente. Isso pode economizar recursos da CPU e reduzir falsos positivos causados por relâmpagos, tempestades, etc., mas pode deixar passar eventos reais, como o rastreamento automático de um objeto por uma câmera PTZ. A escolha envolve um equilíbrio entre descartar alguns megabytes de gravações e analisar alguns clipes curtos. Deixe a opção não definida (None) para desativar esse recurso."
+        },
+        "improve_contrast": {
+            "label": "Melhorar contraste",
+            "description": "Aplique melhoria de contraste aos quadros antes da análise de movimento para auxiliar na detecção."
+        },
+        "contour_area": {
+            "label": "Área de contorno",
+            "description": "Área mínima do contorno, em pixels, necessária para que um contorno de movimento seja contabilizado."
+        },
+        "delta_alpha": {
+            "label": "Delta Alfa",
+            "description": "Fator de *alpha blending* utilizado na diferenciação de quadros para o cálculo de movimento."
+        },
+        "frame_alpha": {
+            "label": "Quadro alfa",
+            "description": "Valor alfa utilizado ao combinar quadros para o pré-processamento de movimento."
+        },
+        "frame_height": {
+            "label": "Altura da quadro",
+            "description": "Altura em pixels para a qual os quadros são redimensionados ao calcular o movimento."
+        },
+        "mask": {
+            "label": "Coordenadas da máscara",
+            "description": "Coordenadas x,y ordenadas que definem o polígono da máscara de movimento utilizado para incluir ou excluir áreas."
+        },
+        "mqtt_off_delay": {
+            "label": "Atraso de desligamento MQTT",
+            "description": "Segundos de espera após o último movimento antes de publicar um estado \"off\" via MQTT."
+        },
+        "enabled_in_config": {
+            "label": "Estado de movimento original",
+            "description": "Indica se a detecção de movimento estava habilitada na configuração estática original."
+        },
+        "raw_mask": {
+            "label": "Máscara Bruta"
+        },
+        "label": "Detecção de movimento"
+    },
+    "objects": {
+        "label": "Objetos",
+        "description": "Configurações padrão de rastreamento de objetos, incluindo quais rótulos rastrear e filtros por objeto.",
+        "track": {
+            "label": "Objetos a rastrear"
+        },
+        "filters": {
+            "label": "Filtros de objeto",
+            "description": "Filtros aplicados aos objetos detectados para reduzir falsos positivos (área, proporção, confiança).",
+            "min_area": {
+                "label": "Área mínima do objeto",
+                "description": "Área mínima da caixa delimitadora (em pixels ou porcentagem) necessária para este tipo de objeto. Pode ser especificada em pixels (inteiro) ou porcentagem (valor de ponto flutuante entre 0,000001 e 0,99)."
+            },
+            "max_area": {
+                "label": "Área máxima do objeto",
+                "description": "Área máxima da caixa delimitadora (pixels ou porcentagem) permitida para este tipo de objeto. Pode ser pixels (int) ou porcentagem (flutuar entre 0,000001 e 0,99)."
+            },
+            "min_ratio": {
+                "label": "Razão de aspecto mínimo",
+                "description": "Razão mínima entre largura e altura necessária para que a caixa delimitadora se qualifique."
+            },
+            "max_ratio": {
+                "label": "Razão de aspecto máxima",
+                "description": "Razão máxima entre largura e altura permitida para que a caixa delimitadora qualifique."
+            },
+            "threshold": {
+                "label": "Limiar de confiança",
+                "description": "Limiar médio de confiança de detecção necessário para que o objeto seja considerado um verdadeiro positivo."
+            },
+            "min_score": {
+                "label": "Confiança mínima",
+                "description": "Confiança mínima de detecção em um único quadro necessária para que o objeto seja contabilizado."
+            },
+            "mask": {
+                "label": "Máscara com filtro",
+                "description": "Coordenadas do polígono que definem onde este filtro é aplicado dentro do quadro."
+            },
+            "raw_mask": {
+                "label": "Máscara Bruta"
+            }
+        },
+        "mask": {
+            "label": "Máscara de objeto",
+            "description": "Polígono de máscara usado para impedir a detecção de objetos em áreas específicas."
+        },
+        "raw_mask": {
+            "label": "Máscara Bruta"
+        },
+        "genai": {
+            "label": "Configuração de objeto da GenAI",
+            "description": "Opções de GenIA para descrever objetos rastreados e enviar quadros para geração.",
+            "enabled": {
+                "label": "Ativar GenAI",
+                "description": "Habilitar por padrão a geração de descrições para objetos rastreados usando GenAI."
+            },
+            "use_snapshot": {
+                "label": "Usar instantâneos",
+                "description": "Use instantâneos de objetos em vez de miniaturas para a geração de descrições pela GenAI."
+            },
+            "prompt": {
+                "label": "Sugestão de legenda",
+                "description": "Modelo de prompt padrão usado ao gerar descrições com GenAI."
+            },
+            "object_prompts": {
+                "label": "Prompts de objeto",
+                "description": "Prompts por objeto para personalizar as saídas de GenAI para rótulos específicos."
+            },
+            "objects": {
+                "label": "Objetos de GenAI",
+                "description": "Lista de rótulos de objetos a serem enviados à GenAI por padrão."
+            },
+            "required_zones": {
+                "label": "Zonas obrigatórias",
+                "description": "Zonas que devem ser acessadas para que os objetos se qualifiquem para a geração de descrições pela GenAI."
+            },
+            "debug_save_thumbnails": {
+                "label": "Salvar miniaturas",
+                "description": "Salve as miniaturas enviadas à GenAI para depuração e revisão."
+            },
+            "send_triggers": {
+                "label": "Gatilhos de GenAI",
+                "description": "Define quando os quadros devem ser enviados para a GenAI (ao final, após atualizações, etc.).",
+                "tracked_object_end": {
+                    "label": "Enviar no fim",
+                    "description": "Envie uma solicitação à GenAI quando o objeto rastreado terminar."
+                },
+                "after_significant_updates": {
+                    "label": "Acionamento antecipado da GenAI",
+                    "description": "Envie uma solicitação à GenAI após um número especificado de atualizações significativas do objeto monitorado."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Estado original da GenAI",
+                "description": "Indica se a GenAI foi habilitada na configuração estática original."
+            }
+        }
+    },
+    "lpr": {
+        "enabled": {
+            "label": "Ativar LPR"
+        },
+        "expire_time": {
+            "label": "Segundos para expirar",
+            "description": "Tempo, em segundos, após o qual uma placa não detectada é removida do rastreador (apenas para câmeras LPR dedicadas)."
+        },
+        "min_area": {
+            "label": "Área mínima da placa",
+            "description": "Área mínima da placa (em pixels) necessária para tentar o reconhecimento."
+        },
+        "enhancement": {
+            "label": "Nível de aprimoramento",
+            "description": "Nível de aprimoramento (0-10) a ser aplicado aos recortes da placa antes do OCR; valores mais altos nem sempre melhoram os resultados, e níveis acima de 5 podem funcionar apenas com placas noturnas, devendo ser utilizados com cautela."
+        }
+    },
+    "record": {
+        "label": "Gravação",
+        "enabled": {
+            "label": "Ativar gravação"
+        },
+        "expire_interval": {
+            "label": "Intervalo de limpeza de gravação",
+            "description": "Minutos entre as execuções de limpeza que removem segmentos de gravação expirados."
+        },
+        "continuous": {
+            "label": "Retenção contínua",
+            "description": "Número de dias para manter as gravações, independentemente de objetos rastreados ou movimento. Defina como 0 se quiser manter apenas gravações de alertas e detecções.",
+            "days": {
+                "label": "Dias de retenção",
+                "description": "Dias para manter as gravações."
+            }
+        },
+        "motion": {
+            "label": "Retenção de movimento",
+            "description": "Número de dias para manter gravações acionadas por movimento, independentemente dos objetos rastreados. Defina como 0 se quiser manter apenas gravações de alertas e detecções.",
+            "days": {
+                "label": "Dias de retenção",
+                "description": "Dias para manter as gravações."
+            }
+        },
+        "detections": {
+            "label": "Retenção de detecção",
+            "description": "Configurações de retenção de gravação para eventos de detecção, incluindo durações de pré e pós-captura.",
+            "pre_capture": {
+                "label": "Segundos de pré-captura",
+                "description": "Número de segundos anteriores ao evento de detecção a serem incluídos na gravação."
+            },
+            "post_capture": {
+                "label": "Segundos após a captura",
+                "description": "Número de segundos após o evento de detecção a serem incluídos na gravação."
+            },
+            "retain": {
+                "label": "Retenção de eventos",
+                "description": "Configurações de retenção para gravações de eventos de detecção.",
+                "days": {
+                    "label": "Dias de retenção",
+                    "description": "Número de dias para manter as gravações de eventos de detecção."
+                },
+                "mode": {
+                    "label": "Modo de retenção",
+                    "description": "Modo de retenção: all (salva todos os segmentos), motion (salva segmentos com movimento) ou active_objects (salva segmentos com objetos ativos)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Retenção de alertas",
+            "description": "Configurações de retenção de gravações para eventos de alerta, incluindo durações de pré e pós-captura.",
+            "pre_capture": {
+                "label": "Segundos de pré-captura",
+                "description": "Número de segundos anteriores ao evento de detecção a serem incluídos na gravação."
+            },
+            "post_capture": {
+                "label": "Segundos após a captura",
+                "description": "Número de segundos após o evento de detecção a serem incluídos na gravação."
+            },
+            "retain": {
+                "label": "Retenção de eventos",
+                "description": "Configurações de retenção para gravações de eventos de detecção.",
+                "days": {
+                    "label": "Dias de retenção",
+                    "description": "Número de dias para manter as gravações de eventos de detecção."
+                },
+                "mode": {
+                    "label": "Modo de retenção",
+                    "description": "Modo de retenção: all (salvar todos os segmentos), motion (salvar segmentos com movimento) ou active_objects (salvar segmentos com objetos ativos)."
+                }
+            }
+        },
+        "export": {
+            "label": "Exportar configuração",
+            "description": "Configurações utilizadas ao exportar gravações, como timelapse e aceleração de hardware.",
+            "hwaccel_args": {
+                "label": "Exportar argumentos de hwaccel",
+                "description": "Argumentos de aceleração de hardware a serem usados para operações de exportação/transcodificação."
+            },
+            "max_concurrent": {
+                "label": "Máximo de exportações simultâneas",
+                "description": "Número máximo de tarefas de exportação a serem processadas simultaneamente."
+            },
+            "chapters": {
+                "label": "Metadados de capítulos para incorporar nas gravações exportadas"
+            }
+        },
+        "preview": {
+            "label": "Pré-visualizar configuração",
+            "description": "Configurações que controlam a qualidade das prévias de gravação exibidas na interface de usuário.",
+            "quality": {
+                "label": "Qualidade da pré-visualização",
+                "description": "Nível de qualidade da pré-visualização (muito_baixa, baixa, média, alta, muito_alta)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Estado original da gravação",
+            "description": "Indica se a gravação foi habilitada na configuração estática original."
+        }
+    },
+    "review": {
+        "label": "Rever",
+        "alerts": {
+            "label": "Configuração de alertas",
+            "description": "Configurações sobre quais objetos monitorados geram alertas e como os alertas são retidos.",
+            "enabled": {
+                "label": "Ativar alertas"
+            },
+            "labels": {
+                "label": "Etiquetas de alerta",
+                "description": "Lista de rótulos de objetos que se qualificam como alertas (por exemplo: carro, pessoa)."
+            },
+            "required_zones": {
+                "label": "Zonas obrigatórias",
+                "description": "Zonas nas quais um objeto deve entrar para ser considerado um alerta; deixe em branco para permitir qualquer zona."
+            },
+            "enabled_in_config": {
+                "label": "Estado dos alertas originais",
+                "description": "Monitora se os alertas estavam originalmente habilitados na configuração estática."
+            },
+            "cutoff_time": {
+                "label": "Horário limite dos alertas",
+                "description": "Segundos de espera após a ausência de atividade que gere alerta antes de encerrar o alerta."
+            }
+        },
+        "detections": {
+            "label": "Configuração de detecções",
+            "description": "Configurações que definem para quais objetos rastreados são geradas detecções (sem gerar alerta) e como essas detecções são retidas.",
+            "enabled": {
+                "label": "Ativar detecções"
+            }
+        }
     }
 }

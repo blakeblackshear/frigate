@@ -1,1 +1,19 @@
-{}
+{
+    "title": "Depuração de Replay",
+    "description": "“Reproduza gravações de câmera para depuração. A lista de objetos exibe um resumo com atraso temporal, dos objetos detectados e a aba de mensagens mostra um fluxo de mensagens internas do Frigate provenientes da gravação reproduzida.",
+    "websocket_messages": "Mensagens",
+    "dialog": {
+        "title": "Iniciar Replay de Depuração",
+        "description": "Crie uma câmera de reprodução temporária que exiba imagens históricas em loop para depurar problemas de detecção e rastreamento de objetos. A câmera de reprodução terá a mesma configuração de detecção da câmera de origem. Escolha um intervalo de tempo para começar.",
+        "camera": "Câmera de origem",
+        "timeRange": "Intervalo de tempo",
+        "preset": {
+            "1m": "Último minuto",
+            "5m": "Últimos 5 minutos",
+            "timeline": "Da Linha do Tempo",
+            "custom": "Personalizada"
+        },
+        "startButton": "Iniciar Reprodução",
+        "selectFromTimeline": "Selecionar"
+    }
+}

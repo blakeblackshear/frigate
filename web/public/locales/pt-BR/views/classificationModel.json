@@ -13,7 +13,7 @@
   "toast": {
     "success": {
       "deletedCategory_one": "Classe Apagada",
-      "deletedCategory_many": "",
+      "deletedCategory_many": "Classes apagadas",
       "deletedCategory_other": "",
       "deletedImage_one": "Imagen Apagada",
       "deletedImage_many": "Imagens Apagadas",
@@ -94,7 +94,14 @@
   },
   "noModels": {
     "object": {
-      "title": "Nenhum Modelo de Classificação de Objetos"
+      "title": "Nenhum Modelo de Classificação de Objetos",
+      "description": "Crie um modelo personalizado para classificar objetos detectados.",
+      "buttonText": "Criar modelo de objeto"
+    },
+    "state": {
+      "title": "Modelos de Classificação Sem Estado",
+      "description": "Crie um modelo personalizado para monitorar e classificar mudanças de estado em áreas específicas da câmera.",
+      "buttonText": "Criar modelo de estado"
     }
   },
   "deleteDatasetImages": {
@@ -104,5 +111,13 @@
     "title": "Editar Modelo de Classificação",
     "descriptionState": "Edite as classes deste modelo de classificação de estado. As alterações exigirão treinar novamente o modelo.",
     "descriptionObject": "Edite o tipo de objeto e tipo de classificação para este modelo de classificação de objeto."
+  },
+  "reclassifyImageAs": "Reclassificar imagem como:",
+  "reclassifyImage": "Reclassificar imagem",
+  "wizard": {
+    "title": "Criar nova classificação",
+    "steps": {
+      "nameAndDefine": "Nomear e definir"
+    }
   }
 }

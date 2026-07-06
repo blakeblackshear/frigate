@@ -68,7 +68,10 @@
         }
       },
       "birdseye": "Visão Panorâmica"
-    }
+    },
+    "showAll": "Exibir todos os grupos de câmeras",
+    "showLess": "Mostrar menos",
+    "editGroups": "Editar grupos de câmeras"
   },
   "debug": {
     "options": {
