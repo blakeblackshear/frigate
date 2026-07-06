@@ -6,7 +6,8 @@
       "title": "Frigate sa reštartuje",
       "content": "Táto stránka bude obnovená o {{countdown}} sekúnd.",
       "button": "Vynútiť opätovné načítanie teraz"
-    }
+    },
+    "description": "Počas reštartu bude Frigate nakrátko zastavený."
   },
   "explore": {
     "plus": {
@@ -64,6 +65,25 @@
     "fromTimeline": {
       "saveExport": "Uložiť Export",
       "previewExport": "Export ukážky"
+    },
+    "case": {
+      "newCaseOption": "Vytvoriť nový prípad",
+      "newCaseNamePlaceholder": "Názov nového prípadu",
+      "newCaseDescriptionPlaceholder": "Popis prípadu",
+      "label": "Prípad",
+      "nonAdminHelp": "Pre tieto exporty bude vytvorený nový prípad.",
+      "placeholder": "Vyberte prípad"
+    },
+    "queueing": "Zaradenie exportu do frontu...",
+    "tabs": {
+      "export": "Jedna kamera",
+      "multiCamera": "Viac kamier"
+    },
+    "multiCamera": {
+      "cameraSelection": "Kamery",
+      "cameraSelectionHelp": "Kamery so sledovanými objektmi v tomto časovom rozsahu sú vopred vybrané",
+      "checkingActivity": "Kontrola aktivity kamery...",
+      "noCameras": "Nie sú k dispozícii žiadne kamery"
     }
   },
   "streaming": {

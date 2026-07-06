@@ -1,1 +1,26 @@
-{}
+{
+    "birdseye": {
+        "order": {
+            "label": "Pozícia",
+            "description": "Číselná pozícia ovládajúca poradie kamery v rozložení Birdseye."
+        }
+    },
+    "detect": {
+        "label": "Detekcia objektov",
+        "enabled": {
+            "label": "Povoliť detekciu objektov"
+        }
+    },
+    "ffmpeg": {
+        "output_args": {
+            "detect": {
+                "label": "Zistiť výstupné argumenty",
+                "description": "Predvolené výstupné argumenty pre detekciu streamov rolí."
+            },
+            "record": {
+                "label": "Zaznamenajte výstupné argumenty",
+                "description": "Predvolené výstupné argumenty pre streamy rolí záznamov."
+            }
+        }
+    }
+}
