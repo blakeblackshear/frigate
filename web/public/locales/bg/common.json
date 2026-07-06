@@ -63,13 +63,17 @@
     "untilRestart": "До рестарт",
     "mo": "{{time}}мес",
     "m": "{{time}}м",
-    "s": "{{time}}с"
+    "s": "{{time}}с",
+    "never": "Никога",
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa"
+    }
   },
   "button": {
     "apply": "Приложи",
     "reset": "Нулиране",
     "done": "Готово",
-    "disabled": "Деактивирано",
+    "disabled": "Изключено",
     "save": "Запази",
     "saving": "Запазване…",
     "cancel": "Отказ",
@@ -80,7 +84,7 @@
     "delete": "Изтриване",
     "yes": "Да",
     "download": "Изтегляне",
-    "enabled": "Активирано",
+    "enabled": "Включено",
     "history": "История",
     "back": "Назад",
     "fullscreen": "Цял екран",
@@ -99,8 +103,8 @@
     "export": "Експортиране",
     "deleteNow": "Изтрии сега",
     "next": "Следващ",
-    "disable": "Деактивирай",
-    "enable": "Активирай"
+    "disable": "Изключи",
+    "enable": "Включи"
   },
   "menu": {
     "live": {
