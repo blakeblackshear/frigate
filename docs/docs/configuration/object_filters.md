@@ -7,7 +7,7 @@ import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
-There are several types of object filters that can be used to reduce false positive rates.
+There are several types of object filters that can be used to reduce [false positive](/frigate/glossary#false-positive) rates.
 
 ## Object Scores
 
@@ -148,4 +148,4 @@ cameras:
 
 ### Object Masks
 
-[Object Filter Masks](/configuration/masks) are a last resort but can be useful when false positives are in the relatively same place but can not be filtered due to their size or shape. Object filter masks can be configured in <NavPath path="Settings > Camera configuration > Masks / Zones" />.
+[Object Filter Masks](/configuration/masks#object-filter-masks) are a last resort but can be useful when false positives are in the relatively same place but can not be filtered due to their size or shape. Object filter masks can be configured in <NavPath path="Settings > Camera configuration > Masks / Zones" />.
