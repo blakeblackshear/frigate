@@ -36,6 +36,9 @@
           "ask_an": "Cet objet est-il un(e) <code>{{label}}</code> ?",
           "ask_a": "Cet objet est-il un(e) <code>{{label}}</code> ?",
           "ask_full": "Cet objet est-il un(e) <code>{{translatedLabel}}</code>  ?"
+        },
+        "toast": {
+          "error": "Impossible d'envoyer à Frigate+. Merci de vérifier votre réseau puis de réessayer."
         }
       }
     },
@@ -68,7 +71,15 @@
       },
       "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations.",
       "view": "Vue",
-      "queued": "Exportation en attente. Consultez la progression sur la page des exportations."
+      "queued": "Exportation en attente. Consultez la progression sur la page des exportations.",
+      "batchSuccess_one": "Un export démarré. Ouverture du dossier en cours.",
+      "batchSuccess_many": "{{count}} exports démarrés. Ouverture du dossier en cours.",
+      "batchSuccess_other": "{{count}} exports démarrés. Ouverture du dossier en cours.",
+      "batchPartial": "{{successful}} exports ont démarré sur un total de : {{total}}. Échecs : {{failedCameras}}",
+      "batchFailed": "Échec du démarrage de {{total}} exports. Échecs : {{failedCameras}}",
+      "batchQueuedSuccess_one": "Un export rajouté au traitement. Ouverture du dossier en cours.",
+      "batchQueuedSuccess_many": "{{count}} exports rajoutés au traitement. Ouverture du dossier en cours.",
+      "batchQueuedSuccess_other": "{{count}} exports rajoutés au traitement. Ouverture du dossier en cours."
     },
     "select": "Sélectionner",
     "name": {
@@ -107,7 +118,14 @@
       "queueingButton": "Mise en file d'attente des exports...",
       "exportButton_one": "Exporter {{count}} caméra",
       "exportButton_many": "Exporter {{count}} caméras",
-      "exportButton_other": "Exporter {{count}} caméras"
+      "exportButton_other": "Exporter {{count}} caméras",
+      "searchOrSelectGroup": "Chercher ou sélectionner un groupe de caméras...",
+      "selectAll": "Sélectionner toutes les cameras",
+      "clearSelection": "Effacer la sélection",
+      "selectWithActivity": "Caméras avec des objets suivis",
+      "selectGroup": "Sélectionner un groupe",
+      "noMatchingCameras": "Aucune caméra ne correspond à votre recherche",
+      "selectedCount": "{{selected}} / {{total}} sélectionnées"
     },
     "multi": {
       "title_one": "Export {{count}} revue",
