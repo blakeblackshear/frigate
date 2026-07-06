@@ -87,7 +87,7 @@ class MediaSyncRunner(threading.Thread):
             self._broadcast_status()
 
         except Exception as e:
-            logger.error(f"Media sync job {self.job.id} failed: {e}", exc_info=True)
+            logger.exception(f"Media sync job {self.job.id} failed: {e}")
             self.job.status = JobStatusTypesEnum.failed
             self.job.error_message = str(e)
             self.job.end_time = datetime.now().timestamp()

@@ -121,7 +121,7 @@ class FrigateProcess(BaseProcess):
                 f"If process crashes, manually generate with: memray flamegraph {binary_file}"
             )
         except Exception as e:
-            self.logger.error(f"Failed to setup memray profiling: {e}", exc_info=True)
+            self.logger.exception(f"Failed to setup memray profiling: {e}")
 
     def _cleanup_memray(self, safe_name: str, binary_file: pathlib.Path) -> None:
         """Stop memray tracking and generate HTML report."""
@@ -156,4 +156,4 @@ class FrigateProcess(BaseProcess):
         except subprocess.TimeoutExpired:
             self.logger.error("Memray report generation timed out")
         except Exception as e:
-            self.logger.error(f"Failed to cleanup memray profiling: {e}", exc_info=True)
+            self.logger.exception(f"Failed to cleanup memray profiling: {e}")

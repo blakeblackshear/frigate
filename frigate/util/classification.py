@@ -294,7 +294,7 @@ class ClassificationTrainingProcess(FrigateProcess):
             return True
 
         except Exception as e:
-            logger.error(f"Training failed for {self.model_name}: {e}", exc_info=True)
+            logger.exception(f"Training failed for {self.model_name}: {e}")
             return False
 
 
