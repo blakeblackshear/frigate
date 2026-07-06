@@ -119,7 +119,14 @@
       "queueingButton": "Poniendo exportaciones en cola...",
       "exportButton_one": "Exportar 1 cámara",
       "exportButton_many": "Exportar {{count}} cámaras",
-      "exportButton_other": "Exportar {{count}} cámaras"
+      "exportButton_other": "Exportar {{count}} cámaras",
+      "searchOrSelectGroup": "Busca o selecciona un grupo de cámaras…",
+      "selectAll": "Seleccionar todas las cámaras",
+      "clearSelection": "Borrar selección",
+      "selectWithActivity": "Cámaras con objetos rastreados",
+      "selectGroup": "Seleccionar grupo",
+      "noMatchingCameras": "Ninguna cámara coincide con tu búsqueda",
+      "selectedCount": "{{selected}} / {{total}} seleccionadas"
     },
     "multi": {
       "title_one": "Exportar 1 revisión",
