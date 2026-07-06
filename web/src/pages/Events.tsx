@@ -75,11 +75,13 @@ export default function Events() {
       return [] as string[];
     }
 
-    return Object.keys(config.cameras).filter(
-      (cam) =>
-        allowedCameras.includes(cam) &&
-        config.cameras[cam]?.ui?.review !== false,
-    );
+    return Object.values(config.cameras)
+      .filter(
+        (conf) =>
+          allowedCameras.includes(conf.name) && conf.ui?.review !== false,
+      )
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order)
+      .map((conf) => conf.name);
   }, [allowedCameras, config?.cameras]);
 
   const selectedMotionSearchCamera = useMemo(() => {
