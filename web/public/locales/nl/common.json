@@ -216,7 +216,8 @@
       "id": "Bahasa Indonesia (Indonesisch)",
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Kroatisch)",
-      "zhHant": "繁體中文 (Traditioneel Chinees)"
+      "zhHant": "繁體中文 (Traditioneel Chinees)",
+      "bs": "Bosanksi (Bosnisch)"
     },
     "darkMode": {
       "label": "Donkere modus",
@@ -267,7 +268,10 @@
       "anonymous": "anoniem"
     },
     "classification": "Classificatie",
-    "profiles": "Profielen"
+    "profiles": "Profielen",
+    "actions": "Acties",
+    "features": "Functies",
+    "chat": "Chat"
   },
   "toast": {
     "copyUrlToClipboard": "URL naar klembord gekopieerd.",
@@ -276,7 +280,8 @@
       "error": {
         "title": "Opslaan van configuratiewijzigingen mislukt: {{errorMessage}}",
         "noMessage": "Het opslaan van configuratiewijzigingen is mislukt"
-      }
+      },
+      "success": "De configuratie aanpassingen zijn succesvol opgeslagen."
     }
   },
   "role": {
@@ -323,5 +328,7 @@
   },
   "credentialField": {
     "savedPlaceholder": "Opgeslagen - leeg laten om huidige te behouden"
-  }
+  },
+  "no_items": "Geen items",
+  "validation_errors": "Validatie fouten"
 }
