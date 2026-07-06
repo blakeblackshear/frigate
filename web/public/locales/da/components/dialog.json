@@ -1,6 +1,6 @@
 {
   "restart": {
-    "title": "Er du sikker på at du vil genstarte Frigate?",
+    "title": "Er du sikker på, at du vil genstarte Frigate?",
     "button": "Genstart",
     "restarting": {
       "title": "Frigate genstarter",
@@ -21,8 +21,46 @@
           "ask_a": "Er dette objekt et <code>{{label}}</code>?",
           "ask_an": "Er dette objekt en <code>{{label}}</code>?",
           "ask_full": "Er dette objekt en <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Indsendt"
+        },
+        "toast": {
+          "error": "Fejl under indsendelse til Frigate+. Kontroller venligst din netværksforbindelse og prøv igen."
         }
       }
+    },
+    "video": {
+      "viewInHistory": "Se i historik"
     }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Vælg fra tidslinje",
+      "lastHour_one": "Sidste time",
+      "lastHour_other": "Sidste {{count}} timer",
+      "custom": "Tidsinterval",
+      "start": {
+        "title": "Starttidspunkt",
+        "label": "Vælg starttidspunkt"
+      },
+      "end": {
+        "title": "Sluttidspunkt",
+        "label": "Vælg sluttidspunkt"
+      }
+    },
+    "name": {
+      "placeholder": "Navngiv eksport"
+    },
+    "case": {
+      "newCaseOption": "Opret ny sag",
+      "newCaseNamePlaceholder": "Nyt sagsnavn",
+      "newCaseDescriptionPlaceholder": "Sagsbeskrivelse",
+      "label": "Sag",
+      "nonAdminHelp": "En ny sag oprettes til disse eksporter.",
+      "placeholder": "Vælg en sag"
+    },
+    "select": "Vælg",
+    "export": "Eksporter"
   }
 }

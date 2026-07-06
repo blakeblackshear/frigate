@@ -180,7 +180,7 @@
   "rats": "Rotter",
   "patter": "Dråbelyd",
   "insect": "Insekt",
-  "cricket": "Cricket",
+  "cricket": "Fårekylling",
   "guitar": "Guitar",
   "electric_guitar": "Elektrisk Guitar",
   "bass_guitar": "Basguitar",
@@ -195,5 +195,16 @@
   "rimshot": "Kantslag",
   "drum_roll": "Trommehvirvel",
   "bass_drum": "Stortromme",
-  "techno": "Techno"
+  "techno": "Techno",
+  "mosquito": "Myg",
+  "fly": "Flue",
+  "buzz": "Summen",
+  "frog": "Frø",
+  "croak": "Kvæk",
+  "snake": "Slange",
+  "rattle": "Klapren",
+  "whale_vocalization": "Hvallyde",
+  "music": "Musik",
+  "musical_instrument": "Musikinstrument",
+  "plucked_string_instrument": "Strengeinstrument"
 }
