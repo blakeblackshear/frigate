@@ -289,7 +289,7 @@
         "label": "Annoteringsförskjutning",
         "desc": "Denna data kommer från din kameras detekteringsflöde men läggs ovanpå bilder från inspelningsflödet. Det är osannolikt att de två strömmarna är helt synkroniserade. Som ett resultat kommer avgränsningsramen och filmmaterialet inte att radas upp perfekt. Du kan använda den här inställningen för att förskjuta anteckningarna framåt eller bakåt i tiden för att bättre anpassa dem till det inspelade materialet.",
         "millisecondsToOffset": "Millisekunder för att förskjuta detektera annoteringar med. <em>Standard: 0</em>",
-        "tips": "TIPS: Föreställ dig ett händelseklipp med en person som går från vänster till höger. Om tidslinjens avgränsningsram konsekvent är till vänster om personen bör värdet minskas. På samma sätt, om en person går från vänster till höger och avgränsningsramen konsekvent är framför personen bör värdet ökas.",
+        "tips": "Sänk värdet om videouppspelningen sker före rutorna och banpunkterna, och öka värdet om videouppspelningen sker bakom dem. Detta värde kan vara negativt.",
         "toast": {
           "success": "Annoteringsförskjutningen för {{camera}} har sparats i konfigurationsfilen."
         }

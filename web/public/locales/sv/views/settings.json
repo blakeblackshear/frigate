@@ -151,7 +151,8 @@
     "triggers": "Utlösare",
     "roles": "Roller",
     "cameraManagement": "Hantering",
-    "cameraReview": "Granska"
+    "cameraReview": "Granska",
+    "profiles": "Profiler"
   },
   "dialog": {
     "unsavedChanges": {
@@ -729,7 +730,7 @@
     "snapshotConfig": {
       "title": "Ögonblicksbild konfiguration",
       "desc": "För att skicka till Frigate+ måste ögonblicksbilder vara aktiverade i konfigurationen.",
-      "cleanCopyWarning": "Vissa kameror har ögonblicksbilder inaktiverade.",
+      "cleanCopyWarning": "Vissa kameror har ögonblicksbilder inaktiverade",
       "table": {
         "camera": "Kamera",
         "snapshots": "Ögonblicksbilder",

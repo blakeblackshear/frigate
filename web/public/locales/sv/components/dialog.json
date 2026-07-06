@@ -50,20 +50,81 @@
       "placeholder": "Ge exporten ett namn"
     },
     "select": "Välj",
-    "export": "Eksport",
+    "export": "Export",
     "selectOrExport": "Välj eller exportera",
     "toast": {
       "success": "Exporten har startats. Visa filen på exportsidan.",
       "error": {
-        "failed": "Misslyckades med att starta exporten: {{error}}",
+        "failed": "Misslyckades med att köa exporten: {{error}}",
         "endTimeMustAfterStartTime": "Sluttiden måste vara efter starttiden",
         "noVaildTimeSelected": "Inget giltigt tidsintervall valt"
       },
-      "view": "Visa"
+      "view": "Visa",
+      "queued": "Exporten är i kö. Se förloppet på exportsidan.",
+      "batchSuccess_one": "Startade 1 export. Öppnar ärendet nu.",
+      "batchSuccess_other": "Startade {{count}} exporter. Öppnar ärendet nu.",
+      "batchPartial": "Startade {{successful}} av {{total}} exporter. Misslyckade kameror: {{failedCameras}}",
+      "batchFailed": "Misslyckades med att starta export av {{total}}. Kameror som inte fungerade: {{failedCameras}}",
+      "batchQueuedSuccess_one": "1 export har köats. Ärendet öppnas nu.",
+      "batchQueuedSuccess_other": "{{count}} exporter har köats. Öppnar ärendet nu.",
+      "batchQueuedPartial": "Köade {{successful}} av {{total}} exporter. Misslyckade kameror: {{failedCameras}}",
+      "batchQueueFailed": "Misslyckades med att köa {{total}} exporter. Felaktiga kameror: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Spara export",
-      "previewExport": "Förhandsgranska export"
+      "previewExport": "Förhandsgranska export",
+      "queueingExport": "Export i kö...",
+      "useThisRange": "Använd detta intervall"
+    },
+    "case": {
+      "newCaseOption": "Skapa nytt ärende",
+      "newCaseNamePlaceholder": "Nytt ärende namn",
+      "newCaseDescriptionPlaceholder": "Ärende beskrivning",
+      "label": "Ärende",
+      "nonAdminHelp": "Ett nytt ärende kommer att skapas för dessa exporter.",
+      "placeholder": "Välj ett ärende"
+    },
+    "queueing": "Export i kö...",
+    "tabs": {
+      "export": "Enskild kamera",
+      "multiCamera": "Flerkameror"
+    },
+    "multiCamera": {
+      "timeRange": "Tidsintervall",
+      "selectFromTimeline": "Välj från tidslinjen",
+      "cameraSelection": "Kameror",
+      "cameraSelectionHelp": "Kameror med spårade objekt inom detta tidsintervall är förvalda",
+      "checkingActivity": "Kontrollerar kameraaktivitet...",
+      "noCameras": "Inga kameror tillgängliga",
+      "detectionCount_one": "1 spårat objekt",
+      "detectionCount_other": "{{count}} spårade objekt",
+      "nameLabel": "Exportnamn",
+      "namePlaceholder": "Valfritt basnamn för dessa exporter",
+      "queueingButton": "Köar exporter...",
+      "exportButton_one": "Exportera 1 kamera",
+      "exportButton_other": "Exportera {{count}} kameror",
+      "selectAll": "Välj alla kameror",
+      "selectWithActivity": "Kameror med spårade objekt",
+      "selectGroup": "Välj grupp",
+      "noMatchingCameras": "Ingen kamera matchar din sökning"
+    },
+    "multi": {
+      "title_one": "Exportera 1 recension",
+      "title_other": "Exportera {{count}} recensioner",
+      "description": "Exportera varje vald recension. Alla exporter grupperas under ett enda ärende.",
+      "descriptionNoCase": "Exportera varje vald recension.",
+      "caseNamePlaceholder": "Granska export - {{date}}",
+      "exportButton_one": "Exportera 1 recension",
+      "exportButton_other": "Exportera {{count}} recensioner",
+      "exportingButton": "Exporterar...",
+      "toast": {
+        "started_one": "Startade 1 export. Öppnar ärendet nu.",
+        "started_other": "Startade {{count}} exporter. Öppnar ärendet nu.",
+        "startedNoCase_one": "Startade 1 export.",
+        "startedNoCase_other": "Startade {{count}} exporter.",
+        "partial": "Startade {{successful}} av {{total}} exporter. Misslyckades: {{failedItems}}",
+        "failed": "Misslyckades med att starta exporten av {{total}}. Misslyckades: {{failedItems}}"
+      }
     }
   },
   "streaming": {
@@ -111,6 +172,14 @@
       "markAsReviewed": "Markera som granskad",
       "deleteNow": "Ta bort nu",
       "markAsUnreviewed": "Markera som ogranskad"
+    },
+    "shareTimestamp": {
+      "label": "Dela tidsstämpel",
+      "title": "Dela tidsstämpel",
+      "description": "Dela en tidsstämplad URL för spelarens nuvarande position eller välj en anpassad tidsstämpel. Observera att detta inte är en offentlig delnings-URL och endast är tillgänglig för användare med åtkomst till Frigate och den här kameran.",
+      "custom": "Anpassad tidsstämpel",
+      "button": "Dela tidsstämpel-URL",
+      "shareTitle": "Frigate granskning tidsstämpel: {{camera}}"
     }
   },
   "imagePicker": {
