@@ -64,6 +64,7 @@ from frigate.util.recording_coverage import (
     plan_clip,
     resolve_coverage,
 )
+from frigate.util.time import get_normalized_tz_name
 
 logger = logging.getLogger(__name__)
 
@@ -837,7 +838,9 @@ async def vod_hour(
     parts = year_month.split("-")
     start_date = (
         datetime(int(parts[0]), int(parts[1]), day, hour, tzinfo=UTC)
-        - datetime.now(ZoneInfo(tz_name.replace(",", "/"))).utcoffset()
+        - datetime.now(
+            ZoneInfo(get_normalized_tz_name(tz_name.replace(",", "/")))
+        ).utcoffset()
     )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
