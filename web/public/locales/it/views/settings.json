@@ -212,7 +212,7 @@
         "type": {
           "zone": "zona",
           "motion_mask": "maschera di movimento",
-          "object_mask": "maschera di oggetto"
+          "object_mask": "maschera oggetto"
         },
         "revertOverride": {
           "title": "Ripristina la configurazione di base",
@@ -447,7 +447,7 @@
     "users": "Utenti",
     "frigateplus": "Frigate+",
     "enrichments": "Miglioramenti",
-    "triggers": "Inneschi",
+    "triggers": "Attivatori",
     "roles": "Ruoli",
     "cameraManagement": "Gestione della telecamera",
     "cameraReview": "Revisiona",
@@ -896,22 +896,22 @@
     "restart_required": "Riavvio richiesto (impostazioni di miglioramento modificate)"
   },
   "triggers": {
-    "documentTitle": "Inneschi",
+    "documentTitle": "Attivatori",
     "management": {
-      "title": "Inneschi",
-      "desc": "Gestisci gli inneschi per {{camera}}. Utilizza il tipo miniatura per attivare miniature simili all'oggetto tracciato selezionato e il tipo descrizione per attivare descrizioni simili al testo specificato."
+      "title": "Attivatori",
+      "desc": "Gestisci gli attivatori per {{camera}}. Utilizza il tipo miniatura per attivare miniature simili all'oggetto tracciato selezionato e il tipo descrizione per attivare descrizioni simili al testo specificato."
     },
-    "addTrigger": "Aggiungi innesco",
+    "addTrigger": "Aggiungi attivatore",
     "table": {
       "name": "Nome",
       "type": "Tipo",
       "content": "Contenuto",
       "threshold": "Soglia",
       "actions": "Azioni",
-      "noTriggers": "Nessun innesco configurato per questa telecamera.",
+      "noTriggers": "Nessun attivatore configurato per questa telecamera.",
       "edit": "Modifica",
-      "deleteTrigger": "Elimina innesco",
-      "lastTriggered": "Ultimo innesco"
+      "deleteTrigger": "Elimina attivatore",
+      "lastTriggered": "Ultimo attivatore"
     },
     "type": {
       "thumbnail": "Miniatura",
@@ -925,34 +925,34 @@
     },
     "dialog": {
       "createTrigger": {
-        "title": "Crea innesco",
-        "desc": "Crea un innesco per la telecamera {{camera}}"
+        "title": "Crea attivatore",
+        "desc": "Crea un attivatore per la telecamera {{camera}}"
       },
       "editTrigger": {
-        "title": "Modifica innesco",
-        "desc": "Modifica le impostazioni per l'innesco della telecamera {{camera}}"
+        "title": "Modifica attivatore",
+        "desc": "Modifica le impostazioni per l'attivatore della telecamera {{camera}}"
       },
       "deleteTrigger": {
-        "title": "Elimina innesco",
-        "desc": "Vuoi davvero eliminare l'innesco <strong>{{triggerName}}</strong>? Questa azione non può essere annullata."
+        "title": "Elimina attivatore",
+        "desc": "Vuoi davvero eliminare l'attivatore <strong>{{triggerName}}</strong>? Questa azione non può essere annullata."
       },
       "form": {
         "name": {
           "title": "Nome",
-          "placeholder": "Assegna un nome a questo innesco",
+          "placeholder": "Assegna un nome a questo attivatore",
           "error": {
             "minLength": "Il campo deve contenere almeno 2 caratteri.",
             "invalidCharacters": "Il campo può contenere solo lettere, numeri, caratteri di sottolineatura e trattini.",
-            "alreadyExists": "Per questa telecamera esiste già un innesco con questo nome."
+            "alreadyExists": "Per questa telecamera esiste già un attivatore con questo nome."
           },
-          "description": "Inserisci un nome o una descrizione univoca per identificare questo innesco"
+          "description": "Inserisci un nome o una descrizione univoca per identificare questo attivatore"
         },
         "enabled": {
-          "description": "Abilita o disabilita questo innesco"
+          "description": "Abilita o disabilita questo attivatore"
         },
         "type": {
           "title": "Tipo",
-          "placeholder": "Seleziona il tipo di innesco",
+          "placeholder": "Seleziona il tipo di attivatore",
           "description": "Si attiva quando viene rilevata una descrizione di un oggetto simile tracciato",
           "thumbnail": "Attiva quando viene rilevata una miniatura di un oggetto simile tracciato"
         },
@@ -960,7 +960,7 @@
           "title": "Contenuto",
           "imagePlaceholder": "Seleziona una miniatura",
           "textPlaceholder": "Inserisci il contenuto del testo",
-          "imageDesc": "Vengono visualizzate solo le 100 miniature più recenti. Se non riesci a trovare la miniatura desiderata, controlla gli oggetti precedenti in Esplora e imposta un innesco dal menu.",
+          "imageDesc": "Vengono visualizzate solo le 100 miniature più recenti. Se non riesci a trovare la miniatura desiderata, controlla gli oggetti precedenti in Esplora e imposta un attivatore dal menu.",
           "textDesc": "Inserisci il testo per attivare questa azione quando viene rilevata una descrizione simile dell'oggetto tracciato.",
           "error": {
             "required": "Il contenuto è obbligatorio."
@@ -972,11 +972,11 @@
             "min": "La soglia deve essere almeno 0",
             "max": "La soglia deve essere al massimo 1"
           },
-          "desc": "Imposta la soglia di similarità per questo innesco. Una soglia più alta indica che è necessaria una corrispondenza più vicina per attivare l'innesco."
+          "desc": "Imposta la soglia di similarità per questo attivatore. Una soglia più alta indica che è necessaria una corrispondenza più vicina per attivare l'attivatore."
         },
         "actions": {
           "title": "Azioni",
-          "desc": "Per impostazione predefinita, Frigate invia un messaggio MQTT per tutti gli inneschi. Le sottoetichette aggiungono il nome dell'innesco all'etichetta dell'oggetto. Gli attributi sono metadati ricercabili, memorizzati separatamente nei metadati dell'oggetto tracciato.",
+          "desc": "Per impostazione predefinita, Frigate invia un messaggio MQTT per tutti gli attivatori. Le sottoetichette aggiungono il nome dell'attivatore all'etichetta dell'oggetto. Gli attributi sono metadati ricercabili, memorizzati separatamente nei metadati dell'oggetto tracciato.",
           "error": {
             "min": "È necessario selezionare almeno un'azione."
           }
@@ -990,30 +990,30 @@
     },
     "toast": {
       "success": {
-        "createTrigger": "L'innesco {{name}} è stato creato correttamente.",
-        "updateTrigger": "L'innesco {{name}} è stato aggiornato correttamente.",
-        "deleteTrigger": "L'innesco {{name}} è stato eliminato correttamente."
+        "createTrigger": "L'attivatore {{name}} è stato creato correttamente.",
+        "updateTrigger": "L'attivatore {{name}} è stato aggiornato correttamente.",
+        "deleteTrigger": "L'attivatore {{name}} è stato eliminato correttamente."
       },
       "error": {
-        "createTriggerFailed": "Impossibile creare l'innesco: {{errorMessage}}",
-        "updateTriggerFailed": "Impossibile aggiornare l'innesco: {{errorMessage}}",
-        "deleteTriggerFailed": "Impossibile eliminare l'innesco: {{errorMessage}}"
+        "createTriggerFailed": "Impossibile creare l'attivatore: {{errorMessage}}",
+        "updateTriggerFailed": "Impossibile aggiornare l'attivatore: {{errorMessage}}",
+        "deleteTriggerFailed": "Impossibile eliminare l'attivatore: {{errorMessage}}"
       }
     },
     "semanticSearch": {
       "title": "La ricerca semantica è disabilitata",
-      "desc": "Per utilizzare gli inneschi, è necessario abilitare la ricerca semantica."
+      "desc": "Per utilizzare gli attivatori, è necessario abilitare la ricerca semantica."
     },
     "wizard": {
-      "title": "Crea innesco",
+      "title": "Crea attivatore",
       "step1": {
-        "description": "Configura le impostazioni di base per il tuo innesco."
+        "description": "Configura le impostazioni di base per il tuo attivatore."
       },
       "step2": {
         "description": "Imposta il contenuto che attiverà questa azione."
       },
       "step3": {
-        "description": "Configura la soglia e le azioni per questo innesco."
+        "description": "Configura la soglia e le azioni per questo attivatore."
       },
       "steps": {
         "nameAndType": "Nome e tipo",
@@ -2030,10 +2030,10 @@
       "desc": "La griglia di regioni è un algoritmo di ottimizzazione che apprende dove gli oggetti di diverse dimensioni appaiono tipicamente nel campo visivo di ciascuna telecamera. Frigate utilizza questi dati per dimensionare in modo efficiente le regioni di rilevamento. La griglia viene creata automaticamente nel tempo a partire dai dati degli oggetti tracciati.",
       "clear": "Pulisci griglia di regioni",
       "clearConfirmTitle": "Pulisci griglia di regioni",
-      "clearConfirmDesc": "La pulizia della griglia di regioni non è consigliata a meno che non si sia recentemente modificato il modello del rilevatore o la posizione fisica della telecamera, riscontrando problemi di tracciamento degli oggetti. La griglia verrà ricostruita automaticamente nel tempo man mano che gli oggetti vengono tracciati. Per rendere effettive le modifiche è necessario riavviare Frigate.",
-      "clearSuccess": "Griglia di regioni pulita con successo",
-      "clearError": "Impossibile pulire la griglia di regioni",
-      "restartRequired": "È necessario riavviare il sistema affinché le modifiche alla griglia di regioni abbiano effetto"
+      "clearConfirmDesc": "La pulizia della griglia delle regioni non è consigliata, a meno che non sia stata modificata di recente la dimensione del modello del rilevatore, oppure sia stata cambiata la posizione fisica della telecamera e si riscontrino problemi di tracciamento degli oggetti. La griglia verrà ricostruita automaticamente nel tempo man mano che gli oggetti vengono tracciati. È richiesto un riavvio di Frigate affinché le modifiche abbiano effetto.",
+      "clearSuccess": "Griglia delle regioni pulita con successo",
+      "clearError": "Impossibile pulire la griglia delle regioni",
+      "restartRequired": "È necessario riavviare il sistema affinché le modifiche alla griglia delle regioni abbiano effetto"
     }
   },
   "retainMode": {
