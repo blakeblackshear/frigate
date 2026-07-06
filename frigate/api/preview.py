@@ -5,8 +5,8 @@ import logging
 import os
 import threading
 from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 
-import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -126,7 +126,7 @@ def preview_hour(
     parts = year_month.split("-")
     start_date = (
         datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=UTC)
-        - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
+        - datetime.now(ZoneInfo(tz_name.replace(",", "/"))).utcoffset()
     )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()

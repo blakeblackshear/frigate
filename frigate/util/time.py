@@ -3,9 +3,8 @@
 import datetime
 import logging
 import math
-from zoneinfo import ZoneInfoNotFoundError
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-import pytz
 from tzlocal import get_localzone
 
 logger = logging.getLogger(__name__)
@@ -13,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def get_tz_modifiers(tz_name: str) -> tuple[str, str, float]:
     seconds_offset = (
-        datetime.datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
+        datetime.datetime.now(ZoneInfo(tz_name)).utcoffset().total_seconds()
     )
     hours_offset = int(seconds_offset / 60 / 60)
     minutes_offset = int(seconds_offset / 60 - hours_offset * 60)
@@ -26,7 +25,7 @@ def get_tomorrow_at_time(hour: int) -> datetime.datetime:
     """Returns the datetime of the following day at 2am."""
     try:
         tomorrow = datetime.datetime.now(get_localzone()) + datetime.timedelta(days=1)
-    except ZoneInfoNotFoundError:
+    except (ValueError, ZoneInfoNotFoundError):
         tomorrow = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=1)
         logger.warning(
             "Using utc for maintenance due to missing or incorrect timezone set"
@@ -84,8 +83,8 @@ def get_dst_transitions(
         continuous periods with the same UTC offset
     """
     try:
-        tz = pytz.timezone(tz_name)
-    except pytz.UnknownTimeZoneError:
+        tz = ZoneInfo(tz_name)
+    except (ValueError, ZoneInfoNotFoundError):
         # If timezone is invalid, return single period with no offset
         return [(start_time, end_time, 0)]
 
