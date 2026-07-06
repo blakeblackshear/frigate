@@ -70,12 +70,18 @@
       "queued": "Dışa aktarımlar kuyruğa alındı. İlerlemeyi dışa aktarım sayfasından görebilirsiniz.",
       "batchSuccess_one": "1 Adet dışa aktarım başlatıldı. Durum açılıyor.",
       "batchSuccess_other": "{{count}} Adet dışa aktarım başlatıldı. Durum açılıyor.",
-      "batchPartial": "{{total}} üzerinden {{successful}} adet dışa aktarım başlatıldı. Başarısız: {{failedCameras}}"
+      "batchPartial": "{{total}} üzerinden {{successful}} adet dışa aktarım başlatıldı. Başarısız: {{failedCameras}}",
+      "batchFailed": "{{total}} dışa aktarma işlemi başlatılamadı. Başarısız kameralar: {{failedCameras}}",
+      "batchQueuedSuccess_one": "1 dışa aktarım sıraya alındı.",
+      "batchQueuedSuccess_other": "{{count}} dışa aktarım sıraya alındı.",
+      "batchQueuedPartial": "{{total}} dışa aktarımdan {{successful}} tanesi sıraya alındı. Başarısız olan kameralar: {{failedCameras}}",
+      "batchQueueFailed": "{{total}} adet dışa aktarım sıraya alınamadı. Başarısız kameralar: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Dışa Aktarımı Kaydet",
       "previewExport": "Dışa Aktarımı Önizle",
-      "useThisRange": "Use This Range"
+      "useThisRange": "Use This Range",
+      "queueingExport": "Dışa aktarma sıraya alınıyor..."
     },
     "name": {
       "placeholder": "Dışa Aktarımı Adlandırın"
@@ -106,7 +112,14 @@
       "namePlaceholder": "Dışa aktarım için opsiyonel temel isim",
       "queueingButton": "Dışa aktarımlar kuyruğa alınıyor...",
       "exportButton_one": "1 Adet Kamera Dışarı Aktarıldı",
-      "exportButton_other": "{{count}} Adet Kamera Dışarı Aktarıldı"
+      "exportButton_other": "{{count}} Adet Kamera Dışarı Aktarıldı",
+      "searchOrSelectGroup": "Kamera grubu arayın veya seçin...",
+      "selectAll": "Tüm kameraları seç",
+      "clearSelection": "Seçimi kaldır",
+      "selectWithActivity": "Nesne takibi yapan kameralar",
+      "selectGroup": "Grup seç",
+      "noMatchingCameras": "Arama kriterlerinize uyan kamera bulunamadı",
+      "selectedCount": "{{selected}} / {{total}} seçilen"
     },
     "multi": {
       "title_one": "1 Adet Değerlendirme Dışarı Aktarıldı",
@@ -172,6 +185,14 @@
       "markAsReviewed": "İncelendi olarak işaretle",
       "deleteNow": "Şimdi Sil",
       "markAsUnreviewed": "Gözden geçirilmedi olarak işaretle"
+    },
+    "shareTimestamp": {
+      "label": "Zaman Damgasını Paylaş",
+      "title": "Zaman Damgasını Paylaş",
+      "description": "Mevcut oynatıcı konumuna ait zaman damgalı bir URL paylaşın veya özel bir zaman damgası seçin. Bunun herkese açık bir paylaşım URL'si olmadığını ve yalnızca Frigate ile bu kameraya erişimi olan kullanıcılar tarafından görüntülenebileceğini unutmayın.",
+      "custom": "Özel Zaman Damgası",
+      "button": "Zaman Damgalı URL'yi Paylaş",
+      "shareTitle": "Frigate İnceleme Zaman Damgası: {{camera}}"
     }
   },
   "imagePicker": {
