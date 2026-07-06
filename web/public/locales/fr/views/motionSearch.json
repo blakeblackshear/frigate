@@ -26,7 +26,9 @@
         "points_many": "{{count}} points",
         "points_other": "{{count}} points",
         "undo": "Annuler le dernier point",
-        "reset": "Réinitialiser le polygone"
+        "reset": "Réinitialiser le polygone",
+        "drawMode": "Dessiner",
+        "moveMode": "Déplacer"
     },
     "motionHeatmapLabel": "Carte thermique des mouvements",
     "dialog": {
@@ -36,6 +38,14 @@
     },
     "timeRange": {
         "title": "Plage de recherche",
-        "start": "Plage de recherche"
+        "start": "Début de la plage de recherche",
+        "end": "Fin de la plage de recherche"
+    },
+    "settings": {
+        "title": "Paramètres de recherche",
+        "parallelMode": "Mode parallèle",
+        "parallelModeDesc": "Scanner plusieurs plages d'enregistrement simultanément (plus rapide ; nécessite plus de ressources de décodage)",
+        "threshold": "Seuil de sensitivité",
+        "thresholdDesc": "Des valeurs basses détectent de plus petits changements (1-255)"
     }
 }
