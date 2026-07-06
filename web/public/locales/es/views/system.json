@@ -81,16 +81,16 @@
       "gpuInfo": {
         "vainfoOutput": {
           "title": "Salida de Vainfo",
-          "returnCode": "Código de Retorno: {{code}}",
-          "processOutput": "Salida del Proceso:",
-          "processError": "Error del Proceso:"
+          "returnCode": "Código de retorno: {{code}}",
+          "processOutput": "Salida del proceso:",
+          "processError": "Error del proceso:"
         },
         "nvidiaSMIOutput": {
-          "cudaComputerCapability": "Capacidad de Cómputo CUDA: {{cuda_compute}}",
+          "cudaComputerCapability": "Capacidad de cómputo CUDA: {{cuda_compute}}",
           "title": "Salida de Nvidia SMI",
           "driver": "Controlador: {{driver}}",
           "name": "Nombre: {{name}}",
-          "vbios": "Información de VBios: {{vbios}}"
+          "vbios": "Informe de VBios: {{vbios}}"
         },
         "toast": {
           "success": "Información de GPU copiada al portapapeles"
@@ -104,7 +104,7 @@
       },
       "gpuMemory": "Memoria de GPU",
       "npuMemory": "Memoria de NPU",
-      "npuUsage": "Uso de NPU",
+      "npuUsage": "Modo de empleo de NPU",
       "intelGpuWarning": {
         "title": "Aviso de estadísticas Intel GPU",
         "message": "Estadísticas de GPU no disponibles",
@@ -122,7 +122,7 @@
         "go2rtc": "go2rtc",
         "recording": "grabación",
         "review_segment": "revisar segmento",
-        "embeddings": "embeddings",
+        "embeddings": "empotrados",
         "audio_detector": "detector de audio"
       }
     }
@@ -165,8 +165,8 @@
       "codec": "Codec:",
       "fetching": "Obteniendo Datos de la Cámara",
       "stream": "Flujo {{idx}}",
-      "video": "Video:",
-      "fps": "FPS:",
+      "video": "Vídeo:",
+      "fps": "CPS:",
       "resolution": "Resolución:",
       "error": "Error: {{error}}",
       "unknown": "Desconocido",
@@ -174,7 +174,22 @@
       "tips": {
         "title": "Información de Sondeo de la Cámara"
       },
-      "aspectRatio": "Relación de aspecto"
+      "aspectRatio": "Relación de aspecto",
+      "keyframes": {
+        "title": "Análisis de clave fotograma",
+        "recordStream": "Flujo de grabación:",
+        "segmentLength": "Longitud de segmento en grabación:",
+        "unknown": "No pudo determinar el espaciado del fotograma.",
+        "analyzing": "Analizando fotogramas clave… {{seconds}} segundos restantes",
+        "stillAnalyzing": "Todavía analizando fotogramas clave…",
+        "keyframeCount": "Fotogramas clave observados:",
+        "observedDuration": "Duración observada:",
+        "gap": "Brecha de fotogramas clave (mín / med / máx):",
+        "recordDisabled": "La grabación está desactivada para esta cámara.",
+        "ok": "Cuadros cada ~{{seconds}}s, bueno para grabación y reproducción.",
+        "warning": "Fotograma clave escaso o variable (hueco más largo ~{{seconds}}s), probablemente un códec inteligente (H.264+/H.265+), esto no es recomendado.",
+        "error": "El intervalo entre fotogramas clave (~{{seconds}} s) supera la duración del segmento de grabación ({{segmentTime}} s). Es posible que algunos segmentos no contengan ningún fotograma clave, lo que impedirá su reproducción. Desactiva el códec inteligente (+) de la cámara o reduce el intervalo entre fotogramas clave."
+      }
     },
     "framesAndDetections": "Fotogramas / Detecciones",
     "label": {
@@ -204,9 +219,9 @@
     },
     "connectionQuality": {
       "excellent": "Excelente",
-      "poor": "Debil",
-      "title": "Calidad de la conexión",
-      "fps": "Cuadros por segundo",
+      "poor": "Pobre",
+      "title": "Calidad de Conexión",
+      "fps": "CPS",
       "expectedFps": "Cuadros por segundo esperados",
       "reconnectsLastHour": "Reconexiones (última hora)",
       "unusable": "No usable",
@@ -222,25 +237,25 @@
     "infPerSecond": "Inferencias Por Segundo",
     "embeddings": {
       "plate_recognition_speed": "Velocidad de Reconocimiento de Matrículas",
-      "face_embedding_speed": "Velocidad de Incrustación de Rostros",
-      "image_embedding_speed": "Velocidad de Incrustación de Imágenes",
-      "text_embedding_speed": "Velocidad de Incrustación de Texto",
+      "face_embedding_speed": "Velocidad de Empotrado Facial",
+      "image_embedding_speed": "Velocidad de Empotrado de Imagen",
+      "text_embedding_speed": "Velocidad de Empotrado de Texto",
       "face_recognition_speed": "Velocidad de Reconocimiento Facial",
-      "text_embedding": "Incrustación de Texto",
+      "text_embedding": "Empotrado de Texto",
       "face_recognition": "Reconocimiento Facial",
       "plate_recognition": "Reconocimiento de Matrículas",
       "yolov9_plate_detection": "Detección de Matrículas YOLOv9",
-      "image_embedding": "Incrustación de Imágenes",
+      "image_embedding": "Empotrado de Imagen",
       "yolov9_plate_detection_speed": "Velocidad de Detección de Matrículas YOLOv9",
       "review_description": "Revisión de descripción",
-      "review_description_speed": "Velocidad de revisión de la descripción",
-      "review_description_events_per_second": "Revisión de la descripción",
+      "review_description_speed": "Revisión de velocidad de descripción",
+      "review_description_events_per_second": "Revisión de Descripción",
       "object_description": "Descripción de Objeto",
-      "object_description_speed": "Velocidad de descripción de objeto",
-      "object_description_events_per_second": "Descripción de objeto",
+      "object_description_speed": "Velocidad de Descripción de Objeto",
+      "object_description_events_per_second": "Descripción de Objeto",
       "classification": "Clasificación de {{name}}",
-      "classification_speed": "Velocidad de clasificación de {{name}}",
-      "classification_events_per_second": "Clasificacion de eventos por segundo de {{name}}"
+      "classification_speed": "Velocidad de Clasificación de {{name}}",
+      "classification_events_per_second": "Clasificación de Eventos por Segundo de {{name}}"
     },
     "title": "Enriquecimientos",
     "averageInf": "Tiempo promedio de inferencia"
@@ -249,7 +264,7 @@
     "ffmpegHighCpuUsage": "{{camera}} tiene un uso elevado de CPU por FFmpeg ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} tiene un uso elevado de CPU por detección ({{detectAvg}}%)",
     "healthy": "El sistema está saludable",
-    "reindexingEmbeddings": "Reindexando incrustaciones ({{processed}}% completado)",
+    "reindexingEmbeddings": "Reindexando empotrados ({{processed}}% completado)",
     "detectIsSlow": "{{detect}} es lento ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} está desconectada",
     "detectIsVerySlow": "{{detect}} es muy lento ({{speed}} ms)",
