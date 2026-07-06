@@ -7,4 +7,4 @@ class AppTimelineHourlyQueryParameters(BaseModel):
     after: float | None = None
     before: float | None = None
     limit: int | None = 200
-    timezone: str | None = "utc"
+    timezone: str | None = "UTC"

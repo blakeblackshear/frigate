@@ -12,8 +12,8 @@ import threading
 from collections.abc import Callable
 from enum import Enum
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-import pytz  # type: ignore[import-untyped]
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
@@ -371,8 +371,8 @@ class RecordingExporter(threading.Thread):
         tz_name = self.config.ui.timezone
         if tz_name:
             try:
-                tz = pytz.timezone(tz_name)
-            except pytz.UnknownTimeZoneError:
+                tz = ZoneInfo(tz_name)
+            except (ValueError, ZoneInfoNotFoundError):
                 tz = None
             if tz is not None:
                 return datetime.datetime.fromtimestamp(timestamp, tz=tz).strftime(
@@ -533,8 +533,8 @@ class RecordingExporter(threading.Thread):
         tz: datetime.tzinfo | None = None
         if tz_name:
             try:
-                tz = pytz.timezone(tz_name)
-            except pytz.UnknownTimeZoneError:
+                tz = ZoneInfo(tz_name)
+            except (ValueError, ZoneInfoNotFoundError):
                 tz = None
         if tz is None:
             tz = datetime.UTC
