@@ -47,5 +47,6 @@
     "error": {
       "submitFrigatePlusFailed": "Не вдалося надіслати фрейм Frigate+"
     }
-  }
+  },
+  "cameraOff": "Камера вимкнена"
 }
