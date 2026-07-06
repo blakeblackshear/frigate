@@ -68,7 +68,7 @@
     "integrationObjectClassification": "Classificació de l'objecte",
     "integrationAudioTranscription": "Transcripció d'àudio",
     "cameraDetect": "Detecció d'objectes",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "Fluxos (FFmpeg)",
     "cameraRecording": "Enregistrament",
     "cameraSnapshots": "Instantànies",
     "cameraMotion": "Detecció de moviment",
@@ -1689,7 +1689,17 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "Flux {{index}}"
+      "itemTitle": "Flux {{index}}",
+      "sourceMode": {
+        "restream": "Restream (go2rtc)",
+        "manual": "Camí d'entrada manual",
+        "go2rtcStreamLabel": "flux go2rtc",
+        "go2rtcStreamPlaceholder": "Selecciona un flux go2rtc",
+        "noGo2rtcStreams": "No s'ha configurat cap flux go2rtc",
+        "go2rtcStreamSearch": "Cerca fluxos...",
+        "availableStreams": "Fluxos disponibles",
+        "noMatchingStreams": "No hi ha fluxos coincidents"
+      }
     },
     "restartRequiredField": "Reinicia requerit",
     "restartRequiredFooter": "S'ha canviat la configuració - es requereix reiniciar",
@@ -2084,6 +2094,13 @@
     },
     "onvif": {
       "autotrackingNoZones": "Autotraquejar requereix al menys una zona. Defineix una zona per aquesta cámera a Mascares/Zones, després usa'l com a requerit a la part inferior."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "No es recomanen arguments manuals d'acceleració de maquinari. Tret que existeixi un requisit específic, seleccioneu el predefinit que coincideixi amb el vostre maquinari."
+    },
+    "model": {
+      "optimizedFor320": "Frigate està optimitzada per a un model 320x320, que és la millor opció per a la majoria de configuracions. Un model 640x640 és més lent i només ajuda en escenaris específics.",
+      "inputDimensionsNotDetectResolution": "L'amplada i l'alçada del model d'entrada són les dimensions d'entrada del model de detecció d'objectes, no la resolució de detecció de la càmera. Haurien de coincidir amb les dimensions del model que esteu utilitzant - típicament una mida quadrada com 320x320 o 640x640."
     }
   },
   "modelSize": {

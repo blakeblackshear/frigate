@@ -7,7 +7,7 @@
         "description": "Paràmetres del FFmpeg que inclouen la ruta dels binaris, args, opcions de hwaccel i args de sortida per rol.",
         "path": {
             "label": "Ruta FFmpeg",
-            "description": "Ruta al binari FFmpeg a usar o un àlies de versió («5.0» o «7.0»)."
+            "description": "Ruta al binari FFmpeg a usar o un àlies de versió («7.0» o «8.0»)."
         },
         "global_args": {
             "label": "Arguments globals del FFmpeg",
@@ -2018,7 +2018,7 @@
         },
         "listen": {
             "label": "Tipus d'escoltes",
-            "description": "Llista de tipus d'esdeveniment d'àudio a detectar (per exemple: escorça, focarmalarma, crit, parla, crida)."
+            "description": "Llista de tipus d'esdeveniment d'àudio a detectar (per exemple: escorça, focarmalarma, parla, crida)."
         },
         "filters": {
             "label": "Filtres d'àudio",

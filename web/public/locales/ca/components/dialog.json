@@ -24,6 +24,9 @@
         },
         "state": {
           "submitted": "Enviat"
+        },
+        "toast": {
+          "error": "No s'ha pogut enviar a Frigate+. Si us plau, comproveu la vostra connexió de xarxa i torneu-ho a provar."
         }
       }
     },
@@ -107,7 +110,14 @@
       "queueingButton": "S'estan posant a la cua les exportacions...",
       "exportButton_one": "Exporta 1 càmera",
       "exportButton_many": "Exporta {{count}} càmeres",
-      "exportButton_other": "Exporta {{count}} càmeres"
+      "exportButton_other": "Exporta {{count}} càmeres",
+      "searchOrSelectGroup": "Cerca, o selecciona un grup de càmeres...",
+      "selectAll": "Selecciona totes les càmeres",
+      "clearSelection": "Neteja la selecció",
+      "selectWithActivity": "Càmeres amb objectes rastrejats",
+      "selectGroup": "Selecciona un grup",
+      "noMatchingCameras": "No hi ha càmeres que coincideixin amb la cerca",
+      "selectedCount": "{{selected}} / {{total}} seleccionats"
     },
     "multi": {
       "title_one": "Exporta {{count}} ressenyes",
