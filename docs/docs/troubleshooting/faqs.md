@@ -147,7 +147,7 @@ Frigate's object detection relies on a machine learning [model](../frigate/gloss
 
 **Train or fine-tune a model with your own images.** The most durable fix is to improve the model itself. The biggest gains usually come from fine-tuning a model on images from your own cameras so it learns your specific scene. Some tools are freely available, and [Frigate+](https://frigate.video/plus) is a paid option that does this - models are trained on security-camera footage and can be fine-tuned on images you submit from your own setup. When Frigate mislabels something, open the tracked object in Explore, select the **Snapshot** tab, and use **Submit to Frigate+** to send the example with the correct label (or mark it as a [false positive](../frigate/glossary.md#false-positive)). Once you've submitted examples and [requested a model](../plus/first_model.md), the retrained model will be more accurate for your cameras. See [Submitting examples to Frigate+](../integrations/plus.md#submit-examples) for the full workflow.
 
-**Suppress the misidentification with filters.** Without Frigate+ you can't retrain the model, but you can stop a specific false positive from being tracked:
+**Suppress the misidentification with filters.** You can use filters to stop a specific false positive from being tracked:
 
 - Tune `min_score` / `threshold`, or add `min_area` / `max_area` / `min_ratio` / `max_ratio` filters — see [Object Filters](../configuration/object_filters.md).
 - If the false positive is always in the same fixed spot (like a statue or mailbox that reads as a person), add an [object filter mask](../configuration/masks.md#object-filter-masks) over that location.
