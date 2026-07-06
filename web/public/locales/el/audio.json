@@ -61,5 +61,14 @@
   "yodeling": "Λαρυγγισμός",
   "chant": "Ύμνος",
   "mantra": "Μάντρα",
-  "synthetic_singing": "Συνθετικό Τραγούδι"
+  "synthetic_singing": "Συνθετικό Τραγούδι",
+  "rapping": "Χτύπημα",
+  "humming": "Μουρμουρητό",
+  "groan": "Aναστεναγμός",
+  "grunt": "Μούγκρισμα",
+  "gasp": "Ανάσα",
+  "pant": "Λαχάνιασμα",
+  "snort": "Ρουθούνισμα",
+  "cough": "Βήχας",
+  "throat_clearing": "Ξεροβήξιμο"
 }
