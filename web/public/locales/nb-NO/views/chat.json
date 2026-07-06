@@ -65,5 +65,8 @@
         "active": "Resonnerer…",
         "show": "Vis resonnering",
         "hide": "Skjul resonnering"
+    },
+    "thinking": {
+        "toggle": "Aktiver/deaktiver tenking"
     }
 }

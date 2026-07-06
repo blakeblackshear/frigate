@@ -48,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "Kunne ikke sende bildet til Frigate+"
     }
-  }
+  },
+  "cameraOff": "Kameraet er av"
 }

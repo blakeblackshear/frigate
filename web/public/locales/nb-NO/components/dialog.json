@@ -34,6 +34,9 @@
           "ask_an": "Er dette objekt en <code>{{label}}</code>?",
           "ask_a": "Er dette objektet en <code>{{label}}</code>?",
           "ask_full": "Er dette objekt en <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "toast": {
+          "error": "Kunne ikke sende til Frigate+. Vennligst sjekk nettverksforbindelsen din og prøv igjen."
         }
       }
     },
@@ -112,7 +115,14 @@
       "detectionCount_one": "1 sporet objekt",
       "detectionCount_other": "{{count}} sporede objekter",
       "exportButton_one": "Eksporter 1 kamera",
-      "exportButton_other": "Eksporter {{count}} kameraer"
+      "exportButton_other": "Eksporter {{count}} kameraer",
+      "searchOrSelectGroup": "Søk, eller velg en kameragruppe...",
+      "selectAll": "Velg alle kameraer",
+      "clearSelection": "Nullstill valg",
+      "selectWithActivity": "Kameraer med sporede objekter",
+      "selectGroup": "Velg gruppe",
+      "noMatchingCameras": "Ingen kameraer samsvarer med søket ditt",
+      "selectedCount": "{{selected}} / {{total}} valgt"
     },
     "multi": {
       "description": "Eksporter hver valgte inspeksjon. Alle eksporter vil bli gruppert under én sak.",

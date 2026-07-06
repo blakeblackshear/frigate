@@ -67,7 +67,7 @@
         },
         "listen": {
             "label": "Lyttetyper",
-            "description": "Liste over typer lydhendelser som skal detekteres (f.eks. bjeff, brannalarm, skrik, tale, rop)."
+            "description": "Liste over typer lydhendelser som skal detekteres (f.eks. bjeff, brannalarm, tale, rop)."
         },
         "filters": {
             "label": "Lydfiltre",
@@ -164,11 +164,11 @@
         }
     },
     "ffmpeg": {
-        "label": "FFmpeg",
+        "label": "Strømmer (FFmpeg)",
         "description": "FFmpeg-innstillinger, inkludert sti til binærfil, argumenter, alternativer for maskinvareakselerasjon og utdata-argumenter per rolle.",
         "path": {
             "label": "FFmpeg-sti",
-            "description": "Sti til FFmpeg-binærfilen som skal brukes, eller et versjonsalias (\"5.0\" eller \"7.0\")."
+            "description": "Sti til FFmpeg-binærfilen som skal brukes, eller et versjonsalias (\"7.0\" eller \"8.0\")."
         },
         "global_args": {
             "label": "Globale FFmpeg-argumenter",
@@ -484,6 +484,9 @@
             "max_concurrent": {
                 "description": "Maksimalt antall eksportjobber som kan behandles samtidig.",
                 "label": "Maksimalt antall samtidige eksporter"
+            },
+            "chapters": {
+                "label": "Kapittelmetadata som skal bygges inn i eksporterte opptak"
             }
         },
         "preview": {
@@ -674,7 +677,7 @@
             "label": "Effekt for tidsstempel",
             "description": "Visuell effekt for tidsstempelteksten (none, solid, shadow)."
         },
-        "description": "Stilalternativer for tidsstempler i strømmen, brukt på opptak og stillbilder."
+        "description": "Stilalternativer for tidsstempler brukt på stillbilder og i Feilsøkingsvisning."
     },
     "audio_transcription": {
         "label": "Lydtranskripsjon",
@@ -870,6 +873,10 @@
         "order": {
             "description": "Numerisk rekkefølge for sortering av kameraet i grensesnittet; høyere tall vises senere.",
             "label": "Rekkefølge i UI"
+        },
+        "review": {
+            "description": "Velg om dette kameraet skal være synlig i inspeksjonen (inspeksjonssiden og dens kamerafilter, bevegelsesinspeksjon og historikkvisning).",
+            "label": "Vis i inspeksjon"
         }
     },
     "webui_url": {
