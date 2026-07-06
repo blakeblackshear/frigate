@@ -74,7 +74,7 @@ def _is_valid_host(host: str) -> bool:
 
 @router.get("/go2rtc/streams", dependencies=[Depends(allow_any_authenticated())])
 async def go2rtc_streams(request: Request):
-    r = requests.get("http://127.0.0.1:1984/api/streams")
+    r = await asyncio.to_thread(requests.get, "http://127.0.0.1:1984/api/streams")
     if not r.ok:
         logger.error("Failed to fetch streams from go2rtc")
         return JSONResponse(
@@ -1285,7 +1285,8 @@ async def delete_camera(
 
     # Best-effort go2rtc stream removal
     try:
-        requests.delete(
+        await asyncio.to_thread(
+            requests.delete,
             "http://127.0.0.1:1984/api/streams",
             params={"src": camera_name},
             timeout=5,
