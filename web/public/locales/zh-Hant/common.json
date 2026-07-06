@@ -70,7 +70,7 @@
     "inProgress": "處理中",
     "invalidStartTime": "無效的起始時間",
     "invalidEndTime": "無效的結束時間",
-    "never": "從不"
+    "never": "永不"
   },
   "unit": {
     "speed": {
@@ -307,7 +307,7 @@
     "internalID": "在Frigate 設定檔和資料庫使用的內部ID"
   },
   "information": {
-    "pixels": "{area}}像素"
+    "pixels": "{{area}} 像素"
   },
   "no_items": "沒有項目",
   "validation_errors": "驗證錯誤",

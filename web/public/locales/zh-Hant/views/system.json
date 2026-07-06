@@ -162,7 +162,7 @@
     "info": {
       "aspectRatio": "長寬比",
       "cameraProbeInfo": "{{camera}} 的詳細資訊",
-      "streamDataFromFFPROBE": "串流資料是透過 <code>ffprobe</code>取得。",
+      "streamDataFromFFPROBE": "串流資料是透過 <code>ffprobe</code> 取得。",
       "fetching": "正在讀取鏡頭資訊",
       "stream": "串流 {{idx}}",
       "video": "影片：",
@@ -174,6 +174,21 @@
       "error": "錯誤：{{error}}",
       "tips": {
         "title": "鏡頭詳細資訊"
+      },
+      "keyframes": {
+        "title": "關鍵幀分析",
+        "analyzing": "正在分析關鍵幀... 剩餘 {{seconds}} 秒",
+        "stillAnalyzing": "仍在分析關鍵幀...",
+        "recordStream": "錄影串流：",
+        "keyframeCount": "偵測到的關鍵幀：",
+        "observedDuration": "觀測持續時間：",
+        "gap": "關鍵幀間隔 (最小 / 平均 / 最大)：",
+        "segmentLength": "錄影片段長度：",
+        "ok": "每約 {{seconds}} 秒一個關鍵幀，適合錄影與回放。",
+        "warning": "關鍵幀稀疏或不固定（最長間隔約 {{seconds}} 秒），可能使用了智慧編碼（H.264+/H.265+），不建議這樣設定。",
+        "error": "關鍵幀間隔（~{{seconds}} 秒）超過了錄影片段長度（{{segmentTime}} 秒）。某些片段可能沒有關鍵幀，這會導致回放中斷。請停用攝影機上的智慧/+編碼，或縮短其關鍵幀間隔。",
+        "unknown": "無法確定關鍵幀間隔。",
+        "recordDisabled": "此攝影機已停用錄影功能。"
       }
     },
     "framesAndDetections": "幀數 / 偵測數",
