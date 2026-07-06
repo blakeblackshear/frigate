@@ -457,7 +457,7 @@ def serialize(vector: list[float] | np.ndarray | float, pack: bool = True) -> by
         else:
             return vector
     except struct.error as e:
-        raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}")
+        raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}") from e
 
 
 def deserialize(bytes_data: bytes) -> list[float]:

@@ -14,7 +14,7 @@ try:
     with open("/config/conv2rknn.yaml") as config_file:
         configuration = yaml.safe_load(config_file)
 except FileNotFoundError:
-    raise Exception("Please place a config file at /config/conv2rknn.yaml")
+    raise Exception("Please place a config file at /config/conv2rknn.yaml") from None
 
 if configuration["config"] != None:
     rknn_config = configuration["config"]
@@ -31,7 +31,7 @@ if "soc" not in configuration:
         with open("/proc/device-tree/compatible") as file:
             soc = file.read().split(",")[-1].strip("\x00")
     except FileNotFoundError:
-        raise Exception("Make sure to run docker in privileged mode.")
+        raise Exception("Make sure to run docker in privileged mode.") from None
 
     configuration["soc"] = [
         soc,

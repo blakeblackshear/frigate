@@ -41,7 +41,7 @@ class Service(ABC):
         try:
             return self.__manager
         except AttributeError:
-            raise RuntimeError("Cannot access associated service manager")
+            raise RuntimeError("Cannot access associated service manager") from None
 
     def start(
         self,

@@ -303,7 +303,7 @@ class HailoDetector(DetectionApi):
             urllib.request.urlretrieve(url, destination)
             logger.debug(f"Downloaded model to {destination}")
         except Exception as e:
-            raise RuntimeError(f"Failed to download model from {url}: {str(e)}")
+            raise RuntimeError(f"Failed to download model from {url}: {str(e)}") from e
 
     def check_and_prepare(self) -> str:
         if not os.path.exists(self.cache_dir):
@@ -349,7 +349,7 @@ class HailoDetector(DetectionApi):
             if not self.inference_thread.is_alive():
                 raise RuntimeError(
                     "HailoRT inference thread has stopped, restart required."
-                )
+                ) from None
 
             return np.zeros((20, 6), dtype=np.float32)
 

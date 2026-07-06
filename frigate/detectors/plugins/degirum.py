@@ -46,7 +46,7 @@ class DGDetector(DetectionApi):
         try:
             import degirum as dg
         except ModuleNotFoundError:
-            raise ImportError("Unable to import DeGirum detector.")
+            raise ImportError("Unable to import DeGirum detector.") from None
 
         self._queue = queue.Queue()
         self._zoo = dg.connect(

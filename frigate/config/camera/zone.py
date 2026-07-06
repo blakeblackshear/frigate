@@ -146,7 +146,7 @@ class ZoneConfig(BaseModel):
             except ValueError:
                 raise ValueError(
                     f"Invalid coordinates found in configuration file. Coordinates must be relative (between 0-1): {coordinates}"
-                )
+                ) from None
 
             if explicit:
                 self.coordinates = ",".join(
@@ -175,7 +175,7 @@ class ZoneConfig(BaseModel):
             except ValueError:
                 raise ValueError(
                     f"Invalid coordinates found in configuration file. Coordinates must be relative (between 0-1): {coordinates}"
-                )
+                ) from None
 
             if explicit:
                 self.coordinates = ",".join(

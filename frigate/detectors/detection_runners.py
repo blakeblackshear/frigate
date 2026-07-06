@@ -491,7 +491,7 @@ class RKNNModelRunner(BaseModelRunner):
 
         except ImportError:
             logger.error("RKNN Lite not available")
-            raise ImportError("RKNN Lite not available")
+            raise ImportError("RKNN Lite not available") from None
         except Exception as e:
             logger.error(f"Error loading RKNN model: {e}")
             raise

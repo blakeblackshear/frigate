@@ -61,7 +61,7 @@ class MemryXDetector(DetectionApi):
         except ModuleNotFoundError:
             raise ImportError(
                 "MemryX SDK is not installed. Install it and set up MIX environment."
-            )
+            ) from None
             return
 
         # Initialize stop_event as None, will be set later by set_stop_event()

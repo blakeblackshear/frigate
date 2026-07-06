@@ -255,7 +255,7 @@ class EmbeddingsContext:
             sanitized_old_name = sanitize_filename(old_name, replacement_text="_")
             sanitized_new_name = sanitize_filename(new_name, replacement_text="_")
         except ValidationError as e:
-            raise ValueError(f"Invalid face name: {str(e)}")
+            raise ValueError(f"Invalid face name: {str(e)}") from e
 
         if not regex.match(valid_name_pattern, old_name):
             raise ValueError(f"Invalid old face name: {old_name}")

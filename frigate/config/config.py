@@ -292,7 +292,7 @@ def verify_recording_segments_setup_with_reasonable_time(
         raise ValueError(
             f"Camera {camera_config.name} has no segment_time in \
                          recording output args, segment args are required for record."
-        )
+        ) from None
 
     if int(record_args[seg_arg_index + 1]) > 60:
         raise ValueError(
