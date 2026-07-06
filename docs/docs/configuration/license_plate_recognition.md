@@ -680,6 +680,7 @@ lpr:
    - You may need to adjust your `detection_threshold` if your plates are not being detected.
 
 4. Ensure the characters on detected plates are being _recognized_.
+   - Check the **Plate recognition** inference time in Enrichment metrics (<NavPath path="System metrics > Enrichments" />). High inference times (> 100ms) could lead to poor recognition results, especially for dedicated LPR cameras where the plate crosses the frame quickly.
    - Enable `debug_save_plates` to save images of detected text on plates to the clips directory (`/media/frigate/clips/lpr`). Ensure these images are readable and the text is clear.
    - Watch the debug view to see plates recognized in real-time. For non-dedicated LPR cameras, the `car` or `motorcycle` label will change to the recognized plate when LPR is enabled and working.
    - Adjust `recognition_threshold` settings per the suggestions [above](#advanced-configuration).

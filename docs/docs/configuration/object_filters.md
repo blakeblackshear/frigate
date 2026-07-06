@@ -7,7 +7,7 @@ import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
-There are several types of object filters that can be used to reduce false positive rates.
+There are several types of object filters that can be used to reduce [false positive](/frigate/glossary#false-positive) rates.
 
 ## Object Scores
 
@@ -144,8 +144,8 @@ cameras:
 
 ### Zones
 
-[Required zones](/configuration/zones.md) can be a great tool to reduce false positives that may be detected in the sky or other areas that are not of interest. The required zones will only create tracked objects for objects that enter the zone.
+[Required zones](/configuration/zones.md#restricting-alerts-and-detections-to-specific-zones) can be a great tool to reduce false positives that may be detected in the sky or other areas that are not of interest. The required zones will only create tracked objects for objects that enter the zone.
 
 ### Object Masks
 
-[Object Filter Masks](/configuration/masks) are a last resort but can be useful when false positives are in the relatively same place but can not be filtered due to their size or shape. Object filter masks can be configured in <NavPath path="Settings > Camera configuration > Masks / Zones" />.
+[Object Filter Masks](/configuration/masks#object-filter-masks) are a last resort but can be useful when false positives are in the relatively same place but can not be filtered due to their size or shape. Object filter masks can be configured in <NavPath path="Settings > Camera configuration > Masks / Zones" />.

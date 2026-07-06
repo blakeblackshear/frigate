@@ -125,11 +125,11 @@ cameras:
       height: 720
 ```
 
-### Why does Frigate keep creating new events for my parked car?
+### Why does Frigate keep creating new tracked objects for my parked car?
 
-Stationary tracking is designed to _prevent_ this — a parked car should stay one tracked object and not generate new events. If you're getting repeated events for the same car, it's likely that Frigate is losing the tracked object and re-detecting it as a new one.
+Stationary tracking is designed to _prevent_ this — a parked car should remain a single tracked object rather than generating new ones. If you're repeatedly getting new tracked objects for the same car, it's likely that Frigate is losing the object and re-detecting it as a new one.
 
-Open one of the events in Explore → **Tracking Details**. If the detection scores are low (< 70% or so), the model isn't confident the parked car is a car. This is common with the free [COCO-trained](https://cocodataset.org/#explore) object detection models on steep/top-down angles, partially occluded cars, foliage, or low-light footage. When detections fall below `min_score` for too many frames the tracker loses the object, and the next confident frame creates a brand new one.
+Open one of the tracked objects in Explore → **Tracking Details**. If the detection scores are low (< 70% or so), the model isn't confident the parked car is a car. This is common with the free [COCO-trained](https://cocodataset.org/#explore) object detection models on steep/top-down angles, partially occluded cars, foliage, or low-light footage. When detections fall below `min_score` for too many frames the tracker loses the object, and the next confident frame creates a brand new one.
 
 What helps:
 
@@ -140,3 +140,16 @@ What helps:
 - **Filter impossible locations** with [object filter masks](../configuration/masks.md#object-filter-masks) if cars are being detected on rooftops, treetops, etc.
 
 See [Object Filters](../configuration/object_filters.md) for more on tuning `min_score` and `threshold` — note that raising them too high will make this exact problem worse.
+
+### How do I correct Frigate when it detects something as the wrong object?
+
+Frigate's object detection relies on a machine learning [model](../frigate/glossary.md#model), and the free [COCO-trained](https://cocodataset.org/#explore) models that ship with Frigate can misidentify objects in scenes they weren't trained on. There are two ways to handle this, depending on whether you want to _teach_ the model or just _suppress_ the bad result.
+
+**Train or fine-tune a model with your own images.** The most durable fix is to improve the model itself. The biggest gains usually come from fine-tuning a model on images from your own cameras so it learns your specific scene. Some tools are freely available, and [Frigate+](https://frigate.video/plus) is a paid option that does this - models are trained on security-camera footage and can be fine-tuned on images you submit from your own setup. When Frigate mislabels something, open the tracked object in Explore, select the **Snapshot** tab, and use **Submit to Frigate+** to send the example with the correct label (or mark it as a [false positive](../frigate/glossary.md#false-positive)). Once you've submitted examples and [requested a model](../plus/first_model.md), the retrained model will be more accurate for your cameras. See [Submitting examples to Frigate+](../integrations/plus.md#submit-examples) for the full workflow.
+
+**Suppress the misidentification with filters.** You can use filters to stop a specific false positive from being tracked:
+
+- Tune `min_score` / `threshold`, or add `min_area` / `max_area` / `min_ratio` / `max_ratio` filters — see [Object Filters](../configuration/object_filters.md).
+- If the false positive is always in the same fixed spot (like a statue or mailbox that reads as a person), add an [object filter mask](../configuration/masks.md#object-filter-masks) over that location.
+
+Filters and masks only hide the incorrect result - they don't teach Frigate what the object actually is. For that, fine-tune your own model or use Frigate+.

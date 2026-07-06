@@ -15,7 +15,7 @@ A property detected on an [object](#object) that exists alongside its [label](#l
 
 ## Bounding Box
 
-A box returned by the object detection [model](#model) that outlines a detected [object](#object) in the frame. In the Debug view, bounding boxes are colored by object [label](#label).
+A box returned by the object detection [model](#model) that outlines a detected [object](#object) in the frame. In the [Debug view](/usage/live#the-single-camera-view), bounding boxes are colored by object [label](#label).
 
 ### Bounding Box Colors
 

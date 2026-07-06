@@ -235,3 +235,9 @@ When you delete a base zone or mask in the Frigate UI, any profile overrides for
 ### Why are some settings missing when I configure a profile override?
 
 Fields that require a Frigate restart to take effect cannot be overridden by profiles, since profiles are applied at runtime without restarting. Those fields are hidden when editing a profile override and can only be changed on the base configuration.
+
+### Can I schedule profiles to be enabled or disabled at certain times?
+
+Not within Frigate itself. Frigate is an NVR, not an automation platform, so it intentionally does not include a scheduler for activating profiles. Instead, activate profiles from an automation platform that already handles time- and event-based triggers well, such as [Home Assistant](https://www.home-assistant.io/) or [Node-RED](https://nodered.org/). These integrate with Frigate and give you far more robust and flexible scheduling than a built-in scheduler could.
+
+If you prefer something lightweight, a simple script driven by a cron job that toggles profiles on a schedule works too.
