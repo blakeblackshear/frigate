@@ -250,7 +250,7 @@ class TestHttpReview(BaseTestHttp):
                 "cameras": "front_door",
                 "labels": "all",
                 "zones": "all",
-                "timezone": "utc",
+                "timezone": "UTC",
             }
             response = client.get("/review/summary", params=params)
             assert response.status_code == 200

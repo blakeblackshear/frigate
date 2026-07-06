@@ -2087,7 +2087,7 @@ paths:
           required: false
           schema:
             type: string
-            default: utc
+            default: UTC
             title: Timezone
       responses:
         '200':
@@ -3129,7 +3129,7 @@ paths:
             anyOf:
               - type: string
               - type: 'null'
-            default: utc
+            default: UTC
             title: Timezone
       responses:
         '200':
@@ -4227,7 +4227,7 @@ paths:
             anyOf:
               - type: string
               - type: 'null'
-            default: utc
+            default: UTC
             title: Timezone
       responses:
         '200':
@@ -4479,7 +4479,7 @@ paths:
             anyOf:
               - type: string
               - type: 'null'
-            default: utc
+            default: UTC
             title: Timezone
         - name: min_score
           in: query
@@ -4559,7 +4559,7 @@ paths:
             anyOf:
               - type: string
               - type: 'null'
-            default: utc
+            default: UTC
             title: Timezone
         - name: has_clip
           in: query
@@ -6854,7 +6854,7 @@ paths:
           required: false
           schema:
             type: string
-            default: utc
+            default: UTC
             title: Timezone
         - name: cameras
           in: query
@@ -6904,7 +6904,7 @@ paths:
           required: false
           schema:
             type: string
-            default: utc
+            default: UTC
             title: Timezone
       responses:
         '200':

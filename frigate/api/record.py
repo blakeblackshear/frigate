@@ -120,7 +120,7 @@ def all_recordings_summary(
 @router.get(
     "/{camera_name}/recordings/summary", dependencies=[Depends(require_camera_access)]
 )
-async def recordings_summary(camera_name: str, timezone: str = "utc"):
+async def recordings_summary(camera_name: str, timezone: str = "UTC"):
     """Returns hourly summary for recordings of given camera"""
 
     time_range_query = (
