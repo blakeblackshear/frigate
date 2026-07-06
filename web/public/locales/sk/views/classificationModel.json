@@ -58,7 +58,7 @@
   },
   "renameCategory": {
     "title": "Premenovať Triedu",
-    "desc": "Zadajte nový názov pre {{name}}. Budete musieť model pretrénovať, aby sa zmena názvu prejavila."
+    "desc": "Zadajte nové meno pre {{name}}. Budete musieť model pretrénovať, aby sa zmena názvu prejavila."
   },
   "description": {
     "invalidName": "Neplatné meno. Mená môžu obsahovať iba písmená, čísla, medzery, apostrofy, podčiarkovníky a spojovníky."

@@ -18,7 +18,7 @@
     "enrichments": "Obohatenia",
     "cameras": "Nastavenia kamier",
     "masksAndZones": "Masky / Zóny",
-    "motionTuner": "Ladič detekcie pohybu",
+    "motionTuner": "Ladenie detekcie pohybu",
     "debug": "Ladenie",
     "users": "Uživatelia",
     "notifications": "Notifikacie",
@@ -26,7 +26,8 @@
     "triggers": "Spúšťače",
     "roles": "Roly",
     "cameraManagement": "Manažment",
-    "cameraReview": "Recenzia"
+    "cameraReview": "Recenzia",
+    "profiles": "Profily"
   },
   "dialog": {
     "unsavedChanges": {
