@@ -14,5 +14,6 @@
     "attachment_chip_remove": "Melléklet eltávolítása",
     "open_in_explore": "Megnyitás Böngészőben",
     "attachment_picker_paste_label": "Vagy illeszd be az esemény ID-t",
-    "attachment_picker_attach": "Melléklet"
+    "attachment_picker_attach": "Melléklet",
+    "arguments": "Argumentumok:"
 }
