@@ -31,6 +31,10 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 
 [Frigate Notify](https://github.com/0x2142/frigate-notify) is a simple app designed to send notifications from Frigate to your favorite platforms. Intended to be used with standalone Frigate installations - Home Assistant not required, MQTT is optional but recommended.
 
+## [Frigate Notify Alert](https://github.com/Sysoev86/frigate-notify-alert)
+
+[Frigate Notify Alert](https://github.com/Sysoev86/frigate-notify-alert) sends Frigate events to Telegram as a photo + video media group. It supports multiple camera groups (each notifying its own chat), optional zone filtering (notify only when an object enters a chosen zone), and in-chat buttons to pause notifications for a set time. Works with standalone Frigate over MQTT; Home Assistant not required.
+
 ## [Frigate Snap-Sync](https://github.com/thequantumphysicist/frigate-snap-sync/)
 
 [Frigate Snap-Sync](https://github.com/thequantumphysicist/frigate-snap-sync/) is a program that works in tandem with Frigate. It responds to Frigate when a snapshot or a review is made (and more can be added), and uploads them to one or more remote server(s) of your choice.
