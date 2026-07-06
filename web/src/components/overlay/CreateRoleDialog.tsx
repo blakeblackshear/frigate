@@ -53,9 +53,13 @@ export default function CreateRoleDialog({
   const { t } = useTranslation(["views/settings"]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const cameras = Object.keys(config.cameras || {}).filter(
-    (name) => !isReplayCamera(name),
-  );
+  const cameras = Object.keys(config.cameras || {})
+    .filter((name) => !isReplayCamera(name))
+    .sort(
+      (a, b) =>
+        (config.cameras[a]?.ui?.order ?? 0) -
+        (config.cameras[b]?.ui?.order ?? 0),
+    );
 
   const existingRoles = Object.keys(config.auth?.roles || {});
 

@@ -64,7 +64,6 @@ export default function Step2StateArea({
 
     const selectedCameraNames = cameraAreas.map((ca) => ca.camera);
     return Object.entries(config.cameras)
-      .sort()
       .filter(
         ([name, cam]) =>
           cam.enabled &&
@@ -72,6 +71,7 @@ export default function Step2StateArea({
           !isReplayCamera(name) &&
           !selectedCameraNames.includes(name),
       )
+      .sort(([, a], [, b]) => a.ui.order - b.ui.order)
       .map(([name]) => ({
         name,
         displayName: resolveCameraName(config, name),

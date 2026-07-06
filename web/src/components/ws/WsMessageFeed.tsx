@@ -169,7 +169,7 @@ export default function WsMessageFeed({
         const cam = config.cameras[name];
         return !isReplayCamera(name) && cam.enabled_in_config;
       })
-      .sort();
+      .sort((a, b) => config.cameras[a].ui.order - config.cameras[b].ui.order);
   }, [config]);
 
   const filteredMessages = useMemo(() => {
