@@ -32,6 +32,9 @@
           "ask_a": "这个目标/物体是 <code>{{label}}</code> 吗？",
           "ask_an": "这个目标/物体是 <code>{{label}}</code> 吗？",
           "ask_full": "这个目标/物体是 <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) 吗？"
+        },
+        "toast": {
+          "error": "提交至 Frigate+ 失败，请检查您的网络连接并重试。"
         }
       }
     },
@@ -105,7 +108,14 @@
       "nameLabel": "导出名称",
       "namePlaceholder": "这些导出文件的可选基础名称",
       "queueingButton": "正在加入导出队列…",
-      "exportButton_other": "导出 {{count}} 个摄像头"
+      "exportButton_other": "导出 {{count}} 个摄像头",
+      "searchOrSelectGroup": "搜索或选择摄像头组…",
+      "selectAll": "选择所有摄像头",
+      "clearSelection": "清空选择",
+      "selectWithActivity": "包含追踪目标的摄像头",
+      "selectGroup": "选择组",
+      "noMatchingCameras": "没有匹配搜索的摄像头",
+      "selectedCount": "{{selected}} / {{total}} 个"
     },
     "multi": {
       "title_other": "导出 {{count}} 个核查",
