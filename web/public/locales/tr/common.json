@@ -36,7 +36,7 @@
     "h": "{{time}} s",
     "yr": "{{time}} yıl",
     "mo": "{{time}} ay",
-    "untilForTime": "{{time}}'a kadar",
+    "untilForTime": "{{time}} saatine kadar",
     "pm": "ÖS",
     "am": "ÖÖ",
     "d": "{{time}} gün",
@@ -192,7 +192,9 @@
       "gl": "Galego (Galiçyaca)",
       "id": "Bahasa Indonesia (Endonezce)",
       "ur": "اردو (Urduca)",
-      "hr": "Hrvatski (Hırvatça)"
+      "hr": "Hrvatski (Hırvatça)",
+      "zhHant": "繁體中文 (Geleneksel Çince)",
+      "bs": "Bosanski (Boşnakça)"
     },
     "withSystem": "Sistem",
     "theme": {
@@ -241,7 +243,8 @@
     "classification": "Sınıflandırma",
     "profiles": "Profiller",
     "actions": "Eylemler",
-    "chat": "Sohbet"
+    "chat": "Sohbet",
+    "features": "Özellikler"
   },
   "label": {
     "back": "Geri",
@@ -324,5 +327,8 @@
     "pixels": "{{area}}px"
   },
   "no_items": "Öge bulunmuyor",
-  "validation_errors": "Doğrulama Hataları"
+  "validation_errors": "Doğrulama Hataları",
+  "credentialField": {
+    "savedPlaceholder": "Kaydedildi — mevcut haliyle kalması için boş bırakın"
+  }
 }

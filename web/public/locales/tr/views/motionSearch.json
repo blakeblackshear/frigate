@@ -1,1 +1,10 @@
-{}
+{
+    "newSearch": "Yeni Arama",
+    "clearResults": "Sonuçları Temizle",
+    "dialog": {
+        "cameraLabel": "Kamera"
+    },
+    "timeRange": {
+        "end": "Bitiş Zamanı"
+    }
+}
