@@ -29,7 +29,7 @@
         },
         "listen": {
             "label": "Tipuri ascultate",
-            "description": "Lista de evenimente audio de detectat (ex: lătrat, alarmă_incendiu, țipăt, vorbire)."
+            "description": "Lista de evenimente audio de detectat (ex: lătrat, alarmă_incendiu, vorbire)."
         },
         "filters": {
             "label": "Filtre audio",
@@ -152,11 +152,11 @@
         }
     },
     "ffmpeg": {
-        "label": "FFmpeg",
-        "description": "Setări FFmpeg: cale binar, argumente, accelerare hardware și ieșiri per rol.",
+        "label": "Stream-uri (FFmpeg)",
+        "description": "Intrările stream-ului camerei și opțiunile FFmpeg, inclusiv calea către binar, argumentele, hwaccel și argumentele de ieșire per rol.",
         "path": {
             "label": "Cale FFmpeg",
-            "description": "Calea către binarul FFmpeg sau un alias de versiune (\"5.0\" sau \"7.0\")."
+            "description": "Calea către binarul FFmpeg sau un alias de versiune (\"7.0\" sau \"8.0\")."
         },
         "global_args": {
             "label": "Argumente globale FFmpeg",

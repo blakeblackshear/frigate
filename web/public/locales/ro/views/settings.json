@@ -69,7 +69,7 @@
     "integrationObjectClassification": "Clasificare obiecte",
     "integrationAudioTranscription": "Transcriere audio",
     "cameraDetect": "Detecție obiecte",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "Stream-uri (FFmpeg)",
     "cameraRecording": "Înregistrare",
     "cameraSnapshots": "Snapshot-uri",
     "cameraMotion": "Detecție mișcare",
@@ -1691,7 +1691,17 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "Stream-ul {{index}}"
+      "itemTitle": "Stream-ul {{index}}",
+      "sourceMode": {
+        "restream": "Restream (go2rtc)",
+        "manual": "Cale de intrare manuală",
+        "go2rtcStreamLabel": "Stream go2rtc",
+        "go2rtcStreamPlaceholder": "Selectează un stream go2rtc",
+        "noGo2rtcStreams": "Niciun stream go2rtc configurat",
+        "availableStreams": "Stream-uri disponibile",
+        "go2rtcStreamSearch": "Caută stream-uri...",
+        "noMatchingStreams": "Niciun stream corespunzător"
+      }
     },
     "restartRequiredField": "Necesită repornire",
     "restartRequiredFooter": "Configurația a fost modificată - Necesită repornire",
@@ -2085,6 +2095,9 @@
     },
     "onvif": {
       "autotrackingNoZones": "Autotracking-ul necesită cel puțin o zonă. Definește o zonă pentru această cameră în Măști / Zone, apoi seteaz-o ca zonă obligatorie mai jos."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "Argumentele manuale pentru accelerarea hardware nu sunt recomandate. Dacă nu există o cerință specifică, selectează presetarea care se potrivește cu hardware-ul tău."
     }
   },
   "birdseye": {
