@@ -46,7 +46,7 @@
         "threshold": "Empfindlichkeitsschwelle",
         "thresholdDesc": "Niedrigere Werte erkennen geringere Veränderungen (1–255)",
         "minArea": "Mindestwechselbereich",
-        "minAreaDesc": "Mindestanteil der untersuchten Region, der sich ändern muss, damit die Veränderung als signifikant gilt",
+        "minAreaDesc": "Mindestgröße eines einzelnen sich bewegenden Bereichs, ausgedrückt als Prozentsatz des untersuchten Bereichs",
         "frameSkip": "Bild überspringen",
         "frameSkipDesc": "Verarbeite jeden N-ten Frame. Stelle diesen Wert auf die Bildrate deiner Kamera ein, um einen Frame pro Sekunde zu verarbeiten (z. B. 5 für eine Kamera mit 5 FPS, 30 für eine Kamera mit 30 FPS). Höhere Werte sorgen für eine schnellere Verarbeitung, können jedoch kurze Bewegungsabläufe übersehen.",
         "maxResults": "Maximale Ergebnisse",
@@ -72,6 +72,9 @@
         "framesDecoded": "Rahmen decodiert",
         "wallTime": "Suchzeit",
         "segmentErrors": "Segmentfehler",
-        "seconds": "{{seconds}}s"
-    }
+        "seconds": "{{seconds}}s",
+        "minutesSeconds": "{{minutes}}m {{seconds}}s",
+        "scanSummary": "{{segments}} Segmente · {{time}}"
+    },
+    "scanning": "Wird gescannt {{time}}"
 }

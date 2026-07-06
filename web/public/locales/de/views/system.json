@@ -173,7 +173,22 @@
       "tips": {
         "title": "Kamera-Untersuchsungsinfo"
       },
-      "aspectRatio": "Seitenverhältnis"
+      "aspectRatio": "Seitenverhältnis",
+      "keyframes": {
+        "title": "Keyframe-Analyse",
+        "analyzing": "Keyframes werden analysiert... Noch {{seconds}} Sekunden",
+        "stillAnalyzing": "Keyframes werden noch analysiert...",
+        "recordStream": "Stream aufzeichnen:",
+        "keyframeCount": "Beobachtete Keyframes:",
+        "observedDuration": "Beobachtete Dauer:",
+        "gap": "Keyframe-Abstand (min. / durchschnittlich / max.):",
+        "segmentLength": "Länge des Aufzeichnungssegments:",
+        "ok": "Keyframes alle ~{{seconds}}s, gut geeignet für Aufzeichnung und Wiedergabe.",
+        "warning": "Seltene oder unregelmäßige Keyframes (längste Lücke ~{{seconds}}s), wahrscheinlich ein „Smart“-Codec (H.264+/H.265+); dies wird nicht empfohlen.",
+        "error": "Die Lücke zwischen den Keyframes (~{{seconds}}s) überschreitet die Länge des Aufzeichnungssegments ({{segmentTime}}s). Einige Segmente enthalten möglicherweise keinen Keyframe, was zu einer Unterbrechung der Wiedergabe führt. Deaktivieren Sie den Smart/+-Codec an der Kamera oder verkürzen Sie dessen Keyframe-Intervall.",
+        "unknown": "Der Abstand zwischen den Keyframes konnte nicht ermittelt werden.",
+        "recordDisabled": "Die Aufzeichnung ist für diese Kamera deaktiviert."
+      }
     },
     "overview": "Übersicht",
     "label": {

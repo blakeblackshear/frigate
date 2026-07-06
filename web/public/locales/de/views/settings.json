@@ -70,7 +70,7 @@
     "integrationObjectClassification": "Objekt Klassifizierung",
     "integrationAudioTranscription": "Audio-Transkription",
     "cameraDetect": "Objekterkennung",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "Streams (FFmpeg)",
     "cameraRecording": "Aufnahme",
     "cameraSnapshots": "Momentaufnahme",
     "cameraMotion": "Bewegungserkennung",
@@ -1376,12 +1376,16 @@
       "details": {
         "edit": "Kameradaten bearbeiten",
         "title": "Kameradaten bearbeiten",
-        "description": "Aktualisieren Sie den Anzeigenamen und die externe URL, die für diese Kamera in der gesamten Frigate-Benutzeroberfläche verwendet werden.",
+        "description": "Aktualisieren Sie den Anzeigenamen, die externe URL und die Sichtbarkeit, die für diese Kamera in der gesamten Frigate-Benutzeroberfläche verwendet werden.",
         "friendlyNameLabel": "Display Name",
         "friendlyNameHelp": "Der in der Benutzeroberfläche von „Frigate“ für diese Kamera angezeigte Spitzname. Lassen Sie das Feld leer, um die Kamera-ID zu verwenden.",
         "webuiUrlLabel": "URL der Web-Benutzeroberfläche",
         "webuiUrlHelp": "URL, um die Web-Benutzeroberfläche der Kamera direkt aus der Debug-Ansicht aufzurufen. Lassen Sie das Feld leer, um den Link zu deaktivieren.",
-        "webuiUrlInvalid": "Es muss sich um eine gültige URL handeln (z. B. https://example.com)."
+        "webuiUrlInvalid": "Es muss sich um eine gültige URL handeln (z. B. https://example.com).",
+        "dashboardLabel": "Im Live-Dashboard anzeigen",
+        "dashboardHelp": "Diese Kamera im Live-Dashboard anzeigen.",
+        "reviewLabel": "In der Überprüfung anzeigen",
+        "reviewHelp": "Zeige diese Kamera in der Übersicht an, einschließlich des Kamerafilters, der Bewegungsübersicht und der Verlaufsansicht."
       },
       "label": "Kamerazustand",
       "description": "Legen Sie den Betriebszustand für jede Kamera fest.<br /><br /><strong>Ein</strong>: Streams werden normal verarbeitet.<br /><strong>Aus</strong>: Die Verarbeitung wird vorübergehend angehalten. Diese Einstellung bleibt bei einem Neustart von Frigate nicht erhalten.<br /><strong>Deaktiviert</strong>: Die Verarbeitung wird beendet und die Änderung in Ihrer Konfiguration gespeichert. Um eine deaktivierte Kamera wieder zu aktivieren, ist ein Neustart erforderlich.<br /><br /><em>Hinweis: Die Deaktivierung hat keine Auswirkungen auf go2rtc-Restreams.</em><br /><br />Ziehen Sie den Griff, um die Reihenfolge der aktiven Kameras in der Benutzeroberfläche anzupassen, einschließlich des Live-Dashboards und der Dropdown-Menüs zur Kameraauswahl.",
@@ -1764,7 +1768,17 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "Stream {{index}}"
+      "itemTitle": "Stream {{index}}",
+      "sourceMode": {
+        "restream": "Restream (go2rtc)",
+        "manual": "Pfad für die manuelle Eingabe",
+        "go2rtcStreamLabel": "go2rtc stream",
+        "go2rtcStreamPlaceholder": "Wählen Sie einen go2rtc-Stream aus",
+        "noGo2rtcStreams": "Es sind keine go2rtc-Streams konfiguriert",
+        "go2rtcStreamSearch": "Suche Streams...",
+        "availableStreams": "Verfügbare Streams",
+        "noMatchingStreams": "Keine passenden Streams"
+      }
     },
     "restartRequiredField": "Neustart erforderlich",
     "restartRequiredFooter": "Konfiguration geändert – Neustart erforderlich",
@@ -2082,7 +2096,11 @@
       "fpsGreaterThanFive": "Es wird nicht empfohlen, den Wert für die FPS-Erkennung auf mehr als 5 zu setzen. Höhere Werte können zu Leistungseinbußen führen und bieten keinerlei Vorteile.",
       "disabled": "Die Objekterkennung ist deaktiviert. Momentaufnahmen, Überprüfungselemente und Erweiterungsfunktionen wie Gesichtserkennung, Kennzeichenerkennung und generative KI funktionieren nicht.",
       "resolutionShouldBeMultipleOfFour": "Um optimale Ergebnisse zu erzielen, sollten Breite und Höhe ein Vielfaches von 4 sein. Andere gerade Werte können zu visuellen Artefakten oder leichten Verzerrungen im Erkennungsstrom führen.",
-      "aspectRatioMismatch": "Die von Ihnen eingegebene Breite und Höhe stimmen nicht mit dem Seitenverhältnis Ihrer aktuell erkannten Auflösung überein. Dies kann zu einem gestreckten oder verzerrten Bild führen."
+      "aspectRatioMismatch": "Die von Ihnen eingegebene Breite und Höhe stimmen nicht mit dem Seitenverhältnis Ihrer aktuell erkannten Auflösung überein. Dies kann zu einem gestreckten oder verzerrten Bild führen.",
+      "maxFramesSet": "Die Festlegung einer maximalen Bildrate überschreibt das Standardverhalten und deaktiviert die Verfolgung stationärer Objekte. Dies ist nur in sehr wenigen Fällen erforderlich; verwenden Sie diese Option daher mit Bedacht.",
+      "squareResolution": "Eine quadratische Erkennungsauflösung ist ungewöhnlich. Die Erkennungsbreite und -höhe sollten dem Seitenverhältnis Ihrer Kamera entsprechen (zum Beispiel 16:9) und nicht den Abmessungen des Objekterkennungsmodells. Ein nicht übereinstimmendes Seitenverhältnis kann das Bild verzerren und die Erkennungsgenauigkeit beeinträchtigen.",
+      "resolutionHigh": "Diese Erkennungsauflösung liegt über der empfohlenen Wert und kann zu einem erhöhten Ressourcenverbrauch führen, ohne die Erkennungsgenauigkeit zu verbessern. Für die meisten Kameras wird eine Erkennungsauflösung von maximal 1080p empfohlen.",
+      "globalResolutionMultipleCameras": "Bei der Konfiguration mehrerer Kameras wird eine globale Erkennungsauflösung festgelegt. Sofern nicht alle Kameras dieselbe Auflösung und dasselbe Seitenverhältnis aufweisen, sollten die Erkennungsbreite und -höhe für jede Kamera separat festgelegt werden, um dem nativen Seitenverhältnis der jeweiligen Kamera zu entsprechen."
     },
     "faceRecognition": {
       "globalDisabled": "Die Gesichtserkennungserweiterung muss aktiviert sein, damit die Gesichtserkennungsfunktionen bei dieser Kamera funktionieren.",
@@ -2115,6 +2133,13 @@
     },
     "onvif": {
       "autotrackingNoZones": "Für die automatische Verfolgung ist mindestens eine Zone erforderlich. Definieren Sie unter „Masken / Zonen“ eine Zone für diese Kamera und legen Sie diese anschließend unten als erforderliche Zone fest."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "Explizite Definitionen der Hardware-beschleunigungs Variablen sind nicht empfohlen. Wähle die Voreinstellung die zu deiner Hardware passt, außer wenn spezifische Anforderungen eine andere Konfiguration erfordern."
+    },
+    "model": {
+      "optimizedFor320": "Frigate ist für ein 320x320-Modell optimiert, was für die meisten Konfigurationen die beste Wahl ist. Ein 640x640-Modell ist langsamer und bietet nur in bestimmten Szenarien Vorteile.",
+      "inputDimensionsNotDetectResolution": "Die Eingangsbreite und -höhe des Modells beziehen sich auf die Abmessungen des Objekterkennungsmodells und nicht auf die Erkennungsauflösung Ihrer Kamera. Sie sollten mit den Abmessungen des von Ihnen verwendeten Modells übereinstimmen – in der Regel quadratische Abmessungen wie 320×320 oder 640×640."
     }
   },
   "birdseye": {
