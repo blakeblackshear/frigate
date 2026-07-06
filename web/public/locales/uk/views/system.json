@@ -40,7 +40,10 @@
       "tips": {
         "title": "Інформація про зонд камери"
       },
-      "aspectRatio": "співвідношення сторін"
+      "aspectRatio": "співвідношення сторін",
+      "keyframes": {
+        "observedDuration": "Тривалість спостереження:"
+      }
     },
     "overview": "Огляд",
     "framesAndDetections": "Кадри / Виявлення"
@@ -178,7 +181,8 @@
     "logs": {
       "frigate": "Фрегатні журнали - Фрегат",
       "go2rtc": "Журнали Go2RTC - Фрегат",
-      "nginx": "Журнали Nginx - Фрегат"
+      "nginx": "Журнали Nginx - Фрегат",
+      "websocket": "Журнал повідомлень - Frigate"
     }
   },
   "title": "Система",
@@ -203,6 +207,25 @@
       "error": {
         "fetchingLogsFailed": "Помилка отримання журналів: {{errorMessage}}",
         "whileStreamingLogs": "Помилка під час потокової передачі журналів: {{errorMessage}}"
+      }
+    },
+    "websocket": {
+      "label": "Повідомлення",
+      "pause": "Павза",
+      "resume": "Продовжити",
+      "clear": "Очистити",
+      "filter": {
+        "all": "Всі теми (topics)",
+        "topics": "Теми (topics)",
+        "events": "Події",
+        "reviews": "Перевірки",
+        "classification": "Класифікація",
+        "face_recognition": "Розпізнавання обличчя",
+        "lpr": "Розпізнавання номерних знаків (LPR)",
+        "camera_activity": "Активність камери",
+        "system": "Система",
+        "camera": "Камера",
+        "all_cameras": "Всі камери"
       }
     }
   }
