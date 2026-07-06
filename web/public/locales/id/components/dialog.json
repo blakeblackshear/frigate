@@ -52,12 +52,73 @@
     "export": "Ekspor",
     "selectOrExport": "Pilih atau Ekspor",
     "toast": {
-      "success": "Berhasil memulai ekspor. Lihat file pada halaman ekspor."
-    }
+      "success": "Berhasil memulai ekspor. Lihat file pada halaman ekspor.",
+      "queued": "Ekspor diantrekan. Lihat progres di halaman ekspor.",
+      "view": "Melihat",
+      "batchSuccess_other": "{{count}} Ekspor dimulai. Membuka kasusnya sekarang.",
+      "batchPartial": "Ekspor berhasil dimulai sebanyak {{successful}} dari total {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
+      "batchFailed": "Gagal memulai ekspor sebanyak {{total}}. Kamera yang gagal: {{failedCameras}}"
+    },
+    "case": {
+      "newCaseOption": "Membuat Kasus Baru",
+      "newCaseNamePlaceholder": "Nama Kasus Baru",
+      "newCaseDescriptionPlaceholder": "Deskripsi Kasus",
+      "label": "Kasus",
+      "nonAdminHelp": "Kasus Baru akan Dibuat untuk Ekspor ini.",
+      "placeholder": "Pilih Kasus"
+    },
+    "tabs": {
+      "export": "Kamera Tunggal",
+      "multiCamera": "Multi Kamera"
+    },
+    "multiCamera": {
+      "timeRange": "Rentang Waktu",
+      "selectFromTimeline": "Pilih dari Timeline",
+      "cameraSelection": "Kamera",
+      "checkingActivity": "Memeriksa Aktivitas Kamera...",
+      "noCameras": "Tidak ada Kamera Tersedia",
+      "detectionCount_other": "{{count}} Objek terlacak",
+      "nameLabel": "Nama Ekspor",
+      "exportButton_other": "Ekspor {{count}} kamera",
+      "cameraSelectionHelp": "Kamera dengan objek yang dilacak dalam rentang waktu ini telah dipilih sebelumnya",
+      "queueingButton": "Mengantrekan ekspor...",
+      "clearSelection": "Hapus pilihan",
+      "selectWithActivity": "Kamera dengan objek yang dilacak",
+      "selectGroup": "Pilih grup",
+      "noMatchingCameras": "Tidak ada kamera yang sesuai dengan pencarian Anda",
+      "selectedCount": "{{terpilih}} / {{total}} terpilih",
+      "namePlaceholder": "Nama dasar opsional untuk ekspor ini"
+    },
+    "multi": {
+      "title_other": "Ekspor {{count}} Ulasan",
+      "toast": {
+        "startedNoCase_other": "{{count}} Ekspor Dimulai.",
+        "started_other": "{{count}} ekspor dimulai. Membuka kasusnya sekarang.",
+        "partial": "Memulai {{successful}} dari {{total}} ekspor. Gagal: {{failedItems}}",
+        "failed": "Gagal memulai {{total}} ekspor. Gagal: {{failedItems}}"
+      },
+      "description": "Ekspor setiap ulasan yang dipilih. Semua Ekspor akan dikelompokkan dalam satu kasus.",
+      "descriptionNoCase": "Ekspor setiap ulasan yang dipilih.",
+      "exportButton_other": "Ekspor {{count}} ulasan",
+      "exportingButton": "Mengekspor...",
+      "caseNamePlaceholder": "Ekspor tinjauan - {{tanggal}}"
+    },
+    "queueing": "Mengantrekan Ekspor..."
   },
   "search": {
     "saveSearch": {
       "overwrite": "{{searchName}} sudah ada. Menyimpan akan menimpa file yang sudah ada."
+    }
+  },
+  "streaming": {
+    "restreaming": {
+      "disabled": "Fitur restreaming tidak diaktifkan untuk kamera ini.",
+      "desc": {
+        "title": "Instal go2rtc untuk opsi tampilan langsung dan audio tambahan untuk kamera ini."
+      }
+    },
+    "showStats": {
+      "label": "Tampilkan statistik streaming"
     }
   }
 }
