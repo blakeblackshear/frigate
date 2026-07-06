@@ -413,6 +413,10 @@
         "description": "The device to use for OpenVINO inference (e.g. 'CPU', 'GPU', 'NPU')."
       }
     },
+    "qualcomm_tfl": {
+      "label": "Qualcomm",
+      "description": "Qualcomm NPU detector using the QNN TFLite delegate to accelerate inference on Qualcomm SoCs with a Hexagon NPU (e.g. IQ9100, QCS6490)."
+    },
     "rknn": {
       "label": "RKNN",
       "description": "RKNN detector for Rockchip NPUs; runs compiled RKNN models on Rockchip hardware.",

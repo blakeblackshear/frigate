@@ -107,6 +107,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [AXEngine](#axera): axera models can run on AXERA NPUs via AXEngine, delivering highly efficient object detection.
 
+**Qualcomm** <CommunityBadge />
+
+- [Qualcomm](#qualcomm): TFLite models can run on Qualcomm SoCs with a Hexagon NPU (e.g. IQ9100, QCS6490) via the QNN TFLite delegate.
+
 :::
 
 ### Hailo-8
@@ -295,6 +299,17 @@ The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms fo
 | Name             | AXERA AX650N/AX8850N Inference Time |
 | ---------------- | ----------------------------------- |
 | yolov9-tiny      | ~ 4 ms                              |
+### Qualcomm
+
+Frigate supports hardware object detection on Qualcomm SoCs with a Hexagon NPU, including the IQ9100 and QCS6490 (RB3 Gen 2). The QNN TFLite delegate is used to accelerate inference on the HTP (Hexagon Tensor Processor).
+
+A single detector is typically sufficient for multiple camera streams. The default model is **SSD MobileDet** (INT8 quantized).
+
+| Name          | IQ9100 Inference Time | QCS6490 Inference Time |
+| ------------- | --------------------- | ---------------------- |
+| ssd_mobiledet | ~ 0.8 ms              | ~ 5.55 ms              |
+
+Detailed information is available [in the detector docs](/configuration/object_detectors#qualcomm).
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
