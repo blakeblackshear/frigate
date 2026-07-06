@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from pydantic import BaseModel, Field, model_validator
 
 MAX_BATCH_EXPORT_ITEMS = 50
@@ -9,18 +7,18 @@ class BatchExportItem(BaseModel):
     camera: str = Field(title="Camera name")
     start_time: float = Field(title="Start time")
     end_time: float = Field(title="End time")
-    image_path: Optional[str] = Field(
+    image_path: str | None = Field(
         default=None,
         title="Existing thumbnail path",
         description="Optional existing image to use as the export thumbnail",
     )
-    friendly_name: Optional[str] = Field(
+    friendly_name: str | None = Field(
         default=None,
         title="Friendly name",
         max_length=256,
         description="Optional friendly name for this specific export item",
     )
-    client_item_id: Optional[str] = Field(
+    client_item_id: str | None = Field(
         default=None,
         title="Client item ID",
         max_length=128,
@@ -29,13 +27,13 @@ class BatchExportItem(BaseModel):
 
 
 class BatchExportBody(BaseModel):
-    items: List[BatchExportItem] = Field(
+    items: list[BatchExportItem] = Field(
         title="Items",
         min_length=1,
         max_length=MAX_BATCH_EXPORT_ITEMS,
         description="List of export items. Each item has its own camera and time range.",
     )
-    export_case_id: Optional[str] = Field(
+    export_case_id: str | None = Field(
         default=None,
         title="Export case ID",
         max_length=30,
@@ -44,13 +42,13 @@ class BatchExportBody(BaseModel):
             "existing case is temporarily admin-only until case-level ACLs exist."
         ),
     )
-    new_case_name: Optional[str] = Field(
+    new_case_name: str | None = Field(
         default=None,
         title="New case name",
         max_length=100,
         description="Name of a new export case to create when export_case_id is omitted",
     )
-    new_case_description: Optional[str] = Field(
+    new_case_description: str | None = Field(
         default=None,
         title="New case description",
         description="Optional description for a newly created export case",

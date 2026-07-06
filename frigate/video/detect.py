@@ -3,7 +3,7 @@
 import logging
 import queue
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
@@ -273,7 +273,7 @@ def process_frames(
             time.sleep(0.1)
             continue
 
-        if datetime.now().astimezone(timezone.utc) > next_region_update:
+        if datetime.now().astimezone(UTC) > next_region_update:
             region_grid = requestor.send_data(REQUEST_REGION_GRID, camera_config.name)
             next_region_update = get_tomorrow_at_time(2)
 

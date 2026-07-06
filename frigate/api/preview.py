@@ -4,7 +4,7 @@ import bisect
 import logging
 import os
 import threading
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytz
 from fastapi import APIRouter, Depends, HTTPException
@@ -125,7 +125,7 @@ def preview_hour(
     """Get all mp4 previews relevant for time period given the timezone"""
     parts = year_month.split("-")
     start_date = (
-        datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc)
+        datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=UTC)
         - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
     )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)

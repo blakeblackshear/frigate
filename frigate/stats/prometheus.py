@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from prometheus_client.core import (
@@ -11,7 +11,7 @@ from prometheus_client.core import (
 )
 
 
-class CustomCollector(object):
+class CustomCollector:
     def __init__(self, _url):
         self.complete_stats = {}  # Store complete stats data
         self.process_stats = {}  # Keep for CPU processing
@@ -491,7 +491,7 @@ collector = CustomCollector(None)
 REGISTRY.register(collector)
 
 
-def update_metrics(stats: Dict[str, Any], event_counts: List[Dict[str, Any]]):
+def update_metrics(stats: dict[str, Any], event_counts: list[dict[str, Any]]):
     """Updates the Prometheus metrics with the given stats data."""
     try:
         # Store the complete stats for later use by collect()

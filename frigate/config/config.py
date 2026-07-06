@@ -4,7 +4,7 @@ import io
 import json
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Self
 
 import numpy as np
 from pydantic import (
@@ -17,7 +17,6 @@ from pydantic import (
     model_validator,
 )
 from ruamel.yaml import YAML
-from typing_extensions import Self
 
 from frigate.const import REGEX_JSON
 from frigate.detectors import DetectorConfig, ModelConfig
@@ -174,7 +173,7 @@ class RuntimeMotionConfig(MotionConfig):
 class RuntimeFilterConfig(FilterConfig):
     """Runtime version of FilterConfig with rasterized masks."""
 
-    rasterized_mask: Optional[np.ndarray] = Field(default=None, exclude=True)
+    rasterized_mask: np.ndarray | None = Field(default=None, exclude=True)
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
@@ -420,7 +419,7 @@ def verify_lpr_and_face(
 
 
 class FrigateConfig(FrigateBaseModel):
-    version: Optional[str] = Field(
+    version: str | None = Field(
         default=None,
         title="Current config version",
         description="Numeric or string version of the active configuration to help detect migrations or format changes.",
@@ -496,7 +495,7 @@ class FrigateConfig(FrigateBaseModel):
     )
 
     # Detector config
-    detectors: Dict[str, BaseDetectorConfig] = Field(
+    detectors: dict[str, BaseDetectorConfig] = Field(
         default=DEFAULT_DETECTORS,
         title="Detector hardware",
         description="Configuration for object detectors (CPU, GPU, ONNX backends) and any detector-specific model settings.",
@@ -508,14 +507,14 @@ class FrigateConfig(FrigateBaseModel):
     )
 
     # GenAI config (named provider configs: name -> GenAIConfig)
-    genai: Dict[str, GenAIConfig] = Field(
+    genai: dict[str, GenAIConfig] = Field(
         default_factory=dict,
         title="Generative AI configuration",
         description="Settings for integrated generative AI providers used to generate object descriptions and review summaries.",
     )
 
     # Camera config
-    cameras: Dict[str, CameraConfig] = Field(title="Cameras", description="Cameras")
+    cameras: dict[str, CameraConfig] = Field(title="Cameras", description="Cameras")
     audio: AudioConfig = Field(
         default_factory=AudioConfig,
         title="Audio detection",
@@ -541,7 +540,7 @@ class FrigateConfig(FrigateBaseModel):
         title="Live playback",
         description="Settings to control the jsmpeg live stream resolution and quality. This does not affect restreamed cameras that use go2rtc for live view.",
     )
-    motion: Optional[MotionConfig] = Field(
+    motion: MotionConfig | None = Field(
         default=None,
         title="Motion detection",
         description="Default motion detection settings applied to cameras unless overridden per-camera.",
@@ -599,19 +598,19 @@ class FrigateConfig(FrigateBaseModel):
         description="License plate recognition settings including detection thresholds, formatting, and known plates.",
     )
 
-    camera_groups: Dict[str, CameraGroupConfig] = Field(
+    camera_groups: dict[str, CameraGroupConfig] = Field(
         default_factory=dict,
         title="Camera groups",
         description="Configuration for named camera groups used to organize cameras in the UI.",
     )
 
-    profiles: Dict[str, ProfileDefinitionConfig] = Field(
+    profiles: dict[str, ProfileDefinitionConfig] = Field(
         default_factory=dict,
         title="Profiles",
         description="Named profile definitions with friendly names. Camera profiles must reference names defined here.",
     )
 
-    active_profile: Optional[str] = Field(
+    active_profile: str | None = Field(
         default=None,
         title="Active profile",
         description="Currently active profile name. Runtime-only, not persisted in YAML.",
@@ -1054,7 +1053,7 @@ class FrigateConfig(FrigateBaseModel):
 
     @field_validator("cameras")
     @classmethod
-    def ensure_zones_and_cameras_have_different_names(cls, v: Dict[str, CameraConfig]):
+    def ensure_zones_and_cameras_have_different_names(cls, v: dict[str, CameraConfig]):
         zones = [zone for camera in v.values() for zone in camera.zones.keys()]
         for zone in zones:
             if zone in v.keys():
@@ -1136,7 +1135,7 @@ class FrigateConfig(FrigateBaseModel):
 
     @classmethod
     def parse_object(
-        cls, obj: Any, *, plus_api: Optional[PlusApi] = None, install: bool = False
+        cls, obj: Any, *, plus_api: PlusApi | None = None, install: bool = False
     ):
         return cls.model_validate(
             obj, context={"plus_api": plus_api, "install": install}

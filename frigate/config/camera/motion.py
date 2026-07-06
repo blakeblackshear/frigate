@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import Field, field_serializer
 
@@ -28,7 +28,7 @@ class MotionConfig(FrigateBaseModel):
         ge=0.3,
         le=1.0,
     )
-    skip_motion_threshold: Optional[float] = Field(
+    skip_motion_threshold: float | None = Field(
         default=None,
         title="Skip motion threshold",
         description="If set to a value between 0.0 and 1.0, and more than this fraction of the image changes in a single frame, the detector will return no motion boxes and immediately recalibrate. This can save CPU and reduce false positives during lightning, storms, etc., but may miss real events such as a PTZ camera auto‑tracking an object. The trade‑off is between dropping a few megabytes of recordings versus reviewing a couple short clips. Leave unset (None) to disable this feature.",
@@ -40,7 +40,7 @@ class MotionConfig(FrigateBaseModel):
         title="Improve contrast",
         description="Apply contrast improvement to frames before motion analysis to help detection.",
     )
-    contour_area: Optional[int] = Field(
+    contour_area: int | None = Field(
         default=10,
         title="Contour area",
         description="Minimum contour area in pixels required for a motion contour to be counted.",
@@ -55,12 +55,12 @@ class MotionConfig(FrigateBaseModel):
         title="Frame alpha",
         description="Alpha value used when blending frames for motion preprocessing.",
     )
-    frame_height: Optional[int] = Field(
+    frame_height: int | None = Field(
         default=100,
         title="Frame height",
         description="Height in pixels to scale frames to when computing motion.",
     )
-    mask: dict[str, Optional[MotionMaskConfig]] = Field(
+    mask: dict[str, MotionMaskConfig | None] = Field(
         default_factory=dict,
         title="Mask coordinates",
         description="Ordered x,y coordinates defining the motion mask polygon used to include/exclude areas.",
@@ -70,12 +70,12 @@ class MotionConfig(FrigateBaseModel):
         title="MQTT off delay",
         description="Seconds to wait after last motion before publishing an MQTT 'off' state.",
     )
-    enabled_in_config: Optional[bool] = Field(
+    enabled_in_config: bool | None = Field(
         default=None,
         title="Original motion state",
         description="Indicates whether motion detection was enabled in the original static configuration.",
     )
-    raw_mask: dict[str, Optional[MotionMaskConfig]] = Field(
+    raw_mask: dict[str, MotionMaskConfig | None] = Field(
         default_factory=dict, exclude=True
     )
 

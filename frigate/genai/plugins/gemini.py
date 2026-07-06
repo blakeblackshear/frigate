@@ -4,7 +4,8 @@ import base64
 import binascii
 import json
 import logging
-from typing import Any, AsyncGenerator, Optional
+from collections.abc import AsyncGenerator
+from typing import Any
 
 from google import genai
 from google.genai import errors, types
@@ -16,7 +17,7 @@ from frigate.genai import GenAIClient, register_genai_provider
 logger = logging.getLogger(__name__)
 
 
-def _decode_thought_signature(value: Any) -> Optional[bytes]:
+def _decode_thought_signature(value: Any) -> bytes | None:
     """Decode a base64-encoded thought_signature carried across conversation turns."""
     if not value:
         return None
@@ -30,14 +31,14 @@ def _decode_thought_signature(value: Any) -> Optional[bytes]:
     return None
 
 
-def _encode_thought_signature(signature: Optional[bytes]) -> Optional[str]:
+def _encode_thought_signature(signature: bytes | None) -> str | None:
     """Encode bytes thought_signature as base64 so it survives JSON-friendly transport."""
     if not signature:
         return None
     return base64.b64encode(signature).decode("ascii")
 
 
-def _stats_from_gemini_usage(usage: Any) -> Optional[dict[str, Any]]:
+def _stats_from_gemini_usage(usage: Any) -> dict[str, Any] | None:
     """Build a stats dict from a Gemini usage_metadata object."""
     prompt_tokens = getattr(usage, "prompt_token_count", None)
     completion_tokens = getattr(usage, "candidates_token_count", None)
@@ -84,9 +85,9 @@ class GeminiClient(GenAIClient):
         self,
         prompt: str,
         images: list[bytes],
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
         enable_thinking: bool = False,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Submit a request to Gemini."""
         contents = [prompt] + [
             types.Part.from_bytes(data=img, mime_type="image/jpeg") for img in images
@@ -141,9 +142,9 @@ class GeminiClient(GenAIClient):
     def chat_with_tools(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> dict[str, Any]:
         """
         Send chat messages to Gemini with optional tool definitions.
@@ -399,9 +400,9 @@ class GeminiClient(GenAIClient):
     async def chat_with_tools_stream(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """
         Stream chat with tools; yields content deltas then final message.
@@ -554,7 +555,7 @@ class GeminiClient(GenAIClient):
             reasoning_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
-            usage_stats: Optional[dict[str, Any]] = None
+            usage_stats: dict[str, Any] | None = None
 
             stream = await self.provider.aio.models.generate_content_stream(
                 model=self.genai_config.model,

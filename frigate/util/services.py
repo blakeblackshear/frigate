@@ -12,7 +12,7 @@ import subprocess as sp
 import time
 import traceback
 from datetime import datetime
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 import cv2
 import psutil
@@ -59,7 +59,7 @@ def get_cgroups_version() -> str:
         return "unknown"
 
     try:
-        with open("/proc/mounts", "r") as f:
+        with open("/proc/mounts") as f:
             mounts = f.readlines()
 
         for mount in mounts:
@@ -89,7 +89,7 @@ def get_docker_memlimit_bytes() -> int:
         memlimit_path = "/sys/fs/cgroup/memory.max"
 
         try:
-            with open(memlimit_path, "r") as f:
+            with open(memlimit_path) as f:
                 value = f.read().strip()
 
             if value.isnumeric():
@@ -127,7 +127,7 @@ def get_cpu_stats() -> dict[str, dict]:
             if not any(keyword in cmdline for keyword in keywords):
                 continue
 
-            with open(f"/proc/{pid}/stat", "r") as f:
+            with open(f"/proc/{pid}/stat") as f:
                 stats = f.readline().split()
             utime = int(stats[13])
             stime = int(stats[14])
@@ -146,7 +146,7 @@ def get_cpu_stats() -> dict[str, dict]:
             process_usage_sec = process_utime_sec + process_stime_sec
             cpu_average_usage = process_usage_sec * 100 // process_elapsed_sec
 
-            with open(f"/proc/{pid}/statm", "r") as f:
+            with open(f"/proc/{pid}/statm") as f:
                 mem_stats = f.readline().split()
             mem_res = int(mem_stats[1]) * os.sysconf("SC_PAGE_SIZE") / 1024
 
@@ -171,7 +171,7 @@ def get_physical_interfaces(interfaces) -> list:
     if not interfaces:
         return []
 
-    with open("/proc/net/dev", "r") as file:
+    with open("/proc/net/dev") as file:
         lines = file.readlines()
 
     physical_interfaces = []
@@ -238,7 +238,7 @@ def is_vaapi_amd_driver() -> bool:
         return any("AMD Radeon Graphics" in line for line in output)
 
 
-def get_amd_gpu_stats() -> Optional[dict[str, str]]:
+def get_amd_gpu_stats() -> dict[str, str] | None:
     """Get stats using radeontop."""
     radeontop_command = ["radeontop", "-d", "-", "-l", "1"]
 
@@ -287,7 +287,7 @@ _XE_ENGINE_KEYS = {
 }
 
 
-def _resolve_intel_gpu_pdev(device: Optional[str]) -> Optional[str]:
+def _resolve_intel_gpu_pdev(device: str | None) -> str | None:
     """Map a configured GPU hint (/dev/dri/card1, renderD128, or a PCI bus
     address) to its drm-pdev string so we can filter fdinfo entries to that
     device. Returns None when no hint is supplied or it cannot be resolved."""
@@ -304,7 +304,7 @@ def _resolve_intel_gpu_pdev(device: Optional[str]) -> Optional[str]:
         return None
 
 
-def _read_intel_drm_fdinfo(target_pdev: Optional[str]) -> dict:
+def _read_intel_drm_fdinfo(target_pdev: str | None) -> dict:
     """Snapshot DRM fdinfo for every Intel client visible in /proc.
 
     Returns a dict keyed by (pdev, drm-client-id, pid) so the same context
@@ -394,8 +394,8 @@ def _read_intel_drm_fdinfo(target_pdev: Optional[str]) -> dict:
 
 
 def get_intel_gpu_stats(
-    intel_gpu_device: Optional[str],
-) -> Optional[dict[str, dict[str, Any]]]:
+    intel_gpu_device: str | None,
+) -> dict[str, dict[str, Any]] | None:
     """Get stats by reading DRM fdinfo files, bucketed per-pdev.
 
     Each DRM client FD exposes monotonic per-engine busy counters via
@@ -509,12 +509,12 @@ def get_intel_gpu_stats(
     return results
 
 
-def get_openvino_npu_stats() -> Optional[dict[str, str]]:
+def get_openvino_npu_stats() -> dict[str, str] | None:
     """Get NPU stats using openvino."""
     NPU_RUNTIME_PATH = "/sys/devices/pci0000:00/0000:00:0b.0/power/runtime_active_time"
 
     try:
-        with open(NPU_RUNTIME_PATH, "r") as f:
+        with open(NPU_RUNTIME_PATH) as f:
             initial_runtime = float(f.read().strip())
 
         initial_time = time.time()
@@ -523,7 +523,7 @@ def get_openvino_npu_stats() -> Optional[dict[str, str]]:
         time.sleep(1.0)
 
         # Read runtime value again
-        with open(NPU_RUNTIME_PATH, "r") as f:
+        with open(NPU_RUNTIME_PATH) as f:
             current_runtime = float(f.read().strip())
 
         current_time = time.time()
@@ -542,10 +542,10 @@ def get_openvino_npu_stats() -> Optional[dict[str, str]]:
         return None
 
 
-def get_rockchip_gpu_stats() -> Optional[dict[str, str | float]]:
+def get_rockchip_gpu_stats() -> dict[str, str | float] | None:
     """Get GPU stats using rk."""
     try:
-        with open("/sys/kernel/debug/rkrga/load", "r") as f:
+        with open("/sys/kernel/debug/rkrga/load") as f:
             content = f.read()
     except FileNotFoundError:
         return None
@@ -563,7 +563,7 @@ def get_rockchip_gpu_stats() -> Optional[dict[str, str | float]]:
     stats: dict[str, str | float] = {"gpu": average_load, "mem": "-%"}
 
     try:
-        with open("/sys/class/thermal/thermal_zone5/temp", "r") as f:
+        with open("/sys/class/thermal/thermal_zone5/temp") as f:
             line = f.readline().strip()
             stats["temp"] = round(int(line) / 1000, 1)
     except (FileNotFoundError, OSError, ValueError):
@@ -572,10 +572,10 @@ def get_rockchip_gpu_stats() -> Optional[dict[str, str | float]]:
     return stats
 
 
-def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
+def get_rockchip_npu_stats() -> dict[str, float | str] | None:
     """Get NPU stats using rk."""
     try:
-        with open("/sys/kernel/debug/rknpu/load", "r") as f:
+        with open("/sys/kernel/debug/rknpu/load") as f:
             npu_output = f.read()
 
             if "Core0:" in npu_output:
@@ -595,7 +595,7 @@ def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
     stats: dict[str, float | str] = {"npu": mean, "mem": "-%"}
 
     try:
-        with open("/sys/class/thermal/thermal_zone6/temp", "r") as f:
+        with open("/sys/class/thermal/thermal_zone6/temp") as f:
             line = f.readline().strip()
             stats["temp"] = round(int(line) / 1000, 1)
     except (FileNotFoundError, OSError, ValueError):
@@ -604,7 +604,7 @@ def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
     return stats
 
 
-def get_axcl_npu_stats() -> Optional[dict[str, str | float]]:
+def get_axcl_npu_stats() -> dict[str, str | float] | None:
     """Get NPU stats using axcl."""
     # Check if axcl-smi exists
     axcl_smi_path = "/usr/bin/axcl/axcl-smi"
@@ -721,18 +721,18 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
         return results
 
 
-def get_jetson_stats() -> Optional[dict[int, dict]]:
+def get_jetson_stats() -> dict[int, dict] | None:
     results = {}
 
     try:
         results["mem"] = "-"  # no discrete gpu memory
 
         if os.path.exists("/sys/devices/gpu.0/load"):
-            with open("/sys/devices/gpu.0/load", "r") as f:
+            with open("/sys/devices/gpu.0/load") as f:
                 gpuload = float(f.readline()) / 10
                 results["gpu"] = f"{gpuload}%"
         elif os.path.exists("/sys/devices/platform/gpu.0/load"):
-            with open("/sys/devices/platform/gpu.0/load", "r") as f:
+            with open("/sys/devices/platform/gpu.0/load") as f:
                 gpuload = float(f.readline()) / 10
                 results["gpu"] = f"{gpuload}%"
         else:
@@ -793,7 +793,7 @@ def get_hailo_temps() -> dict[str, float]:
 def is_go2rtc_arbitrary_exec_allowed() -> bool:
     """Read the GO2RTC_ALLOW_ARBITRARY_EXEC override from env, docker
     secrets, or the Home Assistant add-on options file."""
-    raw: Optional[str] = None
+    raw: str | None = None
     if "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.environ:
         raw = os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC")
     elif (
@@ -839,7 +839,7 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
     else:
         format_entries = None
 
-    def run(rtsp_transport: Optional[str] = None) -> sp.CompletedProcess:
+    def run(rtsp_transport: str | None = None) -> sp.CompletedProcess:
         cmd = [ffmpeg.ffprobe_path]
         if rtsp_transport:
             cmd += ["-rtsp_transport", rtsp_transport]
@@ -883,14 +883,14 @@ KEYFRAME_PROBE_WINDOW_SECONDS = 20
 KEYFRAME_GAP_WARNING_SECONDS = 4.0
 
 
-def parse_keyframe_packets(output: str) -> Tuple[List[float], Optional[float]]:
+def parse_keyframe_packets(output: str) -> tuple[list[float], float | None]:
     """Parse ffprobe CSV `pts_time,flags` output.
 
     Returns the presentation timestamps of keyframes (flags containing "K")
     and the maximum timestamp observed across all packets.
     """
-    keyframe_pts: List[float] = []
-    max_pts: Optional[float] = None
+    keyframe_pts: list[float] = []
+    max_pts: float | None = None
 
     for line in output.splitlines():
         parts = line.split(",")
@@ -909,7 +909,7 @@ def parse_keyframe_packets(output: str) -> Tuple[List[float], Optional[float]]:
 
 
 def classify_keyframe_gaps(
-    keyframe_pts: List[float], segment_time: int
+    keyframe_pts: list[float], segment_time: int
 ) -> dict[str, Any]:
     """Classify keyframe spacing for recording suitability.
 
@@ -990,7 +990,7 @@ async def analyze_record_keyframes(
             stderr=asyncio.subprocess.PIPE,
         )
         stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=window + 15)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.warning("Keyframe probe timed out for record stream")
         proc.kill()
         return classify_keyframe_gaps([], segment_time)
@@ -1004,7 +1004,7 @@ async def analyze_record_keyframes(
     return result
 
 
-def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
+def vainfo_hwaccel(device_name: str | None = None) -> sp.CompletedProcess:
     """Run vainfo."""
     if not device_name:
         cmd = ["vainfo"]
@@ -1081,8 +1081,8 @@ async def get_video_properties(
 ) -> dict[str, Any]:
     async def probe_with_ffprobe(
         url: str,
-        rtsp_transport: Optional[str] = None,
-    ) -> tuple[bool, int, int, Optional[str], float]:
+        rtsp_transport: str | None = None,
+    ) -> tuple[bool, int, int, str | None, float]:
         """Fallback using ffprobe: returns (valid, width, height, codec, duration)."""
         cmd = [ffmpeg.ffprobe_path]
         if rtsp_transport:
@@ -1105,7 +1105,7 @@ async def get_video_properties(
             )
             try:
                 stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=6)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.info(
                     "ffprobe timed out while probing %s (transport=%s)",
                     clean_camera_user_pass(url),
@@ -1137,7 +1137,7 @@ async def get_video_properties(
         except (json.JSONDecodeError, ValueError, KeyError, sp.SubprocessError):
             return False, 0, 0, None, -1
 
-    def probe_with_cv2(url: str) -> tuple[bool, int, int, Optional[str], float]:
+    def probe_with_cv2(url: str) -> tuple[bool, int, int, str | None, float]:
         """Primary attempt using cv2: returns (valid, width, height, fourcc, duration)."""
         cap = cv2.VideoCapture(url)
         if not cap.isOpened():
@@ -1197,10 +1197,10 @@ async def get_video_properties(
 
 def process_logs(
     contents: str,
-    service: Optional[str] = None,
-    start: Optional[int] = None,
-    end: Optional[int] = None,
-) -> Tuple[int, List[str]]:
+    service: str | None = None,
+    start: int | None = None,
+    end: int | None = None,
+) -> tuple[int, list[str]]:
     log_lines = []
     last_message = None
     last_timestamp = None

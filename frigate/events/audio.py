@@ -7,7 +7,7 @@ import threading
 import time
 from multiprocessing.managers import DictProxy
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -272,7 +272,7 @@ class AudioEventMaintainer(threading.Thread):
         self.camera_metrics[self.camera_config.name].audio_rms.value = rms
         self.camera_metrics[self.camera_config.name].audio_dBFS.value = dBFS
 
-        audio_detections: list[Tuple[str, float]] = []
+        audio_detections: list[tuple[str, float]] = []
 
         # only run audio detection when volume is above min_volume
         if rms >= self.camera_config.audio.min_volume:
@@ -323,7 +323,7 @@ class AudioEventMaintainer(threading.Thread):
             else:
                 self.transcription_processor.check_unload_model()
 
-    def calculate_audio_levels(self, audio_as_float: np.ndarray) -> Tuple[float, float]:
+    def calculate_audio_levels(self, audio_as_float: np.ndarray) -> tuple[float, float]:
         # Calculate RMS (Root-Mean-Square) which represents the average signal amplitude
         # Note: np.float32 isn't serializable, we must use np.float64 to publish the message
         rms = np.sqrt(np.mean(np.absolute(np.square(audio_as_float))))

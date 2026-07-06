@@ -131,7 +131,7 @@ class DebugReplayManager:
 
         config_file = find_config_file()
         yaml_parser = YAML()
-        with open(config_file, "r") as f:
+        with open(config_file) as f:
             config_data = yaml_parser.load(f)
 
         if "cameras" not in config_data or config_data["cameras"] is None:

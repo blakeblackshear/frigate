@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import re
-from typing import Optional
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -64,7 +63,7 @@ class RemoteUserPlugin(Plugin):
 def create_fastapi_app(
     frigate_config: FrigateConfig,
     database: SqliteQueueDatabase,
-    embeddings: Optional[EmbeddingsContext],
+    embeddings: EmbeddingsContext | None,
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
@@ -72,8 +71,8 @@ def create_fastapi_app(
     event_metadata_updater: EventMetadataPublisher,
     config_publisher: CameraConfigUpdatePublisher,
     replay_manager: DebugReplayManager,
-    dispatcher: Optional[Dispatcher] = None,
-    profile_manager: Optional[ProfileManager] = None,
+    dispatcher: Dispatcher | None = None,
+    profile_manager: ProfileManager | None = None,
     enforce_default_admin: bool = True,
 ):
     logger.info("Starting FastAPI app")

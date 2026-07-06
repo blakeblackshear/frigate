@@ -1,6 +1,5 @@
 """Tests for keyframe-spacing analysis used to detect smart/+ codecs."""
 
-import asyncio
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -90,7 +89,7 @@ class TestAnalyzeRecordKeyframes(unittest.IsolatedAsyncioTestCase):
 
     async def test_timeout_returns_unknown(self):
         proc = MagicMock()
-        proc.communicate = AsyncMock(side_effect=asyncio.TimeoutError())
+        proc.communicate = AsyncMock(side_effect=TimeoutError())
         proc.kill = MagicMock()
         ffmpeg = MagicMock()
         ffmpeg.ffprobe_path = "/usr/bin/ffprobe"

@@ -2,14 +2,14 @@
 
 import json
 import logging
-from typing import Any, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 def parse_tool_calls_from_message(
     message: dict[str, Any],
-) -> Optional[list[dict[str, Any]]]:
+) -> list[dict[str, Any]] | None:
     """
     Parse tool_calls from an OpenAI-style message dict.
 
@@ -52,7 +52,7 @@ def parse_tool_calls_from_message(
 
 def build_assistant_message_for_conversation(
     content: Any,
-    tool_calls_raw: Optional[List[dict[str, Any]]],
+    tool_calls_raw: list[dict[str, Any]] | None,
 ) -> dict[str, Any]:
     """
     Build the assistant message dict in OpenAI format for appending to a conversation.

@@ -4,11 +4,11 @@ import multiprocessing as mp
 import os
 import secrets
 import shutil
+from collections.abc import Callable
 from multiprocessing import Queue
 from multiprocessing.managers import DictProxy, SyncManager
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-from typing import Callable, Optional
 
 import psutil
 import uvicorn
@@ -95,7 +95,7 @@ class FrigateApp:
         self, config: FrigateConfig, manager: SyncManager, stop_event: MpEvent
     ) -> None:
         self.metrics_manager = manager
-        self.audio_process: Optional[mp.Process] = None
+        self.audio_process: mp.Process | None = None
         self.stop_event = stop_event
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
@@ -120,8 +120,8 @@ class FrigateApp:
         )
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
-        self.embeddings: Optional[EmbeddingsContext] = None
-        self.profile_manager: Optional[ProfileManager] = None
+        self.embeddings: EmbeddingsContext | None = None
+        self.profile_manager: ProfileManager | None = None
         self.config = config
 
     def ensure_dirs(self) -> None:

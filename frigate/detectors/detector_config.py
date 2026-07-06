@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from enum import Enum
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import requests
 from pydantic import BaseModel, ConfigDict, Field
@@ -45,12 +45,12 @@ class ModelTypeEnum(str, Enum):
 
 
 class ModelConfig(BaseModel):
-    path: Optional[str] = Field(
+    path: str | None = Field(
         None,
         title="Custom object detector model path",
         description="Path to a custom detection model file (or plus://<model_id> for Frigate+ models).",
     )
-    labelmap_path: Optional[str] = Field(
+    labelmap_path: str | None = Field(
         None,
         title="Label map for custom object detector",
         description="Path to a labelmap file that maps numeric classes to string labels for the detector.",
@@ -65,12 +65,12 @@ class ModelConfig(BaseModel):
         title="Object detection model input height",
         description="Height of the model input tensor in pixels.",
     )
-    labelmap: Dict[int, str] = Field(
+    labelmap: dict[int, str] = Field(
         default_factory=dict,
         title="Labelmap customization",
         description="Overrides or remapping entries to merge into the standard labelmap.",
     )
-    attributes_map: Dict[str, list[str]] = Field(
+    attributes_map: dict[str, list[str]] = Field(
         default=DEFAULT_ATTRIBUTE_LABEL_MAP,
         title="Map of object labels to their attribute labels",
         description="Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate']).",
@@ -95,18 +95,18 @@ class ModelConfig(BaseModel):
         title="Object Detection Model Type",
         description="Detector model architecture type (ssd, yolox, yolonas) used by some detectors for optimization.",
     )
-    _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
-    _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
+    _merged_labelmap: dict[int, str] | None = PrivateAttr()
+    _colormap: dict[int, tuple[int, int, int]] = PrivateAttr()
     _all_attributes: list[str] = PrivateAttr()
     _all_attribute_logos: list[str] = PrivateAttr()
     _model_hash: str = PrivateAttr()
 
     @property
-    def merged_labelmap(self) -> Dict[int, str]:
+    def merged_labelmap(self) -> dict[int, str]:
         return self._merged_labelmap
 
     @property
-    def colormap(self) -> Dict[int, Tuple[int, int, int]]:
+    def colormap(self) -> dict[int, tuple[int, int, int]]:
         return self._colormap
 
     @property
@@ -171,7 +171,7 @@ class ModelConfig(BaseModel):
             with open(model_info_path, "w") as f:
                 json.dump(model_info, f)
         else:
-            with open(model_info_path, "r") as f:
+            with open(model_info_path) as f:
                 model_info: dict[str, Any] = json.load(f)
 
         if detector and detector not in model_info["supportedDetectors"]:
@@ -240,12 +240,12 @@ class BaseDetectorConfig(BaseModel):
         title="Detector Type",
         description="Type of detector to use for object detection (for example 'cpu', 'edgetpu', 'openvino').",
     )
-    model: Optional[ModelConfig] = Field(
+    model: ModelConfig | None = Field(
         default=None,
         title="Detector specific model configuration",
         description="Detector-specific model configuration options (path, input size, etc.).",
     )
-    model_path: Optional[str] = Field(
+    model_path: str | None = Field(
         default=None,
         title="Detector specific model path",
         description="File path to the detector model binary if required by the chosen detector.",

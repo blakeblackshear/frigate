@@ -5,7 +5,7 @@ import math
 import os
 from collections import defaultdict
 from statistics import median
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import cv2
 import numpy as np
@@ -81,7 +81,7 @@ class TrackedObject:
         self.previous = self.to_dict()
 
     @property
-    def max_severity(self) -> Optional[str]:
+    def max_severity(self) -> str | None:
         review_config = self.camera_config.review
 
         if (
@@ -590,7 +590,7 @@ class TrackedObjectAttribute:
             "box": self.box,
         }
 
-    def find_best_object(self, objects: list[dict[str, Any]]) -> Optional[str]:
+    def find_best_object(self, objects: list[dict[str, Any]]) -> str | None:
         """Find the best attribute for each object and return its ID."""
         best_object_area: float | None = None
         best_object_id: str | None = None

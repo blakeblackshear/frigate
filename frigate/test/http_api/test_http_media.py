@@ -1,6 +1,6 @@
 """Unit tests for recordings/media API endpoints."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytz
 from fastapi import Request
@@ -306,8 +306,8 @@ class TestHttpMedia(BaseTestHttp):
         Test recordings summary with UTC timezone (no DST).
         """
         # Use UTC timestamps directly
-        march_9_utc = datetime(2024, 3, 9, 17, 0, 0, tzinfo=timezone.utc).timestamp()
-        march_10_utc = datetime(2024, 3, 10, 17, 0, 0, tzinfo=timezone.utc).timestamp()
+        march_9_utc = datetime(2024, 3, 9, 17, 0, 0, tzinfo=UTC).timestamp()
+        march_10_utc = datetime(2024, 3, 10, 17, 0, 0, tzinfo=UTC).timestamp()
 
         with AuthTestClient(self.app) as client:
             Recordings.insert(

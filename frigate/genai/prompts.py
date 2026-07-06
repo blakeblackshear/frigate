@@ -6,7 +6,7 @@ transport.
 """
 
 import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from playhouse.shortcuts import model_to_dict
 
@@ -216,7 +216,7 @@ def build_object_description_prompt(
     return template.format(**model_to_dict(event))
 
 
-def get_attribute_classifications(config: FrigateConfig) -> List[Dict[str, Any]]:
+def get_attribute_classifications(config: FrigateConfig) -> list[dict[str, Any]]:
     """Return enabled custom classification models of `attribute` type.
 
     Each entry: {"name": <model name>, "objects": [<object label>, ...]}.
@@ -224,7 +224,7 @@ def get_attribute_classifications(config: FrigateConfig) -> List[Dict[str, Any]]
     types, which can later be filtered via the search_objects `attribute`
     field.
     """
-    result: List[Dict[str, Any]] = []
+    result: list[dict[str, Any]] = []
 
     for model_key, model_config in config.classification.custom.items():
         if not model_config.enabled or model_config.object_config is None:
@@ -248,8 +248,8 @@ def get_attribute_classifications(config: FrigateConfig) -> List[Dict[str, Any]]
 
 def get_tool_definitions(
     semantic_search_enabled: bool = False,
-    attribute_classifications: Optional[List[Dict[str, Any]]] = None,
-) -> List[Dict[str, Any]]:
+    attribute_classifications: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     """
     Get OpenAI-compatible tool definitions for Frigate.
 
@@ -260,7 +260,7 @@ def get_tool_definitions(
     included. When attribute classification models are configured, an
     `attribute` parameter is exposed for filtering by their labels.
     """
-    search_objects_properties: Dict[str, Any] = {
+    search_objects_properties: dict[str, Any] = {
         "camera": {
             "type": "string",
             "description": "Camera name to filter by (optional).",
@@ -657,9 +657,9 @@ def get_tool_definitions(
 
 def build_chat_system_prompt(
     config: FrigateConfig,
-    allowed_cameras: List[str],
+    allowed_cameras: list[str],
     semantic_search_enabled: bool,
-    attribute_classifications: List[Dict[str, Any]],
+    attribute_classifications: list[dict[str, Any]],
 ) -> str:
     """Build the system prompt for the chat completion endpoint.
 
@@ -671,7 +671,7 @@ def build_chat_system_prompt(
     current_date_str = current_datetime.strftime("%Y-%m-%d")
     current_time_str = current_datetime.strftime("%I:%M:%S %p")
 
-    cameras_info: List[str] = []
+    cameras_info: list[str] = []
     has_speed_zone = False
     for camera_id in allowed_cameras:
         if camera_id not in config.cameras:

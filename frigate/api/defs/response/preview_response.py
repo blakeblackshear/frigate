@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel, Field
 
 
@@ -13,5 +11,5 @@ class PreviewModel(BaseModel):
     end: float = Field(description="Unix timestamp when the preview ends")
 
 
-PreviewsResponse = List[PreviewModel]
-PreviewFramesResponse = List[str]
+PreviewsResponse = list[PreviewModel]
+PreviewFramesResponse = list[str]

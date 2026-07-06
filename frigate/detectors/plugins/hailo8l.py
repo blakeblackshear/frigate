@@ -4,12 +4,11 @@ import subprocess
 import threading
 import urllib.request
 from functools import partial
-from typing import Dict, List, Optional, Tuple
+from typing import Literal
 
 import cv2
 import numpy as np
 from pydantic import ConfigDict, Field
-from typing_extensions import Literal
 
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
@@ -83,8 +82,8 @@ class HailoAsyncInference:
         input_store: RequestStore,
         output_store: ResponseStore,
         batch_size: int = 1,
-        input_type: Optional[str] = None,
-        output_type: Optional[Dict[str, str]] = None,
+        input_type: str | None = None,
+        output_type: dict[str, str] | None = None,
         send_original_frame: bool = False,
     ) -> None:
         # when importing hailo it activates the driver
@@ -125,9 +124,9 @@ class HailoAsyncInference:
     def callback(
         self,
         completion_info,
-        bindings_list: List,
-        input_batch: List,
-        request_ids: List[int],
+        bindings_list: list,
+        input_batch: list,
+        request_ids: list[int],
     ):
         if completion_info.exception:
             logger.error(f"Inference error: {completion_info.exception}")
@@ -163,7 +162,7 @@ class HailoAsyncInference:
             }
         return configured_infer_model.create_bindings(output_buffers=output_buffers)
 
-    def get_input_shape(self) -> Tuple[int, ...]:
+    def get_input_shape(self) -> tuple[int, ...]:
         return self.hef.get_input_vstream_infos()[0].shape
 
     def run(self) -> None:

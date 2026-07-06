@@ -1,7 +1,6 @@
-from typing import Optional
+from typing import Self
 
 from pydantic import Field, ValidationInfo, model_validator
-from typing_extensions import Self
 
 from frigate.const import FREQUENCY_STATS_POINTS
 
@@ -43,33 +42,33 @@ class MqttConfig(FrigateBaseModel):
         title="Stats interval",
         description="Interval in seconds for publishing system and camera stats to MQTT.",
     )
-    user: Optional[EnvString] = Field(
+    user: EnvString | None = Field(
         default=None,
         title="MQTT username",
         description="Optional MQTT username; can be provided via environment variables or secrets.",
     )
-    password: Optional[EnvString] = Field(
+    password: EnvString | None = Field(
         default=None,
         title="MQTT password",
         description="Optional MQTT password; can be provided via environment variables or secrets.",
         validate_default=True,
     )
-    tls_ca_certs: Optional[str] = Field(
+    tls_ca_certs: str | None = Field(
         default=None,
         title="TLS CA certs",
         description="Path to CA certificate for TLS connections to the broker (for self-signed certs).",
     )
-    tls_client_cert: Optional[str] = Field(
+    tls_client_cert: str | None = Field(
         default=None,
         title="Client cert",
         description="Client certificate path for TLS mutual authentication; do not set user/password when using client certs.",
     )
-    tls_client_key: Optional[str] = Field(
+    tls_client_key: str | None = Field(
         default=None,
         title="Client key",
         description="Private key path for the client certificate.",
     )
-    tls_insecure: Optional[bool] = Field(
+    tls_insecure: bool | None = Field(
         default=None,
         title="TLS insecure",
         description="Allow insecure TLS connections by skipping hostname verification (not recommended).",

@@ -5,11 +5,11 @@ import shutil
 import urllib.request
 import zipfile
 from queue import Queue
+from typing import Literal
 
 import cv2
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
-from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (

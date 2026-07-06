@@ -2,7 +2,6 @@
 
 import logging
 import re
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +15,7 @@ class IntelGpuNameResolver:
     name with the pdev string used by DRM fdinfo.
     """
 
-    _names: Optional[dict[str, str]] = None
+    _names: dict[str, str] | None = None
 
     def get_names(self) -> dict[str, str]:
         if self._names is not None:
@@ -39,7 +38,7 @@ class IntelGpuNameResolver:
             self._names = names
             return names
 
-        cpu_name: Optional[str] = None
+        cpu_name: str | None = None
         if "CPU" in devices:
             try:
                 cpu_name = self._strip_trademarks(
@@ -70,14 +69,14 @@ class IntelGpuNameResolver:
         return names
 
     @staticmethod
-    def _format_pdev(pci) -> Optional[str]:
+    def _format_pdev(pci) -> str | None:
         try:
             return f"{pci.domain:04x}:{pci.bus:02x}:{pci.device:02x}.{pci.function:x}"
         except AttributeError:
             return None
 
     @classmethod
-    def _resolve_name(cls, raw_name: str, device_type, cpu_name: Optional[str]) -> str:
+    def _resolve_name(cls, raw_name: str, device_type, cpu_name: str | None) -> str:
         """Build a display name for a GPU.
 
         Modern integrated Intel GPUs are reported by OpenVINO with a generic

@@ -6,7 +6,8 @@ import logging
 import random
 import string
 from collections import Counter
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,

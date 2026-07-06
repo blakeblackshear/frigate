@@ -6,7 +6,7 @@ import subprocess as sp
 import threading
 import time
 from collections import deque
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
@@ -260,7 +260,7 @@ class CameraWatchdog(threading.Thread):
             self.start_all_ffmpeg()
             # If recording is enabled at startup, set the grace period timer
             if self.config.record.enabled:
-                self.record_enable_time = datetime.now().astimezone(timezone.utc)
+                self.record_enable_time = datetime.now().astimezone(UTC)
 
         time.sleep(self.sleeptime)
         last_restart_time = datetime.now().timestamp()
@@ -280,7 +280,7 @@ class CameraWatchdog(threading.Thread):
                 self.latest_valid_segment_time = 0
                 self.latest_invalid_segment_time = 0
                 self.latest_cache_segment_time = 0
-                self.record_enable_time = datetime.now().astimezone(timezone.utc)
+                self.record_enable_time = datetime.now().astimezone(UTC)
                 last_restart_time = datetime.now().timestamp()
                 continue
 
@@ -294,7 +294,7 @@ class CameraWatchdog(threading.Thread):
                     self.latest_valid_segment_time = 0
                     self.latest_invalid_segment_time = 0
                     self.latest_cache_segment_time = 0
-                    self.record_enable_time = datetime.now().astimezone(timezone.utc)
+                    self.record_enable_time = datetime.now().astimezone(UTC)
                 else:
                     self.logger.debug(f"Disabling camera {self.config.name}")
                     self.stop_all_ffmpeg()
@@ -318,7 +318,7 @@ class CameraWatchdog(threading.Thread):
                     self.latest_valid_segment_time = 0
                     self.latest_invalid_segment_time = 0
                     self.latest_cache_segment_time = 0
-                    self.record_enable_time = datetime.now().astimezone(timezone.utc)
+                    self.record_enable_time = datetime.now().astimezone(UTC)
                     last_restart_time = datetime.now().timestamp()
                 self.was_record_enabled_in_config = record_enabled_in_config
                 continue
@@ -402,7 +402,7 @@ class CameraWatchdog(threading.Thread):
                 poll = p["process"].poll()
 
                 if self.config.record.enabled and "record" in p["roles"]:
-                    now_utc = datetime.now().astimezone(timezone.utc)
+                    now_utc = datetime.now().astimezone(UTC)
 
                     # Check if we're within the grace period after enabling recording
                     # Grace period: 90 seconds allows time for ffmpeg to start and create first segment
@@ -411,25 +411,19 @@ class CameraWatchdog(threading.Thread):
                     ) < timedelta(seconds=90)
 
                     latest_cache_dt = (
-                        datetime.fromtimestamp(
-                            self.latest_cache_segment_time, tz=timezone.utc
-                        )
+                        datetime.fromtimestamp(self.latest_cache_segment_time, tz=UTC)
                         if self.latest_cache_segment_time > 0
                         else now_utc - timedelta(seconds=1)
                     )
 
                     latest_valid_dt = (
-                        datetime.fromtimestamp(
-                            self.latest_valid_segment_time, tz=timezone.utc
-                        )
+                        datetime.fromtimestamp(self.latest_valid_segment_time, tz=UTC)
                         if self.latest_valid_segment_time > 0
                         else now_utc - timedelta(seconds=1)
                     )
 
                     latest_invalid_dt = (
-                        datetime.fromtimestamp(
-                            self.latest_invalid_segment_time, tz=timezone.utc
-                        )
+                        datetime.fromtimestamp(self.latest_invalid_segment_time, tz=UTC)
                         if self.latest_invalid_segment_time > 0
                         else now_utc - timedelta(seconds=1)
                     )

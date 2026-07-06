@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import Field
 
@@ -26,12 +26,12 @@ class GenAIRoleEnum(str, Enum):
 class GenAIConfig(FrigateBaseModel):
     """Primary GenAI Config to define GenAI Provider."""
 
-    api_key: Optional[EnvString] = Field(
+    api_key: EnvString | None = Field(
         default=None,
         title="API key",
         description="API key required by some providers (can also be set via environment variables).",
     )
-    base_url: Optional[str] = Field(
+    base_url: str | None = Field(
         default=None,
         title="Base URL",
         description="Base URL for self-hosted or compatible providers (for example an Ollama instance).",

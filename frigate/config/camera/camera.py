@@ -1,6 +1,5 @@
 import os
 from enum import Enum
-from typing import Optional
 
 from pydantic import Field, PrivateAttr, model_validator
 
@@ -51,14 +50,14 @@ class CameraTypeEnum(str, Enum):
 
 
 class CameraConfig(FrigateBaseModel):
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None,
         title="Camera name",
         description="Camera name is required",
         pattern=REGEX_CAMERA_NAME,
     )
 
-    friendly_name: Optional[str] = Field(
+    friendly_name: str | None = Field(
         None,
         title="Friendly name",
         description="Camera friendly name used in the Frigate UI",
@@ -180,7 +179,7 @@ class CameraConfig(FrigateBaseModel):
         title="Camera UI",
         description="Display ordering and visibility for this camera in the UI. Ordering affects the default dashboard. For more granular control, use camera groups.",
     )
-    webui_url: Optional[str] = Field(
+    webui_url: str | None = Field(
         None,
         title="Camera URL",
         description="URL to visit the camera directly from system page",
@@ -196,7 +195,7 @@ class CameraConfig(FrigateBaseModel):
         title="Zones",
         description="Zones allow you to define a specific area of the frame so you can determine whether or not an object is within a particular area.",
     )
-    enabled_in_config: Optional[bool] = Field(
+    enabled_in_config: bool | None = Field(
         default=None,
         title="Original camera state",
         description="Keep track of original state of camera.",

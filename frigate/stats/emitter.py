@@ -6,7 +6,7 @@ import logging
 import threading
 import time
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Optional
+from typing import Any
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
@@ -49,9 +49,7 @@ class StatsEmitter(threading.Thread):
             self.stats_history.append(stats)
             return stats
 
-    def get_stats_history(
-        self, keys: Optional[list[str]] = None
-    ) -> list[dict[str, Any]]:
+    def get_stats_history(self, keys: list[str] | None = None) -> list[dict[str, Any]]:
         """Get stats history.
 
         Supports dot-notation for nested keys to avoid returning large objects

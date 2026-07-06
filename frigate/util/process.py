@@ -6,9 +6,9 @@ import os
 import pathlib
 import subprocess
 import threading
+from collections.abc import Callable
 from logging.handlers import QueueHandler
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Callable, Optional
 
 from setproctitle import setproctitle
 
@@ -23,11 +23,11 @@ class BaseProcess(mp.Process):
         stop_event: MpEvent,
         priority: int,
         *,
-        name: Optional[str] = None,
-        target: Optional[Callable] = None,
+        name: str | None = None,
+        target: Callable | None = None,
         args: tuple = (),
         kwargs: dict = {},
-        daemon: Optional[bool] = None,
+        daemon: bool | None = None,
     ):
         self.priority = priority
         self.stop_event = stop_event

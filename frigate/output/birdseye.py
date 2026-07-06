@@ -10,7 +10,7 @@ import subprocess as sp
 import threading
 import traceback
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 import numpy as np
@@ -379,8 +379,8 @@ class BirdsEyeFrameManager:
     def copy_to_position(
         self,
         position: Any,
-        camera: Optional[str] = None,
-        frame: Optional[np.ndarray] = None,
+        camera: str | None = None,
+        frame: np.ndarray | None = None,
     ) -> None:
         if camera is None:
             frame = None
@@ -428,7 +428,7 @@ class BirdsEyeFrameManager:
                 }
         return coordinates
 
-    def update_frame(self, frame: Optional[np.ndarray] = None) -> tuple[bool, bool]:
+    def update_frame(self, frame: np.ndarray | None = None) -> tuple[bool, bool]:
         """
         Update birdseye, optionally with a new frame.
         Returns (frame_changed, layout_changed) to indicate if the frame or layout changed.
@@ -592,12 +592,12 @@ class BirdsEyeFrameManager:
         self,
         cameras_to_add: list[str],
         coefficient: float,
-    ) -> Optional[list[list[Any]]]:
+    ) -> list[list[Any]] | None:
         """Calculate the optimal layout for 2+ cameras."""
 
         def map_layout(
             camera_layout: list[list[Any]], row_height: int
-        ) -> tuple[int, int, Optional[list[list[Any]]]]:
+        ) -> tuple[int, int, list[list[Any]] | None]:
             """Map the calculated layout."""
             candidate_layout = []
             starting_x = 0
@@ -825,7 +825,7 @@ class Birdseye:
         self.stop_event = stop_event
         self.requestor = InterProcessRequestor()
         self.idle_fps: float = self.config.birdseye.idle_heartbeat_fps
-        self._idle_interval: Optional[float] = (
+        self._idle_interval: float | None = (
             (1.0 / self.idle_fps) if self.idle_fps > 0 else None
         )
 

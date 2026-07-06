@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -15,7 +15,7 @@ class ExportModel(BaseModel):
     in_progress: bool = Field(
         description="Whether the export is currently being processed"
     )
-    export_case_id: Optional[str] = Field(
+    export_case_id: str | None = Field(
         default=None, description="ID of the export case this export belongs to"
     )
 
@@ -25,10 +25,10 @@ class StartExportResponse(BaseModel):
 
     success: bool = Field(description="Whether the export was started successfully")
     message: str = Field(description="Status or error message")
-    export_id: Optional[str] = Field(
+    export_id: str | None = Field(
         default=None, description="The export ID if successfully started"
     )
-    status: Optional[str] = Field(
+    status: str | None = Field(
         default=None,
         description="Queue status for the export job",
     )
@@ -38,24 +38,24 @@ class BatchExportResultModel(BaseModel):
     """Per-item result for a batch export request."""
 
     camera: str = Field(description="Camera name for this export attempt")
-    export_id: Optional[str] = Field(
+    export_id: str | None = Field(
         default=None,
         description="The export ID when the export was successfully queued",
     )
     success: bool = Field(description="Whether the export was successfully queued")
-    status: Optional[str] = Field(
+    status: str | None = Field(
         default=None,
         description="Queue status for this camera export",
     )
-    error: Optional[str] = Field(
+    error: str | None = Field(
         default=None,
         description="Validation or queueing error for this item, if any",
     )
-    item_index: Optional[int] = Field(
+    item_index: int | None = Field(
         default=None,
         description="Zero-based index of this result within the request items list",
     )
-    client_item_id: Optional[str] = Field(
+    client_item_id: str | None = Field(
         default=None,
         description="Opaque client-supplied item identifier echoed from the request",
     )
@@ -64,12 +64,12 @@ class BatchExportResultModel(BaseModel):
 class BatchExportResponse(BaseModel):
     """Response model for starting an export batch."""
 
-    export_case_id: Optional[str] = Field(
+    export_case_id: str | None = Field(
         default=None,
         description="Export case ID associated with the batch",
     )
-    export_ids: List[str] = Field(description="Export IDs successfully queued")
-    results: List[BatchExportResultModel] = Field(
+    export_ids: list[str] = Field(description="Export IDs successfully queued")
+    results: list[BatchExportResultModel] = Field(
         description="Per-item batch export results"
     )
 
@@ -81,29 +81,29 @@ class ExportJobModel(BaseModel):
     job_type: str = Field(description="Job type")
     status: str = Field(description="Current job status")
     camera: str = Field(description="Camera associated with this export job")
-    name: Optional[str] = Field(
+    name: str | None = Field(
         default=None,
         description="Friendly name for the export",
     )
-    export_case_id: Optional[str] = Field(
+    export_case_id: str | None = Field(
         default=None,
         description="ID of the export case this export belongs to",
     )
     request_start_time: float = Field(description="Requested export start time")
     request_end_time: float = Field(description="Requested export end time")
-    start_time: Optional[float] = Field(
+    start_time: float | None = Field(
         default=None,
         description="Unix timestamp when execution started",
     )
-    end_time: Optional[float] = Field(
+    end_time: float | None = Field(
         default=None,
         description="Unix timestamp when execution completed",
     )
-    error_message: Optional[str] = Field(
+    error_message: str | None = Field(
         default=None,
         description="Error message for failed jobs",
     )
-    results: Optional[dict[str, Any]] = Field(
+    results: dict[str, Any] | None = Field(
         default=None,
         description="Result metadata for completed jobs",
     )
@@ -117,7 +117,7 @@ class ExportJobModel(BaseModel):
     )
 
 
-ExportJobsResponse = List[ExportJobModel]
+ExportJobsResponse = list[ExportJobModel]
 
 
-ExportsResponse = List[ExportModel]
+ExportsResponse = list[ExportModel]

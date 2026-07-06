@@ -1187,14 +1187,14 @@ async def delete_camera(
 
     try:
         with lock:
-            with open(config_file, "r") as f:
+            with open(config_file) as f:
                 old_raw_config = f.read()
 
             try:
                 yaml = YAML()
                 yaml.indent(mapping=2, sequence=4, offset=2)
 
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     data = yaml.load(f)
 
                 # Remove camera from config
@@ -1223,7 +1223,7 @@ async def delete_camera(
                 with open(config_file, "w") as f:
                     yaml.dump(data, f)
 
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     new_raw_config = f.read()
 
                 try:

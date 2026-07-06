@@ -7,7 +7,7 @@ import operator
 import time
 from datetime import datetime
 from functools import reduce
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
@@ -621,7 +621,7 @@ async def _get_live_frame_image_url(
     request: Request,
     camera: str,
     allowed_cameras: list[str],
-) -> Optional[str]:
+) -> str | None:
     """
     Fetch the current live frame for a camera as a base64 data URL.
 
@@ -1186,7 +1186,7 @@ async def chat_completion(
         async def stream_body_llm():
             nonlocal conversation, stream_iterations
 
-            def _emit_chain(extra: Optional[list[dict[str, Any]]] = None):
+            def _emit_chain(extra: list[dict[str, Any]] | None = None):
                 # Return the full conversation (including the system message) so
                 # the client persists and replays it verbatim next turn.
                 chain = conversation + (extra or [])

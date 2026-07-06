@@ -7,7 +7,7 @@ import os
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 from numpy import ndarray
@@ -323,7 +323,7 @@ class FileLock:
         self.timeout = timeout
         self.poll_interval = poll_interval
         self.stale_timeout = stale_timeout
-        self._fd: Optional[int] = None
+        self._fd: int | None = None
         self._acquired = False
 
         if cleanup_stale_on_init:
@@ -367,7 +367,7 @@ class FileLock:
 
         return False
 
-    def acquire(self, timeout: Optional[int] = None) -> bool:
+    def acquire(self, timeout: int | None = None) -> bool:
         """
         Acquire the file lock using fcntl.flock().
 
@@ -400,7 +400,7 @@ class FileLock:
                     self._acquired = True
                     logger.debug(f"Acquired lock: {self.lock_path}")
                     return True
-                except (OSError, IOError):
+                except OSError:
                     # Lock is held by another process
                     if time.time() - start_time >= timeout:
                         logger.warning(f"Timeout waiting for lock: {self.lock_path}")

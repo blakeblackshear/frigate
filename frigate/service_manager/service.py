@@ -5,12 +5,11 @@ import atexit
 import logging
 import threading
 from abc import ABC, abstractmethod
+from collections.abc import Coroutine
 from contextvars import ContextVar
 from dataclasses import dataclass
 from functools import partial
-from typing import Coroutine, Optional, Union, cast
-
-from typing_extensions import Self
+from typing import Self, cast
 
 
 class Service(ABC):
@@ -19,8 +18,8 @@ class Service(ABC):
     def __init__(
         self,
         *,
-        name: Optional[str] = None,
-        manager: Optional[ServiceManager] = None,
+        name: str | None = None,
+        manager: ServiceManager | None = None,
     ):
         if name:
             self.__dict__["name"] = name
@@ -48,7 +47,7 @@ class Service(ABC):
         self,
         *,
         wait: bool = False,
-        wait_timeout: Optional[float] = None,
+        wait_timeout: float | None = None,
     ) -> Self:
         """Start this service.
 
@@ -70,9 +69,9 @@ class Service(ABC):
         self,
         *,
         force: bool = False,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         wait: bool = False,
-        wait_timeout: Optional[float] = None,
+        wait_timeout: float | None = None,
     ) -> Self:
         """Stop this service.
 
@@ -97,9 +96,9 @@ class Service(ABC):
         self,
         *,
         force: bool = False,
-        stop_timeout: Optional[float] = None,
+        stop_timeout: float | None = None,
         wait: bool = False,
-        wait_timeout: Optional[float] = None,
+        wait_timeout: float | None = None,
     ) -> Self:
         """Restart this service.
 
@@ -129,7 +128,7 @@ class Service(ABC):
         self,
         *,
         force: bool = False,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> None:
         pass
 
@@ -137,14 +136,14 @@ class Service(ABC):
         self,
         *,
         force: bool = False,
-        stop_timeout: Optional[float] = None,
+        stop_timeout: float | None = None,
     ) -> None:
         await self.on_stop(force=force, timeout=stop_timeout)
         await self.on_start()
 
 
 default_service_manager_lock = threading.Lock()
-default_service_manager: Optional[ServiceManager] = None
+default_service_manager: ServiceManager | None = None
 
 current_service_manager: ContextVar[ServiceManager] = ContextVar(
     "current_service_manager"
@@ -162,8 +161,8 @@ class Command:
     """
 
     coro: Coroutine
-    lock: Optional[asyncio.Lock] = None
-    done: Optional[threading.Event] = None
+    lock: asyncio.Lock | None = None
+    done: threading.Event | None = None
 
 
 class ServiceManager:
@@ -189,7 +188,7 @@ class ServiceManager:
     _services_lock: threading.Lock
 
     # Commands will be queued with associated event loop. Queueing `None` signals shutdown.
-    _command_queue: asyncio.Queue[Union[Command, None]]
+    _command_queue: asyncio.Queue[Command | None]
     _event_loop: asyncio.AbstractEventLoop
 
     # The pending command counter is used to ensure all commands have been queued before shutdown.
@@ -204,7 +203,7 @@ class ServiceManager:
     # Will be acquired to ensure the shutdown sentinel is sent only once. Never released.
     _shutdown_lock: threading.Lock
 
-    def __init__(self, *, name: Optional[str] = None):
+    def __init__(self, *, name: str | None = None):
         self._name = name if name is not None else (__package__ or __name__)
         self._logger = logging.getLogger(self.name)
 
@@ -276,8 +275,8 @@ class ServiceManager:
         coro: Coroutine,
         *,
         wait: bool = False,
-        wait_timeout: Optional[float] = None,
-        lock: Optional[asyncio.Lock] = None,
+        wait_timeout: float | None = None,
+        lock: asyncio.Lock | None = None,
     ) -> None:
         """Run an async task in the service manager thread.
 
@@ -299,7 +298,7 @@ class ServiceManager:
             cmd.done.wait(timeout=wait_timeout)
 
     def shutdown(
-        self, *, wait: bool = False, wait_timeout: Optional[float] = None
+        self, *, wait: bool = False, wait_timeout: float | None = None
     ) -> None:
         """Shutdown the service manager thread.
 
@@ -321,7 +320,7 @@ class ServiceManager:
         if not self._manager_thread.is_alive():
             raise RuntimeError(f"ServiceManager {self.name} is not running")
 
-    def _send_command(self, command: Union[Command, None]) -> None:
+    def _send_command(self, command: Command | None) -> None:
         self._ensure_running()
 
         async def queue_command() -> None:
@@ -336,7 +335,7 @@ class ServiceManager:
 
         self._ensure_running()
         with self._services_lock:
-            name_conflict: Optional[Service] = next(
+            name_conflict: Service | None = next(
                 (
                     existing
                     for name, existing in self._services.items()

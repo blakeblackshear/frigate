@@ -84,7 +84,7 @@ def read_training_metadata(model_name: str) -> dict[str, any] | None:
         return None
 
     try:
-        with open(metadata_path, "r") as f:
+        with open(metadata_path) as f:
             metadata = json.load(f)
         return metadata
     except Exception as e:
@@ -732,7 +732,7 @@ def collect_object_classification_examples(
 
     # Step 1: Query events for the specified label and cameras
     events = list(
-        Event.select().where((Event.label == label)).order_by(Event.start_time.asc())
+        Event.select().where(Event.label == label).order_by(Event.start_time.asc())
     )
 
     if not events:

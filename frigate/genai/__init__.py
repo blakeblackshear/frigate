@@ -6,7 +6,8 @@ import logging
 import os
 import re
 import time
-from typing import Any, AsyncGenerator, Callable, Optional
+from collections.abc import AsyncGenerator, Callable
+from typing import Any
 
 import numpy as np
 from pydantic import ValidationError
@@ -235,7 +236,7 @@ class GenAIClient:
         camera_config: CameraConfig,
         thumbnails: list[bytes],
         event: Event,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Generate a description for the frame."""
         try:
             prompt = build_object_description_prompt(camera_config, event)
@@ -254,9 +255,9 @@ class GenAIClient:
         self,
         prompt: str,
         images: list[bytes],
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
         enable_thinking: bool = False,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Submit a request to the provider.
 
         ``enable_thinking`` is honored only by providers that report
@@ -321,9 +322,9 @@ class GenAIClient:
     def chat_with_tools(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> dict[str, Any]:
         """
         Send chat messages to LLM with optional tool definitions.
@@ -395,9 +396,9 @@ class GenAIClient:
     async def chat_with_tools_stream(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """Streaming counterpart to `chat_with_tools`.
 

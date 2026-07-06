@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from collections import deque
 from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 import zmq
@@ -42,9 +42,9 @@ class ObjectDetector(ABC):
 class BaseLocalDetector(ObjectDetector):
     def __init__(
         self,
-        detector_config: Optional[BaseDetectorConfig] = None,
-        labels: Optional[str] = None,
-        stop_event: Optional[MpEvent] = None,
+        detector_config: BaseDetectorConfig | None = None,
+        labels: str | None = None,
+        stop_event: MpEvent | None = None,
     ) -> None:
         self.fps = EventsPerSecond()
         if labels is None:

@@ -856,7 +856,7 @@ class OnvifController:
         try:
             # Wait with a timeout to prevent blocking indefinitely
             future.result(timeout=10)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error(f"Command {command} timed out for camera {camera_name}")
         except Exception as e:
             logger.error(

@@ -11,7 +11,7 @@ except FileNotFoundError:
     pass
 
 try:
-    with open("/config/conv2rknn.yaml", "r") as config_file:
+    with open("/config/conv2rknn.yaml") as config_file:
         configuration = yaml.safe_load(config_file)
 except FileNotFoundError:
     raise Exception("Please place a config file at /config/conv2rknn.yaml")

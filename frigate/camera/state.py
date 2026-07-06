@@ -5,7 +5,8 @@ import logging
 import os
 import threading
 from collections import defaultdict
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import cv2
 import numpy as np

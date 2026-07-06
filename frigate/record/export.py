@@ -9,9 +9,9 @@ import shutil
 import string
 import subprocess as sp
 import threading
+from collections.abc import Callable
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Optional
 
 import pytz  # type: ignore[import-untyped]
 from peewee import DoesNotExist
@@ -209,17 +209,17 @@ class RecordingExporter(threading.Thread):
         config: FrigateConfig,
         id: str,
         camera: str,
-        name: Optional[str],
-        image: Optional[str],
+        name: str | None,
+        image: str | None,
         start_time: int,
         end_time: int,
         playback_source: PlaybackSourceEnum,
-        export_case_id: Optional[str] = None,
-        ffmpeg_input_args: Optional[str] = None,
-        ffmpeg_output_args: Optional[str] = None,
+        export_case_id: str | None = None,
+        ffmpeg_input_args: str | None = None,
+        ffmpeg_output_args: str | None = None,
         cpu_fallback: bool = False,
-        chapters: Optional[ChaptersEnum] = None,
-        on_progress: Optional[Callable[[str, float], None]] = None,
+        chapters: ChaptersEnum | None = None,
+        on_progress: Callable[[str, float], None] | None = None,
     ) -> None:
         super().__init__()
         self.config = config
@@ -283,7 +283,7 @@ class RecordingExporter(threading.Thread):
 
         return input_duration * factor
 
-    def _sum_source_duration_seconds(self) -> Optional[float]:
+    def _sum_source_duration_seconds(self) -> float | None:
         """Sum saved-video seconds inside [start_time, end_time].
 
         Queries Recordings or Previews depending on the playback source,
@@ -383,7 +383,7 @@ class RecordingExporter(threading.Thread):
     def _chapter_metadata_path(self) -> str:
         return os.path.join(CACHE_DIR, f"export_chapters_{self.export_id}.txt")
 
-    def _build_chapter_metadata_file(self, recordings: list) -> Optional[str]:
+    def _build_chapter_metadata_file(self, recordings: list) -> str | None:
         """Write an FFmpeg metadata file with chapters for review items in range.
 
         Chapter offsets are computed in *output time*: the VOD endpoint
@@ -514,7 +514,7 @@ class RecordingExporter(threading.Thread):
 
     def _build_recording_segment_chapter_metadata_file(
         self, recordings: list
-    ) -> Optional[str]:
+    ) -> str | None:
         """Write an FFmpeg metadata file with one chapter per recording segment.
 
         Each chapter's title is the segment's wallclock start time in
@@ -530,14 +530,14 @@ class RecordingExporter(threading.Thread):
             return None
 
         tz_name = self.config.ui.timezone
-        tz: Optional[datetime.tzinfo] = None
+        tz: datetime.tzinfo | None = None
         if tz_name:
             try:
                 tz = pytz.timezone(tz_name)
             except pytz.UnknownTimeZoneError:
                 tz = None
         if tz is None:
-            tz = datetime.timezone.utc
+            tz = datetime.UTC
 
         chapter_blocks: list[str] = []
         output_offset_ms = 0
@@ -591,7 +591,7 @@ class RecordingExporter(threading.Thread):
 
         if (
             self.start_time
-            < datetime.datetime.now(datetime.timezone.utc)
+            < datetime.datetime.now(datetime.UTC)
             .replace(minute=0, second=0, microsecond=0)
             .timestamp()
         ):
@@ -767,7 +767,7 @@ class RecordingExporter(threading.Thread):
         # add metadata
         title = f"Frigate Recording for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
         creation_time = datetime.datetime.fromtimestamp(
-            self.start_time, tz=datetime.timezone.utc
+            self.start_time, tz=datetime.UTC
         ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         ffmpeg_cmd.extend(
             [
@@ -876,7 +876,7 @@ class RecordingExporter(threading.Thread):
         # add metadata
         title = f"Frigate Preview for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
         creation_time = datetime.datetime.fromtimestamp(
-            self.start_time, tz=datetime.timezone.utc
+            self.start_time, tz=datetime.UTC
         ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         ffmpeg_cmd.extend(
             [

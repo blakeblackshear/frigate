@@ -4,7 +4,7 @@ import logging
 import os
 import threading
 import time
-from typing import Any, Optional
+from typing import Any
 
 from peewee import DoesNotExist
 
@@ -142,7 +142,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         except Exception as e:
             logger.error(f"Error in audio transcription post-processing: {e}")
 
-    def __transcribe_audio(self, audio_data: bytes) -> Optional[str]:
+    def __transcribe_audio(self, audio_data: bytes) -> str | None:
         """Transcribe WAV audio data using faster-whisper."""
         if not self.recognizer:
             logger.debug("Recognizer not initialized")

@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Optional
 
 from pydantic import Field
 
@@ -20,7 +19,7 @@ class UnitSystemEnum(str, Enum):
 
 
 class UIConfig(FrigateBaseModel):
-    timezone: Optional[str] = Field(
+    timezone: str | None = Field(
         default=None,
         title="Timezone",
         description="Optional timezone to display across the UI (defaults to browser local time if unset).",

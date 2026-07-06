@@ -416,7 +416,7 @@ class TestSaveThumbnailFromPreviewFrames(unittest.TestCase):
         # comparison takes the current-hour branch (preview frames).
         import datetime
 
-        now = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        now = datetime.datetime.now(datetime.UTC).timestamp()
         exporter = _make_exporter()
         exporter.export_id = "thumb_short"
         exporter.start_time = now

@@ -756,7 +756,7 @@ class PtzAutoTracker:
             try:
                 # Asynchronously wait for move data with a timeout
                 move_data = await asyncio.wait_for(move_queue.get(), timeout=0.1)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
 
             async with self.move_queue_locks[camera]:
