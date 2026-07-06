@@ -176,7 +176,7 @@
         "description": "Włączone"
     },
     "audio": {
-        "label": "Zdarzenia audio",
+        "label": "Wykrywanie dźwięku",
         "description": "Ustawienia detekcji zdarzeń audio dla tej kamery.",
         "enabled": {
             "label": "Włącz detekcję audio",
@@ -196,7 +196,11 @@
         },
         "filters": {
             "label": "Filtry audio",
-            "description": "Ustawienia filtrów dla poszczególnych typów audio, takie jak progi pewności, używane do redukcji fałszywych alarmów."
+            "description": "Ustawienia filtrów dla poszczególnych typów audio, takie jak progi pewności, używane do redukcji fałszywych alarmów.",
+            "threshold": {
+                "label": "Minimalna pewność wykrycia dźwięku",
+                "description": "Minimalny próg pewności, aby zdarzenie audio zostało zliczone."
+            }
         },
         "enabled_in_config": {
             "label": "Pierwotny stan audio",
@@ -224,10 +228,18 @@
     },
     "birdseye": {
         "mode": {
-            "label": "Tryb śledzenia"
+            "label": "Tryb śledzenia",
+            "description": "Tryb uwzględniania kamer w widoku z lotu ptaka: „obiekty”, „ruch” lub „ciągły”."
         },
         "order": {
-            "label": "Pozycja"
+            "label": "Pozycja",
+            "description": "Pozycja numeryczna określająca kolejność kamery w układzie widoku z lotu ptaka."
+        },
+        "label": "Widok z lotu ptaka",
+        "description": "Ustawienia widoku z lotu ptaka „Birdseye”, który łączy obraz z wielu kamer w jeden układ.",
+        "enabled": {
+            "label": "Włącz widok z lotu ptaka",
+            "description": "Włącz lub wyłącz funkcję widoku z lotu ptaka."
         }
     },
     "detect": {
@@ -236,7 +248,58 @@
             "description": "Włącza lub wyłącza wykrywanie obiektów dla tej kamery."
         },
         "stationary": {
-            "label": "Konfiguracja obiektów stacjonarnych"
+            "label": "Konfiguracja obiektów stacjonarnych",
+            "description": "Ustawienia wykrywania i obsługi obiektów statycznych przez określony czas.",
+            "interval": {
+                "label": "Okres bezruchu",
+                "description": "Częstotliwość (w klatkach) sprawdzania detekcji dla obiektów nieruchomych."
+            },
+            "threshold": {
+                "label": "Próg bezruchu",
+                "description": "Liczba klatek bez zmiany pozycji potrzebna do uznania obiektu za nieruchomy."
+            },
+            "max_frames": {
+                "label": "Maksymalna liczba klatek",
+                "description": "Ogranicza czas śledzenia nieruchomych obiektów przed ich usunięciem.",
+                "default": {
+                    "label": "Domyślna maks. liczba klatek",
+                    "description": "Domyślna maksymalna liczba klatek śledzenia nieruchomego obiektu przed zatrzymaniem."
+                },
+                "objects": {
+                    "label": "Maksymalna liczba klatek obiektu",
+                    "description": "Nadpisania dla poszczególnych obiektów określające maksymalną liczbę klatek śledzenia nieruchomych obiektów."
+                }
+            },
+            "classifier": {
+                "label": "Włącz klasyfikator wizualny",
+                "description": "Użyj klasyfikatora wizualnego do wykrywania rzeczywiście nieruchomych obiektów, nawet gdy ramki ograniczające drżą."
+            }
+        },
+        "label": "Wykrywanie obiektów",
+        "description": "Ustawienia roli „detection/detect” używanej do wykrywania obiektów i inicjalizacji trackerów.",
+        "height": {
+            "label": "Wysokość wykrywania",
+            "description": "Wysokość (w pikselach) klatek używanych w strumieniu detekcji; pozostaw puste, aby użyć natywnej rozdzielczości strumienia."
+        },
+        "width": {
+            "label": "Szerokość wykrywania",
+            "description": "Szerokość (w pikselach) klatek używanych w strumieniu detekcji; pozostaw puste, aby użyć natywnej rozdzielczości strumienia."
+        },
+        "fps": {
+            "label": "FPS wykrywania",
+            "description": "Docelowa liczba klatek na sekundę używana do detekcji; niższe wartości zmniejszają użycie CPU (zalecana wartość to 5, ustaw wyższą — maksymalnie 10 — tylko jeśli śledzisz bardzo szybko poruszające się obiekty)."
+        },
+        "min_initialized": {
+            "label": "Minimalna liczba klatek inicjalizacyjnych",
+            "description": "Liczba kolejnych trafień detekcji wymagana do utworzenia śledzonego obiektu. Zwiększenie wartości zmniejsza liczbę fałszywych inicjalizacji. Wartość domyślna to fps podzielone przez 2."
+        },
+        "max_disappeared": {
+            "label": "Maksymalna liczba pominiętych klatek",
+            "description": "Liczba klatek bez detekcji, po której obiekt śledzony jest uznawany za utracony."
+        },
+        "annotation_offset": {
+            "label": "Przesunięcie oznaczenia",
+            "description": "Liczba milisekund przesunięcia adnotacji detekcji w celu lepszego dopasowania ramek ograniczających na osi czasu do nagrań; wartość może być dodatnia lub ujemna."
         }
     },
     "face_recognition": {
@@ -245,6 +308,33 @@
         "enabled": {
             "label": "Włącz rozpoznawanie twarzy",
             "description": "Włącz lub wyłącz rozpoznawanie twarzy."
+        },
+        "min_area": {
+            "label": "Minimalny obszar twarzy",
+            "description": "Minimalny obszar twarzy (w pikselach) wymagany do podjęcia próby rozpoznania."
+        }
+    },
+    "ffmpeg": {
+        "label": "Strumienie (FFmpeg)",
+        "output_args": {
+            "detect": {
+                "description": "Domyślne argumenty wyjściowe dla strumieni z rolą detekcji."
+            },
+            "record": {
+                "description": "Domyślne argumenty wyjściowe dla strumieni z rolą zapisu."
+            }
+        },
+        "retry_interval": {
+            "label": "Czas ponownej próby FFmpeg",
+            "description": "Czas (w sekundach) przed ponownym uruchomieniem utraconego strumienia kamery. Domyślnie: 10."
+        },
+        "apple_compatibility": {
+            "label": "Kompatybilność z Apple",
+            "description": "Włącz tagowanie HEVC, aby zapewnić lepszą zgodność z odtwarzaczami Apple podczas nagrywania w formacie H.265."
+        },
+        "gpu": {
+            "label": "Indeks GPU",
+            "description": "Domyślny indeks karty graficznej używany do akceleracji sprzętowej, jeśli jest dostępna."
         }
     }
 }
