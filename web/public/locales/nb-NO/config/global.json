@@ -212,7 +212,7 @@
         },
         "default_role": {
             "label": "Standardrolle",
-            "description": "Standardrolle tildelt proxy-autentiserte brukere når ingen rolletilordning gjelder (admin eller viewer)."
+            "description": "Standardrolle tildelt proxy-autentiserte brukere når ingen rolletilordning gjelder."
         },
         "separator": {
             "label": "Skilletegn",
@@ -555,7 +555,7 @@
         },
         "listen": {
             "label": "Lyttetyper",
-            "description": "Liste over typer lydhendelser som skal detekteres (f.eks. bjeff, brannalarm, skrik, tale, rop)."
+            "description": "Liste over typer lydhendelser som skal detekteres (f.eks. bjeff, brannalarm, tale, rop)."
         },
         "filters": {
             "label": "Lydfiltre",
@@ -691,7 +691,7 @@
         "description": "FFmpeg-innstillinger, inkludert sti til binærfil, argumenter, alternativer for maskinvareakselerasjon og utdata-argumenter per rolle.",
         "path": {
             "label": "FFmpeg-sti",
-            "description": "Sti til FFmpeg-binærfilen som skal brukes, eller et versjonsalias (\"5.0\" eller \"7.0\")."
+            "description": "Sti til FFmpeg-binærfilen som skal brukes, eller et versjonsalias (\"7.0\" eller \"8.0\")."
         },
         "global_args": {
             "label": "Globale FFmpeg-argumenter",
@@ -1043,6 +1043,9 @@
             "max_concurrent": {
                 "description": "Maksimalt antall eksportjobber som kan behandles samtidig.",
                 "label": "Maksimalt antall samtidige eksporter"
+            },
+            "chapters": {
+                "label": "Kapittelmetadata som skal bygges inn i eksporterte opptak"
             }
         },
         "preview": {
@@ -1554,6 +1557,10 @@
         "dashboard": {
             "label": "Vis i grensesnitt",
             "description": "Velg om dette kameraet skal være synlig i Frigate-grensesnittet. Deaktivering krever manuell redigering av konfigurasjonen for å vise kameraet igjen."
+        },
+        "review": {
+            "label": "Vis i inspeksjon",
+            "description": "Velg om dette kameraet skal være synlig i inspeksjon (inspeksjonssiden og dens kamerafilter, bevegelsesinspeksjon og historikkvisning)."
         }
     },
     "onvif": {

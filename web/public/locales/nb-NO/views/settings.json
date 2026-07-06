@@ -31,7 +31,7 @@
     "notifications": "Meldingsvarsler",
     "enrichments": "Utvidelser",
     "triggers": "Utløsere",
-    "cameraManagement": "Administrasjon",
+    "cameraManagement": "Kamerabehandling",
     "cameraReview": "Inspeksjon",
     "roles": "Roller",
     "profiles": "Profiler",
@@ -46,7 +46,7 @@
     "systemDetectionModel": "Deteksjonsmodell",
     "cameraLivePlayback": "Direkteavspilling",
     "globalLivePlayback": "Direkteavspilling",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "Strømmer (FFmpeg)",
     "globalFfmpeg": "FFmpeg",
     "systemFfmpeg": "FFmpeg",
     "cameraBirdseye": "Fugleperspektiv",
@@ -723,7 +723,8 @@
     "notificationUnavailable": {
       "documentation": "Se dokumentasjonen",
       "title": "Meldingsvarsler utilgjengelig",
-      "desc": "Nettleser push-varsler krever et sikkert miljø (<code>https://…</code>). Dette er en nettleserbegrensning. Få tilgang til Frigate på en sikker måte for å bruke meldingsvarsler."
+      "desc": "Nettleser push-varsler krever et sikkert miljø (<code>https://…</code>). Dette er en nettleserbegrensning. Få tilgang til Frigate på en sikker måte for å bruke meldingsvarsler.",
+      "descPwa": "På iOS er web-pushvarsler kun tilgjengelig når Frigate er installert på hjemskjermen din. Åpne <strong>Del</strong>-menyen, velg <strong>Legg til på hjemskjermen</strong>, og åpne deretter Frigate fra det nye ikonet for å registrere denne enheten for varsler."
     },
     "email": {
       "title": "E-post",
@@ -1136,7 +1137,7 @@
         "brands": {
           "reolink-rtsp": "Reolink RTSP anbefales ikke. Aktiver HTTP i kameraets fastvare-innstillinger og start kameraveiviseren på nytt."
         },
-        "customUrlRtspRequired": "Egendefinerte URL-er må begynne med \"rtsp://\". Manuell konfigurering kreves for kamera­strømmer som ikke bruker RTSP."
+        "customUrlRtspRequired": "Egendefinerte URL-er må begynne med «rtsp://» eller «rtsps://». Manuell konfigurasjon kreves for kamerastrømmer som ikke bruker RTSP."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
@@ -1364,10 +1365,10 @@
     "selectCamera": "Velg et kamera",
     "backToSettings": "Tilbake til kamerainnstillinger",
     "streams": {
-      "title": "Aktiver / Deaktiver kameraer",
+      "title": "Kamerastatus og detaljer",
       "desc": "Midlertidig deaktiver et kamera til Frigate startes på nytt. Deaktivering av et kamera stopper Frigates behandling av dette kameraets strømmer fullstendig. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke go2rtc-restrømming.</em>",
       "disableDesc": "Aktiver et kamera som for øyeblikket ikke er synlig i grensesnittet og deaktivert i konfigurasjonen. En omstart av Frigate kreves etter aktivering.",
-      "enableSuccess": "Aktiverte {{cameraName}} i konfigurasjonen. Start Frigate på nytt for å ta i bruk endringene.",
+      "enableSuccess": "Aktiverte {{cameraName}}. Start Frigate på nytt for å ta i bruk.",
       "enableLabel": "Aktiverte kameraer",
       "enableDesc": "Deaktiver et aktivert kamera midlertidig frem til Frigate starter på nytt. Deaktivering av et kamera stopper all prosessering av kameraets strømmer. Deteksjon, opptak og feilsøking vil være utilgjengelig.<br /> <em>Merk: Dette deaktiverer ikke videreformidling (restream) i go2rtc.</em><br /><br />Dra i feltet for å endre rekkefølgen på kameraene slik de vises i grensesnittet. Rekkefølgen på de aktiverte kameraene vil gjenspeiles i hele grensesnittet, inkludert Live-dashbordet og rullegardinmenyene for kameravalg.",
       "disableLabel": "Deaktiverte kameraer",
@@ -1379,7 +1380,30 @@
       },
       "reorderHandle": "Dra for å endre rekkefølge",
       "saving": "Lagrer…",
-      "saved": "Lagret"
+      "saved": "Lagret",
+      "label": "Kamerastatus",
+      "description": "Angi driftsstatus for hvert kamera.<br /><br /><strong>På</strong>: Strømmer behandles normalt.<br /><strong>Av</strong>: Setter behandlingen midlertidig på pause. Vedvarer ikke etter omstart av Frigate.<br /><strong>Deaktivert</strong>: Stopper behandlingen og lagrer endringen i konfigurasjonen din. En omstart kreves for å aktivere et deaktivert kamera igjen.<br /><br /><em>Merk: Deaktivering påvirker ikke videreformidling (restream) i go2rtc.</em><br /><br />Dra i ikonet for å endre rekkefølgen på aktive kameraer slik de vises i grensesnittet, inkludert Live-dashbordet og rullegardinmenyene for kameravalg.",
+      "disabledSubheading": "Deaktivert i konfigurasjonen",
+      "status": {
+        "on": "På",
+        "off": "Av",
+        "disabled": "Deaktivert"
+      },
+      "disableSuccess": "Deaktiverte {{cameraName}} og lagret i konfigurasjonen.",
+      "details": {
+        "edit": "Rediger kameradetaljer",
+        "title": "Rediger kameradetaljer",
+        "description": "Oppdater visningsnavn, ekstern URL og synlighet brukt for dette kameraet i Frigate-grensesnittet.",
+        "friendlyNameLabel": "Visningsnavn",
+        "friendlyNameHelp": "Vennlig navn som vises for dette kameraet i Frigate-grensesnittet. La stå tomt for å bruke kamera-ID.",
+        "webuiUrlLabel": "URL til kameraets webgrensesnitt",
+        "webuiUrlHelp": "URL for å besøke kameraets webgrensesnitt direkte fra feilsøkingsvisningen (Debug). La stå tomt for å deaktivere lenken.",
+        "webuiUrlInvalid": "Må være en gyldig URL (f.eks. https://example.com).",
+        "dashboardLabel": "Vis på Live-dashbordet",
+        "dashboardHelp": "Vis dette kameraet på Live-dashbordet.",
+        "reviewLabel": "Vis i Inspeksjons-modus",
+        "reviewHelp": "Vis dette kameraet i Inspeksjon (Review), inkludert kamerafilteret, bevegelsesgjennomgang og historikkvisningen."
+      }
     },
     "cameraConfig": {
       "add": "Legg til kamera",
@@ -1414,9 +1438,11 @@
       "enabled": "Aktivert",
       "inherit": "Arv",
       "disabled": "Deaktivert",
-      "description": "Konfigurer hvilke kameraer som er aktivert eller deaktivert når en profil aktiveres. Kameraer satt til \"Arv\" beholder sin opprinnelige status.",
+      "description": "Konfigurer hvilke kameraer som slås på eller av når en profil aktiveres. Kameraer satt til «Arv» beholder sin standardstatus.",
       "title": "Profiloverstyringer for kamera",
-      "selectLabel": "Velg profil"
+      "selectLabel": "Velg profil",
+      "on": "På",
+      "off": "Av"
     },
     "deleteCameraDialog": {
       "confirmTitle": "Er du sikker?",
@@ -1438,7 +1464,92 @@
       "dedicatedLpr": "Dedikert LPR (lesing av kjennemerker)",
       "saveSuccess": "Kameratype oppdatert for {{cameraName}}. Start Frigate på nytt for å bruke endringene."
     },
-    "description": "Legg til, rediger og slett kameraer. Kontroller hvilke kameraer som er aktivert og konfigurer overstyringer for hver profil og kameratype. For å konfigurere strømmer, deteksjon, bevegelse og andre kameraspesifikke innstillinger, velg den aktuelle seksjonen under Kamerakonfigurasjon."
+    "description": "Legg til, rediger og slett kameraer, kontroller statusen til hvert kamera, og konfigurer overstyringer per profil og kameratype. For å konfigurere strømmer, deteksjon, bevegelse og andre kameraspesifikke innstillinger, velg den aktuelle seksjonen under Kamerakonfigurasjon.",
+    "clone": {
+      "sectionTitle": "Klon innstillinger",
+      "sectionDescription": "Kopier konfigurasjon fra ett kamera til et annet eller til et nytt kamera.",
+      "button": "Klon innstillinger",
+      "title": "Klon kamerainnstillinger",
+      "description": "Kopier et kameras konfigurasjon til ett eller flere andre kameraer eller til et nytt kamera. Identitet (navn, visningsnavn, URL til webgrensesnitt, visningsrekkefølge) kopieres ikke.",
+      "source": {
+        "label": "Kildekamera",
+        "placeholder": "Velg et kildekamera",
+        "required": "Kildekamera må velges"
+      },
+      "target": {
+        "legend": "Mål",
+        "newRadio": "Nytt kamera",
+        "newNameLabel": "Kameranavn",
+        "newNamePlaceholder": "f.eks. bakdoer eller Bakdør",
+        "newNameRequired": "Kameranavn kreves",
+        "newNameInvalid": "Ugyldig kameranavn",
+        "newNameCollision": "Et kamera med dette navnet eksisterer allerede",
+        "newStreamsForced": "Strømmer kopieres alltid for et nytt kamera.",
+        "existingCamerasRadio": "Eksisterende kameraer",
+        "allCameras": "Alle kameraer",
+        "existingPlaceholder": "Velg minst ett kamera",
+        "existingDisabled": "Ingen andre kameraer å kopiere til"
+      },
+      "categories": {
+        "legend": "Innstillinger som skal klones",
+        "description": "Velg hvilke innstillinger som skal kopieres fra kildekameraet.",
+        "selectAll": "Velg alle",
+        "selectNone": "Velg ingen",
+        "resetDefaults": "Tilbakestill til standardverdier",
+        "general": "Generelt",
+        "spatial": "Romlige innstillinger",
+        "streams": "Strømmer",
+        "spatialWarningTitle": "Uoverensstemmelse i oppløsning",
+        "spatialWarning": "Kildekameraet {{srcCamera}} sin deteksjonsoppløsning ({{srcWidth}}×{{srcHeight}}) er forskjellig fra: {{cameras}}. Polygoner vil kanskje ikke samsvare på disse kameraene. Disse er deaktivert som standard; aktiver for å kopiere som de er.",
+        "restartHint": "Omstart kreves",
+        "items": {
+          "record": "Opptak pågår",
+          "snapshots": "Øyeblikksbilder",
+          "review": "Inspeksjon",
+          "motion": "Bevegelsesdeteksjon",
+          "objects": "Objekter",
+          "audio": "Lyddeteksjon",
+          "audio_transcription": "Lydtranskripsjon",
+          "notifications": "Varsler",
+          "birdseye": "Fugleperspektiv",
+          "mqtt": "MQTT",
+          "timestamp_style": "Tidsstempelstil",
+          "onvif": "ONVIF",
+          "lpr": "Kjennemerke gjenkjenning",
+          "face_recognition": "Ansiktsgjenkjenning",
+          "semantic_search": "Semantisk søk",
+          "genai": "Generativ AI",
+          "type": "Kameratype (normal / dedikert LPR)",
+          "profiles": "Profiler",
+          "detect": "Deteksjonsdimensjoner",
+          "zones": "Soner",
+          "motion_mask": "Bevegelsesmasker",
+          "object_masks": "Objektmasker",
+          "ffmpeg_live": "Strømme-URL-er og roller"
+        }
+      },
+      "footer": {
+        "restartNeeded": "Omstart vil kreves for enkelte endringer.",
+        "liveOnly": "Alle endringer vil trå i kraft direkte uten omstart.",
+        "submit": "Klon",
+        "submitting": "Kloner…",
+        "changeCount_one": "{{count}} endring vil bli brukt",
+        "changeCount_other": "{{count}} endringer vil bli brukt"
+      },
+      "toast": {
+        "success": "Innstillinger kopiert til {{cameraName}}",
+        "successWithRestart": "Innstillinger kopiert til {{cameraName}}. Start Frigate på nytt for å ta i bruk alle endringer.",
+        "partialFailure": "{{successCount}} seksjoner ble tatt i bruk; «{{failedSection}}» feilet: {{errorMessage}}",
+        "partialFailureMulti": "Kopiert til {{successCount}} kamera(er); feilet for {{failed}}: {{errorMessage}}",
+        "newCameraPartialFailure": "Kameraet {{cameraName}} ble opprettet, men noen innstillinger kunne ikke kopieres: {{errorMessage}}",
+        "sourceMissing": "Kildekameraet eksisterer ikke lenger",
+        "submitError": "Kunne ikke klone kamera: {{errorMessage}}",
+        "successMulti_one": "Innstillinger kopiert til {{count}} kamera",
+        "successMulti_other": "Innstillinger kopiert til {{count}} kameraer",
+        "successMultiWithRestart_one": "Innstillinger kopiert til {{count}} kamera. Start Frigate på nytt for å aktivere alle endringene.",
+        "successMultiWithRestart_other": "Innstillinger kopiert til {{count}} kameraer. Start Frigate på nytt for å bruke alle endringene."
+      }
+    }
   },
   "cameraReview": {
     "title": "Innstillinger for kamerainspeksjon",
@@ -1659,18 +1770,58 @@
     "addCustomLabel": "Legg til egendefinert etikett...",
     "restartRequiredField": "Omstart påkrevd",
     "cameraInputs": {
-      "itemTitle": "Strøm {{index}}"
+      "itemTitle": "Strøm {{index}}",
+      "sourceMode": {
+        "restream": "Videreformidling / Restream (go2rtc)",
+        "manual": "Manuell kildesti",
+        "go2rtcStreamLabel": "go2rtc-strøm",
+        "go2rtcStreamPlaceholder": "Velg en go2rtc-strøm",
+        "noGo2rtcStreams": "Ingen go2rtc-strømmer er konfigurert",
+        "go2rtcStreamSearch": "Søk i strømmer...",
+        "availableStreams": "Tilgjengelige strømmer",
+        "noMatchingStreams": "Ingen matchende strømmer"
+      }
     },
     "searchPlaceholder": "Søk...",
     "showAdvanced": "Vis avanserte innstillinger",
     "genaiModel": {
-      "placeholder": "Velg modell…",
-      "search": "Søk modeller…",
-      "noModels": "Ingen modeller tilgjengelig"
+      "placeholder": "Velg eller skriv inn en modell…",
+      "search": "Søk eller skriv inn en modell…",
+      "noModels": "Ingen modeller tilgjengelig",
+      "available": "Tilgjengelige modeller",
+      "useCustom": "Bruk «{{value}}»",
+      "refresh": "Oppdater modeller",
+      "probeFailed": "Kunne ikke hente modeller",
+      "fetchedModels": "Modelliste ble hentet"
     },
     "knownPlates": {
       "platePlaceholder": "Kjennemerke nummer eller regex",
       "namePlaceholder": "f.eks konas bil"
+    },
+    "liveStreams": {
+      "streamNameLabel": "Strømnavn",
+      "streamNamePlaceholder": "f.eks. Hovedstrøm HD",
+      "go2rtcStreamLabel": "go2rtc-strøm",
+      "go2rtcStreamPlaceholder": "Velg en go2rtc-strøm",
+      "go2rtcStreamSearch": "Søk eller skriv inn et strømnavn…",
+      "noGo2rtcStreams": "Ingen go2rtc-strømmer er konfigurert",
+      "availableStreams": "Tilgjengelige strømmer",
+      "useCustom": "Bruk «{{value}}»",
+      "addStream": "Legg til strøm"
+    },
+    "semanticSearchModelSize": {
+      "notApplicable": "Ikke relevant for leverandører av generativ AI"
+    },
+    "ptzPresets": {
+      "placeholder": "Velg eller skriv inn en forhåndsinnstilling...",
+      "search": "Søk eller skriv inn en forhåndsinnstilling...",
+      "noPresets": "Ingen forhåndsinnstillinger tilgjengelig",
+      "available": "Forhåndsinnstillinger for kamera",
+      "useCustom": "Bruk «{{value}}»"
+    },
+    "defaultRole": {
+      "admin": "Administrator",
+      "viewer": "Seer (Viewer)"
     }
   },
   "button": {
@@ -1754,7 +1905,8 @@
     "renameStreamDesc": "Skriv inn et nytt navn for denne strømmen. Endring av navn kan ødelegge for kameraer eller andre strømmer som refererer til den ved navn.",
     "deleteStream": "Slett strøm",
     "streamName": "Strømnavn",
-    "streamNumber": "Strøm {{index}}"
+    "streamNumber": "Strøm {{index}}",
+    "sourceNumber": "Kilde {{index}}"
   },
   "profiles": {
     "active": "Aktiv",
@@ -1816,7 +1968,13 @@
     },
     "detect": {
       "fpsGreaterThanFive": "Det anbefales ikke å sette FPS for deteksjon høyere enn 5. Høyere verdier kan føre til ytelsesproblemer uten å gi noen fordeler.",
-      "disabled": "Objektdeteksjon er deaktivert. Stillbilder, inspeksjonselementer og utvidelser som ansiktsgjenkjenning, lesing av kjennemerker og generativ AI vil ikke fungere."
+      "disabled": "Objektdeteksjon er deaktivert. Stillbilder, inspeksjonselementer og utvidelser som ansiktsgjenkjenning, lesing av kjennemerker og generativ AI vil ikke fungere.",
+      "resolutionShouldBeMultipleOfFour": "For best resultat bør deteksjonsbredde og -høyde være delelig med 4. Andre partall kan forårsake visuelle feil eller svak forvrengning i deteksjonsstrømmen.",
+      "aspectRatioMismatch": "Bredden og høyden du har oppgitt samsvarer ikke med sideforholdet til din nåværende deteksjonsoppløsning. Dette kan føre til et strukket eller forvrengt bilde.",
+      "maxFramesSet": "Å angi maksimalt antall bilder (max frames) overstyrer standard oppførsel og deaktiverer sporing av stasjonære objekter. Det er svært få situasjoner hvor dette er nødvendig, så bruk det med forsiktighet.",
+      "squareResolution": "En kvadratisk deteksjonsoppløsning er uvanlig. Deteksjonsbredden og -høyden bør samsvare med kameraets sideforhold (for eksempel 16:9), ikke dimensjonene til objektdeteksjonsmodellen. Et feilaktig sideforhold kan strekke bildet og redusere treffsikkerheten for deteksjon.",
+      "resolutionHigh": "Denne deteksjonsoppløsningen er høyere enn anbefalt og kan føre til økt ressursbruk uten å forbedre deteksjonsnøyaktigheten. En deteksjonsoppløsning på eller under 1080p anbefales for de fleste kameraer.",
+      "globalResolutionMultipleCameras": "En global deteksjonsoppløsning er satt samtidig som flere kameraer er konfigurert. Med mindre alle kameraer deler nøyaktig samme oppløsning og sideforhold, bør deteksjonsbredden og -høyden defineres per kamera for å matche hvert kameras opprinnelige sideforhold."
     },
     "birdseye": {
       "objectsModeDetectDisabled": "Fugleperspektiv er satt til 'objekter'-modus, men objektdeteksjon er deaktivert for dette kameraet. Kameraet vil ikke vises i Fugleperspektiv."
@@ -1843,6 +2001,16 @@
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Størrelsen \"liten\" med Jina V2-modellen har høyt minnebruk og beregningskostnad. Den \"store\" modellen med en dedikert GPU anbefales."
+    },
+    "model": {
+      "optimizedFor320": "Frigate er optimalisert for en 320x320-modell, som er det beste valget for de fleste oppsett. En 640x640-modell er tregere og hjelper kun i spesifikke scenarier.",
+      "inputDimensionsNotDetectResolution": "Modellens inndata for bredde og høyde er dimensjonene til selve objektdeteksjonsmodellen, ikke kameraets deteksjonsoppløsning. De skal samsvare med dimensjonene til modellen du bruker – vanligvis en kvadratisk størrelse som 320x320 eller 640x640."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "Manuelle argumenter for maskinvareakselerasjon anbefales ikke. Med mindre det foreligger et spesifikt behov, bør du velge forhåndsinnstillingen som samsvarer med maskinvaren din."
+    },
+    "onvif": {
+      "autotrackingNoZones": "Autosporing krever minst én sone. Definer en sone for dette kameraet under Masker / Soner, og angi den deretter som en påkrevd sone nedenfor."
     }
   },
   "maintenance": {

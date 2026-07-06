@@ -170,7 +170,22 @@
       "tips": {
         "title": "Kamerainformasjon"
       },
-      "aspectRatio": "bildeforhold"
+      "aspectRatio": "bildeforhold",
+      "keyframes": {
+        "error": "Keyframe-intervallet (~{{seconds}}s) overskrider lengden på opptakssegmentet ({{segmentTime}}s). Enkelte segmenter kan mangle en keyframe, noe som ødelegger avspillingen. Deaktiver smart / +kodek'en på kameraet eller forkort keyframe-intervallet.",
+        "warning": "Spredte eller variable ke,yframes (lengste avstand ~{{seconds}}s), sannsynligvis på grunn av en smart-kodek (H.264+/H.265+). Dette er ikke anbefalt.",
+        "unknown": "Kunne ikke bestemme keyframe-intervallet.",
+        "ok": "Keyframes hvert ~{{seconds}}s, optimalt for opptak og avspilling.",
+        "gap": "Keyframe-intervall (min / snitt / maks):",
+        "keyframeCount": "Registrerte keyframes:",
+        "stillAnalyzing": "Analyserer keyframes fremdeles...",
+        "analyzing": "Analyserer keyframes... {{seconds}} sekunder gjenstår",
+        "title": "Keyframe-analyse",
+        "recordStream": "Opptaksstrøm:",
+        "observedDuration": "Observert varighet:",
+        "segmentLength": "Lengde på opptakssegment:",
+        "recordDisabled": "Opptak er deaktivert for dette kameraet."
+      }
     },
     "framesAndDetections": "Bilder / Deteksjoner",
     "title": "Kameraer",

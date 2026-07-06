@@ -217,7 +217,8 @@
       "id": "Bahasa Indonesia (Indonesisk)",
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Kroatisk)",
-      "bs": "Bosanski (Bosnisk)"
+      "bs": "Bosanski (Bosnisk)",
+      "zhHant": "繁體中文 (Tradisjonell kinesisk)"
     },
     "appearance": "Utseende",
     "darkMode": {
@@ -326,5 +327,8 @@
     "separatorWithSpace": ", "
   },
   "validation_errors": "Valideringsfeil",
-  "no_items": "Ingen elementer"
+  "no_items": "Ingen elementer",
+  "credentialField": {
+    "savedPlaceholder": "Lagret – la stå tomt for å beholde gjeldende"
+  }
 }
