@@ -2,16 +2,31 @@
 
 import datetime
 import logging
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from typing import Final
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError, available_timezones
 
 from tzlocal import get_localzone
 
 logger = logging.getLogger(__name__)
 
+TIMEZONE_CASEFOLD_INDEX: Final = {
+    timezone.casefold(): timezone for timezone in available_timezones()
+}
+
+
+def get_normalized_tz_name(tz_name: str) -> str:
+    tz = TIMEZONE_CASEFOLD_INDEX.get(tz_name.casefold())
+    if tz:
+        return tz
+
+    raise ValueError(f"Unknown timezone: {tz_name}")
+
 
 def get_tz_modifiers(tz_name: str) -> tuple[str, str, float]:
     seconds_offset = (
-        datetime.datetime.now(ZoneInfo(tz_name)).utcoffset().total_seconds()
+        datetime.datetime.now(ZoneInfo(get_normalized_tz_name(tz_name)))
+        .utcoffset()
+        .total_seconds()
     )
     hours_offset = int(seconds_offset / 60 / 60)
     minutes_offset = int(seconds_offset / 60 - hours_offset * 60)
@@ -58,7 +73,7 @@ def get_dst_transitions(
         continuous periods with the same UTC offset
     """
     try:
-        tz = ZoneInfo(tz_name)
+        tz = ZoneInfo(get_normalized_tz_name(tz_name))
     except (ValueError, ZoneInfoNotFoundError):
         # If timezone is invalid, return single period with no offset
         return [(start_time, end_time, 0)]
