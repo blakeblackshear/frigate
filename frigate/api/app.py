@@ -14,8 +14,8 @@ from io import StringIO
 from pathlib import Path as FilePath
 from typing import Any
 
-import aiofiles
 import ruamel.yaml
+from anyio import open_file as aopen
 from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
@@ -1052,7 +1052,7 @@ async def logs(
         """Asynchronously stream log lines."""
         buffer = ""
         try:
-            async with aiofiles.open(file_path) as file:
+            async with await aopen(file_path) as file:
                 await file.seek(0, 2)
                 while True:
                     line = await file.readline()
@@ -1090,7 +1090,7 @@ async def logs(
 
     # For full logs initially
     try:
-        async with aiofiles.open(service_location) as file:
+        async with await aopen(service_location) as file:
             contents = await file.read()
 
         total_lines, log_lines = process_logs(contents, service, start, end)

@@ -10,6 +10,7 @@ from urllib.parse import quote_plus
 
 import httpx
 import requests
+from anyio import open_file as aopen
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import JSONResponse
 from filelock import FileLock, Timeout
@@ -1187,15 +1188,17 @@ async def delete_camera(
 
     try:
         with lock:
-            with open(config_file) as f:
-                old_raw_config = f.read()
+            async with await aopen(config_file) as f:
+                old_raw_config = await f.read()
 
             try:
                 yaml = YAML()
                 yaml.indent(mapping=2, sequence=4, offset=2)
 
-                with open(config_file) as f:
-                    data = yaml.load(f)
+                async with await aopen(config_file) as f:
+                    text = await f.read()
+
+                data = yaml.load(text)
 
                 # Remove camera from config
                 if "cameras" in data and camera_name in data["cameras"]:
@@ -1220,17 +1223,17 @@ async def delete_camera(
                     for role_name in empty_roles:
                         del auth["roles"][role_name]
 
-                with open(config_file, "w") as f:
+                async with await aopen(config_file, "w") as f:
                     yaml.dump(data, f)
 
-                with open(config_file) as f:
-                    new_raw_config = f.read()
+                async with await aopen(config_file) as f:
+                    new_raw_config = await f.read()
 
                 try:
                     config = FrigateConfig.parse(new_raw_config)
                 except Exception:
-                    with open(config_file, "w") as f:
-                        f.write(old_raw_config)
+                    async with await aopen(config_file, "w") as f:
+                        await f.write(old_raw_config)
                     logger.exception(
                         "Config error after removing camera %s",
                         camera_name,

@@ -15,6 +15,8 @@ from urllib.parse import unquote
 import cv2
 import numpy as np
 import pytz
+from anyio import Path as AsyncPath
+from anyio import open_file as aopen
 from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pathvalidate import sanitize_filename
@@ -497,18 +499,18 @@ async def recording_clip(
 
     file_name = sanitize_filename(f"playlist_{camera_name}_{start_ts}-{end_ts}.txt")
     file_path = os.path.join(CACHE_DIR, file_name)
-    with open(file_path, "w") as file:
+    async with await aopen(file_path, "w") as file:
         clip: Recordings
         for clip in recordings:
-            file.write(f"file '{clip.path}'\n")
+            await file.write(f"file '{clip.path}'\n")
 
             # if this is the starting clip, add an inpoint
             if clip.start_time < start_ts:
-                file.write(f"inpoint {int(start_ts - clip.start_time)}\n")
+                await file.write(f"inpoint {int(start_ts - clip.start_time)}\n")
 
             # if this is the ending clip, add an outpoint
             if clip.end_time > end_ts:
-                file.write(f"outpoint {int(end_ts - clip.start_time)}\n")
+                await file.write(f"outpoint {int(end_ts - clip.start_time)}\n")
 
     if len(file_name) > 1000:
         return JSONResponse(
@@ -1149,8 +1151,8 @@ async def event_snapshot_clean(request: Request, event_id: str, download: bool =
                 )
 
             if image_path.endswith(".webp"):
-                with open(image_path, "rb") as image_file:
-                    webp_bytes = image_file.read()
+                async with await aopen(image_path, "rb") as image_file:
+                    webp_bytes = await image_file.read()
             else:
                 image = load_event_snapshot_image(event, clean_only=True)[0]
                 if image is None:
@@ -1366,7 +1368,7 @@ async def preview_gif(
         # need to generate from existing images
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 
-        if not os.path.isdir(preview_dir):
+        if not await AsyncPath(preview_dir).is_dir():
             return JSONResponse(
                 content={"success": False, "message": "Preview not found"},
                 status_code=404,
@@ -1555,7 +1557,7 @@ async def preview_mp4(
         # need to generate from existing images
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 
-        if not os.path.isdir(preview_dir):
+        if not await AsyncPath(preview_dir).is_dir():
             return JSONResponse(
                 content={"success": False, "message": "Preview not found"},
                 status_code=404,
@@ -1633,7 +1635,7 @@ async def preview_mp4(
         "Content-Description": "File Transfer",
         "Cache-Control": f"private, max-age={_resolve_cache_age(max_cache_age)}",
         "Content-Type": "video/mp4",
-        "Content-Length": str(os.path.getsize(path)),
+        "Content-Length": str((await AsyncPath(path).stat()).st_size),
         # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
         "X-Accel-Redirect": f"/cache/{file_name}",
     }
@@ -1707,10 +1709,10 @@ async def preview_thumbnail(request: Request, file_name: str):
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 
     try:
-        with open(
+        async with await aopen(
             os.path.join(preview_dir, safe_file_name_current), "rb"
         ) as image_file:
-            jpg_bytes = image_file.read()
+            jpg_bytes = await image_file.read()
     except FileNotFoundError:
         return JSONResponse(
             content=({"success": False, "message": "Image file not found"}),

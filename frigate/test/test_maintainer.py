@@ -1,7 +1,7 @@
 import datetime
 import sys
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 # Mock complex imports before importing maintainer, saving originals so we can
 # restore them after import and avoid polluting sys.modules for other tests.
@@ -42,38 +42,51 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         # One bad file, one good file
         files = ["bad_filename.mp4", "camera@20210101000000+0000.mp4"]
 
-        with patch("os.listdir", return_value=files):
-            with patch("os.path.isfile", return_value=True):
-                with patch(
-                    "frigate.record.maintainer.psutil.process_iter", return_value=[]
-                ):
-                    with patch("frigate.record.maintainer.logger.warning") as warn:
-                        # Mock validate_and_move_segment to avoid further logic
-                        maintainer.validate_and_move_segment = MagicMock()
+        mock_paths = []
+        for filename in files:
+            path = MagicMock()
+            path.name = filename
+            path.suffix = ".mp4"
+            path.is_file = AsyncMock(return_value=True)
+            mock_paths.append(path)
 
-                        try:
-                            await maintainer.move_files()
-                        except ValueError as e:
-                            if "not enough values to unpack" in str(e):
-                                self.fail("move_files() crashed on bad filename!")
-                            raise e
-                        except Exception:
-                            # Ignore other errors (like DB connection) as we only care about the unpack crash
-                            pass
+        async def mock_iterdir():
+            for path in mock_paths:
+                yield path
 
-                        # The bad filename is encountered in multiple loops, but should only warn once.
-                        matching = [
-                            c
-                            for c in warn.call_args_list
-                            if c.args
-                            and isinstance(c.args[0], str)
-                            and "Skipping unexpected files in cache" in c.args[0]
-                        ]
-                        self.assertEqual(
-                            1,
-                            len(matching),
-                            f"Expected a single warning for unexpected files, got {len(matching)}",
-                        )
+        with patch("frigate.record.maintainer.AsyncPath") as mock_async_path:
+            mock_async_path.return_value.iterdir = mock_iterdir
+
+            with patch(
+                "frigate.record.maintainer.psutil.process_iter", return_value=[]
+            ):
+                with patch("frigate.record.maintainer.logger.warning") as warn:
+                    # Mock validate_and_move_segment to avoid further logic
+                    maintainer.validate_and_move_segment = MagicMock()
+
+                    try:
+                        await maintainer.move_files()
+                    except ValueError as e:
+                        if "not enough values to unpack" in str(e):
+                            self.fail("move_files() crashed on bad filename!")
+                        raise e
+                    except Exception:
+                        # Ignore other errors (like DB connection) as we only care about the unpack crash
+                        pass
+
+                    # The bad filename is encountered in multiple loops, but should only warn once.
+                    matching = [
+                        c
+                        for c in warn.call_args_list
+                        if c.args
+                        and isinstance(c.args[0], str)
+                        and "Skipping unexpected files in cache" in c.args[0]
+                    ]
+                    self.assertEqual(
+                        1,
+                        len(matching),
+                        f"Expected a single warning for unexpected files, got {len(matching)}",
+                    )
 
     async def test_drops_quiet_segment_when_only_motion_retention(self):
         # Regression: when motion retention is enabled but a segment has no

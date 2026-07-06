@@ -2,5 +2,20 @@
 target-version = "py311"
 
 [tool.ruff.lint]
-ignore = ["E501","E711","E712","UP031","UP032","UP042","G004"]
-extend-select = ["I", "UP", "G", "ASYNC210", "B904"]
+ignore = [
+  "ASYNC109", # Async function definition with a timeout parameter
+  "E501",     # line-too-long
+  "E711",     # none-comparison
+  "E712",     # true-false-comparison
+  "UP031",    # printf-string-formatting
+  "UP032",    # f-string
+  "UP042",    # replace-str-enum
+  "G004",     # logging-f-string
+]
+extend-select = [
+  "ASYNC", # https://docs.astral.sh/ruff/rules/#flake8-async-async
+  "B904",  # https://docs.astral.sh/ruff/rules/raise-without-from-inside-except/
+  "G",     # https://docs.astral.sh/ruff/rules/#flake8-logging-format-g
+  "I",     # https://docs.astral.sh/ruff/rules/#isort-i
+  "UP",    # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+]
