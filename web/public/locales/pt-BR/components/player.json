@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "Nenhuma Pré-Visualização Encontrada em {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Enviar esse frame para Frigate+?",
-    "submit": "Enviar"
+    "submit": "Enviar",
+    "previewError": "Não foi possível carregar a prévia do instantâneo. A gravação pode não estar disponível no momento."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 ou superior é necessário para esse tipo de transmissão ao vivo.",
   "streamOffline": {
@@ -47,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "Falha em submeter quadro ao Frigate+"
     }
-  }
+  },
+  "cameraOff": "A câmera está desligada"
 }
