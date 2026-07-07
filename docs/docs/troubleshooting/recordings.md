@@ -274,3 +274,40 @@ If none of the above apply, the issue may be a general resource constraint. Moni
 - **Storage space** — Verify you have free space on the Frigate storage volume (check the Storage page in the Frigate UI).
 
 Try temporarily disabling resource-intensive features like `genai` and `face_recognition` to see if the issue resolves. This can help isolate whether the detector is being starved of resources.
+
+## I see the message: ERROR : Error occurred when attempting to maintain recording cache
+
+This message means the recording maintainer hit an error while moving segments from the cache to disk. It is a **generic wrapper** — the actual cause is always logged on the **very next line**. Frigate usually recovers and keeps running, but any affected segments are lost, so it is worth resolving.
+
+:::warning
+
+Always read the line immediately following this message. `Error occurred when attempting to maintain recording cache` on its own tells you nothing; the exception on the next line — for example `[Errno 28] No space left on device` or `[Errno 17] File exists` — is the real problem.
+
+:::
+
+Because these are operating-system-level errors, they must be resolved on the **host**, not within Frigate's configuration. The most common underlying errors are below.
+
+### [Errno 28] No space left on device
+
+The filesystem Frigate is writing to is full. Things to check:
+
+- **The recordings volume is genuinely full.** Check free space on the host with `df -h` for the path mapped to `/media/frigate`, and review the **Storage** page in the Frigate UI.
+- **The disk shows free space but is still "full".** This usually means the filesystem has run out of **inodes** (check with `df -i`), or recordings are landing on a different, smaller filesystem than you expect because of an incorrect bind mount — see [The storage volume isn't mounted correctly](#the-storage-volume-isnt-mounted-correctly) above.
+- **`/tmp/cache` is full.** If you mounted `/tmp/cache` as a small `tmpfs`, a backlog of segments can fill it. Increase the tmpfs size, or address whatever is causing segments to pile up (see the [Too many unprocessed recording segments](#i-see-the-message-warning--too-many-unprocessed-recording-segments-in-cache-for-camera-this-likely-indicates-an-issue-with-the-detect-stream) section above).
+- **The host blocks writes before Frigate can purge.** On some systems (for example Unraid with a fill-up threshold), the host stops writes before Frigate's emergency cleanup can run. Leave more headroom on the volume, or lower your retention so Frigate purges sooner.
+
+### [Errno 17] File exists (with ffmpeg "Error writing trailer" or "unable to re-open output file")
+
+Errors like `[Errno 17] File exists: '/media/frigate/recordings/.../<camera>'`, often alongside ffmpeg errors such as `Unable to re-open ... output file for shifting data` or `Error writing trailer: No such file or directory`, are a hallmark of an **unreliable network share** (NFS or SMB). The mount is dropping, serving stale directory entries, or mishandling file locking.
+
+- Confirm the network connection to the NAS is stable and fast — an intermittent link produces these errors sporadically.
+- Prefer **NFS over SMB** for the recordings mount; several users have found NFS more reliable and faster.
+- Review your `fstab`/mount options for settings that hurt consistency or performance (see the `sync` vs `async` note in the [Unable to keep up with recording segments](#i-see-the-message-warning--unable-to-keep-up-with-recording-segments-in-cache-for-camera-keeping-the-5-most-recent-segments-out-of-6-and-discarding-the-rest) section above).
+- Enable `frigate.record.maintainer` debug logging to confirm whether the errors line up with the share becoming unavailable.
+
+### Errors referencing a camera you manually renamed or removed
+
+If the next-line error references a camera name that no longer exists in your config, orphaned data is left over from a rename or removal in a persistent `/tmp/cache` volume.
+
+- Using a `tmpfs` mount for `/tmp/cache` as recommended in the installation prevents stale cache files under the old camera name from surviving a restart, which avoids this issue entirely.
+- If errors persist, stop Frigate and remove any leftover segments for the old camera name from `/tmp/cache`.
