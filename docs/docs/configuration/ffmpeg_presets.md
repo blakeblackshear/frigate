@@ -11,7 +11,7 @@ Frigate ships with a set of FFmpeg presets to keep your configuration short and 
 
 In the config file you reference a preset by its name (for example, `preset-vaapi`). In the UI, the same preset is shown with a friendly label (for example, **VAAPI (Intel/AMD GPU)**). Both refer to the same thing — the tables below list the config name alongside the label you'll see in the UI.
 
-### Hwaccel (Hardware Acceleration) Presets
+### Hwaccel (Hardware Acceleration) Presets {#hwaccel-presets}
 
 Hardware acceleration arguments tell FFmpeg to decode your camera's video stream on a GPU or integrated graphics chip instead of the CPU, which dramatically lowers CPU usage. Using a preset is highly recommended. Beyond replacing a long list of arguments, each preset also tells Frigate what hardware is available so it can offload additional work to the GPU — for example, encoding the Birdseye restream or scaling a stream whose resolution differs from the camera's native size.
 
