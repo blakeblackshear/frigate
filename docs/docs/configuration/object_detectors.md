@@ -8,7 +8,7 @@ import ConfigTabs from '@site/src/components/ConfigTabs';
 import TabItem from '@theme/TabItem';
 import NavPath from '@site/src/components/NavPath';
 import ModelConfigDropdown from '@site/src/components/ModelConfigDropdown';
-import objectDetectorsModels from '@site/data/object_detectors_models.json';
+import objectDetectorsModels from '@site/data/object_detectors_models.yaml';
 
 ### Supported hardware
 
