@@ -309,5 +309,5 @@ Errors like `[Errno 17] File exists: '/media/frigate/recordings/.../<camera>'`, 
 
 If the next-line error references a camera name that no longer exists in your config, orphaned data is left over from a rename or removal in a persistent `/tmp/cache` volume.
 
-- Using a `tmpfs` mount for `/tmp/cache` as recommended in the installation prevents stale cache files under the old camera name from surviving a restart, which avoids this issue entirely.
+- Using a `tmpfs` mount for `/tmp/cache` as recommended in the [installation docs](/frigate/installation#storage) prevents stale cache files under the old camera name from surviving a restart, which avoids this issue entirely.
 - If errors persist, stop Frigate and remove any leftover segments for the old camera name from `/tmp/cache`.
