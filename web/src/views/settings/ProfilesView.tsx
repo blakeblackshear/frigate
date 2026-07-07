@@ -148,7 +148,7 @@ export default function ProfilesView({
     const data: Record<string, Record<string, string[]>> = {};
     const cameras = Object.keys(config.cameras)
       .filter((name) => !isReplayCamera(name))
-      .sort();
+      .sort((a, b) => config.cameras[a].ui.order - config.cameras[b].ui.order);
 
     for (const profile of allProfileNames) {
       data[profile] = {};
@@ -474,7 +474,11 @@ export default function ProfilesView({
             const color = getProfileColor(profile, allProfileNames);
             const isActive = activeProfile === profile;
             const cameraData = profileOverviewData[profile] ?? {};
-            const cameras = Object.keys(cameraData).sort();
+            const cameras = Object.keys(cameraData).sort(
+              (a, b) =>
+                (config?.cameras[a]?.ui?.order ?? 0) -
+                (config?.cameras[b]?.ui?.order ?? 0),
+            );
             const isExpanded = expandedProfiles.has(profile);
 
             return (

@@ -39,7 +39,9 @@ export default function ObjectPathPlotter() {
 
   const cameraNames = useMemo(() => {
     if (!config) return [];
-    return Object.keys(config.cameras).filter((name) => !isReplayCamera(name));
+    return Object.keys(config.cameras)
+      .filter((name) => !isReplayCamera(name))
+      .sort((a, b) => config.cameras[a].ui.order - config.cameras[b].ui.order);
   }, [config]);
 
   useEffect(() => {

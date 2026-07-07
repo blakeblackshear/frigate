@@ -96,7 +96,7 @@ export default function CloneCameraDialog({
     if (!config) return [];
     return Object.keys(config.cameras)
       .filter((c) => !isReplayCamera(c))
-      .sort();
+      .sort((a, b) => config.cameras[a].ui.order - config.cameras[b].ui.order);
   }, [config]);
 
   const formSchema = useMemo(() => {
@@ -176,7 +176,7 @@ export default function CloneCameraDialog({
     if (!config) return [];
     return Object.keys(config.cameras)
       .filter((c) => c !== sourceCamera && !isReplayCamera(c))
-      .sort();
+      .sort((a, b) => config.cameras[a].ui.order - config.cameras[b].ui.order);
   }, [config, sourceCamera]);
 
   const srcCfg = config?.cameras?.[sourceCamera];

@@ -8,7 +8,7 @@ import ConfigTabs from '@site/src/components/ConfigTabs';
 import TabItem from '@theme/TabItem';
 import NavPath from '@site/src/components/NavPath';
 import ModelConfigDropdown from '@site/src/components/ModelConfigDropdown';
-import objectDetectorsModels from '@site/data/object_detectors_models.json';
+import objectDetectorsModels from '@site/data/object_detectors_models.yaml';
 
 ### Supported hardware
 
@@ -238,7 +238,7 @@ detectors:
 </TabItem>
 </ConfigTabs>
 
-### Configuration
+### Configuration {#configuration-edgetpu}
 
 <ModelConfigDropdown detectorTitle="EdgeTPU" models={objectDetectorsModels.edgeTPU.models} />
 
@@ -256,7 +256,7 @@ If no custom model is provided, the Hailo detector downloads a default model fro
 
 :::
 
-### Configuration
+### Configuration {#configuration-hailo}
 
 When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.
 If both are provided, the detector will first check for the model at the given local path. If the file is not found, it will download the model from the specified URL. The model file is cached under `/config/model_cache/hailo`.
@@ -298,7 +298,7 @@ detectors:
 
 :::
 
-### Configuration
+### Configuration {#configuration-openvino}
 
 <ModelConfigDropdown detectorTitle="OpenVINO" models={objectDetectorsModels.openvino.models} />
 
@@ -308,12 +308,12 @@ detectors:
 
 The NPU in Apple Silicon can't be accessed from within a container, so the [Apple Silicon detector client](https://github.com/frigate-nvr/apple-silicon-detector) must first be setup. It is recommended to use the Frigate docker image with `-standard-arm64` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-standard-arm64`.
 
-### Setup
+### Setup {#setup-apple-silicon}
 
 1. Setup the [Apple Silicon detector client](https://github.com/frigate-nvr/apple-silicon-detector) and run the client
 2. Configure the detector in Frigate and startup Frigate
 
-### Configuration
+### Configuration {#configuration-apple-silicon}
 
 Using the detector config below will connect to the client:
 
@@ -323,7 +323,7 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 ## AMD/ROCm GPU detector
 
-### Setup
+### Setup {#setup-rocm}
 
 Support for AMD GPUs is provided using the [ONNX detector](#onnx). In order to utilize the AMD GPU for object detection use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
 
@@ -401,7 +401,7 @@ We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent an existing override from mes
 $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/rocm/bin/rocminfo |grep gfx)'
 ```
 
-### Configuration
+### Configuration {#configuration-rocm}
 
 :::tip
 
@@ -455,7 +455,7 @@ detectors:
 
 :::
 
-### Configuration
+### Configuration {#configuration-onnx}
 
 <ModelConfigDropdown detectorTitle="ONNX" models={objectDetectorsModels.onnx.models} />
 
@@ -475,7 +475,7 @@ The number of threads used by the interpreter can be specified using the `"num_t
 
 A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
 
-### Configuration
+### Configuration {#configuration-cpu}
 
 <ModelConfigDropdown detectorTitle="CPU" models={objectDetectorsModels.cpu.models} />
 
@@ -485,13 +485,13 @@ When using CPU detectors, you can add one CPU detector per camera. Adding more d
 
 The Deepstack / CodeProject.AI Server detector for Frigate allows you to integrate Deepstack and CodeProject.AI object detection capabilities into Frigate. CodeProject.AI and DeepStack are open-source AI platforms that can be run on various devices such as the Raspberry Pi, Nvidia Jetson, and other compatible hardware. It is important to note that the integration is performed over the network, so the inference times may not be as fast as native Frigate detectors, but it still provides an efficient and reliable solution for object detection and tracking.
 
-### Setup
+### Setup {#setup-deepstack}
 
 To get started with CodeProject.AI, visit their [official website](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) to follow the instructions to download and install the AI server on your preferred device. Detailed setup instructions for CodeProject.AI are outside the scope of the Frigate documentation.
 
 To integrate CodeProject.AI into Frigate, configure the detector as follows:
 
-### Configuration
+### Configuration {#configuration-deepstack}
 
 <ModelConfigDropdown detectorTitle="DeepStack" models={objectDetectorsModels.deepstack.models} />
 
@@ -509,7 +509,7 @@ See the [installation docs](../frigate/installation.md#memryx-mx3) for informati
 
 To configure a MemryX detector, simply set the `type` attribute to `memryx` and follow the configuration guide below.
 
-### Configuration
+### Configuration {#configuration-memryx}
 
 <ModelConfigDropdown detectorTitle="MemryX" models={objectDetectorsModels.memryx.models} />
 
@@ -646,7 +646,7 @@ This implementation is based on sdk `v1.5.0`.
 
 See the [installation docs](../frigate/installation.md#synaptics) for information on configuring the SL-series NPU hardware.
 
-### Configuration
+### Configuration {#configuration-synaptics}
 
 When configuring the Synap detector, you have to specify the model: a local **path**.
 
@@ -759,7 +759,7 @@ Explanation of the paramters:
 
 DeGirum is a detector that can use any type of hardware listed on [their website](https://hub.degirum.com). DeGirum can be used with local hardware through a DeGirum AI Server, or through the use of `@local`. You can also connect directly to DeGirum's AI Hub to run inferences. **Please Note:** This detector _cannot_ be used for commercial purposes.
 
-### Configuration
+### Configuration {#configuration-degirum}
 
 #### AI Server Inference
 
@@ -853,7 +853,7 @@ The AXEngine detector downloads its default model from HuggingFace on first star
 
 :::
 
-### Configuration
+### Configuration {#configuration-axengine}
 
 When configuring the AXEngine detector, you have to specify the model name.
 
