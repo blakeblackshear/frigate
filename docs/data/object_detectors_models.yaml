@@ -38,7 +38,7 @@ edgeTPU:
           model_type: yolo-generic
           width: 320 # <--- should match the imgsize of the model, typically 320
           height: 320 # <--- should match the imgsize of the model, typically 320
-          path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite # use the filename you generated above
+          path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite
           labelmap_path: /config/labels-coco17.txt
 hailo8l:
   title: Hailo-8/Hailo-8L
