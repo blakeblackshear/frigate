@@ -20,11 +20,14 @@ edgeTPU:
 
         | Field                                    | Value                                                             |
         | ---------------------------------------- | ----------------------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolo-generic`                                                    |
-        | **Object detection model input width**   | `320` (should match the imgsize of the model)                     |
-        | **Object detection model input height**  | `320` (should match the imgsize of the model)                     |
         | **Custom object detector model path**    | `/config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite` |
         | **Label map for custom object detector** | `/config/labels-coco17.txt`                                       |
+        | **Object detection model input width**   | `320` (should match the imgsize of the model)                     |
+        | **Object detection model input height**  | `320` (should match the imgsize of the model)                     |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                                   |
+        | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value)                                  |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                                   |
+        | **Object Detection Model Type**          | `yolo-generic`                                                    |
       yaml: |-
         detectors:
           coral:
@@ -35,7 +38,7 @@ edgeTPU:
           model_type: yolo-generic
           width: 320 # <--- should match the imgsize of the model, typically 320
           height: 320 # <--- should match the imgsize of the model, typically 320
-          path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite
+          path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite # use the filename you generated above
           labelmap_path: /config/labels-coco17.txt
 hailo8l:
   title: Hailo-8/Hailo-8L
@@ -49,13 +52,13 @@ hailo8l:
 
         | Field                                    | Value                   |
         | ---------------------------------------- | ----------------------- |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
         | **Object detection model input width**   | `320`                   |
         | **Object detection model input height**  | `320`                   |
-        | **Model Input Tensor Shape**             | `nhwc`                  |
         | **Model Input Pixel Color Format**       | `rgb`                   |
+        | **Model Input Tensor Shape**             | `nhwc`                  |
         | **Model Input D Type**                   | `int`                   |
         | **Object Detection Model Type**          | `yolo-generic`          |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
 
         The detector automatically selects the default model based on your hardware. Optionally, specify a local model path or URL to override.
       yaml: |-
@@ -96,8 +99,9 @@ hailo8l:
         | --------------------------------------- | ------ |
         | **Object detection model input width**  | `300`  |
         | **Object detection model input height** | `300`  |
-        | **Model Input Tensor Shape**            | `nhwc` |
         | **Model Input Pixel Color Format**      | `rgb`  |
+        | **Model Input Tensor Shape**            | `nhwc` |
+        | **Model Input D Type**                  | `int` (Frigate's default value) |
         | **Object Detection Model Type**         | `ssd`  |
 
         Specify the local model path or URL for SSD MobileNet v1.
@@ -153,13 +157,14 @@ openvino:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolo-generic`                                           |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
         | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
         | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
         | **Model Input Tensor Shape**             | `nchw`                                                   |
         | **Model Input D Type**                   | `float`                                                  |
-        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx`                          |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
         detectors:
           ov:
@@ -172,7 +177,7 @@ openvino:
           height: 320 # <--- should match the imgsize set during model export
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/yolo.onnx
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
     - key: ssd
       label: SSDLite MobileNet v2
@@ -183,12 +188,14 @@ openvino:
 
         | Field                                    | Value                                      |
         | ---------------------------------------- | ------------------------------------------ |
-        | **Object detection model input width**   | `300`                                      |
-        | **Object detection model input height**  | `300`                                      |
-        | **Model Input Tensor Shape**             | `nhwc`                                     |
-        | **Model Input Pixel Color Format**       | `bgr`                                      |
         | **Custom object detector model path**    | `/openvino-model/ssdlite_mobilenet_v2.xml` |
         | **Label map for custom object detector** | `/openvino-model/coco_91cl_bkgr.txt`       |
+        | **Object detection model input width**   | `300`                                      |
+        | **Object detection model input height**  | `300`                                      |
+        | **Model Input Pixel Color Format**       | `bgr`                                      |
+        | **Model Input Tensor Shape**             | `nhwc`                                     |
+        | **Model Input D Type**                   | `int` (Frigate's default value)            |
+        | **Object Detection Model Type**          | `ssd` (Frigate's default value)            |
       yaml: |-
         detectors:
           ov:
@@ -219,13 +226,14 @@ openvino:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolo-generic`                                           |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
         | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
         | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
         | **Model Input Tensor Shape**             | `nchw`                                                   |
         | **Model Input D Type**                   | `float`                                                  |
-        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx`                          |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
         detectors:
           ov:
@@ -238,7 +246,7 @@ openvino:
           height: 320 # <--- should match the imgsize set during model export
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/yolo.onnx
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
     - key: yolonas
       label: YOLO-NAS
@@ -258,13 +266,14 @@ openvino:
 
         | Field                                    | Value                                             |
         | ---------------------------------------- | ------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolonas`                                         |
-        | **Object detection model input width**   | `320` (should match whatever was set in notebook) |
-        | **Object detection model input height**  | `320` (should match whatever was set in notebook) |
-        | **Model Input Tensor Shape**             | `nchw`                                            |
-        | **Model Input Pixel Color Format**       | `bgr`                                             |
         | **Custom object detector model path**    | `/config/yolo_nas_s.onnx`                         |
         | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
+        | **Object detection model input width**   | `320` (should match whatever was set in notebook) |
+        | **Object detection model input height**  | `320` (should match whatever was set in notebook) |
+        | **Model Input Pixel Color Format**       | `bgr`                                             |
+        | **Model Input Tensor Shape**             | `nchw`                                            |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                   |
+        | **Object Detection Model Type**          | `yolonas`                                         |
       yaml: |-
         detectors:
           ov:
@@ -288,8 +297,11 @@ openvino:
 
         | Field                                 | Value                            |
         | ------------------------------------- | -------------------------------- |
+        | **Custom object detector model path** |  `/config/yolox.onnx` (use the filename you generated above)     |
+        | **Model Input Pixel Color Format**    | `rgb` (Frigate's default value)  |
+        | **Model Input Tensor Shape**          | `nhwc` (Frigate's default value) |
+        | **Model Input D Type**                | `int` (Frigate's default value)  |
         | **Object Detection Model Type**       | `yolox`                          |
-        | **Custom object detector model path** | path to your YOLOX ONNX model    |
       yaml: |-
         detectors:
           ov:
@@ -298,7 +310,7 @@ openvino:
 
         model:
           model_type: yolox
-          path: /config/model_cache/yolox.onnx
+          path: /config/model_cache/yolox.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
     - key: rfdetr
       label: RF-DETR
@@ -325,12 +337,13 @@ openvino:
 
         | Field                                   | Value                             |
         | --------------------------------------- | --------------------------------- |
-        | **Object Detection Model Type**         | `rfdetr`                          |
+        | **Custom object detector model path**   | `/config/model_cache/rfdetr.onnx` (use the filename you generated above) |
         | **Object detection model input width**  | `320`                             |
         | **Object detection model input height** | `320`                             |
+        | **Model Input Pixel Color Format**      | `rgb` (Frigate's default value)   |
         | **Model Input Tensor Shape**            | `nchw`                            |
         | **Model Input D Type**                  | `float`                           |
-        | **Custom object detector model path**   | `/config/model_cache/rfdetr.onnx` |
+        | **Object Detection Model Type**         | `rfdetr`                          |
       yaml: |-
         detectors:
           ov:
@@ -343,7 +356,7 @@ openvino:
           height: 320
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/rfdetr.onnx
+          path: /config/model_cache/rfdetr.onnx # use the filename you generated above
     - key: dfine
       label: D-FINE / DEIMv2
       recommended: false
@@ -421,13 +434,14 @@ openvino:
 
         | Field                                    | Value                              |
         | ---------------------------------------- | ---------------------------------- |
-        | **Object Detection Model Type**          | `dfine`                            |
+        | **Custom object detector model path**    | `/config/model_cache/dfine-s.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`            |
         | **Object detection model input width**   | `640`                              |
         | **Object detection model input height**  | `640`                              |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)    |
         | **Model Input Tensor Shape**             | `nchw`                             |
         | **Model Input D Type**                   | `float`                            |
-        | **Custom object detector model path**    | `/config/model_cache/dfine-s.onnx` |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`            |
+        | **Object Detection Model Type**          | `dfine`                            |
       yaml: |-
         detectors:
           ov:
@@ -440,7 +454,7 @@ openvino:
           height: 640
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/dfine-s.onnx
+          path: /config/model_cache/dfine-s.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
 appleSilicon:
   title: Apple Silicon
@@ -476,13 +490,14 @@ appleSilicon:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolo-generic`                                           |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
         | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
         | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
         | **Model Input Tensor Shape**             | `nchw`                                                   |
         | **Model Input D Type**                   | `float`                                                  |
-        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx`                          |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
         detectors:
           apple-silicon:
@@ -495,7 +510,7 @@ appleSilicon:
           height: 320 # <--- should match the imgsize set during model export
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/yolo.onnx
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
     - key: yolo-legacy
       label: YOLO (v3, v4, v7)
@@ -514,13 +529,14 @@ appleSilicon:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolo-generic`                                           |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
         | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
         | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
         | **Model Input Tensor Shape**             | `nchw`                                                   |
         | **Model Input D Type**                   | `float`                                                  |
-        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx`                          |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
         detectors:
           apple-silicon:
@@ -533,7 +549,7 @@ appleSilicon:
           height: 320 # <--- should match the imgsize set during model export
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/yolo.onnx
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
 onnx:
   title: ONNX
@@ -569,13 +585,14 @@ onnx:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolo-generic`                                           |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
         | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
         | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
         | **Model Input Tensor Shape**             | `nchw`                                                   |
         | **Model Input D Type**                   | `float`                                                  |
-        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx`                          |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
         detectors:
           onnx:
@@ -587,7 +604,7 @@ onnx:
           height: 320 # <--- should match the imgsize set during model export
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/yolo.onnx
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
     - key: rfdetr
       label: RF-DETR
@@ -614,12 +631,13 @@ onnx:
 
         | Field                                   | Value                             |
         | --------------------------------------- | --------------------------------- |
-        | **Object Detection Model Type**         | `rfdetr`                          |
+        | **Custom object detector model path**   | `/config/model_cache/rfdetr.onnx` (use the filename you generated above) |
         | **Object detection model input width**  | `320`                             |
         | **Object detection model input height** | `320`                             |
+        | **Model Input Pixel Color Format**      | `rgb` (Frigate's default value)   |
         | **Model Input Tensor Shape**            | `nchw`                            |
         | **Model Input D Type**                  | `float`                           |
-        | **Custom object detector model path**   | `/config/model_cache/rfdetr.onnx` |
+        | **Object Detection Model Type**         | `rfdetr`                          |
       yaml: |-
         detectors:
           onnx:
@@ -631,7 +649,7 @@ onnx:
           height: 320
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/rfdetr.onnx
+          path: /config/model_cache/rfdetr.onnx # use the filename you generated above
     - key: yolonas
       label: YOLO-NAS
       recommended: false
@@ -650,13 +668,14 @@ onnx:
 
         | Field                                    | Value                                             |
         | ---------------------------------------- | ------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolonas`                                         |
+        | **Custom object detector model path**    | `/config/yolo_nas_s.onnx`                         |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
         | **Object detection model input width**   | `320` (should match whatever was set in notebook) |
         | **Object detection model input height**  | `320` (should match whatever was set in notebook) |
         | **Model Input Pixel Color Format**       | `bgr`                                             |
         | **Model Input Tensor Shape**             | `nchw`                                            |
-        | **Custom object detector model path**    | `/config/yolo_nas_s.onnx`                         |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                   |
+        | **Object Detection Model Type**          | `yolonas`                                         |
       yaml: |-
         detectors:
           onnx:
@@ -679,13 +698,14 @@ onnx:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolox`                                                  |
+        | **Custom object detector model path**    | `/config/model_cache/yolox_tiny.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
         | **Object detection model input width**   | `416` (should match the imgsize set during model export) |
         | **Object detection model input height**  | `416` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
         | **Model Input Tensor Shape**             | `nchw`                                                   |
         | **Model Input D Type**                   | `float_denorm`                                           |
-        | **Custom object detector model path**    | `/config/model_cache/yolox_tiny.onnx`                    |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object Detection Model Type**          | `yolox`                                                  |
       yaml: |-
         detectors:
           onnx:
@@ -697,7 +717,7 @@ onnx:
           height: 416 # <--- should match the imgsize set during model export
           input_tensor: nchw
           input_dtype: float_denorm
-          path: /config/model_cache/yolox_tiny.onnx
+          path: /config/model_cache/yolox_tiny.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
     - key: dfine
       label: D-FINE / DEIMv2
@@ -776,13 +796,14 @@ onnx:
 
         | Field                                    | Value                                       |
         | ---------------------------------------- | ------------------------------------------- |
-        | **Object Detection Model Type**          | `dfine`                                     |
+        | **Custom object detector model path**    | `/config/model_cache/dfine_m_obj2coco.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                     |
         | **Object detection model input width**   | `640`                                       |
         | **Object detection model input height**  | `640`                                       |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)             |
         | **Model Input Tensor Shape**             | `nchw`                                      |
         | **Model Input D Type**                   | `float`                                     |
-        | **Custom object detector model path**    | `/config/model_cache/dfine_m_obj2coco.onnx` |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                     |
+        | **Object Detection Model Type**          | `dfine`                                     |
       yaml: |-
         detectors:
           onnx:
@@ -794,7 +815,7 @@ onnx:
           height: 640
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/dfine_m_obj2coco.onnx
+          path: /config/model_cache/dfine_m_obj2coco.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
     - key: yolo-legacy
       label: YOLO (v3, v4, v7)
@@ -813,13 +834,14 @@ onnx:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolo-generic`                                           |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
         | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
         | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
         | **Model Input Tensor Shape**             | `nchw`                                                   |
         | **Model Input D Type**                   | `float`                                                  |
-        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx`                          |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
         detectors:
           onnx:
@@ -831,7 +853,7 @@ onnx:
           height: 320 # <--- should match the imgsize set during model export
           input_tensor: nchw
           input_dtype: float
-          path: /config/model_cache/yolo.onnx
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
 cpu:
   title: CPU
@@ -893,12 +915,13 @@ memryx:
 
         | Field                                    | Value                                             |
         | ---------------------------------------- | ------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolonas`                                         |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
         | **Object detection model input width**   | `320` (can be set to `640` for higher resolution) |
         | **Object detection model input height**  | `320` (can be set to `640` for higher resolution) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                   |
         | **Model Input Tensor Shape**             | `nchw`                                            |
         | **Model Input D Type**                   | `float`                                           |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
+        | **Object Detection Model Type**          | `yolonas`                                         |
       yaml: |-
         detectors:
           memx0:
@@ -929,12 +952,13 @@ memryx:
 
         | Field                                    | Value                                             |
         | ---------------------------------------- | ------------------------------------------------- |
-        | **Object Detection Model Type**          | `yolo-generic`                                    |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
         | **Object detection model input width**   | `320` (can be set to `640` for higher resolution) |
         | **Object detection model input height**  | `320` (can be set to `640` for higher resolution) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                   |
         | **Model Input Tensor Shape**             | `nchw`                                            |
         | **Model Input D Type**                   | `float`                                           |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
+        | **Object Detection Model Type**          | `yolo-generic`                                    |
       yaml: |-
         detectors:
           memx0:
@@ -964,12 +988,13 @@ memryx:
 
         | Field                                    | Value                   |
         | ---------------------------------------- | ----------------------- |
-        | **Object Detection Model Type**          | `yolox`                 |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
         | **Object detection model input width**   | `640`                   |
         | **Object detection model input height**  | `640`                   |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value) |
         | **Model Input Tensor Shape**             | `nchw`                  |
         | **Model Input D Type**                   | `float_denorm`          |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
+        | **Object Detection Model Type**          | `yolox`                 |
       yaml: |-
         detectors:
           memx0:
@@ -999,12 +1024,13 @@ memryx:
 
         | Field                                    | Value                   |
         | ---------------------------------------- | ----------------------- |
-        | **Object Detection Model Type**          | `ssd`                   |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
         | **Object detection model input width**   | `320`                   |
         | **Object detection model input height**  | `320`                   |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value) |
         | **Model Input Tensor Shape**             | `nchw`                  |
         | **Model Input D Type**                   | `float`                 |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
+        | **Object Detection Model Type**          | `ssd`                   |
       yaml: |-
         detectors:
           memx0:
@@ -1047,12 +1073,14 @@ tensorrt:
 
         | Field                                    | Value                                                        |
         | ---------------------------------------- | ------------------------------------------------------------ |
-        | **Custom object detector model path**    | `/config/model_cache/tensorrt/yolov7-320.trt`                |
+        | **Custom object detector model path**    | `/config/model_cache/tensorrt/yolov7-320.trt` (use the filename you generated above) |
         | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                      |
-        | **Model Input Tensor Shape**             | `nchw`                                                       |
-        | **Model Input Pixel Color Format**       | `rgb`                                                        |
         | **Object detection model input width**   | `320` (MUST match the chosen model, e.g., yolov7-320 -> 320) |
         | **Object detection model input height**  | `320` (MUST match the chosen model, e.g., yolov7-320 -> 320) |
+        | **Model Input Pixel Color Format**       | `rgb`                                                        |
+        | **Model Input Tensor Shape**             | `nchw`                                                       |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                              |
+        | **Object Detection Model Type**          | `ssd` (Frigate's default value)                              |
       yaml: |-
         detectors:
           tensorrt:
@@ -1060,7 +1088,7 @@ tensorrt:
             device: 0 #This is the default, select the first GPU
 
         model:
-          path: /config/model_cache/tensorrt/yolov7-320.trt
+          path: /config/model_cache/tensorrt/yolov7-320.trt # use the filename you generated above
           labelmap_path: /labelmap/coco-80.txt
           input_tensor: nchw
           input_pixel_format: rgb
@@ -1079,10 +1107,13 @@ synaptics:
         | Field                                    | Value                        |
         | ---------------------------------------- | ---------------------------- |
         | **Custom object detector model path**    | `/synaptics/mobilenet.synap` |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`      |
         | **Object detection model input width**   | `224`                        |
         | **Object detection model input height**  | `224`                        |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value) |
         | **Model Input Tensor Shape**             | `nhwc`                       |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`      |
+        | **Model Input D Type**                   | `int` (Frigate's default value) |
+        | **Object Detection Model Type**          | `ssd` (Frigate's default value) |
       yaml: |-
         detectors: # required
           synap_npu: # required
@@ -1110,11 +1141,13 @@ rknn:
         | Field                                    | Value                                              |
         | ---------------------------------------- | -------------------------------------------------- |
         | **Custom object detector model path**    | `frigate-fp16-yolov9-t` (or other yolov9 variants) |
-        | **Object Detection Model Type**          | `yolo-generic`                                     |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                            |
         | **Object detection model input width**   | `320`                                              |
         | **Object detection model input height**  | `320`                                              |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                    |
         | **Model Input Tensor Shape**             | `nhwc`                                             |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                            |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                    |
+        | **Object Detection Model Type**          | `yolo-generic`                                     |
       yaml: |-
         model: # required
           # name of model (will be automatically downloaded) or path to your own .rknn model file
@@ -1146,12 +1179,13 @@ rknn:
         | Field                                    | Value                                                                   |
         | ---------------------------------------- | ----------------------------------------------------------------------- |
         | **Custom object detector model path**    | `deci-fp16-yolonas_s` (or `deci-fp16-yolonas_m`, `deci-fp16-yolonas_l`) |
-        | **Object Detection Model Type**          | `yolonas`                                                               |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                                 |
         | **Object detection model input width**   | `320`                                                                   |
         | **Object detection model input height**  | `320`                                                                   |
         | **Model Input Pixel Color Format**       | `bgr`                                                                   |
         | **Model Input Tensor Shape**             | `nhwc`                                                                  |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                                 |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                                         |
+        | **Object Detection Model Type**          | `yolonas`                                                               |
       yaml: |-
         model: # required
           # name of model (will be automatically downloaded) or path to your own .rknn model file
@@ -1180,11 +1214,13 @@ rknn:
         | Field                                    | Value                                          |
         | ---------------------------------------- | ---------------------------------------------- |
         | **Custom object detector model path**    | `rock-i8-yolox_nano` (or other yolox variants) |
-        | **Object Detection Model Type**          | `yolox`                                        |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                        |
         | **Object detection model input width**   | `416`                                          |
         | **Object detection model input height**  | `416`                                          |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                |
         | **Model Input Tensor Shape**             | `nhwc`                                         |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                        |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                |
+        | **Object Detection Model Type**          | `yolox`                                        |
       yaml: |-
         model: # required
           # name of model (will be automatically downloaded) or path to your own .rknn model file
@@ -1213,12 +1249,13 @@ axengine:
         | Field                                    | Value                   |
         | ---------------------------------------- | ----------------------- |
         | **Custom object detector model path**    | `frigate-yolov9-tiny`   |
-        | **Object Detection Model Type**          | `yolo-generic`          |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
         | **Object detection model input width**   | `320`                   |
         | **Object detection model input height**  | `320`                   |
-        | **Model Input D Type**                   | `int`                   |
         | **Model Input Pixel Color Format**       | `bgr`                   |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
+        | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value) |
+        | **Model Input D Type**                   | `int`                   |
+        | **Object Detection Model Type**          | `yolo-generic`          |
       yaml: |-
         detectors:
           axengine:
