@@ -53,7 +53,7 @@ If you expected continuous footage but only configured motion/event retention, a
 
 #### You're following an outdated guide
 
-Configuration keys change between major versions. The old `clips` config, for example, has not existed for a long time. If you copied a config from an old blog post or video, verify every key against the current [reference config](/configuration/reference).
+Configuration keys change between major versions. The old `clips` config, for example, has not existed for a long time. If you copied a config from an old blog post or video, verify every key against the current [reference config](/configuration/advanced/reference).
 
 ### Camera and stream issues
 
