@@ -10,7 +10,8 @@ body:
 
         Before submitting, read the [beta documentation][docs].
 
-        [docs]: https://deploy-preview-19787--frigate-docs.netlify.app/
+        [docs]: https://docs-dev.frigate.video/
+        [discussions]: https://github.com/blakeblackshear/frigate/discussions
   - type: textarea
     id: description
     attributes:
@@ -22,8 +23,8 @@ body:
     id: version
     attributes:
       label: Beta Version
-      description: Visible on the System page in the Web UI. Please include the full version including the build identifier (eg. 0.17.0-beta1)
-      placeholder: "0.17.0-beta1"
+      description: Visible on the System Metrics page in the Web UI. Please include the full version including the build identifier (eg. 0.18.0-beta1, 0.18.0-8b72c7a, etc.)
+      placeholder: "0.18.0-beta1"
     validations:
       required: true
   - type: dropdown
@@ -71,11 +72,11 @@ body:
     attributes:
       label: Install method
       options:
-        - Home Assistant Add-on
+        - Home Assistant App
         - Docker Compose
         - Docker CLI
         - Proxmox via Docker
-        - Proxmox via TTeck Script
+        - Proxmox via installation script
         - Windows WSL2
     validations:
       required: true
