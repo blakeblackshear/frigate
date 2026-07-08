@@ -25,7 +25,7 @@ This guide is mainly useful if you are **upgrading from an older version and hav
 
 If you added your cameras with the wizard, go2rtc is already configured. You can skip straight to [troubleshooting](/troubleshooting/go2rtc). The steps below are for upgrading users with existing cameras that aren't using go2rtc yet, or for anyone who prefers to configure a stream by hand.
 
-Configure go2rtc to connect to your camera by adding the stream you want to use for live view. Avoid changing any other parts of your config at this step. Note that go2rtc supports [many different stream types](https://github.com/AlexxIT/go2rtc/tree/v1.9.13#module-streams), not just rtsp.
+Configure go2rtc to connect to your camera by adding the stream you want to use for live view. Avoid changing any other parts of your config at this step. Note that go2rtc supports [many different stream types](https://github.com/AlexxIT/go2rtc/tree/v1.9.14#module-streams), not just rtsp.
 
 :::tip
 

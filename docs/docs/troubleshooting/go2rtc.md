@@ -220,7 +220,7 @@ go2rtc:
 
 `/dev/dri/renderD128` is the usual render node; on a system with more than one GPU you may need `renderD129` (or higher), and the device must be passed into the container (e.g. `devices: - /dev/dri:/dev/dri` in Docker Compose).
 
-If you use a **different hardware acceleration backend**, you will likely need to specify its device in the same way, using the option that matches that backend instead of `-vaapi_device`. See the [go2rtc FFmpeg source documentation](https://github.com/AlexxIT/go2rtc/tree/v1.9.13#source-ffmpeg) and the upstream report ([go2rtc issue #1984](https://github.com/AlexxIT/go2rtc/issues/1984)) for background and other examples.
+If you use a **different hardware acceleration backend**, you will likely need to specify its device in the same way, using the option that matches that backend instead of `-vaapi_device`. See the [go2rtc FFmpeg source documentation](https://github.com/AlexxIT/go2rtc/tree/v1.9.14#source-ffmpeg) and the upstream report ([go2rtc issue #1984](https://github.com/AlexxIT/go2rtc/issues/1984)) for background and other examples.
 
 :::tip
 
