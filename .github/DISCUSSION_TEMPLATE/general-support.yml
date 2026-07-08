@@ -78,6 +78,7 @@ body:
         - Docker CLI
         - Proxmox via Docker
         - Proxmox via installation script
+        - Proxmox via VM
         - Windows WSL2
     validations:
       required: true
