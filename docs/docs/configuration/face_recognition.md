@@ -6,6 +6,7 @@ title: Face Recognition
 import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
+import FaqItem from "@site/src/components/FaqItem";
 
 Face recognition identifies known individuals by matching detected faces with previously learned facial data. When a known `person` is recognized, their name will be added as a `sub_label`. This information is included in the UI, filters, as well as in notifications.
 
@@ -227,7 +228,7 @@ Once front-facing images are performing well, start choosing slightly off-angle 
 
 ### Getting Recognition Working
 
-#### How do I debug Face Recognition issues?
+<FaqItem id="how-do-i-debug-face-recognition-issues" question="How do I debug Face Recognition issues?">
 
 Start with the [Usage](#usage) section and re-read the [Model Requirements](#model-requirements) above.
 
@@ -245,7 +246,9 @@ Start with the [Usage](#usage) section and re-read the [Model Requirements](#mod
    - Make sure you have trained at least one face per the recommendations above.
    - Adjust `recognition_threshold` settings per the suggestions [above](#advanced-configuration).
 
-#### Does face recognition run on the recording stream?
+</FaqItem>
+
+<FaqItem id="does-face-recognition-run-on-the-recording-stream" question="Does face recognition run on the recording stream?">
 
 Face recognition does not run on the recording stream, this would be suboptimal for many reasons:
 
@@ -253,27 +256,37 @@ Face recognition does not run on the recording stream, this would be suboptimal 
 2. The embedding models used run on a set image size, so larger images will be scaled down to match this anyway.
 3. Motion clarity is much more important than extra pixels, over-compression and motion blur are much more detrimental to results than resolution.
 
+</FaqItem>
+
 ### Improving Accuracy and Training
 
-#### Detection does not work well with blurry images?
+<FaqItem id="detection-does-not-work-well-with-blurry-images" question="Detection does not work well with blurry images?">
 
 Accuracy is definitely a going to be improved with higher quality cameras / streams. It is important to look at the DORI (Detection Observation Recognition Identification) range of your camera, if that specification is posted. This specification explains the distance from the camera that a person can be detected, observed, recognized, and identified. The identification range is the most relevant here, and the distance listed by the camera is the furthest that face recognition will realistically work.
 
 Some users have also noted that setting the stream in camera firmware to a constant bit rate (CBR) leads to better image clarity than with a variable bit rate (VBR).
 
-#### Can I train faces for people who only appear at night?
+</FaqItem>
+
+<FaqItem id="can-i-train-faces-for-people-who-only-appear-at-night" question="Can I train faces for people who only appear at night?">
 
 The embedding models are trained on color images, so gray-scale and infrared (IR) faces sit in a different feature distribution and are more easily confused with other people. Prefer color images, and avoid mixing gray-scale samples in early while you are building a foundation. If someone only ever appears at night, gray-scale training is acceptable, but keep those samples limited and as clear as possible, and add them only once color recognition is stable for your other people.
 
-#### Why can't I bulk upload photos?
+</FaqItem>
+
+<FaqItem id="why-cant-i-bulk-upload-photos" question="Why can't I bulk upload photos?">
 
 It is important to methodically add photos to the library, bulk importing photos (especially from a general photo library) will lead to over-fitting in that particular scenario and hurt recognition performance.
 
-#### Why can't I bulk reprocess faces?
+</FaqItem>
+
+<FaqItem id="why-cant-i-bulk-reprocess-faces" question="Why can't I bulk reprocess faces?">
 
 Face embedding models work by breaking apart faces into different features. This means that when reprocessing an image, only images from a similar angle will have its score affected.
 
-#### Why do unknown people score similarly to known people?
+</FaqItem>
+
+<FaqItem id="why-do-unknown-people-score-similarly-to-known-people" question="Why do unknown people score similarly to known people?">
 
 This can happen for a few different reasons, but this is usually an indicator that the training set needs to be improved. This is often related to over-fitting:
 
@@ -285,7 +298,9 @@ Review your face collections and remove most of the unclear or low-quality image
 
 Avoid training on images that already score highly, as this can lead to over-fitting. Instead, focus on relatively clear images that score lower (ideally with different lighting, angles, and conditions) to help the model generalize more effectively.
 
-#### Should I correct a face that was recognized as the wrong person?
+</FaqItem>
+
+<FaqItem id="should-i-correct-a-face-that-was-recognized-as-the-wrong-person" question="Should I correct a face that was recognized as the wrong person?">
 
 Only if it is a good image. Reassigning a face does add it to that person's training set, but two things are true at once:
 
@@ -296,27 +311,39 @@ So the decision is about image quality, not about the wrong label. If the crop i
 
 If a person is repeatedly misidentified, do not keep reassigning the same frame. Instead, remove low-quality or misleading images and add a few high-quality samples to the correct person. See [Why do unknown people score similarly to known people?](#why-do-unknown-people-score-similarly-to-known-people) above.
 
-#### Frigate misidentified a face. Can I tell it that a face is "not" a specific person?
+</FaqItem>
+
+<FaqItem id="frigate-misidentified-a-face-can-i-tell-it-that-a-face-is-not-a-specific-person" question={'Frigate misidentified a face. Can I tell it that a face is "not" a specific person?'}>
 
 No, face recognition does not support negative training (i.e., explicitly telling it who someone is _not_). Instead, the best approach is to improve the training data by using a more diverse and representative set of images for each person.
 For more guidance, refer to the section above on improving recognition accuracy.
 
 This also applies to a stranger who is repeatedly matched to a known person (for example, a delivery driver recognized as you). Do not create a profile for them and do not reassign their faces to yourself, as this pollutes your training set and makes recognition worse. Leave the detection as unknown and improve the known person's training set instead. Face recognition learns who someone is, not who they are not.
 
-#### I see scores above the threshold in the Recent Recognitions tab, but a sub label wasn't assigned?
+</FaqItem>
+
+<FaqItem id="i-see-scores-above-the-threshold-in-the-recent-recognitions-tab-but-a-sub-label-wasnt-assigned" question="I see scores above the threshold in the Recent Recognitions tab, but a sub label wasn't assigned?">
 
 The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
 
+</FaqItem>
+
 ### Compatibility and Maintenance
 
-#### Can I use other face recognition software like DoubleTake at the same time as the built in face recognition?
+<FaqItem id="can-i-use-other-face-recognition-software-like-doubletake-at-the-same-time-as-the-built-in-face-recognition" question="Can I use other face recognition software like DoubleTake at the same time as the built in face recognition?">
 
 No, using another face recognition service will interfere with Frigate's built in face recognition. When using double-take the sub_label feature must be disabled if the built in face recognition is also desired.
 
-#### I get an unknown error when taking a photo directly with my iPhone
+</FaqItem>
+
+<FaqItem id="i-get-an-unknown-error-when-taking-a-photo-directly-with-my-iphone" question="I get an unknown error when taking a photo directly with my iPhone">
 
 By default iOS devices will use HEIC (High Efficiency Image Container) for images, but this format is not supported for uploads. Choosing `large` as the format instead of `original` will use JPG which will work correctly.
 
-#### How can I delete the face database and start over?
+</FaqItem>
+
+<FaqItem id="how-can-i-delete-the-face-database-and-start-over" question="How can I delete the face database and start over?">
 
 Frigate does not store anything in its database related to face recognition. You can simply delete all of your faces through the Frigate UI or remove the contents of the `/media/frigate/clips/faces` directory.
+
+</FaqItem>
