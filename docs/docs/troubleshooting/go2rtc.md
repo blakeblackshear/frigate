@@ -230,6 +230,6 @@ If you don't transcode in go2rtc with hardware acceleration, this does not affec
 
 ## Home Assistant and port access
 
-When running Frigate as a Home Assistant add-on, the go2rtc API (port `1984`), the RTSP restream (port `8554`), and WebRTC (port `8555`) are **disabled and hidden by default**. To use them (for example to reach the go2rtc web interface for troubleshooting, or to open a go2rtc stream externally in an app like VLC), go to <NavPath path="Settings > Add-ons > Frigate > Configuration > Network" />, click **Show disabled ports**, enable the port you need, and save. Use the host's IP address rather than an mDNS name like `homeassistant.local`.
+When running Frigate as a Home Assistant App, the go2rtc API (port `1984`), the RTSP restream (port `8554`), and WebRTC (port `8555`) are **disabled and hidden by default**. To use them (for example to reach the go2rtc web interface for troubleshooting, or to open a go2rtc stream externally in an app like VLC), go to <NavPath path="Settings > Apps > Frigate > Configuration > Network" />, click **Show disabled ports**, enable the port you need, and save. Use the host's IP address rather than an mDNS name like `homeassistant.local`.
 
 If live view works in the Frigate UI but not in Home Assistant, the most common cause is the go2rtc stream name not matching the camera name: name the primary go2rtc stream exactly like the camera, or add a `live -> streams` mapping, so the integration can resolve the restream.

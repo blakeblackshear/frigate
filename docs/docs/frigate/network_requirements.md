@@ -32,7 +32,7 @@ The following models are downloaded automatically the first time their associate
 | [License plate recognition](/configuration/license_plate_recognition)                         | PaddleOCR (detection, classification, recognition) + YOLOv9 plate detector | GitHub               |
 | [Bird classification](/configuration/bird_classification)                                     | MobileNetV2 bird model + label map                                         | GitHub               |
 | [Custom classification](/configuration/custom_classification/state_classification) (training) | MobileNetV2 ImageNet base weights (via Keras)                              | Google storage       |
-| [Audio transcription](/configuration/advanced/system)                                                | Whisper or Sherpa-ONNX streaming model                                     | HuggingFace / OpenAI |
+| [Audio transcription](/configuration/advanced/system)                                         | Whisper or Sherpa-ONNX streaming model                                     | HuggingFace / OpenAI |
 
 ### Hardware-Specific Detector Models
 
@@ -91,13 +91,13 @@ See [Frigate+](/integrations/plus) for details.
 
 When a Generative AI provider is configured, Frigate sends images and prompts to the configured provider for event descriptions, chat, and camera monitoring. Available providers:
 
-| Provider      | Internet Required                                                |
-| ------------- | ---------------------------------------------------------------- |
-| OpenAI        | Yes, connects to OpenAI API (or custom base URL)                 |
-| Google Gemini | Yes, connects to Google Generative AI API                        |
-| Azure OpenAI  | Yes, connects to your Azure endpoint                             |
-| Ollama        | Depends: typically local (`localhost:11434`), but can be remote  |
-| llama.cpp     | No, runs entirely locally                                        |
+| Provider      | Internet Required                                               |
+| ------------- | --------------------------------------------------------------- |
+| OpenAI        | Yes, connects to OpenAI API (or custom base URL)                |
+| Google Gemini | Yes, connects to Google Generative AI API                       |
+| Azure OpenAI  | Yes, connects to your Azure endpoint                            |
+| Ollama        | Depends: typically local (`localhost:11434`), but can be remote |
+| llama.cpp     | No, runs entirely locally                                       |
 
 Disable Generative AI by removing the `genai` configuration from your cameras. See [Generative AI](/configuration/genai/genai_config) for details.
 
@@ -131,7 +131,7 @@ For [WebRTC live streaming](/configuration/live), Frigate uses STUN for NAT trav
 
 ## Home Assistant Supervisor
 
-When running as a Home Assistant add-on, the go2rtc startup script queries the local Supervisor API (`http://supervisor/`) to discover the host IP address and WebRTC port. This is a local network call to the Home Assistant host, not an internet connection.
+When running as a Home Assistant App, the go2rtc startup script queries the local Supervisor API (`http://supervisor/`) to discover the host IP address and WebRTC port. This is a local network call to the Home Assistant host, not an internet connection.
 
 ## What Does NOT Require Internet
 
