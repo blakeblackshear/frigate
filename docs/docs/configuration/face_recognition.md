@@ -195,7 +195,7 @@ While each image can be used to train the system for a specific person, not all 
 
 ### How Frigate Decides Who a Person Is
 
-Recognition does not happen one frame at a time. While a `person` is in view, Frigate runs face recognition on many frames and collects every attempt. The final `sub_label` is decided from all of those attempts together, weighted by the area of each face (larger, closer faces count more), not from any single frame.
+Recognition does not happen one frame at a time. While a `person` is in view, Frigate runs face recognition on many frames, not just a single frame. The final `sub_label` is decided from all of those attempts together, weighted by the area of each face (larger, closer faces count more), not from any single frame.
 
 This has a few practical consequences:
 
