@@ -15,7 +15,7 @@ Frigate uses the bundled go2rtc to power a number of key features:
 
 :::tip[Most users no longer need to configure go2rtc by hand]
 
-The **camera setup wizard** is the recommended way to add cameras. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />, and the wizard probes your camera and writes its configuration for you — including the go2rtc restream and the live stream mapping — so go2rtc is set up automatically.
+The **camera setup wizard** is the recommended way to add cameras. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />, and the wizard probes your camera and writes its configuration for you, including the go2rtc restream and the live stream mapping, so go2rtc is set up automatically.
 
 This guide is mainly useful if you are **upgrading from an older version and have existing cameras that don't yet use go2rtc**, or if you want to fine-tune a stream by hand (for example, to transcode a codec your browser can't play). The [go2rtc troubleshooting guide](/troubleshooting/go2rtc) applies regardless of how your cameras were added.
 
@@ -23,7 +23,7 @@ This guide is mainly useful if you are **upgrading from an older version and hav
 
 ## Adding a go2rtc stream manually
 
-If you added your cameras with the wizard, go2rtc is already configured — you can skip straight to [troubleshooting](/troubleshooting/go2rtc). The steps below are for upgrading users with existing cameras that aren't using go2rtc yet, or for anyone who prefers to configure a stream by hand.
+If you added your cameras with the wizard, go2rtc is already configured. You can skip straight to [troubleshooting](/troubleshooting/go2rtc). The steps below are for upgrading users with existing cameras that aren't using go2rtc yet, or for anyone who prefers to configure a stream by hand.
 
 Configure go2rtc to connect to your camera by adding the stream you want to use for live view. Avoid changing any other parts of your config at this step. Note that go2rtc supports [many different stream types](https://github.com/AlexxIT/go2rtc/tree/v1.9.13#module-streams), not just rtsp.
 
@@ -63,7 +63,7 @@ After adding this to the config, restart Frigate and try to watch the live strea
 
 ## Troubleshooting
 
-If your stream won't play, has no audio, uses excessive CPU, or otherwise misbehaves, see the dedicated [go2rtc troubleshooting guide](/troubleshooting/go2rtc). It walks through how to isolate where the problem is and covers the most common issues — unsupported codecs, H.265/HEVC, audio, WebRTC and two-way talk, hardware-accelerated transcoding with FFmpeg 8, and camera-specific quirks.
+If your stream won't play, has no audio, uses excessive CPU, or otherwise misbehaves, see the dedicated [go2rtc troubleshooting guide](/troubleshooting/go2rtc). It walks through how to isolate where the problem is and covers the most common issues: unsupported codecs, H.265/HEVC, audio, WebRTC and two-way talk, hardware-accelerated transcoding with FFmpeg 8, and camera-specific quirks.
 
 ## Homekit Configuration
 

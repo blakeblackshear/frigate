@@ -35,7 +35,7 @@ Frigate relies on WebSockets for real-time communication between the browser and
 
 Your reverse proxy must be configured to forward the `Upgrade` and `Connection` headers so that WebSocket connections can be established. Each proxy example below already includes the directives needed to do this, but if you are adapting your own configuration, ensure these headers are passed through.
 
-Note that some proxies disable WebSocket support by default — for example, Nginx Proxy Manager has a "Websockets Support" toggle that must be enabled.
+Note that some proxies disable WebSocket support by default. For example, Nginx Proxy Manager has a "Websockets Support" toggle that must be enabled.
 
 ## Proxies
 

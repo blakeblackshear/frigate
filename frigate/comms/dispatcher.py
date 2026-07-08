@@ -105,6 +105,8 @@ class Dispatcher:
         self.web_push_client = next(
             (comm for comm in communicators if isinstance(comm, WebPushClient)), None
         )
+        if self.web_push_client is not None:
+            self.web_push_client.set_suspension_broadcaster(self.publish)
 
     def _receive(self, topic: str, payload: Any) -> Any | None:
         """Handle receiving of payload from communicators."""

@@ -38,6 +38,7 @@ When reviewing code, do NOT comment on:
 - **Type Checking**: Use type hints consistently
 - **Testing**: unittest framework - use `python3 -u -m unittest` to run tests
 - **Language**: American English for all code, comments, and documentation
+- **Punctuation**: Do not use em dashes in documentation, comments, or strings; reword with standard punctuation (commas, colons, parentheses, or separate sentences)
 
 ### Logging Standards
 

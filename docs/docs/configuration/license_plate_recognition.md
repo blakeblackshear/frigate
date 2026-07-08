@@ -283,8 +283,8 @@ Navigate to <NavPath path="Settings > Enrichments > License plate recognition" /
 | Field                          | Description                                                                                           |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------- |
 | **Enable LPR**                 | Set to on                                                                                             |
-| **Minimum plate area**         | Set to `1500` — ignore plates with an area (length x width) smaller than 1500 pixels                  |
-| **Min plate length**           | Set to `4` — only recognize plates with 4 or more characters                                          |
+| **Minimum plate area**         | Set to `1500` to ignore plates with an area (length x width) smaller than 1500 pixels                  |
+| **Min plate length**           | Set to `4` to only recognize plates with 4 or more characters                                          |
 | **Known plates > Wife's Car**  | `ABC-1234`, `ABC-I234` (accounts for potential confusion between the number one and capital letter I) |
 | **Known plates > Johnny**      | `J*N-*234` (matches JHN-1234 and JMN-I234; `*` matches any number of characters)                      |
 | **Known plates > Sally**       | `[S5]LL 1234` (matches both SLL 1234 and 5LL 1234)                                                    |
@@ -473,7 +473,7 @@ Navigate to <NavPath path="Settings > Camera configuration > License plate recog
 | Field                 | Description                                                                      |
 | --------------------- | -------------------------------------------------------------------------------- |
 | **Enable LPR**        | Set to on                                                                        |
-| **Enhancement level** | Set to `3` (optional — enhances the image before trying to recognize characters) |
+| **Enhancement level** | Set to `3` (optional, enhances the image before trying to recognize characters) |
 
 Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> and add your camera streams.
 
@@ -481,7 +481,7 @@ Navigate to <NavPath path="Settings > Camera configuration > Object detection" /
 
 | Field                       | Description                                                                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Enable object detection** | Set to off — disables Frigate's standard object detection pipeline                                                           |
+| **Enable object detection** | Set to off to disable Frigate's standard object detection pipeline                                                           |
 | **Detect FPS**              | Set to `5`. Increase if necessary, though high values may slow down Frigate's enrichments pipeline and use considerable CPU. |
 | **Detect width**            | Set to `1920` (recommended value, but depends on your camera)                                                                |
 | **Detect height**           | Set to `1080` (recommended value, but depends on your camera)                                                                |
@@ -490,7 +490,7 @@ Navigate to <NavPath path="Settings > Camera configuration > Objects" />.
 
 | Field                | Description                                                                            |
 | -------------------- | -------------------------------------------------------------------------------------- |
-| **Objects to track** | Set to an empty list — required when not using a Frigate+ model for dedicated LPR mode |
+| **Objects to track** | Set to an empty list, required when not using a Frigate+ model for dedicated LPR mode |
 
 Navigate to <NavPath path="Settings > Camera configuration > Motion detection" />.
 

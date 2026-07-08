@@ -57,11 +57,11 @@ Only one replay session can be active at a time. If a session is already running
 
 Debug Replay can be started from several places in the UI. The starting point determines the time range that gets replayed.
 
-- **History — Actions menu.** Navigate to <NavPath path="History > {camera}" />, open the **Actions** menu in the toolbar, and choose **Debug Replay**. From here you can pick a preset (**Last 1 Minute**, **Last 5 Minutes**), select a range directly on the timeline with **From Timeline**, or enter exact start and end times with **Custom**. This is the most flexible option and the best choice when you want to add padding around a detection. On mobile, the same options appear in the Actions drawer.
-- **History — Detail Stream event menu.** While viewing a review item in the Detail Stream, open the menu on a tracked object's event card and choose **Debug Replay**. The replay range is set automatically to that object's start and end times.
-- **Explore — search result menu.** From an Explore card, open the kebab menu and choose **Debug Replay**. The range is taken from the tracked object's lifecycle.
-- **Explore — Tracking Details Actions menu.** Open a tracked object's **Tracking Details** dialog, then choose **Debug Replay** from the Actions menu. Same automatic range as the search result menu.
-- **Exports — export card menu.** From <NavPath path="Exports" />, open the menu on an export and choose **Debug Replay** to loop the exported clip through the detection pipeline for the camera it was exported from.
+- **History: Actions menu.** Navigate to <NavPath path="History > {camera}" />, open the **Actions** menu in the toolbar, and choose **Debug Replay**. From here you can pick a preset (**Last 1 Minute**, **Last 5 Minutes**), select a range directly on the timeline with **From Timeline**, or enter exact start and end times with **Custom**. This is the most flexible option and the best choice when you want to add padding around a detection. On mobile, the same options appear in the Actions drawer.
+- **History: Detail Stream event menu.** While viewing a review item in the Detail Stream, open the menu on a tracked object's event card and choose **Debug Replay**. The replay range is set automatically to that object's start and end times.
+- **Explore: search result menu.** From an Explore card, open the kebab menu and choose **Debug Replay**. The range is taken from the tracked object's lifecycle.
+- **Explore: Tracking Details Actions menu.** Open a tracked object's **Tracking Details** dialog, then choose **Debug Replay** from the Actions menu. Same automatic range as the search result menu.
+- **Exports: export card menu.** From <NavPath path="Exports" />, open the menu on an export and choose **Debug Replay** to loop the exported clip through the detection pipeline for the camera it was exported from.
 
 The Detail Stream, Explore, and Exports entry points use the underlying recording or export's bounds with a small amount of padding. This can be convenient for quick checks, but if a detection is short or you want extra "settle" time for motion and the detector, start the replay from the History Actions menu instead and widen the range manually.
 
@@ -77,7 +77,7 @@ Treat the replay as a close approximation rather than an exact reproduction. Run
 
 ## Manual Dummy Camera
 
-For advanced scenarios — such as testing with a clip from a different source, debugging ffmpeg behavior, or running a clip through a completely custom configuration — you can set up a dummy camera manually.
+For advanced scenarios (such as testing with a clip from a different source, debugging ffmpeg behavior, or running a clip through a completely custom configuration), you can set up a dummy camera manually.
 
 ### Example config
 

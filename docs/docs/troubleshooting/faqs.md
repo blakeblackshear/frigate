@@ -127,19 +127,19 @@ cameras:
 
 ### Why does Frigate keep creating new tracked objects for my parked car?
 
-Stationary tracking is designed to _prevent_ this — a parked car should remain a single tracked object rather than generating new ones. If you're repeatedly getting new tracked objects for the same car, it's likely that Frigate is losing the object and re-detecting it as a new one.
+Stationary tracking is designed to _prevent_ this: a parked car should remain a single tracked object rather than generating new ones. If you're repeatedly getting new tracked objects for the same car, it's likely that Frigate is losing the object and re-detecting it as a new one.
 
 Open one of the tracked objects in Explore → **Tracking Details**. If the detection scores are low (< 70% or so), the model isn't confident the parked car is a car. This is common with the free [COCO-trained](https://cocodataset.org/#explore) object detection models on steep/top-down angles, partially occluded cars, foliage, or low-light footage. When detections fall below `min_score` for too many frames the tracker loses the object, and the next confident frame creates a brand new one.
 
 What helps:
 
-- **Improve the view** — even a small angle change that gets more of the car visible could lift scores enough to stabilize tracking.
-- **Use a more accurate model** — switching from `mobiledet` to `yolov9`, or stepping up to a larger variant like `yolov9-s` over `yolov9-t`, can help (at the cost of inference time, and still on the COCO dataset). The biggest gains usually come from fine-tuning a model on images from your own cameras so it learns your specific scene. [Frigate+](https://frigate.video/plus) is a paid option that does this - models are trained on security-camera footage and can be fine-tuned on images you submit from your own setup.
-- **Don't set `detect -> stationary -> max_frames` for `car`** — it artificially ends tracking and forces re-detection as a new object. See [Stationary Objects](../configuration/stationary_objects.md).
-- **Restrict alerts to the areas you care about** with `required_zones` — see [Zones](../configuration/zones.md#restricting-alerts-and-detections-to-specific-zones). Make sure those zones use the default `loitering_time: 0` unless you specifically want the review item to stay open until the car leaves.
+- **Improve the view**: even a small angle change that gets more of the car visible could lift scores enough to stabilize tracking.
+- **Use a more accurate model**: switching from `mobiledet` to `yolov9`, or stepping up to a larger variant like `yolov9-s` over `yolov9-t`, can help (at the cost of inference time, and still on the COCO dataset). The biggest gains usually come from fine-tuning a model on images from your own cameras so it learns your specific scene. [Frigate+](https://frigate.video/plus) is a paid option that does this - models are trained on security-camera footage and can be fine-tuned on images you submit from your own setup.
+- **Don't set `detect -> stationary -> max_frames` for `car`**: it artificially ends tracking and forces re-detection as a new object. See [Stationary Objects](../configuration/stationary_objects.md).
+- **Restrict alerts to the areas you care about** with `required_zones`. See [Zones](../configuration/zones.md#restricting-alerts-and-detections-to-specific-zones). Make sure those zones use the default `loitering_time: 0` unless you specifically want the review item to stay open until the car leaves.
 - **Filter impossible locations** with [object filter masks](../configuration/masks.md#object-filter-masks) if cars are being detected on rooftops, treetops, etc.
 
-See [Object Filters](../configuration/object_filters.md) for more on tuning `min_score` and `threshold` — note that raising them too high will make this exact problem worse.
+See [Object Filters](../configuration/object_filters.md) for more on tuning `min_score` and `threshold`. Note that raising them too high will make this exact problem worse.
 
 ### How do I correct Frigate when it detects something as the wrong object?
 
@@ -149,7 +149,7 @@ Frigate's object detection relies on a machine learning [model](../frigate/gloss
 
 **Suppress the misidentification with filters.** You can use filters to stop a specific false positive from being tracked:
 
-- Tune `min_score` / `threshold`, or add `min_area` / `max_area` / `min_ratio` / `max_ratio` filters — see [Object Filters](../configuration/object_filters.md).
+- Tune `min_score` / `threshold`, or add `min_area` / `max_area` / `min_ratio` / `max_ratio` filters. See [Object Filters](../configuration/object_filters.md).
 - If the false positive is always in the same fixed spot (like a statue or mailbox that reads as a person), add an [object filter mask](../configuration/masks.md#object-filter-masks) over that location.
 
 Filters and masks only hide the incorrect result - they don't teach Frigate what the object actually is. For that, fine-tune your own model or use Frigate+.

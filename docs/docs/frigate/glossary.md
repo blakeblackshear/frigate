@@ -11,7 +11,7 @@ The higher-priority of the two [review item](#review-item) severities, the other
 
 ## Attribute
 
-A property detected on an [object](#object) that exists alongside its [label](#label). Unlike a [sub label](#sub-label), an object can carry several attributes at once. Some attributes come directly from the object detection [model](#model) — for example `face`, `license_plate`, or delivery carrier logos such as `amazon`, `ups`, and `fedex` — while others come from a [custom object classification model](/configuration/custom_classification/object_classification) configured with the `attribute` type. Attributes are visible in the Tracked Object Details pane in Explore, in `frigate/events` MQTT messages, and through the HTTP API.
+A property detected on an [object](#object) that exists alongside its [label](#label). Unlike a [sub label](#sub-label), an object can carry several attributes at once. Some attributes come directly from the object detection [model](#model) (for example `face`, `license_plate`, or delivery carrier logos such as `amazon`, `ups`, and `fedex`), while others come from a [custom object classification model](/configuration/custom_classification/object_classification) configured with the `attribute` type. Attributes are visible in the Tracked Object Details pane in Explore, in `frigate/events` MQTT messages, and through the HTTP API.
 
 ## Bounding Box
 
@@ -30,15 +30,15 @@ The categories a classification [model](#model) is trained to distinguish betwee
 
 ## Detection
 
-The lower-priority of the two [review item](#review-item) severities, the other being an [alert](#alert). By default, any review item that does not qualify as an alert is a detection; the qualifying [labels](#label) and [zones](#zone) can be configured. Despite the name, a detection is a category of review item — not the same as the object detection performed by the [model](#model). [See the review docs for more info](/configuration/review)
+The lower-priority of the two [review item](#review-item) severities, the other being an [alert](#alert). By default, any review item that does not qualify as an alert is a detection; the qualifying [labels](#label) and [zones](#zone) can be configured. Despite the name, a detection is a category of review item, not the same as the object detection performed by the [model](#model). [See the review docs for more info](/configuration/review)
 
 ## False Positive
 
-An incorrect result from the object detection [model](#model), where it assigns the wrong [label](#label) to something in the frame — for example a dog identified as a person, or a chair identified as a dog. A person correctly identified in an area you want to ignore is not a false positive.
+An incorrect result from the object detection [model](#model), where it assigns the wrong [label](#label) to something in the frame, for example a dog identified as a person, or a chair identified as a dog. A person correctly identified in an area you want to ignore is not a false positive.
 
 ## Label
 
-The type assigned to a detected [object](#object) by the object detection [model](#model), drawn from the model's labelmap — for example `person`, `car`, or `dog`. Frigate tracks `person` by default; additional labels are tracked by adding them to the objects configuration. [See the available objects docs for the full list](/configuration/objects)
+The type assigned to a detected [object](#object) by the object detection [model](#model), drawn from the model's labelmap, for example `person`, `car`, or `dog`. Frigate tracks `person` by default; additional labels are tracked by adding them to the objects configuration. [See the available objects docs for the full list](/configuration/objects)
 
 ## Mask
 
@@ -46,7 +46,7 @@ There are two types of masks in Frigate. [See the mask docs for more info](/conf
 
 ### Motion Mask
 
-A motion mask stops [motion](#motion) in the masked area from triggering object detection. It does not stop an object from being detected when object detection runs because of motion in a nearby area. Use motion masks for parts of the frame that change constantly but never contain objects you care about — camera timestamps, the sky, the tops of trees, and so on.
+A motion mask stops [motion](#motion) in the masked area from triggering object detection. It does not stop an object from being detected when object detection runs because of motion in a nearby area. Use motion masks for parts of the frame that change constantly but never contain objects you care about: camera timestamps, the sky, the tops of trees, and so on.
 
 ### Object Mask
 
