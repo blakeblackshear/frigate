@@ -11,9 +11,9 @@ Frigate is designed to run locally and does not require a persistent internet co
 
 Frigate's internet usage falls into three categories:
 
-1. **One-time model downloads** — ML models are downloaded the first time a feature is enabled, then cached locally. No internet is needed on subsequent startups.
-2. **Optional cloud services** — Features like Frigate+ and Generative AI connect to external APIs only when explicitly configured.
-3. **Build-time dependencies** — Components bundled into the Docker image during the build process. These require no internet at runtime.
+1. **One-time model downloads**: ML models are downloaded the first time a feature is enabled, then cached locally. No internet is needed on subsequent startups.
+2. **Optional cloud services**: Features like Frigate+ and Generative AI connect to external APIs only when explicitly configured.
+3. **Build-time dependencies**: Components bundled into the Docker image during the build process. These require no internet at runtime.
 
 :::tip
 
@@ -93,11 +93,11 @@ When a Generative AI provider is configured, Frigate sends images and prompts to
 
 | Provider      | Internet Required                                                |
 | ------------- | ---------------------------------------------------------------- |
-| OpenAI        | Yes — connects to OpenAI API (or custom base URL)                |
-| Google Gemini | Yes — connects to Google Generative AI API                       |
-| Azure OpenAI  | Yes — connects to your Azure endpoint                            |
-| Ollama        | Depends — typically local (`localhost:11434`), but can be remote |
-| llama.cpp     | No — runs entirely locally                                       |
+| OpenAI        | Yes, connects to OpenAI API (or custom base URL)                 |
+| Google Gemini | Yes, connects to Google Generative AI API                        |
+| Azure OpenAI  | Yes, connects to your Azure endpoint                             |
+| Ollama        | Depends: typically local (`localhost:11434`), but can be remote  |
+| llama.cpp     | No, runs entirely locally                                        |
 
 Disable Generative AI by removing the `genai` configuration from your cameras. See [Generative AI](/configuration/genai/genai_config) for details.
 
@@ -126,7 +126,7 @@ When using the [DeepStack detector plugin](/configuration/object_detectors), Fri
 
 For [WebRTC live streaming](/configuration/live), Frigate uses STUN for NAT traversal:
 
-- **go2rtc** defaults to a local STUN listener (`stun:8555`) — no internet required.
+- **go2rtc** defaults to a local STUN listener (`stun:8555`), no internet required.
 - **The web UI's WebRTC player** includes a fallback to Google's public STUN server (`stun:stun.l.google.com:19302`), which requires internet.
 
 ## Home Assistant Supervisor
@@ -135,21 +135,21 @@ When running as a Home Assistant add-on, the go2rtc startup script queries the l
 
 ## What Does NOT Require Internet
 
-- **Object detection** — CPU, EdgeTPU, OpenVINO, and other bundled detector models are included in the Docker image.
-- **Recording and playback** — All video is stored and served locally.
-- **Live streaming** — Camera streams are pulled over your local network. MSE and HLS streaming work without any external connections.
-- **The web interface** — Fully self-contained with no external fonts, scripts, analytics, or CDN dependencies. All translations are bundled locally.
-- **Custom classification inference** — After training, custom models run entirely locally.
-- **Audio detection** — The YAMNet audio classification model is bundled in the Docker image.
+- **Object detection**: CPU, EdgeTPU, OpenVINO, and other bundled detector models are included in the Docker image.
+- **Recording and playback**: All video is stored and served locally.
+- **Live streaming**: Camera streams are pulled over your local network. MSE and HLS streaming work without any external connections.
+- **The web interface**: Fully self-contained with no external fonts, scripts, analytics, or CDN dependencies. All translations are bundled locally.
+- **Custom classification inference**: After training, custom models run entirely locally.
+- **Audio detection**: The YAMNet audio classification model is bundled in the Docker image.
 
 ## Running Frigate Offline
 
 To run Frigate in an air-gapped or offline environment:
 
-1. **Pre-download models** — Start Frigate with internet access once with all desired features enabled. Models will be cached in `/config/model_cache/`.
-2. **Disable version check** — Set `telemetry.version_check: false` in your configuration.
-3. **Block outbound model requests** — Set the `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` environment variables to prevent HuggingFace and Transformers from attempting any network requests.
-4. **Avoid cloud features** — Do not configure Frigate+, Generative AI providers that require internet, or cloud MQTT brokers.
-5. **Use local model mirrors** — If limited internet is available, set the `HF_ENDPOINT`, `GITHUB_ENDPOINT`, and `GITHUB_RAW_ENDPOINT` environment variables to point to local mirrors.
+1. **Pre-download models**: Start Frigate with internet access once with all desired features enabled. Models will be cached in `/config/model_cache/`.
+2. **Disable version check**: Set `telemetry.version_check: false` in your configuration.
+3. **Block outbound model requests**: Set the `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` environment variables to prevent HuggingFace and Transformers from attempting any network requests.
+4. **Avoid cloud features**: Do not configure Frigate+, Generative AI providers that require internet, or cloud MQTT brokers.
+5. **Use local model mirrors**: If limited internet is available, set the `HF_ENDPOINT`, `GITHUB_ENDPOINT`, and `GITHUB_RAW_ENDPOINT` environment variables to point to local mirrors.
 
 After these steps, Frigate will operate with no outbound internet connections.

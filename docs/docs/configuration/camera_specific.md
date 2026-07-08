@@ -165,7 +165,7 @@ If available, recommended settings are:
 
 #### Setup via the Add Camera Wizard
 
-The Add Camera Wizard is the recommended way to add a standard Reolink camera. Before starting, make sure HTTP is enabled in the camera's advanced network settings — the wizard uses the camera's HTTP API to determine its resolution and choose the recommended stream type from the table above.
+The Add Camera Wizard is the recommended way to add a standard Reolink camera. Before starting, make sure HTTP is enabled in the camera's advanced network settings. The wizard uses the camera's HTTP API to determine its resolution and choose the recommended stream type from the table above.
 
 1. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />.
 2. Choose **Manual selection** as the stream detection method and select **Reolink** as the camera brand.

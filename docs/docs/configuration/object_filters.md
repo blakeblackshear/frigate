@@ -26,9 +26,9 @@ In frame 2, the score is below the `min_score` value, so Frigate ignores it and 
 
 The **top score** is the highest computed score the tracked object has ever reached during its lifetime. Because the computed score rises and falls as new frames come in, the top score can be thought of as the peak confidence Frigate had in the object. In Frigate's UI (such as the Tracking Details pane in Explore), you may see all three values:
 
-- **Score** — the raw detector score for that single frame.
-- **Computed Score** — the median of the most recent score history at that moment. This is the value compared against `threshold`.
-- **Top Score** — the highest computed score reached so far for the tracked object.
+- **Score**: the raw detector score for that single frame.
+- **Computed Score**: the median of the most recent score history at that moment. This is the value compared against `threshold`.
+- **Top Score**: the highest computed score reached so far for the tracked object.
 
 ### Minimum Score
 

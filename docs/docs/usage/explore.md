@@ -11,13 +11,13 @@ This page describes how to _use_ the Explore view. For how the underlying featur
 
 :::tip
 
-If you just want to quickly see what happened on your cameras, it's recommended to use [Review](/usage/review) rather than Explore. Review groups overlapping and adjacent activity on a camera into **review items** and sorts them into Alerts, Detections, and Motion, so you can scan and play back footage in a few clicks instead of sifting through individual objects. Reach for Explore when you need to find a _specific_ tracked object after the fact — by label, time, zone, or description.
+If you just want to quickly see what happened on your cameras, it's recommended to use [Review](/usage/review) rather than Explore. Review groups overlapping and adjacent activity on a camera into **review items** and sorts them into Alerts, Detections, and Motion, so you can scan and play back footage in a few clicks instead of sifting through individual objects. Reach for Explore when you need to find a _specific_ tracked object after the fact: by label, time, zone, or description.
 
 :::
 
 ## Browsing tracked objects
 
-The default view shows your most recent tracked objects grouped into rows by label — _Person_, _Car_, _Dog_, and so on — each row labeled with the object type and a count. The arrow at the end of a row opens the full, filterable grid for that label.
+The default view shows your most recent tracked objects grouped into rows by label (_Person_, _Car_, _Dog_, and so on), each row labeled with the object type and a count. The arrow at the end of a row opens the full, filterable grid for that label.
 
 Clicking a thumbnail opens its [detail dialog](#tracked-object-details); right-clicking or long-pressing a thumbnail opens an [actions menu](#actions-and-bulk-selection). You can switch to a denser grid layout and adjust the number of columns from the view's settings.
 
@@ -25,8 +25,8 @@ Clicking a thumbnail opens its [detail dialog](#tracked-object-details); right-c
 
 When [Semantic Search](/configuration/semantic_search) is enabled, a search bar appears that combines two things in one input:
 
-- **Natural-language search** — type a free-text query and press Enter to run a semantic search over your tracked objects.
-- **Filter tokens** — type a `key:` to get suggestions, then a value, to add a structured filter. Each filter becomes a removable chip, and you can chain several together.
+- **Natural-language search**: type a free-text query and press Enter to run a semantic search over your tracked objects.
+- **Filter tokens**: type a `key:` to get suggestions, then a value, to add a structured filter. Each filter becomes a removable chip, and you can chain several together.
 
 You can save a search with the star icon and reload it later, and clear everything with the clear-search icon. A help popover explains the token syntax, for example:
 
@@ -68,12 +68,12 @@ Natural-language search, thumbnail search, and description search all require [S
 
 Selecting an object opens the **Tracked Object Details** dialog. Use the arrows (or the left/right keys) to step to the previous or next object. The dialog has two tabs:
 
-- **Snapshot** or **Thumbnail** — the saved snapshot (or thumbnail).
-- **Tracking Details** — the object's lifecycle, available when the object has a recording. It lists each significant moment (detected, entered a zone, became active or stationary, left, and so on); clicking a moment plays that part of the recording with the bounding box overlaid. A settings popover lets you show all zones and adjust the annotation offset.
+- **Snapshot** or **Thumbnail**: the saved snapshot (or thumbnail).
+- **Tracking Details**: the object's lifecycle, available when the object has a recording. It lists each significant moment (detected, entered a zone, became active or stationary, left, and so on); clicking a moment plays that part of the recording with the bounding box overlaid. A settings popover lets you show all zones and adjust the annotation offset.
 
 The details pane shows the object's **label**, **scores**, **camera**, **timestamp**, estimated **speed**, any **recognized license plate** and **classification attributes**, and its **description**. Admins can edit the sub label, license plate, and attributes inline.
 
-The **description** can be edited by hand, and — when [Generative AI descriptions](/configuration/genai/genai_objects) are enabled and the object's lifecycle has ended — regenerated from the snapshot or from thumbnails. For `speech` objects, a **Transcribe** action is available when audio transcription is enabled. When [Frigate+](/integrations/plus) is enabled, admins can submit a snapshot to improve their model directly from this pane.
+The **description** can be edited by hand, and, when [Generative AI descriptions](/configuration/genai/genai_objects) are enabled and the object's lifecycle has ended, regenerated from the snapshot or from thumbnails. For `speech` objects, a **Transcribe** action is available when audio transcription is enabled. When [Frigate+](/integrations/plus) is enabled, admins can submit a snapshot to improve their model directly from this pane.
 
 ## Actions and bulk selection
 

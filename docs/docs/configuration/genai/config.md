@@ -55,7 +55,7 @@ Frigate manages reasoning per task automatically:
 - **Description tasks** (object descriptions, review descriptions, review summaries) are synthesis-only and benefit from concise, direct output, so Frigate disables thinking for these calls when the model exposes a per-request toggle.
 - **Chat** lets you toggle thinking on or off from the composer when the configured model supports it.
 
-You can use a pure instruct, hybrid, or thinking-capable model with Frigate — no extra configuration is required to disable thinking for descriptions.
+You can use a pure instruct, hybrid, or thinking-capable model with Frigate. No extra configuration is required to disable thinking for descriptions.
 
 ### llama.cpp
 

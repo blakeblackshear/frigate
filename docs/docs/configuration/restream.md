@@ -61,7 +61,7 @@ Configure the go2rtc stream and point the camera inputs at the local restream.
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > go2rtc streams" /> and add stream entries for each camera. Then navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> for each camera. For each input, choose **Restream (go2rtc)** and pick the matching stream from the dropdown — Frigate uses the local restream URL (`rtsp://127.0.0.1:8554/<camera_name>`) and the `preset-rtsp-restream` input args for that input automatically. (Choose **Manual input path** instead to type a URL directly.)
+Navigate to <NavPath path="Settings > System > go2rtc streams" /> and add stream entries for each camera. Then navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> for each camera. For each input, choose **Restream (go2rtc)** and pick the matching stream from the dropdown. Frigate uses the local restream URL (`rtsp://127.0.0.1:8554/<camera_name>`) and the `preset-rtsp-restream` input args for that input automatically. (Choose **Manual input path** instead to type a URL directly.)
 
 </TabItem>
 <TabItem value="yaml">
@@ -111,7 +111,7 @@ Two connections are made to the camera. One for the sub stream, one for the rest
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > go2rtc streams" /> and add stream entries for each camera and its sub stream. Then navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> for each camera and add separate inputs for the main and sub streams. Set each input's source to **Restream (go2rtc)** and pick the matching stream from the dropdown — Frigate uses the local restream URL and the `preset-rtsp-restream` input args for that input automatically.
+Navigate to <NavPath path="Settings > System > go2rtc streams" /> and add stream entries for each camera and its sub stream. Then navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> for each camera and add separate inputs for the main and sub streams. Set each input's source to **Restream (go2rtc)** and pick the matching stream from the dropdown. Frigate uses the local restream URL and the `preset-rtsp-restream` input args for that input automatically.
 
 </TabItem>
 <TabItem value="yaml">

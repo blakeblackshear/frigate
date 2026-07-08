@@ -27,7 +27,7 @@ Larger resolutions **do** improve performance if the objects are very small in t
 
 ### Choosing a detect frame rate
 
-`detect.fps` controls how many times per second Frigate runs object detection — it does **not** need to match your camera's frame rate. The default of **5** is correct for the vast majority of cameras.
+`detect.fps` controls how many times per second Frigate runs object detection. It does **not** need to match your camera's frame rate. The default of **5** is correct for the vast majority of cameras.
 
 :::warning
 
@@ -47,7 +47,7 @@ Estimate how long an object is visible as it crosses the area of interest, aimin
 
 > **`detect.fps` ≈ 10 ÷ (seconds the object is in view)**
 
-Most objects — people walking or running, pets, and vehicles in a yard, driveway, or walkway — stay in view for two seconds or more, so the default of 5 fps is correct. Slowly try raising it to 10 (the recommended maximum) in increments only when objects routinely cross the entire frame in about a second, such as a camera aimed at a street or sidewalk with fast cross-traffic. Objects that transit in under a second cannot be tracked reliably at any practical rate, so reposition the camera instead.
+Most objects (people walking or running, pets, and vehicles in a yard, driveway, or walkway) stay in view for two seconds or more, so the default of 5 fps is correct. Slowly try raising it to 10 (the recommended maximum) in increments only when objects routinely cross the entire frame in about a second, such as a camera aimed at a street or sidewalk with fast cross-traffic. Objects that transit in under a second cannot be tracked reliably at any practical rate, so reposition the camera instead.
 
 :::tip
 

@@ -48,7 +48,7 @@ Some users have reported that this older device runs an older kernel causing iss
 
 ### QNAP NAS
 
-QNAP NAS devices, such as the TS-253A, may use connected Coral TPU devices if [QuMagie](https://www.qnap.com/en/software/qumagie) is installed along with its QNAP AI Core extension. If any of the features—`facial recognition`, `object recognition`, or `similar photo recognition`—are enabled, Container Station applications such as `Frigate` or `CodeProject.AI Server` will be unable to initialize the TPU device in use.
+QNAP NAS devices, such as the TS-253A, may use connected Coral TPU devices if [QuMagie](https://www.qnap.com/en/software/qumagie) is installed along with its QNAP AI Core extension. If any of the features (`facial recognition`, `object recognition`, or `similar photo recognition`) are enabled, Container Station applications such as `Frigate` or `CodeProject.AI Server` will be unable to initialize the TPU device in use.
 To allow the Coral TPU device to be discovered, the you must either:
 
 1. [Disable the AI recognition features in QuMagie](https://docs.qnap.com/application/qumagie/2.x/en-us/configuring-qnap-ai-core-settings-FB13CE03.html),
