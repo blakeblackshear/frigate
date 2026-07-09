@@ -76,7 +76,7 @@ This is an issue due to outdated gasket driver when being used with new linux ke
 
 ### Not detected on Raspberry Pi5
 
-A kernel update to the RPi5 means an upate to config.txt is required, see [the raspberry pi forum for more info](https://forums.raspberrypi.com/viewtopic.php?t=363682&sid=cb59b026a412f0dc041595951273a9ca&start=25)
+A kernel update to the RPi5 means an update to config.txt is required, see [the raspberry pi forum for more info](https://forums.raspberrypi.com/viewtopic.php?t=363682&sid=cb59b026a412f0dc041595951273a9ca&start=25)
 
 Specifically, add the following to config.txt
 

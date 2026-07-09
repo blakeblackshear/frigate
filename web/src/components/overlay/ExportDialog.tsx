@@ -134,7 +134,7 @@ export default function ExportDialog({
     }
 
     if (!range) {
-      toast.error(t("export.toast.error.noVaildTimeSelected"), {
+      toast.error(t("export.toast.error.noValidTimeSelected"), {
         position: "top-center",
       });
       return false;
@@ -665,7 +665,7 @@ export function ExportContent({
     }
 
     if (!range) {
-      toast.error(t("export.toast.error.noVaildTimeSelected"), {
+      toast.error(t("export.toast.error.noValidTimeSelected"), {
         position: "top-center",
       });
       return;

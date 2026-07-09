@@ -743,13 +743,13 @@ config:
   quant_img_RGB2BGR: true
 ```
 
-Explanation of the paramters:
+Explanation of the parameters:
 
 - `soc`: A list of all SoCs you want to build the rknn model for. If you don't specify this parameter, the script tries to find out your SoC and builds the rknn model for this one.
 - `quantization`: true: 8 bit integer (i8) quantization, false: 16 bit float (fp16). Default: false.
 - `output_name`: The output name of the model. The following variables are available:
   - `quant`: "i8" or "fp16" depending on the config
-  - `input_basename`: the basename of the input model (e.g. "my_model" if the input model is calles "my_model.onnx")
+  - `input_basename`: the basename of the input model (e.g. "my_model" if the input model is called "my_model.onnx")
   - `soc`: the SoC this model was build for (e.g. "rk3588")
   - `tk_version`: Version of `rknn-toolkit2` (e.g. "2.3.0")
   - **example**: Specifying `output_name = "frigate-{quant}-{input_basename}-{soc}-v{tk_version}"` could result in a model called `frigate-i8-my_model-rk3588-v2.3.0.rknn`.
