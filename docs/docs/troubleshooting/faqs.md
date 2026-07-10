@@ -29,7 +29,7 @@ You can open `chrome://media-internals/` in another tab and then try to playback
 
 ### What do I do if my cameras sub stream is not good enough?
 
-Frigate generally [recommends cameras with configurable sub streams](/frigate/hardware.md). However, if your camera does not have a sub stream that a suitable resolution, the main stream can be resized.
+Frigate generally [recommends cameras with configurable sub streams](/frigate/hardware.md). However, if your camera does not have a sub stream that is a suitable resolution, the main stream can be resized.
 
 To do this efficiently the following setup is required:
 

@@ -23,7 +23,7 @@ The [Advanced Camera Card](https://card.camera/#/README) is a Home Assistant das
 
 ## [Double Take](https://github.com/skrashevich/double-take)
 
-[Double Take](https://github.com/skrashevich/double-take) provides an unified UI and API for processing and training images for facial recognition.
+[Double Take](https://github.com/skrashevich/double-take) provides a unified UI and API for processing and training images for facial recognition.
 It supports automatically setting the sub labels in Frigate for person objects that are detected and recognized.
 This is a fork (with fixed errors and new features) of [original Double Take](https://github.com/jakowenko/double-take) project which, unfortunately, isn't being maintained by author.
 
@@ -53,7 +53,7 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 
 ## [Scrypted - Frigate bridge plugin](https://github.com/apocaliss92/scrypted-frigate-bridge)
 
-[Scrypted - Frigate bridge](https://github.com/apocaliss92/scrypted-frigate-bridge) is an plugin that allows to ingest Frigate detections, motion, videoclips on Scrypted as well as provide templates to export rebroadcast configurations on Frigate.
+[Scrypted - Frigate bridge](https://github.com/apocaliss92/scrypted-frigate-bridge) is a plugin that allows you to ingest Frigate detections, motion, videoclips on Scrypted as well as provide templates to export rebroadcast configurations on Frigate.
 
 ## [Strix](https://github.com/eduard256/Strix)
 
