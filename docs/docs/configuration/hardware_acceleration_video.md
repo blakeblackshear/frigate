@@ -477,7 +477,7 @@ Error marking filters as finished
 Restarting ffmpeg...
 ```
 
-you should try to uprade to FFmpeg 7. This can be done using this config option:
+you should try to upgrade to FFmpeg 7. This can be done using this config option:
 
 ```yaml
 ffmpeg:

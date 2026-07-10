@@ -305,7 +305,7 @@ export default function MotionSearchView({
   const handleExportPreview = useCallback(() => {
     if (!exportRange) {
       toast.error(
-        t("export.toast.error.noVaildTimeSelected", {
+        t("export.toast.error.noValidTimeSelected", {
           ns: "components/dialog",
         }),
         {
@@ -351,7 +351,7 @@ export default function MotionSearchView({
   const handleExportSave = useCallback(() => {
     if (!exportRange || !selectedCamera) {
       toast.error(
-        t("export.toast.error.noVaildTimeSelected", {
+        t("export.toast.error.noValidTimeSelected", {
           ns: "components/dialog",
         }),
         {

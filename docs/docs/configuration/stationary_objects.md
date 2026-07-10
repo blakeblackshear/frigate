@@ -43,7 +43,7 @@ Let's look at an example use case: I want to record any cars that enter my drive
 
 One might simply think "Why not just run object detection any time there is motion around the driveway area and notify if the bounding box is in that zone?"
 
-With that approach, what video is related to the car that entered the driveway? Did it come from the left or right? Was it parked across the street for an hour before turning into the driveway? One approach is to just record 24/7 or for motion (on any changed changed pixels) and not attempt to do that at all. This is what most other NVRs do. Just don't even try to identify a start and end for that object since it's hard and you will be wrong some portion of the time.
+With that approach, what video is related to the car that entered the driveway? Did it come from the left or right? Was it parked across the street for an hour before turning into the driveway? One approach is to just record 24/7 or for motion (on any changed pixels) and not attempt to do that at all. This is what most other NVRs do. Just don't even try to identify a start and end for that object since it's hard and you will be wrong some portion of the time.
 
 Couldn't you just look at when motion stopped and started? Motion for a video feed is nothing more than looking for pixels that are different than they were in previous frames. If the car entered the driveway while someone was mowing the grass, how would you know which motion was for the car and which was for the person when they mow along the driveway or street? What if another car was driving the other direction on the street? Or what if its a windy day and the bush by your mailbox is blowing around?
 

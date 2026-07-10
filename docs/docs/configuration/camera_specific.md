@@ -204,7 +204,7 @@ go2rtc:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
     your_reolink_camera_sub:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
-    # example for connectin to a Reolink camera that supports two way talk
+    # example for connecting to a Reolink camera that supports two way talk
     your_reolink_camera_twt:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
       - "rtsp://username:password@reolink_ip/Preview_01_sub"
@@ -249,7 +249,7 @@ cameras:
 
 :::note
 
-Unifi G5s cameras and newer need a Unifi Protect server to enable rtsps stream, it's not posible to enable it in standalone mode.
+Unifi G5s cameras and newer need a Unifi Protect server to enable rtsps stream, it's not possible to enable it in standalone mode.
 
 :::
 
