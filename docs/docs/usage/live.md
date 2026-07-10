@@ -60,7 +60,7 @@ You can optionally overlay live streaming statistics (stream type, bandwidth, la
 
 Right-clicking (or long-pressing) a camera tile opens a context menu with quick controls: an **audio volume** control for streams that support audio, **Mute / Unmute all cameras**, **show or hide streaming statistics**, the **debug view**, **notification** options, and, for admins, turning the camera on or off. If the audio control doesn't appear, see [Audio Support](/configuration/live#audio-support). Audio requires go2rtc configured with a compatible codec.
 
-A **Low-bandwidth mode** notice may also appear in the context menu with a **Reset** option appears when Frigate has fallen back to the lower-quality jsmpeg stream. See the [Live view FAQ](/configuration/live#live-view-faq) for why this happens.
+A **Low-bandwidth mode** notice may also appear in the context menu with a **Reset** option when Frigate has fallen back to the lower-quality jsmpeg stream. See the [Live view FAQ](/configuration/live#live-view-faq) for why this happens.
 
 For non-default groups, the context menu also exposes **Streaming Settings** for that camera, which let you choose:
 

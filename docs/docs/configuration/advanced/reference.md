@@ -339,7 +339,7 @@ detect:
   # especially when using separate streams for detect and record.
   # Use this setting to make the timeline bounding boxes more closely align
   # with the recording. The value can be positive or negative.
-  # TIP: Imagine there is an tracked object clip with a person walking from left to right.
+  # TIP: Imagine there is a tracked object clip with a person walking from left to right.
   #      If the tracked object lifecycle bounding box is consistently to the left of the person
   #      then the value should be decreased. Similarly, if a person is walking from
   #      left to right and the bounding box is consistently ahead of the person

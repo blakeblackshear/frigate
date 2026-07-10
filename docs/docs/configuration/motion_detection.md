@@ -66,7 +66,7 @@ motion:
 </TabItem>
 </ConfigTabs>
 
-Lower values mean motion detection is more sensitive to changes in color, making it more likely for example to detect motion when a brown dogs blends in with a brown fence or a person wearing a red shirt blends in with a red car. If the threshold is too low however, it may detect things like grass blowing in the wind, shadows, etc. to be detected as motion.
+Lower values mean motion detection is more sensitive to changes in color, making it more likely for example to detect motion when a brown dog blends in with a brown fence or a person wearing a red shirt blends in with a red car. If the threshold is too low however, it may detect things like grass blowing in the wind, shadows, etc. to be detected as motion.
 
 Watching the motion boxes in the debug view, increase the threshold until you only see motion that is visible to the eye. Once this is done, it is important to test and ensure that desired motion is still detected.
 

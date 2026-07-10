@@ -1053,7 +1053,7 @@
       },
       "createUser": {
         "title": "Create New User",
-        "desc": "Add a new user account and specify an role for access to areas of the Frigate UI.",
+        "desc": "Add a new user account and specify a role for access to areas of the Frigate UI.",
         "usernameOnlyInclude": "Username may only include letters, numbers, . or _",
         "confirmPassword": "Please confirm your password"
       },

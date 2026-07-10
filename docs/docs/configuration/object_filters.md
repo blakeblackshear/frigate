@@ -36,7 +36,7 @@ Any detection below `min_score` will be immediately thrown out and never tracked
 
 ### Threshold
 
-`threshold` is used to determine that the object is a true positive. Once an object is detected with a score >= `threshold` object is considered a true positive. If `threshold` is too low then some higher scoring false positives may create an tracked object. If `threshold` is too high then true positive tracked objects may be missed due to the object never scoring high enough.
+`threshold` is used to determine that the object is a true positive. Once an object is detected with a score >= `threshold` object is considered a true positive. If `threshold` is too low then some higher scoring false positives may create a tracked object. If `threshold` is too high then true positive tracked objects may be missed due to the object never scoring high enough.
 
 ## Configuring Object Scores
 

@@ -262,7 +262,7 @@ Face recognition does not run on the recording stream, this would be suboptimal 
 
 <FaqItem id="detection-does-not-work-well-with-blurry-images" question="Detection does not work well with blurry images?">
 
-Accuracy is definitely a going to be improved with higher quality cameras / streams. It is important to look at the DORI (Detection Observation Recognition Identification) range of your camera, if that specification is posted. This specification explains the distance from the camera that a person can be detected, observed, recognized, and identified. The identification range is the most relevant here, and the distance listed by the camera is the furthest that face recognition will realistically work.
+Accuracy is definitely going to be improved with higher quality cameras / streams. It is important to look at the DORI (Detection Observation Recognition Identification) range of your camera, if that specification is posted. This specification explains the distance from the camera that a person can be detected, observed, recognized, and identified. The identification range is the most relevant here, and the distance listed by the camera is the furthest that face recognition will realistically work.
 
 Some users have also noted that setting the stream in camera firmware to a constant bit rate (CBR) leads to better image clarity than with a variable bit rate (VBR).
 
@@ -324,7 +324,7 @@ This also applies to a stranger who is repeatedly matched to a known person (for
 
 <FaqItem id="i-see-scores-above-the-threshold-in-the-recent-recognitions-tab-but-a-sub-label-wasnt-assigned" question="I see scores above the threshold in the Recent Recognitions tab, but a sub label wasn't assigned?">
 
-The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
+Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
 
 </FaqItem>
 
