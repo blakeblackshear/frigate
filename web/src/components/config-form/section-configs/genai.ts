@@ -9,7 +9,15 @@ const genai: SectionConfigOverrides = {
     uiSchema: {
       "ui:options": { disableNestedCard: true },
       "*": {
-        "ui:options": { disableNestedCard: true },
+        "ui:options": {
+          disableNestedCard: true,
+          additionalPropertyKeyLabel:
+            "configForm.additionalProperties.providerNameLabel",
+          additionalPropertyKeyPlaceholder:
+            "configForm.additionalProperties.providerNamePlaceholder",
+          additionalPropertyKeyPattern: "^[a-zA-Z0-9_-]+$",
+          preventKeyRename: true,
+        },
         "ui:order": [
           "provider",
           "api_key",

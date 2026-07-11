@@ -1490,7 +1490,14 @@
       "keyLabel": "Key",
       "valueLabel": "Value",
       "keyPlaceholder": "New key",
-      "remove": "Remove"
+      "remove": "Remove",
+      "providerNameLabel": "Provider name",
+      "providerNamePlaceholder": "e.g., openai",
+      "variableNameLabel": "Variable name",
+      "variableNamePlaceholder": "e.g., MY_VARIABLE",
+      "loggerNameLabel": "Logger name",
+      "loggerNamePlaceholder": "e.g., frigate.record",
+      "keyPatternError": "Use only letters, numbers, hyphens, and underscores (no spaces)"
     },
     "knownPlates": {
       "namePlaceholder": "e.g., Wife's Car",
