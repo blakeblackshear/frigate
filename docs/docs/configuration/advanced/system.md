@@ -72,10 +72,10 @@ Variables prefixed with `FRIGATE_` can be referenced in config fields that suppo
 
 Navigate to <NavPath path="Settings > System > Environment variables" /> to add or edit environment variables.
 
-| Field     | Description                                               |
-| --------- | --------------------------------------------------------- |
-| **Key**   | The environment variable name (e.g., `FRIGATE_MQTT_USER`) |
-| **Value** | The value for the variable                                |
+| Field             | Description                                               |
+| ----------------- | --------------------------------------------------------- |
+| **Variable name** | The environment variable name (e.g., `FRIGATE_MQTT_USER`) |
+| **Value**         | The value for the variable                                |
 
 Variables defined here can be referenced elsewhere in your configuration using the `{FRIGATE_VARIABLE_NAME}` syntax.
 

@@ -7,7 +7,13 @@ const environmentVars: SectionConfigOverrides = {
     advancedFields: [],
     uiSchema: {
       additionalProperties: {
-        "ui:options": { size: "lg" },
+        "ui:options": {
+          size: "lg",
+          additionalPropertyKeyLabel:
+            "configForm.additionalProperties.variableNameLabel",
+          additionalPropertyKeyPlaceholder:
+            "configForm.additionalProperties.variableNamePlaceholder",
+        },
       },
     },
   },
