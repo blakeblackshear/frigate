@@ -5,7 +5,7 @@ title: Zones
 
 import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
-import NavPath from "@site/src/components/NavPath";
+import FrigateConfigMock from "@site/src/components/FrigateConfigMock";
 
 Zones allow you to define a specific area of the frame and apply additional filters for object types so you can determine whether or not an object is within a particular area. Presence in a zone is evaluated based on the bottom center of the bounding box for the object. It does not matter how much of the bounding box overlaps with the zone.
 
@@ -25,11 +25,32 @@ During testing, enable the Zones option for the [Debug view](/usage/live#the-sin
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
-2. Under the **Zones** section, click the plus icon to add a new zone.
-3. Click on the camera's latest image to create the points for the zone boundary. Click the first point again to close the polygon.
-4. Configure zone options such as **Friendly name**, **Objects**, **Loitering time**, and **Inertia** in the zone editor.
-5. Press **Save** when finished.
+<FrigateConfigMock
+level="camera"
+section="masksAndZones"
+steps={[
+{
+focus: "zone.add",
+label: "Add Zone",
+hint: "Select the plus button beside Zones to create a zone.",
+},
+{
+focus: "zone.canvas",
+label: "Draw the zone",
+hint: "Select points on the camera image, then close the polygon by selecting the first point again.",
+},
+{
+focus: "zone.options",
+label: "Zone options",
+hint: "Configure the friendly name, objects, loitering time, inertia, and optional speed settings.",
+},
+{
+focus: "zone.save",
+label: "Save",
+hint: "Save the zone after its boundary and options are complete.",
+},
+]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -57,11 +78,14 @@ To create an alert only when an object enters the `entire_yard` zone:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > Review" />.
-
-| Field                              | Description                                                                               |
-| ---------------------------------- | ----------------------------------------------------------------------------------------- |
-| **Alerts config > Required zones** | Set to `entire_yard` so an object must enter that zone to be considered an alert; leave empty to allow alerts anywhere in the frame. |
+<FrigateConfigMock
+autoPlay={false}
+level="camera"
+section="review"
+focus="alerts.required_zones"
+values={{ "alerts.required_zones": ["entire_yard"] }}
+hint="Select entire_yard so an object must enter that zone to be considered an alert."
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -87,12 +111,26 @@ You may also want to filter detections to only be created when an object enters 
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > Review" />.
-
-| Field                                  | Description                                                                                  |
-| -------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **Alerts config > Required zones**     | Set to `inner_yard` so an object must enter that zone to be considered an alert; leave empty to allow alerts anywhere in the frame.       |
-| **Detections config > Required zones** | Set to `edge_yard` so an object must enter that zone to be considered a detection; leave empty to allow detections anywhere in the frame. |
+<FrigateConfigMock
+autoPlay={false}
+showNavigationSteps={false}
+level="camera"
+section="review"
+values={{
+    "alerts.required_zones": ["inner_yard"],
+    "detections.required_zones": ["edge_yard"],
+  }}
+targets={[
+{
+field: "alerts.required_zones",
+hint: "Select inner_yard so an object must enter the inner area to be considered an alert.",
+},
+{
+field: "detections.required_zones",
+hint: "Select edge_yard so activity in the secondary area can be retained as a detection.",
+},
+]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -126,8 +164,15 @@ To only save snapshots when an object enters a specific zone, for example an `en
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Snapshots" /> and select your camera.
-   - Set **Required zones** to `entire_yard`
+<FrigateConfigMock
+autoPlay={false}
+showNavigationSteps={false}
+level="camera"
+section="snapshots"
+focus="required_zones"
+values={{ required_zones: ["entire_yard"] }}
+hint="Select entire_yard to save snapshots only after an object enters that zone."
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -154,11 +199,15 @@ Sometimes you want to limit a zone to specific object types to have more granula
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
-2. Create a zone named `entire_yard` covering everywhere you want to track a person.
-   - Under **Objects**, add `person`
-3. Create a second zone named `front_yard_street` covering just the street.
-   - Under **Objects**, add `car`
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  level="camera"
+  section="masksAndZones"
+  focus="zone.objects"
+  label="Objects"
+  hint="Choose which object types apply to the zone. For example, use person for the yard and car for the street."
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -198,10 +247,15 @@ When using loitering zones, a review item will behave in the following way:
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
-2. Edit or create the zone (e.g., `sidewalk`).
-   - Set **Loitering time** to the desired number of seconds (e.g., `4`)
-   - Under **Objects**, add the relevant object types (e.g., `person`)
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  level="camera"
+  section="masksAndZones"
+  focus="zone.loitering_time"
+  label="Loitering Time"
+  hint="Set the minimum number of seconds an object must remain in the zone before the zone activates."
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -227,9 +281,15 @@ Sometimes an objects bounding box may be slightly incorrect and the bottom cente
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
-2. Edit or create the zone (e.g., `front_yard`).
-   - Set **Inertia** to the desired number of consecutive frames (e.g., `3`)
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  level="camera"
+  section="masksAndZones"
+  focus="zone.inertia"
+  label="Inertia"
+  hint="Set the number of consecutive frames an object must be inside the zone. The default is 3."
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -253,9 +313,15 @@ There may also be cases where you expect an object to quickly enter and exit a z
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
-2. Edit or create the zone (e.g., `driveway_entrance`).
-   - Set **Inertia** to `1`
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  level="camera"
+  section="masksAndZones"
+  focus="zone.inertia"
+  label="Inertia"
+  hint="Set Inertia to 1 when an object should be considered inside the zone immediately."
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -289,11 +355,23 @@ Accurate real-world distance measurements are required to estimate speeds. These
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
-2. Create or edit a zone with exactly 4 points aligned to the ground plane.
-3. In the zone editor, enter the real-world **Distances** between each pair of consecutive points.
-   - For example, if the distance between the first and second points is 10 meters, between the second and third is 12 meters, etc.
-4. Distances are measured in meters (metric) or feet (imperial), depending on the **Unit system** setting.
+<FrigateConfigMock
+level="camera"
+showNavigationSteps={false}
+section="masksAndZones"
+steps={[
+{
+focus: "zone.canvas",
+label: "Draw a four-point zone",
+hint: "Draw exactly four points aligned to the ground plane where objects will travel.",
+},
+{
+focus: "zone.speed",
+label: "Speed Estimation",
+hint: "Enter the real-world distance between each pair of consecutive points. Units follow the UI unit system setting.",
+},
+]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -317,11 +395,14 @@ The `distance` values are measured in meters (metric) or feet (imperial), depend
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > UI" />.
-
-| Field           | Description                                                          |
-| --------------- | -------------------------------------------------------------------- |
-| **Unit system** | Set to `metric` (kilometers per hour) or `imperial` (miles per hour) |
+<FrigateConfigMock
+autoPlay={false}
+level="global"
+section="ui"
+focus="unit_system"
+values={{ unit_system: "metric" }}
+hint="Choose metric for kilometers per hour or imperial for miles per hour."
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -356,10 +437,15 @@ Zones can be configured with a minimum speed requirement, meaning an object must
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
-2. Edit or create the zone with distances configured.
-   - Set **Speed threshold** to the desired minimum speed (e.g., `20`)
-   - The unit is kph or mph, depending on the **Unit system** setting
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  level="camera"
+  section="masksAndZones"
+  focus="zone.speed_threshold"
+  label="Speed Threshold"
+  hint="Set the minimum speed required for an object to be considered inside the zone. Units follow the UI unit system setting."
+/>
 
 </TabItem>
 <TabItem value="yaml">

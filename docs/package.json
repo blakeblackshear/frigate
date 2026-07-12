@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "build:config": "node scripts/build-config.mjs",
+    "build:mock": "node scripts/generate-mock-manifest.mjs",
+    "check:mock": "node scripts/generate-mock-manifest.mjs --check",
     "docusaurus": "docusaurus",
-    "start": "npm run build:config && npm run regen-docs && docusaurus start --host 0.0.0.0",
-    "build": "npm run build:config && npm run regen-docs && docusaurus build",
+    "start": "npm run build:config && npm run build:mock && npm run regen-docs && docusaurus start --host 0.0.0.0",
+    "build": "npm run build:config && npm run build:mock && npm run regen-docs && docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
@@ -33,7 +35,8 @@
     "prism-react-renderer": "^2.4.1",
     "raw-loader": "^4.0.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.7.0"
   },
   "browserslist": {
     "production": [

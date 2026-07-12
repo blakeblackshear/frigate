@@ -4,6 +4,7 @@ title: Motion Detection
 ---
 
 import ConfigTabs from "@site/src/components/ConfigTabs";
+import FrigateConfigMock from "@site/src/components/FrigateConfigMock";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
@@ -44,13 +45,13 @@ The threshold value dictates how much of a change in a pixels luminance is requi
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Global configuration > Motion detection" /> to set the threshold globally.
-
-To override for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Motion detection" /> and select the camera, or use the <NavPath path="Settings > Camera configuration > Motion tuner" /> to adjust it live.
-
-| Field                | Description                                                                                                                                                                                                                                                                                  |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Motion threshold** | The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive. The value should be between 1 and 255. (default: 30) |
+<FrigateConfigMock
+  section="motion"
+  fields={["threshold"]}
+  values={{ threshold: 30 }}
+  focus="threshold"
+  hint="The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive. The value should be between 1 and 255. (default: 30)"
+/>
 
 </TabItem>
 <TabItem value="yaml">
