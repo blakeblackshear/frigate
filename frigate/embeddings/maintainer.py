@@ -376,20 +376,22 @@ class EmbeddingMaintainer(threading.Thread):
             logger.info(f"Disabled classification processor for model: {model_name}")
             return
 
-        # Check if processor already exists
         for processor in self.realtime_processors:
-            if isinstance(
-                processor,
-                (
-                    CustomStateClassificationProcessor,
-                    CustomObjectClassificationProcessor,
-                ),
+            if (
+                isinstance(
+                    processor,
+                    (
+                        CustomStateClassificationProcessor,
+                        CustomObjectClassificationProcessor,
+                    ),
+                )
+                and processor.model_config.name == model_name
             ):
-                if processor.model_config.name == model_name:
-                    logger.debug(
-                        f"Classification processor for model {model_name} already exists, skipping"
-                    )
-                    return
+                processor.model_config = model_config
+                logger.debug(
+                    f"Updated config for classification processor: {model_name}"
+                )
+                return
 
         if model_config.state_config is not None:
             processor = CustomStateClassificationProcessor(
