@@ -69,9 +69,15 @@
     "enabledDesc": "Run this model. When disabled, it stops running and no longer classifies.",
     "saveAttempts": "Save Attempts",
     "saveAttemptsDesc": "Number of classification attempt images to keep for the recent classifications UI.",
+    "motion": "Run on Motion",
+    "motionDesc": "Run classification when motion is detected within the configured crop.",
+    "interval": "Interval",
+    "intervalDesc": "Seconds between periodic classification runs. Leave empty to run only on motion.",
+    "intervalPlaceholder": "No interval",
     "stateClassesInfo": "Model updated. Retrain the model for the class changes to take effect.",
     "errors": {
-      "saveAttemptsInvalid": "Save attempts must be a whole number of 0 or greater"
+      "saveAttemptsInvalid": "Save attempts must be a whole number of 0 or greater",
+      "intervalInvalid": "Interval must be a whole number greater than 0"
     }
   },
   "deleteDatasetImages": {
