@@ -875,7 +875,11 @@ def login(request: Request, body: AppPostLoginBody):
         encoded_jwt = create_encoded_jwt(user, role, expiration, request.app.jwt_token)
         response = Response("", 200)
         set_jwt_cookie(
-            response, JWT_COOKIE_NAME, encoded_jwt, JWT_SESSION_LENGTH, JWT_COOKIE_SECURE
+            response,
+            JWT_COOKIE_NAME,
+            encoded_jwt,
+            JWT_SESSION_LENGTH,
+            JWT_COOKIE_SECURE,
         )
         # Clear admin_first_time_login flag after successful admin login so the
         # UI stops showing the first-time login documentation link.
@@ -1037,7 +1041,11 @@ async def update_password(
         )
         # Set new JWT cookie on response
         set_jwt_cookie(
-            response, JWT_COOKIE_NAME, encoded_jwt, JWT_SESSION_LENGTH, JWT_COOKIE_SECURE
+            response,
+            JWT_COOKIE_NAME,
+            encoded_jwt,
+            JWT_SESSION_LENGTH,
+            JWT_COOKIE_SECURE,
         )
 
     return response
