@@ -44,6 +44,11 @@
   transform: rotate(45deg);
 }
 
+.question {
+  flex: 1;
+  min-width: 0;
+}
+
 .content {
   display: none;
   padding: 0 0 0.85rem;
@@ -61,7 +66,7 @@
 /* Desktop: render as a normal expanded heading + answer. */
 @media (min-width: 997px) {
   .heading {
-    margin: 1.75rem 0 0.5rem;
+    margin: 1.75rem 0 0.85rem;
   }
 
   .toggle {
@@ -78,7 +83,8 @@
 
   .content {
     display: block;
-    padding: 0;
+    padding: 0 0 0.5rem 1rem;
+    border-left: 2px solid var(--ifm-color-emphasis-200);
   }
 
   .heading :global(.hash-link) {
