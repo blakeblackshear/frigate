@@ -360,7 +360,7 @@ def _read_intel_drm_fdinfo(target_pdev: str | None) -> dict:
             if key in snapshot:
                 continue
 
-            engines: dict[str, tuple[int, int]] = {}
+            engines: dict[str, tuple[int, int, int]] = {}
 
             if driver == "i915":
                 for fkey, engine in _I915_ENGINE_KEYS.items():
@@ -368,19 +368,34 @@ def _read_intel_drm_fdinfo(target_pdev: str | None) -> dict:
                     if not raw:
                         continue
                     try:
-                        engines[engine] = (int(raw.split()[0]), 0)
+                        engines[engine] = (int(raw.split()[0]), 0, 1)
                     except (ValueError, IndexError):
                         continue
             else:
                 for suffix, engine in _XE_ENGINE_KEYS.items():
                     busy_raw = fields.get(f"drm-cycles-{suffix}")
                     total_raw = fields.get(f"drm-total-cycles-{suffix}")
+
                     if not (busy_raw and total_raw):
                         continue
+
+                    # drm-cycles-* is summed across every instance of the engine
+                    # class while drm-total-cycles-* tracks a single instance, so
+                    # busy/total scales up to the capacity (e.g. Battlemage
+                    # reports 2 for vcs/vecs). Capture it to divide back out;
+                    # absent means a single engine, so default to 1.
+                    capacity_raw = fields.get(f"drm-engine-capacity-{suffix}")
+
+                    try:
+                        capacity = int(capacity_raw.split()[0]) if capacity_raw else 1
+                    except (ValueError, IndexError):
+                        capacity = 1
+
                     try:
                         engines[engine] = (
                             int(busy_raw.split()[0]),
                             int(total_raw.split()[0]),
+                            max(1, capacity),
                         )
                     except (ValueError, IndexError):
                         continue
@@ -450,11 +465,13 @@ def get_intel_gpu_stats(
         pid_pct = per_pdev_pid_pct.setdefault(pdev, {})
 
         client_total = 0.0
-        for engine, (busy_b, total_b) in data_b["engines"].items():
+        for engine, (busy_b, total_b, capacity) in data_b["engines"].items():
             if engine not in engine_pct:
                 continue
 
-            busy_a, total_a = data_a["engines"].get(engine, (busy_b, total_b))
+            busy_a, total_a, _ = data_a["engines"].get(
+                engine, (busy_b, total_b, capacity)
+            )
 
             if data_b["driver"] == "i915":
                 delta = max(0, busy_b - busy_a)
@@ -464,7 +481,9 @@ def get_intel_gpu_stats(
                 delta_total = total_b - total_a
                 if delta_total <= 0:
                     continue
-                pct = min(100.0, delta_busy / delta_total * 100.0)
+                # Normalize by capacity so a class with N engine instances
+                # (busy summed across all N) reports 0-100%, not 0-N*100%.
+                pct = min(100.0, delta_busy / (delta_total * capacity) * 100.0)
 
             engine_pct[engine] += pct
             client_total += pct
