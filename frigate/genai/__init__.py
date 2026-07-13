@@ -281,6 +281,11 @@ class GenAIClient:
         """Whether the configured model exposes a per-request thinking toggle."""
         return False
 
+    @property
+    def supports_embeddings(self) -> bool:
+        """Whether the configured model can generate embeddings via embed()."""
+        return False
+
     def list_models(self) -> list[str]:
         """Return the list of model names available from this provider.
 

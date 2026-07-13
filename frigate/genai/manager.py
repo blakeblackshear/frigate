@@ -121,5 +121,6 @@ class GenAIClientManager:
                 "models": client.list_models(),
                 "roles": [r.value for r in genai_cfg.roles],
                 "supports_toggleable_thinking": client.supports_toggleable_thinking,
+                "supports_embeddings": client.supports_embeddings,
             }
         return result
