@@ -40,6 +40,24 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const { data } = useSWR("/auth/first_time_login", fetcher);
   const showFirstTimeLink = data?.admin_first_time_login === true;
 
+  const { data: oidcConfig } = useSWR<{ enabled: boolean }>(
+    "/oidc/config",
+    fetcher,
+  );
+  const oidcEnabled = oidcConfig?.enabled === true;
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oidcError = params.get("oidc_error");
+    if (oidcError) {
+      toast.error(oidcError, { position: "top-center" });
+      params.delete("oidc_error");
+      const next = params.toString();
+      const url = `${window.location.pathname}${next ? `?${next}` : ""}${window.location.hash}`;
+      window.history.replaceState(null, "", url);
+    }
+  }, []);
+
   const formSchema = z.object({
     user: z.string().min(1, t("form.errors.usernameRequired")),
     password: z.string().min(1, t("form.errors.passwordRequired")),
@@ -98,6 +116,26 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
+      {oidcEnabled && (
+        <div className="flex flex-col gap-4">
+          <Button
+            variant="select"
+            type="button"
+            className="w-full"
+            aria-label={t("form.oidc.button")}
+            onClick={() => {
+              window.location.href = `${baseUrl}api/oidc/login`;
+            }}
+          >
+            {t("form.oidc.button")}
+          </Button>
+          <div className="flex items-center gap-3 text-xs uppercase text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            {t("form.oidc.divider")}
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </div>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

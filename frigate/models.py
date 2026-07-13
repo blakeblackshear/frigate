@@ -147,9 +147,11 @@ class User(Model):
         max_length=20,
         default="admin",
     )
-    password_hash = CharField(null=False, max_length=120)
+    password_hash = CharField(null=True, max_length=120)
     password_changed_at = DateTimeField(null=True)
     notification_tokens = JSONField()
+    external_id = CharField(null=True, unique=True, max_length=255)
+    email = CharField(null=True, max_length=255)
 
     @classmethod
     def get_allowed_cameras(

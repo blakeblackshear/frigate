@@ -1,8 +1,99 @@
 from pydantic import Field, field_validator, model_validator
 
 from .base import FrigateBaseModel
+from .env import EnvString
 
-__all__ = ["AuthConfig"]
+__all__ = ["AuthConfig", "OidcConfig"]
+
+
+class OidcConfig(FrigateBaseModel):
+    enabled: bool = Field(
+        default=False,
+        title="Enable OpenID Connect",
+        description="Enable Single Sign-On via an OpenID Connect identity provider.",
+    )
+    issuer: str | None = Field(
+        default=None,
+        title="Issuer URL",
+        description=(
+            "Issuer URL of the OIDC provider. Frigate will fetch discovery metadata "
+            "from '{issuer}/.well-known/openid-configuration'."
+        ),
+    )
+    client_id: EnvString | None = Field(
+        default=None,
+        title="Client ID",
+        description="OIDC client identifier issued by the provider.",
+    )
+    client_secret: EnvString | None = Field(
+        default=None,
+        title="Client secret",
+        description="OIDC client secret issued by the provider.",
+    )
+    redirect_uri: str | None = Field(
+        default=None,
+        title="Redirect URI override",
+        description=(
+            "Optional absolute URL for the OIDC callback. When unset it is derived "
+            "from the incoming request as '{scheme}://{host}/api/oidc/callback'."
+        ),
+    )
+    scopes: list[str] = Field(
+        default_factory=lambda: ["openid", "email", "profile", "groups"],
+        title="Requested scopes",
+        description="Scopes requested from the OIDC provider.",
+    )
+    username_claim: str = Field(
+        default="preferred_username",
+        title="Username claim",
+        description=(
+            "ID token claim that supplies the Frigate username. Falls back to 'email' "
+            "and then 'sub' when the configured claim is missing."
+        ),
+    )
+    groups_claim: str = Field(
+        default="groups",
+        title="Groups claim",
+        description="ID token claim (list or delimited string) that supplies the user's groups.",
+    )
+    group_map: dict[str, list[str]] = Field(
+        default_factory=dict,
+        title="Group to role mapping",
+        description=(
+            "Map Frigate roles to lists of provider group values. When a user's "
+            "groups claim matches any entry the corresponding role is granted. The "
+            "admin role is prioritized to avoid accidental downgrade."
+        ),
+    )
+    default_role: str | None = Field(
+        default="viewer",
+        title="Default role",
+        description="Role assigned when no group_map entry matches. Must be a configured role.",
+    )
+    auto_provision: bool = Field(
+        default=True,
+        title="Auto-provision users",
+        description=(
+            "Create or update the Frigate user row on successful OIDC login. When "
+            "disabled a matching user must already exist in the database."
+        ),
+    )
+    end_session_endpoint: str | None = Field(
+        default=None,
+        title="End-session endpoint override",
+        description=(
+            "Optional URL to redirect to on logout. When unset Frigate uses the "
+            "'end_session_endpoint' advertised by discovery, when available."
+        ),
+    )
+    allowed_group_separators: str = Field(
+        default=",",
+        title="Group value separator",
+        description=(
+            "When the groups claim is a string instead of a list it is split on any "
+            "character in this string."
+        ),
+    )
 
 
 class AuthConfig(FrigateBaseModel):
@@ -67,6 +158,11 @@ class AuthConfig(FrigateBaseModel):
             "When true the UI may show a help link on the login page informing users how to sign in after an admin password reset. "
         ),
     )
+    oidc: OidcConfig = Field(
+        default_factory=OidcConfig,
+        title="OpenID Connect",
+        description="Configuration for Single Sign-On via an OIDC provider.",
+    )
 
     @field_validator("roles")
     @classmethod
@@ -99,5 +195,39 @@ class AuthConfig(FrigateBaseModel):
         # Ensure admin and viewer are never overridden
         self.roles["admin"] = []
         self.roles["viewer"] = []
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_oidc(self):
+        oidc = self.oidc
+        if not oidc.enabled:
+            return self
+
+        missing = [
+            name
+            for name, value in (
+                ("issuer", oidc.issuer),
+                ("client_id", oidc.client_id),
+                ("client_secret", oidc.client_secret),
+            )
+            if not value
+        ]
+        if missing:
+            raise ValueError(
+                f"OIDC is enabled but the following auth.oidc fields are missing: {', '.join(missing)}"
+            )
+
+        valid_roles = set(self.roles.keys()) | {"admin", "viewer"}
+        for role in oidc.group_map.keys():
+            if role not in valid_roles:
+                raise ValueError(
+                    f"auth.oidc.group_map role '{role}' is not a configured role. Known roles: {sorted(valid_roles)}"
+                )
+
+        if oidc.default_role is not None and oidc.default_role not in valid_roles:
+            raise ValueError(
+                f"auth.oidc.default_role '{oidc.default_role}' is not a configured role. Known roles: {sorted(valid_roles)}"
+            )
 
         return self

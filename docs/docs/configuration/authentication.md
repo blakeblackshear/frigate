@@ -141,7 +141,7 @@ Changing the secret will invalidate current tokens.
 
 ## Proxy configuration
 
-Frigate can be configured to leverage features of common upstream authentication proxies such as Authelia, Authentik, oauth2_proxy, or traefik-forward-auth. Frigate does not implement OIDC, SAML, or LDAP natively; as an NVR focused on recording and object detection, it relies on robust, battle-tested proxies to handle those protocols and passes the authenticated user and role through via headers (see below).
+Frigate can be configured to leverage features of common upstream authentication proxies such as Authelia, Authentik, oauth2_proxy, or traefik-forward-auth. Frigate also has native OpenID Connect (OIDC) support (see the [OpenID Connect](#openid-connect-oidc) section below) for deployments that do not want an additional proxy in front of Frigate. SAML and LDAP are still expected to be handled by an upstream proxy.
 
 If you are leveraging the authentication of an upstream proxy, you likely want to disable Frigate's authentication as there is no correspondence between users in Frigate's database and users authenticated via the proxy. Optionally, if communication between the reverse proxy and Frigate is over an untrusted network, you should set an `auth_secret` in the `proxy` config and configure the proxy to send the secret value as a header named `X-Proxy-Secret`. Assuming this is an untrusted network, you will also want to [configure a real TLS certificate](tls.md) to ensure the traffic can't simply be sniffed to steal the secret.
 
@@ -307,6 +307,113 @@ Frigate gracefully performs login page redirection that should work with most au
 ### Custom logout url
 
 If your reverse proxy has a dedicated logout url, you can specify using the `logout_url` config option. This will update the link for the `Logout` link in the UI.
+
+## OpenID Connect (OIDC)
+
+Frigate can authenticate users directly against an OpenID Connect provider (Authentik, Keycloak, Zitadel, Okta, Auth0, Google Workspace, and other standards-compliant identity providers). When enabled a **Sign in with SSO** button appears on the login page and the existing local admin login remains available as a fallback.
+
+Frigate implements the authorization code flow with PKCE and validates the returned ID token against the provider's published JWKS. On a successful login Frigate maps the user's group claims to a Frigate role, creates or updates a matching row in the user table (so features like notification tokens work), and issues the same `frigate_token` JWT cookie used by native login.
+
+### Prerequisites
+
+Register Frigate as a confidential client in your identity provider with:
+
+- Grant type: `authorization_code`
+- Response type: `code`
+- Redirect URI: `https://<your-frigate-host>/api/oidc/callback`
+- Recommended scopes: `openid`, `email`, `profile`, and whatever scope emits the user's groups (for example `groups`)
+
+### Minimal configuration
+
+```yaml
+auth:
+  enabled: true # native login must remain enabled so Frigate can issue its own session cookie
+  oidc:
+    enabled: true
+    issuer: https://idp.example.com
+    client_id: frigate
+    client_secret: "{FRIGATE_OIDC_SECRET}" # or the literal value; env substitution is supported
+```
+
+Frigate fetches `<issuer>/.well-known/openid-configuration` at startup of the flow, so only the issuer URL is required — the authorization, token, JWKS, and (optional) end-session endpoints are discovered automatically.
+
+### Group to role mapping
+
+The `group_map` block translates provider group claims into Frigate roles. The mapping semantics mirror the `role_map` under `proxy.header_map`: any match wins, but if the `admin` mapping matches Frigate resolves the session to `admin` to prevent an accidental downgrade when a user belongs to both an admin group and a lower-privilege group.
+
+```yaml
+auth:
+  roles:
+    operator:
+      - front_door
+      - garage
+  oidc:
+    enabled: true
+    issuer: https://idp.example.com
+    client_id: frigate
+    client_secret: "{FRIGATE_OIDC_SECRET}"
+    groups_claim: groups # ID token claim to read; may be a list or a delimited string
+    group_map:
+      admin:
+        - frigate-admins
+      viewer:
+        - frigate-users
+      operator:
+        - frigate-operators
+    default_role: viewer # fallback role when no group_map entry matches
+```
+
+If the user's groups claim contains none of the mapped values, Frigate assigns `default_role`. If `default_role` is unset or invalid, `viewer` is used.
+
+### Username and email
+
+Frigate reads the username from the claim named by `username_claim` (default `preferred_username`), falling back to `email` and then `sub`. Non-alphanumeric characters other than `.` and `_` are replaced with `.` so the value fits the user table's format, and the result is truncated to 30 characters. The `email` claim, when present, is stored on the user row.
+
+The stable identity used to link a returning user to their existing row is the ID token's `sub` claim, stored on the user row's `external_id` column. Renaming the username in the identity provider does not create a duplicate row.
+
+### Auto-provisioning
+
+By default (`auto_provision: true`), Frigate creates or updates a user row on every successful OIDC login. Set `auto_provision: false` to require that the user already exists in Frigate's database, matched either by `external_id` or `username`. This is useful when you want to explicitly onboard OIDC users through **Settings > Users** before granting access.
+
+### Redirect URI
+
+Frigate derives the redirect URI at request time as `<scheme>://<host>/api/oidc/callback`, honoring `X-Forwarded-Proto` and `X-Forwarded-Host` when set by a trusted proxy. If your setup needs a fixed value (for example when the public URL differs from the request host), set `auth.oidc.redirect_uri` to the absolute URL.
+
+### Logout
+
+If `auth.oidc.end_session_endpoint` is set, Frigate redirects to that URL from `/api/logout` after clearing the local session cookie. Leave it unset to keep the default behavior of redirecting back to the login page.
+
+### Full example
+
+```yaml
+auth:
+  enabled: true
+  roles:
+    operator:
+      - front_door
+      - garage
+  oidc:
+    enabled: true
+    issuer: https://idp.example.com
+    client_id: frigate
+    client_secret: "{FRIGATE_OIDC_SECRET}"
+    redirect_uri: https://frigate.example.com/api/oidc/callback
+    scopes:
+      - openid
+      - email
+      - profile
+      - groups
+    username_claim: preferred_username
+    groups_claim: groups
+    group_map:
+      admin:
+        - frigate-admins
+      operator:
+        - frigate-operators
+    default_role: viewer
+    auto_provision: true
+    end_session_endpoint: https://idp.example.com/oidc/logout
+```
 
 ## User Roles
 

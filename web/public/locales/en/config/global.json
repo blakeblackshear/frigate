@@ -69,6 +69,62 @@
     "admin_first_time_login": {
       "label": "First-time admin flag",
       "description": "When true the UI may show a help link on the login page informing users how to sign in after an admin password reset. "
+    },
+    "oidc": {
+      "label": "OpenID Connect",
+      "description": "Configuration for Single Sign-On via an OIDC provider.",
+      "enabled": {
+        "label": "Enable OpenID Connect",
+        "description": "Enable Single Sign-On via an OpenID Connect identity provider."
+      },
+      "issuer": {
+        "label": "Issuer URL",
+        "description": "Issuer URL of the OIDC provider. Frigate will fetch discovery metadata from '{issuer}/.well-known/openid-configuration'."
+      },
+      "client_id": {
+        "label": "Client ID",
+        "description": "OIDC client identifier issued by the provider."
+      },
+      "client_secret": {
+        "label": "Client secret",
+        "description": "OIDC client secret issued by the provider."
+      },
+      "redirect_uri": {
+        "label": "Redirect URI override",
+        "description": "Optional absolute URL for the OIDC callback. When unset it is derived from the incoming request as '{scheme}://{host}/api/oidc/callback'."
+      },
+      "scopes": {
+        "label": "Requested scopes",
+        "description": "Scopes requested from the OIDC provider."
+      },
+      "username_claim": {
+        "label": "Username claim",
+        "description": "ID token claim that supplies the Frigate username. Falls back to 'email' and then 'sub' when the configured claim is missing."
+      },
+      "groups_claim": {
+        "label": "Groups claim",
+        "description": "ID token claim (list or delimited string) that supplies the user's groups."
+      },
+      "group_map": {
+        "label": "Group to role mapping",
+        "description": "Map Frigate roles to lists of provider group values. When a user's groups claim matches any entry the corresponding role is granted. The admin role is prioritized to avoid accidental downgrade."
+      },
+      "default_role": {
+        "label": "Default role",
+        "description": "Role assigned when no group_map entry matches. Must be a configured role."
+      },
+      "auto_provision": {
+        "label": "Auto-provision users",
+        "description": "Create or update the Frigate user row on successful OIDC login. When disabled a matching user must already exist in the database."
+      },
+      "end_session_endpoint": {
+        "label": "End-session endpoint override",
+        "description": "Optional URL to redirect to on logout. When unset Frigate uses the 'end_session_endpoint' advertised by discovery, when available."
+      },
+      "allowed_group_separators": {
+        "label": "Group value separator",
+        "description": "When the groups claim is a string instead of a list it is split on any character in this string."
+      }
     }
   },
   "database": {

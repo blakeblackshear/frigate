@@ -31,6 +31,23 @@ from frigate.api.media_auth import (
     deny_response_for_media_uri,
     is_role_restricted,
 )
+from frigate.api.oidc import (
+    STATE_COOKIE_NAME,
+    STATE_TTL_SECONDS,
+    OidcError,
+    build_authorization_url,
+    decode_state_cookie,
+    encode_state_cookie,
+    exchange_code_for_tokens,
+    generate_nonce,
+    generate_pkce_pair,
+    generate_state,
+    get_discovery,
+    resolve_oidc_role,
+    resolve_username,
+    sanitize_username,
+    verify_id_token,
+)
 from frigate.config import AuthConfig, NetworkingConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
@@ -67,6 +84,9 @@ def require_admin_by_default():
         "/auth/first_time_login",
         "/login",
         "/logout",
+        "/oidc/config",
+        "/oidc/login",
+        "/oidc/callback",
         # Authenticated user endpoints (allow_any_authenticated)
         "/profile",
         "/profiles",
@@ -826,12 +846,16 @@ def profile(request: Request):
     "/logout",
     dependencies=[Depends(allow_public())],
     summary="Logout user",
-    description="Logs out the current user by clearing the session cookie. After logout, subsequent requests will require re-authentication.",
+    description="Logs out the current user by clearing the session cookie. When OIDC end-session is configured, the browser is redirected to the provider's end-session endpoint.",
 )
 def logout(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
-    response = RedirectResponse("/login", status_code=303)
+    target = "/login"
+    if auth_config.oidc.enabled and auth_config.oidc.end_session_endpoint:
+        target = auth_config.oidc.end_session_endpoint
+    response = RedirectResponse(target, status_code=303)
     response.delete_cookie(auth_config.cookie_name)
+    response.delete_cookie(STATE_COOKIE_NAME, path="/")
     return response
 
 
@@ -884,6 +908,293 @@ def login(request: Request, body: AppPostLoginBody):
 
         return response
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
+
+
+def _resolve_oidc_redirect_uri(request: Request) -> str:
+    oidc = request.app.frigate_config.auth.oidc
+    if oidc.redirect_uri:
+        return oidc.redirect_uri
+    forwarded_proto = request.headers.get("x-forwarded-proto")
+    forwarded_host = request.headers.get("x-forwarded-host")
+    scheme = forwarded_proto or request.url.scheme
+    host = forwarded_host or request.headers.get("host") or request.url.netloc
+    return f"{scheme}://{host}/api/oidc/callback"
+
+
+def _issue_oidc_session(
+    request: Request,
+    username: str,
+    role: str,
+    response: Response,
+) -> None:
+    """Issue the standard frigate_token JWT cookie for an OIDC-authenticated user."""
+    JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
+    JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
+    JWT_SESSION_LENGTH = request.app.frigate_config.auth.session_length
+    expiration = int(time.time()) + JWT_SESSION_LENGTH
+    encoded_jwt = create_encoded_jwt(username, role, expiration, request.app.jwt_token)
+    set_jwt_cookie(
+        response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
+    )
+
+
+def _upsert_oidc_user(
+    username: str,
+    role: str,
+    external_id: str,
+    email: str | None,
+) -> None:
+    """Insert or update the Frigate user row for an OIDC login.
+
+    The external_id (the id_token 'sub' claim) is the stable identity: if a
+    user with the same external_id already exists we update it, otherwise a
+    new row is created with a null password_hash. Notification tokens default
+    to an empty list on first insert.
+    """
+    existing = User.select().where(User.external_id == external_id).first()
+    if existing is not None:
+        # Keep the existing username as the primary key even if the IdP claim
+        # changes; only refresh mutable attributes.
+        User.update(
+            {
+                User.role: role,
+                User.email: email,
+            }
+        ).where(User.external_id == external_id).execute()
+        return
+
+    # No row keyed on external_id yet. Fall back to matching by username so a
+    # pre-existing local admin can be linked to their OIDC identity on first
+    # login without losing their notification tokens.
+    match_by_name = User.select().where(User.username == username).first()
+    if match_by_name is not None:
+        User.update(
+            {
+                User.role: role,
+                User.email: email,
+                User.external_id: external_id,
+            }
+        ).where(User.username == username).execute()
+        return
+
+    User.insert(
+        {
+            User.username: username,
+            User.role: role,
+            User.password_hash: None,
+            User.external_id: external_id,
+            User.email: email,
+            User.notification_tokens: [],
+        }
+    ).execute()
+
+
+@router.get(
+    "/oidc/config",
+    dependencies=[Depends(allow_public())],
+    summary="Get OIDC availability",
+    description="Returns whether OIDC single sign-on is configured so the login page can render an SSO button.",
+)
+def oidc_config(request: Request):
+    oidc = request.app.frigate_config.auth.oidc
+    return JSONResponse(content={"enabled": bool(oidc.enabled)})
+
+
+@router.get(
+    "/oidc/login",
+    dependencies=[Depends(allow_public())],
+    summary="Start OIDC login",
+    description="Redirects the browser to the configured OIDC provider to begin the authorization code flow.",
+)
+async def oidc_login(request: Request):
+    auth_config: AuthConfig = request.app.frigate_config.auth
+    if not auth_config.oidc.enabled:
+        return JSONResponse(content={"message": "OIDC is not enabled"}, status_code=404)
+    if request.app.jwt_token is None:
+        return JSONResponse(
+            content={"message": "OIDC requires auth.enabled to be true"},
+            status_code=400,
+        )
+
+    try:
+        discovery = await get_discovery(auth_config.oidc)
+    except OidcError as err:
+        logger.error("OIDC discovery failed: %s", err)
+        return JSONResponse(
+            content={"message": "OIDC provider is not reachable"},
+            status_code=502,
+        )
+
+    state = generate_state()
+    nonce = generate_nonce()
+    verifier, challenge = generate_pkce_pair()
+    redirect_uri = _resolve_oidc_redirect_uri(request)
+    return_to = request.query_params.get("return_to", "/")
+
+    try:
+        authorization_url = build_authorization_url(
+            discovery, auth_config.oidc, redirect_uri, state, nonce, challenge
+        )
+    except OidcError as err:
+        logger.error("Failed to build OIDC authorization URL: %s", err)
+        return JSONResponse(
+            content={"message": "OIDC provider configuration is invalid"},
+            status_code=502,
+        )
+
+    cookie_value = encode_state_cookie(
+        request.app.jwt_token, state, nonce, verifier, return_to
+    )
+    response = RedirectResponse(authorization_url, status_code=302)
+    response.set_cookie(
+        key=STATE_COOKIE_NAME,
+        value=cookie_value,
+        httponly=True,
+        secure=auth_config.cookie_secure,
+        max_age=STATE_TTL_SECONDS,
+        samesite="lax",
+        path="/",
+    )
+    return response
+
+
+@router.get(
+    "/oidc/callback",
+    dependencies=[Depends(allow_public())],
+    summary="Complete OIDC login",
+    description="Callback endpoint invoked by the OIDC provider with the authorization code.",
+)
+async def oidc_callback(request: Request):
+    auth_config: AuthConfig = request.app.frigate_config.auth
+    if not auth_config.oidc.enabled:
+        return JSONResponse(content={"message": "OIDC is not enabled"}, status_code=404)
+    if request.app.jwt_token is None:
+        return JSONResponse(
+            content={"message": "OIDC requires auth.enabled to be true"},
+            status_code=400,
+        )
+
+    error = request.query_params.get("error")
+    if error:
+        description = request.query_params.get("error_description", "")
+        logger.warning("OIDC provider returned error: %s %s", error, description)
+        return _oidc_failure_response(
+            request, "The identity provider rejected the login."
+        )
+
+    code = request.query_params.get("code")
+    returned_state = request.query_params.get("state")
+    if not code or not returned_state:
+        return _oidc_failure_response(
+            request, "The identity provider response was incomplete."
+        )
+
+    encoded_state = request.cookies.get(STATE_COOKIE_NAME)
+    if not encoded_state:
+        return _oidc_failure_response(
+            request, "The login session expired. Please try again."
+        )
+
+    try:
+        state_claims = decode_state_cookie(request.app.jwt_token, encoded_state)
+    except OidcError as err:
+        logger.warning("Rejecting OIDC callback: %s", err)
+        return _oidc_failure_response(
+            request, "The login session is invalid. Please try again."
+        )
+
+    if not secrets.compare_digest(state_claims.get("state", ""), returned_state):
+        logger.warning("Rejecting OIDC callback: state parameter mismatch")
+        return _oidc_failure_response(
+            request, "The login session did not match. Please try again."
+        )
+
+    redirect_uri = _resolve_oidc_redirect_uri(request)
+    try:
+        discovery = await get_discovery(auth_config.oidc)
+        tokens = await exchange_code_for_tokens(
+            discovery,
+            auth_config.oidc,
+            code,
+            redirect_uri,
+            state_claims.get("cv", ""),
+        )
+        claims = await verify_id_token(
+            tokens["id_token"], auth_config.oidc, state_claims.get("nonce", "")
+        )
+    except OidcError as err:
+        logger.error("OIDC callback failed: %s", err)
+        return _oidc_failure_response(
+            request, "Sign-in failed. Please try again or contact your administrator."
+        )
+
+    external_id = str(claims.get("sub") or "")
+    if not external_id:
+        logger.error("OIDC id_token missing 'sub' claim")
+        return _oidc_failure_response(
+            request, "The identity provider did not return a stable user identifier."
+        )
+
+    try:
+        raw_username = resolve_username(claims, auth_config.oidc)
+        username = sanitize_username(raw_username)
+    except OidcError as err:
+        logger.error("OIDC username resolution failed: %s", err)
+        return _oidc_failure_response(
+            request, "The identity provider did not return a usable username."
+        )
+
+    config_roles = set(auth_config.roles.keys())
+    role = resolve_oidc_role(claims, auth_config.oidc, config_roles)
+    email = claims.get("email")
+    if email is not None:
+        email = str(email)
+
+    if auth_config.oidc.auto_provision:
+        try:
+            _upsert_oidc_user(username, role, external_id, email)
+        except Exception:
+            logger.exception("Failed to auto-provision OIDC user %s", username)
+            return _oidc_failure_response(
+                request,
+                "Unable to provision the user account. Please contact your administrator.",
+            )
+    else:
+        # Require an existing local user matched by external_id or username.
+        existing = (
+            User.select()
+            .where((User.external_id == external_id) | (User.username == username))
+            .first()
+        )
+        if existing is None:
+            logger.warning(
+                "Rejecting OIDC login for %s: auto_provision is disabled and no matching user exists",
+                username,
+            )
+            return _oidc_failure_response(
+                request, "This account is not authorized to sign in."
+            )
+        role = existing.role
+        username = existing.username
+
+    return_to = state_claims.get("rt") or "/"
+    if not return_to.startswith("/"):
+        return_to = "/"
+    response = RedirectResponse(return_to, status_code=303)
+    response.delete_cookie(STATE_COOKIE_NAME, path="/")
+    _issue_oidc_session(request, username, role, response)
+    if role == "admin":
+        auth_config.admin_first_time_login = False
+    return response
+
+
+def _oidc_failure_response(request: Request, message: str) -> RedirectResponse:
+    """Redirect back to /login with an inline error message via query string."""
+    from urllib.parse import quote
+
+    response = RedirectResponse(f"/login?oidc_error={quote(message)}", status_code=303)
+    response.delete_cookie(STATE_COOKIE_NAME, path="/")
+    return response
 
 
 @router.get(

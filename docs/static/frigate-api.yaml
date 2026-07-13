@@ -91,7 +91,7 @@ paths:
       description: |-
         **Access:** Public — no authentication required.
 
-        Logs out the current user by clearing the session cookie. After logout, subsequent requests will require re-authentication.
+        Logs out the current user by clearing the session cookie. When OIDC end-session is configured, the browser is redirected to the provider's end-session endpoint.
       operationId: logout_logout_get
       responses:
         '200':
@@ -134,6 +134,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      security: []
+      x-required-role: public
+  /oidc/config:
+    get:
+      tags:
+        - Auth
+      summary: Get OIDC availability
+      description: |-
+        **Access:** Public — no authentication required.
+
+        Returns whether OIDC single sign-on is configured so the login page can render an SSO button.
+      operationId: oidc_config_oidc_config_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security: []
+      x-required-role: public
+  /oidc/login:
+    get:
+      tags:
+        - Auth
+      summary: Start OIDC login
+      description: |-
+        **Access:** Public — no authentication required.
+
+        Redirects the browser to the configured OIDC provider to begin the authorization code flow.
+      operationId: oidc_login_oidc_login_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security: []
+      x-required-role: public
+  /oidc/callback:
+    get:
+      tags:
+        - Auth
+      summary: Complete OIDC login
+      description: |-
+        **Access:** Public — no authentication required.
+
+        Callback endpoint invoked by the OIDC provider with the authorization code.
+      operationId: oidc_callback_oidc_callback_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
       security: []
       x-required-role: public
   /users:
