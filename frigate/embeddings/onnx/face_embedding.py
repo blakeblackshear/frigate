@@ -73,7 +73,7 @@ class FaceNetEmbedding(BaseEmbedding):
             self.tensor_output_details = self.runner.get_output_details()
 
     def _preprocess_inputs(self, raw_inputs):
-        pil = self._process_image(raw_inputs[0])
+        pil = self._process_image(self._bgr_to_rgb(raw_inputs[0]))
 
         # handle images larger than input size
         width, height = pil.size
@@ -159,7 +159,7 @@ class ArcfaceEmbedding(BaseEmbedding):
             )
 
     def _preprocess_inputs(self, raw_inputs):
-        pil = self._process_image(raw_inputs[0])
+        pil = self._process_image(self._bgr_to_rgb(raw_inputs[0]))
 
         # handle images larger than input size
         width, height = pil.size
