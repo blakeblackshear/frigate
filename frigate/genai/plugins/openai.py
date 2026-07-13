@@ -423,9 +423,18 @@ class OpenAIClient(GenAIClient):
                 for tc in tool_calls_by_index.values():
                     try:
                         # Parse accumulated arguments as JSON
-                        parsed_args = json.loads(tc["arguments"])
-                    except (json.JSONDecodeError, Exception):
-                        parsed_args = tc["arguments"]
+                        parsed_args = json.loads(tc["arguments"] or "{}")
+                    except (json.JSONDecodeError, ValueError):
+                        logger.warning(
+                            "Failed to parse streamed tool call arguments for %s",
+                            tc["name"],
+                        )
+                        parsed_args = {}
+
+                    # Downstream (ToolCall model) requires a dict; never leak a
+                    # partial/invalid arguments string.
+                    if not isinstance(parsed_args, dict):
+                        parsed_args = {}
 
                     tool_calls_list.append(
                         {

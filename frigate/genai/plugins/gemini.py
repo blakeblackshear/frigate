@@ -38,6 +38,37 @@ def _encode_thought_signature(signature: bytes | None) -> str | None:
     return base64.b64encode(signature).decode("ascii")
 
 
+def _decode_data_uri(url: str) -> tuple[str, bytes] | None:
+    """Decode a ``data:`` URI into ``(mime_type, bytes)``; None if not a data URI."""
+    if not isinstance(url, str) or not url.startswith("data:"):
+        return None
+    try:
+        header, b64 = url.split(",", 1)
+        mime = header[len("data:") :].split(";")[0] or "image/jpeg"
+        return mime, base64.b64decode(b64)
+    except (ValueError, binascii.Error):
+        return None
+
+
+def _parts_from_content(content: Any) -> list[types.Part]:
+    """Convert OpenAI-style message content (str or multimodal list) to Gemini parts."""
+    if isinstance(content, list):
+        parts: list[types.Part] = []
+        for item in content:
+            if not isinstance(item, dict):
+                continue
+            if item.get("type") == "text":
+                parts.append(types.Part.from_text(text=item.get("text") or ""))
+            elif item.get("type") == "image_url":
+                decoded = _decode_data_uri((item.get("image_url") or {}).get("url", ""))
+                if decoded is not None:
+                    mime, data = decoded
+                    parts.append(types.Part.from_bytes(data=data, mime_type=mime))
+        # Gemini rejects empty parts; fall back to a single space.
+        return parts or [types.Part.from_text(text=" ")]
+    return [types.Part.from_text(text=content or "")]
+
+
 def _stats_from_gemini_usage(usage: Any) -> dict[str, Any] | None:
     """Build a stats dict from a Gemini usage_metadata object."""
     prompt_tokens = getattr(usage, "prompt_token_count", None)
@@ -227,9 +258,7 @@ class GeminiClient(GenAIClient):
                     )
                 else:  # user
                     gemini_messages.append(
-                        types.Content(
-                            role="user", parts=[types.Part.from_text(text=content)]
-                        )
+                        types.Content(role="user", parts=_parts_from_content(content))
                     )
 
             # Convert tools to Gemini format
@@ -485,9 +514,7 @@ class GeminiClient(GenAIClient):
                     )
                 else:  # user
                     gemini_messages.append(
-                        types.Content(
-                            role="user", parts=[types.Part.from_text(text=content)]
-                        )
+                        types.Content(role="user", parts=_parts_from_content(content))
                     )
 
             # Convert tools to Gemini format
@@ -553,7 +580,7 @@ class GeminiClient(GenAIClient):
             # Use streaming API
             content_parts: list[str] = []
             reasoning_parts: list[str] = []
-            tool_calls_by_index: dict[int, dict[str, Any]] = {}
+            tool_calls_accum: list[dict[str, Any]] = []
             finish_reason = "stop"
             usage_stats: dict[str, Any] | None = None
 
@@ -600,7 +627,11 @@ class GeminiClient(GenAIClient):
                                 content_parts.append(part.text)
                                 yield ("content_delta", part.text)
                         elif part.function_call:
-                            # Handle function call
+                            # Gemini streams complete function calls (not partial
+                            # argument deltas), so each part is a distinct tool
+                            # call. Append rather than accumulate by name — the
+                            # latter concatenated parallel/repeated calls into one
+                            # invalid arguments string (e.g. `{...}{...}`).
                             try:
                                 arguments = (
                                     dict(part.function_call.args)
@@ -610,40 +641,16 @@ class GeminiClient(GenAIClient):
                             except Exception:
                                 arguments = {}
 
-                            # Store tool call
-                            tool_call_id = part.function_call.name or ""
-                            tool_call_name = part.function_call.name or ""
-
-                            # Check if we already have this tool call
-                            found_index = None
-                            for idx, tc in tool_calls_by_index.items():
-                                if tc["name"] == tool_call_name:
-                                    found_index = idx
-                                    break
-
-                            if found_index is None:
-                                found_index = len(tool_calls_by_index)
-                                tool_calls_by_index[found_index] = {
-                                    "id": tool_call_id,
-                                    "name": tool_call_name,
-                                    "arguments": "",
-                                    "thought_signature": None,
+                            tool_calls_accum.append(
+                                {
+                                    "id": part.function_call.name or "",
+                                    "name": part.function_call.name or "",
+                                    "arguments": arguments,
+                                    "thought_signature": getattr(
+                                        part, "thought_signature", None
+                                    ),
                                 }
-
-                            # Accumulate arguments
-                            if arguments:
-                                tool_calls_by_index[found_index]["arguments"] += (
-                                    json.dumps(arguments)
-                                    if isinstance(arguments, dict)
-                                    else str(arguments)
-                                )
-
-                            # Capture latest thought_signature for this call
-                            chunk_sig = getattr(part, "thought_signature", None)
-                            if chunk_sig:
-                                tool_calls_by_index[found_index][
-                                    "thought_signature"
-                                ] = chunk_sig
+                            )
 
             # Build final message
             full_content = "".join(content_parts).strip() or None
@@ -651,25 +658,20 @@ class GeminiClient(GenAIClient):
 
             # Convert tool calls to list format
             tool_calls_list = None
-            if tool_calls_by_index:
-                tool_calls_list = []
-                for tc in tool_calls_by_index.values():
-                    try:
-                        # Try to parse accumulated arguments as JSON
-                        parsed_args = json.loads(tc["arguments"])
-                    except (json.JSONDecodeError, Exception):
-                        parsed_args = tc["arguments"]
-
-                    tool_calls_list.append(
-                        {
-                            "id": tc["id"],
-                            "name": tc["name"],
-                            "arguments": parsed_args,
-                            "thought_signature": _encode_thought_signature(
-                                tc.get("thought_signature")
-                            ),
-                        }
-                    )
+            if tool_calls_accum:
+                tool_calls_list = [
+                    {
+                        "id": tc["id"],
+                        "name": tc["name"],
+                        "arguments": tc["arguments"]
+                        if isinstance(tc["arguments"], dict)
+                        else {},
+                        "thought_signature": _encode_thought_signature(
+                            tc.get("thought_signature")
+                        ),
+                    }
+                    for tc in tool_calls_accum
+                ]
                 finish_reason = "tool_calls"
 
             if usage_stats is not None:

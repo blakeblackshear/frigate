@@ -128,6 +128,11 @@ class LlamaCppClient(GenAIClient):
     _text_baseline_tokens: int | None
     _media_marker: str
 
+    @property
+    def supports_embeddings(self) -> bool:
+        """llama.cpp exposes an /embeddings endpoint for any loaded model."""
+        return True
+
     def _init_provider(self) -> str | None:
         """Initialize the client and query model metadata from the server."""
         self.provider_options = {
