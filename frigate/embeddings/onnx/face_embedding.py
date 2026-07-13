@@ -73,13 +73,7 @@ class FaceNetEmbedding(BaseEmbedding):
             self.tensor_output_details = self.runner.get_output_details()
 
     def _preprocess_inputs(self, raw_inputs):
-        frame = raw_inputs[0]
-
-        # convert the BGR face crop to the RGB order the model expects
-        if isinstance(frame, np.ndarray) and frame.ndim == 3:
-            frame = np.ascontiguousarray(frame[:, :, ::-1])
-
-        pil = self._process_image(frame)
+        pil = self._process_image(self._bgr_to_rgb(raw_inputs[0]))
 
         # handle images larger than input size
         width, height = pil.size
@@ -165,13 +159,7 @@ class ArcfaceEmbedding(BaseEmbedding):
             )
 
     def _preprocess_inputs(self, raw_inputs):
-        frame = raw_inputs[0]
-
-        # convert the BGR face crop to the RGB order the model expects
-        if isinstance(frame, np.ndarray) and frame.ndim == 3:
-            frame = np.ascontiguousarray(frame[:, :, ::-1])
-
-        pil = self._process_image(frame)
+        pil = self._process_image(self._bgr_to_rgb(raw_inputs[0]))
 
         # handle images larger than input size
         width, height = pil.size
