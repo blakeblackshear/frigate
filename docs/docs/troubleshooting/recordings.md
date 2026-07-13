@@ -126,7 +126,7 @@ The same recording playing perfectly in VLC, decoding cleanly with `ffprobe`/`ff
 
 #### Step 1: Confirm it is a browser issue
 
-Open the same recording in **Firefox**. Firefox uses a different (Gecko) media engine and cannot produce `PIPELINE_ERROR_DECODE`, so if playback works there you have confirmed a client-side codec or decoder problem rather than a bad recording. Switching browsers is a workaround, not a fix; the remaining steps address the root cause so that Chromium browsers work too.
+Open the same recording in **Firefox** or **Safari**. Firefox and Safari both use a different media engine and cannot produce `PIPELINE_ERROR_DECODE`, so if playback works there you have confirmed a client-side codec or decoder problem rather than a bad recording. Switching browsers is a workaround, not a fix; the remaining steps address the root cause so that Chromium browsers work too.
 
 #### Step 2: Rule out H.265 / HEVC
 
