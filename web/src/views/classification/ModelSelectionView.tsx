@@ -3,6 +3,7 @@ import ClassificationModelWizardDialog from "@/components/classification/Classif
 import ClassificationModelEditDialog from "@/components/classification/ClassificationModelEditDialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ImageShadowOverlay } from "@/components/overlay/ImageShadowOverlay";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import useOptimisticState from "@/hooks/use-optimistic-state";
@@ -330,13 +331,24 @@ function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
         {coverImage ? (
           <>
             <img
-              className="size-full"
+              className={cn(
+                "size-full",
+                !config.enabled && "opacity-50 grayscale",
+              )}
               src={`${baseUrl}clips/${config.name}/dataset/${coverImage.name}/${coverImage.img}`}
             />
             <ImageShadowOverlay lowerClassName="h-[30%] z-0" />
           </>
         ) : (
           <Skeleton className="flex size-full items-center justify-center" />
+        )}
+        {!config.enabled && (
+          <Badge
+            variant="secondary"
+            className="absolute right-2 top-2 z-40 text-primary-variant"
+          >
+            {t("disabled")}
+          </Badge>
         )}
         <div className="absolute bottom-2 left-3 text-lg text-white smart-capitalize">
           {config.name}

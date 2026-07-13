@@ -67,6 +67,12 @@ This section can be used to set environment variables for those unable to modify
 
 Variables prefixed with `FRIGATE_` can be referenced in config fields that support environment variable substitution (such as MQTT host and credentials, camera stream URLs, and ONVIF host and credentials) using the `{FRIGATE_VARIABLE_NAME}` syntax.
 
+:::note
+
+The `go2rtc` section is an exception. go2rtc runs as a separate process, so its stream definitions can only be substituted with variables that exist in the container's environment (set via Docker `-e`, the `environment:` section of `docker-compose.yml`, or Docker secrets). Variables defined in the `environment_vars` block above are not available to go2rtc streams. Home Assistant app users, who cannot set container environment variables, must instead put credentials directly in their go2rtc stream URLs.
+
+:::
+
 <ConfigTabs>
 <TabItem value="ui">
 
