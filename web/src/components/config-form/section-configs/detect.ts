@@ -169,6 +169,13 @@ const detect: SectionConfigOverrides = {
       resolution: ["width", "height", "fps"],
       tracking: ["min_initialized", "max_disappeared"],
     },
+    uiSchema: {
+      annotation_offset: {
+        "ui:options": {
+          signed: true,
+        },
+      },
+    },
     hiddenFields: ["enabled_in_config"],
     advancedFields: [
       "min_initialized",
