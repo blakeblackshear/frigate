@@ -1,8 +1,10 @@
-import re
 import sqlite3
 from typing import Any
 
+import regex
 from playhouse.sqliteq import SqliteQueueDatabase
+
+REGEXP_TIMEOUT_SECONDS = 1.0
 
 
 class SqliteVecQueueDatabase(SqliteQueueDatabase):
@@ -34,8 +36,10 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
             if item is None:
                 return False
             try:
-                return re.search(expr, item) is not None
-            except re.error:
+                return (
+                    regex.search(expr, item, timeout=REGEXP_TIMEOUT_SECONDS) is not None
+                )
+            except (regex.error, TimeoutError):
                 return False
 
         conn.create_function("REGEXP", 2, regexp)
