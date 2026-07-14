@@ -98,11 +98,14 @@ def _resolve_zones(
     """Map zone names to their canonical config keys, case-insensitively.
 
     LLMs frequently echo a user's casing ("Front Yard") instead of the
-    configured key ("front_yard"). The downstream zone filter is a SQLite GLOB
-    over the JSON-encoded zones column, which is case-sensitive — so an
-    unnormalized name silently returns zero matches. Build a lookup over the
-    relevant cameras' configured zones and substitute when we find a match;
-    unknown names pass through so behavior matches what the model asked for.
+    configured key ("front_yard"), or fall back to a zone's friendly name
+    ("Front Walkway") instead of its ID ("front_walk"). The downstream zone
+    filter is a SQLite GLOB over the JSON-encoded zones column, which stores
+    config keys and is case-sensitive — so an unnormalized name silently
+    returns zero matches. Build a lookup over the relevant cameras' configured
+    zones, keyed by both the config key and the friendly name, and substitute
+    when we find a match; unknown names pass through so behavior matches what
+    the model asked for.
     """
     if not zones:
         return zones
@@ -112,8 +115,11 @@ def _resolve_zones(
         camera_config = config.cameras.get(camera_id)
         if camera_config is None:
             continue
-        for zone_name in camera_config.zones.keys():
+        for zone_name, zone_config in camera_config.zones.items():
             lookup.setdefault(zone_name.lower(), zone_name)
+            lookup.setdefault(
+                zone_config.get_formatted_name(zone_name).lower(), zone_name
+            )
 
     return [lookup.get(z.lower(), z) for z in zones]
 
