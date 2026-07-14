@@ -6,7 +6,7 @@ transport.
 """
 
 import datetime
-from typing import Any
+from typing import Any, Literal
 
 from playhouse.shortcuts import model_to_dict
 
@@ -249,6 +249,7 @@ def get_attribute_classifications(config: FrigateConfig) -> list[dict[str, Any]]
 def get_tool_definitions(
     semantic_search_enabled: bool = False,
     attribute_classifications: list[dict[str, Any]] | None = None,
+    embeddings_language: Literal["english", "multi"] = "multi",
 ) -> list[dict[str, Any]]:
     """
     Get OpenAI-compatible tool definitions for Frigate.
@@ -258,7 +259,9 @@ def get_tool_definitions(
     tool exposes an additional `semantic_query` parameter for descriptive
     queries (e.g. "person riding a lawn mower") and find_similar_objects is
     included. When attribute classification models are configured, an
-    `attribute` parameter is exposed for filtering by their labels.
+    `attribute` parameter is exposed for filtering by their labels. When the
+    embeddings model only understands English (JinaV1), the `semantic_query`
+    description instructs the model to write the query in English.
     """
     search_objects_properties: dict[str, Any] = {
         "camera": {
@@ -349,6 +352,14 @@ def get_tool_definitions(
                 "When set, combine with label/time/camera/zone filters as "
                 "usual (e.g. label='person', semantic_query='riding a lawn "
                 "mower', after='2024-05-01T00:00:00Z')."
+                + (
+                    " The configured embeddings model only understands "
+                    "English, so always write semantic_query in English, "
+                    "translating the user's description if they phrased it "
+                    "in another language."
+                    if embeddings_language == "english"
+                    else ""
+                )
             ),
         }
 

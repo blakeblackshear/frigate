@@ -7,7 +7,7 @@ import operator
 import time
 from datetime import datetime
 from functools import reduce
-from typing import Any
+from typing import Any, Literal
 
 import cv2
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
@@ -37,6 +37,7 @@ from frigate.api.defs.response.chat_response import (
 from frigate.api.defs.tags import Tags
 from frigate.api.event import _build_attribute_filter_clause, events
 from frigate.config import FrigateConfig
+from frigate.config.classification import SemanticSearchModelEnum
 from frigate.genai.prompts import (
     build_chat_system_prompt,
     get_attribute_classifications,
@@ -86,8 +87,21 @@ def get_tools(request: Request) -> JSONResponse:
     tools = get_tool_definitions(
         semantic_search_enabled=semantic_search_enabled,
         attribute_classifications=attribute_classifications,
+        embeddings_language=_embeddings_language(config),
     )
     return JSONResponse(content={"tools": tools})
+
+
+def _embeddings_language(config: FrigateConfig) -> Literal["english", "multi"]:
+    """Return the language capability of the configured embeddings model.
+
+    JinaV1 is English-only; every other option (JinaV2 or a GenAI embeddings
+    provider) handles multiple languages.
+    """
+    if config.semantic_search.model == SemanticSearchModelEnum.jinav1:
+        return "english"
+
+    return "multi"
 
 
 def _resolve_zones(
@@ -1140,6 +1154,7 @@ async def chat_completion(
     tools = get_tool_definitions(
         semantic_search_enabled=semantic_search_enabled,
         attribute_classifications=attribute_classifications,
+        embeddings_language=_embeddings_language(config),
     )
     conversation = []
 
