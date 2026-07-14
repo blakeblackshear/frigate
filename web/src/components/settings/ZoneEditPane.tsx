@@ -108,7 +108,11 @@ export default function ZoneEditPane({
     }
     const inRequiredZones =
       cam.review.alerts.required_zones.includes(polygon.name) ||
-      cam.review.detections.required_zones.includes(polygon.name);
+      cam.review.detections.required_zones.includes(polygon.name) ||
+      cam.objects.genai.required_zones.includes(polygon.name) ||
+      cam.snapshots.required_zones.includes(polygon.name) ||
+      cam.mqtt.required_zones.includes(polygon.name) ||
+      cam.onvif.autotracking.required_zones.includes(polygon.name);
     const hasProfileOverride = Object.values(cam.profiles ?? {}).some(
       (profile) => profile?.zones && polygon.name in profile.zones,
     );
