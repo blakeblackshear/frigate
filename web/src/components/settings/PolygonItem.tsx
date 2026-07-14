@@ -27,7 +27,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { reviewQueries } from "@/utils/zoneEdutUtil";
+import { removeRequiredZoneQuery, reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
 import { buttonVariants } from "@/components/ui/button";
 import { Trans, useTranslation } from "react-i18next";
@@ -153,6 +153,30 @@ export default function PolygonItem({
             cameraConfig?.review.alerts.required_zones || [],
             cameraConfig?.review.detections.required_zones || [],
           );
+          const genaiQueries = removeRequiredZoneQuery(
+            polygon.name,
+            polygon.camera,
+            "objects.genai",
+            cameraConfig?.objects.genai.required_zones || [],
+          );
+          const snapshotQueries = removeRequiredZoneQuery(
+            polygon.name,
+            polygon.camera,
+            "snapshots",
+            cameraConfig?.snapshots.required_zones || [],
+          );
+          const mqttQueries = removeRequiredZoneQuery(
+            polygon.name,
+            polygon.camera,
+            "mqtt",
+            cameraConfig?.mqtt.required_zones || [],
+          );
+          const autotrackQueries = removeRequiredZoneQuery(
+            polygon.name,
+            polygon.camera,
+            "onvif.autotracking",
+            cameraConfig?.onvif.autotracking.required_zones || [],
+          );
           // Also delete from profiles that have overrides for this zone
           let profileQueries = "";
           if (allProfileNames && cameraConfig) {
@@ -165,7 +189,7 @@ export default function PolygonItem({
               }
             }
           }
-          url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}${profileQueries}`;
+          url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}${genaiQueries}${snapshotQueries}${mqttQueries}${autotrackQueries}${profileQueries}`;
         }
 
         await axios
