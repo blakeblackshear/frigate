@@ -57,6 +57,7 @@ const record: SectionConfigOverrides = {
           "ui:options": {
             suppressMultiSchema: true,
             ffmpegPresetField: "hwaccel_args",
+            ffmpegGlobalFieldPath: "export.hwaccel_args",
           },
         },
       },
