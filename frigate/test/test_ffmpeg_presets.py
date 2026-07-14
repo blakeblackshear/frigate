@@ -77,6 +77,26 @@ class TestFfmpegPresets(unittest.TestCase):
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
+    def test_ffmpeg_hwaccel_qsv_scale_preset(self):
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["hwaccel_args"] = (
+            "preset-intel-qsv-h264"
+        )
+        self.default_ffmpeg["cameras"]["back"]["detect"] = {
+            "height": 1920,
+            "width": 2560,
+            "fps": 10,
+        }
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        assert "preset-intel-qsv-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        # fps decimation must come before vpp_qsv so surplus frames are
+        # dropped before the expensive hwdownload
+        assert (
+            "fps=10,vpp_qsv=w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        )
+
     def test_default_ffmpeg_input_arg_preset(self):
         frigate_config = FrigateConfig(**self.default_ffmpeg)
 
