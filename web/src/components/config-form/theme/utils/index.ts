@@ -17,3 +17,4 @@ export {
   isSubtreeModified,
 } from "./overrides";
 export { getSizedFieldClassName } from "./fieldSizing";
+export { getNumericInputMode } from "./inputMode";

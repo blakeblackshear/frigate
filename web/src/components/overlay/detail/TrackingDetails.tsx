@@ -301,11 +301,19 @@ export function TrackingDetails({
     [recordings, actualVideoStart],
   );
 
-  eventSequence?.map((event) => {
-    event.data.zones_friendly_names = event.data?.zones?.map((zone) => {
-      return resolveZoneName(config, zone);
-    });
-  });
+  const sequence = useMemo(
+    () =>
+      eventSequence?.map((item) => ({
+        ...item,
+        data: {
+          ...item.data,
+          zones_friendly_names: item.data?.zones?.map((zone) =>
+            resolveZoneName(config, zone, item.camera),
+          ),
+        },
+      })),
+    [eventSequence, config],
+  );
 
   // Use manualOverride (set when seeking in image mode) if present so
   // lifecycle rows and overlays follow image-mode seeks. Otherwise fall
@@ -849,9 +857,9 @@ export function TrackingDetails({
             </div>
 
             <div className="mt-2">
-              {!eventSequence ? (
+              {!sequence ? (
                 <ActivityIndicator className="size-2" size={2} />
-              ) : eventSequence.length === 0 ? (
+              ) : sequence.length === 0 ? (
                 <div className="py-2 text-muted-foreground">
                   {t("detail.noObjectDetailData", { ns: "views/events" })}
                 </div>
@@ -871,7 +879,7 @@ export function TrackingDetails({
                     />
                   )}
                   <div className="space-y-2">
-                    {eventSequence.map((item, idx) => {
+                    {sequence.map((item, idx) => {
                       return (
                         <div
                           key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}

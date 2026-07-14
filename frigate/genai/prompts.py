@@ -6,7 +6,7 @@ transport.
 """
 
 import datetime
-from typing import Any
+from typing import Any, Literal
 
 from playhouse.shortcuts import model_to_dict
 
@@ -249,6 +249,7 @@ def get_attribute_classifications(config: FrigateConfig) -> list[dict[str, Any]]
 def get_tool_definitions(
     semantic_search_enabled: bool = False,
     attribute_classifications: list[dict[str, Any]] | None = None,
+    embeddings_language: Literal["english", "multi"] = "multi",
 ) -> list[dict[str, Any]]:
     """
     Get OpenAI-compatible tool definitions for Frigate.
@@ -258,7 +259,9 @@ def get_tool_definitions(
     tool exposes an additional `semantic_query` parameter for descriptive
     queries (e.g. "person riding a lawn mower") and find_similar_objects is
     included. When attribute classification models are configured, an
-    `attribute` parameter is exposed for filtering by their labels.
+    `attribute` parameter is exposed for filtering by their labels. When the
+    embeddings model only understands English (JinaV1), the `semantic_query`
+    description instructs the model to write the query in English.
     """
     search_objects_properties: dict[str, Any] = {
         "camera": {
@@ -349,6 +352,14 @@ def get_tool_definitions(
                 "When set, combine with label/time/camera/zone filters as "
                 "usual (e.g. label='person', semantic_query='riding a lawn "
                 "mower', after='2024-05-01T00:00:00Z')."
+                + (
+                    " The configured embeddings model only understands "
+                    "English, so always write semantic_query in English, "
+                    "translating the user's description if they phrased it "
+                    "in another language."
+                    if embeddings_language == "english"
+                    else ""
+                )
             ),
         }
 
@@ -682,14 +693,17 @@ def build_chat_system_prompt(
             if camera_config.friendly_name
             else camera_id.replace("_", " ").title()
         )
-        zone_names = list(camera_config.zones.keys())
+        zone_descriptors = [
+            f"{zone_config.get_formatted_name(zone_name)} (ID: {zone_name})"
+            for zone_name, zone_config in camera_config.zones.items()
+        ]
         if not has_speed_zone:
             has_speed_zone = any(
                 zone.distances for zone in camera_config.zones.values()
             )
-        if zone_names:
+        if zone_descriptors:
             cameras_info.append(
-                f"  - {friendly_name} (ID: {camera_id}, zones: {', '.join(zone_names)})"
+                f"  - {friendly_name} (ID: {camera_id}, zones: {', '.join(zone_descriptors)})"
             )
         else:
             cameras_info.append(f"  - {friendly_name} (ID: {camera_id})")
@@ -699,7 +713,7 @@ def build_chat_system_prompt(
         cameras_section = (
             "\n\nAvailable cameras:\n"
             + "\n".join(cameras_info)
-            + "\n\nWhen users refer to cameras by their friendly name (e.g., 'Back Deck Camera'), use the corresponding camera ID (e.g., 'back_deck_cam') in tool calls."
+            + "\n\nWhen users refer to cameras or zones by their friendly name (e.g., 'Back Deck Camera', 'Front Walkway'), use the corresponding ID (e.g., 'back_deck_cam', 'front_walk') in tool calls. Tool results also identify zones by their ID, so when presenting cameras or zones back to the user, translate the ID to its friendly name."
         )
 
     speed_units_section = ""

@@ -61,7 +61,11 @@ export function ObjectPath({
                 ...pos.lifecycle_item?.data,
                 zones_friendly_names: pos.lifecycle_item?.data.zones.map(
                   (zone) => {
-                    return resolveZoneName(config, zone);
+                    return resolveZoneName(
+                      config,
+                      zone,
+                      pos.lifecycle_item?.camera,
+                    );
                   },
                 ),
               },

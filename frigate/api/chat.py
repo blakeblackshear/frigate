@@ -7,7 +7,7 @@ import operator
 import time
 from datetime import datetime
 from functools import reduce
-from typing import Any
+from typing import Any, Literal
 
 import cv2
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
@@ -37,6 +37,7 @@ from frigate.api.defs.response.chat_response import (
 from frigate.api.defs.tags import Tags
 from frigate.api.event import _build_attribute_filter_clause, events
 from frigate.config import FrigateConfig
+from frigate.config.classification import SemanticSearchModelEnum
 from frigate.genai.prompts import (
     build_chat_system_prompt,
     get_attribute_classifications,
@@ -86,8 +87,21 @@ def get_tools(request: Request) -> JSONResponse:
     tools = get_tool_definitions(
         semantic_search_enabled=semantic_search_enabled,
         attribute_classifications=attribute_classifications,
+        embeddings_language=_embeddings_language(config),
     )
     return JSONResponse(content={"tools": tools})
+
+
+def _embeddings_language(config: FrigateConfig) -> Literal["english", "multi"]:
+    """Return the language capability of the configured embeddings model.
+
+    JinaV1 is English-only; every other option (JinaV2 or a GenAI embeddings
+    provider) handles multiple languages.
+    """
+    if config.semantic_search.model == SemanticSearchModelEnum.jinav1:
+        return "english"
+
+    return "multi"
 
 
 def _resolve_zones(
@@ -98,11 +112,14 @@ def _resolve_zones(
     """Map zone names to their canonical config keys, case-insensitively.
 
     LLMs frequently echo a user's casing ("Front Yard") instead of the
-    configured key ("front_yard"). The downstream zone filter is a SQLite GLOB
-    over the JSON-encoded zones column, which is case-sensitive — so an
-    unnormalized name silently returns zero matches. Build a lookup over the
-    relevant cameras' configured zones and substitute when we find a match;
-    unknown names pass through so behavior matches what the model asked for.
+    configured key ("front_yard"), or fall back to a zone's friendly name
+    ("Front Walkway") instead of its ID ("front_walk"). The downstream zone
+    filter is a SQLite GLOB over the JSON-encoded zones column, which stores
+    config keys and is case-sensitive — so an unnormalized name silently
+    returns zero matches. Build a lookup over the relevant cameras' configured
+    zones, keyed by both the config key and the friendly name, and substitute
+    when we find a match; unknown names pass through so behavior matches what
+    the model asked for.
     """
     if not zones:
         return zones
@@ -112,8 +129,11 @@ def _resolve_zones(
         camera_config = config.cameras.get(camera_id)
         if camera_config is None:
             continue
-        for zone_name in camera_config.zones.keys():
+        for zone_name, zone_config in camera_config.zones.items():
             lookup.setdefault(zone_name.lower(), zone_name)
+            lookup.setdefault(
+                zone_config.get_formatted_name(zone_name).lower(), zone_name
+            )
 
     return [lookup.get(z.lower(), z) for z in zones]
 
@@ -1134,6 +1154,7 @@ async def chat_completion(
     tools = get_tool_definitions(
         semantic_search_enabled=semantic_search_enabled,
         attribute_classifications=attribute_classifications,
+        embeddings_language=_embeddings_language(config),
     )
     conversation = []
 

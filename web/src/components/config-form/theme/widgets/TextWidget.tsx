@@ -2,7 +2,7 @@
 import type { WidgetProps } from "@rjsf/utils";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { getSizedFieldClassName } from "../utils";
+import { getNumericInputMode, getSizedFieldClassName } from "../utils";
 
 export function TextWidget(props: WidgetProps) {
   const {
@@ -28,6 +28,7 @@ export function TextWidget(props: WidgetProps) {
       id={id}
       className={cn(fieldClassName)}
       type="text"
+      inputMode={getNumericInputMode(schema, options)}
       value={value ?? ""}
       disabled={disabled || readonly}
       placeholder={placeholder || (options.placeholder as string) || ""}
