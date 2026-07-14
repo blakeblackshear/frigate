@@ -55,7 +55,7 @@ export default function FaqItem({ id, question, children }) {
           aria-controls={`${id}-content`}
           onClick={toggle}
         >
-          {question}
+          <span className={styles.question}>{question}</span>
         </button>
       </Heading>
       <div id={`${id}-content`} className={styles.content}>

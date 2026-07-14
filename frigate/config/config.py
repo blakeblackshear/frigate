@@ -400,6 +400,9 @@ def verify_objects_track(
         )
         camera_config.objects.track = valid_objects
 
+        for label in invalid_objects:
+            camera_config.objects.filters.pop(label, None)
+
 
 def verify_lpr_and_face(
     frigate_config: FrigateConfig, camera_config: CameraConfig
