@@ -78,13 +78,37 @@ Users of the Snapcraft build of Docker cannot use storage locations outside your
 
 Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is **64MB**.
 
-The default shm size of **128MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in Docker Compose).
+The default shm size of **128MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in Docker Compose). If raising the shm size does not help, check your [process and file limits](#process-and-file-limits) as well.
 
 The Frigate container also stores logs in shm, which can take up to **40MB**, so make sure to take this into account in your math as well.
 
 <ShmCalculator/>
 
 The shm size cannot be set per container for Home Assistant Apps. However, this is probably not required since by default Home Assistant Supervisor allocates `/dev/shm` with half the size of your total memory. If your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB without any additional configuration.
+
+### Process and file limits
+
+Frigate runs many processes and opens a number of shared memory files. Installs with a large number of cameras can exceed the default limits your container runtime applies.
+
+Hitting the PID limit logs `RuntimeError: can't start new thread`, often followed by a "Bus error" that makes it look like an shm sizing problem. Compare the current count against the max from inside the container:
+
+```bash
+cat /sys/fs/cgroup/pids.current
+cat /sys/fs/cgroup/pids.max
+```
+
+If these are close, raise the limit with [`--pids-limit`](https://docs.docker.com/engine/containers/resource_constraints/) (or `service.pids_limit` in Docker Compose).
+
+Running out of file descriptors logs `OSError: [Errno 24] Too many open files`. Raise the limit in Docker Compose:
+
+```yaml
+services:
+  frigate:
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+```
 
 ## Extra Steps for Specific Hardware
 
@@ -483,7 +507,6 @@ Running through Docker with Docker Compose is the recommended install method.
 Generate a Frigate Docker Compose configuration based on your hardware and requirements.
 
 <DockerComposeGenerator/>
-
 
   </TabItem>
   <TabItem value="original" label="Example Docker Compose File">
