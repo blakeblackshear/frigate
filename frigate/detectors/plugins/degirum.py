@@ -1,9 +1,9 @@
 import logging
 import queue
+from typing import Literal
 
 import numpy as np
 from pydantic import ConfigDict, Field
-from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
@@ -46,7 +46,7 @@ class DGDetector(DetectionApi):
         try:
             import degirum as dg
         except ModuleNotFoundError:
-            raise ImportError("Unable to import DeGirum detector.")
+            raise ImportError("Unable to import DeGirum detector.") from None
 
         self._queue = queue.Queue()
         self._zoo = dg.connect(

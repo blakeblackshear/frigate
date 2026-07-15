@@ -81,6 +81,7 @@
     "zones": "ゾーン",
     "mask": "マスク",
     "motion": "モーション",
-    "regions": "領域"
+    "regions": "領域",
+    "paths": "軌跡"
   }
 }

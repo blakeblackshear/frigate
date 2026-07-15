@@ -22,6 +22,7 @@ type SaveAllPreviewPopoverProps = {
   className?: string;
   align?: "start" | "center" | "end";
   side?: "top" | "bottom" | "left" | "right";
+  disablePortal?: boolean;
 };
 
 export default function SaveAllPreviewPopover({
@@ -29,6 +30,7 @@ export default function SaveAllPreviewPopover({
   className,
   align = "end",
   side = "bottom",
+  disablePortal = false,
 }: SaveAllPreviewPopoverProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const [open, setOpen] = useState(false);
@@ -67,6 +69,7 @@ export default function SaveAllPreviewPopover({
       <PopoverContent
         align={align}
         side={side}
+        disablePortal={disablePortal}
         className="w-[90vw] max-w-sm border bg-background p-4 shadow-lg"
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
@@ -108,13 +111,13 @@ export default function SaveAllPreviewPopover({
                   }`}
                   className="rounded-md border border-secondary bg-background_alt p-2"
                 >
-                  <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
+                  <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-xs">
                     <span className="text-muted-foreground">
                       {t("saveAllPreview.scope.label", {
                         ns: "views/settings",
                       })}
                     </span>
-                    <span className="truncate">{scopeLabel}</span>
+                    <span className="min-w-0 truncate">{scopeLabel}</span>
                     {item.profileName && (
                       <>
                         <span className="text-muted-foreground">
@@ -122,7 +125,7 @@ export default function SaveAllPreviewPopover({
                             ns: "views/settings",
                           })}
                         </span>
-                        <span className="truncate font-medium">
+                        <span className="min-w-0 truncate font-medium">
                           {item.profileName}
                         </span>
                       </>
@@ -132,7 +135,7 @@ export default function SaveAllPreviewPopover({
                         ns: "views/settings",
                       })}
                     </span>
-                    <span className="break-all font-mono">
+                    <span className="min-w-0 break-all font-mono">
                       {item.fieldPath}
                     </span>
                     <span className="text-muted-foreground">
@@ -140,7 +143,7 @@ export default function SaveAllPreviewPopover({
                         ns: "views/settings",
                       })}
                     </span>
-                    <span className="whitespace-pre-wrap break-words font-mono">
+                    <span className="min-w-0 whitespace-pre-wrap break-all font-mono">
                       {formatValue(item.value)}
                     </span>
                   </div>

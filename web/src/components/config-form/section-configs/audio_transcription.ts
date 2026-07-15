@@ -10,7 +10,11 @@ const audioTranscription: SectionConfigOverrides = {
         severity: "warning",
         condition: (ctx) => {
           if (ctx.level === "camera" && ctx.fullCameraConfig) {
-            return ctx.fullCameraConfig.audio.enabled === false;
+            return (
+              !ctx.fullCameraConfig.ffmpeg?.inputs?.some((input) =>
+                input.roles?.includes("audio"),
+              ) || ctx.fullCameraConfig.audio.enabled === false
+            );
           }
           return false;
         },
@@ -21,6 +25,11 @@ const audioTranscription: SectionConfigOverrides = {
     hiddenFields: ["enabled_in_config", "live_enabled"],
     advancedFields: ["language", "device", "model_size"],
     overrideFields: ["enabled", "live_enabled"],
+    uiSchema: {
+      model_size: {
+        "ui:options": { size: "xs", enumI18nPrefix: "modelSize" },
+      },
+    },
   },
   global: {
     fieldOrder: ["enabled", "language", "device", "model_size"],

@@ -12,42 +12,27 @@ sys.path.insert(0, "/opt/frigate")
 from frigate.config.env import substitute_frigate_vars
 from frigate.const import (
     BIRDSEYE_PIPE,
-    DEFAULT_FFMPEG_VERSION,
-    INCLUDED_FFMPEG_VERSIONS,
     LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
-from frigate.util.config import find_config_file
+from frigate.util.config import find_config_file, resolve_ffmpeg_path
+from frigate.util.services import (
+    is_go2rtc_arbitrary_exec_allowed,
+    is_restricted_go2rtc_source,
+)
 
 sys.path.remove("/opt/frigate")
 
 yaml = YAML()
 
-# Check if arbitrary exec sources are allowed (defaults to False for security)
-allow_arbitrary_exec = None
-if "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.environ:
-    allow_arbitrary_exec = os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC")
-elif (
-    os.path.isdir("/run/secrets")
-    and os.access("/run/secrets", os.R_OK)
-    and "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.listdir("/run/secrets")
-):
-    allow_arbitrary_exec = (
-        Path(os.path.join("/run/secrets", "GO2RTC_ALLOW_ARBITRARY_EXEC"))
-        .read_text()
-        .strip()
-    )
-# check for the add-on options file
-elif os.path.isfile("/data/options.json"):
-    with open("/data/options.json") as f:
-        raw_options = f.read()
-    options = json.loads(raw_options)
-    allow_arbitrary_exec = options.get("go2rtc_allow_arbitrary_exec")
-
-ALLOW_ARBITRARY_EXEC = allow_arbitrary_exec is not None and str(
-    allow_arbitrary_exec
-).lower() in ("true", "1", "yes")
-
+FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
+# read docker secret files as env vars too
+if os.path.isdir("/run/secrets"):
+    for secret_file in os.listdir("/run/secrets"):
+        if secret_file.startswith("FRIGATE_"):
+            FRIGATE_ENV_VARS[secret_file] = (
+                Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
+            )
 
 config_file = find_config_file()
 
@@ -107,12 +92,7 @@ if go2rtc_config.get("rtsp", {}).get("password") is not None:
 
 # ensure ffmpeg path is set correctly
 path = config.get("ffmpeg", {}).get("path", "default")
-if path == "default":
-    ffmpeg_path = f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
-elif path in INCLUDED_FFMPEG_VERSIONS:
-    ffmpeg_path = f"/usr/lib/ffmpeg/{path}/bin/ffmpeg"
-else:
-    ffmpeg_path = f"{path}/bin/ffmpeg"
+ffmpeg_path = resolve_ffmpeg_path(path, "ffmpeg")
 
 if go2rtc_config.get("ffmpeg") is None:
     go2rtc_config["ffmpeg"] = {"bin": ffmpeg_path}
@@ -128,18 +108,13 @@ if LIBAVFORMAT_VERSION_MAJOR < 59:
         go2rtc_config["ffmpeg"]["rtsp"] = rtsp_args
 
 
-def is_restricted_source(stream_source: str) -> bool:
-    """Check if a stream source is restricted (echo, expr, or exec)."""
-    return stream_source.strip().startswith(("echo:", "expr:", "exec:"))
-
-
 for name in list(go2rtc_config.get("streams", {})):
     stream = go2rtc_config["streams"][name]
 
     if isinstance(stream, str):
         try:
-            formatted_stream = substitute_frigate_vars(stream)
-            if not ALLOW_ARBITRARY_EXEC and is_restricted_source(formatted_stream):
+            formatted_stream = stream.format(**FRIGATE_ENV_VARS)
+            if is_restricted_go2rtc_source(formatted_stream):
                 print(
                     f"[ERROR] Stream '{name}' uses a restricted source (echo/expr/exec) which is disabled by default for security. "
                     f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
@@ -157,8 +132,8 @@ for name in list(go2rtc_config.get("streams", {})):
         filtered_streams = []
         for i, stream_item in enumerate(stream):
             try:
-                formatted_stream = substitute_frigate_vars(stream_item)
-                if not ALLOW_ARBITRARY_EXEC and is_restricted_source(formatted_stream):
+                formatted_stream = stream_item.format(**FRIGATE_ENV_VARS)
+                if is_restricted_go2rtc_source(formatted_stream):
                     print(
                         f"[ERROR] Stream '{name}' item {i + 1} uses a restricted source (echo/expr/exec) which is disabled by default for security. "
                         f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
@@ -180,6 +155,20 @@ for name in list(go2rtc_config.get("streams", {})):
                 f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
             )
             del go2rtc_config["streams"][name]
+
+    elif isinstance(stream, dict):
+        # The map form ({"url": ...}) lets go2rtc resolve the source
+        # recursively, so it is effectively a dynamic way to generate the URL
+        # for a stream. That can only be backed by an exec source, so it cannot
+        # be allowed unless arbitrary exec is explicitly enabled. When it is
+        # enabled, leave the map untouched for go2rtc to resolve.
+        if not is_go2rtc_arbitrary_exec_allowed():
+            print(
+                f"[ERROR] Stream '{name}' uses a dynamic source format which is disabled by default for security. "
+                f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
+            )
+            del go2rtc_config["streams"][name]
+            continue
 
 # add birdseye restream stream if enabled
 if config.get("birdseye", {}).get("restream", False):

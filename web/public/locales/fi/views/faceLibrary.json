@@ -2,7 +2,8 @@
   "description": {
     "addFace": "Opastus: Uuden kokoelman lisääminen Kasvokirjastoon.",
     "invalidName": "Virheellinen nimi. Nimi voi sisältää vain merkkejä, numeroita, välejä, heittomerkkejä, alaviivoja ja väliviivoja.",
-    "placeholder": "Anna nimi kokoelmalle"
+    "placeholder": "Anna nimi kokoelmalle",
+    "nameCannotContainHash": "Nimi ei voi sisältää \"#\"."
   },
   "uploadFaceImage": {
     "desc": "Lähetä kuva kasvojen tunnistukseen ja lisää se sivulle {{pageToggle}}",

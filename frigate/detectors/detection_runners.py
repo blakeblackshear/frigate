@@ -15,6 +15,9 @@ from frigate.util.rknn_converter import auto_convert_model, is_rknn_compatible
 
 logger = logging.getLogger(__name__)
 
+# Process-wide lock serializing all OpenVINO compile/inference calls
+_OPENVINO_LOCK = threading.Lock()
+
 
 def is_arm64_platform() -> bool:
     """Check if we're running on an ARM platform."""
@@ -79,7 +82,11 @@ def is_openvino_gpu_npu_available() -> bool:
     available_devices = get_openvino_available_devices()
     # Check for GPU, NPU, or other acceleration devices (excluding CPU)
     acceleration_devices = ["GPU", "MYRIAD", "NPU", "GNA", "HDDL"]
-    return any(device in available_devices for device in acceleration_devices)
+    return any(
+        avail_dev == accel_dev or avail_dev.startswith(accel_dev + ".")
+        for avail_dev in available_devices
+        for accel_dev in acceleration_devices
+    )
 
 
 class BaseModelRunner(ABC):
@@ -132,7 +139,6 @@ class ONNXModelRunner(BaseModelRunner):
         return model_type in [
             EnrichmentModelTypeEnum.paddleocr.value,
             EnrichmentModelTypeEnum.jina_v2.value,
-            EnrichmentModelTypeEnum.arcface.value,
             ModelTypeEnum.rfdetr.value,
             ModelTypeEnum.dfine.value,
         ]
@@ -279,6 +285,13 @@ class OpenVINOModelRunner(BaseModelRunner):
             EnrichmentModelTypeEnum.arcface.value,
         ]
 
+    @staticmethod
+    def is_detection_model(model_type: str) -> bool:
+        # Import here to avoid circular imports
+        from frigate.detectors.detector_config import ModelTypeEnum
+
+        return model_type in [m.value for m in ModelTypeEnum]
+
     def __init__(self, model_path: str, device: str, model_type: str, **kwargs):
         self.model_path = model_path
         self.device = device
@@ -307,21 +320,25 @@ class OpenVINOModelRunner(BaseModelRunner):
         # Apply performance optimization
         self.ov_core.set_property(device, {"PERF_COUNT": "NO"})
 
-        if device in ["GPU", "AUTO"]:
+        if device in ["GPU", "AUTO", "NPU"]:
             self.ov_core.set_property(device, {"PERFORMANCE_HINT": "LATENCY"})
 
-        # Compile model
-        self.compiled_model = self.ov_core.compile_model(
-            model=model_path, device_name=device
-        )
+        if device == "NPU" and OpenVINOModelRunner.is_detection_model(model_type):
+            try:
+                self.ov_core.set_property(device, {"NPU_TURBO": "YES"})
+            except Exception as e:
+                logger.debug(f"NPU_TURBO not supported by driver: {e}")
 
-        # Create reusable inference request
-        self.infer_request = self.compiled_model.create_infer_request()
+        # Compile model under the shared lock
+        with _OPENVINO_LOCK:
+            self.compiled_model = self.ov_core.compile_model(
+                model=model_path, device_name=device
+            )
+
+            # Create reusable inference request
+            self.infer_request = self.compiled_model.create_infer_request()
+
         self.input_tensor: ov.Tensor | None = None
-
-        # Thread lock to prevent concurrent inference (needed for JinaV2 which shares
-        # one runner between text and vision embeddings called from different threads)
-        self._inference_lock = threading.Lock()
 
         if not self.complex_model:
             try:
@@ -366,9 +383,11 @@ class OpenVINOModelRunner(BaseModelRunner):
         Returns:
             List of output tensors
         """
-        # Lock prevents concurrent access to infer_request
-        # Needed for JinaV2: genai thread (text) + embeddings thread (vision)
-        with self._inference_lock:
+        # Shared lock serializes inference across every OpenVINO runner in this
+        # process — both the shared-runner JinaV2 case (genai text thread +
+        # embeddings vision thread) and distinct runners running on separate
+        # threads (e.g. the ArcFace face-model build vs the LPR detector).
+        with _OPENVINO_LOCK:
             from frigate.embeddings.types import EnrichmentModelTypeEnum
 
             if self.model_type in [EnrichmentModelTypeEnum.arcface.value]:
@@ -472,7 +491,7 @@ class RKNNModelRunner(BaseModelRunner):
 
         except ImportError:
             logger.error("RKNN Lite not available")
-            raise ImportError("RKNN Lite not available")
+            raise ImportError("RKNN Lite not available") from None
         except Exception as e:
             logger.error(f"Error loading RKNN model: {e}")
             raise

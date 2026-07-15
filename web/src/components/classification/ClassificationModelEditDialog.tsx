@@ -9,6 +9,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -50,13 +52,24 @@ type ClassificationModelEditDialogProps = {
 type ObjectClassificationType = "sub_label" | "attribute";
 
 type ObjectFormData = {
+  enabled: boolean;
+  saveAttempts: number;
   objectLabel: string;
   objectType: ObjectClassificationType;
 };
 
 type StateFormData = {
+  enabled: boolean;
+  saveAttempts: number;
+  motion: boolean;
+  interval?: number;
   classes: string[];
 };
+
+const DEFAULT_SAVE_ATTEMPTS = {
+  object: 200,
+  state: 100,
+} as const;
 
 export default function ClassificationModelEditDialog({
   open,
@@ -70,6 +83,10 @@ export default function ClassificationModelEditDialog({
 
   const isStateModel = model.state_config !== undefined;
   const isObjectModel = model.object_config !== undefined;
+
+  const defaultSaveAttempts = isObjectModel
+    ? DEFAULT_SAVE_ATTEMPTS.object
+    : DEFAULT_SAVE_ATTEMPTS.state;
 
   const objectLabels = useMemo(() => {
     if (!config) return [];
@@ -93,8 +110,17 @@ export default function ClassificationModelEditDialog({
 
   // Define form schema based on model type
   const formSchema = useMemo(() => {
+    const sharedFields = {
+      enabled: z.boolean(),
+      saveAttempts: z.coerce
+        .number({ message: t("edit.errors.saveAttemptsInvalid") })
+        .int(t("edit.errors.saveAttemptsInvalid"))
+        .min(0, t("edit.errors.saveAttemptsInvalid")),
+    };
+
     if (isObjectModel) {
       return z.object({
+        ...sharedFields,
         objectLabel: z
           .string()
           .min(1, t("wizard.step1.errors.objectLabelRequired")),
@@ -103,6 +129,17 @@ export default function ClassificationModelEditDialog({
     } else {
       // State model
       return z.object({
+        ...sharedFields,
+        motion: z.boolean(),
+        interval: z.preprocess(
+          (val) =>
+            val === "" || val === null || val === undefined ? undefined : val,
+          z.coerce
+            .number({ message: t("edit.errors.intervalInvalid") })
+            .int(t("edit.errors.intervalInvalid"))
+            .positive(t("edit.errors.intervalInvalid"))
+            .optional(),
+        ),
         classes: z
           .array(z.string())
           .min(1, t("wizard.step1.errors.classRequired"))
@@ -129,12 +166,18 @@ export default function ClassificationModelEditDialog({
     resolver: zodResolver(formSchema),
     defaultValues: isObjectModel
       ? ({
+          enabled: model.enabled,
+          saveAttempts: model.save_attempts ?? defaultSaveAttempts,
           objectLabel: model.object_config?.objects?.[0] || "",
           objectType:
             (model.object_config
               ?.classification_type as ObjectClassificationType) || "sub_label",
         } as ObjectFormData)
       : ({
+          enabled: model.enabled,
+          saveAttempts: model.save_attempts ?? defaultSaveAttempts,
+          motion: model.state_config?.motion ?? false,
+          interval: model.state_config?.interval,
           classes: [""], // Will be populated from dataset
         } as StateFormData),
     mode: "onChange",
@@ -151,6 +194,8 @@ export default function ClassificationModelEditDialog({
     if (open) {
       if (isObjectModel) {
         form.reset({
+          enabled: model.enabled,
+          saveAttempts: model.save_attempts ?? defaultSaveAttempts,
           objectLabel: model.object_config?.objects?.[0] || "",
           objectType:
             (model.object_config
@@ -158,6 +203,10 @@ export default function ClassificationModelEditDialog({
         } as ObjectFormData);
       } else {
         form.reset({
+          enabled: model.enabled,
+          saveAttempts: model.save_attempts ?? defaultSaveAttempts,
+          motion: model.state_config?.motion ?? false,
+          interval: model.state_config?.interval,
           classes: [""],
         } as StateFormData);
       }
@@ -166,7 +215,15 @@ export default function ClassificationModelEditDialog({
         mutateDataset();
       }
     }
-  }, [open, isObjectModel, isStateModel, model, form, mutateDataset]);
+  }, [
+    open,
+    isObjectModel,
+    isStateModel,
+    model,
+    form,
+    mutateDataset,
+    defaultSaveAttempts,
+  ]);
 
   // Update form with classes from dataset when loaded
   useEffect(() => {
@@ -233,6 +290,7 @@ export default function ClassificationModelEditDialog({
       setIsSaving(true);
       try {
         if (isObjectModel) {
+          // object model save
           const objectData = data as ObjectFormData;
 
           // Update the config
@@ -243,9 +301,10 @@ export default function ClassificationModelEditDialog({
               classification: {
                 custom: {
                   [model.name]: {
-                    enabled: model.enabled,
+                    enabled: objectData.enabled,
                     name: model.name,
                     threshold: model.threshold,
+                    save_attempts: objectData.saveAttempts,
                     object_config: {
                       objects: [objectData.objectLabel],
                       classification_type: objectData.objectType,
@@ -260,7 +319,34 @@ export default function ClassificationModelEditDialog({
             position: "top-center",
           });
         } else {
+          // state model save
           const stateData = data as StateFormData;
+
+          const stateConfig: { motion: boolean; interval?: number | null } = {
+            motion: stateData.motion,
+          };
+          if (stateData.interval != null) {
+            stateConfig.interval = stateData.interval;
+          } else if (model.state_config?.interval != null) {
+            stateConfig.interval = null;
+          }
+
+          await axios.put("/config/set", {
+            requires_restart: 0,
+            update_topic: `config/classification/custom/${model.name}`,
+            config_data: {
+              classification: {
+                custom: {
+                  [model.name]: {
+                    enabled: stateData.enabled,
+                    save_attempts: stateData.saveAttempts,
+                    state_config: stateConfig,
+                  },
+                },
+              },
+            },
+          });
+
           const newClasses = stateData.classes.filter(
             (c) => c.trim().length > 0,
           );
@@ -307,11 +393,11 @@ export default function ClassificationModelEditDialog({
           if (renamePromises.length > 0) {
             await Promise.all(renamePromises);
             await mutate(`classification/${model.name}/dataset`);
-            toast.success(t("toast.success.updatedModel"), {
+            toast.success(t("edit.stateClassesInfo"), {
               position: "top-center",
             });
           } else {
-            toast.info(t("edit.stateClassesInfo"), {
+            toast.success(t("toast.success.updatedModel"), {
               position: "top-center",
             });
           }
@@ -359,6 +445,29 @@ export default function ClassificationModelEditDialog({
         <div className="space-y-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between gap-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-primary-variant">
+                        {t("edit.enabled")}
+                      </FormLabel>
+                      <FormDescription className="text-xs">
+                        {t("edit.enabledDesc")}
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
               {isObjectModel && (
                 <>
                   <FormField
@@ -485,7 +594,7 @@ export default function ClassificationModelEditDialog({
                             <FormControl>
                               <div className="flex items-center gap-2">
                                 <Input
-                                  className="text-md h-8"
+                                  className="h-8"
                                   placeholder={t(
                                     "wizard.step1.classPlaceholder",
                                   )}
@@ -519,6 +628,77 @@ export default function ClassificationModelEditDialog({
                     )}
                 </div>
               )}
+
+              {isStateModel && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="motion"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between gap-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-primary-variant">
+                            {t("edit.motion")}
+                          </FormLabel>
+                          <FormDescription className="text-xs">
+                            {t("edit.motionDesc")}
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="interval"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-primary-variant">
+                          {t("edit.interval")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            className="h-8"
+                            inputMode="numeric"
+                            placeholder={t("edit.intervalPlaceholder")}
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          {t("edit.intervalDesc")}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+
+              <FormField
+                control={form.control}
+                name="saveAttempts"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-primary-variant">
+                      {t("edit.saveAttempts")}
+                    </FormLabel>
+                    <FormControl>
+                      <Input className="h-8" inputMode="numeric" {...field} />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      {t("edit.saveAttemptsDesc")}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
                 <Button

@@ -6,6 +6,7 @@ import {
   LuLifeBuoy,
   LuList,
   LuLogOut,
+  LuMessageSquare,
   LuMoon,
   LuSquarePen,
   LuScanFace,
@@ -81,9 +82,13 @@ import { MdCategory } from "react-icons/md";
 
 type GeneralSettingsProps = {
   className?: string;
+  large?: boolean;
 };
 
-export default function GeneralSettings({ className }: GeneralSettingsProps) {
+export default function GeneralSettings({
+  className,
+  large,
+}: GeneralSettingsProps) {
   const { t } = useTranslation(["common", "views/settings"]);
   const { getLocaleDocUrl } = useDocDomain();
   const { data: profile } = useSWR("profile");
@@ -91,6 +96,14 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const { data: profilesData, mutate: updateProfiles } =
     useSWR<ProfilesApiResponse>("profiles");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
+
+  const hasChatAgent = useMemo(
+    () =>
+      Object.values(config?.genai ?? {}).some((agent) =>
+        agent?.roles?.includes("chat"),
+      ),
+    [config?.genai],
+  );
 
   // languages
 
@@ -100,6 +113,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
       "nb-NO": "nb",
       "yue-Hant": "yue",
       "zh-CN": "zhCN",
+      "zh-Hant": "zhHant",
       "pt-BR": "ptBR",
     };
 
@@ -205,7 +219,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   return (
     <>
-      <Container modal={!isDesktop}>
+      <Container>
         <Trigger>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -215,10 +229,13 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   isDesktop
                     ? "cursor-pointer rounded-lg bg-secondary text-secondary-foreground hover:bg-muted"
                     : "text-secondary-foreground",
+                  large && "size-12",
                   className,
                 )}
               >
-                <LuSettings className="size-5 md:m-[6px]" />
+                <LuSettings
+                  className={cn("md:m-[6px]", large ? "size-6" : "size-5")}
+                />
               </div>
             </TooltipTrigger>
             <TooltipPortal>
@@ -482,21 +499,25 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   </Link>
                 </>
               )}
-              {isAdmin && isMobile && config?.face_recognition.enabled && (
-                <>
-                  <Link to="/faces">
-                    <MenuItem
-                      className="flex w-full items-center p-2 text-sm"
-                      aria-label={t("menu.faceLibrary")}
-                    >
-                      <LuScanFace className="mr-2 size-4" />
-                      <span>{t("menu.faceLibrary")}</span>
-                    </MenuItem>
-                  </Link>
-                </>
-              )}
-              {isAdmin && isMobile && (
-                <>
+            </DropdownMenuGroup>
+            {isMobile && isAdmin && (
+              <>
+                <DropdownMenuLabel className="mt-1">
+                  {t("menu.features")}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup className="flex flex-col">
+                  {config?.face_recognition.enabled && (
+                    <Link to="/faces">
+                      <MenuItem
+                        className="flex w-full items-center p-2 text-sm"
+                        aria-label={t("menu.faceLibrary")}
+                      >
+                        <LuScanFace className="mr-2 size-4" />
+                        <span>{t("menu.faceLibrary")}</span>
+                      </MenuItem>
+                    </Link>
+                  )}
                   <Link to="/classification">
                     <MenuItem
                       className="flex w-full items-center p-2 text-sm"
@@ -506,9 +527,20 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       <span>{t("menu.classification")}</span>
                     </MenuItem>
                   </Link>
-                </>
-              )}
-            </DropdownMenuGroup>
+                  {hasChatAgent && (
+                    <Link to="/chat">
+                      <MenuItem
+                        className="flex w-full items-center p-2 text-sm"
+                        aria-label={t("menu.chat")}
+                      >
+                        <LuMessageSquare className="mr-2 size-4" />
+                        <span>{t("menu.chat")}</span>
+                      </MenuItem>
+                    </Link>
+                  )}
+                </DropdownMenuGroup>
+              </>
+            )}
             <DropdownMenuLabel className={isDesktop ? "mt-3" : "mt-1"}>
               {t("menu.appearance")}
             </DropdownMenuLabel>

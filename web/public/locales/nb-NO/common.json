@@ -171,7 +171,7 @@
     "configuration": "Konfigurasjon",
     "systemLogs": "Systemlogger",
     "settings": "Innstillinger",
-    "configurationEditor": "Rediger konfigurasjonen",
+    "configurationEditor": "Rediger konfigurasjonsfil",
     "languages": "Språk",
     "language": {
       "en": "English (Engelsk)",
@@ -216,7 +216,9 @@
       "gl": "Galego (Galisisk)",
       "id": "Bahasa Indonesia (Indonesisk)",
       "ur": "اردو (Urdu)",
-      "hr": "Hrvatski (Kroatisk)"
+      "hr": "Hrvatski (Kroatisk)",
+      "bs": "Bosanski (Bosnisk)",
+      "zhHant": "繁體中文 (Tradisjonell kinesisk)"
     },
     "appearance": "Utseende",
     "darkMode": {
@@ -241,7 +243,8 @@
     "classification": "Klassifisering",
     "profiles": "Profiler",
     "chat": "Chat",
-    "actions": "Handlinger"
+    "actions": "Handlinger",
+    "features": "Funksjoner"
   },
   "pagination": {
     "next": {
@@ -324,5 +327,8 @@
     "separatorWithSpace": ", "
   },
   "validation_errors": "Valideringsfeil",
-  "no_items": "Ingen elementer"
+  "no_items": "Ingen elementer",
+  "credentialField": {
+    "savedPlaceholder": "Lagret – la stå tomt for å beholde gjeldende"
+  }
 }

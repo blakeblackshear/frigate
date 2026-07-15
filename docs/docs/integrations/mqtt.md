@@ -280,7 +280,7 @@ Same data available at `/api/stats` published at a configurable interval.
 
 ### `frigate/camera_activity`
 
-Returns data about each camera, its current features, and if it is detecting motion, objects, etc. Can be triggered by publising to `frigate/onConnect`
+Returns data about each camera, its current features, and if it is detecting motion, objects, etc. Can be triggered by publishing to `frigate/onConnect`
 
 ### `frigate/profile/set`
 
@@ -306,7 +306,7 @@ Publishes the current health status of each role that is enabled (`audio`, `dete
 
 - `online`: Stream is running and being processed
 - `offline`: Stream is offline and is being restarted
-- `disabled`: Camera is currently disabled
+- `disabled`: Camera is currently turned off (either at runtime via the `enabled/set` topic, or persistently via the configuration file). See [Camera state](/configuration/live#camera-state) for the distinction.
 
 ### `frigate/<camera_name>/<object_name>`
 
@@ -368,15 +368,15 @@ The published value is the detected state class name (e.g., `open`, `closed`, `o
 
 ### `frigate/<camera_name>/enabled/set`
 
-Topic to turn Frigate's processing of a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn Frigate's processing of a camera on or off at runtime. Expected values are `ON` and `OFF`. The change is persisted across Frigate restarts (see [Runtime toggle persistence](/configuration/live#runtime-toggle-persistence)). To permanently change the configured value, use **Settings → Global configuration → Camera management** in the Frigate UI. See [Camera state](/configuration/live#camera-state) for the difference between turning a camera off and disabling it.
 
 ### `frigate/<camera_name>/enabled/state`
 
-Topic with current state of processing for a camera. Published values are `ON` and `OFF`.
+Topic with current runtime state of processing for a camera. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/detect/set`
 
-Topic to turn object detection for a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn object detection for a camera on and off. Expected values are `ON` and `OFF`. The change is persisted across Frigate restarts (see [Runtime toggle persistence](/configuration/live#runtime-toggle-persistence)).
 
 ### `frigate/<camera_name>/detect/state`
 
@@ -384,7 +384,7 @@ Topic with current state of object detection for a camera. Published values are 
 
 ### `frigate/<camera_name>/audio/set`
 
-Topic to turn audio detection for a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn audio detection for a camera on and off. Expected values are `ON` and `OFF`. The change is persisted across Frigate restarts (see [Runtime toggle persistence](/configuration/live#runtime-toggle-persistence)).
 
 ### `frigate/<camera_name>/audio/state`
 
@@ -392,7 +392,7 @@ Topic with current state of audio detection for a camera. Published values are `
 
 ### `frigate/<camera_name>/recordings/set`
 
-Topic to turn recordings for a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn recordings for a camera on and off. Expected values are `ON` and `OFF`. The change is persisted across Frigate restarts (see [Runtime toggle persistence](/configuration/live#runtime-toggle-persistence)).
 
 ### `frigate/<camera_name>/recordings/state`
 
@@ -400,7 +400,7 @@ Topic with current state of recordings for a camera. Published values are `ON` a
 
 ### `frigate/<camera_name>/snapshots/set`
 
-Topic to turn snapshots for a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn snapshots for a camera on and off. Expected values are `ON` and `OFF`. The change is persisted across Frigate restarts (see [Runtime toggle persistence](/configuration/live#runtime-toggle-persistence)).
 
 ### `frigate/<camera_name>/snapshots/state`
 

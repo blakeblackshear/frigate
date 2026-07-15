@@ -66,10 +66,10 @@
   },
   "general": {
     "detector": {
-      "memoryUsage": "Ús de memòria del detector",
+      "memoryUsage": "Ús de la memòria del detector",
       "title": "Detectors",
       "inferenceSpeed": "Velocitat d'inferència del detector",
-      "cpuUsage": "Ús de CPU del detector",
+      "cpuUsage": "Ús de la CPU del detector",
       "temperature": "Temperatura del detector",
       "cpuUsageInformation": "CPU usada en la preparació d'entrades i sortides desde/cap als models de detecció. Aquest valor no mesura l'utilització d'inferència, encara que usis una GPU o accelerador."
     },
@@ -118,11 +118,11 @@
     "otherProcesses": {
       "title": "Altres processos",
       "processMemoryUsage": "Ús de memòria de procés",
-      "processCpuUsage": "Ús de la CPU del procés",
+      "processCpuUsage": "Ús de la CPU per procés",
       "series": {
         "recording": "gravant",
         "review_segment": "segment de revisió",
-        "embeddings": "incrustacions",
+        "embeddings": "Vectors",
         "audio_detector": "detector d'àudio",
         "go2rtc": "go2rtc"
       }
@@ -191,7 +191,22 @@
       },
       "audio": "Àudio:",
       "cameraProbeInfo": "Informació del sondeig de la càmera {{camera}}",
-      "streamDataFromFFPROBE": "Les dades de la transmissió són obtingudes mitjançant <code>ffprobe</code>."
+      "streamDataFromFFPROBE": "Les dades de la transmissió són obtingudes mitjançant <code>ffprobe</code>.",
+      "keyframes": {
+        "title": "Anàlisi de fotogrames clau",
+        "analyzing": "S'estan analitzant els fotogrames clau... queden {{seconds}} segons",
+        "stillAnalyzing": "Encara s'estan analitzant els fotogrames clau...",
+        "recordStream": "Registre de flux:",
+        "keyframeCount": "Fotogrames clau observats:",
+        "observedDuration": "Durada observada:",
+        "gap": "Espai de fotogrames clau (mín / avg / max):",
+        "segmentLength": "Longitud del segment d'enregistrament:",
+        "ok": "Fotogrames clau cada ,{{seconds}}s, bons per enregistrar i reproduir.",
+        "warning": "Els fotogrames clau dispersos o variables (espai més llarg .{{seconds}}s), probablement un còdec intel·ligent (H.264+/H.265+), això no és recomanable.",
+        "error": "El buit dels fotogrames clau ( the{{seconds}}s) excedeix la longitud del segment d'enregistrament ({{segmentTime}}s). Alguns segments poden no tenir un fotograma clau, el qual trenca la reproducció. Desactiva el còdec intel·ligent/+ a la càmera o escurça el seu interval de fotogrames clau.",
+        "unknown": "No s'ha pogut determinar l'espaiat dels fotogrames clau.",
+        "recordDisabled": "L'enregistrament està desactivat per a aquesta càmera."
+      }
     },
     "title": "Càmeres",
     "overview": "Visió general",
@@ -213,11 +228,14 @@
       "expectedFps": "FPS esperat",
       "reconnectsLastHour": "Reconnecta (última hora)",
       "stallsLastHour": "Parades (última hora)"
+    },
+    "noCameras": {
+      "title": "No s'ha trobat cap càmera"
     }
   },
   "lastRefreshed": "Darrera actualització: ",
   "stats": {
-    "reindexingEmbeddings": "Reindexant incrustacions ({{processed}}% completat)",
+    "reindexingEmbeddings": "Reindexant vectors ({{processed}}% completat)",
     "healthy": "El sistema és saludable",
     "cameraIsOffline": "{{camera}} està fora de línia",
     "ffmpegHighCpuUsage": "{{camera}} te un ús elevat de CPU per FFmpeg ({{ffmpegAvg}}%)",
@@ -231,14 +249,14 @@
     "title": "Enriquiments",
     "embeddings": {
       "face_recognition_speed": "Velocitat de reconeixement facial",
-      "image_embedding": "Incrustació d'imatges",
-      "text_embedding": "Incrustació de text",
+      "image_embedding": "Vectors d'imatges",
+      "text_embedding": "Vectors de text",
       "face_recognition": "Reconeixement de rostres",
       "plate_recognition": "Reconeixemnt de matrícules",
-      "image_embedding_speed": "Velocitat d'ncrustació d'imatges",
-      "face_embedding_speed": "Velocitat d'incrustació de rostres",
+      "image_embedding_speed": "Velocitat de generació de vectors",
+      "face_embedding_speed": "Velocitat de generació de vectors facials",
       "plate_recognition_speed": "Velocitat de reconeixement de matrícules",
-      "text_embedding_speed": "Velocitat d'incrustació de text",
+      "text_embedding_speed": "Velocitat de generació de vectors de text",
       "yolov9_plate_detection": "Detecció de matrícules YOLOv9",
       "yolov9_plate_detection_speed": "Velocitat de detecció de matrícules YOLOv9",
       "review_description": "Descripció de la revisió",

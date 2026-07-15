@@ -2,6 +2,7 @@ import { useFrigateStats } from "@/api/ws";
 import { CameraLineGraph } from "@/components/graph/LineGraph";
 import CameraInfoDialog from "@/components/overlay/CameraInfoDialog";
 import { ConnectionQualityIndicator } from "@/components/camera/ConnectionQualityIndicator";
+import { EmptyCard } from "@/components/card/EmptyCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats } from "@/types/stats";
@@ -13,6 +14,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { BsFillCameraVideoOffFill } from "react-icons/bs";
 import { MdInfo } from "react-icons/md";
 import {
   Tooltip,
@@ -23,6 +25,7 @@ import useSWR from "swr";
 import { useTranslation } from "react-i18next";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
 type CameraMetricsProps = {
   lastUpdated: number;
@@ -173,7 +176,7 @@ export default function CameraMetrics({
       }
 
       Object.entries(stats.cameras).forEach(([key, camStats]) => {
-        if (!config?.cameras[key].enabled) {
+        if (!camStats || !config?.cameras[key]?.enabled) {
           return;
         }
 
@@ -228,6 +231,10 @@ export default function CameraMetrics({
       }
 
       Object.entries(stats.cameras).forEach(([key, camStats]) => {
+        if (!camStats) {
+          return;
+        }
+
         if (!(key in series)) {
           const camName = getCameraName(key);
           series[key] = {};
@@ -274,6 +281,17 @@ export default function CameraMetrics({
     }
   }, [showCameraInfoDialog]);
 
+  if (config && Object.keys(config.cameras).length === 0) {
+    return (
+      <div className="flex size-full items-center justify-center">
+        <EmptyCard
+          icon={<BsFillCameraVideoOffFill className="size-8" />}
+          title={t("cameras.noCameras.title")}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col gap-3 overflow-y-auto">
       <div className="text-sm font-medium text-muted-foreground">
@@ -298,114 +316,114 @@ export default function CameraMetrics({
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {config &&
-          Object.values(config.cameras).map((camera) => {
-            if (camera.enabled) {
-              return (
-                <Fragment key={camera.name}>
-                  {probeCameraName == camera.name && (
-                    <CameraInfoDialog
-                      camera={camera}
-                      showCameraInfoDialog={showCameraInfoDialog}
-                      setShowCameraInfoDialog={setShowCameraInfoDialog}
-                    />
-                  )}
-                  <div className="flex w-full flex-col gap-3">
-                    <div className="flex flex-row items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-medium text-muted-foreground smart-capitalize">
-                          <CameraNameLabel camera={camera} />
-                        </div>
-                        {statsHistory.length > 0 &&
-                          statsHistory[statsHistory.length - 1]?.cameras[
-                            camera.name
-                          ] && (
-                            <ConnectionQualityIndicator
-                              quality={
-                                statsHistory[statsHistory.length - 1]?.cameras[
-                                  camera.name
-                                ]?.connection_quality
-                              }
-                              expectedFps={
-                                statsHistory[statsHistory.length - 1]?.cameras[
-                                  camera.name
-                                ]?.expected_fps || 0
-                              }
-                              reconnects={
-                                statsHistory[statsHistory.length - 1]?.cameras[
-                                  camera.name
-                                ]?.reconnects_last_hour || 0
-                              }
-                              stalls={
-                                statsHistory[statsHistory.length - 1]?.cameras[
-                                  camera.name
-                                ]?.stalls_last_hour || 0
-                              }
-                            />
-                          )}
-                      </div>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <MdInfo
-                            className="size-5 cursor-pointer text-muted-foreground"
-                            onClick={() => {
-                              setShowCameraInfoDialog(true);
-                              setProbeCameraName(camera.name);
-                            }}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {t("cameras.info.tips.title")}
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <div
-                      key={camera.name}
-                      className="grid gap-2 sm:grid-cols-2"
-                    >
-                      {Object.keys(cameraCpuSeries).includes(camera.name) ? (
-                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                          <div className="mb-5">CPU</div>
-                          <CameraLineGraph
-                            graphId={`${camera.name}-cpu`}
-                            unit="%"
-                            dataLabels={["ffmpeg", "capture", "detect"]}
-                            updateTimes={updateTimes}
-                            data={Object.values(
-                              cameraCpuSeries[camera.name] || {},
-                            )}
-                            isActive={isActive}
-                          />
-                        </div>
-                      ) : (
-                        <Skeleton className="aspect-video size-full" />
-                      )}
-                      {Object.keys(cameraFpsSeries).includes(camera.name) ? (
-                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                          <div className="mb-5">
-                            {t("cameras.framesAndDetections")}
+          Object.values(config.cameras)
+            .sort((a, b) => a.ui.order - b.ui.order)
+            .map((camera) => {
+              if (camera.enabled && !isReplayCamera(camera.name)) {
+                return (
+                  <Fragment key={camera.name}>
+                    {probeCameraName == camera.name && (
+                      <CameraInfoDialog
+                        camera={camera}
+                        showCameraInfoDialog={showCameraInfoDialog}
+                        setShowCameraInfoDialog={setShowCameraInfoDialog}
+                      />
+                    )}
+                    <div className="flex w-full flex-col gap-3">
+                      <div className="flex flex-row items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-medium text-muted-foreground smart-capitalize">
+                            <CameraNameLabel camera={camera} />
                           </div>
-                          <CameraLineGraph
-                            graphId={`${camera.name}-dps`}
-                            unit=""
-                            dataLabels={["camera", "detect", "skipped"]}
-                            updateTimes={updateTimes}
-                            data={Object.values(
-                              cameraFpsSeries[camera.name] || {},
+                          {statsHistory.length > 0 &&
+                            statsHistory[statsHistory.length - 1]?.cameras[
+                              camera.name
+                            ] && (
+                              <ConnectionQualityIndicator
+                                quality={
+                                  statsHistory[statsHistory.length - 1]
+                                    ?.cameras[camera.name]?.connection_quality
+                                }
+                                expectedFps={
+                                  statsHistory[statsHistory.length - 1]
+                                    ?.cameras[camera.name]?.expected_fps || 0
+                                }
+                                reconnects={
+                                  statsHistory[statsHistory.length - 1]
+                                    ?.cameras[camera.name]
+                                    ?.reconnects_last_hour || 0
+                                }
+                                stalls={
+                                  statsHistory[statsHistory.length - 1]
+                                    ?.cameras[camera.name]?.stalls_last_hour ||
+                                  0
+                                }
+                              />
                             )}
-                            isActive={isActive}
-                          />
                         </div>
-                      ) : (
-                        <Skeleton className="aspect-video size-full" />
-                      )}
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <MdInfo
+                              className="size-5 cursor-pointer text-muted-foreground"
+                              onClick={() => {
+                                setShowCameraInfoDialog(true);
+                                setProbeCameraName(camera.name);
+                              }}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t("cameras.info.tips.title")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <div
+                        key={camera.name}
+                        className="grid gap-2 sm:grid-cols-2"
+                      >
+                        {Object.keys(cameraCpuSeries).includes(camera.name) ? (
+                          <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                            <div className="mb-5">CPU</div>
+                            <CameraLineGraph
+                              graphId={`${camera.name}-cpu`}
+                              unit="%"
+                              dataLabels={["ffmpeg", "capture", "detect"]}
+                              updateTimes={updateTimes}
+                              data={Object.values(
+                                cameraCpuSeries[camera.name] || {},
+                              )}
+                              isActive={isActive}
+                            />
+                          </div>
+                        ) : (
+                          <Skeleton className="aspect-video size-full" />
+                        )}
+                        {Object.keys(cameraFpsSeries).includes(camera.name) ? (
+                          <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                            <div className="mb-5">
+                              {t("cameras.framesAndDetections")}
+                            </div>
+                            <CameraLineGraph
+                              graphId={`${camera.name}-dps`}
+                              unit=""
+                              dataLabels={["camera", "detect", "skipped"]}
+                              updateTimes={updateTimes}
+                              data={Object.values(
+                                cameraFpsSeries[camera.name] || {},
+                              )}
+                              isActive={isActive}
+                            />
+                          </div>
+                        ) : (
+                          <Skeleton className="aspect-video size-full" />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Fragment>
-              );
-            }
+                  </Fragment>
+                );
+              }
 
-            return null;
-          })}
+              return null;
+            })}
       </div>
     </div>
   );

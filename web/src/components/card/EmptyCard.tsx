@@ -12,6 +12,7 @@ type EmptyCardProps = {
   description?: string;
   buttonText?: string;
   link?: string;
+  onClick?: () => void;
 };
 export function EmptyCard({
   className,
@@ -21,6 +22,7 @@ export function EmptyCard({
   description,
   buttonText,
   link,
+  onClick,
 }: EmptyCardProps) {
   let TitleComponent;
 
@@ -39,11 +41,16 @@ export function EmptyCard({
           {description}
         </div>
       )}
-      {buttonText?.length && (
-        <Button size="sm" variant="select">
-          <Link to={link ?? "#"}>{buttonText}</Link>
-        </Button>
-      )}
+      {buttonText?.length &&
+        (onClick ? (
+          <Button size="sm" variant="select" onClick={onClick}>
+            {buttonText}
+          </Button>
+        ) : (
+          <Button size="sm" variant="select">
+            <Link to={link ?? "#"}>{buttonText}</Link>
+          </Button>
+        ))}
     </div>
   );
 }

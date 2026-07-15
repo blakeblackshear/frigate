@@ -29,14 +29,15 @@
     "masksAndZones": "마스크와 구역 편집기 - Frigate",
     "motionTuner": "움직임 감지 조정 - Frigate",
     "object": "디버그 - Frigate",
-    "general": "프로필 설정 - Frigate",
+    "general": "UI 설정 - Frigate",
     "frigatePlus": "Frigate+ 설정 - Frigate",
     "notifications": "알림 설정 - Frigate",
     "cameraManagement": "카메라 관리 - Frigate",
     "cameraReview": "카메라 다시보기 설정 - Frigate",
     "globalConfig": "전체 설정 - Frigate",
     "cameraConfig": "카메라 설정 - Frigate",
-    "maintenance": "유지 관리 - Frigate"
+    "maintenance": "유지 관리 - Frigate",
+    "profiles": "프로필 - Frigate"
   },
   "users": {
     "table": {
@@ -219,5 +220,11 @@
       "label": "새 값",
       "reset": "초기화"
     }
+  },
+  "button": {
+    "overriddenGlobal": "전역 재정의됨",
+    "overriddenGlobalTooltip": "이 카메라는 이 섹션의 전역 설정을 재정의합니다",
+    "overriddenBaseConfig": "기본 설정 재정의됨",
+    "overriddenBaseConfigTooltip": "{{profile}} 프로필은 이 섹션의 구성 설정을 재정의합니다"
   }
 }

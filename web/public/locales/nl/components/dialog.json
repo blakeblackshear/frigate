@@ -67,17 +67,60 @@
         "endTimeMustAfterStartTime": "Eindtijd moet na starttijd zijn"
       },
       "success": "Export is succesvol gestart. Bekijk het bestand op de exportpagina.",
-      "view": "Weergeven"
+      "view": "Weergeven",
+      "queued": "Export staat in de wachtrij. Bekijk voortgang op de exports pagina."
     },
     "fromTimeline": {
       "saveExport": "Export opslaan",
-      "previewExport": "Export vooraf bekijken"
+      "previewExport": "Export vooraf bekijken",
+      "useThisRange": "Gebruik dit bereik",
+      "queueingExport": "Export in wachtrij zetten..."
     },
     "export": "Exporteren",
     "selectOrExport": "Selecteren of exporteren",
     "case": {
       "label": "Dossier",
-      "placeholder": "Selecteer een dossier"
+      "placeholder": "Selecteer een dossier",
+      "newCaseOption": "Maak nieuwe case",
+      "newCaseNamePlaceholder": "Nieuwe case naam",
+      "newCaseDescriptionPlaceholder": "Case beschrijving",
+      "nonAdminHelp": "Een nieuwe case wordt gemaakt voor deze exports."
+    },
+    "queueing": "Export in wachtrij zetten...",
+    "tabs": {
+      "export": "Enkele Camera",
+      "multiCamera": "Multi-Camera"
+    },
+    "multiCamera": {
+      "timeRange": "Tijdspanne",
+      "selectFromTimeline": "Selecteer van tijdslijn",
+      "cameraSelection": "Camera's",
+      "cameraSelectionHelp": "Camera’s met getrackte objecten in deze tijdspanne zijn vooraf geselecteerd",
+      "checkingActivity": "Camera-activiteit controleren...",
+      "noCameras": "Geen camera's beschikbaar",
+      "detectionCount_one": "1 gevolgd object",
+      "detectionCount_other": "{{count}} gevolgde objecten",
+      "nameLabel": "Exportnaam",
+      "namePlaceholder": "Optionele basisnaam voor deze exporten",
+      "queueingButton": "Exporten in wachtrij plaatsen...",
+      "exportButton_one": "Export 1 Camera",
+      "exportButton_other": "{{count}} camera's exporteren"
+    },
+    "multi": {
+      "title_one": "Review 1 exporteren",
+      "title_other": "{{count}} reviews exporteren",
+      "description": "Exporteer alle geselecteerde reviews. Alle exports worden samengevoegd in één case.",
+      "descriptionNoCase": "Exporteer elke geselecteerde review.",
+      "toast": {
+        "startedNoCase_one": "1 export gestart.",
+        "startedNoCase_other": "{{count}} Exports gestart.",
+        "partial": "{{successful}} van {{total}} exports gestart. Mislukte items: {{failedItems}}",
+        "failed": "Het starten van {{total}} exports is mislukt. Mislukt: {{failedItems}}"
+      },
+      "exportingButton": "Exporteren...",
+      "exportButton_one": "Exporteer 1 revisie",
+      "exportButton_other": "Exporteer {{count}} revisies",
+      "caseNamePlaceholder": "Inspecteer export - {{date}}"
     }
   },
   "streaming": {
@@ -125,6 +168,14 @@
         "error": "Verwijderen mislukt: {{error}}",
         "success": "De videobeelden die aan de geselecteerde beoordelingsitems zijn gekoppeld, zijn succesvol verwijderd."
       }
+    },
+    "shareTimestamp": {
+      "label": "Tijdstempel delen",
+      "title": "Tijdstempel delen",
+      "description": "Deel een URL met tijdstempel van de huidige positie in de afspeler of kies een aangepaste tijdstempel. Let op: dit is geen openbare deel-URL en is alleen toegankelijk voor gebruikers die toegang hebben tot Frigate en deze camera.",
+      "custom": "Aangepaste tijdstempel",
+      "button": "Deel tijdstempel URL",
+      "shareTitle": "Frigate Beoordelingstijdstempel: {{camera}}"
     }
   },
   "imagePicker": {

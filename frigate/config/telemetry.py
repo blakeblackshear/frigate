@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import Field
 
 from .base import FrigateBaseModel
@@ -23,10 +21,10 @@ class StatsConfig(FrigateBaseModel):
         title="Network bandwidth",
         description="Enable per-process network bandwidth monitoring for camera ffmpeg processes and detectors (requires capabilities).",
     )
-    intel_gpu_device: Optional[str] = Field(
+    intel_gpu_device: str | None = Field(
         default=None,
-        title="SR-IOV device",
-        description="Device identifier used when treating Intel GPUs as SR-IOV to fix GPU stats.",
+        title="Intel GPU device",
+        description="PCI bus address or DRM device path (e.g. /dev/dri/card1) used to pin Intel GPU stats to a specific device when multiple are present.",
     )
 
 

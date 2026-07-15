@@ -177,6 +177,7 @@
       "en": "English (English)",
       "es": "Español (Spanish)",
       "zhCN": "简体中文 (Simplified Chinese)",
+      "zhHant": "繁體中文 (Traditional Chinese)",
       "hi": "हिन्दी (Hindi)",
       "fr": "Français (French)",
       "ar": "العربية (Arabic)",
@@ -207,6 +208,7 @@
       "th": "ไทย (Thai)",
       "ca": "Català (Catalan)",
       "hr": "Hrvatski (Croatian)",
+      "bs": "Bosanski (Bosnian)",
       "sr": "Српски (Serbian)",
       "sl": "Slovenščina (Slovenian)",
       "lt": "Lietuvių (Lithuanian)",
@@ -257,6 +259,7 @@
     "export": "Export",
     "actions": "Actions",
     "uiPlayground": "UI Playground",
+    "features": "Features",
     "faceLibrary": "Face Library",
     "classification": "Classification",
     "chat": "Chat",
@@ -314,5 +317,8 @@
     "pixels": "{{area}}px"
   },
   "no_items": "No items",
-  "validation_errors": "Validation Errors"
+  "validation_errors": "Validation Errors",
+  "credentialField": {
+    "savedPlaceholder": "Saved — leave blank to keep current"
+  }
 }

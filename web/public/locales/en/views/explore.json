@@ -76,7 +76,7 @@
       },
       "offset": {
         "label": "Annotation Offset",
-        "desc": "This data comes from your camera's detect feed but is overlayed on images from the the record feed. It is unlikely that the two streams are perfectly in sync. As a result, the bounding box and the footage will not line up perfectly. You can use this setting to offset the annotations forward or backward in time to better align them with the recorded footage.",
+        "desc": "This data comes from your camera's detect feed but is overlaid on images from the record feed. It is unlikely that the two streams are perfectly in sync. As a result, the bounding box and the footage will not line up perfectly. You can use this setting to offset the annotations forward or backward in time to better align them with the recorded footage.",
         "millisecondsToOffset": "Milliseconds to offset detect annotations by. <em>Default: 0</em>",
         "tips": "Lower the value if the video playback is ahead of the boxes and path points, and increase the value if the video playback is behind them. This value can be negative.",
         "toast": {
@@ -222,7 +222,7 @@
       "label": "Hide object path"
     },
     "debugReplay": {
-      "label": "Debug replay",
+      "label": "Debug Replay",
       "aria": "View this tracked object in the debug replay view"
     },
     "more": {

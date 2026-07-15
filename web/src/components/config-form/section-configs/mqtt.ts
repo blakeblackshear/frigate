@@ -64,6 +64,7 @@ const mqtt: SectionConfigOverrides = {
     liveValidate: true,
     uiSchema: {
       password: {
+        "ui:widget": "password",
         "ui:options": { size: "xs" },
       },
     },

@@ -218,7 +218,7 @@ export default function CameraReviewClassification({
                 <Label
                   className={cn(
                     "flex flex-row items-center text-base",
-                    alertsZonesModified && "text-danger",
+                    alertsZonesModified && "text-unsaved",
                   )}
                 >
                   <Trans ns="views/settings">cameraReview.review.alerts</Trans>
@@ -243,12 +243,7 @@ export default function CameraReviewClassification({
                         handleZoneToggle("alerts.required_zones", zone.name)
                       }
                     />
-                    <Label
-                      className={cn(
-                        "font-normal",
-                        !zone.friendly_name && "smart-capitalize",
-                      )}
-                    >
+                    <Label className="font-normal">
                       {zone.friendly_name || zone.name}
                     </Label>
                   </div>
@@ -286,7 +281,7 @@ export default function CameraReviewClassification({
                 <Label
                   className={cn(
                     "flex flex-row items-center text-base",
-                    detectionsZonesModified && "text-danger",
+                    detectionsZonesModified && "text-unsaved",
                   )}
                 >
                   <Trans ns="views/settings">

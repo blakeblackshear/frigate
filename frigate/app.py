@@ -4,11 +4,11 @@ import multiprocessing as mp
 import os
 import secrets
 import shutil
+from collections.abc import Callable
 from multiprocessing import Queue
 from multiprocessing.managers import DictProxy, SyncManager
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-from typing import Callable, Optional
 
 import psutil
 import uvicorn
@@ -95,7 +95,7 @@ class FrigateApp:
         self, config: FrigateConfig, manager: SyncManager, stop_event: MpEvent
     ) -> None:
         self.metrics_manager = manager
-        self.audio_process: Optional[mp.Process] = None
+        self.audio_process: mp.Process | None = None
         self.stop_event = stop_event
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
@@ -120,8 +120,8 @@ class FrigateApp:
         )
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
-        self.embeddings: Optional[EmbeddingsContext] = None
-        self.profile_manager: Optional[ProfileManager] = None
+        self.embeddings: EmbeddingsContext | None = None
+        self.profile_manager: ProfileManager | None = None
         self.config = config
 
     def ensure_dirs(self) -> None:
@@ -144,7 +144,7 @@ class FrigateApp:
         for d in dirs:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
-                os.makedirs(d)
+                os.makedirs(d, exist_ok=True)
             else:
                 logger.debug(f"Skipping directory: {d}")
 
@@ -189,17 +189,6 @@ class FrigateApp:
             except PermissionError:
                 logger.error("Unable to write to /config to save DB state")
 
-        def cleanup_timeline_db(db: SqliteExtDatabase) -> None:
-            db.execute_sql(
-                "DELETE FROM timeline WHERE source_id NOT IN (SELECT id FROM event);"
-            )
-
-            try:
-                with open(f"{CONFIG_DIR}/.timeline", "w") as f:
-                    f.write(str(datetime.datetime.now().timestamp()))
-            except PermissionError:
-                logger.error("Unable to write to /config to save DB state")
-
         # Migrate DB schema
         migrate_db = SqliteExtDatabase(self.config.database.path)
 
@@ -215,11 +204,6 @@ class FrigateApp:
             )
 
         router.run()
-
-        # this is a temporary check to clean up user DB from beta
-        # will be removed before final release
-        if not os.path.exists(f"{CONFIG_DIR}/.timeline"):
-            cleanup_timeline_db(migrate_db)
 
         # check if vacuum needs to be run
         if os.path.exists(f"{CONFIG_DIR}/.vacuum"):
@@ -359,12 +343,24 @@ class FrigateApp:
         )
         self.dispatcher.profile_manager = self.profile_manager
 
+    def restore_active_profile(self) -> None:
+        """Re-activate the persisted profile after subscribers are connected.
+
+        ZMQ PUB/SUB drops messages with no subscribers, so activation must
+        run after every config_updater subscriber is up.
+        """
+        if self.profile_manager is None:
+            return
+
         persisted = ProfileManager.load_persisted_profile()
         if persisted and any(
             persisted in cam.profiles for cam in self.config.cameras.values()
         ):
             logger.info("Restoring persisted profile '%s'", persisted)
-            self.profile_manager.activate_profile(persisted)
+            # runtime overrides are layered on top via restore_runtime_state()
+            self.profile_manager.activate_profile(
+                persisted, clear_runtime_overrides=False
+            )
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
@@ -444,18 +440,11 @@ class FrigateApp:
         self.camera_maintainer.start()
 
     def start_audio_processor(self) -> None:
-        audio_cameras = [
-            c
-            for c in self.config.cameras.values()
-            if c.enabled and c.audio.enabled_in_config
-        ]
-
-        if audio_cameras:
-            self.audio_process = AudioProcessor(
-                self.config, audio_cameras, self.camera_metrics, self.stop_event
-            )
-            self.audio_process.start()
-            self.processes["audio_detector"] = self.audio_process.pid or 0
+        self.audio_process = AudioProcessor(
+            self.config, self.camera_metrics, self.stop_event
+        )
+        self.audio_process.start()
+        self.processes["audio_detector"] = self.audio_process.pid or 0
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
@@ -634,6 +623,10 @@ class FrigateApp:
         self.start_event_cleanup()
         self.start_record_cleanup()
         self.start_watchdog()
+
+        # restore persisted runtime overrides on top of config
+        self.restore_active_profile()
+        self.dispatcher.restore_runtime_state()
 
         self.init_auth()
 

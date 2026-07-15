@@ -17,12 +17,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Usunięte klasy",
-      "deletedCategory_few": "",
-      "deletedCategory_many": "",
-      "deletedImage_one": "Usunięte obrazy",
-      "deletedImage_few": "",
-      "deletedImage_many": "",
+      "deletedCategory_one": "Usunięto {{count}} klasę",
+      "deletedCategory_few": "Usunięto {{count}} klasy",
+      "deletedCategory_many": "Usunięto {{count}} klas",
+      "deletedImage_one": "Usunięto {{count}} obraz",
+      "deletedImage_few": "Usunięto {{count}} obrazy",
+      "deletedImage_many": "Usunięto {{count}} obrazów",
       "deletedModel_one": "Pomyślenie usunięto {{count}} model",
       "deletedModel_few": "Pomyślenie usunięto {{count}} modele",
       "deletedModel_many": "Pomyślenie usunięto {{count}} modeli",
@@ -30,7 +30,8 @@
       "trainedModel": "Model pomyślnie wytrenowany.",
       "trainingModel": "Pomyślnie uruchomiono trenowanie modelu.",
       "updatedModel": "Pomyślnie zaktualizowane ustawienia modelu",
-      "renamedCategory": "Pomyślnie zmieniono nazwę klasy na {{name}}"
+      "renamedCategory": "Pomyślnie zmieniono nazwę klasy na {{name}}",
+      "reclassifiedImage": "Pomyślne przeklasyfikowanie obrazu"
     },
     "error": {
       "deleteImageFailed": "Nie udało się usunąć: {{errorMessage}}",
@@ -40,7 +41,8 @@
       "trainingFailed": "Trening modelu zakończył się niepowodzeniem. Sprawdź logi Frigate aby uzyskać więcej informacji.",
       "updateModelFailed": "Nie udało się zaktualizować modelu: {{errorMessage}}",
       "trainingFailedToStart": "Nie udało się rozpocząć trenowania modelu: {{errorMessage}}",
-      "renameCategoryFailed": "Nie udało się zmienić nazwy klasy: {{errorMessage}}"
+      "renameCategoryFailed": "Nie udało się zmienić nazwy klasy: {{errorMessage}}",
+      "reclassifyFailed": "Niepowodzenie zmiany klasyfikacji obrazu: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -191,7 +193,14 @@
       "missingStatesWarning": {
         "title": "Przykłady brakujących stanów",
         "description": "Aby uzyskać najlepsze wyniki, zaleca się wybranie przykładów dla wszystkich stanów. Można kontynuować bez wybierania wszystkich stanów, ale model nie zostanie wytrenowany, dopóki wszystkie stany nie będą miały obrazów. Po kontynuowaniu należy użyć widoku Ostatnie klasyfikacje, aby sklasyfikować obrazy dla brakujących stanów, a następnie wytrenować model."
+      },
+      "refreshExamples": "Generuj nowe przykłady",
+      "refreshConfirm": {
+        "title": "Czy generować nowe przykłady?",
+        "description": "Spowoduje to wygenerowanie nowego zestawu obrazów i wyczyszczenie wszystkich zaznaczeń, w tym dotychczasowych klas. Konieczne będzie ponowne wybranie przykładów dla wszystkich klas."
       }
     }
-  }
+  },
+  "reclassifyImageAs": "Klasyfikuj jako:",
+  "reclassifyImage": "Zmiana klasyfikacji obrazu"
 }

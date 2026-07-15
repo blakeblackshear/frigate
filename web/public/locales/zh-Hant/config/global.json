@@ -2,7 +2,8 @@
     "audio": {
         "label": "音訊事件",
         "enabled": {
-            "label": "啟用音訊偵測"
+            "label": "啟用音訊偵測",
+            "description": "為所有攝影機啟用或停用音訊事件偵測；可按攝影機覆蓋。"
         },
         "max_not_heard": {
             "label": "結束逾時",
@@ -15,6 +16,1624 @@
         "listen": {
             "label": "監聽的音訊類型",
             "description": "要偵測的音訊事件類型清單（例如：狗吠、火警、尖叫、說話、大叫）。"
+        },
+        "description": "所有攝影機的基於音訊的事件偵測設定；可按攝影機覆蓋。",
+        "filters": {
+            "label": "音訊過濾器",
+            "description": "按音訊型別的過濾器設定，如用於減少誤報的置信度閾值。",
+            "threshold": {
+                "label": "最低音訊置信度",
+                "description": "音訊事件被計入的最低置信度閾值。"
+            }
+        },
+        "enabled_in_config": {
+            "label": "原始音訊狀態",
+            "description": "指示原始靜態設定檔中是否開啟了音訊偵測。"
+        },
+        "num_threads": {
+            "label": "偵測執行緒",
+            "description": "用於音訊偵測處理的執行緒數量。"
+        }
+    },
+    "version": {
+        "label": "當前配置版本",
+        "description": "用於標識當前生效配置的版本號（數字或字串均可），幫助辨識配置遷移或格式是否發生變更。"
+    },
+    "safe_mode": {
+        "label": "安全模式",
+        "description": "開啟後，Frigate 將以安全模式啟動，將會關閉部分功能，以便排查問題。"
+    },
+    "environment_vars": {
+        "label": "環境變數",
+        "description": "用於在 Home Assistant OS 中為 Frigate 程序設定的環境變數。非 HAOS 使用者不能使用該配置項，而必須使用 Docker 的環境變數配置。"
+    },
+    "logger": {
+        "label": "日誌",
+        "description": "控制預設日誌詳細程度，以及各元件的日誌級別覆蓋。",
+        "default": {
+            "label": "日誌等級",
+            "description": "預設全域性日誌詳細程度（除錯、資訊、警告、錯誤）。"
+        },
+        "logs": {
+            "label": "單程序日誌級別",
+            "description": "按元件覆蓋日誌級別配置，用於提高或降低特定模組的日誌詳細程度。"
+        }
+    },
+    "auth": {
+        "label": "身份驗證",
+        "description": "身份驗證和工作階段相關設定，包括 Cookie 和速率限制選項。",
+        "enabled": {
+            "label": "開啟身份驗證",
+            "description": "為 Frigate 頁面開啟原生身份驗證。"
+        },
+        "reset_admin_password": {
+            "label": "重設管理員密碼",
+            "description": "開啟後，啟動時將重設管理員使用者密碼，並在日誌中列印新密碼。"
+        },
+        "cookie_name": {
+            "label": "JWT Cookie 名稱",
+            "description": "用於儲存原生身份驗證 JWT 令牌的 Cookie 名稱。"
+        },
+        "cookie_secure": {
+            "label": "安全 Cookie 標誌",
+            "description": "在身份驗證 Cookie 上設定安全標誌；使用 TLS 時應啟用此選項。"
+        },
+        "session_length": {
+            "label": "工作階段時長",
+            "description": "基於 JWT 的工作階段持續時間（秒）。"
+        },
+        "refresh_time": {
+            "label": "工作階段重新整理視窗",
+            "description": "當工作階段距離過期時間在此秒數範圍內時，將工作階段重新整理回完整時長。"
+        },
+        "failed_login_rate_limit": {
+            "label": "登入失敗限制",
+            "description": "用於限制登入失敗嘗試次數的規則，以減少暴力破解攻擊。"
+        },
+        "trusted_proxies": {
+            "label": "受信任的代理",
+            "description": "用於確定客戶端 IP 以進行速率限制的受信任代理 IP 清單。"
+        },
+        "hash_iterations": {
+            "label": "雜湊迭代次數",
+            "description": "對使用者密碼進行雜湊處理時使用的 PBKDF2-SHA256 迭代次數。"
+        },
+        "roles": {
+            "label": "權限組對映",
+            "description": "將權限組對映到攝影機清單。空清單表示該權限組可以存取所有攝影機。"
+        },
+        "admin_first_time_login": {
+            "label": "管理員首次登入標誌",
+            "description": "啟用後，UI 可能會在登入頁面顯示幫助連結，告知使用者如何在管理員密碼重設後登入。 "
+        }
+    },
+    "database": {
+        "label": "資料庫",
+        "description": "Frigate 用於儲存追蹤目標和錄影元資料的 SQLite 資料庫設定。",
+        "path": {
+            "label": "資料庫路徑",
+            "description": "Frigate SQLite 資料庫檔案的儲存路徑。"
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "整合的 go2rtc 轉發服務設定，用於即時監控流轉發和轉碼。"
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "連線到 MQTT 代理併發布遙測資料、快照和事件詳情的設定。",
+        "enabled": {
+            "label": "開啟 MQTT",
+            "description": "啟用或停用 MQTT 整合，用於狀態、事件和快照。"
+        },
+        "host": {
+            "label": "MQTT 主機",
+            "description": "MQTT 代理的主機名或 IP 地址。"
+        },
+        "port": {
+            "label": "MQTT 埠",
+            "description": "MQTT 代理的埠（普通 MQTT 通常為 1883）。"
+        },
+        "topic_prefix": {
+            "label": "主題字首",
+            "description": "所有 Frigate 主題的 MQTT 主題字首；如果執行多個例項，必須唯一。"
+        },
+        "client_id": {
+            "label": "客戶端 ID",
+            "description": "連線到 MQTT 代理時使用的客戶端辨識符號；每個例項應該唯一。"
+        },
+        "stats_interval": {
+            "label": "統計資訊間隔",
+            "description": "向 MQTT 釋出系統和攝影機統計資訊的時間間隔（秒）。"
+        },
+        "user": {
+            "label": "MQTT 使用者名稱",
+            "description": "可選的 MQTT 使用者名稱；可以透過環境變數或金鑰提供。"
+        },
+        "password": {
+            "label": "MQTT 密碼",
+            "description": "可選的 MQTT 密碼；可以透過環境變數或金鑰提供。"
+        },
+        "tls_ca_certs": {
+            "label": "TLS CA 證書",
+            "description": "用於 TLS 連線到代理的 CA 證書路徑（用於自簽名證書）。"
+        },
+        "tls_client_cert": {
+            "label": "客戶端證書",
+            "description": "TLS 雙向認證的客戶端證書路徑；使用客戶端證書時不要設定使用者名稱/密碼。"
+        },
+        "tls_client_key": {
+            "label": "客戶端金鑰",
+            "description": "客戶端證書的私鑰路徑。"
+        },
+        "tls_insecure": {
+            "label": "TLS 不安全連線",
+            "description": "透過跳過主機名驗證允許不安全的 TLS 連線（不推薦）。"
+        },
+        "qos": {
+            "label": "MQTT QoS",
+            "description": "MQTT 釋出/訂閱的服務品質級別（0、1 或 2）。"
+        }
+    },
+    "notifications": {
+        "label": "通知",
+        "description": "為所有攝影機啟用和控制通知的設定；可按攝影機覆蓋。",
+        "enabled": {
+            "label": "開啟通知",
+            "description": "為所有攝影機啟用或停用通知；可按攝影機覆蓋。"
+        },
+        "email": {
+            "label": "通知郵箱",
+            "description": "用於推送通知或某些通知提供商要求的郵箱地址。"
+        },
+        "cooldown": {
+            "label": "冷卻時間",
+            "description": "通知之間的冷卻時間（秒），以避免向收件人傳送垃圾資訊。"
+        },
+        "enabled_in_config": {
+            "label": "原始通知狀態",
+            "description": "指示原始靜態配置中是否啟用了通知。"
+        }
+    },
+    "networking": {
+        "label": "網路",
+        "description": "網路相關設定，如 Frigate 端點的 IPv6 啟用。",
+        "ipv6": {
+            "label": "IPv6 配置",
+            "description": "Frigate 網路服務的 IPv6 特定設定。",
+            "enabled": {
+                "label": "開啟 IPv6",
+                "description": "在適用的情況下為 Frigate 服務（API 和 UI）啟用 IPv6 支援。"
+            }
+        },
+        "listen": {
+            "label": "監聽埠配置",
+            "description": "內部和外部監聽埠的配置。此選項適用於高階使用者。對於大多數用例，建議在 Docker compose 檔案的 ports 部分進行更改。",
+            "internal": {
+                "label": "內部埠",
+                "description": "Frigate 的內部監聽埠（預設 5000）。"
+            },
+            "external": {
+                "label": "外部埠",
+                "description": "Frigate 的外部監聽埠（預設 8971）。"
+            }
+        }
+    },
+    "proxy": {
+        "label": "代理",
+        "description": "用於將 Frigate 整合到傳遞已認證使用者頭的反向代理後面的設定。",
+        "header_map": {
+            "label": "請求頭對映",
+            "description": "將傳入的代理請求頭對映到 Frigate 使用者和權限組欄位，用於基於代理的身份驗證。",
+            "user": {
+                "label": "使用者請求頭",
+                "description": "包含上游代理提供的已認證使用者名稱的請求頭。"
+            },
+            "role": {
+                "label": "權限組請求頭",
+                "description": "包含來自上游代理的已認證使用者權限組或使用者組的請求頭。"
+            },
+            "role_map": {
+                "label": "權限組對映",
+                "description": "將上游組值對映到 Frigate 權限組（例如將管理員組對映到管理員權限組）。"
+            }
+        },
+        "logout_url": {
+            "label": "登出 URL",
+            "description": "透過代理登出時重定向使用者的 URL。"
+        },
+        "auth_secret": {
+            "label": "代理金鑰",
+            "description": "與 X-Proxy-Secret 請求頭進行比對的可選金鑰，用於驗證受信任的代理。"
+        },
+        "default_role": {
+            "label": "預設權限組",
+            "description": "當沒有權限組對映適用時分配給代理認證使用者的預設權限組（admin 或 viewer）。"
+        },
+        "separator": {
+            "label": "分隔符",
+            "description": "用於分割代理請求頭中多個值的字元。"
+        }
+    },
+    "telemetry": {
+        "label": "遙測",
+        "description": "系統遙測和統計選項，包括 GPU 和網路頻寬監控。",
+        "network_interfaces": {
+            "label": "網路介面",
+            "description": "要監控頻寬統計資訊的網路介面名稱字首清單。"
+        },
+        "stats": {
+            "label": "系統統計",
+            "description": "用於啟用/停用各種系統和 GPU 統計資訊收集的選項。",
+            "amd_gpu_stats": {
+                "label": "AMD GPU 統計",
+                "description": "如果存在 AMD GPU，則啟用 AMD GPU 統計資訊收集。"
+            },
+            "intel_gpu_stats": {
+                "label": "Intel GPU 統計",
+                "description": "如果存在 Intel GPU，則啟用 Intel GPU 統計資訊收集。"
+            },
+            "network_bandwidth": {
+                "label": "網路頻寬",
+                "description": "為攝影機 ffmpeg 程序和偵測器啟用按程序網路頻寬監控（需要權限）。"
+            },
+            "intel_gpu_device": {
+                "label": "Intel GPU 裝置",
+                "description": "當系統存在多個 Intel 顯示卡時，用於將顯示卡執行資料繫結到指定裝置的 PCI 匯流排地址或 DRM 裝置路徑（示例：/dev/dri/card1）。"
+            }
+        },
+        "version_check": {
+            "label": "版本檢查",
+            "description": "啟用出站檢查以偵測是否有更新版本的 Frigate 可用。"
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "Frigate Web 端點（埠 8971）的 TLS 設定。",
+        "enabled": {
+            "label": "開啟 TLS",
+            "description": "為 Frigate 的網頁頁面和 API 的埠開啟 TLS 加密。"
+        }
+    },
+    "ui": {
+        "label": "使用者介面",
+        "description": "使用者介面偏好設定，如時區、時間/日期格式和單位。",
+        "timezone": {
+            "label": "時區",
+            "description": "UI 中顯示的可選時區（如果未設定，則預設為瀏覽器本地時間）。"
+        },
+        "time_format": {
+            "label": "時間格式",
+            "description": "UI 中使用的時間格式（browser、12hour 或 24hour）。"
+        },
+        "date_style": {
+            "label": "日期樣式",
+            "description": "UI 中使用的日期樣式（full、long、medium、short）。"
+        },
+        "time_style": {
+            "label": "時間樣式",
+            "description": "UI 中使用的時間樣式（full、long、medium、short）。"
+        },
+        "unit_system": {
+            "label": "單位系統",
+            "description": "UI 和 MQTT 中使用的顯示單位系統（公制或英制）。"
+        }
+    },
+    "detectors": {
+        "label": "偵測器硬體",
+        "description": "目標偵測器（CPU、GPU、ONNX 後端）的配置以及任何偵測器特定的模型設定。",
+        "type": {
+            "label": "型別"
+        },
+        "model": {
+            "label": "偵測器特定的模型配置",
+            "description": "偵測器特定的模型配置選項（路徑、輸入尺寸等）。",
+            "path": {
+                "label": "自訂目標偵測模型路徑",
+                "description": "自訂偵測模型檔案的路徑（或使用 plus://<model_id> 指定 Frigate+ 模型）。"
+            },
+            "labelmap_path": {
+                "label": "自訂目標偵測器的標籤對映（labelmap）",
+                "description": "偵測器標籤對映檔案（labelmap）路徑，用於將數字類別對映為文字標籤。"
+            },
+            "width": {
+                "label": "目標偵測模型輸入寬度",
+                "description": "模型輸入張量（input tensor）的寬度（以像素為單位）。"
+            },
+            "height": {
+                "label": "目標偵測模型輸入高度",
+                "description": "模型輸入張量（input tensor）的高度（以像素為單位）。"
+            },
+            "labelmap": {
+                "label": "標籤對映（labelmap）自訂",
+                "description": "合併到標準標籤對映表中的覆蓋 / 重對映規則。"
+            },
+            "attributes_map": {
+                "label": "目標標籤到其屬性標籤的對映",
+                "description": "用於繫結元資料的目標標籤 → 屬性標籤對映關係（例如：'car'→ ['license_plate'] 為將車牌屬性繫結到車輛上）。"
+            },
+            "input_tensor": {
+                "label": "模型輸入張量形狀",
+                "description": "模型期望的張量格式（Tensor format）：'nhwc' 或 'nchw'。"
+            },
+            "input_pixel_format": {
+                "label": "模型輸入像素顏色格式",
+                "description": "模型期望的像素顏色空間：'rgb'、'bgr' 或 'yuv'。"
+            },
+            "input_dtype": {
+                "label": "模型輸入資料型別",
+                "description": "模型輸入張量的資料型別（例如 'float32'）。"
+            },
+            "model_type": {
+                "label": "目標偵測模型型別",
+                "description": "某些偵測器用於最佳化的偵測器模型架構型別（ssd、yolox、yolonas）。"
+            }
+        },
+        "model_path": {
+            "label": "偵測器專用模型路徑",
+            "description": "所選偵測器需要時，需填寫其模型檔案的路徑。"
+        },
+        "axengine": {
+            "label": "愛芯元智 NPU",
+            "description": "AXERA AX650N/AX8850N NPU 偵測器，透過 AXEngine 執行庫載入並執行編譯後的 .axmodel 模型檔案。"
+        },
+        "cpu": {
+            "label": "CPU",
+            "description": "在主機 CPU 上執行 TensorFlow Lite 模型的 CPU TFLite 偵測器，無硬體加速。不推薦使用。",
+            "num_threads": {
+                "label": "偵測執行緒數",
+                "description": "用於基於 CPU 的推理的執行緒數。"
+            }
+        },
+        "deepstack": {
+            "label": "DeepStack",
+            "description": "將影像傳送到遠端 DeepStack HTTP API 進行推理的 DeepStack/CodeProject.AI 偵測器。不推薦使用。",
+            "api_url": {
+                "label": "DeepStack API 網址",
+                "description": "DeepStack API 的 URL。"
+            },
+            "api_timeout": {
+                "label": "DeepStack API 超時時間（秒）",
+                "description": "DeepStack API 請求允許的最長時間。"
+            },
+            "api_key": {
+                "label": "DeepStack API 金鑰（如需要）",
+                "description": "用於認證 DeepStack 服務的可選 API 金鑰。"
+            }
+        },
+        "degirum": {
+            "label": "DeGirum",
+            "description": "透過 DeGirum 雲或本地推理服務執行模型的 DeGirum 偵測器。",
+            "location": {
+                "label": "推理位置",
+                "description": "DeGirum 推理引擎的位置（例如 '@cloud'、'127.0.0.1'）。"
+            },
+            "zoo": {
+                "label": "模型庫",
+                "description": "DeGirum 模型庫的路徑或 URL。"
+            },
+            "token": {
+                "label": "DeGirum 雲令牌",
+                "description": "用於 DeGirum 雲存取的令牌。"
+            }
+        },
+        "edgetpu": {
+            "label": "EdgeTPU",
+            "description": "使用 EdgeTPU 委託執行為 Coral EdgeTPU 編譯的 TensorFlow Lite 模型的 EdgeTPU 偵測器。",
+            "device": {
+                "label": "裝置型別",
+                "description": "用於 EdgeTPU 推理的裝置（例如 'usb'、'pci'）。"
+            }
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L",
+            "description": "使用 HEF 模型和 HailoRT SDK 在 Hailo 硬體上進行推理的 Hailo-8/Hailo-8L 偵測器。",
+            "device": {
+                "label": "裝置型別",
+                "description": "用於 Hailo 推理的裝置（例如 'PCIe'、'M.2'）。"
+            }
+        },
+        "memryx": {
+            "label": "MemryX",
+            "description": "在 MemryX 加速器上執行編譯的 DFP 模型的 MemryX MX3 偵測器。",
+            "device": {
+                "label": "裝置路徑",
+                "description": "用於 MemryX 推理的裝置（例如 'PCIe'）。"
+            }
+        },
+        "onnx": {
+            "label": "ONNX",
+            "description": "執行 ONNX 模型的 ONNX 偵測器；當可用時將使用可用的加速後端（CUDA/ROCm/OpenVINO）。",
+            "device": {
+                "label": "裝置型別",
+                "description": "用於 ONNX 推理的裝置（例如 'AUTO'、'CPU'、'GPU'）。"
+            }
+        },
+        "openvino": {
+            "label": "OpenVINO",
+            "description": "適用於 AMD 和 Intel CPU、Intel GPU 和 Intel VPU 硬體的 OpenVINO 偵測器。",
+            "device": {
+                "label": "裝置型別",
+                "description": "用於 OpenVINO 推理的裝置（例如 'CPU'、'GPU'、'NPU'）。"
+            }
+        },
+        "rknn": {
+            "label": "RKNN",
+            "description": "用於 Rockchip NPU 的 RKNN 偵測器；在 Rockchip 硬體上執行編譯的 RKNN 模型。",
+            "num_cores": {
+                "label": "使用的 NPU 核心數。",
+                "description": "要使用的 NPU 核心數（0 表示自動）。"
+            }
+        },
+        "synaptics": {
+            "label": "Synaptics",
+            "description": "使用 Synap SDK 在 Synaptics 硬體上執行 .synap 格式模型的 Synaptics NPU 偵測器。"
+        },
+        "teflon_tfl": {
+            "label": "Teflon",
+            "description": "使用 Mesa Teflon 委託庫在支援的 GPU 上加速推理的 TFLite Teflon 委託偵測器。"
+        },
+        "tensorrt": {
+            "label": "TensorRT",
+            "description": "使用序列化的 TensorRT 引擎進行加速推理的 Nvidia Jetson 裝置 TensorRT 偵測器。",
+            "device": {
+                "label": "GPU 裝置索引",
+                "description": "要使用的 GPU 裝置索引。"
+            }
+        },
+        "zmq": {
+            "label": "ZMQ IPC",
+            "description": "透過 ZeroMQ IPC 端點將推理解除安裝到外部程序的 ZMQ IPC 偵測器。",
+            "endpoint": {
+                "label": "ZMQ IPC 端點",
+                "description": "要連線的 ZMQ 端點。"
+            },
+            "request_timeout_ms": {
+                "label": "ZMQ 請求超時（毫秒）",
+                "description": "ZMQ 請求的超時時間（毫秒）。"
+            },
+            "linger_ms": {
+                "label": "ZMQ 套接字逗留時間（毫秒）",
+                "description": "套接字逗留時間（毫秒）。"
+            }
+        }
+    },
+    "model": {
+        "label": "偵測模型",
+        "description": "用於配置自訂目標偵測模型及其輸入形狀的設定。",
+        "path": {
+            "label": "自訂目標偵測模型路徑",
+            "description": "自訂偵測模型檔案的路徑（或 Frigate+ 模型的 plus://<model_id>）。"
+        },
+        "labelmap_path": {
+            "label": "自訂目標偵測器的標籤對映",
+            "description": "將數字類別對映到偵測器字串標籤的標籤對映檔案路徑。"
+        },
+        "width": {
+            "label": "目標偵測模型輸入寬度",
+            "description": "模型輸入張量的寬度（像素）。"
+        },
+        "height": {
+            "label": "目標偵測模型輸入高度",
+            "description": "模型輸入張量的高度（像素）。"
+        },
+        "labelmap": {
+            "label": "標籤對映自訂",
+            "description": "要合併到標準標籤對映中的覆蓋或重對映條目。"
+        },
+        "attributes_map": {
+            "label": "目標標籤到屬性標籤的對映",
+            "description": "從目標標籤到屬性標籤的對映，用於附加元資料（例如 'car' -> ['license_plate']）。"
+        },
+        "input_tensor": {
+            "label": "模型輸入張量形狀",
+            "description": "模型期望的張量格式：'nhwc' 或 'nchw'。"
+        },
+        "input_pixel_format": {
+            "label": "模型輸入像素顏色格式",
+            "description": "模型期望的像素色彩空間：'rgb'、'bgr' 或 'yuv'。"
+        },
+        "input_dtype": {
+            "label": "模型輸入資料型別",
+            "description": "模型輸入張量的資料型別（例如 'float32'）。"
+        },
+        "model_type": {
+            "label": "目標偵測模型型別",
+            "description": "某些偵測器用於最佳化的偵測器模型架構型別（ssd、yolox、yolonas）。"
+        }
+    },
+    "genai": {
+        "label": "生成式 AI 配置",
+        "description": "用於生成目標描述和審閱摘要的整合生成式 AI 提供商設定。",
+        "api_key": {
+            "label": "API 金鑰",
+            "description": "某些提供商要求的 API 金鑰（也可以透過環境變數設定）。"
+        },
+        "base_url": {
+            "label": "基礎 URL",
+            "description": "自託管或相容提供商的基礎 URL（例如 Ollama 例項）。"
+        },
+        "model": {
+            "label": "模型",
+            "description": "用於生成描述或摘要的提供商模型。"
+        },
+        "provider": {
+            "label": "提供商",
+            "description": "要使用的生成式 AI 提供商（例如：ollama、gemini、openai 等。國產大模型廠商可使用 openai 介面）。"
+        },
+        "roles": {
+            "label": "功能",
+            "description": "生成式 AI 功能（對話、描述、嵌入）；每個功能單獨一個提供商。"
+        },
+        "provider_options": {
+            "label": "提供商選項",
+            "description": "要傳遞給生成式 AI 客戶端的、與服務提供商相關的額外配置項。"
+        },
+        "runtime_options": {
+            "label": "執行時選項",
+            "description": "每次推理呼叫時傳遞給提供商的執行時選項。"
+        }
+    },
+    "birdseye": {
+        "label": "鳥瞰圖",
+        "description": "將多路攝影機畫面合併為統一佈局的鳥瞰合成檢視設定。",
+        "enabled": {
+            "label": "開啟鳥瞰圖",
+            "description": "開啟或關閉鳥瞰圖功能。"
+        },
+        "mode": {
+            "label": "追蹤模式",
+            "description": "在鳥瞰檢視中包含攝影機的模式：'objects'（目標）、'motion'（動作）或 'continuous'（持續）。"
+        },
+        "restream": {
+            "label": "轉發 RTSP",
+            "description": "將鳥瞰圖輸出作為 RTSP 流重新轉發；啟用此功能將使鳥瞰圖持續執行。"
+        },
+        "width": {
+            "label": "寬度",
+            "description": "合成的鳥瞰幀的輸出寬度（像素）。"
+        },
+        "height": {
+            "label": "高度",
+            "description": "合成的鳥瞰幀的輸出高度（像素）。"
+        },
+        "quality": {
+            "label": "編碼品質",
+            "description": "鳥瞰圖 mpeg1 流的編碼品質（1 最高品質，31 最低）。"
+        },
+        "inactivity_threshold": {
+            "label": "非活動閾值",
+            "description": "攝影機停止在鳥瞰圖中顯示的非活動秒數。"
+        },
+        "layout": {
+            "label": "佈局",
+            "description": "鳥瞰圖合成的佈局選項。",
+            "scaling_factor": {
+                "label": "縮放因子",
+                "description": "佈局計算器使用的縮放因子（範圍 1.0 到 5.0）。"
+            },
+            "max_cameras": {
+                "label": "最大攝影機數",
+                "description": "鳥瞰圖中同時顯示的最大攝影機數量；顯示最近的攝影機。"
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "空閒心跳 FPS",
+            "description": "空閒時重新發送最後一個合成鳥瞰幀的每秒幀數；設為 0 則停用。"
+        },
+        "order": {
+            "label": "排序位置",
+            "description": "用於控制攝影機在鳥瞰檢視佈局中排序位置的數值。"
+        }
+    },
+    "detect": {
+        "label": "目標偵測",
+        "description": "用於執行目標偵測、初始化追蹤器的偵測模組設定。",
+        "enabled": {
+            "label": "開啟目標偵測",
+            "description": "為所有攝影機啟用或停用目標偵測，可按攝影機覆蓋。"
+        },
+        "height": {
+            "label": "偵測畫面高度",
+            "description": "用於配置偵測流的畫面高度（像素）；留空則使用原始影片流解析度。"
+        },
+        "width": {
+            "label": "偵測畫面寬度",
+            "description": "用於配置偵測流的畫面寬度（像素）；留空則使用原始影片流解析度。"
+        },
+        "fps": {
+            "label": "偵測幀率",
+            "description": "偵測時希望使用的幀率；數值越低，CPU 佔用越小（推薦值為 5，僅在追蹤極高速運動的目標時才設定更高數值，最高不建議超過 10）。"
+        },
+        "min_initialized": {
+            "label": "最小初始化幀數",
+            "description": "建立追蹤目標前，需要連續偵測到目標的次數。數值越大，錯誤觸發的追蹤越少。預設值為幀率除以 2。"
+        },
+        "max_disappeared": {
+            "label": "最大消失幀數",
+            "description": "追蹤目標在連續多少幀未被偵測到時，將被判定為已消失。"
+        },
+        "stationary": {
+            "label": "靜止目標配置",
+            "description": "用於偵測和管理長時間靜止目標的相關設定。",
+            "interval": {
+                "label": "靜止間隔",
+                "description": "設定每隔多少幀執行一次偵測，用於確認目標是否處於靜止狀態。"
+            },
+            "threshold": {
+                "label": "靜止閾值",
+                "description": "目標需要連續多少幀位置不變，才會被標記為靜止狀態。"
+            },
+            "max_frames": {
+                "label": "最大幀數",
+                "description": "限制靜止目標最大追蹤時長（以幀數為單位），超過將會停止追蹤。",
+                "default": {
+                    "label": "預設最大幀數",
+                    "description": "停止追蹤前，用於追蹤靜止目標的預設最大幀數。"
+                },
+                "objects": {
+                    "label": "目標最大幀數",
+                    "description": "可對不同型別目標分別設定靜止追蹤的最大幀數（覆蓋全域性設定）。"
+                }
+            },
+            "classifier": {
+                "label": "開啟視覺分類器",
+                "description": "使用視覺分類器，即使偵測框有輕微抖動，也能準確判斷物體是否為靜止。"
+            }
+        },
+        "annotation_offset": {
+            "label": "標記偏移量",
+            "description": "偵測標記的時間偏移量（毫秒），用於讓時間軸上的偵測框與錄影畫面更精準對齊；可設定為正數或負數。"
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "FFmpeg 編解碼相關設定，包含可執行檔案路徑、命令列引數、硬體加速選項，以及按不同功能劃分的輸出引數。",
+        "path": {
+            "label": "FFmpeg 路徑",
+            "description": "要使用的 FFmpeg 可執行檔案路徑，或版本別名（如 \"5.0\" 或 \"7.0\"）。"
+        },
+        "global_args": {
+            "label": "FFmpeg 全域性引數",
+            "description": "傳遞給 FFmpeg 程序的全域性引數。"
+        },
+        "hwaccel_args": {
+            "label": "硬體加速引數",
+            "description": "用於 FFmpeg 的硬體加速引數。建議使用對應硬體廠商的預設配置。"
+        },
+        "input_args": {
+            "label": "輸入引數",
+            "description": "應用於 FFmpeg 輸入影片流的輸入引數。"
+        },
+        "output_args": {
+            "label": "輸出引數",
+            "description": "用於不同 FFmpeg 功能（如偵測、錄製）的預設輸出引數。",
+            "detect": {
+                "label": "偵測輸出引數",
+                "description": "偵測功能影片流的預設輸出引數。"
+            },
+            "record": {
+                "label": "錄製輸出引數",
+                "description": "錄製功能影片流的預設輸出引數。"
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg 重試時間",
+            "description": "攝影機影片流異常斷開後，重新連線前的等待時間。預設為 10 秒。"
+        },
+        "apple_compatibility": {
+            "label": "Apple 相容性",
+            "description": "錄製 H.265 影片時啟用 HEVC 標記，以提升對 Apple 裝置播放的相容性。"
+        },
+        "gpu": {
+            "label": "GPU 索引",
+            "description": "在啟用硬體加速時，預設使用的 GPU 索引。"
+        },
+        "inputs": {
+            "label": "攝影機輸入影片流",
+            "description": "該攝影機的所有輸入流配置清單（包含路徑和功能）。",
+            "path": {
+                "label": "輸入路徑",
+                "description": "攝影機輸入影片流的地址或路徑。"
+            },
+            "roles": {
+                "label": "輸入流功能",
+                "description": "定義該影片流的功能。"
+            },
+            "global_args": {
+                "label": "FFmpeg 全域性引數",
+                "description": "該輸入影片流使用的 FFmpeg 全域性通用引數。"
+            },
+            "hwaccel_args": {
+                "label": "硬體加速引數",
+                "description": "該輸入影片流的硬體加速引數。"
+            },
+            "input_args": {
+                "label": "輸入引數",
+                "description": "該影片流特定的輸入引數。"
+            }
+        }
+    },
+    "live": {
+        "label": "即時監控觀看",
+        "description": "用於控制 jsmpeg 即時串流解析度與畫質的設定。此設定不影響使用 go2rtc 進行即時預覽的重新串流攝影機。",
+        "streams": {
+            "label": "即時監控流名稱",
+            "description": "配置的流名稱到用於即時監控播放的 restream/go2rtc 名稱的對映。"
+        },
+        "height": {
+            "label": "即時監控高度",
+            "description": "在網頁頁面中渲染 jsmpeg 即時監控流的高度（像素）；必須小於等於偵測流高度。"
+        },
+        "quality": {
+            "label": "即時監控品質",
+            "description": "jsmpeg 流的編碼品質（1 最高，31 最低）。"
+        }
+    },
+    "motion": {
+        "label": "畫面變動偵測",
+        "description": "應用於攝影機的預設動作偵測設定，除非按攝影機覆蓋。",
+        "enabled": {
+            "label": "開啟畫面變動偵測",
+            "description": "為所有攝影機啟用或停用動作偵測；可按攝影機覆蓋。"
+        },
+        "threshold": {
+            "label": "畫面變動閾值",
+            "description": "畫面變動偵測器使用的像素差異閾值；數值越高靈敏度越低（範圍 1-255）。"
+        },
+        "lightning_threshold": {
+            "label": "閃電閾值",
+            "description": "用於偵測和忽略短暫閃電閃爍的閾值（數值越低越敏感，範圍 0.3 到 1.0）。這不會完全阻止畫面變動偵測；只是當超過閾值時偵測器會停止分析額外的幀。在此類事件期間仍會建立基於畫面變動的錄影。"
+        },
+        "skip_motion_threshold": {
+            "label": "跳過畫面變動閾值",
+            "description": "如果單幀中畫面變化超過此比例，偵測器將判定為無畫面變動並立即重新校準。這可以節省 CPU 並減少閃電、風暴等情況下的誤報，但也可能會錯過真正的事件，如 PTZ 攝影機自動追蹤目標。你需要權衡取捨：是否犧牲少量錄製片段，換取更少無效影片與更低的誤檢。保持為空即可關閉該功能。"
+        },
+        "improve_contrast": {
+            "label": "改善對比度",
+            "description": "在畫面變動分析之前對幀應用對比度改善以幫助偵測。"
+        },
+        "contour_area": {
+            "label": "輪廓區域",
+            "description": "畫面變動輪廓被計入所需的最小輪廓區域（像素）。"
+        },
+        "delta_alpha": {
+            "label": "Delta alpha",
+            "description": "用於畫面變動計算的幀差異中使用的 alpha 混合因子。"
+        },
+        "frame_alpha": {
+            "label": "畫面 alpha 通道",
+            "description": "畫面變動預處理時混合畫面所使用的 alpha 值。"
+        },
+        "frame_height": {
+            "label": "畫面高度",
+            "description": "計算畫面變動時縮放畫面的高度（像素）。"
+        },
+        "mask": {
+            "label": "遮罩座標",
+            "description": "定義用於包含/排除區域的畫面變動遮罩多邊形的有序 x,y 座標。"
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT 關閉延遲",
+            "description": "在釋出 MQTT 'off' 狀態之前，最後一次畫面變動後等待的秒數。"
+        },
+        "enabled_in_config": {
+            "label": "原始畫面變動狀態",
+            "description": "指示原始靜態配置中是否啟用了畫面變動偵測。"
+        },
+        "raw_mask": {
+            "label": "原始遮罩"
+        }
+    },
+    "objects": {
+        "label": "目標",
+        "description": "目標追蹤預設設定，包括要追蹤的標籤和按目標的過濾器。",
+        "track": {
+            "label": "要追蹤的目標",
+            "description": "所有攝影機要追蹤的目標標籤清單；可按攝影機覆蓋。"
+        },
+        "filters": {
+            "label": "目標過濾器",
+            "description": "應用於偵測到的目標以減少誤報的過濾器（區域、比例、置信度）。",
+            "min_area": {
+                "label": "最小目標區域",
+                "description": "此目標型別所需的最小邊界框區域（像素或百分比）。可以是像素（整數）或百分比（0.000001 到 0.99 之間的浮點數）。"
+            },
+            "max_area": {
+                "label": "最大目標區域",
+                "description": "此目標型別允許的最大邊界框區域（像素或百分比）。可以是像素（整數）或百分比（0.000001 到 0.99 之間的浮點數）。"
+            },
+            "min_ratio": {
+                "label": "最小縱橫比",
+                "description": "邊界框所需的最小寬高比。"
+            },
+            "max_ratio": {
+                "label": "最大縱橫比",
+                "description": "邊界框允許的最大寬高比。"
+            },
+            "threshold": {
+                "label": "置信度閾值",
+                "description": "目標被視為真正陽性所需的平均偵測置信度閾值。"
+            },
+            "min_score": {
+                "label": "最小置信度",
+                "description": "目標被計入所需的最小單幀偵測置信度。"
+            },
+            "mask": {
+                "label": "過濾器遮罩",
+                "description": "定義此過濾器在幀內應用位置的多邊形座標。"
+            },
+            "raw_mask": {
+                "label": "原始遮罩"
+            }
+        },
+        "mask": {
+            "label": "目標遮罩",
+            "description": "用於防止在指定區域進行目標偵測的遮罩多邊形。"
+        },
+        "raw_mask": {
+            "label": "原始遮罩"
+        },
+        "genai": {
+            "label": "生成式 AI 目標配置",
+            "description": "用於傳送畫面給生成式 AI 進行生成和描述追蹤目標的選項。",
+            "enabled": {
+                "label": "開啟生成式 AI",
+                "description": "預設開啟生成式 AI 生成追蹤目標的描述。"
+            },
+            "use_snapshot": {
+                "label": "使用快照",
+                "description": "使用目標快照而不是縮圖給生成式 AI 進行描述生成。"
+            },
+            "prompt": {
+                "label": "字幕提示",
+                "description": "使用生成式 AI 生成描述時使用的預設提示模板。"
+            },
+            "object_prompts": {
+                "label": "目標提示",
+                "description": "按目標設定提示詞，讓生成式 AI 對不同標籤的輸出進行定製。"
+            },
+            "objects": {
+                "label": "生成式 AI 目標",
+                "description": "預設傳送給生成式 AI 的目標標籤清單。"
+            },
+            "required_zones": {
+                "label": "必需區域",
+                "description": "目標必須進入這些區域，才會觸發生成式 AI 描述生成。"
+            },
+            "debug_save_thumbnails": {
+                "label": "儲存縮圖",
+                "description": "儲存傳送給生成式 AI 的縮圖用於除錯和審閱。"
+            },
+            "send_triggers": {
+                "label": "生成式 AI 觸發器",
+                "description": "定義畫面幀應在何時傳送給生成式 AI（如偵測結束時、更新後等）。",
+                "tracked_object_end": {
+                    "label": "結束時傳送",
+                    "description": "目標追蹤結束時向生成式 AI 傳送請求。"
+                },
+                "after_significant_updates": {
+                    "label": "生成式 AI 提前觸發",
+                    "description": "在追蹤目標發生指定次數的重要變化後，向生成式 AI 傳送請求。"
+                }
+            },
+            "enabled_in_config": {
+                "label": "原配置生成式 AI 狀態",
+                "description": "表示在原始靜態配置中是否已啟用生成式 AI。"
+            }
+        },
+        "filters_attribute": {
+            "label": "屬性篩選器",
+            "description": "篩選器用來篩選屬性，以此降低誤報（區域、比例、置信度）。",
+            "min_area": {
+                "label": "最小屬性區域",
+                "description": "此屬性允許的最小邊界框區域（像素或百分比）。可以是像素（整數）或百分比（0.000001 到 0.99 之間的浮點數）。"
+            },
+            "max_area": {
+                "label": "最大屬性區域",
+                "description": "此屬性允許的最大邊界框區域（像素或百分比）。可以是像素（整數）或百分比（0.000001 到 0.99 之間的浮點數）。"
+            },
+            "min_ratio": {
+                "label": "最小長寬比",
+                "description": "邊界框所需的最小長寬比。"
+            },
+            "max_ratio": {
+                "label": "最大長寬比",
+                "description": "邊界框允許的最大長寬比。"
+            },
+            "threshold": {
+                "label": "置信度門檻",
+                "description": "判定屬性有效所需的平均偵測置信度門檻。"
+            },
+            "min_score": {
+                "label": "最小置信度",
+                "description": "此屬性與其父物件關聯所需的最小單幀畫面的偵測置信度。"
+            },
+            "mask": {
+                "label": "篩選遮罩",
+                "description": "定義此篩選器在畫面內應用位置的多邊形座標。"
+            },
+            "raw_mask": {
+                "label": "原始遮罩"
+            }
+        }
+    },
+    "record": {
+        "label": "錄影",
+        "description": "應用於攝影機的錄影和保留設定，除非按攝影機覆蓋。",
+        "enabled": {
+            "label": "開啟錄影",
+            "description": "為所有攝影機啟用或停用錄影；可按攝影機覆蓋。"
+        },
+        "expire_interval": {
+            "label": "錄影清理間隔",
+            "description": "清理過期錄影片段的間隔分鐘數。"
+        },
+        "continuous": {
+            "label": "持續保留",
+            "description": "無論是否有追蹤目標或動作，保留錄影的天數。如果只想保留警報和偵測的錄影，請設定為 0。",
+            "days": {
+                "label": "保留天數",
+                "description": "保留錄影的天數。"
+            }
+        },
+        "motion": {
+            "label": "動作保留",
+            "description": "無論是否有追蹤目標，由動作觸發的錄影保留天數。如果只想保留警報和偵測的錄影，請設定為 0。",
+            "days": {
+                "label": "保留天數",
+                "description": "保留錄影的天數。"
+            }
+        },
+        "detections": {
+            "label": "偵測保留",
+            "description": "偵測事件的錄影保留設定，包括前後捕獲時長。",
+            "pre_capture": {
+                "label": "前捕獲秒數",
+                "description": "偵測事件之前包含在錄影中的秒數。"
+            },
+            "post_capture": {
+                "label": "後捕獲秒數",
+                "description": "偵測事件之後包含在錄影中的秒數。"
+            },
+            "retain": {
+                "label": "事件保留",
+                "description": "偵測事件錄影的保留設定。",
+                "days": {
+                    "label": "保留天數",
+                    "description": "保留偵測事件錄影的天數。"
+                },
+                "mode": {
+                    "label": "保留模式",
+                    "description": "保留模式：all（儲存所有片段）、motion（儲存有動作的片段）或 active_objects（儲存有活動目標的片段）。"
+                }
+            }
+        },
+        "alerts": {
+            "label": "警報保留",
+            "description": "警報事件的錄影保留設定，包括前後捕獲時長。",
+            "pre_capture": {
+                "label": "前捕獲秒數",
+                "description": "偵測事件之前包含在錄影中的秒數。"
+            },
+            "post_capture": {
+                "label": "後捕獲秒數",
+                "description": "偵測事件之後包含在錄影中的秒數。"
+            },
+            "retain": {
+                "label": "事件保留",
+                "description": "偵測事件錄影的保留設定。",
+                "days": {
+                    "label": "保留天數",
+                    "description": "保留偵測事件錄影的天數。"
+                },
+                "mode": {
+                    "label": "保留模式",
+                    "description": "保留模式：all（儲存所有片段）、motion（儲存有動作的片段）或 active_objects（儲存有活動目標的片段）。"
+                }
+            }
+        },
+        "export": {
+            "label": "匯出配置",
+            "description": "匯出錄影時使用的設定，如延時攝影和硬體加速。",
+            "hwaccel_args": {
+                "label": "匯出硬體加速引數",
+                "description": "用於匯出/轉碼操作的硬體加速引數。"
+            },
+            "max_concurrent": {
+                "label": "最大併發匯出數",
+                "description": "同時可處理的最大匯出任務數量。"
+            }
+        },
+        "preview": {
+            "label": "預覽配置",
+            "description": "控制介面中顯示的錄影預覽品質的設定。",
+            "quality": {
+                "label": "預覽品質",
+                "description": "預覽品質級別（very_low、low、medium、high、very_high）。"
+            }
+        },
+        "enabled_in_config": {
+            "label": "原始錄影狀態",
+            "description": "指示原始靜態配置中是否啟用了錄影。"
+        }
+    },
+    "review": {
+        "label": "審閱",
+        "description": "控制 UI 和儲存使用的警報、偵測和 GenAI 審閱摘要的設定。",
+        "alerts": {
+            "label": "警報配置",
+            "description": "哪些追蹤目標生成警報以及如何保留警報的設定。",
+            "enabled": {
+                "label": "開啟警報",
+                "description": "為所有攝影機啟用或停用警報生成；可按攝影機覆蓋。"
+            },
+            "labels": {
+                "label": "警報標籤",
+                "description": "符合警報條件的目標標籤清單（例如：car、person）。"
+            },
+            "required_zones": {
+                "label": "必需區域",
+                "description": "目標必須進入才能被視為警報的區域；留空則允許任何區域。"
+            },
+            "enabled_in_config": {
+                "label": "原始警報狀態",
+                "description": "追蹤原始靜態配置中是否啟用了警報。"
+            },
+            "cutoff_time": {
+                "label": "警報截止時間",
+                "description": "在沒有引起警報的活動後等待多少秒後截止警報。"
+            }
+        },
+        "detections": {
+            "label": "偵測配置",
+            "description": "用於設定哪些追蹤目標會生成偵測記錄（非警報類），以及偵測記錄的保留方式。",
+            "enabled": {
+                "label": "開啟偵測",
+                "description": "為所有攝影機啟用或停用偵測事件；可按攝影機覆蓋。"
+            },
+            "labels": {
+                "label": "偵測標籤",
+                "description": "符合偵測事件條件的目標標籤清單。"
+            },
+            "required_zones": {
+                "label": "必需區域",
+                "description": "目標必須進入才能被視為偵測的區域；留空則允許任何區域。"
+            },
+            "cutoff_time": {
+                "label": "偵測截止時間",
+                "description": "在沒有引起偵測的活動後等待多少秒後截止偵測。"
+            },
+            "enabled_in_config": {
+                "label": "原始偵測狀態",
+                "description": "追蹤原始靜態配置中是否啟用了偵測。"
+            }
+        },
+        "genai": {
+            "label": "生成式 AI 配置",
+            "description": "控制使用生成式 AI 為審閱項生成描述和摘要。",
+            "enabled": {
+                "label": "開啟生成式 AI 描述",
+                "description": "為審閱項開啟或關閉使用生成式 AI 生成描述和摘要。"
+            },
+            "alerts": {
+                "label": "為警報開啟生成式 AI",
+                "description": "使用生成式 AI 為警報項生成描述。"
+            },
+            "detections": {
+                "label": "為偵測開啟生成式 AI",
+                "description": "使用生成式 AI 為偵測項生成描述。"
+            },
+            "image_source": {
+                "label": "審閱影像來源",
+                "description": "傳送給生成式 AI 的畫面來源（'preview' 或 'recordings'）；'recordings' 使用更高品質的畫面幀，但會消耗更多的 token。"
+            },
+            "additional_concerns": {
+                "label": "額外關注事項",
+                "description": "生成式 AI 在分析此攝影機的監控行為時，需要額外注意的事項或說明清單。"
+            },
+            "debug_save_thumbnails": {
+                "label": "儲存縮圖",
+                "description": "儲存傳送給生成式 AI 提供商的縮圖用於除錯和審閱。"
+            },
+            "enabled_in_config": {
+                "label": "原配置生成式 AI 狀態",
+                "description": "記錄在靜態配置中最初是否已啟用生成式 AI 審閱功能。"
+            },
+            "preferred_language": {
+                "label": "首選語言",
+                "description": "向生成式 AI 提供商請求生成回應的首選語言。"
+            },
+            "activity_context_prompt": {
+                "label": "活動上下文提示",
+                "description": "自訂提示詞，用於說明可疑行為與非可疑行為的界定，為生成式 AI 生成摘要提供上下文依據。"
+            }
+        }
+    },
+    "snapshots": {
+        "label": "快照",
+        "description": "所有攝影機的追蹤目標 API 快照設定；可攝影機單獨配置覆蓋全域性配置。",
+        "enabled": {
+            "label": "開啟快照",
+            "description": "為所有攝影機啟用或停用儲存快照；可按攝影機覆蓋。"
+        },
+        "timestamp": {
+            "label": "時間戳疊加",
+            "description": "在 API 生成的快照上疊加時間戳。"
+        },
+        "bounding_box": {
+            "label": "邊界框疊加",
+            "description": "在 API 生成的快照上繪製追蹤目標的邊界框。"
+        },
+        "crop": {
+            "label": "裁剪快照",
+            "description": "在 API 生成的快照裁剪到偵測到的目標邊界框。"
+        },
+        "required_zones": {
+            "label": "必需區域",
+            "description": "目標必須進入才能儲存快照的區域。"
+        },
+        "height": {
+            "label": "快照高度",
+            "description": "將 API 生成的快照調整到的目標高度（像素）；留空則保持原始大小。"
+        },
+        "retain": {
+            "label": "快照保留",
+            "description": "快照的保留設定，包括預設天數和按目標覆蓋。",
+            "default": {
+                "label": "預設保留",
+                "description": "保留快照的預設天數。"
+            },
+            "mode": {
+                "label": "保留模式",
+                "description": "保留模式：all（儲存所有片段）、motion（儲存有動作的片段）或 active_objects（儲存有活動目標的片段）。"
+            },
+            "objects": {
+                "label": "目標保留",
+                "description": "按目標覆蓋的快照保留天數。"
+            }
+        },
+        "quality": {
+            "label": "快照品質",
+            "description": "儲存快照的編碼品質（0-100）。"
+        }
+    },
+    "timestamp_style": {
+        "label": "時間戳樣式",
+        "description": "應用於除錯檢視和快照的幀內時間戳樣式選項。",
+        "position": {
+            "label": "時間戳位置",
+            "description": "時間戳在影像上的位置（tl/tr/bl/br）。"
+        },
+        "format": {
+            "label": "時間戳格式",
+            "description": "用於時間戳的日期時間格式字串（Python 日期時間格式程式碼）。"
+        },
+        "color": {
+            "label": "時間戳顏色",
+            "description": "時間戳文字的 RGB 顏色值（所有值 0-255）。",
+            "red": {
+                "label": "紅色",
+                "description": "時間戳顏色的紅色分量（0-255）。"
+            },
+            "green": {
+                "label": "綠色",
+                "description": "時間戳顏色的綠色分量（0-255）。"
+            },
+            "blue": {
+                "label": "藍色",
+                "description": "時間戳顏色的藍色分量（0-255）。"
+            }
+        },
+        "thickness": {
+            "label": "時間戳粗細",
+            "description": "時間戳文字的線條粗細。"
+        },
+        "effect": {
+            "label": "時間戳效果",
+            "description": "時間戳文字的視覺效果（none、solid、shadow）。"
+        }
+    },
+    "audio_transcription": {
+        "label": "音訊轉錄",
+        "description": "用於事件和即時字幕的即時和語音音訊轉錄設定。",
+        "enabled": {
+            "label": "啟用語音轉文字",
+            "description": "為所有攝影機啟用或停用自動音訊轉錄；可按攝影機覆蓋。"
+        },
+        "language": {
+            "label": "轉錄語言",
+            "description": "用於轉錄/翻譯的語言程式碼（例如 'en' 表示英語）。請參閱 https://whisper-api.com/docs/languages/ 瞭解支援的語言程式碼。"
+        },
+        "device": {
+            "label": "轉錄裝置",
+            "description": "執行轉錄模型的裝置金鑰（CPU/GPU）。目前僅支援 NVIDIA CUDA GPU 進行轉錄。"
+        },
+        "model_size": {
+            "label": "模型大小",
+            "description": "用於離線音訊事件轉錄的模型大小。"
+        },
+        "live_enabled": {
+            "label": "即時監控轉寫",
+            "description": "在接收到音訊時開啟即時監控持續轉寫。"
+        }
+    },
+    "classification": {
+        "label": "目標分類",
+        "description": "用於最佳化目標標籤或狀態分類的分類模型設定。",
+        "bird": {
+            "label": "鳥類分類配置",
+            "description": "鳥類分類模型特定的設定。",
+            "enabled": {
+                "label": "鳥類分類",
+                "description": "啟用或停用鳥類分類。"
+            },
+            "threshold": {
+                "label": "最小分數",
+                "description": "接受鳥類分類所需的最小分類分數。"
+            }
+        },
+        "custom": {
+            "label": "自訂分類模型",
+            "description": "用於目標或狀態偵測的自訂分類模型配置。",
+            "enabled": {
+                "label": "開啟模型",
+                "description": "啟用或停用自訂分類模型。"
+            },
+            "name": {
+                "label": "模型名稱",
+                "description": "要使用的自訂分類模型的辨識符號。"
+            },
+            "threshold": {
+                "label": "分數閾值",
+                "description": "用於更改分類狀態的分數閾值。"
+            },
+            "save_attempts": {
+                "label": "儲存嘗試",
+                "description": "為最近分類 UI 儲存多少次分類嘗試。"
+            },
+            "object_config": {
+                "objects": {
+                    "label": "分類目標",
+                    "description": "要執行目標分類的目標型別清單。"
+                },
+                "classification_type": {
+                    "label": "分類型別",
+                    "description": "應用的分類型別：'sub_label'（新增 sub_label）或其他支援的型別。"
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "分類攝影機",
+                    "description": "用於執行狀態分類的按攝影機裁剪和設定。",
+                    "crop": {
+                        "label": "分類裁剪",
+                        "description": "用於在此攝影機上執行分類的裁剪座標。"
+                    }
+                },
+                "motion": {
+                    "label": "動作時執行",
+                    "description": "啟用後，當在指定裁剪區域內偵測到動作時執行分類。"
+                },
+                "interval": {
+                    "label": "分類間隔",
+                    "description": "狀態分類的定期分類執行間隔（秒）。"
+                }
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "語意搜尋",
+        "description": "用於構建和查詢目標嵌入以查詢相似項的語意搜尋設定。",
+        "enabled": {
+            "label": "開啟語意搜尋",
+            "description": "啟用或停用語意搜尋功能。"
+        },
+        "reindex": {
+            "label": "啟動時重建索引",
+            "description": "觸發將歷史追蹤目標完全重新索引到嵌入資料庫。"
+        },
+        "model": {
+            "label": "語意搜尋模型或生成式 AI 服務名稱",
+            "description": "用於語意搜尋的嵌入模型（例如 'jinav1'），或具有嵌入功能（embeddings）的生成式 AI 服務名稱。"
+        },
+        "model_size": {
+            "label": "模型大小",
+            "description": "選擇模型大小；'small' 在 CPU 上執行，'large' 通常需要 GPU。"
+        },
+        "device": {
+            "label": "裝置",
+            "description": "這是一個覆蓋選項，用於指定特定裝置。請參閱 https://onnxruntime.ai/docs/execution-providers/ 瞭解更多資訊"
+        },
+        "triggers": {
+            "label": "觸發器",
+            "description": "攝影機特定語意搜尋觸發器的操作和匹配條件。",
+            "friendly_name": {
+                "label": "友好名稱",
+                "description": "在 UI 中為此觸發器顯示的可選友好名稱。"
+            },
+            "enabled": {
+                "label": "開啟此觸發器",
+                "description": "啟用或停用此語意搜尋觸發器。"
+            },
+            "type": {
+                "label": "觸發器型別",
+                "description": "觸發器型別：'thumbnail'（與影像匹配）或 'description'（與文字匹配）。"
+            },
+            "data": {
+                "label": "觸發器內容",
+                "description": "要與追蹤目標匹配的文字短語或縮圖 ID。"
+            },
+            "threshold": {
+                "label": "觸發器閾值",
+                "description": "啟用此觸發器所需的最小相似度分數（0-1）。"
+            },
+            "actions": {
+                "label": "觸發器操作",
+                "description": "觸發器匹配時要執行的操作清單（通知、sub_label、屬性）。"
+            }
+        }
+    },
+    "face_recognition": {
+        "label": "人臉辨識",
+        "description": "所有攝影機的人臉偵測和辨識設定；可按攝影機覆蓋。",
+        "enabled": {
+            "label": "開啟人臉辨識",
+            "description": "為所有攝影機啟用或停用人臉辨識；可按攝影機覆蓋。"
+        },
+        "model_size": {
+            "label": "模型大小",
+            "description": "用於人臉嵌入的模型大小（small/large）；較大的可能需要 GPU。"
+        },
+        "unknown_score": {
+            "label": "未知分數閾值",
+            "description": "低於此距離閾值的人臉被視為潛在匹配（數值越高越嚴格）。"
+        },
+        "detection_threshold": {
+            "label": "偵測閾值",
+            "description": "將人臉偵測視為有效所需的最小偵測置信度。"
+        },
+        "recognition_threshold": {
+            "label": "辨識閾值",
+            "description": "將兩張人臉視為匹配的人臉嵌入距離閾值。"
+        },
+        "min_area": {
+            "label": "最小人臉區域",
+            "description": "需要嘗試進行人臉辨識的人臉偵測框最小大小（像素）。"
+        },
+        "min_faces": {
+            "label": "最小人臉數",
+            "description": "在將辨識的子標籤應用於人員之前所需的最小人臉辨識次數。"
+        },
+        "save_attempts": {
+            "label": "儲存嘗試",
+            "description": "為最近辨識 UI 保留的人臉辨識嘗試次數。"
+        },
+        "blur_confidence_filter": {
+            "label": "模糊置信度過濾器",
+            "description": "根據影像模糊程度調整置信度分數，以減少低品質人臉的誤報。"
+        },
+        "device": {
+            "label": "裝置",
+            "description": "這是一個覆蓋選項，用於指定特定裝置。請參閱 https://onnxruntime.ai/docs/execution-providers/ 瞭解更多資訊"
+        }
+    },
+    "lpr": {
+        "label": "車牌辨識",
+        "description": "車牌辨識設定，包括偵測閾值、格式化和已知車牌。",
+        "enabled": {
+            "label": "開啟車牌辨識",
+            "description": "為所有攝影機啟用或停用車牌辨識；可按攝影機覆蓋。"
+        },
+        "model_size": {
+            "label": "模型大小",
+            "description": "用於文字偵測/辨識的模型大小，大多數使用者應使用 'small'，只有'small'模型支援中文。"
+        },
+        "detection_threshold": {
+            "label": "偵測閾值",
+            "description": "開始對疑似車牌執行 OCR 的偵測置信度閾值。"
+        },
+        "min_area": {
+            "label": "最小車牌區域",
+            "description": "嘗試辨識所需的最小車牌區域（像素）。"
+        },
+        "recognition_threshold": {
+            "label": "辨識閾值",
+            "description": "辨識的車牌文字作為子標籤附加所需的置信度閾值。"
+        },
+        "min_plate_length": {
+            "label": "最小車牌長度",
+            "description": "辨識的車牌被視為有效所需的最小字元數。"
+        },
+        "format": {
+            "label": "車牌格式正則",
+            "description": "用於驗證辨識的車牌字串是否符合預期格式的可選正則表示式。"
+        },
+        "match_distance": {
+            "label": "匹配距離",
+            "description": "將偵測到的車牌與已知車牌比較時允許的字元不匹配數。"
+        },
+        "known_plates": {
+            "label": "已知車牌",
+            "description": "要特別追蹤或報警的車牌或正則表示式清單。"
+        },
+        "enhancement": {
+            "label": "增強級別",
+            "description": "在 OCR 之前應用於車牌裁剪的增強級別（0-10）；較高的值可能不總是改善結果，5 以上的級別可能僅適用於夜間車牌，應謹慎使用。"
+        },
+        "debug_save_plates": {
+            "label": "儲存除錯車牌",
+            "description": "儲存車牌裁剪影像用於除錯 LPR 效能。"
+        },
+        "device": {
+            "label": "裝置",
+            "description": "這是一個覆蓋選項，用於指定特定裝置。請參閱 https://onnxruntime.ai/docs/execution-providers/ 瞭解更多資訊"
+        },
+        "replace_rules": {
+            "label": "替換規則",
+            "description": "用於在匹配之前規範化偵測到的車牌字串的正則替換規則。",
+            "pattern": {
+                "label": "正則模式"
+            },
+            "replacement": {
+                "label": "替換字串"
+            }
+        },
+        "expire_time": {
+            "label": "過期秒數",
+            "description": "未見到的車牌從追蹤器中過期的時間（秒）（僅適用於專用 LPR 攝影機）。"
+        }
+    },
+    "camera_groups": {
+        "label": "攝影機分組",
+        "description": "用於在頁面中組織攝影機的命名攝影機分組配置。",
+        "cameras": {
+            "label": "攝影機清單",
+            "description": "此分組中包含的攝影機名稱陣列。"
+        },
+        "icon": {
+            "label": "分組圖示",
+            "description": "在頁面中代表攝影機分組的圖示。"
+        },
+        "order": {
+            "label": "排序順序",
+            "description": "用於在頁面中對攝影機分組進行排序的數字順序；數值越大越靠後。"
+        }
+    },
+    "profiles": {
+        "label": "設定檔",
+        "description": "帶有別名的命名設定檔定義。攝影機設定檔必須引用此處定義的名稱。",
+        "friendly_name": {
+            "label": "別名",
+            "description": "在介面中顯示的此設定檔名稱，可以使用中文。"
+        }
+    },
+    "active_profile": {
+        "label": "啟用設定檔",
+        "description": "當前啟用的設定檔名稱。僅在執行時使用，不會寫入 YAML 設定檔中。"
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "MQTT 影像釋出設定。",
+        "enabled": {
+            "label": "傳送影像",
+            "description": "為此攝影機啟用將目標快照影像釋出到 MQTT 主題。"
+        },
+        "timestamp": {
+            "label": "新增時間戳",
+            "description": "在釋出到 MQTT 的影像上疊加時間戳。"
+        },
+        "bounding_box": {
+            "label": "新增邊界框",
+            "description": "在透過 MQTT 釋出的影像上繪製邊界框。"
+        },
+        "crop": {
+            "label": "裁剪影像",
+            "description": "將釋出到 MQTT 的影像裁剪到偵測到的目標邊界框。"
+        },
+        "height": {
+            "label": "影像高度",
+            "description": "透過 MQTT 釋出的影像調整到的目標高度（像素）。"
+        },
+        "required_zones": {
+            "label": "必需區域",
+            "description": "目標必須進入才能釋出 MQTT 影像的區域。"
+        },
+        "quality": {
+            "label": "JPEG 品質",
+            "description": "釋出到 MQTT 的影像的 JPEG 品質（0-100）。"
+        }
+    },
+    "camera_ui": {
+        "label": "攝影機頁面",
+        "description": "此攝影機在頁面中的顯示順序和可見性。顯示順序僅影響預設儀表板。如需更精細的控制，請使用“攝影機組”。",
+        "order": {
+            "label": "UI 順序",
+            "description": "用於在頁面中排序攝影機的順序（只會影響預設儀表板和清單）；數值越大則在越後面。"
+        },
+        "dashboard": {
+            "label": "在 UI 中顯示",
+            "description": "切換此攝影機在 Frigate 頁面中是否可見。停用後需要手動編輯配置才能再次在頁面中檢視此攝影機。"
+        },
+        "review": {
+            "label": "在審查中顯示",
+            "description": "切換此攝影機在審查中是否顯示（包含審查頁面及其攝影機篩選器、動態審查和歷史檢視）。"
+        }
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "此攝影機的 ONVIF 連線和 PTZ 自動追蹤設定。",
+        "host": {
+            "label": "ONVIF 主機",
+            "description": "此攝影機 ONVIF 服務的主機（和可選協議）。"
+        },
+        "port": {
+            "label": "ONVIF 埠",
+            "description": "ONVIF 服務的埠號。"
+        },
+        "user": {
+            "label": "ONVIF 使用者名稱",
+            "description": "ONVIF 身份驗證的使用者名稱；某些裝置需要管理員使用者才能使用 ONVIF。"
+        },
+        "password": {
+            "label": "ONVIF 密碼",
+            "description": "ONVIF 身份驗證的密碼。"
+        },
+        "tls_insecure": {
+            "label": "停用 TLS 驗證",
+            "description": "跳過 TLS 驗證並停用 ONVIF 的摘要認證（不安全；僅用於安全網路）。"
+        },
+        "profile": {
+            "label": "ONVIF 設定檔",
+            "description": "用於 PTZ 控制的指定 ONVIF 媒體配置，將透過 Token 或名稱匹配。如果未手動指定，將自動選擇第一個包含有效 PTZ 配置的媒體配置。"
+        },
+        "autotracking": {
+            "label": "自動追蹤",
+            "description": "使用 PTZ 攝影機移動自動追蹤移動目標並使其保持在畫面中心。",
+            "enabled": {
+                "label": "開啟自動追蹤",
+                "description": "啟用或停用偵測目標的自動 PTZ 攝影機追蹤。"
+            },
+            "calibrate_on_startup": {
+                "label": "啟動時校準",
+                "description": "在啟動時測量 PTZ 電機速度以提高追蹤精度。Frigate 將在校準後用 movement_weights 更新配置。"
+            },
+            "zooming": {
+                "label": "變焦模式",
+                "description": "控制變焦行為：disabled（僅平移/傾斜）、absolute（最相容）或 relative（同時平移/傾斜/變焦）。"
+            },
+            "zoom_factor": {
+                "label": "變焦因子",
+                "description": "控制追蹤目標的變焦級別。數值越低保持更多場景可見；數值越高放大更近但可能丟失追蹤。數值範圍 0.1 到 0.75。"
+            },
+            "track": {
+                "label": "追蹤目標",
+                "description": "應觸發自動追蹤的目標型別清單。"
+            },
+            "required_zones": {
+                "label": "必需區域",
+                "description": "目標必須進入這些區域之一才能開始自動追蹤。"
+            },
+            "return_preset": {
+                "label": "返回預設",
+                "description": "追蹤結束後返回的攝影機韌體中配置的 ONVIF 預設名稱。"
+            },
+            "timeout": {
+                "label": "返回超時",
+                "description": "失去追蹤後等待多少秒後將攝影機返回到預設位置。"
+            },
+            "movement_weights": {
+                "label": "移動權重",
+                "description": "由攝影機校準自動生成的校準值。請勿手動修改。"
+            },
+            "enabled_in_config": {
+                "label": "原始自動追蹤狀態",
+                "description": "用於追蹤配置中是否啟用自動追蹤的內部欄位。"
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "忽略時間不匹配",
+            "description": "忽略 ONVIF 通訊中攝影機和 Frigate 伺服器之間的時間同步差異。"
         }
     }
 }

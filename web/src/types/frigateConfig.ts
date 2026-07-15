@@ -4,9 +4,8 @@ import { TriggerAction, TriggerType } from "./trigger";
 export interface UiConfig {
   timezone?: string;
   time_format?: "browser" | "12hour" | "24hour";
-  date_style?: "full" | "long" | "medium" | "short";
-  time_style?: "full" | "long" | "medium" | "short";
   dashboard: boolean;
+  review: boolean;
   order: number;
   unit_system?: "metric" | "imperial";
 }
@@ -371,6 +370,7 @@ export type CustomClassificationModelConfig = {
       };
     };
     motion: boolean;
+    interval?: number;
   };
 };
 
@@ -380,6 +380,18 @@ export type GroupStreamingSettings = {
 
 export type AllGroupsStreamingSettings = {
   [groupName: string]: GroupStreamingSettings;
+};
+
+export type GenAIRole = "chat" | "descriptions" | "embeddings";
+
+export type GenAIAgentConfig = {
+  api_key?: string;
+  base_url?: string;
+  model: string;
+  provider?: string;
+  roles: GenAIRole[];
+  provider_options?: Record<string, unknown>;
+  runtime_options?: Record<string, unknown>;
 };
 
 export interface FrigateConfig {
@@ -478,12 +490,7 @@ export interface FrigateConfig {
     retry_interval: number;
   };
 
-  genai: {
-    provider: string;
-    base_url?: string;
-    api_key?: string;
-    model: string;
-  };
+  genai: Record<string, GenAIAgentConfig>;
 
   go2rtc: {
     streams: Record<string, string | string[]>;
@@ -515,8 +522,8 @@ export interface FrigateConfig {
     path: string | null;
     width: number;
     colormap: { [key: string]: [number, number, number] };
-    attributes_map: { [key: string]: [string] };
-    all_attributes: [string];
+    attributes_map: { [key: string]: string[] };
+    all_attributes: string[];
     plus?: {
       name: string;
       id: string;

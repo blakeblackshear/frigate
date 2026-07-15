@@ -31,7 +31,6 @@ import { FaCheckCircle } from "react-icons/fa";
 import { flattenPoints, interpolatePoints } from "@/utils/canvasUtil";
 import axios from "axios";
 import { toast } from "sonner";
-import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
@@ -263,8 +262,9 @@ export default function ObjectMaskEditPane({
               },
             );
             updateConfig();
-            // Only publish WS state for base config when mask has a name
-            if (!editingProfile && maskName) {
+            // Only publish WS state for base config when mask has a name and
+            // wasn't renamed (the hook is bound to the old name).
+            if (!editingProfile && maskName && !renamingMask) {
               sendObjectMaskState(enabled ? "ON" : "OFF");
             }
           } else {
@@ -334,7 +334,6 @@ export default function ObjectMaskEditPane({
 
   return (
     <>
-      <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
           ? t("masksAndZones.objectMasks.edit")
@@ -389,6 +388,7 @@ export default function ObjectMaskEditPane({
                 placeholderName={t(
                   "masksAndZones.objectMasks.name.placeholder",
                 )}
+                idDisabled={!!editingProfile && polygon.name.length > 0}
               />
               <FormField
                 control={form.control}

@@ -42,7 +42,7 @@
     "untilRestart": "Bis zum Neustart",
     "justNow": "Gerade",
     "pm": "nachmittags",
-    "mo": "{{time}} Mon",
+    "mo": "{{time}} Mon.",
     "formattedTimestamp": {
       "12hour": "d. MMM, hh:mm:ss aaa",
       "24hour": "dd. MMM, hh:mm:ss aaa"
@@ -192,7 +192,9 @@
       "bg": "Български (bulgarisch)",
       "gl": "Galego (Galicisch)",
       "id": "Bahasa Indonesia (Indonesisch)",
-      "hr": "Hrvatski (Kroatisch)"
+      "hr": "Hrvatski (Kroatisch)",
+      "bs": "Bosanski (Bosnisch)",
+      "zhHant": "Traditional Chinese"
     },
     "appearance": "Erscheinung",
     "theme": {
@@ -250,7 +252,8 @@
     "classification": "Klassifizierung",
     "actions": "Aktion",
     "chat": "Chat",
-    "profiles": "Profile"
+    "profiles": "Profile",
+    "features": "Funktionen"
   },
   "unit": {
     "speed": {
@@ -324,5 +327,8 @@
     "separatorWithSpace": ", "
   },
   "no_items": "Keine Artikel",
-  "validation_errors": "Validierungsfehler"
+  "validation_errors": "Validierungsfehler",
+  "credentialField": {
+    "savedPlaceholder": "Gespeichert – leer lassen, um den aktuellen Stand beizubehalten"
+  }
 }

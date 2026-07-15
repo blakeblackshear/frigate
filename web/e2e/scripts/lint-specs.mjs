@@ -14,10 +14,6 @@
  *
  * @mobile rule: every .spec.ts under specs/ (not specs/_meta/) must
  * contain at least one test title or describe with the substring "@mobile".
- *
- * Specs in PENDING_REWRITE are exempt from all rules until they are
- * rewritten with proper assertions and mobile coverage. Remove each
- * entry when its spec is updated.
  */
 
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -27,24 +23,6 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SPECS_DIR = resolve(__dirname, "..", "specs");
 const META_PREFIX = resolve(SPECS_DIR, "_meta");
-
-// Specs exempt from lint rules until they are rewritten with proper
-// assertions and mobile coverage. Remove each entry when its spec is updated.
-const PENDING_REWRITE = new Set([
-  "auth.spec.ts",
-  "chat.spec.ts",
-  "classification.spec.ts",
-  "config-editor.spec.ts",
-  "explore.spec.ts",
-  "export.spec.ts",
-  "face-library.spec.ts",
-  "live.spec.ts",
-  "logs.spec.ts",
-  "navigation.spec.ts",
-  "replay.spec.ts",
-  "review.spec.ts",
-  "system.spec.ts",
-]);
 
 const BANNED_PATTERNS = [
   {
@@ -62,14 +40,12 @@ const BANNED_PATTERNS = [
   {
     name: "conditional count() assertion",
     regex: /\bif\s*\(\s*\(?\s*await\s+[^)]*\.count\s*\(\s*\)\s*\)?\s*[><=!]/,
-    advice:
-      "Assertions must be unconditional. Use expect(...).toHaveCount(n).",
+    advice: "Assertions must be unconditional. Use expect(...).toHaveCount(n).",
   },
   {
     name: "vacuous textContent length assertion",
     regex: /expect\([^)]*\.length\)\.toBeGreaterThan\(0\)/,
-    advice:
-      "Assert specific content, not that some text exists.",
+    advice: "Assert specific content, not that some text exists.",
   },
 ];
 
@@ -89,8 +65,6 @@ function walk(dir) {
 }
 
 function lintFile(file) {
-  const basename = file.split("/").pop();
-  if (PENDING_REWRITE.has(basename)) return [];
   if (file.includes("/specs/settings/")) return [];
 
   const errors = [];

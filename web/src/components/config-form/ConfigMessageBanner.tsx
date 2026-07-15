@@ -18,11 +18,11 @@ const severityVariantMap: Record<
 function SeverityIcon({ severity }: { severity: MessageSeverity }) {
   switch (severity) {
     case "info":
-      return <LuInfo className="size-4" />;
+      return <LuInfo className="size-4 shrink-0" />;
     case "warning":
-      return <LuTriangleAlert className="size-4" />;
+      return <LuTriangleAlert className="size-4 shrink-0" />;
     case "error":
-      return <LuCircleAlert className="size-4" />;
+      return <LuCircleAlert className="size-4 shrink-0" />;
   }
 }
 
@@ -44,7 +44,7 @@ export function ConfigMessageBanner({ messages }: ConfigMessageBannerProps) {
           className="flex items-center [&>svg+div]:translate-y-0 [&>svg]:static [&>svg~*]:pl-2"
         >
           <SeverityIcon severity={msg.severity} />
-          <AlertDescription>{t(msg.messageKey)}</AlertDescription>
+          <AlertDescription>{t(msg.messageKey, msg.values)}</AlertDescription>
         </Alert>
       ))}
     </div>

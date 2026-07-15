@@ -28,5 +28,8 @@
         "header_map": {
             "roleHeaderRequired": "配置权限组映射时需要的 role 请求头。"
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "必须是偶数。"
     }
 }

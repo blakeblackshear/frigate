@@ -1,0 +1,59 @@
+{
+    "websocket_messages": "Berichten",
+    "dialog": {
+        "camera": "Broncamera",
+        "preset": {
+            "1m": "Laatste 1 minuut",
+            "5m": "Laatste 5 minuten",
+            "timeline": "Vanaf tijdlijn",
+            "custom": "Aangepast"
+        },
+        "title": "Start Debug Herhaling",
+        "timeRange": "Tijdsbereik",
+        "startButton": "Start herhaling",
+        "selectFromTimeline": "Selecteer",
+        "starting": "Herhaling starten...",
+        "startLabel": "Start",
+        "endLabel": "Einde",
+        "description": "Maak een tijdelijke herhalingscamera die historische beelden in een lus afspeelt voor het debuggen van objectdetectie- en trackingproblemen. De herhalingscamera gebruikt dezelfde detectieconfiguratie als de broncamera. Kies een tijdsbereik om te beginnen.",
+        "toast": {
+            "error": "Kan debugherhaling niet starten: {{error}}",
+            "alreadyActive": "Er is al een herhalingssessie actief",
+            "stopError": "Kan debugherhaling niet stoppen: {{error}}",
+            "goToReplay": "Ga naar herhaling"
+        }
+    },
+    "title": "Debug Herhaling",
+    "description": "Herhaal camera-opnames voor foutopsporing. De objectlijst toont een vertraagde samenvatting van gedetecteerde objecten en het tabblad Berichten toont een stream van interne Frigate-berichten uit de herhaalde beelden.",
+    "page": {
+        "noSession": "Geen actieve debugherhalingssessie",
+        "noSessionDesc": "Start een debugherhaling vanuit de Geschiedenis-weergave door op de knop Acties in de werkbalk te klikken en Debug Herhaling te kiezen.",
+        "goToRecordings": "Ga naar Geschiedenis",
+        "preparingClip": "Clip voorbereiden…",
+        "preparingClipDesc": "Frigate voegt opnames samen voor het geselecteerde tijdsbereik. Dit kan bij langere bereiken even duren.",
+        "startingCamera": "Debugherhaling starten…",
+        "startError": {
+            "title": "Kan debugherhaling niet starten",
+            "back": "Terug naar Geschiedenis"
+        },
+        "sourceCamera": "Broncamera",
+        "replayCamera": "Herhalingscamera",
+        "initializingReplay": "Debugherhaling initialiseren...",
+        "stoppingReplay": "Debugherhaling stoppen...",
+        "stopReplay": "Stop herhaling",
+        "confirmStop": {
+            "title": "Debugherhaling stoppen?",
+            "description": "Dit stopt de sessie en ruimt alle tijdelijke gegevens op. Weet je het zeker?",
+            "confirm": "Stop herhaling",
+            "cancel": "Annuleren"
+        },
+        "activity": "Activiteit",
+        "objects": "Objectlijst",
+        "audioDetections": "Audiodetecties",
+        "noActivity": "Geen activiteit gedetecteerd",
+        "activeTracking": "Actieve tracking",
+        "noActiveTracking": "Geen actieve tracking",
+        "configuration": "Configuratie",
+        "configurationDesc": "Stem de instellingen voor bewegingsdetectie en objecttracking van de debugherhalingscamera nauwkeurig af. Wijzigingen worden niet opgeslagen in je Frigate-configuratiebestand."
+    }
+}

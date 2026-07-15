@@ -18,20 +18,20 @@
     "title": "UI inställningar",
     "liveDashboard": {
       "automaticLiveView": {
-        "desc": "Automatiskt byte till kamera där aktivitet registreras. Inaktivering av denna inställning gör att en statisk bild visas i Live Panelen som uppdateras en gång per minut.",
-        "label": "Automatisk Live Visning"
+        "desc": "Växla automatiskt till kamerans livevy när aktivitet upptäcks. Om det här alternativet inaktiveras uppdateras statiska kamerabilder på livepanelen bara en gång per minut.",
+        "label": "Automatisk livevisning"
       },
       "playAlertVideos": {
-        "desc": "Som standard visas varningar på Live panelen som små loopande klipp. Inaktivera denna inställning för att bara visa en statisk bild av nya varningar på denna enhet/webbläsare.",
+        "desc": "Som standard spelas de senaste varningarna upp som små loopande videor på livepanelen. Inaktivera det här alternativet om du bara vill visa en statisk bild av de senaste varningarna på den här enheten/i den här webbläsaren.",
         "label": "Spela upp Varnings videor"
       },
-      "title": "Live Panel",
+      "title": "Livepanel",
       "displayCameraNames": {
         "label": "Visa alltid kameranamn",
         "desc": "Visa alltid kameranamnen i ett chip i instrumentpanelen för livevisning med flera kameror."
       },
       "liveFallbackTimeout": {
-        "label": "Live spelare reserv timeout",
+        "label": "Reservtimeout för livespelare",
         "desc": "När en kameras högkvalitativa liveström inte är tillgänglig, återgå till lågbandbreddsläge efter så här många sekunder. Standard: 3."
       }
     },
@@ -125,10 +125,10 @@
           "desc": "Att använda <em>large</em> använder en ArcFace-modell för ansiktsinbäddning och körs automatiskt på GPU:n om tillämpligt."
         }
       },
-      "title": "Ansikts igenkänning"
+      "title": "Ansiktsigenkänning"
     },
     "licensePlateRecognition": {
-      "title": "Nummerplåt Erkännande",
+      "title": "Igenkänning av registreringsskyltar",
       "desc": "Frigate kan känna igen nummerplåt på fordon och automatiskt lägga till de upptäckta tecknen i fältet recognized_license_plate eller ett känt namn som en underetikett till objekt av typen bil. Ett vanligt användningsfall kan vara att läsa nummerplåtor på bilar som kör in på en uppfart eller bilar som passerar på en gata.",
       "readTheDocumentation": "Läs dokumentationen"
     },
@@ -151,7 +151,8 @@
     "triggers": "Utlösare",
     "roles": "Roller",
     "cameraManagement": "Hantering",
-    "cameraReview": "Granska"
+    "cameraReview": "Granska",
+    "profiles": "Profiler"
   },
   "dialog": {
     "unsavedChanges": {
@@ -244,7 +245,7 @@
       }
     },
     "motionMaskLabel": "Rörelsemask {{number}}",
-    "objectMaskLabel": "Objektmask {{number}} ({{label}})",
+    "objectMaskLabel": "Objektmask {{number}}",
     "form": {
       "zoneName": {
         "error": {
@@ -407,7 +408,7 @@
   },
   "motionDetectionTuner": {
     "title": "Rörelsedetekteringstuner",
-    "unsavedChanges": "Osparade ändringar i Motion Tuner ({{camera}})",
+    "unsavedChanges": "Osparade ändringar i rörelsejusteraren ({{camera}})",
     "desc": {
       "title": "Frigate använder rörelsedetektering som en första kontroll för att se om det händer något i bilden som är värt att kontrollera med objektdetektering.",
       "documentation": "Läs guiden för rörelsejustering"
@@ -430,7 +431,7 @@
   },
   "debug": {
     "title": "Felsök",
-    "detectorDesc": "Fregate använder dina detektorer ({{detectors}}) för att upptäcka objekt i din kameras videoström.",
+    "detectorDesc": "Frigate använder dina detektorer ({{detectors}}) för att upptäcka objekt i kamerans videoström.",
     "desc": "Felsökningsvyn visar en realtidsvy av spårade objekt och deras statistik. Objektlistan visar en tidsfördröjd sammanfattning av upptäckta objekt.",
     "openCameraWebUI": "Öppna {{camera}}s webbgränssnitt",
     "debugging": "Felsökning",
@@ -567,7 +568,7 @@
       },
       "createUser": {
         "title": "Skapa ny användare",
-        "desc": "Lägg till ett nytt användarkonto och ange en roll för åtkomst till områden i Frigate gränssnittet.",
+        "desc": "Lägg till ett nytt användarkonto och ange en roll för åtkomst till områden i Frigate-gränssnittet.",
         "usernameOnlyInclude": "Användarnamnet får endast innehålla bokstäver, siffror, . eller _",
         "confirmPassword": "Vänligen bekräfta ditt lösenord"
       },
@@ -597,7 +598,7 @@
           "admin": "Administratör",
           "adminDesc": "Full åtkomst till alla funktioner.",
           "viewer": "Åskådare",
-          "viewerDesc": "Begränsat till Live-dashboards, Review, Explore, och Exports bara.",
+          "viewerDesc": "Endast åtkomst till Live-paneler, Granskning, Utforska och Exporter.",
           "customDesc": "Anpassad roll med specifik kameraåtkomst."
         }
       }
@@ -684,7 +685,7 @@
     "dialog": {
       "createRole": {
         "title": "Skapa ny roll",
-        "desc": "Skapa en ny roll och ange kamera åtkomstbehörigheter."
+        "desc": "Skapa en ny roll och ange behörigheter för kameraåtkomst."
       },
       "deleteRole": {
         "title": "Radera roll",
@@ -714,7 +715,7 @@
     },
     "management": {
       "title": "Hantering av tittarroller",
-      "desc": "Hantera anpassade tittarroller och deras kameraåtkomstbehörigheter för den här Frigate instansen."
+      "desc": "Hantera anpassade tittarroller och deras kameraåtkomstbehörigheter för den här Frigate-instansen."
     }
   },
   "frigatePlus": {
@@ -728,8 +729,8 @@
     },
     "snapshotConfig": {
       "title": "Ögonblicksbild konfiguration",
-      "desc": "Att skicka till Frigate+ kräver att både snapshots och <code>clean_copy</code> snapshots är aktiverade i din konfiguration.",
-      "cleanCopyWarning": "Vissa kameror har aktiverade ögonblicksbilder men har ren kopia inaktiverad. Du måste aktivera <code>clean_copy</code> i din ögonblicksbild konfiguration för att kunna skicka bilder från dessa kameror till Frigate+.",
+      "desc": "För att skicka till Frigate+ måste ögonblicksbilder vara aktiverade i konfigurationen.",
+      "cleanCopyWarning": "Vissa kameror har ögonblicksbilder inaktiverade",
       "table": {
         "camera": "Kamera",
         "snapshots": "Ögonblicksbilder",
@@ -1079,7 +1080,7 @@
       "streamsTitle": "Kameraströmmar",
       "addStream": "Lägg till ström",
       "addAnotherStream": "Lägg till ytterligare en ström",
-      "streamUrl": "Stream-URL",
+      "streamUrl": "Ström-URL",
       "streamUrlPlaceholder": "rtsp://användarnamn:lösenord@värd:portnummer/plats",
       "selectStream": "Välj en ström",
       "searchCandidates": "Sök kandidater...",
@@ -1225,7 +1226,7 @@
       "noDefinedZones": "Inga zoner är definierade för den här kameran.",
       "objectAlertsTips": "Alla {{alertsLabels}}-objekt på {{cameraName}} kommer att visas som Varningar.",
       "zoneObjectAlertsTips": "Alla {{alertsLabels}} objekt som upptäcks i {{zone}} på {{cameraName}} kommer att visas som Varningar.",
-      "objectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} kommer att visas som Detektioner oavsett vilken zon de befinner sig i.",
+      "objectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} visas som detekteringar oavsett vilken zon de befinner sig i.",
       "zoneObjectDetectionsTips": {
         "text": "Alla {{detectionsLabels}}-objekt som inte kategoriseras i {{zone}} på {{cameraName}} kommer att visas som Detektioner.",
         "notSelectDetections": "Alla {{detectionsLabels}} objekt som upptäckts i {{zone}} på {{cameraName}} och som inte kategoriserats som Varningar kommer att visas som Detekteringar oavsett vilken zon de befinner sig i.",

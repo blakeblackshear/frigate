@@ -4,7 +4,7 @@ import logging
 import os
 import queue
 import threading
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -75,9 +75,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
                 f"Failed to initialize live streaming audio transcription: {e}"
             )
 
-    def __process_audio_stream(
-        self, audio_data: np.ndarray
-    ) -> Optional[tuple[str, bool]]:
+    def __process_audio_stream(self, audio_data: np.ndarray) -> tuple[str, bool] | None:
         if (
             self.model_runner.model is None
             and self.config.audio_transcription.model_size == "small"

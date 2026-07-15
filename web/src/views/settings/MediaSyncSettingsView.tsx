@@ -2,7 +2,6 @@ import Heading from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Toaster } from "@/components/ui/sonner";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,13 +9,16 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useJobStatus } from "@/api/ws";
 import { Switch } from "@/components/ui/switch";
-import { LuCheck, LuX } from "react-icons/lu";
+import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { MediaSyncResults, MediaSyncStats } from "@/types/ws";
+import { useDocDomain } from "@/hooks/use-doc-domain";
+import { Link } from "react-router-dom";
 
 export default function MediaSyncSettingsView() {
   const { t } = useTranslation("views/settings");
+  const { getLocaleDocUrl } = useDocDomain();
   const [selectedMediaTypes, setSelectedMediaTypes] = useState<string[]>([
     "all",
   ]);
@@ -102,20 +104,31 @@ export default function MediaSyncSettingsView() {
   return (
     <>
       <div className="flex size-full flex-col md:flex-row">
-        <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
           <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
             <div className="col-span-1">
               <Heading as="h4" className="mb-2 hidden md:block">
                 {t("maintenance.sync.title")}
               </Heading>
-
               <div className="max-w-6xl">
                 <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-muted-foreground">
                   <p>{t("maintenance.sync.desc")}</p>
+
+                  <div className="flex items-center text-primary-variant">
+                    <Link
+                      to={getLocaleDocUrl(
+                        "configuration/record#syncing-media-files-with-disk",
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      {t("readTheDocumentation", { ns: "common" })}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
+                  </div>
                 </div>
               </div>
-
               <div className="space-y-6">
                 {/* Media Types Selection */}
                 <div>

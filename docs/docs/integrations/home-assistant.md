@@ -9,6 +9,8 @@ The best way to integrate with Home Assistant is to use the [official integratio
 
 ### Preparation
 
+Frigate itself must be installed and running before setting up the integration. See the [installation documentation](../frigate/installation.md) for details.
+
 The Frigate integration requires the `mqtt` integration to be installed and
 manually configured first.
 
@@ -122,7 +124,7 @@ Use `http://<frigate_device_ip>:8971` as the URL for the integration so that aut
 
 The above URL assumes you have [disabled TLS](../configuration/tls).
 By default, TLS is enabled and Frigate will be using a self-signed certificate. HomeAssistant will fail to connect HTTPS to port 8971 since it fails to verify the self-signed certificate.
-Either disable TLS and use HTTP from HomeAssistant, or configure Frigate to be acessible with a valid certificate.
+Either disable TLS and use HTTP from HomeAssistant, or configure Frigate to be accessible with a valid certificate.
 
 :::
 
@@ -195,7 +197,7 @@ For clips to be castable to media devices, audio is required and may need to be 
 
 ## Camera API
 
-To disable a camera dynamically
+To turn a camera off (pauses Frigate's processing of the stream; does not persist across Frigate restarts; see [Camera state](/configuration/live#camera-state)):
 
 ```
 action: camera.turn_off
@@ -204,7 +206,7 @@ target:
   entity_id: camera.back_deck_cam  # your Frigate camera entity ID
 ```
 
-To enable a camera that has been disabled dynamically
+To turn a camera back on:
 
 ```
 action: camera.turn_on
@@ -212,6 +214,12 @@ data: {}
 target:
   entity_id: camera.back_deck_cam  # your Frigate camera entity ID
 ```
+
+:::note
+
+These actions toggle Frigate's runtime On/Off state. To permanently disable a camera, set its status to **Disabled** in **Settings → Camera Management** in the Frigate UI.
+
+:::
 
 ## Notification API
 

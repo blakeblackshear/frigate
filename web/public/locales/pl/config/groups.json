@@ -1,1 +1,73 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Ogólne Wykrywanie",
+            "sensitivity": "Ogólna Czułość"
+        },
+        "cameras": {
+            "detection": "Wykrywanie",
+            "sensitivity": "Czułość"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Ogólny Wygląd"
+        },
+        "cameras": {
+            "appearance": "Wygląd"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Ogólna Czułość",
+            "algorithm": "Ogólny Algorytm"
+        },
+        "cameras": {
+            "sensitivity": "Czułość",
+            "algorithm": "Algorytm"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Ogólne Ustawienia Wyświetlania"
+        },
+        "cameras": {
+            "display": "Wyświetlanie"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Ogólna Rozdzielczość",
+            "tracking": "Ogólne Śledzenie"
+        },
+        "cameras": {
+            "resolution": "Rozdzielczość",
+            "tracking": "Śledzenie"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Ogólne Śledzenie",
+            "filtering": "Ogólne Filtrowanie"
+        },
+        "cameras": {
+            "tracking": "Śledzenie",
+            "filtering": "Filtrowanie"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Ogólne Przechowywanie",
+            "events": "Ogólne Zdarzenia"
+        },
+        "cameras": {
+            "retention": "Przechowywanie",
+            "events": "Zdarzenia"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Argumenty FFmpeg dotyczące konkretnej kamery"
+        }
+    }
+}

@@ -144,7 +144,7 @@ At this point you should be able to start Frigate and a basic config will be cre
 
 ### Step 2: Add a camera
 
-Click the **Add Camera** button in <NavPath path="Settings > Camera configuration > Management" /> to use the camera setup wizard to get your first camera added into Frigate.
+Click the **Add Camera** button in <NavPath path="Settings > Global configuration > Camera management" /> to use the camera setup wizard to get your first camera added into Frigate.
 
 ### Step 3: Configure hardware acceleration (recommended)
 
@@ -192,7 +192,7 @@ cameras:
 
 ### Step 4: Configure detectors
 
-By default, Frigate will use a single CPU detector.
+By default, Frigate will use a single OpenVINO detector running on the CPU.
 
 In many cases, the integrated graphics on Intel CPUs provides sufficient performance for typical Frigate setups. If you have an Intel processor, you can follow the configuration below.
 
@@ -204,8 +204,8 @@ You need to refer to **Configure hardware acceleration** above to enable the con
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `OpenVINO` and **Device** `GPU`
-2. Navigate to <NavPath path="Settings > System > Detection model" /> and configure the model settings for OpenVINO:
+1. Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `OpenVINO` and **Device** `GPU`
+2. On the same page, in the **Custom Model** tab, configure the model settings for OpenVINO:
 
 | Field                                    | Value                                      |
 | ---------------------------------------- | ------------------------------------------ |
@@ -273,7 +273,7 @@ services:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detector hardware" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`.
+Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`.
 
 </TabItem>
 <TabItem value="yaml">
@@ -301,11 +301,11 @@ cameras:
 
 More details on available detectors can be found [here](../configuration/object_detectors.md).
 
-Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they can be configured in <NavPath path="Settings > Global configuration > Objects" /> or via the [configuration file reference](../configuration/reference.md).
+Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they can be configured in <NavPath path="Settings > Global configuration > Objects" /> or via the [configuration file reference](../configuration/advanced/reference.md).
 
 ### Step 5: Setup motion masks
 
-Now that you have optimized your configuration for decoding the video stream, you will want to check to see where to implement motion masks. Click on the camera from the main dashboard, then select the gear icon in the top right, enable Debug View, and finally enable the switch for Motion Boxes. Watch for areas that continuously trigger unwanted motion to be detected. Common areas to mask include camera timestamps and trees that frequently blow in the wind. The goal is to avoid wasting object detection cycles looking at these areas.
+Now that you have optimized your configuration for decoding the video stream, you will want to check to see where to implement motion masks. Click on the camera from the main dashboard, then select the gear icon in the top right, enable the [Debug view](/usage/live#the-single-camera-view), and finally enable the switch for Motion Boxes. Watch for areas that continuously trigger unwanted motion to be detected. Common areas to mask include camera timestamps and trees that frequently blow in the wind. The goal is to avoid wasting object detection cycles looking at these areas.
 
 Use the mask editor to draw polygon masks directly on the camera feed. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and set up a motion mask over the area. More information about masks can be found [here](../configuration/masks.md).
 
@@ -348,7 +348,7 @@ In order to review activity in the Frigate UI, recordings need to be enabled.
 <ConfigTabs>
 <TabItem value="ui">
 
-1. If you have separate streams for detect and record, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />, select your camera, and add a second input with the `record` role pointing to your high-resolution stream
+1. If you have separate streams for detect and record, navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" />, select your camera, and add a second input with the `record` role pointing to your high-resolution stream
 2. Navigate to <NavPath path="Settings > Global configuration > Recording" /> (or <NavPath path="Settings > Camera configuration > Recording" /> for a specific camera) and set **Enable recording** to on
 
 </TabItem>
@@ -388,21 +388,20 @@ If you only plan to use Frigate for recording, it is still recommended to define
 
 :::
 
-By default, Frigate will retain video of all tracked objects for 10 days. The full set of options for recording can be found [here](../configuration/reference.md).
+By default, Frigate will retain video of all tracked objects for 10 days. The full set of options for recording can be found [here](../configuration/advanced/reference.md).
 
 ### Step 7: Complete config
 
 At this point you have a complete config with basic functionality.
 
-- View [common configuration examples](../configuration/index.md#common-configuration-examples) for a list of common configuration examples.
-- View [full config reference](../configuration/reference.md) for a complete list of configuration options.
+- View [common configuration examples](../configuration/config.md#common-configuration-examples) for a list of common configuration examples.
+- View [full config reference](../configuration/advanced/reference.md) for a complete list of configuration options.
 
 ### Follow up
 
 Now that you have a working install, you can use the following documentation for additional features:
 
-1. [Configuring go2rtc](configuring_go2rtc.md) - Additional live view options and RTSP relay
-2. [Zones](../configuration/zones.md)
-3. [Review](../configuration/review.md)
-4. [Masks](../configuration/masks.md)
-5. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
+1. [Zones](../configuration/zones.md)
+2. [Review](../configuration/review.md)
+3. [Masks](../configuration/masks.md)
+4. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant

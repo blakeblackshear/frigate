@@ -3,7 +3,9 @@
   "search": "Keresés",
   "noExports": "Export nem található",
   "deleteExport.desc": "Biztos, hogy törölni akarja {{exportName}}-t?",
-  "deleteExport": "Export törlése",
+  "deleteExport": {
+    "label": "Export törlése"
+  },
   "editExport": {
     "title": "Exportálás átnevezése",
     "desc": "Adjon meg egy új nevet ennek az exportnak.",
@@ -23,5 +25,8 @@
   "headings": {
     "cases": "Esetek",
     "uncategorizedExports": "Kategória nélküli exportok"
+  },
+  "toolbar": {
+    "addExport": "Export hozzáadása"
   }
 }

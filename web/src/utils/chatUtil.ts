@@ -1,8 +1,16 @@
-import type { ChatMessage, ToolCall } from "@/types/chat";
+import type { ChatMessage, ChatStats, ToolCall } from "@/types/chat";
 
 export type StreamChatCallbacks = {
-  /** Update the messages array (e.g. pass to setState). */
-  updateMessages: (updater: (prev: ChatMessage[]) => ChatMessage[]) => void;
+  /** Streamed delta of the assistant's final answer text. */
+  onContentDelta: (delta: string) => void;
+  /** Streamed delta of the assistant's reasoning trace. */
+  onReasoningDelta: (delta: string) => void;
+  /** The full conversation chain so far (system message, history, this turn's
+   * tool-call turns, tool results, and — on the final emission — the final
+   * assistant message). */
+  onChain: (chain: ChatMessage[]) => void;
+  /** Token/timing stats for the turn. */
+  onStats: (stats: ChatStats) => void;
   /** Called when the stream sends an error or fetch fails. */
   onError: (message: string) => void;
   /** Called when the stream finishes (success or error). */
@@ -11,34 +19,59 @@ export type StreamChatCallbacks = {
   defaultErrorMessage?: string;
 };
 
+type StatsChunk = {
+  type: "stats";
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  completion_duration_ms?: number;
+  tokens_per_second?: number;
+};
+
 type StreamChunk =
   | { type: "error"; error: string }
-  | { type: "tool_calls"; tool_calls: ToolCall[] }
-  | { type: "content"; delta: string };
+  | { type: "messages"; messages: ChatMessage[] }
+  | { type: "content"; delta: string }
+  | { type: "reasoning"; delta: string }
+  | StatsChunk;
 
 /**
  * POST to chat/completion with stream: true, parse NDJSON stream, and invoke
  * callbacks so the caller can update UI (e.g. React state).
  */
+export type StreamChatOptions = {
+  enableThinking?: boolean;
+};
+
 export async function streamChatCompletion(
   url: string,
   headers: Record<string, string>,
-  apiMessages: { role: string; content: string }[],
+  apiMessages: ChatMessage[],
   callbacks: StreamChatCallbacks,
   signal?: AbortSignal,
+  options: StreamChatOptions = {},
 ): Promise<void> {
   const {
-    updateMessages,
+    onContentDelta,
+    onReasoningDelta,
+    onChain,
+    onStats,
     onError,
     onDone,
     defaultErrorMessage = "Something went wrong. Please try again.",
   } = callbacks;
 
   try {
+    const body: Record<string, unknown> = {
+      messages: apiMessages,
+      stream: true,
+    };
+    if (options.enableThinking !== undefined) {
+      body.enable_thinking = options.enableThinking;
+    }
     const res = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify({ messages: apiMessages, stream: true }),
+      body: JSON.stringify(body),
       signal,
     });
 
@@ -64,34 +97,26 @@ export async function streamChatCompletion(
     const applyChunk = (data: StreamChunk) => {
       if (data.type === "error") {
         onError(data.error);
-        updateMessages((prev) =>
-          prev.filter((m) => !(m.role === "assistant" && m.content === "")),
-        );
         return "break";
       }
-      if (data.type === "tool_calls" && data.tool_calls?.length) {
-        updateMessages((prev) => {
-          const next = [...prev];
-          const lastMsg = next[next.length - 1];
-          if (lastMsg?.role === "assistant")
-            next[next.length - 1] = {
-              ...lastMsg,
-              toolCalls: data.tool_calls,
-            };
-          return next;
-        });
+      if (data.type === "messages") {
+        onChain(data.messages ?? []);
         return "continue";
       }
       if (data.type === "content" && data.delta !== undefined) {
-        updateMessages((prev) => {
-          const next = [...prev];
-          const lastMsg = next[next.length - 1];
-          if (lastMsg?.role === "assistant")
-            next[next.length - 1] = {
-              ...lastMsg,
-              content: lastMsg.content + data.delta,
-            };
-          return next;
+        onContentDelta(data.delta);
+        return "continue";
+      }
+      if (data.type === "reasoning" && data.delta !== undefined) {
+        onReasoningDelta(data.delta);
+        return "continue";
+      }
+      if (data.type === "stats") {
+        onStats({
+          promptTokens: data.prompt_tokens,
+          completionTokens: data.completion_tokens,
+          completionDurationMs: data.completion_duration_ms,
+          tokensPerSecond: data.tokens_per_second,
         });
         return "continue";
       }
@@ -108,9 +133,8 @@ export async function streamChatCompletion(
         const trimmed = line.trim();
         if (!trimmed) continue;
         try {
-          const data = JSON.parse(trimmed) as StreamChunk & { type: string };
-          const result = applyChunk(data as StreamChunk);
-          if (result === "break") {
+          const data = JSON.parse(trimmed) as StreamChunk;
+          if (applyChunk(data) === "break") {
             hadStreamError = true;
             break;
           }
@@ -124,48 +148,61 @@ export async function streamChatCompletion(
     // Flush remaining buffer
     if (!hadStreamError && buffer.trim()) {
       try {
-        const data = JSON.parse(buffer.trim()) as StreamChunk & {
-          type: string;
-          delta?: string;
-        };
-        if (data.type === "content" && data.delta !== undefined) {
-          updateMessages((prev) => {
-            const next = [...prev];
-            const lastMsg = next[next.length - 1];
-            if (lastMsg?.role === "assistant")
-              next[next.length - 1] = {
-                ...lastMsg,
-                content: lastMsg.content + data.delta!,
-              };
-            return next;
-          });
-        }
+        const data = JSON.parse(buffer.trim()) as StreamChunk;
+        applyChunk(data);
       } catch {
         // ignore final malformed chunk
       }
-    }
-
-    if (!hadStreamError) {
-      updateMessages((prev) => {
-        const next = [...prev];
-        const lastMsg = next[next.length - 1];
-        if (lastMsg?.role === "assistant" && lastMsg.content === "")
-          next[next.length - 1] = { ...lastMsg, content: " " };
-        return next;
-      });
     }
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
       // User stopped generation — not an error
     } else {
       onError(defaultErrorMessage);
-      updateMessages((prev) =>
-        prev.filter((m) => !(m.role === "assistant" && m.content === "")),
-      );
     }
   } finally {
     onDone();
   }
+}
+
+/** Map each tool result message to its tool_call_id for response lookup. */
+export function toolResponsesById(
+  messages: ChatMessage[],
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const m of messages) {
+    if (m.role === "tool" && typeof m.tool_call_id === "string") {
+      map.set(
+        m.tool_call_id,
+        typeof m.content === "string" ? m.content : JSON.stringify(m.content),
+      );
+    }
+  }
+  return map;
+}
+
+/** Derive the display tool calls for one assistant message. */
+export function toolCallsForMessage(
+  message: ChatMessage,
+  responses: Map<string, string>,
+): ToolCall[] {
+  if (!message.tool_calls?.length) return [];
+  return message.tool_calls.map((tc) => {
+    let args: Record<string, unknown> | undefined;
+    const raw = tc.function?.arguments;
+    if (typeof raw === "string") {
+      try {
+        args = JSON.parse(raw) as Record<string, unknown>;
+      } catch {
+        args = undefined;
+      }
+    }
+    return {
+      name: tc.function?.name ?? "",
+      arguments: args,
+      response: responses.get(tc.id),
+    };
+  });
 }
 
 /**

@@ -1,5 +1,6 @@
 import { useState, ReactNode, useCallback } from "react";
 import { SearchResult } from "@/types/search";
+import { REVIEW_PADDING } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { baseUrl } from "@/api/baseUrl";
 import { toast } from "sonner";
@@ -94,14 +95,11 @@ export default function SearchResultActions({
       axios
         .post("debug_replay/start", {
           camera: event.camera,
-          start_time: event.start_time,
-          end_time: event.end_time,
+          start_time: (event.start_time ?? 0) - REVIEW_PADDING,
+          end_time: (event.end_time ?? Date.now() / 1000) + REVIEW_PADDING,
         })
         .then((response) => {
-          if (response.status === 200) {
-            toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
-              position: "top-center",
-            });
+          if (response.status === 202 || response.status === 200) {
             navigate("/replay");
           }
         })
@@ -119,7 +117,11 @@ export default function SearchResultActions({
                 closeButton: true,
                 dismissible: false,
                 action: (
-                  <a href="/replay" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`${baseUrl}replay`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button>
                       {t("dialog.toast.goToReplay", { ns: "views/replay" })}
                     </Button>
@@ -128,9 +130,15 @@ export default function SearchResultActions({
               },
             );
           } else {
-            toast.error(t("dialog.toast.error", { error: errorMessage }), {
-              position: "top-center",
-            });
+            toast.error(
+              t("dialog.toast.error", {
+                ns: "views/replay",
+                error: errorMessage,
+              }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .finally(() => {
@@ -204,7 +212,7 @@ export default function SearchResultActions({
             <span>{t("itemMenu.addTrigger.label")}</span>
           </MenuItem>
         )}
-      {searchResult.has_clip && (
+      {isAdmin && searchResult.has_clip && (
         <MenuItem
           className="cursor-pointer"
           aria-label={t("itemMenu.debugReplay.aria")}
@@ -258,13 +266,13 @@ export default function SearchResultActions({
         </AlertDialogContent>
       </AlertDialog>
       {isContextMenu ? (
-        <ContextMenu modal={false}>
+        <ContextMenu>
           <ContextMenuTrigger>{children}</ContextMenuTrigger>
           <ContextMenuContent>{menuItems}</ContextMenuContent>
         </ContextMenu>
       ) : (
         <>
-          <DropdownMenu modal={false}>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <BlurredIconButton aria-label={t("itemMenu.more.aria")}>
                 <FiMoreVertical className="size-5" />

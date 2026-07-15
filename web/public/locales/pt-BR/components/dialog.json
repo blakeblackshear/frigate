@@ -24,6 +24,9 @@
         },
         "state": {
           "submitted": "Enviado"
+        },
+        "toast": {
+          "error": "Falha ao enviar para o Frigate+. Verifique sua conexão de rede e tente novamente."
         }
       }
     },
@@ -56,19 +59,81 @@
     "toast": {
       "success": "Exportação iniciada com sucesso. Veja o arquivo na tela exportar.",
       "error": {
-        "failed": "Falha em iniciar exportação: {{error}}",
+        "failed": "Falha ao iniciar exportação: {{error}}",
         "endTimeMustAfterStartTime": "Tempo de finalização deve ser após tempo de início",
         "noVaildTimeSelected": "Nenhuma faixa de tempo válida selecionada"
       },
-      "view": "Ver"
+      "view": "Ver",
+      "batchQueuedSuccess_one": "1 exportação na fila. Abrindo o caso agora.",
+      "batchQueuedSuccess_many": "{{count}} exportações colocadas na fila. Abrindo o caso agora.",
+      "batchQueuedSuccess_other": "",
+      "batchQueuedPartial": "{{successful}} de {{total}} exportações na fila. Câmeras com falha: {{failedCameras}}",
+      "batchQueueFailed": "Falha ao enfileirar {{total}} exportações. Câmeras com falha: {{failedCameras}}",
+      "batchPartial": "Iniciadas {{successful}} de {{total}} exportações. Câmeras com falha: {{failedCameras}}",
+      "batchFailed": "Falha ao iniciar {{total}} exportações. Câmeras com falha: {{failedCameras}}",
+      "queued": "Exportação na fila. Acompanhe o progresso na página de exportações."
     },
     "fromTimeline": {
       "saveExport": "Salvar Exportação",
-      "previewExport": "Pré-Visualizar Exportação"
+      "previewExport": "Pré-Visualizar Exportação",
+      "queueingExport": "Enfileirando exportação...",
+      "useThisRange": "Use esta faixa"
     },
     "case": {
       "label": "Caso",
-      "placeholder": "Selecione um caso"
+      "placeholder": "Selecione um caso",
+      "newCaseOption": "Criar novo caso de uso",
+      "newCaseNamePlaceholder": "Novo caso de uso",
+      "newCaseDescriptionPlaceholder": "Descrição do caso de uso",
+      "nonAdminHelp": "Um novo caso de uso será criado para estas exportações."
+    },
+    "queueing": "Exportação na fila...",
+    "tabs": {
+      "export": "Câmera única",
+      "multiCamera": "Multi-Câmera"
+    },
+    "multiCamera": {
+      "timeRange": "Intervalo de tempo",
+      "selectFromTimeline": "Selecione do intervale de tempo",
+      "cameraSelection": "Câmeras",
+      "cameraSelectionHelp": "Câmeras com objetos localizados neste intervalo de tempo estão pré-selecionados",
+      "checkingActivity": "Verificando se a câmera está ativa...",
+      "noCameras": "Sem câmeras disponíveis",
+      "detectionCount_one": "Objeto localizado",
+      "detectionCount_many": "{{count}} objetos localizados",
+      "detectionCount_other": "{{count}} objetos localizados",
+      "nameLabel": "Nome do arquivo exportado",
+      "namePlaceholder": "Padrão de nome para exportação",
+      "queueingButton": "Exportações na fila...",
+      "exportButton_one": "Exportar câmera",
+      "exportButton_many": "Exportar {{count}} câmeras",
+      "exportButton_other": "Exportar {{count}} câmeras",
+      "searchOrSelectGroup": "Procurar, ou selecionar um grupo de câmeras...",
+      "selectAll": "Selecionar todas as câmeras",
+      "clearSelection": "Limpar seleção",
+      "selectWithActivity": "Câmeras com rastreamento de objetos",
+      "selectGroup": "Selecione grupo",
+      "noMatchingCameras": "Nenhuma câmera corresponde à sua pesquisa",
+      "selectedCount": "{{selected}} / {{total}} selecionados"
+    },
+    "multi": {
+      "title_one": "Exportar análise",
+      "title_many": "Exportar {{count}} análises",
+      "title_other": "Exportar {{count}} análises",
+      "description": "Exportar cada análise selecionada. Todas as exportações serão agrupadas em um único caso.",
+      "descriptionNoCase": "Exportar cada análise selecionada.",
+      "caseNamePlaceholder": "Exportar análise - {{date}}",
+      "exportButton_one": "Exportar análise",
+      "exportButton_many": "Exportar {{count}} análises",
+      "exportButton_other": "Exportar {{count}} análises",
+      "exportingButton": "Exportando...",
+      "toast": {
+        "started_one": "Uma exportação iniciada. Abrindo o caso agora.",
+        "started_many": "Iniciadas {{count}} exportações. Abrindo o caso agora.",
+        "started_other": "",
+        "failed": "Falha ao iniciar {{total}} exportações. Falhas: {{failedItems}}",
+        "partial": "Iniciadas {{successful}} de {{total}} exportações. Falhas: {{failedItems}}"
+      }
     }
   },
   "streaming": {
@@ -116,6 +181,14 @@
       "export": "Exportar",
       "deleteNow": "Deletar Agora",
       "markAsUnreviewed": "Marcar como não revisado"
+    },
+    "shareTimestamp": {
+      "label": "Compartilhar marca de tempo",
+      "title": "Compartilhar marca de tempo",
+      "description": "Compartilhe uma URL com marca de tempo da posição atual da reprodução ou escolha uma marca de tempo personalizada. Observe que esta não é uma URL de compartilhamento público e só pode ser acessada por usuários que tenham acesso ao Frigate e a esta câmera.",
+      "custom": "Marcação de data/hora personalizado",
+      "button": "Compartilhar URL com marcação de tempo",
+      "shareTitle": "Marcação de data/hora da análise do Frigate: {{camera}}"
     }
   },
   "imagePicker": {

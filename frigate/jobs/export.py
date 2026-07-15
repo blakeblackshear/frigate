@@ -4,15 +4,17 @@ import logging
 import os
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from queue import Full, Queue
-from typing import Any, Callable, Optional
+from typing import Any
 
 from peewee import DoesNotExist
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.config.camera.record import ChaptersEnum
 from frigate.const import UPDATE_JOB_STATE
 from frigate.jobs.job import Job
 from frigate.models import Export
@@ -46,15 +48,16 @@ class ExportJob(Job):
 
     job_type: str = "export"
     camera: str = ""
-    name: Optional[str] = None
-    image_path: Optional[str] = None
-    export_case_id: Optional[str] = None
+    name: str | None = None
+    image_path: str | None = None
+    export_case_id: str | None = None
     request_start_time: float = 0.0
     request_end_time: float = 0.0
     playback_source: str = PlaybackSourceEnum.recordings.value
-    ffmpeg_input_args: Optional[str] = None
-    ffmpeg_output_args: Optional[str] = None
+    ffmpeg_input_args: str | None = None
+    ffmpeg_output_args: str | None = None
     cpu_fallback: bool = False
+    chapters: ChaptersEnum | None = None
     current_step: str = "queued"
     progress_percent: float = 0.0
 
@@ -147,7 +150,7 @@ class ExportJobManager:
         config: FrigateConfig,
         max_concurrent: int,
         max_queued: int = MAX_QUEUED_EXPORT_JOBS,
-        publisher: Optional[JobStatePublisher] = None,
+        publisher: JobStatePublisher | None = None,
     ) -> None:
         self.config = config
         self.max_concurrent = max(1, max_concurrent)
@@ -266,7 +269,7 @@ class ExportJobManager:
 
         return job.id
 
-    def get_job(self, job_id: str) -> Optional[ExportJob]:
+    def get_job(self, job_id: str) -> ExportJob | None:
         """Get a job by ID."""
         with self.lock:
             return self.jobs.get(job_id)
@@ -343,6 +346,7 @@ class ExportJobManager:
             job.ffmpeg_input_args,
             job.ffmpeg_output_args,
             job.cpu_fallback,
+            job.chapters,
             on_progress=self._make_progress_callback(job),
         )
 
@@ -376,7 +380,7 @@ class ExportJobManager:
             self._schedule_job_cleanup(job.id)
 
 
-_job_manager: Optional[ExportJobManager] = None
+_job_manager: ExportJobManager | None = None
 _job_manager_lock = threading.Lock()
 
 
@@ -482,7 +486,7 @@ def start_export_job(config: FrigateConfig, job: ExportJob) -> str:
     return get_export_job_manager(config).enqueue(job)
 
 
-def get_export_job(config: FrigateConfig, job_id: str) -> Optional[ExportJob]:
+def get_export_job(config: FrigateConfig, job_id: str) -> ExportJob | None:
     """Get a queued or completed export job by ID."""
     return get_export_job_manager(config).get_job(job_id)
 

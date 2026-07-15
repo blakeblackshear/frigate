@@ -6,6 +6,7 @@
  */
 
 import type { ConfigFormContext } from "@/types/configForm";
+import { getEffectiveAttributeLabels } from "@/utils/configUtil";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -70,12 +71,27 @@ export function buildTranslationPath(
     (segment): segment is string => typeof segment === "string",
   );
 
-  // Handle filters section - skip the dynamic filter object name
-  // Example: filters.person.threshold -> filters.threshold
+  // Handle filters section - skip the dynamic filter object name. Route
+  // to `filters_attribute.<field>` when the dynamic key is an attribute
+  // label (face, license_plate, courier logos) so attribute filter fields
+  // pick up the attribute-worded translations emitted by
+  // generate_config_translations.py.
+  // Example: filters.person.threshold      -> filters.threshold
+  // Example: filters.face.min_area         -> filters_attribute.min_area
   const filtersIndex = stringSegments.indexOf("filters");
   if (filtersIndex !== -1 && stringSegments.length > filtersIndex + 2) {
+    const filterKey = stringSegments[filtersIndex + 1];
+    const allAttributes = getEffectiveAttributeLabels(
+      formContext?.fullConfig,
+      formContext?.fullCameraConfig,
+      formContext?.level,
+    );
+    const sectionWord = allAttributes.includes(filterKey)
+      ? "filters_attribute"
+      : "filters";
     const normalized = [
-      ...stringSegments.slice(0, filtersIndex + 1),
+      ...stringSegments.slice(0, filtersIndex),
+      sectionWord,
       ...stringSegments.slice(filtersIndex + 2),
     ];
     return normalized.join(".");

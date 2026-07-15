@@ -1,1 +1,56 @@
-{}
+{
+    "audio": {
+        "label": "Helisündmused"
+    },
+    "birdseye": {
+        "mode": {
+            "label": "Jälgimisrežiim"
+        }
+    },
+    "version": {
+        "label": "Praegune seadistuse versioon",
+        "description": "Aktiivse seadistuse numbriline või tekstiline versioon, mis aitab tuvastada vormingumuudatusi."
+    },
+    "classification": {
+        "bird": {
+            "threshold": {
+                "label": "Minimaalne punktiskoor",
+                "description": "Objekti määratlemiseks linnina vajalik mlassifitseerimise minimaalne punktiskoor."
+            }
+        },
+        "custom": {
+            "threshold": {
+                "label": "Punktiskoori lävend",
+                "description": "Punktiskoori lävend, mida kasutatakse klassifitseerimise oleku muutmiseks."
+            }
+        }
+    },
+    "semantic_search": {
+        "triggers": {
+            "threshold": {
+                "description": "Minimaalne sarnasuse punktiskoor (0-1), mis on vajalik selle päästiku käivitamiseks."
+            }
+        }
+    },
+    "face_recognition": {
+        "unknown_score": {
+            "label": "Tundmatu punktiskoori lävend"
+        }
+    },
+    "lpr": {
+        "label": "Sõidukite numbrimärkide tuvastus",
+        "description": "Sõidukite numbrimärkide tuvastuse seadistus sisaldab tuvastuse lävendeid, vormindust ja teadaolevaid numbrimärke.",
+        "enabled": {
+            "description": "Lülita sõidukite numbrimärkide tuvastus kõikide kaamerate jaoks sisse; seda saad kaamerakohaselt ka sürjutada."
+        }
+    },
+    "genai": {
+        "label": "Generatiivse tehisaru seadistus",
+        "description": "Seadistsued generatiivse tehisaru teenusepakkujate kasutamisel kirjelduste ja kokkuvõtete loomiseks ülevaatamisele kuuluvate objektide jaoks."
+    },
+    "review": {
+        "genai": {
+            "description": "Kontrollib generatiivse tehisaru kasutamist kirjelduste ja kokkuvõtete koostamiseks ülevaatamisele kuuluvate objektide jaoks."
+        }
+    }
+}

@@ -28,5 +28,8 @@
             "detectRequired": "Pelo menos um fluxo de entrada deve ter a função 'detectar' atribuída.",
             "hwaccelDetectOnly": "Somente o fluxo de entrada com a função de detecção pode definir argumentos de aceleração de hardware."
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Deve ser um número par."
     }
 }

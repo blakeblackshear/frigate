@@ -2,10 +2,10 @@
   "exploreIsUnavailable": {
     "downloadingModels": {
       "tips": {
-        "context": "Potser voldreu reindexar les incrustacions dels objectes seguits un cop s'hagin descarregat els models.",
+        "context": "Potser voldreu reindexar els vectors dels objectes seguits un cop s'hagin descarregat els models.",
         "documentation": "Llegir la documentació"
       },
-      "context": "Frigate està descarregant els models d'embeddings necessaris per a donar suport a la funció de cerca semàntica. Això pot trigar diversos minuts, depenent de la velocitat de la teva connexió de xarxa.",
+      "context": "El Frigate està baixant els models de vectors necessaris per a admetre la funció de Cerca Semàntica. Això pot trigar uns quants minuts depenent de la velocitat de la vostra connexió de xarxa.",
       "setup": {
         "visionModel": "Model de visió",
         "visionModelFeatureExtractor": "Extractor de característiques del model de visió",
@@ -248,7 +248,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar la supressió",
-      "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol detall de seguiment. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
+      "desc": "En eliminar aquest objecte detectat, s'esborrarà la instantània, els vectors desats i qualsevol entrada associada als detalls de seguiment d'aquest objecte. El metratge enregistrat d'aquest objecte detectat a la vista de l'Historial <em>NO</em> s'esborrarà.<br /><br />Segur que voleu continuar?"
     },
     "toast": {
       "error": "S'ha produït un error en suprimir aquest objecte rastrejat: {{errorMessage}}"
@@ -282,14 +282,17 @@
         "faceOrLicense_plate": "{{attribute}} detectat per {{label}}",
         "other": "{{label}} reconegut com a {{attribute}}"
       },
-      "gone": "{{label}} esquerra",
+      "gone": "{{label}} ha sortit",
       "heard": "{{label}} sentit",
       "external": "{{label}} detectat",
       "header": {
         "zones": "Zones",
         "ratio": "Ràtio",
         "area": "Àrea",
-        "score": "Puntuació"
+        "score": "Puntuació",
+        "computedScore": "Puntuació calculada",
+        "topScore": "Puntuació superior",
+        "toggleAdvancedScores": "Commuta les puntuacions avançades"
       }
     },
     "annotationSettings": {

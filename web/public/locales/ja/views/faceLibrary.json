@@ -17,7 +17,7 @@
   "documentTitle": "顔データベース - Frigate",
   "uploadFaceImage": {
     "title": "顔画像をアップロード",
-    "desc": "顔を検出するために画像をアップロードし、{{pageToggle}} に追加します"
+    "desc": "顔を検知するために画像をアップロードし、{{pageToggle}} に追加します"
   },
   "collections": "コレクション",
   "createFaceLibrary": {
@@ -39,7 +39,11 @@
     "title": "過去の学習",
     "aria": "過去の学習を選択",
     "empty": "最近の顔認識の試行はありません",
-    "titleShort": "Classifications,最近の分類結果を選択,,False,train.aria,,"
+    "titleShort": "最近の分類",
+    "emptyNoLibrary": {
+      "title": "顔画像をアップロード",
+      "description": "顔認識を機能させるには、ライブラリに少なくとも 1 つの顔を追加する必要があります。"
+    }
   },
   "selectFace": "顔を選択",
   "deleteFaceLibrary": {
@@ -82,7 +86,8 @@
       "deletedName_other": "{{count}} 件の顔を削除しました。",
       "renamedFace": "顔の名前を {{name}} に変更しました",
       "trainedFace": "顔の学習が完了しました。",
-      "updatedFaceScore": "顔のスコアを {{name}} ({{score}})に更新しました。"
+      "updatedFaceScore": "顔のスコアを {{name}} ({{score}})に更新しました。",
+      "reclassifiedFace": "顔を再分類しました。"
     },
     "error": {
       "uploadingImageFailed": "画像のアップロードに失敗しました: {{errorMessage}}",
@@ -91,7 +96,10 @@
       "deleteNameFailed": "名前の削除に失敗しました: {{errorMessage}}",
       "renameFaceFailed": "顔の名前変更に失敗しました: {{errorMessage}}",
       "trainFailed": "学習に失敗しました: {{errorMessage}}",
-      "updateFaceScoreFailed": "顔スコアの更新に失敗しました: {{errorMessage}}"
+      "updateFaceScoreFailed": "顔スコアの更新に失敗しました: {{errorMessage}}",
+      "reclassifyFailed": "顔の再分類に失敗しました: {{errorMessage}}"
     }
-  }
+  },
+  "reclassifyFaceAs": "顔を再分類する:",
+  "reclassifyFace": "顔の再分類"
 }

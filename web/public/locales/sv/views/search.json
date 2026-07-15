@@ -14,18 +14,18 @@
       "desc": {
         "step1": "Skriv ett filtreringsnyckelnamn följt av ett kolon (t.ex. \"kameror:\").",
         "step2": "Välj ett värde utifrån alternativen eller skriv in ditt egna.",
-        "step3": "Använd flera filter genom att addera dom en efter en med ett mellanslag emellan dom.",
+        "step3": "Använd flera filter genom att lägga till dem en efter en med ett mellanslag mellan dem.",
         "step4": "Datumfilter (före: och efter:) använd {{DateFormat}} format.",
         "step5": "Tidsintervaller använder {{exampleTime}} format.",
         "exampleLabel": "Exempel:",
-        "step6": "Ta bort filter genom att klicka på 'x\" bredvid dom.",
+        "step6": "Ta bort filter genom att klicka på \"x\" bredvid dem.",
         "text": "Filter hjälper dig att begränsa dina sökresultat. Så här använder du dem i inmatningsfältet:"
       },
       "title": "Hur du använder filter"
     },
     "header": {
       "noFilters": "Filter",
-      "activeFilters": "Aktiva Filter",
+      "activeFilters": "Aktiva filter",
       "currentFilterType": "Filtervärden"
     },
     "label": {

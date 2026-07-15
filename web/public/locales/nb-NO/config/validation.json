@@ -28,5 +28,8 @@
         }
     },
     "minLength": "Må være minst {{limit}} tegn",
-    "maxLength": "Må være maks {{limit}} tegn"
+    "maxLength": "Må være maks {{limit}} tegn",
+    "detect": {
+        "dimensionMustBeEven": "Må være et partall."
+    }
 }

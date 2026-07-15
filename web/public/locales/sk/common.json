@@ -98,7 +98,7 @@
       "kbps": "kB/s",
       "mbps": "MB/s",
       "gbps": "GB/s",
-      "kbph": "kb/hour",
+      "kbph": "kb/hodina",
       "mbph": "MB/hodinu",
       "gbph": "GB/hodinu"
     }
@@ -149,7 +149,16 @@
     "unsuspended": "Zrušte pozastavenie",
     "play": "Hrať",
     "unselect": "Zrušte výber",
-    "continue": "Pokračovať"
+    "continue": "Pokračovať",
+    "copiedToClipboard": "Skopírované do schránky",
+    "modified": "Upravené",
+    "overridden": "Prepísané",
+    "resetToGlobal": "Obnoviť na globálne",
+    "resetToDefault": "Obnoviť predvolené",
+    "saveAll": "Uložiť všetko",
+    "savingAll": "Ukladá sa všetko…",
+    "undoAll": "Vrátiť späť všetko",
+    "retry": "Skúste to znova"
   },
   "menu": {
     "system": "Systém",
@@ -252,7 +261,11 @@
     },
     "review": "Recenzia",
     "explore": "Preskúmať",
-    "classification": "Klasifikácia"
+    "classification": "Klasifikácia",
+    "profiles": "Profily",
+    "actions": "Akcie",
+    "features": "Vlastnosti",
+    "chat": "Chat"
   },
   "toast": {
     "copyUrlToClipboard": "Adresa URL bola skopírovaná do schránky.",
@@ -261,7 +274,8 @@
       "error": {
         "title": "Chyba pri ukladaní zmien konfigurácie: {{errorMessage}}",
         "noMessage": "Chyba pri ukladaní zmien konfigurácie"
-      }
+      },
+      "success": "Zmeny konfigurácie boli úspešne uložené."
     }
   },
   "role": {
@@ -303,5 +317,10 @@
   "field": {
     "optional": "Voliteľné",
     "internalID": "Interné ID Frigate používa v konfigurácii a databáze"
+  },
+  "no_items": "Žiadne položky",
+  "validation_errors": "Chyby overenia",
+  "credentialField": {
+    "savedPlaceholder": "Uložené – pre aktuálne informácie nechajte prázdne"
   }
 }

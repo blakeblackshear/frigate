@@ -68,7 +68,10 @@
         "placeholder": "Choisissez un flux."
       },
       "birdseye": "Birdseye"
-    }
+    },
+    "showAll": "Afficher tout les groupes de caméras",
+    "showLess": "Réduire l'affichage",
+    "editGroups": "Modifier les groupes de caméras"
   },
   "debug": {
     "timestamp": "Horodatage",
@@ -82,6 +85,7 @@
     },
     "boundingBox": "Cadre de détection",
     "zones": "Zones",
-    "regions": "Régions"
+    "regions": "Régions",
+    "paths": "Chemins"
   }
 }

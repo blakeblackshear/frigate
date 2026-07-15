@@ -415,10 +415,7 @@ export default function Step3StreamConfig({
                               </Button>
                             </div>
                           </PopoverTrigger>
-                          <PopoverContent
-                            className="w-[--radix-popover-trigger-width] p-2"
-                            disablePortal
-                          >
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-2">
                             <Command>
                               <CommandInput
                                 placeholder={t(
@@ -600,7 +597,7 @@ export default function Step3StreamConfig({
                   <Label className="text-sm font-medium text-primary-variant">
                     {t("cameraWizard.step3.roles")}
                   </Label>
-                  <Popover modal={true}>
+                  <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                         <LuInfo className="size-3" />
@@ -670,7 +667,7 @@ export default function Step3StreamConfig({
                   <Label className="text-sm font-medium text-primary-variant">
                     {t("cameraWizard.step3.featuresTitle")}
                   </Label>
-                  <Popover modal={true}>
+                  <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                         <LuInfo className="size-3" />
@@ -734,7 +731,7 @@ export default function Step3StreamConfig({
         </div>
       )}
 
-      <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-end sm:gap-4">
+      <div className="flex flex-col-reverse gap-2 pt-6 sm:flex-row sm:justify-end">
         {onBack && (
           <Button type="button" onClick={onBack} className="sm:flex-1">
             {t("button.back", { ns: "common" })}

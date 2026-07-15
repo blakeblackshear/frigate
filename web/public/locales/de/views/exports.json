@@ -14,7 +14,9 @@
   "toast": {
     "error": {
       "renameExportFailed": "Umbenennen des Exports fehlgeschlagen: {{errorMessage}}",
-      "assignCaseFailed": "Aktualisierung der Fallzuweisung fehlgeschlagen: {{errorMessage}}"
+      "assignCaseFailed": "Aktualisierung der Fallzuweisung fehlgeschlagen: {{errorMessage}}",
+      "caseSaveFailed": "Fehler beim speichern vom Fall: {{errorMessage}}",
+      "caseDeleteFailed": "Fehler beim löschem vom Fall: {{errorMessage}}"
     }
   },
   "tooltip": {
@@ -22,7 +24,8 @@
     "downloadVideo": "Video herunterladen",
     "editName": "Name ändern",
     "deleteExport": "Export löschen",
-    "assignToCase": "Hinzufügen zum Fall"
+    "assignToCase": "Hinzufügen zum Fall",
+    "removeFromCase": "Vom Gehäuse entfernen"
   },
   "headings": {
     "cases": "Fälle",
@@ -35,5 +38,91 @@
     "newCaseOption": "Neuen Fall erstellen",
     "nameLabel": "Fallname",
     "descriptionLabel": "Beschreibung"
+  },
+  "toolbar": {
+    "newCase": "Neuer Fall",
+    "addExport": "Zum expotieren hinzufügen",
+    "editCase": "Fall bearbeiten",
+    "deleteCase": "Fall löschen"
+  },
+  "deleteCase": {
+    "label": "Fall löschen",
+    "desc": "Sind sie sich sicher löschen von{{caseName}}?",
+    "descKeepExports": "Exporte bleiben als nicht kategorisierte Exporte verfügbar.",
+    "descDeleteExports": "Alle Exporte werden in diesem Fall endgültig gelöscht.",
+    "deleteExports": "Exporte auch löschen"
+  },
+  "caseCard": {
+    "emptyCase": "Noch keine Exporte"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} export",
+    "queued": "In der Warteschlange",
+    "running": "läuft",
+    "preparing": "Vorbereitung",
+    "copying": "kopieren",
+    "encoding": "Codierung",
+    "encodingRetry": "Kodierung (Wiederholung)",
+    "finalizing": "Abschließen"
+  },
+  "caseView": {
+    "noDescription": "keine Beschreibung",
+    "createdAt": "Erstellt {{value}}",
+    "exportCount_one": "1 Export",
+    "exportCount_other": "{{count}} Exports",
+    "cameraCount_one": "1 Kamera",
+    "cameraCount_other": "{{count}} Kameras",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger Anzeigen",
+    "emptyTitle": "Der Fall ist leer",
+    "emptyDescription": "Fügen Sie vorhandene, nicht kategorisierte Exporte hinzu, um den Fall übersichtlich zu halten.",
+    "emptyDescriptionNoExports": "Es sind noch keine nicht kategorisierten Exporte zum Hinzufügen verfügbar."
+  },
+  "caseEditor": {
+    "createTitle": "Fall erstellen",
+    "editTitle": "Fall bearbeiten",
+    "namePlaceholder": "Fall Name",
+    "descriptionPlaceholder": "Fügen Sie Anmerkungen oder Kontext zu diesem Fall hinzu"
+  },
+  "addExportDialog": {
+    "title": "Export zum {{caseName}} hinzufügen",
+    "searchPlaceholder": "Suche nach nicht kategorisierten Exporten",
+    "empty": "Es wurden keine nicht kategorisierten Exporte gefunden, die dieser Suche entsprechen.",
+    "addButton_one": "1 Export hinzufügen",
+    "addButton_other": "Fügen Sie {{count}} Exporte hinzu",
+    "adding": "Hinzufügen..."
+  },
+  "selected_one": "{{count}} ausgewählt",
+  "selected_other": "{{count}} ausgewählt",
+  "bulkActions": {
+    "addToCase": "Zum Fall hinzufügen",
+    "moveToCase": "Zum Fall wechseln",
+    "removeFromCase": "Aus dem Fall nehmen",
+    "delete": "löschen",
+    "deleteNow": "jetzt löschen"
+  },
+  "bulkDelete": {
+    "title": "Exporte löschen",
+    "desc_one": "Möchten Sie den Export {{count}} wirklich löschen?",
+    "desc_other": "Möchten Sie wirklich {{count}} Exporte löschen?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Aus dem Fall nehmen",
+    "desc_one": "{{count}}-Export aus diesem Fall entfernen?",
+    "desc_other": "{{count}} Exporte aus diesem Fall entfernen?",
+    "descKeepExports": "Die Exporte werden in die Kategorie „Nicht kategorisiert“ verschoben.",
+    "descDeleteExports": "Exporte werden endgültig gelöscht.",
+    "deleteExports": "Löschen Sie stattdessen Exporte"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Exporte erfolgreich gelöscht",
+      "reassign": "Fallzuweisung erfolgreich aktualisiert",
+      "remove": "Exporte erfolgreich aus dem Fall entfernt"
+    },
+    "error": {
+      "deleteFailed": "Fehler beim Löschen der Exporte: {{errorMessage}}",
+      "reassignFailed": "Fehler beim Aktualisieren der Fallzuordnung: {{errorMessage}}"
+    }
   }
 }

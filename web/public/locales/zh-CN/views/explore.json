@@ -285,7 +285,10 @@
         "zones": "区",
         "ratio": "比例",
         "area": "大小",
-        "score": "分数"
+        "score": "分数",
+        "computedScore": "计算得分",
+        "topScore": "最高得分",
+        "toggleAdvancedScores": "切换高级分数"
       }
     },
     "annotationSettings": {

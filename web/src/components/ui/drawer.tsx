@@ -2,8 +2,6 @@ import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
-import { isPWA } from "@/utils/isPWA";
-import { isIOS } from "react-device-detect";
 
 const Drawer = ({
   shouldScaleBackground = true,
@@ -43,10 +41,9 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border border-b-0 bg-background",
         className,
-        isIOS && isPWA && "pb-5",
-        isIOS && !isPWA && "md:pb-5",
+        "pb-[calc(0.25rem+env(safe-area-inset-bottom))]",
       )}
       {...props}
     >

@@ -241,7 +241,7 @@ function AnnotationSettings({
 
   return (
     <div className="ml-2">
-      <Overlay modal={isDesktop} open={open} onOpenChange={handleOpenChange}>
+      <Overlay open={open} onOpenChange={handleOpenChange}>
         <Trigger asChild>
           <Button
             type="button"
@@ -269,7 +269,6 @@ function AnnotationSettings({
               : "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4"
           }
           {...contentProps}
-          {...(isDesktop ? { disablePortal: true } : {})}
           data-annotation-popover
         >
           <AnnotationSettingsPane
@@ -958,8 +957,9 @@ function ObjectDetailsTab({
             toast.success(
               t("details.item.toast.success.regenerate", {
                 provider: capitalizeAll(
-                  config?.genai.provider.replaceAll("_", " ") ??
-                    t("generativeAI"),
+                  Object.values(config?.genai ?? {})
+                    .find((agent) => agent?.roles?.includes("descriptions"))
+                    ?.provider?.replaceAll("_", " ") ?? t("generativeAI"),
                 ),
               }),
               {
@@ -977,8 +977,9 @@ function ObjectDetailsTab({
           toast.error(
             t("details.item.toast.error.regenerate", {
               provider: capitalizeAll(
-                config?.genai.provider.replaceAll("_", " ") ??
-                  t("generativeAI"),
+                Object.values(config?.genai ?? {})
+                  .find((agent) => agent?.roles?.includes("descriptions"))
+                  ?.provider?.replaceAll("_", " ") ?? t("generativeAI"),
               ),
               errorMessage,
             }),
@@ -1250,30 +1251,41 @@ function ObjectDetailsTab({
         return;
       }
 
-      falsePositive
-        ? axios.put(`events/${search.id}/false_positive`)
-        : axios.post(`events/${search.id}/plus`, {
-            include_annotation: 1,
-          });
+      try {
+        const resp = falsePositive
+          ? await axios.put(`events/${search.id}/false_positive`)
+          : await axios.post(`events/${search.id}/plus`, {
+              include_annotation: 1,
+            });
 
-      setState("submitted");
-      setSearch({ ...search, plus_id: "new_upload" });
-      mutate(
-        (key) => isEventsKey(key),
-        (currentData: SearchResult[][] | SearchResult[] | undefined) =>
-          mapSearchResults(currentData, (event) =>
-            event.id === search.id
-              ? { ...event, plus_id: "new_upload" }
-              : event,
-          ),
-        {
-          optimisticData: true,
-          rollbackOnError: true,
-          revalidate: false,
-        },
-      );
+        if (resp.status !== 200 || !resp.data?.success) {
+          throw new Error();
+        }
+
+        setState("submitted");
+        mutate(
+          (key) => isEventsKey(key),
+          (currentData: SearchResult[][] | SearchResult[] | undefined) =>
+            mapSearchResults(currentData, (event) =>
+              event.id === search.id
+                ? { ...event, plus_id: "new_upload" }
+                : event,
+            ),
+          {
+            optimisticData: true,
+            rollbackOnError: true,
+            revalidate: false,
+          },
+        );
+      } catch {
+        setState("reviewing");
+        toast.error(
+          t("explore.plus.review.toast.error", { ns: "components/dialog" }),
+          { position: "top-center" },
+        );
+      }
     },
-    [search, mutate, mapSearchResults, setSearch, isEventsKey],
+    [search, mutate, mapSearchResults, isEventsKey, t],
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);
@@ -1568,7 +1580,7 @@ function ObjectDetailsTab({
                       {t("button.yes", { ns: "common" })}
                     </Button>
                     <Button
-                      className="flex-1 text-white"
+                      className="flex-1"
                       aria-label={t("button.no", { ns: "common" })}
                       variant="destructive"
                       onClick={() => {
@@ -1705,7 +1717,7 @@ function ObjectDetailsTab({
         ) : (
           <div className="flex flex-col gap-2">
             <Textarea
-              className="text-md h-32 md:text-sm"
+              className="h-32 md:text-sm"
               placeholder={t("details.description.placeholder")}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}

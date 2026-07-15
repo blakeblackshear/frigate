@@ -1,4 +1,5 @@
 import { useApiHost } from "@/api";
+import { baseUrl } from "@/api/baseUrl";
 import { useTranslation } from "react-i18next";
 import { LuExternalLink } from "react-icons/lu";
 import {
@@ -6,7 +7,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 
 type ChatEvent = { id: string; score?: number };
 
@@ -37,10 +37,7 @@ export function ChatEventThumbnailsRow({
   const renderThumb = (event: ChatEvent, isAnchor = false) => (
     <div
       key={event.id}
-      className={cn(
-        "relative aspect-square size-32 shrink-0 overflow-hidden rounded-lg",
-        isAnchor && "ring-2 ring-primary",
-      )}
+      className="relative aspect-square size-32 shrink-0 overflow-hidden rounded-lg"
     >
       <button
         type="button"
@@ -58,7 +55,7 @@ export function ChatEventThumbnailsRow({
       <Tooltip>
         <TooltipTrigger asChild>
           <a
-            href={`/explore?event_id=${event.id}`}
+            href={`${baseUrl}explore?event_id=${event.id}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
@@ -71,9 +68,15 @@ export function ChatEventThumbnailsRow({
         <TooltipContent>{t("open_in_explore")}</TooltipContent>
       </Tooltip>
       {isAnchor && (
-        <span className="pointer-events-none absolute left-1 top-1 rounded bg-primary px-1 text-[10px] text-primary-foreground">
-          {t("anchor")}
-        </span>
+        <>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-lg ring-2 ring-inset ring-primary"
+          />
+          <span className="pointer-events-none absolute left-1 top-1 rounded bg-primary px-1 text-[10px] text-primary-foreground">
+            {t("anchor")}
+          </span>
+        </>
       )}
     </div>
   );

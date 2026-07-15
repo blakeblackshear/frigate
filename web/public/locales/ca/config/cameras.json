@@ -13,7 +13,7 @@
         "description": "Habilitat"
     },
     "audio": {
-        "label": "Esdeveniments d'àudio",
+        "label": "Detecció d'àudio",
         "description": "Configuració per a la detecció d'esdeveniments basats en àudio per a aquesta càmera.",
         "enabled": {
             "label": "Habilita la detecció d'àudio",
@@ -29,11 +29,15 @@
         },
         "listen": {
             "label": "Tipus d'escoltes",
-            "description": "Llista de tipus d'esdeveniment d'àudio a detectar (per exemple: escorça, focarmalarma, crit, parla, crida)."
+            "description": "Llista de tipus d'esdeveniment d'àudio a detectar (per exemple: escorça, focarmalarma, parla, crida)."
         },
         "filters": {
             "label": "Filtres d'àudio",
-            "description": "Paràmetres de filtre per-àudio-tipus, com ara llindars de confiança utilitzats per reduir falsos positius."
+            "description": "Paràmetres de filtre per-àudio-tipus, com ara llindars de confiança utilitzats per reduir falsos positius.",
+            "threshold": {
+                "label": "Confiança mínima de l'àudio",
+                "description": "Llindar mínim de confiança per a l'esdeveniment d'àudio a comptar."
+            }
         },
         "enabled_in_config": {
             "label": "Estat d'àudio original",
@@ -148,11 +152,11 @@
         }
     },
     "ffmpeg": {
-        "label": "FFmpeg",
-        "description": "Paràmetres del FFmpeg que inclouen la ruta dels binaris, args, opcions de hwaccel i args de sortida per rol.",
+        "label": "Fluxos (FFmpeg)",
+        "description": "Les entrades de flux de càmera i les opcions del FFmpeg, incloent-hi el camí binari, els arguments, l'hwaccel i els arguments de sortida per rol.",
         "path": {
             "label": "Ruta FFmpeg",
-            "description": "Ruta al binari FFmpeg a usar o un àlies de versió («5.0» o «7.0»)."
+            "description": "Ruta al binari FFmpeg a usar o un àlies de versió («7.0» o «8.0»)."
         },
         "global_args": {
             "label": "Arguments globals del FFmpeg",
@@ -485,6 +489,10 @@
             "hwaccel_args": {
                 "label": "Exporta els arguments de l'hwaccel",
                 "description": "Args d'acceleració de maquinari a utilitzar per a operacions d'exportació/transcodificació."
+            },
+            "max_concurrent": {
+                "label": "Màxim d'exportacions concurrents",
+                "description": "Nombre màxim de treballs d'exportació a processar al mateix temps."
             }
         },
         "preview": {
@@ -678,7 +686,7 @@
     },
     "timestamp_style": {
         "label": "Estil de la marca horària",
-        "description": "Opcions d'estilització per a marques de temps d'alimentació aplicades a enregistraments i instantànies.",
+        "description": "Opcions d'estilització per a marques de temps aplicades instantànies i la vista de depuració.",
         "position": {
             "label": "Posició de la marca horària",
             "description": "Posició de la marca horària a la imatge (tl/tr/bl/br)."
@@ -858,6 +866,10 @@
         "dashboard": {
             "label": "Mostra a l'interfície d'usuari",
             "description": "Estableix si aquesta càmera és visible a tot arreu a la interfície d'usuari de la Frigate. Desactivar això requerirà editar manualment la configuració per tornar a veure aquesta càmera a la interfície d'usuari."
+        },
+        "review": {
+            "label": "Mostra en la revisió",
+            "description": "Alterna si aquesta càmera és visible a la revisió (la pàgina de revisió i el seu filtre de càmera, la revisió de moviment i la vista de l'historial)."
         }
     },
     "webui_url": {

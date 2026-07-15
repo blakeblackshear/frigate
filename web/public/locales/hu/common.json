@@ -178,7 +178,8 @@
     "configuration": "Konfiguráció",
     "systemLogs": "Rendszer naplók",
     "settings": "Beállítások",
-    "classification": "Osztályozás"
+    "classification": "Osztályozás",
+    "profiles": "Profilok"
   },
   "role": {
     "viewer": "Néző",
@@ -273,7 +274,8 @@
     "export": "Exportálás",
     "deleteNow": "Törlés Most",
     "next": "Következő",
-    "continue": "Tovább"
+    "continue": "Tovább",
+    "add": "Hozzáad"
   },
   "label": {
     "back": "Vissza",

@@ -3,6 +3,8 @@ id: dummy-camera
 title: Analyzing Object Detection
 ---
 
+import NavPath from "@site/src/components/NavPath";
+
 Frigate provides several tools for investigating object detection and tracking behavior: reviewing recorded detections through the UI, using the built-in Debug Replay feature, and manually setting up a dummy camera for advanced scenarios.
 
 ## Reviewing Detections in the UI
@@ -37,6 +39,10 @@ The per-clip variation is typically quite low and is mostly an artifact of keyfr
 
 Debug Replay lets you re-run Frigate's detection pipeline against a section of recorded video without manually configuring a dummy camera. It automatically extracts the recording, creates a temporary camera with the same detection settings as the original, and loops the clip through the pipeline so you can observe detections in real time.
 
+The replay camera behaves like a live camera feed rather than History's video player: it loops the clip continuously as Frigate analyzes it and has no playback controls, so you cannot pause, scrub, or step through it frame by frame.
+
+Debug Replay isn't intended to be a one-stop pane for all Frigate diagnostics or a comprehensive debugging environment for every Frigate feature. It merely makes it easier to spin up a "dummy camera" and perform some common adjustments in real time. You'll still need to use the normal tools (logs, an MQTT client, etc) to debug your feature.
+
 ### When to use
 
 - Reproducing a detection or tracking issue from a specific time range
@@ -49,17 +55,31 @@ Only one replay session can be active at a time. If a session is already running
 
 :::
 
+### Starting Debug Replay
+
+Debug Replay can be started from several places in the UI. The starting point determines the time range that gets replayed.
+
+- **History: Actions menu.** Navigate to <NavPath path="History > {camera}" />, open the **Actions** menu in the toolbar, and choose **Debug Replay**. From here you can pick a preset (**Last 1 Minute**, **Last 5 Minutes**), select a range directly on the timeline with **From Timeline**, or enter exact start and end times with **Custom**. This is the most flexible option and the best choice when you want to add padding around a detection. On mobile, the same options appear in the Actions drawer.
+- **History: Detail Stream event menu.** While viewing a review item in the Detail Stream, open the menu on a tracked object's event card and choose **Debug Replay**. The replay range is set automatically to that object's start and end times.
+- **Explore: search result menu.** From an Explore card, open the kebab menu and choose **Debug Replay**. The range is taken from the tracked object's lifecycle.
+- **Explore: Tracking Details Actions menu.** Open a tracked object's **Tracking Details** dialog, then choose **Debug Replay** from the Actions menu. Same automatic range as the search result menu.
+- **Exports: export card menu.** From <NavPath path="Exports" />, open the menu on an export and choose **Debug Replay** to loop the exported clip through the detection pipeline for the camera it was exported from.
+
+The Detail Stream, Explore, and Exports entry points use the underlying recording or export's bounds with a small amount of padding. This can be convenient for quick checks, but if a detection is short or you want extra "settle" time for motion and the detector, start the replay from the History Actions menu instead and widen the range manually.
+
 ### Variables to consider
 
 - The replay will not always produce identical results to the original run. Different frames may be selected on replay, which can change detections and tracking.
 - Motion detection depends on the exact frames used; small frame shifts can change motion regions and therefore what gets passed to the detector.
 - Object detection is not fully deterministic: models and post-processing can yield slightly different results across runs.
+- In cases where a detection is short and a replay may only be a small number of frames, it is recommended to manually add some padding before and after the detection so that the motion and object detectors have time to settle into the scene. Rather than starting Debug Replay from Explore, navigate to History for your camera, choose Debug Replay from the Actions menu, and click the "From Timeline" or "Custom" option.
+- The replay camera inherits the source camera's zones. Any automations that trigger on those zone names will fire for the replay camera as well. This can be helpful when debugging zone behavior, but may be unexpected. You can add a condition on the source camera's name in your automation if you want to exclude replay triggers.
 
 Treat the replay as a close approximation rather than an exact reproduction. Run multiple loops and examine the debug overlays and logs to understand the behavior.
 
 ## Manual Dummy Camera
 
-For advanced scenarios — such as testing with a clip from a different source, debugging ffmpeg behavior, or running a clip through a completely custom configuration — you can set up a dummy camera manually.
+For advanced scenarios (such as testing with a clip from a different source, debugging ffmpeg behavior, or running a clip through a completely custom configuration), you can set up a dummy camera manually.
 
 ### Example config
 
@@ -91,7 +111,7 @@ cameras:
 2. Add the temporary camera to `config/config.yml` (example above). Use a unique name such as `test` or `replay_camera` so it's easy to remove later.
    - If you're debugging a specific camera, copy the settings from that camera (frame rate, model/enrichment settings, zones, etc.) into the temporary camera so the replay closely matches the original environment. Leave `record` and `snapshots` disabled unless you are specifically debugging recording or snapshot behavior.
 3. Restart Frigate.
-4. Observe the Debug view in the UI and logs as the clip is replayed. Watch detections, zones, or any feature you're looking to debug, and note any errors in the logs to reproduce the issue.
+4. Observe the [Debug view](/usage/live#the-single-camera-view) in the UI and logs as the clip is replayed. Watch detections, zones, or any feature you're looking to debug, and note any errors in the logs to reproduce the issue.
 5. Iterate on camera or enrichment settings (model, fps, zones, filters) and re-check the replay until the behavior is resolved.
 6. Remove the temporary camera from your config after debugging to avoid spurious telemetry or recordings.
 

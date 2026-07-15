@@ -6,6 +6,7 @@ import {
   isRedirectingToLogin,
   setRedirectingToLogin,
 } from "@/api/auth-redirect";
+import { baseUrl } from "@/api/baseUrl";
 
 export default function ProtectedRoute({
   requiredRoles,
@@ -24,7 +25,7 @@ export default function ProtectedRoute({
       !isRedirectingToLogin()
     ) {
       setRedirectingToLogin(true);
-      window.location.href = "/login";
+      window.location.href = `${baseUrl}login`;
     }
   }, [auth.isLoading, auth.isAuthenticated, auth.user]);
 

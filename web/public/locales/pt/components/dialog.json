@@ -36,6 +36,9 @@
           "ask_a": "Este objeto é um <code>{{label}}</code>?",
           "ask_an": "Este objeto é um <code>{{label}}</code>?",
           "ask_full": "Este objeto é um <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "toast": {
+          "error": "Não foi possível submeter para Frigate+. Por favor verifique a sua connecção e tente novamente."
         }
       }
     },
@@ -76,6 +79,13 @@
     "select": "Selecionar",
     "name": {
       "placeholder": "Nome da Exportação"
+    },
+    "case": {
+      "newCaseOption": "Criar um novo caso",
+      "newCaseNamePlaceholder": "Nome do novo caso"
+    },
+    "multiCamera": {
+      "selectFromTimeline": "Selecionar da Timeline"
     }
   },
   "streaming": {

@@ -4,11 +4,17 @@ import asyncio
 import logging
 import os
 import shutil
-from typing import Any, Optional, Union
+from typing import Any
 
 from ruamel.yaml import YAML
 
-from frigate.const import CONFIG_DIR, EXPORT_DIR
+from frigate.const import (
+    CONFIG_DIR,
+    DEFAULT_FFMPEG_VERSION,
+    EXPORT_DIR,
+    INCLUDED_FFMPEG_VERSIONS,
+    REDACTED_CREDENTIAL_SENTINEL,
+)
 from frigate.util.builtin import deep_merge
 from frigate.util.services import get_video_properties
 
@@ -16,6 +22,41 @@ logger = logging.getLogger(__name__)
 
 CURRENT_CONFIG_VERSION = "0.18-0"
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
+
+
+def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
+    """Resolve an ffmpeg version alias or custom path to a binary path.
+
+    A bare version alias that is no longer bundled (for example one that was
+    dropped when the default version changed) falls back to the default
+    bundled version so existing configs keep working across an upgrade or a
+    revert. Custom install paths (anything absolute) are used as-is.
+    """
+    if path == "default" or (
+        not path.startswith("/") and path not in INCLUDED_FFMPEG_VERSIONS
+    ):
+        version = DEFAULT_FFMPEG_VERSION
+    elif path in INCLUDED_FFMPEG_VERSIONS:
+        version = path
+    else:
+        return f"{path}/bin/{binary}"
+
+    return f"/usr/lib/ffmpeg/{version}/bin/{binary}"
+
+
+def redact_credential(obj: dict[str, Any], key: str) -> None:
+    """Replace obj[key] with the redaction sentinel if a value is saved, else drop.
+
+    Used when shaping the /config response so saved credentials never leave
+    the server. The frontend recognizes REDACTED_CREDENTIAL_SENTINEL, renders
+    the field as empty with a "saved — leave blank to keep" placeholder, and
+    /config/set strips it from any incoming payload so the YAML value is
+    preserved when the user doesn't touch the field.
+    """
+    if obj.get(key):
+        obj[key] = REDACTED_CREDENTIAL_SENTINEL
+    else:
+        obj.pop(key, None)
 
 
 def find_config_file() -> str:
@@ -37,7 +78,7 @@ def migrate_frigate_config(config_file: str):
 
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
-    with open(config_file, "r") as f:
+    with open(config_file) as f:
         config: dict[str, dict[str, Any]] = yaml.load(f)
 
     if config is None:
@@ -436,7 +477,7 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
 
 def _convert_legacy_mask_to_dict(
-    mask: Optional[Union[str, list]], mask_type: str = "motion_mask", label: str = ""
+    mask: str | list | None, mask_type: str = "motion_mask", label: str = ""
 ) -> dict[str, dict[str, Any]]:
     """Convert legacy mask format (str or list[str]) to new dict format.
 
@@ -492,7 +533,7 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
     genai = new_config.get("genai")
 
     if genai and genai.get("provider"):
-        genai["roles"] = ["embeddings", "vision", "tools"]
+        genai["roles"] = ["embeddings", "descriptions", "chat"]
         new_config["genai"] = {"default": genai}
 
     # Remove deprecated sync_recordings from global record config
@@ -603,16 +644,29 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
         new_config["cameras"][name] = camera_config
 
+    # Remove deprecated date_style and time_style from global ui config
+    global_ui = new_config.get("ui", {})
+    if global_ui.get("date_style") is not None:
+        del new_config["ui"]["date_style"]
+    if global_ui.get("time_style") is not None:
+        del new_config["ui"]["time_style"]
+    # Remove ui section if empty
+    if "ui" in new_config and not new_config["ui"]:
+        del new_config["ui"]
+
     new_config["version"] = "0.18-0"
     return new_config
 
 
 def get_relative_coordinates(
-    mask: Optional[Union[str, list]], frame_shape: tuple[int, int]
-) -> Union[str, list]:
+    mask: str | list | None,
+    frame_shape: tuple[int, int],
+    camera_name: str = "",
+) -> str | list:
     # masks and zones are saved as relative coordinates
     # we know if any points are > 1 then it is using the
     # old native resolution coordinates
+    where = f" for camera {camera_name}" if camera_name else ""
     if mask:
         if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
             relative_masks = []
@@ -627,7 +681,7 @@ def get_relative_coordinates(
 
                         if x > frame_shape[1] or y > frame_shape[0]:
                             logger.error(
-                                f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
+                                f"Not applying mask due to invalid coordinates{where}. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
                             )
                             continue
 
@@ -650,7 +704,7 @@ def get_relative_coordinates(
 
                 if x > frame_shape[1] or y > frame_shape[0]:
                     logger.error(
-                        f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
+                        f"Not applying mask due to invalid coordinates{where}. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
                     )
                     return []
 
@@ -666,7 +720,7 @@ def get_relative_coordinates(
 
 
 def convert_area_to_pixels(
-    area_value: Union[int, float], frame_shape: tuple[int, int]
+    area_value: int | float, frame_shape: tuple[int, int]
 ) -> int:
     """
     Convert area specification to pixels.
@@ -708,7 +762,7 @@ class StreamInfoRetriever:
         return info
 
 
-def apply_section_update(camera_config, section: str, update: dict) -> Optional[str]:
+def apply_section_update(camera_config, section: str, update: dict) -> str | None:
     """Merge an update dict into a camera config section and rebuild runtime variants.
 
     For motion and object filter sections, the plain Pydantic models are rebuilt
@@ -769,6 +823,45 @@ def apply_section_update(camera_config, section: str, update: dict) -> Optional[
                     **filt.model_dump(exclude_unset=True, exclude={"mask", "raw_mask"}),
                 )
             camera_config.objects = new_objects
+
+        elif section == "detect":
+            # apply detect first so frame_shape reflects the new resolution
+            # before we rebuild mask-dependent runtime configs below
+            merged = deep_merge(current.model_dump(), update, override=True)
+            camera_config.detect = current.__class__.model_validate(merged)
+
+            new_frame_shape = camera_config.frame_shape
+
+            # rebuild motion's rasterized_mask at the new frame_shape
+            if camera_config.motion is not None:
+                camera_config.motion = RuntimeMotionConfig(
+                    frame_shape=new_frame_shape,
+                    **camera_config.motion.model_dump(exclude_unset=True),
+                )
+
+            # rebuild per-object filter masks at the new frame_shape
+            for obj_name, filt in camera_config.objects.filters.items():
+                merged_mask = dict(filt.mask)
+                if camera_config.objects.mask:
+                    for gid, gmask in camera_config.objects.mask.items():
+                        merged_mask[f"global_{gid}"] = gmask
+
+                camera_config.objects.filters[obj_name] = RuntimeFilterConfig(
+                    frame_shape=new_frame_shape,
+                    mask=merged_mask,
+                    **filt.model_dump(exclude_unset=True, exclude={"mask", "raw_mask"}),
+                )
+
+            # Regenerate zone contours and per-zone filter masks at the new
+            # frame_shape so zone outlines and membership stay relative
+            for zone in camera_config.zones.values():
+                if zone.filters:
+                    for zone_obj_name, zone_filter in zone.filters.items():
+                        zone.filters[zone_obj_name] = RuntimeFilterConfig(
+                            frame_shape=new_frame_shape,
+                            **zone_filter.model_dump(exclude_unset=True),
+                        )
+                zone.generate_contour(new_frame_shape)
 
         else:
             merged = deep_merge(current.model_dump(), update, override=True)

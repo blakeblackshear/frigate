@@ -1,6 +1,6 @@
 {
     "audio": {
-        "label": "Evenimente audio",
+        "label": "Detecție audio",
         "enabled": {
             "label": "Activare detecție audio",
             "description": "Activează sau dezactivează detecția audio pentru toate camerele."
@@ -15,11 +15,15 @@
         },
         "listen": {
             "label": "Tipuri ascultate",
-            "description": "Lista de evenimente audio de detectat (ex: lătrat, alarmă_incendiu, țipăt, vorbire)."
+            "description": "Lista de evenimente audio de detectat (ex: lătrat, alarmă_incendiu, vorbire)."
         },
         "filters": {
             "label": "Filtre audio",
-            "description": "Setări de filtrare per tip audio, cum ar fi pragul de încredere."
+            "description": "Setări de filtrare per tip audio, cum ar fi pragul de încredere.",
+            "threshold": {
+                "label": "Încredere audio minimă",
+                "description": "Pragul minim de încredere pentru ca evenimentul audio să fie luat în considerare."
+            }
         },
         "enabled_in_config": {
             "label": "Stare audio originală",
@@ -216,7 +220,7 @@
         "description": "Setări FFmpeg: cale binar, argumente, accelerare hardware și ieșiri per rol.",
         "path": {
             "label": "Cale FFmpeg",
-            "description": "Calea către binarul FFmpeg sau un alias de versiune (\"5.0\" sau \"7.0\")."
+            "description": "Calea către binarul FFmpeg sau un alias de versiune (\"7.0\" sau \"8.0\")."
         },
         "global_args": {
             "label": "Argumente globale FFmpeg",
@@ -512,6 +516,41 @@
                 "label": "Stare GenAI originală",
                 "description": "Indică dacă GenAI a fost activat în configurația inițială."
             }
+        },
+        "filters_attribute": {
+            "label": "Filtre de atribute",
+            "description": "Filtre aplicate atributelor detectate pentru a reduce rezultatele fals pozitive (arie, raport, încredere).",
+            "min_area": {
+                "label": "Aria minimă a atributului",
+                "description": "Aria minimă a casetei de încadrare (pixeli sau procentaj) necesară pentru acest atribut. Poate fi în pixeli (int) sau procentaj (între 0.000001 și 0.99)."
+            },
+            "max_area": {
+                "label": "Aria maximă a atributului",
+                "description": "Aria minimă a casetei de încadrare (pixeli sau procentaj) necesară pentru acest atribut. Poate fi în pixeli (int) sau procentaj (între 0.000001 și 0.99)."
+            },
+            "min_ratio": {
+                "label": "Raport de aspect minim",
+                "description": "Raportul minim lățime/înălțime necesar pentru ca o casetă de încadrare să fie validă."
+            },
+            "max_ratio": {
+                "label": "Raport de aspect maxim",
+                "description": "Raportul maxim lățime/înălțime permis pentru ca o casetă de încadrare să fie validă."
+            },
+            "threshold": {
+                "label": "Prag de încredere",
+                "description": "Pragul mediu de încredere a detecției necesar pentru ca atributul să fie considerat un rezultat adevărat pozitiv."
+            },
+            "min_score": {
+                "label": "Încredere minimă",
+                "description": "Încrederea minimă de detecție pe un singur cadru necesară pentru a asocia acest atribut cu obiectul său părinte."
+            },
+            "mask": {
+                "label": "Mască de filtrare",
+                "description": "Coordonatele poligonului care definesc unde se aplică acest filtru în cadru."
+            },
+            "raw_mask": {
+                "label": "Mască brută"
+            }
         }
     },
     "record": {
@@ -594,6 +633,10 @@
             "hwaccel_args": {
                 "label": "Argumente hwaccel export",
                 "description": "Argumente de accelerare hardware pentru operațiunile de export/transcodare."
+            },
+            "max_concurrent": {
+                "description": "Numărul maxim de sarcini de export de procesat în același timp.",
+                "label": "Număr maxim de exporturi simultane"
             }
         },
         "preview": {
@@ -1131,7 +1174,7 @@
         },
         "default_role": {
             "label": "Rol implicit",
-            "description": "Rolul implicit atribuit utilizatorilor autentificați prin proxy când nu se aplică nicio mapare de rol (admin sau viewer)."
+            "description": "Rolul implicit atribuit utilizatorilor autentificați prin proxy când nu se aplică nicio mapare de rol."
         },
         "separator": {
             "label": "Caracter separator",
@@ -1161,8 +1204,8 @@
                 "description": "Activează monitorizarea lățimii de bandă a rețelei pe proces pentru procesele ffmpeg ale camerelor și detectoare (necesită capabilități)."
             },
             "intel_gpu_device": {
-                "label": "Dispozitiv SR-IOV",
-                "description": "Identificator de dispozitiv folosit când GPU-urile Intel sunt tratate ca SR-IOV pentru a repara statisticile GPU."
+                "label": "Dispozitiv GPU Intel",
+                "description": "Adresa magistralei PCI sau calea dispozitivului DRM (ex./dev/dri/card1) folosită pentru a fixa statisticile GPU Intel la un anumit dispozitiv când sunt prezente mai multe."
             }
         },
         "version_check": {
@@ -2161,7 +2204,7 @@
         },
         "roles": {
             "label": "Roluri",
-            "description": "Roluri GenAI (unelte, viziune, înglobări); un furnizor per rol."
+            "description": "Roluri GenAI (chat, descrieri, înglobări); un furnizor per rol."
         },
         "provider_options": {
             "label": "Opțiuni furnizor",
@@ -2294,6 +2337,10 @@
         "dashboard": {
             "label": "Arată în interfață",
             "description": "Comută dacă această cameră este vizibilă peste tot în interfața Frigate. Dezactivarea acestei opțiuni va necesita editarea manuală a config-ului pentru a vedea din nou camera în interfață."
+        },
+        "review": {
+            "label": "Arată în Revizuire",
+            "description": "Comută dacă această cameră este vizibilă în Revizuire (pagina de revizuire și filtrul ei de camere, revizuirea mișcărilor și vizualizarea istoricului)."
         }
     },
     "profiles": {

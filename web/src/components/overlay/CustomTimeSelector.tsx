@@ -127,7 +127,7 @@ export function CustomTimeSelector({
               {formattedStart}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="flex flex-col items-center" disablePortal>
+          <PopoverContent className="flex flex-col items-center">
             <TimezoneAwareCalendar
               timezone={config?.ui.timezone}
               selectedDay={new Date(startTime * 1000)}
@@ -144,7 +144,7 @@ export function CustomTimeSelector({
             />
             <SelectSeparator className="bg-secondary" />
             <input
-              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+              className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
               id="startTime"
               type="time"
               value={startClock}
@@ -193,7 +193,7 @@ export function CustomTimeSelector({
               {formattedEnd}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="flex flex-col items-center" disablePortal>
+          <PopoverContent className="flex flex-col items-center">
             <TimezoneAwareCalendar
               timezone={config?.ui.timezone}
               selectedDay={new Date(endTime * 1000)}
@@ -210,7 +210,7 @@ export function CustomTimeSelector({
             />
             <SelectSeparator className="bg-secondary" />
             <input
-              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+              className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
               id="endTime"
               type="time"
               value={endClock}

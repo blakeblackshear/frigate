@@ -33,6 +33,7 @@ import { getTranslatedLabel } from "@/utils/i18n";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { AudioLevelGraph } from "@/components/audio/AudioLevelGraph";
 import { useWs } from "@/api/ws";
+import { cn } from "@/lib/utils";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -200,15 +201,18 @@ export default function ObjectSettingsView({
 
         <Tabs defaultValue="debug" className="w-full">
           <TabsList
-            className={`grid w-full ${cameraConfig.ffmpeg.inputs.some((input) => input.roles.includes("audio")) ? "grid-cols-3" : "grid-cols-2"}`}
+            className={cn(
+              "grid w-full",
+              cameraConfig.audio.enabled_in_config
+                ? "grid-cols-3"
+                : "grid-cols-2",
+            )}
           >
             <TabsTrigger value="debug">{t("debug.debugging")}</TabsTrigger>
             <TabsTrigger value="objectlist">
               {t("debug.objectList")}
             </TabsTrigger>
-            {cameraConfig.ffmpeg.inputs.some((input) =>
-              input.roles.includes("audio"),
-            ) && (
+            {cameraConfig.audio.enabled_in_config && (
               <TabsTrigger value="audio">{t("debug.audio.title")}</TabsTrigger>
             )}
           </TabsList>
@@ -325,9 +329,7 @@ export default function ObjectSettingsView({
           <TabsContent value="objectlist">
             <ObjectList cameraConfig={cameraConfig} objects={memoizedObjects} />
           </TabsContent>
-          {cameraConfig.ffmpeg.inputs.some((input) =>
-            input.roles.includes("audio"),
-          ) && (
+          {cameraConfig.audio.enabled_in_config && (
             <TabsContent value="audio">
               <AudioList
                 cameraConfig={cameraConfig}
@@ -413,7 +415,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                   </div>
                 </div>
                 <div className="flex w-8/12 flex-row items-center justify-end">
-                  <div className="text-md mr-2 w-1/3">
+                  <div className="mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
                         {t("debug.objectShapeFilterDrawing.score")}
@@ -424,7 +426,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                       %
                     </div>
                   </div>
-                  <div className="text-md mr-2 w-1/3">
+                  <div className="mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
                         {t("debug.objectShapeFilterDrawing.ratio")}
@@ -432,7 +434,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
                       {obj.ratio ? obj.ratio.toFixed(2).toString() : "-"}
                     </div>
                   </div>
-                  <div className="text-md mr-2 w-1/3">
+                  <div className="mr-2 w-1/3">
                     <div className="flex flex-col items-end justify-end">
                       <p className="mb-1.5 text-sm text-primary-variant">
                         {t("debug.objectShapeFilterDrawing.area")}
@@ -503,7 +505,7 @@ function AudioList({ cameraConfig, audioDetections }: AudioListProps) {
                 <div className="ml-3 text-lg">{getTranslatedLabel(key)}</div>
               </div>
               <div className="flex w-8/12 flex-row items-center justify-end">
-                <div className="text-md mr-2 w-1/3">
+                <div className="mr-2 w-1/3">
                   <div className="flex flex-col items-end justify-end">
                     <p className="mb-1.5 text-sm text-primary-variant">
                       {t("debug.audio.score")}

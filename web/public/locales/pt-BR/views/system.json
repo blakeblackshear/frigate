@@ -50,8 +50,10 @@
         "lpr": "LPR",
         "camera_activity": "Atividade da câmera",
         "system": "Sistema",
-        "camera": "Camera"
-      }
+        "camera": "Camera",
+        "all_cameras": "Todas as cameras"
+      },
+      "empty": "Nenhuma mensagem capturada ainda"
     }
   },
   "general": {

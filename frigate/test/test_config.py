@@ -10,7 +10,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
-from frigate.util.builtin import deep_merge, load_labels
+from frigate.util.builtin import deep_merge
 
 
 class TestConfig(unittest.TestCase):
@@ -309,15 +309,10 @@ class TestConfig(unittest.TestCase):
         }
 
         frigate_config = FrigateConfig(**config)
-        all_audio_labels = {
-            label
-            for label in load_labels("/audio-labelmap.txt", prefill=521).values()
-            if label
+        assert set(frigate_config.cameras["back"].audio.filters.keys()) == {
+            "speech",
+            "yell",
         }
-
-        assert all_audio_labels.issubset(
-            set(frigate_config.cameras["back"].audio.filters.keys())
-        )
 
     def test_override_audio_filters(self):
         config = {
@@ -345,7 +340,8 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "speech" in frigate_config.cameras["back"].audio.filters
         assert frigate_config.cameras["back"].audio.filters["speech"].threshold == 0.9
-        assert "babbling" in frigate_config.cameras["back"].audio.filters
+        assert "yell" in frigate_config.cameras["back"].audio.filters
+        assert "babbling" not in frigate_config.cameras["back"].audio.filters
 
     def test_inherit_object_filters(self):
         config = {
@@ -400,6 +396,43 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "dog" in frigate_config.cameras["back"].objects.filters
         assert frigate_config.cameras["back"].objects.filters["dog"].threshold == 0.7
+
+    def test_unsupported_tracked_object_pruned_from_track_and_filters(self):
+        # "unicorn" is not in the model labelmap, so it must be removed from the
+        # tracked objects AND from the object filters, otherwise a stale filter
+        # entry lingers in the parsed config.
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "objects": {
+                        "track": ["person", "unicorn"],
+                        "filters": {
+                            "person": {"threshold": 0.7},
+                            "unicorn": {"threshold": 0.7},
+                        },
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        objects = frigate_config.cameras["back"].objects
+        assert "unicorn" not in objects.track
+        assert "unicorn" not in objects.filters
+        # supported entries are left untouched
+        assert "person" in objects.track
+        assert "person" in objects.filters
 
     def test_global_object_mask(self):
         config = {
@@ -1005,6 +1038,7 @@ class TestConfig(unittest.TestCase):
 
         config = {
             "mqtt": {"host": "mqtt"},
+            "detectors": {"cpu": {"type": "cpu"}},
             "model": {"path": "plus://test"},
             "cameras": {
                 "back": {
@@ -1674,6 +1708,61 @@ class TestConfig(unittest.TestCase):
         }
 
         self.assertRaises(ValueError, lambda: FrigateConfig(**config))
+
+
+class TestAttributeFilterDefaults(unittest.TestCase):
+    """Verify attribute filter min_score handling at config load."""
+
+    def setUp(self):
+        self.minimal = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+    def _build_config(self, object_filters: dict | None = None) -> FrigateConfig:
+        config = deep_merge({}, self.minimal)
+        if object_filters is not None:
+            config.setdefault("objects", {})["filters"] = object_filters
+        return FrigateConfig(**config)
+
+    def test_attribute_with_no_filter_gets_default_min_score(self):
+        """Attribute with no user-provided filter gets created with min_score=0.7."""
+        config = self._build_config()
+        face_filter = config.objects.filters.get("face")
+        self.assertIsNotNone(face_filter)
+        self.assertEqual(face_filter.min_score, 0.7)
+
+    def test_attribute_filter_without_min_score_gets_bumped(self):
+        """If user sets some FilterConfig field but not min_score, min_score is bumped to 0.7."""
+        config = self._build_config({"face": {"min_area": 500}})
+        face_filter = config.objects.filters["face"]
+        self.assertEqual(face_filter.min_area, 500)
+        self.assertEqual(face_filter.min_score, 0.7)
+
+    def test_attribute_filter_explicit_min_score_half_is_preserved(self):
+        """User-provided min_score=0.5 must NOT be silently rewritten to 0.7."""
+        config = self._build_config({"face": {"min_score": 0.5}})
+        face_filter = config.objects.filters["face"]
+        self.assertEqual(face_filter.min_score, 0.5)
+
+    def test_attribute_filter_explicit_min_score_other_value_is_preserved(self):
+        """Sanity: explicit non-0.5 values pass through unchanged."""
+        config = self._build_config({"face": {"min_score": 0.3}})
+        face_filter = config.objects.filters["face"]
+        self.assertEqual(face_filter.min_score, 0.3)
 
 
 if __name__ == "__main__":

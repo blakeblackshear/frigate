@@ -79,17 +79,26 @@ export default function ReviewCard({
       ? event.end_time + REVIEW_PADDING
       : Date.now() / 1000;
 
+    const genAiTitle = event.data.metadata?.title?.trim();
+
     axios
       .post(
         `export/${event.camera}/start/${event.start_time - REVIEW_PADDING}/end/${endTime}`,
-        { playback: "realtime" },
+        {
+          playback: "realtime",
+          ...(genAiTitle ? { name: genAiTitle } : {}),
+        },
       )
       .then((response) => {
-        if (response.status == 200) {
+        if (response.status < 300) {
           toast.success(t("export.toast.success"), {
             position: "top-center",
             action: (
-              <a href="/export" target="_blank" rel="noopener noreferrer">
+              <a
+                href={`${baseUrl}export`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button>{t("export.toast.view")}</Button>
               </a>
             ),
@@ -275,7 +284,7 @@ export default function ReviewCard({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <ContextMenu key={event.id} modal={false}>
+        <ContextMenu key={event.id}>
           <ContextMenuTrigger asChild>{content}</ContextMenuTrigger>
           <ContextMenuContent>
             <ContextMenuItem>

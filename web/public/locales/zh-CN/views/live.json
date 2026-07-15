@@ -58,7 +58,9 @@
   },
   "camera": {
     "enable": "开启摄像头",
-    "disable": "关闭摄像头"
+    "disable": "关闭摄像头",
+    "turnOn": "开启摄像头",
+    "turnOff": "关闭摄像头"
   },
   "muteCameras": {
     "enable": "屏蔽所有摄像头",
@@ -70,7 +72,8 @@
   },
   "recording": {
     "enable": "开启录制",
-    "disable": "关闭录制"
+    "disable": "关闭录制",
+    "disabledInConfig": "必须先在该摄像头的设置中开启录制功能。"
   },
   "snapshots": {
     "enable": "开启快照",
@@ -150,7 +153,8 @@
     "snapshots": "快照",
     "audioDetection": "音频检测",
     "autotracking": "自动追踪",
-    "transcription": "音频转录"
+    "transcription": "音频转录",
+    "camera": "摄像头"
   },
   "history": {
     "label": "显示历史录像"

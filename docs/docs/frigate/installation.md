@@ -4,12 +4,15 @@ title: Installation
 ---
 
 import ShmCalculator from '@site/src/components/ShmCalculator'
+import DockerComposeGenerator from '@site/src/components/DockerComposeGenerator'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 Frigate is a Docker container that can be run on any Docker host including as a [Home Assistant App](https://www.home-assistant.io/apps/). Note that the Home Assistant App is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant, whether you are running Frigate as a standalone Docker container or as a Home Assistant App.
 
 :::tip
 
-If you already have Frigate installed as a Home Assistant App, check out the [getting started guide](../guides/getting_started#configuring-frigate) to configure Frigate.
+If you already have Frigate installed as a Home Assistant App, check out the [getting started guide](../guides/getting_started.md#configuring-frigate) to configure Frigate.
 
 :::
 
@@ -91,7 +94,7 @@ The following sections contain additional setup steps that are only required if 
 
 By default, the Raspberry Pi limits the amount of memory available to the GPU. In order to use ffmpeg hardware acceleration, you must increase the available memory by setting `gpu_mem` to the maximum recommended value in `config.txt` as described in the [official docs](https://www.raspberrypi.org/documentation/computers/config_txt.html#memory-options).
 
-Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with it's own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
+Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with its own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
 
 ### Hailo-8
 
@@ -286,7 +289,7 @@ The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVM
 
 #### Installation
 
-To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/get_started/hardware_setup.html).
+To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/2p1/get_started/install_hardware.html).
 
 Then follow these steps for installing the correct driver/runtime configuration:
 
@@ -294,6 +297,12 @@ Then follow these steps for installing the correct driver/runtime configuration:
 2. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
 3. Run the script with `./user_installation.sh`
 4. **Restart your computer** to complete driver installation.
+
+:::warning
+
+For manual setup, use **MemryX SDK 2.1** only. Other SDK versions are not supported for this setup. See the [SDK 2.1 documentation](https://developer.memryx.com/2p1/index.html)
+
+:::
 
 #### Setup
 
@@ -468,6 +477,16 @@ Finally, configure [hardware object detection](/configuration/object_detectors#a
 
 Running through Docker with Docker Compose is the recommended install method.
 
+<Tabs>
+  <TabItem value="domestic" label="Docker Compose Generator" default>
+
+Generate a Frigate Docker Compose configuration based on your hardware and requirements.
+
+<DockerComposeGenerator/>
+
+
+  </TabItem>
+  <TabItem value="original" label="Example Docker Compose File">
 ```yaml
 services:
   frigate:
@@ -501,6 +520,10 @@ services:
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
+  </TabItem>
+</Tabs>
+
+**Docker CLI**
 
 If you can't use Docker Compose, you can run the container with something similar to this:
 
@@ -577,7 +600,7 @@ There are several variants of the App available:
 
 If you are using hardware acceleration for ffmpeg, you **may** need to use the _Full Access_ variant of the App. This is because the Frigate App runs in a container with limited access to the host system. The _Full Access_ variant allows you to disable _Protection mode_ and give Frigate full access to the host system.
 
-You can also edit the Frigate configuration file through the [VS Code App](https://github.com/hassio-addons/addon-vscode) or similar. In that case, the configuration file will be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate App you are running. See the list of directories [here](../configuration/index.md#accessing-app-config-dir).
+You can also edit the Frigate configuration file through the [VS Code App](https://github.com/hassio-addons/addon-vscode) or similar. In that case, the configuration file will be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate App you are running. See the list of directories [here](../configuration/config.md#accessing-app-config-dir).
 
 ## Kubernetes
 
@@ -726,7 +749,7 @@ Failure to remap port 5000 on the host will result in the WebUI and all API endp
 
 :::
 
-Docker containers on macOS can be orchestrated by either [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) or [OrbStack](https://orbstack.dev) (native swift app). The difference in inference speeds is negligable, however CPU, power consumption and container start times will be lower on OrbStack because it is a native Swift application.
+Docker containers on macOS can be orchestrated by either [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) or [OrbStack](https://orbstack.dev) (native Swift app). The difference in inference speeds is negligible, however CPU, power consumption and container start times will be lower on OrbStack because it is a native Swift application.
 
 To allow Frigate to use the Apple Silicon Neural Engine / Processing Unit (NPU) the host must be running [Apple Silicon Detector](../configuration/object_detectors.md#apple-silicon-detector) on the host (outside Docker)
 
@@ -745,7 +768,7 @@ services:
       - /path/to/your/recordings:/recordings
     ports:
       - "8971:8971"
-      # If exposing on macOS map to a diffent host port like 5001 or any orher port with no conflicts
+      # If exposing on macOS map to a different host port like 5001 or any other port with no conflicts
       # - "5001:5000" # Internal unauthenticated access. Expose carefully.
       - "8554:8554" # RTSP feeds
     extra_hosts:

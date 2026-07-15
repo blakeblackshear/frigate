@@ -1,0 +1,493 @@
+"""Debug replay startup job: ffmpeg remux + camera config publish.
+
+The runner orchestrates the async portion of starting a debug replay
+session. The DebugReplayManager (in frigate.debug_replay) owns session
+presence so the status bar can keep reading a single `active` flag from
+/debug_replay/status for the entire session window — which is broader
+than this job's lifetime.
+"""
+
+import logging
+import os
+import subprocess as sp
+import threading
+import time
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Optional, cast
+
+from peewee import ModelSelect
+
+from frigate.config import FrigateConfig
+from frigate.config.camera.updater import CameraConfigUpdatePublisher
+from frigate.const import REPLAY_CAMERA_PREFIX, REPLAY_DIR
+from frigate.jobs.export import JobStatePublisher
+from frigate.jobs.job import Job
+from frigate.jobs.manager import job_is_running, set_current_job
+from frigate.models import Export, Recordings
+from frigate.types import JobStatusTypesEnum
+from frigate.util.ffmpeg import run_ffmpeg_with_progress
+
+if TYPE_CHECKING:
+    from frigate.debug_replay import DebugReplayManager
+
+logger = logging.getLogger(__name__)
+
+# Coalesce frequent ffmpeg progress callbacks so the WS isn't flooded.
+PROGRESS_BROADCAST_MIN_INTERVAL = 1.0
+
+JOB_TYPE = "debug_replay"
+
+STEP_PREPARING_CLIP = "preparing_clip"
+STEP_STARTING_CAMERA = "starting_camera"
+
+
+_active_runner: Optional["DebugReplayJobRunner"] = None
+_runner_lock = threading.Lock()
+
+
+def _set_active_runner(runner: Optional["DebugReplayJobRunner"]) -> None:
+    global _active_runner
+    with _runner_lock:
+        _active_runner = runner
+
+
+def get_active_runner() -> Optional["DebugReplayJobRunner"]:
+    with _runner_lock:
+        return _active_runner
+
+
+@dataclass
+class DebugReplayJob(Job):
+    """Job state for a debug replay startup."""
+
+    job_type: str = JOB_TYPE
+    source_camera: str = ""
+    replay_camera_name: str = ""
+    start_ts: float = 0.0
+    end_ts: float = 0.0
+    current_step: str | None = None
+    progress_percent: float = 0.0
+
+    def to_dict(self) -> dict[str, Any]:
+        """Whitelisted payload for the job_state WS topic.
+
+        Replay-specific fields land in results so the frontend's
+        generic Job<TResults> type can be parameterised cleanly.
+        """
+        return {
+            "id": self.id,
+            "job_type": self.job_type,
+            "status": self.status,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "error_message": self.error_message,
+            "results": {
+                "current_step": self.current_step,
+                "progress_percent": self.progress_percent,
+                "source_camera": self.source_camera,
+                "replay_camera_name": self.replay_camera_name,
+                "start_ts": self.start_ts,
+                "end_ts": self.end_ts,
+            },
+        }
+
+
+def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> ModelSelect:
+    """Return the Recordings query for the time range.
+
+    Module-level so tests can patch it without instantiating a runner.
+    """
+    query = (
+        Recordings.select(
+            Recordings.path,
+            Recordings.start_time,
+            Recordings.end_time,
+        )
+        .where(
+            Recordings.start_time.between(start_ts, end_ts)
+            | Recordings.end_time.between(start_ts, end_ts)
+            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
+        )
+        .where(Recordings.camera == source_camera)
+        .order_by(Recordings.start_time.asc())
+    )
+    return cast(ModelSelect, query)
+
+
+class DebugReplaySource(ABC):
+    """Abstract source for a debug replay session.
+
+    Provides the camera identity and time range the replay represents,
+    validates that usable content exists, and supplies the ffmpeg input
+    args used to build the replay clip.
+    """
+
+    @property
+    @abstractmethod
+    def source_camera(self) -> str:
+        """Camera name the replay is derived from."""
+
+    @property
+    @abstractmethod
+    def start_ts(self) -> float:
+        """Unix timestamp marking the start of the replay range."""
+
+    @property
+    @abstractmethod
+    def end_ts(self) -> float:
+        """Unix timestamp marking the end of the replay range."""
+
+    @abstractmethod
+    def validate(self) -> None:
+        """Raise ValueError if the source has no usable content."""
+
+    @abstractmethod
+    def ffmpeg_input_args(self, working_dir: str) -> list[str]:
+        """Return ffmpeg input args (including -i). May write temp files in working_dir."""
+
+    def cleanup(self, working_dir: str) -> None:
+        """Remove any temp files the source created in working_dir. Default no-op."""
+
+
+class RecordingDebugReplaySource(DebugReplaySource):
+    """Replay source backed by the Recordings table.
+
+    Feeds ffmpeg the internal VOD endpoint so segments with mismatched
+    SPS/PPS (e.g. across day/night transitions) stitch cleanly via HLS
+    discontinuities.
+    """
+
+    def __init__(
+        self,
+        source_camera: str,
+        start_ts: float,
+        end_ts: float,
+        internal_port: int,
+    ) -> None:
+        self._camera = source_camera
+        self._start_ts = start_ts
+        self._end_ts = end_ts
+        self._internal_port = internal_port
+
+    @property
+    def source_camera(self) -> str:
+        return self._camera
+
+    @property
+    def start_ts(self) -> float:
+        return self._start_ts
+
+    @property
+    def end_ts(self) -> float:
+        return self._end_ts
+
+    def validate(self) -> None:
+        if self._end_ts <= self._start_ts:
+            raise ValueError("End time must be after start time")
+
+        if not query_recordings(self._camera, self._start_ts, self._end_ts).count():
+            raise ValueError(
+                f"No recordings found for camera '{self._camera}' in the specified time range"
+            )
+
+    def ffmpeg_input_args(self, working_dir: str) -> list[str]:
+        playlist_url = (
+            f"http://127.0.0.1:{self._internal_port}/vod/{self._camera}"
+            f"/start/{self._start_ts}/end/{self._end_ts}/index.m3u8"
+        )
+        return [
+            "-protocol_whitelist",
+            "pipe,file,http,tcp",
+            "-i",
+            playlist_url,
+        ]
+
+
+class ExportDebugReplaySource(DebugReplaySource):
+    """Replay source backed by an existing Export.
+
+    Uses the export's video file directly as the ffmpeg input — does not
+    require recordings to still exist for the time range.
+    """
+
+    def __init__(self, export: Export, duration: float) -> None:
+        self._camera = cast(str, export.camera)
+        # Export.date is declared DateTimeField but Frigate writes raw unix
+        # timestamps to the column.
+        self._start_ts = float(cast(Any, export.date))
+        self._video_path = cast(str, export.video_path)
+        self._duration = duration
+
+    @property
+    def source_camera(self) -> str:
+        return self._camera
+
+    @property
+    def start_ts(self) -> float:
+        return self._start_ts
+
+    @property
+    def end_ts(self) -> float:
+        return self._start_ts + self._duration
+
+    def validate(self) -> None:
+        if not os.path.exists(self._video_path):
+            raise ValueError(f"Export video file not found: {self._video_path}")
+
+    def ffmpeg_input_args(self, working_dir: str) -> list[str]:
+        return ["-i", self._video_path]
+
+
+class DebugReplayJobRunner(threading.Thread):
+    """Worker thread that drives the startup job to completion.
+
+    Owns the live ffmpeg Popen reference for cancellation. Cancellation
+    is two-step (threading.Event + proc.terminate()) so the runner
+    both knows it should stop and is unblocked from its blocking subprocess
+    wait.
+    """
+
+    def __init__(
+        self,
+        job: DebugReplayJob,
+        source: DebugReplaySource,
+        frigate_config: FrigateConfig,
+        config_publisher: CameraConfigUpdatePublisher,
+        replay_manager: "DebugReplayManager",
+        publisher: JobStatePublisher | None = None,
+    ) -> None:
+        super().__init__(daemon=True, name=f"debug_replay_{job.id}")
+        self.job = job
+        self.source = source
+        self.frigate_config = frigate_config
+        self.config_publisher = config_publisher
+        self.replay_manager = replay_manager
+        self.publisher = publisher if publisher is not None else JobStatePublisher()
+        self._cancel_event = threading.Event()
+        self._active_process: sp.Popen | None = None
+        self._proc_lock = threading.Lock()
+        self._last_broadcast_monotonic: float = 0.0
+
+    def cancel(self) -> None:
+        """Request cancellation. Idempotent."""
+        self._cancel_event.set()
+        with self._proc_lock:
+            proc = self._active_process
+        if proc is not None:
+            try:
+                proc.terminate()
+            except Exception as exc:
+                logger.warning("Failed to terminate ffmpeg subprocess: %s", exc)
+
+    def is_cancelled(self) -> bool:
+        return self._cancel_event.is_set()
+
+    def _record_proc(self, proc: sp.Popen) -> None:
+        with self._proc_lock:
+            self._active_process = proc
+        # Race: cancel arrived between Popen and _record_proc.
+        if self._cancel_event.is_set():
+            try:
+                proc.terminate()
+            except Exception:
+                pass
+
+    def _broadcast(self, force: bool = False) -> None:
+        now = time.monotonic()
+        if (
+            not force
+            and now - self._last_broadcast_monotonic < PROGRESS_BROADCAST_MIN_INTERVAL
+        ):
+            return
+        self._last_broadcast_monotonic = now
+
+        try:
+            self.publisher.publish(self.job.to_dict())
+        except Exception as err:
+            logger.warning("Publisher raised during job state broadcast: %s", err)
+
+    def run(self) -> None:
+        replay_name = self.job.replay_camera_name
+        os.makedirs(REPLAY_DIR, exist_ok=True)
+        clip_path = os.path.join(REPLAY_DIR, f"{replay_name}.mp4")
+
+        self.job.status = JobStatusTypesEnum.running
+        self.job.start_time = time.time()
+        self.job.current_step = STEP_PREPARING_CLIP
+        self._broadcast(force=True)
+
+        try:
+            input_args = self.source.ffmpeg_input_args(REPLAY_DIR)
+
+            ffmpeg_cmd = [
+                self.frigate_config.ffmpeg.ffmpeg_path,
+                "-hide_banner",
+                "-y",
+                *input_args,
+                "-c",
+                "copy",
+                "-movflags",
+                "+faststart",
+                clip_path,
+            ]
+
+            logger.info(
+                "Generating replay clip for %s (%.1f - %.1f)",
+                self.job.source_camera,
+                self.job.start_ts,
+                self.job.end_ts,
+            )
+
+            def _on_progress(percent: float) -> None:
+                self.job.progress_percent = percent
+                self._broadcast()
+
+            try:
+                returncode, stderr = run_ffmpeg_with_progress(
+                    ffmpeg_cmd,
+                    expected_duration_seconds=max(
+                        0.0, self.job.end_ts - self.job.start_ts
+                    ),
+                    on_progress=_on_progress,
+                    process_started=self._record_proc,
+                    use_low_priority=True,
+                )
+            finally:
+                with self._proc_lock:
+                    self._active_process = None
+
+            if self._cancel_event.is_set():
+                self._finalize_cancelled(clip_path)
+                return
+
+            if returncode != 0:
+                raise RuntimeError(f"FFmpeg failed: {stderr[-500:]}")
+
+            if not os.path.exists(clip_path):
+                raise RuntimeError("Clip file was not created")
+
+            self.job.current_step = STEP_STARTING_CAMERA
+            self.job.progress_percent = 100.0
+            self._broadcast(force=True)
+
+            if self._cancel_event.is_set():
+                self._finalize_cancelled(clip_path)
+                return
+
+            self.replay_manager.publish_camera(
+                source_camera=self.job.source_camera,
+                replay_name=replay_name,
+                clip_path=clip_path,
+                frigate_config=self.frigate_config,
+                config_publisher=self.config_publisher,
+            )
+            self.replay_manager.mark_session_ready(clip_path)
+
+            self.job.status = JobStatusTypesEnum.success
+            self.job.end_time = time.time()
+            self._broadcast(force=True)
+            logger.info(
+                "Debug replay started: %s -> %s",
+                self.job.source_camera,
+                replay_name,
+            )
+        except Exception as exc:
+            logger.exception("Debug replay startup failed")
+            self.job.status = JobStatusTypesEnum.failed
+            self.job.error_message = str(exc)
+            self.job.end_time = time.time()
+            self._broadcast(force=True)
+            self.replay_manager.clear_session()
+            _remove_silent(clip_path)
+        finally:
+            self.source.cleanup(REPLAY_DIR)
+            _set_active_runner(None)
+
+    def _finalize_cancelled(self, clip_path: str) -> None:
+        logger.info("Debug replay startup cancelled")
+        self.job.status = JobStatusTypesEnum.cancelled
+        self.job.end_time = time.time()
+        self._broadcast(force=True)
+        # The caller of cancel_debug_replay_job (DebugReplayManager.stop) owns
+        # session cleanup — db rows, filesystem artifacts, clear_session. We
+        # only clean up the partial concat output we created.
+        _remove_silent(clip_path)
+
+
+def _remove_silent(path: str) -> None:
+    try:
+        if os.path.exists(path):
+            os.remove(path)
+    except OSError:
+        pass
+
+
+def start_debug_replay_job(
+    *,
+    source: DebugReplaySource,
+    frigate_config: FrigateConfig,
+    config_publisher: CameraConfigUpdatePublisher,
+    replay_manager: "DebugReplayManager",
+) -> str:
+    """Validate, create job, start runner. Returns the job id.
+
+    Raises ValueError for an invalid source (camera missing, source has
+    no usable content) and RuntimeError if a session is already active.
+    """
+    if job_is_running(JOB_TYPE) or replay_manager.active:
+        raise RuntimeError("A replay session is already active")
+
+    if source.source_camera not in frigate_config.cameras:
+        raise ValueError(f"Camera '{source.source_camera}' not found")
+
+    source.validate()
+
+    replay_name = f"{REPLAY_CAMERA_PREFIX}{source.source_camera}"
+    replay_manager.mark_starting(
+        source_camera=source.source_camera,
+        replay_camera_name=replay_name,
+        start_ts=source.start_ts,
+        end_ts=source.end_ts,
+    )
+
+    job = DebugReplayJob(
+        source_camera=source.source_camera,
+        replay_camera_name=replay_name,
+        start_ts=source.start_ts,
+        end_ts=source.end_ts,
+    )
+    set_current_job(job)
+
+    runner = DebugReplayJobRunner(
+        job=job,
+        source=source,
+        frigate_config=frigate_config,
+        config_publisher=config_publisher,
+        replay_manager=replay_manager,
+    )
+    _set_active_runner(runner)
+    runner.start()
+
+    return job.id
+
+
+def cancel_debug_replay_job() -> bool:
+    """Signal the active runner to cancel.
+
+    Returns True if a runner was signalled, False if no job was active.
+    """
+    runner = get_active_runner()
+    if runner is None:
+        return False
+    runner.cancel()
+    return True
+
+
+def wait_for_runner(timeout: float = 2.0) -> bool:
+    """Join the active runner. Returns True if the runner ended in time."""
+    runner = get_active_runner()
+    if runner is None:
+        return True
+    runner.join(timeout=timeout)
+    return not runner.is_alive()

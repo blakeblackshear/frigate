@@ -6,7 +6,6 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 from frigate.const import SUPPORTED_RK_SOCS
 from frigate.util.file import FileLock
@@ -139,7 +138,7 @@ def ensure_rknn_toolkit() -> bool:
         return False
 
 
-def get_soc_type() -> Optional[str]:
+def get_soc_type() -> str | None:
     """Get the SoC type from device tree."""
     try:
         with open("/proc/device-tree/compatible") as file:
@@ -160,7 +159,7 @@ def convert_onnx_to_rknn(
     output_path: str,
     model_type: str,
     quantization: bool = False,
-    soc: Optional[str] = None,
+    soc: str | None = None,
 ) -> bool:
     """
     Convert ONNX model to RKNN format.
@@ -345,7 +344,7 @@ def wait_for_conversion_completion(
 
 def auto_convert_model(
     model_path: str, model_type: str | None = None, quantization: bool = False
-) -> Optional[str]:
+) -> str | None:
     """
     Automatically convert a model to RKNN format if needed.
 

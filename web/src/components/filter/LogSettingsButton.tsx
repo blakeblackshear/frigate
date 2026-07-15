@@ -40,7 +40,7 @@ export function LogSettingsButton({
     <div className={cn("my-3 space-y-3 py-3 md:mt-0 md:py-0")}>
       <div className="space-y-4">
         <div className="space-y-0.5">
-          <div className="text-md">{t("filter")}</div>
+          <div>{t("filter")}</div>
           <div className="space-y-1 text-xs text-muted-foreground">
             {t("logSettings.filterBySeverity")}
           </div>
@@ -53,7 +53,7 @@ export function LogSettingsButton({
       <DropdownMenuSeparator />
       <div className="space-y-4">
         <div className="space-y-0.5">
-          <div className="text-md">{t("logSettings.loading.title")}</div>
+          <div>{t("logSettings.loading.title")}</div>
           <div className="mt-2.5 flex flex-col gap-2.5">
             <div className="space-y-1 text-xs text-muted-foreground">
               {t("logSettings.loading.desc")}

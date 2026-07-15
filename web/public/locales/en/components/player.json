@@ -4,14 +4,15 @@
   "noPreviewFoundFor": "No Preview Found for {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Submit this frame to Frigate+?",
-    "submit": "Submit"
+    "submit": "Submit",
+    "previewError": "Could not load snapshot preview. The recording may not be available at this time."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 or greater is required for this live stream type.",
   "streamOffline": {
     "title": "Stream Offline",
     "desc": "No frames have been received on the {{cameraName}} <code>detect</code> stream, check error logs"
   },
-  "cameraDisabled": "Camera is disabled",
+  "cameraOff": "Camera is off",
   "stats": {
     "streamType": {
       "title": "Stream Type:",

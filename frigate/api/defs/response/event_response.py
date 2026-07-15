@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -6,20 +6,20 @@ from pydantic import BaseModel, ConfigDict
 class EventResponse(BaseModel):
     id: str
     label: str
-    sub_label: Optional[str]
+    sub_label: str | None
     camera: str
     start_time: float
-    end_time: Optional[float]
-    false_positive: Optional[bool]
+    end_time: float | None
+    false_positive: bool | None
     zones: list[str]
-    thumbnail: Optional[str]
+    thumbnail: str | None
     has_clip: bool
     has_snapshot: bool
     retain_indefinitely: bool
-    plus_id: Optional[str]
-    model_hash: Optional[str]
-    detector_type: Optional[str]
-    model_type: Optional[str]
+    plus_id: str | None
+    model_hash: str | None
+    detector_type: str | None
+    model_type: str | None
     data: dict[str, Any]
 
     model_config = ConfigDict(protected_namespaces=())

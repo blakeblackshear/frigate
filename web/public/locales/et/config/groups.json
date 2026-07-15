@@ -1,1 +1,73 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Üldine tuvastamine",
+            "sensitivity": "Üldine tundlikkus"
+        },
+        "cameras": {
+            "detection": "Tuvastamine",
+            "sensitivity": "Tundlikkus"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Üldine tundlikkus",
+            "algorithm": "Üldine algoritm"
+        },
+        "cameras": {
+            "sensitivity": "Tundlikkus",
+            "algorithm": "Algoritm"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Üldine vaade"
+        },
+        "cameras": {
+            "display": "Vaade"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Üldine välimus"
+        },
+        "cameras": {
+            "appearance": "Välimus"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Üldine eraldusvõime",
+            "tracking": "Üldine jälgimine"
+        },
+        "cameras": {
+            "resolution": "Eraldusvõime",
+            "tracking": "Jälgimine"
+        }
+    },
+    "objects": {
+        "global": {
+            "filtering": "Üldine filtreerimine",
+            "tracking": "Üldine jälgimine"
+        },
+        "cameras": {
+            "filtering": "Filtreerimine",
+            "tracking": "Jälgimine"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Üldine säilitamine",
+            "events": "Üldised sündmused"
+        },
+        "cameras": {
+            "retention": "Säilitamine",
+            "events": "Sündmused"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Kaamerakohased FFmpegi argumendid"
+        }
+    }
+}

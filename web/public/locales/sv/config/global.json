@@ -1,1 +1,17 @@
-{}
+{
+    "version": {
+        "label": "Nuvarande konfigurations version"
+    },
+    "audio": {
+        "label": "Ljuddetektering",
+        "enabled": {
+            "label": "Aktivera ljuddetektering"
+        },
+        "max_not_heard": {
+            "description": "Antal sekunder utan den konfigurerade ljudtypen innan en ljudbaserad händelse slutar."
+        },
+        "min_volume": {
+            "label": "Minsta ljudvolym"
+        }
+    }
+}

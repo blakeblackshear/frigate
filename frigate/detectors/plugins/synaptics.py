@@ -1,9 +1,9 @@
 import logging
 import os
+from typing import Literal
 
 import numpy as np
 from pydantic import ConfigDict
-from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (

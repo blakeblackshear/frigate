@@ -38,12 +38,6 @@ export default function RestartDialog({
   const [restartingSheetOpen, setRestartingSheetOpen] = useState(false);
   const [countdown, setCountdown] = useState(60);
 
-  const clearBodyPointerEvents = () => {
-    if (typeof document !== "undefined") {
-      document.body.style.pointerEvents = "";
-    }
-  };
-
   useEffect(() => {
     setRestartDialogOpen(isOpen);
   }, [isOpen]);
@@ -85,16 +79,10 @@ export default function RestartDialog({
           if (!open) {
             setRestartDialogOpen(false);
             onClose();
-            clearBodyPointerEvents();
           }
         }}
       >
-        <AlertDialogContent
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            clearBodyPointerEvents();
-          }}
-        >
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("restart.title")}</AlertDialogTitle>
             <AlertDialogDescription className="sr-only">

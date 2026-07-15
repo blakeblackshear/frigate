@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/hover-card";
 import copy from "copy-to-clipboard";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -54,6 +53,7 @@ export default function MasksAndZonesView({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
+  const [polygonsInitialized, setPolygonsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPolygonIndex, setLoadingPolygonIndex] = useState<
     number | undefined
@@ -610,6 +610,7 @@ export default function MasksAndZonesView({
         ...globalObjectMasks,
         ...objectMasks,
       ]);
+      setPolygonsInitialized(true);
       // Don't overwrite editingPolygons during editing – layout shifts
       // from switching to the edit pane can trigger a resize which
       // recalculates scaledWidth/scaledHeight and would discard the
@@ -677,7 +678,7 @@ export default function MasksAndZonesView({
   }, [currentEditingProfile]);
 
   useSearchEffect("object_mask", (coordinates: string) => {
-    if (!scaledWidth || !scaledHeight || isLoading) {
+    if (!scaledWidth || !scaledHeight || isLoading || !polygonsInitialized) {
       return false;
     }
     // convert box points string to points array
@@ -730,7 +731,6 @@ export default function MasksAndZonesView({
     <>
       {cameraConfig && editingPolygons && (
         <div className="flex size-full flex-col md:flex-row">
-          <Toaster position="top-center" closeButton={true} />
           <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12 md:min-w-0 md:shrink-0">
             {editPane == "zone" && (
               <ZoneEditPane
@@ -793,7 +793,7 @@ export default function MasksAndZonesView({
                       <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
-                            <div className="text-md cursor-default">
+                            <div className="cursor-default">
                               {t("masksAndZones.zones.label")}
                             </div>
                           </HoverCardTrigger>
@@ -871,7 +871,7 @@ export default function MasksAndZonesView({
                       <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
-                            <div className="text-md cursor-default">
+                            <div className="cursor-default">
                               {t("masksAndZones.motionMasks.label")}
                             </div>
                           </HoverCardTrigger>
@@ -953,7 +953,7 @@ export default function MasksAndZonesView({
                       <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
-                            <div className="text-md cursor-default">
+                            <div className="cursor-default">
                               {t("masksAndZones.objectMasks.label")}
                             </div>
                           </HoverCardTrigger>

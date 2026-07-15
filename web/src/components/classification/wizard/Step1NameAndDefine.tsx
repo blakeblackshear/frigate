@@ -214,7 +214,7 @@ export default function Step1NameAndDefine({
                 </FormLabel>
                 <FormControl>
                   <Input
-                    className="text-md h-8"
+                    className="h-8"
                     placeholder={t("wizard.step1.namePlaceholder")}
                     {...field}
                   />
@@ -322,7 +322,7 @@ export default function Step1NameAndDefine({
                       <FormLabel className="text-primary-variant">
                         {t("wizard.step1.classificationType")}
                       </FormLabel>
-                      <Popover modal={true}>
+                      <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             variant="ghost"
@@ -405,7 +405,7 @@ export default function Step1NameAndDefine({
                     ? t("wizard.step1.states")
                     : t("wizard.step1.classes")}
                 </FormLabel>
-                <Popover modal={true}>
+                <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                       <LuInfo className="size-3" />
@@ -457,7 +457,7 @@ export default function Step1NameAndDefine({
                       <FormControl>
                         <div className="flex items-center gap-2">
                           <Input
-                            className="text-md h-8"
+                            className="h-8"
                             placeholder={t("wizard.step1.classPlaceholder")}
                             {...field}
                           />
@@ -489,7 +489,7 @@ export default function Step1NameAndDefine({
         </form>
       </Form>
 
-      <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+      <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
         <Button type="button" onClick={onCancel} className="sm:flex-1">
           {t("button.cancel", { ns: "common" })}
         </Button>

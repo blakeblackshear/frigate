@@ -27,13 +27,12 @@ Running Generative AI models on CPU is not recommended, as high inference times 
 
 You must use a vision-capable model with Frigate. The following models are recommended for local deployment:
 
-| Model         | Notes                                                                                                                                                                |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl`    | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object.                                              |
-| `qwen3.5`     | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
-| `gemma4`      | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
-| `Intern3.5VL` | Relatively fast with good vision comprehension                                                                                                                       |
-| `gemma3`      | Slower model with good vision and temporal understanding                                                                                                             |
+| Model      | Notes                                                                                                                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qwen3-vl` | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object.                                              |
+| `qwen3.5`  | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
+| `qwen3.6`  | Strong situational understanding, similar to qwen3-vl                                                                                                                |
+| `gemma4`   | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
 
 :::info
 
@@ -49,15 +48,14 @@ You should have at least 8 GB of RAM available (or VRAM if running on GPU) to ru
 
 ### Model Types: Instruct vs Thinking
 
-Most vision-language models are available as **instruct** models, which are fine-tuned to follow instructions and respond concisely to prompts. However, some models (such as certain Qwen-VL or minigpt variants) offer both **instruct** and **thinking** versions.
+Vision-language models come in **instruct** variants (fine-tuned to follow instructions and respond concisely), **thinking** variants (fine-tuned for free-form, speculative reasoning), and **hybrid** variants that support both modes per request. Most modern vision-language models are hybrid.
 
-- **Instruct models** are always recommended for use with Frigate. These models generate direct, relevant, actionable descriptions that best fit Frigate's object and event summary use case.
-- **Reasoning / Thinking models** are fine-tuned for more free-form, open-ended, and speculative outputs, which are typically not concise and may not provide the practical summaries Frigate expects. For this reason, Frigate does **not** recommend or support using thinking models.
+Frigate manages reasoning per task automatically:
 
-Some models are labeled as **hybrid** (capable of both thinking and instruct tasks). In these cases, it is recommended to disable reasoning / thinking, which is generally model specific (see your models documentation).
+- **Description tasks** (object descriptions, review descriptions, review summaries) are synthesis-only and benefit from concise, direct output, so Frigate disables thinking for these calls when the model exposes a per-request toggle.
+- **Chat** lets you toggle thinking on or off from the composer when the configured model supports it.
 
-**Recommendation:**
-Always select the `-instruct` or documented instruct/tagged variant of any model you use in your Frigate configuration. If in doubt, refer to your model provider's documentation or model library for guidance on the correct model variant to use.
+You can use a pure instruct, hybrid, or thinking-capable model with Frigate. No extra configuration is required to disable thinking for descriptions.
 
 ### llama.cpp
 
@@ -201,7 +199,7 @@ Cloud Generative AI providers require an active internet connection to send imag
 
 ### Ollama Cloud
 
-Ollama also supports [cloud models](https://ollama.com/cloud), where your local Ollama instance handles requests from Frigate, but model inference is performed in the cloud. Set up Ollama locally, sign in with your Ollama account, and specify the cloud model name in your Frigate config. For more details, see the Ollama cloud model [docs](https://docs.ollama.com/cloud).
+Ollama also supports [cloud models](https://ollama.com/cloud), where model inference is performed in the cloud. You can connect directly to Ollama Cloud by setting `base_url` to `https://ollama.com` and providing an API key. Alternatively, you can run Ollama locally and use a cloud model name so your local instance forwards requests to the cloud. For more details, see the Ollama cloud model [docs](https://docs.ollama.com/cloud).
 
 #### Configuration
 
@@ -210,7 +208,8 @@ Ollama also supports [cloud models](https://ollama.com/cloud), where your local 
 
 1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
    - Set **Provider** to `ollama`
-   - Set **Base URL** to your local Ollama address (e.g., `http://localhost:11434`)
+   - Set **Base URL** to your local Ollama address (e.g., `http://localhost:11434`) or `https://ollama.com` for direct cloud inference
+   - Set **API key** if required by your endpoint (e.g., when using `https://ollama.com`)
    - Set **Model** to the cloud model name
 
 </TabItem>
@@ -221,6 +220,16 @@ genai:
   provider: ollama
   base_url: http://localhost:11434
   model: cloud-model-name
+```
+
+or when using Ollama Cloud directly
+
+```yaml
+genai:
+  provider: ollama
+  base_url: https://ollama.com
+  model: cloud-model-name
+  api_key: your-api-key
 ```
 
 </TabItem>
@@ -284,7 +293,7 @@ Other HTTP options are available, see the [python-genai documentation](https://g
 
 ### OpenAI
 
-OpenAI does not have a free tier for their API. With the release of gpt-4o, pricing has been reduced and each generation should cost fractions of a cent if you choose to go this route.
+OpenAI does not have a free tier for their API.
 
 #### Supported Models
 

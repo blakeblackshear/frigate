@@ -13,7 +13,7 @@
         "description": "Activată"
     },
     "audio": {
-        "label": "Evenimente audio",
+        "label": "Detecție audio",
         "description": "Setări pentru detectarea evenimentelor bazate pe sunet pentru această cameră.",
         "enabled": {
             "label": "Activare detecție audio",
@@ -29,11 +29,15 @@
         },
         "listen": {
             "label": "Tipuri ascultate",
-            "description": "Lista de evenimente audio de detectat (ex: lătrat, alarmă_incendiu, țipăt, vorbire)."
+            "description": "Lista de evenimente audio de detectat (ex: lătrat, alarmă_incendiu, vorbire)."
         },
         "filters": {
             "label": "Filtre audio",
-            "description": "Setări de filtrare per tip audio, cum ar fi pragul de încredere."
+            "description": "Setări de filtrare per tip audio, cum ar fi pragul de încredere.",
+            "threshold": {
+                "label": "Încredere audio minimă",
+                "description": "Pragul minim de încredere pentru ca evenimentul audio să fie luat în considerare."
+            }
         },
         "enabled_in_config": {
             "label": "Stare audio originală",
@@ -148,11 +152,11 @@
         }
     },
     "ffmpeg": {
-        "label": "FFmpeg",
-        "description": "Setări FFmpeg: cale binar, argumente, accelerare hardware și ieșiri per rol.",
+        "label": "Stream-uri (FFmpeg)",
+        "description": "Intrările stream-ului camerei și opțiunile FFmpeg, inclusiv calea către binar, argumentele, hwaccel și argumentele de ieșire per rol.",
         "path": {
             "label": "Cale FFmpeg",
-            "description": "Calea către binarul FFmpeg sau un alias de versiune (\"5.0\" sau \"7.0\")."
+            "description": "Calea către binarul FFmpeg sau un alias de versiune (\"7.0\" sau \"8.0\")."
         },
         "global_args": {
             "label": "Argumente globale FFmpeg",
@@ -485,6 +489,10 @@
             "hwaccel_args": {
                 "label": "Argumente hwaccel export",
                 "description": "Argumente de accelerare hardware pentru operațiunile de export/transcodare."
+            },
+            "max_concurrent": {
+                "description": "Numărul maxim de sarcini de export de procesat în același timp.",
+                "label": "Număr maxim de exporturi simultane"
             }
         },
         "preview": {
@@ -678,7 +686,7 @@
     },
     "timestamp_style": {
         "label": "Stil timestamp",
-        "description": "Opțiuni de stilizare pentru timestamp-ul din flux, aplicate înregistrărilor și snapshot-urilor.",
+        "description": "Opțiuni de stilizare pentru marcajele de timp aplicate snapshot-urilor și vizualizării Debug.",
         "position": {
             "label": "Poziție timestamp",
             "description": "Unde apare data/ora pe imagine (stânga-sus/dreapta-sus etc.)."
@@ -858,6 +866,10 @@
         "dashboard": {
             "label": "Arată în interfață",
             "description": "Comută vizibilitatea acestei camere peste tot în interfața Frigate. Dezactivarea acestei opțiuni va necesita editarea manuală a configurației pentru a vedea din nou camera în interfață."
+        },
+        "review": {
+            "label": "Arată în Revizuire",
+            "description": "Comută dacă această cameră este vizibilă în Rrevizuire (pagina de revizuire și filtrul ei de camere, revizuirea mișcărilor și vizualizarea istoricului)."
         }
     },
     "webui_url": {

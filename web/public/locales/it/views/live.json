@@ -9,7 +9,7 @@
     "disable": "Disabilita audio bidirezionale"
   },
   "snapshots": {
-    "enable": "Abilita istantanee",
+    "enable": "Abilita Istantanee",
     "disable": "Disabilita istantanee"
   },
   "manualRecording": {
@@ -40,7 +40,8 @@
     "objectDetection": "Rilevamento oggetti",
     "recording": "Registrazione",
     "audioDetection": "Rilevamento audio",
-    "transcription": "Trascrizione audio"
+    "transcription": "Trascrizione audio",
+    "camera": "Telecamera"
   },
   "history": {
     "label": "Mostra filmati storici"
@@ -98,7 +99,9 @@
   },
   "camera": {
     "enable": "Abilita telecamera",
-    "disable": "Disabilita telecamera"
+    "disable": "Disabilita telecamera",
+    "turnOn": "Attiva la telecamera",
+    "turnOff": "Disattiva la telecamera"
   },
   "muteCameras": {
     "enable": "Muta tutte le telecamere",
@@ -110,7 +113,8 @@
   },
   "recording": {
     "enable": "Abilita registrazione",
-    "disable": "Disabilita registrazione"
+    "disable": "Disabilita registrazione",
+    "disabledInConfig": "Per questa telecamera è necessario prima abilitare la registrazione nelle impostazioni."
   },
   "audioDetect": {
     "enable": "Abilita rilevamento audio",
@@ -157,7 +161,7 @@
   },
   "effectiveRetainMode": {
     "modes": {
-      "all": "Tutto",
+      "all": "Tutti",
       "motion": "Movimento",
       "active_objects": "Oggetti attivi"
     },

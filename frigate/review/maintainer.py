@@ -11,7 +11,7 @@ import sys
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 import numpy as np
@@ -267,7 +267,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     def __init__(self, config: FrigateConfig, stop_event: MpEvent):
         super().__init__(name="review_segment_maintainer")
         self.config = config
-        self.active_review_segments: dict[str, Optional[PendingReviewSegment]] = {}
+        self.active_review_segments: dict[str, PendingReviewSegment | None] = {}
         self.frame_manager = SharedMemoryFrameManager()
 
         # create communication for review segments
@@ -323,7 +323,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         self,
         segment: PendingReviewSegment,
         camera_config: CameraConfig,
-        frame: Optional[np.ndarray],
+        frame: np.ndarray | None,
         objects: list[dict[str, Any]],
         prev_data: dict[str, Any],
     ) -> None:

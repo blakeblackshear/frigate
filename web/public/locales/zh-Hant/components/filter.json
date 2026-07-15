@@ -106,7 +106,7 @@
   },
   "trackedObjectDelete": {
     "title": "確認刪除",
-    "desc": "刪除這 {{objectLength}} 個追蹤物件將會刪除截圖、儲存的嵌入資料，以及相關的物件生命週期紀錄。歷史記錄中的錄影檔案<em>不會</em>被刪除。<br /><br />你確定要繼續嗎？<br /><br />按住 <em>Shift</em> 可在未來跳過這個確認內容。",
+    "desc": "刪除這 {{objectLength}} 個追蹤物件將會移除快照、已儲存的嵌入向量資料（embeddings），以及相關的物件生命週期紀錄。歷史檢視中的錄影檔案 <em>不會</em> 被刪除。<br /><br />確定要繼續嗎？<br /><br />按住 <em>Shift</em> 鍵可在未來跳過此對話框。",
     "toast": {
       "success": "成功刪除追蹤物件。",
       "error": "刪除追蹤物件失敗：{{errorMessage}}"

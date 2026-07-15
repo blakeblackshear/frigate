@@ -8,7 +8,7 @@ import threading
 import time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 
@@ -45,6 +45,7 @@ class VLMWatchJob(Job):
     last_reasoning: str = ""
     notification_message: str = ""
     iteration_count: int = 0
+    username: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -359,8 +360,8 @@ class VLMWatchRunner(threading.Thread):
 
 
 # Module-level singleton (only one watch job at a time)
-_current_job: Optional[VLMWatchJob] = None
-_cancel_event: Optional[threading.Event] = None
+_current_job: VLMWatchJob | None = None
+_cancel_event: threading.Event | None = None
 _job_lock = threading.Lock()
 
 
@@ -374,6 +375,7 @@ def start_vlm_watch_job(
     dispatcher: Any,
     labels: list[str] | None = None,
     zones: list[str] | None = None,
+    username: str = "",
 ) -> str:
     """Start a new VLM watch job. Returns the job ID.
 
@@ -397,6 +399,7 @@ def start_vlm_watch_job(
             max_duration_minutes=max_duration_minutes,
             labels=labels or [],
             zones=zones or [],
+            username=username,
         )
         cancel_ev = threading.Event()
         _current_job = job
@@ -441,6 +444,6 @@ def stop_vlm_watch_job() -> bool:
         return True
 
 
-def get_vlm_watch_job() -> Optional[VLMWatchJob]:
+def get_vlm_watch_job() -> VLMWatchJob | None:
     """Return the current (or most recent) VLM watch job."""
     return _current_job

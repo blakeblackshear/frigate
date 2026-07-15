@@ -9,13 +9,14 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
-import { JsonObject, JsonValue } from "@/types/configForm";
+import { HiddenFieldContext, JsonObject, JsonValue } from "@/types/configForm";
+import { getEffectiveAttributeLabels } from "@/utils/configUtil";
 
 /**
  * Sections that require special handling at the global level.
  * Add new section paths here as needed.
  */
-const SPECIAL_CASE_SECTIONS = ["motion", "detectors"] as const;
+const SPECIAL_CASE_SECTIONS = ["motion", "detectors", "genai"] as const;
 
 /**
  * Check if a section requires special case handling.
@@ -37,13 +38,28 @@ export function isSpecialCaseSection(
  *
  * - detectors: Strip the "default" field to prevent RJSF from merging the
  *   default {"cpu": {"type": "cpu"}} with stored detector keys.
+ * - genai: Inject a default provider value on the additionalProperties shape.
+ * - objects: Promote tracked attribute labels (face, license_plate, courier
+ *   logos) from `filters.additionalProperties` to explicit
+ *   `filters.properties.<attr>` entries with a restricted FilterConfig
+ *   shape, so RJSF renders just that one field for
+ *   attribute filters. Non-attribute tracked labels (person, car, …)
+ *   keep flowing through the unmodified `additionalProperties` and render
+ *   the full FilterConfig form.
  */
 export function modifySchemaForSection(
   sectionPath: string,
   level: string,
   schema: RJSFSchema | undefined,
+  ctx?: HiddenFieldContext,
 ): RJSFSchema | undefined {
-  if (!schema || !isSpecialCaseSection(sectionPath, level)) {
+  if (!schema) return schema;
+
+  if (sectionPath === "objects") {
+    return modifyObjectsSchema(schema, ctx);
+  }
+
+  if (!isSpecialCaseSection(sectionPath, level)) {
     return schema;
   }
 
@@ -53,7 +69,199 @@ export function modifySchemaForSection(
     return schemaWithoutDefault;
   }
 
+  if (sectionPath === "genai") {
+    const additional = schema.additionalProperties;
+    if (
+      additional &&
+      typeof additional === "object" &&
+      !Array.isArray(additional)
+    ) {
+      const props = (additional as RJSFSchema).properties;
+      if (props && typeof props.provider === "object") {
+        return {
+          ...schema,
+          additionalProperties: {
+            ...additional,
+            properties: {
+              ...props,
+              provider: { ...(props.provider as object), default: "openai" },
+            },
+          },
+        };
+      }
+    }
+  }
+
   return schema;
+}
+
+/**
+ * Build a stripped FilterConfig schema for tracked attribute filters
+ * (face, license_plate, etc.). Keeps only the fields meaningful for
+ * attribute detections — `min_score`, `min_area`, `max_area`. `threshold`
+ * and the ratio fields aren't exposed: attributes don't flow through
+ * `_is_false_positive` (no median-of-history check), and aspect-ratio
+ * filtering isn't a typical attribute-tuning knob.
+ *
+ * `min_area` and `max_area` are `Union[int, float]` in Pydantic which
+ * emits as `anyOf` in JSON schema; we flatten to a plain `number` so RJSF
+ * doesn't render the int/float type-selector dropdown for each attribute
+ * filter. The backend still accepts either int (pixels) or float
+ * (percentage) since the underlying FilterConfig union is unchanged.
+ */
+function buildAttributeFilterSchema(
+  filterConfigSchema: RJSFSchema,
+  attributeLabel: string,
+): RJSFSchema {
+  const props = isJsonObject(
+    (filterConfigSchema as { properties?: unknown }).properties,
+  )
+    ? (filterConfigSchema as { properties: Record<string, RJSFSchema> })
+        .properties
+    : undefined;
+
+  const minScoreSchema =
+    props && props.min_score ? props.min_score : { type: "number" };
+
+  const flattenToNumber = (src: RJSFSchema | undefined): RJSFSchema => {
+    if (!src) return { type: "number" };
+    const { anyOf: _anyOf, ...rest } = src as {
+      anyOf?: unknown;
+      [k: string]: unknown;
+    };
+    return { ...rest, type: "number" } as RJSFSchema;
+  };
+
+  return {
+    type: "object",
+    title: attributeLabel,
+    properties: {
+      min_score: minScoreSchema,
+      min_area: flattenToNumber(props && props.min_area),
+      max_area: flattenToNumber(props && props.max_area),
+    },
+    additionalProperties: false,
+  } as RJSFSchema;
+}
+
+function modifyObjectsSchema(
+  schema: RJSFSchema,
+  ctx: HiddenFieldContext | undefined,
+): RJSFSchema {
+  if (!ctx) return schema;
+
+  const allAttributes = getEffectiveAttributeLabels(
+    ctx.fullConfig,
+    ctx.fullCameraConfig,
+    ctx.level,
+  );
+
+  // Resolve effective track at this scope, falling back through camera
+  // config then global config (matches hideAttributeFilters in objects.ts).
+  const trackFromForm = Array.isArray(
+    (ctx.formData as { track?: unknown } | undefined)?.track,
+  )
+    ? (ctx.formData as { track: string[] }).track
+    : undefined;
+  const track =
+    trackFromForm ??
+    (ctx.level !== "global"
+      ? ctx.fullCameraConfig?.objects?.track
+      : undefined) ??
+    ctx.fullConfig.objects?.track ??
+    [];
+
+  // Also promote any label that has a saved filter entry but isn't in
+  // `track` (e.g. the user toggled an object off but left a customized
+  // filter in YAML). Without this, RJSF falls back to the additional-
+  // properties Key/Value editor for those orphans.
+  const filtersSaved =
+    (ctx.level !== "global"
+      ? ctx.fullCameraConfig?.objects?.filters
+      : undefined) ??
+    ctx.fullConfig.objects?.filters ??
+    {};
+
+  if (track.length === 0 && Object.keys(filtersSaved).length === 0) {
+    return schema;
+  }
+
+  const schemaProperties = isJsonObject(
+    (schema as { properties?: unknown }).properties,
+  )
+    ? (schema as { properties: Record<string, RJSFSchema> }).properties
+    : undefined;
+  const filtersSchema =
+    schemaProperties && schemaProperties.filters
+      ? schemaProperties.filters
+      : undefined;
+  if (!filtersSchema) return schema;
+
+  const filterEntrySchema = isJsonObject(
+    (filtersSchema as { additionalProperties?: unknown }).additionalProperties,
+  )
+    ? (filtersSchema as { additionalProperties: RJSFSchema })
+        .additionalProperties
+    : undefined;
+  if (!filterEntrySchema) return schema;
+
+  const attributeSet = new Set(allAttributes);
+  const existingProperties = isJsonObject(
+    (filtersSchema as { properties?: unknown }).properties,
+  )
+    ? (filtersSchema as { properties: Record<string, RJSFSchema> }).properties
+    : {};
+
+  // Promote every tracked label (and any orphaned filter entry) to an
+  // explicit property entry so RJSF renders it as a normal collapsible
+  // (no additionalProperties key/value editor UI). Attribute labels get a
+  // restricted shape with only `min_score`/`min_area`/`max_area`;
+  // non-attribute labels get the full FilterConfig. Sorted alphabetically
+  // so the filter collapsibles match the order of the sibling `track`
+  // switches.
+  const labelsToPromote = new Set<string>();
+  for (const label of track) {
+    if (typeof label === "string") labelsToPromote.add(label);
+  }
+  for (const key of Object.keys(filtersSaved)) {
+    // Skip attribute labels that aren't tracked — those are hidden
+    // entirely via hideAttributeFilters; promoting them would surface a
+    // collapsible we then have to hide separately.
+    if (attributeSet.has(key) && !labelsToPromote.has(key)) continue;
+    labelsToPromote.add(key);
+  }
+  const sortedTrackedLabels = [...labelsToPromote].sort((a, b) =>
+    a.localeCompare(b),
+  );
+  const updatedFilterProperties: Record<string, RJSFSchema> = {
+    ...existingProperties,
+  };
+  for (const label of sortedTrackedLabels) {
+    if (attributeSet.has(label)) {
+      updatedFilterProperties[label] = buildAttributeFilterSchema(
+        filterEntrySchema,
+        label,
+      );
+    } else {
+      updatedFilterProperties[label] = {
+        ...filterEntrySchema,
+        title: label,
+      } as RJSFSchema;
+    }
+  }
+
+  const updatedFiltersSchema: RJSFSchema = {
+    ...filtersSchema,
+    properties: updatedFilterProperties,
+  };
+
+  return {
+    ...schema,
+    properties: {
+      ...schemaProperties,
+      filters: updatedFiltersSchema,
+    },
+  };
 }
 
 /**
@@ -103,6 +311,60 @@ export function getEffectiveDefaultsForSection(
   }
 
   return schemaDefaults;
+}
+
+// Sections whose `filters` dict is keyed by a sibling list field. The backend
+// auto-populates these filters at config init but doesn't re-run after profile
+// merges, so we synthesize the missing entries on the frontend.
+const FILTER_SECTIONS: Record<string, { listField: string }> = {
+  objects: { listField: "track" },
+  audio: { listField: "listen" },
+};
+
+/**
+ * Add default filter entries for any label in the section's list field
+ * (e.g. `objects.track`, `audio.listen`) that isn't already in `filters`, so
+ * each label gets a collapsible. The backend only auto-populates filters at
+ * config init, not after profile merges.
+ */
+export function synthesizeMissingFilters(
+  sectionPath: string,
+  data: unknown,
+  sectionSchema: RJSFSchema | undefined,
+): unknown {
+  const sectionConfig = FILTER_SECTIONS[sectionPath];
+  if (!sectionConfig) return data;
+  if (!isJsonObject(data)) return data;
+
+  const listValue = (data as JsonObject)[sectionConfig.listField];
+  if (!Array.isArray(listValue) || listValue.length === 0) return data;
+
+  const properties = (sectionSchema as { properties?: Record<string, unknown> })
+    ?.properties;
+  const filtersSchema = isJsonObject(properties)
+    ? (properties.filters as { additionalProperties?: unknown } | undefined)
+    : undefined;
+  const filterEntrySchema = isJsonObject(filtersSchema?.additionalProperties)
+    ? (filtersSchema.additionalProperties as RJSFSchema)
+    : undefined;
+
+  const existingFilters = isJsonObject((data as JsonObject).filters)
+    ? ((data as JsonObject).filters as JsonObject)
+    : {};
+
+  const newFilters: JsonObject = { ...existingFilters };
+  let added = false;
+  for (const label of listValue) {
+    if (typeof label !== "string") continue;
+    if (Object.prototype.hasOwnProperty.call(newFilters, label)) continue;
+    newFilters[label] = (
+      filterEntrySchema ? applySchemaDefaults(filterEntrySchema, {}) : {}
+    ) as JsonValue;
+    added = true;
+  }
+
+  if (!added) return data;
+  return { ...(data as JsonObject), filters: newFilters };
 }
 
 /**

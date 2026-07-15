@@ -12,18 +12,18 @@
   "ptz": {
     "zoom": {
       "in": {
-        "label": "Zooma in PTZ kamera"
+        "label": "Zooma in PTZ-kameran"
       },
       "out": {
-        "label": "Zooma ut PTZ kamera"
+        "label": "Zooma ut PTZ-kameran"
       }
     },
     "move": {
       "up": {
-        "label": "Flytta PTZ kamera uppåt"
+        "label": "Flytta PTZ-kameran uppåt"
       },
       "right": {
-        "label": "Flytta PTZ kamera åt höger"
+        "label": "Flytta PTZ-kameran åt höger"
       },
       "clickMove": {
         "disable": "Inaktivera klick för att flytta",
@@ -42,10 +42,10 @@
         "label": "Klicka i bilden för att centrera PTZ kamera"
       }
     },
-    "presets": "PTZ kamera förinställningar",
+    "presets": "PTZ-kamerans förinställningar",
     "focus": {
       "in": {
-        "label": "Fokusera PTZ-kameran in"
+        "label": "Fokusera PTZ-kameran närmare"
       },
       "out": {
         "label": "Fokusera PTZ-kameran ut"
@@ -101,7 +101,7 @@
   },
   "cameraSettings": {
     "audioDetection": "Ljuddetektering",
-    "title": "{{kamera}} inställningar",
+    "title": "Inställningar för {{camera}}",
     "cameraEnabled": "Kamera Aktiverad",
     "objectDetection": "Objektsdetektering",
     "recording": "Inspelning",

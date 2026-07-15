@@ -2,7 +2,7 @@ import type { SectionConfigOverrides } from "./types";
 
 const telemetry: SectionConfigOverrides = {
   base: {
-    sectionDocs: "/configuration/reference",
+    sectionDocs: "/configuration/advanced/reference",
     restartRequired: ["version_check"],
     fieldOrder: ["network_interfaces", "stats", "version_check"],
     advancedFields: [],

@@ -12,12 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Видалений клас",
-      "deletedCategory_few": "",
-      "deletedCategory_many": "",
-      "deletedImage_one": "Видалені зображення",
-      "deletedImage_few": "",
-      "deletedImage_many": "",
+      "deletedCategory_one": "Видалено {{count}} клас",
+      "deletedCategory_few": "Видалено {{count}} класи",
+      "deletedCategory_many": "Видалено {{count}} класів",
+      "deletedImage_one": "Видалено {{count}} зображення",
+      "deletedImage_few": "Видалено {{count}} зображення",
+      "deletedImage_many": "Видалено {{count}} зображень",
       "categorizedImage": "Зображення успішно класифіковано",
       "trainedModel": "Успішно навчена модель.",
       "trainingModel": "Успішно розпочато навчання моделі.",

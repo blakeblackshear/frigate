@@ -24,7 +24,7 @@ Video decoding is one of the most CPU-intensive tasks in Frigate. While an AI ac
 
 ### Configuration
 
-Frigate provides preset configurations for common hardware acceleration scenarios. Set up `hwaccel_args` based on your hardware in your [configuration](../configuration/reference) as described in the [getting started guide](../guides/getting_started).
+Frigate provides preset configurations for common hardware acceleration scenarios. Set up `hwaccel_args` based on your hardware in your [configuration](../configuration/advanced/reference) as described in the [getting started guide](../guides/getting_started).
 
 ### Troubleshooting Hardware Acceleration
 
@@ -44,7 +44,7 @@ Choosing the right detector for your hardware is the single most important facto
 
 ### Understanding Detector Performance
 
-Frigate uses motion detection as a first-line check before running expensive object detection, as explained in the [motion detection documentation](../configuration/motion_detection). When motion is detected, Frigate creates a "region" (the green boxes in the debug viewer) and sends it to the detector. The detector's inference speed determines how many detections per second your system can handle.
+Frigate uses motion detection as a first-line check before running expensive object detection, as explained in the [motion detection documentation](../configuration/motion_detection). When motion is detected, Frigate creates a "region" (the green boxes in the [debug viewer](/usage/live#the-single-camera-view)) and sends it to the detector. The detector's inference speed determines how many detections per second your system can handle.
 
 **Calculating Detector Capacity:** Your detector has a finite capacity measured in detections per second. With an inference speed of 10ms, your detector can handle approximately 100 detections per second (1000ms / 10ms = 100).If your cameras collectively require more than this capacity, you'll experience delays, missed detections, or the system will fall behind.
 
@@ -58,7 +58,6 @@ When a single detector cannot keep up with your camera count, some detector type
 
 For detailed instructions on configuring multiple detectors, see the [Object Detectors documentation](../configuration/object_detectors).
 
-
 **When to add a second detector:**
 
 - Skipped FPS is consistently > 0 even during normal activity
@@ -71,3 +70,5 @@ The model you use significantly impacts detector performance. Frigate provides d
 
 - Smaller models (320x320): Faster inference, Frigate is specifically optimized for a 320x320 size model.
 - Larger models (640x640): Slower inference, can sometimes have higher accuracy on very large objects that take up a majority of the frame.
+
+For more detail on picking the right size, see [Choosing a model size](../configuration/object_detectors.md#choosing-a-model-size).

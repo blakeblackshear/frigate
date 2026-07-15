@@ -18,7 +18,12 @@ const proxy: SectionConfigOverrides = {
         "ui:options": { size: "lg" },
       },
       auth_secret: {
+        "ui:widget": "password",
         "ui:options": { size: "md" },
+      },
+      default_role: {
+        "ui:widget": "defaultRole",
+        "ui:options": { size: "sm" },
       },
       header_map: {
         "ui:after": { render: "ProxyRoleMap" },

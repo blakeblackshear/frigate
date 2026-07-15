@@ -52,8 +52,12 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1 amd64/bin/ffmpeg amd64/bin/ffprobe
     rm -rf ffmpeg.tar.xz
     mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2026-03-19-13-03/ffmpeg-n7.1.3-43-g5a1f107b4c-linux64-gpl-7.1.tar.xz"
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linux64-gpl-7.0.tar.xz"
     tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1 amd64/bin/ffmpeg amd64/bin/ffprobe
+    rm -rf ffmpeg.tar.xz
+    mkdir -p /usr/lib/ffmpeg/8.0
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2026-06-02-14-20/ffmpeg-n8.1.1-9-g58d4114d36-linux64-gpl-8.1.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/8.0 --strip-components 1 amd64/bin/ffmpeg amd64/bin/ffprobe
     rm -rf ffmpeg.tar.xz
 fi
 
@@ -64,8 +68,12 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
     tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1 arm64/bin/ffmpeg arm64/bin/ffprobe
     rm -f ffmpeg.tar.xz
     mkdir -p /usr/lib/ffmpeg/7.0
-    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2026-03-19-13-03/ffmpeg-n7.1.3-43-g5a1f107b4c-linuxarm64-gpl-7.1.tar.xz"
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linuxarm64-gpl-7.0.tar.xz"
     tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1 arm64/bin/ffmpeg arm64/bin/ffprobe
+    rm -f ffmpeg.tar.xz
+    mkdir -p /usr/lib/ffmpeg/8.0
+    wget -qO ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2026-06-02-14-20/ffmpeg-n8.1.1-9-g58d4114d36-linuxarm64-gpl-8.1.tar.xz"
+    tar -xf ffmpeg.tar.xz -C /usr/lib/ffmpeg/8.0 --strip-components 1 arm64/bin/ffmpeg arm64/bin/ffprobe
     rm -f ffmpeg.tar.xz
 fi
 
@@ -87,40 +95,47 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     # intel packages use zst compression so we need to update dpkg
     apt-get install -y dpkg
 
-    # use intel apt intel packages
+    # use intel apt repo for libmfx1 (legacy QSV, pre-Gen12)
     wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/gpu/ubuntu jammy client" | tee /etc/apt/sources.list.d/intel-gpu-jammy.list
     apt-get -qq update
+
     # intel-media-va-driver-non-free is built from source in the
     # intel-media-driver Dockerfile stage for Battlemage (Xe2) support
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        libmfx1 libmfxgen1 libvpl2
+        libmfx1
+    rm -f /usr/share/keyrings/intel-graphics.gpg
+    rm -f /etc/apt/sources.list.d/intel-gpu-jammy.list
 
+    # upgrade libva2, oneVPL runtime, and libvpl2 from trixie for Battlemage support
+    echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
+    apt-get -qq update
+    apt-get -qq install -y -t trixie libva2 libva-drm2 libzstd1
+    apt-get -qq install -y -t trixie libmfx-gen1.2 libvpl2
+    rm -f /etc/apt/sources.list.d/trixie.list
+    apt-get -qq update
     apt-get -qq install -y ocl-icd-libopencl1
 
     # install libtbb12 for NPU support
     apt-get -qq install -y libtbb12
 
-    rm -f /usr/share/keyrings/intel-graphics.gpg
-    rm -f /etc/apt/sources.list.d/intel-gpu-jammy.list
-
-    # install legacy and standard intel icd and level-zero-gpu
+    # install legacy and standard intel compute packages
     # see https://github.com/intel/compute-runtime/blob/master/LEGACY_PLATFORMS.md for more info
     # needed core package
-    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.19/libigdgmm12_22.7.0_amd64.deb
-    dpkg -i libigdgmm12_22.7.0_amd64.deb
-    rm libigdgmm12_22.7.0_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/26.14.37833.4/libigdgmm12_22.9.0_amd64.deb
+    dpkg -i libigdgmm12_22.9.0_amd64.deb
+    rm libigdgmm12_22.9.0_amd64.deb
 
-    # legacy packages
+    # legacy compute-runtime packages
     wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.36/intel-opencl-icd-legacy1_24.35.30872.36_amd64.deb
     wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.36/intel-level-zero-gpu-legacy1_1.5.30872.36_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-opencl_1.0.17537.24_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-core_1.0.17537.24_amd64.deb
-    # standard packages
-    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.19/intel-opencl-icd_25.13.33276.19_amd64.deb
-    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.19/intel-level-zero-gpu_1.6.33276.19_amd64.deb
-    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.10.10/intel-igc-opencl-2_2.10.10+18926_amd64.deb
-    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.10.10/intel-igc-core-2_2.10.10+18926_amd64.deb
+    # standard compute-runtime packages
+    wget https://github.com/intel/compute-runtime/releases/download/26.14.37833.4/intel-opencl-icd_26.14.37833.4-0_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/26.14.37833.4/libze-intel-gpu1_26.14.37833.4-0_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.32.7/intel-igc-opencl-2_2.32.7+21184_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.32.7/intel-igc-core-2_2.32.7+21184_amd64.deb
     # npu packages
     wget https://github.com/oneapi-src/level-zero/releases/download/v1.28.2/level-zero_1.28.2+u22.04_amd64.deb
     wget https://github.com/intel/linux-npu-driver/releases/download/v1.19.0/intel-driver-compiler-npu_1.19.0.20250707-16111289554_ubuntu22.04_amd64.deb
@@ -130,6 +145,10 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     dpkg -i *.deb
     rm *.deb
     apt-get -qq install -f -y
+
+    # Battlemage uses the xe kernel driver, but the VA-API driver is still iHD.
+    # The oneVPL runtime may look for a driver named after the kernel module.
+    ln -sf /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so /usr/lib/x86_64-linux-gnu/dri/xe_drv_video.so
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then

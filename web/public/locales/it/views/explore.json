@@ -202,8 +202,8 @@
       "aria": "Invia a Frigate Plus"
     },
     "addTrigger": {
-      "label": "Aggiungi innesco",
-      "aria": "Aggiungi un innesco per questo oggetto tracciato"
+      "label": "Aggiungi attivatore",
+      "aria": "Aggiungi un attivatore per questo oggetto tracciato"
     },
     "audioTranscription": {
       "label": "Trascrivere",
@@ -224,8 +224,8 @@
       "aria": "Scarica istantanea pulita"
     },
     "debugReplay": {
-      "label": "Riproduzione di correzione",
-      "aria": "Visualizza questo oggetto tracciato nella vista di riproduzione di correzione"
+      "label": "Riproduzione di correzioni",
+      "aria": "Visualizza questo oggetto tracciato nella vista di riproduzione di correzioni"
     },
     "more": {
       "aria": "Altri"
@@ -289,7 +289,10 @@
         "zones": "Zone",
         "ratio": "Rapporto",
         "area": "Area",
-        "score": "Punteggio"
+        "score": "Punteggio",
+        "computedScore": "Punteggio calcolato",
+        "topScore": "Punteggio massimo",
+        "toggleAdvancedScores": "Attiva/disattiva i punteggi avanzati"
       }
     },
     "annotationSettings": {

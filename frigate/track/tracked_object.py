@@ -5,7 +5,7 @@ import math
 import os
 from collections import defaultdict
 from statistics import median
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import cv2
 import numpy as np
@@ -81,7 +81,7 @@ class TrackedObject:
         self.previous = self.to_dict()
 
     @property
-    def max_severity(self) -> Optional[str]:
+    def max_severity(self) -> str | None:
         review_config = self.camera_config.review
 
         if (
@@ -330,7 +330,12 @@ class TrackedObject:
             if self.obj_data["position_changes"] != obj_data["position_changes"]:
                 significant_change = True
 
-            if self.obj_data["attributes"] != obj_data["attributes"]:
+            # disappearance of a per-frame attribute can be caused by detection
+            # skipping the object on a frame (stationary objects on non-interval
+            # frames), so only flag when a new attribute label appears
+            prev_labels = {a["label"] for a in self.obj_data["attributes"]}
+            curr_labels = {a["label"] for a in obj_data["attributes"]}
+            if curr_labels - prev_labels:
                 significant_change = True
 
             # if the state changed between stationary and active
@@ -526,8 +531,7 @@ class TrackedObject:
 
         directory = os.path.join(THUMB_DIR, self.camera_config.name)
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
         thumb_bytes = self.get_thumbnail("webp")
 
@@ -586,7 +590,7 @@ class TrackedObjectAttribute:
             "box": self.box,
         }
 
-    def find_best_object(self, objects: list[dict[str, Any]]) -> Optional[str]:
+    def find_best_object(self, objects: list[dict[str, Any]]) -> str | None:
         """Find the best attribute for each object and return its ID."""
         best_object_area: float | None = None
         best_object_id: str | None = None

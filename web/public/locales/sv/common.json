@@ -114,7 +114,19 @@
     "download": "Ladda ner",
     "info": "Info",
     "export": "Exportera",
-    "continue": "Fortsätta"
+    "continue": "Fortsätta",
+    "add": "Lägg till",
+    "applying": "Verkställer…",
+    "undo": "Ångra",
+    "copiedToClipboard": "Kopieras till urklipp",
+    "modified": "Modifiera",
+    "overridden": "Åsidosatt",
+    "resetToGlobal": "Återställ till Global",
+    "resetToDefault": "Återställ till standard",
+    "saveAll": "Spara alla",
+    "savingAll": "Sparar alla…",
+    "retry": "Försök igen",
+    "undoAll": "Ångra alla"
   },
   "menu": {
     "language": {
@@ -160,7 +172,9 @@
       "gl": "Galego (Galiciska)",
       "id": "Bahasa Indonesia (Indonesiska)",
       "ur": "اردو (Urdu)",
-      "hr": "Hrvatski (kroatiska)"
+      "hr": "Hrvatski (kroatiska)",
+      "zhHant": "繁體中文 (Traditionell kinesisk)",
+      "bs": "Bosanski (Bosniska)"
     },
     "darkMode": {
       "withSystem": {
@@ -207,7 +221,7 @@
     "help": "Hjälp",
     "documentation": {
       "title": "Dokumentation",
-      "label": "Frigate dokumentation"
+      "label": "Frigate-dokumentation"
     },
     "uiPlayground": "UI Testmiljö",
     "restart": "Starta om Frigate",
@@ -216,7 +230,11 @@
     "configurationEditor": "Konfigurationsredigerare",
     "withSystem": "System",
     "appearance": "Utseende",
-    "classification": "Klassificering"
+    "classification": "Klassificering",
+    "profiles": "Profiler",
+    "actions": "Åtgärder",
+    "features": "Funktioner",
+    "chat": "Chatt"
   },
   "pagination": {
     "next": {
@@ -252,7 +270,8 @@
       "error": {
         "title": "Misslyckades med att spara konfigurationsändringar: {{errorMessage}}",
         "noMessage": "Misslyckades med att spara konfigurationsändringar"
-      }
+      },
+      "success": "Konfigurationsändringarna har sparats."
     },
     "copyUrlToClipboard": "Webbadressen har kopierats till urklipp."
   },
@@ -296,5 +315,10 @@
   "field": {
     "optional": "Valfritt",
     "internalID": "Det interna ID som Frigate använder i konfigurationen och databasen"
+  },
+  "no_items": "Inga artiklar",
+  "validation_errors": "Valideringsfel",
+  "credentialField": {
+    "savedPlaceholder": "Sparad — lämna tomt för att hålla dig aktuell"
   }
 }

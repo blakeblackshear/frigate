@@ -1,5 +1,6 @@
+from typing import Self
+
 from pydantic import Field, ValidationInfo, model_validator
-from typing_extensions import Self
 
 from frigate.log import LogLevel, apply_log_levels
 

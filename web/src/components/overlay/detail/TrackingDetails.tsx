@@ -1,5 +1,13 @@
 import useSWR from "swr";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { flushSync } from "react-dom";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { Event } from "@/types/event";
@@ -293,11 +301,19 @@ export function TrackingDetails({
     [recordings, actualVideoStart],
   );
 
-  eventSequence?.map((event) => {
-    event.data.zones_friendly_names = event.data?.zones?.map((zone) => {
-      return resolveZoneName(config, zone);
-    });
-  });
+  const sequence = useMemo(
+    () =>
+      eventSequence?.map((item) => ({
+        ...item,
+        data: {
+          ...item.data,
+          zones_friendly_names: item.data?.zones?.map((zone) =>
+            resolveZoneName(config, zone, item.camera),
+          ),
+        },
+      })),
+    [eventSequence, config],
+  );
 
   // Use manualOverride (set when seeking in image mode) if present so
   // lifecycle rows and overlays follow image-mode seeks. Otherwise fall
@@ -389,7 +405,12 @@ export function TrackingDetails({
 
   // When the pinned timestamp or offset changes, re-seek the video and
   // explicitly update currentTime so the overlay shows the pinned event's box.
-  useEffect(() => {
+  // useLayoutEffect + flushSync force the setCurrentTime commit to land before
+  // the browser paints, so the overlay never shows a frame where
+  // annotationOffset has changed but currentTime has not — that mismatch would
+  // resolve effectiveCurrentTime away from the pinned detect timestamp and
+  // make the bounding box disappear or jump for one frame.
+  useLayoutEffect(() => {
     const pinned = pinnedDetectTimestampRef.current;
     if (!isAnnotationSettingsOpen || pinned == null) return;
     if (!videoRef.current || displaySource !== "video") return;
@@ -398,10 +419,9 @@ export function TrackingDetails({
     const relativeTime = timestampToVideoTime(targetTimeRecord);
     videoRef.current.currentTime = relativeTime;
 
-    // Explicitly update currentTime state so the overlay's effectiveCurrentTime
-    // resolves back to the pinned detect timestamp:
-    //   effectiveCurrentTime = targetTimeRecord - annotationOffset/1000 = pinned
-    setCurrentTime(targetTimeRecord);
+    flushSync(() => {
+      setCurrentTime(targetTimeRecord);
+    });
   }, [
     isAnnotationSettingsOpen,
     annotationOffset,
@@ -636,6 +656,13 @@ export function TrackingDetails({
     return axios.post(`/${event.camera}/plus/${currentTime}`);
   }, [event.camera, currentTime]);
 
+  const getSnapshotUrlForPlus = useCallback(() => {
+    if (!currentTime) {
+      return undefined;
+    }
+    return `${apiHost}api/${event.camera}/recordings/${currentTime}/snapshot.jpg?height=500`;
+  }, [apiHost, event.camera, currentTime]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -683,6 +710,7 @@ export function TrackingDetails({
                 onTimeUpdate={handleTimeUpdate}
                 onSeekToTime={handleSeekToTime}
                 onUploadFrame={onUploadFrameToPlus}
+                getSnapshotUrl={getSnapshotUrlForPlus}
                 onPlaying={() => setIsVideoLoading(false)}
                 setFullResolution={setFullResolution}
                 toggleFullscreen={toggleFullscreen}
@@ -801,7 +829,7 @@ export function TrackingDetails({
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="capitalize">{label}</span>
-                  <div className="md:text-md flex items-center text-xs text-secondary-foreground">
+                  <div className="flex items-center text-xs text-secondary-foreground">
                     {formattedStart ?? ""}
                     {event.end_time != null ? (
                       <> - {formattedEnd}</>
@@ -829,9 +857,9 @@ export function TrackingDetails({
             </div>
 
             <div className="mt-2">
-              {!eventSequence ? (
+              {!sequence ? (
                 <ActivityIndicator className="size-2" size={2} />
-              ) : eventSequence.length === 0 ? (
+              ) : sequence.length === 0 ? (
                 <div className="py-2 text-muted-foreground">
                   {t("detail.noObjectDetailData", { ns: "views/events" })}
                 </div>
@@ -851,7 +879,7 @@ export function TrackingDetails({
                     />
                   )}
                   <div className="space-y-2">
-                    {eventSequence.map((item, idx) => {
+                    {sequence.map((item, idx) => {
                       return (
                         <div
                           key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
@@ -867,6 +895,7 @@ export function TrackingDetails({
                             getZoneColor={getZoneColor}
                             effectiveTime={effectiveTime}
                             isTimelineActive={isWithinEventRange}
+                            annotationOffset={annotationOffset}
                           />
                         </div>
                       );
@@ -890,6 +919,7 @@ type LifecycleIconRowProps = {
   getZoneColor: (zoneName: string) => number[] | undefined;
   effectiveTime?: number;
   isTimelineActive?: boolean;
+  annotationOffset: number;
 };
 
 function LifecycleIconRow({
@@ -900,6 +930,7 @@ function LifecycleIconRow({
   getZoneColor,
   effectiveTime,
   isTimelineActive,
+  annotationOffset,
 }: LifecycleIconRowProps) {
   const { t } = useTranslation(["views/explore", "components/player"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -1049,7 +1080,7 @@ function LifecycleIconRow({
 
         <div className="ml-2 flex w-full min-w-0 flex-1">
           <div className="flex flex-col">
-            <div className="text-md flex items-start break-words text-left">
+            <div className="flex items-start break-words text-left">
               {getLifecycleItemDescription(item)}
             </div>
             {/* Only show Score/Ratio/Area for object events, not for audio (heard) or manual API (external) events */}
@@ -1174,14 +1205,7 @@ function LifecycleIconRow({
                           backgroundColor: `rgb(${color})`,
                         }}
                       />
-                      <span
-                        className={cn(
-                          item.data?.zones_friendly_names?.[zidx] === zone &&
-                            "smart-capitalize",
-                        )}
-                      >
-                        {item.data?.zones_friendly_names?.[zidx]}
-                      </span>
+                      <span>{item.data?.zones_friendly_names?.[zidx]}</span>
                     </Badge>
                   );
                 })}
@@ -1193,7 +1217,11 @@ function LifecycleIconRow({
           <div className="flex flex-row items-center gap-3">
             <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
             {isAdmin && (config?.plus?.enabled || item.data.box) && (
-              <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+              <DropdownMenu
+                modal={false}
+                open={isOpen}
+                onOpenChange={setIsOpen}
+              >
                 <DropdownMenuTrigger>
                   <div className="rounded p-1 pr-2" role="button">
                     <HiDotsHorizontal className="size-4 text-muted-foreground" />
@@ -1205,11 +1233,15 @@ function LifecycleIconRow({
                       <DropdownMenuItem
                         className="cursor-pointer"
                         onSelect={async () => {
-                          const resp = await axios.post(
-                            `/${item.camera}/plus/${item.timestamp}`,
-                          );
+                          try {
+                            const resp = await axios.post(
+                              `/${item.camera}/plus/${item.timestamp + annotationOffset / 1000}`,
+                            );
 
-                          if (resp && resp.status == 200) {
+                            if (resp.status !== 200) {
+                              throw new Error();
+                            }
+
                             toast.success(
                               t("toast.success.submittedFrigatePlus", {
                                 ns: "components/player",
@@ -1218,8 +1250,8 @@ function LifecycleIconRow({
                                 position: "top-center",
                               },
                             );
-                          } else {
-                            toast.success(
+                          } catch {
+                            toast.error(
                               t("toast.error.submitFrigatePlusFailed", {
                                 ns: "components/player",
                               }),

@@ -62,7 +62,8 @@
   },
   "recording": {
     "disable": "Aufzeichnung deaktivieren",
-    "enable": "Aufzeichnung aktivieren"
+    "enable": "Aufzeichnung aktivieren",
+    "disabledInConfig": "Aufnahme muss erst in den Einstellung für diese Kamera aktiviert werden."
   },
   "snapshots": {
     "enable": "Schnappschüsse aktivieren",
@@ -143,7 +144,9 @@
   },
   "camera": {
     "enable": "Kamera aktivieren",
-    "disable": "Kamera deaktivieren"
+    "disable": "Kamera deaktivieren",
+    "turnOn": "Schalte die Kamera ein",
+    "turnOff": "Schalte die Kamera aus"
   },
   "audioDetect": {
     "enable": "Audioerkennung aktivieren",
@@ -161,7 +164,8 @@
     "autotracking": "Autotracking",
     "audioDetection": "Audioerkennung",
     "title": "{{camera}} Einstellungen",
-    "transcription": "Audio Transkription"
+    "transcription": "Audio Transkription",
+    "camera": "Kamera"
   },
   "history": {
     "label": "Historisches Filmmaterial zeigen"

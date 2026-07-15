@@ -8,9 +8,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { useApiHost } from "@/api";
+import { baseUrl } from "@/api/baseUrl";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Event } from "@/types/event";
+import { REVIEW_PADDING } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useState } from "react";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -57,14 +59,11 @@ export default function EventMenu({
       axios
         .post("debug_replay/start", {
           camera: event.camera,
-          start_time: event.start_time,
-          end_time: event.end_time,
+          start_time: (event.start_time ?? 0) - REVIEW_PADDING,
+          end_time: (event.end_time ?? Date.now() / 1000) + REVIEW_PADDING,
         })
         .then((response) => {
-          if (response.status === 200) {
-            toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
-              position: "top-center",
-            });
+          if (response.status === 202 || response.status === 200) {
             navigate("/replay");
           }
         })
@@ -82,7 +81,11 @@ export default function EventMenu({
                 closeButton: true,
                 dismissible: false,
                 action: (
-                  <a href="/replay" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`${baseUrl}replay`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button>
                       {t("dialog.toast.goToReplay", { ns: "views/replay" })}
                     </Button>
@@ -91,9 +94,15 @@ export default function EventMenu({
               },
             );
           } else {
-            toast.error(t("dialog.toast.error", { error: errorMessage }), {
-              position: "top-center",
-            });
+            toast.error(
+              t("dialog.toast.error", {
+                ns: "views/replay",
+                error: errorMessage,
+              }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .finally(() => {
@@ -106,7 +115,7 @@ export default function EventMenu({
   return (
     <>
       <span tabIndex={0} className="sr-only" />
-      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenu modal={false} open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger>
           <div className="rounded p-1 pr-2" role="button">
             <HiDotsHorizontal className="size-4 text-muted-foreground" />
@@ -174,7 +183,7 @@ export default function EventMenu({
                 {t("itemMenu.findSimilar.label")}
               </DropdownMenuItem>
             )}
-            {event.has_clip && (
+            {isAdmin && event.has_clip && (
               <DropdownMenuItem
                 className="cursor-pointer"
                 disabled={isStarting}

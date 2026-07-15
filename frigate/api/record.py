@@ -5,7 +5,6 @@ import logging
 from datetime import datetime, timedelta
 from functools import reduce
 from pathlib import Path
-from typing import List
 from urllib.parse import unquote
 
 from fastapi import APIRouter, Depends, Request
@@ -35,7 +34,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.recordings])
 
 
-@router.get("/recordings/storage", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/recordings/storage", dependencies=[Depends(require_role(["admin"]))])
 def get_recordings_storage_usage(request: Request):
     recording_stats = request.app.stats_emitter.get_latest_stats()["service"][
         "storage"
@@ -63,7 +62,7 @@ def get_recordings_storage_usage(request: Request):
 def all_recordings_summary(
     request: Request,
     params: MediaRecordingsSummaryQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Returns true/false by day indicating if recordings exist"""
 
@@ -263,18 +262,18 @@ async def recordings(
 async def no_recordings(
     request: Request,
     params: MediaRecordingsAvailabilityQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Get time ranges with no recordings."""
     cameras = params.cameras
     if cameras != "all":
         requested = set(unquote(cameras).split(","))
-        filtered = requested.intersection(allowed_cameras)
-        if not filtered:
-            return JSONResponse(content=[])
-        cameras = ",".join(filtered)
+        camera_list = list(requested.intersection(allowed_cameras))
     else:
-        cameras = allowed_cameras
+        camera_list = list(allowed_cameras)
+
+    if not camera_list:
+        return JSONResponse(content=[])
 
     before = params.before or datetime.datetime.now().timestamp()
     after = (
@@ -283,12 +282,10 @@ async def no_recordings(
     )
     scale = params.scale
 
-    clauses = [(Recordings.end_time >= after) & (Recordings.start_time <= before)]
-    if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((Recordings.camera << camera_list))
-    else:
-        camera_list = allowed_cameras
+    clauses = [
+        (Recordings.end_time >= after) & (Recordings.start_time <= before),
+        (Recordings.camera << camera_list),
+    ]
 
     # Get recording start times
     data: list[Recordings] = (
@@ -299,22 +296,36 @@ async def no_recordings(
         .iterator()
     )
 
-    # Convert recordings to list of (start, end) tuples
+    # Convert recordings to list of (start, end) tuples, ordered by start_time
     recordings = [(r["start_time"], r["end_time"]) for r in data]
+
+    # Merge overlapping/adjacent recordings into covered intervals. The query
+    # orders by start_time, so a single pass merges them
+    covered: list[tuple[float, float]] = []
+    for rec_start, rec_end in recordings:
+        if covered and rec_start <= covered[-1][1]:
+            covered[-1] = (covered[-1][0], max(covered[-1][1], rec_end))
+        else:
+            covered.append((rec_start, rec_end))
 
     # Iterate through time segments and check if each has any recording
     no_recording_segments = []
     current = after
     current_gap_start = None
+    idx = 0
+    covered_count = len(covered)
 
     while current < before:
         segment_end = min(current + scale, before)
 
-        # Check if this segment overlaps with any recording
-        has_recording = any(
-            rec_start < segment_end and rec_end > current
-            for rec_start, rec_end in recordings
-        )
+        # Advance past covered intervals that end before this segment begins;
+        # they cannot overlap this or any later segment.
+        while idx < covered_count and covered[idx][1] <= current:
+            idx += 1
+
+        # A covered interval overlaps the segment when it starts before the
+        # segment ends (its end is already known to be > current).
+        has_recording = idx < covered_count and covered[idx][0] < segment_end
 
         if not has_recording:
             # This segment has no recordings
@@ -353,7 +364,7 @@ async def delete_recordings(
     start: float = PathParam(..., description="Start timestamp (unix)"),
     end: float = PathParam(..., description="End timestamp (unix)"),
     params: RecordingsDeleteQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Delete recordings in the specified time range."""
     if start >= end:

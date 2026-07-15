@@ -2,7 +2,8 @@
   "description": {
     "addFace": "上傳您的第一張照片至臉部資料庫以新增一個新的集合。",
     "placeholder": "輸入此集合的名稱",
-    "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。"
+    "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。",
+    "nameCannotContainHash": "名稱中不允許包含“#”符號。"
   },
   "details": {
     "person": "人",
@@ -38,7 +39,11 @@
     "title": "最近的識別紀錄",
     "aria": "選擇最近的識別紀錄",
     "empty": "最近沒有辨識人臉的操作",
-    "titleShort": "最近"
+    "titleShort": "最近",
+    "emptyNoLibrary": {
+      "title": "上傳一張人臉",
+      "description": "您必須先在資料庫中加入至少一張人臉，才能使用人臉辨識功能。"
+    }
   },
   "selectFace": "選擇人臉",
   "deleteFaceLibrary": {
@@ -82,7 +87,8 @@
       "deletedName_other": "{{count}} 個人臉已成功刪除。",
       "renamedFace": "成功將人臉重新命名為 {{name}}",
       "trainedFace": "成功訓練人臉。",
-      "updatedFaceScore": "成功更新人臉分數{{name}}({{score}})。"
+      "updatedFaceScore": "成功更新人臉分數{{name}}({{score}})。",
+      "reclassifiedFace": "重新分類人臉成功。"
     },
     "error": {
       "uploadingImageFailed": "上傳圖片失敗：{{errorMessage}}",
@@ -91,7 +97,10 @@
       "deleteNameFailed": "刪除名稱失敗：{{errorMessage}}",
       "renameFaceFailed": "重新命名人臉失敗：{{errorMessage}}",
       "trainFailed": "訓練失敗：{{errorMessage}}",
-      "updateFaceScoreFailed": "更新人臉分數失敗：{{errorMessage}}"
+      "updateFaceScoreFailed": "更新人臉分數失敗：{{errorMessage}}",
+      "reclassifyFailed": "重新分類人臉失敗：{{errorMessage}}"
     }
-  }
+  },
+  "reclassifyFaceAs": "將人臉重新分類為：",
+  "reclassifyFace": "重新分類人臉"
 }

@@ -68,7 +68,8 @@
     "roles": "Lomas",
     "frigateplus": "Frigate+",
     "notifications": "Paziņojumi",
-    "triggers": "Trigeri"
+    "triggers": "Trigeri",
+    "profiles": "Profili"
   },
   "cameraSetting": {
     "camera": "Kamera"

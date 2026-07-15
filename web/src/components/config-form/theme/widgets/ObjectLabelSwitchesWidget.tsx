@@ -2,7 +2,7 @@
 import { WidgetProps } from "@rjsf/utils";
 import { SwitchesWidget } from "./SwitchesWidget";
 import { FormContext } from "./SwitchesWidget";
-import { getTranslatedLabel } from "@/utils/i18n";
+import i18n, { getTranslatedLabel } from "@/utils/i18n";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { JsonObject } from "@/types/configForm";
 
@@ -76,7 +76,12 @@ function getObjectLabels(context: FormContext): string[] {
     ...sourceLabels,
     ...formDataLabels,
   ]);
-  return [...combinedLabels].sort();
+  return [...combinedLabels].sort((a, b) =>
+    getObjectLabelDisplayName(a).localeCompare(
+      getObjectLabelDisplayName(b),
+      i18n.language,
+    ),
+  );
 }
 
 function getObjectLabelDisplayName(label: string): string {
@@ -94,6 +99,7 @@ export function ObjectLabelSwitchesWidget(props: WidgetProps) {
         i18nKey: "objectLabels",
         listClassName:
           "relative max-h-none overflow-visible md:max-h-64 md:overflow-y-auto md:overscroll-contain md:scrollbar-container",
+        enableSearch: true,
       }}
     />
   );

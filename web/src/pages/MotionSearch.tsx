@@ -30,9 +30,9 @@ export default function MotionSearch() {
 
   const cameras = useMemo(() => {
     if (!config?.cameras) return [];
-    return Object.keys(config.cameras).filter((cam) =>
-      allowedCameras.includes(cam),
-    );
+    return Object.keys(config.cameras)
+      .filter((cam) => allowedCameras.includes(cam))
+      .sort((a, b) => config.cameras[a].ui.order - config.cameras[b].ui.order);
   }, [config?.cameras, allowedCameras]);
 
   // Selected camera state

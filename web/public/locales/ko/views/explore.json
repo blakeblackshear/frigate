@@ -22,10 +22,18 @@
         "visionModelFeatureExtractor": "비전 모델 특징 추출기",
         "textModel": "Text model",
         "textTokenizer": "텍스트 토크나이저"
-      }
+      },
+      "tips": {
+        "context": "모델이 다운로드된 후 추적 객체의 임베딩을 색인 재구성하는 것이 좋습니다."
+      },
+      "error": "오류가 발생했습니다. Frigate 로그를 확인하세요."
     }
   },
   "details": {
     "timestamp": "시간 기록"
+  },
+  "trackedObjectDetails": "추적 객체 세부 정보",
+  "type": {
+    "details": "세부 정보"
   }
 }

@@ -123,7 +123,19 @@
     "unselect": "Deselecteren",
     "next": "Volgende",
     "deleteNow": "Nu verwijderen",
-    "continue": "Doorgaan"
+    "continue": "Doorgaan",
+    "add": "Toevoegen",
+    "undo": "Ongedaan maken",
+    "copiedToClipboard": "Gekopieerd naar klembord",
+    "applying": "Verwerken…",
+    "modified": "Gewijzigd",
+    "overridden": "Overschreven",
+    "resetToGlobal": "Reset naar Globaal",
+    "resetToDefault": "Terugzetten naar Standaard",
+    "saveAll": "Alles Opslaan",
+    "savingAll": "Alles aan het opslaan…",
+    "undoAll": "Alles ongedaan maken",
+    "retry": "Opnieuw proberen"
   },
   "unit": {
     "speed": {
@@ -203,7 +215,9 @@
       "gl": "Galego (Galicisch)",
       "id": "Bahasa Indonesia (Indonesisch)",
       "ur": "اردو (Urdu)",
-      "hr": "Hrvatski (Kroatisch)"
+      "hr": "Hrvatski (Kroatisch)",
+      "zhHant": "繁體中文 (Traditioneel Chinees)",
+      "bs": "Bosanksi (Bosnisch)"
     },
     "darkMode": {
       "label": "Donkere modus",
@@ -254,7 +268,10 @@
       "anonymous": "anoniem"
     },
     "classification": "Classificatie",
-    "profiles": "Profielen"
+    "profiles": "Profielen",
+    "actions": "Acties",
+    "features": "Functies",
+    "chat": "Chat"
   },
   "toast": {
     "copyUrlToClipboard": "URL naar klembord gekopieerd.",
@@ -263,7 +280,8 @@
       "error": {
         "title": "Opslaan van configuratiewijzigingen mislukt: {{errorMessage}}",
         "noMessage": "Het opslaan van configuratiewijzigingen is mislukt"
-      }
+      },
+      "success": "De configuratie aanpassingen zijn succesvol opgeslagen."
     }
   },
   "role": {
@@ -307,5 +325,10 @@
   "field": {
     "optional": "Optioneel",
     "internalID": "De interne ID die Frigate gebruikt in de configuratie en database"
-  }
+  },
+  "credentialField": {
+    "savedPlaceholder": "Opgeslagen - leeg laten om huidige te behouden"
+  },
+  "no_items": "Geen items",
+  "validation_errors": "Validatie fouten"
 }

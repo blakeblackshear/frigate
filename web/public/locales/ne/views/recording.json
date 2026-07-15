@@ -1,0 +1,12 @@
+{
+  "export": "निर्यात",
+  "filter": "फिल्टर गर्नुहोस्",
+  "calendar": "कैलेंडर",
+  "filters": "फिल्टरहरू",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "कुनै मान्य समय दायरा चयन गरिएको छैन",
+      "endTimeMustAfterStartTime": "अन्त्य समय सुरु समय पछि हुनुपर्छ"
+    }
+  }
+}

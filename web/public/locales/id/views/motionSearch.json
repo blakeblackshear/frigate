@@ -1,0 +1,73 @@
+{
+    "documentTitle": "Pencarian Gerakan - Frigate",
+    "title": "Pencarian Gerakan",
+    "description": "Gambar poligon untuk menentukan wilayah yang diminati, lalu tentukan rentang waktu untuk mencari perubahan gerakan di dalam wilayah tersebut.",
+    "selectCamera": "Pencarian Gerakan sedang dimuat",
+    "startSearch": "Mulai Pencarian",
+    "searchStarted": "Pencarian dimulai",
+    "searchCancelled": "Pencarian dibatalkan",
+    "cancelSearch": "Batal",
+    "searching": "Pencarian sedang berlangsung.",
+    "searchComplete": "Pencarian selesai",
+    "noResultsYet": "Jalankan pencarian untuk menemukan perubahan gerakan di wilayah yang dipilih",
+    "noChangesFound": "Tidak ada perubahan piksel yang terdeteksi di wilayah yang dipilih",
+    "changesFound_other": "Ditemukan {{count}} perubahan gerakan",
+    "framesProcessed": "{{count}} frame diproses",
+    "jumpToTime": "Lompat ke waktu ini",
+    "results": "Hasil",
+    "showSegmentHeatmap": "Peta panas",
+    "newSearch": "Pencarian Baru",
+    "clearResults": "Hapus Hasil",
+    "clearROI": "Hapus poligon",
+    "polygonControls": {
+        "points_other": "{{count}} titik",
+        "undo": "Urungkan titik terakhir",
+        "reset": "Atur ulang poligon"
+    },
+    "motionHeatmapLabel": "Peta Panas Gerakan",
+    "dialog": {
+        "title": "Pencarian Gerakan",
+        "cameraLabel": "Kamera",
+        "previewAlt": "Pratinjau kamera untuk {{camera}}"
+    },
+    "timeRange": {
+        "title": "Rentang Pencarian",
+        "start": "Waktu mulai",
+        "end": "Waktu selesai"
+    },
+    "settings": {
+        "title": "Pengaturan Pencarian",
+        "parallelMode": "Mode paralel",
+        "parallelModeDesc": "Pindai beberapa segmen rekaman secara bersamaan (lebih cepat, tetapi penggunaan CPU jauh lebih tinggi)",
+        "threshold": "Ambang Sensitivitas",
+        "thresholdDesc": "Nilai yang lebih rendah mendeteksi perubahan yang lebih kecil (1-255)",
+        "minArea": "Luas Perubahan Minimum",
+        "minAreaDesc": "Persentase minimum dari wilayah yang diminati yang harus berubah agar dianggap signifikan",
+        "frameSkip": "Lewati Frame",
+        "frameSkipDesc": "Proses setiap frame ke-N. Atur ini ke frame rate kamera Anda untuk memproses satu frame per detik (misalnya 5 untuk kamera 5 FPS, 30 untuk kamera 30 FPS). Nilai yang lebih tinggi akan lebih cepat, tetapi bisa melewatkan kejadian gerakan singkat.",
+        "maxResults": "Jumlah Hasil Maksimum",
+        "maxResultsDesc": "Berhenti setelah sebanyak ini cap waktu yang cocok"
+    },
+    "errors": {
+        "noCamera": "Silakan pilih kamera",
+        "noROI": "Silakan gambar wilayah yang diminati",
+        "noTimeRange": "Silakan pilih rentang waktu",
+        "invalidTimeRange": "Waktu selesai harus setelah waktu mulai",
+        "searchFailed": "Pencarian gagal: {{message}}",
+        "polygonTooSmall": "Poligon harus memiliki setidaknya 3 titik",
+        "unknown": "Kesalahan tidak diketahui"
+    },
+    "changePercentage": "{{percentage}}% berubah",
+    "metrics": {
+        "title": "Metrik Pencarian",
+        "segmentsScanned": "Segmen dipindai",
+        "segmentsProcessed": "Diproses",
+        "segmentsSkippedInactive": "Dilewati (tidak ada aktivitas)",
+        "segmentsSkippedHeatmap": "Dilewati (tidak ada tumpang tindih ROI)",
+        "fallbackFullRange": "Pemindaian rentang penuh cadangan",
+        "framesDecoded": "Frame didekode",
+        "wallTime": "Waktu pencarian",
+        "segmentErrors": "Kesalahan segmen",
+        "seconds": "{{seconds}} dtk"
+    }
+}

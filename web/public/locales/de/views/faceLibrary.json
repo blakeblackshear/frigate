@@ -48,7 +48,11 @@
     "title": "Neueste Erkennungen",
     "aria": "Wähle aktuelle Erkennungen",
     "empty": "Es gibt keine aktuellen Versuche zur Gesichtserkennung",
-    "titleShort": "frisch"
+    "titleShort": "frisch",
+    "emptyNoLibrary": {
+      "title": "Gesicht hinzufügen",
+      "description": "Sie müssen mindestens ein Gesicht zur Bibliothek hinzufügen, damit die Gesichtserkennung funktioniert."
+    }
   },
   "deleteFaceLibrary": {
     "title": "Lösche Name",

@@ -1,1 +1,35 @@
-{}
+{
+    "minimum": "必須至少為 {{limit}}",
+    "maximum": "最大值不能超過 {{limit}}",
+    "exclusiveMinimum": "必須大於 {{limit}}",
+    "exclusiveMaximum": "必須小於 {{limit}}",
+    "minLength": "長度至少為 {{limit}} 個字元",
+    "maxLength": "長度最多為 {{limit}} 個字元",
+    "minItems": "至少包含 {{limit}} 項",
+    "maxItems": "最多包含 {{limit}} 項",
+    "pattern": "格式無效",
+    "required": "此欄位為必填項",
+    "type": "值型別無效",
+    "enum": "必須是允許的值之一",
+    "const": "值與預期的常量不匹配",
+    "uniqueItems": "所有項必須唯一",
+    "format": "格式無效",
+    "additionalProperties": "不允許未知屬性",
+    "oneOf": "必須完全匹配一個允許的模式",
+    "anyOf": "必須至少匹配一個允許的模式",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "設定角色對應時必須要有 role 標頭。"
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "每個角色只能分配給一個輸入串流。",
+            "detectRequired": "必須至少有一個輸入串流分配為 'detect' 角色。",
+            "hwaccelDetectOnly": "只有分配了 detect 角色的輸入串流才能定義硬體加速引數。"
+        }
+    },
+    "detect": {
+        "dimensionMustBeEven": "必須是偶數。"
+    }
+}

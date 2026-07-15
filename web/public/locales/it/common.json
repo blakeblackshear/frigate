@@ -221,7 +221,9 @@
       "gl": "Galego (Galiziano)",
       "id": "Bahasa Indonesia (Indonesiano)",
       "ur": "اردو (Urdu)",
-      "hr": "Hrvatski (Croato)"
+      "hr": "Hrvatski (Croato)",
+      "bs": "Bosanski (Bosniaco)",
+      "zhHant": "繁體中文 (Cinese Tradizionale)"
     },
     "darkMode": {
       "label": "Modalità scura",
@@ -258,7 +260,7 @@
       "label": "Documentazione di Frigate"
     },
     "restart": "Riavvia Frigate",
-    "review": "Rivedi",
+    "review": "Revisiona",
     "explore": "Esplora",
     "export": "Esporta",
     "uiPlayground": "Interfaccia area prove",
@@ -275,11 +277,12 @@
     "classification": "Classificazione",
     "chat": "Chat",
     "profiles": "Profili",
-    "actions": "Azioni"
+    "actions": "Azioni",
+    "features": "Caratteristiche"
   },
   "pagination": {
     "next": {
-      "title": "Successiva",
+      "title": "Successivo",
       "label": "Vai alla pagina successiva"
     },
     "previous": {
@@ -292,8 +295,8 @@
   "role": {
     "title": "Ruolo",
     "admin": "Amministratore",
-    "viewer": "Spettatore",
-    "desc": "Gli amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia utente di Frigate. Gli spettatori possono visualizzare solo le telecamere, gli elementi di revisione e i filmati storici nell'interfaccia utente."
+    "viewer": "Visualizzatore",
+    "desc": "Gli amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia utente di Frigate. I visualizzatori possono visualizzare solo le telecamere, gli elementi di revisione e i filmati storici nell'interfaccia utente."
   },
   "accessDenied": {
     "desc": "Non hai i permessi per visualizzare questa pagina.",
@@ -331,5 +334,8 @@
     "internalID": "L'ID interno che Frigate utilizza nella configurazione e nel database"
   },
   "no_items": "Nessun elemento",
-  "validation_errors": "Errori di convalida"
+  "validation_errors": "Errori di convalida",
+  "credentialField": {
+    "savedPlaceholder": "Salvato — lascia vuoto per mantenere aggiornato"
+  }
 }

@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
   SettingsGroupCard,
   SplitCardRow,
@@ -7,22 +8,30 @@ import { useTranslation } from "react-i18next";
 
 type FrigatePlusCurrentModelSummaryProps = {
   plusModel: FrigateConfig["model"]["plus"];
+  action?: ReactNode;
 };
 
 export default function FrigatePlusCurrentModelSummary({
   plusModel,
+  action,
 }: FrigatePlusCurrentModelSummaryProps) {
   const { t } = useTranslation("views/settings");
 
+  const title = action ? (
+    <div className="flex w-full items-center justify-between gap-3">
+      <span>{t("frigatePlus.cardTitles.currentModel")}</span>
+      {action}
+    </div>
+  ) : (
+    t("frigatePlus.cardTitles.currentModel")
+  );
+
   return (
-    <SettingsGroupCard title={t("frigatePlus.cardTitles.currentModel")}>
-      {plusModel === undefined && (
+    <SettingsGroupCard title={title}>
+      {!plusModel && (
         <p className="text-muted-foreground">
-          {t("frigatePlus.modelInfo.loading")}
+          {t("frigatePlus.modelInfo.noModelLoaded")}
         </p>
-      )}
-      {plusModel === null && (
-        <p className="text-danger">{t("frigatePlus.modelInfo.error")}</p>
       )}
       {plusModel && (
         <div className="space-y-6">

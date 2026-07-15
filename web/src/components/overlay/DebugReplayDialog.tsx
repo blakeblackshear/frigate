@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { baseUrl } from "@/api/baseUrl";
 import {
   Dialog,
   DialogContent,
@@ -112,19 +113,15 @@ export function DebugReplayContent({
 
       {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
 
-      <DialogFooter
-        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
-      >
-        <div
-          className={`cursor-pointer p-2 text-center ${isDesktop ? "" : "w-full"}`}
+      <DialogFooter className="mt-3 sm:mt-0">
+        <Button
+          aria-label={t("button.cancel", { ns: "common" })}
           onClick={onCancel}
         >
           {t("button.cancel", { ns: "common" })}
-        </div>
+        </Button>
         <Button
-          className={isDesktop ? "" : "w-full"}
           variant="select"
-          size="sm"
           disabled={isStarting}
           onClick={() => {
             if (selectedOption === "timeline") {
@@ -208,10 +205,7 @@ export default function DebugReplayDialog({
         end_time: range.before,
       })
       .then((response) => {
-        if (response.status === 200) {
-          toast.success(t("dialog.toast.success"), {
-            position: "top-center",
-          });
+        if (response.status === 202 || response.status === 200) {
           setMode("none");
           setRange(undefined);
           navigate("/replay");
@@ -229,7 +223,11 @@ export default function DebugReplayDialog({
             closeButton: true,
             dismissible: false,
             action: (
-              <a href="/replay" target="_blank" rel="noopener noreferrer">
+              <a
+                href={`${baseUrl}replay`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button>{t("dialog.toast.goToReplay")}</Button>
               </a>
             ),

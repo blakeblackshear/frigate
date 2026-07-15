@@ -9,18 +9,27 @@ import { useTranslation } from "react-i18next";
 import { FaFilm } from "react-icons/fa6";
 
 type ActionsDropdownProps = {
-  onDebugReplayClick: () => void;
+  onDebugReplayClick?: () => void;
   onExportClick: () => void;
+  onShareTimestampClick: () => void;
+  onMotionSearchClick?: () => void;
 };
 
 export default function ActionsDropdown({
   onDebugReplayClick,
   onExportClick,
-}: ActionsDropdownProps) {
-  const { t } = useTranslation(["components/dialog", "views/replay", "common"]);
+  onShareTimestampClick,
+  onMotionSearchClick,
+}: Readonly<ActionsDropdownProps>) {
+  const { t } = useTranslation([
+    "components/dialog",
+    "views/replay",
+    "views/events",
+    "common",
+  ]);
 
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           className="flex items-center gap-2"
@@ -37,9 +46,19 @@ export default function ActionsDropdown({
         <DropdownMenuItem onClick={onExportClick}>
           {t("menu.export", { ns: "common" })}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onDebugReplayClick}>
-          {t("title", { ns: "views/replay" })}
+        <DropdownMenuItem onClick={onShareTimestampClick}>
+          {t("recording.shareTimestamp.label", { ns: "components/dialog" })}
         </DropdownMenuItem>
+        {onMotionSearchClick && (
+          <DropdownMenuItem onClick={onMotionSearchClick}>
+            {t("motionSearch.menuItem", { ns: "views/events" })}
+          </DropdownMenuItem>
+        )}
+        {onDebugReplayClick && (
+          <DropdownMenuItem onClick={onDebugReplayClick}>
+            {t("title", { ns: "views/replay" })}
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

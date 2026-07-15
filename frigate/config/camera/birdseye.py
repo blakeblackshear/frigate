@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -35,7 +34,7 @@ class BirdseyeLayoutConfig(FrigateBaseModel):
         ge=1.0,
         le=5.0,
     )
-    max_cameras: Optional[int] = Field(
+    max_cameras: int | None = Field(
         default=None,
         title="Max cameras",
         description="Maximum number of cameras to display at once in Birdseye; shows the most recent cameras.",

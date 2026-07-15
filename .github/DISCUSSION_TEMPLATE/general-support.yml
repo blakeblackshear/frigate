@@ -73,11 +73,12 @@ body:
     attributes:
       label: Install method
       options:
-        - Home Assistant Add-on
+        - Home Assistant App
         - Docker Compose
         - Docker CLI
         - Proxmox via Docker
-        - Proxmox via TTeck Script
+        - Proxmox via installation script
+        - Proxmox via VM
         - Windows WSL2
     validations:
       required: true

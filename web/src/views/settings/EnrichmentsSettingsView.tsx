@@ -306,9 +306,7 @@ export default function EnrichmentsSettingsView({
           </div>
           <div className="mt-2 flex flex-col space-y-6">
             <div className="space-y-0.5">
-              <div className="text-md">
-                {t("enrichments.semanticSearch.modelSize.label")}
-              </div>
+              <div>{t("enrichments.semanticSearch.modelSize.label")}</div>
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
                   <Trans ns="views/settings">
@@ -436,9 +434,7 @@ export default function EnrichmentsSettingsView({
               </div>
             </div>
             <div className="space-y-0.5">
-              <div className="text-md">
-                {t("enrichments.faceRecognition.modelSize.label")}
-              </div>
+              <div>{t("enrichments.faceRecognition.modelSize.label")}</div>
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
                   <Trans ns="views/settings">

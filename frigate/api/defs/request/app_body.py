@@ -1,24 +1,33 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
+
+from frigate.config import GenAIProviderEnum
 
 
 class AppConfigSetBody(BaseModel):
     requires_restart: int = 1
     update_topic: str | None = None
-    config_data: Optional[Dict[str, Any]] = None
+    config_data: dict[str, Any] | None = None
     skip_save: bool = False
+
+
+class GenAIProbeBody(BaseModel):
+    provider: GenAIProviderEnum
+    api_key: str | None = None
+    base_url: str | None = None
+    provider_options: dict[str, Any] = Field(default_factory=dict)
 
 
 class AppPutPasswordBody(BaseModel):
     password: str
-    old_password: Optional[str] = None
+    old_password: str | None = None
 
 
 class AppPostUsersBody(BaseModel):
     username: str
     password: str
-    role: Optional[str] = "viewer"
+    role: str | None = "viewer"
 
 
 class AppPostLoginBody(BaseModel):
@@ -38,7 +47,7 @@ class MediaSyncBody(BaseModel):
     dry_run: bool = Field(
         default=True, description="If True, only report orphans without deleting them"
     )
-    media_types: List[str] = Field(
+    media_types: list[str] = Field(
         default=["all"],
         description="Types of media to sync: 'all', 'event_snapshots', 'event_thumbnails', 'review_thumbnails', 'previews', 'exports', 'recordings'",
     )

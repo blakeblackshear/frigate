@@ -348,6 +348,19 @@ function MotionPreviewClip({
     }
   }, [clipStart, clipEnd, playbackRate, preview]);
 
+  useEffect(() => {
+    if (!videoRef.current || !preview || !videoPlaying) {
+      return;
+    }
+
+    if (isSafari || (isFirefox && isMobile)) {
+      // These browsers step frames manually; rebuild the interval at the new rate
+      resetPlayback();
+    } else {
+      videoRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate, preview, videoPlaying, resetPlayback]);
+
   const drawDimOverlay = useCallback(() => {
     if (!dimOverlayCanvasRef.current) {
       return;

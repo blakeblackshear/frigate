@@ -5,7 +5,7 @@
     },
     "safe_mode": {
         "label": "Trygg modus",
-        "description": "Når aktivert, start Frigate i trygg modus med reduserte funksjoner for feilsøking."
+        "description": "Når aktivert, start Frigate i trygg modus med redusert funksjonalitet for feilsøking."
     },
     "environment_vars": {
         "label": "Miljøvariabler",
@@ -15,7 +15,7 @@
         "label": "Logging",
         "description": "Kontrollerer standard loggdetaljnivå og overstyringer av loggnivå per komponent.",
         "default": {
-            "label": "Loggnivå",
+            "label": "Loggenivå",
             "description": "Standard globale loggedetaljer (debug, info, warning, error)."
         },
         "logs": {
@@ -212,7 +212,7 @@
         },
         "default_role": {
             "label": "Standardrolle",
-            "description": "Standardrolle tildelt proxy-autentiserte brukere når ingen rolletilordning gjelder (admin eller viewer)."
+            "description": "Standardrolle tildelt proxy-autentiserte brukere når ingen rolletilordning gjelder."
         },
         "separator": {
             "label": "Skilletegn",
@@ -242,7 +242,7 @@
                 "description": "Aktiver overvåking av nettverksbåndbredde per prosess for kamera-ffmpeg-prosesser og detektorer."
             },
             "intel_gpu_device": {
-                "label": "SR-IOV-enhet",
+                "label": "Intel GPU-enhet",
                 "description": "Enhetsidentifikator som brukes når Intel-GPU-er behandles som SR-IOV for å korrigere GPU-statistikk."
             }
         },
@@ -527,7 +527,7 @@
         },
         "roles": {
             "label": "Roller",
-            "description": "GenAI-roller (verktøy, bildeforståelse/syn, vektorrepresentasjoner); én leverandør per rolle."
+            "description": "GenAI-roller (chat, beskrivelser, vektorrepresentasjoner); én leverandør per rolle."
         },
         "provider_options": {
             "label": "Leverandøralternativer",
@@ -539,7 +539,7 @@
         }
     },
     "audio": {
-        "label": "Lydhendelser",
+        "label": "Lyddeteksjon",
         "description": "Innstillinger for lydbasert hendelsesdeteksjon for alle kameraer; kan overstyres per kamera.",
         "enabled": {
             "label": "Aktiver lyddeteksjon",
@@ -555,11 +555,15 @@
         },
         "listen": {
             "label": "Lyttetyper",
-            "description": "Liste over typer lydhendelser som skal detekteres (f.eks. bjeff, brannalarm, skrik, tale, rop)."
+            "description": "Liste over typer lydhendelser som skal detekteres (f.eks. bjeff, brannalarm, tale, rop)."
         },
         "filters": {
             "label": "Lydfiltre",
-            "description": "Filterinnstillinger per lydtype, som konfidensterskler for å redusere falske positive."
+            "description": "Filterinnstillinger per lydtype, som konfidensterskler for å redusere falske positive.",
+            "threshold": {
+                "description": "Minimum konfidens-terskel for at lydhendelsen skal bli registrert.",
+                "label": "Minimum konfidens for lyd"
+            }
         },
         "enabled_in_config": {
             "label": "Opprinnelig lydstatus",
@@ -687,7 +691,7 @@
         "description": "FFmpeg-innstillinger, inkludert sti til binærfil, argumenter, alternativer for maskinvareakselerasjon og utdata-argumenter per rolle.",
         "path": {
             "label": "FFmpeg-sti",
-            "description": "Sti til FFmpeg-binærfilen som skal brukes, eller et versjonsalias (\"5.0\" eller \"7.0\")."
+            "description": "Sti til FFmpeg-binærfilen som skal brukes, eller et versjonsalias (\"7.0\" eller \"8.0\")."
         },
         "global_args": {
             "label": "Globale FFmpeg-argumenter",
@@ -917,6 +921,41 @@
                 "label": "Opprinnelig GenAI-status",
                 "description": "Indikerer om GenAI var aktivert i den opprinnelige statiske konfigurasjonen."
             }
+        },
+        "filters_attribute": {
+            "label": "Attributtfiltre",
+            "description": "Filtre som brukes på detekterte attributter for å redusere falske positiver (område, sideforhold, konfidens).",
+            "min_area": {
+                "label": "Minimum attributtområde",
+                "description": "Minimum areal for markeringsrammen(piksler eller prosent) som kreves for dette attributtet. Kan oppgis i piksler (heltall) eller prosent (desimaltall mellom 0.000001 og 0.99)."
+            },
+            "max_area": {
+                "label": "Maksimum attributtområde",
+                "description": "Maksimum areal for markeringsrammen (piksler eller prosent) tillatt for dette attributtet. Kan oppgis i piksler (heltall) eller prosent (desimaltall mellom 0.000001 og 0.99)."
+            },
+            "min_ratio": {
+                "label": "Minimum sideforhold",
+                "description": "Minimum bredde-/høydeforhold som kreves for at markeringsrammen skal kvalifisere."
+            },
+            "max_ratio": {
+                "label": "Maksimum sideforhold",
+                "description": "Maksimum bredde-/høydeforhold tillatt for at markeringsrammen skal kvalifisere."
+            },
+            "threshold": {
+                "label": "Konfidensterskel",
+                "description": "Gjennomsnittlig terskel for deteksjonskonfidens som kreves for at attributtet skal anses som en ekte positiv."
+            },
+            "min_score": {
+                "label": "Minimum konfidens",
+                "description": "Minimum deteksjonskonfidens i et enkeltbilde som kreves for å knytte dette attributtet til sitt hovedobjekt."
+            },
+            "mask": {
+                "label": "Filtermaske",
+                "description": "Polygonkoordinater som definerer hvor denne masken gjelder innenfor bildet."
+            },
+            "raw_mask": {
+                "label": "Råmaske"
+            }
         }
     },
     "record": {
@@ -966,7 +1005,7 @@
                 },
                 "mode": {
                     "label": "Bevaringsmodus",
-                    "description": "Modus for bevaring: all (alle), motion (bevegelse) eller active_objects (aktive objekter)."
+                    "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
                 }
             }
         },
@@ -990,7 +1029,7 @@
                 },
                 "mode": {
                     "label": "Bevaringsmodus",
-                    "description": "Modus for bevaring: all (lagre alle segmenter), motion (lagre segmenter med bevegelse) eller active_objects (lagre segmenter med aktive objekter)."
+                    "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
                 }
             }
         },
@@ -1000,6 +1039,13 @@
             "hwaccel_args": {
                 "label": "Argumenter for maskinvareakselerasjon ved eksport",
                 "description": "Argumenter for maskinvareakselerasjon som skal brukes ved eksport og transkoding."
+            },
+            "max_concurrent": {
+                "description": "Maksimalt antall eksportjobber som kan behandles samtidig.",
+                "label": "Maksimalt antall samtidige eksporter"
+            },
+            "chapters": {
+                "label": "Kapittelmetadata som skal bygges inn i eksporterte opptak"
             }
         },
         "preview": {
@@ -1143,7 +1189,7 @@
             },
             "mode": {
                 "label": "Bevaringsmodus",
-                "description": "Modus for bevaring: all (lagre alle segmenter), motion (lagre segmenter med bevegelse) eller active_objects (lagre segmenter med aktive objekter)."
+                "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
             },
             "objects": {
                 "label": "Objektbevaring",
@@ -1511,6 +1557,10 @@
         "dashboard": {
             "label": "Vis i grensesnitt",
             "description": "Velg om dette kameraet skal være synlig i Frigate-grensesnittet. Deaktivering krever manuell redigering av konfigurasjonen for å vise kameraet igjen."
+        },
+        "review": {
+            "label": "Vis i inspeksjon",
+            "description": "Velg om dette kameraet skal være synlig i inspeksjon (inspeksjonssiden og dens kamerafilter, bevegelsesinspeksjon og historikkvisning)."
         }
     },
     "onvif": {

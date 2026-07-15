@@ -1,7 +1,9 @@
 {
   "search": "Arama",
   "documentTitle": "Dışa Aktar - Frigate",
-  "deleteExport": "Dışa Aktarımı Sil",
+  "deleteExport": {
+    "label": "Dışa Aktarımı Sil"
+  },
   "deleteExport.desc": "{{exportName}} adlı dışa aktarımı silmek istediğinize emin misiniz?",
   "editExport": {
     "saveExport": "Dışa Aktarımı Kaydet",
@@ -19,5 +21,9 @@
     "downloadVideo": "Videoyu İndir",
     "editName": "İsmi Düzenle",
     "deleteExport": "Dışa Aktarmayı Sil"
+  },
+  "headings": {
+    "uncategorizedExports": "Kategorize Edilmemiş Dışa Aktarım",
+    "cases": "Durumlar"
   }
 }

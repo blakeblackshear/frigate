@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Konfigurasjonseditor - Frigate",
+  "documentTitle": "Konfigurasjonsfil - Frigate",
   "toast": {
     "error": {
       "savingError": "Feil ved lagring av konfigurasjon"
@@ -8,11 +8,11 @@
       "copyToClipboard": "Konfigurasjonen ble kopiert til utklippstavlen."
     }
   },
-  "configEditor": "Konfig-editor",
+  "configEditor": "Konfigurasjonsfil",
   "copyConfig": "Kopier konfigurasjonen",
   "saveAndRestart": "Lagre og omstart",
   "saveOnly": "Kun lagre",
   "confirm": "Avslutt uten å lagre?",
-  "safeConfigEditor": "Konfig-editor (Sikker modus)",
+  "safeConfigEditor": "Konfigurasjonsfil (Sikker modus)",
   "safeModeDescription": "Frigate er i sikker modus grunnet en feil i validering av konfigurasjonen."
 }

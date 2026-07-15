@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react";
+import { baseUrl } from "@/api/baseUrl";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
-import { LuBug } from "react-icons/lu";
+import { LuBug, LuSearch, LuShare2 } from "react-icons/lu";
 import { TimeRange } from "@/types/timeline";
 import { ExportContent, ExportPreviewDialog, ExportTab } from "./ExportDialog";
 import {
@@ -27,6 +28,8 @@ import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { StartExportResponse } from "@/types/export";
+import { ShareTimestampContent } from "./ShareTimestampDialog";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type DrawerMode =
   | "none"
@@ -34,13 +37,16 @@ type DrawerMode =
   | "export"
   | "calendar"
   | "filter"
-  | "debug-replay";
+  | "debug-replay"
+  | "share-timestamp";
 
 const DRAWER_FEATURES = [
   "export",
   "calendar",
   "filter",
   "debug-replay",
+  "share-timestamp",
+  "motion-search",
 ] as const;
 export type DrawerFeatures = (typeof DRAWER_FEATURES)[number];
 const DEFAULT_DRAWER_FEATURES: DrawerFeatures[] = [
@@ -48,6 +54,8 @@ const DEFAULT_DRAWER_FEATURES: DrawerFeatures[] = [
   "calendar",
   "filter",
   "debug-replay",
+  "share-timestamp",
+  "motion-search",
 ];
 
 type MobileReviewSettingsDrawerProps = {
@@ -68,6 +76,8 @@ type MobileReviewSettingsDrawerProps = {
   debugReplayRange?: TimeRange;
   setDebugReplayMode?: (mode: ExportMode) => void;
   setDebugReplayRange?: (range: TimeRange | undefined) => void;
+  onShareTimestamp?: (timestamp: number) => void;
+  onMotionSearch?: () => void;
   onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
@@ -91,6 +101,8 @@ export default function MobileReviewSettingsDrawer({
   debugReplayRange,
   setDebugReplayMode = () => {},
   setDebugReplayRange = () => {},
+  onShareTimestamp = () => {},
+  onMotionSearch,
   onUpdateFilter,
   setRange,
   setMode,
@@ -100,7 +112,10 @@ export default function MobileReviewSettingsDrawer({
     "views/recording",
     "components/dialog",
     "views/replay",
+    "views/events",
+    "common",
   ]);
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
   const [exportTab, setExportTab] = useState<ExportTab>("export");
@@ -108,6 +123,15 @@ export default function MobileReviewSettingsDrawer({
     "1" | "5" | "custom" | "timeline"
   >("1");
   const [isDebugReplayStarting, setIsDebugReplayStarting] = useState(false);
+  const [selectedShareOption, setSelectedShareOption] = useState<
+    "current" | "custom"
+  >("current");
+  const [shareTimestampAtOpen, setShareTimestampAtOpen] = useState(
+    Math.floor(currentTime),
+  );
+  const [customShareTimestamp, setCustomShareTimestamp] = useState(
+    Math.floor(currentTime),
+  );
 
   // exports
 
@@ -125,7 +149,7 @@ export default function MobileReviewSettingsDrawer({
 
     if (!range) {
       toast.error(
-        t("export.toast.error.noVaildTimeSelected", {
+        t("export.toast.error.noValidTimeSelected", {
           ns: "components/dialog",
         }),
         {
@@ -174,7 +198,11 @@ export default function MobileReviewSettingsDrawer({
       toast.success(t("export.toast.queued", { ns: "components/dialog" }), {
         position: "top-center",
         action: (
-          <a href="/export" target="_blank" rel="noopener noreferrer">
+          <a
+            href={`${baseUrl}export`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button>
               {t("export.toast.view", { ns: "components/dialog" })}
             </Button>
@@ -246,10 +274,7 @@ export default function MobileReviewSettingsDrawer({
         end_time: debugReplayRange.before,
       });
 
-      if (response.status === 200) {
-        toast.success(t("dialog.toast.success", { ns: "views/replay" }), {
-          position: "top-center",
-        });
+      if (response.status === 202 || response.status === 200) {
         setDebugReplayMode("none");
         setDebugReplayRange(undefined);
         setDrawerMode("none");
@@ -349,15 +374,47 @@ export default function MobileReviewSettingsDrawer({
             {t("filter")}
           </Button>
         )}
-        {features.includes("debug-replay") && (
+        {features.includes("share-timestamp") && (
+          <Button
+            className="flex w-full items-center justify-center gap-2"
+            aria-label={t("recording.shareTimestamp.label", {
+              ns: "components/dialog",
+            })}
+            onClick={() => {
+              const initialTimestamp = Math.floor(currentTime);
+
+              setShareTimestampAtOpen(initialTimestamp);
+              setCustomShareTimestamp(initialTimestamp);
+              setSelectedShareOption("current");
+              setDrawerMode("share-timestamp");
+            }}
+          >
+            <LuShare2 className="size-5 rounded-md bg-secondary-foreground stroke-secondary p-1" />
+            {t("recording.shareTimestamp.label", {
+              ns: "components/dialog",
+            })}
+          </Button>
+        )}
+        {features.includes("motion-search") && onMotionSearch && (
+          <Button
+            className="flex w-full items-center justify-center gap-2"
+            aria-label={t("motionSearch.menuItem", { ns: "views/events" })}
+            onClick={() => {
+              onMotionSearch();
+              setDrawerMode("none");
+            }}
+          >
+            <LuSearch className="size-5 rounded-md bg-secondary-foreground stroke-secondary p-1" />
+            {t("motionSearch.menuItem", { ns: "views/events" })}
+          </Button>
+        )}
+        {isAdmin && features.includes("debug-replay") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
             aria-label={t("title", { ns: "views/replay" })}
             onClick={() => {
-              const now = new Date(latestTime * 1000);
-              now.setHours(now.getHours() - 1);
               setDebugReplayRange({
-                after: now.getTime() / 1000,
+                after: latestTime - 60,
                 before: latestTime,
               });
               setSelectedReplayOption("1");
@@ -504,11 +561,9 @@ export default function MobileReviewSettingsDrawer({
         return;
       }
 
-      const hours = parseInt(option);
+      const minutes = parseInt(option, 10);
       const end = latestTime;
-      const now = new Date(end * 1000);
-      now.setHours(now.getHours() - hours);
-      setDebugReplayRange({ after: now.getTime() / 1000, before: end });
+      setDebugReplayRange({ after: end - minutes * 60, before: end });
     };
 
     content = (
@@ -534,6 +589,28 @@ export default function MobileReviewSettingsDrawer({
           }
         }}
       />
+    );
+  } else if (drawerMode == "share-timestamp") {
+    content = (
+      <div className="w-full">
+        <div className="relative h-8 w-full">
+          <div className="absolute left-1/2 -translate-x-1/2 text-muted-foreground">
+            {t("recording.shareTimestamp.title", { ns: "components/dialog" })}
+          </div>
+        </div>
+        <ShareTimestampContent
+          currentTime={shareTimestampAtOpen}
+          selectedOption={selectedShareOption}
+          setSelectedOption={setSelectedShareOption}
+          customTimestamp={customShareTimestamp}
+          setCustomTimestamp={setCustomShareTimestamp}
+          onShareTimestamp={(timestamp) => {
+            onShareTimestamp(timestamp);
+            setDrawerMode("none");
+          }}
+          onCancel={() => setDrawerMode("select")}
+        />
+      </div>
     );
   }
 

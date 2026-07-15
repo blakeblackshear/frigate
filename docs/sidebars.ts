@@ -17,91 +17,126 @@ const sidebars: SidebarsConfig = {
     ],
     Guides: [
       "guides/getting_started",
-      "guides/configuring_go2rtc",
       "guides/ha_notifications",
       "guides/ha_network_storage",
       "guides/reverse_proxy",
     ],
-    Configuration: {
-      "Configuration Files": [
-        "configuration/index",
-        "configuration/reference",
-        {
-          type: "link",
-          label: "Go2RTC Configuration Reference",
-          href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.13#configuration",
-        } as PropSidebarItemLink,
-      ],
-      Detectors: [
-        "configuration/object_detectors",
-        "configuration/audio_detectors",
-      ],
-      Enrichments: [
-        "configuration/semantic_search",
-        "configuration/face_recognition",
-        "configuration/license_plate_recognition",
-        "configuration/bird_classification",
-        {
-          type: "category",
-          label: "Custom Classification",
-          link: {
-            type: "generated-index",
-            title: "Custom Classification",
-            description: "Configuration for custom classification models",
+    Usage: [
+      "usage/live",
+      "usage/review",
+      "usage/history",
+      "usage/explore",
+      "usage/exports",
+    ],
+    Configuration: [
+      "configuration/config",
+      {
+        type: "category",
+        label: "Detectors",
+        items: [
+          "configuration/object_detectors",
+          "configuration/audio_detectors",
+        ],
+      },
+      {
+        type: "category",
+        label: "Enrichments",
+        items: [
+          "configuration/semantic_search",
+          "configuration/face_recognition",
+          "configuration/license_plate_recognition",
+          "configuration/bird_classification",
+          {
+            type: "category",
+            label: "Custom Classification",
+            link: {
+              type: "generated-index",
+              title: "Custom Classification",
+              description: "Configuration for custom classification models",
+            },
+            items: [
+              "configuration/custom_classification/state_classification",
+              "configuration/custom_classification/object_classification",
+            ],
           },
-          items: [
-            "configuration/custom_classification/state_classification",
-            "configuration/custom_classification/object_classification",
-          ],
-        },
-        {
-          type: "category",
-          label: "Generative AI",
-          link: {
-            type: "generated-index",
-            title: "Generative AI",
-            description: "Generative AI Features",
+          {
+            type: "category",
+            label: "Generative AI",
+            link: {
+              type: "generated-index",
+              title: "Generative AI",
+              description: "Generative AI Features",
+            },
+            items: [
+              "configuration/genai/genai_config",
+              "configuration/genai/genai_review",
+              "configuration/genai/genai_objects",
+            ],
           },
-          items: [
-            "configuration/genai/genai_config",
-            "configuration/genai/genai_review",
-            "configuration/genai/genai_objects",
-          ],
-        },
-      ],
-      Cameras: [
-        "configuration/cameras",
-        "configuration/review",
-        "configuration/record",
-        "configuration/snapshots",
-        "configuration/motion_detection",
-        "configuration/birdseye",
-        "configuration/live",
-        "configuration/restream",
-        "configuration/autotracking",
-        "configuration/camera_specific",
-      ],
-      Objects: [
-        "configuration/object_filters",
-        "configuration/masks",
-        "configuration/zones",
-        "configuration/objects",
-        "configuration/stationary_objects",
-      ],
-      "Hardware Acceleration": [
-        "configuration/hardware_acceleration_video",
-        "configuration/hardware_acceleration_enrichments",
-      ],
-      "Extra Configuration": [
-        "configuration/authentication",
-        "configuration/notifications",
-        "configuration/profiles",
-        "configuration/ffmpeg_presets",
-        "configuration/pwa",
-        "configuration/tls",
-        "configuration/advanced",
-      ],
-    },
+        ],
+      },
+      {
+        type: "category",
+        label: "Cameras",
+        items: [
+          "configuration/cameras",
+          "configuration/review",
+          "configuration/record",
+          "configuration/snapshots",
+          "configuration/motion_detection",
+          "configuration/birdseye",
+          "configuration/live",
+          "configuration/restream",
+          "configuration/autotracking",
+          "configuration/camera_specific",
+        ],
+      },
+      {
+        type: "category",
+        label: "Objects",
+        items: [
+          "configuration/object_filters",
+          "configuration/masks",
+          "configuration/zones",
+          "configuration/objects",
+          "configuration/stationary_objects",
+        ],
+      },
+      {
+        type: "category",
+        label: "Hardware Acceleration",
+        items: [
+          "configuration/hardware_acceleration_video",
+          "configuration/hardware_acceleration_enrichments",
+        ],
+      },
+      {
+        type: "category",
+        label: "Extra Configuration",
+        items: [
+          "configuration/authentication",
+          "configuration/notifications",
+          "configuration/profiles",
+          "configuration/go2rtc",
+          "configuration/ffmpeg_presets",
+          "configuration/pwa",
+          "configuration/tls",
+        ],
+      },
+      {
+        type: "category",
+        label: "Advanced Configuration",
+        items: [
+          "configuration/advanced/system",
+          "configuration/advanced/reference",
+          {
+            type: "link",
+            label: "Go2RTC Configuration Reference",
+            href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.14#configuration",
+          } as PropSidebarItemLink,
+        ],
+      },
+    ],
     Integrations: [
       "integrations/plus",
       "integrations/home-assistant",
@@ -130,6 +165,7 @@ const sidebars: SidebarsConfig = {
     ],
     Troubleshooting: [
       "troubleshooting/faqs",
+      "troubleshooting/go2rtc",
       "troubleshooting/recordings",
       "troubleshooting/dummy-camera",
       {

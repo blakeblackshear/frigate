@@ -3,8 +3,9 @@
 import logging
 import multiprocessing as mp
 import threading
+from collections.abc import Callable
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Callable
+from typing import Any
 
 import zmq
 

@@ -7,9 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 
@@ -77,7 +75,7 @@ export default function MultiSelectDialog({
             />
           ))}
         </div>
-        <DialogFooter className={cn("pt-4", isMobile && "gap-2")}>
+        <DialogFooter className="pt-4">
           <Button type="button" onClick={() => setOpen(false)}>
             {t("button.cancel")}
           </Button>

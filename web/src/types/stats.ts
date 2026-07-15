@@ -62,7 +62,10 @@ export type ExtraProcessStats = {
   mem?: string;
 };
 
+export type GpuVendor = "intel" | "amd" | "nvidia" | "rockchip" | "rpi";
+
 export type GpuStats = {
+  vendor?: GpuVendor;
   gpu: string;
   mem: string;
   enc?: string;
@@ -131,4 +134,23 @@ export type Ffprobe = {
       width?: number;
     }[];
   };
+};
+
+export type KeyframeSeverity =
+  | "ok"
+  | "warning"
+  | "error"
+  | "unknown"
+  | "record_disabled";
+
+export type KeyframeAnalysis = {
+  severity: KeyframeSeverity;
+  stream_index?: number;
+  keyframe_count?: number;
+  max_gap?: number | null;
+  mean_gap?: number | null;
+  min_gap?: number | null;
+  duration_observed?: number | null;
+  segment_time?: number;
+  thresholds?: { warning: number; error: number };
 };

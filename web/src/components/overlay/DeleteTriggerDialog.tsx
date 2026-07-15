@@ -43,36 +43,30 @@ export default function DeleteTriggerDialog({
             </Trans>
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex gap-3 sm:justify-end">
-          <div className="flex flex-1 flex-col justify-end">
-            <div className="flex flex-row gap-2 pt-5">
-              <Button
-                className="flex flex-1"
-                aria-label={t("button.cancel", { ns: "common" })}
-                onClick={onCancel}
-                type="button"
-                disabled={isLoading}
-              >
-                {t("button.cancel", { ns: "common" })}
-              </Button>
-              <Button
-                variant="destructive"
-                aria-label={t("button.delete", { ns: "common" })}
-                className="flex flex-1 text-white"
-                onClick={onDelete}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex flex-row items-center gap-2">
-                    <ActivityIndicator />
-                    <span>{t("button.delete", { ns: "common" })}</span>
-                  </div>
-                ) : (
-                  t("button.delete", { ns: "common" })
-                )}
-              </Button>
-            </div>
-          </div>
+        <DialogFooter>
+          <Button
+            aria-label={t("button.cancel", { ns: "common" })}
+            onClick={onCancel}
+            type="button"
+            disabled={isLoading}
+          >
+            {t("button.cancel", { ns: "common" })}
+          </Button>
+          <Button
+            variant="destructive"
+            aria-label={t("button.delete", { ns: "common" })}
+            onClick={onDelete}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="flex flex-row items-center gap-2">
+                <ActivityIndicator />
+                <span>{t("button.delete", { ns: "common" })}</span>
+              </div>
+            ) : (
+              t("button.delete", { ns: "common" })
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

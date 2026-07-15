@@ -2,7 +2,7 @@ import type { SectionConfigOverrides } from "./types";
 
 const timestampStyle: SectionConfigOverrides = {
   base: {
-    sectionDocs: "/configuration/reference",
+    sectionDocs: "/configuration/advanced/reference",
     restartRequired: [],
     fieldOrder: ["position", "format", "thickness", "color"],
     hiddenFields: ["effect", "enabled_in_config"],

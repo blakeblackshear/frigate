@@ -9,7 +9,7 @@ import {
   useRef,
   useContext,
 } from "react";
-import useSWR from "swr";
+import useSWR, { mutate as swrMutate } from "swr";
 import axios from "axios";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -22,24 +22,22 @@ import {
   modifySchemaForSection,
   getEffectiveDefaultsForSection,
   sanitizeOverridesForSection,
+  synthesizeMissingFilters,
 } from "./section-special-cases";
 import { getSectionValidation } from "../section-validations";
 import { useConfigOverride } from "@/hooks/use-config-override";
+import { CameraOverridesBadge } from "./CameraOverridesBadge";
+import { GlobalOverridesBadge } from "./GlobalOverridesBadge";
+import { ProfileOverridesBadge } from "./ProfileOverridesBadge";
 import { useSectionSchema } from "@/hooks/use-config-schema";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import Heading from "@/components/ui/heading";
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
-import merge from "lodash/merge";
 import {
   Collapsible,
   CollapsibleContent,
@@ -57,7 +55,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { cn } from "@/lib/utils";
-import { ConfigSectionData, JsonValue } from "@/types/configForm";
+import {
+  ConfigSectionData,
+  HiddenFieldEntry,
+  JsonValue,
+} from "@/types/configForm";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import {
@@ -65,10 +67,16 @@ import {
   globalCameraDefaultSections,
   buildOverrides,
   buildConfigDataForPath,
+  flattenOverrides,
   getBaseCameraSectionValue,
+  mergeProfileOverrides,
+  resolveHiddenFieldEntries,
   sanitizeSectionData as sharedSanitizeSectionData,
   requiresRestartForOverrides as sharedRequiresRestartForOverrides,
 } from "@/utils/configUtil";
+import SaveAllPreviewPopover, {
+  type SaveAllPreviewItem,
+} from "@/components/overlay/detail/SaveAllPreviewPopover";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useRestart } from "@/api/ws";
 import type {
@@ -78,6 +86,8 @@ import type {
 } from "../section-configs/types";
 import { useConfigMessages } from "@/hooks/use-config-messages";
 import { ConfigMessageBanner } from "../ConfigMessageBanner";
+import { FieldMessagesContext } from "../FieldMessagesContext";
+import { LiveFormDataContext } from "../LiveFormDataContext";
 
 export interface SectionConfig {
   /** Field ordering within the section */
@@ -85,7 +95,7 @@ export interface SectionConfig {
   /** Fields to group together */
   fieldGroups?: Record<string, string[]>;
   /** Fields to hide from UI */
-  hiddenFields?: string[];
+  hiddenFields?: HiddenFieldEntry[];
   /** Fields to show in advanced section */
   advancedFields?: string[];
   /** Fields to compare for override detection */
@@ -167,6 +177,9 @@ export interface BaseSectionProps {
   isSavingAll?: boolean;
   /** Callback when this section's saving state changes */
   onSavingChange?: (isSaving: boolean) => void;
+  /** When true, render the form fields only; suppress the internal save/undo bar.
+   *  The parent owns the save action and reads pending data via `onPendingDataChange`. */
+  embedded?: boolean;
 }
 
 export interface CreateSectionOptions {
@@ -203,6 +216,7 @@ export function ConfigSection({
   onDeleteProfileSection,
   isSavingAll = false,
   onSavingChange,
+  embedded = false,
 }: ConfigSectionProps) {
   // For replay level, treat as camera-level config access
   const effectiveLevel = level === "replay" ? "camera" : level;
@@ -296,11 +310,30 @@ export function ConfigSection({
   // Get section schema using cached hook
   const sectionSchema = useSectionSchema(sectionPath, effectiveLevel);
 
-  // Apply special case handling for sections with problematic schema defaults
+  // Apply special case handling for sections with problematic schema defaults.
+  // The HiddenFieldContext is built from `config` (saved state) only — not the
+  // in-flight raw section value — because the schema is computed before
+  // rawFormData is derived. The objects-branch fallback in
+  // modifySchemaForSection reads `track` from fullCameraConfig / fullConfig.
   const modifiedSchema = useMemo(
     () =>
-      modifySchemaForSection(sectionPath, level, sectionSchema ?? undefined),
-    [sectionPath, level, sectionSchema],
+      modifySchemaForSection(
+        sectionPath,
+        level,
+        sectionSchema ?? undefined,
+        config
+          ? {
+              fullConfig: config,
+              fullCameraConfig:
+                effectiveLevel === "camera" && cameraName
+                  ? config.cameras?.[cameraName]
+                  : undefined,
+              level,
+              cameraName,
+            }
+          : undefined,
+      ),
+    [sectionPath, level, sectionSchema, config, effectiveLevel, cameraName],
   );
 
   // Get override status (camera vs global)
@@ -342,7 +375,10 @@ export function ConfigSection({
           `profiles.${profileName}.${sectionPath}`,
         );
         if (profileOverrides && typeof profileOverrides === "object") {
-          return merge(cloneDeep(baseValue ?? {}), cloneDeep(profileOverrides));
+          return mergeProfileOverrides(
+            (baseValue as object) ?? {},
+            profileOverrides as object,
+          );
         }
         return baseValue;
       }
@@ -352,25 +388,50 @@ export function ConfigSection({
     return get(config, sectionPath);
   }, [config, cameraName, sectionPath, effectiveLevel, profileName]);
 
-  const rawFormData = useMemo(() => {
+  const rawFormData = useMemo<ConfigSectionData>(() => {
     if (!config) return {};
 
     if (rawSectionValue === undefined || rawSectionValue === null) {
       return {};
     }
 
-    return rawSectionValue;
-  }, [config, rawSectionValue]);
+    return synthesizeMissingFilters(
+      sectionPath,
+      rawSectionValue,
+      modifiedSchema ?? undefined,
+    ) as ConfigSectionData;
+  }, [config, rawSectionValue, sectionPath, modifiedSchema]);
 
   // When editing a profile, hide fields that require a restart since they
   // cannot take effect via profile switching alone.
   const effectiveHiddenFields = useMemo(() => {
+    const ctx = config
+      ? {
+          fullConfig: config,
+          fullCameraConfig:
+            effectiveLevel === "camera" && cameraName
+              ? config.cameras?.[cameraName]
+              : undefined,
+          level,
+          cameraName,
+          formData: rawFormData,
+        }
+      : undefined;
+    const base = resolveHiddenFieldEntries(sectionConfig.hiddenFields, ctx);
     if (!profileName || !sectionConfig.restartRequired?.length) {
-      return sectionConfig.hiddenFields;
+      return base;
     }
-    const base = sectionConfig.hiddenFields ?? [];
     return [...new Set([...base, ...sectionConfig.restartRequired])];
-  }, [profileName, sectionConfig.hiddenFields, sectionConfig.restartRequired]);
+  }, [
+    profileName,
+    sectionConfig.hiddenFields,
+    sectionConfig.restartRequired,
+    config,
+    effectiveLevel,
+    cameraName,
+    level,
+    rawFormData,
+  ]);
 
   const sanitizeSectionData = useCallback(
     (data: ConfigSectionData) =>
@@ -382,7 +443,7 @@ export function ConfigSection({
     const baseData = modifiedSchema
       ? applySchemaDefaults(modifiedSchema, rawFormData)
       : rawFormData;
-    return sanitizeSectionData(baseData);
+    return sanitizeSectionData(baseData as ConfigSectionData);
   }, [rawFormData, modifiedSchema, sanitizeSectionData]);
 
   const baselineSnapshot = useMemo(() => {
@@ -568,44 +629,6 @@ export function ConfigSection({
     messageContext,
   );
 
-  // Merge field-level conditional messages into uiSchema
-  const effectiveUiSchema = useMemo(() => {
-    if (activeFieldMessages.length === 0) return sectionConfig.uiSchema;
-    const merged = { ...(sectionConfig.uiSchema ?? {}) };
-    for (const msg of activeFieldMessages) {
-      const segments = msg.field.split(".");
-      // Navigate to the nested uiSchema node, shallow-cloning along the way
-      let node = merged;
-      for (let i = 0; i < segments.length - 1; i++) {
-        const seg = segments[i];
-        node[seg] = { ...(node[seg] as Record<string, unknown>) };
-        node = node[seg] as Record<string, unknown>;
-      }
-      const leafKey = segments[segments.length - 1];
-      const existing = node[leafKey] as Record<string, unknown> | undefined;
-      const existingMessages = ((existing?.["ui:messages"] as unknown[]) ??
-        []) as Array<{
-        key: string;
-        messageKey: string;
-        severity: string;
-        position?: string;
-      }>;
-      node[leafKey] = {
-        ...existing,
-        "ui:messages": [
-          ...existingMessages,
-          {
-            key: msg.key,
-            messageKey: msg.messageKey,
-            severity: msg.severity,
-            position: msg.position ?? "before",
-          },
-        ],
-      };
-    }
-    return merged;
-  }, [sectionConfig.uiSchema, activeFieldMessages]);
-
   const currentOverrides = useMemo(() => {
     if (!currentFormData || typeof currentFormData !== "object") {
       return undefined;
@@ -719,6 +742,7 @@ export function ConfigSection({
               "Settings saved successfully. Restart Frigate to apply your changes.",
           }),
           {
+            duration: 10000,
             action: (
               <a onClick={() => setRestartDialogOpen(true)}>
                 <Button>
@@ -738,6 +762,7 @@ export function ConfigSection({
       }
 
       await refreshConfig();
+      swrMutate("config/raw_paths");
       setPendingData(null);
       onSave?.();
     } catch (error) {
@@ -913,6 +938,34 @@ export function ConfigSection({
     );
   }, [sectionConfig?.renderers, sectionPath, cameraName, setPendingData]);
 
+  // Build a flat list of pending field changes for this section only.
+  // Mirrors the global Save All preview but scoped to the current section so
+  // users can inspect what will be saved without leaving the section.
+  const sectionPreviewItems = useMemo<SaveAllPreviewItem[]>(() => {
+    if (!hasChanges) return [];
+    if (!effectiveOverrides || typeof effectiveOverrides !== "object") {
+      return [];
+    }
+    const flattened = flattenOverrides(effectiveOverrides as JsonValue);
+    return flattened.map(({ path, value }) => ({
+      scope: effectiveLevel,
+      cameraName,
+      profileName: profileName
+        ? (profileFriendlyName ?? profileName)
+        : undefined,
+      fieldPath: path ? `${sectionPath}.${path}` : sectionPath,
+      value,
+    }));
+  }, [
+    hasChanges,
+    effectiveOverrides,
+    effectiveLevel,
+    cameraName,
+    profileName,
+    profileFriendlyName,
+    sectionPath,
+  ]);
+
   if (!modifiedSchema) {
     return null;
   }
@@ -945,168 +998,183 @@ export function ConfigSection({
   const sectionContent = (
     <div className="space-y-6">
       <ConfigMessageBanner messages={activeMessages} />
-      <ConfigForm
-        key={formKey}
-        schema={modifiedSchema}
-        formData={currentFormData}
-        onChange={handleChange}
-        onValidationChange={setHasValidationErrors}
-        fieldOrder={sectionConfig.fieldOrder}
-        fieldGroups={sectionConfig.fieldGroups}
-        hiddenFields={effectiveHiddenFields}
-        advancedFields={sectionConfig.advancedFields}
-        liveValidate={sectionConfig.liveValidate}
-        uiSchema={effectiveUiSchema}
-        disabled={disabled || isSaving}
-        readonly={readonly}
-        showSubmit={false}
-        i18nNamespace={configNamespace}
-        customValidate={customValidate}
-        formContext={{
-          level: effectiveLevel,
-          cameraName,
-          globalValue,
-          cameraValue,
-          hasChanges,
-          extraHasChanges,
-          setExtraHasChanges,
-          overrides: uiOverrides as JsonValue | undefined,
-          formData: currentFormData as ConfigSectionData,
-          baselineFormData: effectiveBaselineFormData as ConfigSectionData,
-          pendingDataBySection,
-          onPendingDataChange,
-          onFormDataChange: (data: ConfigSectionData) => handleChange(data),
-          // For widgets that need access to full camera config (e.g., zone names)
-          fullCameraConfig:
-            effectiveLevel === "camera" && cameraName
-              ? config?.cameras?.[cameraName]
-              : undefined,
-          fullConfig: config,
-          // When rendering camera-level sections, provide the section path so
-          // field templates can look up keys under the `config/cameras` namespace
-          // When using a consolidated global namespace, keys are nested
-          // under the section name (e.g., `audio.label`) so provide the
-          // section prefix to templates so they can attempt `${section}.${field}` lookups.
-          sectionI18nPrefix: sectionPath,
-          t,
-          renderers: wrappedRenderers,
-          sectionDocs: sectionConfig.sectionDocs,
-          fieldDocs: sectionConfig.fieldDocs,
-          hiddenFields: effectiveHiddenFields,
-          restartRequired: sectionConfig.restartRequired,
-          requiresRestart,
-        }}
-      />
+      <FieldMessagesContext.Provider value={activeFieldMessages}>
+        <LiveFormDataContext.Provider
+          value={(currentFormData as ConfigSectionData | null) ?? null}
+        >
+          <ConfigForm
+            key={formKey}
+            schema={modifiedSchema}
+            formData={currentFormData}
+            onChange={handleChange}
+            onValidationChange={setHasValidationErrors}
+            fieldOrder={sectionConfig.fieldOrder}
+            fieldGroups={sectionConfig.fieldGroups}
+            hiddenFields={effectiveHiddenFields}
+            advancedFields={sectionConfig.advancedFields}
+            liveValidate={sectionConfig.liveValidate}
+            uiSchema={sectionConfig.uiSchema}
+            disabled={disabled || isSaving}
+            readonly={readonly}
+            showSubmit={false}
+            i18nNamespace={configNamespace}
+            customValidate={customValidate}
+            formContext={{
+              level: effectiveLevel,
+              cameraName,
+              globalValue,
+              cameraValue,
+              hasChanges,
+              extraHasChanges,
+              setExtraHasChanges,
+              overrides: uiOverrides as JsonValue | undefined,
+              formData: currentFormData as ConfigSectionData,
+              baselineFormData: effectiveBaselineFormData as ConfigSectionData,
+              pendingDataBySection,
+              onPendingDataChange,
+              onFormDataChange: (data: ConfigSectionData) => handleChange(data),
+              // For widgets that need access to full camera config (e.g., zone names)
+              fullCameraConfig:
+                effectiveLevel === "camera" && cameraName
+                  ? config?.cameras?.[cameraName]
+                  : undefined,
+              fullConfig: config,
+              // When rendering camera-level sections, provide the section path so
+              // field templates can look up keys under the `config/cameras` namespace
+              // When using a consolidated global namespace, keys are nested
+              // under the section name (e.g., `audio.label`) so provide the
+              // section prefix to templates so they can attempt `${section}.${field}` lookups.
+              sectionI18nPrefix: sectionPath,
+              t,
+              renderers: wrappedRenderers,
+              sectionDocs: sectionConfig.sectionDocs,
+              fieldDocs: sectionConfig.fieldDocs,
+              hiddenFields: effectiveHiddenFields,
+              restartRequired: sectionConfig.restartRequired,
+              requiresRestart,
+              isProfile: !!profileName,
+            }}
+          />
+        </LiveFormDataContext.Provider>
+      </FieldMessagesContext.Provider>
 
-      <div
-        className={cn(
-          "w-full border-t border-secondary bg-background pt-0",
-          !noStickyButtons && "sticky bottom-0 z-50",
-        )}
-      >
+      {!embedded && (
         <div
           className={cn(
-            "flex flex-col items-center gap-4 pt-2 md:flex-row",
-            hasChanges ? "justify-between" : "justify-end",
+            "w-full border-t border-secondary bg-background pt-0",
+            !noStickyButtons && "sticky bottom-0 z-50",
           )}
         >
-          {hasChanges && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-danger">
-                {t("unsavedChanges", {
-                  ns: "views/settings",
-                  defaultValue: "You have unsaved changes",
-                })}
-              </span>
-            </div>
-          )}
-          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
-            {((effectiveLevel === "camera" && isOverridden) ||
-              effectiveLevel === "global") &&
-              !hasChanges &&
-              !skipSave &&
-              !profileName && (
-                <Button
-                  onClick={() => setIsResetDialogOpen(true)}
-                  variant="outline"
-                  disabled={isSaving || isResettingToDefault || disabled}
-                  className="flex flex-1 gap-2"
-                >
-                  {isResettingToDefault && (
-                    <ActivityIndicator className="h-4 w-4" />
-                  )}
-                  {effectiveLevel === "global"
-                    ? t("button.resetToDefault", {
-                        ns: "common",
-                        defaultValue: "Reset to Default",
-                      })
-                    : t("button.resetToGlobal", {
-                        ns: "common",
-                        defaultValue: "Reset to Global",
-                      })}
-                </Button>
-              )}
-            {profileName &&
-              profileOverridesSection &&
-              !hasChanges &&
-              !skipSave &&
-              onDeleteProfileSection && (
-                <Button
-                  onClick={() => setIsDeleteProfileDialogOpen(true)}
-                  variant="outline"
-                  disabled={isSaving || disabled}
-                  className="flex flex-1 gap-2"
-                >
-                  {t("profiles.removeOverride", {
-                    ns: "views/settings",
-                    defaultValue: "Remove Profile Override",
-                  })}
-                </Button>
-              )}
+          <div
+            className={cn(
+              "flex flex-col items-center gap-4 pt-2 md:flex-row",
+              hasChanges ? "justify-between" : "justify-end",
+            )}
+          >
             {hasChanges && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-unsaved">
+                  {t("unsavedChanges", {
+                    ns: "views/settings",
+                    defaultValue: "You have unsaved changes",
+                  })}
+                </span>
+                <SaveAllPreviewPopover
+                  items={sectionPreviewItems}
+                  className="h-7 w-7"
+                  align="start"
+                  side="top"
+                />
+              </div>
+            )}
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
+              {((effectiveLevel === "camera" && isOverridden) ||
+                effectiveLevel === "global") &&
+                !hasChanges &&
+                !skipSave &&
+                !profileName && (
+                  <Button
+                    onClick={() => setIsResetDialogOpen(true)}
+                    variant="outline"
+                    disabled={isSaving || isResettingToDefault || disabled}
+                    className="flex flex-1 gap-2"
+                  >
+                    {isResettingToDefault && (
+                      <ActivityIndicator className="h-4 w-4" />
+                    )}
+                    {effectiveLevel === "global"
+                      ? t("button.resetToDefault", {
+                          ns: "common",
+                          defaultValue: "Reset to Default",
+                        })
+                      : t("button.resetToGlobal", {
+                          ns: "common",
+                          defaultValue: "Reset to Global",
+                        })}
+                  </Button>
+                )}
+              {profileName &&
+                profileOverridesSection &&
+                !hasChanges &&
+                !skipSave &&
+                onDeleteProfileSection && (
+                  <Button
+                    onClick={() => setIsDeleteProfileDialogOpen(true)}
+                    variant="outline"
+                    disabled={isSaving || disabled}
+                    className="flex flex-1 gap-2"
+                  >
+                    {t("profiles.removeOverride", {
+                      ns: "views/settings",
+                      defaultValue: "Remove Profile Override",
+                    })}
+                  </Button>
+                )}
+              {hasChanges && (
+                <Button
+                  onClick={handleReset}
+                  variant="outline"
+                  disabled={isSaving || isSavingAll || disabled}
+                  className="flex min-w-36 flex-1 gap-2"
+                >
+                  {t("button.undo", { ns: "common", defaultValue: "Undo" })}
+                </Button>
+              )}
               <Button
-                onClick={handleReset}
-                variant="outline"
-                disabled={isSaving || isSavingAll || disabled}
+                onClick={handleSave}
+                variant="select"
+                disabled={
+                  !hasChanges ||
+                  hasValidationErrors ||
+                  isSaving ||
+                  isSavingAll ||
+                  disabled
+                }
                 className="flex min-w-36 flex-1 gap-2"
               >
-                {t("button.undo", { ns: "common", defaultValue: "Undo" })}
+                {isSaving ? (
+                  <>
+                    <ActivityIndicator className="h-4 w-4" />
+                    {skipSave
+                      ? t("button.applying", {
+                          ns: "common",
+                          defaultValue: "Applying...",
+                        })
+                      : t("button.saving", {
+                          ns: "common",
+                          defaultValue: "Saving...",
+                        })}
+                  </>
+                ) : skipSave ? (
+                  t("button.apply", { ns: "common", defaultValue: "Apply" })
+                ) : (
+                  t("button.save", { ns: "common", defaultValue: "Save" })
+                )}
               </Button>
-            )}
-            <Button
-              onClick={handleSave}
-              variant="select"
-              disabled={
-                !hasChanges ||
-                hasValidationErrors ||
-                isSaving ||
-                isSavingAll ||
-                disabled
-              }
-              className="flex min-w-36 flex-1 gap-2"
-            >
-              {isSaving ? (
-                <>
-                  <ActivityIndicator className="h-4 w-4" />
-                  {skipSave
-                    ? t("button.applying", {
-                        ns: "common",
-                        defaultValue: "Applying...",
-                      })
-                    : t("button.saving", {
-                        ns: "common",
-                        defaultValue: "Saving...",
-                      })}
-                </>
-              ) : skipSave ? (
-                t("button.apply", { ns: "common", defaultValue: "Apply" })
-              ) : (
-                t("button.save", { ns: "common", defaultValue: "Save" })
-              )}
-            </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
         <AlertDialogContent>
@@ -1168,7 +1236,7 @@ export function ConfigSection({
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className={cn(buttonVariants({ variant: "destructive" }))}
               onClick={() => {
                 onDeleteProfileSection?.();
                 setIsDeleteProfileDialogOpen(false);
@@ -1190,41 +1258,33 @@ export function ConfigSection({
             <CollapsibleTrigger asChild>
               <div className="flex cursor-pointer items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {isOpen ? (
-                    <LuChevronDown className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <LuChevronRight className="h-4 w-4 text-muted-foreground" />
-                  )}
-                  <Heading as="h4">{title}</Heading>
+                  <Heading
+                    as="h4"
+                    className={level === "replay" ? "text-base" : undefined}
+                  >
+                    {title}
+                  </Heading>
                   {showOverrideIndicator &&
                     effectiveLevel === "camera" &&
-                    (profileOverridesSection || isOverridden) && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge variant="secondary" className="text-xs">
-                            {overrideSource === "profile"
-                              ? t("button.overriddenBaseConfig", {
-                                  ns: "views/settings",
-                                  defaultValue: "Overridden (Base Config)",
-                                })
-                              : t("button.overriddenGlobal", {
-                                  ns: "views/settings",
-                                  defaultValue: "Overridden (Global)",
-                                })}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {overrideSource === "profile"
-                            ? t("button.overriddenBaseConfigTooltip", {
-                                ns: "views/settings",
-                                profile: profileFriendlyName ?? profileName,
-                              })
-                            : t("button.overriddenGlobalTooltip", {
-                                ns: "views/settings",
-                              })}
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
+                    (profileOverridesSection || isOverridden) &&
+                    cameraName &&
+                    (overrideSource === "profile" && profileName ? (
+                      <ProfileOverridesBadge
+                        sectionPath={sectionPath}
+                        cameraName={cameraName}
+                        profileName={profileName}
+                        profileFriendlyName={profileFriendlyName}
+                        profileBorderColor={profileBorderColor}
+                      />
+                    ) : (
+                      <GlobalOverridesBadge
+                        sectionPath={sectionPath}
+                        cameraName={cameraName}
+                      />
+                    ))}
+                  {showOverrideIndicator && effectiveLevel === "global" && (
+                    <CameraOverridesBadge sectionPath={sectionPath} />
+                  )}
                   {hasChanges && (
                     <Badge variant="outline" className="text-xs">
                       {t("button.modified", {
@@ -1233,12 +1293,17 @@ export function ConfigSection({
                       })}
                     </Badge>
                   )}
+                  {isOpen ? (
+                    <LuChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <LuChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
                 </div>
               </div>
             </CollapsibleTrigger>
 
             <CollapsibleContent>
-              <div className="pl-7">{sectionContent}</div>
+              <div className="pl-0">{sectionContent}</div>
             </CollapsibleContent>
           </div>
         </Collapsible>
@@ -1261,45 +1326,29 @@ export function ConfigSection({
                 <Heading as="h4">{title}</Heading>
                 {showOverrideIndicator &&
                   effectiveLevel === "camera" &&
-                  (profileOverridesSection || isOverridden) && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            "cursor-default border-2 text-center text-xs text-primary-variant",
-                            overrideSource === "profile" && profileBorderColor
-                              ? profileBorderColor
-                              : "border-selected",
-                          )}
-                        >
-                          {overrideSource === "profile"
-                            ? t("button.overriddenBaseConfig", {
-                                ns: "views/settings",
-                                defaultValue: "Overridden (Base Config)",
-                              })
-                            : t("button.overriddenGlobal", {
-                                ns: "views/settings",
-                                defaultValue: "Overridden (Global)",
-                              })}
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {overrideSource === "profile"
-                          ? t("button.overriddenBaseConfigTooltip", {
-                              ns: "views/settings",
-                              profile: profileFriendlyName ?? profileName,
-                            })
-                          : t("button.overriddenGlobalTooltip", {
-                              ns: "views/settings",
-                            })}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
+                  (profileOverridesSection || isOverridden) &&
+                  cameraName &&
+                  (overrideSource === "profile" && profileName ? (
+                    <ProfileOverridesBadge
+                      sectionPath={sectionPath}
+                      cameraName={cameraName}
+                      profileName={profileName}
+                      profileFriendlyName={profileFriendlyName}
+                      profileBorderColor={profileBorderColor}
+                    />
+                  ) : (
+                    <GlobalOverridesBadge
+                      sectionPath={sectionPath}
+                      cameraName={cameraName}
+                    />
+                  ))}
+                {showOverrideIndicator && effectiveLevel === "global" && (
+                  <CameraOverridesBadge sectionPath={sectionPath} />
+                )}
                 {hasChanges && (
                   <Badge
                     variant="secondary"
-                    className="cursor-default bg-danger text-xs text-white hover:bg-danger"
+                    className="cursor-default bg-unsaved text-xs text-black hover:bg-unsaved"
                   >
                     {t("button.modified", {
                       ns: "common",

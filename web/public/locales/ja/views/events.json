@@ -1,12 +1,12 @@
 {
-  "detections": "検出",
+  "detections": "検知",
   "motion": {
     "label": "モーション",
     "only": "モーションのみ"
   },
   "alerts": "アラート",
   "empty": {
-    "detection": "レビューする検出はありません",
+    "detection": "レビューする検知はありません",
     "alert": "レビューするアラートはありません",
     "motion": "モーションデータは見つかりません",
     "recordingsDisabled": {
@@ -16,7 +16,9 @@
   },
   "camera": "カメラ",
   "allCameras": "全カメラ",
-  "timeline": "タイムライン",
+  "timeline": {
+    "label": "タイムライン"
+  },
   "timeline.aria": "タイムラインを選択",
   "events": {
     "label": "イベント",
@@ -25,7 +27,9 @@
   },
   "documentTitle": "レビュー - Frigate",
   "recordings": {
-    "documentTitle": "録画 - Frigate"
+    "documentTitle": "録画 - Frigate",
+    "invalidSharedLink": "解析エラーのため、タイムスタンプ付きの録画リンクを開くことができません。",
+    "invalidSharedCamera": "不明または未承認のカメラのため、タイムスタンプ付き録画のリンクを開くことができません。"
   },
   "calendarFilter": {
     "last24Hours": "直近24時間"
@@ -36,9 +40,9 @@
     "label": "新しいレビュー項目を表示",
     "button": "レビューすべき新規項目"
   },
-  "selected_one": "{{count}} 件選択",
-  "selected_other": "{{count}} 件選択",
-  "detected": "検出",
+  "selected_one": "{{count}} 選択済み",
+  "selected_other": "{{count}} 選択済み",
+  "detected": "検知",
   "suspiciousActivity": "不審なアクティビティ",
   "threateningActivity": "脅威となるアクティビティ",
   "zoomIn": "ズームイン",
@@ -63,5 +67,28 @@
   "select_all": "すべて",
   "normalActivity": "通常",
   "needsReview": "要確認",
-  "securityConcern": "セキュリティ上の懸念"
+  "securityConcern": "セキュリティ上の懸念",
+  "motionSearch": {
+    "menuItem": "モーション検索",
+    "openMenu": "カメラオプション"
+  },
+  "motionPreviews": {
+    "menuItem": "モーションプレビューを表示",
+    "title": "モーションプレビュー: {{camera}}",
+    "mobileSettingsTitle": "モーションプレビュー設定",
+    "mobileSettingsDesc": "再生速度と暗転具合を調整し、確認したい日付を選んでモーションのみのクリップを再生します。",
+    "dim": "暗転",
+    "dimAria": "暗転の強さを調整",
+    "dimDesc": "暗転を強くするとモーション領域が見やすくなります。",
+    "speed": "速度",
+    "speedAria": "プレビューの再生速度を選択",
+    "speedDesc": "プレビュークリップの再生速度を選びます。",
+    "back": "戻る",
+    "empty": "利用可能なプレビューがありません",
+    "noPreview": "プレビューを利用できません",
+    "seekAria": "{{camera}} のプレーヤーを {{time}} までシーク",
+    "filter": "フィルター",
+    "filterDesc": "領域を選択すると、その領域でモーションが発生したクリップのみが表示されます。",
+    "filterClear": "クリア"
+  }
 }

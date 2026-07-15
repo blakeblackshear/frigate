@@ -3,9 +3,9 @@ import logging
 import threading
 import time
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Callable
 
 from frigate.object_detection.base import ObjectDetectProcess
 from frigate.util.process import FrigateProcess
@@ -28,6 +28,7 @@ class MonitoredProcess:
     restart_timestamps: deque[float] = field(
         default_factory=lambda: deque(maxlen=MAX_RESTARTS)
     )
+    clean_exit_logged: bool = False
 
     def is_restarting_too_fast(self, now: float) -> bool:
         while (
@@ -72,7 +73,9 @@ class FrigateWatchdog(threading.Thread):
 
         exitcode = entry.process.exitcode
         if exitcode == 0:
-            logger.info("Process %s exited cleanly, not restarting", entry.name)
+            if not entry.clean_exit_logged:
+                logger.info("Process %s exited cleanly, not restarting", entry.name)
+                entry.clean_exit_logged = True
             return
 
         logger.warning(

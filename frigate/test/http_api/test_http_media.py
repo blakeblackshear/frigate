@@ -1,6 +1,6 @@
 """Unit tests for recordings/media API endpoints."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytz
 from fastapi import Request
@@ -306,8 +306,8 @@ class TestHttpMedia(BaseTestHttp):
         Test recordings summary with UTC timezone (no DST).
         """
         # Use UTC timestamps directly
-        march_9_utc = datetime(2024, 3, 9, 17, 0, 0, tzinfo=timezone.utc).timestamp()
-        march_10_utc = datetime(2024, 3, 10, 17, 0, 0, tzinfo=timezone.utc).timestamp()
+        march_9_utc = datetime(2024, 3, 9, 17, 0, 0, tzinfo=UTC).timestamp()
+        march_10_utc = datetime(2024, 3, 10, 17, 0, 0, tzinfo=UTC).timestamp()
 
         with AuthTestClient(self.app) as client:
             Recordings.insert(
@@ -403,3 +403,127 @@ class TestHttpMedia(BaseTestHttp):
             assert len(summary) == 1
             assert "2024-03-10" in summary
             assert summary["2024-03-10"] is True
+
+    def test_recordings_unavailable_reports_gap_between_recordings(self):
+        """A gap between two recordings is reported as an unavailable segment."""
+        with AuthTestClient(self.app) as client:
+            # Two recordings with a 20s gap (1010-1030) between them.
+            Recordings.insert(
+                id="rec_a",
+                path="/media/recordings/a.mp4",
+                camera="front_door",
+                start_time=1000,
+                end_time=1010,
+                duration=10,
+                motion=0,
+            ).execute()
+            Recordings.insert(
+                id="rec_b",
+                path="/media/recordings/b.mp4",
+                camera="front_door",
+                start_time=1030,
+                end_time=1040,
+                duration=10,
+                motion=0,
+            ).execute()
+
+            response = client.get(
+                "/recordings/unavailable",
+                params={
+                    "after": 1000,
+                    "before": 1040,
+                    "scale": 5,
+                    "cameras": "front_door",
+                },
+            )
+
+            assert response.status_code == 200
+            assert response.json() == [{"start_time": 1010, "end_time": 1030}]
+
+    def test_recordings_unavailable_merges_overlapping_recordings(self):
+        """Overlapping recordings are merged so no false gap is reported."""
+        with AuthTestClient(self.app) as client:
+            # Overlapping recordings spanning the whole requested range.
+            Recordings.insert(
+                id="rec_a",
+                path="/media/recordings/a.mp4",
+                camera="front_door",
+                start_time=1000,
+                end_time=1020,
+                duration=20,
+                motion=0,
+            ).execute()
+            Recordings.insert(
+                id="rec_b",
+                path="/media/recordings/b.mp4",
+                camera="front_door",
+                start_time=1010,
+                end_time=1030,
+                duration=20,
+                motion=0,
+            ).execute()
+
+            response = client.get(
+                "/recordings/unavailable",
+                params={
+                    "after": 1000,
+                    "before": 1030,
+                    "scale": 5,
+                    "cameras": "front_door",
+                },
+            )
+
+            assert response.status_code == 200
+            assert response.json() == []
+
+    def test_recordings_unavailable_cameras_all_scopes_to_allowed_cameras(self):
+        """cameras=all must not error and must only consider allowed cameras.
+
+        allowed_cameras is mocked to ["front_door"]. A back_door recording that
+        would otherwise fill the gap must be ignored, and the request must not
+        500 the way it did when cameras was reassigned to a list.
+        """
+        with AuthTestClient(self.app) as client:
+            # front_door has a 20s gap (1010-1030).
+            Recordings.insert(
+                id="front_a",
+                path="/media/recordings/front_a.mp4",
+                camera="front_door",
+                start_time=1000,
+                end_time=1010,
+                duration=10,
+                motion=0,
+            ).execute()
+            Recordings.insert(
+                id="front_b",
+                path="/media/recordings/front_b.mp4",
+                camera="front_door",
+                start_time=1030,
+                end_time=1040,
+                duration=10,
+                motion=0,
+            ).execute()
+            # back_door is not in allowed_cameras; its full-window coverage must
+            # not mask the front_door gap.
+            Recordings.insert(
+                id="back_a",
+                path="/media/recordings/back_a.mp4",
+                camera="back_door",
+                start_time=1000,
+                end_time=1040,
+                duration=40,
+                motion=0,
+            ).execute()
+
+            response = client.get(
+                "/recordings/unavailable",
+                params={
+                    "after": 1000,
+                    "before": 1040,
+                    "scale": 5,
+                    "cameras": "all",
+                },
+            )
+
+            assert response.status_code == 200
+            assert response.json() == [{"start_time": 1010, "end_time": 1030}]

@@ -47,7 +47,7 @@
   "carrot": "Zanahoria",
   "hot_dog": "Perrito caliente",
   "pizza": "Pizza",
-  "donut": "Donut",
+  "donut": "Rosquilla",
   "chair": "Silla",
   "couch": "Sofá",
   "potted_plant": "Planta en maceta",
@@ -116,5 +116,15 @@
   "animal": "Animal",
   "postnord": "PostNord",
   "usps": "USPS",
-  "gls": "GLS"
+  "gls": "GLS",
+  "canada_post": "Canada Post",
+  "royal_mail": "Royal Mail",
+  "school_bus": "Autobús escolar",
+  "skunk": "Mofeta",
+  "kangaroo": "Canguro",
+  "baby": "Bebé",
+  "baby_stroller": "Cochecito de bebé",
+  "rickshaw": "Rickshaw",
+  "Rodent": "Roedor",
+  "rodent": "Roedor"
 }

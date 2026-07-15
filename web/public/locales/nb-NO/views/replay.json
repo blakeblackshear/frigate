@@ -1,0 +1,59 @@
+{
+    "title": "Feilsøkingsavspilling",
+    "description": "Spill av kameraopptak for feilsøking. Objektlisten viser et tidsforsinket sammendrag av detekterte objekter, og fanen Meldinger viser en strøm av Frigates interne meldinger fra avspillingen.",
+    "websocket_messages": "Meldinger",
+    "dialog": {
+        "title": "Start feilsøkingsavspilling",
+        "description": "Opprett et midlertidig avspillingskamera som repeterer historisk materiale for å feilsøke problemer med objektdeteksjon og sporing. Avspillingskameraet vil ha samme deteksjonskonfigurasjon som kildekameraet. Velg et tidsrom for å begynne.",
+        "camera": "Kildekamera",
+        "timeRange": "Tidsrom",
+        "preset": {
+            "1m": "Siste minutt",
+            "5m": "Siste 5 minutter",
+            "timeline": "Fra tidslinje",
+            "custom": "Egendefinert"
+        },
+        "startButton": "Start avspilling",
+        "selectFromTimeline": "Velg",
+        "starting": "Starter avspilling...",
+        "startLabel": "Start",
+        "endLabel": "Slutt",
+        "toast": {
+            "error": "Kunne ikke starte feilsøkingsavspilling: {{error}}",
+            "alreadyActive": "En avspillingsøkt er allerede aktiv",
+            "stopError": "Kunne ikke stoppe feilsøkingsavspilling: {{error}}",
+            "goToReplay": "Gå til avspilling"
+        }
+    },
+    "page": {
+        "noSession": "Ingen aktiv feilsøkingsøkt",
+        "noSessionDesc": "Start en feilsøkingsavspilling fra Historikk-visningen ved å klikke på Handlinger-knappen i verktøylinjen og velge Feilsøkingsavspilling.",
+        "goToRecordings": "Gå til historikk",
+        "preparingClip": "Forbereder klipp…",
+        "preparingClipDesc": "Frigate syr sammen opptak for det valgte tidsrommet. Dette kan ta et minutt for lengre perioder.",
+        "startingCamera": "Starter feilsøkingsavspilling…",
+        "startError": {
+            "title": "Kunne ikke starte feilsøkingsavspilling",
+            "back": "Tilbake til historikk"
+        },
+        "sourceCamera": "Kildekamera",
+        "replayCamera": "Avspillingskamera",
+        "initializingReplay": "Initialiserer feilsøkingsavspilling...",
+        "stoppingReplay": "Stopper feilsøkingsavspilling...",
+        "stopReplay": "Stopp avspilling",
+        "confirmStop": {
+            "title": "Stoppe feilsøkingsavspilling?",
+            "description": "Dette vil stoppe økten og slette alle midlertidige data. Er du sikker?",
+            "confirm": "Stopp avspilling",
+            "cancel": "Avbryt"
+        },
+        "activity": "Aktivitet",
+        "objects": "Objektliste",
+        "audioDetections": "Lyd-deteksjoner",
+        "noActivity": "Ingen aktivitet detektert",
+        "activeTracking": "Aktiv sporing",
+        "noActiveTracking": "Ingen aktiv sporing",
+        "configuration": "Konfigurasjon",
+        "configurationDesc": "Finjuster innstillinger for bevegelsesdeteksjon og objektsporing for feilsøkingskameraet. Ingen endringer lagres i din Frigate-konfigurasjonsfil."
+    }
+}

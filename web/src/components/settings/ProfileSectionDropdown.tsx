@@ -41,7 +41,7 @@ export function ProfileSectionDropdown({
     : null;
 
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {iconOnly ? (
           <Button variant="outline" size="sm">
@@ -91,7 +91,7 @@ export function ProfileSectionDropdown({
               className="group flex items-start justify-between gap-2"
               onClick={() => onSelectProfile(profile)}
             >
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-start gap-2">
                 <div className="flex w-full flex-row items-center justify-start gap-2">
                   {isActive && <Check className="h-3.5 w-3.5 shrink-0" />}
                   <span

@@ -24,11 +24,13 @@ Each role can only be assigned to one input per camera. The options for roles ar
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />.
+Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" />.
 
 | Field             | Description                                                         |
 | ----------------- | ------------------------------------------------------------------- |
 | **Camera inputs** | List of input stream definitions (paths and roles) for this camera. |
+
+For each input you can choose its source: select **Restream (go2rtc)** to pick an existing [go2rtc stream](restream.md) from a dropdown (Frigate uses the `rtsp://127.0.0.1:8554/<stream>` path and `preset-rtsp-restream` input args for that input automatically), or **Manual input path** to type the stream URL directly.
 
 Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
 
@@ -67,7 +69,7 @@ Additional cameras are simply added under the camera configuration section.
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > Management" /> and use the add camera button to configure each additional camera.
+Navigate to <NavPath path="Settings > Global configuration > Camera management" /> and use the add camera button to configure each additional camera.
 
 </TabItem>
 <TabItem value="yaml">
@@ -143,6 +145,11 @@ If your ONVIF camera does not require authentication credentials, you may still 
 
 :::
 
+If a camera connects but fails to authenticate, two optional fields can help:
+
+- `tls_insecure`: Skips TLS certificate verification and sends the ONVIF password as plaintext (`PasswordText`) instead of a hashed digest (`PasswordDigest`). Some cameras reject the digest token and only accept plaintext. This weakens connection security, so only enable it on a trusted local network.
+- `ignore_time_mismatch`: ONVIF authentication tokens include a timestamp, and a camera will reject the token if its clock differs too much from Frigate's. Enabling this makes Frigate compensate for the time offset so authentication can still succeed. Running NTP on both the camera and the Frigate host is the recommended fix; only use this in a "safe" environment, as it slightly weakens token validation.
+
 If your camera has multiple ONVIF profiles, you can specify which one to use for PTZ control with the `profile` option, matched by token or name. When not set, Frigate selects the first profile with a valid PTZ configuration. Check the Frigate debug logs (`frigate.ptz.onvif: debug`) to see available profile names and tokens for your camera.
 
 An ONVIF-capable camera that supports relative movement within the field of view (FOV) can also be configured to automatically track moving objects and keep them in the center of the frame. For autotracking setup, see the [autotracking](autotracking.md) docs.
@@ -174,7 +181,7 @@ The FeatureList on the [ONVIF Conformant Products Database](https://www.onvif.or
 | Hikvision DS-2DE3A404IWG-E/W |      ✅      |      ✅      |                                                                                                                                                                                                                                                                   |
 | Reolink                      |      ✅      |      ❌      |                                                                                                                                                                                                                                                                   |
 | Speco O8P32X                 |      ✅      |      ❌      |                                                                                                                                                                                                                                                                   |
-| Sunba 405-D20X               |      ✅      |      ❌      | Incomplete ONVIF support reported on original, and 4k models. All models are suspected incompatable.                                                                                                                                                              |
+| Sunba 405-D20X               |      ✅      |      ❌      | Incomplete ONVIF support reported on original, and 4k models. All models are suspected incompatible.                                                                                                                                                              |
 | Tapo                         |      ✅      |      ❌      | Many models supported, ONVIF Service Port: 2020                                                                                                                                                                                                                   |
 | Uniview IPC672LR-AX4DUPK     |      ✅      |      ❌      | Firmware says FOV relative movement is supported, but camera doesn't actually move when sending ONVIF commands                                                                                                                                                    |
 | Uniview IPC6612SR-X33-VG     |      ✅      |      ✅      | Leave `calibrate_on_startup` as `False`. A user has reported that zooming with `absolute` is working.                                                                                                                                                             |
@@ -187,7 +194,7 @@ Camera groups let you organize cameras together with a shared name and icon, mak
 <ConfigTabs>
 <TabItem value="ui">
 
-On the Live dashboard, press the **+** icon in the main navigation to add a new camera group. Configure the group name, select which cameras to include, choose an icon, and set the display order.
+On the Live dashboard, press the **pencil icon** in the main navigation to add a new camera group. Configure the group name, select which cameras to include, choose an icon, and set the display order.
 
 </TabItem>
 <TabItem value="yaml">

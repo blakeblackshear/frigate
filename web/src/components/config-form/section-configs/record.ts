@@ -44,9 +44,35 @@ const record: SectionConfigOverrides = {
     hiddenFields: ["enabled_in_config", "sync_recordings"],
     advancedFields: ["expire_interval", "preview", "export"],
     uiSchema: {
+      continuous: {
+        "ui:options": { defaultOpen: true, disableCollapsible: true },
+      },
+      motion: {
+        "ui:options": { defaultOpen: true, disableCollapsible: true },
+      },
       export: {
+        "ui:options": { defaultOpen: true, disableCollapsible: true },
         hwaccel_args: {
-          "ui:options": { suppressMultiSchema: true, size: "lg" },
+          "ui:widget": "FfmpegArgsWidget",
+          "ui:options": {
+            suppressMultiSchema: true,
+            ffmpegPresetField: "hwaccel_args",
+            ffmpegGlobalFieldPath: "export.hwaccel_args",
+          },
+        },
+      },
+      "alerts.retain.mode": {
+        "ui:options": { enumI18nPrefix: "retainMode" },
+      },
+      "detections.retain.mode": {
+        "ui:options": { enumI18nPrefix: "retainMode" },
+      },
+      preview: {
+        "ui:options": { defaultOpen: true, disableCollapsible: true },
+        quality: {
+          "ui:options": {
+            enumI18nPrefix: "previewQuality",
+          },
         },
       },
     },

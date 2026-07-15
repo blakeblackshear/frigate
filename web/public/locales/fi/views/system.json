@@ -20,6 +20,10 @@
         "fetchingLogsFailed": "Virhe noudettaessa lokeja: {{errorMessage}}",
         "whileStreamingLogs": "Virhe toistettaessa lokeja: {{errorMessage}}"
       }
+    },
+    "websocket": {
+      "label": "Viestit",
+      "pause": "Pysäytä"
     }
   },
   "documentTitle": {
@@ -30,7 +34,8 @@
     "logs": {
       "frigate": "Frigaten lokit - Frigate",
       "go2rtc": "Go2RTC lokit - Frigate",
-      "nginx": "Nginx lokit - Frigate"
+      "nginx": "Nginx lokit - Frigate",
+      "websocket": "Viestilokit - Frigate"
     }
   },
   "title": "Järjestelmä",

@@ -116,7 +116,9 @@
         "error": "Sledovaný objekt se nepodařilo smazat: {{errorMessage}}",
         "success": "Sledovaný objekt úspěšně smazán."
       }
-    }
+    },
+    "previousTrackedObject": "Předchozí sledovaný objekt",
+    "nextTrackedObject": "Následující sledovaný objekt"
   },
   "objectLifecycle": {
     "count": "{{first}} z {{second}}",
@@ -202,6 +204,12 @@
     "audioTranscription": {
       "label": "Přepsat",
       "aria": "Požádat o přepis zvukového záznamu"
+    },
+    "showObjectDetails": {
+      "label": "Zobrazit trasu objektu"
+    },
+    "hideObjectDetails": {
+      "label": "Skrýt trasu objektu"
     }
   },
   "dialog": {

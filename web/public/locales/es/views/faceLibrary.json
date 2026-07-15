@@ -30,7 +30,11 @@
     "title": "Reconocimientos Recientes",
     "aria": "Seleccionar reconocimientos recientes",
     "empty": "No hay intentos recientes de reconocimiento facial",
-    "titleShort": "Reciente"
+    "titleShort": "Reciente",
+    "emptyNoLibrary": {
+      "title": "Subir una cara",
+      "description": "Debes añadir al menos una cara a la biblioteca para que el reconocimiento facial funcione."
+    }
   },
   "selectItem": "Seleccionar {{item}}",
   "selectFace": "Seleccionar rostro",

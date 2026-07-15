@@ -27,10 +27,12 @@ const lpr: SectionConfigOverrides = {
     ],
     fieldDocs: {
       enhancement: "/configuration/license_plate_recognition#enhancement",
+      debug_save_plates:
+        "/configuration/license_plate_recognition/#how-do-i-debug-lpr-issues",
     },
     restartRequired: [],
     fieldOrder: ["enabled", "min_area", "enhancement", "expire_time"],
-    hiddenFields: [],
+    hiddenFields: ["expire_time"],
     advancedFields: ["expire_time", "enhancement"],
     overrideFields: ["enabled", "min_area", "enhancement"],
   },
@@ -63,6 +65,16 @@ const lpr: SectionConfigOverrides = {
       "replace_rules",
     ],
     restartRequired: ["model_size", "enhancement", "device"],
+    fieldMessages: [
+      {
+        key: "model-size-large",
+        field: "model_size",
+        messageKey: "configMessages.lpr.modelSizeLarge",
+        severity: "info",
+        position: "after",
+        condition: (ctx) => ctx.formData?.model_size === "large",
+      },
+    ],
     uiSchema: {
       format: {
         "ui:options": { size: "md" },
@@ -80,6 +92,9 @@ const lpr: SectionConfigOverrides = {
           label: false,
           suppressDescription: true,
         },
+      },
+      model_size: {
+        "ui:options": { size: "xs", enumI18nPrefix: "modelSize" },
       },
     },
   },

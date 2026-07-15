@@ -124,7 +124,7 @@ function useHelpfulLinks(content: string | undefined) {
 
     if (/Did not detect hwaccel/.exec(content)) {
       links.push({
-        link: getLocaleDocUrl("configuration/hardware_acceleration"),
+        link: getLocaleDocUrl("configuration/hardware_acceleration_video"),
         text: "Setup Hardware Acceleration",
       });
     }
@@ -142,7 +142,7 @@ function useHelpfulLinks(content: string | undefined) {
       content.includes("No VA display found for device /dev/dri/renderD128")
     ) {
       links.push({
-        link: getLocaleDocUrl("configuration/hardware_acceleration"),
+        link: getLocaleDocUrl("configuration/hardware_acceleration_video"),
         text: "Verify Hardware Acceleration Setup",
       });
     }

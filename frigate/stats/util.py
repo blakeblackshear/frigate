@@ -1,12 +1,13 @@
 """Utilities for stats."""
 
 import asyncio
+import logging
 import os
 import shutil
 import time
 from json import JSONDecodeError
 from multiprocessing.managers import DictProxy
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from requests.exceptions import RequestException
@@ -33,6 +34,10 @@ from frigate.util.services import (
     is_vaapi_amd_driver,
 )
 from frigate.version import VERSION
+
+logger = logging.getLogger(__name__)
+
+HWACCEL_ERROR_COOLDOWN_SECONDS = 3600
 
 
 def get_latest_version(config: FrigateConfig) -> str:
@@ -73,7 +78,7 @@ def stats_init(
     return stats_tracking
 
 
-def read_temperature(path: str) -> Optional[float]:
+def read_temperature(path: str) -> float | None:
     if os.path.isfile(path):
         with open(path) as f:
             line = f.readline().strip()
@@ -101,7 +106,7 @@ def get_temperatures() -> dict[str, float]:
 def get_detector_temperature(
     detector_type: str,
     detector_index_by_type: dict[str, int],
-) -> Optional[float]:
+) -> float | None:
     """Get temperature for a specific detector based on its type."""
     if detector_type == "edgetpu":
         # Get temperatures for all attached Corals
@@ -167,7 +172,9 @@ def get_detector_stats(
 
 
 def get_processing_stats(
-    config: FrigateConfig, stats: dict[str, str], hwaccel_errors: list[str]
+    config: FrigateConfig,
+    stats: dict[str, str],
+    hwaccel_errors: dict[str, float],
 ) -> None:
     """Get stats for cpu / gpu."""
 
@@ -206,7 +213,9 @@ async def set_bandwidth_stats(config: FrigateConfig, all_stats: dict[str, Any]) 
 
 
 async def set_gpu_stats(
-    config: FrigateConfig, all_stats: dict[str, Any], hwaccel_errors: list[str]
+    config: FrigateConfig,
+    all_stats: dict[str, Any],
+    hwaccel_errors: dict[str, float],
 ) -> None:
     """Parse GPUs from hwaccel args and use for stats."""
     hwaccel_args = []
@@ -230,18 +239,24 @@ async def set_gpu_stats(
                 hwaccel_args.append(args)
 
     stats: dict[str, dict] = {}
+    intel_gpu_collected = False
+    now = time.monotonic()
 
     for args in hwaccel_args:
-        if args in hwaccel_errors:
-            # known erroring args should automatically return as error
-            stats["error-gpu"] = {"gpu": "", "mem": ""}
-        elif "cuvid" in args or "nvidia" in args:
+        last_error = hwaccel_errors.get(args)
+        if last_error is not None:
+            if now - last_error < HWACCEL_ERROR_COOLDOWN_SECONDS:
+                continue
+            hwaccel_errors.pop(args, None)
+
+        if "cuvid" in args or "nvidia" in args:
             # nvidia GPU
             nvidia_usage = get_nvidia_gpu_stats()
 
             if nvidia_usage:
                 for i in range(len(nvidia_usage)):
                     stats[nvidia_usage[i]["name"]] = {
+                        "vendor": "nvidia",
                         "gpu": str(round(float(nvidia_usage[i]["gpu"]), 2)) + "%",
                         "mem": str(round(float(nvidia_usage[i]["mem"]), 2)) + "%",
                         "enc": str(round(float(nvidia_usage[i]["enc"]), 2)) + "%",
@@ -250,32 +265,35 @@ async def set_gpu_stats(
                     }
 
             else:
-                stats["nvidia-gpu"] = {"gpu": "", "mem": ""}
-                hwaccel_errors.append(args)
+                stats["nvidia-gpu"] = {"vendor": "nvidia", "gpu": "", "mem": ""}
+                hwaccel_errors[args] = time.monotonic()
         elif "nvmpi" in args or "jetson" in args:
             # nvidia Jetson
             jetson_usage = get_jetson_stats()
 
             if jetson_usage:
-                stats["jetson-gpu"] = jetson_usage
+                stats["jetson-gpu"] = {"vendor": "nvidia", **jetson_usage}
             else:
-                stats["jetson-gpu"] = {"gpu": "", "mem": ""}
-                hwaccel_errors.append(args)
+                stats["jetson-gpu"] = {"vendor": "nvidia", "gpu": "", "mem": ""}
+                hwaccel_errors[args] = time.monotonic()
         elif "qsv" in args or ("vaapi" in args and not is_vaapi_amd_driver()):
             if not config.telemetry.stats.intel_gpu_stats:
                 continue
 
-            if "intel-gpu" not in stats:
+            if not intel_gpu_collected:
                 # intel GPU (QSV or VAAPI both use the same physical GPU)
+                intel_gpu_collected = True
                 intel_usage = get_intel_gpu_stats(
                     config.telemetry.stats.intel_gpu_device
                 )
 
-                if intel_usage is not None:
-                    stats["intel-gpu"] = intel_usage or {"gpu": "", "mem": ""}
+                if intel_usage:
+                    for entry in intel_usage.values():
+                        name = entry.pop("name")
+                        stats[name] = entry
                 else:
-                    stats["intel-gpu"] = {"gpu": "", "mem": ""}
-                    hwaccel_errors.append(args)
+                    stats["intel-gpu"] = {"vendor": "intel", "gpu": "", "mem": ""}
+                    hwaccel_errors[args] = time.monotonic()
         elif "vaapi" in args:
             if not config.telemetry.stats.amd_gpu_stats:
                 continue
@@ -284,18 +302,18 @@ async def set_gpu_stats(
             amd_usage = get_amd_gpu_stats()
 
             if amd_usage:
-                stats["amd-vaapi"] = amd_usage
+                stats["amd-vaapi"] = {"vendor": "amd", **amd_usage}
             else:
-                stats["amd-vaapi"] = {"gpu": "", "mem": ""}
-                hwaccel_errors.append(args)
+                stats["amd-vaapi"] = {"vendor": "amd", "gpu": "", "mem": ""}
+                hwaccel_errors[args] = time.monotonic()
         elif "preset-rk" in args:
             rga_usage = get_rockchip_gpu_stats()
 
             if rga_usage:
-                stats["rockchip"] = rga_usage
+                stats["rockchip"] = {"vendor": "rockchip", **rga_usage}
         elif "v4l2m2m" in args or "rpi" in args:
             # RPi v4l2m2m is currently not able to get usage stats
-            stats["rpi-v4l2m2m"] = {"gpu": "", "mem": ""}
+            stats["rpi-v4l2m2m"] = {"vendor": "rpi", "gpu": "", "mem": ""}
 
     if stats:
         all_stats["gpu_usages"] = stats
@@ -323,7 +341,9 @@ async def set_npu_usages(config: FrigateConfig, all_stats: dict[str, Any]) -> No
 
 
 def stats_snapshot(
-    config: FrigateConfig, stats_tracking: StatsTrackingTypes, hwaccel_errors: list[str]
+    config: FrigateConfig,
+    stats_tracking: StatsTrackingTypes,
+    hwaccel_errors: dict[str, float],
 ) -> dict[str, Any]:
     """Get a snapshot of the current stats that are being tracked."""
     camera_metrics = stats_tracking["camera_metrics"]

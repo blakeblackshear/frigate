@@ -181,20 +181,15 @@ export default function Step3ThresholdAndActions({
           )}
         />
 
-        <div className="flex gap-2 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="flex-1"
-          >
+        <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end">
+          <Button type="button" onClick={onBack} className="sm:flex-1">
             {t("button.back", { ns: "common" })}
           </Button>
           <Button
             type="button"
             onClick={handleSave}
             disabled={isLoading}
-            className="flex-1"
+            className="sm:flex-1"
             variant="select"
           >
             {isLoading && <ActivityIndicator className="mr-2 size-5" />}

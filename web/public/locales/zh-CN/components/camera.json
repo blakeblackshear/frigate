@@ -68,7 +68,10 @@
         "placeholder": "选择视频流"
       },
       "birdseye": "鸟瞰图"
-    }
+    },
+    "showAll": "显示所有的摄像头组摄像头摄像头",
+    "showLess": "显示更少",
+    "editGroups": "编辑摄像头组"
   },
   "debug": {
     "options": {

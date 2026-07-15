@@ -8,10 +8,9 @@ import os
 import queue
 import subprocess as sp
 import threading
-import time
 import traceback
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 import numpy as np
@@ -19,6 +18,7 @@ import numpy as np
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import BirdseyeModeEnum, FfmpegConfig, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE, INSTALL_DIR, UPDATE_BIRDSEYE_LAYOUT
+from frigate.output.ws_auth import ws_has_camera_access
 from frigate.util.image import (
     SharedMemoryFrameManager,
     copy_yuv_to_position,
@@ -62,8 +62,10 @@ def get_canvas_shape(width: int, height: int) -> tuple[int, int]:
     if round(a_w / a_h, 2) != round(width / height, 2):
         canvas_width = int(width // 4 * 4)
         canvas_height = int((canvas_width / a_w * a_h) // 4 * 4)
-        logger.warning(
-            f"The birdseye resolution is a non-standard aspect ratio, forcing birdseye resolution to {canvas_width} x {canvas_height}"
+        logger.error(
+            f"Birdseye resolution {width}x{height} is not a supported aspect ratio "
+            f"and may cause visual distortion; falling back to {canvas_width}x{canvas_height}. "
+            f"Set width and height to a supported aspect ratio (16:9, 20:10, 16:6, 32:9, 12:9, 22:15, 9:16, 9:12, 16:3, or 1:1)"
         )
 
     return (canvas_width, canvas_height)
@@ -236,12 +238,14 @@ class BroadcastThread(threading.Thread):
         converter: FFMpegConverter,
         websocket_server: Any,
         stop_event: MpEvent,
+        config: FrigateConfig,
     ):
         super().__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
         self.stop_event = stop_event
+        self.config = config
 
     def run(self) -> None:
         while not self.stop_event.is_set():
@@ -256,6 +260,7 @@ class BroadcastThread(threading.Thread):
                     if (
                         not ws.terminated
                         and ws.environ["PATH_INFO"] == f"/{self.camera}"
+                        and ws_has_camera_access(ws, self.camera, self.config)
                     ):
                         try:
                             ws.send(buf, binary=True)
@@ -374,8 +379,8 @@ class BirdsEyeFrameManager:
     def copy_to_position(
         self,
         position: Any,
-        camera: Optional[str] = None,
-        frame: Optional[np.ndarray] = None,
+        camera: str | None = None,
+        frame: np.ndarray | None = None,
     ) -> None:
         if camera is None:
             frame = None
@@ -423,7 +428,7 @@ class BirdsEyeFrameManager:
                 }
         return coordinates
 
-    def update_frame(self, frame: Optional[np.ndarray] = None) -> tuple[bool, bool]:
+    def update_frame(self, frame: np.ndarray | None = None) -> tuple[bool, bool]:
         """
         Update birdseye, optionally with a new frame.
         Returns (frame_changed, layout_changed) to indicate if the frame or layout changed.
@@ -587,7 +592,7 @@ class BirdsEyeFrameManager:
         self,
         cameras_to_add: list[str],
         coefficient: float,
-    ) -> Optional[list[list[Any]]]:
+    ) -> list[list[Any]] | None:
         """Calculate the optimal layout for 2+ cameras."""
 
         def find_available_x(
@@ -595,7 +600,7 @@ class BirdsEyeFrameManager:
             width: int,
             reserved_ranges: list[tuple[int, int]],
             max_width: int,
-        ) -> Optional[int]:
+        ) -> int | None:
             """Find the first horizontal slot that does not collide with reservations."""
             x = current_x
 
@@ -613,7 +618,7 @@ class BirdsEyeFrameManager:
 
             return None
 
-        def map_layout(row_height: int) -> tuple[int, int, Optional[list[list[Any]]]]:
+        def map_layout(row_height: int) -> tuple[int, int, list[list[Any]] | None]:
             """Lay out cameras row by row while reserving portrait spans for the next row."""
             candidate_layout: list[list[Any]] = []
             reserved_ranges: dict[int, list[tuple[int, int]]] = {}
@@ -773,27 +778,34 @@ class Birdseye:
         websocket_server: Any,
     ) -> None:
         self.config = config
+        canvas_width, canvas_height = get_canvas_shape(
+            config.birdseye.width, config.birdseye.height
+        )
         self.input: queue.Queue[bytes] = queue.Queue(maxsize=10)
         self.converter = FFMpegConverter(
             config.ffmpeg,
             self.input,
             stop_event,
-            config.birdseye.width,
-            config.birdseye.height,
-            config.birdseye.width,
-            config.birdseye.height,
+            canvas_width,
+            canvas_height,
+            canvas_width,
+            canvas_height,
             config.birdseye.quality,
             config.birdseye.restream,
         )
         self.broadcaster = BroadcastThread(
-            "birdseye", self.converter, websocket_server, stop_event
+            "birdseye",
+            self.converter,
+            websocket_server,
+            stop_event,
+            config,
         )
         self.birdseye_manager = BirdsEyeFrameManager(self.config, stop_event)
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
         self.requestor = InterProcessRequestor()
         self.idle_fps: float = self.config.birdseye.idle_heartbeat_fps
-        self._idle_interval: Optional[float] = (
+        self._idle_interval: float | None = (
             (1.0 / self.idle_fps) if self.idle_fps > 0 else None
         )
 
@@ -854,7 +866,7 @@ class Birdseye:
                 coordinates = self.birdseye_manager.get_camera_coordinates()
                 self.requestor.send_data(UPDATE_BIRDSEYE_LAYOUT, coordinates)
         if self._idle_interval:
-            now = time.monotonic()
+            now = datetime.datetime.now().timestamp()
             is_idle = len(self.birdseye_manager.camera_layout) == 0
             if (
                 is_idle

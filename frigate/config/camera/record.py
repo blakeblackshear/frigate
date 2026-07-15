@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Optional, Union
 
 from pydantic import Field
 
@@ -9,6 +8,7 @@ from frigate.review.types import SeverityEnum
 from ..base import FrigateBaseModel
 
 __all__ = [
+    "ChaptersEnum",
     "RecordConfig",
     "RecordExportConfig",
     "RecordPreviewConfig",
@@ -86,8 +86,14 @@ class RecordPreviewConfig(FrigateBaseModel):
     )
 
 
+class ChaptersEnum(str, Enum):
+    none = "none"
+    recording_segments = "recording_segments"
+    review_items = "review_items"
+
+
 class RecordExportConfig(FrigateBaseModel):
-    hwaccel_args: Union[str, list[str]] = Field(
+    hwaccel_args: str | list[str] = Field(
         default="auto",
         title="Export hwaccel args",
         description="Hardware acceleration args to use for export/transcode operations.",
@@ -97,6 +103,10 @@ class RecordExportConfig(FrigateBaseModel):
         ge=1,
         title="Maximum concurrent exports",
         description="Maximum number of export jobs to process at the same time.",
+    )
+    chapters: ChaptersEnum = Field(
+        default=ChaptersEnum.review_items,
+        title="Chapter metadata to embed in exported recordings",
     )
 
 
@@ -141,7 +151,7 @@ class RecordConfig(FrigateBaseModel):
         title="Preview config",
         description="Settings controlling the quality of recording previews shown in the UI.",
     )
-    enabled_in_config: Optional[bool] = Field(
+    enabled_in_config: bool | None = Field(
         default=None,
         title="Original recording state",
         description="Indicates whether recording was enabled in the original static configuration.",

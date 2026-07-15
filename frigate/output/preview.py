@@ -251,7 +251,7 @@ class PreviewRecorder:
 
         # end segment at end of hour (use UTC to avoid DST issues)
         self.segment_end = (
-            (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1))
+            (datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1))
             .replace(minute=0, second=0, microsecond=0)
             .timestamp()
         )
@@ -263,7 +263,7 @@ class PreviewRecorder:
 
         # check for existing items in cache
         start_ts = (
-            datetime.datetime.now(datetime.timezone.utc)
+            datetime.datetime.now(datetime.UTC)
             .replace(minute=0, second=0, microsecond=0)
             .timestamp()
         )
@@ -298,7 +298,7 @@ class PreviewRecorder:
     def reset_frame_cache(self, frame_time: float) -> None:
         self.segment_end = (
             (
-                datetime.datetime.fromtimestamp(frame_time, tz=datetime.timezone.utc)
+                datetime.datetime.fromtimestamp(frame_time, tz=datetime.UTC)
                 + datetime.timedelta(hours=1)
             )
             .replace(minute=0, second=0, microsecond=0)
@@ -361,14 +361,17 @@ class PreviewRecorder:
             small_frame,
             cv2.COLOR_YUV2BGR_I420,
         )
-        cv2.imwrite(
-            get_cache_image_name(self.camera_name, frame_time),
+        cache_path = get_cache_image_name(self.camera_name, frame_time)
+
+        if not cv2.imwrite(
+            cache_path,
             small_frame,
             [
                 int(cv2.IMWRITE_WEBP_QUALITY),
                 PREVIEW_QUALITY_WEBP[self.config.record.preview.quality],
             ],
-        )
+        ):
+            logger.error("Failed to write preview frame to %s", cache_path)
 
     def write_data(
         self,

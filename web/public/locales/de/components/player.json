@@ -3,7 +3,8 @@
   "noPreviewFound": "Keine Vorschau gefunden",
   "submitFrigatePlus": {
     "title": "Dieses Bild an Frigate+ senden?",
-    "submit": "Senden"
+    "submit": "Absenden",
+    "previewError": "Schnappschuss Vorschau konnte nicht geladen werden. Die Aufnahme ist möglicherweise derzeit nicht verfügbar."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 oder höher ist für diesen Typ eines Live-Streams erforderlich.",
   "streamOffline": {
@@ -47,5 +48,6 @@
       "submittedFrigatePlus": "Bild erfolgreich an Frigate+ gesendet"
     }
   },
-  "noPreviewFoundFor": "Keine Vorschau für {{cameraName}} gefunden"
+  "noPreviewFoundFor": "Keine Vorschau für {{cameraName}} gefunden",
+  "cameraOff": "Kamera ist ausgeschaltet"
 }

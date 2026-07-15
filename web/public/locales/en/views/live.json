@@ -57,8 +57,8 @@
     "presets": "PTZ camera presets"
   },
   "camera": {
-    "enable": "Enable Camera",
-    "disable": "Disable Camera"
+    "turnOn": "Turn Camera On",
+    "turnOff": "Turn Camera Off"
   },
   "muteCameras": {
     "enable": "Mute All Cameras",
@@ -70,7 +70,8 @@
   },
   "recording": {
     "enable": "Enable Recording",
-    "disable": "Disable Recording"
+    "disable": "Disable Recording",
+    "disabledInConfig": "Recording must first be enabled in Settings for this camera."
   },
   "snapshots": {
     "enable": "Enable Snapshots",
@@ -152,7 +153,7 @@
   },
   "cameraSettings": {
     "title": "{{camera}} Settings",
-    "cameraEnabled": "Camera Enabled",
+    "camera": "Camera",
     "objectDetection": "Object Detection",
     "recording": "Recording",
     "snapshots": "Snapshots",

@@ -30,7 +30,11 @@
     "empty": "Nu există încercări recente de recunoaștere facială",
     "title": "Recunoașteri Recente",
     "aria": "Selectează Recunoașteri Recente",
-    "titleShort": "Recent"
+    "titleShort": "Recent",
+    "emptyNoLibrary": {
+      "title": "Încarcă o față",
+      "description": "Trebuie să adaugi cel puțin o față în librărie pentru ca recunoașterea facială să funcționeze."
+    }
   },
   "steps": {
     "description": {

@@ -9,11 +9,13 @@ import {
 import { Children, useState, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
-import { LuChevronDown, LuChevronRight } from "react-icons/lu";
+import { LuChevronDown, LuChevronRight, LuExternalLink } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { requiresRestartForFieldPath } from "@/utils/configUtil";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 import { ConfigFormContext } from "@/types/configForm";
 import {
   buildTranslationPath,
@@ -50,12 +52,11 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   } = props;
   const formContext = registry?.formContext as ConfigFormContext | undefined;
 
-  // Check if this is a root-level object
-  const isRoot = registry?.rootSchema === schema;
   const overrides = formContext?.overrides;
   const baselineFormData = formContext?.baselineFormData;
   const hiddenFields = formContext?.hiddenFields;
   const fieldPath = props.fieldPathId.path;
+  const isRoot = fieldPath.length === 0;
   const restartRequired = formContext?.restartRequired;
   const defaultRequiresRestart = formContext?.requiresRestart ?? true;
 
@@ -155,7 +156,8 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   };
 
   const hasModifiedDescendants = checkSubtreeModified(fieldPath);
-  const [isOpen, setIsOpen] = useState(hasModifiedDescendants);
+  const defaultOpen = uiSchema?.["ui:options"]?.defaultOpen === true;
+  const [isOpen, setIsOpen] = useState(hasModifiedDescendants || defaultOpen);
   const resetKey = `${formContext?.level ?? "global"}::${
     formContext?.cameraName ?? "global"
   }`;
@@ -178,6 +180,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     "views/settings",
     "common",
   ]);
+  const { getLocaleDocUrl } = useDocDomain();
   const objectRequiresRestart = requiresRestartForFieldPath(
     fieldPath,
     restartRequired,
@@ -190,6 +193,8 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     (uiSchema?.["ui:groups"] as Record<string, string[]> | undefined) || {};
   const disableNestedCard =
     uiSchema?.["ui:options"]?.disableNestedCard === true;
+  const disableCollapsible =
+    uiSchema?.["ui:options"]?.disableCollapsible === true;
 
   const isHiddenProp = (prop: (typeof properties)[number]) =>
     (prop.content.props as RjsfElementProps).uiSchema?.["ui:widget"] ===
@@ -208,6 +213,9 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
       (p.content.props as RjsfElementProps).uiSchema?.["ui:options"]
         ?.advanced !== true,
   );
+
+  const isAudioLabels = uiSchema?.["ui:options"]?.isAudioLabels === true;
+
   const hasModifiedAdvanced = advancedProps.some((prop) =>
     checkSubtreeModified([...fieldPath, prop.name]),
   );
@@ -223,10 +231,10 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   useEffect(() => {
     if (lastResetKeyRef.current !== resetKey) {
       lastResetKeyRef.current = resetKey;
-      setIsOpen(hasModifiedDescendants);
+      setIsOpen(hasModifiedDescendants || defaultOpen);
       setShowAdvanced(hasModifiedAdvanced);
     }
-  }, [resetKey, hasModifiedDescendants, hasModifiedAdvanced]);
+  }, [resetKey, hasModifiedDescendants, hasModifiedAdvanced, defaultOpen]);
   const { children } = props as ObjectFieldTemplateProps & {
     children?: ReactNode;
   };
@@ -241,7 +249,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const path = fieldPathId?.path;
   const filterObjectLabel = path ? getFilterObjectLabel(path) : undefined;
   const translatedFilterLabel = filterObjectLabel
-    ? getTranslatedLabel(filterObjectLabel, "object")
+    ? getTranslatedLabel(filterObjectLabel, isAudioLabels ? "audio" : "object")
     : undefined;
   if (path) {
     translationPath = buildTranslationPath(
@@ -300,6 +308,17 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     schemaDescription;
   inferredDescription = inferredDescription ?? fallbackDescription;
 
+  const pathStringSegments =
+    path?.filter((segment): segment is string => typeof segment === "string") ??
+    [];
+  const fieldDocsKey = translationPath || pathStringSegments.join(".");
+  const fieldDocsPath = fieldDocsKey
+    ? formContext?.fieldDocs?.[fieldDocsKey]
+    : undefined;
+  const fieldDocsUrl = fieldDocsPath
+    ? getLocaleDocUrl(fieldDocsPath)
+    : undefined;
+
   const renderGroupedFields = (items: (typeof properties)[number][]) => {
     if (!items.length) {
       return null;
@@ -355,7 +374,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
             key={group.groupKey}
             className="space-y-4 rounded-lg border border-border/70 bg-card/30 p-4"
           >
-            <div className="text-md border-b border-border/60 pb-4 font-semibold text-primary-variant">
+            <div className="border-b border-border/60 pb-4 font-semibold text-primary-variant">
               {group.label}
             </div>
             <div className="space-y-6">
@@ -442,6 +461,75 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     );
   }
 
+  // Label/description/docs header shared by the collapsible and static layouts.
+  const cardHeaderContent = (
+    <div className="min-w-0 pr-3">
+      <CardTitle
+        className={cn(
+          "flex items-center text-sm",
+          hasModifiedDescendants && "text-unsaved",
+        )}
+      >
+        {inferredLabel}
+        {objectRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
+      </CardTitle>
+      {inferredDescription && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          {inferredDescription}
+        </p>
+      )}
+      {fieldDocsUrl && (
+        <div className="mt-1 flex items-center text-xs text-primary-variant">
+          <Link
+            to={fieldDocsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {t("readTheDocumentation", { ns: "common" })}
+            <LuExternalLink className="ml-2 inline-flex size-3" />
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+
+  // Body shared by the collapsible and static layouts.
+  const cardBody = hasCustomChildren ? (
+    children
+  ) : (
+    <>
+      {renderGroupedFields(regularProps)}
+      <AddPropertyButton
+        onAddProperty={onAddProperty}
+        schema={schema}
+        uiSchema={uiSchema}
+        formData={formData}
+        disabled={disabled}
+        readonly={readonly}
+      />
+
+      <AdvancedCollapsible
+        count={advancedProps.length}
+        open={showAdvanced}
+        onOpenChange={setShowAdvanced}
+      >
+        {renderGroupedFields(advancedProps)}
+      </AdvancedCollapsible>
+    </>
+  );
+
+  // Static (non-collapsible) card: keep the labeled header, always show content.
+  if (disableCollapsible) {
+    return (
+      <Card className="w-full">
+        <CardHeader className="p-4">{cardHeaderContent}</CardHeader>
+        <CardContent className="space-y-6 p-4 pt-0">{cardBody}</CardContent>
+      </Card>
+    );
+  }
+
   // Nested objects render as collapsible cards
   return (
     <Card className="w-full">
@@ -449,24 +537,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer p-4 transition-colors hover:bg-muted/50">
             <div className="flex items-center justify-between">
-              <div className="min-w-0 pr-3">
-                <CardTitle
-                  className={cn(
-                    "flex items-center text-sm",
-                    hasModifiedDescendants && "text-danger",
-                  )}
-                >
-                  {inferredLabel}
-                  {objectRequiresRestart && (
-                    <RestartRequiredIndicator className="ml-2" />
-                  )}
-                </CardTitle>
-                {inferredDescription && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {inferredDescription}
-                  </p>
-                )}
-              </div>
+              {cardHeaderContent}
               {isOpen ? (
                 <LuChevronDown className="h-4 w-4 shrink-0" />
               ) : (
@@ -476,31 +547,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-6 p-4 pt-0">
-            {hasCustomChildren ? (
-              children
-            ) : (
-              <>
-                {renderGroupedFields(regularProps)}
-                <AddPropertyButton
-                  onAddProperty={onAddProperty}
-                  schema={schema}
-                  uiSchema={uiSchema}
-                  formData={formData}
-                  disabled={disabled}
-                  readonly={readonly}
-                />
-
-                <AdvancedCollapsible
-                  count={advancedProps.length}
-                  open={showAdvanced}
-                  onOpenChange={setShowAdvanced}
-                >
-                  {renderGroupedFields(advancedProps)}
-                </AdvancedCollapsible>
-              </>
-            )}
-          </CardContent>
+          <CardContent className="space-y-6 p-4 pt-0">{cardBody}</CardContent>
         </CollapsibleContent>
       </Collapsible>
     </Card>

@@ -13,6 +13,20 @@ export type JsonArray = JsonValue[];
 
 export type ConfigSectionData = JsonObject;
 
+export type HiddenFieldContext = {
+  fullConfig: FrigateConfig;
+  fullCameraConfig?: CameraConfig;
+  level: "global" | "camera" | "replay";
+  cameraName?: string;
+  // Saved form data for the current section/scope (i.e. rawFormData in
+  // BaseSection.tsx). Not the user's in-flight RJSF edits. Optional because
+  // most hidden-field callsites compute patterns without a specific section
+  // value on hand; resolvers fall back to fullCameraConfig / fullConfig.
+  formData?: ConfigSectionData;
+};
+
+export type HiddenFieldEntry = string | ((ctx: HiddenFieldContext) => string[]);
+
 export type ConfigFormContext = {
   level?: "global" | "camera";
   cameraName?: string;
@@ -42,4 +56,5 @@ export type ConfigFormContext = {
   requiresRestart?: boolean;
   t?: (key: string, options?: Record<string, unknown>) => string;
   renderers?: Record<string, RendererComponent>;
+  isProfile?: boolean;
 };

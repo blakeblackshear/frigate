@@ -6,7 +6,7 @@ no chat feature is active) are never initialized.
 """
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any
 
 from frigate.config import FrigateConfig
 from frigate.config.camera.genai import GenAIConfig, GenAIRoleEnum
@@ -23,7 +23,7 @@ class GenAIClientManager:
     def __init__(self, config: FrigateConfig) -> None:
         self._configs: dict[str, GenAIConfig] = {}
         self._role_map: dict[GenAIRoleEnum, str] = {}
-        self._clients: dict[str, "GenAIClient"] = {}
+        self._clients: dict[str, GenAIClient] = {}
         self.update_config(config)
 
     def update_config(self, config: FrigateConfig) -> None:
@@ -59,10 +59,12 @@ class GenAIClientManager:
             for role in genai_cfg.roles:
                 self._role_map[role] = name
 
-    def _get_client(self, name: str) -> "Optional[GenAIClient]":
+    def _get_client(self, name: str) -> "GenAIClient | None":
         """Return the client for *name*, creating it on first access."""
         if name in self._clients:
-            return self._clients[name]
+            client = self._clients[name]
+            client.ensure_provider()
+            return client
 
         from frigate.genai import PROVIDERS
 
@@ -78,7 +80,7 @@ class GenAIClientManager:
             return None
 
         try:
-            client: "GenAIClient" = provider_cls(genai_cfg)
+            client = provider_cls(genai_cfg)
         except Exception as e:
             logger.exception(
                 "Failed to create GenAI client for provider %s: %s",
@@ -91,28 +93,34 @@ class GenAIClientManager:
         return client
 
     @property
-    def chat_client(self) -> "Optional[GenAIClient]":
+    def chat_client(self) -> "GenAIClient | None":
         """Client configured for the chat role (e.g. chat with function calling)."""
         name = self._role_map.get(GenAIRoleEnum.chat)
         return self._get_client(name) if name else None
 
     @property
-    def description_client(self) -> "Optional[GenAIClient]":
+    def description_client(self) -> "GenAIClient | None":
         """Client configured for the descriptions role (e.g. review descriptions, object descriptions)."""
         name = self._role_map.get(GenAIRoleEnum.descriptions)
         return self._get_client(name) if name else None
 
     @property
-    def embeddings_client(self) -> "Optional[GenAIClient]":
+    def embeddings_client(self) -> "GenAIClient | None":
         """Client configured for the embeddings role."""
         name = self._role_map.get(GenAIRoleEnum.embeddings)
         return self._get_client(name) if name else None
 
-    def list_models(self) -> dict[str, list[str]]:
-        """Return available models keyed by config entry name."""
-        result: dict[str, list[str]] = {}
-        for name in self._configs:
+    def list_models(self) -> dict[str, dict[str, Any]]:
+        """Return per-entry model lists and capabilities, keyed by config entry name."""
+        result: dict[str, dict[str, Any]] = {}
+        for name, genai_cfg in self._configs.items():
             client = self._get_client(name)
-            if client:
-                result[name] = client.list_models()
+            if not client:
+                continue
+            result[name] = {
+                "models": client.list_models(),
+                "roles": [r.value for r in genai_cfg.roles],
+                "supports_toggleable_thinking": client.supports_toggleable_thinking,
+                "supports_embeddings": client.supports_embeddings,
+            }
         return result

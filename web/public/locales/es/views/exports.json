@@ -13,7 +13,9 @@
   "toast": {
     "error": {
       "renameExportFailed": "No se pudo renombrar la exportación: {{errorMessage}}",
-      "assignCaseFailed": "Fallo en la actualización de la asignación de caso: {{errorMessage}}"
+      "assignCaseFailed": "No se pudo actualizar la asignación al caso: {{errorMessage}}",
+      "caseSaveFailed": "No se pudo guardar el caso: {{errorMessage}}",
+      "caseDeleteFailed": "No se pudo eliminar el caso: {{errorMessage}}"
     }
   },
   "deleteExport.desc": "¿Estás seguro de que quieres eliminar {{exportName}}?",
@@ -22,17 +24,105 @@
     "downloadVideo": "Descargar video",
     "editName": "Editar nombre",
     "deleteExport": "Eliminar exportación",
-    "assignToCase": "Añadir al caso"
+    "assignToCase": "Añadir al caso",
+    "removeFromCase": "Eliminar del caso"
   },
   "headings": {
     "cases": "Casos",
-    "uncategorizedExports": "Exportaciones sin categorizar"
+    "uncategorizedExports": "Exportaciones sin categorización"
   },
   "caseDialog": {
     "title": "Añadir al caso",
     "newCaseOption": "Crear nuevo caso",
     "nameLabel": "Nombre del caso",
     "description": "Elige un caso existente o crea uno nuevo.",
-    "selectLabel": "Caso"
+    "selectLabel": "Caso",
+    "descriptionLabel": "Descripción"
+  },
+  "toolbar": {
+    "addExport": "Agregar exportación",
+    "newCase": "Nuevo caso",
+    "editCase": "Editar caso",
+    "deleteCase": "Eliminar caso"
+  },
+  "deleteCase": {
+    "label": "Eliminar caso",
+    "desc": "¿Estás seguro de que quieres eliminar {{caseName}}?",
+    "descKeepExports": "Las exportaciones seguirán disponibles como exportaciones sin categoría.",
+    "descDeleteExports": "Todas las exportaciones de este caso se eliminarán de forma permanente.",
+    "deleteExports": "Eliminar también las exportaciones"
+  },
+  "caseCard": {
+    "emptyCase": "Aún no hay exportaciones"
+  },
+  "jobCard": {
+    "defaultName": "Exportación de {{camera}}",
+    "queued": "En cola",
+    "running": "En ejecución",
+    "preparing": "Preparando",
+    "copying": "Copiando",
+    "encoding": "Codificando",
+    "encodingRetry": "Codificando (reintento)",
+    "finalizing": "Finalizando"
+  },
+  "caseView": {
+    "noDescription": "Sin descripción",
+    "createdAt": "Creado {{value}}",
+    "exportCount_one": "1 exportación",
+    "exportCount_other": "{{count}} exportaciones",
+    "cameraCount_one": "1 cámara",
+    "cameraCount_other": "{{count}} cámaras",
+    "showMore": "Mostrar más",
+    "showLess": "Mostrar menos",
+    "emptyTitle": "Este caso está vacío",
+    "emptyDescription": "Añade exportaciones existentes sin categorizar para mantener el caso organizado.",
+    "emptyDescriptionNoExports": "Todavía no hay exportaciones sin categorizar disponibles para añadir."
+  },
+  "caseEditor": {
+    "createTitle": "Crear caso",
+    "editTitle": "Editar caso",
+    "namePlaceholder": "Nombre del caso",
+    "descriptionPlaceholder": "Añade notas o contexto para este caso"
+  },
+  "addExportDialog": {
+    "title": "Añadir exportación a {{caseName}}",
+    "searchPlaceholder": "Buscar exportaciones sin categorizar",
+    "empty": "Ninguna exportación sin categorizar coincide con esta búsqueda.",
+    "addButton_one": "Añadir 1 exportación",
+    "addButton_other": "Añadir {{count}} exportaciones",
+    "adding": "Añadiendo..."
+  },
+  "selected_one": "{{count}} seleccionados",
+  "selected_other": "{{count}} seleccionados",
+  "bulkActions": {
+    "addToCase": "Añadir al caso",
+    "moveToCase": "Mover al caso",
+    "removeFromCase": "Eliminar del caso",
+    "delete": "Eliminar",
+    "deleteNow": "Eliminar ahora"
+  },
+  "bulkDelete": {
+    "title": "Eliminar exportaciones",
+    "desc_one": "¿Seguro que quieres eliminar {{count}} exportación?",
+    "desc_other": "¿Seguro que quieres eliminar {{count}} exportaciones?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Eliminar del caso",
+    "desc_one": "¿Eliminar {{count}} exportación de este caso?",
+    "desc_other": "¿Eliminar {{count}} exportaciones de este caso?",
+    "descKeepExports": "Las exportaciones se moverán a sin categorizar.",
+    "descDeleteExports": "Las exportaciones se eliminarán permanentemente.",
+    "deleteExports": "Eliminar exportaciones en su lugar"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Exportaciones eliminadas correctamente",
+      "reassign": "Asignación de caso actualizada correctamente",
+      "remove": "Exportaciones eliminadas del caso correctamente"
+    },
+    "error": {
+      "deleteFailed": "No se pudieron eliminar las exportaciones: {{errorMessage}}",
+      "reassignFailed": "No se pudo actualizar la asignación del caso: {{errorMessage}}"
+    }
   }
 }

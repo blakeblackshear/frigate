@@ -13,7 +13,7 @@
     "description": "Enabled"
   },
   "audio": {
-    "label": "Audio events",
+    "label": "Audio detection",
     "description": "Settings for audio-based event detection for this camera.",
     "enabled": {
       "label": "Enable audio detection",
@@ -29,11 +29,15 @@
     },
     "listen": {
       "label": "Listen types",
-      "description": "List of audio event types to detect (for example: bark, fire_alarm, scream, speech, yell)."
+      "description": "List of audio event types to detect (for example: bark, fire_alarm, speech, yell)."
     },
     "filters": {
       "label": "Audio filters",
-      "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives."
+      "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives.",
+      "threshold": {
+        "label": "Minimum audio confidence",
+        "description": "Minimum confidence threshold for the audio event to be counted."
+      }
     },
     "enabled_in_config": {
       "label": "Original audio state",
@@ -148,11 +152,11 @@
     }
   },
   "ffmpeg": {
-    "label": "FFmpeg",
-    "description": "FFmpeg settings including binary path, args, hwaccel options, and per-role output args.",
+    "label": "Streams (FFmpeg)",
+    "description": "Camera stream inputs and FFmpeg options, including binary path, args, hwaccel, and per-role output args.",
     "path": {
       "label": "FFmpeg path",
-      "description": "Path to the FFmpeg binary to use or a version alias (\"5.0\" or \"7.0\")."
+      "description": "Path to the FFmpeg binary to use or a version alias (\"7.0\" or \"8.0\")."
     },
     "global_args": {
       "label": "FFmpeg global arguments",
@@ -485,6 +489,13 @@
       "hwaccel_args": {
         "label": "Export hwaccel args",
         "description": "Hardware acceleration args to use for export/transcode operations."
+      },
+      "max_concurrent": {
+        "label": "Maximum concurrent exports",
+        "description": "Maximum number of export jobs to process at the same time."
+      },
+      "chapters": {
+        "label": "Chapter metadata to embed in exported recordings"
       }
     },
     "preview": {
@@ -658,10 +669,6 @@
         "label": "Default retention",
         "description": "Default number of days to retain snapshots."
       },
-      "mode": {
-        "label": "Retention mode",
-        "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
-      },
       "objects": {
         "label": "Object retention",
         "description": "Per-object overrides for snapshot retention days."
@@ -674,7 +681,7 @@
   },
   "timestamp_style": {
     "label": "Timestamp style",
-    "description": "Styling options for in-feed timestamps applied to recordings and snapshots.",
+    "description": "Styling options for timestamps applied to snapshots and Debug view.",
     "position": {
       "label": "Timestamp position",
       "description": "Position of the timestamp on the image (tl/tr/bl/br)."
@@ -854,6 +861,10 @@
     "dashboard": {
       "label": "Show in UI",
       "description": "Toggle whether this camera is visible everywhere in the Frigate UI. Disabling this will require manually editing the config to view this camera in the UI again."
+    },
+    "review": {
+      "label": "Show in review",
+      "description": "Toggle whether this camera is visible in review (the review page and its camera filter, motion review, and the history view)."
     }
   },
   "webui_url": {

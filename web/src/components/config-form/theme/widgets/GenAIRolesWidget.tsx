@@ -1,8 +1,10 @@
 import type { WidgetProps } from "@rjsf/utils";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import useSWR from "swr";
 import { Switch } from "@/components/ui/switch";
 import type { ConfigFormContext } from "@/types/configForm";
+import type { GenAIModelsResponse } from "@/types/chat";
 
 const GENAI_ROLES = ["embeddings", "descriptions", "chat"] as const;
 
@@ -37,10 +39,24 @@ export function GenAIRolesWidget(props: WidgetProps) {
   const selectedRoles = useMemo(() => normalizeValue(value), [value]);
   const providerKey = useMemo(() => getProviderKey(id), [id]);
 
-  // Compute occupied roles directly from formData. The computation is
-  // trivially cheap (iterate providers × 3 roles max) so we skip an
-  // intermediate memoization layer whose formData dependency would
-  // never produce a cache hit (new object reference on every change).
+  const { data: genaiInfo } = useSWR<GenAIModelsResponse>("genai/models", {
+    revalidateOnFocus: false,
+  });
+
+  const embeddingsSupported = useMemo(() => {
+    if (!providerKey) return true;
+    const info = genaiInfo?.[providerKey];
+    return info ? info.supports_embeddings : true;
+  }, [genaiInfo, providerKey]);
+
+  const availableRoles = useMemo(
+    () =>
+      embeddingsSupported
+        ? GENAI_ROLES
+        : GENAI_ROLES.filter((role) => role !== "embeddings"),
+    [embeddingsSupported],
+  );
+
   const occupiedRoles = useMemo(() => {
     const occupied = new Set<string>();
     const fd = formContext?.formData;
@@ -64,6 +80,12 @@ export function GenAIRolesWidget(props: WidgetProps) {
     return occupied;
   }, [formContext?.formData, providerKey]);
 
+  useEffect(() => {
+    if (!embeddingsSupported && selectedRoles.includes("embeddings")) {
+      onChange(selectedRoles.filter((role) => role !== "embeddings"));
+    }
+  }, [embeddingsSupported, selectedRoles, onChange]);
+
   const toggleRole = (role: string, enabled: boolean) => {
     if (enabled) {
       if (!selectedRoles.includes(role)) {
@@ -78,7 +100,7 @@ export function GenAIRolesWidget(props: WidgetProps) {
   return (
     <div className="rounded-lg border border-secondary-highlight bg-background_alt p-2 pr-0 md:max-w-md">
       <div className="grid gap-2">
-        {GENAI_ROLES.map((role) => {
+        {availableRoles.map((role) => {
           const checked = selectedRoles.includes(role);
           const roleDisabled = !checked && occupiedRoles.has(role);
           const label = t(`configForm.genaiRoles.options.${role}`, {

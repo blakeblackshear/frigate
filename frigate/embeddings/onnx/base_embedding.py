@@ -57,6 +57,12 @@ class BaseEmbedding(ABC):
     def _preprocess_inputs(self, raw_inputs: Any) -> Any:
         pass
 
+    @staticmethod
+    def _bgr_to_rgb(frame: Any) -> Any:
+        if isinstance(frame, np.ndarray) and frame.ndim == 3:
+            return np.ascontiguousarray(frame[:, :, ::-1])
+        return frame
+
     def _process_image(self, image, output: str = "RGB") -> Image.Image:
         if isinstance(image, str):
             if image.startswith("http"):

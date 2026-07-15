@@ -6,12 +6,12 @@
 
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
-import merge from "lodash/merge";
 import unset from "lodash/unset";
 import isEqual from "lodash/isEqual";
 import mergeWith from "lodash/mergeWith";
 import set from "lodash/set";
 import { isJsonObject } from "@/lib/utils";
+import { REDACTED_CREDENTIAL_SENTINEL } from "@/lib/const";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { normalizeConfigValue } from "@/hooks/use-config-override";
 import {
@@ -20,14 +20,42 @@ import {
   sanitizeOverridesForSection,
 } from "@/components/config-form/sections/section-special-cases";
 import type { RJSFSchema } from "@rjsf/utils";
-import type { FrigateConfig } from "@/types/frigateConfig";
+import type { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import type {
   ConfigSectionData,
+  HiddenFieldContext,
   JsonObject,
   JsonValue,
 } from "@/types/configForm";
 import type { SectionConfig } from "../components/config-form/sections/BaseSection";
 import { sectionConfigs } from "../components/config-form/sectionConfigs";
+
+/**
+ * Recursively strip any key whose value is the redaction sentinel from a
+ * config_data payload. Use just before sending to /config/set so untouched
+ * credential placeholder fields don't clobber the saved YAML value. Mutates
+ * and returns the input.
+ */
+export function stripRedactedCredentials<T>(value: T): T {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      stripRedactedCredentials(item);
+    }
+    return value;
+  }
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    for (const key of Object.keys(obj)) {
+      const v = obj[key];
+      if (v === REDACTED_CREDENTIAL_SENTINEL) {
+        delete obj[key];
+      } else if (v && typeof v === "object") {
+        stripRedactedCredentials(v);
+      }
+    }
+  }
+  return value;
+}
 
 // ---------------------------------------------------------------------------
 // cameraUpdateTopicMap — maps config section paths to MQTT/WS update topics
@@ -53,6 +81,7 @@ export const cameraUpdateTopicMap: Record<string, string> = {
   mqtt: "mqtt",
   onvif: "onvif",
   ui: "ui",
+  zones: "zones",
 };
 
 // Sections where global config serves as the default for per-camera config.
@@ -90,6 +119,32 @@ export function getBaseCameraSectionValue(
   if (!cam) return undefined;
   const base = cam.base_config?.[sectionPath];
   return base !== undefined ? base : get(cam, sectionPath);
+}
+
+// mergeWith customizer that replaces arrays wholesale instead of merging them
+// positionally by index. Used when the source value is meant to fully replace
+// the destination (e.g. profile overrides, section config overrides), so an
+// empty source array correctly clears the destination array.
+const replaceArraysCustomizer = (objValue: unknown, srcValue: unknown) => {
+  if (Array.isArray(objValue) || Array.isArray(srcValue)) {
+    return srcValue !== undefined ? srcValue : objValue;
+  }
+  return undefined;
+};
+
+// Merge profile overrides on top of base config values. Matches the backend's
+// deep_merge(overrides, base_data) semantics: arrays are replaced wholesale by
+// the profile's value rather than merged positionally, so an empty array in a
+// profile clears the base array instead of leaving stale entries behind.
+export function mergeProfileOverrides<T extends object>(
+  baseValue: T,
+  profileOverrides: object,
+): T {
+  return mergeWith(
+    cloneDeep(baseValue),
+    cloneDeep(profileOverrides),
+    replaceArraysCustomizer,
+  ) as T;
 }
 
 /** Sections that can appear inside a camera profile definition. */
@@ -175,7 +230,12 @@ export function buildOverrides(
 
     const result: JsonObject = {};
     for (const [key, value] of Object.entries(currentObj)) {
-      if (value === undefined && baseObj && baseObj[key] !== undefined) {
+      if (
+        (value === undefined || value === null) &&
+        baseObj &&
+        baseObj[key] !== undefined &&
+        baseObj[key] !== null
+      ) {
         result[key] = "";
         continue;
       }
@@ -220,6 +280,32 @@ export function buildOverrides(
 }
 
 // ---------------------------------------------------------------------------
+// flattenOverrides — turn an overrides object into a list of leaf paths
+// ---------------------------------------------------------------------------
+
+// Walks a nested overrides value and produces a flat list of `{ path, value }`
+// entries, one per leaf.  Used by save/preview UIs to enumerate the individual
+// fields that will be changed.
+export function flattenOverrides(
+  value: JsonValue | undefined,
+  path: string[] = [],
+): Array<{ path: string; value: JsonValue }> {
+  if (value === undefined) return [];
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return [{ path: path.join("."), value }];
+  }
+
+  const entries = Object.entries(value);
+  if (entries.length === 0) {
+    return [{ path: path.join("."), value: {} }];
+  }
+
+  return entries.flatMap(([key, entryValue]) =>
+    flattenOverrides(entryValue, [...path, key]),
+  );
+}
+
+// ---------------------------------------------------------------------------
 // sanitizeSectionData — normalize config values and strip hidden fields
 // ---------------------------------------------------------------------------
 
@@ -228,7 +314,10 @@ export function buildOverrides(
 
 // lodash `unset` treats `*` as a literal key.  This helper expands wildcard
 // segments so that e.g. `"filters.*.mask"` unsets `filters.<each key>.mask`.
-function unsetWithWildcard(obj: Record<string, unknown>, path: string): void {
+export function unsetWithWildcard(
+  obj: Record<string, unknown>,
+  path: string,
+): void {
   if (!path.includes("*")) {
     unset(obj, path);
     return;
@@ -514,6 +603,17 @@ export function prepareSectionSavePayload(opts: {
     schemaSection,
     level,
     sectionSchema,
+    config
+      ? {
+          fullConfig: config,
+          fullCameraConfig:
+            level === "camera" && cameraName
+              ? config.cameras?.[cameraName]
+              : undefined,
+          level,
+          cameraName,
+        }
+      : undefined,
   );
 
   // Compute rawFormData (the current stored value for this section)
@@ -535,9 +635,9 @@ export function prepareSectionSavePayload(opts: {
         baseValue &&
         typeof baseValue === "object"
       ) {
-        rawSectionValue = merge(
-          cloneDeep(baseValue),
-          cloneDeep(profileOverrides),
+        rawSectionValue = mergeProfileOverrides(
+          baseValue as object,
+          profileOverrides as object,
         );
       } else {
         rawSectionValue = baseValue;
@@ -561,13 +661,20 @@ export function prepareSectionSavePayload(opts: {
   // For profile sections, also hide restart-required fields to match
   // effectiveHiddenFields in BaseSection (prevents spurious deletion markers
   // for fields that are hidden from the form during profile editing).
-  let hiddenFieldsForSanitize = sectionConfig.hiddenFields;
-  if (profileInfo.isProfile && sectionConfig.restartRequired?.length) {
-    const base = sectionConfig.hiddenFields ?? [];
-    hiddenFieldsForSanitize = [
-      ...new Set([...base, ...sectionConfig.restartRequired]),
-    ];
-  }
+  const resolvedHidden = resolveHiddenFieldEntries(sectionConfig.hiddenFields, {
+    fullConfig: config,
+    fullCameraConfig:
+      level === "camera" && cameraName
+        ? config.cameras?.[cameraName]
+        : undefined,
+    level,
+    cameraName,
+    formData: rawFormData as ConfigSectionData,
+  });
+  const hiddenFieldsForSanitize =
+    profileInfo.isProfile && sectionConfig.restartRequired?.length
+      ? [...new Set([...resolvedHidden, ...sectionConfig.restartRequired])]
+      : resolvedHidden;
 
   // Sanitize raw form data
   const rawData = sanitizeSectionData(
@@ -645,13 +752,12 @@ const mergeSectionConfig = (
   overrides: Partial<SectionConfig> | undefined,
 ): SectionConfig =>
   mergeWith({}, base ?? {}, overrides ?? {}, (objValue, srcValue, key) => {
-    if (Array.isArray(objValue) || Array.isArray(srcValue)) {
-      return srcValue ?? objValue;
-    }
+    const arrayResult = replaceArraysCustomizer(objValue, srcValue);
+    if (arrayResult !== undefined) return arrayResult;
 
     if (key === "uiSchema") {
       if (objValue && srcValue) {
-        return merge({}, objValue, srcValue);
+        return mergeWith({}, objValue, srcValue, replaceArraysCustomizer);
       }
       return srcValue ?? objValue;
     }
@@ -675,4 +781,105 @@ export function getSectionConfig(
         ? entry.replay
         : entry.camera;
   return mergeSectionConfig(entry.base, overrides);
+}
+
+/**
+ * Resolve the effective attribute label set at a given scope. At camera
+ * (and replay) scope on a dedicated LPR camera (`camera.type === "lpr"`),
+ * `license_plate` is treated as a regular tracked object — not an
+ * attribute — to match the backend's per-camera carve-out in
+ * `frigate/video/detect.py`. Returns the full attribute list at global
+ * scope and for non-LPR cameras.
+ */
+export function getEffectiveAttributeLabels(
+  fullConfig: FrigateConfig | undefined,
+  fullCameraConfig: CameraConfig | undefined,
+  level: "global" | "camera" | "replay" | undefined,
+): string[] {
+  const all = fullConfig?.model?.all_attributes ?? [];
+  if (level !== "global" && fullCameraConfig?.type === "lpr") {
+    return all.filter((attr) => attr !== "license_plate");
+  }
+  return all;
+}
+
+/**
+ * Build a `HiddenFieldContext` for the common case where a callsite has
+ * `config`, an optional `cameraName`, and a level, but no per-section
+ * saved form data to thread through. Resolvers that don't read `formData`
+ * (which is most of them) just fall through to `fullCameraConfig` /
+ * `fullConfig`.
+ */
+export function buildHiddenFieldContext(
+  config: FrigateConfig | undefined,
+  level: "global" | "camera" | "replay",
+  cameraName?: string,
+): HiddenFieldContext | undefined {
+  if (!config) return undefined;
+  return {
+    fullConfig: config,
+    fullCameraConfig:
+      level !== "global" && cameraName
+        ? config.cameras?.[cameraName]
+        : undefined,
+    level,
+    cameraName,
+  };
+}
+
+/**
+ * Resolve the effective hidden-field patterns for a section. Each entry in
+ * `hiddenFields` is either a literal pattern or a function that produces
+ * patterns from the loaded config and scope (e.g. `filters.<attr>` for each
+ * `model.all_attributes` entry on the objects section, gated by the
+ * effective `objects.track` list at the current scope).
+ */
+export function getEffectiveHiddenFields(
+  sectionKey: string,
+  level: "global" | "camera" | "replay",
+  ctx: HiddenFieldContext | undefined,
+): string[] {
+  return resolveHiddenFieldEntries(
+    getSectionConfig(sectionKey, level).hiddenFields,
+    ctx,
+  );
+}
+
+export function resolveHiddenFieldEntries(
+  entries: SectionConfig["hiddenFields"] | undefined,
+  ctx: HiddenFieldContext | undefined,
+): string[] {
+  if (!entries || entries.length === 0) return [];
+  const result: string[] = [];
+  for (const entry of entries) {
+    if (typeof entry === "function") {
+      if (ctx) result.push(...entry(ctx));
+    } else {
+      result.push(entry);
+    }
+  }
+  return result;
+}
+
+/**
+ * Match a delta path against a hidden-field pattern. Supports literal prefixes
+ * (so a hidden field "streams" also hides "streams.foo.bar") and `*` wildcards
+ * matching exactly one path segment (e.g. "filters.*.mask").
+ */
+export function pathMatchesHiddenPattern(
+  path: string,
+  pattern: string,
+): boolean {
+  if (!pattern) return false;
+  if (!pattern.includes("*")) {
+    return path === pattern || path.startsWith(`${pattern}.`);
+  }
+  const patternSegments = pattern.split(".");
+  const pathSegments = path.split(".");
+  if (pathSegments.length < patternSegments.length) return false;
+  for (let i = 0; i < patternSegments.length; i += 1) {
+    if (patternSegments[i] === "*") continue;
+    if (patternSegments[i] !== pathSegments[i]) return false;
+  }
+  return true;
 }

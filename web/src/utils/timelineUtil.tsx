@@ -38,6 +38,22 @@ export function getChunkedTimeDay(timeRange: TimeRange): TimeRange[] {
   return data;
 }
 
+/**
+ * Find the chunk index that contains the given timestamp.
+ * Uses half-open intervals [after, before) for all chunks except the last,
+ * which uses a closed interval [after, before] so the terminal boundary
+ * is always reachable.
+ */
+export function findChunkIndex(chunks: TimeRange[], timestamp: number): number {
+  return chunks.findIndex((chunk, i) => {
+    const isLast = i === chunks.length - 1;
+    return (
+      chunk.after <= timestamp &&
+      (isLast ? chunk.before >= timestamp : chunk.before > timestamp)
+    );
+  });
+}
+
 export function getChunkedTimeRange(
   startTimestamp: number,
   endTimestamp: number,

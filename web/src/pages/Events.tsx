@@ -21,6 +21,10 @@ import {
   getBeginningOfDayTimestamp,
   getEndOfDayTimestamp,
 } from "@/utils/dateUtil";
+import {
+  parseRecordingReviewLink,
+  RECORDING_REVIEW_LINK_PARAM,
+} from "@/utils/recordingReviewUrl";
 import EventView from "@/views/events/EventView";
 import MotionSearchView from "@/views/motion-search/MotionSearchView";
 import { RecordingView } from "@/views/recording/RecordingView";
@@ -28,6 +32,7 @@ import { useFrigateReviews } from "@/api/ws";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function Events() {
@@ -51,11 +56,9 @@ export default function Events() {
     false,
   );
 
-  const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
-    "recording",
-    undefined,
-    false,
-  );
+  const [recording, setRecording] = useOverlayState<
+    RecordingStartingPoint | undefined
+  >("recording", undefined, false);
   const [motionPreviewsCamera, setMotionPreviewsCamera] = useOverlayState<
     string | undefined
   >("motionPreviewsCamera", undefined);
@@ -67,14 +70,18 @@ export default function Events() {
     undefined,
   );
 
-  const motionSearchCameras = useMemo(() => {
+  const reviewCameras = useMemo(() => {
     if (!config?.cameras) {
       return [] as string[];
     }
 
-    return Object.keys(config.cameras).filter((cam) =>
-      allowedCameras.includes(cam),
-    );
+    return Object.values(config.cameras)
+      .filter(
+        (conf) =>
+          allowedCameras.includes(conf.name) && conf.ui?.review !== false,
+      )
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order)
+      .map((conf) => conf.name);
   }, [allowedCameras, config?.cameras]);
 
   const selectedMotionSearchCamera = useMemo(() => {
@@ -82,12 +89,12 @@ export default function Events() {
       return null;
     }
 
-    if (motionSearchCameras.includes(motionSearchCamera)) {
+    if (reviewCameras.includes(motionSearchCamera)) {
       return motionSearchCamera;
     }
 
-    return motionSearchCameras[0] ?? null;
-  }, [motionSearchCamera, motionSearchCameras]);
+    return reviewCameras[0] ?? null;
+  }, [motionSearchCamera, reviewCameras]);
 
   const motionSearchTimeRange = useMemo(() => {
     if (motionSearchDay) {
@@ -128,6 +135,14 @@ export default function Events() {
   const [notificationTab, setNotificationTab] =
     useState<TimelineType>("timeline");
 
+  const getReviewDayBounds = useCallback((date: Date) => {
+    const now = Date.now() / 1000;
+    return {
+      after: getBeginningOfDayTimestamp(date),
+      before: Math.min(getEndOfDayTimestamp(date), now),
+    };
+  }, []);
+
   useSearchEffect("tab", (tab: string) => {
     if (tab === "timeline" || tab === "events" || tab === "detail") {
       setNotificationTab(tab as TimelineType);
@@ -143,10 +158,7 @@ export default function Events() {
           const startTime = resp.data.start_time - REVIEW_PADDING;
           const date = new Date(startTime * 1000);
 
-          setReviewFilter({
-            after: getBeginningOfDayTimestamp(date),
-            before: getEndOfDayTimestamp(date),
-          });
+          setReviewFilter(getReviewDayBounds(date));
           setRecording(
             {
               camera: resp.data.camera,
@@ -234,6 +246,51 @@ export default function Events() {
     [recording, setRecording, setReviewFilter],
   );
 
+  useSearchEffect(RECORDING_REVIEW_LINK_PARAM, (reviewLinkValue: string) => {
+    if (!config) {
+      return false;
+    }
+
+    const reviewLink = parseRecordingReviewLink(reviewLinkValue);
+
+    if (!reviewLink) {
+      toast.error(t("recordings.invalidSharedLink"), {
+        position: "top-center",
+      });
+      return true;
+    }
+
+    const validCamera =
+      config.cameras[reviewLink.camera] &&
+      allowedCameras.includes(reviewLink.camera);
+
+    if (!validCamera) {
+      toast.error(t("recordings.invalidSharedCamera"), {
+        position: "top-center",
+      });
+      return true;
+    }
+
+    setReviewFilter({
+      ...reviewFilter,
+      ...getReviewDayBounds(new Date(reviewLink.timestamp * 1000)),
+    });
+    setRecording(
+      {
+        camera: reviewLink.camera,
+        startTime: reviewLink.timestamp,
+        // severity not actually applicable here, but the type requires it
+        // this pattern is also used LiveCameraView to enter recording view
+        severity: "alert",
+        timelineType: notificationTab,
+        navigationSource: "shared-link",
+      },
+      true,
+    );
+
+    return true;
+  });
+
   // review paging
 
   const [beforeTs, setBeforeTs] = useState(Math.ceil(Date.now() / 1000));
@@ -304,6 +361,10 @@ export default function Events() {
     const motion: ReviewSegment[] = [];
 
     reviews?.forEach((segment) => {
+      if (config?.cameras[segment.camera]?.ui?.review === false) {
+        return;
+      }
+
       all.push(segment);
 
       switch (segment.severity) {
@@ -325,7 +386,7 @@ export default function Events() {
       detection: detections,
       significant_motion: motion,
     };
-  }, [reviews]);
+  }, [reviews, config?.cameras]);
 
   // update review items in place when a review segment ends
   const reviewUpdate = useFrigateReviews();
@@ -582,7 +643,7 @@ export default function Events() {
     }
 
     setStartTime(recording.startTime);
-    const allCameras = reviewFilter?.cameras ?? Object.keys(config.cameras);
+    const allCameras = reviewFilter?.cameras ?? reviewCameras;
 
     return {
       camera: recording.camera,
@@ -613,6 +674,10 @@ export default function Events() {
           filter={reviewFilter}
           updateFilter={onUpdateFilter}
           refreshData={reloadData}
+          onMotionSearch={(camera) => {
+            setMotionSearchCamera(camera);
+            setRecording(undefined);
+          }}
         />
       );
     }
@@ -623,7 +688,7 @@ export default function Events() {
       ) : (
         <MotionSearchView
           config={config}
-          cameras={motionSearchCameras}
+          cameras={reviewCameras}
           selectedCamera={selectedMotionSearchCamera}
           onCameraSelect={handleMotionSearchCameraSelect}
           cameraLocked={true}

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -443,7 +442,6 @@ export default function TriggerView({
 
   return (
     <div className="flex size-full flex-col md:flex-row">
-      <Toaster position="top-center" closeButton={true} />
       <div
         className={cn(
           "scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2",
@@ -486,8 +484,8 @@ export default function TriggerView({
         ) : (
           <>
             <div className="mb-5 flex flex-row items-center justify-between gap-2">
-              <div className="flex flex-col items-start">
-                <Heading as="h4" className="mb-2">
+              <div className="flex max-w-5xl flex-col items-start">
+                <Heading as="h4" className="mb-1">
                   {t("triggers.management.title")}
                 </Heading>
                 <p className="text-sm text-muted-foreground">
@@ -495,6 +493,17 @@ export default function TriggerView({
                     camera: cameraName,
                   })}
                 </p>
+                <div className="mt-1 flex items-center text-sm text-primary-variant">
+                  <Link
+                    to={getLocaleDocUrl("configuration/semantic_search")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline"
+                  >
+                    {t("readTheDocumentation", { ns: "common" })}{" "}
+                    <LuExternalLink className="ml-2 inline-flex size-3" />
+                  </Link>
+                </div>
               </div>
               <Button
                 className="flex items-center gap-2 self-start sm:self-auto"

@@ -1,9 +1,9 @@
 import logging
+from typing import Literal
 
 import numpy as np
 import openvino as ov
 from pydantic import ConfigDict, Field
-from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detection_runners import OpenVINOModelRunner
@@ -51,6 +51,12 @@ class OvDetector(DetectionApi):
 
         self.h = detector_config.model.height
         self.w = detector_config.model.width
+
+        logger.info(
+            "Loading OpenVINO model %s on device %s",
+            detector_config.model.path,
+            detector_config.device,
+        )
 
         self.runner = OpenVINOModelRunner(
             model_path=detector_config.model.path,

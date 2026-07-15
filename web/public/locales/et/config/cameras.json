@@ -2,5 +2,38 @@
     "name": {
         "label": "Kaamera nimi",
         "description": "Kaamera nimi on nõutav"
+    },
+    "friendly_name": {
+        "label": "Sõbralik nimi",
+        "description": "Frigate UI-s kasutatud kaamerasõbralik nimi"
+    },
+    "enabled": {
+        "label": "Kasutusel",
+        "description": "Kasutusel"
+    },
+    "audio": {
+        "label": "Helisündmused"
+    },
+    "birdseye": {
+        "mode": {
+            "label": "Jälgimisrežiim"
+        }
+    },
+    "label": "Kaameraseadistus",
+    "semantic_search": {
+        "triggers": {
+            "threshold": {
+                "description": "Minimaalne sarnasuse punktiskoor (0-1), mis on vajalik selle päästiku käivitamiseks."
+            }
+        }
+    },
+    "lpr": {
+        "label": "Sõidukite numbrimärkide tuvastus",
+        "description": "Sõidukite numbrimärkide tuvastuse seadistus sisaldab tuvastuse lävendeid, vormindust ja teadaolevaid numbrimärke."
+    },
+    "review": {
+        "genai": {
+            "description": "Kontrollib generatiivse tehisaru kasutamist kirjelduste ja kokkuvõtete koostamiseks ülevaatamisele kuuluvate objektide jaoks."
+        }
     }
 }

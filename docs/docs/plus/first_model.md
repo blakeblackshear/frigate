@@ -3,6 +3,10 @@ id: first_model
 title: Requesting your first model
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 ## Step 1: Upload and annotate your images
 
 Before requesting your first model, you will need to upload and verify at least 10 images to Frigate+. The more images you upload, annotate, and verify the better your results will be. Most users start to see very good results once they have at least 100 verified images per camera. Keep in mind that varying conditions should be included. You will want images from cloudy days, sunny days, dawn, dusk, and night. Refer to the [integration docs](../integrations/plus.md#generate-an-api-key) for instructions on how to easily submit images to Frigate+ directly from Frigate.
@@ -16,12 +20,20 @@ For more detailed recommendations, you can refer to the docs on [annotating](./a
 Once you have an initial set of verified images, you can request a model on the Models page. For guidance on choosing a model type, refer to [this part of the documentation](./index.md#available-model-types). If you are unsure which type to request, you can test the base model for each version from the "Base Models" tab. Each model request requires 1 of the 12 trainings that you receive with your annual subscription. This model will support all [label types available](./index.md#available-label-types) even if you do not submit any examples for those labels. Model creation can take up to 36 hours.
 ![Plus Models Page](/img/plus/plus-models.jpg)
 
-## Step 3: Set your model id in the config
+## Step 3: Set your model
 
 You will receive an email notification when your Frigate+ model is ready.
 ![Model Ready Email](/img/plus/model-ready-email.jpg)
 
 Models available in Frigate+ can be used with a special model path. No other information needs to be configured because it fetches the remaining config from Frigate+ automatically.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > System > Detectors and model" />. In the **Detection Model** section, choose the **Frigate+** tab. Select your new Frigate+ model from the **Available Frigate+ models** dropdown, then click **Save**. Restart Frigate to apply the change.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 detectors: ...
@@ -30,21 +42,45 @@ model:
   path: plus://<your_model_id>
 ```
 
-:::note
-
-Model IDs are not secret values and can be shared freely. Access to your model is protected by your API key.
-
-:::
-
 :::tip
 
 When setting the plus model id, all other fields should be removed as these are configured automatically with the Frigate+ model config
 
 :::
 
+</TabItem>
+</ConfigTabs>
+
+:::note
+
+Model IDs are not secret values and can be shared freely. Access to your model is protected by your API key.
+
+:::
+
 ## Step 4: Adjust your object filters for higher scores
 
 Frigate+ models generally have much higher scores than the default model provided in Frigate. You will likely need to increase your `threshold` and `min_score` values. Here is an example of how these values can be refined, but you should expect these to evolve as your model improves. For more information about how `threshold` and `min_score` are related, see the docs on [object filters](../configuration/object_filters.md#object-scores).
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Objects" />. Under **Object filters**, set **Min Score** and **Threshold** for each object type, then click **Save**.
+
+| Object            | Min Score | Threshold |
+| ----------------- | --------- | --------- |
+| **dog**           | .7        | .9        |
+| **cat**           | .65       | .8        |
+| **face**          | .7        |           |
+| **package**       | .65       | .9        |
+| **license_plate** | .6        |           |
+| **amazon**        | .75       |           |
+| **ups**           | .75       |           |
+| **fedex**         | .75       |           |
+| **person**        | .65       | .85       |
+| **car**           | .65       | .85       |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 objects:
@@ -75,3 +111,6 @@ objects:
       min_score: .65
       threshold: .85
 ```
+
+</TabItem>
+</ConfigTabs>

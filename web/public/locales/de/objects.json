@@ -90,7 +90,7 @@
   "laptop": "Laptop",
   "mouse": "Maus",
   "goat": "Ziege",
-  "keyboard": "Klaviatur",
+  "keyboard": "Klavier",
   "cell_phone": "Handy",
   "remote": "Fernbedienung",
   "airplane": "Flugzeug",
@@ -121,5 +121,9 @@
   "royal_mail": "Royal-Mail",
   "school_bus": "Schulbus",
   "skunk": "Stinktier",
-  "kangaroo": "Känguruh"
+  "kangaroo": "Känguruh",
+  "baby": "Baby",
+  "baby_stroller": "Kinderwagen",
+  "rickshaw": "Rikscha",
+  "rodent": "Nagetier"
 }

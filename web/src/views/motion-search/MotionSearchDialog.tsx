@@ -3,9 +3,12 @@ import { useTranslation } from "react-i18next";
 import { isDesktop, isIOS, isMobile } from "react-device-detect";
 import { FaArrowRight, FaCalendarAlt, FaCheckCircle } from "react-icons/fa";
 import { MdOutlineRestartAlt, MdUndo } from "react-icons/md";
+import { LuHand, LuPencil } from "react-icons/lu";
 
 import { FrigateConfig } from "@/types/frigateConfig";
 import { TimeRange } from "@/types/timeline";
+import { RecordingsSummary } from "@/types/review";
+import { ASPECT_PORTRAIT_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +45,11 @@ import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { TimezoneAwareCalendar } from "@/components/overlay/ReviewActivityCalendar";
 
 import { useApiHost } from "@/api";
-import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
+import {
+  useFormattedTimestamp,
+  use24HourTime,
+  useTimezone,
+} from "@/hooks/use-date-utils";
 import { getUTCOffset } from "@/utils/dateUtil";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
@@ -67,8 +74,6 @@ type MotionSearchDialogProps = {
   setThreshold: React.Dispatch<React.SetStateAction<number>>;
   minArea: number;
   setMinArea: React.Dispatch<React.SetStateAction<number>>;
-  frameSkip: number;
-  setFrameSkip: React.Dispatch<React.SetStateAction<number>>;
   maxResults: number;
   setMaxResults: React.Dispatch<React.SetStateAction<number>>;
   searchRange?: TimeRange;
@@ -98,8 +103,6 @@ export default function MotionSearchDialog({
   setThreshold,
   minArea,
   setMinArea,
-  frameSkip,
-  setFrameSkip,
   maxResults,
   setMaxResults,
   searchRange,
@@ -112,39 +115,44 @@ export default function MotionSearchDialog({
 }: MotionSearchDialogProps) {
   const { t } = useTranslation(["views/motionSearch", "common"]);
   const apiHost = useApiHost();
-  const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(
-    null,
-  );
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const containerWidth = containerSize.width;
-  const containerHeight = containerSize.height;
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [panMode, setPanMode] = useState(false);
 
-  useEffect(() => {
-    if (!containerNode) {
-      return;
-    }
-
-    const measure = () => {
-      const rect = containerNode.getBoundingClientRect();
-      setContainerSize((prev) =>
-        prev.width === rect.width && prev.height === rect.height
-          ? prev
-          : { width: rect.width, height: rect.height },
-      );
-    };
-
-    measure();
-
-    const observer = new ResizeObserver(() => measure());
-    observer.observe(containerNode);
-    return () => observer.disconnect();
-  }, [containerNode]);
+  const recordingsTimezone = useTimezone(config);
+  const { data: recordingsSummary } = useSWR<RecordingsSummary>(
+    selectedCamera
+      ? [
+          "recordings/summary",
+          { timezone: recordingsTimezone, cameras: selectedCamera },
+        ]
+      : null,
+  );
 
   const cameraConfig = useMemo(() => {
     if (!selectedCamera) return undefined;
     return config.cameras[selectedCamera];
   }, [config, selectedCamera]);
+
+  const aspectRatio = useMemo(() => {
+    if (!cameraConfig) {
+      return 16 / 9;
+    }
+
+    return cameraConfig.detect.width / cameraConfig.detect.height;
+  }, [cameraConfig]);
+
+  // Determine camera aspect ratio category
+  const cameraAspect = useMemo(() => {
+    if (!aspectRatio) {
+      return "normal";
+    } else if (aspectRatio > ASPECT_WIDE_LAYOUT) {
+      return "wide";
+    } else if (aspectRatio < ASPECT_PORTRAIT_LAYOUT) {
+      return "tall";
+    } else {
+      return "normal";
+    }
+  }, [aspectRatio]);
 
   const polygonClosed = useMemo(
     () => !isDrawingROI && polygonPoints.length >= 3,
@@ -169,30 +177,9 @@ export default function MotionSearchDialog({
     setIsDrawingROI(true);
   }, [isSearching, polygonPoints.length, setIsDrawingROI, setPolygonPoints]);
 
-  const imageSize = useMemo(() => {
-    if (!containerWidth || !containerHeight || !cameraConfig) {
-      return { width: 0, height: 0 };
-    }
-
-    const cameraAspectRatio =
-      cameraConfig.detect.width / cameraConfig.detect.height;
-    const availableAspectRatio = containerWidth / containerHeight;
-
-    if (availableAspectRatio >= cameraAspectRatio) {
-      return {
-        width: containerHeight * cameraAspectRatio,
-        height: containerHeight,
-      };
-    }
-
-    return {
-      width: containerWidth,
-      height: containerWidth / cameraAspectRatio,
-    };
-  }, [containerWidth, containerHeight, cameraConfig]);
-
   useEffect(() => {
     setImageLoaded(false);
+    setPanMode(false);
   }, [selectedCamera]);
 
   const Overlay = isDesktop ? Dialog : Drawer;
@@ -267,7 +254,13 @@ export default function MotionSearchDialog({
                 </div>
               )}
 
-              <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
+              <TransformWrapper
+                minScale={1.0}
+                wheel={{ smoothStep: 0.005 }}
+                panning={{ disabled: !isDesktop && !panMode }}
+                pinch={{ disabled: !isDesktop && !panMode }}
+                doubleClick={{ disabled: !isDesktop && !panMode }}
+              >
                 <div className="flex flex-col gap-2">
                   <TransformComponent
                     wrapperStyle={{
@@ -281,18 +274,16 @@ export default function MotionSearchDialog({
                     }}
                   >
                     <div
-                      ref={setContainerNode}
-                      className="relative flex w-full items-center justify-center overflow-hidden rounded-lg border bg-secondary"
-                      style={{ aspectRatio: "16 / 9" }}
+                      className={cn(
+                        "relative mx-auto flex items-center justify-center overflow-hidden rounded-lg border bg-secondary",
+                        cameraAspect === "tall"
+                          ? "max-h-[50dvh] lg:max-h-[60dvh]"
+                          : "w-full",
+                      )}
+                      style={{ aspectRatio }}
                     >
                       {selectedCamera && cameraConfig ? (
-                        <div
-                          className="relative"
-                          style={{
-                            width: imageSize.width || "100%",
-                            height: imageSize.height || "100%",
-                          }}
-                        >
+                        <div className="relative h-full w-full">
                           <img
                             alt={t("dialog.previewAlt", {
                               camera: selectedCamera,
@@ -320,6 +311,7 @@ export default function MotionSearchDialog({
                             isDrawing={isDrawingROI}
                             setIsDrawing={setIsDrawingROI}
                             isInteractive={true}
+                            panMode={panMode}
                           />
                         </div>
                       ) : (
@@ -341,11 +333,41 @@ export default function MotionSearchDialog({
                     {polygonClosed && <FaCheckCircle className="ml-2 size-5" />}
                   </div>
                   <div className="flex flex-row justify-center gap-2">
+                    {!isDesktop && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant={panMode ? "select" : "default"}
+                            className="size-8 rounded-md p-1.5"
+                            aria-label={
+                              panMode
+                                ? t("polygonControls.moveMode")
+                                : t("polygonControls.drawMode")
+                            }
+                            onClick={() => setPanMode((prev) => !prev)}
+                          >
+                            {panMode ? (
+                              <LuHand className="text-selected-foreground" />
+                            ) : (
+                              <LuPencil className="text-secondary-foreground" />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {panMode
+                            ? t("polygonControls.moveMode")
+                            : t("polygonControls.drawMode")}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="default"
-                          className="size-6 rounded-md p-1"
+                          className={cn(
+                            "rounded-md",
+                            isDesktop ? "size-6 p-1" : "size-8 p-1.5",
+                          )}
                           aria-label={t("polygonControls.undo")}
                           disabled={polygonPoints.length === 0 || isSearching}
                           onClick={undoPolygonPoint}
@@ -361,7 +383,10 @@ export default function MotionSearchDialog({
                       <TooltipTrigger asChild>
                         <Button
                           variant="default"
-                          className="size-6 rounded-md p-1"
+                          className={cn(
+                            "rounded-md",
+                            isDesktop ? "size-6 p-1" : "size-8 p-1.5",
+                          )}
                           aria-label={t("polygonControls.reset")}
                           disabled={polygonPoints.length === 0 || isSearching}
                           onClick={resetPolygon}
@@ -424,23 +449,6 @@ export default function MotionSearchDialog({
                     </p>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="frameSkip">{t("settings.frameSkip")}</Label>
-                    <div className="flex items-center gap-2">
-                      <Slider
-                        id="frameSkip"
-                        min={1}
-                        max={60}
-                        step={1}
-                        value={[frameSkip]}
-                        onValueChange={([value]) => setFrameSkip(value)}
-                      />
-                      <span className="w-12 text-sm">{frameSkip}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {t("settings.frameSkipDesc")}
-                    </p>
-                  </div>
-                  <div className="grid gap-2">
                     <div className="flex items-center justify-between gap-2">
                       <Label htmlFor="parallelMode">
                         {t("settings.parallelMode")}
@@ -482,6 +490,7 @@ export default function MotionSearchDialog({
                 setRange={setSearchRange}
                 defaultRange={defaultRange}
                 timezone={timezone}
+                recordingsSummary={recordingsSummary}
               />
 
               <Button
@@ -505,6 +514,7 @@ type SearchRangeSelectorProps = {
   setRange: React.Dispatch<React.SetStateAction<TimeRange | undefined>>;
   defaultRange: TimeRange;
   timezone?: string;
+  recordingsSummary?: RecordingsSummary;
 };
 
 function SearchRangeSelector({
@@ -512,6 +522,7 @@ function SearchRangeSelector({
   setRange,
   defaultRange,
   timezone,
+  recordingsSummary,
 }: SearchRangeSelectorProps) {
   const { t } = useTranslation(["views/motionSearch", "common"]);
   const [startOpen, setStartOpen] = useState(false);
@@ -598,7 +609,6 @@ function SearchRangeSelector({
                 setStartOpen(false);
               }
             }}
-            modal={false}
           >
             <PopoverTrigger asChild>
               <Button
@@ -614,12 +624,10 @@ function SearchRangeSelector({
                 {formattedStart}
               </Button>
             </PopoverTrigger>
-            <PopoverContent
-              disablePortal
-              className="flex flex-col items-center"
-            >
+            <PopoverContent className="flex flex-col items-center">
               <TimezoneAwareCalendar
                 timezone={timezone}
+                recordingsSummary={recordingsSummary}
                 selectedDay={new Date(startTime * 1000)}
                 onSelect={(day) => {
                   if (!day) {
@@ -634,7 +642,7 @@ function SearchRangeSelector({
               />
               <SelectSeparator className="bg-secondary" />
               <input
-                className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                 id="startTime"
                 type="time"
                 value={startClock}
@@ -668,7 +676,6 @@ function SearchRangeSelector({
                 setEndOpen(false);
               }
             }}
-            modal={false}
           >
             <PopoverTrigger asChild>
               <Button
@@ -684,12 +691,10 @@ function SearchRangeSelector({
                 {formattedEnd}
               </Button>
             </PopoverTrigger>
-            <PopoverContent
-              disablePortal
-              className="flex flex-col items-center"
-            >
+            <PopoverContent className="flex flex-col items-center">
               <TimezoneAwareCalendar
                 timezone={timezone}
+                recordingsSummary={recordingsSummary}
                 selectedDay={new Date(endTime * 1000)}
                 onSelect={(day) => {
                   if (!day) {
@@ -704,7 +709,7 @@ function SearchRangeSelector({
               />
               <SelectSeparator className="bg-secondary" />
               <input
-                className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                 id="endTime"
                 type="time"
                 value={endClock}

@@ -10,15 +10,21 @@ import {
   LuEye,
   LuEyeOff,
   LuPencil,
-  LuPlus,
+  LuCirclePlus,
+  LuSlidersHorizontal,
   LuTrash2,
+  LuX,
 } from "react-icons/lu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
 import Heading from "@/components/ui/heading";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Collapsible,
@@ -52,8 +58,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import SaveAllPreviewPopover, {
+  type SaveAllPreviewItem,
+} from "@/components/overlay/detail/SaveAllPreviewPopover";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { FrigateConfig } from "@/types/frigateConfig";
+import type { SettingsPageProps } from "@/views/settings/SingleSectionPage";
+import type { ConfigSectionData } from "@/types/configForm";
 import { cn } from "@/lib/utils";
 import {
   isMaskedPath,
@@ -62,11 +73,13 @@ import {
 } from "@/utils/credentialMask";
 import {
   parseFfmpegUrl,
+  parseFfmpegBaseAndExtras,
   buildFfmpegUrl,
   toggleFfmpegMode,
   type FfmpegVideoOption,
   type FfmpegAudioOption,
   type FfmpegHardwareOption,
+  type ParsedFfmpegUrl,
 } from "@/utils/go2rtcFfmpeg";
 
 type RawPathsResponse = {
@@ -77,18 +90,8 @@ type RawPathsResponse = {
   go2rtc: { streams: Record<string, string | string[]> };
 };
 
-type Go2RtcStreamsSettingsViewProps = {
-  setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
-  onSectionStatusChange?: (
-    sectionKey: string,
-    level: "global" | "camera",
-    status: {
-      hasChanges: boolean;
-      isOverridden: boolean;
-      hasValidationErrors: boolean;
-    },
-  ) => void;
-};
+const SECTION_KEY = "go2rtc_streams";
+const EMPTY_PENDING: Record<string, ConfigSectionData> = {};
 
 const STREAM_NAME_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
@@ -106,7 +109,11 @@ function normalizeStreams(
 export default function Go2RtcStreamsSettingsView({
   setUnsavedChanges,
   onSectionStatusChange,
-}: Go2RtcStreamsSettingsViewProps) {
+  pendingDataBySection,
+  onPendingDataChange,
+  isSavingAll,
+  onSectionSavingChange,
+}: SettingsPageProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config, mutate: updateConfig } =
@@ -114,13 +121,6 @@ export default function Go2RtcStreamsSettingsView({
   const { data: rawPaths, mutate: updateRawPaths } =
     useSWR<RawPathsResponse>("config/raw_paths");
 
-  const [editedStreams, setEditedStreams] = useState<Record<string, string[]>>(
-    {},
-  );
-  const [serverStreams, setServerStreams] = useState<Record<string, string[]>>(
-    {},
-  );
-  const [initialized, setInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [credentialVisibility, setCredentialVisibility] = useState<
     Record<string, boolean>
@@ -130,34 +130,51 @@ export default function Go2RtcStreamsSettingsView({
   const [addStreamDialogOpen, setAddStreamDialogOpen] = useState(false);
   const [newlyAdded, setNewlyAdded] = useState<Set<string>>(new Set());
 
-  // Initialize from config — wait for both config and rawPaths to avoid
-  // a mismatch when rawPaths arrives after config with different data
-  useEffect(() => {
-    if (!config || !rawPaths) return;
+  const childPending = pendingDataBySection ?? EMPTY_PENDING;
 
-    // Always use rawPaths for go2rtc streams — the /config endpoint masks
-    // credentials, so using config.go2rtc.streams would save masked values
-    const normalized = normalizeStreams(rawPaths.go2rtc?.streams);
+  // Saved/server state. Always read from rawPaths
+  const serverStreams = useMemo<Record<string, string[]>>(
+    () => normalizeStreams(rawPaths?.go2rtc?.streams),
+    [rawPaths],
+  );
 
-    setServerStreams(normalized);
-    if (!initialized) {
-      setEditedStreams(normalized);
-      setInitialized(true);
-    }
-  }, [config, rawPaths, initialized]);
+  // Pending edits live in the parent's store so they survive navigation; fall back to saved state
+  const liveStreams = useMemo<Record<string, string[]>>(
+    () =>
+      (childPending[SECTION_KEY] as Record<string, string[]> | undefined) ??
+      serverStreams,
+    [childPending, serverStreams],
+  );
+
+  // Persist edits to the parent store, clearing the entry when an edit returns
+  // the section to its saved state so Save All and the sidebar dot reset cleanly.
+  const commitStreams = useCallback(
+    (next: Record<string, string[]>) => {
+      if (isEqual(next, serverStreams)) {
+        onPendingDataChange?.(SECTION_KEY, undefined, null);
+      } else {
+        onPendingDataChange?.(
+          SECTION_KEY,
+          undefined,
+          next as ConfigSectionData,
+        );
+      }
+    },
+    [serverStreams, onPendingDataChange],
+  );
 
   // Track unsaved changes
   const hasChanges = useMemo(
-    () => initialized && !isEqual(editedStreams, serverStreams),
-    [editedStreams, serverStreams, initialized],
+    () => !isEqual(liveStreams, serverStreams),
+    [liveStreams, serverStreams],
   );
 
   useEffect(() => {
-    setUnsavedChanges(hasChanges);
+    setUnsavedChanges?.(hasChanges);
   }, [hasChanges, setUnsavedChanges]);
 
   const hasValidationErrors = useMemo(() => {
-    const names = Object.keys(editedStreams);
+    const names = Object.keys(liveStreams);
     const seenNames = new Set<string>();
 
     for (const name of names) {
@@ -165,13 +182,43 @@ export default function Go2RtcStreamsSettingsView({
       if (seenNames.has(name)) return true;
       seenNames.add(name);
 
-      const urls = editedStreams[name];
+      const urls = liveStreams[name];
       if (!urls || urls.length === 0 || urls.every((u) => !u.trim()))
         return true;
     }
 
     return false;
-  }, [editedStreams]);
+  }, [liveStreams]);
+
+  // Pending changes for this section's Save All preview popover. Diff the
+  // pending streams against the saved state and mask credentials for display.
+  const sectionPreviewItems = useMemo<SaveAllPreviewItem[]>(() => {
+    if (!hasChanges) return [];
+    const items: SaveAllPreviewItem[] = [];
+
+    // Added or changed streams
+    for (const [name, urls] of Object.entries(liveStreams)) {
+      if (name in serverStreams && isEqual(urls, serverStreams[name])) continue;
+      const masked = urls.map((url) => maskCredentials(url));
+      items.push({
+        scope: "global",
+        fieldPath: `go2rtc.streams.${name}`,
+        value: masked.length === 1 ? masked[0] : masked,
+      });
+    }
+
+    // Deleted streams (present in saved config, absent from pending)
+    for (const name of Object.keys(serverStreams)) {
+      if (name in liveStreams) continue;
+      items.push({
+        scope: "global",
+        fieldPath: `go2rtc.streams.${name}`,
+        value: "",
+      });
+    }
+
+    return items;
+  }, [hasChanges, liveStreams, serverStreams]);
 
   // Report status to parent for sidebar red dot
   useEffect(() => {
@@ -185,13 +232,14 @@ export default function Go2RtcStreamsSettingsView({
   // Save handler
   const saveToConfig = useCallback(async () => {
     setIsLoading(true);
+    onSectionSavingChange?.(true);
 
     try {
       const streamsPayload: Record<string, string[] | string> = {
-        ...editedStreams,
+        ...liveStreams,
       };
       const deletedStreamNames = Object.keys(serverStreams).filter(
-        (name) => !(name in editedStreams),
+        (name) => !(name in liveStreams),
       );
       for (const deleted of deletedStreamNames) {
         streamsPayload[deleted] = "";
@@ -204,7 +252,7 @@ export default function Go2RtcStreamsSettingsView({
 
       // Update running go2rtc instance
       const go2rtcUpdates: Promise<unknown>[] = [];
-      for (const [streamName, urls] of Object.entries(editedStreams)) {
+      for (const [streamName, urls] of Object.entries(liveStreams)) {
         if (urls[0]) {
           go2rtcUpdates.push(
             axios.put(
@@ -225,9 +273,9 @@ export default function Go2RtcStreamsSettingsView({
         }),
       );
 
-      setServerStreams(editedStreams);
-      updateConfig();
-      updateRawPaths();
+      await updateConfig();
+      await updateRawPaths();
+      onPendingDataChange?.(SECTION_KEY, undefined, null);
     } catch {
       toast.error(
         t("toast.error", {
@@ -237,74 +285,86 @@ export default function Go2RtcStreamsSettingsView({
       );
     } finally {
       setIsLoading(false);
+      onSectionSavingChange?.(false);
     }
-  }, [editedStreams, serverStreams, t, updateConfig, updateRawPaths]);
+  }, [
+    liveStreams,
+    serverStreams,
+    t,
+    updateConfig,
+    updateRawPaths,
+    onPendingDataChange,
+    onSectionSavingChange,
+  ]);
 
   // Reset handler
   const onReset = useCallback(() => {
-    setEditedStreams(serverStreams);
+    onPendingDataChange?.(SECTION_KEY, undefined, null);
     setCredentialVisibility({});
-  }, [serverStreams]);
+  }, [onPendingDataChange]);
 
   // Stream CRUD operations
-  const addStream = useCallback((name: string) => {
-    setEditedStreams((prev) => ({ ...prev, [name]: [""] }));
-    setNewlyAdded((prev) => new Set(prev).add(name));
-    setAddStreamDialogOpen(false);
-  }, []);
+  const addStream = useCallback(
+    (name: string) => {
+      commitStreams({ ...liveStreams, [name]: [""] });
+      setNewlyAdded((prev) => new Set(prev).add(name));
+      setAddStreamDialogOpen(false);
+    },
+    [liveStreams, commitStreams],
+  );
 
-  const deleteStream = useCallback((streamName: string) => {
-    setEditedStreams((prev) => {
-      const { [streamName]: _, ...rest } = prev;
-      return rest;
-    });
-    setDeleteDialog(null);
-  }, []);
+  const deleteStream = useCallback(
+    (streamName: string) => {
+      const { [streamName]: _removed, ...rest } = liveStreams;
+      commitStreams(rest);
+      setDeleteDialog(null);
+    },
+    [liveStreams, commitStreams],
+  );
 
-  const renameStream = useCallback((oldName: string, newName: string) => {
-    if (oldName === newName || !newName.trim()) return;
+  const renameStream = useCallback(
+    (oldName: string, newName: string) => {
+      if (oldName === newName || !newName.trim()) return;
+      if (!(oldName in liveStreams)) return;
 
-    setEditedStreams((prev) => {
-      const urls = prev[oldName];
-      if (!urls) return prev;
-
-      const entries = Object.entries(prev);
       const result: Record<string, string[]> = {};
-      for (const [key, value] of entries) {
-        if (key === oldName) {
-          result[newName] = value;
-        } else {
-          result[key] = value;
-        }
+      for (const [key, value] of Object.entries(liveStreams)) {
+        result[key === oldName ? newName : key] = value;
       }
-      return result;
-    });
-  }, []);
+      commitStreams(result);
+    },
+    [liveStreams, commitStreams],
+  );
 
   const updateUrl = useCallback(
     (streamName: string, urlIndex: number, newUrl: string) => {
-      setEditedStreams((prev) => {
-        const urls = [...(prev[streamName] || [])];
-        urls[urlIndex] = newUrl;
-        return { ...prev, [streamName]: urls };
-      });
+      const urls = [...(liveStreams[streamName] || [])];
+      urls[urlIndex] = newUrl;
+      commitStreams({ ...liveStreams, [streamName]: urls });
     },
-    [],
+    [liveStreams, commitStreams],
   );
 
-  const addUrl = useCallback((streamName: string) => {
-    setEditedStreams((prev) => {
-      const urls = [...(prev[streamName] || []), ""];
-      return { ...prev, [streamName]: urls };
-    });
-  }, []);
+  const addUrl = useCallback(
+    (streamName: string) => {
+      const urls = [...(liveStreams[streamName] || []), ""];
+      commitStreams({ ...liveStreams, [streamName]: urls });
+    },
+    [liveStreams, commitStreams],
+  );
 
-  const removeUrl = useCallback((streamName: string, urlIndex: number) => {
-    setEditedStreams((prev) => {
-      const urls = (prev[streamName] || []).filter((_, i) => i !== urlIndex);
-      return { ...prev, [streamName]: urls.length > 0 ? urls : [""] };
-    });
-  }, []);
+  const removeUrl = useCallback(
+    (streamName: string, urlIndex: number) => {
+      const urls = (liveStreams[streamName] || []).filter(
+        (_, i) => i !== urlIndex,
+      );
+      commitStreams({
+        ...liveStreams,
+        [streamName]: urls.length > 0 ? urls : [""],
+      });
+    },
+    [liveStreams, commitStreams],
+  );
 
   const toggleCredentialVisibility = useCallback((key: string) => {
     setCredentialVisibility((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -312,7 +372,7 @@ export default function Go2RtcStreamsSettingsView({
 
   if (!config) return null;
 
-  const streamEntries = Object.entries(editedStreams);
+  const streamEntries = Object.entries(liveStreams);
 
   return (
     <div className="flex size-full flex-col lg:pr-2">
@@ -324,7 +384,7 @@ export default function Go2RtcStreamsSettingsView({
           </div>
           <div className="flex items-center text-sm text-primary-variant">
             <Link
-              to={getLocaleDocUrl("guides/configuring_go2rtc")}
+              to={getLocaleDocUrl("troubleshooting/go2rtc")}
               target="_blank"
               rel="noopener noreferrer"
               className="inline"
@@ -365,7 +425,7 @@ export default function Go2RtcStreamsSettingsView({
           variant="outline"
           className="my-4"
         >
-          <LuPlus className="mr-2 size-4" />
+          <LuCirclePlus className="mr-2 size-4" />
           {t("go2rtcStreams.addStream")}
         </Button>
       </div>
@@ -380,15 +440,23 @@ export default function Go2RtcStreamsSettingsView({
         >
           {hasChanges && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-danger">{t("unsavedChanges")}</span>
+              <span className="text-sm text-unsaved">
+                {t("unsavedChanges")}
+              </span>
+              <SaveAllPreviewPopover
+                items={sectionPreviewItems}
+                className="h-7 w-7"
+                align="start"
+                side="top"
+              />
             </div>
           )}
-          <div className="flex w-full items-center gap-2 md:w-auto">
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
             {hasChanges && (
               <Button
                 onClick={onReset}
                 variant="outline"
-                disabled={isLoading}
+                disabled={isLoading || isSavingAll}
                 className="flex min-w-36 flex-1 gap-2"
               >
                 {t("button.undo", { ns: "common" })}
@@ -397,7 +465,9 @@ export default function Go2RtcStreamsSettingsView({
             <Button
               onClick={saveToConfig}
               variant="select"
-              disabled={!hasChanges || isLoading || hasValidationErrors}
+              disabled={
+                !hasChanges || isLoading || isSavingAll || hasValidationErrors
+              }
               className="flex min-w-36 flex-1 gap-2"
             >
               {isLoading ? (
@@ -436,10 +506,7 @@ export default function Go2RtcStreamsSettingsView({
               {t("button.cancel", { ns: "common" })}
             </AlertDialogCancel>
             <AlertDialogAction
-              className={cn(
-                buttonVariants({ variant: "destructive" }),
-                "text-white",
-              )}
+              className={cn(buttonVariants({ variant: "destructive" }))}
               onClick={() => deleteDialog && deleteStream(deleteDialog)}
             >
               {t("go2rtcStreams.deleteStream")}
@@ -452,7 +519,7 @@ export default function Go2RtcStreamsSettingsView({
       <RenameStreamDialog
         open={renameDialog !== null}
         streamName={renameDialog ?? ""}
-        allStreamNames={Object.keys(editedStreams)}
+        allStreamNames={Object.keys(liveStreams)}
         onRename={(oldName, newName) => {
           renameStream(oldName, newName);
           setRenameDialog(null);
@@ -462,7 +529,7 @@ export default function Go2RtcStreamsSettingsView({
 
       <AddStreamDialog
         open={addStreamDialogOpen}
-        allStreamNames={Object.keys(editedStreams)}
+        allStreamNames={Object.keys(liveStreams)}
         onAdd={addStream}
         onClose={() => setAddStreamDialogOpen(false)}
       />
@@ -523,7 +590,6 @@ function RenameStreamDialog({
         <div className="space-y-2 py-2">
           <Label>{t("go2rtcStreams.newStreamName")}</Label>
           <Input
-            className="text-md"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => {
@@ -537,7 +603,7 @@ function RenameStreamDialog({
             <p className="text-xs text-destructive">{nameError}</p>
           )}
         </div>
-        <DialogFooter className="gap-2 sm:justify-end md:gap-0">
+        <DialogFooter>
           <DialogClose asChild>
             <Button>{t("button.cancel", { ns: "common" })}</Button>
           </DialogClose>
@@ -604,7 +670,6 @@ function AddStreamDialog({
           <Label>{t("go2rtcStreams.streamName")}</Label>
           <Input
             value={name}
-            className="text-md"
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && canSubmit) {
@@ -618,7 +683,7 @@ function AddStreamDialog({
             <p className="text-xs text-destructive">{nameError}</p>
           )}
         </div>
-        <DialogFooter className="gap-2 sm:justify-end md:gap-0">
+        <DialogFooter>
           <DialogClose asChild>
             <Button>{t("button.cancel", { ns: "common" })}</Button>
           </DialogClose>
@@ -701,7 +766,7 @@ function StreamCard({
             </div>
           </div>
           <CollapsibleContent>
-            <div className="space-y-3 px-4 pb-4">
+            <div className="space-y-2 px-4 pb-4">
               {urls.map((url, urlIndex) => (
                 <StreamUrlEntry
                   key={urlIndex}
@@ -726,7 +791,7 @@ function StreamCard({
                 onClick={onAddUrl}
                 className="w-fit"
               >
-                <LuPlus className="mr-2 size-4" />
+                <LuCirclePlus className="mr-2 size-4" />
                 {t("go2rtcStreams.addUrl")}
               </Button>
             </div>
@@ -762,7 +827,9 @@ function StreamUrlEntry({
   const [isFocused, setIsFocused] = useState(false);
   const parsed = useMemo(() => parseFfmpegUrl(url), [url]);
 
-  const rawBaseUrl = parsed.isFfmpeg ? parsed.baseUrl : url;
+  const rawBaseUrl = parsed.isFfmpeg
+    ? [parsed.baseUrl, ...parsed.extraFragments].join("#")
+    : url;
   const canToggleCredentials =
     hasCredentials(rawBaseUrl) && !isMaskedPath(rawBaseUrl);
 
@@ -776,15 +843,16 @@ function StreamUrlEntry({
   }, [rawBaseUrl, showCredentials, isFocused]);
 
   const isTranscodingVideo =
-    parsed.isFfmpeg && parsed.video !== "copy" && parsed.video !== "exclude";
+    parsed.isFfmpeg && parsed.videos.some((v) => v === "h264" || v === "h265");
 
   const handleBaseUrlChange = useCallback(
-    (newBaseUrl: string) => {
+    (newInput: string) => {
       if (parsed.isFfmpeg) {
-        const newUrl = buildFfmpegUrl({ ...parsed, baseUrl: newBaseUrl });
+        const { baseUrl, extraFragments } = parseFfmpegBaseAndExtras(newInput);
+        const newUrl = buildFfmpegUrl({ ...parsed, baseUrl, extraFragments });
         onUpdateUrl(streamName, urlIndex, newUrl);
       } else {
-        onUpdateUrl(streamName, urlIndex, newBaseUrl);
+        onUpdateUrl(streamName, urlIndex, newInput);
       }
     },
     [parsed, streamName, urlIndex, onUpdateUrl],
@@ -798,212 +866,328 @@ function StreamUrlEntry({
     [url, streamName, urlIndex, onUpdateUrl],
   );
 
-  const handleFfmpegOptionChange = useCallback(
-    (
-      field: "video" | "audio" | "hardware",
-      value: FfmpegVideoOption | FfmpegAudioOption | FfmpegHardwareOption,
-    ) => {
-      const updated = { ...parsed, [field]: value };
-      // Clear hardware when switching away from transcoding video
-      if (field === "video" && (value === "copy" || value === "exclude")) {
-        updated.hardware = "none";
+  const persistFfmpeg = useCallback(
+    (next: Partial<ParsedFfmpegUrl>) => {
+      const merged = { ...parsed, ...next };
+      // Hardware acceleration is meaningless without a transcoding video codec
+      if (!merged.videos.some((v) => v === "h264" || v === "h265")) {
+        merged.hardware = "none";
       }
-      const newUrl = buildFfmpegUrl(updated);
-      onUpdateUrl(streamName, urlIndex, newUrl);
+      onUpdateUrl(streamName, urlIndex, buildFfmpegUrl(merged));
     },
     [parsed, streamName, urlIndex, onUpdateUrl],
   );
 
-  const audioDisplayLabel = useMemo(() => {
-    const labels: Record<string, string> = {
-      copy: t("go2rtcStreams.ffmpeg.audioCopy"),
-      aac: t("go2rtcStreams.ffmpeg.audioAac"),
-      opus: t("go2rtcStreams.ffmpeg.audioOpus"),
-      pcmu: t("go2rtcStreams.ffmpeg.audioPcmu"),
-      pcma: t("go2rtcStreams.ffmpeg.audioPcma"),
-      pcm: t("go2rtcStreams.ffmpeg.audioPcm"),
-      mp3: t("go2rtcStreams.ffmpeg.audioMp3"),
-      exclude: t("go2rtcStreams.ffmpeg.audioExclude"),
-    };
-    return labels[parsed.audio] || parsed.audio;
-  }, [parsed.audio, t]);
+  const updateVideoAt = useCallback(
+    (idx: number, value: FfmpegVideoOption) => {
+      // Picking exclude on the primary row drops any existing fallbacks —
+      // they have no meaning when the track is excluded entirely.
+      const videos =
+        idx === 0 && value === "exclude"
+          ? ["exclude" as FfmpegVideoOption]
+          : parsed.videos.map((v, i) => (i === idx ? value : v));
+      persistFfmpeg({ videos });
+    },
+    [parsed.videos, persistFfmpeg],
+  );
+
+  const addVideo = useCallback(() => {
+    persistFfmpeg({ videos: [...parsed.videos, "copy"] });
+  }, [parsed.videos, persistFfmpeg]);
+
+  const removeVideoAt = useCallback(
+    (idx: number) => {
+      persistFfmpeg({ videos: parsed.videos.filter((_, i) => i !== idx) });
+    },
+    [parsed.videos, persistFfmpeg],
+  );
+
+  const updateAudioAt = useCallback(
+    (idx: number, value: FfmpegAudioOption) => {
+      // Picking exclude on the primary row drops any existing fallbacks —
+      // they have no meaning when the track is excluded entirely.
+      const audios =
+        idx === 0 && value === "exclude"
+          ? ["exclude" as FfmpegAudioOption]
+          : parsed.audios.map((a, i) => (i === idx ? value : a));
+      persistFfmpeg({ audios });
+    },
+    [parsed.audios, persistFfmpeg],
+  );
+
+  const addAudio = useCallback(() => {
+    persistFfmpeg({ audios: [...parsed.audios, "copy"] });
+  }, [parsed.audios, persistFfmpeg]);
+
+  const removeAudioAt = useCallback(
+    (idx: number) => {
+      persistFfmpeg({ audios: parsed.audios.filter((_, i) => i !== idx) });
+    },
+    [parsed.audios, persistFfmpeg],
+  );
+
+  const updateHardware = useCallback(
+    (value: FfmpegHardwareOption) => {
+      persistFfmpeg({ hardware: value });
+    },
+    [persistFfmpeg],
+  );
+
+  const videoLabels: Record<FfmpegVideoOption, string> = {
+    copy: t("go2rtcStreams.ffmpeg.videoCopy"),
+    h264: t("go2rtcStreams.ffmpeg.videoH264"),
+    h265: t("go2rtcStreams.ffmpeg.videoH265"),
+    exclude: t("go2rtcStreams.ffmpeg.videoExclude"),
+  };
+  const audioLabels: Record<FfmpegAudioOption, string> = {
+    copy: t("go2rtcStreams.ffmpeg.audioCopy"),
+    aac: t("go2rtcStreams.ffmpeg.audioAac"),
+    opus: t("go2rtcStreams.ffmpeg.audioOpus"),
+    pcmu: t("go2rtcStreams.ffmpeg.audioPcmu"),
+    pcma: t("go2rtcStreams.ffmpeg.audioPcma"),
+    pcm: t("go2rtcStreams.ffmpeg.audioPcm"),
+    mp3: t("go2rtcStreams.ffmpeg.audioMp3"),
+    exclude: t("go2rtcStreams.ffmpeg.audioExclude"),
+  };
+  const hardwareLabels: Record<FfmpegHardwareOption, string> = {
+    none: t("go2rtcStreams.ffmpeg.hardwareNone"),
+    auto: t("go2rtcStreams.ffmpeg.hardwareAuto"),
+    vaapi: t("go2rtcStreams.ffmpeg.hardwareVaapi"),
+    cuda: t("go2rtcStreams.ffmpeg.hardwareCuda"),
+    v4l2m2m: t("go2rtcStreams.ffmpeg.hardwareV4l2m2m"),
+    dxva2: t("go2rtcStreams.ffmpeg.hardwareDxva2"),
+    videotoolbox: t("go2rtcStreams.ffmpeg.hardwareVideotoolbox"),
+  };
 
   return (
-    <div className="space-y-2 rounded-lg bg-background p-3">
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Input
-            className="text-md h-8 pr-10"
-            value={baseUrlForDisplay}
-            onChange={(e) => handleBaseUrlChange(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder={t("go2rtcStreams.streamUrlPlaceholder")}
-          />
-          {canToggleCredentials && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-              onClick={onToggleCredentialVisibility}
-            >
-              {showCredentials ? (
-                <LuEyeOff className="size-4" />
-              ) : (
-                <LuEye className="size-4" />
-              )}
-            </Button>
-          )}
-        </div>
+    <div className="pb-4">
+      <div className="flex h-7 flex-row items-center justify-start gap-2 text-sm text-primary-variant">
+        {t("go2rtcStreams.sourceNumber", { index: urlIndex + 1 })}
         {canRemove && (
           <Button
             variant="ghost"
             size="sm"
             onClick={onRemoveUrl}
-            className="text-secondary-foreground hover:text-secondary-foreground"
+            className="size-7 p-0 text-secondary-foreground hover:text-secondary-foreground"
+            aria-label={t("button.delete", { ns: "common" })}
           >
             <LuTrash2 className="size-4" />
           </Button>
         )}
       </div>
-
-      {/* ffmpeg module toggle */}
-      <div className="flex items-center space-x-2">
-        <Switch
-          checked={parsed.isFfmpeg}
-          onCheckedChange={handleFfmpegToggle}
-        />
-        <Label className="text-sm">
-          {t("go2rtcStreams.ffmpeg.useFfmpegModule")}
-        </Label>
-      </div>
-
-      {/* ffmpeg options */}
-      {parsed.isFfmpeg && (
-        <div
-          className={cn(
-            "grid grid-cols-1 gap-3 pl-4",
-            isTranscodingVideo ? "sm:grid-cols-3" : "sm:grid-cols-2",
-          )}
-        >
-          {/* Video */}
-          <div className="space-y-1">
-            <Label className="text-xs font-medium">
-              {t("go2rtcStreams.ffmpeg.video")}
-            </Label>
-            <Select
-              value={parsed.video}
-              onValueChange={(v) =>
-                handleFfmpegOptionChange("video", v as FfmpegVideoOption)
-              }
-            >
-              <SelectTrigger className="h-8">
-                {parsed.video === "copy"
-                  ? t("go2rtcStreams.ffmpeg.videoCopy")
-                  : parsed.video === "h264"
-                    ? t("go2rtcStreams.ffmpeg.videoH264")
-                    : parsed.video === "h265"
-                      ? t("go2rtcStreams.ffmpeg.videoH265")
-                      : t("go2rtcStreams.ffmpeg.videoExclude")}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="copy">
-                    {t("go2rtcStreams.ffmpeg.videoCopy")}
-                  </SelectItem>
-                  <SelectItem value="h264">
-                    {t("go2rtcStreams.ffmpeg.videoH264")}
-                  </SelectItem>
-                  <SelectItem value="h265">
-                    {t("go2rtcStreams.ffmpeg.videoH265")}
-                  </SelectItem>
-                  <SelectItem value="exclude">
-                    {t("go2rtcStreams.ffmpeg.videoExclude")}
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Audio */}
-          <div className="space-y-1">
-            <Label className="text-xs font-medium">
-              {t("go2rtcStreams.ffmpeg.audio")}
-            </Label>
-            <Select
-              value={parsed.audio}
-              onValueChange={(v) =>
-                handleFfmpegOptionChange("audio", v as FfmpegAudioOption)
-              }
-            >
-              <SelectTrigger className="h-8">{audioDisplayLabel}</SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="copy">
-                    {t("go2rtcStreams.ffmpeg.audioCopy")}
-                  </SelectItem>
-                  <SelectItem value="aac">
-                    {t("go2rtcStreams.ffmpeg.audioAac")}
-                  </SelectItem>
-                  <SelectItem value="opus">
-                    {t("go2rtcStreams.ffmpeg.audioOpus")}
-                  </SelectItem>
-                  <SelectItem value="pcmu">
-                    {t("go2rtcStreams.ffmpeg.audioPcmu")}
-                  </SelectItem>
-                  <SelectItem value="pcma">
-                    {t("go2rtcStreams.ffmpeg.audioPcma")}
-                  </SelectItem>
-                  <SelectItem value="pcm">
-                    {t("go2rtcStreams.ffmpeg.audioPcm")}
-                  </SelectItem>
-                  <SelectItem value="mp3">
-                    {t("go2rtcStreams.ffmpeg.audioMp3")}
-                  </SelectItem>
-                  <SelectItem value="exclude">
-                    {t("go2rtcStreams.ffmpeg.audioExclude")}
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Hardware acceleration - only when transcoding video */}
-          {isTranscodingVideo && (
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">
-                {t("go2rtcStreams.ffmpeg.hardware")}
-              </Label>
-              <Select
-                value={parsed.hardware}
-                onValueChange={(v) =>
-                  handleFfmpegOptionChange(
-                    "hardware",
-                    v as FfmpegHardwareOption,
-                  )
-                }
+      <div className="space-y-4 rounded-lg bg-background p-4">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Input
+              className="h-8 pr-10"
+              value={baseUrlForDisplay}
+              onChange={(e) => handleBaseUrlChange(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder={t("go2rtcStreams.streamUrlPlaceholder")}
+            />
+            {canToggleCredentials && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                onClick={onToggleCredentialVisibility}
               >
-                <SelectTrigger className="h-8">
-                  {parsed.hardware === "auto"
-                    ? t("go2rtcStreams.ffmpeg.hardwareAuto")
-                    : t("go2rtcStreams.ffmpeg.hardwareNone")}
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="none">
-                      {t("go2rtcStreams.ffmpeg.hardwareNone")}
-                    </SelectItem>
-                    <SelectItem value="auto">
-                      {t("go2rtcStreams.ffmpeg.hardwareAuto")}
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+                {showCredentials || isFocused ? (
+                  <LuEyeOff className="size-4" />
+                ) : (
+                  <LuEye className="size-4" />
+                )}
+              </Button>
+            )}
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant={parsed.isFfmpeg ? "select" : "ghost"}
+                size="sm"
+                aria-pressed={parsed.isFfmpeg}
+                aria-label={t("go2rtcStreams.ffmpeg.useFfmpegModule")}
+                onClick={() => handleFfmpegToggle(!parsed.isFfmpeg)}
+                className="size-8 p-0"
+              >
+                <LuSlidersHorizontal className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t("go2rtcStreams.ffmpeg.useFfmpegModule")}
+            </TooltipContent>
+          </Tooltip>
         </div>
-      )}
+
+        {/* ffmpeg options */}
+        {parsed.isFfmpeg && (
+          <div
+            className={cn(
+              "grid grid-cols-1 gap-3 pl-4",
+              isTranscodingVideo ? "sm:grid-cols-3" : "sm:grid-cols-2",
+            )}
+          >
+            {/* Video — one row per #video= fragment */}
+            <div className="space-y-2">
+              <div className="flex h-7 items-center justify-start gap-2">
+                <Label className="text-xs font-medium">
+                  {t("go2rtcStreams.ffmpeg.video")}
+                </Label>
+                {parsed.videos[0] !== "exclude" && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={addVideo}
+                    className="size-6 p-0 text-muted-foreground hover:text-primary"
+                    aria-label={t("go2rtcStreams.ffmpeg.addVideoCodec")}
+                  >
+                    <LuCirclePlus className="size-4" />
+                  </Button>
+                )}
+              </div>
+              {parsed.videos.map((v, idx) => (
+                <div key={idx} className="flex items-center gap-1">
+                  <Select
+                    value={v}
+                    onValueChange={(next) =>
+                      updateVideoAt(idx, next as FfmpegVideoOption)
+                    }
+                  >
+                    <SelectTrigger className="h-8 flex-1">
+                      {videoLabels[v] ?? v}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {(Object.keys(videoLabels) as FfmpegVideoOption[])
+                          // Exclude is only meaningful on the primary row.
+                          .filter((opt) => idx === 0 || opt !== "exclude")
+                          .map((opt) => (
+                            <SelectItem key={opt} value={opt}>
+                              {videoLabels[opt]}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  {idx > 0 ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeVideoAt(idx)}
+                      className="size-8 p-0 text-muted-foreground hover:text-primary"
+                      aria-label={t("go2rtcStreams.ffmpeg.removeCodec")}
+                    >
+                      <LuX className="size-4" />
+                    </Button>
+                  ) : (
+                    // Reserve the same horizontal slot so the primary Select
+                    // doesn't stretch wider than fallback rows.
+                    <div className="size-8 shrink-0" aria-hidden="true" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Audio — one row per #audio= fragment */}
+            <div className="space-y-2">
+              <div className="flex h-7 items-center justify-start gap-2">
+                <Label className="text-xs font-medium">
+                  {t("go2rtcStreams.ffmpeg.audio")}
+                </Label>
+                {parsed.audios[0] !== "exclude" && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={addAudio}
+                    className="size-6 p-0 text-muted-foreground hover:text-primary"
+                    aria-label={t("go2rtcStreams.ffmpeg.addAudioCodec")}
+                  >
+                    <LuCirclePlus className="size-4" />
+                  </Button>
+                )}
+              </div>
+              {parsed.audios.map((a, idx) => (
+                <div key={idx} className="flex items-center gap-1">
+                  <Select
+                    value={a}
+                    onValueChange={(next) =>
+                      updateAudioAt(idx, next as FfmpegAudioOption)
+                    }
+                  >
+                    <SelectTrigger className="h-8 flex-1">
+                      {audioLabels[a] ?? a}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {(Object.keys(audioLabels) as FfmpegAudioOption[])
+                          // Exclude is only meaningful on the primary row.
+                          .filter((opt) => idx === 0 || opt !== "exclude")
+                          .map((opt) => (
+                            <SelectItem key={opt} value={opt}>
+                              {audioLabels[opt]}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  {idx > 0 ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeAudioAt(idx)}
+                      className="size-8 p-0 text-muted-foreground hover:text-primary"
+                      aria-label={t("go2rtcStreams.ffmpeg.removeCodec")}
+                    >
+                      <LuX className="size-4" />
+                    </Button>
+                  ) : (
+                    <div className="size-8 shrink-0" aria-hidden="true" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Hardware acceleration — only when transcoding video */}
+            {isTranscodingVideo && (
+              <div className="space-y-2">
+                <div className="flex h-7 items-center">
+                  <Label className="text-xs font-medium">
+                    {t("go2rtcStreams.ffmpeg.hardware")}
+                  </Label>
+                </div>
+                <Select
+                  value={parsed.hardware}
+                  onValueChange={(v) =>
+                    updateHardware(v as FfmpegHardwareOption)
+                  }
+                >
+                  <SelectTrigger className="h-8">
+                    {hardwareLabels[parsed.hardware] ?? parsed.hardware}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {(
+                        Object.keys(hardwareLabels) as FfmpegHardwareOption[]
+                      ).map((opt) => (
+                        <SelectItem key={opt} value={opt}>
+                          {hardwareLabels[opt]}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

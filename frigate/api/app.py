@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
 from pathlib import Path as FilePath
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import aiofiles
 import ruamel.yaml
@@ -34,15 +34,18 @@ from frigate.api.auth import (
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import (
     AppConfigSetBody,
+    GenAIProbeBody,
     MediaSyncBody,
 )
 from frigate.api.defs.tags import Tags
-from frigate.config import FrigateConfig
+from frigate.config import FrigateConfig, GenAIConfig, GenAIProviderEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
+from frigate.const import REDACTED_CREDENTIAL_SENTINEL
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
+from frigate.genai import PROVIDERS, load_providers
 from frigate.jobs.media_sync import (
     get_current_media_sync_job,
     get_media_sync_job_by_id,
@@ -59,7 +62,11 @@ from frigate.util.builtin import (
     process_config_query_string,
     update_yaml_file_bulk,
 )
-from frigate.util.config import apply_section_update, find_config_file
+from frigate.util.config import (
+    apply_section_update,
+    find_config_file,
+    redact_credential,
+)
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
     get_nvidia_driver_info,
@@ -74,6 +81,14 @@ logger = logging.getLogger(__name__)
 
 
 router = APIRouter(tags=[Tags.app])
+
+# Short timeout for the /genai/probe path. The probe is interactive — fail
+# fast on hung providers rather than holding an API worker thread.
+_PROBE_TIMEOUT_SECONDS = 10
+# Outer cap that returns control to the caller even if the underlying sync
+# HTTP call ignores its timeout. The sync work continues in the background
+# thread; only the response is bounded.
+_PROBE_OUTER_TIMEOUT_SECONDS = 15
 
 
 @router.get(
@@ -96,11 +111,46 @@ def version():
 
 
 @router.get("/stats", dependencies=[Depends(allow_any_authenticated())])
-def stats(request: Request):
-    return JSONResponse(content=request.app.stats_emitter.get_latest_stats())
+def stats(
+    request: Request,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
+    stats_data = request.app.stats_emitter.get_latest_stats()
+
+    # Admins see the full snapshot
+    if request.headers.get("remote-role") == "admin":
+        return JSONResponse(content=stats_data)
+
+    allowed_set = set(allowed_cameras)
+
+    # Shallow-copy so we don't mutate the cached stats history entry.
+    filtered = {**stats_data}
+
+    cameras = stats_data.get("cameras")
+    if cameras is not None:
+        filtered["cameras"] = {
+            name: data for name, data in cameras.items() if name in allowed_set
+        }
+
+    bandwidth = stats_data.get("bandwidth_usages")
+    if bandwidth is not None:
+        filtered["bandwidth_usages"] = {
+            name: data for name, data in bandwidth.items() if name in allowed_set
+        }
+
+    # cmdline can leak camera URLs/paths; strip but keep cpu/mem so
+    # client-side problem heuristics still work.
+    cpu_usages = stats_data.get("cpu_usages")
+    if cpu_usages is not None:
+        filtered["cpu_usages"] = {
+            pid: {k: v for k, v in usage.items() if k != "cmdline"}
+            for pid, usage in cpu_usages.items()
+        }
+
+    return JSONResponse(content=filtered)
 
 
-@router.get("/stats/history", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/stats/history", dependencies=[Depends(require_role(["admin"]))])
 def stats_history(request: Request, keys: str = None):
     if keys:
         keys = keys.split(",")
@@ -114,7 +164,7 @@ def metrics(request: Request):
     # Retrieve the latest statistics and update the Prometheus metrics
     stats = request.app.stats_emitter.get_latest_stats()
     # query DB for count of events by camera, label
-    event_counts: List[Dict[str, Any]] = (
+    event_counts: list[dict[str, Any]] = (
         Event.select(Event.camera, Event.label, fn.Count())
         .group_by(Event.camera, Event.label)
         .dicts()
@@ -135,6 +185,95 @@ def genai_models(request: Request):
     return JSONResponse(content=request.app.genai_manager.list_models())
 
 
+@router.post(
+    "/genai/probe",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Probe a GenAI provider without saving config",
+    description=(
+        "Builds a transient client from the request body and returns its "
+        "available models. Used to validate provider credentials in the UI "
+        "before saving the configuration."
+    ),
+)
+async def genai_probe(body: GenAIProbeBody):
+    load_providers()
+
+    provider_cls = PROVIDERS.get(body.provider)
+    if not provider_cls:
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "message": "Unknown provider"},
+        )
+
+    # The OpenAI-compatible SDKs accept "timeout" as a constructor kwarg via
+    # provider_options; other plugins use GenAIClient.timeout passed below.
+    # Don't inject timeout for Gemini — its HttpOptions interprets the value
+    # in milliseconds and would clash with the plugin's own default.
+    probe_provider_options: dict[str, Any] = dict(body.provider_options or {})
+    if body.provider in (GenAIProviderEnum.openai, GenAIProviderEnum.azure_openai):
+        probe_provider_options.setdefault("timeout", _PROBE_TIMEOUT_SECONDS)
+
+    try:
+        transient_cfg = GenAIConfig(
+            provider=body.provider,
+            api_key=body.api_key,
+            base_url=body.base_url,
+            provider_options=probe_provider_options,
+            # model is required by the schema but irrelevant for listing.
+            model="probe",
+            roles=[],
+        )
+    except ValidationError:
+        logger.exception("GenAI probe: invalid configuration")
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "message": "Invalid provider configuration"},
+        )
+
+    try:
+        client = provider_cls(
+            transient_cfg,
+            timeout=_PROBE_TIMEOUT_SECONDS,
+            validate_model=False,
+        )
+    except Exception:
+        logger.exception("GenAI probe: failed to construct client")
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Failed to connect to provider",
+            },
+        )
+
+    try:
+        models = await asyncio.wait_for(
+            asyncio.to_thread(client.list_models),
+            timeout=_PROBE_OUTER_TIMEOUT_SECONDS,
+        )
+    except TimeoutError:
+        return JSONResponse(
+            content={"success": False, "message": "Probe timed out"},
+        )
+    except Exception:
+        logger.exception("GenAI probe: list_models failed")
+        return JSONResponse(
+            content={"success": False, "message": "Provider returned no models"},
+        )
+
+    if not models:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": (
+                    "No models returned. Check the API key, base URL, and "
+                    "that the provider is reachable."
+                ),
+            },
+        )
+
+    return JSONResponse(content={"success": True, "models": models})
+
+
 @router.get("/config", dependencies=[Depends(allow_any_authenticated())])
 def config(request: Request):
     config_obj: FrigateConfig = request.app.frigate_config
@@ -146,25 +285,28 @@ def config(request: Request):
         for name, detector in config_obj.detectors.items()
     }
 
-    # remove the mqtt password
-    config["mqtt"].pop("password", None)
+    # remove environment_vars for non-admin users
+    if request.headers.get("remote-role") != "admin":
+        config.pop("environment_vars", None)
 
-    # remove the proxy secret
-    config["proxy"].pop("auth_secret", None)
+    # redact mqtt credentials
+    redact_credential(config["mqtt"], "password")
 
-    # remove genai api keys
-    for genai_name, genai_cfg in config.get("genai", {}).items():
+    # redact proxy secret
+    redact_credential(config["proxy"], "auth_secret")
+
+    # redact genai api keys
+    for _genai_name, genai_cfg in config.get("genai", {}).items():
         if isinstance(genai_cfg, dict):
-            genai_cfg.pop("api_key", None)
+            redact_credential(genai_cfg, "api_key")
 
     for camera_name, camera in request.app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
 
-        # remove onvif credentials
+        # redact onvif credentials
         onvif_dict = camera_dict.get("onvif", {})
         if onvif_dict:
-            onvif_dict.pop("user", None)
-            onvif_dict.pop("password", None)
+            redact_credential(onvif_dict, "password")
 
         # clean paths
         for input in camera_dict.get("ffmpeg", {}).get("inputs", []):
@@ -232,7 +374,7 @@ def config(request: Request):
         if model_path:
             model_json_path = FilePath(model_path).with_suffix(".json")
             try:
-                with open(model_json_path, "r") as f:
+                with open(model_json_path) as f:
                     model_plus_data = json.load(f)
                 config["model"]["plus"] = model_plus_data
             except FileNotFoundError:
@@ -360,7 +502,7 @@ def config_raw():
             status_code=404,
         )
 
-    with open(config_file, "r") as f:
+    with open(config_file) as f:
         raw_config = f.read()
         f.close()
 
@@ -494,6 +636,40 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
+def _restore_masked_camera_paths(config_data: dict, config: FrigateConfig) -> None:
+    """Substitute incoming `*:*` masked credentials with the in-memory ones.
+
+    The /config response masks ffmpeg input credentials, so the settings UI
+    sends the masked path back when sibling fields (e.g. hwaccel_args) are
+    edited.  Without this we'd write `rtsp://*:*@host` into YAML and lose
+    the real credentials.  Mutates `config_data` in place.
+    """
+    cameras = config_data.get("cameras")
+    if not isinstance(cameras, dict):
+        return
+
+    for camera_name, camera_data in cameras.items():
+        if not isinstance(camera_data, dict):
+            continue
+        inputs = camera_data.get("ffmpeg", {}).get("inputs")
+        if not isinstance(inputs, list):
+            continue
+        existing = config.cameras.get(camera_name)
+        if existing is None:
+            continue
+        existing_paths = [inp.path for inp in existing.ffmpeg.inputs]
+        for index, input_obj in enumerate(inputs):
+            if not isinstance(input_obj, dict):
+                continue
+            path = input_obj.get("path")
+            if not isinstance(path, str):
+                continue
+            if ("://*:*@" in path or "user=*&password=*" in path) and index < len(
+                existing_paths
+            ):
+                input_obj["path"] = existing_paths[index]
+
+
 def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONResponse:
     """Apply config changes in-memory only, without writing to YAML.
 
@@ -504,8 +680,13 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
     try:
         updates = {}
         if body.config_data:
+            _restore_masked_camera_paths(body.config_data, request.app.frigate_config)
             updates = flatten_config_data(body.config_data)
             updates = {k: ("" if v is None else v) for k, v in updates.items()}
+            # Drop any field whose value is still the redaction sentinel
+            updates = {
+                k: v for k, v in updates.items() if v != REDACTED_CREDENTIAL_SENTINEL
+            }
 
         if not updates:
             return JSONResponse(
@@ -569,6 +750,40 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
                     settings,
                 )
 
+                # detect resize also republishes motion + objects so other
+                # processes pick up the rebuilt masks, and fires refresh so
+                # the camera maintainer recycles the camera process to pick
+                # up the new ffmpeg cmd / SHM sizing
+                if field == "detect":
+                    cam_cfg = config.cameras.get(camera)
+                    if cam_cfg is not None:
+                        if cam_cfg.motion is not None:
+                            request.app.config_publisher.publish_update(
+                                CameraConfigUpdateTopic(
+                                    CameraConfigUpdateEnum.motion, camera
+                                ),
+                                cam_cfg.motion,
+                            )
+                        request.app.config_publisher.publish_update(
+                            CameraConfigUpdateTopic(
+                                CameraConfigUpdateEnum.objects, camera
+                            ),
+                            cam_cfg.objects,
+                        )
+                        if cam_cfg.zones:
+                            request.app.config_publisher.publish_update(
+                                CameraConfigUpdateTopic(
+                                    CameraConfigUpdateEnum.zones, camera
+                                ),
+                                cam_cfg.zones,
+                            )
+                        request.app.config_publisher.publish_update(
+                            CameraConfigUpdateTopic(
+                                CameraConfigUpdateEnum.refresh, camera
+                            ),
+                            cam_cfg,
+                        )
+
         return JSONResponse(
             content={"success": True, "message": "Config applied in-memory"},
             status_code=200,
@@ -592,7 +807,7 @@ def config_set(request: Request, body: AppConfigSetBody):
 
     try:
         with lock:
-            with open(config_file, "r") as f:
+            with open(config_file) as f:
                 old_raw_config = f.read()
 
             try:
@@ -610,9 +825,19 @@ def config_set(request: Request, body: AppConfigSetBody):
                 if query_string:
                     updates = process_config_query_string(query_string)
                 elif body.config_data:
+                    _restore_masked_camera_paths(
+                        body.config_data, request.app.frigate_config
+                    )
                     updates = flatten_config_data(body.config_data)
                     # Convert None values to empty strings for deletion (e.g., when deleting masks)
                     updates = {k: ("" if v is None else v) for k, v in updates.items()}
+                    # Drop sentinel-valued fields so untouched credential
+                    # placeholders don't clobber the saved YAML value.
+                    updates = {
+                        k: v
+                        for k, v in updates.items()
+                        if v != REDACTED_CREDENTIAL_SENTINEL
+                    }
 
                 if not updates:
                     return JSONResponse(
@@ -629,7 +854,7 @@ def config_set(request: Request, body: AppConfigSetBody):
                 update_yaml_file_bulk(config_file, updates)
 
                 # validate the updated config
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     new_raw_config = f.read()
 
                 try:
@@ -683,6 +908,11 @@ def config_set(request: Request, body: AppConfigSetBody):
                     status_code=500,
                 )
 
+            # drop runtime overrides for any fields the user just rewrote in
+            # yaml so a stale override doesn't silently win after restart
+            if request.app.dispatcher is not None:
+                request.app.dispatcher.clear_runtime_state_for_yaml_keys(updates.keys())
+
             if body.requires_restart == 0 or body.update_topic:
                 old_config: FrigateConfig = request.app.frigate_config
                 request.app.frigate_config = config
@@ -696,6 +926,8 @@ def config_set(request: Request, body: AppConfigSetBody):
 
                 if request.app.dispatcher is not None:
                     request.app.dispatcher.config = config
+                    for comm in request.app.dispatcher.comms:
+                        comm.config = config
 
                 if body.update_topic:
                     if body.update_topic.startswith("config/cameras/"):
@@ -792,20 +1024,20 @@ def nvinfo():
 @router.get(
     "/logs/{service}",
     tags=[Tags.logs],
-    dependencies=[Depends(allow_any_authenticated())],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 async def logs(
     service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
-    download: Optional[str] = None,
-    stream: Optional[bool] = False,
-    start: Optional[int] = 0,
-    end: Optional[int] = None,
+    download: str | None = None,
+    stream: bool | None = False,
+    start: int | None = 0,
+    end: int | None = None,
 ):
     """Get logs for the requested service (frigate/nginx/go2rtc)"""
 
     def download_logs(service_location: str):
         try:
-            file = open(service_location, "r")
+            file = open(service_location)
             contents = file.read()
             file.close()
             return JSONResponse(jsonable_encoder(contents))
@@ -820,7 +1052,7 @@ async def logs(
         """Asynchronously stream log lines."""
         buffer = ""
         try:
-            async with aiofiles.open(file_path, "r") as file:
+            async with aiofiles.open(file_path) as file:
                 await file.seek(0, 2)
                 while True:
                     line = await file.readline()
@@ -858,7 +1090,7 @@ async def logs(
 
     # For full logs initially
     try:
-        async with aiofiles.open(service_location, "r") as file:
+        async with aiofiles.open(service_location) as file:
             contents = await file.read()
 
         total_lines, log_lines = process_logs(contents, service, start, end)
@@ -997,12 +1229,27 @@ def get_media_sync_status(job_id: str):
 
 
 @router.get("/labels", dependencies=[Depends(allow_any_authenticated())])
-def get_labels(camera: str = ""):
+def get_labels(
+    camera: str = "",
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
         if camera:
+            if camera not in allowed_cameras:
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Access denied to camera '{camera}'",
+                    },
+                    status_code=403,
+                )
             events = Event.select(Event.label).where(Event.camera == camera).distinct()
         else:
-            events = Event.select(Event.label).distinct()
+            events = (
+                Event.select(Event.label)
+                .where(Event.camera << allowed_cameras)
+                .distinct()
+            )
     except Exception as e:
         logger.error(e)
         return JSONResponse(
@@ -1015,9 +1262,16 @@ def get_labels(camera: str = ""):
 
 
 @router.get("/sub_labels", dependencies=[Depends(allow_any_authenticated())])
-def get_sub_labels(split_joined: Optional[int] = None):
+def get_sub_labels(
+    split_joined: int | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
-        events = Event.select(Event.sub_label).distinct()
+        events = (
+            Event.select(Event.sub_label)
+            .where(Event.camera << allowed_cameras)
+            .distinct()
+        )
     except Exception:
         return JSONResponse(
             content=({"success": False, "message": "Failed to get sub_labels"}),
@@ -1097,8 +1351,8 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
     "/recognized_license_plates", dependencies=[Depends(allow_any_authenticated())]
 )
 def get_recognized_license_plates(
-    split_joined: Optional[int] = None,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    split_joined: int | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     try:
         query = (
@@ -1139,8 +1393,8 @@ def get_recognized_license_plates(
 def timeline(
     camera: str = "all",
     limit: int = 100,
-    source_id: Optional[str] = None,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    source_id: str | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     clauses = []
 
@@ -1154,20 +1408,20 @@ def timeline(
     ]
 
     if camera != "all":
-        clauses.append((Timeline.camera == camera))
+        clauses.append(Timeline.camera == camera)
 
     if source_id:
         source_ids = [sid.strip() for sid in source_id.split(",")]
         if len(source_ids) == 1:
-            clauses.append((Timeline.source_id == source_ids[0]))
+            clauses.append(Timeline.source_id == source_ids[0])
         else:
-            clauses.append((Timeline.source_id.in_(source_ids)))
+            clauses.append(Timeline.source_id.in_(source_ids))
 
     # Enforce per-camera access control
-    clauses.append((Timeline.camera << allowed_cameras))
+    clauses.append(Timeline.camera << allowed_cameras)
 
     if len(clauses) == 0:
-        clauses.append((True))
+        clauses.append(True)
 
     timeline = (
         Timeline.select(*selected_columns)
@@ -1183,7 +1437,7 @@ def timeline(
 @router.get("/timeline/hourly", dependencies=[Depends(allow_any_authenticated())])
 def hourly_timeline(
     params: AppTimelineHourlyQueryParameters = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Get hourly summary for timeline."""
     cameras = params.cameras
@@ -1200,23 +1454,23 @@ def hourly_timeline(
 
     if cameras != "all":
         camera_list = cameras.split(",")
-        clauses.append((Timeline.camera << camera_list))
+        clauses.append(Timeline.camera << camera_list)
 
     # Enforce per-camera access control
-    clauses.append((Timeline.camera << allowed_cameras))
+    clauses.append(Timeline.camera << allowed_cameras)
 
     if labels != "all":
         label_list = labels.split(",")
-        clauses.append((Timeline.data["label"] << label_list))
+        clauses.append(Timeline.data["label"] << label_list)
 
     if before:
-        clauses.append((Timeline.timestamp < before))
+        clauses.append(Timeline.timestamp < before)
 
     if after:
-        clauses.append((Timeline.timestamp > after))
+        clauses.append(Timeline.timestamp > after)
 
     if len(clauses) == 0:
-        clauses.append((True))
+        clauses.append(True)
 
     timeline = (
         Timeline.select(

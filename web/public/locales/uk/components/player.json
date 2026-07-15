@@ -37,7 +37,7 @@
   },
   "streamOffline": {
     "title": "Струм офлайн",
-    "desc": "Потік <code> detect </code > камера {{cameraName}} не отримувала ніяких кадрів, перевіряйте журнали помилок"
+    "desc": "Потік <code>detect</code > камери {{cameraName}} не отримував ніяких кадрів, перевірте журнал помилок"
   },
   "cameraDisabled": "Камера вимкнена",
   "toast": {
@@ -47,5 +47,6 @@
     "error": {
       "submitFrigatePlusFailed": "Не вдалося надіслати фрейм Frigate+"
     }
-  }
+  },
+  "cameraOff": "Камера вимкнена"
 }

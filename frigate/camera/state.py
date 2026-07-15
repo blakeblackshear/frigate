@@ -5,7 +5,8 @@ import logging
 import os
 import threading
 from collections import defaultdict
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import cv2
 import numpy as np
@@ -45,6 +46,7 @@ class CameraState:
         self.frame_cache: dict[float, dict[str, Any]] = {}
         self.zone_objects: defaultdict[str, list[Any]] = defaultdict(list)
         self._current_frame = np.zeros(self.camera_config.frame_shape_yuv, np.uint8)
+        self._last_frame_shape: tuple[int, int] = self.camera_config.frame_shape_yuv
         self.current_frame_lock = threading.Lock()
         self.current_frame_time = 0.0
         self.motion_boxes: list[tuple[int, int, int, int]] = []
@@ -303,6 +305,42 @@ class CameraState:
     def on(self, event_type: str, callback: Callable[..., Any]) -> None:
         self.callbacks[event_type].append(callback)
 
+    def _discard_stale_resolution_state(
+        self, current_detections: dict[str, dict[str, Any]]
+    ) -> bool:
+        """Drop tracked state when the camera's detect resolution has
+        changed, and signal the caller to skip this batch if it contains
+        out-of-bounds boxes from the pre-recycle detect process.
+
+        Returns True when the batch should be skipped entirely.
+        """
+        # detect resolution changed — drop tracked state so old-grid
+        # boxes don't leak through end-callbacks
+        current_shape = self.camera_config.frame_shape_yuv
+        if current_shape != self._last_frame_shape:
+            logger.debug(
+                f"{self.name}: detect resolution changed {self._last_frame_shape} -> {current_shape}, dropping tracked state"
+            )
+            with self.current_frame_lock:
+                self.tracked_objects.clear()
+                self.motion_boxes = []
+                self.regions = []
+            self._last_frame_shape = current_shape
+
+        # drop in-flight batches from the pre-recycle detect process
+        # whose boxes exceed the current detect resolution
+        detect = self.camera_config.detect
+        if detect.width is not None and detect.height is not None:
+            for obj in current_detections.values():
+                box = obj.get("box")
+                if box and (box[2] > detect.width or box[3] > detect.height):
+                    logger.debug(
+                        f"{self.name}: dropping stale-resolution detection batch (box {box} exceeds {detect.width}x{detect.height})"
+                    )
+                    return True
+
+        return False
+
     def update(
         self,
         frame_name: str,
@@ -311,6 +349,9 @@ class CameraState:
         motion_boxes: list[tuple[int, int, int, int]],
         regions: list[tuple[int, int, int, int]],
     ) -> None:
+        if self._discard_stale_resolution_state(current_detections):
+            return
+
         current_frame = self.frame_manager.get(
             frame_name, self.camera_config.frame_shape_yuv
         )
@@ -332,14 +373,18 @@ class CameraState:
                 current_detections[id],
             )
 
-            # add initial frame to frame cache
-            logger.debug(
-                f"{self.name}: New object, adding {frame_time} to frame cache for {id}"
-            )
-            self.frame_cache[frame_time] = {
-                "frame": np.copy(current_frame),  # type: ignore[arg-type]
-                "object_id": id,
-            }
+            # Skip caching when the frame buffer isn't readable — e.g.
+            # frame_manager.get returned None because the SHM segment was
+            # unlinked or hasn't been recreated yet during a camera
+            # add/remove cycle.
+            if current_frame is not None:
+                logger.debug(
+                    f"{self.name}: New object, adding {frame_time} to frame cache for {id}"
+                )
+                self.frame_cache[frame_time] = {
+                    "frame": np.copy(current_frame),
+                    "object_id": id,
+                }
 
             # save initial thumbnail data and best object
             thumbnail_data = {

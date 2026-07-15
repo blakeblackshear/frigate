@@ -1,4 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
+import { throttle } from "lodash";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
@@ -19,11 +21,21 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
 
+const SLIDER_DRAG_THROTTLE_MS = 80;
+
 type Props = {
   className?: string;
+  // Optional side-effect invoked atomically with setAnnotationOffset (inside
+  // flushSync) so callers like the timeline panel can re-seek the video in the
+  // same React commit as the offset state update — preventing a one-frame
+  // overlay mismatch where annotationOffset has changed but currentTime has not.
+  onApplyOffset?: (newOffset: number) => void;
 };
 
-export default function AnnotationOffsetSlider({ className }: Props) {
+export default function AnnotationOffsetSlider({
+  className,
+  onApplyOffset,
+}: Props) {
   const { annotationOffset, setAnnotationOffset, camera } = useDetailStream();
   const isAdmin = useIsAdmin();
   const { getLocaleDocUrl } = useDocDomain();
@@ -31,31 +43,62 @@ export default function AnnotationOffsetSlider({ className }: Props) {
   const { t } = useTranslation(["views/explore"]);
   const [isSaving, setIsSaving] = useState(false);
 
+  const applyOffset = useCallback(
+    (newOffset: number) => {
+      flushSync(() => {
+        setAnnotationOffset(newOffset);
+        onApplyOffset?.(newOffset);
+      });
+    },
+    [setAnnotationOffset, onApplyOffset],
+  );
+
+  const throttledApplyOffset = useMemo(
+    () =>
+      throttle(applyOffset, SLIDER_DRAG_THROTTLE_MS, {
+        leading: true,
+        trailing: true,
+      }),
+    [applyOffset],
+  );
+
+  useEffect(() => () => throttledApplyOffset.cancel(), [throttledApplyOffset]);
+
   const handleChange = useCallback(
     (values: number[]) => {
       if (!values || values.length === 0) return;
-      const valueMs = values[0];
-      setAnnotationOffset(valueMs);
+      throttledApplyOffset(values[0]);
     },
-    [setAnnotationOffset],
+    [throttledApplyOffset],
+  );
+
+  const handleCommit = useCallback(
+    (values: number[]) => {
+      if (!values || values.length === 0) return;
+      // Ensure the final value lands even if it would otherwise be discarded
+      // by the trailing edge of the throttle window.
+      throttledApplyOffset.cancel();
+      applyOffset(values[0]);
+    },
+    [throttledApplyOffset, applyOffset],
   );
 
   const stepOffset = useCallback(
     (delta: number) => {
-      setAnnotationOffset((prev) => {
-        const next = prev + delta;
-        return Math.max(
-          ANNOTATION_OFFSET_MIN,
-          Math.min(ANNOTATION_OFFSET_MAX, next),
-        );
-      });
+      const next = Math.max(
+        ANNOTATION_OFFSET_MIN,
+        Math.min(ANNOTATION_OFFSET_MAX, annotationOffset + delta),
+      );
+      throttledApplyOffset.cancel();
+      applyOffset(next);
     },
-    [setAnnotationOffset],
+    [annotationOffset, applyOffset, throttledApplyOffset],
   );
 
   const reset = useCallback(() => {
-    setAnnotationOffset(0);
-  }, [setAnnotationOffset]);
+    throttledApplyOffset.cancel();
+    applyOffset(0);
+  }, [applyOffset, throttledApplyOffset]);
 
   const save = useCallback(async () => {
     setIsSaving(true);
@@ -130,6 +173,7 @@ export default function AnnotationOffsetSlider({ className }: Props) {
             max={ANNOTATION_OFFSET_MAX}
             step={ANNOTATION_OFFSET_STEP}
             onValueChange={handleChange}
+            onValueCommit={handleCommit}
           />
         </div>
         <Button

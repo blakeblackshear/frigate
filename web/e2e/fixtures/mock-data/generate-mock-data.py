@@ -111,6 +111,18 @@ def generate_config():
     return snapshot
 
 
+def generate_config_schema():
+    """Generate the JSON Schema for FrigateConfig from the backend model.
+
+    This is what the app fetches from /api/config/schema.json to drive the
+    RJSF-based config form. Generating it here keeps the e2e fixture in sync
+    with the backend whenever config models change.
+    """
+    from frigate.config import FrigateConfig
+
+    return FrigateConfig.model_json_schema()
+
+
 def generate_reviews():
     """Generate ReviewSegmentResponse[] validated against Pydantic + Peewee."""
     from frigate.api.defs.response.review_response import ReviewSegmentResponse
@@ -411,6 +423,7 @@ def main():
     print()
 
     write_json("config-snapshot.json", generate_config())
+    write_json("config-schema.json", generate_config_schema())
     write_json("reviews.json", generate_reviews())
     write_json("events.json", generate_events())
     write_json("exports.json", generate_exports())

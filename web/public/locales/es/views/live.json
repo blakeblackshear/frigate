@@ -17,7 +17,7 @@
         "label": "Haz clic en el marco para centrar la cámara",
         "enable": "Habilitar clic para mover",
         "disable": "Deshabilitar clic para mover",
-        "enableWithZoom": "Activar clic para mover / arrastrar para hacer zoom"
+        "enableWithZoom": "Habilitar clic para mover / arrastrar para aumentar"
       },
       "up": {
         "label": "Mover la cámara PTZ hacia arriba"
@@ -57,7 +57,9 @@
   },
   "camera": {
     "enable": "Habilitar cámara",
-    "disable": "Deshabilitar cámara"
+    "disable": "Deshabilitar cámara",
+    "turnOn": "Encender cámara",
+    "turnOff": "Apagar cámara"
   },
   "muteCameras": {
     "enable": "Silenciar todas las cámaras",
@@ -69,7 +71,8 @@
   },
   "recording": {
     "enable": "Habilitar grabación",
-    "disable": "Deshabilitar grabación"
+    "disable": "Deshabilitar grabación",
+    "disabledInConfig": "La grabación debe activarse primero en Ajustes para esta cámara."
   },
   "snapshots": {
     "enable": "Habilitar capturas de pantalla",
@@ -150,7 +153,8 @@
     "snapshots": "Capturas de pantalla",
     "autotracking": "Seguimiento automático",
     "cameraEnabled": "Cámara habilitada",
-    "transcription": "Transcripción de Audio"
+    "transcription": "Transcripción de Audio",
+    "camera": "Cámara"
   },
   "history": {
     "label": "Mostrar grabaciones históricas"

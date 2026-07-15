@@ -26,7 +26,7 @@ _Please read the [contributing guidelines](https://github.com/blakeblackshear/fr
 
 - This PR fixes or closes issue: fixes #
 - This PR is related to issue:
-- Link to discussion with maintainers (**required** for large/pinned features):
+- Link to discussion with maintainers (**required** for any large or "planned" features):
 
 ## For new features
 

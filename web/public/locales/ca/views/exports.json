@@ -14,7 +14,9 @@
   "toast": {
     "error": {
       "renameExportFailed": "Error al canviar el nom de l’exportació: {{errorMessage}}",
-      "assignCaseFailed": "No s'ha pogut actualitzar l'assignació de cas:{{errorMessage}}"
+      "assignCaseFailed": "No s'ha pogut actualitzar l'assignació de cas:{{errorMessage}}",
+      "caseSaveFailed": "No s'ha pogut desar el cas: {{errorMessage}}",
+      "caseDeleteFailed": "No s'ha pogut suprimir el cas: {{errorMessage}}"
     }
   },
   "tooltip": {
@@ -22,7 +24,8 @@
     "downloadVideo": "Baixa el vídeo",
     "editName": "Edita el nom",
     "deleteExport": "Suprimeix l'exportació",
-    "assignToCase": "Afegeix al cas"
+    "assignToCase": "Afegeix al cas",
+    "removeFromCase": "Elimina del cas"
   },
   "headings": {
     "cases": "Casos",
@@ -35,5 +38,91 @@
     "newCaseOption": "Crea un cas nou",
     "nameLabel": "Nom del cas",
     "descriptionLabel": "Descripció"
+  },
+  "toolbar": {
+    "newCase": "Cas nou",
+    "addExport": "Afegeix una exportació",
+    "editCase": "Edita el cas",
+    "deleteCase": "Suprimeix el cas"
+  },
+  "deleteCase": {
+    "label": "Suprimeix el cas",
+    "desc": "Esteu segur que voleu suprimir {{caseName}}?",
+    "descKeepExports": "Les exportacions continuaran estant disponibles com a exportacions sense categoria.",
+    "descDeleteExports": "Totes les exportacions en aquest cas s'eliminaran permanentment.",
+    "deleteExports": "Elimina també les exportacions"
+  },
+  "caseCard": {
+    "emptyCase": "Encara no hi ha exportacions"
+  },
+  "jobCard": {
+    "defaultName": "Exportació de {{camera}}",
+    "queued": "En cua",
+    "running": "En execució",
+    "preparing": "Preparant",
+    "copying": "Copiant",
+    "encoding": "Codificant",
+    "encodingRetry": "Codificant (reintent)",
+    "finalizing": "Finalitzant"
+  },
+  "caseView": {
+    "noDescription": "Sense descripció",
+    "createdAt": "{{value}} creat",
+    "exportCount_one": "1 exportació",
+    "exportCount_other": "{{count}} exportacions",
+    "cameraCount_one": "1 càmera",
+    "cameraCount_other": "{{count}} càmeres",
+    "showMore": "Mostra'n més",
+    "showLess": "Mostra menys",
+    "emptyTitle": "Aquest cas és buit",
+    "emptyDescription": "Afegeix les exportacions no categoritzades existents per mantenir el cas organitzat.",
+    "emptyDescriptionNoExports": "Encara no hi ha exportacions sense categoria per afegir."
+  },
+  "caseEditor": {
+    "createTitle": "Crea un cas",
+    "editTitle": "Edita el cas",
+    "namePlaceholder": "Nom del cas",
+    "descriptionPlaceholder": "Afegeix notes o context per a aquest cas"
+  },
+  "addExportDialog": {
+    "title": "Afegeix l'exportació a {{caseName}}",
+    "searchPlaceholder": "Cerca exportacions sense categoria",
+    "empty": "No hi ha exportacions sense categoria que coincideixin amb aquesta cerca.",
+    "addButton_one": "Afegeix 1 exportació",
+    "addButton_other": "Afegeix {{count}} exportacions",
+    "adding": "S'està afegint..."
+  },
+  "selected_one": "{{count}} seleccionats",
+  "selected_other": "{{count}} seleccionats",
+  "bulkActions": {
+    "addToCase": "Afegeix al cas",
+    "moveToCase": "Mou al cas",
+    "removeFromCase": "Elimina del cas",
+    "delete": "Suprimeix",
+    "deleteNow": "Suprimeix ara"
+  },
+  "bulkDelete": {
+    "title": "Suprimeix les exportacions",
+    "desc_one": "Esteu segur que voleu suprimir {{count}} l'exportació?",
+    "desc_other": "steu segur que voleu suprimir {{count}} exportacions?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Elimina del cas",
+    "desc_one": "Voleu suprimir {{count}} d'aquest cas?",
+    "desc_other": "Voleu eliminar {{count}} exportacions d'aquest cas?",
+    "descKeepExports": "Les exportacions es mouran a sense categoria.",
+    "descDeleteExports": "Les exportacions s'eliminaran permanentment.",
+    "deleteExports": "Suprimeix les exportacions"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Exportacions suprimides amb èxit",
+      "reassign": "Assignació de cas actualitzada amb èxit",
+      "remove": "S'han eliminat les exportacions del cas"
+    },
+    "error": {
+      "deleteFailed": "No s'han pogut suprimir les exportacions: {{errorMessage}}",
+      "reassignFailed": "No s'ha pogut actualitzar l'assignació de cas: {{errorMessage}}"
+    }
   }
 }

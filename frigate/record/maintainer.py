@@ -11,7 +11,7 @@ import time
 from collections import defaultdict
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-from typing import Any, Optional, Tuple
+from typing import Any
 
 import numpy as np
 import psutil
@@ -41,6 +41,8 @@ from frigate.review.types import SeverityEnum
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
+
+STALE_RECORDINGS_INFO_TTL = MAX_SEGMENTS_IN_CACHE * MAX_SEGMENT_DURATION * 2
 
 
 class SegmentInfo:
@@ -98,7 +100,7 @@ class RecordingMaintainer(threading.Thread):
         self.stop_event = stop_event
         self.object_recordings_info: dict[str, list] = defaultdict(list)
         self.audio_recordings_info: dict[str, list] = defaultdict(list)
-        self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
+        self.end_time_cache: dict[str, tuple[datetime.datetime, float]] = {}
         self.unexpected_cache_files_logged: bool = False
 
     async def move_files(self) -> None:
@@ -125,7 +127,7 @@ class RecordingMaintainer(threading.Thread):
 
             start_time = datetime.datetime.strptime(
                 date, CACHE_SEGMENT_FORMAT
-            ).astimezone(datetime.timezone.utc)
+            ).astimezone(datetime.UTC)
             if (
                 camera not in newest_cache_segments
                 or start_time > newest_cache_segments[camera]["start_time"]
@@ -185,7 +187,7 @@ class RecordingMaintainer(threading.Thread):
             # important that start_time is utc because recordings are stored and compared in utc
             start_time = datetime.datetime.strptime(
                 date, CACHE_SEGMENT_FORMAT
-            ).astimezone(datetime.timezone.utc)
+            ).astimezone(datetime.UTC)
 
             grouped_recordings[camera].append(
                 {
@@ -301,9 +303,9 @@ class RecordingMaintainer(threading.Thread):
                 RecordingsDataTypeEnum.saved.value,
             )
 
-        recordings_to_insert: list[Optional[dict[str, Any]]] = await asyncio.gather(
-            *tasks
-        )
+        self._expire_stale_recordings_info(grouped_recordings)
+
+        recordings_to_insert: list[dict[str, Any] | None] = await asyncio.gather(*tasks)
 
         # fire and forget recordings entries
         self.requestor.send_data(
@@ -311,13 +313,28 @@ class RecordingMaintainer(threading.Thread):
             [r for r in recordings_to_insert if r is not None],
         )
 
+    def _expire_stale_recordings_info(
+        self, grouped_recordings: defaultdict[str, list[dict[str, Any]]]
+    ) -> None:
+        expire_before = datetime.datetime.now().timestamp() - STALE_RECORDINGS_INFO_TTL
+        for recordings_info in (
+            self.object_recordings_info,
+            self.audio_recordings_info,
+        ):
+            for camera in list(recordings_info.keys()):
+                if camera in grouped_recordings:
+                    continue
+                info = recordings_info[camera]
+                while info and info[0][0] < expire_before:
+                    info.pop(0)
+
     def drop_segment(self, cache_path: str) -> None:
         Path(cache_path).unlink(missing_ok=True)
         self.end_time_cache.pop(cache_path, None)
 
     async def validate_and_move_segment(
         self, camera: str, reviews: Any, recording: dict[str, Any]
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         cache_path: str = recording["cache_path"]
         start_time: datetime.datetime = recording["start_time"]
 
@@ -394,7 +411,7 @@ class RecordingMaintainer(threading.Thread):
             if (
                 datetime.datetime.fromtimestamp(
                     most_recently_processed_frame_time
-                ).astimezone(datetime.timezone.utc)
+                ).astimezone(datetime.UTC)
                 >= end_time
             ):
                 record_mode = (
@@ -464,17 +481,19 @@ class RecordingMaintainer(threading.Thread):
                 self.drop_segment(cache_path)
                 return None
 
-        # if it doesn't overlap with an review item, go ahead and drop the segment
-        # if it ends more than the configured pre_capture for the camera
-        # BUT only if continuous/motion is NOT enabled (otherwise wait for processing)
-        elif highest is None:
+        # if it doesn't overlap with a review item, drop the segment once it
+        # ends more than event_pre_capture before the most recently processed
+        # frame. at this point we've already decided not to keep it for
+        # continuous/motion retention (either disabled or segment_stats said
+        # discard), so waiting longer just fills the cache.
+        else:
             camera_info = self.object_recordings_info[camera]
             most_recently_processed_frame_time = (
                 camera_info[-1][0] if len(camera_info) > 0 else 0
             )
             retain_cutoff = datetime.datetime.fromtimestamp(
                 most_recently_processed_frame_time - record_config.event_pre_capture
-            ).astimezone(datetime.timezone.utc)
+            ).astimezone(datetime.UTC)
 
             if end_time < retain_cutoff:
                 self.drop_segment(cache_path)
@@ -600,7 +619,7 @@ class RecordingMaintainer(threading.Thread):
         duration: float,
         cache_path: str,
         segment_info: SegmentInfo,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         # directory will be in utc due to start_time being in utc
         directory = os.path.join(
             RECORD_DIR,
@@ -608,8 +627,7 @@ class RecordingMaintainer(threading.Thread):
             camera,
         )
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
         # file will be in utc due to start_time being in utc
         file_name = f"{start_time.strftime('%M.%S.mp4')}"
@@ -630,6 +648,8 @@ class RecordingMaintainer(threading.Thread):
                     "copy",
                     "-movflags",
                     "+faststart",
+                    "-metadata",
+                    f"creation_time={start_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')}",
                     file_path,
                     stderr=asyncio.subprocess.PIPE,
                     stdout=asyncio.subprocess.DEVNULL,

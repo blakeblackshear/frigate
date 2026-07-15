@@ -272,11 +272,11 @@ export default function LiveContextMenu({
 
   return (
     <div className={cn("w-full", className)}>
-      <ContextMenu key={camera} modal={false} onOpenChange={handleOpenChange}>
+      <ContextMenu key={camera} onOpenChange={handleOpenChange}>
         <ContextMenuTrigger>{children}</ContextMenuTrigger>
         <ContextMenuContent>
           <div className="flex flex-col items-start gap-1 py-1 pl-2">
-            <div className="text-md text-primary-variant smart-capitalize">
+            <div className="text-primary-variant smart-capitalize">
               <CameraNameLabel camera={camera} />
             </div>
             {preferredLiveMode == "jsmpeg" && isRestreamed && (
@@ -320,7 +320,7 @@ export default function LiveContextMenu({
                   onClick={() => sendEnabled(isEnabled ? "OFF" : "ON")}
                 >
                   <div className="text-primary">
-                    {isEnabled ? t("camera.disable") : t("camera.enable")}
+                    {isEnabled ? t("camera.turnOff") : t("camera.turnOn")}
                   </div>
                 </div>
               </ContextMenuItem>

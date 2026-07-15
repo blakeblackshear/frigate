@@ -668,7 +668,6 @@ function LibrarySelector({
                 </Button>
                 <Button
                   variant="destructive"
-                  className="text-white"
                   onClick={() => {
                     if (confirmDelete) {
                       handleDeleteCategory(confirmDelete);
@@ -698,7 +697,7 @@ function LibrarySelector({
         regexErrorMessage={t("description.invalidName")}
       />
 
-      <DropdownMenu modal={false}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
             {pageTitle}

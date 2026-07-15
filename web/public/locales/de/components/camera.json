@@ -66,9 +66,12 @@
       "label": "Kameras",
       "desc": "Wähle Kameras für diese Gruppe aus."
     },
-    "label": "Kameragruppen",
+    "label": "Kamera Gruppen",
     "edit": "Kameragruppe bearbeiten",
-    "success": "Kameragruppe {{name}} wurde gespeichert."
+    "success": "Kameragruppe {{name}} wurde gespeichert.",
+    "showAll": "Alle Kameragruppen anzeigen",
+    "showLess": "Weniger anzeigen",
+    "editGroups": "Kameragruppen bearbeiten"
   },
   "debug": {
     "options": {

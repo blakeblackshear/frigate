@@ -3,11 +3,13 @@
 import datetime
 import json
 import logging
-from typing import Any, Callable, Optional, cast
+from collections.abc import Callable, Iterable
+from typing import Any, cast
 
 from frigate.camera import PTZMetrics
 from frigate.camera.activity_manager import AudioActivityManager, CameraActivityManager
 from frigate.comms.base_communicator import Communicator
+from frigate.comms.runtime_state import RuntimeStatePersistence
 from frigate.comms.webpush import WebPushClient
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.config.camera.updater import (
@@ -67,6 +69,7 @@ class Dispatcher:
         self.embeddings_reindex: dict[str, Any] = {}
         self.birdseye_layout: dict[str, Any] = {}
         self.audio_transcription_state: str = "idle"
+        self._runtime_state = RuntimeStatePersistence()
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
             "audio_transcription": self._on_audio_transcription_command,
@@ -94,7 +97,7 @@ class Dispatcher:
             "notifications": self._on_global_notification_command,
             "profile": self._on_profile_command,
         }
-        self.profile_manager: Optional[ProfileManager] = None
+        self.profile_manager: ProfileManager | None = None
 
         for comm in self.comms:
             comm.subscribe(self._receive)
@@ -102,8 +105,10 @@ class Dispatcher:
         self.web_push_client = next(
             (comm for comm in communicators if isinstance(comm, WebPushClient)), None
         )
+        if self.web_push_client is not None:
+            self.web_push_client.set_suspension_broadcaster(self.publish)
 
-    def _receive(self, topic: str, payload: Any) -> Optional[Any]:
+    def _receive(self, topic: str, payload: Any) -> Any | None:
         """Handle receiving of payload from communicators."""
 
         def handle_camera_command(
@@ -394,8 +399,64 @@ class Dispatcher:
             comm.publish(topic, payload, retain)
 
     def stop(self) -> None:
+        self.camera_activity.stop()
+
         for comm in self.comms:
             comm.stop()
+
+    def restore_runtime_state(self) -> None:
+        """Replay persisted runtime overrides through the camera settings handlers.
+
+        Called once after Frigate startup completes so processing threads can
+        receive the resulting ``config_updater`` broadcasts. Unknown cameras
+        and topics are skipped; handler exceptions are logged and replay
+        continues for remaining entries.
+        """
+        state = self._runtime_state.load()
+        for camera_name, features in state.items():
+            if camera_name not in self.config.cameras:
+                continue
+            for topic, value in features.items():
+                handler = self._camera_settings_handlers.get(topic)
+                if handler is None:
+                    continue
+                payload = "ON" if value else "OFF"
+                try:
+                    handler(camera_name, payload)
+                except Exception:
+                    logger.exception(
+                        "Failed to restore runtime state %s.%s=%s",
+                        camera_name,
+                        topic,
+                        payload,
+                    )
+                    continue
+                logger.info(
+                    "Restored runtime state: %s.%s=%s",
+                    camera_name,
+                    topic,
+                    payload,
+                )
+
+    def clear_runtime_state_for_yaml_keys(self, dotted_keys: Iterable[str]) -> None:
+        """Clear stored runtime overrides for YAML keys that were just rewritten.
+
+        Called by ``/api/config/set`` after a successful YAML save so an
+        explicit settings-UI save isn't silently overridden by an older
+        runtime toggle on the next restart.
+        """
+        self._runtime_state.clear_for_yaml_keys(dotted_keys)
+
+    def clear_runtime_state(self) -> None:
+        """Wipe every stored runtime override.
+
+        Called when a profile is activated or deactivated. A profile switch
+        changes the layer below the runtime overrides, so the stored
+        "steady state" is no longer valid and must be reset; otherwise a
+        subsequent restart would replay stale overrides on top of the new
+        profile-derived in-memory state.
+        """
+        self._runtime_state.clear_all()
 
     def _on_detect_command(self, camera_name: str, payload: str) -> None:
         """Callback for detect topic."""
@@ -428,6 +489,7 @@ class Dispatcher:
             CameraConfigUpdateTopic(CameraConfigUpdateEnum.detect, camera_name),
             detect_settings,
         )
+        self._runtime_state.set(camera_name, "detect", detect_settings.enabled)
         self.publish(f"{camera_name}/detect/state", payload, retain=True)
 
     def _on_enabled_command(self, camera_name: str, payload: str) -> None:
@@ -452,6 +514,7 @@ class Dispatcher:
             CameraConfigUpdateTopic(CameraConfigUpdateEnum.enabled, camera_name),
             camera_settings.enabled,
         )
+        self._runtime_state.set(camera_name, "enabled", camera_settings.enabled)
         self.publish(f"{camera_name}/enabled/state", payload, retain=True)
 
     def _on_motion_command(self, camera_name: str, payload: str) -> None:
@@ -614,6 +677,7 @@ class Dispatcher:
             CameraConfigUpdateTopic(CameraConfigUpdateEnum.audio, camera_name),
             audio_settings,
         )
+        self._runtime_state.set(camera_name, "audio", audio_settings.enabled)
         self.publish(f"{camera_name}/audio/state", payload, retain=True)
 
     def _on_audio_transcription_command(self, camera_name: str, payload: str) -> None:
@@ -670,6 +734,7 @@ class Dispatcher:
             CameraConfigUpdateTopic(CameraConfigUpdateEnum.record, camera_name),
             record_settings,
         )
+        self._runtime_state.set(camera_name, "recordings", record_settings.enabled)
         self.publish(f"{camera_name}/recordings/state", payload, retain=True)
 
     def _on_snapshots_command(self, camera_name: str, payload: str) -> None:
@@ -689,6 +754,7 @@ class Dispatcher:
             CameraConfigUpdateTopic(CameraConfigUpdateEnum.snapshots, camera_name),
             snapshots_settings,
         )
+        self._runtime_state.set(camera_name, "snapshots", snapshots_settings.enabled)
         self.publish(f"{camera_name}/snapshots/state", payload, retain=True)
 
     def _on_ptz_command(self, camera_name: str, payload: str | bytes) -> None:

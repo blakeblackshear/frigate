@@ -90,7 +90,7 @@ class Rknn(DetectionApi):
             with open("/proc/device-tree/compatible") as file:
                 soc = file.read().split(",")[-1].strip("\x00")
         except FileNotFoundError:
-            raise Exception("Make sure to run docker in privileged mode.")
+            raise Exception("Make sure to run docker in privileged mode.") from None
 
         if soc not in SUPPORTED_RK_SOCS:
             raise Exception(

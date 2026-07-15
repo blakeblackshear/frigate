@@ -18,11 +18,11 @@
   "toast": {
     "success": {
       "deletedCategory_one": "Класс удалён",
-      "deletedCategory_few": "",
-      "deletedCategory_many": "",
+      "deletedCategory_few": "Класса удалено",
+      "deletedCategory_many": "Классов удалено",
       "deletedImage_one": "Изображения удалены",
-      "deletedImage_few": "",
-      "deletedImage_many": "",
+      "deletedImage_few": "Изображения удалено",
+      "deletedImage_many": "Изображений удалено",
       "deletedModel_one": "Успешно удалена {{count}} модель",
       "deletedModel_few": "Успешно удалены {{count}} модели",
       "deletedModel_many": "Успешно удалены {{count}} моделей",
@@ -30,7 +30,8 @@
       "trainedModel": "Модель успешно обучена.",
       "trainingModel": "Обучение модели успешно запущено.",
       "updatedModel": "Конфигурация модели успешно обновлена",
-      "renamedCategory": "Класс успешно переименован в {{name}}"
+      "renamedCategory": "Класс успешно переименован в {{name}}",
+      "reclassifiedImage": "Изображение успешно переклассифцировано"
     },
     "error": {
       "deleteImageFailed": "Не удалось удалить: {{errorMessage}}",

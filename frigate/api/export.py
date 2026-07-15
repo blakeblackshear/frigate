@@ -5,13 +5,15 @@ import logging
 import random
 import string
 import time
+import zipfile
+from collections import deque
+from collections.abc import Iterator
 from pathlib import Path
-from typing import List, Optional
 
 import psutil
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.responses import JSONResponse
-from pathvalidate import sanitize_filepath
+from fastapi.responses import JSONResponse, StreamingResponse
+from pathvalidate import sanitize_filename, sanitize_filepath
 from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
@@ -66,6 +68,7 @@ from frigate.jobs.export import (
 from frigate.models import Export, ExportCase, Previews, Recordings
 from frigate.record.export import (
     DEFAULT_TIME_LAPSE_FFMPEG_ARGS,
+    ChaptersEnum,
     PlaybackSourceEnum,
     validate_ffmpeg_args,
 )
@@ -86,7 +89,7 @@ def _generate_export_id(camera_name: str) -> str:
 
 def _create_export_case_record(
     name: str,
-    description: Optional[str],
+    description: str | None,
 ) -> ExportCase:
     now = datetime.datetime.fromtimestamp(time.time())
     return ExportCase.create(
@@ -98,7 +101,7 @@ def _create_export_case_record(
     )
 
 
-def _validate_camera_name(request: Request, camera_name: str) -> Optional[JSONResponse]:
+def _validate_camera_name(request: Request, camera_name: str) -> JSONResponse | None:
     if camera_name and request.app.frigate_config.cameras.get(camera_name):
         return None
 
@@ -108,7 +111,7 @@ def _validate_camera_name(request: Request, camera_name: str) -> Optional[JSONRe
     )
 
 
-def _validate_export_case(export_case_id: Optional[str]) -> Optional[JSONResponse]:
+def _validate_export_case(export_case_id: str | None) -> JSONResponse | None:
     if export_case_id is None:
         return None
 
@@ -124,8 +127,17 @@ def _validate_export_case(export_case_id: Optional[str]) -> Optional[JSONRespons
 
 
 def _sanitize_existing_image(
-    image_path: Optional[str],
-) -> tuple[Optional[str], Optional[JSONResponse]]:
+    image_path: str | None,
+) -> tuple[str | None, JSONResponse | None]:
+    # sanitize_filepath normalizes "\" to "/" but leaves ".." intact, so a path
+    # like "clips\..\..\etc/passwd" passes the CLIPS_DIR prefix check yet still
+    # escapes the directory once resolved. A valid snapshot path never uses "..".
+    if image_path and ".." in image_path:
+        return None, JSONResponse(
+            content={"success": False, "message": "Invalid image path"},
+            status_code=400,
+        )
+
     existing_image = sanitize_filepath(image_path) if image_path else None
 
     if existing_image and not existing_image.startswith(CLIPS_DIR):
@@ -142,7 +154,7 @@ def _validate_export_source(
     start_time: float,
     end_time: float,
     playback_source: PlaybackSourceEnum,
-) -> Optional[str]:
+) -> str | None:
     if playback_source == PlaybackSourceEnum.recordings:
         recordings_count = (
             Recordings.select()
@@ -245,13 +257,14 @@ def _build_export_job(
     camera_name: str,
     start_time: float,
     end_time: float,
-    friendly_name: Optional[str],
-    existing_image: Optional[str],
+    friendly_name: str | None,
+    existing_image: str | None,
     playback_source: PlaybackSourceEnum,
-    export_case_id: Optional[str],
-    ffmpeg_input_args: Optional[str] = None,
-    ffmpeg_output_args: Optional[str] = None,
+    export_case_id: str | None,
+    ffmpeg_input_args: str | None = None,
+    ffmpeg_output_args: str | None = None,
     cpu_fallback: bool = False,
+    chapters: ChaptersEnum | None = None,
 ) -> ExportJob:
     return ExportJob(
         id=_generate_export_id(camera_name),
@@ -265,6 +278,7 @@ def _build_export_job(
         ffmpeg_input_args=ffmpeg_input_args,
         ffmpeg_output_args=ffmpeg_output_args,
         cpu_fallback=cpu_fallback,
+        chapters=chapters,
     )
 
 
@@ -288,11 +302,11 @@ def _export_case_to_dict(case: ExportCase) -> dict[str, object]:
     Returns a list of exports ordered by date (most recent first).""",
 )
 def get_exports(
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
-    export_case_id: Optional[str] = None,
-    cameras: Optional[str] = Query(default="all"),
-    start_date: Optional[float] = None,
-    end_date: Optional[float] = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+    export_case_id: str | None = None,
+    cameras: str | None = Query(default="all"),
+    start_date: float | None = None,
+    end_date: float | None = None,
 ):
     query = Export.select().where(Export.camera << allowed_cameras)
 
@@ -359,6 +373,136 @@ def get_export_case(case_id: str):
             content={"success": False, "message": "Export case not found"},
             status_code=404,
         )
+
+
+_ZIP_STREAM_CHUNK_SIZE = 1024 * 1024  # 1 MiB
+
+
+class _StreamingZipBuffer:
+    """File-like sink for ZipFile that exposes written bytes via drain().
+
+    ZipFile writes synchronously into this buffer; the generator drains the
+    queue between writes so StreamingResponse can yield bytes without
+    materializing the whole archive in memory.
+    """
+
+    def __init__(self) -> None:
+        self._queue: deque[bytes] = deque()
+        self._offset = 0
+
+    def write(self, data: bytes) -> int:
+        if data:
+            self._queue.append(bytes(data))
+            self._offset += len(data)
+        return len(data)
+
+    def tell(self) -> int:
+        return self._offset
+
+    def flush(self) -> None:
+        pass
+
+    def drain(self) -> Iterator[bytes]:
+        while self._queue:
+            yield self._queue.popleft()
+
+
+def _unique_archive_name(export: Export, used: set[str]) -> str:
+    base = sanitize_filename(export.name) if export.name else None
+    if not base:
+        base = f"{export.camera}_{int(export.date)}"
+
+    candidate = f"{base}.mp4"
+    counter = 1
+    while candidate in used:
+        candidate = f"{base}_{counter}.mp4"
+        counter += 1
+
+    used.add(candidate)
+    return candidate
+
+
+def _stream_case_archive(exports: list[Export]) -> Iterator[bytes]:
+    """Yield bytes of a zip archive built from the given exports' mp4 files."""
+    buffer = _StreamingZipBuffer()
+    used_names: set[str] = set()
+
+    # ZIP_STORED: mp4 is already compressed, recompressing wastes CPU for ~0% size win.
+    with zipfile.ZipFile(
+        buffer,
+        mode="w",
+        compression=zipfile.ZIP_STORED,
+        allowZip64=True,
+    ) as archive:
+        for export in exports:
+            source = Path(export.video_path)
+            if not source.exists():
+                continue
+
+            arcname = _unique_archive_name(export, used_names)
+
+            with (
+                archive.open(arcname, mode="w", force_zip64=True) as entry,
+                source.open("rb") as src,
+            ):
+                while True:
+                    chunk = src.read(_ZIP_STREAM_CHUNK_SIZE)
+                    if not chunk:
+                        break
+
+                    entry.write(chunk)
+                    yield from buffer.drain()
+
+            yield from buffer.drain()
+
+    yield from buffer.drain()
+
+
+@router.get(
+    "/cases/{case_id}/download",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Download export case as zip",
+    description="Streams a zip archive containing every completed export's mp4 for the given case.",
+)
+def download_export_case(
+    case_id: str,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
+    try:
+        case = ExportCase.get(ExportCase.id == case_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Export case not found"},
+            status_code=404,
+        )
+
+    exports = list(
+        Export.select()
+        .where(
+            Export.export_case == case_id,
+            ~Export.in_progress,
+            Export.camera << allowed_cameras,
+        )
+        .order_by(Export.date.asc())
+    )
+
+    if not exports:
+        return JSONResponse(
+            content={"success": False, "message": "No exports available to download."},
+            status_code=404,
+        )
+
+    archive_base = sanitize_filename(case.name) if case.name else ""
+    if not archive_base:
+        archive_base = case_id
+
+    return StreamingResponse(
+        _stream_case_archive(exports),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="{archive_base}.zip"',
+        },
+    )
 
 
 @router.patch(
@@ -436,7 +580,7 @@ def delete_export_case(case_id: str, request: Request, delete_exports: bool = Fa
 )
 def get_active_export_jobs(
     request: Request,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     jobs = list_active_export_jobs(request.app.frigate_config)
     return JSONResponse(
@@ -478,7 +622,7 @@ async def get_export_job_status(export_id: str, request: Request):
 def export_recordings_batch(
     request: Request,
     body: BatchExportBody,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
     current_user: dict = Depends(get_current_user),
 ):
     if isinstance(current_user, JSONResponse):
@@ -518,7 +662,7 @@ def export_recordings_batch(
 
     # Sanitize each item's image_path up front. A bad path in any item
     # kills the whole request, consistent with single-export behavior.
-    sanitized_images: list[Optional[str]] = []
+    sanitized_images: list[str | None] = []
     for item in body.items:
         existing_image, image_validation_error = _sanitize_existing_image(
             item.image_path
@@ -569,7 +713,7 @@ def export_recordings_batch(
         export_case_id = export_case.id
 
     export_ids: list[str] = []
-    results: list[dict[str, Optional[str] | bool | int]] = []
+    results: list[dict[str, str | None | bool | int]] = []
     for index, item in enumerate(body.items):
         if index in item_errors:
             results.append(
@@ -593,6 +737,9 @@ def export_recordings_batch(
             sanitized_images[index],
             PlaybackSourceEnum.recordings,
             export_case_id,
+            chapters=request.app.frigate_config.cameras[
+                item.camera
+            ].record.export.chapters,
         )
         try:
             start_export_job(request.app.frigate_config, export_job)
@@ -671,6 +818,14 @@ def export_recording(
 
     export_case_id = body.export_case_id
 
+    # a chapters value in the request body overrides the camera's export config
+    camera_config = request.app.frigate_config.cameras[camera_name]
+    chapters = (
+        body.chapters
+        if body.chapters is not None
+        else camera_config.record.export.chapters
+    )
+
     # Attaching to an existing case requires admin. Single-export for
     # cameras the user can access is otherwise non-admin; we only gate
     # the case-attachment side effect.
@@ -707,6 +862,7 @@ def export_recording(
         existing_image,
         playback_source,
         export_case_id,
+        chapters=chapters,
     )
     try:
         start_export_job(request.app.frigate_config, export_job)

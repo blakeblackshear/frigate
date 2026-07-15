@@ -1,5 +1,6 @@
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { EmptyCard } from "@/components/card/EmptyCard";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
@@ -473,7 +474,9 @@ export default function FaceLibrary() {
             attemptImages={trainImages}
             faceNames={faces}
             selectedFaces={selectedFaces}
+            isLoading={faceData === undefined}
             onClickFaces={onClickFaces}
+            onAddFace={() => setAddFace(true)}
             onRefresh={refreshFaces}
           />
         ) : (
@@ -564,7 +567,6 @@ function LibrarySelector({
             </Button>
             <Button
               variant="destructive"
-              className="text-white"
               onClick={() => {
                 if (confirmDelete) {
                   handleDeleteFace(confirmDelete);
@@ -594,7 +596,7 @@ function LibrarySelector({
         forbiddenErrorMessage={t("description.nameCannotContainHash")}
       />
 
-      <DropdownMenu modal={false}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
             {pageTitle}
@@ -691,7 +693,9 @@ type TrainingGridProps = {
   attemptImages: string[];
   faceNames: string[];
   selectedFaces: string[];
+  isLoading: boolean;
   onClickFaces: (images: string[], ctrl: boolean) => void;
+  onAddFace: () => void;
   onRefresh: (
     data?:
       | FaceLibraryData
@@ -708,7 +712,9 @@ function TrainingGrid({
   attemptImages,
   faceNames,
   selectedFaces,
+  isLoading,
   onClickFaces,
+  onAddFace,
   onRefresh,
 }: TrainingGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -762,6 +768,25 @@ function TrainingGrid({
   ]);
 
   if (attemptImages.length == 0) {
+    if (isLoading) {
+      return (
+        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center text-center" />
+      );
+    }
+
+    if (faceNames.length == 0) {
+      return (
+        <EmptyCard
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center text-center"
+          icon={<AddFaceIcon className="size-16" />}
+          title={t("train.emptyNoLibrary.title")}
+          description={t("train.emptyNoLibrary.description")}
+          buttonText={t("button.addFace")}
+          onClick={onAddFace}
+        />
+      );
+    }
+
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderCheck className="size-16" />

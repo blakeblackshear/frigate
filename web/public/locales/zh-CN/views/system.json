@@ -175,7 +175,22 @@
       "tips": {
         "title": "摄像头信息"
       },
-      "aspectRatio": "宽高比"
+      "aspectRatio": "宽高比",
+      "keyframes": {
+        "title": "关键帧分析",
+        "analyzing": "正在分析关键帧... 剩余 {{seconds}} 秒",
+        "stillAnalyzing": "仍在分析关键帧...",
+        "recordStream": "录制视频流：",
+        "keyframeCount": "观察到的关键帧：",
+        "observedDuration": "观测持续时间：",
+        "gap": "关键帧间隔（最小值 / 平均值 / 最大值）：",
+        "segmentLength": "录制片段长度：",
+        "ok": "每 {{seconds}} 秒取一帧，适用于录制和回放。",
+        "warning": "稀疏或不均匀的关键帧（最长间隔约{{seconds}}秒），可能是使用了智能编码器（例如H.264+/H.265+），不建议开启该功能。",
+        "error": "关键帧间隔（~{{seconds}}秒）超过了录制片段长度（{{segmentTime}}秒）。某些片段可能没有关键帧，这会导致播放中断。请尝试禁用摄像头的智能或 + 编解码器或缩短其关键帧间隔。",
+        "unknown": "无法确定关键帧间隔。",
+        "recordDisabled": "此摄像头的录制功能已禁用。"
+      }
     },
     "framesAndDetections": "帧数/检测次数",
     "label": {
@@ -213,6 +228,9 @@
       "expectedFps": "预期帧率",
       "reconnectsLastHour": "最近一小时重连次数",
       "stallsLastHour": "最近一小时卡顿次数"
+    },
+    "noCameras": {
+      "title": "没有找到摄像头"
     }
   },
   "lastRefreshed": "最后刷新时间： ",

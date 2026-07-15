@@ -1,0 +1,381 @@
+/* ===================================================================
+   Docker Compose Generator — styles
+   Uses Docusaurus / Infima CSS variables for theme compatibility.
+   =================================================================== */
+
+.generator {
+  margin: 2rem 0;
+}
+
+.card {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+[data-theme="light"] .card {
+  background: var(--ifm-color-emphasis-100);
+  border: 1px solid var(--ifm-color-emphasis-300);
+}
+
+/* --- Form sections --- */
+
+.formSection {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-400);
+}
+
+.formSection:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.formSection h4 {
+  margin: 0 0 1rem 0;
+  color: var(--ifm-font-color-base);
+  font-size: 1.1rem;
+  font-weight: var(--ifm-font-weight-semibold);
+}
+
+/* --- Form controls --- */
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--ifm-font-color-base);
+  font-weight: var(--ifm-font-weight-semibold);
+  font-size: 0.9rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 6px;
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+[data-theme="light"] .input {
+  background: #fff;
+  border: 1px solid #d0d7de;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 3px var(--ifm-color-primary-lightest);
+}
+
+[data-theme="dark"] .input {
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+.inputError {
+  border-color: #e74c3c;
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* --- Select dropdown --- */
+
+.select {
+  cursor: pointer;
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: var(--ifm-background-color)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E")
+    no-repeat right 0.75rem center / 12px 12px;
+  padding-right: 2rem;
+}
+
+[data-theme="light"] .select {
+  background: #fff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 8L1 3h10z'/%3E%3C/svg%3E")
+    no-repeat right 0.75rem center / 12px 12px;
+}
+
+.helpText {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--ifm-font-color-secondary);
+  line-height: 1.5;
+}
+
+.helpText a {
+  color: var(--ifm-color-primary);
+}
+
+/* --- Device grid --- */
+
+.deviceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.deviceCard {
+  padding: 0.75rem;
+  border: 2px solid var(--ifm-color-emphasis-400);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  background: var(--ifm-background-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+[data-theme="light"] .deviceCard {
+  border: 2px solid #d0d7de;
+  background: #fff;
+}
+
+.deviceCard:hover {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-emphasis-100);
+  transform: translateY(-2px);
+}
+
+.deviceCardActive {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-primary-lightest);
+  box-shadow: 0 0 0 1px var(--ifm-color-primary);
+}
+
+[data-theme="light"] .deviceCardActive {
+  background: color-mix(in srgb, var(--ifm-color-primary) 12%, #fff);
+}
+
+[data-theme="dark"] .deviceCardActive {
+  background: color-mix(in srgb, var(--ifm-color-primary) 25%, #1b1b1b);
+}
+
+[data-theme="dark"] .deviceCardActive .deviceName {
+  color: var(--ifm-color-primary-light);
+}
+
+[data-theme="dark"] .deviceCardActive .deviceDesc {
+  color: var(--ifm-color-primary-light);
+  opacity: 0.85;
+}
+
+.deviceIcon {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+  height: 40px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deviceIconSvg {
+  margin-bottom: 0.25rem;
+  height: 40px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  /* Allow iconStyle width/height to override */
+  flex-shrink: 0;
+}
+
+.deviceIconSvg svg {
+  width: var(--svg-width, 100%);
+  height: var(--svg-height, 100%);
+  fill: var(--svg-fill, currentColor);
+  transform: var(--svg-transform, none);
+}
+
+.deviceIconImage {
+  margin-bottom: 0.25rem;
+  height: 40px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deviceIconImage img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.deviceName {
+  font-weight: var(--ifm-font-weight-semibold);
+  color: var(--ifm-font-color-base);
+  margin-bottom: 0.15rem;
+  font-size: 0.9rem;
+}
+
+.deviceDesc {
+  font-size: 0.75rem;
+  color: var(--ifm-font-color-secondary);
+  line-height: 1.3;
+}
+
+/* --- Checkbox grid --- */
+
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+@media (max-width: 576px) {
+  .checkboxGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hardwareItem {
+  margin-bottom: 0;
+}
+
+.hardwareDescription {
+  margin: 0.15rem 0 0.4rem 1.6rem;
+  font-size: 0.8rem;
+  color: var(--ifm-font-color-secondary);
+  line-height: 1.5;
+}
+
+.hardwareDescription a {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+}
+
+.checkboxLabel:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkboxLabel span {
+  color: var(--ifm-font-color-base);
+}
+
+.checkboxDisabled {
+  cursor: not-allowed;
+}
+
+.checkboxDisabled:hover {
+  background: transparent;
+}
+
+.checkboxDisabled input[type="checkbox"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* --- Form grid (side-by-side) --- */
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 576px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formGrid .formGroup {
+  margin-bottom: 0;
+}
+
+/* --- Port section --- */
+
+.portSection {
+  margin-bottom: 0.75rem;
+}
+
+.warningBadge {
+  margin-left: auto;
+  color: #e67e22;
+  font-size: 0.85rem;
+}
+
+/* --- NVIDIA config --- */
+
+.nvidiaConfig {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--ifm-background-color);
+  border-radius: 8px;
+  border-left: 3px solid var(--ifm-color-primary);
+}
+
+[data-theme="light"] .nvidiaConfig {
+  background: #f6f8fa;
+  border-left: 3px solid var(--ifm-color-primary);
+}
+
+/* --- Result section --- */
+
+.resultSection {
+  margin-top: 2rem;
+}
+
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.resultHeader h4 {
+  margin: 0;
+  color: var(--ifm-font-color-base);
+}

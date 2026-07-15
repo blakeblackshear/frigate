@@ -1,13 +1,13 @@
 {
   "labels": {
     "all": {
-      "title": "Alla Etiketter",
+      "title": "Alla etiketter",
       "short": "Etiketter"
     },
     "label": "Etiketter",
     "count": "{{count}} Etiketter",
     "count_one": "{{count}} Etikett",
-    "count_other": "{{count}} Etiketter"
+    "count_other": "{{count}} etiketter"
   },
   "filter": "Filtrera",
   "zones": {
@@ -49,7 +49,7 @@
       "defaultView": {
         "title": "Standard Vy",
         "summary": "Sammanfattning",
-        "desc": "När inga filter är valda, visa en översikt av de senaste spårade objekten per etikett-typ eller visa ett ofiltrerat rutnät.",
+        "desc": "När inga filter är valda, visa en översikt av de senaste spårade objekten per etikett eller visa ett ofiltrerat rutnät.",
         "unfilteredGrid": "Ofiltrerat Rutnät"
       },
       "searchSource": {
@@ -95,7 +95,7 @@
     "selectAll": "Välj alla",
     "clearAll": "Rensa alla"
   },
-  "more": "Flera filter",
+  "more": "Fler filter",
   "reset": {
     "label": "Nollställ filter"
   },
@@ -121,7 +121,7 @@
     "filterBySeverity": "Filtrera logg på allvarlighetsgrad",
     "disableLogStreaming": "Inaktivera strömning av logg",
     "allLogs": "Alla loggar",
-    "label": "Filter loggnivå"
+    "label": "Filtrera loggnivå"
   },
   "trackedObjectDelete": {
     "title": "Bekräfta Borttagning",

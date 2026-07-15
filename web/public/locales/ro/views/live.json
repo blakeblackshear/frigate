@@ -58,7 +58,9 @@
   },
   "camera": {
     "enable": "Activează camera",
-    "disable": "Dezactivează camera"
+    "disable": "Dezactivează camera",
+    "turnOn": "Camera este pornittă",
+    "turnOff": "Oprește camera"
   },
   "muteCameras": {
     "enable": "Dezactivează sunetul pentru toate camerele",
@@ -70,7 +72,8 @@
   },
   "recording": {
     "enable": "Activează înregistrarea",
-    "disable": "Dezactivează înregistrarea"
+    "disable": "Dezactivează înregistrarea",
+    "disabledInConfig": "Înregistrarea trebuie mai întâi activată în Setări pentru această cameră."
   },
   "snapshots": {
     "disable": "Dezactivează snapshoturile",
@@ -150,7 +153,8 @@
     "snapshots": "Snapshot-uri",
     "audioDetection": "Detectare sunet",
     "autotracking": "Urmărire automată",
-    "transcription": "Transcriere audio"
+    "transcription": "Transcriere audio",
+    "camera": "Cameră"
   },
   "history": {
     "label": "Afișează înregistrările istorice"

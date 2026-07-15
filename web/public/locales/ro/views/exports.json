@@ -14,7 +14,9 @@
   "toast": {
     "error": {
       "renameExportFailed": "Redenumirea exportului a eșuat: {{errorMessage}}",
-      "assignCaseFailed": "Actualizarea atribuirii cazului a eșuat: {{errorMessage}}"
+      "assignCaseFailed": "Actualizarea atribuirii cazului a eșuat: {{errorMessage}}",
+      "caseSaveFailed": "Salvarea cazului a eșuat: {{errorMessage}}",
+      "caseDeleteFailed": "Ștergerea cazului a eșuat: {{errorMessage}}"
     }
   },
   "tooltip": {
@@ -22,7 +24,8 @@
     "downloadVideo": "Descarcă video",
     "editName": "Editează numele",
     "deleteExport": "Șterge exportul",
-    "assignToCase": "Adaugă la un caz"
+    "assignToCase": "Adaugă la un caz",
+    "removeFromCase": "Elimină din caz"
   },
   "headings": {
     "cases": "Cazuri",
@@ -35,5 +38,91 @@
     "newCaseOption": "Creează un caz nou",
     "nameLabel": "Numele cazului",
     "descriptionLabel": "Descriere"
+  },
+  "toolbar": {
+    "newCase": "Caz nou",
+    "addExport": "Adaugă export",
+    "editCase": "Editează cazul",
+    "deleteCase": "Șterge cazul"
+  },
+  "deleteCase": {
+    "label": "Șterge cazul",
+    "desc": "Sigur vrei să ștergi {{caseName}}?",
+    "descKeepExports": "Exporturile vor rămâne disponibile ca exporturi necategorizate.",
+    "descDeleteExports": "Toate exporturile din acest caz vor fi șterse definitiv.",
+    "deleteExports": "Șterge și exporturile"
+  },
+  "caseCard": {
+    "emptyCase": "Niciun export încă"
+  },
+  "jobCard": {
+    "defaultName": "Export {{camera}}",
+    "queued": "În așteptare",
+    "running": "În rulare",
+    "preparing": "Pregătire",
+    "copying": "Copiere",
+    "encoding": "Codare",
+    "encodingRetry": "Codare (reîncercare)",
+    "finalizing": "Finalizare"
+  },
+  "caseView": {
+    "noDescription": "Fără descriere",
+    "createdAt": "Creat {{value}}",
+    "exportCount_one": "1 export",
+    "exportCount_other": "{{count}} exporturi",
+    "cameraCount_one": "1 cameră",
+    "cameraCount_other": "{{count}} camere",
+    "showMore": "Afișează mai mult",
+    "showLess": "Afișează mai puțin",
+    "emptyTitle": "Acest caz este gol",
+    "emptyDescription": "Adaugă exporturile necategorizate existente pentru a menține cazul organizat.",
+    "emptyDescriptionNoExports": "Nu există încă exporturi necategorizate disponibile pentru a fi adăugate."
+  },
+  "caseEditor": {
+    "createTitle": "Creează caz",
+    "editTitle": "Editează cazul",
+    "namePlaceholder": "Nume caz",
+    "descriptionPlaceholder": "Adaugă note sau context pentru acest caz"
+  },
+  "addExportDialog": {
+    "title": "Adaugă export la {{caseName}}",
+    "searchPlaceholder": "Caută exporturi necategorizate",
+    "empty": "Niciun export necategorizat nu se potrivește cu această căutare.",
+    "addButton_one": "Adaugă 1 export",
+    "addButton_other": "Adaugă {{count}} exporturi",
+    "adding": "Se adaugă..."
+  },
+  "selected_one": "{{count}} selectat",
+  "selected_other": "{{count}} selectate",
+  "bulkActions": {
+    "addToCase": "Adaugă la caz",
+    "moveToCase": "Mută la caz",
+    "removeFromCase": "Elimină din caz",
+    "delete": "Șterge",
+    "deleteNow": "Șterge acum"
+  },
+  "bulkDelete": {
+    "title": "Șterge exporturile",
+    "desc_one": "Sigur vrei să ștergi {{count}} export?",
+    "desc_other": "Sigur vrei să ștergi {{count}} exporturi?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Elimină din caz",
+    "desc_one": "Elimini {{count}} export din acest caz?",
+    "desc_other": "Elimini {{count}} exporturi din acest caz?",
+    "descKeepExports": "Exporturile vor fi mutate la necategorizate.",
+    "descDeleteExports": "Exporturile vor fi șterse definitiv.",
+    "deleteExports": "Șterge exporturile în schimb"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Exporturile au fost șterse cu succes",
+      "reassign": "Alocarea cazului a fost actualizată cu succes",
+      "remove": "Exporturile au fost eliminate din caz cu succes"
+    },
+    "error": {
+      "deleteFailed": "Ștergerea exporturilor a eșuat: {{errorMessage}}",
+      "reassignFailed": "Actualizarea alocării cazului a eșuat: {{errorMessage}}"
+    }
   }
 }

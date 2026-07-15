@@ -18,12 +18,16 @@
             "description": "Mindest-RMS-Lautstärkeschwelle, die für die Audioerkennung erforderlich ist; niedrigere Werte erhöhen die Empfindlichkeit (z. B. 200 hoch, 500 mittel, 1000 niedrig)."
         },
         "listen": {
-            "description": "Liste der zu erkennenden Audioereignisse (z.B: bellen, Feueralarm, schreien, sprechen, rufen).",
+            "description": "Liste der zu erkennenden Audioereignisse (z.B: bellen, Feueralarm, Gespräche, Rufen).",
             "label": "Hörtypen"
         },
         "filters": {
             "label": "Audiofilter",
-            "description": "Filtereinstellungen pro Audiotyp, wie z. B. Konfidenzschwellenwerte, die zur Reduzierung von Fehlalarmen verwendet werden."
+            "description": "Filtereinstellungen pro Audiotyp, wie z. B. Konfidenzschwellenwerte, die zur Reduzierung von Fehlalarmen verwendet werden.",
+            "threshold": {
+                "label": "Mindestvertrauensgrad für Audio",
+                "description": "Mindestschwellenwert für die Zuverlässigkeit, damit das Audioereignis gezählt wird."
+            }
         },
         "max_not_heard": {
             "label": "Ende Timeout",
@@ -376,7 +380,7 @@
         "description": "FFmpeg-Einstellungen, einschließlich Binärpfad, Argumente, hwaccel-Optionen und rollenspezifische Ausgabeargumente.",
         "path": {
             "label": "FFmpeg-Pfad",
-            "description": "Pfad zur zu verwendenden FFmpeg-Binärdatei oder ein Versionsalias („5.0” oder „7.0”)."
+            "description": "Pfad zur zu verwendenden FFmpeg-Binärdatei oder ein Versionsalias („7.0” oder „8.0”)."
         },
         "global_args": {
             "label": "Globale Argumente von FFmpeg",
@@ -492,7 +496,7 @@
         },
         "default_role": {
             "label": "Standardrolle",
-            "description": "Standardrolle, die proxy-authentifizierten Benutzern zugewiesen wird, wenn keine Rollenzuordnung gilt (Admin oder Betrachter)."
+            "description": "Standardrolle, die proxy-authentifizierten Benutzern zugewiesen wird, wenn keine Rollenzuordnung vorliegt."
         },
         "separator": {
             "label": "Trennzeichen",
@@ -538,8 +542,8 @@
                 "description": "Aktivieren Sie die prozessbezogene Überwachung der Netzwerkbandbreite für Kamera-FFmpeg-Prozesse und Detektoren (erfordert entsprechende Funktionen)."
             },
             "intel_gpu_device": {
-                "label": "SR-IOV-Gerät",
-                "description": "Gerätekennung, die verwendet wird, wenn Intel-GPUs als SR-IOV behandelt werden, um die GPU-Statistiken zu korrigieren."
+                "label": "Intel GPU",
+                "description": "PCI-Bus-Adresse oder DRM-Gerätepfad (z. B. /dev/dri/card1), der verwendet wird, um die Intel-GPU-Statistiken einem bestimmten Gerät zuzuordnen, wenn mehrere vorhanden sind."
             }
         },
         "version_check": {
@@ -1275,6 +1279,41 @@
         },
         "raw_mask": {
             "label": "Rohmaske"
+        },
+        "filters_attribute": {
+            "label": "Attributfilter",
+            "description": "Auf erkannte Attribute angewendete Filter zur Reduzierung von Fehlalarmen (Fläche, Verhältnis, Konfidenz).",
+            "min_area": {
+                "label": "Mindestfläche des Attributs",
+                "description": "Für dieses Attribut erforderliche Mindestfläche des Begrenzungsrahmens (in Pixeln oder Prozent). Kann als Pixelwert (Ganzzahl) oder als Prozentwert (Gleitkommawert zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "max_area": {
+                "label": "Maximale Attributfläche",
+                "description": "Maximal zulässige Fläche des Begrenzungsrahmens (in Pixeln oder Prozent) für dieses Attribut. Kann als Pixelwert (Ganzzahl) oder als Prozentwert (Gleitkommawert zwischen 0,000001 und 0,99) angegeben werden."
+            },
+            "min_ratio": {
+                "label": "Mindestseitenverhältnis",
+                "description": "Erforderliches Mindestverhältnis von Breite zu Höhe, damit die Begrenzungsbox die Anforderungen erfüllt."
+            },
+            "max_ratio": {
+                "label": "Maximales Seitenverhältnis",
+                "description": "Maximal zulässiges Verhältnis von Breite zu Höhe für die Begrenzungsbox, damit diese die Anforderungen erfüllt."
+            },
+            "threshold": {
+                "label": "Konfidenzschwelle",
+                "description": "Durchschnittlicher Schwellenwert für die Erkennungssicherheit, der erforderlich ist, damit das Merkmal als echtes Positiv gewertet wird."
+            },
+            "min_score": {
+                "label": "Mindestvertrauen",
+                "description": "Mindestwert für die Erkennungssicherheit eines einzelnen Bildes, der erforderlich ist, um dieses Attribut seinem übergeordneten Objekt zuzuordnen."
+            },
+            "mask": {
+                "label": "Filtermaske",
+                "description": "Polygonkoordinaten, die festlegen, wo dieser Filter innerhalb des Bildausschnitts angewendet wird."
+            },
+            "raw_mask": {
+                "label": "Rohmaske"
+            }
         }
     },
     "record": {
@@ -1357,6 +1396,10 @@
             "hwaccel_args": {
                 "label": "hwaccel-Argumente exportieren",
                 "description": "Argumente für die Hardwarebeschleunigung bei Export- und Transkodierungsvorgängen."
+            },
+            "max_concurrent": {
+                "label": "Maximale Anzahl gleichzeitiger Exporte",
+                "description": "Maximale Anzahl der gleichzeitig zu verarbeitenden Exportaufträge."
             }
         },
         "preview": {
@@ -1710,7 +1753,7 @@
         },
         "roles": {
             "label": "Rollen",
-            "description": "GenAI-Rollen (Tools, Vision, Einbettungen); ein Anbieter pro Rolle."
+            "description": "GenAI-Rollen (Nachrichten, Beschreibung, Einbettungen); ein Anbieter pro Rolle."
         },
         "provider_options": {
             "label": "Anbieter Optionen",
@@ -1891,6 +1934,10 @@
         "dashboard": {
             "label": "In der Benutzeroberfläche anzeigen",
             "description": "Schalte ein, ob diese Kamera überall in der Benutzeroberfläche von „Frigate“ sichtbar ist. Wenn du diese Option deaktivierst, musst du die Konfiguration manuell bearbeiten, um diese Kamera wieder in der Benutzeroberfläche anzuzeigen."
+        },
+        "review": {
+            "label": "In der Überprüfung anzeigen",
+            "description": "Legen Sie fest, ob diese Kamera in der Übersicht angezeigt wird (auf der Übersichtsseite sowie im Kamerafilter, in der Bewegungsübersicht und in der Verlaufsansicht)."
         }
     }
 }

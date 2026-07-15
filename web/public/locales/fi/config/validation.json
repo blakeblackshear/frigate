@@ -1,1 +1,13 @@
-{}
+{
+    "minimum": "Täytyy olla vähintään {{limit}}",
+    "maximum": "Täytyy olla korkeitaan {{limit}}",
+    "exclusiveMinimum": "Täytyy olla suurempi kuin {{limit}}",
+    "exclusiveMaximum": "Täytyy olla vähemmän kuin {{limit}}",
+    "minLength": "Täytyy olla vähintään {{limit}} merkkiä",
+    "maxLength": "Täytyy olla enintään {{limit}} merkkiä",
+    "minItems": "Täytyy olla vähintään {{limit}} kappaletta",
+    "maxItems": "Täytyy olla enintään {{limit}} kappaletta",
+    "pattern": "Väärä formaatti",
+    "required": "Tämä kenttä on pakollinen",
+    "type": "Väärä arvon tyyppi"
+}

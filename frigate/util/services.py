@@ -12,7 +12,7 @@ import subprocess as sp
 import time
 import traceback
 from datetime import datetime
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 import cv2
 import psutil
@@ -59,7 +59,7 @@ def get_cgroups_version() -> str:
         return "unknown"
 
     try:
-        with open("/proc/mounts", "r") as f:
+        with open("/proc/mounts") as f:
             mounts = f.readlines()
 
         for mount in mounts:
@@ -89,7 +89,7 @@ def get_docker_memlimit_bytes() -> int:
         memlimit_path = "/sys/fs/cgroup/memory.max"
 
         try:
-            with open(memlimit_path, "r") as f:
+            with open(memlimit_path) as f:
                 value = f.read().strip()
 
             if value.isnumeric():
@@ -127,7 +127,7 @@ def get_cpu_stats() -> dict[str, dict]:
             if not any(keyword in cmdline for keyword in keywords):
                 continue
 
-            with open(f"/proc/{pid}/stat", "r") as f:
+            with open(f"/proc/{pid}/stat") as f:
                 stats = f.readline().split()
             utime = int(stats[13])
             stime = int(stats[14])
@@ -146,7 +146,7 @@ def get_cpu_stats() -> dict[str, dict]:
             process_usage_sec = process_utime_sec + process_stime_sec
             cpu_average_usage = process_usage_sec * 100 // process_elapsed_sec
 
-            with open(f"/proc/{pid}/statm", "r") as f:
+            with open(f"/proc/{pid}/statm") as f:
                 mem_stats = f.readline().split()
             mem_res = int(mem_stats[1]) * os.sysconf("SC_PAGE_SIZE") / 1024
 
@@ -171,7 +171,7 @@ def get_physical_interfaces(interfaces) -> list:
     if not interfaces:
         return []
 
-    with open("/proc/net/dev", "r") as file:
+    with open("/proc/net/dev") as file:
         lines = file.readlines()
 
     physical_interfaces = []
@@ -238,7 +238,7 @@ def is_vaapi_amd_driver() -> bool:
         return any("AMD Radeon Graphics" in line for line in output)
 
 
-def get_amd_gpu_stats() -> Optional[dict[str, str]]:
+def get_amd_gpu_stats() -> dict[str, str] | None:
     """Get stats using radeontop."""
     radeontop_command = ["radeontop", "-d", "-", "-l", "1"]
 
@@ -264,164 +264,276 @@ def get_amd_gpu_stats() -> Optional[dict[str, str]]:
         return results
 
 
-def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, str]]:
-    """Get stats using intel_gpu_top.
+_INTEL_FDINFO_SAMPLE_SECONDS = 1.0
 
-    Returns overall GPU usage derived from rc6 residency (idle time),
-    plus individual engine breakdowns:
-      - enc: Render/3D engine (compute/shader encoder, used by QSV)
-      - dec: Video engines (fixed-function codec, used by VAAPI)
+# Engines we track. Render/3D and Compute are pooled into "compute"; Video and
+# VideoEnhance into "dec" (VideoEnhance is the post-process engine that handles
+# VAAPI scaling/deinterlace/CSC, e.g. ffmpeg `-vf scale_vaapi=...`). The Copy
+# (DMA blitter) engine is intentionally ignored — it represents transparent
+# memory transfers, not user-visible GPU work.
+# i915 fdinfo keys (cumulative ns) → logical engine name.
+_I915_ENGINE_KEYS = {
+    "drm-engine-render": "render",
+    "drm-engine-video": "video",
+    "drm-engine-video-enhance": "video-enhance",
+    "drm-engine-compute": "compute",
+}
+# Xe fdinfo suffixes (cumulative cycles, paired with drm-total-cycles-*).
+_XE_ENGINE_KEYS = {
+    "rcs": "render",
+    "vcs": "video",
+    "vecs": "video-enhance",
+    "ccs": "compute",
+}
+
+
+def _resolve_intel_gpu_pdev(device: str | None) -> str | None:
+    """Map a configured GPU hint (/dev/dri/card1, renderD128, or a PCI bus
+    address) to its drm-pdev string so we can filter fdinfo entries to that
+    device. Returns None when no hint is supplied or it cannot be resolved."""
+    if not device:
+        return None
+
+    if re.match(r"^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F]$", device):
+        return device
+
+    name = os.path.basename(device.rstrip("/"))
+    try:
+        return os.path.basename(os.path.realpath(f"/sys/class/drm/{name}/device"))
+    except OSError:
+        return None
+
+
+def _read_intel_drm_fdinfo(target_pdev: str | None) -> dict:
+    """Snapshot DRM fdinfo for every Intel client visible in /proc.
+
+    Returns a dict keyed by (pdev, drm-client-id, pid) so the same context
+    seen via multiple file descriptors on a single process collapses to one
+    entry.
     """
-
-    def get_stats_manually(output: str) -> dict[str, str]:
-        """Find global stats via regex when json fails to parse."""
-        reading = "".join(output)
-        results: dict[str, str] = {}
-
-        # rc6 residency for overall GPU usage
-        rc6_match = re.search(r'"rc6":\{"value":([\d.]+)', reading)
-        if rc6_match:
-            rc6_value = float(rc6_match.group(1))
-            results["gpu"] = f"{round(100.0 - rc6_value, 2)}%"
-        else:
-            results["gpu"] = "-%"
-
-        results["mem"] = "-%"
-
-        # Render/3D is the compute/encode engine
-        render = []
-        for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
-            packet = json.loads(result[14:])
-            single = packet.get("busy", 0.0)
-            render.append(float(single))
-
-        if render:
-            results["compute"] = f"{round(sum(render) / len(render), 2)}%"
-
-        # Video engines are the fixed-function decode engines
-        video = []
-        for result in re.findall(r'"Video/\d":{[a-z":\d.,%]+}', reading):
-            packet = json.loads(result[10:])
-            single = packet.get("busy", 0.0)
-            video.append(float(single))
-
-        if video:
-            results["dec"] = f"{round(sum(video) / len(video), 2)}%"
-
-        return results
-
-    intel_gpu_top_command = [
-        "timeout",
-        "0.5s",
-        "intel_gpu_top",
-        "-J",
-        "-o",
-        "-",
-        "-s",
-        "1000",  # Intel changed this from seconds to milliseconds in 2024+ versions
-    ]
-
-    if intel_gpu_device:
-        intel_gpu_top_command += ["-d", intel_gpu_device]
+    snapshot: dict = {}
 
     try:
-        p = sp.run(
-            intel_gpu_top_command,
-            encoding="ascii",
-            capture_output=True,
-        )
-    except UnicodeDecodeError:
-        return None
+        proc_entries = os.listdir("/proc")
+    except OSError:
+        return snapshot
 
-    # timeout has a non-zero returncode when timeout is reached
-    if p.returncode != 124:
-        logger.error(f"Unable to poll intel GPU stats: {p.stderr}")
-        return None
-    else:
-        output = "".join(p.stdout.split())
+    for entry in proc_entries:
+        if not entry.isdigit():
+            continue
 
+        fdinfo_dir = f"/proc/{entry}/fdinfo"
         try:
-            data = json.loads(f"[{output}]")
-        except json.JSONDecodeError:
-            return get_stats_manually(output)
+            fds = os.listdir(fdinfo_dir)
+        except (FileNotFoundError, PermissionError, NotADirectoryError, OSError):
+            continue
 
-        results: dict[str, str] = {}
-        rc6_values = []
-        render_global = []
-        video_global = []
-        # per-client: {pid: [total_busy_per_sample, ...]}
-        client_usages: dict[str, list[float]] = {}
+        for fd in fds:
+            try:
+                with open(f"{fdinfo_dir}/{fd}") as f:
+                    content = f.read()
+            except (FileNotFoundError, PermissionError, OSError):
+                continue
 
-        for block in data:
-            # rc6 residency: percentage of time GPU is idle
-            rc6 = block.get("rc6", {}).get("value")
-            if rc6 is not None:
-                rc6_values.append(float(rc6))
+            if "drm-driver" not in content:
+                continue
 
-            global_engine = block.get("engines")
+            fields: dict[str, str] = {}
+            for line in content.splitlines():
+                key, sep, value = line.partition(":")
+                if sep:
+                    fields[key.strip()] = value.strip()
 
-            if global_engine:
-                render_frame = global_engine.get("Render/3D/0", {}).get("busy")
-                video_frame = global_engine.get("Video/0", {}).get("busy")
+            driver = fields.get("drm-driver")
+            if driver not in ("i915", "xe"):
+                continue
 
-                if render_frame is not None:
-                    render_global.append(float(render_frame))
+            pdev = fields.get("drm-pdev", "")
+            if target_pdev and pdev != target_pdev:
+                continue
 
-                if video_frame is not None:
-                    video_global.append(float(video_frame))
+            client_id = fields.get("drm-client-id")
+            if not client_id:
+                continue
 
-            clients = block.get("clients", {})
+            key = (pdev, client_id, entry)
+            if key in snapshot:
+                continue
 
-            if clients:
-                for client_block in clients.values():
-                    pid = client_block["pid"]
+            engines: dict[str, tuple[int, int, int]] = {}
 
-                    if pid not in client_usages:
-                        client_usages[pid] = []
+            if driver == "i915":
+                for fkey, engine in _I915_ENGINE_KEYS.items():
+                    raw = fields.get(fkey)
+                    if not raw:
+                        continue
+                    try:
+                        engines[engine] = (int(raw.split()[0]), 0, 1)
+                    except (ValueError, IndexError):
+                        continue
+            else:
+                for suffix, engine in _XE_ENGINE_KEYS.items():
+                    busy_raw = fields.get(f"drm-cycles-{suffix}")
+                    total_raw = fields.get(f"drm-total-cycles-{suffix}")
 
-                    # Sum all engine-class busy values for this client
-                    total_busy = 0.0
-                    for engine in client_block.get("engine-classes", {}).values():
-                        busy = engine.get("busy")
-                        if busy is not None:
-                            total_busy += float(busy)
+                    if not (busy_raw and total_raw):
+                        continue
 
-                    client_usages[pid].append(total_busy)
+                    # drm-cycles-* is summed across every instance of the engine
+                    # class while drm-total-cycles-* tracks a single instance, so
+                    # busy/total scales up to the capacity (e.g. Battlemage
+                    # reports 2 for vcs/vecs). Capture it to divide back out;
+                    # absent means a single engine, so default to 1.
+                    capacity_raw = fields.get(f"drm-engine-capacity-{suffix}")
 
-        # Overall GPU usage from rc6 (idle) residency
-        if rc6_values:
-            rc6_avg = sum(rc6_values) / len(rc6_values)
-            results["gpu"] = f"{round(100.0 - rc6_avg, 2)}%"
+                    try:
+                        capacity = int(capacity_raw.split()[0]) if capacity_raw else 1
+                    except (ValueError, IndexError):
+                        capacity = 1
 
-        results["mem"] = "-%"
+                    try:
+                        engines[engine] = (
+                            int(busy_raw.split()[0]),
+                            int(total_raw.split()[0]),
+                            max(1, capacity),
+                        )
+                    except (ValueError, IndexError):
+                        continue
 
-        # Compute: Render/3D engine (compute/shader workloads and QSV encode)
-        if render_global:
-            results["compute"] = f"{round(sum(render_global) / len(render_global), 2)}%"
+            if not engines:
+                continue
 
-        # Decoder: Video engine (fixed-function codec)
-        if video_global:
-            results["dec"] = f"{round(sum(video_global) / len(video_global), 2)}%"
+            snapshot[key] = {"driver": driver, "pid": entry, "engines": engines}
 
-        # Per-client GPU usage (sum of all engines per process)
-        if client_usages:
-            results["clients"] = {}
-
-            for pid, samples in client_usages.items():
-                if samples:
-                    results["clients"][pid] = (
-                        f"{round(sum(samples) / len(samples), 2)}%"
-                    )
-
-        return results
+    return snapshot
 
 
-def get_openvino_npu_stats() -> Optional[dict[str, str]]:
+def get_intel_gpu_stats(
+    intel_gpu_device: str | None,
+) -> dict[str, dict[str, Any]] | None:
+    """Get stats by reading DRM fdinfo files, bucketed per-pdev.
+
+    Each DRM client FD exposes monotonic per-engine busy counters via
+    /proc/<pid>/fdinfo/<fd> (i915 since kernel 5.19, Xe since first release).
+    We sample twice and divide busy-time deltas by wall-clock to derive
+    utilization. Render/3D and Compute are pooled into "compute"; Video and
+    VideoEnhance into "dec". Overall "gpu" is the sum of those pools (clamped
+    to 100%).
+
+    The return value is keyed by the GPU's drm-pdev string so multiple Intel
+    GPUs in the same system are reported separately. Each entry carries a
+    "name" populated from OpenVINO (falling back to the pdev) so callers can
+    surface a real device name in the UI.
+    """
+    from frigate.stats.intel_gpu_info import intel_gpu_name_resolver
+
+    target_pdev = _resolve_intel_gpu_pdev(intel_gpu_device)
+
+    snapshot_a = _read_intel_drm_fdinfo(target_pdev)
+    if not snapshot_a:
+        logger.warning(
+            "Unable to collect Intel GPU stats: no DRM fdinfo entries found"
+            "%s. Check that /proc is readable and the i915/xe driver is loaded",
+            f" for pdev {target_pdev}" if target_pdev else "",
+        )
+        return None
+
+    start = time.monotonic()
+    time.sleep(_INTEL_FDINFO_SAMPLE_SECONDS)
+    elapsed_ns = (time.monotonic() - start) * 1e9
+
+    snapshot_b = _read_intel_drm_fdinfo(target_pdev)
+    if not snapshot_b or elapsed_ns <= 0:
+        logger.warning(
+            "Unable to collect Intel GPU stats: second DRM fdinfo sample was empty"
+        )
+        return None
+
+    def _new_engine_pct() -> dict[str, float]:
+        return {"render": 0.0, "video": 0.0, "video-enhance": 0.0, "compute": 0.0}
+
+    per_pdev_engine_pct: dict[str, dict[str, float]] = {}
+    per_pdev_pid_pct: dict[str, dict[str, float]] = {}
+
+    for key, data_b in snapshot_b.items():
+        data_a = snapshot_a.get(key)
+        if not data_a or data_a["driver"] != data_b["driver"]:
+            continue
+
+        pdev = key[0]
+        engine_pct = per_pdev_engine_pct.setdefault(pdev, _new_engine_pct())
+        pid_pct = per_pdev_pid_pct.setdefault(pdev, {})
+
+        client_total = 0.0
+        for engine, (busy_b, total_b, capacity) in data_b["engines"].items():
+            if engine not in engine_pct:
+                continue
+
+            busy_a, total_a, _ = data_a["engines"].get(
+                engine, (busy_b, total_b, capacity)
+            )
+
+            if data_b["driver"] == "i915":
+                delta = max(0, busy_b - busy_a)
+                pct = min(100.0, delta / elapsed_ns * 100.0)
+            else:
+                delta_busy = max(0, busy_b - busy_a)
+                delta_total = total_b - total_a
+                if delta_total <= 0:
+                    continue
+                # Normalize by capacity so a class with N engine instances
+                # (busy summed across all N) reports 0-100%, not 0-N*100%.
+                pct = min(100.0, delta_busy / (delta_total * capacity) * 100.0)
+
+            engine_pct[engine] += pct
+            client_total += pct
+
+        pid_pct[data_b["pid"]] = pid_pct.get(data_b["pid"], 0.0) + client_total
+
+    if not per_pdev_engine_pct:
+        logger.warning(
+            "Unable to collect Intel GPU stats: no per-engine counters available "
+            "(i915 requires kernel >= 5.19)"
+        )
+        return None
+
+    names = intel_gpu_name_resolver.get_names()
+    results: dict[str, dict[str, Any]] = {}
+
+    for pdev, engine_pct in per_pdev_engine_pct.items():
+        for engine in engine_pct:
+            engine_pct[engine] = min(100.0, engine_pct[engine])
+
+        compute_pct = min(100.0, engine_pct["render"] + engine_pct["compute"])
+        dec_pct = min(100.0, engine_pct["video"] + engine_pct["video-enhance"])
+        overall_pct = min(100.0, compute_pct + dec_pct)
+
+        entry: dict[str, Any] = {
+            "name": names.get(pdev) or "Intel iGPU",
+            "vendor": "intel",
+            "gpu": f"{round(overall_pct, 2)}%",
+            "mem": "-%",
+            "compute": f"{round(compute_pct, 2)}%",
+            "dec": f"{round(dec_pct, 2)}%",
+        }
+
+        pid_pct = per_pdev_pid_pct.get(pdev)
+        if pid_pct:
+            entry["clients"] = {
+                pid: f"{round(min(100.0, pct), 2)}%" for pid, pct in pid_pct.items()
+            }
+
+        results[pdev] = entry
+
+    return results
+
+
+def get_openvino_npu_stats() -> dict[str, str] | None:
     """Get NPU stats using openvino."""
     NPU_RUNTIME_PATH = "/sys/devices/pci0000:00/0000:00:0b.0/power/runtime_active_time"
 
     try:
-        with open(NPU_RUNTIME_PATH, "r") as f:
+        with open(NPU_RUNTIME_PATH) as f:
             initial_runtime = float(f.read().strip())
 
         initial_time = time.time()
@@ -430,7 +542,7 @@ def get_openvino_npu_stats() -> Optional[dict[str, str]]:
         time.sleep(1.0)
 
         # Read runtime value again
-        with open(NPU_RUNTIME_PATH, "r") as f:
+        with open(NPU_RUNTIME_PATH) as f:
             current_runtime = float(f.read().strip())
 
         current_time = time.time()
@@ -449,10 +561,10 @@ def get_openvino_npu_stats() -> Optional[dict[str, str]]:
         return None
 
 
-def get_rockchip_gpu_stats() -> Optional[dict[str, str | float]]:
+def get_rockchip_gpu_stats() -> dict[str, str | float] | None:
     """Get GPU stats using rk."""
     try:
-        with open("/sys/kernel/debug/rkrga/load", "r") as f:
+        with open("/sys/kernel/debug/rkrga/load") as f:
             content = f.read()
     except FileNotFoundError:
         return None
@@ -470,7 +582,7 @@ def get_rockchip_gpu_stats() -> Optional[dict[str, str | float]]:
     stats: dict[str, str | float] = {"gpu": average_load, "mem": "-%"}
 
     try:
-        with open("/sys/class/thermal/thermal_zone5/temp", "r") as f:
+        with open("/sys/class/thermal/thermal_zone5/temp") as f:
             line = f.readline().strip()
             stats["temp"] = round(int(line) / 1000, 1)
     except (FileNotFoundError, OSError, ValueError):
@@ -479,10 +591,10 @@ def get_rockchip_gpu_stats() -> Optional[dict[str, str | float]]:
     return stats
 
 
-def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
+def get_rockchip_npu_stats() -> dict[str, float | str] | None:
     """Get NPU stats using rk."""
     try:
-        with open("/sys/kernel/debug/rknpu/load", "r") as f:
+        with open("/sys/kernel/debug/rknpu/load") as f:
             npu_output = f.read()
 
             if "Core0:" in npu_output:
@@ -502,7 +614,7 @@ def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
     stats: dict[str, float | str] = {"npu": mean, "mem": "-%"}
 
     try:
-        with open("/sys/class/thermal/thermal_zone6/temp", "r") as f:
+        with open("/sys/class/thermal/thermal_zone6/temp") as f:
             line = f.readline().strip()
             stats["temp"] = round(int(line) / 1000, 1)
     except (FileNotFoundError, OSError, ValueError):
@@ -511,7 +623,7 @@ def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
     return stats
 
 
-def get_axcl_npu_stats() -> Optional[dict[str, str | float]]:
+def get_axcl_npu_stats() -> dict[str, str | float] | None:
     """Get NPU stats using axcl."""
     # Check if axcl-smi exists
     axcl_smi_path = "/usr/bin/axcl/axcl-smi"
@@ -628,18 +740,18 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
         return results
 
 
-def get_jetson_stats() -> Optional[dict[int, dict]]:
+def get_jetson_stats() -> dict[int, dict] | None:
     results = {}
 
     try:
         results["mem"] = "-"  # no discrete gpu memory
 
         if os.path.exists("/sys/devices/gpu.0/load"):
-            with open("/sys/devices/gpu.0/load", "r") as f:
+            with open("/sys/devices/gpu.0/load") as f:
                 gpuload = float(f.readline()) / 10
                 results["gpu"] = f"{gpuload}%"
         elif os.path.exists("/sys/devices/platform/gpu.0/load"):
-            with open("/sys/devices/platform/gpu.0/load", "r") as f:
+            with open("/sys/devices/platform/gpu.0/load") as f:
                 gpuload = float(f.readline()) / 10
                 results["gpu"] = f"{gpuload}%"
         else:
@@ -697,6 +809,41 @@ def get_hailo_temps() -> dict[str, float]:
     return temps
 
 
+def is_go2rtc_arbitrary_exec_allowed() -> bool:
+    """Read the GO2RTC_ALLOW_ARBITRARY_EXEC override from env, docker
+    secrets, or the Home Assistant add-on options file."""
+    raw: str | None = None
+    if "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.environ:
+        raw = os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC")
+    elif (
+        os.path.isdir("/run/secrets")
+        and os.access("/run/secrets", os.R_OK)
+        and "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.listdir("/run/secrets")
+    ):
+        try:
+            with open("/run/secrets/GO2RTC_ALLOW_ARBITRARY_EXEC") as f:
+                raw = f.read().strip()
+        except OSError:
+            raw = None
+    elif os.path.isfile("/data/options.json"):
+        try:
+            with open("/data/options.json") as f:
+                options = json.loads(f.read())
+            raw = options.get("go2rtc_allow_arbitrary_exec")
+        except (OSError, json.JSONDecodeError):
+            raw = None
+
+    return raw is not None and str(raw).lower() in ("true", "1", "yes")
+
+
+def is_restricted_go2rtc_source(stream_source: str) -> bool:
+    """Check if a stream source is a restricted type (echo, expr, or exec)
+    and the GO2RTC_ALLOW_ARBITRARY_EXEC override is not set."""
+    if not stream_source.strip().startswith(("echo:", "expr:", "exec:")):
+        return False
+    return not is_go2rtc_arbitrary_exec_allowed()
+
+
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     clean_path = escape_special_characters(path)
@@ -711,26 +858,172 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
     else:
         format_entries = None
 
-    ffprobe_cmd = [
+    def run(rtsp_transport: str | None = None) -> sp.CompletedProcess:
+        cmd = [ffmpeg.ffprobe_path]
+        if rtsp_transport:
+            cmd += ["-rtsp_transport", rtsp_transport]
+        cmd += [
+            "-timeout",
+            "1000000",
+            "-print_format",
+            "json",
+            "-show_entries",
+            f"stream={stream_entries}",
+        ]
+        if detailed and format_entries:
+            cmd.extend(["-show_entries", f"format={format_entries}"])
+        cmd.extend(["-loglevel", "error", clean_path])
+        try:
+            return sp.run(cmd, capture_output=True, timeout=6)
+        except sp.TimeoutExpired as e:
+            logger.info(
+                "ffprobe timed out while probing %s (transport=%s)",
+                clean_camera_user_pass(path),
+                rtsp_transport or "default",
+            )
+            return sp.CompletedProcess(
+                args=cmd,
+                returncode=1,
+                stdout=e.stdout or b"",
+                stderr=(e.stderr or b"") + b"\nffprobe timed out",
+            )
+
+    result = run()
+
+    # For RTSP: retry with explicit TCP transport if the first attempt failed
+    # (default UDP may be blocked)
+    if result.returncode != 0 and clean_path.startswith("rtsp://"):
+        result = run(rtsp_transport="tcp")
+
+    return result
+
+
+KEYFRAME_PROBE_WINDOW_SECONDS = 20
+KEYFRAME_GAP_WARNING_SECONDS = 4.0
+
+
+def parse_keyframe_packets(output: str) -> tuple[list[float], float | None]:
+    """Parse ffprobe CSV `pts_time,flags` output.
+
+    Returns the presentation timestamps of keyframes (flags containing "K")
+    and the maximum timestamp observed across all packets.
+    """
+    keyframe_pts: list[float] = []
+    max_pts: float | None = None
+
+    for line in output.splitlines():
+        parts = line.split(",")
+        if len(parts) < 2:
+            continue
+        try:
+            pts = float(parts[0])
+        except ValueError:
+            continue
+        if max_pts is None or pts > max_pts:
+            max_pts = pts
+        if "K" in parts[1]:
+            keyframe_pts.append(pts)
+
+    return keyframe_pts, max_pts
+
+
+def classify_keyframe_gaps(
+    keyframe_pts: list[float], segment_time: int
+) -> dict[str, Any]:
+    """Classify keyframe spacing for recording suitability.
+
+    A camera using a smart/+ codec or a long/variable GOP produces large or
+    irregular gaps between keyframes, which breaks time-based recording
+    segmentation. Severity:
+      - "unknown" when fewer than two keyframes were observed
+      - "error" when the longest gap exceeds the record segment length
+      - "warning" when the longest gap exceeds the warning threshold
+      - "ok" otherwise
+    """
+    thresholds = {
+        "warning": KEYFRAME_GAP_WARNING_SECONDS,
+        "error": segment_time,
+    }
+
+    if len(keyframe_pts) < 2:
+        return {
+            "keyframe_count": len(keyframe_pts),
+            "max_gap": None,
+            "mean_gap": None,
+            "min_gap": None,
+            "segment_time": segment_time,
+            "severity": "unknown",
+            "thresholds": thresholds,
+        }
+
+    gaps = [b - a for a, b in zip(keyframe_pts, keyframe_pts[1:])]
+    max_gap = max(gaps)
+
+    if max_gap > segment_time:
+        severity = "error"
+    elif max_gap > KEYFRAME_GAP_WARNING_SECONDS:
+        severity = "warning"
+    else:
+        severity = "ok"
+
+    return {
+        "keyframe_count": len(keyframe_pts),
+        "max_gap": round(max_gap, 2),
+        "mean_gap": round(sum(gaps) / len(gaps), 2),
+        "min_gap": round(min(gaps), 2),
+        "segment_time": segment_time,
+        "severity": severity,
+        "thresholds": thresholds,
+    }
+
+
+async def analyze_record_keyframes(
+    ffmpeg, url: str, segment_time: int, window: int = KEYFRAME_PROBE_WINDOW_SECONDS
+) -> dict[str, Any]:
+    """Probe a stream for ~`window` seconds and classify its keyframe spacing.
+
+    Reads video packet flags via ffprobe to find keyframes, then measures the
+    gaps between them. On timeout or failure returns an "unknown" result rather
+    than a false all-clear.
+    """
+    clean_url = escape_special_characters(url)
+    cmd = [
         ffmpeg.ffprobe_path,
-        "-timeout",
-        "1000000",
-        "-print_format",
-        "json",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-read_intervals",
+        f"%+{window}",
         "-show_entries",
-        f"stream={stream_entries}",
+        "packet=pts_time,flags",
+        "-of",
+        "csv=p=0",
+        clean_url,
     ]
 
-    # Add format entries for detailed mode
-    if detailed and format_entries:
-        ffprobe_cmd.extend(["-show_entries", f"format={format_entries}"])
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=window + 15)
+    except TimeoutError:
+        logger.warning("Keyframe probe timed out for record stream")
+        proc.kill()
+        return classify_keyframe_gaps([], segment_time)
+    except OSError as err:
+        logger.error("Keyframe probe failed: %s", err)
+        return classify_keyframe_gaps([], segment_time)
 
-    ffprobe_cmd.extend(["-loglevel", "error", clean_path])
+    keyframe_pts, max_pts = parse_keyframe_packets(stdout.decode("utf-8", "replace"))
+    result = classify_keyframe_gaps(keyframe_pts, segment_time)
+    result["duration_observed"] = round(max_pts, 2) if max_pts is not None else None
+    return result
 
-    return sp.run(ffprobe_cmd, capture_output=True)
 
-
-def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
+def vainfo_hwaccel(device_name: str | None = None) -> sp.CompletedProcess:
     """Run vainfo."""
     if not device_name:
         cmd = ["vainfo"]
@@ -807,10 +1100,15 @@ async def get_video_properties(
 ) -> dict[str, Any]:
     async def probe_with_ffprobe(
         url: str,
-    ) -> tuple[bool, int, int, Optional[str], float]:
+        rtsp_transport: str | None = None,
+    ) -> tuple[bool, int, int, str | None, float]:
         """Fallback using ffprobe: returns (valid, width, height, codec, duration)."""
-        cmd = [
-            ffmpeg.ffprobe_path,
+        cmd = [ffmpeg.ffprobe_path]
+        if rtsp_transport:
+            cmd += ["-rtsp_transport", rtsp_transport]
+        cmd += [
+            "-rw_timeout",
+            "5000000",
             "-v",
             "quiet",
             "-print_format",
@@ -819,11 +1117,23 @@ async def get_video_properties(
             "-show_streams",
             url,
         ]
+        proc = None
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            stdout, _ = await proc.communicate()
+            try:
+                stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=6)
+            except TimeoutError:
+                logger.info(
+                    "ffprobe timed out while probing %s (transport=%s)",
+                    clean_camera_user_pass(url),
+                    rtsp_transport or "default",
+                )
+                proc.kill()
+                await proc.wait()
+                return False, 0, 0, None, -1
+
             if proc.returncode != 0:
                 return False, 0, 0, None, -1
 
@@ -846,7 +1156,7 @@ async def get_video_properties(
         except (json.JSONDecodeError, ValueError, KeyError, sp.SubprocessError):
             return False, 0, 0, None, -1
 
-    def probe_with_cv2(url: str) -> tuple[bool, int, int, Optional[str], float]:
+    def probe_with_cv2(url: str) -> tuple[bool, int, int, str | None, float]:
         """Primary attempt using cv2: returns (valid, width, height, fourcc, duration)."""
         cap = cv2.VideoCapture(url)
         if not cap.isOpened():
@@ -872,12 +1182,26 @@ async def get_video_properties(
         cap.release()
         return valid, width, height, fourcc, duration
 
-    # try cv2 first
-    has_video, width, height, fourcc, duration = probe_with_cv2(url)
+    is_rtsp = url.startswith("rtsp://")
 
-    # fallback to ffprobe if needed
-    if not has_video or (get_duration and duration < 0):
+    if is_rtsp:
+        # skip cv2 for RTSP: its FFmpeg backend has a hardcoded ~30s internal
+        # timeout that cannot be shortened per-call, and ffprobe bounded by
+        # -rw_timeout handles RTSP probing reliably
         has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
+    else:
+        # try cv2 first for local files, HTTP, RTMP
+        has_video, width, height, fourcc, duration = probe_with_cv2(url)
+
+        # fallback to ffprobe if needed
+        if not has_video or (get_duration and duration < 0):
+            has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
+
+    # last resort for RTSP: try TCP transport, since default UDP may be blocked
+    if (not has_video or (get_duration and duration < 0)) and is_rtsp:
+        has_video, width, height, fourcc, duration = await probe_with_ffprobe(
+            url, rtsp_transport="tcp"
+        )
 
     result: dict[str, Any] = {"has_valid_video": has_video}
     if has_video:
@@ -892,10 +1216,10 @@ async def get_video_properties(
 
 def process_logs(
     contents: str,
-    service: Optional[str] = None,
-    start: Optional[int] = None,
-    end: Optional[int] = None,
-) -> Tuple[int, List[str]]:
+    service: str | None = None,
+    start: int | None = None,
+    end: int | None = None,
+) -> tuple[int, list[str]]:
     log_lines = []
     last_message = None
     last_timestamp = None

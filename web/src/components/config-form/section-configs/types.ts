@@ -24,6 +24,10 @@ export type ConditionalMessage = {
   severity: MessageSeverity;
   /** Function returning true when the message should be shown */
   condition: (ctx: MessageConditionContext) => boolean;
+  /** Optional interpolation values passed to t() for {{var}} substitution */
+  values?: Record<string, unknown>;
+  /** Optional documentation path (e.g. "/configuration/object_detectors#model"). */
+  docLink?: string;
 };
 
 /** Field-level conditional message, adds field targeting */

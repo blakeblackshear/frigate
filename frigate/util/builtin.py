@@ -2,7 +2,6 @@
 
 import ast
 import copy
-import datetime
 import logging
 import math
 import multiprocessing.queues
@@ -10,16 +9,21 @@ import queue
 import re
 import shlex
 import struct
+import time
 import urllib.parse
+from collections import deque
 from collections.abc import Mapping
 from multiprocessing.managers import ValueProxy
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from ruamel.yaml import YAML
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
+
+if TYPE_CHECKING:
+    from frigate.config import CameraConfig
 
 logger = logging.getLogger(__name__)
 
@@ -29,23 +33,20 @@ class EventsPerSecond:
         self._start = None
         self._max_events = max_events
         self._last_n_seconds = last_n_seconds
-        self._timestamps = []
+        self._timestamps: deque[float] = deque(maxlen=max_events)
 
     def start(self) -> None:
-        self._start = datetime.datetime.now().timestamp()
+        self._start = time.monotonic()
 
     def update(self) -> None:
-        now = datetime.datetime.now().timestamp()
+        now = time.monotonic()
         if self._start is None:
             self._start = now
         self._timestamps.append(now)
-        # truncate the list when it goes 100 over the max_size
-        if len(self._timestamps) > self._max_events + 100:
-            self._timestamps = self._timestamps[(1 - self._max_events) :]
         self.expire_timestamps(now)
 
     def eps(self) -> float:
-        now = datetime.datetime.now().timestamp()
+        now = time.monotonic()
         if self._start is None:
             self._start = now
         # compute the (approximate) events in the last n seconds
@@ -60,7 +61,7 @@ class EventsPerSecond:
     def expire_timestamps(self, now: float) -> None:
         threshold = now - self._last_n_seconds
         while self._timestamps and self._timestamps[0] < threshold:
-            del self._timestamps[0]
+            self._timestamps.popleft()
 
 
 class InferenceSpeed:
@@ -132,8 +133,26 @@ def get_ffmpeg_arg_list(arg: Any) -> list:
     return arg if isinstance(arg, list) else shlex.split(arg)
 
 
+# all built-in record presets use this segment_time
+DEFAULT_RECORD_SEGMENT_TIME = 10
+
+
+def get_record_segment_time(config: "CameraConfig") -> int:
+    """Extract -segment_time from the camera's record output args."""
+    record_args = get_ffmpeg_arg_list(config.ffmpeg.output_args.record)
+
+    if record_args and record_args[0].startswith("preset"):
+        return DEFAULT_RECORD_SEGMENT_TIME
+
+    try:
+        idx = record_args.index("-segment_time")
+        return int(record_args[idx + 1])
+    except (ValueError, IndexError):
+        return DEFAULT_RECORD_SEGMENT_TIME
+
+
 def load_labels(
-    path: Optional[str], encoding="utf-8", prefill=91, indexed: bool | None = None
+    path: str | None, encoding="utf-8", prefill=91, indexed: bool | None = None
 ):
     """Loads labels from file (with or without index numbers).
     Args:
@@ -145,7 +164,7 @@ def load_labels(
     if path is None:
         return {}
 
-    with open(path, "r", encoding=encoding) as f:
+    with open(path, encoding=encoding) as f:
         labels = {index: "unknown" for index in range(prefill)}
         lines = f.readlines()
         if not lines:
@@ -161,8 +180,8 @@ def load_labels(
 
 
 def to_relative_box(
-    width: int, height: int, box: Tuple[int, int, int, int]
-) -> Tuple[int | float, int | float, int | float, int | float]:
+    width: int, height: int, box: tuple[int, int, int, int]
+) -> tuple[int | float, int | float, int | float, int | float]:
     return (
         box[0] / width,  # x
         box[1] / height,  # y
@@ -176,7 +195,7 @@ def create_mask(frame_shape, mask):
     mask_img[:] = 255
 
 
-def process_config_query_string(query_string: Dict[str, list]) -> Dict[str, Any]:
+def process_config_query_string(query_string: dict[str, list]) -> dict[str, Any]:
     updates = {}
     for key_path_str, new_value_list in query_string.items():
         # use the string key as-is for updates dictionary
@@ -194,8 +213,8 @@ def process_config_query_string(query_string: Dict[str, list]) -> Dict[str, Any]
 
 
 def flatten_config_data(
-    config_data: Dict[str, Any], parent_key: str = ""
-) -> Dict[str, Any]:
+    config_data: dict[str, Any], parent_key: str = ""
+) -> dict[str, Any]:
     items = []
     for key, value in config_data.items():
         escaped_key = escape_config_key_segment(str(key))
@@ -242,12 +261,12 @@ def split_config_key_path(key_path_str: str) -> list[str]:
     return parts
 
 
-def update_yaml_file_bulk(file_path: str, updates: Dict[str, Any]):
+def update_yaml_file_bulk(file_path: str, updates: dict[str, Any]):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
 
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             data = yaml.load(f)
     except FileNotFoundError:
         logger.error(
@@ -274,26 +293,51 @@ def update_yaml_file_bulk(file_path: str, updates: Dict[str, Any]):
         logger.error(f"Unable to write to Frigate config file {file_path}: {e}")
 
 
+def clear_orphaned_comments(collection, parent, parent_key) -> None:
+    """Drop stale ruamel comment tokens after a deletion empties a collection.
+
+    When the last entry of a mapping or sequence is removed, any comments that
+    lived inside that collection's block are orphaned. ruamel then emits them
+    above a flow-style `{}`/`[]` dedented to column 0, which is unparseable and
+    corrupts the config. Clearing the emptied collection's own comment metadata
+    (and the parent's entry pointing at it) keeps the dump valid. Non-empty
+    collections are left untouched so comments on remaining siblings survive.
+    """
+    if not hasattr(collection, "ca") or len(collection) != 0:
+        return
+
+    collection.ca.items.clear()
+    collection.ca.comment = None
+    if parent is not None and hasattr(parent, "ca"):
+        parent.ca.items.pop(parent_key, None)
+
+
 def update_yaml(data, key_path, new_value):
     temp = data
+    parent = None
+    parent_key = None
     for key in key_path[:-1]:
         if isinstance(key, tuple):
             if key[0] not in temp:
                 temp[key[0]] = [{}] * max(1, key[1] + 1)
             elif len(temp[key[0]]) <= key[1]:
                 temp[key[0]] += [{}] * (key[1] - len(temp[key[0]]) + 1)
+            parent, parent_key = temp[key[0]], key[1]
             temp = temp[key[0]][key[1]]
         else:
             if key not in temp or temp[key] is None:
                 temp[key] = {}
+            parent, parent_key = temp, key
             temp = temp[key]
 
     last_key = key_path[-1]
     if new_value == "":
         if isinstance(last_key, tuple):
             del temp[last_key[0]][last_key[1]]
+            clear_orphaned_comments(temp[last_key[0]], temp, last_key[0])
         else:
             del temp[last_key]
+            clear_orphaned_comments(temp, parent, parent_key)
     else:
         if isinstance(last_key, tuple):
             if last_key[0] not in temp:
@@ -394,9 +438,7 @@ def generate_color_palette(n):
     return colors
 
 
-def serialize(
-    vector: Union[list[float], np.ndarray, float], pack: bool = True
-) -> bytes:
+def serialize(vector: list[float] | np.ndarray | float, pack: bool = True) -> bytes:
     """Serializes a list of floats, numpy array, or single float into a compact "raw bytes" format"""
     if isinstance(vector, np.ndarray):
         # Convert numpy array to list of floats
@@ -415,7 +457,7 @@ def serialize(
         else:
             return vector
     except struct.error as e:
-        raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}")
+        raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}") from e
 
 
 def deserialize(bytes_data: bytes) -> list[float]:

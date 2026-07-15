@@ -357,6 +357,9 @@ class TrackedObjectProcessor(threading.Thread):
 
     def get_current_frame_time(self, camera: str) -> float:
         """Returns the latest frame time for a given camera."""
+        if camera not in self.camera_states:
+            return 0.0
+
         return self.camera_states[camera].current_frame_time
 
     def set_sub_label(
@@ -773,7 +776,9 @@ class TrackedObjectProcessor(threading.Thread):
                 logger.debug(f"Camera {camera} disabled, skipping update")
                 continue
 
-            camera_state = self.camera_states[camera]
+            camera_state = self.camera_states.get(camera)
+            if camera_state is None:
+                continue
 
             camera_state.update(
                 frame_name, frame_time, current_tracked_objects, motion_boxes, regions
