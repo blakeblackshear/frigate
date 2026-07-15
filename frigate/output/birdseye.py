@@ -335,6 +335,7 @@ class BirdsEyeFrameManager:
 
         self.camera_layout: list[Any] = []
         self.active_cameras: set[str] = set()
+        self.layout_camera_order: list[str] = []
         self.last_output_time = 0.0
 
     def add_camera(self, cam: str) -> None:
@@ -371,6 +372,13 @@ class BirdsEyeFrameManager:
         """Remove a camera from self.cameras."""
         if cam in self.cameras:
             del self.cameras[cam]
+
+    def sort_cameras(self, cameras: set[str]) -> list[str]:
+        """Sort cameras by birdseye order, falling back to name when tied."""
+        return sorted(
+            cameras,
+            key=lambda camera: (self.config.cameras[camera].birdseye.order, camera),
+        )
 
     def clear_frame(self) -> None:
         logger.debug("Clearing the birdseye frame")
@@ -482,6 +490,7 @@ class BirdsEyeFrameManager:
             # if the layout needs to be cleared
             self.camera_layout = []
             self.active_cameras = set()
+            self.layout_camera_order = []
             self.clear_frame()
             frame_changed = True
             layout_changed = True
@@ -500,21 +509,21 @@ class BirdsEyeFrameManager:
             else:
                 reset_layout = True
 
+            sorted_active_cameras = self.sort_cameras(active_cameras)
+
+            if not reset_layout and sorted_active_cameras != self.layout_camera_order:
+                logger.debug("Birdseye camera order changed")
+                reset_layout = True
+
             if reset_layout:
                 logger.debug("Resetting Birdseye layout...")
                 self.clear_frame()
                 self.active_cameras = active_cameras
+                self.layout_camera_order = sorted_active_cameras
                 layout_changed = True  # Layout is changing due to reset
                 # this also converts added_cameras from a set to a list since we need
                 # to pop elements in order
-                active_cameras_to_add = sorted(
-                    active_cameras,
-                    # sort cameras by order and by name if the order is the same
-                    key=lambda active_camera: (
-                        self.config.cameras[active_camera].birdseye.order,
-                        active_camera,
-                    ),
-                )
+                active_cameras_to_add = sorted_active_cameras
                 if len(active_cameras) == 1:
                     # show single camera as fullscreen
                     camera = active_cameras_to_add[0]
@@ -780,6 +789,7 @@ class BirdsEyeFrameManager:
             frame_changed, layout_changed = False, False
             self.active_cameras = set()
             self.camera_layout = []
+            self.layout_camera_order = []
             print(traceback.format_exc())
 
         # if the frame was updated or the fps is too low, send frame
