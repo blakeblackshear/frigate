@@ -1365,7 +1365,7 @@ class PtzAutoTracker:
         camera_config = self.config.cameras[camera]
 
         if camera_config.onvif.autotracking.enabled:
-            if not self.autotracker_init[camera]:
+            if not self.autotracker_init.get(camera):
                 future = asyncio.run_coroutine_threadsafe(
                     self._autotracker_setup(camera_config, camera), self.onvif.loop
                 )
@@ -1483,9 +1483,11 @@ class PtzAutoTracker:
                 }
 
     async def camera_maintenance(self, camera):
-        # bail and don't check anything if we're calibrating or tracking an object
+        # bail and don't check anything if we're not set up yet, calibrating, or
+        # tracking an object. a camera enabled at runtime has no autotracker_init
+        # entry until autotrack_object sets it up
         if (
-            not self.autotracker_init[camera]
+            not self.autotracker_init.get(camera)
             or self.calibrating[camera]
             or self.tracked_object[camera] is not None
         ):
