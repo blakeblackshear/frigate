@@ -971,7 +971,11 @@ def config_set(request: Request, body: AppConfigSetBody):
                 content=(
                     {
                         "success": True,
-                        "message": "Config successfully updated, restart to apply",
+                        "message": (
+                            "Config successfully updated"
+                            if body.requires_restart == 0
+                            else "Config successfully updated, restart to apply"
+                        ),
                     }
                 ),
                 status_code=200,
