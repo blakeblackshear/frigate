@@ -21,8 +21,12 @@ class TestGpuStats(unittest.TestCase):
     @patch("frigate.util.services.time.sleep")
     @patch("frigate.util.services.time.monotonic")
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    def test_intel_gpu_stats_fdinfo(self, read_fdinfo, monotonic, sleep, get_names):
+    @patch("frigate.util.services._enumerate_drm_devices")
+    def test_intel_gpu_stats_fdinfo(
+        self, drm_devices, read_fdinfo, monotonic, sleep, get_names
+    ):
         # 1 second of wall clock between snapshots
+        drm_devices.return_value = {"0000:00:02.0": "i915"}
         monotonic.side_effect = [0.0, 1.0]
         get_names.return_value = {"0000:00:02.0": "Intel Graphics"}
 
@@ -96,13 +100,15 @@ class TestGpuStats(unittest.TestCase):
     @patch("frigate.util.services.time.sleep")
     @patch("frigate.util.services.time.monotonic")
     @patch("frigate.util.services._read_intel_drm_fdinfo")
+    @patch("frigate.util.services._enumerate_drm_devices")
     def test_intel_gpu_stats_xe_capacity(
-        self, read_fdinfo, monotonic, sleep, get_names
+        self, drm_devices, read_fdinfo, monotonic, sleep, get_names
     ):
         # Xe engines report cumulative cycles paired with total cycles, plus a
         # per-class capacity. drm-cycles-* is summed across every instance of a
         # class, so on Battlemage (capacity 2 for vcs/vecs) busy/total must be
         # divided by capacity to land in 0-100%.
+        drm_devices.return_value = {"0000:03:00.0": "xe"}
         monotonic.side_effect = [0.0, 1.0]
         get_names.return_value = {"0000:03:00.0": "Intel Arc"}
 
@@ -150,7 +156,145 @@ class TestGpuStats(unittest.TestCase):
             },
         }
 
+    @patch("frigate.stats.intel_gpu_info.intel_gpu_name_resolver.get_names")
+    @patch("frigate.util.services.time.sleep")
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    def test_intel_gpu_stats_no_clients(self, read_fdinfo):
+    @patch("frigate.util.services._enumerate_drm_devices")
+    def test_intel_gpu_stats_no_clients_reports_idle(
+        self, drm_devices, read_fdinfo, sleep, get_names
+    ):
+        # The device exists but nothing holds it open, e.g. while camera
+        # processes are restarting. This is an idle state, not an error:
+        # returning None here would latch the hwaccel error cooldown and
+        # blank GPU stats for an hour over a momentary gap.
+        drm_devices.return_value = {"0000:00:02.0": "i915"}
         read_fdinfo.return_value = {}
+        get_names.return_value = {"0000:00:02.0": "Intel Graphics"}
+
+        assert get_intel_gpu_stats(None) == {
+            "0000:00:02.0": {
+                "name": "Intel Graphics",
+                "vendor": "intel",
+                "gpu": "0.0%",
+                "mem": "-%",
+                "compute": "0.0%",
+                "dec": "0.0%",
+            },
+        }
+        # Idle short-circuits before spending the sample window
+        sleep.assert_not_called()
+        read_fdinfo.assert_called_once()
+
+    @patch("frigate.util.services.time.sleep")
+    @patch("frigate.util.services._read_intel_drm_fdinfo")
+    @patch("frigate.util.services._enumerate_drm_devices")
+    def test_intel_gpu_stats_clients_without_engine_counters(
+        self, drm_devices, read_fdinfo, sleep
+    ):
+        # i915 publishes drm-driver/drm-pdev/drm-client-id but no drm-engine-*
+        # lines while GuC submission is active on kernels older than 6.5, so
+        # clients are found with nothing to sample. Reporting idle here would
+        # be a lie, and sampling a second time cannot help.
+        drm_devices.return_value = {"0000:00:02.0": "i915"}
+        read_fdinfo.return_value = {
+            ("0000:00:02.0", "48", "1109"): {
+                "driver": "i915",
+                "pid": "1109",
+                "engines": {},
+            },
+            ("0000:00:02.0", "51", "1258"): {
+                "driver": "i915",
+                "pid": "1258",
+                "engines": {},
+            },
+        }
+
         assert get_intel_gpu_stats(None) is None
+        sleep.assert_not_called()
+        read_fdinfo.assert_called_once()
+
+    @patch("frigate.util.services._read_intel_drm_fdinfo")
+    @patch("frigate.util.services._enumerate_drm_devices")
+    def test_intel_gpu_stats_no_intel_device(self, drm_devices, read_fdinfo):
+        # Only a non-Intel GPU is visible in sysfs; /proc is never scanned
+        drm_devices.return_value = {"0000:01:00.0": "nvidia"}
+
+        assert get_intel_gpu_stats(None) is None
+        read_fdinfo.assert_not_called()
+
+    @patch("frigate.util.services._read_intel_drm_fdinfo")
+    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services._resolve_intel_gpu_pdev")
+    def test_intel_gpu_stats_unresolvable_device_hint(
+        self, resolve_pdev, drm_devices, read_fdinfo
+    ):
+        # A configured intel_gpu_device that cannot be resolved is a config
+        # error, not a reason to silently fall back to reporting all GPUs
+        resolve_pdev.return_value = None
+
+        assert get_intel_gpu_stats("/dev/dri/renderD999") is None
+        drm_devices.assert_not_called()
+        read_fdinfo.assert_not_called()
+
+    @patch("frigate.util.services._read_intel_drm_fdinfo")
+    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services._resolve_intel_gpu_pdev")
+    def test_intel_gpu_stats_hint_resolves_to_non_intel_gpu(
+        self, resolve_pdev, drm_devices, read_fdinfo
+    ):
+        # card numbering can reorder across reboots on multi-GPU hosts, so a
+        # configured hint may point at another vendor's card; call it out
+        # instead of reporting nothing
+        resolve_pdev.return_value = "0000:01:00.0"
+        drm_devices.return_value = {
+            "0000:00:02.0": "i915",
+            "0000:01:00.0": "nvidia",
+        }
+
+        assert get_intel_gpu_stats("/dev/dri/card0") is None
+        read_fdinfo.assert_not_called()
+
+    @patch("frigate.util.services._read_intel_drm_fdinfo")
+    @patch("frigate.util.services._enumerate_drm_devices")
+    def test_intel_gpu_stats_unreadable_proc(self, drm_devices, read_fdinfo):
+        # A scan failure (None) is a different condition than a scan that
+        # finds no clients ({}) and must not report idle
+        drm_devices.return_value = {"0000:00:02.0": "i915"}
+        read_fdinfo.return_value = None
+
+        assert get_intel_gpu_stats(None) is None
+
+    @patch("frigate.stats.intel_gpu_info.intel_gpu_name_resolver.get_names")
+    @patch("frigate.util.services.time.sleep")
+    @patch("frigate.util.services.time.monotonic")
+    @patch("frigate.util.services._read_intel_drm_fdinfo")
+    @patch("frigate.util.services._enumerate_drm_devices")
+    def test_intel_gpu_stats_clients_lost_between_samples(
+        self, drm_devices, read_fdinfo, monotonic, sleep, get_names
+    ):
+        # Clients disappearing during the sample window is transient process
+        # churn, so report idle rather than latching an error
+        drm_devices.return_value = {"0000:00:02.0": "i915"}
+        monotonic.side_effect = [0.0, 1.0]
+        get_names.return_value = {"0000:00:02.0": "Intel Graphics"}
+        read_fdinfo.side_effect = [
+            {
+                ("0000:00:02.0", "1", "100"): {
+                    "driver": "i915",
+                    "pid": "100",
+                    "engines": {"video": (5_000_000_000, 0, 1)},
+                },
+            },
+            {},
+        ]
+
+        assert get_intel_gpu_stats(None) == {
+            "0000:00:02.0": {
+                "name": "Intel Graphics",
+                "vendor": "intel",
+                "gpu": "0.0%",
+                "mem": "-%",
+                "compute": "0.0%",
+                "dec": "0.0%",
+            },
+        }
