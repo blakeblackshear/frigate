@@ -97,6 +97,15 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         if self.inference_speed:
             self.inference_speed.update(duration)
 
+    def refresh_idle_metrics(self) -> None:
+        name = self.model_config.name
+        if not self.metrics or name not in self.metrics.classification_cps:
+            return
+        eps = self.classifications_per_second.eps()
+        self.metrics.classification_cps[name].value = eps
+        if eps == 0 and name in self.metrics.classification_speeds:
+            self.metrics.classification_speeds[name].value = 0.0
+
     def _should_save_image(
         self, camera: str, detected_state: str, score: float = 1.0
     ) -> bool:
@@ -443,6 +452,15 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
         self.classifications_per_second.update()
         if self.inference_speed:
             self.inference_speed.update(duration)
+
+    def refresh_idle_metrics(self) -> None:
+        name = self.model_config.name
+        if not self.metrics or name not in self.metrics.classification_cps:
+            return
+        eps = self.classifications_per_second.eps()
+        self.metrics.classification_cps[name].value = eps
+        if eps == 0 and name in self.metrics.classification_speeds:
+            self.metrics.classification_speeds[name].value = 0.0
 
     def get_weighted_score(
         self,

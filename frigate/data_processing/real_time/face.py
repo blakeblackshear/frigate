@@ -177,6 +177,12 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.faces_per_second.update()
         self.inference_speed.update(duration)
 
+    def refresh_idle_metrics(self) -> None:
+        eps = self.faces_per_second.eps()
+        self.metrics.face_rec_fps.value = eps
+        if eps == 0:
+            self.metrics.face_rec_speed.value = 0.0
+
     def process_frame(self, obj_data: dict[str, Any], frame: np.ndarray) -> None:
         """Look for faces in image."""
         self.metrics.face_rec_fps.value = self.faces_per_second.eps()

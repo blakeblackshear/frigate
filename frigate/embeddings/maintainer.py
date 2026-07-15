@@ -281,6 +281,9 @@ class EmbeddingMaintainer(threading.Thread):
         # recordings data
         self.recordings_available_through: dict[str, float] = {}
 
+        # throttle for decaying idle enrichment metrics
+        self._last_metrics_refresh = 0.0
+
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
@@ -295,6 +298,7 @@ class EmbeddingMaintainer(threading.Thread):
             self._expire_dedicated_lpr()
             self._process_finalized()
             self._process_event_metadata()
+            self._refresh_idle_metrics()
 
         # Shutdown deferred processors
         for processor in self.realtime_processors:
@@ -311,6 +315,24 @@ class EmbeddingMaintainer(threading.Thread):
         self.embeddings_responder.stop()
         self.requestor.stop()
         logger.info("Exiting embeddings maintenance...")
+
+    def _refresh_idle_metrics(self) -> None:
+        """Let each processor decay its rate/speed gauges while idle.
+
+        Processors only touch their metrics inside process_frame/process_data,
+        so without this their gauges freeze at the last value when no objects
+        are being processed and the UI keeps showing a stale inference time.
+        Throttled to once per second — eps() decays over a 10s window, so a
+        finer cadence is unnecessary.
+        """
+        now = datetime.datetime.now().timestamp()
+        if now - self._last_metrics_refresh < 1.0:
+            return
+        self._last_metrics_refresh = now
+        for processor in self.realtime_processors:
+            processor.refresh_idle_metrics()
+        for processor in self.post_processors:
+            processor.refresh_idle_metrics()
 
     def _check_enrichment_config_updates(self) -> None:
         """Check for enrichment config updates and delegate to processors."""

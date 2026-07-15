@@ -57,6 +57,12 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         self.object_desc_dps = EventsPerSecond()
         self.object_desc_dps.start()
 
+    def refresh_idle_metrics(self) -> None:
+        eps = self.object_desc_dps.eps()
+        self.metrics.object_desc_dps.value = eps
+        if eps == 0:
+            self.metrics.object_desc_speed.value = 0.0
+
     def __handle_frame_update(
         self, camera: str, data: dict, yuv_frame: np.ndarray
     ) -> None:

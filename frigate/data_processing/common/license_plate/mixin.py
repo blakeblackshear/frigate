@@ -59,6 +59,16 @@ class LicensePlateProcessingMixin:
         self.plates_det_second = EventsPerSecond()
         self.plates_det_second.start()
         self.event_metadata_publisher = EventMetadataPublisher()
+
+    def refresh_idle_metrics(self) -> None:
+        rec_eps = self.plates_rec_second.eps()
+        self.metrics.alpr_pps.value = rec_eps
+        if rec_eps == 0:
+            self.metrics.alpr_speed.value = 0.0
+        det_eps = self.plates_det_second.eps()
+        self.metrics.yolov9_lpr_pps.value = det_eps
+        if det_eps == 0:
+            self.metrics.yolov9_lpr_speed.value = 0.0
         self.ctc_decoder = CTCDecoder(
             character_dict_path=os.path.join(
                 MODEL_CACHE_DIR, "paddleocr-onnx", "ppocr_keys_v1.txt"

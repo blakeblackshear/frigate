@@ -59,6 +59,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         self.review_desc_dps = EventsPerSecond()
         self.review_desc_dps.start()
 
+    def refresh_idle_metrics(self) -> None:
+        eps = self.review_desc_dps.eps()
+        self.metrics.review_desc_dps.value = eps
+        if eps == 0:
+            self.metrics.review_desc_speed.value = 0.0
+
     def calculate_frame_count(
         self,
         camera: str,

@@ -63,3 +63,15 @@ class PostProcessorApi(ABC):
             payload: The updated configuration object.
         """
         pass
+
+    def refresh_idle_metrics(self) -> None:
+        """Decay this processor's rate/speed gauges toward 0 while idle.
+
+        process_data() only runs when there is a description to generate, so the
+        rate gauge and the inference-speed EMA hold their last value when the
+        processor is idle and the UI shows a stale inference time forever. The
+        maintainer calls this every loop iteration; processors with gauges
+        override it to re-read EventsPerSecond.eps() and zero the speed once the
+        rate reaches 0. Default is a no-op.
+        """
+        pass

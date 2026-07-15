@@ -80,6 +80,19 @@ class RealTimeProcessorApi(ABC):
         """
         pass
 
+    def refresh_idle_metrics(self) -> None:
+        """Decay this processor's rate/speed gauges toward 0 while idle.
+
+        process_frame() only runs on object updates, so the rate gauge (an
+        EventsPerSecond value) and the inference-speed gauge (an EMA that only
+        changes on update) both hold their last value when the processor stops
+        receiving frames. The UI then shows a stale inference time forever. The
+        maintainer calls this every loop iteration; processors with gauges
+        override it to re-read EventsPerSecond.eps() (which decays on its own)
+        and zero the speed once the rate reaches 0. Default is a no-op.
+        """
+        pass
+
     def drain_results(self) -> list[dict[str, Any]]:
         """Return pending results that need IPC side-effects.
 
