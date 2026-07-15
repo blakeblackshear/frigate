@@ -20,6 +20,10 @@ from norfair.camera_motion import (
 from frigate.camera import PTZMetrics
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import CameraConfig, FrigateConfig, ZoomingModeEnum
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     AUTOTRACKING_MAX_AREA_RATIO,
     AUTOTRACKING_MAX_MOVE_METRICS,
@@ -194,7 +198,9 @@ class PtzAutoTrackerThread(threading.Thread):
 
     def run(self):
         while not self.stop_event.wait(1):
-            for camera, camera_config in self.config.cameras.items():
+            self.ptz_autotracker.config_subscriber.check_for_updates()
+
+            for camera, camera_config in list(self.config.cameras.items()):
                 if not camera_config.enabled:
                     continue
 
@@ -211,6 +217,7 @@ class PtzAutoTrackerThread(threading.Thread):
                         self.ptz_autotracker.tracked_object[camera] = None
                         self.ptz_autotracker.tracked_object_history[camera].clear()
 
+        self.ptz_autotracker.config_subscriber.stop()
         logger.info("Exiting autotracker...")
 
 
@@ -243,6 +250,15 @@ class PtzAutoTracker:
         self.move_coefficients: dict[str, object] = {}
         self.zoom_time: dict[str, float] = {}
         self.zoom_factor: dict[str, object] = {}
+
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.autotracking,
+            ],
+        )
 
         # if cam is set to autotrack, onvif should be set up
         for camera, camera_config in self.config.cameras.items():

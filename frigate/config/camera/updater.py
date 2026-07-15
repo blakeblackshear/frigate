@@ -14,6 +14,7 @@ class CameraConfigUpdateEnum(str, Enum):
     add = "add"  # for adding a camera
     audio = "audio"
     audio_transcription = "audio_transcription"
+    autotracking = "autotracking"  # ptz autotracking only, without an onvif reinit
     birdseye = "birdseye"
     detect = "detect"
     enabled = "enabled"
@@ -145,6 +146,8 @@ class CameraConfigUpdateSubscriber:
             config.snapshots = updated_config
         elif update_type == CameraConfigUpdateEnum.onvif:
             config.onvif = updated_config
+        elif update_type == CameraConfigUpdateEnum.autotracking:
+            config.onvif.autotracking = updated_config
         elif update_type == CameraConfigUpdateEnum.timestamp_style:
             config.timestamp_style = updated_config
         elif update_type == CameraConfigUpdateEnum.zones:
