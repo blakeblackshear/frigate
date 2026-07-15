@@ -117,7 +117,9 @@ class CameraMaintainer(threading.Thread):
 
         if runtime:
             self.camera_metrics[name] = CameraMetrics(self.metrics_manager)
-            self.ptz_metrics[name] = PTZMetrics(autotracker_enabled=False)
+            self.ptz_metrics[name] = PTZMetrics(
+                autotracker_enabled=config.onvif.autotracking.enabled
+            )
             self.region_grids[name] = get_camera_regions_grid(
                 name,
                 config.detect,
