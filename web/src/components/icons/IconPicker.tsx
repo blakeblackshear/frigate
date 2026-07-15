@@ -153,11 +153,15 @@ export default function IconPicker({
 }
 
 type IconRendererProps = {
-  icon: IconType;
+  icon: IconType | undefined;
   size?: number;
   className?: string;
 };
 
 export function IconRenderer({ icon, size, className }: IconRendererProps) {
+  if (!icon) {
+    return null;
+  }
+
   return <>{React.createElement(icon, { size, className })}</>;
 }
