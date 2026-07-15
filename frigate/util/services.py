@@ -433,7 +433,8 @@ def get_intel_gpu_stats(
     if not snapshot_a:
         logger.warning(
             "Unable to collect Intel GPU stats: no DRM fdinfo entries found"
-            "%s. Check that /proc is readable and the i915/xe driver is loaded",
+            "%s. Check kernel version (required >= 6.5) and that /proc is readable"
+            " and the i915/xe driver is loaded",
             f" for pdev {target_pdev}" if target_pdev else "",
         )
         return None
