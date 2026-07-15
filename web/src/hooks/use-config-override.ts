@@ -103,6 +103,91 @@ function stripAutoDerivedMissingFromGlobal(
 }
 
 /**
+ * Sections carrying a `filters` map that the backend materializes per-camera:
+ * every label in the camera's label list (`objects.track`, `audio.listen`)
+ * without an explicit filter gets a default entry. The global map gets no
+ * equivalent treatment for those labels, so a label the camera picks up exists
+ * on the camera side alone.
+ */
+const AUTO_POPULATED_FILTER_SECTIONS = ["objects", "audio"];
+
+/**
+ * Resolve the schema defaults for a single `<section>.filters` entry, in the
+ * normalized/collapsed shape config values are compared in. Returns undefined
+ * when the schema hasn't loaded or doesn't describe the filters map.
+ */
+function getDefaultFilter(
+  sectionPath: string,
+  schema?: RJSFSchema,
+): JsonValue | undefined {
+  if (!schema) return undefined;
+  const sectionSchema = extractSectionSchema(schema, sectionPath, "camera");
+  const filtersSchema = sectionSchema?.properties?.filters as
+    | RJSFSchema
+    | undefined;
+  if (!filtersSchema) return undefined;
+
+  // An optional map (`dict[str, X] | None`, as `audio.filters` is declared)
+  // becomes an anyOf, so the entry schema can sit in a branch rather than on
+  // the map schema itself.
+  const candidates = [
+    filtersSchema,
+    ...((filtersSchema.anyOf ?? filtersSchema.oneOf ?? []) as RJSFSchema[]),
+  ];
+  const filterSchema = candidates.find((candidate) =>
+    isJsonObject(candidate?.additionalProperties as JsonValue),
+  )?.additionalProperties;
+  if (!filterSchema || typeof filterSchema !== "object") return undefined;
+  return collapseEmpty(
+    normalizeConfigValue(applySchemaDefaults(filterSchema as RJSFSchema, {})),
+  );
+}
+
+/**
+ * Complete a global baseline with the filter entries the backend only
+ * materializes per-camera.
+ *
+ * The effective global value for a label with no explicit global filter is the
+ * filter's schema defaults, not "absent": that is exactly what a camera
+ * inherits for it. Filling those in keeps an untouched label from reading as a
+ * camera override, and lets a label the camera does filter report the specific
+ * changed field rather than the whole filter.
+ */
+function withDefaultFilters(
+  sectionPath: string,
+  globalValue: JsonValue,
+  cameraValue: JsonValue,
+  schema?: RJSFSchema,
+): JsonValue {
+  if (
+    !AUTO_POPULATED_FILTER_SECTIONS.includes(sectionPath) ||
+    !isJsonObject(globalValue) ||
+    !isJsonObject(cameraValue)
+  ) {
+    return globalValue;
+  }
+  const cameraFilters = cameraValue.filters;
+  if (!isJsonObject(cameraFilters)) return globalValue;
+
+  const globalFilters = isJsonObject(globalValue.filters)
+    ? globalValue.filters
+    : undefined;
+  const missing = Object.keys(cameraFilters).filter(
+    (label) => globalFilters?.[label] === undefined,
+  );
+  if (missing.length === 0) return globalValue;
+
+  const defaultFilter = getDefaultFilter(sectionPath, schema);
+  if (defaultFilter === undefined) return globalValue;
+
+  const filters: JsonObject = { ...globalFilters };
+  for (const label of missing) {
+    filters[label] = defaultFilter;
+  }
+  return { ...globalValue, filters };
+}
+
+/**
  * Whether the given field is auto-derived for `sectionPath` and the global
  * value at that path is missing — in which case a per-camera value should
  * not be treated as an override.
@@ -290,7 +375,7 @@ export function useConfigOverride({
       "camera",
       buildHiddenFieldContext(config, "camera", cameraName),
     );
-    const collapsedGlobal = stripHiddenPaths(
+    const collapsedGlobalRaw = stripHiddenPaths(
       collapseEmpty(normalizedGlobalValue),
       hiddenFields,
     );
@@ -300,8 +385,14 @@ export function useConfigOverride({
     );
     const collapsedCamera = stripAutoDerivedMissingFromGlobal(
       sectionPath,
-      collapsedGlobal,
+      collapsedGlobalRaw,
       collapsedCameraRaw,
+    );
+    const collapsedGlobal = withDefaultFilters(
+      sectionPath,
+      collapsedGlobalRaw,
+      collapsedCamera,
+      schema,
     );
 
     const comparisonGlobal = compareFields
@@ -446,7 +537,7 @@ export function useAllCameraOverrides(
         "camera",
         buildHiddenFieldContext(config, "camera", cameraName),
       );
-      const collapsedGlobal = stripHiddenPaths(
+      const collapsedGlobalRaw = stripHiddenPaths(
         collapseEmpty(globalValue),
         hiddenFields,
       );
@@ -456,8 +547,14 @@ export function useAllCameraOverrides(
       );
       const collapsedCamera = stripAutoDerivedMissingFromGlobal(
         key,
-        collapsedGlobal,
+        collapsedGlobalRaw,
         collapsedCameraRaw,
+      );
+      const collapsedGlobal = withDefaultFilters(
+        key,
+        collapsedGlobalRaw,
+        collapsedCamera,
+        schema,
       );
       const comparisonGlobal = compareFields
         ? pickFields(collapsedGlobal, compareFields)
@@ -714,8 +811,14 @@ export function useCamerasOverridingSection(
         globalValue,
         collapseEmpty(cameraSectionValues[idx]),
       );
-      for (const delta of collectFieldDeltas(
+      const effectiveGlobalValue = withDefaultFilters(
+        sectionPath,
         globalValue,
+        cameraValue,
+        schema,
+      );
+      for (const delta of collectFieldDeltas(
+        effectiveGlobalValue,
         cameraValue,
         compareFields,
       )) {
@@ -738,7 +841,7 @@ export function useCamerasOverridingSection(
           if (deltasByPath.has(path)) continue;
           if (isCrossCameraIgnoredPath(path)) continue;
           if (!isPathAllowed(path, compareFields)) continue;
-          const g = get(globalValue, path);
+          const g = get(effectiveGlobalValue, path);
           const p = get(normalizedProfile, path);
           if (!isEqual(g, p)) {
             deltasByPath.set(path, {
@@ -791,17 +894,23 @@ export function useCameraSectionDeltas(
     const sectionMeta = OVERRIDABLE_SECTIONS.find((s) => s.key === sectionPath);
     const compareFields = sectionMeta?.compareFields;
 
-    const globalValue = collapseEmpty(
+    const rawGlobalValue = collapseEmpty(
       getEffectiveGlobalBaseline(config, sectionPath, compareFields, schema),
     );
     const cameraValue = stripAutoDerivedMissingFromGlobal(
       sectionPath,
-      globalValue,
+      rawGlobalValue,
       collapseEmpty(
         normalizeConfigValue(
           getBaseCameraSectionValue(config, cameraName, sectionPath),
         ),
       ),
+    );
+    const globalValue = withDefaultFilters(
+      sectionPath,
+      rawGlobalValue,
+      cameraValue,
+      schema,
     );
 
     const hiddenFields = getEffectiveHiddenFields(

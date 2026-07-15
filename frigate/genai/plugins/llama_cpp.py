@@ -76,29 +76,6 @@ def _parse_launch_arg(args: list[str], flag: str) -> str | None:
     return args[idx + 1]
 
 
-def _fetch_llama_props(base_url: str, model: str) -> dict[str, Any]:
-    """Fetch /props from a llama.cpp server, with llama-swap fallback.
-
-    Raises the underlying RequestException if both endpoints fail; callers
-    decide how to surface the failure.
-    """
-    try:
-        response = requests.get(
-            f"{base_url}/props",
-            params={"model": model},
-            timeout=10,
-        )
-        response.raise_for_status()
-        return cast(dict[str, Any], response.json())
-    except Exception:
-        response = requests.get(
-            f"{base_url}/upstream/{model}/props",
-            timeout=10,
-        )
-        response.raise_for_status()
-        return cast(dict[str, Any], response.json())
-
-
 def _to_jpeg(img_bytes: bytes) -> bytes | None:
     """Convert image bytes to JPEG. llama.cpp/STB does not support WebP."""
     try:
@@ -132,6 +109,43 @@ class LlamaCppClient(GenAIClient):
     def supports_embeddings(self) -> bool:
         """llama.cpp exposes an /embeddings endpoint for any loaded model."""
         return True
+
+    def _auth_headers(self) -> dict | None:
+        """Bearer auth header when an API key is configured, else None."""
+        if self.genai_config.api_key:
+            return {"Authorization": "Bearer " + self.genai_config.api_key}
+
+        return None
+
+    def _get(self, url: str, **kwargs: Any) -> requests.Response:
+        """GET with the configured auth headers injected."""
+        return requests.get(url, headers=self._auth_headers(), **kwargs)
+
+    def _post(self, url: str, **kwargs: Any) -> requests.Response:
+        """POST with the configured auth headers injected."""
+        return requests.post(url, headers=self._auth_headers(), **kwargs)
+
+    def _fetch_llama_props(self, base_url: str, model: str) -> dict[str, Any]:
+        """Fetch /props from a llama.cpp server, with llama-swap fallback.
+
+        Raises the underlying RequestException if both endpoints fail; callers
+        decide how to surface the failure.
+        """
+        try:
+            response = self._get(
+                f"{base_url}/props",
+                params={"model": model},
+                timeout=10,
+            )
+            response.raise_for_status()
+            return cast(dict[str, Any], response.json())
+        except Exception:
+            response = self._get(
+                f"{base_url}/upstream/{model}/props",
+                timeout=10,
+            )
+            response.raise_for_status()
+            return cast(dict[str, Any], response.json())
 
     def _init_provider(self) -> str | None:
         """Initialize the client and query model metadata from the server."""
@@ -216,7 +230,7 @@ class LlamaCppClient(GenAIClient):
 
         model_entry: dict[str, Any] | None = None
         try:
-            response = requests.get(f"{base_url}/v1/models", timeout=10)
+            response = self._get(f"{base_url}/v1/models", timeout=10)
             response.raise_for_status()
             models_data = response.json()
 
@@ -277,7 +291,7 @@ class LlamaCppClient(GenAIClient):
                 info["supports_tools"] = True
 
         try:
-            props = _fetch_llama_props(base_url, configured_model)
+            props = self._fetch_llama_props(base_url, configured_model)
 
             if info["context_size"] is None:
                 default_settings = props.get("default_generation_settings", {})
@@ -363,7 +377,7 @@ class LlamaCppClient(GenAIClient):
             if self.supports_toggleable_thinking:
                 payload["chat_template_kwargs"] = {"enable_thinking": enable_thinking}
 
-            response = requests.post(
+            response = self._post(
                 f"{self.provider}/v1/chat/completions",
                 json=payload,
                 timeout=self.timeout,
@@ -413,7 +427,7 @@ class LlamaCppClient(GenAIClient):
         if base_url is None:
             return []
         try:
-            response = requests.get(f"{base_url}/v1/models", timeout=10)
+            response = self._get(f"{base_url}/v1/models", timeout=10)
             response.raise_for_status()
             models = []
             for m in response.json().get("data", []):
@@ -516,7 +530,7 @@ class LlamaCppClient(GenAIClient):
             "messages": [{"role": "user", "content": content}],
             "max_tokens": 1,
         }
-        response = requests.post(
+        response = self._post(
             f"{self.provider}/v1/chat/completions",
             json=payload,
             timeout=60,
@@ -626,7 +640,7 @@ class LlamaCppClient(GenAIClient):
         if self.provider is None:
             return False
         try:
-            props = _fetch_llama_props(self.provider, self.genai_config.model)
+            props = self._fetch_llama_props(self.provider, self.genai_config.model)
         except Exception as e:
             logger.warning("Failed to refresh llama.cpp media marker: %s", e)
             return False
@@ -687,7 +701,7 @@ class LlamaCppClient(GenAIClient):
             return content
 
         def post_embeddings() -> requests.Response:
-            return requests.post(
+            return self._post(
                 f"{self.provider}/embeddings",
                 json={"model": self.genai_config.model, "content": build_content()},
                 timeout=self.timeout,
@@ -791,7 +805,7 @@ class LlamaCppClient(GenAIClient):
                 stream=False,
                 enable_thinking=enable_thinking,
             )
-            response = requests.post(
+            response = self._post(
                 f"{self.provider}/v1/chat/completions",
                 json=payload,
                 timeout=self.timeout,
@@ -872,6 +886,7 @@ class LlamaCppClient(GenAIClient):
                     "POST",
                     f"{self.provider}/v1/chat/completions",
                     json=payload,
+                    headers=self._auth_headers(),
                 ) as response:
                     response.raise_for_status()
                     async for line in response.aiter_lines():

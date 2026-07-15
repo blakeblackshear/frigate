@@ -401,7 +401,7 @@ class _FakeAsyncClient:
     async def __aexit__(self, *exc):
         return False
 
-    def stream(self, method, url, json=None):
+    def stream(self, method, url, json=None, headers=None):
         return _FakeStreamCtx(self._lines)
 
 
