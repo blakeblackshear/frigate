@@ -926,8 +926,12 @@ def config_set(request: Request, body: AppConfigSetBody):
 
                 if request.app.dispatcher is not None:
                     request.app.dispatcher.config = config
+
                     for comm in request.app.dispatcher.comms:
                         comm.config = config
+
+                    # the swap rebuilt every camera from yaml, so re-layer the runtime toggles
+                    request.app.dispatcher.apply_runtime_state()
 
                 if body.update_topic:
                     if body.update_topic.startswith("config/cameras/"):
