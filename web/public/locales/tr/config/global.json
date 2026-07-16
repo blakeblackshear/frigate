@@ -7,7 +7,34 @@
         "label": "Ortam değişkenleri"
     },
     "audio": {
-        "label": "Ses olayları"
+        "label": "Ses olayları",
+        "enabled": {
+            "label": "Ses algılamayı etkinleştir"
+        },
+        "max_not_heard": {
+            "label": "Zaman aşımını sonlandır",
+            "description": "Ses tabanlı olayın sona ermesi için yapılandırılmış ses türünün algılanmadığı saniye süresi."
+        },
+        "min_volume": {
+            "label": "Minimum ses seviyesi",
+            "description": "Ses algılamayı çalıştırmak için gereken minimum RMS ses seviyesi eşiği; daha düşük değerler hassasiyeti artırır (örneğin: 200 yüksek, 500 orta, 1000 düşük)."
+        },
+        "listen": {
+            "label": "Dinlenecek ses türleri",
+            "description": "Algılanacak ses olayı türlerinin listesi (örneğin: bark (havlama), fire_alarm (yangın alarmı), speech (konuşma), yell (bağırma))."
+        },
+        "filters": {
+            "label": "Ses filtreleri",
+            "description": "Yanlış alarmları azaltmak için kullanılan güven eşikleri gibi ses türüne özel filtre ayarları.",
+            "threshold": {
+                "label": "Minimum ses güven eşiği",
+                "description": "Ses olayının sayılması için gereken minimum güven eşiği."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Orijinal ses durumu",
+            "description": "Ses algılamanın statik yapılandırma dosyasında başlangıçta etkinleştirilip etkinleştirilmediğini belirtir."
+        }
     },
     "version": {
         "label": "Mevcut konfigürasyon versiyonu",
@@ -15,5 +42,24 @@
     },
     "logger": {
         "label": "Kayıt"
+    },
+    "detect": {
+        "stationary": {
+            "threshold": {
+                "label": "Sabitlik eşiği",
+                "description": "Bir nesneyi sabit olarak işaretlemek için gereken, konum değişikliği olmayan kare sayısı."
+            },
+            "max_frames": {
+                "label": "Maksimum kare sayısı",
+                "description": "Sabit nesnelerin, izlenmesi bırakılmadan önce ne kadar süre takip edileceğini sınırlar.",
+                "default": {
+                    "label": "Varsayılan maksimum kare sayısı",
+                    "description": "Sabit bir nesneyi durdurmadan önce takip etmek için varsayılan maksimum kare sayısı."
+                },
+                "objects": {
+                    "label": "Nesne maksimum kare sayısı"
+                }
+            }
+        }
     }
 }

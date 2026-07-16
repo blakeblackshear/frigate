@@ -42,12 +42,49 @@
         "stream": "Siaran",
         "placeholder": "Pilih stream",
         "streamMethod": {
-          "label": "Metode Streaming"
+          "label": "Metode Streaming",
+          "placeholder": "Pilih satu metode streaming",
+          "method": {
+            "noStreaming": {
+              "label": "Tidak Streaming",
+              "desc": "Gambar kamera hanya diperbarui sekali per menit dan tidak akan ada live streaming."
+            },
+            "smartStreaming": {
+              "label": "Streaming cerdas (disarankan)",
+              "desc": "Streaming cerdas akan memperbarui gambar kamera sekali per menit saat tidak ada aktivitas yang terdeteksi untuk menghemat bandwidth dan sumber daya. Ketika aktivitas terdeteksi, gambar akan otomatis beralih ke live stream."
+            },
+            "continuousStreaming": {
+              "desc": {
+                "title": "Kamera akan selalu live stream selama muncul di dashboard, meskipun tidak ada aktivitas yang terdeteksi.",
+                "warning": "Streaming Terus Menerus dapat menyebabkan penggunaan bandwidth yang tinggi dan masalah performa. Gunakan dengan hati-hati."
+              },
+              "label": "Streaming Terus Menerus"
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Mode Kompatibilitas",
+          "desc": "Aktifkan opsi ini hanya jika live stream kamera Anda menampilkan artefak warna dan memiliki garis diagonal di sisi kanan gambar."
         }
       }
-    }
+    },
+    "showAll": "Tampilkan semua grup kamera",
+    "showLess": "Lebih sedikit",
+    "editGroups": "Sunting Grup Kamera"
   },
   "debug": {
-    "boundingBox": "Batas Kotak"
+    "boundingBox": "Batas Kotak",
+    "options": {
+      "label": "Pengaturan",
+      "title": "Opsi",
+      "showOptions": "Lihat Opsi",
+      "hideOptions": "Sembunyikan Opsi"
+    },
+    "zones": "Zona",
+    "motion": "Gerakan",
+    "regions": "Wilayah",
+    "timestamp": "Timestamp",
+    "mask": "Masker",
+    "paths": "Path"
   }
 }

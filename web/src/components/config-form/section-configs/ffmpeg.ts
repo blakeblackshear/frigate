@@ -22,6 +22,27 @@ const ffmpegArgsWidget = (
 const ffmpeg: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/ffmpeg_presets",
+    fieldMessages: [
+      {
+        key: "hwaccel-manual-not-recommended",
+        field: "hwaccel_args",
+        position: "after",
+        messageKey: "configMessages.ffmpeg.hwaccelManualNotRecommended",
+        severity: "warning",
+        condition: (ctx) => {
+          // Manual mode is active when hwaccel_args is an explicit args list
+          // or a non-preset string
+          const value = ctx.formData?.hwaccel_args;
+          if (Array.isArray(value)) {
+            return value.length > 0;
+          }
+          if (typeof value === "string") {
+            return !value.startsWith("preset-");
+          }
+          return false;
+        },
+      },
+    ],
     fieldDocs: {
       hwaccel_args: "/configuration/ffmpeg_presets#hwaccel-presets",
       "inputs.hwaccel_args": "/configuration/ffmpeg_presets#hwaccel-presets",

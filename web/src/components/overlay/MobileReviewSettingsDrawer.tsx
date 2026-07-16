@@ -149,7 +149,7 @@ export default function MobileReviewSettingsDrawer({
 
     if (!range) {
       toast.error(
-        t("export.toast.error.noVaildTimeSelected", {
+        t("export.toast.error.noValidTimeSelected", {
           ns: "components/dialog",
         }),
         {

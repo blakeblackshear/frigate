@@ -1032,7 +1032,7 @@ function ObjectTimeline({
         data: {
           ...event.data,
           zones_friendly_names: event.data?.zones?.map((zone) =>
-            resolveZoneName(config, zone),
+            resolveZoneName(config, zone, event.camera),
           ),
         },
       }));

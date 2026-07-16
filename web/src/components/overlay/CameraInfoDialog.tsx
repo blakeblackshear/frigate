@@ -7,7 +7,8 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { Ffprobe } from "@/types/stats";
+import KeyframeAnalysisSection from "./KeyframeAnalysisSection";
+import { Ffprobe, KeyframeAnalysis } from "@/types/stats";
 import { Button } from "../ui/button";
 import copy from "copy-to-clipboard";
 import { CameraConfig } from "@/types/frigateConfig";
@@ -30,6 +31,7 @@ export default function CameraInfoDialog({
 }: CameraInfoDialogProps) {
   const { t } = useTranslation(["views/system"]);
   const [ffprobeInfo, setFfprobeInfo] = useState<Ffprobe[]>();
+  const [keyframeInfo, setKeyframeInfo] = useState<KeyframeAnalysis>();
 
   useEffect(() => {
     axios
@@ -67,7 +69,12 @@ export default function CameraInfoDialog({
   }, []);
 
   const onCopyFfprobe = async () => {
-    copy(JSON.stringify(ffprobeInfo));
+    copy(
+      JSON.stringify({
+        ffprobe: ffprobeInfo,
+        keyframe_analysis: keyframeInfo,
+      }),
+    );
     toast.success(t("cameras.toast.success.copyToClipboard"));
   };
 
@@ -96,7 +103,7 @@ export default function CameraInfoDialog({
             <Trans ns="views/system">cameras.info.streamDataFromFFPROBE</Trans>
           </DialogDescription>
 
-          <div className="mb-2 p-4">
+          <div className="mb-2 p-4 text-sm">
             {ffprobeInfo ? (
               <div>
                 {ffprobeInfo.map((stream, idx) => (
@@ -184,6 +191,10 @@ export default function CameraInfoDialog({
                     )}
                   </div>
                 ))}
+                <KeyframeAnalysisSection
+                  cameraName={camera.name}
+                  onResult={setKeyframeInfo}
+                />
               </div>
             ) : (
               <div className="flex flex-col items-center">

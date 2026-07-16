@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
 
 from numpy import ndarray
 
@@ -10,7 +9,7 @@ class MotionDetector(ABC):
     @abstractmethod
     def __init__(
         self,
-        frame_shape: Tuple[int, int, int],
+        frame_shape: tuple[int, int, int],
         config: MotionConfig,
         fps: int,
         improve_contrast: bool,

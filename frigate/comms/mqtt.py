@@ -1,6 +1,7 @@
 import logging
 import threading
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
@@ -40,6 +41,18 @@ class MqttClient(Communicator):
     def stop(self) -> None:
         self.publish("available", "stopped", retain=True)
         self.client.disconnect()
+
+    def _notifications_enabled_in_config(self) -> bool:
+        """Whether notifications are configured globally or on any camera.
+
+        Notifications can be enabled per camera with the global config left
+        disabled, so the global topics must consider both (matching how
+        app.py decides to create the WebPushClient).
+        """
+        return self.config.notifications.enabled_in_config or any(
+            cam.enabled and cam.notifications.enabled_in_config
+            for cam in self.config.cameras.values()
+        )
 
     def _set_initial_topics(self) -> None:
         """Set initial state topics."""
@@ -157,7 +170,7 @@ class MqttClient(Communicator):
                     retain=True,
                 )
 
-        if self.config.notifications.enabled_in_config:
+        if self._notifications_enabled_in_config():
             self.publish(
                 "notifications/state",
                 "ON" if self.config.notifications.enabled else "OFF",
@@ -202,8 +215,8 @@ class MqttClient(Communicator):
                 logger.error("Unable to connect to MQTT server: MQTT Not authorized")
             else:
                 logger.error(
-                    "Unable to connect to MQTT server: Connection refused. Error code: "
-                    + reason_code.getName()
+                    "Unable to connect to MQTT server: Connection refused. Error code: %s",
+                    reason_code.getName(),
                 )
 
         self.connected = True
@@ -256,6 +269,7 @@ class MqttClient(Communicator):
             "review_detections",
             "object_descriptions",
             "review_descriptions",
+            "notifications",
         ]
 
         for name in self.config.cameras.keys():
@@ -264,6 +278,12 @@ class MqttClient(Communicator):
                     f"{self.mqtt_config.topic_prefix}/{name}/{callback}/set",
                     self.on_mqtt_command,
                 )
+
+            # notifications suspend doesn't follow the /set topic pattern
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/{name}/notifications/suspend",
+                self.on_mqtt_command,
+            )
 
             if self.config.cameras[name].onvif.host:
                 self.client.message_callback_add(
@@ -289,7 +309,7 @@ class MqttClient(Communicator):
                     self.on_mqtt_command,
                 )
 
-        if self.config.notifications.enabled_in_config:
+        if self._notifications_enabled_in_config():
             self.client.message_callback_add(
                 f"{self.mqtt_config.topic_prefix}/notifications/set",
                 self.on_mqtt_command,

@@ -72,7 +72,7 @@
     "integrationObjectClassification": "Clasificación de objetos",
     "integrationAudioTranscription": "Transcripción de audio",
     "cameraDetect": "Detección de objetos",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "Flujos (FFmpeg)",
     "cameraRecording": "Grabación",
     "cameraSnapshots": "Instantáneas",
     "cameraMotion": "Detección de movimiento",
@@ -1720,7 +1720,17 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "Flujo {{index}}"
+      "itemTitle": "Flujo {{index}}",
+      "sourceMode": {
+        "restream": "Retransmisión (go2rtc)",
+        "manual": "Ruta de entrada manual",
+        "go2rtcStreamLabel": "Flujo go2rtc",
+        "go2rtcStreamPlaceholder": "Selecciona un flujo go2rtc",
+        "noGo2rtcStreams": "No hay flujos go2rtc configurados",
+        "go2rtcStreamSearch": "Buscar flujos…",
+        "availableStreams": "Flujos disponibles",
+        "noMatchingStreams": "No hay flujos coincidentes"
+      }
     },
     "restartRequiredField": "Reinicio necesario",
     "restartRequiredFooter": "Configuración modificada - reinicio necesario",
@@ -2020,6 +2030,9 @@
     },
     "onvif": {
       "autotrackingNoZones": "El seguimiento automático requiere al menos una zona. Define una zona para esta cámara en Máscaras / Zonas y, a continuación, establécela como zona obligatoria a continuación."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "No son remontados los argumentos de aceleración por hardware manual. A no ser que un requisito específico exista, seleccione la preselección que coincida con su hardware."
     }
   },
   "resetToDefaultDescription": "Esto restablecerá todos los ajustes de esta sección a sus valores predeterminados. Esta acción no se puede deshacer.",

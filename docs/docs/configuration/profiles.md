@@ -14,13 +14,13 @@ Profiles allow you to define named sets of camera configuration overrides that c
 Profiles operate as a two-level system:
 
 1. **Profile definitions** are declared at the top level of your config under `profiles`. Each definition has a machine name (the key) and a `friendly_name` for display in the UI.
-2. **Camera profile overrides** are declared under each camera's `profiles` section, keyed by the profile name. Only the settings you want to change need to be specified — everything else is inherited from the camera's base configuration.
+2. **Camera profile overrides** are declared under each camera's `profiles` section, keyed by the profile name. Only the settings you want to change need to be specified. Everything else is inherited from the camera's base configuration.
 
 When a profile is activated, Frigate merges each camera's profile overrides on top of its base config. When the profile is deactivated, all cameras revert to their original settings. Only one profile can be active at a time.
 
 :::info
 
-Profile changes are applied in-memory and take effect immediately — no restart is required. The active profile is persisted across Frigate restarts (stored in the `/config/.profiles` file).
+Profile changes are applied in-memory and take effect immediately. No restart is required. The active profile is persisted across Frigate restarts (stored in the `/config/.profiles` file).
 
 :::
 
@@ -33,10 +33,10 @@ The easiest way to define profiles is to use the Frigate UI. Profiles can also b
 <ConfigTabs>
 <TabItem value="ui">
 
-1. **Create a profile** — Navigate to <NavPath path="Settings > Global configuration > Profiles" />. Click the **Add Profile** button, enter a name (and optionally a profile ID).
-2. **Configure overrides** — Navigate to a camera configuration section (e.g. Motion detection, Record, Notifications). In the top right, two buttons will appear - choose a camera and a profile from the profile selector to edit overrides for that camera and section. Only the fields you change will be stored as overrides — fields that require a restart are hidden since profiles are applied at runtime. You can click the **Remove Profile Override** button to clear overrides.
-3. **Activate a profile** — Use the **Profiles** option in Frigate's main menu to choose a profile. Alternatively, in Settings, navigate to <NavPath path="Settings > Global configuration > Profiles" />, then choose a profile in the Active Profile dropdown to activate it. The active profile is also shown in the status bar at the bottom of the screen on desktop browsers.
-4. **Delete a profile** — Navigate to <NavPath path="Settings > Global configuration > Profiles" />, then click the trash icon for a profile. This removes the profile definition and all camera overrides associated with it.
+1. **Create a profile**: Navigate to <NavPath path="Settings > Global configuration > Profiles" />. Click the **Add Profile** button, enter a name (and optionally a profile ID).
+2. **Configure overrides**: Navigate to a camera configuration section (e.g. Motion detection, Record, Notifications). In the top right, two buttons will appear - choose a camera and a profile from the profile selector to edit overrides for that camera and section. Only the fields you change will be stored as overrides. Fields that require a restart are hidden since profiles are applied at runtime. You can click the **Remove Profile Override** button to clear overrides.
+3. **Activate a profile**: Use the **Profiles** option in Frigate's main menu to choose a profile. Alternatively, in Settings, navigate to <NavPath path="Settings > Global configuration > Profiles" />, then choose a profile in the Active Profile dropdown to activate it. The active profile is also shown in the status bar at the bottom of the screen on desktop browsers.
+4. **Delete a profile**: Navigate to <NavPath path="Settings > Global configuration > Profiles" />, then click the trash icon for a profile. This removes the profile definition and all camera overrides associated with it.
 
 </TabItem>
 <TabItem value="yaml">
@@ -235,3 +235,9 @@ When you delete a base zone or mask in the Frigate UI, any profile overrides for
 ### Why are some settings missing when I configure a profile override?
 
 Fields that require a Frigate restart to take effect cannot be overridden by profiles, since profiles are applied at runtime without restarting. Those fields are hidden when editing a profile override and can only be changed on the base configuration.
+
+### Can I schedule profiles to be enabled or disabled at certain times?
+
+Not within Frigate itself. Frigate is an NVR, not an automation platform, so it intentionally does not include a scheduler for activating profiles. Instead, activate profiles from an automation platform that already handles time- and event-based triggers well, such as [Home Assistant](https://www.home-assistant.io/) or [Node-RED](https://nodered.org/). These integrate with Frigate and give you far more robust and flexible scheduling than a built-in scheduler could.
+
+If you prefer something lightweight, a simple script driven by a cron job that toggles profiles on a schedule works too.

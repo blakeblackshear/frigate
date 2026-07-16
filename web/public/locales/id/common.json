@@ -126,7 +126,8 @@
       "ur": "اردو (Urdu)",
       "withSystem": {
         "label": "Gunakan pengaturan sistem untuk bahasa"
-      }
+      },
+      "zhHant": "繁體中文 (Tionghoa Tradisional)"
     },
     "appearance": "Tampilan",
     "darkMode": {

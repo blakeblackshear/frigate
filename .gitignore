@@ -12,6 +12,7 @@ config/*
 models
 *.mp4
 *.db
+*.db-*
 *.csv
 frigate/version.py
 web/build

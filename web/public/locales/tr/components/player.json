@@ -48,5 +48,6 @@
     "title": "Bu kare Frigate+'ya gönderilsin mi?",
     "submit": "Gönder",
     "previewError": "Önizleme şuan aktif edilemiyor. Kayıt şuan mevcut olmayabilir."
-  }
+  },
+  "cameraOff": "Kamera kapalı"
 }

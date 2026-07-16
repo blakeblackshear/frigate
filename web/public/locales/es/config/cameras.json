@@ -24,7 +24,7 @@
         },
         "listen": {
             "label": "Tipos de escucha",
-            "description": "Lista de tipos de eventos de audio a detectar (por ejemplo: ladrido, alarma de incendios, grito, voz, alarido)."
+            "description": "Lista de tipos de eventos de audio a detectar (por ejemplo: ladrar, alarma de incendio, habla, gritar)."
         },
         "filters": {
             "label": "Filtros de audio",
@@ -744,7 +744,7 @@
             "label": "Tiempo de reintento de FFmpeg"
         },
         "path": {
-            "description": "Ruta al binario de FFmpeg que se va a utilizar o un alias de versión (\"5.0\" o \"7.0\").",
+            "description": "Ruta al binario de FFmpeg que se va a utilizar o un alias de versión (\"7.0\" o \"8.0\").",
             "label": "Ruta de FFmpeg"
         },
         "output_args": {
@@ -759,8 +759,8 @@
                 "description": "Argumentos de salida predeterminados para los flujos con rol de grabación."
             }
         },
-        "description": "Configuración de FFmpeg, incluyendo la ruta del binario, argumentos, opciones de aceleración por hardware y argumentos de salida por rol.",
-        "label": "FFmpeg",
+        "description": "Entradas de flujo de la cámara y opciones de FFmpeg, incluida la ruta del binario, argumentos, aceleración por hardware y argumentos de salida por rol.",
+        "label": "Flujos (FFmpeg)",
         "global_args": {
             "label": "Argumentos globales de FFmpeg",
             "description": "Argumentos globales pasados a los procesos de FFmpeg."

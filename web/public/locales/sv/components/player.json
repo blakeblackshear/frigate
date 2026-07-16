@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "Ingen förhandsvisning hittad för {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Skicka denna bild till Frigate+?",
-    "submit": "Skicka"
+    "submit": "Skicka",
+    "previewError": "Det gick inte att ladda förhandsgranskningen av ögonblicksbilden. Inspelningen är kanske inte tillgänglig just nu."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 eller senare krävs för den här typen av livestream.",
   "streamOffline": {
@@ -47,5 +48,6 @@
     "success": {
       "submittedFrigatePlus": "Bildruta har skickats till Frigate+ med lyckat resultat"
     }
-  }
+  },
+  "cameraOff": "Kameran är avstängd"
 }

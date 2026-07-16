@@ -1,8 +1,8 @@
 import logging
 import os
 import threading
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, List
 
 import requests
 
@@ -19,7 +19,7 @@ class ModelDownloader:
         self,
         model_name: str,
         download_path: str,
-        file_names: List[str],
+        file_names: list[str],
         download_func: Callable[[str], None],
         complete_func: Callable[[], None] | None = None,
         silent: bool = False,

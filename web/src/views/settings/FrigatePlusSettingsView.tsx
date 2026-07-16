@@ -140,6 +140,7 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
                       <tbody>
                         {Object.entries(config.cameras)
                           .filter(([name]) => !isReplayCamera(name))
+                          .sort(([, a], [, b]) => a.ui.order - b.ui.order)
                           .map(([name, camera]) => (
                             <tr
                               key={name}

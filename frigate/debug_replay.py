@@ -21,8 +21,6 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateTopic,
 )
 from frigate.const import (
-    CLIPS_DIR,
-    RECORD_DIR,
     REPLAY_CAMERA_PREFIX,
     REPLAY_DIR,
     THUMB_DIR,
@@ -131,7 +129,7 @@ class DebugReplayManager:
 
         config_file = find_config_file()
         yaml_parser = YAML()
-        with open(config_file, "r") as f:
+        with open(config_file) as f:
             config_data = yaml_parser.load(f)
 
         if "cameras" not in config_data or config_data["cameras"] is None:
@@ -331,12 +329,14 @@ def cleanup_replay_cameras() -> None:
     """
     stale_cameras: set[str] = set()
 
-    # Scan filesystem for leftover replay artifacts to derive camera names
-    for dir_path in [RECORD_DIR, CLIPS_DIR, THUMB_DIR]:
-        if os.path.isdir(dir_path):
-            for entry in os.listdir(dir_path):
-                if entry.startswith(REPLAY_CAMERA_PREFIX):
-                    stale_cameras.add(entry)
+    # Derive stale camera names from THUMB_DIR (per-camera dirs) and
+    # REPLAY_DIR (the session's source clip); both listings are bounded by
+    # camera count. cleanup_camera_files below removes any remaining
+    # per-camera artifacts (snapshots, thumbnails, LPR images, etc.) by name.
+    if os.path.isdir(THUMB_DIR):
+        for entry in os.listdir(THUMB_DIR):
+            if entry.startswith(REPLAY_CAMERA_PREFIX):
+                stale_cameras.add(entry)
 
     if os.path.isdir(REPLAY_DIR):
         for entry in os.listdir(REPLAY_DIR):

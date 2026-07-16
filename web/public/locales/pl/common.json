@@ -167,7 +167,8 @@
     "saveAll": "Zapisz wszystkie",
     "savingAll": "Zapisywanie wszystkich…",
     "undoAll": "Cofnij wszystko",
-    "retry": "Powtórz"
+    "retry": "Powtórz",
+    "resetToGlobal": "Przywróć ustawienie globalne"
   },
   "menu": {
     "system": "System",
@@ -274,7 +275,10 @@
     "settings": "Ustawienia",
     "export": "Eksportuj",
     "classification": "Klasyfikacja",
-    "profiles": "Profile"
+    "profiles": "Profile",
+    "actions": "Akcje",
+    "features": "Funkcje",
+    "chat": "Czat"
   },
   "role": {
     "viewer": "Przeglądający",
@@ -328,5 +332,10 @@
   "field": {
     "optional": "Opcjonalny",
     "internalID": "Wewnętrzny identyfikator używany przez Frigate w konfiguracji i bazie danych"
+  },
+  "no_items": "Brak elementów",
+  "validation_errors": "Błędy walidacji",
+  "credentialField": {
+    "savedPlaceholder": "Zapisano — pozostaw puste, aby zachować bieżącą wartość"
   }
 }

@@ -6,9 +6,15 @@ import NavPath from "@site/src/components/NavPath";
 
 In addition to Frigate's Live camera dashboard, Birdseye allows a portable heads-up view of your cameras to see what is going on around your property / space without having to watch all cameras that may have nothing happening. Birdseye allows specific modes that intelligently show and disappear based on what you care about.
 
-Birdseye can be viewed by adding the "Birdseye" camera to a Camera Group in the Web UI. Add a Camera Group by pressing the "+" icon on the Live page, and choose "Birdseye" as one of the cameras.
+Birdseye can be viewed by adding the "Birdseye" camera to a Camera Group in the Web UI. Add a Camera Group by pressing the pencil icon in the sidebar on the Live page, and choose "Birdseye" as one of the cameras.
 
 Birdseye can also be used in Home Assistant dashboards, cast to media devices, etc.
+
+:::note
+
+Each camera tile in Birdseye is composed from the frames of the stream assigned the `detect` role, so a camera's image quality in Birdseye matches its detect stream resolution rather than a higher-resolution recording stream. If a camera looks low quality in Birdseye, increasing the detect width and height (or assigning the `detect` role to a higher-resolution stream) is what affects it. See [setting up camera inputs](./cameras.md#setting-up-camera-inputs) for how roles are assigned.
+
+:::
 
 ## Birdseye Behavior
 
@@ -35,10 +41,10 @@ To include a camera in Birdseye view only for specific circumstances, or exclude
 
 **Per-camera overrides:** Navigate to <NavPath path="Settings > Camera configuration > Birdseye" /> to override the mode or disable Birdseye for a specific camera.
 
-| Field | Description |
-|-------|-------------|
-| **Enable Birdseye** | Whether this camera appears in Birdseye view |
-| **Tracking mode** | When to show the camera: `continuous`, `motion`, or `objects` |
+| Field               | Description                                                   |
+| ------------------- | ------------------------------------------------------------- |
+| **Enable Birdseye** | Whether this camera appears in Birdseye view                  |
+| **Tracking mode**   | When to show the camera: `continuous`, `motion`, or `objects` |
 
 </TabItem>
 <TabItem value="yaml">
@@ -72,8 +78,8 @@ By default birdseye shows all cameras that have had the configured activity in t
 
 Navigate to <NavPath path="Settings > System > Birdseye" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                    | Description                                                                 |
+| ------------------------ | --------------------------------------------------------------------------- |
 | **Inactivity threshold** | Seconds of inactivity before a camera is hidden from Birdseye (default: 30) |
 
 </TabItem>
@@ -100,9 +106,9 @@ The resolution and aspect ratio of birdseye can be configured. Resolution will i
 
 Navigate to <NavPath path="Settings > System > Birdseye" />.
 
-| Field | Description |
-|-------|-------------|
-| **Width** | Birdseye output width in pixels (default: 1280) |
+| Field      | Description                                     |
+| ---------- | ----------------------------------------------- |
+| **Width**  | Birdseye output width in pixels (default: 1280) |
 | **Height** | Birdseye output height in pixels (default: 720) |
 
 </TabItem>
@@ -120,12 +126,12 @@ birdseye:
 
 ### Sorting cameras in the Birdseye view
 
-It is possible to override the order of cameras that are being shown in the Birdseye view. The order is set at the camera level.
+It is possible to override the order of cameras that are being shown in the Birdseye view. The order is set at the camera level (when using YAML).
 
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > Birdseye" /> for each camera and set the **Position** field to control the display order.
+Navigate to <NavPath path="Settings > System > Birdseye" /> and in the **Camera order** field, use the drag handle next to each camera name to control the display order.
 
 </TabItem>
 <TabItem value="yaml">
@@ -161,8 +167,8 @@ It is possible to limit the number of cameras shown on birdseye at one time. Whe
 
 Navigate to <NavPath path="Settings > System > Birdseye" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                    | Description                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------- |
 | **Layout > Max cameras** | Maximum number of cameras shown at once (e.g., `1` for only the most active camera) |
 
 </TabItem>
@@ -187,8 +193,8 @@ By default birdseye tries to fit 2 cameras in each row and then double in size u
 
 Navigate to <NavPath path="Settings > System > Birdseye" />.
 
-| Field | Description |
-|-------|-------------|
+| Field                       | Description                                              |
+| --------------------------- | -------------------------------------------------------- |
 | **Layout > Scaling factor** | Camera scaling factor between 1.0 and 5.0 (default: 2.0) |
 
 </TabItem>

@@ -72,11 +72,24 @@
         "endTimeMustAfterStartTime": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia",
         "noVaildTimeSelected": "Nie wybrano prawidłowego zakresu czasu"
       },
-      "view": "Widok"
+      "view": "Widok",
+      "queued": "Eksport dodany do kolejki. Postęp można sprawdzić na stronie eksportów.",
+      "batchSuccess_one": "Rozpoczęto 1 eksport. Otwieranie przypadku.",
+      "batchSuccess_few": "Rozpoczęto {{count}} eksporty Otwieranie przypadku.",
+      "batchSuccess_many": "Rozpoczęto {{count}} eksportów. Otwieranie przypadku.",
+      "batchPartial": "Rozpoczęto {{successful}} z {{total}} eksportów. Nieudane kamery: {{failedCameras}}",
+      "batchFailed": "Nie udało się uruchomić {{total}} eksportów. Nieudane kamery: {{failedCameras}}",
+      "batchQueuedSuccess_one": "Eksport dodany do kolejki. Otwieranie przypadku.",
+      "batchQueuedSuccess_few": "Dodano {{count}} eksportydo kolejki. Otwieranie przypadku.",
+      "batchQueuedSuccess_many": "Dodano {{count}} eksportów do kolejki. Otwieranie przypadku.",
+      "batchQueuedPartial": "Dodano do kolejki {{successful}} z {{total}} eksportów. Nieudane kamery: {{failedCameras}}",
+      "batchQueueFailed": "Nie udało się dodać do kolejki {{total}} eksportów. Nieudane kamery: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Zapisz Eksport",
-      "previewExport": "Podgląd Eksportu"
+      "previewExport": "Podgląd Eksportu",
+      "queueingExport": "Kolejkowanie eksportu...",
+      "useThisRange": "Użyj tego zakresu"
     },
     "multiCamera": {
       "timeRange": "Zakres czasu",
@@ -88,7 +101,54 @@
       "detectionCount_one": "{{count}} śledzony obiekt",
       "detectionCount_few": "{{count}} śledzone obiekty",
       "detectionCount_many": "{{count}} śledzonych obiektów",
-      "nameLabel": "Wyeksportuj nazwę"
+      "nameLabel": "Wyeksportuj nazwę",
+      "namePlaceholder": "Opcjonalna nazwa bazowa eksportów",
+      "queueingButton": "Kolejkowanie eksportów...",
+      "exportButton_one": "Eksport 1 kamery",
+      "exportButton_few": "Eksport {{count}} kamer",
+      "exportButton_many": "Eksport {{count}} kamer",
+      "searchOrSelectGroup": "Szukaj lub wybierz grupę kamer ...",
+      "selectAll": "Wybierz wszystkie kamery",
+      "clearSelection": "Wyczyść wybór",
+      "selectWithActivity": "Kamery z obiektami śledzonymi",
+      "selectGroup": "Wybierz grupę",
+      "noMatchingCameras": "Nie ma kamer spełniających Twoje wyszukiwanie",
+      "selectedCount": "{{selected}} / {{total}} wybrane"
+    },
+    "case": {
+      "newCaseOption": "Utwórz nowy przypadek",
+      "newCaseNamePlaceholder": "Nazwa nowego przypadku",
+      "newCaseDescriptionPlaceholder": "Opis przypadku",
+      "label": "Przypadek",
+      "nonAdminHelp": "Dla tych eksportów zostanie utworzony nowy przypadek.",
+      "placeholder": "Wybierz przypadek"
+    },
+    "queueing": "Dodawanie eksportu do kolejki...",
+    "tabs": {
+      "export": "Pojedyncza kamera",
+      "multiCamera": "Wiele kamer"
+    },
+    "multi": {
+      "title_one": "Eksport 1 recenzji",
+      "title_few": "Eksport {{count}} recenzji",
+      "title_many": "Eksport {{count}} recenzji",
+      "description": "Eksportuj każdą wybraną recenzję. Wszystkie eksporty zostaną pogrupowane w jednym przypadku.",
+      "descriptionNoCase": "Eksportuj każdą wybraną recenzję.",
+      "caseNamePlaceholder": "Eksport recenzji – {{date}}",
+      "exportButton_one": "Eksport 1 recenzji",
+      "exportButton_few": "Eksport {{count}} recenzji",
+      "exportButton_many": "Eksport {{count}} recenzji",
+      "exportingButton": "Eksportowanie...",
+      "toast": {
+        "started_one": "Rozpoczęto 1 eksport. Otwieranie przypadku.",
+        "started_few": "Rozpoczęto {{count}} eksportów. Otwieranie przypadku.",
+        "started_many": "Rozpoczęto {{count}} eksportów. Otwieranie przypadku.",
+        "startedNoCase_one": "Rozpoczęto 1 eksport.",
+        "startedNoCase_few": "Rozpoczęto {{count}} eksportów.",
+        "startedNoCase_many": "Rozpoczęto {{count}} eksportów.",
+        "partial": "Rozpoczęto {{successful}} z {{total}} eksportów. Niepowodzenia: {{failedItems}}",
+        "failed": "Nie udało się uruchomić {{total}} eksportów. Niepowodzenia: {{failedItems}}"
+      }
     }
   },
   "recording": {
@@ -107,6 +167,14 @@
         "success": "Nagrania wideo powiązane z wybranymi elementami przeglądu zostały pomyślnie usunięte.",
         "error": "Nie udało się usunąć: {{error}}"
       }
+    },
+    "shareTimestamp": {
+      "label": "Udostępnij znacznik czasu",
+      "title": "Udostępnij znacznik czasu",
+      "description": "Udostępnij adres URL z aktualnym znacznikiem czasu pozycji odtwarzacza lub wybierz niestandardowy znacznik czasu. Należy pamiętać, że nie jest to publiczny link udostępniania i jest dostępny wyłącznie dla użytkowników mających dostęp do Frigate i tej kamery.",
+      "custom": "Własny znacznik czasu",
+      "button": "Udostępnij adres URL ze znacznikiem czasu",
+      "shareTitle": "Znacznik czasu przeglądu Frigate: {{camera}}"
     }
   },
   "streaming": {

@@ -3,7 +3,8 @@
 import base64
 import json
 import logging
-from typing import Any, AsyncGenerator, Optional
+from collections.abc import AsyncGenerator
+from typing import Any
 
 from httpx import TimeoutException
 from openai import OpenAI
@@ -14,7 +15,7 @@ from frigate.genai import GenAIClient, register_genai_provider
 logger = logging.getLogger(__name__)
 
 
-def _stats_from_openai_usage(usage: Any) -> Optional[dict[str, Any]]:
+def _stats_from_openai_usage(usage: Any) -> dict[str, Any] | None:
     """Build a stats dict from an OpenAI-compatible usage object."""
     if usage is None:
         return None
@@ -35,7 +36,7 @@ class OpenAIClient(GenAIClient):
     """Generative AI client for Frigate using OpenAI."""
 
     provider: OpenAI
-    context_size: Optional[int] = None
+    context_size: int | None = None
 
     def _init_provider(self) -> OpenAI:
         """Initialize the client.
@@ -60,9 +61,9 @@ class OpenAIClient(GenAIClient):
         self,
         prompt: str,
         images: list[bytes],
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
         enable_thinking: bool = False,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Submit a request to OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
         messages_content: list[dict] = [
@@ -186,9 +187,9 @@ class OpenAIClient(GenAIClient):
     def chat_with_tools(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> dict[str, Any]:
         """
         Send chat messages to OpenAI with optional tool definitions.
@@ -307,9 +308,9 @@ class OpenAIClient(GenAIClient):
     async def chat_with_tools_stream(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """
         Stream chat with tools; yields content deltas then final message.
@@ -357,7 +358,7 @@ class OpenAIClient(GenAIClient):
             reasoning_parts: list[str] = []
             tool_calls_by_index: dict[int, dict[str, Any]] = {}
             finish_reason = "stop"
-            usage_stats: Optional[dict[str, Any]] = None
+            usage_stats: dict[str, Any] | None = None
 
             stream = self.provider.chat.completions.create(**request_params)
 
@@ -422,9 +423,18 @@ class OpenAIClient(GenAIClient):
                 for tc in tool_calls_by_index.values():
                     try:
                         # Parse accumulated arguments as JSON
-                        parsed_args = json.loads(tc["arguments"])
-                    except (json.JSONDecodeError, Exception):
-                        parsed_args = tc["arguments"]
+                        parsed_args = json.loads(tc["arguments"] or "{}")
+                    except (json.JSONDecodeError, ValueError):
+                        logger.warning(
+                            "Failed to parse streamed tool call arguments for %s",
+                            tc["name"],
+                        )
+                        parsed_args = {}
+
+                    # Downstream (ToolCall model) requires a dict; never leak a
+                    # partial/invalid arguments string.
+                    if not isinstance(parsed_args, dict):
+                        parsed_args = {}
 
                     tool_calls_list.append(
                         {

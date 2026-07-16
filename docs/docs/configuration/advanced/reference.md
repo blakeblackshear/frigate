@@ -212,7 +212,6 @@ audio:
   listen:
     - bark
     - fire_alarm
-    - scream
     - speech
     - yell
   # Optional: Filters to configure detection.
@@ -340,7 +339,7 @@ detect:
   # especially when using separate streams for detect and record.
   # Use this setting to make the timeline bounding boxes more closely align
   # with the recording. The value can be positive or negative.
-  # TIP: Imagine there is an tracked object clip with a person walking from left to right.
+  # TIP: Imagine there is a tracked object clip with a person walking from left to right.
   #      If the tracked object lifecycle bounding box is consistently to the left of the person
   #      then the value should be decreased. Similarly, if a person is walking from
   #      left to right and the bounding box is consistently ahead of the person
@@ -656,11 +655,6 @@ snapshots:
   retain:
     # Required: Default retention days (default: shown below)
     default: 10
-    # Optional: Mode for retention. (default: shown below)
-    #   all - save all snapshots regardless of activity
-    #   motion - save snapshots for any detected motion
-    #   active_objects - save snapshots for active/moving objects
-    mode: motion
     # Optional: Per object retention days
     objects:
       person: 15
@@ -826,7 +820,7 @@ classification:
         interval: None
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v1.9.13)
+# Uses https://github.com/AlexxIT/go2rtc (v1.9.14)
 # NOTE: The default go2rtc API port (1984) must be used,
 #       changing this port for the integrated go2rtc instance is not supported.
 go2rtc:

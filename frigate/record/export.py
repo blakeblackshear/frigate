@@ -9,14 +9,15 @@ import shutil
 import string
 import subprocess as sp
 import threading
+from collections.abc import Callable
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Optional
 
 import pytz  # type: ignore[import-untyped]
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
+from frigate.config.camera.record import ChaptersEnum
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -42,33 +43,118 @@ TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
 # Captures the floating-point factor so we can scale expected duration.
 SETPTS_FACTOR_RE = re.compile(r"setpts=([0-9]*\.?[0-9]+)\*PTS")
 
-# ffmpeg flags that can read from or write to arbitrary files
-BLOCKED_FFMPEG_ARGS = frozenset(
+# Allowlisted flags that take no value.
+_VALUELESS_FLAGS = frozenset({"-an", "-sn", "-dn"})
+
+# Allowlisted filter flags. Their value is validated as a filtergraph and may
+# only reference filters in _SAFE_FILTERS.
+_FILTER_FLAGS = frozenset({"-vf", "-af", "-filter"})
+
+# Allowlisted flags that take exactly one value (encoder / muxer-safe options).
+_VALUE_FLAGS = frozenset(
     {
-        "-i",
-        "-filter_script",
-        "-filter_complex",
-        "-lavfi",
-        "-vf",
-        "-af",
-        "-filter",
-        "-vstats_file",
-        "-passlogfile",
-        "-sdp_file",
-        "-dump_attachment",
-        "-attach",
+        "-c",
+        "-codec",
+        "-b",
+        "-crf",
+        "-qp",
+        "-q",
+        "-qscale",
+        "-preset",
+        "-tune",
+        "-profile",
+        "-level",
+        "-pix_fmt",
+        "-r",
+        "-g",
+        "-keyint_min",
+        "-sc_threshold",
+        "-bf",
+        "-refs",
+        "-qmin",
+        "-qmax",
+        "-maxrate",
+        "-minrate",
+        "-bufsize",
+        "-movflags",
+        "-threads",
+        "-aspect",
+        "-fps_mode",
+        "-vsync",
+        "-skip_frame",
     }
 )
 
+_ALLOWED_FLAGS = _VALUELESS_FLAGS | _FILTER_FLAGS | _VALUE_FLAGS
+
+# Filters that cannot read files, load plugins, or open network sources.
+_SAFE_FILTERS = frozenset(
+    {
+        "setpts",
+        "fps",
+        "scale",
+        "format",
+        "transpose",
+        "hflip",
+        "vflip",
+        "crop",
+        "pad",
+        "setsar",
+        "setdar",
+    }
+)
+
+# Conservative shape for a non-filter flag value. Excludes "/" (paths /
+# filtergraph division), whitespace, brackets, and a leading "-" so a value
+# can never be a path or swallow a following flag. ":" is permitted for values
+# like "16:9".
+_SAFE_VALUE_RE = re.compile(r"^[A-Za-z0-9_.:+][A-Za-z0-9_.:+-]*$")
+
+# Substrings inside a filtergraph that indicate a file-reading filter option.
+# "movie=" also matches "amovie=" as a substring.
+_BLOCKED_FILTER_VALUE_MARKERS = ("movie=", "textfile=", "filename=", "fontfile=")
+
+
+def _base_flag(token: str) -> str:
+    """Return a flag's base name, lowercased and without its stream specifier.
+
+    e.g. "-c:v" -> "-c", "-filter:a:0" -> "-filter".
+    """
+    return token.lower().split(":", 1)[0]
+
+
+def _validate_filtergraph(value: str) -> tuple[bool, str]:
+    """Validate a filtergraph value, allowing only filters in _SAFE_FILTERS."""
+    # None of the safe filters need any of these
+    if any(token in value for token in ("://", "..", "[", "]")):
+        return False, "Invalid filter graph in custom ffmpeg arguments"
+
+    lowered = value.lower()
+    if any(marker in lowered for marker in _BLOCKED_FILTER_VALUE_MARKERS):
+        return False, "File-reading filters are not allowed in custom ffmpeg arguments"
+
+    # Filters are separated by "," within a chain and ";" between chains. Safe
+    # filters never use unescaped "," or ";" in their arguments, so splitting on
+    # them to recover filter names cannot hide a disallowed filter.
+    for spec in re.split(r"[;,]", value):
+        spec = spec.strip()
+        if not spec:
+            continue
+
+        name = spec.split("=", 1)[0].strip().lower()
+        if name not in _SAFE_FILTERS:
+            return False, f"Filter not allowed in custom ffmpeg arguments: {name}"
+
+    return True, ""
+
 
 def validate_ffmpeg_args(args: str) -> tuple[bool, str]:
-    """Validate that user-provided ffmpeg args don't allow input/output injection.
+    """Validate user-provided custom export ffmpeg args with an allowlist.
 
-    Blocks:
-    - The -i flag and other flags that read/write arbitrary files
-    - Filter flags (can read files via movie=/amovie= source filters)
-    - Absolute/relative file paths (potential extra outputs)
-    - URLs and ffmpeg protocol references (data exfiltration)
+    Every token must be an allowlisted flag or the value of one; filter values
+    may only reference safe filters; and no token may become a bare input or
+    output URL. This structurally prevents arbitrary file read/write, network
+    exfiltration/SSRF, and resource-exhaustion via the export endpoint.
 
     Admin users skip this validation entirely since they are trusted.
     """
@@ -76,26 +162,36 @@ def validate_ffmpeg_args(args: str) -> tuple[bool, str]:
         return True, ""
 
     tokens = args.split()
-    for token in tokens:
-        # Block flags that could inject inputs or write to arbitrary files
-        if token.lower() in BLOCKED_FFMPEG_ARGS:
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+
+        # A bare (non-flag) token here would be parsed by ffmpeg as an input or
+        # output URL. Only the server sets inputs/outputs, never the user.
+        if not token.startswith("-"):
+            return False, f"Unexpected argument in custom ffmpeg arguments: {token}"
+
+        base = _base_flag(token)
+        if base not in _ALLOWED_FLAGS:
             return False, f"Forbidden ffmpeg argument: {token}"
 
-        # Block tokens that look like file paths (potential output injection)
-        if (
-            token.startswith("/")
-            or token.startswith("./")
-            or token.startswith("../")
-            or token.startswith("~")
-        ):
-            return False, "File paths are not allowed in custom ffmpeg arguments"
+        if base in _VALUELESS_FLAGS:
+            i += 1
+            continue
 
-        # Block URLs and ffmpeg protocol references (e.g. http://, tcp://, pipe:, file:)
-        if "://" in token or token.startswith("pipe:") or token.startswith("file:"):
-            return (
-                False,
-                "Protocol references are not allowed in custom ffmpeg arguments",
-            )
+        # Remaining flags consume exactly one value.
+        if i + 1 >= len(tokens):
+            return False, f"Missing value for ffmpeg argument: {token}"
+
+        value = tokens[i + 1]
+        if base in _FILTER_FLAGS:
+            valid, message = _validate_filtergraph(value)
+            if not valid:
+                return False, message
+        elif not _SAFE_VALUE_RE.match(value):
+            return False, f"Invalid value for {token}: {value}"
+
+        i += 2
 
     return True, ""
 
@@ -113,16 +209,17 @@ class RecordingExporter(threading.Thread):
         config: FrigateConfig,
         id: str,
         camera: str,
-        name: Optional[str],
-        image: Optional[str],
+        name: str | None,
+        image: str | None,
         start_time: int,
         end_time: int,
         playback_source: PlaybackSourceEnum,
-        export_case_id: Optional[str] = None,
-        ffmpeg_input_args: Optional[str] = None,
-        ffmpeg_output_args: Optional[str] = None,
+        export_case_id: str | None = None,
+        ffmpeg_input_args: str | None = None,
+        ffmpeg_output_args: str | None = None,
         cpu_fallback: bool = False,
-        on_progress: Optional[Callable[[str, float], None]] = None,
+        chapters: ChaptersEnum | None = None,
+        on_progress: Callable[[str, float], None] | None = None,
     ) -> None:
         super().__init__()
         self.config = config
@@ -137,6 +234,7 @@ class RecordingExporter(threading.Thread):
         self.ffmpeg_input_args = ffmpeg_input_args
         self.ffmpeg_output_args = ffmpeg_output_args
         self.cpu_fallback = cpu_fallback
+        self.chapters = chapters
         self.on_progress = on_progress
 
         # ensure export thumb dir
@@ -185,7 +283,7 @@ class RecordingExporter(threading.Thread):
 
         return input_duration * factor
 
-    def _sum_source_duration_seconds(self) -> Optional[float]:
+    def _sum_source_duration_seconds(self) -> float | None:
         """Sum saved-video seconds inside [start_time, end_time].
 
         Queries Recordings or Previews depending on the playback source,
@@ -285,7 +383,7 @@ class RecordingExporter(threading.Thread):
     def _chapter_metadata_path(self) -> str:
         return os.path.join(CACHE_DIR, f"export_chapters_{self.export_id}.txt")
 
-    def _build_chapter_metadata_file(self, recordings: list) -> Optional[str]:
+    def _build_chapter_metadata_file(self, recordings: list) -> str | None:
         """Write an FFmpeg metadata file with chapters for review items in range.
 
         Chapter offsets are computed in *output time*: the VOD endpoint
@@ -414,6 +512,74 @@ class RecordingExporter(threading.Thread):
 
         return meta_path
 
+    def _build_recording_segment_chapter_metadata_file(
+        self, recordings: list
+    ) -> str | None:
+        """Write an FFmpeg metadata file with one chapter per recording segment.
+
+        Each chapter's title is the segment's wallclock start time in
+        strict ISO 8601 form so a viewer can map any point in the
+        export's playback timeline back to real-world time without
+        OCR-ing a burnt-in timestamp. Chapter offsets are computed in
+        *output time*: the VOD endpoint concatenates recording clips
+        back-to-back, so wall-clock gaps between recordings collapse in
+        the produced video. Returns ``None`` when there are no
+        recordings or every segment is empty after clipping.
+        """
+        if not recordings:
+            return None
+
+        tz_name = self.config.ui.timezone
+        tz: datetime.tzinfo | None = None
+        if tz_name:
+            try:
+                tz = pytz.timezone(tz_name)
+            except pytz.UnknownTimeZoneError:
+                tz = None
+        if tz is None:
+            tz = datetime.UTC
+
+        chapter_blocks: list[str] = []
+        output_offset_ms = 0
+        for rec in recordings:
+            clipped_start = max(float(rec.start_time), float(self.start_time))
+            clipped_end = min(float(rec.end_time), float(self.end_time))
+            if clipped_end <= clipped_start:
+                continue
+
+            duration_ms = int(round((clipped_end - clipped_start) * 1000))
+            if duration_ms <= 0:
+                continue
+
+            title = datetime.datetime.fromtimestamp(clipped_start, tz=tz).isoformat(
+                timespec="seconds"
+            )
+            chapter_blocks.append(
+                "[CHAPTER]\n"
+                "TIMEBASE=1/1000\n"
+                f"START={output_offset_ms}\n"
+                f"END={output_offset_ms + duration_ms}\n"
+                f"title={title}"
+            )
+            output_offset_ms += duration_ms
+
+        if not chapter_blocks:
+            return None
+
+        meta_path = self._chapter_metadata_path()
+        try:
+            with open(meta_path, "w", encoding="utf-8") as f:
+                f.write(";FFMETADATA1\n")
+                f.write("\n".join(chapter_blocks))
+                f.write("\n")
+        except OSError:
+            logger.exception(
+                "Failed to write chapter metadata file for export %s", self.export_id
+            )
+            return None
+
+        return meta_path
+
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
 
@@ -425,7 +591,7 @@ class RecordingExporter(threading.Thread):
 
         if (
             self.start_time
-            < datetime.datetime.now(datetime.timezone.utc)
+            < datetime.datetime.now(datetime.UTC)
             .replace(minute=0, second=0, microsecond=0)
             .timestamp()
         ):
@@ -577,7 +743,18 @@ class RecordingExporter(threading.Thread):
                 )
             ).split(" ")
         else:
-            chapters_path = self._build_chapter_metadata_file(recordings)
+            # Realtime/stream-copy export. Embed chapter metadata according to
+            # the camera's configured chapter mode: per-recording-segment
+            # timestamps or per-review-item titles.
+            if self.chapters == ChaptersEnum.recording_segments:
+                chapters_path = self._build_recording_segment_chapter_metadata_file(
+                    recordings
+                )
+            elif self.chapters == ChaptersEnum.review_items:
+                chapters_path = self._build_chapter_metadata_file(recordings)
+            else:
+                chapters_path = None
+
             chapter_args = (
                 f" -i {chapters_path} -map 0 -dn -map_metadata 1"
                 if chapters_path
@@ -589,7 +766,19 @@ class RecordingExporter(threading.Thread):
 
         # add metadata
         title = f"Frigate Recording for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
-        ffmpeg_cmd.extend(["-metadata", f"title={title}"])
+        creation_time = datetime.datetime.fromtimestamp(
+            self.start_time, tz=datetime.UTC
+        ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        ffmpeg_cmd.extend(
+            [
+                "-metadata",
+                f"title={title}",
+                "-metadata",
+                f"creation_time={creation_time}",
+                "-metadata",
+                f"comment=Camera: {self.camera}",
+            ]
+        )
 
         ffmpeg_cmd.append(video_path)
 
@@ -675,18 +864,32 @@ class RecordingExporter(threading.Thread):
                     self.config.ffmpeg.ffmpeg_path,
                     hwaccel_args,
                     f"{self.ffmpeg_input_args} {TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}".strip(),
-                    f"{self.ffmpeg_output_args} -movflags +faststart {video_path}".strip(),
+                    f"{self.ffmpeg_output_args} -movflags +faststart".strip(),
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
         else:
             ffmpeg_cmd = (
-                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart {video_path}"
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} {codec} -movflags +faststart"
             ).split(" ")
 
         # add metadata
         title = f"Frigate Preview for {self.camera}, {self.get_datetime_from_timestamp(self.start_time)} - {self.get_datetime_from_timestamp(self.end_time)}"
-        ffmpeg_cmd.extend(["-metadata", f"title={title}"])
+        creation_time = datetime.datetime.fromtimestamp(
+            self.start_time, tz=datetime.UTC
+        ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        ffmpeg_cmd.extend(
+            [
+                "-metadata",
+                f"title={title}",
+                "-metadata",
+                f"creation_time={creation_time}",
+                "-metadata",
+                f"comment=Camera: {self.camera}",
+            ]
+        )
+
+        ffmpeg_cmd.append(video_path)
 
         return ffmpeg_cmd, playlist_lines
 

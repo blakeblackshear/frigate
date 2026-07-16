@@ -11,6 +11,16 @@ class TestCheckWsAuthorization(unittest.TestCase):
 
     DEFAULT_SEPARATOR = ","
 
+    # admin/viewer are reserved and always map to all cameras (empty list);
+    # custom roles map to a specific set of cameras.
+    ROLES_CONFIG = {
+        "admin": [],
+        "viewer": [],
+        "yard": ["front_door", "backyard"],
+        "garage_only": ["garage"],
+    }
+    CAMERA_NAMES = {"front_door", "backyard", "garage"}
+
     # --- IPC topic blocking (unconditional, regardless of role) ---
 
     def test_ipc_topic_blocked_for_admin(self):
@@ -159,6 +169,124 @@ class TestCheckWsAuthorization(unittest.TestCase):
     def test_no_role_header_allows_viewer_topics(self):
         self.assertTrue(
             _check_ws_authorization("onConnect", None, self.DEFAULT_SEPARATOR)
+        )
+
+    # --- Camera-scoped PTZ access (non-admin with camera access) ---
+
+    def test_viewer_can_ptz_camera_with_access(self):
+        # viewer maps to all cameras, so PTZ is allowed
+        self.assertTrue(
+            _check_ws_authorization(
+                "front_door/ptz",
+                "viewer",
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
+        )
+
+    def test_custom_role_can_ptz_assigned_camera(self):
+        self.assertTrue(
+            _check_ws_authorization(
+                "front_door/ptz",
+                "yard",
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
+        )
+
+    def test_custom_role_blocked_from_ptz_unassigned_camera(self):
+        self.assertFalse(
+            _check_ws_authorization(
+                "garage/ptz",
+                "yard",
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
+        )
+
+    def test_multiple_roles_union_camera_access_for_ptz(self):
+        # "yard" covers front_door/backyard, "garage_only" covers garage
+        self.assertTrue(
+            _check_ws_authorization(
+                "garage/ptz",
+                "yard,garage_only",
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
+        )
+
+    def test_unknown_role_blocked_from_ptz(self):
+        self.assertFalse(
+            _check_ws_authorization(
+                "front_door/ptz",
+                "nonexistent",
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
+        )
+
+    def test_no_role_header_treated_as_viewer_for_ptz(self):
+        # proxy-only / auth-disabled setups default to the viewer role
+        self.assertTrue(
+            _check_ws_authorization(
+                "front_door/ptz",
+                None,
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
+        )
+
+    def test_camera_access_does_not_grant_set_commands(self):
+        # camera access enables PTZ only, not config-changing "set" commands
+        self.assertFalse(
+            _check_ws_authorization(
+                "front_door/detect/set",
+                "yard",
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
+        )
+
+    def test_ptz_autotracker_stays_admin_only(self):
+        # ptz_autotracker is a config toggle, not a live-view action
+        self.assertFalse(
+            _check_ws_authorization(
+                "front_door/ptz_autotracker/set",
+                "viewer",
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
+        )
+
+    def test_admin_can_ptz_any_camera_with_config(self):
+        self.assertTrue(
+            _check_ws_authorization(
+                "garage/ptz",
+                "admin",
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
+        )
+
+    def test_ipc_topic_still_blocked_with_camera_access(self):
+        # IPC topics are blocked unconditionally, even with camera access
+        self.assertFalse(
+            _check_ws_authorization(
+                UPDATE_CAMERA_ACTIVITY,
+                "viewer",
+                self.DEFAULT_SEPARATOR,
+                self.ROLES_CONFIG,
+                self.CAMERA_NAMES,
+            )
         )
 
 

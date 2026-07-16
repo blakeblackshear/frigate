@@ -3,6 +3,8 @@ id: camera_specific
 title: Camera Specific Configurations
 ---
 
+import NavPath from "@site/src/components/NavPath";
+
 :::note
 
 This page makes use of presets of FFmpeg args. For more information on presets, see the [FFmpeg Presets](/configuration/ffmpeg_presets) page.
@@ -148,18 +150,33 @@ WEB Digest Algorithm  - MD5
 
 Reolink has many different camera models with inconsistently supported features and behavior. The below table shows a summary of various features and recommendations.
 
-| Camera Resolution | Camera Generation         | Recommended Stream Type           | Additional Notes                                                        |
-| ----------------- | ------------------------- | --------------------------------- | ----------------------------------------------------------------------- |
-| 5MP or lower      | All                       | http-flv                          | Stream is h264                                                          |
-| 6MP or higher     | Latest (ex: Duo3, CX-8##) | http-flv with ffmpeg 8.0, or rtsp | This uses the new http-flv-enhanced over H265 which requires ffmpeg 8.0 |
-| 6MP or higher     | Older (ex: RLC-8##)       | rtsp                              |                                                                         |
+| Camera Resolution | Camera Generation         | Recommended Stream Type           | Additional Notes                                                                            |
+| ----------------- | ------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------- |
+| 5MP or lower      | All                       | http-flv                          | Stream is h264                                                                              |
+| 6MP or higher     | Latest (ex: Duo3, CX-8##) | http-flv with ffmpeg 8.0, or rtsp | This uses the new http-flv-enhanced over H265 which requires ffmpeg 8.0 (Frigate's default) |
+| 6MP or higher     | Older (ex: RLC-8##)       | rtsp                              |                                                                                             |
 
-Frigate works much better with newer reolink cameras that are setup with the below options:
+Frigate works much better with newer Reolink cameras that are setup with the below options:
 
 If available, recommended settings are:
 
 - `On, fluency first` this sets the camera to CBR (constant bit rate)
 - `Interframe Space 1x` this sets the iframe interval to the same as the frame rate
+
+#### Setup via the Add Camera Wizard
+
+The Add Camera Wizard is the recommended way to add a standard Reolink camera. Before starting, make sure [HTTP is enabled](https://support.reolink.com/articles/360003452893-How-to-Access-Reolink-Cameras-NVRs-Home-Hub-Locally-via-Web-Browsers/) in the camera's advanced network settings. The wizard uses the camera's HTTP API to determine its resolution and choose the recommended stream type from the table above.
+
+1. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />.
+2. Choose **Manual selection** as the stream detection method and select **Reolink** as the camera brand.
+3. The wizard queries the camera and automatically uses an http-flv stream for cameras 5MP and lower, or an RTSP stream for higher resolution cameras.
+4. In the validation step, enable **Use stream compatibility mode** for http-flv streams when the wizard recommends it.
+
+If you use the **Probe camera** method instead, the discovered stream URLs will be RTSP. For Reolink cameras where http-flv is recommended, the wizard will show a warning in the validation step.
+
+The wizard covers standard single-camera setups. For two way talk, cameras connected through a Reolink NVR, or audio transcoding for WebRTC live view, configure the camera manually as shown below.
+
+#### Manual configuration
 
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
@@ -175,7 +192,7 @@ Reolink's latest cameras support two way audio via go2rtc and other applications
 
 NOTE: The RTSP stream can not be prefixed with `ffmpeg:`, as go2rtc needs to handle the stream to support two way audio.
 
-Ensure HTTP is enabled in the camera's advanced network settings. To use two way talk with Frigate, see the [Live view documentation](/configuration/live#two-way-talk).
+Ensure [HTTP is enabled](https://support.reolink.com/articles/360003452893-How-to-Access-Reolink-Cameras-NVRs-Home-Hub-Locally-via-Web-Browsers/) in the camera's advanced network settings. To use two way talk with Frigate, see the [Live view documentation](/configuration/live#two-way-talk).
 
 :::
 
@@ -187,7 +204,7 @@ go2rtc:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
     your_reolink_camera_sub:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
-    # example for connectin to a Reolink camera that supports two way talk
+    # example for connecting to a Reolink camera that supports two way talk
     your_reolink_camera_twt:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
       - "rtsp://username:password@reolink_ip/Preview_01_sub"
@@ -225,13 +242,14 @@ cameras:
           roles:
             - detect
 ```
+
 </details>
 
 ### Unifi Protect Cameras
 
-:::note 
+:::note
 
-Unifi G5s cameras and newer need a Unifi Protect server to enable rtsps stream, it's not posible to enable it in standalone mode.
+Unifi G5s cameras and newer need a Unifi Protect server to enable rtsps stream, it's not possible to enable it in standalone mode.
 
 :::
 
@@ -246,7 +264,7 @@ go2rtc:
       - rtspx://192.168.1.1:7441/abcdefghijk
 ```
 
-[See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.9.13#source-rtsp)
+[See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.9.14#source-rtsp)
 
 In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record if used directly with unifi protect.
 
@@ -269,7 +287,6 @@ Some community members have found better performance on Wyze cameras by using an
 To use a USB camera (webcam) with Frigate, the recommendation is to use go2rtc's [FFmpeg Device](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg-device) support:
 
 - Preparation outside of Frigate:
-
   - Get USB camera path. Run `v4l2-ctl --list-devices` to get a listing of locally-connected cameras available. (You may need to install `v4l-utils` in a way appropriate for your Linux distribution). In the sample configuration below, we use `video=0` to correlate with a detected device path of `/dev/video0`
   - Get USB camera formats & resolutions. Run `ffmpeg -f v4l2 -list_formats all -i /dev/video0` to get an idea of what formats and resolutions the USB Camera supports. In the sample configuration below, we use a width of 1024 and height of 576 in the stream and detection settings based on what was reported back.
   - If using Frigate in a container (e.g. Docker on TrueNAS), ensure you have USB Passthrough support enabled, along with a specific Host Device (`/dev/video0`) + Container Device (`/dev/video0`) listed.

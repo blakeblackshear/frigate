@@ -1,6 +1,6 @@
 """Mask configuration for motion and object masks."""
 
-from typing import Any, Optional, Union
+from typing import Any
 
 from pydantic import Field, field_serializer
 
@@ -12,7 +12,7 @@ __all__ = ["MotionMaskConfig", "ObjectMaskConfig"]
 class MotionMaskConfig(FrigateBaseModel):
     """Configuration for a single motion mask."""
 
-    friendly_name: Optional[str] = Field(
+    friendly_name: str | None = Field(
         default=None,
         title="Friendly name",
         description="A friendly name for this motion mask used in the Frigate UI",
@@ -22,13 +22,13 @@ class MotionMaskConfig(FrigateBaseModel):
         title="Enabled",
         description="Enable or disable this motion mask",
     )
-    coordinates: Union[str, list[str]] = Field(
+    coordinates: str | list[str] = Field(
         default="",
         title="Coordinates",
         description="Ordered x,y coordinates defining the motion mask polygon used to include/exclude areas.",
     )
-    raw_coordinates: Union[str, list[str]] = ""
-    enabled_in_config: Optional[bool] = Field(
+    raw_coordinates: str | list[str] = ""
+    enabled_in_config: bool | None = Field(
         default=None, title="Keep track of original state of motion mask."
     )
 
@@ -50,7 +50,7 @@ class MotionMaskConfig(FrigateBaseModel):
 class ObjectMaskConfig(FrigateBaseModel):
     """Configuration for a single object mask."""
 
-    friendly_name: Optional[str] = Field(
+    friendly_name: str | None = Field(
         default=None,
         title="Friendly name",
         description="A friendly name for this object mask used in the Frigate UI",
@@ -60,13 +60,13 @@ class ObjectMaskConfig(FrigateBaseModel):
         title="Enabled",
         description="Enable or disable this object mask",
     )
-    coordinates: Union[str, list[str]] = Field(
+    coordinates: str | list[str] = Field(
         default="",
         title="Coordinates",
         description="Ordered x,y coordinates defining the object mask polygon used to include/exclude areas.",
     )
-    raw_coordinates: Union[str, list[str]] = ""
-    enabled_in_config: Optional[bool] = Field(
+    raw_coordinates: str | list[str] = ""
+    enabled_in_config: bool | None = Field(
         default=None, title="Keep track of original state of object mask."
     )
 

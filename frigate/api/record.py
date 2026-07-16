@@ -5,7 +5,6 @@ import logging
 from datetime import datetime, timedelta
 from functools import reduce
 from pathlib import Path
-from typing import List
 from urllib.parse import unquote
 
 from fastapi import APIRouter, Depends, Request
@@ -63,7 +62,7 @@ def get_recordings_storage_usage(request: Request):
 def all_recordings_summary(
     request: Request,
     params: MediaRecordingsSummaryQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Returns true/false by day indicating if recordings exist"""
 
@@ -263,18 +262,18 @@ async def recordings(
 async def no_recordings(
     request: Request,
     params: MediaRecordingsAvailabilityQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Get time ranges with no recordings."""
     cameras = params.cameras
     if cameras != "all":
         requested = set(unquote(cameras).split(","))
-        filtered = requested.intersection(allowed_cameras)
-        if not filtered:
-            return JSONResponse(content=[])
-        cameras = ",".join(filtered)
+        camera_list = list(requested.intersection(allowed_cameras))
     else:
-        cameras = allowed_cameras
+        camera_list = list(allowed_cameras)
+
+    if not camera_list:
+        return JSONResponse(content=[])
 
     before = params.before or datetime.datetime.now().timestamp()
     after = (
@@ -283,12 +282,10 @@ async def no_recordings(
     )
     scale = params.scale
 
-    clauses = [(Recordings.end_time >= after) & (Recordings.start_time <= before)]
-    if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((Recordings.camera << camera_list))
-    else:
-        camera_list = allowed_cameras
+    clauses = [
+        (Recordings.end_time >= after) & (Recordings.start_time <= before),
+        (Recordings.camera << camera_list),
+    ]
 
     # Get recording start times
     data: list[Recordings] = (
@@ -367,7 +364,7 @@ async def delete_recordings(
     start: float = PathParam(..., description="Start timestamp (unix)"),
     end: float = PathParam(..., description="End timestamp (unix)"),
     params: RecordingsDeleteQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Delete recordings in the specified time range."""
     if start >= end:

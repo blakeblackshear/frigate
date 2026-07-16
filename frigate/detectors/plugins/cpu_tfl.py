@@ -1,7 +1,7 @@
 import logging
+from typing import Literal
 
 from pydantic import ConfigDict, Field
-from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig

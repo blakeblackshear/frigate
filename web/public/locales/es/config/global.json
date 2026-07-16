@@ -39,7 +39,7 @@
         },
         "listen": {
             "label": "Tipos de escucha",
-            "description": "Lista de tipos de eventos de audio a detectar (por ejemplo: ladrido, alarma de incendios, grito, voz, alarido)."
+            "description": "Lista de tipos de eventos de audio a detectar (por ejemplo: ladrar, alarma de incendio, habla, gritar)."
         },
         "filters": {
             "label": "Filtros de audio",
@@ -1234,7 +1234,7 @@
             "label": "Tiempo de reintento de FFmpeg"
         },
         "path": {
-            "description": "Ruta al binario de FFmpeg que se va a utilizar o un alias de versión (\"5.0\" o \"7.0\").",
+            "description": "Ruta al binario de FFmpeg que se va a utilizar o un alias de versión (\"7.0\" o \"8.0\").",
             "label": "Ruta de FFmpeg"
         },
         "output_args": {

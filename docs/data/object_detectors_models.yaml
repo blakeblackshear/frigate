@@ -1,0 +1,1346 @@
+edgeTPU:
+  title: EdgeTPU
+  models:
+    - key: mobiledet
+      label: Mobiledet
+      recommended: true
+      download: A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+      ui: Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`.
+      yaml: |-
+        detectors:
+          coral:
+            type: edgetpu
+            device: usb
+    - key: yolov9
+      label: YOLOv9
+      recommended: false
+      download: "[Download the model](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite), bind mount the file into the container, and provide the path with `model.path`. Note that the linked model requires a 17-label [labelmap file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) that includes only 17 COCO classes."
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`. Then on the same page, in the **Custom Model** tab, configure the model settings:
+
+        | Field                                    | Value                                                             |
+        | ---------------------------------------- | ----------------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite` |
+        | **Label map for custom object detector** | `/config/labels-coco17.txt`                                       |
+        | **Object detection model input width**   | `320` (should match the imgsize of the model)                     |
+        | **Object detection model input height**  | `320` (should match the imgsize of the model)                     |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                                   |
+        | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value)                                  |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                                   |
+        | **Object Detection Model Type**          | `yolo-generic`                                                    |
+      yaml: |-
+        detectors:
+          coral:
+            type: edgetpu
+            device: usb
+
+        model:
+          model_type: yolo-generic
+          width: 320 # <--- should match the imgsize of the model, typically 320
+          height: 320 # <--- should match the imgsize of the model, typically 320
+          path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite
+          labelmap_path: /config/labels-coco17.txt
+hailo8l:
+  title: Hailo-8/Hailo-8L
+  models:
+    - key: yolo
+      label: YOLO
+      recommended: true
+      download: If no custom model path or URL is provided, the Hailo detector automatically downloads the default model (YOLOv6n) from the Hailo Model Zoo on first startup based on the detected hardware. Once cached under `/config/model_cache/hailo`, the model works fully offline.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **Hailo-8/Hailo-8L** from the detector type dropdown and click **Add**, then set device to `PCIe`. Then on the same page, in the **Custom Model** tab, configure the model settings:
+
+        | Field                                    | Value                   |
+        | ---------------------------------------- | ----------------------- |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
+        | **Object detection model input width**   | `320`                   |
+        | **Object detection model input height**  | `320`                   |
+        | **Model Input Pixel Color Format**       | `rgb`                   |
+        | **Model Input Tensor Shape**             | `nhwc`                  |
+        | **Model Input D Type**                   | `int`                   |
+        | **Object Detection Model Type**          | `yolo-generic`          |
+
+        The detector automatically selects the default model based on your hardware. Optionally, specify a local model path or URL to override.
+      yaml: |-
+        detectors:
+          hailo:
+            type: hailo8l
+            device: PCIe
+
+        model:
+          width: 320
+          height: 320
+          input_tensor: nhwc
+          input_pixel_format: rgb
+          input_dtype: int
+          model_type: yolo-generic
+          labelmap_path: /labelmap/coco-80.txt
+
+          # The detector automatically selects the default model based on your hardware:
+          # - For Hailo-8 hardware: YOLOv6n (default: yolov6n.hef)
+          # - For Hailo-8L hardware: YOLOv6n (default: yolov6n.hef)
+          #
+          # Optionally, you can specify a local model path to override the default.
+          # If a local path is provided and the file exists, it will be used instead of downloading.
+          # Example:
+          # path: /config/model_cache/hailo/yolov6n.hef
+          #
+          # You can also override using a custom URL:
+          # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov6n.hef
+          # just make sure to give it the write configuration based on the model
+    - key: ssd
+      label: SSD MobileNet v1
+      recommended: false
+      download: For SSD-based models, provide either a model path or URL to your compiled SSD model. The integration will first check the local path before downloading if necessary. The model file is cached under `/config/model_cache/hailo`.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **Hailo-8/Hailo-8L** from the detector type dropdown and click **Add**, then set device to `PCIe`. Then on the same page, in the **Custom Model** tab, configure the model settings:
+
+        | Field                                   | Value  |
+        | --------------------------------------- | ------ |
+        | **Object detection model input width**  | `300`  |
+        | **Object detection model input height** | `300`  |
+        | **Model Input Pixel Color Format**      | `rgb`  |
+        | **Model Input Tensor Shape**            | `nhwc` |
+        | **Model Input D Type**                  | `int` (Frigate's default value) |
+        | **Object Detection Model Type**         | `ssd`  |
+
+        Specify the local model path or URL for SSD MobileNet v1.
+      yaml: |-
+        detectors:
+          hailo:
+            type: hailo8l
+            device: PCIe
+
+        model:
+          width: 300
+          height: 300
+          input_tensor: nhwc
+          input_pixel_format: rgb
+          model_type: ssd
+          # Specify the local model path (if available) or URL for SSD MobileNet v1.
+          # Example with a local path:
+          # path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+          #
+          # Or override using a custom URL:
+          # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/ssd_mobilenet_v1.hef
+openvino:
+  title: OpenVINO
+  models:
+    - key: yolov9
+      label: YOLOv9
+      recommended: true
+      download: |-
+        YOLOv9 model can be exported as ONNX using the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=t` and `IMG_SIZE=320` in the first line to the [model size](https://github.com/WongKinYiu/yolov9#performance) you would like to convert (available model sizes are `t`, `s`, `m`, `c`, and `e`, common image sizes are `320` and `640`).
+
+        ```sh
+        docker build . --build-arg MODEL_SIZE=t --build-arg IMG_SIZE=320 --output . -f- <<'EOF'
+        FROM python:3.11 AS build
+        RUN apt-get update && apt-get install --no-install-recommends -y cmake libgl1 && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+        WORKDIR /yolov9
+        ADD https://github.com/WongKinYiu/yolov9.git .
+        RUN uv pip install --system -r requirements.txt
+        RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier==0.4.* onnxscript
+        ARG MODEL_SIZE
+        ARG IMG_SIZE
+        ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-${MODEL_SIZE}-converted.pt yolov9-${MODEL_SIZE}.pt
+        RUN sed -i "s/ckpt = torch.load(attempt_download(w), map_location='cpu')/ckpt = torch.load(attempt_download(w), map_location='cpu', weights_only=False)/g" models/experimental.py
+        RUN python3 export.py --weights ./yolov9-${MODEL_SIZE}.pt --imgsz ${IMG_SIZE} --simplify --include onnx
+        FROM scratch
+        ARG MODEL_SIZE
+        ARG IMG_SIZE
+        COPY --from=build /yolov9/yolov9-${MODEL_SIZE}.onnx /yolov9-${MODEL_SIZE}-${IMG_SIZE}.onnx
+        EOF
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU` (or `NPU`). Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                                    |
+        | ---------------------------------------- | -------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
+        | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
+        | **Model Input Tensor Shape**             | `nchw`                                                   |
+        | **Model Input D Type**                   | `float`                                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
+      yaml: |-
+        detectors:
+          ov:
+            type: openvino
+            device: GPU # or NPU
+
+        model:
+          model_type: yolo-generic
+          width: 320 # <--- should match the imgsize set during model export
+          height: 320 # <--- should match the imgsize set during model export
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+    - key: ssd
+      label: SSDLite MobileNet v2
+      recommended: false
+      download: An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU` (or `NPU`). Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                      |
+        | ---------------------------------------- | ------------------------------------------ |
+        | **Custom object detector model path**    | `/openvino-model/ssdlite_mobilenet_v2.xml` |
+        | **Label map for custom object detector** | `/openvino-model/coco_91cl_bkgr.txt`       |
+        | **Object detection model input width**   | `300`                                      |
+        | **Object detection model input height**  | `300`                                      |
+        | **Model Input Pixel Color Format**       | `bgr`                                      |
+        | **Model Input Tensor Shape**             | `nhwc`                                     |
+        | **Model Input D Type**                   | `int` (Frigate's default value)            |
+        | **Object Detection Model Type**          | `ssd` (Frigate's default value)            |
+      yaml: |-
+        detectors:
+          ov:
+            type: openvino
+            device: GPU # Or NPU
+
+        model:
+          width: 300
+          height: 300
+          input_tensor: nhwc
+          input_pixel_format: bgr
+          path: /openvino-model/ssdlite_mobilenet_v2.xml
+          labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+    - key: yolo-legacy
+      label: YOLO (v3, v4, v7)
+      recommended: false
+      download: |-
+        To export as ONNX:
+
+        ```sh
+        git clone https://github.com/NateMeyer/tensorrt_demos
+        cd tensorrt_demos/yolo
+        ./download_yolo.sh
+        python3 yolo_to_onnx.py -m yolov7-320
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU` (or `NPU`). Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                                    |
+        | ---------------------------------------- | -------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
+        | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
+        | **Model Input Tensor Shape**             | `nchw`                                                   |
+        | **Model Input D Type**                   | `float`                                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
+      yaml: |-
+        detectors:
+          ov:
+            type: openvino
+            device: GPU # or NPU
+
+        model:
+          model_type: yolo-generic
+          width: 320 # <--- should match the imgsize set during model export
+          height: 320 # <--- should match the imgsize set during model export
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+    - key: yolonas
+      label: YOLO-NAS
+      recommended: false
+      download: |-
+        You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) which can be run directly in [Google Colab](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
+
+        :::warning
+
+        The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+        :::
+
+        The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                             |
+        | ---------------------------------------- | ------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/yolo_nas_s.onnx`                         |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
+        | **Object detection model input width**   | `320` (should match whatever was set in notebook) |
+        | **Object detection model input height**  | `320` (should match whatever was set in notebook) |
+        | **Model Input Pixel Color Format**       | `bgr`                                             |
+        | **Model Input Tensor Shape**             | `nchw`                                            |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                   |
+        | **Object Detection Model Type**          | `yolonas`                                         |
+      yaml: |-
+        detectors:
+          ov:
+            type: openvino
+            device: GPU
+
+        model:
+          model_type: yolonas
+          width: 320 # <--- should match whatever was set in notebook
+          height: 320 # <--- should match whatever was set in notebook
+          input_tensor: nchw
+          input_pixel_format: bgr
+          path: /config/yolo_nas_s.onnx
+          labelmap_path: /labelmap/coco-80.txt
+    - key: yolox
+      label: YOLOX
+      recommended: false
+      download: YOLOx models can be downloaded [from the YOLOx repo](https://github.com/Megvii-BaseDetection/YOLOX/tree/main/demo/ONNXRuntime).
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                 | Value                            |
+        | ------------------------------------- | -------------------------------- |
+        | **Custom object detector model path** |  `/config/yolox.onnx` (use the filename you generated above)     |
+        | **Model Input Pixel Color Format**    | `rgb` (Frigate's default value)  |
+        | **Model Input Tensor Shape**          | `nhwc` (Frigate's default value) |
+        | **Model Input D Type**                | `int` (Frigate's default value)  |
+        | **Object Detection Model Type**       | `yolox`                          |
+      yaml: |-
+        detectors:
+          ov:
+            type: openvino
+            device: GPU
+
+        model:
+          model_type: yolox
+          path: /config/model_cache/yolox.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+    - key: rfdetr
+      label: RF-DETR
+      recommended: false
+      download: |-
+        RF-DETR can be exported as ONNX by running the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=Nano` in the first line to `Nano`, `Small`, or `Medium` size.
+
+        ```sh
+        docker build . --build-arg MODEL_SIZE=Nano --rm --output . -f- <<'EOF'
+        FROM python:3.12 AS build
+        RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+        WORKDIR /rfdetr
+        RUN uv pip install --system rfdetr[onnxexport] torch==2.8.0 onnx==1.19.1 transformers==4.57.6 onnxscript
+        ARG MODEL_SIZE
+        RUN python3 -c "from rfdetr import RFDETR${MODEL_SIZE}; x = RFDETR${MODEL_SIZE}(resolution=320); x.export(simplify=True)"
+        FROM scratch
+        ARG MODEL_SIZE
+        COPY --from=build /rfdetr/output/inference_model.onnx /rfdetr-${MODEL_SIZE}.onnx
+        EOF
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                   | Value                             |
+        | --------------------------------------- | --------------------------------- |
+        | **Custom object detector model path**   | `/config/model_cache/rfdetr.onnx` (use the filename you generated above) |
+        | **Object detection model input width**  | `320`                             |
+        | **Object detection model input height** | `320`                             |
+        | **Model Input Pixel Color Format**      | `rgb` (Frigate's default value)   |
+        | **Model Input Tensor Shape**            | `nchw`                            |
+        | **Model Input D Type**                  | `float`                           |
+        | **Object Detection Model Type**         | `rfdetr`                          |
+      yaml: |-
+        detectors:
+          ov:
+            type: openvino
+            device: GPU
+
+        model:
+          model_type: rfdetr
+          width: 320
+          height: 320
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/rfdetr.onnx # use the filename you generated above
+    - key: dfine
+      label: D-FINE / DEIMv2
+      recommended: false
+      download: |-
+        #### D-FINE
+
+        D-FINE can be exported as ONNX by running the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=s` in the first line to `s`, `m`, or `l` size.
+
+        ```sh
+        docker build . --build-arg MODEL_SIZE=s --output . -f- <<'EOF'
+        FROM python:3.11 AS build
+        RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+        WORKDIR /dfine
+        RUN git clone https://github.com/Peterande/D-FINE.git .
+        RUN uv pip install --system -r requirements.txt
+        RUN uv pip install --system onnx onnxruntime onnxsim onnxscript
+        # Create output directory and download checkpoint
+        RUN mkdir -p output
+        ARG MODEL_SIZE
+        RUN wget https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_${MODEL_SIZE}_obj2coco.pth -O output/dfine_${MODEL_SIZE}_obj2coco.pth
+        # Modify line 58 of export_onnx.py to change batch size to 1
+        RUN sed -i '58s/data = torch.rand(.*)/data = torch.rand(1, 3, 640, 640)/' tools/deployment/export_onnx.py
+        RUN python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hgnetv2_${MODEL_SIZE}_obj2coco.yml -r output/dfine_${MODEL_SIZE}_obj2coco.pth
+        FROM scratch
+        ARG MODEL_SIZE
+        COPY --from=build /dfine/output/dfine_${MODEL_SIZE}_obj2coco.onnx /dfine-${MODEL_SIZE}.onnx
+        EOF
+        ```
+
+        #### DEIMv2
+
+        [DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2) can be exported as ONNX by running the command below. Pretrained weights are available on Hugging Face for two backbone families:
+
+        - **HGNetv2** (smaller/faster): `atto`, `femto`, `pico`, `n`
+        - **DINOv3** (larger/more accurate): `s`, `m`, `l`, `x`
+
+        Set `BACKBONE` and `MODEL_SIZE` in the first line to match your desired variant. Hugging Face model names use uppercase (e.g. `HGNetv2_N`, `DINOv3_S`), while config files use lowercase (e.g. `hgnetv2_n`, `dinov3_s`).
+
+        ```sh
+        docker build . --rm --build-arg BACKBONE=hgnetv2 --build-arg MODEL_SIZE=n --output . -f- <<'EOF'
+        FROM python:3.11-slim AS build
+        RUN apt-get update && apt-get install --no-install-recommends -y git libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+        WORKDIR /deimv2
+        RUN git clone https://github.com/Intellindust-AI-Lab/DEIMv2.git .
+        # Install CPU-only PyTorch first to avoid pulling CUDA variant
+        RUN uv pip install --no-cache --system torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        RUN uv pip install --no-cache --system -r requirements.txt
+        RUN uv pip install --no-cache --system onnx safetensors huggingface_hub
+        RUN mkdir -p output
+        ARG BACKBONE
+        ARG MODEL_SIZE
+        # Download from Hugging Face and convert safetensors to pth
+        RUN python3 -c "\
+        from huggingface_hub import hf_hub_download; \
+        from safetensors.torch import load_file; \
+        import torch; \
+        backbone = '${BACKBONE}'.replace('hgnetv2','HGNetv2').replace('dinov3','DINOv3'); \
+        size = '${MODEL_SIZE}'.upper(); \
+        st = load_file(hf_hub_download('Intellindust/DEIMv2_' + backbone + '_' + size + '_COCO', 'model.safetensors')); \
+        torch.save({'model': st}, 'output/deimv2.pth')"
+        RUN sed -i "s/data = torch.rand(2/data = torch.rand(1/" tools/deployment/export_onnx.py
+        # HuggingFace safetensors omits frozen constants that the model constructor initializes
+        RUN sed -i "s/cfg.model.load_state_dict(state)/cfg.model.load_state_dict(state, strict=False)/" tools/deployment/export_onnx.py
+        RUN python3 tools/deployment/export_onnx.py -c configs/deimv2/deimv2_${BACKBONE}_${MODEL_SIZE}_coco.yml -r output/deimv2.pth
+        FROM scratch
+        ARG BACKBONE
+        ARG MODEL_SIZE
+        COPY --from=build /deimv2/output/deimv2.onnx /deimv2_${BACKBONE}_${MODEL_SIZE}.onnx
+        EOF
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `CPU`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                              |
+        | ---------------------------------------- | ---------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/dfine-s.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`            |
+        | **Object detection model input width**   | `640`                              |
+        | **Object detection model input height**  | `640`                              |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)    |
+        | **Model Input Tensor Shape**             | `nchw`                             |
+        | **Model Input D Type**                   | `float`                            |
+        | **Object Detection Model Type**          | `dfine`                            |
+      yaml: |-
+        detectors:
+          ov:
+            type: openvino
+            device: CPU
+
+        model:
+          model_type: dfine
+          width: 640
+          height: 640
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/dfine-s.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+appleSilicon:
+  title: Apple Silicon
+  models:
+    - key: yolov9
+      label: YOLOv9
+      recommended: true
+      download: |-
+        YOLOv9 model can be exported as ONNX using the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=t` and `IMG_SIZE=320` in the first line to the [model size](https://github.com/WongKinYiu/yolov9#performance) you would like to convert (available model sizes are `t`, `s`, `m`, `c`, and `e`, common image sizes are `320` and `640`).
+
+        ```sh
+        docker build . --build-arg MODEL_SIZE=t --build-arg IMG_SIZE=320 --output . -f- <<'EOF'
+        FROM python:3.11 AS build
+        RUN apt-get update && apt-get install --no-install-recommends -y cmake libgl1 && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+        WORKDIR /yolov9
+        ADD https://github.com/WongKinYiu/yolov9.git .
+        RUN uv pip install --system -r requirements.txt
+        RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier==0.4.* onnxscript
+        ARG MODEL_SIZE
+        ARG IMG_SIZE
+        ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-${MODEL_SIZE}-converted.pt yolov9-${MODEL_SIZE}.pt
+        RUN sed -i "s/ckpt = torch.load(attempt_download(w), map_location='cpu')/ckpt = torch.load(attempt_download(w), map_location='cpu', weights_only=False)/g" models/experimental.py
+        RUN python3 export.py --weights ./yolov9-${MODEL_SIZE}.pt --imgsz ${IMG_SIZE} --simplify --include onnx
+        FROM scratch
+        ARG MODEL_SIZE
+        ARG IMG_SIZE
+        COPY --from=build /yolov9/yolov9-${MODEL_SIZE}.onnx /yolov9-${MODEL_SIZE}-${IMG_SIZE}.onnx
+        EOF
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **ZMQ IPC** from the detector type dropdown and click **Add**, then set the endpoint to `tcp://host.docker.internal:5555`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                                    |
+        | ---------------------------------------- | -------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
+        | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
+        | **Model Input Tensor Shape**             | `nchw`                                                   |
+        | **Model Input D Type**                   | `float`                                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
+      yaml: |-
+        detectors:
+          apple-silicon:
+            type: zmq
+            endpoint: tcp://host.docker.internal:5555
+
+        model:
+          model_type: yolo-generic
+          width: 320 # <--- should match the imgsize set during model export
+          height: 320 # <--- should match the imgsize set during model export
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+    - key: yolo-legacy
+      label: YOLO (v3, v4, v7)
+      recommended: false
+      download: |-
+        To export as ONNX:
+
+        ```sh
+        git clone https://github.com/NateMeyer/tensorrt_demos
+        cd tensorrt_demos/yolo
+        ./download_yolo.sh
+        python3 yolo_to_onnx.py -m yolov7-320
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **ZMQ IPC** from the detector type dropdown and click **Add**, then set the endpoint to `tcp://host.docker.internal:5555`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                                    |
+        | ---------------------------------------- | -------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
+        | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
+        | **Model Input Tensor Shape**             | `nchw`                                                   |
+        | **Model Input D Type**                   | `float`                                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
+      yaml: |-
+        detectors:
+          apple-silicon:
+            type: zmq
+            endpoint: tcp://host.docker.internal:5555
+
+        model:
+          model_type: yolo-generic
+          width: 320 # <--- should match the imgsize set during model export
+          height: 320 # <--- should match the imgsize set during model export
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+onnx:
+  title: ONNX
+  models:
+    - key: yolov9
+      label: YOLOv9
+      recommended: true
+      download: |-
+        YOLOv9 model can be exported as ONNX using the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=t` and `IMG_SIZE=320` in the first line to the [model size](https://github.com/WongKinYiu/yolov9#performance) you would like to convert (available model sizes are `t`, `s`, `m`, `c`, and `e`, common image sizes are `320` and `640`).
+
+        ```sh
+        docker build . --build-arg MODEL_SIZE=t --build-arg IMG_SIZE=320 --output . -f- <<'EOF'
+        FROM python:3.11 AS build
+        RUN apt-get update && apt-get install --no-install-recommends -y cmake libgl1 && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+        WORKDIR /yolov9
+        ADD https://github.com/WongKinYiu/yolov9.git .
+        RUN uv pip install --system -r requirements.txt
+        RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier==0.4.* onnxscript
+        ARG MODEL_SIZE
+        ARG IMG_SIZE
+        ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-${MODEL_SIZE}-converted.pt yolov9-${MODEL_SIZE}.pt
+        RUN sed -i "s/ckpt = torch.load(attempt_download(w), map_location='cpu')/ckpt = torch.load(attempt_download(w), map_location='cpu', weights_only=False)/g" models/experimental.py
+        RUN python3 export.py --weights ./yolov9-${MODEL_SIZE}.pt --imgsz ${IMG_SIZE} --simplify --include onnx
+        FROM scratch
+        ARG MODEL_SIZE
+        ARG IMG_SIZE
+        COPY --from=build /yolov9/yolov9-${MODEL_SIZE}.onnx /yolov9-${MODEL_SIZE}-${IMG_SIZE}.onnx
+        EOF
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                                    |
+        | ---------------------------------------- | -------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
+        | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
+        | **Model Input Tensor Shape**             | `nchw`                                                   |
+        | **Model Input D Type**                   | `float`                                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
+      yaml: |-
+        detectors:
+          onnx:
+            type: onnx
+
+        model:
+          model_type: yolo-generic
+          width: 320 # <--- should match the imgsize set during model export
+          height: 320 # <--- should match the imgsize set during model export
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+    - key: rfdetr
+      label: RF-DETR
+      recommended: false
+      download: |-
+        RF-DETR can be exported as ONNX by running the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=Nano` in the first line to `Nano`, `Small`, or `Medium` size.
+
+        ```sh
+        docker build . --build-arg MODEL_SIZE=Nano --rm --output . -f- <<'EOF'
+        FROM python:3.12 AS build
+        RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+        WORKDIR /rfdetr
+        RUN uv pip install --system rfdetr[onnxexport] torch==2.8.0 onnx==1.19.1 transformers==4.57.6 onnxscript
+        ARG MODEL_SIZE
+        RUN python3 -c "from rfdetr import RFDETR${MODEL_SIZE}; x = RFDETR${MODEL_SIZE}(resolution=320); x.export(simplify=True)"
+        FROM scratch
+        ARG MODEL_SIZE
+        COPY --from=build /rfdetr/output/inference_model.onnx /rfdetr-${MODEL_SIZE}.onnx
+        EOF
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                   | Value                             |
+        | --------------------------------------- | --------------------------------- |
+        | **Custom object detector model path**   | `/config/model_cache/rfdetr.onnx` (use the filename you generated above) |
+        | **Object detection model input width**  | `320`                             |
+        | **Object detection model input height** | `320`                             |
+        | **Model Input Pixel Color Format**      | `rgb` (Frigate's default value)   |
+        | **Model Input Tensor Shape**            | `nchw`                            |
+        | **Model Input D Type**                  | `float`                           |
+        | **Object Detection Model Type**         | `rfdetr`                          |
+      yaml: |-
+        detectors:
+          onnx:
+            type: onnx
+
+        model:
+          model_type: rfdetr
+          width: 320
+          height: 320
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/rfdetr.onnx # use the filename you generated above
+    - key: yolonas
+      label: YOLO-NAS
+      recommended: false
+      download: |-
+        You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) which can be run directly in [Google Colab](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
+
+        :::warning
+
+        The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+        :::
+
+        The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                             |
+        | ---------------------------------------- | ------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/yolo_nas_s.onnx`                         |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
+        | **Object detection model input width**   | `320` (should match whatever was set in notebook) |
+        | **Object detection model input height**  | `320` (should match whatever was set in notebook) |
+        | **Model Input Pixel Color Format**       | `bgr`                                             |
+        | **Model Input Tensor Shape**             | `nchw`                                            |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                   |
+        | **Object Detection Model Type**          | `yolonas`                                         |
+      yaml: |-
+        detectors:
+          onnx:
+            type: onnx
+
+        model:
+          model_type: yolonas
+          width: 320 # <--- should match whatever was set in notebook
+          height: 320 # <--- should match whatever was set in notebook
+          input_pixel_format: bgr
+          input_tensor: nchw
+          path: /config/yolo_nas_s.onnx
+          labelmap_path: /labelmap/coco-80.txt
+    - key: yolox
+      label: YOLOX
+      recommended: false
+      download: YOLOx models can be downloaded [from the YOLOx repo](https://github.com/Megvii-BaseDetection/YOLOX/tree/main/demo/ONNXRuntime).
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                                    |
+        | ---------------------------------------- | -------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolox_tiny.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object detection model input width**   | `416` (should match the imgsize set during model export) |
+        | **Object detection model input height**  | `416` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
+        | **Model Input Tensor Shape**             | `nchw`                                                   |
+        | **Model Input D Type**                   | `float_denorm`                                           |
+        | **Object Detection Model Type**          | `yolox`                                                  |
+      yaml: |-
+        detectors:
+          onnx:
+            type: onnx
+
+        model:
+          model_type: yolox
+          width: 416 # <--- should match the imgsize set during model export
+          height: 416 # <--- should match the imgsize set during model export
+          input_tensor: nchw
+          input_dtype: float_denorm
+          path: /config/model_cache/yolox_tiny.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+    - key: dfine
+      label: D-FINE / DEIMv2
+      recommended: false
+      download: |-
+        #### Downloading D-FINE Model
+
+        D-FINE can be exported as ONNX by running the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=s` in the first line to `s`, `m`, or `l` size.
+
+        ```sh
+        docker build . --build-arg MODEL_SIZE=s --output . -f- <<'EOF'
+        FROM python:3.11 AS build
+        RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+        WORKDIR /dfine
+        RUN git clone https://github.com/Peterande/D-FINE.git .
+        RUN uv pip install --system -r requirements.txt
+        RUN uv pip install --system onnx onnxruntime onnxsim onnxscript
+        # Create output directory and download checkpoint
+        RUN mkdir -p output
+        ARG MODEL_SIZE
+        RUN wget https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_${MODEL_SIZE}_obj2coco.pth -O output/dfine_${MODEL_SIZE}_obj2coco.pth
+        # Modify line 58 of export_onnx.py to change batch size to 1
+        RUN sed -i '58s/data = torch.rand(.*)/data = torch.rand(1, 3, 640, 640)/' tools/deployment/export_onnx.py
+        RUN python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hgnetv2_${MODEL_SIZE}_obj2coco.yml -r output/dfine_${MODEL_SIZE}_obj2coco.pth
+        FROM scratch
+        ARG MODEL_SIZE
+        COPY --from=build /dfine/output/dfine_${MODEL_SIZE}_obj2coco.onnx /dfine-${MODEL_SIZE}.onnx
+        EOF
+        ```
+
+        #### Downloading DEIMv2 Model
+
+        [DEIMv2](https://github.com/Intellindust-AI-Lab/DEIMv2) can be exported as ONNX by running the command below. Pretrained weights are available on Hugging Face for two backbone families:
+
+        - **HGNetv2** (smaller/faster): `atto`, `femto`, `pico`, `n`
+        - **DINOv3** (larger/more accurate): `s`, `m`, `l`, `x`
+
+        Set `BACKBONE` and `MODEL_SIZE` in the first line to match your desired variant. Hugging Face model names use uppercase (e.g. `HGNetv2_N`, `DINOv3_S`), while config files use lowercase (e.g. `hgnetv2_n`, `dinov3_s`).
+
+        ```sh
+        docker build . --rm --build-arg BACKBONE=hgnetv2 --build-arg MODEL_SIZE=n --output . -f- <<'EOF'
+        FROM python:3.11-slim AS build
+        RUN apt-get update && apt-get install --no-install-recommends -y git libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+        WORKDIR /deimv2
+        RUN git clone https://github.com/Intellindust-AI-Lab/DEIMv2.git .
+        # Install CPU-only PyTorch first to avoid pulling CUDA variant
+        RUN uv pip install --no-cache --system torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        RUN uv pip install --no-cache --system -r requirements.txt
+        RUN uv pip install --no-cache --system onnx safetensors huggingface_hub
+        RUN mkdir -p output
+        ARG BACKBONE
+        ARG MODEL_SIZE
+        # Download from Hugging Face and convert safetensors to pth
+        RUN python3 -c "\
+        from huggingface_hub import hf_hub_download; \
+        from safetensors.torch import load_file; \
+        import torch; \
+        backbone = '${BACKBONE}'.replace('hgnetv2','HGNetv2').replace('dinov3','DINOv3'); \
+        size = '${MODEL_SIZE}'.upper(); \
+        st = load_file(hf_hub_download('Intellindust/DEIMv2_' + backbone + '_' + size + '_COCO', 'model.safetensors')); \
+        torch.save({'model': st}, 'output/deimv2.pth')"
+        RUN sed -i "s/data = torch.rand(2/data = torch.rand(1/" tools/deployment/export_onnx.py
+        # HuggingFace safetensors omits frozen constants that the model constructor initializes
+        RUN sed -i "s/cfg.model.load_state_dict(state)/cfg.model.load_state_dict(state, strict=False)/" tools/deployment/export_onnx.py
+        RUN python3 tools/deployment/export_onnx.py -c configs/deimv2/deimv2_${BACKBONE}_${MODEL_SIZE}_coco.yml -r output/deimv2.pth
+        FROM scratch
+        ARG BACKBONE
+        ARG MODEL_SIZE
+        COPY --from=build /deimv2/output/deimv2.onnx /deimv2_${BACKBONE}_${MODEL_SIZE}.onnx
+        EOF
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                       |
+        | ---------------------------------------- | ------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/dfine_m_obj2coco.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                     |
+        | **Object detection model input width**   | `640`                                       |
+        | **Object detection model input height**  | `640`                                       |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)             |
+        | **Model Input Tensor Shape**             | `nchw`                                      |
+        | **Model Input D Type**                   | `float`                                     |
+        | **Object Detection Model Type**          | `dfine`                                     |
+      yaml: |-
+        detectors:
+          onnx:
+            type: onnx
+
+        model:
+          model_type: dfine
+          width: 640
+          height: 640
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/dfine_m_obj2coco.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+    - key: yolo-legacy
+      label: YOLO (v3, v4, v7)
+      recommended: false
+      download: |-
+        To export as ONNX:
+
+        ```sh
+        git clone https://github.com/NateMeyer/tensorrt_demos
+        cd tensorrt_demos/yolo
+        ./download_yolo.sh
+        python3 yolo_to_onnx.py -m yolov7-320
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                                    |
+        | ---------------------------------------- | -------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolo.onnx` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                  |
+        | **Object detection model input width**   | `320` (should match the imgsize set during model export) |
+        | **Object detection model input height**  | `320` (should match the imgsize set during model export) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                          |
+        | **Model Input Tensor Shape**             | `nchw`                                                   |
+        | **Model Input D Type**                   | `float`                                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                                           |
+      yaml: |-
+        detectors:
+          onnx:
+            type: onnx
+
+        model:
+          model_type: yolo-generic
+          width: 320 # <--- should match the imgsize set during model export
+          height: 320 # <--- should match the imgsize set during model export
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/model_cache/yolo.onnx # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+cpu:
+  title: CPU
+  models:
+    - key: ssd
+      label: MobileNet v2
+      recommended: true
+      download: A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **CPU** from the detector type dropdown and click **Add**. Configure the number of threads and click **Add** again to add additional CPU detectors as needed (one per camera is recommended).
+
+        | Field             | Value |
+        | ----------------- | ----- |
+        | **Detector type** | `cpu` |
+        | **Num threads**   | `3`   |
+      yaml: |-
+        detectors:
+          cpu1:
+            type: cpu
+            num_threads: 3
+deepstack:
+  title: DeepStack / CodeProject.AI
+  models:
+    - key: yolo
+      label: YOLO
+      recommended: true
+      download: This detector runs object detection over the network against a CodeProject.AI or DeepStack server, so no model is downloaded into Frigate itself. Visit the [CodeProject.AI official website](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) to download and install the AI server on your preferred device (e.g. Raspberry Pi, Nvidia Jetson, or other compatible hardware) before configuring the detector.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **DeepStack** from the detector type dropdown and click **Add**. Set the API URL to point to your CodeProject.AI server (e.g., `http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection`).
+
+        | Field         | Value                                                                  |
+        | ------------- | ---------------------------------------------------------------------- |
+        | **API URL**   | `http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection`    |
+        | **API Timeout** | `0.1` (seconds)                                                      |
+      yaml: |-
+        detectors:
+          deepstack:
+            api_url: http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection
+            type: deepstack
+            api_timeout: 0.1 # seconds
+memryx:
+  title: MemryX
+  models:
+    - key: yolonas
+      label: YOLO-NAS
+      recommended: true
+      download: |-
+        The [YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) model included in this detector is downloaded automatically and compiled to DFP with [mx_nc](https://developer.memryx.com/2p1/tools/neural_compiler.html#usage).
+
+        **Note:** The default model for the MemryX detector is YOLO-NAS 320x320.
+
+        The input size for **YOLO-NAS** can be set to either **320x320** (default) or **640x640**.
+
+        - The default size of **320x320** is optimized for lower CPU usage and faster inference times.
+
+        MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **MemryX** from the detector type dropdown and click **Add**, then set device to `PCIe:0`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                             |
+        | ---------------------------------------- | ------------------------------------------------- |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
+        | **Object detection model input width**   | `320` (can be set to `640` for higher resolution) |
+        | **Object detection model input height**  | `320` (can be set to `640` for higher resolution) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                   |
+        | **Model Input Tensor Shape**             | `nchw`                                            |
+        | **Model Input D Type**                   | `float`                                           |
+        | **Object Detection Model Type**          | `yolonas`                                         |
+      yaml: |-
+        detectors:
+          memx0:
+            type: memryx
+            device: PCIe:0
+
+        model:
+          model_type: yolonas
+          width: 320 # (Can be set to 640 for higher resolution)
+          height: 320 # (Can be set to 640 for higher resolution)
+          input_tensor: nchw
+          input_dtype: float
+          labelmap_path: /labelmap/coco-80.txt
+          # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+          # path: /config/yolonas.zip
+          # The .zip file must contain:
+          # ├── yolonas.dfp          (a file ending with .dfp)
+          # └── yolonas_post.onnx    (optional; only if the model includes a cropped post-processing network)
+    - key: yolov9
+      label: YOLOv9
+      recommended: false
+      download: |-
+        The YOLOv9s model included in this detector is downloaded from [the original GitHub](https://github.com/WongKinYiu/yolov9) and compiled to DFP with [mx_nc](https://developer.memryx.com/2p1/tools/neural_compiler.html#usage).
+
+        MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **MemryX** from the detector type dropdown and click **Add**, then set device to `PCIe:0`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                             |
+        | ---------------------------------------- | ------------------------------------------------- |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                           |
+        | **Object detection model input width**   | `320` (can be set to `640` for higher resolution) |
+        | **Object detection model input height**  | `320` (can be set to `640` for higher resolution) |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                   |
+        | **Model Input Tensor Shape**             | `nchw`                                            |
+        | **Model Input D Type**                   | `float`                                           |
+        | **Object Detection Model Type**          | `yolo-generic`                                    |
+      yaml: |-
+        detectors:
+          memx0:
+            type: memryx
+            device: PCIe:0
+
+        model:
+          model_type: yolo-generic
+          width: 320 # (Can be set to 640 for higher resolution)
+          height: 320 # (Can be set to 640 for higher resolution)
+          input_tensor: nchw
+          input_dtype: float
+          labelmap_path: /labelmap/coco-80.txt
+          # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+          # path: /config/yolov9.zip
+          # The .zip file must contain:
+          # ├── yolov9.dfp          (a file ending with .dfp)
+    - key: yolox
+      label: YOLOX
+      recommended: false
+      download: |-
+        The model is sourced from the [OpenCV Model Zoo](https://github.com/opencv/opencv_zoo) and precompiled to DFP.
+
+        MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **MemryX** from the detector type dropdown and click **Add**, then set device to `PCIe:0`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                   |
+        | ---------------------------------------- | ----------------------- |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
+        | **Object detection model input width**   | `640`                   |
+        | **Object detection model input height**  | `640`                   |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value) |
+        | **Model Input Tensor Shape**             | `nchw`                  |
+        | **Model Input D Type**                   | `float_denorm`          |
+        | **Object Detection Model Type**          | `yolox`                 |
+      yaml: |-
+        detectors:
+          memx0:
+            type: memryx
+            device: PCIe:0
+
+        model:
+          model_type: yolox
+          width: 640
+          height: 640
+          input_tensor: nchw
+          input_dtype: float_denorm
+          labelmap_path: /labelmap/coco-80.txt
+          # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+          # path: /config/yolox.zip
+          # The .zip file must contain:
+          # ├── yolox.dfp          (a file ending with .dfp)
+    - key: ssd
+      label: SSDLite MobileNet v2
+      recommended: false
+      download: |-
+        The model is sourced from the [OpenMMLab Model Zoo](https://mmdeploy-oss.openmmlab.com/model/mmdet-det/ssdlite-e8679f.onnx) and has been converted to DFP.
+
+        MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **MemryX** from the detector type dropdown and click **Add**, then set device to `PCIe:0`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                   |
+        | ---------------------------------------- | ----------------------- |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
+        | **Object detection model input width**   | `320`                   |
+        | **Object detection model input height**  | `320`                   |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value) |
+        | **Model Input Tensor Shape**             | `nchw`                  |
+        | **Model Input D Type**                   | `float`                 |
+        | **Object Detection Model Type**          | `ssd`                   |
+      yaml: |-
+        detectors:
+          memx0:
+            type: memryx
+            device: PCIe:0
+
+        model:
+          model_type: ssd
+          width: 320
+          height: 320
+          input_tensor: nchw
+          input_dtype: float
+          labelmap_path: /labelmap/coco-80.txt
+          # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+          # path: /config/ssdlite_mobilenet.zip
+          # The .zip file must contain:
+          # ├── ssdlite_mobilenet.dfp          (a file ending with .dfp)
+          # └── ssdlite_mobilenet_post.onnx    (optional; only if the model includes a cropped post-processing network)
+tensorrt:
+  title: TensorRT
+  models:
+    - key: yolo-legacy
+      label: YOLO (v3, v4, v7)
+      recommended: true
+      download: |-
+        The model used for TensorRT must be preprocessed on the same hardware platform that it will run on, so Frigate generates the `.trt` model file on-device at startup. Processed models are stored in the `/config/model_cache` folder.
+
+        By default no models are generated. Set the `YOLO_MODELS` environment variable in Docker to one or more comma-separated model names (from the available `yolov3`/`yolov4`/`yolov7` models) and each one will be generated on startup if the corresponding `{model}.trt` file is not already present in `model_cache` (delete it to force regeneration). On Jetson devices with DLAs (Xavier or Orin), append `-dla` to a model name to generate a DLA model. If your GPU does not support FP16 operations, pass `USE_FP16=False` to disable it.
+
+        An example `docker-compose.yml` fragment that converts the `yolov7-320` and `yolov7x-640` models:
+
+        ```yml
+        frigate:
+          environment:
+            - YOLO_MODELS=yolov7-320,yolov7x-640
+            - USE_FP16=false
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **TensorRT** from the detector type dropdown and click **Add**, then set the device to `0` (the default GPU index). Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                                        |
+        | ---------------------------------------- | ------------------------------------------------------------ |
+        | **Custom object detector model path**    | `/config/model_cache/tensorrt/yolov7-320.trt` (use the filename you generated above) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                      |
+        | **Object detection model input width**   | `320` (MUST match the chosen model, e.g., yolov7-320 -> 320) |
+        | **Object detection model input height**  | `320` (MUST match the chosen model, e.g., yolov7-320 -> 320) |
+        | **Model Input Pixel Color Format**       | `rgb`                                                        |
+        | **Model Input Tensor Shape**             | `nchw`                                                       |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                              |
+        | **Object Detection Model Type**          | `ssd` (Frigate's default value)                              |
+      yaml: |-
+        detectors:
+          tensorrt:
+            type: tensorrt
+            device: 0 #This is the default, select the first GPU
+
+        model:
+          path: /config/model_cache/tensorrt/yolov7-320.trt # use the filename you generated above
+          labelmap_path: /labelmap/coco-80.txt
+          input_tensor: nchw
+          input_pixel_format: rgb
+          width: 320 # MUST match the chosen model i.e yolov7-320 -> 320, yolov4-416 -> 416
+          height: 320 # MUST match the chosen model i.e yolov7-320 -> 320 yolov4-416 -> 416
+synaptics:
+  title: Synaptics
+  models:
+    - key: ssd
+      label: SSD MobileNet
+      recommended: true
+      download: A synap model is provided in the container at `/mobilenet.synap` and is used by this detector type by default. The model comes from the [Synap-release Github](https://github.com/synaptics-astra/synap-release/tree/v1.5.0/models/dolphin/object_detection/coco/model/mobilenet224_full80).
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **Synaptics** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                        |
+        | ---------------------------------------- | ---------------------------- |
+        | **Custom object detector model path**    | `/synaptics/mobilenet.synap` |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`      |
+        | **Object detection model input width**   | `224`                        |
+        | **Object detection model input height**  | `224`                        |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value) |
+        | **Model Input Tensor Shape**             | `nhwc`                       |
+        | **Model Input D Type**                   | `int` (Frigate's default value) |
+        | **Object Detection Model Type**          | `ssd` (Frigate's default value) |
+      yaml: |-
+        detectors: # required
+          synap_npu: # required
+            type: synaptics # required
+
+        model: # required
+          path: /synaptics/mobilenet.synap # required
+          width: 224 # required
+          height: 224 # required
+          input_tensor: nhwc # default value (optional. If you change the model, it is required)
+          labelmap_path: /labelmap/coco-80.txt # required
+rknn:
+  title: RKNN
+  models:
+    - key: yolov9
+      label: YOLOv9
+      recommended: true
+      download: |-
+        If no custom model is provided, the RKNN detector downloads a default model from GitHub on first startup. Once cached, the model works fully offline. All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
+
+        You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                              |
+        | ---------------------------------------- | -------------------------------------------------- |
+        | **Custom object detector model path**    | `frigate-fp16-yolov9-t` (or other yolov9 variants) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                            |
+        | **Object detection model input width**   | `320`                                              |
+        | **Object detection model input height**  | `320`                                              |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                    |
+        | **Model Input Tensor Shape**             | `nhwc`                                             |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                    |
+        | **Object Detection Model Type**          | `yolo-generic`                                     |
+      yaml: |-
+        model: # required
+          # name of model (will be automatically downloaded) or path to your own .rknn model file
+          # possible values are:
+          # - frigate-fp16-yolov9-t
+          # - frigate-fp16-yolov9-s
+          # - frigate-fp16-yolov9-m
+          # - frigate-fp16-yolov9-c
+          # - frigate-fp16-yolov9-e
+          # your yolo_model.rknn
+          path: frigate-fp16-yolov9-t
+          model_type: yolo-generic
+          width: 320
+          height: 320
+          input_tensor: nhwc
+          labelmap_path: /labelmap/coco-80.txt
+    - key: yolonas
+      label: YOLO-NAS
+      recommended: false
+      download: |-
+        If no custom model is provided, the RKNN detector downloads a default model from GitHub on first startup. Once cached, the model works fully offline. All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
+
+        You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
+
+        **Note:** The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                                                   |
+        | ---------------------------------------- | ----------------------------------------------------------------------- |
+        | **Custom object detector model path**    | `deci-fp16-yolonas_s` (or `deci-fp16-yolonas_m`, `deci-fp16-yolonas_l`) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                                 |
+        | **Object detection model input width**   | `320`                                                                   |
+        | **Object detection model input height**  | `320`                                                                   |
+        | **Model Input Pixel Color Format**       | `bgr`                                                                   |
+        | **Model Input Tensor Shape**             | `nhwc`                                                                  |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                                         |
+        | **Object Detection Model Type**          | `yolonas`                                                               |
+      yaml: |-
+        model: # required
+          # name of model (will be automatically downloaded) or path to your own .rknn model file
+          # possible values are:
+          # - deci-fp16-yolonas_s
+          # - deci-fp16-yolonas_m
+          # - deci-fp16-yolonas_l
+          # your yolonas_model.rknn
+          path: deci-fp16-yolonas_s
+          model_type: yolonas
+          width: 320
+          height: 320
+          input_pixel_format: bgr
+          input_tensor: nhwc
+          labelmap_path: /labelmap/coco-80.txt
+    - key: yolox
+      label: YOLOx
+      recommended: false
+      download: |-
+        If no custom model is provided, the RKNN detector downloads a default model from GitHub on first startup. Once cached, the model works fully offline. All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
+
+        You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                          |
+        | ---------------------------------------- | ---------------------------------------------- |
+        | **Custom object detector model path**    | `rock-i8-yolox_nano` (or other yolox variants) |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                        |
+        | **Object detection model input width**   | `416`                                          |
+        | **Object detection model input height**  | `416`                                          |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                |
+        | **Model Input Tensor Shape**             | `nhwc`                                         |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                |
+        | **Object Detection Model Type**          | `yolox`                                        |
+      yaml: |-
+        model: # required
+          # name of model (will be automatically downloaded) or path to your own .rknn model file
+          # possible values are:
+          # - rock-i8-yolox_nano
+          # - rock-i8-yolox_tiny
+          # - rock-fp16-yolox_nano
+          # - rock-fp16-yolox_tiny
+          # your yolox_model.rknn
+          path: rock-i8-yolox_nano
+          model_type: yolox
+          width: 416
+          height: 416
+          input_tensor: nhwc
+          labelmap_path: /labelmap/coco-80.txt
+axengine:
+  title: AXEngine
+  models:
+    - key: yolov9
+      label: YOLOv9
+      recommended: true
+      download: A yolov9 axmodel is provided in the container at `/axmodels` and is used by this detector type by default. The AXEngine detector downloads its default model from HuggingFace on first startup; once cached, the model works fully offline.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **AXEngine NPU** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                   |
+        | ---------------------------------------- | ----------------------- |
+        | **Custom object detector model path**    | `frigate-yolov9-tiny`   |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt` |
+        | **Object detection model input width**   | `320`                   |
+        | **Object detection model input height**  | `320`                   |
+        | **Model Input Pixel Color Format**       | `bgr`                   |
+        | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value) |
+        | **Model Input D Type**                   | `int`                   |
+        | **Object Detection Model Type**          | `yolo-generic`          |
+      yaml: |-
+        detectors:
+          axengine:
+            type: axengine
+
+        model:
+          path: frigate-yolov9-tiny
+          model_type: yolo-generic
+          width: 320
+          height: 320
+          input_dtype: int
+          input_pixel_format: bgr
+          labelmap_path: /labelmap/coco-80.txt
+degirumAiServer:
+  title: DeGirum AI Server
+  models:
+    - key: ai-server-inference
+      label: AI Server Inference
+      recommended: true
+      download: |-
+        Launch a DeGirum AI server as a Docker container, then point the detector at it. Add this to your `docker-compose.yml`:
+
+        ```yaml
+        degirum_detector:
+          container_name: degirum
+          image: degirum/aiserver:latest
+          privileged: true
+          ports:
+            - "8778:8778"
+        ```
+
+        Set `location` to the server's service name, container name, or `host:port`.
+      ui: |
+        Navigate to **Settings > System > Detectors and model** and select **DeGirum** from the detector type dropdown and click **Add**.
+
+        | Field | Value |
+        | --- | --- |
+        | **Location** | `degirum` |
+        | **Zoo** | `degirum/public` |
+        | **Token** | your AI Hub token (optional for the public zoo) |
+      yaml: |
+        degirum_detector:
+          type: degirum
+          location: degirum
+          zoo: degirum/public
+          token: dg_example_token
+degirumLocal:
+  title: DeGirum Local
+  models:
+    - key: local-inference
+      label: Local Inference
+      recommended: true
+      download: Run hardware directly inside the Frigate container with `@local`, removing the AI server hop. The matching device runtime (e.g. the Hailo runtime) must be installed in the container; confirm it with `degirum sys-info`.
+      ui: |
+        Navigate to **Settings > System > Detectors and model** and select **DeGirum** from the detector type dropdown and click **Add**.
+
+        | Field | Value |
+        | --- | --- |
+        | **Location** | `@local` |
+        | **Zoo** | `degirum/public` |
+        | **Token** | your AI Hub token (optional for the public zoo) |
+      yaml: |
+        degirum_detector:
+          type: degirum
+          location: @local
+          zoo: degirum/public
+          token: dg_example_token
+degirumCloud:
+  title: DeGirum AI Hub Cloud
+  models:
+    - key: ai-hub-cloud-inference
+      label: AI Hub Cloud Inference
+      recommended: true
+      download: Run inferences on DeGirum's [AI Hub](https://hub.degirum.com) cloud with `@cloud`. Sign up, create an access token, and set it as `token`. Network latency may require lowering your detection fps.
+      ui: |
+        Navigate to **Settings > System > Detectors and model** and select **DeGirum** from the detector type dropdown and click **Add**.
+
+        | Field | Value |
+        | --- | --- |
+        | **Location** | `@cloud` |
+        | **Zoo** | `degirum/public` |
+        | **Token** | your AI Hub token (optional for the public zoo) |
+      yaml: |
+        degirum_detector:
+          type: degirum
+          location: @cloud
+          zoo: degirum/public
+          token: dg_example_token

@@ -3,7 +3,7 @@
 import logging
 import os
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from frigate.const import (
     FFMPEG_HVC1_ARGS,
@@ -150,7 +150,11 @@ PRESETS_HW_ACCEL_SCALE["preset-rk-h265"] = PRESETS_HW_ACCEL_SCALE[FFMPEG_HWACCEL
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-rpi-64-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m {2}",
     "preset-rpi-64-h265": "{0} -hide_banner {1} -c:v hevc_v4l2m2m {2}",
-    FFMPEG_HWACCEL_VAAPI: "{0} -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {3} {1} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {2}",
+    # -vaapi_device is required in addition to -hwaccel_device: this is the only
+    # birdseye preset that uses hwupload, and ffmpeg 8 initializes filters before
+    # the decoder creates a device, so hwupload cannot see an -hwaccel_device one.
+    # See https://github.com/AlexxIT/go2rtc/issues/1984
+    FFMPEG_HWACCEL_VAAPI: "{0} -hide_banner -vaapi_device {3} -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {3} {1} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {2}",
     "preset-intel-qsv-h264": "{0} -hide_banner {1} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {2}",
     "preset-intel-qsv-h265": "{0} -hide_banner {1} -c:v h264_qsv -g 50 -bf 0 -profile:v main -level:v 4.1 -async_depth:v 1 {2}",
     FFMPEG_HWACCEL_NVIDIA: "{0} -hide_banner {1} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {2}",
@@ -215,7 +219,7 @@ def parse_preset_hardware_acceleration_decode(
     width: int,
     height: int,
     gpu: int,
-) -> Optional[list[str]]:
+) -> list[str] | None:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
@@ -420,7 +424,7 @@ PRESETS_INPUT = {
 }
 
 
-def parse_preset_input(arg: Any, detect_fps: int) -> Optional[list[str]]:
+def parse_preset_input(arg: Any, detect_fps: int) -> list[str] | None:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
@@ -530,9 +534,7 @@ PRESETS_RECORD_OUTPUT = {
 }
 
 
-def parse_preset_output_record(
-    arg: Any, force_record_hvc1: bool
-) -> Optional[list[str]]:
+def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str] | None:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None

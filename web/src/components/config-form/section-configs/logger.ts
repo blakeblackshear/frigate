@@ -12,7 +12,13 @@ const logger: SectionConfigOverrides = {
       },
       logs: {
         additionalProperties: {
-          "ui:options": { enumI18nPrefix: "logger.logLevel" },
+          "ui:options": {
+            enumI18nPrefix: "logger.logLevel",
+            additionalPropertyKeyLabel:
+              "configForm.additionalProperties.loggerNameLabel",
+            additionalPropertyKeyPlaceholder:
+              "configForm.additionalProperties.loggerNamePlaceholder",
+          },
         },
       },
     },

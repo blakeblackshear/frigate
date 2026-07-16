@@ -82,12 +82,15 @@ export function processWsMessage(raw: string) {
 
 function applyTopicUpdate(topic: string, newVal: unknown) {
   const oldVal = wsState[topic];
+  // camera_activity snapshots always re-notify: consumers reconcile local
+  // state that may have diverged from an unchanged snapshot
+  const isActivitySnapshot = topic.startsWith("camera_activity/");
   // Fast path: === for primitives ("ON"/"OFF", numbers).
   // Fall back to isEqual for objects/arrays.
   const unchanged =
     oldVal === newVal ||
     (typeof newVal === "object" && newVal !== null && isEqual(oldVal, newVal));
-  if (unchanged) return;
+  if (unchanged && !isActivitySnapshot) return;
 
   wsState[topic] = newVal;
   // Snapshot the Set — a listener may trigger unmount that modifies it.
@@ -130,6 +133,25 @@ let wsMessageIdCounter = 0;
 // fresh objects (which defeat Object.is and force expensive isEqual deep
 // traversals) on every flush — critical with many cameras.
 let lastCameraActivityPayload: string | null = null;
+
+// Make the next camera_activity snapshot fully apply even when byte-identical
+// to the previous one — local state may have diverged while no messages flowed
+export function invalidateCameraActivityCache() {
+  lastCameraActivityPayload = null;
+}
+
+// Collapse same-task resync requests (one hook per camera card) into a
+// single onConnect round-trip
+let resyncScheduled = false;
+function requestCameraActivityResync(sendOnConnect: () => void) {
+  if (resyncScheduled) return;
+  resyncScheduled = true;
+  queueMicrotask(() => {
+    resyncScheduled = false;
+    invalidateCameraActivityCache();
+    sendOnConnect();
+  });
+}
 
 function applyCameraActivity(payload: string) {
   // Fast path: if the raw JSON string is identical, nothing changed.
@@ -509,15 +531,16 @@ export function useInitialCameraState(
   // camera_activity sub-topic payload is already parsed by expandCameraActivity
   const data = payload as FrigateCameraState | undefined;
 
-  // onConnect is sent once in WsProvider.onopen — no need to re-request on
-  // every component mount.  Components read cached wsState immediately via
-  // useSyncExternalStore.  Only re-request when the user tabs back in.
+  // the cached snapshot is only written on onConnect and can be stale by the
+  // time this hook mounts — re-request on mount and when the user tabs back in
   useEffect(() => {
     if (!revalidateOnFocus) return;
 
+    requestCameraActivityResync(() => sendCommand("onConnect"));
+
     const listener = () => {
       if (document.visibilityState === "visible") {
-        sendCommand("onConnect");
+        requestCameraActivityResync(() => sendCommand("onConnect"));
       }
     };
     addEventListener("visibilitychange", listener);

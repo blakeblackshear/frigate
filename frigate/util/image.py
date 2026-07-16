@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from multiprocessing import resource_tracker as _mprt
 from multiprocessing import shared_memory as _mpshm
 from string import printable
-from typing import Any, AnyStr, Optional
+from typing import Any, AnyStr
 
 import cv2
 import numpy as np
@@ -270,7 +270,7 @@ def draw_box_with_label(
     )
 
 
-def get_image_quality_params(ext: str, quality: Optional[int]) -> list[int]:
+def get_image_quality_params(ext: str, quality: int | None) -> list[int]:
     if ext in ("jpg", "jpeg"):
         return [int(cv2.IMWRITE_JPEG_QUALITY), quality if quality is not None else 70]
 
@@ -921,7 +921,7 @@ def yuv_region_2_bgr(frame, region):
         raise
 
 
-def intersection(box_a, box_b) -> Optional[list[int]]:
+def intersection(box_a, box_b) -> list[int] | None:
     """Return intersection box or None if boxes do not intersect."""
     if (
         box_a[2] < box_b[0]
@@ -994,7 +994,7 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def write(self, name: str) -> Optional[memoryview]:
+    def write(self, name: str) -> memoryview | None:
         pass
 
     @abstractmethod
@@ -1021,7 +1021,7 @@ class UntrackedSharedMemory(_mpshm.SharedMemory):
 
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: str | None = None,
         create: bool = False,
         size: int = 0,
         *,
@@ -1075,7 +1075,7 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store[name] = shm
         return shm.buf
 
-    def write(self, name: str) -> Optional[memoryview]:
+    def write(self, name: str) -> memoryview | None:
         try:
             if name in self.shm_store:
                 shm = self.shm_store[name]
@@ -1087,7 +1087,7 @@ class SharedMemoryFrameManager(FrameManager):
             logger.info(f"the file {name} not found")
             return None
 
-    def get(self, name: str, shape) -> Optional[np.ndarray]:
+    def get(self, name: str, shape) -> np.ndarray | None:
         try:
             required = int(np.prod(shape))
             shm = self.shm_store.get(name)
@@ -1185,10 +1185,10 @@ def run_ffmpeg_snapshot(
     ffmpeg,
     input_path: str,
     codec: str,
-    seek_time: Optional[float] = None,
-    height: Optional[int] = None,
-    timeout: Optional[int] = None,
-) -> tuple[Optional[bytes], str]:
+    seek_time: float | None = None,
+    height: int | None = None,
+    timeout: int | None = None,
+) -> tuple[bytes | None, str]:
     """Run ffmpeg to extract a snapshot/image from a video source."""
     ffmpeg_cmd = [
         ffmpeg.ffmpeg_path,
@@ -1238,8 +1238,8 @@ def get_image_from_recording(
     file_path: str,
     relative_frame_time: float,
     codec: str,
-    height: Optional[int] = None,
-) -> Optional[Any]:
+    height: int | None = None,
+) -> Any | None:
     """retrieve a frame from given time in recording file."""
 
     image_data, _ = run_ffmpeg_snapshot(
@@ -1261,7 +1261,7 @@ def get_histogram(image, x_min, y_min, x_max, y_max):
 
 def create_thumbnail(
     yuv_frame: np.ndarray, box: tuple[int, int, int, int], height=500
-) -> Optional[bytes]:
+) -> bytes | None:
     """Return jpg thumbnail of a region of the frame."""
     frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2BGR_I420)
     region = calculate_region(

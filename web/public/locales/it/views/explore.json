@@ -202,8 +202,8 @@
       "aria": "Invia a Frigate Plus"
     },
     "addTrigger": {
-      "label": "Aggiungi innesco",
-      "aria": "Aggiungi un innesco per questo oggetto tracciato"
+      "label": "Aggiungi attivatore",
+      "aria": "Aggiungi un attivatore per questo oggetto tracciato"
     },
     "audioTranscription": {
       "label": "Trascrivere",

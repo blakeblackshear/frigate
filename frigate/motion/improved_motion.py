@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import cv2
 import numpy as np
@@ -19,7 +18,7 @@ class ImprovedMotionDetector(MotionDetector):
         frame_shape: tuple[int, ...],
         config: RuntimeMotionConfig,
         fps: int,
-        ptz_metrics: Optional[PTZMetrics] = None,
+        ptz_metrics: PTZMetrics | None = None,
         name: str = "improved",
         blur_radius: int = 1,
         interpolation: int = cv2.INTER_NEAREST,

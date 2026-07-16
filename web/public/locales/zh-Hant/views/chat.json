@@ -60,5 +60,13 @@
     "stats": {
         "context": "{{tokens}} 個 token",
         "tokens_per_second": "{{rate}} tokens/秒"
+    },
+    "reasoning": {
+        "active": "推論中…",
+        "show": "顯示推論過程",
+        "hide": "隱藏推論過程"
+    },
+    "thinking": {
+        "toggle": "切換顯示推論"
     }
 }

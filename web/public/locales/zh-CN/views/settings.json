@@ -70,7 +70,7 @@
     "integrationObjectClassification": "目标分类",
     "integrationAudioTranscription": "音频转录",
     "cameraDetect": "目标检测",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "视频流（FFmpeg）",
     "cameraRecording": "录制",
     "cameraSnapshots": "快照",
     "cameraMotion": "画面变动检测",
@@ -1700,7 +1700,17 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "视频流 {{index}}"
+      "itemTitle": "视频流 {{index}}",
+      "sourceMode": {
+        "restream": "转流传输（go2rtc）",
+        "manual": "手动输入路径",
+        "go2rtcStreamPlaceholder": "选择 go2rtc 视频流",
+        "noGo2rtcStreams": "没有配置 go2rtc 视频流",
+        "go2rtcStreamSearch": "搜索视频流…",
+        "go2rtcStreamLabel": "go2rtc 视频流",
+        "availableStreams": "可用的视频流",
+        "noMatchingStreams": "没有匹配的视频流"
+      }
     },
     "restartRequiredField": "需要重启",
     "restartRequiredFooter": "配置已更改 - 需要重启",
@@ -2082,7 +2092,11 @@
       "fpsGreaterThanFive": "不建议设置检测帧率高于 5，数值设置过高可能引发性能问题，且不会带来任何增益。",
       "disabled": "目标检测已禁用。快照、回放条目以及人脸识别、车牌识别、生成式 AI 等增强功能都将无法使用。",
       "resolutionShouldBeMultipleOfFour": "为了获得最佳效果，检测的宽度和高度应该是4的倍数。其他偶数值可能会在检测流中产生视觉伪影或轻微失真。",
-      "aspectRatioMismatch": "你输入的宽度和高度与当前检测分辨率的不匹配，这可能会导致图像被拉伸或变形。"
+      "aspectRatioMismatch": "你输入的宽度和高度与当前检测分辨率的不匹配，这可能会导致图像被拉伸或变形。",
+      "maxFramesSet": "设置最大帧数将会覆盖默认行为，并且禁用静态物体追踪。只有很少的情况下需要这个功能，请谨慎使用。",
+      "squareResolution": "方形的检测分辨率比较少见。检测宽度和高度应该与你摄像头的画面比例一致（例如 16:9），而不是跟目标检测模型的输入尺寸一致。画面比例不匹配可能会拉伸图像，从而降低检测准确率。",
+      "resolutionHigh": "这个检测分辨率高于推荐值，可能会增加资源占用，但不一定提升检测准确率。对于大多数摄像头，建议使用 1080p 或更低的检测分辨率。",
+      "globalResolutionMultipleCameras": "在配置了多个摄像头同时还设置了全局检测分辨率。除非所有摄像头都使用相同的分辨率和画面比例，否则应该为每个摄像头单独设置检测宽度和高度，使其匹配各自摄像头的原生画面比例。"
     },
     "faceRecognition": {
       "globalDisabled": "必须开启人脸识别增强功能，此摄像头的人脸识别相关功能才能正常使用。",
@@ -2111,6 +2125,13 @@
     },
     "onvif": {
       "autotrackingNoZones": "自动追踪至少需要一个区域。请先在“遮罩 / 区域”中为此摄像头定义一个区域，然后在下方将其设置为必需区域。"
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "不建议手动硬件加速参数。除非存在特定需求，否则选择与你的硬件匹配的预设。"
+    },
+    "model": {
+      "optimizedFor320": "Frigate 针对了 320x320 的模型进行优化，这是大多数设置的最佳选择。640x640 模型速度较慢，仅在特定场景下有帮助。",
+      "inputDimensionsNotDetectResolution": "模型输入的宽度和高度是目标检测模型的输入尺寸，而不是你摄像头的检测分辨率。它们应该与你正在使用的模型的尺寸相匹配，通常是一个方形尺寸，如320x320或640x640。"
     }
   },
   "birdseye": {
@@ -2172,7 +2193,7 @@
   },
   "retainMode": {
     "all": "全部",
-    "motion": "运动",
+    "motion": "画面变动",
     "active_objects": "活动目标"
   },
   "previewQuality": {

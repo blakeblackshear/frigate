@@ -14,6 +14,7 @@ class CameraConfigUpdateEnum(str, Enum):
     add = "add"  # for adding a camera
     audio = "audio"
     audio_transcription = "audio_transcription"
+    autotracking = "autotracking"  # ptz autotracking only, without an onvif reinit
     birdseye = "birdseye"
     detect = "detect"
     enabled = "enabled"
@@ -73,7 +74,12 @@ class CameraConfigUpdateSubscriber:
 
         base_topic = "config/cameras"
 
-        if len(self.camera_configs) == 1:
+        # global subscribers must hear every camera; only narrow per-camera workers
+        is_global_subscriber = (
+            CameraConfigUpdateEnum.add in self.topics
+            or CameraConfigUpdateEnum.remove in self.topics
+        )
+        if not is_global_subscriber and len(self.camera_configs) == 1:
             base_topic += f"/{list(self.camera_configs.keys())[0]}"
 
         self.subscriber = ConfigSubscriber(
@@ -140,6 +146,8 @@ class CameraConfigUpdateSubscriber:
             config.snapshots = updated_config
         elif update_type == CameraConfigUpdateEnum.onvif:
             config.onvif = updated_config
+        elif update_type == CameraConfigUpdateEnum.autotracking:
+            config.onvif.autotracking = updated_config
         elif update_type == CameraConfigUpdateEnum.timestamp_style:
             config.timestamp_style = updated_config
         elif update_type == CameraConfigUpdateEnum.zones:

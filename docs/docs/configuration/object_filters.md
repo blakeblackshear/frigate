@@ -7,7 +7,7 @@ import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
-There are several types of object filters that can be used to reduce false positive rates.
+There are several types of object filters that can be used to reduce [false positive](/frigate/glossary#false-positive) rates.
 
 ## Object Scores
 
@@ -26,9 +26,9 @@ In frame 2, the score is below the `min_score` value, so Frigate ignores it and 
 
 The **top score** is the highest computed score the tracked object has ever reached during its lifetime. Because the computed score rises and falls as new frames come in, the top score can be thought of as the peak confidence Frigate had in the object. In Frigate's UI (such as the Tracking Details pane in Explore), you may see all three values:
 
-- **Score** — the raw detector score for that single frame.
-- **Computed Score** — the median of the most recent score history at that moment. This is the value compared against `threshold`.
-- **Top Score** — the highest computed score reached so far for the tracked object.
+- **Score**: the raw detector score for that single frame.
+- **Computed Score**: the median of the most recent score history at that moment. This is the value compared against `threshold`.
+- **Top Score**: the highest computed score reached so far for the tracked object.
 
 ### Minimum Score
 
@@ -36,7 +36,7 @@ Any detection below `min_score` will be immediately thrown out and never tracked
 
 ### Threshold
 
-`threshold` is used to determine that the object is a true positive. Once an object is detected with a score >= `threshold` object is considered a true positive. If `threshold` is too low then some higher scoring false positives may create an tracked object. If `threshold` is too high then true positive tracked objects may be missed due to the object never scoring high enough.
+`threshold` is used to determine that the object is a true positive. Once an object is detected with a score >= `threshold` object is considered a true positive. If `threshold` is too low then some higher scoring false positives may create a tracked object. If `threshold` is too high then true positive tracked objects may be missed due to the object never scoring high enough.
 
 ## Configuring Object Scores
 
@@ -144,8 +144,8 @@ cameras:
 
 ### Zones
 
-[Required zones](/configuration/zones.md) can be a great tool to reduce false positives that may be detected in the sky or other areas that are not of interest. The required zones will only create tracked objects for objects that enter the zone.
+[Required zones](/configuration/zones.md#restricting-alerts-and-detections-to-specific-zones) can be a great tool to reduce false positives that may be detected in the sky or other areas that are not of interest. The required zones will only create tracked objects for objects that enter the zone.
 
 ### Object Masks
 
-[Object Filter Masks](/configuration/masks) are a last resort but can be useful when false positives are in the relatively same place but can not be filtered due to their size or shape. Object filter masks can be configured in <NavPath path="Settings > Camera configuration > Masks / Zones" />.
+[Object Filter Masks](/configuration/masks#object-filter-masks) are a last resort but can be useful when false positives are in the relatively same place but can not be filtered due to their size or shape. Object filter masks can be configured in <NavPath path="Settings > Camera configuration > Masks / Zones" />.

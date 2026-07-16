@@ -42,7 +42,7 @@
     "untilRestart": "Bis zum Neustart",
     "justNow": "Gerade",
     "pm": "nachmittags",
-    "mo": "{{time}} Mon",
+    "mo": "{{time}} Mon.",
     "formattedTimestamp": {
       "12hour": "d. MMM, hh:mm:ss aaa",
       "24hour": "dd. MMM, hh:mm:ss aaa"
@@ -193,7 +193,7 @@
       "gl": "Galego (Galicisch)",
       "id": "Bahasa Indonesia (Indonesisch)",
       "hr": "Hrvatski (Kroatisch)",
-      "bs": "Bosnisch",
+      "bs": "Bosanski (Bosnisch)",
       "zhHant": "Traditional Chinese"
     },
     "appearance": "Erscheinung",

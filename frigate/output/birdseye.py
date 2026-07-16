@@ -10,7 +10,7 @@ import subprocess as sp
 import threading
 import traceback
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Optional
+from typing import Any
 
 import cv2
 import numpy as np
@@ -335,6 +335,7 @@ class BirdsEyeFrameManager:
 
         self.camera_layout: list[Any] = []
         self.active_cameras: set[str] = set()
+        self.layout_camera_order: list[str] = []
         self.last_output_time = 0.0
 
     def add_camera(self, cam: str) -> None:
@@ -372,6 +373,13 @@ class BirdsEyeFrameManager:
         if cam in self.cameras:
             del self.cameras[cam]
 
+    def sort_cameras(self, cameras: set[str]) -> list[str]:
+        """Sort cameras by birdseye order, falling back to name when tied."""
+        return sorted(
+            cameras,
+            key=lambda camera: (self.config.cameras[camera].birdseye.order, camera),
+        )
+
     def clear_frame(self) -> None:
         logger.debug("Clearing the birdseye frame")
         self.frame[:] = self.blank_frame
@@ -379,8 +387,8 @@ class BirdsEyeFrameManager:
     def copy_to_position(
         self,
         position: Any,
-        camera: Optional[str] = None,
-        frame: Optional[np.ndarray] = None,
+        camera: str | None = None,
+        frame: np.ndarray | None = None,
     ) -> None:
         if camera is None:
             frame = None
@@ -428,7 +436,7 @@ class BirdsEyeFrameManager:
                 }
         return coordinates
 
-    def update_frame(self, frame: Optional[np.ndarray] = None) -> tuple[bool, bool]:
+    def update_frame(self, frame: np.ndarray | None = None) -> tuple[bool, bool]:
         """
         Update birdseye, optionally with a new frame.
         Returns (frame_changed, layout_changed) to indicate if the frame or layout changed.
@@ -482,6 +490,7 @@ class BirdsEyeFrameManager:
             # if the layout needs to be cleared
             self.camera_layout = []
             self.active_cameras = set()
+            self.layout_camera_order = []
             self.clear_frame()
             frame_changed = True
             layout_changed = True
@@ -500,21 +509,21 @@ class BirdsEyeFrameManager:
             else:
                 reset_layout = True
 
+            sorted_active_cameras = self.sort_cameras(active_cameras)
+
+            if not reset_layout and sorted_active_cameras != self.layout_camera_order:
+                logger.debug("Birdseye camera order changed")
+                reset_layout = True
+
             if reset_layout:
                 logger.debug("Resetting Birdseye layout...")
                 self.clear_frame()
                 self.active_cameras = active_cameras
+                self.layout_camera_order = sorted_active_cameras
                 layout_changed = True  # Layout is changing due to reset
                 # this also converts added_cameras from a set to a list since we need
                 # to pop elements in order
-                active_cameras_to_add = sorted(
-                    active_cameras,
-                    # sort cameras by order and by name if the order is the same
-                    key=lambda active_camera: (
-                        self.config.cameras[active_camera].birdseye.order,
-                        active_camera,
-                    ),
-                )
+                active_cameras_to_add = sorted_active_cameras
                 if len(active_cameras) == 1:
                     # show single camera as fullscreen
                     camera = active_cameras_to_add[0]
@@ -592,12 +601,12 @@ class BirdsEyeFrameManager:
         self,
         cameras_to_add: list[str],
         coefficient: float,
-    ) -> Optional[list[list[Any]]]:
+    ) -> list[list[Any]] | None:
         """Calculate the optimal layout for 2+ cameras."""
 
         def map_layout(
             camera_layout: list[list[Any]], row_height: int
-        ) -> tuple[int, int, Optional[list[list[Any]]]]:
+        ) -> tuple[int, int, list[list[Any]] | None]:
             """Map the calculated layout."""
             candidate_layout = []
             starting_x = 0
@@ -780,6 +789,7 @@ class BirdsEyeFrameManager:
             frame_changed, layout_changed = False, False
             self.active_cameras = set()
             self.camera_layout = []
+            self.layout_camera_order = []
             print(traceback.format_exc())
 
         # if the frame was updated or the fps is too low, send frame
@@ -825,7 +835,7 @@ class Birdseye:
         self.stop_event = stop_event
         self.requestor = InterProcessRequestor()
         self.idle_fps: float = self.config.birdseye.idle_heartbeat_fps
-        self._idle_interval: Optional[float] = (
+        self._idle_interval: float | None = (
             (1.0 / self.idle_fps) if self.idle_fps > 0 else None
         )
 

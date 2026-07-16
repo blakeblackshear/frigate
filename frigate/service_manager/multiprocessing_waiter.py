@@ -7,7 +7,7 @@ import threading
 from multiprocessing.connection import Connection
 from multiprocessing.connection import wait as mp_wait
 from socket import socket
-from typing import Any, Optional, Union
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -118,10 +118,10 @@ class MultiprocessingWaiter(threading.Thread):
 
 
 waiter_lock = threading.Lock()
-waiter_thread: Optional[MultiprocessingWaiter] = None
+waiter_thread: MultiprocessingWaiter | None = None
 
 
-async def wait(object: Union[mp.Process, Connection, socket]) -> None:
+async def wait(object: mp.Process | Connection | socket) -> None:
     """Wait for the supplied object to be ready.
 
     Under the hood, this uses multiprocessing.connection.wait() and a background thread manage the
@@ -129,7 +129,7 @@ async def wait(object: Union[mp.Process, Connection, socket]) -> None:
     """
     global waiter_thread, waiter_lock
 
-    sentinel: Union[Connection, socket, int]
+    sentinel: Connection | socket | int
     if isinstance(object, mp.Process):
         sentinel = object.sentinel
     elif isinstance(object, Connection) or isinstance(object, socket):

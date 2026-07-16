@@ -201,7 +201,22 @@
         "title": "Info Sondă Cameră"
       },
       "fps": "FPS:",
-      "unknown": "Necunoscut"
+      "unknown": "Necunoscut",
+      "keyframes": {
+        "title": "Analiză keyframe",
+        "analyzing": "Se analizează keyframe-urile... {{seconds}} secunde rămase",
+        "stillAnalyzing": "Încă se analizează keyframe-urile...",
+        "keyframeCount": "Keyframe-uri observate:",
+        "recordStream": "Stream de înregistrare:",
+        "observedDuration": "Durată observată:",
+        "gap": "Interval keyframe (min / med / max):",
+        "ok": "Keyframe-uri la fiecare ~{{seconds}}s, bune pentru înregistrare și redare.",
+        "segmentLength": "Lungime segment de înregistrare:",
+        "warning": "Keyframe-uri rare sau variabile (cel mai lung interval ~{{seconds}}s), probabil un codec smart (H.264+/H.265+), acest lucru nu este recomandat.",
+        "error": "Intervalul keyframe (~{{seconds}}s) depășește lungimea segmentului de înregistrare ({{segmentTime}}s). Unele segmente pot să nu aibă niciun keyframe, ceea ce întrerupe redarea. Dezactivează codecul smart/+ de pe cameră sau scurtează intervalul keyframe.",
+        "unknown": "Nu s-a putut determina distanțarea keyframe-urilor.",
+        "recordDisabled": "Înregistrarea este dezactivată pentru această cameră."
+      }
     },
     "label": {
       "capture": "captură",

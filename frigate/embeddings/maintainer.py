@@ -200,6 +200,9 @@ class EmbeddingMaintainer(threading.Thread):
             )
 
         for model_config in self.config.classification.custom.values():
+            if not model_config.enabled:
+                continue
+
             self.realtime_processors.append(
                 CustomStateClassificationProcessor(
                     self.config, model_config, self.requestor, self.metrics
@@ -332,6 +335,25 @@ class EmbeddingMaintainer(threading.Thread):
         for processor in self.post_processors:
             processor.update_config(topic, payload)
 
+    def _remove_custom_classification_processor(self, model_name: str) -> None:
+        """Shut down and drop any running processor for a custom model."""
+        remaining = []
+        for processor in self.realtime_processors:
+            if (
+                isinstance(
+                    processor,
+                    (
+                        CustomStateClassificationProcessor,
+                        CustomObjectClassificationProcessor,
+                    ),
+                )
+                and processor.model_config.name == model_name
+            ):
+                processor.shutdown()
+            else:
+                remaining.append(processor)
+        self.realtime_processors = remaining
+
     def _handle_custom_classification_update(
         self, topic: str, model_config: Any
     ) -> None:
@@ -339,23 +361,7 @@ class EmbeddingMaintainer(threading.Thread):
         model_name = topic.split("/")[-1]
 
         if model_config is None:
-            remaining = []
-            for processor in self.realtime_processors:
-                if (
-                    isinstance(
-                        processor,
-                        (
-                            CustomStateClassificationProcessor,
-                            CustomObjectClassificationProcessor,
-                        ),
-                    )
-                    and processor.model_config.name == model_name
-                ):
-                    processor.shutdown()
-                else:
-                    remaining.append(processor)
-            self.realtime_processors = remaining
-
+            self._remove_custom_classification_processor(model_name)
             logger.info(
                 f"Successfully removed classification processor for model: {model_name}"
             )
@@ -363,20 +369,29 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.config.classification.custom[model_name] = model_config
 
-        # Check if processor already exists
+        # A disabled model must not run; tear down any existing processor and
+        # do not register a new one.
+        if not model_config.enabled:
+            self._remove_custom_classification_processor(model_name)
+            logger.info(f"Disabled classification processor for model: {model_name}")
+            return
+
         for processor in self.realtime_processors:
-            if isinstance(
-                processor,
-                (
-                    CustomStateClassificationProcessor,
-                    CustomObjectClassificationProcessor,
-                ),
+            if (
+                isinstance(
+                    processor,
+                    (
+                        CustomStateClassificationProcessor,
+                        CustomObjectClassificationProcessor,
+                    ),
+                )
+                and processor.model_config.name == model_name
             ):
-                if processor.model_config.name == model_name:
-                    logger.debug(
-                        f"Classification processor for model {model_name} already exists, skipping"
-                    )
-                    return
+                processor.model_config = model_config
+                logger.debug(
+                    f"Updated config for classification processor: {model_name}"
+                )
+                return
 
         if model_config.state_config is not None:
             processor = CustomStateClassificationProcessor(
@@ -435,7 +450,7 @@ class EmbeddingMaintainer(threading.Thread):
                 logger.error(f"No processor handled the topic {topic}")
                 return None
             except Exception as e:
-                logger.error(f"Unable to handle embeddings request {e}", exc_info=True)
+                logger.exception(f"Unable to handle embeddings request {e}")
 
         self.embeddings_responder.check_for_request(_handle_request)
 
@@ -702,7 +717,11 @@ class EmbeddingMaintainer(threading.Thread):
             and "license_plate" not in camera_config.objects.track
         )
 
-        if not dedicated_lpr_enabled and len(self.config.classification.custom) == 0:
+        has_enabled_custom = any(
+            c.enabled for c in self.config.classification.custom.values()
+        )
+
+        if not dedicated_lpr_enabled and not has_enabled_custom:
             # no active features that use this data
             return
 

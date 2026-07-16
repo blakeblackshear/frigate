@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional
-
 from pydantic import Field, field_validator, model_validator
 
 from .base import FrigateBaseModel
@@ -41,7 +39,7 @@ class AuthConfig(FrigateBaseModel):
         description="When a session is within this many seconds of expiring, refresh it back to full length.",
         ge=30,
     )
-    failed_login_rate_limit: Optional[str] = Field(
+    failed_login_rate_limit: str | None = Field(
         default=None,
         title="Failed login limits",
         description="Rate limiting rules for failed login attempts to reduce brute-force attacks.",
@@ -57,12 +55,12 @@ class AuthConfig(FrigateBaseModel):
         title="Hash iterations",
         description="Number of PBKDF2-SHA256 iterations to use when hashing user passwords.",
     )
-    roles: Dict[str, List[str]] = Field(
+    roles: dict[str, list[str]] = Field(
         default_factory=dict,
         title="Role mappings",
         description="Map roles to camera lists. An empty list grants access to all cameras for the role.",
     )
-    admin_first_time_login: Optional[bool] = Field(
+    admin_first_time_login: bool | None = Field(
         default=False,
         title="First-time admin flag",
         description=(
@@ -72,7 +70,7 @@ class AuthConfig(FrigateBaseModel):
 
     @field_validator("roles")
     @classmethod
-    def validate_roles(cls, v: Dict[str, List[str]]) -> Dict[str, List[str]]:
+    def validate_roles(cls, v: dict[str, list[str]]) -> dict[str, list[str]]:
         # Ensure role names are valid (alphanumeric with underscores)
         for role in v.keys():
             if not role.replace("_", "").isalnum():

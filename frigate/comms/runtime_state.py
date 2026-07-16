@@ -146,7 +146,7 @@ class RuntimeStatePersistence:
         if not os.path.exists(self._path):
             return {}
         try:
-            with open(self._path, "r") as f:
+            with open(self._path) as f:
                 data = json.load(f)
         except (OSError, json.JSONDecodeError):
             logger.exception(

@@ -7,7 +7,7 @@ import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
-Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one. This feature works by creating _embeddings_ — numerical vector representations — for both the images and text descriptions of your tracked objects. By comparing these embeddings, Frigate assesses their similarities to deliver relevant search results.
+Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one. This feature works by creating _embeddings_, numerical vector representations, for both the images and text descriptions of your tracked objects. By comparing these embeddings, Frigate assesses their similarities to deliver relevant search results.
 
 Frigate uses models from [Jina AI](https://huggingface.co/jinaai) to create and save embeddings to Frigate's database. All of this runs locally.
 
@@ -222,11 +222,11 @@ See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_
 
 ## Usage and Best Practices
 
-For tips on getting the best results from Semantic Search — choosing between thumbnail and description search, phrasing queries effectively, and combining search with the other Explore filters — see [Usage and best practices](/usage/explore#usage-and-best-practices) in the Usage docs.
+For tips on getting the best results from Semantic Search (choosing between thumbnail and description search, phrasing queries effectively, and combining search with the other Explore filters), see [Usage and best practices](/usage/explore#usage-and-best-practices) in the Usage docs.
 
 ## Triggers
 
-Triggers utilize Semantic Search to automate actions when a tracked object matches a specified image or description. Triggers can be configured so that Frigate executes a specific actions when a tracked object's image or description matches a predefined image or text, based on a similarity threshold. Triggers are managed per camera and can be configured via the Frigate UI in the Settings page under the Triggers tab.
+Triggers utilize Semantic Search to automate actions when a tracked object matches a specified image or description. Triggers can be configured so that Frigate executes specific actions when a tracked object's image or description matches a predefined image or text, based on a similarity threshold. Triggers are managed per camera and can be configured via the Frigate UI in the Settings page under the Triggers tab.
 
 :::note
 

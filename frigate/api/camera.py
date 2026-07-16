@@ -34,11 +34,15 @@ from frigate.config.camera.updater import (
 )
 from frigate.config.env import substitute_frigate_vars
 from frigate.models import User
-from frigate.util.builtin import clean_camera_user_pass
+from frigate.util.builtin import clean_camera_user_pass, get_record_segment_time
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
 from frigate.util.image import run_ffmpeg_snapshot
-from frigate.util.services import ffprobe_stream, is_restricted_go2rtc_source
+from frigate.util.services import (
+    analyze_record_keyframes,
+    ffprobe_stream,
+    is_restricted_go2rtc_source,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +74,7 @@ def _is_valid_host(host: str) -> bool:
 
 @router.get("/go2rtc/streams", dependencies=[Depends(allow_any_authenticated())])
 async def go2rtc_streams(request: Request):
-    r = requests.get("http://127.0.0.1:1984/api/streams")
+    r = await asyncio.to_thread(requests.get, "http://127.0.0.1:1984/api/streams")
     if not r.ok:
         logger.error("Failed to fetch streams from go2rtc")
         return JSONResponse(
@@ -143,6 +147,19 @@ def go2rtc_camera_stream(request: Request, stream_name: str):
 )
 def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
     """Add or update a go2rtc stream configuration."""
+    if src and is_restricted_go2rtc_source(src):
+        logger.warning(
+            "Rejected go2rtc stream '%s' with restricted source type (echo/expr/exec)",
+            stream_name,
+        )
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Restricted stream source type",
+            },
+            status_code=400,
+        )
+
     try:
         params = {"name": stream_name}
         if src:
@@ -360,6 +377,48 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
         output.append(result)
 
     return JSONResponse(content=output)
+
+
+@router.get("/keyframe_analysis", dependencies=[Depends(require_role(["admin"]))])
+async def keyframe_analysis(request: Request, camera: str = ""):
+    """Probe a camera's record stream and classify its keyframe spacing.
+
+    Detects smart/+ codecs and long/variable GOPs that degrade recording.
+    """
+    config: FrigateConfig = request.app.frigate_config
+
+    if camera not in config.cameras:
+        return JSONResponse(
+            content={"success": False, "message": f"{camera} is not a valid camera."},
+            status_code=404,
+        )
+
+    camera_config = config.cameras[camera]
+
+    if not camera_config.enabled:
+        return JSONResponse(
+            content={"success": False, "message": f"{camera} is not enabled."},
+            status_code=404,
+        )
+
+    # keyframe spacing only matters when this camera is recording
+    if not camera_config.record.enabled:
+        return JSONResponse(content={"severity": "record_disabled"})
+
+    # recording guarantees an input carries the record role; its index matches
+    # the "Stream N" numbering the ffprobe endpoint surfaces (same input order)
+    record_index, record_input = next(
+        (idx, i)
+        for idx, i in enumerate(camera_config.ffmpeg.inputs)
+        if "record" in i.roles
+    )
+
+    segment_time = get_record_segment_time(camera_config)
+    result = await analyze_record_keyframes(
+        config.ffmpeg, record_input.path, segment_time
+    )
+    result["stream_index"] = record_index
+    return JSONResponse(content=result)
 
 
 @router.get("/ffprobe/snapshot", dependencies=[Depends(require_role(["admin"]))])
@@ -1128,14 +1187,14 @@ async def delete_camera(
 
     try:
         with lock:
-            with open(config_file, "r") as f:
+            with open(config_file) as f:
                 old_raw_config = f.read()
 
             try:
                 yaml = YAML()
                 yaml.indent(mapping=2, sequence=4, offset=2)
 
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     data = yaml.load(f)
 
                 # Remove camera from config
@@ -1164,7 +1223,7 @@ async def delete_camera(
                 with open(config_file, "w") as f:
                     yaml.dump(data, f)
 
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     new_raw_config = f.read()
 
                 try:
@@ -1226,7 +1285,8 @@ async def delete_camera(
 
     # Best-effort go2rtc stream removal
     try:
-        requests.delete(
+        await asyncio.to_thread(
+            requests.delete,
             "http://127.0.0.1:1984/api/streams",
             params={"src": camera_name},
             timeout=5,

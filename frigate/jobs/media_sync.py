@@ -5,7 +5,7 @@ import os
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional, cast
+from typing import cast
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import CONFIG_DIR, UPDATE_JOB_STATE
@@ -87,7 +87,7 @@ class MediaSyncRunner(threading.Thread):
             self._broadcast_status()
 
         except Exception as e:
-            logger.error(f"Media sync job {self.job.id} failed: {e}", exc_info=True)
+            logger.exception(f"Media sync job {self.job.id} failed: {e}")
             self.job.status = JobStatusTypesEnum.failed
             self.job.error_message = str(e)
             self.job.end_time = datetime.now().timestamp()
@@ -110,10 +110,10 @@ class MediaSyncRunner(threading.Thread):
 
 def start_media_sync_job(
     dry_run: bool = False,
-    media_types: Optional[list[str]] = None,
+    media_types: list[str] | None = None,
     force: bool = False,
     verbose: bool = False,
-) -> Optional[str]:
+) -> str | None:
     """Start a new media sync job if none is currently running.
 
     Returns job ID on success, None if job already running.
@@ -144,11 +144,11 @@ def start_media_sync_job(
     return job.id
 
 
-def get_current_media_sync_job() -> Optional[MediaSyncJob]:
+def get_current_media_sync_job() -> MediaSyncJob | None:
     """Get the current running/queued media sync job, if any."""
-    return cast(Optional[MediaSyncJob], get_current_job("media_sync"))
+    return cast(MediaSyncJob | None, get_current_job("media_sync"))
 
 
-def get_media_sync_job_by_id(job_id: str) -> Optional[MediaSyncJob]:
+def get_media_sync_job_by_id(job_id: str) -> MediaSyncJob | None:
     """Get media sync job by ID. Currently only tracks the current job."""
-    return cast(Optional[MediaSyncJob], get_job_by_id("media_sync", job_id))
+    return cast(MediaSyncJob | None, get_job_by_id("media_sync", job_id))

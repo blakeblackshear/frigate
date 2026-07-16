@@ -4,9 +4,10 @@ import logging
 import threading
 from abc import ABC, abstractmethod
 from collections import deque
+from collections.abc import Callable
 from concurrent.futures import Future
 from queue import Empty, Full, Queue
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 

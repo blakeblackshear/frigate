@@ -1,22 +1,31 @@
-from typing import Optional, Union
-
 from pydantic import BaseModel, Field
 from pydantic.json_schema import SkipJsonSchema
 
-from frigate.record.export import PlaybackSourceEnum
+from frigate.record.export import (
+    ChaptersEnum,
+    PlaybackSourceEnum,
+)
 
 
 class ExportRecordingsBody(BaseModel):
     source: PlaybackSourceEnum = Field(
         default=PlaybackSourceEnum.recordings, title="Playback source"
     )
-    name: Optional[str] = Field(title="Friendly name", default=None, max_length=256)
-    image_path: Union[str, SkipJsonSchema[None]] = None
-    export_case_id: Optional[str] = Field(
+    name: str | None = Field(title="Friendly name", default=None, max_length=256)
+    image_path: str | SkipJsonSchema[None] = None
+    export_case_id: str | None = Field(
         default=None,
         title="Export case ID",
         max_length=30,
         description="ID of the export case to assign this export to",
+    )
+    chapters: ChaptersEnum | None = Field(
+        default=None,
+        title="Chapter mode",
+        description=(
+            "Optional chapter metadata to embed in the export. When omitted, "
+            "the camera's configured export chapter mode is used."
+        ),
     )
 
 
@@ -25,19 +34,19 @@ class ExportRecordingsCustomBody(BaseModel):
         default=PlaybackSourceEnum.recordings, title="Playback source"
     )
     name: str = Field(title="Friendly name", default=None, max_length=256)
-    image_path: Union[str, SkipJsonSchema[None]] = None
-    export_case_id: Optional[str] = Field(
+    image_path: str | SkipJsonSchema[None] = None
+    export_case_id: str | None = Field(
         default=None,
         title="Export case ID",
         max_length=30,
         description="ID of the export case to assign this export to",
     )
-    ffmpeg_input_args: Optional[str] = Field(
+    ffmpeg_input_args: str | None = Field(
         default=None,
         title="FFmpeg input arguments",
         description="Custom FFmpeg input arguments. If not provided, defaults to timelapse input args.",
     )
-    ffmpeg_output_args: Optional[str] = Field(
+    ffmpeg_output_args: str | None = Field(
         default=None,
         title="FFmpeg output arguments",
         description="Custom FFmpeg output arguments. If not provided, defaults to timelapse output args.",

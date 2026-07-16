@@ -397,6 +397,43 @@ class TestConfig(unittest.TestCase):
         assert "dog" in frigate_config.cameras["back"].objects.filters
         assert frigate_config.cameras["back"].objects.filters["dog"].threshold == 0.7
 
+    def test_unsupported_tracked_object_pruned_from_track_and_filters(self):
+        # "unicorn" is not in the model labelmap, so it must be removed from the
+        # tracked objects AND from the object filters, otherwise a stale filter
+        # entry lingers in the parsed config.
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "objects": {
+                        "track": ["person", "unicorn"],
+                        "filters": {
+                            "person": {"threshold": 0.7},
+                            "unicorn": {"threshold": 0.7},
+                        },
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        objects = frigate_config.cameras["back"].objects
+        assert "unicorn" not in objects.track
+        assert "unicorn" not in objects.filters
+        # supported entries are left untouched
+        assert "person" in objects.track
+        assert "person" in objects.filters
+
     def test_global_object_mask(self):
         config = {
             "mqtt": {"host": "mqtt"},

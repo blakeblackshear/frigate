@@ -3,8 +3,8 @@
 import datetime
 import json
 import logging
-from collections.abc import Iterable
-from typing import Any, Callable, Optional, cast
+from collections.abc import Callable, Iterable
+from typing import Any, cast
 
 from frigate.camera import PTZMetrics
 from frigate.camera.activity_manager import AudioActivityManager, CameraActivityManager
@@ -97,7 +97,7 @@ class Dispatcher:
             "notifications": self._on_global_notification_command,
             "profile": self._on_profile_command,
         }
-        self.profile_manager: Optional[ProfileManager] = None
+        self.profile_manager: ProfileManager | None = None
 
         for comm in self.comms:
             comm.subscribe(self._receive)
@@ -105,8 +105,10 @@ class Dispatcher:
         self.web_push_client = next(
             (comm for comm in communicators if isinstance(comm, WebPushClient)), None
         )
+        if self.web_push_client is not None:
+            self.web_push_client.set_suspension_broadcaster(self.publish)
 
-    def _receive(self, topic: str, payload: Any) -> Optional[Any]:
+    def _receive(self, topic: str, payload: Any) -> Any | None:
         """Handle receiving of payload from communicators."""
 
         def handle_camera_command(
@@ -397,6 +399,8 @@ class Dispatcher:
             comm.publish(topic, payload, retain)
 
     def stop(self) -> None:
+        self.camera_activity.stop()
+
         for comm in self.comms:
             comm.stop()
 
@@ -584,6 +588,10 @@ class Dispatcher:
                 self.ptz_metrics[camera_name].start_time.value = 0
                 ptz_autotracker_settings.enabled = False
 
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.autotracking, camera_name),
+            ptz_autotracker_settings,
+        )
         self.publish(f"{camera_name}/ptz_autotracker/state", payload, retain=True)
 
     def _on_motion_contour_area_command(self, camera_name: str, payload: int) -> None:

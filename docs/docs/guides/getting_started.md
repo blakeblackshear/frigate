@@ -305,7 +305,7 @@ Restart Frigate and you should start seeing detections for `person`. If you want
 
 ### Step 5: Setup motion masks
 
-Now that you have optimized your configuration for decoding the video stream, you will want to check to see where to implement motion masks. Click on the camera from the main dashboard, then select the gear icon in the top right, enable Debug View, and finally enable the switch for Motion Boxes. Watch for areas that continuously trigger unwanted motion to be detected. Common areas to mask include camera timestamps and trees that frequently blow in the wind. The goal is to avoid wasting object detection cycles looking at these areas.
+Now that you have optimized your configuration for decoding the video stream, you will want to check to see where to implement motion masks. Click on the camera from the main dashboard, then select the gear icon in the top right, enable the [Debug view](/usage/live#the-single-camera-view), and finally enable the switch for Motion Boxes. Watch for areas that continuously trigger unwanted motion to be detected. Common areas to mask include camera timestamps and trees that frequently blow in the wind. The goal is to avoid wasting object detection cycles looking at these areas.
 
 Use the mask editor to draw polygon masks directly on the camera feed. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and set up a motion mask over the area. More information about masks can be found [here](../configuration/masks.md).
 
@@ -348,7 +348,7 @@ In order to review activity in the Frigate UI, recordings need to be enabled.
 <ConfigTabs>
 <TabItem value="ui">
 
-1. If you have separate streams for detect and record, navigate to <NavPath path="Settings > Camera configuration > FFmpeg" />, select your camera, and add a second input with the `record` role pointing to your high-resolution stream
+1. If you have separate streams for detect and record, navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" />, select your camera, and add a second input with the `record` role pointing to your high-resolution stream
 2. Navigate to <NavPath path="Settings > Global configuration > Recording" /> (or <NavPath path="Settings > Camera configuration > Recording" /> for a specific camera) and set **Enable recording** to on
 
 </TabItem>

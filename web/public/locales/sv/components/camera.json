@@ -68,7 +68,10 @@
     "cameras": {
       "desc": "Välj kameror för denna guppen.",
       "label": "Kameror"
-    }
+    },
+    "showAll": "Visa alla kameragrupper",
+    "showLess": "Visa mindre",
+    "editGroups": "Redigera kameragrupper"
   },
   "debug": {
     "options": {
@@ -82,6 +85,7 @@
     "zones": "Zoner",
     "mask": "Maskera",
     "motion": "Rörelse",
-    "regions": "Regioner"
+    "regions": "Regioner",
+    "paths": "Vägar"
   }
 }

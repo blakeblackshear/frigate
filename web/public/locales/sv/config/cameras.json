@@ -1,6 +1,29 @@
 {
-    "label": "Kamera konfiguration",
+    "label": "KameraKonfiguration",
     "name": {
-        "label": "Kameranamn"
+        "label": "Kameranamn",
+        "description": "Kameranamn krävs"
+    },
+    "friendly_name": {
+        "label": "Visningsnamn",
+        "description": "Visningsnamn för kamera i Frigate UI"
+    },
+    "enabled": {
+        "label": "Aktiverad",
+        "description": "Aktiverad"
+    },
+    "audio": {
+        "label": "Ljuddetektering",
+        "description": "Inställningar för ljudbaserad händelsedetektering för denna kamera.",
+        "enabled": {
+            "label": "Aktivera ljuddetektering",
+            "description": "Aktivera eller avaktivera ljudbaserad detektering för denna kamera."
+        },
+        "max_not_heard": {
+            "description": "Antal sekunder utan den konfigurerade ljudtypen innan en ljudbaserad händelse slutar."
+        },
+        "min_volume": {
+            "label": "Minsta ljudvolym"
+        }
     }
 }

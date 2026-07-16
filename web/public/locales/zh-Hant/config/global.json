@@ -389,7 +389,7 @@
             "label": "DeepStack",
             "description": "將影像傳送到遠端 DeepStack HTTP API 進行推理的 DeepStack/CodeProject.AI 偵測器。不推薦使用。",
             "api_url": {
-                "label": "DeepStack API URL",
+                "label": "DeepStack API 網址",
                 "description": "DeepStack API 的 URL。"
             },
             "api_timeout": {
@@ -756,7 +756,7 @@
     },
     "live": {
         "label": "即時監控觀看",
-        "description": "用於控制 JSMPEG 即時流解析度與畫質的設定。此設定不影響使用 go2rtc 進行即時預覽的攝影機。",
+        "description": "用於控制 jsmpeg 即時串流解析度與畫質的設定。此設定不影響使用 go2rtc 進行即時預覽的重新串流攝影機。",
         "streams": {
             "label": "即時監控流名稱",
             "description": "配置的流名稱到用於即時監控播放的 restream/go2rtc 名稱的對映。"
@@ -946,7 +946,15 @@
                 "description": "判定屬性有效所需的平均偵測置信度門檻。"
             },
             "min_score": {
-                "label": "最小置信度"
+                "label": "最小置信度",
+                "description": "此屬性與其父物件關聯所需的最小單幀畫面的偵測置信度。"
+            },
+            "mask": {
+                "label": "篩選遮罩",
+                "description": "定義此篩選器在畫面內應用位置的多邊形座標。"
+            },
+            "raw_mask": {
+                "label": "原始遮罩"
             }
         }
     },
@@ -1230,7 +1238,7 @@
         "label": "音訊轉錄",
         "description": "用於事件和即時字幕的即時和語音音訊轉錄設定。",
         "enabled": {
-            "label": "開啟音訊轉錄",
+            "label": "啟用語音轉文字",
             "description": "為所有攝影機啟用或停用自動音訊轉錄；可按攝影機覆蓋。"
         },
         "language": {
@@ -1546,6 +1554,10 @@
         "dashboard": {
             "label": "在 UI 中顯示",
             "description": "切換此攝影機在 Frigate 頁面中是否可見。停用後需要手動編輯配置才能再次在頁面中檢視此攝影機。"
+        },
+        "review": {
+            "label": "在審查中顯示",
+            "description": "切換此攝影機在審查中是否顯示（包含審查頁面及其攝影機篩選器、動態審查和歷史檢視）。"
         }
     },
     "onvif": {

@@ -125,5 +125,7 @@ jobs:
         run: devcontainer up --workspace-folder .
       - name: Run mypy in devcontainer
         run: devcontainer exec --workspace-folder . bash -lc "python3 -u -m mypy --config-file frigate/mypy.ini frigate"
+      - name: Check API spec is up to date
+        run: devcontainer exec --workspace-folder . bash -lc "python3 generate_api_auth_spec.py --check"
       - name: Run unit tests in devcontainer
         run: devcontainer exec --workspace-folder . bash -lc "python3 -u -m unittest"

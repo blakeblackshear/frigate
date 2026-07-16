@@ -38,6 +38,7 @@ When reviewing code, do NOT comment on:
 - **Type Checking**: Use type hints consistently
 - **Testing**: unittest framework - use `python3 -u -m unittest` to run tests
 - **Language**: American English for all code, comments, and documentation
+- **Punctuation**: Do not use em dashes in documentation, comments, or strings; reword with standard punctuation (commas, colons, parentheses, or separate sentences)
 
 ### Logging Standards
 
@@ -235,6 +236,14 @@ ruff check frigate/
 
 # Type check
 python3 -u -m mypy --config-file frigate/mypy.ini frigate
+
+# Regenerate the OpenAPI spec after adding, changing, or removing an API
+# endpoint or its auth dependency — outputs docs/static/frigate-api.yaml,
+# annotated with each endpoint's auth requirement (admin / any / camera /
+# public). NEVER edit that file by hand. CI runs the --check variant and fails
+# if it is out of date. (from repo root)
+python3 generate_api_auth_spec.py
+python3 generate_api_auth_spec.py --check
 ```
 
 ### Frontend (from web/ directory)
@@ -315,6 +324,8 @@ async def get_events(request: Request, limit: int = 100):
     """Retrieve events from the database."""
     # Implementation
 ```
+
+After adding, changing, or removing an endpoint (or its auth dependency), regenerate the OpenAPI spec with `python3 generate_api_auth_spec.py` so `docs/static/frigate-api.yaml` stays in sync and the endpoint's auth requirement is documented. CI enforces this via the `--check` variant; never edit that file by hand.
 
 ### Configuration Access
 

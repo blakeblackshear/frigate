@@ -189,7 +189,11 @@
       "face_recognition": "Arcfelismerés",
       "plate_recognition": "Rendszám Felismerés",
       "yolov9_plate_detection_speed": "YOLOv9 Rendszám Felismerés Sebesség",
-      "yolov9_plate_detection": "YOLOv9 Rendszám Észlelés"
+      "yolov9_plate_detection": "YOLOv9 Rendszám Észlelés",
+      "classification_events_per_second": "{{name}} Osztályozási események másodpercenként",
+      "classification_speed": "{{name}} Osztályozási sebesség",
+      "classification": "{{name}} Osztályozás",
+      "object_description_events_per_second": "Objektum leírás"
     },
     "infPerSecond": "Inferencia Per Másodperc",
     "title": "Kiegészítések"

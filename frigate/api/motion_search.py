@@ -1,7 +1,7 @@
 """Motion search API for detecting changes within a region of interest."""
 
 import logging
-from typing import Any, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
@@ -26,7 +26,7 @@ class MotionSearchRequest(BaseModel):
 
     start_time: float = Field(description="Start timestamp for the search range")
     end_time: float = Field(description="End timestamp for the search range")
-    polygon_points: List[List[float]] = Field(
+    polygon_points: list[list[float]] = Field(
         description="List of [x, y] normalized coordinates (0-1) defining the ROI polygon"
     )
     threshold: int = Field(
@@ -87,12 +87,12 @@ class MotionSearchStatusResponse(BaseModel):
     success: bool
     message: str
     status: str  # "queued", "running", "success", "failed", or "cancelled"
-    results: Optional[List[MotionSearchResult]] = None
-    total_frames_processed: Optional[int] = None
-    error_message: Optional[str] = None
-    metrics: Optional[MotionSearchMetricsResponse] = None
-    scanning_timestamp: Optional[float] = None
-    progress: Optional[float] = None
+    results: list[MotionSearchResult] | None = None
+    total_frames_processed: int | None = None
+    error_message: str | None = None
+    metrics: MotionSearchMetricsResponse | None = None
+    scanning_timestamp: float | None = None
+    progress: float | None = None
 
 
 @router.post(

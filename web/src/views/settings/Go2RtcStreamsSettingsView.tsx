@@ -58,8 +58,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import SaveAllPreviewPopover, {
+  type SaveAllPreviewItem,
+} from "@/components/overlay/detail/SaveAllPreviewPopover";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { FrigateConfig } from "@/types/frigateConfig";
+import type { SettingsPageProps } from "@/views/settings/SingleSectionPage";
+import type { ConfigSectionData } from "@/types/configForm";
 import { cn } from "@/lib/utils";
 import {
   isMaskedPath,
@@ -85,18 +90,8 @@ type RawPathsResponse = {
   go2rtc: { streams: Record<string, string | string[]> };
 };
 
-type Go2RtcStreamsSettingsViewProps = {
-  setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
-  onSectionStatusChange?: (
-    sectionKey: string,
-    level: "global" | "camera",
-    status: {
-      hasChanges: boolean;
-      isOverridden: boolean;
-      hasValidationErrors: boolean;
-    },
-  ) => void;
-};
+const SECTION_KEY = "go2rtc_streams";
+const EMPTY_PENDING: Record<string, ConfigSectionData> = {};
 
 const STREAM_NAME_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
@@ -114,7 +109,11 @@ function normalizeStreams(
 export default function Go2RtcStreamsSettingsView({
   setUnsavedChanges,
   onSectionStatusChange,
-}: Go2RtcStreamsSettingsViewProps) {
+  pendingDataBySection,
+  onPendingDataChange,
+  isSavingAll,
+  onSectionSavingChange,
+}: SettingsPageProps) {
   const { t } = useTranslation(["views/settings", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config, mutate: updateConfig } =
@@ -122,13 +121,6 @@ export default function Go2RtcStreamsSettingsView({
   const { data: rawPaths, mutate: updateRawPaths } =
     useSWR<RawPathsResponse>("config/raw_paths");
 
-  const [editedStreams, setEditedStreams] = useState<Record<string, string[]>>(
-    {},
-  );
-  const [serverStreams, setServerStreams] = useState<Record<string, string[]>>(
-    {},
-  );
-  const [initialized, setInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [credentialVisibility, setCredentialVisibility] = useState<
     Record<string, boolean>
@@ -138,34 +130,51 @@ export default function Go2RtcStreamsSettingsView({
   const [addStreamDialogOpen, setAddStreamDialogOpen] = useState(false);
   const [newlyAdded, setNewlyAdded] = useState<Set<string>>(new Set());
 
-  // Initialize from config — wait for both config and rawPaths to avoid
-  // a mismatch when rawPaths arrives after config with different data
-  useEffect(() => {
-    if (!config || !rawPaths) return;
+  const childPending = pendingDataBySection ?? EMPTY_PENDING;
 
-    // Always use rawPaths for go2rtc streams — the /config endpoint masks
-    // credentials, so using config.go2rtc.streams would save masked values
-    const normalized = normalizeStreams(rawPaths.go2rtc?.streams);
+  // Saved/server state. Always read from rawPaths
+  const serverStreams = useMemo<Record<string, string[]>>(
+    () => normalizeStreams(rawPaths?.go2rtc?.streams),
+    [rawPaths],
+  );
 
-    setServerStreams(normalized);
-    if (!initialized) {
-      setEditedStreams(normalized);
-      setInitialized(true);
-    }
-  }, [config, rawPaths, initialized]);
+  // Pending edits live in the parent's store so they survive navigation; fall back to saved state
+  const liveStreams = useMemo<Record<string, string[]>>(
+    () =>
+      (childPending[SECTION_KEY] as Record<string, string[]> | undefined) ??
+      serverStreams,
+    [childPending, serverStreams],
+  );
+
+  // Persist edits to the parent store, clearing the entry when an edit returns
+  // the section to its saved state so Save All and the sidebar dot reset cleanly.
+  const commitStreams = useCallback(
+    (next: Record<string, string[]>) => {
+      if (isEqual(next, serverStreams)) {
+        onPendingDataChange?.(SECTION_KEY, undefined, null);
+      } else {
+        onPendingDataChange?.(
+          SECTION_KEY,
+          undefined,
+          next as ConfigSectionData,
+        );
+      }
+    },
+    [serverStreams, onPendingDataChange],
+  );
 
   // Track unsaved changes
   const hasChanges = useMemo(
-    () => initialized && !isEqual(editedStreams, serverStreams),
-    [editedStreams, serverStreams, initialized],
+    () => !isEqual(liveStreams, serverStreams),
+    [liveStreams, serverStreams],
   );
 
   useEffect(() => {
-    setUnsavedChanges(hasChanges);
+    setUnsavedChanges?.(hasChanges);
   }, [hasChanges, setUnsavedChanges]);
 
   const hasValidationErrors = useMemo(() => {
-    const names = Object.keys(editedStreams);
+    const names = Object.keys(liveStreams);
     const seenNames = new Set<string>();
 
     for (const name of names) {
@@ -173,13 +182,43 @@ export default function Go2RtcStreamsSettingsView({
       if (seenNames.has(name)) return true;
       seenNames.add(name);
 
-      const urls = editedStreams[name];
+      const urls = liveStreams[name];
       if (!urls || urls.length === 0 || urls.every((u) => !u.trim()))
         return true;
     }
 
     return false;
-  }, [editedStreams]);
+  }, [liveStreams]);
+
+  // Pending changes for this section's Save All preview popover. Diff the
+  // pending streams against the saved state and mask credentials for display.
+  const sectionPreviewItems = useMemo<SaveAllPreviewItem[]>(() => {
+    if (!hasChanges) return [];
+    const items: SaveAllPreviewItem[] = [];
+
+    // Added or changed streams
+    for (const [name, urls] of Object.entries(liveStreams)) {
+      if (name in serverStreams && isEqual(urls, serverStreams[name])) continue;
+      const masked = urls.map((url) => maskCredentials(url));
+      items.push({
+        scope: "global",
+        fieldPath: `go2rtc.streams.${name}`,
+        value: masked.length === 1 ? masked[0] : masked,
+      });
+    }
+
+    // Deleted streams (present in saved config, absent from pending)
+    for (const name of Object.keys(serverStreams)) {
+      if (name in liveStreams) continue;
+      items.push({
+        scope: "global",
+        fieldPath: `go2rtc.streams.${name}`,
+        value: "",
+      });
+    }
+
+    return items;
+  }, [hasChanges, liveStreams, serverStreams]);
 
   // Report status to parent for sidebar red dot
   useEffect(() => {
@@ -193,13 +232,14 @@ export default function Go2RtcStreamsSettingsView({
   // Save handler
   const saveToConfig = useCallback(async () => {
     setIsLoading(true);
+    onSectionSavingChange?.(true);
 
     try {
       const streamsPayload: Record<string, string[] | string> = {
-        ...editedStreams,
+        ...liveStreams,
       };
       const deletedStreamNames = Object.keys(serverStreams).filter(
-        (name) => !(name in editedStreams),
+        (name) => !(name in liveStreams),
       );
       for (const deleted of deletedStreamNames) {
         streamsPayload[deleted] = "";
@@ -212,7 +252,7 @@ export default function Go2RtcStreamsSettingsView({
 
       // Update running go2rtc instance
       const go2rtcUpdates: Promise<unknown>[] = [];
-      for (const [streamName, urls] of Object.entries(editedStreams)) {
+      for (const [streamName, urls] of Object.entries(liveStreams)) {
         if (urls[0]) {
           go2rtcUpdates.push(
             axios.put(
@@ -233,9 +273,9 @@ export default function Go2RtcStreamsSettingsView({
         }),
       );
 
-      setServerStreams(editedStreams);
-      updateConfig();
-      updateRawPaths();
+      await updateConfig();
+      await updateRawPaths();
+      onPendingDataChange?.(SECTION_KEY, undefined, null);
     } catch {
       toast.error(
         t("toast.error", {
@@ -245,74 +285,86 @@ export default function Go2RtcStreamsSettingsView({
       );
     } finally {
       setIsLoading(false);
+      onSectionSavingChange?.(false);
     }
-  }, [editedStreams, serverStreams, t, updateConfig, updateRawPaths]);
+  }, [
+    liveStreams,
+    serverStreams,
+    t,
+    updateConfig,
+    updateRawPaths,
+    onPendingDataChange,
+    onSectionSavingChange,
+  ]);
 
   // Reset handler
   const onReset = useCallback(() => {
-    setEditedStreams(serverStreams);
+    onPendingDataChange?.(SECTION_KEY, undefined, null);
     setCredentialVisibility({});
-  }, [serverStreams]);
+  }, [onPendingDataChange]);
 
   // Stream CRUD operations
-  const addStream = useCallback((name: string) => {
-    setEditedStreams((prev) => ({ ...prev, [name]: [""] }));
-    setNewlyAdded((prev) => new Set(prev).add(name));
-    setAddStreamDialogOpen(false);
-  }, []);
+  const addStream = useCallback(
+    (name: string) => {
+      commitStreams({ ...liveStreams, [name]: [""] });
+      setNewlyAdded((prev) => new Set(prev).add(name));
+      setAddStreamDialogOpen(false);
+    },
+    [liveStreams, commitStreams],
+  );
 
-  const deleteStream = useCallback((streamName: string) => {
-    setEditedStreams((prev) => {
-      const { [streamName]: _, ...rest } = prev;
-      return rest;
-    });
-    setDeleteDialog(null);
-  }, []);
+  const deleteStream = useCallback(
+    (streamName: string) => {
+      const { [streamName]: _removed, ...rest } = liveStreams;
+      commitStreams(rest);
+      setDeleteDialog(null);
+    },
+    [liveStreams, commitStreams],
+  );
 
-  const renameStream = useCallback((oldName: string, newName: string) => {
-    if (oldName === newName || !newName.trim()) return;
+  const renameStream = useCallback(
+    (oldName: string, newName: string) => {
+      if (oldName === newName || !newName.trim()) return;
+      if (!(oldName in liveStreams)) return;
 
-    setEditedStreams((prev) => {
-      const urls = prev[oldName];
-      if (!urls) return prev;
-
-      const entries = Object.entries(prev);
       const result: Record<string, string[]> = {};
-      for (const [key, value] of entries) {
-        if (key === oldName) {
-          result[newName] = value;
-        } else {
-          result[key] = value;
-        }
+      for (const [key, value] of Object.entries(liveStreams)) {
+        result[key === oldName ? newName : key] = value;
       }
-      return result;
-    });
-  }, []);
+      commitStreams(result);
+    },
+    [liveStreams, commitStreams],
+  );
 
   const updateUrl = useCallback(
     (streamName: string, urlIndex: number, newUrl: string) => {
-      setEditedStreams((prev) => {
-        const urls = [...(prev[streamName] || [])];
-        urls[urlIndex] = newUrl;
-        return { ...prev, [streamName]: urls };
-      });
+      const urls = [...(liveStreams[streamName] || [])];
+      urls[urlIndex] = newUrl;
+      commitStreams({ ...liveStreams, [streamName]: urls });
     },
-    [],
+    [liveStreams, commitStreams],
   );
 
-  const addUrl = useCallback((streamName: string) => {
-    setEditedStreams((prev) => {
-      const urls = [...(prev[streamName] || []), ""];
-      return { ...prev, [streamName]: urls };
-    });
-  }, []);
+  const addUrl = useCallback(
+    (streamName: string) => {
+      const urls = [...(liveStreams[streamName] || []), ""];
+      commitStreams({ ...liveStreams, [streamName]: urls });
+    },
+    [liveStreams, commitStreams],
+  );
 
-  const removeUrl = useCallback((streamName: string, urlIndex: number) => {
-    setEditedStreams((prev) => {
-      const urls = (prev[streamName] || []).filter((_, i) => i !== urlIndex);
-      return { ...prev, [streamName]: urls.length > 0 ? urls : [""] };
-    });
-  }, []);
+  const removeUrl = useCallback(
+    (streamName: string, urlIndex: number) => {
+      const urls = (liveStreams[streamName] || []).filter(
+        (_, i) => i !== urlIndex,
+      );
+      commitStreams({
+        ...liveStreams,
+        [streamName]: urls.length > 0 ? urls : [""],
+      });
+    },
+    [liveStreams, commitStreams],
+  );
 
   const toggleCredentialVisibility = useCallback((key: string) => {
     setCredentialVisibility((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -320,7 +372,7 @@ export default function Go2RtcStreamsSettingsView({
 
   if (!config) return null;
 
-  const streamEntries = Object.entries(editedStreams);
+  const streamEntries = Object.entries(liveStreams);
 
   return (
     <div className="flex size-full flex-col lg:pr-2">
@@ -391,6 +443,12 @@ export default function Go2RtcStreamsSettingsView({
               <span className="text-sm text-unsaved">
                 {t("unsavedChanges")}
               </span>
+              <SaveAllPreviewPopover
+                items={sectionPreviewItems}
+                className="h-7 w-7"
+                align="start"
+                side="top"
+              />
             </div>
           )}
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
@@ -398,7 +456,7 @@ export default function Go2RtcStreamsSettingsView({
               <Button
                 onClick={onReset}
                 variant="outline"
-                disabled={isLoading}
+                disabled={isLoading || isSavingAll}
                 className="flex min-w-36 flex-1 gap-2"
               >
                 {t("button.undo", { ns: "common" })}
@@ -407,7 +465,9 @@ export default function Go2RtcStreamsSettingsView({
             <Button
               onClick={saveToConfig}
               variant="select"
-              disabled={!hasChanges || isLoading || hasValidationErrors}
+              disabled={
+                !hasChanges || isLoading || isSavingAll || hasValidationErrors
+              }
               className="flex min-w-36 flex-1 gap-2"
             >
               {isLoading ? (
@@ -459,7 +519,7 @@ export default function Go2RtcStreamsSettingsView({
       <RenameStreamDialog
         open={renameDialog !== null}
         streamName={renameDialog ?? ""}
-        allStreamNames={Object.keys(editedStreams)}
+        allStreamNames={Object.keys(liveStreams)}
         onRename={(oldName, newName) => {
           renameStream(oldName, newName);
           setRenameDialog(null);
@@ -469,7 +529,7 @@ export default function Go2RtcStreamsSettingsView({
 
       <AddStreamDialog
         open={addStreamDialogOpen}
-        allStreamNames={Object.keys(editedStreams)}
+        allStreamNames={Object.keys(liveStreams)}
         onAdd={addStream}
         onClose={() => setAddStreamDialogOpen(false)}
       />

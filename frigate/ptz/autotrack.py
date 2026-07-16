@@ -20,6 +20,10 @@ from norfair.camera_motion import (
 from frigate.camera import PTZMetrics
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import CameraConfig, FrigateConfig, ZoomingModeEnum
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     AUTOTRACKING_MAX_AREA_RATIO,
     AUTOTRACKING_MAX_MOVE_METRICS,
@@ -46,6 +50,22 @@ def ptz_moving_at_frame_time(frame_time, ptz_start_time, ptz_stop_time):
     return (ptz_start_time != 0.0 and frame_time > ptz_start_time) and (
         ptz_stop_time == 0.0 or (ptz_start_time <= frame_time <= ptz_stop_time)
     )
+
+
+def transform_is_finite(coord_transformations) -> bool:
+    """Return True if a norfair coordinate transform contains only finite values.
+
+    A near-singular homography (common when the motion estimator can't find
+    enough stable features during zoom on a low-texture scene) can produce
+    inf/nan matrix entries. norfair accumulates the homography across frames, so
+    a single bad transform poisons every subsequent one and propagates nan into
+    the tracker's distance function, crashing the camera process.
+    """
+    for attr in ("homography_matrix", "inverse_homography_matrix", "movement_vector"):
+        value = getattr(coord_transformations, attr, None)
+        if value is not None and not np.all(np.isfinite(value)):
+            return False
+    return True
 
 
 class PtzMotionEstimator:
@@ -135,6 +155,19 @@ class PtzMotionEstimator:
                 )
                 self.coord_transformations = None
 
+            # A degenerate homography can yield non-finite transform values that
+            # norfair would accumulate and feed to the tracker as nan estimates.
+            # Drop the bad transform and request a reset so the estimator rebuilds
+            # a fresh reference frame instead of poisoning every following frame.
+            if self.coord_transformations is not None and not transform_is_finite(
+                self.coord_transformations
+            ):
+                logger.warning(
+                    f"Autotracker: motion estimator produced a non-finite transform for {camera} at frame time {frame_time}, resetting"
+                )
+                self.coord_transformations = None
+                self.ptz_metrics.reset.set()
+
             try:
                 logger.debug(
                     f"{camera}: Motion estimator transformation: {self.coord_transformations.rel_to_abs([[0, 0]])}"
@@ -165,7 +198,9 @@ class PtzAutoTrackerThread(threading.Thread):
 
     def run(self):
         while not self.stop_event.wait(1):
-            for camera, camera_config in self.config.cameras.items():
+            self.ptz_autotracker.check_for_updates()
+
+            for camera, camera_config in list(self.config.cameras.items()):
                 if not camera_config.enabled:
                     continue
 
@@ -182,6 +217,7 @@ class PtzAutoTrackerThread(threading.Thread):
                         self.ptz_autotracker.tracked_object[camera] = None
                         self.ptz_autotracker.tracked_object_history[camera].clear()
 
+        self.ptz_autotracker.config_subscriber.stop()
         logger.info("Exiting autotracker...")
 
 
@@ -215,6 +251,16 @@ class PtzAutoTracker:
         self.zoom_time: dict[str, float] = {}
         self.zoom_factor: dict[str, object] = {}
 
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.autotracking,
+                CameraConfigUpdateEnum.onvif,
+            ],
+        )
+
         # if cam is set to autotrack, onvif should be set up
         for camera, camera_config in self.config.cameras.items():
             if not camera_config.enabled:
@@ -230,6 +276,29 @@ class PtzAutoTracker:
                 )
                 # Wait for the coroutine to complete
                 future.result()
+
+    def check_for_updates(self) -> None:
+        """Apply camera config updates and mirror autotracking state to ptz metrics.
+
+        The camera processes read autotracker_enabled rather than the config, so it
+        has to follow every path that can change autotracking, not just the mqtt
+        toggle that writes it directly.
+        """
+        updates = self.config_subscriber.check_for_updates()
+
+        for cameras in updates.values():
+            for camera in cameras:
+                camera_config = self.config.cameras.get(camera)
+                metrics = self.ptz_metrics.get(camera)
+
+                # a camera added at runtime gets its metrics from the maintainer on
+                # another thread, which seeds them from this same config value
+                if camera_config is None or metrics is None:
+                    continue
+
+                metrics.autotracker_enabled.value = (
+                    camera_config.onvif.autotracking.enabled
+                )
 
     async def _autotracker_setup(self, camera_config: CameraConfig, camera: str):
         logger.debug(f"{camera}: Autotracker init")
@@ -727,7 +796,7 @@ class PtzAutoTracker:
             try:
                 # Asynchronously wait for move data with a timeout
                 move_data = await asyncio.wait_for(move_queue.get(), timeout=0.1)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
 
             async with self.move_queue_locks[camera]:
@@ -919,8 +988,8 @@ class PtzAutoTracker:
 
         if invalid:
             logger.debug(
-                f"{camera}: Invalid velocity: {tuple(np.round(velocities, 2).flatten().astype(int))}: Invalid because: "
-                + ", ".join(
+                f"{camera}: Invalid velocity: {tuple(np.round(velocities, 2).flatten().astype(int))}: Invalid because: %s",
+                ", ".join(
                     [
                         var_name
                         for var_name, is_invalid in [
@@ -932,7 +1001,7 @@ class PtzAutoTracker:
                         ]
                         if is_invalid
                     ]
-                )
+                ),
             )
             # invalid velocity
             return False, np.zeros((4,))
@@ -1336,7 +1405,7 @@ class PtzAutoTracker:
         camera_config = self.config.cameras[camera]
 
         if camera_config.onvif.autotracking.enabled:
-            if not self.autotracker_init[camera]:
+            if not self.autotracker_init.get(camera):
                 future = asyncio.run_coroutine_threadsafe(
                     self._autotracker_setup(camera_config, camera), self.onvif.loop
                 )
@@ -1454,9 +1523,11 @@ class PtzAutoTracker:
                 }
 
     async def camera_maintenance(self, camera):
-        # bail and don't check anything if we're calibrating or tracking an object
+        # bail and don't check anything if we're not set up yet, calibrating, or
+        # tracking an object. a camera enabled at runtime has no autotracker_init
+        # entry until autotrack_object sets it up
         if (
-            not self.autotracker_init[camera]
+            not self.autotracker_init.get(camera)
             or self.calibrating[camera]
             or self.tracked_object[camera] is not None
         ):

@@ -1,9 +1,9 @@
 import logging
+from typing import Literal
 
 import numpy as np
 import openvino as ov
 from pydantic import ConfigDict, Field
-from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detection_runners import OpenVINOModelRunner

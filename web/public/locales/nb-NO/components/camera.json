@@ -68,7 +68,10 @@
       "desc": "Velg kameraer for denne gruppen."
     },
     "icon": "Ikon",
-    "success": "Kameragruppen ({{name}}) er lagret."
+    "success": "Kameragruppen ({{name}}) er lagret.",
+    "showAll": "Vis alle kameragrupper",
+    "showLess": "Vis mindre",
+    "editGroups": "Rediger kameragrupper"
   },
   "debug": {
     "options": {

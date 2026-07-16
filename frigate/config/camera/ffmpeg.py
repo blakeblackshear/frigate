@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Union
 
 from pydantic import Field, field_validator
 
@@ -33,12 +32,12 @@ DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
 
 
 class FfmpegOutputArgsConfig(FrigateBaseModel):
-    detect: Union[str, list[str]] = Field(
+    detect: str | list[str] = Field(
         default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Detect output arguments",
         description="Default output arguments for detect role streams.",
     )
-    record: Union[str, list[str]] = Field(
+    record: str | list[str] = Field(
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Record output arguments",
         description="Default output arguments for record role streams.",
@@ -49,19 +48,19 @@ class FfmpegConfig(FrigateBaseModel):
     path: str = Field(
         default="default",
         title="FFmpeg path",
-        description='Path to the FFmpeg binary to use or a version alias ("5.0" or "8.0").',
+        description='Path to the FFmpeg binary to use or a version alias ("7.0" or "8.0").',
     )
-    global_args: Union[str, list[str]] = Field(
+    global_args: str | list[str] = Field(
         default=FFMPEG_GLOBAL_ARGS_DEFAULT,
         title="FFmpeg global arguments",
         description="Global arguments passed to FFmpeg processes.",
     )
-    hwaccel_args: Union[str, list[str]] = Field(
+    hwaccel_args: str | list[str] = Field(
         default="auto",
         title="Hardware acceleration arguments",
         description="Hardware acceleration arguments for FFmpeg. Provider-specific presets are recommended.",
     )
-    input_args: Union[str, list[str]] = Field(
+    input_args: str | list[str] = Field(
         default=FFMPEG_INPUT_ARGS_DEFAULT,
         title="Input arguments",
         description="Input arguments applied to FFmpeg input streams.",
@@ -112,17 +111,17 @@ class CameraInput(FrigateBaseModel):
         title="Input roles",
         description="Roles for this input stream.",
     )
-    global_args: Union[str, list[str]] = Field(
+    global_args: str | list[str] = Field(
         default_factory=list,
         title="FFmpeg global arguments",
         description="FFmpeg global arguments for this input stream.",
     )
-    hwaccel_args: Union[str, list[str]] = Field(
+    hwaccel_args: str | list[str] = Field(
         default_factory=list,
         title="Hardware acceleration arguments",
         description="Hardware acceleration arguments for this input stream.",
     )
-    input_args: Union[str, list[str]] = Field(
+    input_args: str | list[str] = Field(
         default_factory=list,
         title="Input arguments",
         description="Input arguments specific to this stream.",

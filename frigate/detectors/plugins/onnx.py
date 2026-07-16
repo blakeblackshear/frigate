@@ -1,8 +1,8 @@
 import logging
+from typing import Literal
 
 import numpy as np
 from pydantic import ConfigDict, Field
-from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detection_runners import get_optimized_runner

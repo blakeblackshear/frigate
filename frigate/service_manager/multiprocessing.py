@@ -9,7 +9,6 @@ from abc import ABC, abstractmethod
 from asyncio.exceptions import TimeoutError
 from logging.handlers import QueueHandler
 from types import FrameType
-from typing import Optional
 
 import frigate.log
 
@@ -22,13 +21,13 @@ DEFAULT_STOP_TIMEOUT = 10  # seconds
 class BaseServiceProcess(Service, ABC):
     """A Service the manages a multiprocessing.Process."""
 
-    _process: Optional[mp.Process]
+    _process: mp.Process | None
 
     def __init__(
         self,
         *,
-        name: Optional[str] = None,
-        manager: Optional[ServiceManager] = None,
+        name: str | None = None,
+        manager: ServiceManager | None = None,
     ) -> None:
         super().__init__(name=name, manager=manager)
 
@@ -55,7 +54,7 @@ class BaseServiceProcess(Service, ABC):
         self,
         *,
         force: bool = False,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> None:
         if timeout is None:
             timeout = DEFAULT_STOP_TIMEOUT
@@ -85,7 +84,7 @@ class BaseServiceProcess(Service, ABC):
         self.manager.logger.info(f"{self.name} stopped")
 
     @property
-    def pid(self) -> Optional[int]:
+    def pid(self) -> int | None:
         return self._process.pid if self._process else None
 
     def _run(self) -> None:
@@ -143,7 +142,7 @@ class ServiceProcess(BaseServiceProcess):
 
         faulthandler.enable()
 
-        def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
+        def receiveSignal(signalNumber: int, frame: FrameType | None) -> None:
             # Get the stop_event through the dict to bypass lazy initialization.
             stop_event = self.__dict__.get("stop_event")
             if stop_event is not None:

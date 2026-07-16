@@ -1,5 +1,3 @@
-from typing import Union
-
 from pydantic import Field
 
 from .base import FrigateBaseModel
@@ -16,12 +14,12 @@ class IPv6Config(FrigateBaseModel):
 
 
 class ListenConfig(FrigateBaseModel):
-    internal: Union[int, str] = Field(
+    internal: int | str = Field(
         default=5000,
         title="Internal port",
         description="Internal listening port for Frigate (default 5000).",
     )
-    external: Union[int, str] = Field(
+    external: int | str = Field(
         default=8971,
         title="External port",
         description="External listening port for Frigate (default 8971).",

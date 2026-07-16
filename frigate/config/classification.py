@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Dict, List, Optional, Union
 
 from pydantic import ConfigDict, Field, field_validator
 
@@ -68,7 +67,7 @@ class AudioTranscriptionConfig(FrigateBaseModel):
         title="Model size",
         description="Model size to use for offline audio event transcription.",
     )
-    live_enabled: Optional[bool] = Field(
+    live_enabled: bool | None = Field(
         default=False,
         title="Live transcription",
         description="Enable streaming live transcription for audio as it is received.",
@@ -98,7 +97,7 @@ class CustomClassificationStateCameraConfig(FrigateBaseModel):
 
 
 class CustomClassificationStateConfig(FrigateBaseModel):
-    cameras: Dict[str, CustomClassificationStateCameraConfig] = Field(
+    cameras: dict[str, CustomClassificationStateCameraConfig] = Field(
         title="Classification cameras",
         description="Per-camera crop and settings for running state classification.",
     )
@@ -160,7 +159,7 @@ class ClassificationConfig(FrigateBaseModel):
         title="Bird classification config",
         description="Settings specific to bird classification models.",
     )
-    custom: Dict[str, CustomClassificationConfig] = Field(
+    custom: dict[str, CustomClassificationConfig] = Field(
         default={},
         title="Custom Classification Models",
         description="Configuration for custom classification models used for objects or state detection.",
@@ -173,12 +172,12 @@ class SemanticSearchConfig(FrigateBaseModel):
         title="Enable semantic search",
         description="Enable or disable the semantic search feature.",
     )
-    reindex: Optional[bool] = Field(
+    reindex: bool | None = Field(
         default=False,
         title="Reindex on startup",
         description="Trigger a full reindex of historical tracked objects into the embeddings database.",
     )
-    model: Optional[Union[SemanticSearchModelEnum, str]] = Field(
+    model: SemanticSearchModelEnum | str | None = Field(
         default=SemanticSearchModelEnum.jinav1,
         title="Semantic search model or GenAI provider name",
         description="The embeddings model to use for semantic search (for example 'jinav1'), or the name of a GenAI provider with the embeddings role.",
@@ -199,7 +198,7 @@ class SemanticSearchConfig(FrigateBaseModel):
         title="Model size",
         description="Select model size; 'small' runs on CPU and 'large' typically requires GPU.",
     )
-    device: Optional[str] = Field(
+    device: str | None = Field(
         default=None,
         title="Device",
         description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
@@ -207,7 +206,7 @@ class SemanticSearchConfig(FrigateBaseModel):
 
 
 class TriggerConfig(FrigateBaseModel):
-    friendly_name: Optional[str] = Field(
+    friendly_name: str | None = Field(
         None,
         title="Friendly name",
         description="Optional friendly name displayed in the UI for this trigger.",
@@ -233,7 +232,7 @@ class TriggerConfig(FrigateBaseModel):
         gt=0.0,
         le=1.0,
     )
-    actions: List[TriggerAction] = Field(
+    actions: list[TriggerAction] = Field(
         default=[],
         title="Trigger actions",
         description="List of actions to execute when trigger matches (notification, sub_label, attribute).",
@@ -243,7 +242,7 @@ class TriggerConfig(FrigateBaseModel):
 
 
 class CameraSemanticSearchConfig(FrigateBaseModel):
-    triggers: Dict[str, TriggerConfig] = Field(
+    triggers: dict[str, TriggerConfig] = Field(
         default={},
         title="Triggers",
         description="Actions and matching criteria for camera-specific semantic search triggers.",
@@ -307,7 +306,7 @@ class FaceRecognitionConfig(FrigateBaseModel):
         title="Blur confidence filter",
         description="Adjust confidence scores based on image blur to reduce false positives for poor quality faces.",
     )
-    device: Optional[str] = Field(
+    device: str | None = Field(
         default=None,
         title="Device",
         description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
@@ -369,7 +368,7 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         title="Min plate length",
         description="Minimum number of characters a recognized plate must contain to be considered valid.",
     )
-    format: Optional[str] = Field(
+    format: str | None = Field(
         default=None,
         title="Plate format regex",
         description="Optional regex to validate recognized plate strings against an expected format.",
@@ -380,7 +379,7 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         description="Number of character mismatches allowed when comparing detected plates to known plates.",
         ge=0,
     )
-    known_plates: Optional[Dict[str, List[str]]] = Field(
+    known_plates: dict[str, list[str]] | None = Field(
         default={},
         title="Known plates",
         description="List of plates or regexes to specially track or alert on.",
@@ -397,12 +396,12 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         title="Save debug plates",
         description="Save plate crop images for debugging LPR performance.",
     )
-    device: Optional[str] = Field(
+    device: str | None = Field(
         default=None,
         title="Device",
         description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
     )
-    replace_rules: List[ReplaceRule] = Field(
+    replace_rules: list[ReplaceRule] = Field(
         default_factory=list,
         title="Replacement rules",
         description="Regex replacement rules used to normalize detected plate strings before matching.",
@@ -443,10 +442,10 @@ class CameraAudioTranscriptionConfig(FrigateBaseModel):
         title="Enable transcription",
         description="Enable or disable manually triggered audio event transcription.",
     )
-    enabled_in_config: Optional[bool] = Field(
+    enabled_in_config: bool | None = Field(
         default=None, title="Original transcription state"
     )
-    live_enabled: Optional[bool] = Field(
+    live_enabled: bool | None = Field(
         default=False,
         title="Live transcription",
         description="Enable streaming live transcription for audio as it is received.",

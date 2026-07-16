@@ -72,7 +72,11 @@
     "title": "Reconhecimentos Recentes",
     "aria": "Selecionar reconhecimentos recentes",
     "empty": "Não há tentativas recentes de reconhecimento facial",
-    "titleShort": "Recente"
+    "titleShort": "Recente",
+    "emptyNoLibrary": {
+      "title": "Carregue uma foto de rosto",
+      "description": "Você deve adicionar pelo menos um rosto à biblioteca para que o reconhecimento facial funcione."
+    }
   },
   "selectFace": "Selecionar Rosto",
   "trainFaceAs": "Treinar Rosto como:",
@@ -89,7 +93,8 @@
       "renamedFace": "O rosto foi renomeado com sucesso para {{name}}",
       "deletedName_one": "{{count}} rosto foi deletado com sucesso.",
       "deletedName_many": "{{count}} rostos foram deletados com sucesso.",
-      "deletedName_other": "{{count}} rostos foram deletados com sucesso."
+      "deletedName_other": "{{count}} rostos foram deletados com sucesso.",
+      "reclassifiedFace": "Rosto reclassificado com sucesso."
     },
     "error": {
       "uploadingImageFailed": "Falha ao enviar a imagem: {{errorMessage}}",
@@ -98,7 +103,10 @@
       "deleteNameFailed": "Falha ao deletar nome: {{errorMessage}}",
       "renameFaceFailed": "Falha ao renomear rosto: {{errorMessage}}",
       "trainFailed": "Falha ao treinar: {{errorMessage}}",
-      "updateFaceScoreFailed": "Falha ao atualizar pontuação de rosto: {{errorMessage}}"
+      "updateFaceScoreFailed": "Falha ao atualizar pontuação de rosto: {{errorMessage}}",
+      "reclassifyFailed": "Falha ao reclassificar o rosto: {{errorMessage}}"
     }
-  }
+  },
+  "reclassifyFaceAs": "Reclassificar rosto como:",
+  "reclassifyFace": "Reclassificar rosto"
 }

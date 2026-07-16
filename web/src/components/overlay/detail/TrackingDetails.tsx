@@ -301,11 +301,19 @@ export function TrackingDetails({
     [recordings, actualVideoStart],
   );
 
-  eventSequence?.map((event) => {
-    event.data.zones_friendly_names = event.data?.zones?.map((zone) => {
-      return resolveZoneName(config, zone);
-    });
-  });
+  const sequence = useMemo(
+    () =>
+      eventSequence?.map((item) => ({
+        ...item,
+        data: {
+          ...item.data,
+          zones_friendly_names: item.data?.zones?.map((zone) =>
+            resolveZoneName(config, zone, item.camera),
+          ),
+        },
+      })),
+    [eventSequence, config],
+  );
 
   // Use manualOverride (set when seeking in image mode) if present so
   // lifecycle rows and overlays follow image-mode seeks. Otherwise fall
@@ -849,9 +857,9 @@ export function TrackingDetails({
             </div>
 
             <div className="mt-2">
-              {!eventSequence ? (
+              {!sequence ? (
                 <ActivityIndicator className="size-2" size={2} />
-              ) : eventSequence.length === 0 ? (
+              ) : sequence.length === 0 ? (
                 <div className="py-2 text-muted-foreground">
                   {t("detail.noObjectDetailData", { ns: "views/events" })}
                 </div>
@@ -871,7 +879,7 @@ export function TrackingDetails({
                     />
                   )}
                   <div className="space-y-2">
-                    {eventSequence.map((item, idx) => {
+                    {sequence.map((item, idx) => {
                       return (
                         <div
                           key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
@@ -1197,14 +1205,7 @@ function LifecycleIconRow({
                           backgroundColor: `rgb(${color})`,
                         }}
                       />
-                      <span
-                        className={cn(
-                          item.data?.zones_friendly_names?.[zidx] === zone &&
-                            "smart-capitalize",
-                        )}
-                      >
-                        {item.data?.zones_friendly_names?.[zidx]}
-                      </span>
+                      <span>{item.data?.zones_friendly_names?.[zidx]}</span>
                     </Badge>
                   );
                 })}
@@ -1232,11 +1233,15 @@ function LifecycleIconRow({
                       <DropdownMenuItem
                         className="cursor-pointer"
                         onSelect={async () => {
-                          const resp = await axios.post(
-                            `/${item.camera}/plus/${item.timestamp + annotationOffset / 1000}`,
-                          );
+                          try {
+                            const resp = await axios.post(
+                              `/${item.camera}/plus/${item.timestamp + annotationOffset / 1000}`,
+                            );
 
-                          if (resp && resp.status == 200) {
+                            if (resp.status !== 200) {
+                              throw new Error();
+                            }
+
                             toast.success(
                               t("toast.success.submittedFrigatePlus", {
                                 ns: "components/player",
@@ -1245,8 +1250,8 @@ function LifecycleIconRow({
                                 position: "top-center",
                               },
                             );
-                          } else {
-                            toast.success(
+                          } catch {
+                            toast.error(
                               t("toast.error.submitFrigatePlusFailed", {
                                 ns: "components/player",
                               }),

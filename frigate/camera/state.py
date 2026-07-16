@@ -5,7 +5,8 @@ import logging
 import os
 import threading
 from collections import defaultdict
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import cv2
 import numpy as np
@@ -110,9 +111,9 @@ class CameraState:
                 # draw thicker box around ptz autotracked object
                 if (
                     self.camera_config.onvif.autotracking.enabled
-                    and self.ptz_autotracker_thread.ptz_autotracker.autotracker_init[
+                    and self.ptz_autotracker_thread.ptz_autotracker.autotracker_init.get(
                         self.name
-                    ]
+                    )
                     and self.ptz_autotracker_thread.ptz_autotracker.tracked_object[
                         self.name
                     ]

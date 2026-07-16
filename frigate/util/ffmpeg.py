@@ -2,7 +2,8 @@
 
 import logging
 import subprocess as sp
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from frigate.const import PROCESS_PRIORITY_LOW
 from frigate.log import LogPipe
@@ -68,9 +69,9 @@ def run_ffmpeg_with_progress(
     cmd: list[str],
     *,
     expected_duration_seconds: float,
-    on_progress: Optional[Callable[[float], None]] = None,
-    stdin_payload: Optional[str] = None,
-    process_started: Optional[Callable[[sp.Popen], None]] = None,
+    on_progress: Callable[[float], None] | None = None,
+    stdin_payload: str | None = None,
+    process_started: Callable[[sp.Popen], None] | None = None,
     use_low_priority: bool = True,
 ) -> tuple[int, str]:
     """Run an ffmpeg command, streaming progress via `-progress pipe:2`.

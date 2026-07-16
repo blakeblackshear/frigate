@@ -1,6 +1,22 @@
+import random
 import unittest
 
+import numpy as np
+
 from frigate.track.tracked_object import TrackedObjectAttribute
+from frigate.util.object import average_boxes
+
+
+class TestBoxStatistics(unittest.TestCase):
+    def test_average_boxes_matches_numpy(self) -> None:
+        rng = random.Random(0)
+        for _ in range(5000):
+            boxes = [
+                [rng.randint(0, 4000) for _ in range(4)]
+                for _ in range(rng.randint(1, 10))
+            ]
+            expected = [float(np.mean([b[i] for b in boxes])) for i in range(4)]
+            self.assertEqual(average_boxes(boxes), expected)
 
 
 class TestAttribute(unittest.TestCase):

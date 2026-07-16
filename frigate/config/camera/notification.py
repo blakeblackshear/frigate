@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import Field
 
 from ..base import FrigateBaseModel
@@ -13,7 +11,7 @@ class NotificationConfig(FrigateBaseModel):
         title="Enable notifications",
         description="Enable or disable notifications for all cameras; can be overridden per-camera.",
     )
-    email: Optional[str] = Field(
+    email: str | None = Field(
         default=None,
         title="Notification email",
         description="Email address used for push notifications or required by certain notification providers.",
@@ -24,7 +22,7 @@ class NotificationConfig(FrigateBaseModel):
         title="Cooldown period",
         description="Cooldown (seconds) between notifications to avoid spamming recipients.",
     )
-    enabled_in_config: Optional[bool] = Field(
+    enabled_in_config: bool | None = Field(
         default=None,
         title="Original notifications state",
         description="Indicates whether notifications were enabled in the original static configuration.",

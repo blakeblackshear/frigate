@@ -8,7 +8,7 @@ from collections.abc import Callable, Generator, Iterable
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import cv2
 import numpy as np
@@ -102,11 +102,11 @@ class MotionSearchJob(Job):
     total_frames_processed: int = 0
 
     # Live progress (ride the existing to_dict() websocket broadcast)
-    scanning_timestamp: Optional[float] = None
+    scanning_timestamp: float | None = None
     progress: float = 0.0
 
     # Metrics for observability
-    metrics: Optional[MotionSearchMetrics] = None
+    metrics: MotionSearchMetrics | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for WebSocket transmission."""
@@ -911,14 +911,14 @@ def start_motion_search_job(
     return job.id
 
 
-def get_motion_search_job(job_id: str) -> Optional[MotionSearchJob]:
+def get_motion_search_job(job_id: str) -> MotionSearchJob | None:
     """Get a motion search job by ID."""
     with _jobs_lock:
         job_entry = _motion_search_jobs.get(job_id)
         if job_entry:
             return job_entry[0]
     # Check completed jobs via manager
-    return cast(Optional[MotionSearchJob], get_job_by_id("motion_search", job_id))
+    return cast(MotionSearchJob | None, get_job_by_id("motion_search", job_id))
 
 
 def cancel_motion_search_job(job_id: str) -> bool:
@@ -942,7 +942,7 @@ def cancel_motion_search_job(job_id: str) -> bool:
         job_payload = job.to_dict()
         logger.info("Cancelled motion search job %s", job_id)
 
-    requestor: Optional[InterProcessRequestor] = None
+    requestor: InterProcessRequestor | None = None
     try:
         requestor = InterProcessRequestor()
         requestor.send_data(UPDATE_JOB_STATE, job_payload)

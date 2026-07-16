@@ -7,13 +7,13 @@ import NavPath from "@site/src/components/NavPath";
 
 **Live view** is Frigate's real-time dashboard and the page you land on by default. It shows all of your cameras at a glance, streams your most recent alerts across the top, and lets you open any camera in a full-resolution single-camera view with audio, two-way talk, PTZ, and on-demand recording controls.
 
-This page describes how to _use_ the Live view. For how to _configure_ live streaming — go2rtc, stream selection, smart streaming, WebRTC, and audio — see the [Live View configuration](/configuration/live) docs.
+This page describes how to _use_ the Live view. For how to _configure_ live streaming (go2rtc, stream selection, smart streaming, WebRTC, and audio), see the [Live View configuration](/configuration/live) docs.
 
 ## The dashboard at a glance
 
-The default **All Cameras** dashboard shows every camera, with a filmstrip of recent **alerts** scrolling across the top. Clicking an alert opens it in [Review](/usage/review); each card also has a check button to mark it reviewed without leaving the dashboard.
+The default **All Cameras** dashboard shows every camera, with a filmstrip of recent **alerts** scrolling across the top. Clicking an alert opens it in [Review](/usage/review); each card also has a check button to mark it reviewed without leaving the dashboard. Only **alerts** appear in the filmstrip. To suppress a label or zone from showing there, configure it as a detection instead (see [Alerts and Detections](/configuration/review#alerts-and-detections)).
 
-By default Frigate uses **smart streaming**: a camera's image updates roughly once per minute while nothing is happening, and switches to a full live stream the moment activity is detected. This conserves bandwidth and resources. You can change this per camera or per group (see [Streaming settings](#streaming-settings-and-the-right-click-menu) below), and the behavior is explained in detail under [Live view technologies](/configuration/live#live-view-technologies).
+By default Frigate uses **smart streaming**: a camera's image updates roughly once per minute while nothing is happening, and switches to a full live stream the moment activity is detected. This conserves bandwidth and resources. You can change this for each camera when using a camera group (see [Streaming settings](#streaming-settings-and-the-right-click-menu) below), and the behavior is explained in detail under [Live view technologies](/configuration/live#live-view-technologies).
 
 On mobile, a toggle in the header switches between a **grid** layout and a single-column **list** layout. On desktop a **fullscreen** button is available in the lower-right corner.
 
@@ -24,7 +24,7 @@ The icon rail (top-left on desktop, a horizontal strip on mobile) switches betwe
 - The **home** icon is the **All Cameras** dashboard, which shows every camera enabled for the dashboard.
 - Each **camera group** you create appears as its own icon. Selecting a group shows only that group's cameras.
 
-Camera groups are useful for organizing cameras by location (for example, _Front of House_ or _Backyard_) and for giving each group its own dashboard layout and streaming preferences.
+Camera groups are useful for organizing cameras by location (for example, _Front of House_ or _Backyard_) and for giving each group its own dashboard layout and camera streaming preferences.
 
 You can also view [Birdseye](/configuration/birdseye) on the dashboard, or open it directly at `http://<frigate_host>:5000/#birdseye`. Clicking a camera inside the Birdseye view jumps to that camera's live feed.
 
@@ -33,7 +33,7 @@ You can also view [Birdseye](/configuration/birdseye) on the dashboard, or open 
 Admins can manage groups from the pencil icon next to the group rail, which opens the **Camera Groups** dialog. From there you can add a group, or edit and delete existing ones. When creating a group you choose:
 
 - a **Name** (spaces are converted to underscores),
-- the **cameras** to include — each camera has a toggle and a gear that opens its [streaming settings](#streaming-settings-and-the-right-click-menu), and
+- the **cameras** to include (each camera has a toggle and a gear that opens its [streaming settings](#streaming-settings-and-the-right-click-menu)), and
 - an **icon** used for the group's button in the rail.
 
 Deleting a group also clears any custom layout you saved for it.
@@ -42,7 +42,7 @@ Deleting a group also clears any custom layout you saved for it.
 
 On desktop and tablet, each camera group has its own freely-arrangeable grid. Enter **Edit Layout** mode from the layout button in the lower-right corner: camera tiles gain a drag handle and corner resize handles. Drag a tile to reposition it and drag a corner to resize it (the aspect ratio is preserved). Exit edit mode to save. The layout is stored in your browser per device, so each device can have its own arrangement.
 
-The default **All Cameras** dashboard is not manually arrangeable — it automatically sizes tiles based on each camera's aspect ratio (wide cameras span two columns, tall cameras span two rows).
+The default **All Cameras** dashboard is not manually arrangeable. It automatically sizes tiles based on each camera's aspect ratio (wide cameras span two columns, tall cameras span two rows).
 
 ## Reading the tile indicators
 
@@ -58,14 +58,14 @@ You can optionally overlay live streaming statistics (stream type, bandwidth, la
 
 ## Streaming settings and the right-click menu
 
-Right-clicking (or long-pressing) a camera tile opens a context menu with quick controls: an **audio volume** control for streams that support audio, **Mute / Unmute all cameras**, **show or hide streaming statistics**, the **debug view**, **notification** options, and — for admins — turning the camera on or off.
+Right-clicking (or long-pressing) a camera tile opens a context menu with quick controls: an **audio volume** control for streams that support audio, **Mute / Unmute all cameras**, **show or hide streaming statistics**, the **debug view**, **notification** options, and, for admins, turning the camera on or off. If the audio control doesn't appear, see [Audio Support](/configuration/live#audio-support). Audio requires go2rtc configured with a compatible codec.
 
-A **Low-bandwidth mode** notice may also appear in the context menu with a **Reset** option appears when Frigate has fallen back to the lower-quality jsmpeg stream — see the [Live view FAQ](/configuration/live#live-view-faq) for why this happens.
+A **Low-bandwidth mode** notice may also appear in the context menu with a **Reset** option when Frigate has fallen back to the lower-quality jsmpeg stream. See the [Live view FAQ](/configuration/live#live-view-faq) for why this happens.
 
 For non-default groups, the context menu also exposes **Streaming Settings** for that camera, which let you choose:
 
 - the **stream** to display (the dropdown lists the streams you configured under [`live -> streams`](/configuration/live#setting-streams-for-live-ui), and indicates whether audio is available),
-- the **streaming method** — **No Streaming**, **Smart Streaming** (recommended), or **Continuous Streaming** (higher bandwidth), and
+- the **streaming method**: **No Streaming**, **Smart Streaming** (recommended), or **Continuous Streaming** (higher bandwidth), and
 - **compatibility mode**, for devices that have trouble rendering the default player.
 
 These settings are saved per group and per device in your browser, not in your config file.
@@ -77,7 +77,7 @@ Clicking a camera tile opens its full-resolution single-camera view. The top bar
 - **Back** (also the `Esc` key) to return to the dashboard,
 - **History** to jump to the [recordings](/usage/history) for this camera, starting about 30 seconds in the past,
 - **Fullscreen** and **Picture-in-Picture** (if supported by your browser),
-- **Two-way talk** (the microphone button — requires a supported camera and WebRTC; keyboard shortcut `t`), and
+- **Two-way talk** (the microphone button, which requires a supported camera and WebRTC; keyboard shortcut `t`), and
 - **Camera audio muting** (the speaker button; keyboard shortcut `m`).
 
 You can pinch or scroll to zoom into the feed. A **settings** gear provides a **stream** selector (with audio and two-way-talk availability indicators), **Play in background**, **Show stats**, and a **Debug view** that overlays Frigate's detection regions and bounding boxes.
@@ -100,7 +100,7 @@ Admins get a row of toggles in the single-camera view (a settings drawer on mobi
 - **Live audio transcription** (when audio detection is enabled), and
 - **Autotracking** (for [autotracking-capable PTZ cameras](/configuration/autotracking)).
 
-These toggles change runtime behavior immediately. Whether a change persists across a restart depends on the feature — see the relevant configuration page.
+These toggles change runtime behavior immediately. Whether a change persists across a restart depends on the feature. See the relevant configuration page.
 
 ## On-demand recording and snapshots
 

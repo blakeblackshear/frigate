@@ -426,5 +426,12 @@
   "chink": "Csörömpölés",
   "shatter": "Összetörés",
   "field_recording": "Helyszíni felvétel",
-  "noise": "Zaj"
+  "noise": "Zaj",
+  "liquid": "Folyadék",
+  "splash": "Csobbanás",
+  "slosh": "Löttyenés",
+  "trickle": "Csörgedezés",
+  "gush": "Folyás",
+  "stir": "Kavarás",
+  "thump": "Puffanás"
 }

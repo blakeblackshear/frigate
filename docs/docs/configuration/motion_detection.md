@@ -11,7 +11,7 @@ import NavPath from "@site/src/components/NavPath";
 
 Frigate uses motion detection as a first line check to see if there is anything happening in the frame worth checking with object detection.
 
-Once motion is detected, it tries to group up nearby areas of motion together in hopes of identifying a rectangle in the image that will capture the area worth inspecting. These are the red "motion boxes" you see in the debug viewer.
+Once motion is detected, it tries to group up nearby areas of motion together in hopes of identifying a rectangle in the image that will capture the area worth inspecting. These are the red "motion boxes" you see in the [debug viewer](/usage/live#the-single-camera-view).
 
 ## The Goal
 
@@ -66,7 +66,7 @@ motion:
 </TabItem>
 </ConfigTabs>
 
-Lower values mean motion detection is more sensitive to changes in color, making it more likely for example to detect motion when a brown dogs blends in with a brown fence or a person wearing a red shirt blends in with a red car. If the threshold is too low however, it may detect things like grass blowing in the wind, shadows, etc. to be detected as motion.
+Lower values mean motion detection is more sensitive to changes in color, making it more likely for example to detect motion when a brown dog blends in with a brown fence or a person wearing a red shirt blends in with a red car. If the threshold is too low however, it may detect things like grass blowing in the wind, shadows, etc. to be detected as motion.
 
 Watching the motion boxes in the debug view, increase the threshold until you only see motion that is visible to the eye. Once this is done, it is important to test and ensure that desired motion is still detected.
 
@@ -151,7 +151,7 @@ motion:
 
 Large changes in motion like PTZ moves and camera switches between Color and IR mode should result in a pause in object detection. `lightning_threshold` defines the percentage of the image used to detect these substantial changes. Increasing this value makes motion detection more likely to treat large changes (like IR mode switches) as valid motion. Decreasing it makes motion detection more likely to ignore large amounts of motion, such as a person approaching a doorbell camera.
 
-Note that `lightning_threshold` does **not** stop motion-based recordings from being saved — it only prevents additional motion analysis after the threshold is exceeded, reducing false positive object detections during high-motion periods (e.g. storms or PTZ sweeps) without interfering with recordings.
+Note that `lightning_threshold` does **not** stop motion-based recordings from being saved. It only prevents additional motion analysis after the threshold is exceeded, reducing false positive object detections during high-motion periods (e.g. storms or PTZ sweeps) without interfering with recordings.
 
 :::warning
 
@@ -194,10 +194,10 @@ This option is handy when you want to prevent large transient changes from trigg
 
 :::warning
 
-When the skip threshold is exceeded, **no motion is reported** for that frame, meaning **nothing is recorded** for that frame. That means you can miss something important, like a PTZ camera auto-tracking an object or activity while the camera is moving. If you prefer to guarantee that every frame is saved, leave this unset and accept occasional recordings containing scene noise — they typically only take up a few megabytes and are quick to scan in the timeline UI.
+When the skip threshold is exceeded, **no motion is reported** for that frame, meaning **nothing is recorded** for that frame. That means you can miss something important, like a PTZ camera auto-tracking an object or activity while the camera is moving. If you prefer to guarantee that every frame is saved, leave this unset and accept occasional recordings containing scene noise. They typically only take up a few megabytes and are quick to scan in the timeline UI.
 
 :::
 
 ## Reviewing Detected Motion
 
-To review what the detector picked up — or to search past recordings for motion in a specific region — see [Reviewing Motion](/usage/review#reviewing-motion) on the Review page.
+To review what the detector picked up, or to search past recordings for motion in a specific region, see [Reviewing Motion](/usage/review#reviewing-motion) on the Review page.

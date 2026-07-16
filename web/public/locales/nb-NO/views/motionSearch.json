@@ -24,7 +24,9 @@
         "points_one": "{{count}} punkt",
         "points_other": "{{count}} punkter",
         "undo": "Angre siste punkt",
-        "reset": "Tilbakestill polygon"
+        "reset": "Tilbakestill polygon",
+        "moveMode": "Flytt",
+        "drawMode": "Tegn"
     },
     "motionHeatmapLabel": "Varmekart for bevegelse",
     "dialog": {
@@ -40,11 +42,11 @@
     "settings": {
         "title": "Søkeinnstillinger",
         "parallelMode": "Parallellmodus",
-        "parallelModeDesc": "Skann flere opptakssegmenter samtidig (raskere, men betydelig mer CPU-intensivt)",
+        "parallelModeDesc": "Skann flere opptaksintervaller samtidig (raskere, men krever mer dekodingsressurser)",
         "threshold": "Følsomhetsterskel",
         "thresholdDesc": "Lavere verdier detekterer mindre endringer (1–255)",
         "minArea": "Minimum endringsområde",
-        "minAreaDesc": "Minimum prosentandel av interesseområdet som må endres for å anses som betydelig",
+        "minAreaDesc": "Minimumsstørrelse for et enkelt bevegelsesområde, som en prosentandel av interesseområdet",
         "frameSkip": "Bilde-sprang",
         "frameSkipDesc": "Behandle hvert N-te bilde. Sett denne til kameraets bildefrekvens for å behandle ett bilde i sekundet (f.eks. 5 for et 5 FPS-kamera, 30 for et 30 FPS-kamera). Høyere verdier vil være raskere, men kan gå glipp av korte bevegelseshendelser.",
         "maxResults": "Maksimalt antall resultater",
@@ -70,6 +72,9 @@
         "framesDecoded": "Bilder dekodet",
         "wallTime": "Søketid",
         "segmentErrors": "Segmentfeil",
-        "seconds": "{{seconds}}s"
-    }
+        "seconds": "{{seconds}}s",
+        "scanSummary": "{{segments}} segmenter · {{time}}",
+        "minutesSeconds": "{{minutes}}m {{seconds}}s"
+    },
+    "scanning": "Skanner {{time}}"
 }

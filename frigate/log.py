@@ -6,13 +6,14 @@ import os
 import sys
 import threading
 from collections import deque
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from enum import Enum
 from functools import wraps
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing.managers import SyncManager
 from queue import Empty, Queue
-from typing import Any, Callable, Deque, Generator, Optional
+from typing import Any
 
 from frigate.util.builtin import clean_camera_user_pass
 
@@ -47,8 +48,8 @@ class LogLevel(str, Enum):
     critical = "critical"
 
 
-log_listener: Optional[QueueListener] = None
-log_queue: Optional[Queue] = None
+log_listener: QueueListener | None = None
+log_queue: Queue | None = None
 
 
 def setup_logging(manager: SyncManager) -> None:
@@ -118,7 +119,7 @@ class LogPipe(threading.Thread):
         super().__init__(daemon=False)
         self.logger = logging.getLogger(log_name)
         self.level = level
-        self.deque: Deque[str] = deque(maxlen=100)
+        self.deque: deque[str] = deque(maxlen=100)
         self.fdRead, self.fdWrite = os.pipe()
         self.pipeReader = os.fdopen(self.fdRead)
         self.start()

@@ -10,13 +10,14 @@ A reverse proxy is typically needed if you want to set up Frigate on a custom UR
 Before setting up a reverse proxy, check if any of the built-in functionality in Frigate suits your needs:
 |Topic|Docs|
 |-|-|
-|TLS|Please see the  `tls` [configuration option](../configuration/tls.md)|
+|TLS|Please see the `tls` [configuration option](../configuration/tls.md)|
 |Authentication|Please see the [authentication](../configuration/authentication.md) documentation|
 |IPv6|[Enabling IPv6](../configuration/advanced/system.md#enabling-ipv6)
 
-**Note about TLS**  
-When using a reverse proxy, the TLS session is usually terminated at the proxy, sending the internal request over plain HTTP. If this is the desired behavior, TLS must first be disabled in Frigate, or you will encounter an HTTP 400 error: "The plain HTTP request was sent to HTTPS port."  
+**Note about TLS**
+When using a reverse proxy, the TLS session is usually terminated at the proxy, sending the internal request over plain HTTP. If this is the desired behavior, TLS must first be disabled in Frigate, or you will encounter an HTTP 400 error: "The plain HTTP request was sent to HTTPS port."
 To disable TLS, set the following in your Frigate configuration:
+
 ```yml
 tls:
   enabled: false
@@ -24,18 +25,26 @@ tls:
 
 :::warning
 A reverse proxy can be used to secure access to an internal web server, but the user will be entirely reliant on the steps they have taken. You must ensure you are following security best practices.
-This page does not attempt to outline the specific steps needed to secure your internal website.  
+This page does not attempt to outline the specific steps needed to secure your internal website.
 Please use your own knowledge to assess and vet the reverse proxy software before you install anything on your system.
 :::
+
+## WebSocket support
+
+Frigate relies on WebSockets for real-time communication between the browser and the backend. Features such as camera controls (enabling/disabling a camera, audio, detect, recordings, and other toggles), live stream playback, and other live-updating parts of the UI will not function correctly if WebSocket connections are not proxied.
+
+Your reverse proxy must be configured to forward the `Upgrade` and `Connection` headers so that WebSocket connections can be established. Each proxy example below already includes the directives needed to do this, but if you are adapting your own configuration, ensure these headers are passed through.
+
+Note that some proxies disable WebSocket support by default. For example, Nginx Proxy Manager has a "Websockets Support" toggle that must be enabled.
 
 ## Proxies
 
 There are many solutions available to implement reverse proxies and the community is invited to help out documenting others through a contribution to this page.
 
-* [Apache2](#apache2-reverse-proxy)
-* [Nginx](#nginx-reverse-proxy)
-* [Traefik](#traefik-reverse-proxy)
-* [Caddy](#caddy-reverse-proxy)
+- [Apache2](#apache2-reverse-proxy)
+- [Nginx](#nginx-reverse-proxy)
+- [Traefik](#traefik-reverse-proxy)
+- [Caddy](#caddy-reverse-proxy)
 
 ## Apache2 Reverse Proxy
 
@@ -159,7 +168,7 @@ The settings below enabled connection upgrade, sets up logging (optional) and pr
 
 ## Traefik Reverse Proxy
 
-This example shows how to add a `label` to the Frigate Docker compose file, enabling Traefik to automatically discover your Frigate instance.  
+This example shows how to add a `label` to the Frigate Docker compose file, enabling Traefik to automatically discover your Frigate instance.
 Before using the example below, you must first set up Traefik with the [Docker provider](https://doc.traefik.io/traefik/providers/docker/)
 
 ```yml
@@ -203,7 +212,7 @@ This example shows Frigate running under a subdomain with logging and a tls cert
 }
 
 frigate.YOUR_DOMAIN.TLD {
-        reverse_proxy http://localhost:8971 
+        reverse_proxy http://localhost:8971
         import tls
         import logging frigate.YOUR_DOMAIN.TLD
 }

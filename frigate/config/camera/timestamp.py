@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Optional
 
 from pydantic import Field
 
@@ -76,7 +75,7 @@ class TimestampStyleConfig(FrigateBaseModel):
         title="Timestamp thickness",
         description="Line thickness of the timestamp text.",
     )
-    effect: Optional[TimestampEffectEnum] = Field(
+    effect: TimestampEffectEnum | None = Field(
         default=None,
         title="Timestamp effect",
         description="Visual effect for the timestamp text (none, solid, shadow).",

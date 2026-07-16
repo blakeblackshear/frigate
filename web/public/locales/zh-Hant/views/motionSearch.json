@@ -22,7 +22,9 @@
     "polygonControls": {
         "points_other": "{{count}} 個點位",
         "undo": "撤銷上一個點位",
-        "reset": "重設多邊形"
+        "reset": "重設多邊形",
+        "drawMode": "繪製",
+        "moveMode": "移動"
     },
     "motionHeatmapLabel": "畫面變動熱力圖",
     "dialog": {
@@ -38,7 +40,7 @@
     "settings": {
         "title": "搜尋設定",
         "parallelMode": "並行模式",
-        "parallelModeDesc": "同時掃描多個錄製片段（速度更快，但 CPU 佔用會顯著升高）",
+        "parallelModeDesc": "同時掃描多個錄影片段（速度更快，但會消耗更多解碼資源）",
         "threshold": "靈敏度閾值",
         "thresholdDesc": "數值越低，可偵測到越小的變化（取值範圍 1-255）",
         "minArea": "最小變化區域",
@@ -68,6 +70,9 @@
         "framesDecoded": "畫面已解碼",
         "wallTime": "搜尋時間",
         "segmentErrors": "片段異常",
-        "seconds": "{{seconds}} 秒"
-    }
+        "seconds": "{{seconds}} 秒",
+        "minutesSeconds": "{{minutes}}分 {{seconds}}秒",
+        "scanSummary": "{{segments}} 個片段 · {{time}}"
+    },
+    "scanning": "掃描中 {{time}}"
 }

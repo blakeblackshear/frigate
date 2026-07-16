@@ -21,23 +21,19 @@ const snapshots: SectionConfigOverrides = {
       "crop",
       "quality",
       "timestamp",
+      "required_zones",
       "retain",
     ],
     fieldGroups: {
       display: ["bounding_box", "crop", "quality", "timestamp"],
     },
     hiddenFields: ["enabled_in_config"],
-    advancedFields: ["height", "quality", "retain"],
+    advancedFields: ["height", "quality"],
     uiSchema: {
       required_zones: {
         "ui:widget": "zoneNames",
         "ui:options": {
           suppressMultiSchema: true,
-        },
-      },
-      "retain.mode": {
-        "ui:options": {
-          enumI18nPrefix: "retainMode",
         },
       },
     },

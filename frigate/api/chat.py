@@ -7,7 +7,7 @@ import operator
 import time
 from datetime import datetime
 from functools import reduce
-from typing import Any, Dict, List, Optional
+from typing import Any, Literal
 
 import cv2
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
@@ -37,6 +37,7 @@ from frigate.api.defs.response.chat_response import (
 from frigate.api.defs.tags import Tags
 from frigate.api.event import _build_attribute_filter_clause, events
 from frigate.config import FrigateConfig
+from frigate.config.classification import SemanticSearchModelEnum
 from frigate.genai.prompts import (
     build_chat_system_prompt,
     get_attribute_classifications,
@@ -59,7 +60,7 @@ class ToolExecuteRequest(BaseModel):
     """Request model for tool execution."""
 
     tool_name: str
-    arguments: Dict[str, Any]
+    arguments: dict[str, Any]
 
 
 class VLMMonitorRequest(BaseModel):
@@ -68,8 +69,8 @@ class VLMMonitorRequest(BaseModel):
     camera: str
     condition: str
     max_duration_minutes: int = 60
-    labels: List[str] = []
-    zones: List[str] = []
+    labels: list[str] = []
+    zones: list[str] = []
 
 
 @router.get(
@@ -86,42 +87,61 @@ def get_tools(request: Request) -> JSONResponse:
     tools = get_tool_definitions(
         semantic_search_enabled=semantic_search_enabled,
         attribute_classifications=attribute_classifications,
+        embeddings_language=_embeddings_language(config),
     )
     return JSONResponse(content={"tools": tools})
 
 
+def _embeddings_language(config: FrigateConfig) -> Literal["english", "multi"]:
+    """Return the language capability of the configured embeddings model.
+
+    JinaV1 is English-only; every other option (JinaV2 or a GenAI embeddings
+    provider) handles multiple languages.
+    """
+    if config.semantic_search.model == SemanticSearchModelEnum.jinav1:
+        return "english"
+
+    return "multi"
+
+
 def _resolve_zones(
-    zones: List[str],
+    zones: list[str],
     config: FrigateConfig,
-    target_cameras: List[str],
-) -> List[str]:
+    target_cameras: list[str],
+) -> list[str]:
     """Map zone names to their canonical config keys, case-insensitively.
 
     LLMs frequently echo a user's casing ("Front Yard") instead of the
-    configured key ("front_yard"). The downstream zone filter is a SQLite GLOB
-    over the JSON-encoded zones column, which is case-sensitive — so an
-    unnormalized name silently returns zero matches. Build a lookup over the
-    relevant cameras' configured zones and substitute when we find a match;
-    unknown names pass through so behavior matches what the model asked for.
+    configured key ("front_yard"), or fall back to a zone's friendly name
+    ("Front Walkway") instead of its ID ("front_walk"). The downstream zone
+    filter is a SQLite GLOB over the JSON-encoded zones column, which stores
+    config keys and is case-sensitive — so an unnormalized name silently
+    returns zero matches. Build a lookup over the relevant cameras' configured
+    zones, keyed by both the config key and the friendly name, and substitute
+    when we find a match; unknown names pass through so behavior matches what
+    the model asked for.
     """
     if not zones:
         return zones
 
-    lookup: Dict[str, str] = {}
+    lookup: dict[str, str] = {}
     for camera_id in target_cameras:
         camera_config = config.cameras.get(camera_id)
         if camera_config is None:
             continue
-        for zone_name in camera_config.zones.keys():
+        for zone_name, zone_config in camera_config.zones.items():
             lookup.setdefault(zone_name.lower(), zone_name)
+            lookup.setdefault(
+                zone_config.get_formatted_name(zone_name).lower(), zone_name
+            )
 
     return [lookup.get(z.lower(), z) for z in zones]
 
 
 async def _execute_search_objects(
     request: Request,
-    arguments: Dict[str, Any],
-    allowed_cameras: List[str],
+    arguments: dict[str, Any],
+    allowed_cameras: list[str],
 ) -> JSONResponse:
     """
     Execute the search_objects tool.
@@ -201,7 +221,7 @@ async def _execute_search_objects(
         # Return it as-is for the LLM
         return response
     except Exception as e:
-        logger.error(f"Error executing search_objects: {e}", exc_info=True)
+        logger.exception(f"Error executing search_objects: {e}")
         return JSONResponse(
             content={
                 "success": False,
@@ -213,8 +233,8 @@ async def _execute_search_objects(
 
 async def _execute_search_objects_semantic(
     request: Request,
-    arguments: Dict[str, Any],
-    allowed_cameras: List[str],
+    arguments: dict[str, Any],
+    allowed_cameras: list[str],
     semantic_query: str,
 ) -> JSONResponse:
     """Search objects via fused thumbnail + description embeddings.
@@ -263,8 +283,8 @@ async def _execute_search_objects_semantic(
     limit = int(arguments.get("limit", 25))
     limit = max(1, min(limit, 100))
 
-    visual_distances: Dict[str, float] = {}
-    description_distances: Dict[str, float] = {}
+    visual_distances: dict[str, float] = {}
+    description_distances: dict[str, float] = {}
     try:
         rows = context.search_thumbnail(semantic_query)
         visual_distances = {row[0]: row[1] for row in rows}
@@ -305,7 +325,7 @@ async def _execute_search_objects_semantic(
 
     eligible = {e.id: e for e in Event.select().where(reduce(operator.and_, clauses))}
 
-    scored: List[tuple[str, float]] = []
+    scored: list[tuple[str, float]] = []
     for eid in eligible:
         v_score = (
             distance_to_score(visual_distances[eid], context.thumb_stats)
@@ -331,9 +351,9 @@ async def _execute_search_objects_semantic(
 
 async def _execute_find_similar_objects(
     request: Request,
-    arguments: Dict[str, Any],
-    allowed_cameras: List[str],
-) -> Dict[str, Any]:
+    arguments: dict[str, Any],
+    allowed_cameras: list[str],
+) -> dict[str, Any]:
     """Execute the find_similar_objects tool.
 
     Returns a plain dict (not JSONResponse) so the chat loop can embed it
@@ -403,8 +423,8 @@ async def _execute_find_similar_objects(
     # version (see frigate/embeddings/__init__.py). Mirror the pattern used by
     # frigate/api/event.py events_search: fetch top-k globally, then intersect
     # with the structured filters via Peewee.
-    visual_distances: Dict[str, float] = {}
-    description_distances: Dict[str, float] = {}
+    visual_distances: dict[str, float] = {}
+    description_distances: dict[str, float] = {}
 
     try:
         if similarity_mode in ("visual", "fused"):
@@ -462,7 +482,7 @@ async def _execute_find_similar_objects(
     eligible = {e.id: e for e in Event.select().where(reduce(operator.and_, clauses))}
 
     # 6. Fuse and rank.
-    scored: List[tuple[str, float]] = []
+    scored: list[tuple[str, float]] = []
     for eid in eligible:
         v_score = (
             distance_to_score(visual_distances[eid], context.thumb_stats)
@@ -503,7 +523,7 @@ async def _execute_find_similar_objects(
 async def execute_tool(
     request: Request,
     body: ToolExecuteRequest = Body(...),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ) -> JSONResponse:
     """
     Execute a tool function call.
@@ -545,8 +565,8 @@ async def execute_tool(
 async def _execute_get_live_context(
     request: Request,
     camera: str,
-    allowed_cameras: List[str],
-) -> Dict[str, Any]:
+    allowed_cameras: list[str],
+) -> dict[str, Any]:
     # Reject wildcards explicitly so models retry with a real camera name
     # instead of silently fanning out across every camera.
     if camera in ("*", "all"):
@@ -593,7 +613,7 @@ async def _execute_get_live_context(
                     "stationary": obj_dict.get("stationary", False),
                 }
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "camera": camera,
             "timestamp": frame_time,
             "detections": list(tracked_objects_dict.values()),
@@ -611,7 +631,7 @@ async def _execute_get_live_context(
         return result
 
     except Exception as e:
-        logger.error(f"Error executing get_live_context: {e}", exc_info=True)
+        logger.exception(f"Error executing get_live_context: {e}")
         return {
             "error": "Error getting live context",
         }
@@ -620,8 +640,8 @@ async def _execute_get_live_context(
 async def _get_live_frame_image_url(
     request: Request,
     camera: str,
-    allowed_cameras: List[str],
-) -> Optional[str]:
+    allowed_cameras: list[str],
+) -> str | None:
     """
     Fetch the current live frame for a camera as a base64 data URL.
 
@@ -659,8 +679,8 @@ async def _get_live_frame_image_url(
 
 async def _execute_set_camera_state(
     request: Request,
-    arguments: Dict[str, Any],
-) -> Dict[str, Any]:
+    arguments: dict[str, Any],
+) -> dict[str, Any]:
     role = request.headers.get("remote-role", "")
     if "admin" not in [r.strip() for r in role.split(",")]:
         return {"error": "Admin privileges required to change camera settings."}
@@ -699,10 +719,10 @@ async def _execute_set_camera_state(
 
 async def _execute_tool_internal(
     tool_name: str,
-    arguments: Dict[str, Any],
+    arguments: dict[str, Any],
     request: Request,
-    allowed_cameras: List[str],
-) -> Dict[str, Any]:
+    allowed_cameras: list[str],
+) -> dict[str, Any]:
     """
     Internal helper to execute a tool and return the result as a dict.
 
@@ -763,8 +783,8 @@ async def _execute_tool_internal(
 
 async def _execute_start_camera_watch(
     request: Request,
-    arguments: Dict[str, Any],
-) -> Dict[str, Any]:
+    arguments: dict[str, Any],
+) -> dict[str, Any]:
     camera = arguments.get("camera", "").strip()
     condition = arguments.get("condition", "").strip()
     max_duration_minutes = int(arguments.get("max_duration_minutes", 60))
@@ -801,7 +821,7 @@ async def _execute_start_camera_watch(
             zones=zones,
         )
     except RuntimeError as e:
-        logger.error("Failed to start VLM watch job: %s", e, exc_info=True)
+        logger.exception("Failed to start VLM watch job: %s", e)
         return {"error": "Failed to start VLM watch job."}
 
     return {
@@ -814,14 +834,14 @@ async def _execute_start_camera_watch(
     }
 
 
-def _execute_stop_camera_watch() -> Dict[str, Any]:
+def _execute_stop_camera_watch() -> dict[str, Any]:
     cancelled = stop_vlm_watch_job()
     if cancelled:
         return {"success": True, "message": "Watch job cancelled."}
     return {"success": False, "message": "No active watch job to cancel."}
 
 
-def _execute_get_profile_status(request: Request) -> Dict[str, Any]:
+def _execute_get_profile_status(request: Request) -> dict[str, Any]:
     """Return profile status including active profile and activation timestamps."""
     profile_manager = getattr(request.app, "profile_manager", None)
     if profile_manager is None:
@@ -846,9 +866,9 @@ def _execute_get_profile_status(request: Request) -> Dict[str, Any]:
 
 
 def _execute_get_recap(
-    arguments: Dict[str, Any],
-    allowed_cameras: List[str],
-) -> Dict[str, Any]:
+    arguments: dict[str, Any],
+    allowed_cameras: list[str],
+) -> dict[str, Any]:
     """Fetch review segments with GenAI metadata for a time period."""
     from functools import reduce
 
@@ -909,7 +929,7 @@ def _execute_get_recap(
             .iterator()
         )
 
-        events: List[Dict[str, Any]] = []
+        events: list[dict[str, Any]] = []
 
         for row in rows:
             data = row.get("data") or {}
@@ -920,7 +940,7 @@ def _execute_get_recap(
                     data = {}
 
             camera = row["camera"]
-            event: Dict[str, Any] = {
+            event: dict[str, Any] = {
                 "camera": camera.replace("_", " ").title(),
                 "severity": row.get("severity", "detection"),
             }
@@ -979,15 +999,15 @@ def _execute_get_recap(
 
         return {"events": events}
     except Exception as e:
-        logger.error("Error executing get_recap: %s", e, exc_info=True)
+        logger.exception("Error executing get_recap: %s", e)
         return {"error": "Failed to fetch recap data."}
 
 
 async def _execute_pending_tools(
-    pending_tool_calls: List[Dict[str, Any]],
+    pending_tool_calls: list[dict[str, Any]],
     request: Request,
-    allowed_cameras: List[str],
-) -> tuple[List[ToolCall], List[Dict[str, Any]], List[Dict[str, Any]]]:
+    allowed_cameras: list[str],
+) -> tuple[list[ToolCall], list[dict[str, Any]], list[dict[str, Any]]]:
     """
     Execute a list of tool calls.
 
@@ -996,9 +1016,9 @@ async def _execute_pending_tools(
          tool result dicts for conversation,
          extra messages to inject after tool results — e.g. user messages with images)
     """
-    tool_calls_out: List[ToolCall] = []
-    tool_results: List[Dict[str, Any]] = []
-    extra_messages: List[Dict[str, Any]] = []
+    tool_calls_out: list[ToolCall] = []
+    tool_results: list[dict[str, Any]] = []
+    extra_messages: list[dict[str, Any]] = []
     for tool_call in pending_tool_calls:
         tool_name = tool_call["name"]
         tool_args = tool_call.get("arguments") or {}
@@ -1072,13 +1092,12 @@ async def _execute_pending_tools(
                 }
             )
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "Error executing tool %s (id: %s): %s. Arguments: %s",
                 tool_name,
                 tool_call_id,
                 e,
                 json.dumps(tool_args),
-                exc_info=True,
             )
             error_content = json.dumps({"error": f"Tool execution failed: {str(e)}"})
             tool_calls_out.append(
@@ -1106,7 +1125,7 @@ async def _execute_pending_tools(
 async def chat_completion(
     request: Request,
     body: ChatCompletionRequest = Body(...),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """
     Chat completion endpoint with tool calling support.
@@ -1135,22 +1154,27 @@ async def chat_completion(
     tools = get_tool_definitions(
         semantic_search_enabled=semantic_search_enabled,
         attribute_classifications=attribute_classifications,
+        embeddings_language=_embeddings_language(config),
     )
     conversation = []
 
-    system_prompt = build_chat_system_prompt(
-        config=config,
-        allowed_cameras=allowed_cameras,
-        semantic_search_enabled=semantic_search_enabled,
-        attribute_classifications=attribute_classifications,
-    )
-
-    conversation.append(
-        {
-            "role": "system",
-            "content": system_prompt,
-        }
-    )
+    # Build the system message only when the client hasn't already pinned one.
+    # The first turn has no system message; we generate it (with the current
+    # timestamp) and return the whole chain so the client persists it. Later
+    # turns send it back verbatim, freezing the timestamp so the prompt prefix
+    # stays byte-identical and the model server's prompt cache keeps hitting.
+    if not body.messages or body.messages[0].role != "system":
+        conversation.append(
+            {
+                "role": "system",
+                "content": build_chat_system_prompt(
+                    config=config,
+                    allowed_cameras=allowed_cameras,
+                    semantic_search_enabled=semantic_search_enabled,
+                    attribute_classifications=attribute_classifications,
+                ),
+            }
+        )
 
     for msg in body.messages:
         msg_dict = {
@@ -1161,11 +1185,13 @@ async def chat_completion(
             msg_dict["tool_call_id"] = msg.tool_call_id
         if msg.name:
             msg_dict["name"] = msg.name
+        if msg.tool_calls is not None:
+            msg_dict["tool_calls"] = msg.tool_calls
 
         conversation.append(msg_dict)
 
     tool_iterations = 0
-    tool_calls: List[ToolCall] = []
+    tool_calls: list[ToolCall] = []
     max_iterations = body.max_tool_iterations
 
     logger.debug(
@@ -1175,11 +1201,20 @@ async def chat_completion(
 
     # True LLM streaming when client supports it and stream requested
     if body.stream and hasattr(genai_client, "chat_with_tools_stream"):
-        stream_tool_calls: List[ToolCall] = []
         stream_iterations = 0
 
         async def stream_body_llm():
-            nonlocal conversation, stream_tool_calls, stream_iterations
+            nonlocal conversation, stream_iterations
+
+            def _emit_chain(extra: list[dict[str, Any]] | None = None):
+                # Return the full conversation (including the system message) so
+                # the client persists and replays it verbatim next turn.
+                chain = conversation + (extra or [])
+                return (
+                    json.dumps({"type": "messages", "messages": chain}).encode("utf-8")
+                    + b"\n"
+                )
+
             while stream_iterations < max_iterations:
                 if await request.is_disconnected():
                     logger.debug("Client disconnected, stopping chat stream")
@@ -1244,31 +1279,33 @@ async def chat_completion(
                                 )
                                 return
                             (
-                                executed_calls,
+                                _executed_calls,
                                 tool_results,
                                 extra_msgs,
                             ) = await _execute_pending_tools(
                                 pending, request, allowed_cameras
                             )
-                            stream_tool_calls.extend(executed_calls)
                             conversation.extend(tool_results)
                             conversation.extend(extra_msgs)
-                            yield (
-                                json.dumps(
-                                    {
-                                        "type": "tool_calls",
-                                        "tool_calls": [
-                                            tc.model_dump() for tc in stream_tool_calls
-                                        ],
-                                    }
-                                ).encode("utf-8")
-                                + b"\n"
-                            )
+                            # Emit the running chain so the client can render tool
+                            # calls live and replay them verbatim next turn.
+                            yield _emit_chain()
                             break
                         else:
+                            # Streaming never appends the final assistant message
+                            # to the conversation, so add it to the chain.
+                            yield _emit_chain(
+                                extra=[
+                                    {
+                                        "role": "assistant",
+                                        "content": msg.get("content"),
+                                    }
+                                ]
+                            )
                             yield (json.dumps({"type": "done"}).encode("utf-8") + b"\n")
                             return
             else:
+                yield _emit_chain()
                 yield json.dumps({"type": "done"}).encode("utf-8") + b"\n"
 
         return StreamingResponse(
@@ -1315,19 +1352,15 @@ async def chat_completion(
                 if body.stream:
                     final_reasoning = response.get("reasoning")
 
+                    chain = list(conversation)
+
                     async def stream_body() -> Any:
-                        if tool_calls:
-                            yield (
-                                json.dumps(
-                                    {
-                                        "type": "tool_calls",
-                                        "tool_calls": [
-                                            tc.model_dump() for tc in tool_calls
-                                        ],
-                                    }
-                                ).encode("utf-8")
-                                + b"\n"
+                        yield (
+                            json.dumps({"type": "messages", "messages": chain}).encode(
+                                "utf-8"
                             )
+                            + b"\n"
+                        )
                         # Emit the full reasoning trace up front when the
                         # underlying client did not stream it
                         if final_reasoning:
@@ -1363,6 +1396,7 @@ async def chat_completion(
                         finish_reason=response.get("finish_reason", "stop"),
                         tool_iterations=tool_iterations,
                         tool_calls=tool_calls,
+                        messages=list(conversation),
                     ).model_dump(),
                 )
 
@@ -1395,11 +1429,12 @@ async def chat_completion(
                 finish_reason="length",
                 tool_iterations=tool_iterations,
                 tool_calls=tool_calls,
+                messages=list(conversation),
             ).model_dump(),
         )
 
     except Exception as e:
-        logger.error(f"Error in chat completion: {e}", exc_info=True)
+        logger.exception(f"Error in chat completion: {e}")
         return JSONResponse(
             content={
                 "error": "An error occurred while processing your request.",
@@ -1462,7 +1497,7 @@ async def start_vlm_monitor(
             username=request.headers.get("remote-user", ""),
         )
     except RuntimeError as e:
-        logger.error("Failed to start VLM watch job: %s", e, exc_info=True)
+        logger.exception("Failed to start VLM watch job: %s", e)
         return JSONResponse(
             content={"success": False, "message": "Failed to start VLM watch job."},
             status_code=409,

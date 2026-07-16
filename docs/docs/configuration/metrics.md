@@ -59,6 +59,8 @@ Metrics are available at `/api/metrics` by default. No additional Frigate config
 - `frigate_storage_used_bytes{storage=""}` - Storage used bytes
 - `frigate_storage_mount_type{mount_type="", storage=""}` - Storage mount type info
 
+These gauges report the operating system's figures for the whole filesystem (the same numbers as `df`), not Frigate's own recording footprint. For how this differs from the recordings usage shown in the UI, see [Understanding storage usage](/configuration/record#understanding-storage-usage).
+
 ### Service Metrics
 
 - `frigate_service_uptime_seconds` - Uptime in seconds

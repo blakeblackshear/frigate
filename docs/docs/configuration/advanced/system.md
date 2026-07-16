@@ -67,15 +67,21 @@ This section can be used to set environment variables for those unable to modify
 
 Variables prefixed with `FRIGATE_` can be referenced in config fields that support environment variable substitution (such as MQTT host and credentials, camera stream URLs, and ONVIF host and credentials) using the `{FRIGATE_VARIABLE_NAME}` syntax.
 
+:::note
+
+The `go2rtc` section is an exception. go2rtc runs as a separate process, so its stream definitions can only be substituted with variables that exist in the container's environment (set via Docker `-e`, the `environment:` section of `docker-compose.yml`, or Docker secrets). Variables defined in the `environment_vars` block above are not available to go2rtc streams. Home Assistant app users, who cannot set container environment variables, must instead put credentials directly in their go2rtc stream URLs.
+
+:::
+
 <ConfigTabs>
 <TabItem value="ui">
 
 Navigate to <NavPath path="Settings > System > Environment variables" /> to add or edit environment variables.
 
-| Field     | Description                                               |
-| --------- | --------------------------------------------------------- |
-| **Key**   | The environment variable name (e.g., `FRIGATE_MQTT_USER`) |
-| **Value** | The value for the variable                                |
+| Field             | Description                                               |
+| ----------------- | --------------------------------------------------------- |
+| **Variable name** | The environment variable name (e.g., `FRIGATE_MQTT_USER`) |
+| **Value**         | The value for the variable                                |
 
 Variables defined here can be referenced elsewhere in your configuration using the `{FRIGATE_VARIABLE_NAME}` syntax.
 
@@ -237,7 +243,7 @@ Frigate exposes a few networking options. IPv6 and the listen ports are set in t
 
 ### Enabling IPv6
 
-By default Frigate listens on IPv4 only. To also listen on IPv6 — on port `5000`, and on `8971` when TLS is configured — enable it in the `networking` configuration.
+By default Frigate listens on IPv4 only. To also listen on IPv6 (on port `5000`, and on `8971` when TLS is configured), enable it in the `networking` configuration.
 
 <ConfigTabs>
 <TabItem value="ui">
@@ -354,7 +360,7 @@ To do this:
 
 ### Custom go2rtc version
 
-Frigate currently includes go2rtc v1.9.13, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.14, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 

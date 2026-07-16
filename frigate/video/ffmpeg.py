@@ -6,7 +6,7 @@ import subprocess as sp
 import threading
 import time
 from collections import deque
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
@@ -24,7 +24,7 @@ from frigate.config.camera.updater import (
 )
 from frigate.const import PROCESS_PRIORITY_HIGH
 from frigate.log import LogPipe
-from frigate.util.builtin import EventsPerSecond, get_ffmpeg_arg_list
+from frigate.util.builtin import EventsPerSecond, get_record_segment_time
 from frigate.util.ffmpeg import start_or_restart_ffmpeg, stop_ffmpeg
 from frigate.util.image import (
     FrameManager,
@@ -33,23 +33,6 @@ from frigate.util.image import (
 from frigate.util.process import FrigateProcess
 
 logger = logging.getLogger(__name__)
-
-# all built-in record presets use this segment_time
-DEFAULT_RECORD_SEGMENT_TIME = 10
-
-
-def _get_record_segment_time(config: CameraConfig) -> int:
-    """Extract -segment_time from the camera's record output args."""
-    record_args = get_ffmpeg_arg_list(config.ffmpeg.output_args.record)
-
-    if record_args and record_args[0].startswith("preset"):
-        return DEFAULT_RECORD_SEGMENT_TIME
-
-    try:
-        idx = record_args.index("-segment_time")
-        return int(record_args[idx + 1])
-    except (ValueError, IndexError):
-        return DEFAULT_RECORD_SEGMENT_TIME
 
 
 def capture_frames(
@@ -185,7 +168,7 @@ class CameraWatchdog(threading.Thread):
         # `valid` segments are published with the segment's start time, so the
         # gap between consecutive publishes can reach 2 * segment_time. Pad the
         # staleness threshold so it's never tighter than that worst case.
-        segment_time = _get_record_segment_time(self.config)
+        segment_time = get_record_segment_time(self.config)
         self.record_stale_threshold = max(120, 2 * segment_time + 30)
 
         # Stall tracking (based on last processed frame)
@@ -277,7 +260,7 @@ class CameraWatchdog(threading.Thread):
             self.start_all_ffmpeg()
             # If recording is enabled at startup, set the grace period timer
             if self.config.record.enabled:
-                self.record_enable_time = datetime.now().astimezone(timezone.utc)
+                self.record_enable_time = datetime.now().astimezone(UTC)
 
         time.sleep(self.sleeptime)
         last_restart_time = datetime.now().timestamp()
@@ -297,7 +280,7 @@ class CameraWatchdog(threading.Thread):
                 self.latest_valid_segment_time = 0
                 self.latest_invalid_segment_time = 0
                 self.latest_cache_segment_time = 0
-                self.record_enable_time = datetime.now().astimezone(timezone.utc)
+                self.record_enable_time = datetime.now().astimezone(UTC)
                 last_restart_time = datetime.now().timestamp()
                 continue
 
@@ -311,7 +294,7 @@ class CameraWatchdog(threading.Thread):
                     self.latest_valid_segment_time = 0
                     self.latest_invalid_segment_time = 0
                     self.latest_cache_segment_time = 0
-                    self.record_enable_time = datetime.now().astimezone(timezone.utc)
+                    self.record_enable_time = datetime.now().astimezone(UTC)
                 else:
                     self.logger.debug(f"Disabling camera {self.config.name}")
                     self.stop_all_ffmpeg()
@@ -335,7 +318,7 @@ class CameraWatchdog(threading.Thread):
                     self.latest_valid_segment_time = 0
                     self.latest_invalid_segment_time = 0
                     self.latest_cache_segment_time = 0
-                    self.record_enable_time = datetime.now().astimezone(timezone.utc)
+                    self.record_enable_time = datetime.now().astimezone(UTC)
                     last_restart_time = datetime.now().timestamp()
                 self.was_record_enabled_in_config = record_enabled_in_config
                 continue
@@ -419,7 +402,7 @@ class CameraWatchdog(threading.Thread):
                 poll = p["process"].poll()
 
                 if self.config.record.enabled and "record" in p["roles"]:
-                    now_utc = datetime.now().astimezone(timezone.utc)
+                    now_utc = datetime.now().astimezone(UTC)
 
                     # Check if we're within the grace period after enabling recording
                     # Grace period: 90 seconds allows time for ffmpeg to start and create first segment
@@ -428,25 +411,19 @@ class CameraWatchdog(threading.Thread):
                     ) < timedelta(seconds=90)
 
                     latest_cache_dt = (
-                        datetime.fromtimestamp(
-                            self.latest_cache_segment_time, tz=timezone.utc
-                        )
+                        datetime.fromtimestamp(self.latest_cache_segment_time, tz=UTC)
                         if self.latest_cache_segment_time > 0
                         else now_utc - timedelta(seconds=1)
                     )
 
                     latest_valid_dt = (
-                        datetime.fromtimestamp(
-                            self.latest_valid_segment_time, tz=timezone.utc
-                        )
+                        datetime.fromtimestamp(self.latest_valid_segment_time, tz=UTC)
                         if self.latest_valid_segment_time > 0
                         else now_utc - timedelta(seconds=1)
                     )
 
                     latest_invalid_dt = (
-                        datetime.fromtimestamp(
-                            self.latest_invalid_segment_time, tz=timezone.utc
-                        )
+                        datetime.fromtimestamp(self.latest_invalid_segment_time, tz=UTC)
                         if self.latest_invalid_segment_time > 0
                         else now_utc - timedelta(seconds=1)
                     )

@@ -9,6 +9,8 @@ The best way to integrate with Home Assistant is to use the [official integratio
 
 ### Preparation
 
+Frigate itself must be installed and running before setting up the integration. See the [installation documentation](../frigate/installation.md) for details.
+
 The Frigate integration requires the `mqtt` integration to be installed and
 manually configured first.
 
@@ -122,7 +124,7 @@ Use `http://<frigate_device_ip>:8971` as the URL for the integration so that aut
 
 The above URL assumes you have [disabled TLS](../configuration/tls).
 By default, TLS is enabled and Frigate will be using a self-signed certificate. HomeAssistant will fail to connect HTTPS to port 8971 since it fails to verify the self-signed certificate.
-Either disable TLS and use HTTP from HomeAssistant, or configure Frigate to be acessible with a valid certificate.
+Either disable TLS and use HTTP from HomeAssistant, or configure Frigate to be accessible with a valid certificate.
 
 :::
 

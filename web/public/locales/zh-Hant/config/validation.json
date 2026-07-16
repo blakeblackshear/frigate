@@ -28,5 +28,8 @@
             "detectRequired": "必須至少有一個輸入串流分配為 'detect' 角色。",
             "hwaccelDetectOnly": "只有分配了 detect 角色的輸入串流才能定義硬體加速引數。"
         }
+    },
+    "detect": {
+        "dimensionMustBeEven": "必須是偶數。"
     }
 }

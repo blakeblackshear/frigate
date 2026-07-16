@@ -24,6 +24,9 @@
         },
         "state": {
           "submitted": "Submitted"
+        },
+        "toast": {
+          "error": "Failed to submit to Frigate+. Please check your network connection and try again."
         }
       }
     },
@@ -70,6 +73,13 @@
       "selectFromTimeline": "Select from Timeline",
       "cameraSelection": "Cameras",
       "cameraSelectionHelp": "Cameras with tracked objects in this time range are pre-selected",
+      "searchOrSelectGroup": "Search, or select a camera group...",
+      "selectAll": "Select all cameras",
+      "clearSelection": "Clear selection",
+      "selectWithActivity": "Cameras with tracked objects",
+      "selectGroup": "Select group",
+      "noMatchingCameras": "No cameras match your search",
+      "selectedCount": "{{selected}} / {{total}} selected",
       "checkingActivity": "Checking camera activity...",
       "noCameras": "No cameras available",
       "detectionCount_one": "1 tracked object",
@@ -113,7 +123,7 @@
       "error": {
         "failed": "Failed to queue export: {{error}}",
         "endTimeMustAfterStartTime": "End time must be after start time",
-        "noVaildTimeSelected": "No valid time range selected"
+        "noValidTimeSelected": "No valid time range selected"
       }
     },
     "fromTimeline": {

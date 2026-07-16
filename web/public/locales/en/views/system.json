@@ -107,12 +107,7 @@
       },
       "npuUsage": "NPU Usage",
       "npuMemory": "NPU Memory",
-      "npuTemperature": "NPU Temperature",
-      "intelGpuWarning": {
-        "title": "Intel GPU Stats Warning",
-        "message": "GPU stats unavailable",
-        "description": "This is a known bug in Intel's GPU stats reporting tools (intel_gpu_top) where it will break and repeatedly return a GPU usage of 0% even in cases where hardware acceleration and object detection are correctly running on the (i)GPU. This is not a Frigate bug. You can restart the host to temporarily fix the issue and confirm that the GPU is working correctly. This does not affect performance."
-      }
+      "npuTemperature": "NPU Temperature"
     },
     "otherProcesses": {
       "title": "Other Processes",
@@ -174,6 +169,21 @@
       "error": "Error: {{error}}",
       "tips": {
         "title": "Camera Probe Info"
+      },
+      "keyframes": {
+        "title": "Keyframe analysis",
+        "analyzing": "Analyzing keyframes... {{seconds}} seconds remaining",
+        "stillAnalyzing": "Still analyzing keyframes...",
+        "recordStream": "Record stream:",
+        "keyframeCount": "Keyframes observed:",
+        "observedDuration": "Observed duration:",
+        "gap": "Keyframe gap (min / avg / max):",
+        "segmentLength": "Recording segment length:",
+        "ok": "Keyframes every ~{{seconds}}s, good for recording and playback.",
+        "warning": "Sparse or variable keyframes (longest gap ~{{seconds}}s), likely a smart codec (H.264+/H.265+), this is not recommended.",
+        "error": "Keyframe gap (~{{seconds}}s) exceeds the recording segment length ({{segmentTime}}s). Some segments may have no keyframe, which breaks playback. Disable the smart/+ codec on the camera or shorten its keyframe interval.",
+        "unknown": "Couldn't determine keyframe spacing.",
+        "recordDisabled": "Recording is disabled for this camera."
       }
     },
     "framesAndDetections": "Frames / Detections",

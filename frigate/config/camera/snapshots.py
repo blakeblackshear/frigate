@@ -1,9 +1,6 @@
-from typing import Optional
-
 from pydantic import Field
 
 from ..base import FrigateBaseModel
-from .record import RetainModeEnum
 
 __all__ = ["SnapshotsConfig", "RetainConfig"]
 
@@ -13,11 +10,6 @@ class RetainConfig(FrigateBaseModel):
         default=10,
         title="Default retention",
         description="Default number of days to retain snapshots.",
-    )
-    mode: RetainModeEnum = Field(
-        default=RetainModeEnum.motion,
-        title="Retention mode",
-        description="Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects).",
     )
     objects: dict[str, float] = Field(
         default_factory=dict,
@@ -52,7 +44,7 @@ class SnapshotsConfig(FrigateBaseModel):
         title="Required zones",
         description="Zones an object must enter for a snapshot to be saved.",
     )
-    height: Optional[int] = Field(
+    height: int | None = Field(
         default=None,
         title="Snapshot height",
         description="Height (pixels) to resize snapshots from API to; leave empty to preserve original size.",

@@ -10,7 +10,6 @@ import random
 import string
 from functools import reduce
 from pathlib import Path
-from typing import List
 from urllib.parse import unquote
 
 import numpy as np
@@ -97,7 +96,7 @@ def _build_attribute_filter_clause(attributes: str):
 )
 def events(
     params: EventsQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     camera = params.camera
     cameras = params.cameras
@@ -171,7 +170,7 @@ def events(
     ]
 
     if camera != "all":
-        clauses.append((Event.camera == camera))
+        clauses.append(Event.camera == camera)
 
     if cameras != "all":
         requested = set(cameras.split(","))
@@ -181,11 +180,11 @@ def events(
         camera_list = list(filtered)
     else:
         camera_list = allowed_cameras
-    clauses.append((Event.camera << camera_list))
+    clauses.append(Event.camera << camera_list)
 
     if labels != "all":
         label_list = labels.split(",")
-        clauses.append((Event.label << label_list))
+        clauses.append(Event.label << label_list)
 
     if sub_labels != "all":
         # use matching so joined sub labels are included
@@ -196,24 +195,24 @@ def events(
 
         if "None" in filtered_sub_labels:
             filtered_sub_labels.remove("None")
-            sub_label_clauses.append((Event.sub_label.is_null()))
+            sub_label_clauses.append(Event.sub_label.is_null())
 
         for label in filtered_sub_labels:
             lowered = label.lower()
             sub_label_clauses.append(
-                (fn.LOWER(Event.sub_label.cast("text")) == lowered)
+                fn.LOWER(Event.sub_label.cast("text")) == lowered
             )  # include exact matches (case-insensitive)
 
             # include this label when part of a list (LIKE is case-insensitive in sqlite for ASCII)
             sub_label_clauses.append(
-                (fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*")
+                fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*"
             )
             sub_label_clauses.append(
-                (fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*")
+                fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*"
             )
 
         sub_label_clause = reduce(operator.or_, sub_label_clauses)
-        clauses.append((sub_label_clause))
+        clauses.append(sub_label_clause)
 
     if attributes != "all":
         # Custom classification results are stored as data[model_name] = result_value
@@ -257,19 +256,19 @@ def events(
 
         if "None" in filtered_zones:
             filtered_zones.remove("None")
-            zone_clauses.append((Event.zones.length() == 0))
+            zone_clauses.append(Event.zones.length() == 0)
 
         for zone in filtered_zones:
-            zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+            zone_clauses.append(Event.zones.cast("text") % f'*"{zone}"*')
 
         zone_clause = reduce(operator.or_, zone_clauses)
-        clauses.append((zone_clause))
+        clauses.append(zone_clause)
 
     if after:
-        clauses.append((Event.start_time > after))
+        clauses.append(Event.start_time > after)
 
     if before:
-        clauses.append((Event.start_time < before))
+        clauses.append(Event.start_time < before)
 
     if time_range != DEFAULT_TIME_RANGE:
         # get timezone arg to ensure browser times are used
@@ -289,62 +288,60 @@ def events(
         # should use or operator
         if time_after > time_before:
             clauses.append(
-                (
-                    reduce(
-                        operator.or_,
-                        [(start_hour_fun > time_after), (start_hour_fun < time_before)],
-                    )
+                reduce(
+                    operator.or_,
+                    [(start_hour_fun > time_after), (start_hour_fun < time_before)],
                 )
             )
         # all other cases should be and operator
         else:
-            clauses.append((start_hour_fun > time_after))
-            clauses.append((start_hour_fun < time_before))
+            clauses.append(start_hour_fun > time_after)
+            clauses.append(start_hour_fun < time_before)
 
     if has_clip is not None:
-        clauses.append((Event.has_clip == has_clip))
+        clauses.append(Event.has_clip == has_clip)
 
     if has_snapshot is not None:
-        clauses.append((Event.has_snapshot == has_snapshot))
+        clauses.append(Event.has_snapshot == has_snapshot)
 
     if in_progress is not None:
-        clauses.append((Event.end_time.is_null(in_progress)))
+        clauses.append(Event.end_time.is_null(in_progress))
 
     if include_thumbnails:
         selected_columns.append(Event.thumbnail)
 
     if favorites:
-        clauses.append((Event.retain_indefinitely == favorites))
+        clauses.append(Event.retain_indefinitely == favorites)
 
     if max_score is not None:
-        clauses.append((Event.data["score"] <= max_score))
+        clauses.append(Event.data["score"] <= max_score)
 
     if min_score is not None:
-        clauses.append((Event.data["score"] >= min_score))
+        clauses.append(Event.data["score"] >= min_score)
 
     if max_speed is not None:
-        clauses.append((Event.data["average_estimated_speed"] <= max_speed))
+        clauses.append(Event.data["average_estimated_speed"] <= max_speed)
 
     if min_speed is not None:
-        clauses.append((Event.data["average_estimated_speed"] >= min_speed))
+        clauses.append(Event.data["average_estimated_speed"] >= min_speed)
 
     if min_length is not None:
-        clauses.append(((Event.end_time - Event.start_time) >= min_length))
+        clauses.append((Event.end_time - Event.start_time) >= min_length)
 
     if max_length is not None:
-        clauses.append(((Event.end_time - Event.start_time) <= max_length))
+        clauses.append((Event.end_time - Event.start_time) <= max_length)
 
     if is_submitted is not None:
         if is_submitted == 0:
-            clauses.append((Event.plus_id.is_null()))
+            clauses.append(Event.plus_id.is_null())
         elif is_submitted > 0:
-            clauses.append((Event.plus_id != ""))
+            clauses.append(Event.plus_id != "")
 
     if event_id is not None:
-        clauses.append((Event.id == event_id))
+        clauses.append(Event.id == event_id)
 
     if len(clauses) == 0:
-        clauses.append((True))
+        clauses.append(True)
 
     if sort:
         if sort == "score_asc":
@@ -387,7 +384,7 @@ def events(
 )
 def events_explore(
     limit: int = 10,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     # get distinct labels for all events
     distinct_labels = (
@@ -515,7 +512,7 @@ async def event_ids(ids: str, request: Request):
 def events_search(
     request: Request,
     params: EventsSearchQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     query = params.query
     search_type = params.search_type
@@ -595,12 +592,12 @@ def events_search(
         filtered = requested.intersection(allowed_cameras)
         if not filtered:
             return JSONResponse(content=[])
-        event_filters.append((Event.camera << list(filtered)))
+        event_filters.append(Event.camera << list(filtered))
     else:
-        event_filters.append((Event.camera << allowed_cameras))
+        event_filters.append(Event.camera << allowed_cameras)
 
     if labels != "all":
-        event_filters.append((Event.label << labels.split(",")))
+        event_filters.append(Event.label << labels.split(","))
 
     if sub_labels != "all":
         # use matching so joined sub labels are included
@@ -611,23 +608,23 @@ def events_search(
 
         if "None" in filtered_sub_labels:
             filtered_sub_labels.remove("None")
-            sub_label_clauses.append((Event.sub_label.is_null()))
+            sub_label_clauses.append(Event.sub_label.is_null())
 
         for label in filtered_sub_labels:
             lowered = label.lower()
             sub_label_clauses.append(
-                (fn.LOWER(Event.sub_label.cast("text")) == lowered)
+                fn.LOWER(Event.sub_label.cast("text")) == lowered
             )  # include exact matches (case-insensitive)
 
             # include this label when part of a list (LIKE is case-insensitive in sqlite for ASCII)
             sub_label_clauses.append(
-                (fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*")
+                fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*"
             )
             sub_label_clauses.append(
-                (fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*")
+                fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*"
             )
 
-        event_filters.append((reduce(operator.or_, sub_label_clauses)))
+        event_filters.append(reduce(operator.or_, sub_label_clauses))
 
     if attributes != "all":
         # Custom classification results are stored as data[model_name] = result_value
@@ -641,12 +638,12 @@ def events_search(
 
         if "None" in filtered_zones:
             filtered_zones.remove("None")
-            zone_clauses.append((Event.zones.length() == 0))
+            zone_clauses.append(Event.zones.length() == 0)
 
         for zone in filtered_zones:
-            zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+            zone_clauses.append(Event.zones.cast("text") % f'*"{zone}"*')
 
-        event_filters.append((reduce(operator.or_, zone_clauses)))
+        event_filters.append(reduce(operator.or_, zone_clauses))
 
     if recognized_license_plate != "all":
         filtered_recognized_license_plates = recognized_license_plate.split(",")
@@ -674,43 +671,43 @@ def events_search(
             )
 
         recognized_license_plate_clause = reduce(operator.or_, clauses_for_plates)
-        event_filters.append((recognized_license_plate_clause))
+        event_filters.append(recognized_license_plate_clause)
 
     if after:
-        event_filters.append((Event.start_time > after))
+        event_filters.append(Event.start_time > after)
 
     if before:
-        event_filters.append((Event.start_time < before))
+        event_filters.append(Event.start_time < before)
 
     if has_clip is not None:
-        event_filters.append((Event.has_clip == has_clip))
+        event_filters.append(Event.has_clip == has_clip)
 
     if has_snapshot is not None:
-        event_filters.append((Event.has_snapshot == has_snapshot))
+        event_filters.append(Event.has_snapshot == has_snapshot)
 
     if is_submitted is not None:
         if is_submitted == 0:
-            event_filters.append((Event.plus_id.is_null()))
+            event_filters.append(Event.plus_id.is_null())
         elif is_submitted > 0:
-            event_filters.append((Event.plus_id != ""))
+            event_filters.append(Event.plus_id != "")
 
     if min_score is not None and max_score is not None:
-        event_filters.append((Event.data["score"].between(min_score, max_score)))
+        event_filters.append(Event.data["score"].between(min_score, max_score))
     else:
         if min_score is not None:
-            event_filters.append((Event.data["score"] >= min_score))
+            event_filters.append(Event.data["score"] >= min_score)
         if max_score is not None:
-            event_filters.append((Event.data["score"] <= max_score))
+            event_filters.append(Event.data["score"] <= max_score)
 
     if min_speed is not None and max_speed is not None:
         event_filters.append(
-            (Event.data["average_estimated_speed"].between(min_speed, max_speed))
+            Event.data["average_estimated_speed"].between(min_speed, max_speed)
         )
     else:
         if min_speed is not None:
-            event_filters.append((Event.data["average_estimated_speed"] >= min_speed))
+            event_filters.append(Event.data["average_estimated_speed"] >= min_speed)
         if max_speed is not None:
-            event_filters.append((Event.data["average_estimated_speed"] <= max_speed))
+            event_filters.append(Event.data["average_estimated_speed"] <= max_speed)
 
     if time_range != DEFAULT_TIME_RANGE:
         tz_name = params.timezone
@@ -728,17 +725,15 @@ def events_search(
         # should use or operator
         if time_after > time_before:
             event_filters.append(
-                (
-                    reduce(
-                        operator.or_,
-                        [(start_hour_fun > time_after), (start_hour_fun < time_before)],
-                    )
+                reduce(
+                    operator.or_,
+                    [(start_hour_fun > time_after), (start_hour_fun < time_before)],
                 )
             )
         # all other cases should be and operator
         else:
-            event_filters.append((start_hour_fun > time_after))
-            event_filters.append((start_hour_fun < time_before))
+            event_filters.append(start_hour_fun > time_after)
+            event_filters.append(start_hour_fun < time_before)
 
     # Perform semantic search
     search_results = {}
@@ -894,7 +889,7 @@ def events_search(
 @router.get("/events/summary", dependencies=[Depends(allow_any_authenticated())])
 def events_summary(
     params: EventsSummaryQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     tz_name = params.timezone
     has_clip = params.has_clip
@@ -903,13 +898,13 @@ def events_summary(
     clauses = []
 
     if has_clip is not None:
-        clauses.append((Event.has_clip == has_clip))
+        clauses.append(Event.has_clip == has_clip)
 
     if has_snapshot is not None:
-        clauses.append((Event.has_snapshot == has_snapshot))
+        clauses.append(Event.has_snapshot == has_snapshot)
 
     if len(clauses) == 0:
-        clauses.append((True))
+        clauses.append(True)
 
     time_range_query = (
         Event.select(

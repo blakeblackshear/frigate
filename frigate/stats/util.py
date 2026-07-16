@@ -7,7 +7,7 @@ import shutil
 import time
 from json import JSONDecodeError
 from multiprocessing.managers import DictProxy
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from requests.exceptions import RequestException
@@ -78,7 +78,7 @@ def stats_init(
     return stats_tracking
 
 
-def read_temperature(path: str) -> Optional[float]:
+def read_temperature(path: str) -> float | None:
     if os.path.isfile(path):
         with open(path) as f:
             line = f.readline().strip()
@@ -106,7 +106,7 @@ def get_temperatures() -> dict[str, float]:
 def get_detector_temperature(
     detector_type: str,
     detector_index_by_type: dict[str, int],
-) -> Optional[float]:
+) -> float | None:
     """Get temperature for a specific detector based on its type."""
     if detector_type == "edgetpu":
         # Get temperatures for all attached Corals

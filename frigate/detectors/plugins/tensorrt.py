@@ -14,8 +14,9 @@ try:
 except ModuleNotFoundError:
     TRT_SUPPORT = False
 
+from typing import Literal
+
 from pydantic import ConfigDict, Field
-from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
@@ -58,7 +59,7 @@ class TensorRTDetectorConfig(BaseDetectorConfig):
     )
 
 
-class HostDeviceMem(object):
+class HostDeviceMem:
     """Simple helper data class that's a little nicer to use than a 2-tuple."""
 
     def __init__(self, host_mem, device_mem, nbytes, size):

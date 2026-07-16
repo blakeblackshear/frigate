@@ -10,7 +10,7 @@ import random
 import re
 import string
 from pathlib import Path
-from typing import Any, List, Tuple
+from typing import Any
 
 import cv2
 import numpy as np
@@ -86,13 +86,15 @@ class LicensePlateProcessingMixin:
         self.similarity_threshold = 0.8
         self.cluster_threshold = 0.85
 
-    def _detect(self, image: np.ndarray) -> List[np.ndarray]:
+    def _detect(self, image: np.ndarray, debug_frame_id: int) -> list[np.ndarray]:
         """
         Detect possible areas of text in the input image by first resizing and normalizing it,
         running a detection model, and filtering out low-probability regions.
 
         Args:
             image (np.ndarray): The input image in which license plates will be detected.
+            debug_frame_id (int): Shared id used to name debug images so all artifacts
+                from a single LPR pass share the same filename suffix.
 
         Returns:
             List[np.ndarray]: A list of bounding box coordinates representing detected license plates.
@@ -106,9 +108,8 @@ class LicensePlateProcessingMixin:
         normalized_image = self._normalize_image(resized_image)
 
         if WRITE_DEBUG_IMAGES:
-            current_time = int(datetime.datetime.now().timestamp())
             cv2.imwrite(
-                f"debug/frames/license_plate_resized_{current_time}.jpg",
+                f"debug/frames/license_plate_resized_{debug_frame_id}.jpg",
                 resized_image,
             )
 
@@ -131,8 +132,8 @@ class LicensePlateProcessingMixin:
         return self._filter_polygon(boxes, (h, w))  # type: ignore[return-value,arg-type]
 
     def _classify(
-        self, images: List[np.ndarray]
-    ) -> Tuple[List[np.ndarray], List[Tuple[str, float]]] | None:
+        self, images: list[np.ndarray]
+    ) -> tuple[list[np.ndarray], list[tuple[str, float]]] | None:
         """
         Classify the orientation or category of each detected license plate.
 
@@ -162,8 +163,8 @@ class LicensePlateProcessingMixin:
         return self._process_classification_output(images, outputs)
 
     def _recognize(
-        self, camera: str, images: List[np.ndarray]
-    ) -> Tuple[List[str], List[List[float]]]:
+        self, camera: str, images: list[np.ndarray]
+    ) -> tuple[list[str], list[list[float]]]:
         """
         Recognize the characters on the detected license plates using the recognition model.
 
@@ -203,8 +204,8 @@ class LicensePlateProcessingMixin:
         return self.ctc_decoder(outputs)
 
     def _process_license_plate(
-        self, camera: str, id: str, image: np.ndarray
-    ) -> Tuple[List[str], List[List[float]], List[int]]:
+        self, camera: str, id: str, image: np.ndarray, debug_frame_id: int
+    ) -> tuple[list[str], list[list[float]], list[int]]:
         """
         Complete pipeline for detecting, classifying, and recognizing license plates in the input image.
         Combines multi-line plates into a single plate string, grouping boxes by vertical alignment and ordering top to bottom,
@@ -214,6 +215,8 @@ class LicensePlateProcessingMixin:
             camera (str): Camera identifier.
             id (str): Event identifier.
             image (np.ndarray): The input image in which to detect, classify, and recognize license plates.
+            debug_frame_id (int): Shared id used to name debug images so all artifacts
+                from a single LPR pass share the same filename suffix.
 
         Returns:
             Tuple[List[str], List[List[float]], List[int]]: Detected license plate texts, character-level confidence scores for each plate (flattened into a single list per plate), and areas of the plates.
@@ -227,7 +230,7 @@ class LicensePlateProcessingMixin:
             logger.debug("Model runners not loaded")
             return [], [], []
 
-        boxes = self._detect(image)
+        boxes = self._detect(image, debug_frame_id)
         if len(boxes) == 0:
             logger.debug(f"{camera}: No boxes found by OCR detector model")
             return [], [], []
@@ -243,7 +246,6 @@ class LicensePlateProcessingMixin:
             boxes, plate_width=plate_width, gap_fraction=0.1
         )
 
-        current_time = int(datetime.datetime.now().timestamp())
         if WRITE_DEBUG_IMAGES:
             debug_image = image.copy()
             for box in boxes:
@@ -259,7 +261,7 @@ class LicensePlateProcessingMixin:
                 )
 
             cv2.imwrite(
-                f"debug/frames/license_plate_boxes_{current_time}.jpg", debug_image
+                f"debug/frames/license_plate_boxes_{debug_frame_id}.jpg", debug_image
             )
 
         boxes = self._sort_boxes(list(boxes))
@@ -322,7 +324,7 @@ class LicensePlateProcessingMixin:
             if WRITE_DEBUG_IMAGES:
                 for i, img in enumerate(group_plate_images):
                     cv2.imwrite(
-                        f"debug/frames/license_plate_cropped_{current_time}_{group_indices[i] + 1}.jpg",
+                        f"debug/frames/license_plate_cropped_{debug_frame_id}_{group_indices[i] + 1}.jpg",
                         img,
                     )
 
@@ -335,7 +337,7 @@ class LicensePlateProcessingMixin:
                     cv2.imwrite(
                         os.path.join(
                             CLIPS_DIR,
-                            f"lpr/{camera}/{id}/{current_time}_{group_indices[i] + 1}.jpg",
+                            f"lpr/{camera}/{id}/{debug_frame_id}_{group_indices[i] + 1}.jpg",
                         ),
                         img,
                     )
@@ -467,11 +469,11 @@ class LicensePlateProcessingMixin:
 
     def _merge_nearby_boxes(
         self,
-        boxes: List[np.ndarray],
+        boxes: list[np.ndarray],
         plate_width: float,
         gap_fraction: float = 0.1,
         min_overlap_fraction: float = -0.2,
-    ) -> List[np.ndarray]:
+    ) -> list[np.ndarray]:
         """
         Merge bounding boxes that are likely part of the same license plate based on proximity,
         with a dynamic max_gap based on the provided width of the entire license plate.
@@ -553,7 +555,7 @@ class LicensePlateProcessingMixin:
 
     def _boxes_from_bitmap(
         self, output: np.ndarray, mask: np.ndarray, dest_width: int, dest_height: int
-    ) -> Tuple[np.ndarray, List[float]]:
+    ) -> tuple[np.ndarray, list[float]]:
         """
         Process the binary mask to extract bounding boxes and associated confidence scores.
 
@@ -618,7 +620,7 @@ class LicensePlateProcessingMixin:
         return np.array(boxes, dtype="int32"), scores
 
     @staticmethod
-    def _get_min_boxes(contour: np.ndarray) -> Tuple[List[Tuple[float, float]], float]:
+    def _get_min_boxes(contour: np.ndarray) -> tuple[list[tuple[float, float]], float]:
         """
         Calculate the minimum bounding box (rotated rectangle) for a given contour.
 
@@ -657,7 +659,7 @@ class LicensePlateProcessingMixin:
         return cv2.mean(bitmap[y1 : y2 + 1, x1 : x2 + 1], mask)[0]
 
     @staticmethod
-    def _expand_box(points: List[Tuple[float, float]]) -> np.ndarray:
+    def _expand_box(points: list[tuple[float, float]]) -> np.ndarray:
         """
         Expand a polygonal shape slightly by a factor determined by the area-to-perimeter ratio.
 
@@ -675,7 +677,7 @@ class LicensePlateProcessingMixin:
         return expanded
 
     def _filter_polygon(
-        self, points: List[np.ndarray], shape: Tuple[int, int]
+        self, points: list[np.ndarray], shape: tuple[int, int]
     ) -> np.ndarray:
         """
         Filter a set of polygons to include only valid ones that fit within an image shape
@@ -837,8 +839,8 @@ class LicensePlateProcessingMixin:
         return padded_image
 
     def _process_classification_output(
-        self, images: List[np.ndarray], outputs: List[np.ndarray]
-    ) -> Tuple[List[np.ndarray], List[Tuple[str, float]]]:
+        self, images: list[np.ndarray], outputs: list[np.ndarray]
+    ) -> tuple[list[np.ndarray], list[tuple[str, float]]]:
         """
         Process the classification model output by matching labels with confidence scores.
 
@@ -1093,8 +1095,8 @@ class LicensePlateProcessingMixin:
             return None  # No detection above the threshold
 
     def _get_cluster_rep(
-        self, plates: List[dict]
-    ) -> Tuple[str, float, List[float], int]:
+        self, plates: list[dict]
+    ) -> tuple[str, float, list[float], int]:
         """
         Cluster plate variants and select the representative from the best cluster.
         """
@@ -1199,6 +1201,7 @@ class LicensePlateProcessingMixin:
         self.metrics.yolov9_lpr_pps.value = self.plates_det_second.eps()
         camera = obj_data if dedicated_lpr else obj_data["camera"]
         current_time = int(datetime.datetime.now().timestamp())
+        debug_frame_id = int(datetime.datetime.now().timestamp() * 1000)
 
         if not self.config.cameras[camera].lpr.enabled:
             return
@@ -1214,7 +1217,7 @@ class LicensePlateProcessingMixin:
 
             if WRITE_DEBUG_IMAGES:
                 cv2.imwrite(
-                    f"debug/frames/dedicated_lpr_masked_{current_time}.jpg",
+                    f"debug/frames/dedicated_lpr_masked_{debug_frame_id}.jpg",
                     rgb,
                 )
 
@@ -1326,7 +1329,7 @@ class LicensePlateProcessingMixin:
 
                 if WRITE_DEBUG_IMAGES:
                     cv2.imwrite(
-                        f"debug/frames/car_frame_{current_time}.jpg",
+                        f"debug/frames/car_frame_{debug_frame_id}.jpg",
                         car,
                     )
 
@@ -1454,7 +1457,7 @@ class LicensePlateProcessingMixin:
 
             if WRITE_DEBUG_IMAGES:
                 cv2.imwrite(
-                    f"debug/frames/license_plate_frame_{current_time}.jpg",
+                    f"debug/frames/license_plate_frame_{debug_frame_id}.jpg",
                     license_plate_frame,
                 )
 
@@ -1464,7 +1467,7 @@ class LicensePlateProcessingMixin:
         # run detection, returns results sorted by confidence, best first
         start = datetime.datetime.now().timestamp()
         license_plates, confidences, areas = self._process_license_plate(
-            camera, id, license_plate_frame
+            camera, id, license_plate_frame, debug_frame_id
         )
         self.plates_rec_second.update()
         self.plate_rec_speed.update(datetime.datetime.now().timestamp() - start)
@@ -1701,7 +1704,7 @@ class CTCDecoder:
         """
         self.characters = []
         if character_dict_path and os.path.exists(character_dict_path):
-            with open(character_dict_path, "r", encoding="utf-8") as f:
+            with open(character_dict_path, encoding="utf-8") as f:
                 self.characters = (
                     ["blank"] + [line.strip() for line in f if line.strip()] + [" "]
                 )
@@ -1809,8 +1812,8 @@ class CTCDecoder:
         self.char_map = {i: char for i, char in enumerate(self.characters)}
 
     def __call__(
-        self, outputs: List[np.ndarray]
-    ) -> Tuple[List[str], List[List[float]]]:
+        self, outputs: list[np.ndarray]
+    ) -> tuple[list[str], list[list[float]]]:
         """
         Decode a batch of model outputs into character sequences and their confidence scores.
 

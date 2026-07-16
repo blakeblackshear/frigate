@@ -208,7 +208,12 @@ export default function CameraManagementView({
             !config.cameras[camera].enabled_in_config &&
             !isReplayCamera(camera),
         )
-        .sort();
+        .sort((a, b) => {
+          const orderA = config.cameras[a].ui?.order ?? 0;
+          const orderB = config.cameras[b].ui?.order ?? 0;
+          if (orderA !== orderB) return orderA - orderB;
+          return a.localeCompare(b);
+        });
     }
     return [];
   }, [config]);
@@ -217,7 +222,12 @@ export default function CameraManagementView({
     if (config) {
       return Object.keys(config.cameras)
         .filter((camera) => !isReplayCamera(camera))
-        .sort();
+        .sort((a, b) => {
+          const orderA = config.cameras[a].ui?.order ?? 0;
+          const orderB = config.cameras[b].ui?.order ?? 0;
+          if (orderA !== orderB) return orderA - orderB;
+          return a.localeCompare(b);
+        });
     }
     return [];
   }, [config]);

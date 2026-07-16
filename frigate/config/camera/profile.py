@@ -1,7 +1,5 @@
 """Camera profile configuration for named config overrides."""
 
-from typing import Optional
-
 from ..base import FrigateBaseModel
 from ..classification import (
     CameraFaceRecognitionConfig,
@@ -29,16 +27,16 @@ class CameraProfileConfig(FrigateBaseModel):
     explicitly-set fields are used as overrides via exclude_unset.
     """
 
-    enabled: Optional[bool] = None
-    audio: Optional[AudioConfig] = None
-    birdseye: Optional[BirdseyeCameraConfig] = None
-    detect: Optional[DetectConfig] = None
-    face_recognition: Optional[CameraFaceRecognitionConfig] = None
-    lpr: Optional[CameraLicensePlateRecognitionConfig] = None
-    motion: Optional[MotionConfig] = None
-    notifications: Optional[NotificationConfig] = None
-    objects: Optional[ObjectConfig] = None
-    record: Optional[RecordConfig] = None
-    review: Optional[ReviewConfig] = None
-    snapshots: Optional[SnapshotsConfig] = None
-    zones: Optional[dict[str, ZoneConfig]] = None
+    enabled: bool | None = None
+    audio: AudioConfig | None = None
+    birdseye: BirdseyeCameraConfig | None = None
+    detect: DetectConfig | None = None
+    face_recognition: CameraFaceRecognitionConfig | None = None
+    lpr: CameraLicensePlateRecognitionConfig | None = None
+    motion: MotionConfig | None = None
+    notifications: NotificationConfig | None = None
+    objects: ObjectConfig | None = None
+    record: RecordConfig | None = None
+    review: ReviewConfig | None = None
+    snapshots: SnapshotsConfig | None = None
+    zones: dict[str, ZoneConfig] | None = None

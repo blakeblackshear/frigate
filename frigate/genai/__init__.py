@@ -5,7 +5,9 @@ import json
 import logging
 import os
 import re
-from typing import Any, AsyncGenerator, Callable, Optional
+import time
+from collections.abc import AsyncGenerator, Callable
+from typing import Any
 
 import numpy as np
 from pydantic import ValidationError
@@ -50,6 +52,10 @@ def register_genai_provider(key: GenAIProviderEnum) -> Callable:
 class GenAIClient:
     """Generative AI client for Frigate."""
 
+    # Minimum seconds between re-initialization attempts when the provider was
+    # offline at startup
+    REINIT_INTERVAL = 60.0
+
     def __init__(
         self,
         genai_config: GenAIConfig,
@@ -60,6 +66,34 @@ class GenAIClient:
         self.timeout = timeout
         self.validate_model = validate_model
         self.provider = self._init_provider()
+        self._last_init_attempt = time.monotonic()
+
+    def ensure_provider(self) -> bool:
+        """Ensure a provider is available, retrying initialization if needed.
+
+        Providers can fail to initialize at startup when their backing service
+        isn't online yet (common when both are started together). This retries
+        ``_init_provider`` lazily — throttled to ``REINIT_INTERVAL`` — so the
+        client recovers on its own once the service is reachable, without a
+        config reload.
+
+        Returns True if a provider is available.
+        """
+        if self.provider is not None:
+            return True
+
+        now = time.monotonic()
+        if now - self._last_init_attempt < self.REINIT_INTERVAL:
+            return False
+
+        self._last_init_attempt = now
+        self.provider = self._init_provider()
+        if self.provider is not None:
+            logger.info(
+                "GenAI provider %s is now available",
+                self.genai_config.provider,
+            )
+        return self.provider is not None
 
     def generate_review_description(
         self,
@@ -202,7 +236,7 @@ class GenAIClient:
         camera_config: CameraConfig,
         thumbnails: list[bytes],
         event: Event,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Generate a description for the frame."""
         try:
             prompt = build_object_description_prompt(camera_config, event)
@@ -221,9 +255,9 @@ class GenAIClient:
         self,
         prompt: str,
         images: list[bytes],
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
         enable_thinking: bool = False,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Submit a request to the provider.
 
         ``enable_thinking`` is honored only by providers that report
@@ -245,6 +279,11 @@ class GenAIClient:
     @property
     def supports_toggleable_thinking(self) -> bool:
         """Whether the configured model exposes a per-request thinking toggle."""
+        return False
+
+    @property
+    def supports_embeddings(self) -> bool:
+        """Whether the configured model can generate embeddings via embed()."""
         return False
 
     def list_models(self) -> list[str]:
@@ -288,9 +327,9 @@ class GenAIClient:
     def chat_with_tools(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> dict[str, Any]:
         """
         Send chat messages to LLM with optional tool definitions.
@@ -362,9 +401,9 @@ class GenAIClient:
     async def chat_with_tools_stream(
         self,
         messages: list[dict[str, Any]],
-        tools: Optional[list[dict[str, Any]]] = None,
-        tool_choice: Optional[str] = "auto",
-        enable_thinking: Optional[bool] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | None = "auto",
+        enable_thinking: bool | None = None,
     ) -> AsyncGenerator[tuple[str, Any], None]:
         """Streaming counterpart to `chat_with_tools`.
 

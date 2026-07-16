@@ -44,7 +44,7 @@
         },
         "listen": {
             "label": "监听类型",
-            "description": "要检测的音频事件类型列表（例如：bark、fire_alarm、scream、speech、yell）。"
+            "description": "要检测的音频事件类型列表（例如：bark、fire_alarm、speech、yell）。"
         },
         "filters": {
             "label": "音频过滤器",
@@ -292,7 +292,7 @@
         "description": "FFmpeg 编解码相关设置，包含可执行文件路径、命令行参数、硬件加速选项，以及按不同功能划分的输出参数。",
         "path": {
             "label": "FFmpeg 路径",
-            "description": "要使用的 FFmpeg 可执行文件路径，或版本别名（如 \"5.0\" 或 \"7.0\"）。"
+            "description": "要使用的 FFmpeg 可执行文件路径，或版本别名（如 \"7.0\" 或 \"8.0\"）。"
         },
         "global_args": {
             "label": "FFmpeg 全局参数",
@@ -1778,6 +1778,9 @@
             "max_concurrent": {
                 "label": "最大并发导出数",
                 "description": "同时可处理的最大导出任务数量。"
+            },
+            "chapters": {
+                "label": "导出的录制中嵌入元数据"
             }
         },
         "preview": {

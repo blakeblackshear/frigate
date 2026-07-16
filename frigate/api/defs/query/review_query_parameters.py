@@ -1,5 +1,3 @@
-from typing import Union
-
 from pydantic import BaseModel
 from pydantic.json_schema import SkipJsonSchema
 
@@ -10,11 +8,11 @@ class ReviewQueryParams(BaseModel):
     cameras: str = "all"
     labels: str = "all"
     zones: str = "all"
-    reviewed: Union[int, SkipJsonSchema[None]] = None
-    limit: Union[int, SkipJsonSchema[None]] = None
-    severity: Union[SeverityEnum, SkipJsonSchema[None]] = None
-    before: Union[float, SkipJsonSchema[None]] = None
-    after: Union[float, SkipJsonSchema[None]] = None
+    reviewed: int | SkipJsonSchema[None] = None
+    limit: int | SkipJsonSchema[None] = None
+    severity: SeverityEnum | SkipJsonSchema[None] = None
+    before: float | SkipJsonSchema[None] = None
+    after: float | SkipJsonSchema[None] = None
 
 
 class ReviewSummaryQueryParams(BaseModel):
@@ -26,6 +24,6 @@ class ReviewSummaryQueryParams(BaseModel):
 
 class ReviewActivityMotionQueryParams(BaseModel):
     cameras: str = "all"
-    before: Union[float, SkipJsonSchema[None]] = None
-    after: Union[float, SkipJsonSchema[None]] = None
+    before: float | SkipJsonSchema[None] = None
+    after: float | SkipJsonSchema[None] = None
     scale: int = 30

@@ -18,7 +18,7 @@ Zones cannot have the same name as a camera. If desired, a single zone can inclu
 
 Zones can be toggled on or off without removing them from the configuration. Disabled zones are completely ignored at runtime - objects will not be tracked for zone presence, and zones will not appear in the debug view. This is useful for temporarily disabling a zone during certain seasons or times of day without modifying the configuration.
 
-During testing, enable the Zones option for the Debug view of your camera (Settings --> Debug) so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
+During testing, enable the Zones option for the [Debug view](/usage/live#the-single-camera-view) of your camera so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
 
 ## Creating a Zone
 
@@ -61,7 +61,7 @@ Navigate to <NavPath path="Settings > Camera configuration > Review" />.
 
 | Field                              | Description                                                                               |
 | ---------------------------------- | ----------------------------------------------------------------------------------------- |
-| **Alerts config > Required zones** | Zones that an object must enter to be considered an alert; leave empty to allow any zone. |
+| **Alerts config > Required zones** | Set to `entire_yard` so an object must enter that zone to be considered an alert; leave empty to allow alerts anywhere in the frame. |
 
 </TabItem>
 <TabItem value="yaml">
@@ -82,7 +82,7 @@ cameras:
 </TabItem>
 </ConfigTabs>
 
-You may also want to filter detections to only be created when an object enters a secondary area of interest. For example, to trigger alerts when an object enters the inner area of the yard but detections when an object enters the edge of the yard:
+You may also want to filter detections to only be created when an object enters a secondary area of interest. For example, to trigger alerts when an object enters the inner area of the yard (an `inner_yard` zone) but detections when an object enters the edge of the yard (an `edge_yard` zone):
 
 <ConfigTabs>
 <TabItem value="ui">
@@ -91,8 +91,8 @@ Navigate to <NavPath path="Settings > Camera configuration > Review" />.
 
 | Field                                  | Description                                                                                  |
 | -------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **Alerts config > Required zones**     | Zones that an object must enter to be considered an alert; leave empty to allow any zone.    |
-| **Detections config > Required zones** | Zones that an object must enter to be considered a detection; leave empty to allow any zone. |
+| **Alerts config > Required zones**     | Set to `inner_yard` so an object must enter that zone to be considered an alert; leave empty to allow alerts anywhere in the frame.       |
+| **Detections config > Required zones** | Set to `edge_yard` so an object must enter that zone to be considered a detection; leave empty to allow detections anywhere in the frame. |
 
 </TabItem>
 <TabItem value="yaml">
@@ -121,7 +121,7 @@ cameras:
 
 ### Restricting snapshots to specific zones
 
-To only save snapshots when an object enters a specific zone:
+To only save snapshots when an object enters a specific zone, for example an `entire_yard` zone:
 
 <ConfigTabs>
 <TabItem value="ui">

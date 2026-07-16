@@ -3,9 +3,9 @@ import logging
 import threading
 import time
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Callable
 
 from frigate.object_detection.base import ObjectDetectProcess
 from frigate.util.process import FrigateProcess

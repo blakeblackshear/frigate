@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import Field
 
 from frigate.const import AUDIO_MIN_CONFIDENCE
@@ -9,7 +7,7 @@ from ..base import FrigateBaseModel
 __all__ = ["AudioConfig", "AudioFilterConfig"]
 
 
-DEFAULT_LISTEN_AUDIO = ["bark", "fire_alarm", "scream", "speech", "yell"]
+DEFAULT_LISTEN_AUDIO = ["bark", "fire_alarm", "speech", "yell"]
 
 
 class AudioFilterConfig(FrigateBaseModel):
@@ -41,14 +39,14 @@ class AudioConfig(FrigateBaseModel):
     listen: list[str] = Field(
         default=DEFAULT_LISTEN_AUDIO,
         title="Listen types",
-        description="List of audio event types to detect (for example: bark, fire_alarm, scream, speech, yell).",
+        description="List of audio event types to detect (for example: bark, fire_alarm, speech, yell).",
     )
-    filters: Optional[dict[str, AudioFilterConfig]] = Field(
+    filters: dict[str, AudioFilterConfig] | None = Field(
         None,
         title="Audio filters",
         description="Per-audio-type filter settings such as confidence thresholds used to reduce false positives.",
     )
-    enabled_in_config: Optional[bool] = Field(
+    enabled_in_config: bool | None = Field(
         None,
         title="Original audio state",
         description="Indicates whether audio detection was originally enabled in the static config file.",

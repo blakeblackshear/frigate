@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -8,7 +6,7 @@ class ExportCaseModel(BaseModel):
 
     id: str = Field(description="Unique identifier for the export case")
     name: str = Field(description="Friendly name of the export case")
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None, description="Optional description of the export case"
     )
     created_at: float = Field(
@@ -19,4 +17,4 @@ class ExportCaseModel(BaseModel):
     )
 
 
-ExportCasesResponse = List[ExportCaseModel]
+ExportCasesResponse = list[ExportCaseModel]
