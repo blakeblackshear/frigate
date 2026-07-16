@@ -91,6 +91,7 @@ export default function BirdseyeCameraReorder({
     try {
       await axios.put("config/set", {
         requires_restart: 0,
+        update_topic: "config/cameras/*/birdseye",
         config_data: { cameras: cameraUpdates },
       });
       await updateConfig();

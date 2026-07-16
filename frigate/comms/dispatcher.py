@@ -588,6 +588,10 @@ class Dispatcher:
                 self.ptz_metrics[camera_name].start_time.value = 0
                 ptz_autotracker_settings.enabled = False
 
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.autotracking, camera_name),
+            ptz_autotracker_settings,
+        )
         self.publish(f"{camera_name}/ptz_autotracker/state", payload, retain=True)
 
     def _on_motion_contour_area_command(self, camera_name: str, payload: int) -> None:

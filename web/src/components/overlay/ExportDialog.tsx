@@ -65,6 +65,7 @@ import { Textarea } from "../ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { isReplayCamera } from "@/utils/cameraUtil";
+import { isValidIconName } from "@/utils/iconUtil";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -1066,7 +1067,11 @@ export function ExportContent({
                                 }
                               >
                                 <IconRenderer
-                                  icon={LuIcons[group.icon]}
+                                  icon={
+                                    isValidIconName(group.icon)
+                                      ? LuIcons[group.icon]
+                                      : LuIcons.LuFolder
+                                  }
                                   className="mr-2 size-4 text-secondary-foreground"
                                 />
                                 <span className="truncate">{group.name}</span>
