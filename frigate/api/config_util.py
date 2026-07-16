@@ -30,4 +30,6 @@ def swap_runtime_config(app: FastAPI, config: FrigateConfig) -> None:
         for comm in app.dispatcher.comms:
             comm.config = config
 
-        app.dispatcher.apply_runtime_state()
+        # workers still hold the live toggle values, so correct only the
+        # config object here rather than re-broadcasting every override
+        app.dispatcher.reapply_runtime_state_to_config()

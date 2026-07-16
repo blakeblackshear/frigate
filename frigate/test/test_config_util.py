@@ -35,7 +35,7 @@ class TestSwapRuntimeConfig(unittest.TestCase):
         swap_runtime_config(app, config)
 
         # the swap rebuilds cameras from yaml, so overrides must be re-layered
-        app.dispatcher.apply_runtime_state.assert_called_once_with()
+        app.dispatcher.reapply_runtime_state_to_config.assert_called_once_with()
 
     def test_tolerates_missing_optional_collaborators(self) -> None:
         app = MagicMock()
