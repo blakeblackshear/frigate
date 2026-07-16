@@ -141,6 +141,11 @@ class ProfileManager:
         Preserves active profile state: re-snapshots base configs from the new
         (freshly parsed) config, then re-applies profile overrides if a profile
         was active.
+
+        Deliberately does not clear the dispatcher's runtime overrides. This is
+        the config-save path, not a profile switch: the save only invalidates
+        the toggles it rewrote in yaml, which /api/config/set already clears by
+        key. The broad wipe belongs to activate_profile alone.
         """
         current_active = self.config.active_profile
         self.config = new_config
@@ -163,10 +168,6 @@ class ProfileManager:
                 # Profile was deleted — deactivate
                 self.config.active_profile = None
                 self._persist_active_profile(None)
-
-            # drop all runtime overrides so they don't replay stale values on restart
-            if self.dispatcher is not None:
-                self.dispatcher.clear_runtime_state()
 
     def activate_profile(
         self,

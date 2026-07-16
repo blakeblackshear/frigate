@@ -126,6 +126,40 @@ class TestRestoreRuntimeState(unittest.TestCase):
         self.dispatcher.restore_runtime_state()
         self.handler_mocks["detect"].assert_called_once_with("front_door", "ON")
 
+    def test_apply_runtime_state_replays_through_handlers(self) -> None:
+        """The extracted method replays every stored entry."""
+        with patch.object(
+            self.dispatcher._runtime_state,
+            "load",
+            return_value={"front_door": {"enabled": False, "detect": True}},
+        ):
+            self.dispatcher.apply_runtime_state()
+
+        self.handler_mocks["enabled"].assert_called_once_with("front_door", "OFF")
+        self.handler_mocks["detect"].assert_called_once_with("front_door", "ON")
+
+    def test_apply_runtime_state_returns_applied_entries(self) -> None:
+        """Callers get back what was replayed, for logging and assertions."""
+        with patch.object(
+            self.dispatcher._runtime_state,
+            "load",
+            return_value={"front_door": {"enabled": False}, "nope": {"enabled": True}},
+        ):
+            applied = self.dispatcher.apply_runtime_state()
+
+        self.assertEqual(applied, {"front_door": {"enabled": False}})
+
+    def test_restore_runtime_state_still_replays(self) -> None:
+        """The startup entry point keeps working after the extraction."""
+        with patch.object(
+            self.dispatcher._runtime_state,
+            "load",
+            return_value={"back_yard": {"snapshots": False}},
+        ):
+            self.dispatcher.restore_runtime_state()
+
+        self.handler_mocks["snapshots"].assert_called_once_with("back_yard", "OFF")
+
 
 class TestHandlersPersistViaSet(unittest.TestCase):
     """Verify each in-scope handler writes to the runtime state on success."""
@@ -211,6 +245,12 @@ class TestClearPassthrough(unittest.TestCase):
         dispatcher._runtime_state = MagicMock(spec=RuntimeStatePersistence)
         dispatcher.clear_runtime_state()
         dispatcher._runtime_state.clear_all.assert_called_once_with()
+
+    def test_clear_runtime_state_for_camera_passthrough(self) -> None:
+        dispatcher = _build_dispatcher({})
+        dispatcher._runtime_state = MagicMock(spec=RuntimeStatePersistence)
+        dispatcher.clear_runtime_state_for_camera("front_door")
+        dispatcher._runtime_state.clear_camera.assert_called_once_with("front_door")
 
 
 if __name__ == "__main__":
