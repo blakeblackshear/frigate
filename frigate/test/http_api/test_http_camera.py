@@ -118,7 +118,7 @@ class TestDeleteCameraRuntimeConfig(BaseTestHttp):
                 self.assertIn("back_yard", dispatcher.config.cameras)
 
                 # surviving cameras' overrides are re-layered onto the new object
-                dispatcher.apply_runtime_state.assert_called_once_with()
+                dispatcher.reapply_runtime_state_to_config.assert_called_once_with()
 
                 # the deleted camera's persisted overrides are pruned
                 dispatcher.clear_runtime_state_for_camera.assert_called_once_with(

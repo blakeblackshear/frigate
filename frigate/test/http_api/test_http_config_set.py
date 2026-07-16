@@ -143,11 +143,10 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
         # front_door was turned off via the UI: the override is on disk, and
         # yaml still says enabled: true. Stand in for the real replay, which
         # reads dispatcher.config - the object the endpoint just swapped in.
-        def fake_apply():
+        def fake_reapply():
             dispatcher.config.cameras["front_door"].enabled = False
-            return {"front_door": {"enabled": False}}
 
-        dispatcher.apply_runtime_state.side_effect = fake_apply
+        dispatcher.reapply_runtime_state_to_config.side_effect = fake_reapply
 
         try:
             app, _ = self._create_app_with_dispatcher(dispatcher)
@@ -168,7 +167,7 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
 
                 # the swap must be repaired: the new config object the API and
                 # dispatcher now share has to still show front_door as off
-                dispatcher.apply_runtime_state.assert_called_once_with()
+                dispatcher.reapply_runtime_state_to_config.assert_called_once_with()
                 self.assertFalse(app.frigate_config.cameras["front_door"].enabled)
                 self.assertIs(dispatcher.config, app.frigate_config)
 
@@ -178,7 +177,7 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
                 call_names = [name for name, _, _ in dispatcher.mock_calls]
                 self.assertLess(
                     call_names.index("clear_runtime_state_for_yaml_keys"),
-                    call_names.index("apply_runtime_state"),
+                    call_names.index("reapply_runtime_state_to_config"),
                 )
         finally:
             os.unlink(config_path)
@@ -205,7 +204,7 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
                 )
 
                 self.assertEqual(resp.status_code, 200)
-                dispatcher.apply_runtime_state.assert_not_called()
+                dispatcher.reapply_runtime_state_to_config.assert_not_called()
         finally:
             os.unlink(config_path)
 
