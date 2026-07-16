@@ -246,6 +246,12 @@ class TestClearPassthrough(unittest.TestCase):
         dispatcher.clear_runtime_state()
         dispatcher._runtime_state.clear_all.assert_called_once_with()
 
+    def test_clear_runtime_state_for_camera_passthrough(self) -> None:
+        dispatcher = _build_dispatcher({})
+        dispatcher._runtime_state = MagicMock(spec=RuntimeStatePersistence)
+        dispatcher.clear_runtime_state_for_camera("front_door")
+        dispatcher._runtime_state.clear_camera.assert_called_once_with("front_door")
+
 
 if __name__ == "__main__":
     unittest.main()

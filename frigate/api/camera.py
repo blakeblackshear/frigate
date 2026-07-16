@@ -25,6 +25,7 @@ from frigate.api.auth import (
     require_go2rtc_stream_access,
     require_role,
 )
+from frigate.api.config_util import swap_runtime_config
 from frigate.api.defs.request.app_body import CameraSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
@@ -1254,9 +1255,14 @@ async def delete_camera(
                     status_code=500,
                 )
 
-            # Update runtime config
-            request.app.frigate_config = config
-            request.app.genai_manager.update_config(config)
+            # rebind every collaborator to the new config and re-layer runtime
+            # toggles for the surviving cameras, same as /api/config/set
+            swap_runtime_config(request.app, config)
+
+            # drop the deleted camera's persisted overrides so a camera later
+            # added under the same name doesn't inherit them
+            if request.app.dispatcher is not None:
+                request.app.dispatcher.clear_runtime_state_for_camera(camera_name)
 
             # Publish removal to stop ffmpeg processes and clean up runtime state
             request.app.config_publisher.publish_update(

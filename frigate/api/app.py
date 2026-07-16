@@ -31,6 +31,7 @@ from frigate.api.auth import (
     get_allowed_cameras_for_filter,
     require_role,
 )
+from frigate.api.config_util import swap_runtime_config
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import (
     AppConfigSetBody,
@@ -915,23 +916,7 @@ def config_set(request: Request, body: AppConfigSetBody):
 
             if body.requires_restart == 0 or body.update_topic:
                 old_config: FrigateConfig = request.app.frigate_config
-                request.app.frigate_config = config
-                request.app.genai_manager.update_config(config)
-
-                if request.app.profile_manager is not None:
-                    request.app.profile_manager.update_config(config)
-
-                if request.app.stats_emitter is not None:
-                    request.app.stats_emitter.config = config
-
-                if request.app.dispatcher is not None:
-                    request.app.dispatcher.config = config
-
-                    for comm in request.app.dispatcher.comms:
-                        comm.config = config
-
-                    # the swap rebuilt every camera from yaml, so re-layer the runtime toggles
-                    request.app.dispatcher.apply_runtime_state()
+                swap_runtime_config(request.app, config)
 
                 if body.update_topic:
                     if body.update_topic.startswith("config/cameras/"):

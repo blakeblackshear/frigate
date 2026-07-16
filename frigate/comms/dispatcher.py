@@ -484,6 +484,14 @@ class Dispatcher:
         """
         self._runtime_state.clear_all()
 
+    def clear_runtime_state_for_camera(self, camera: str) -> None:
+        """Drop all persisted runtime overrides for a deleted camera.
+
+        Called by camera deletion so a camera later added under the same name
+        does not inherit the removed camera's stale toggles.
+        """
+        self._runtime_state.clear_camera(camera)
+
     def _on_detect_command(self, camera_name: str, payload: str) -> None:
         """Callback for detect topic."""
         detect_settings = self.config.cameras[camera_name].detect

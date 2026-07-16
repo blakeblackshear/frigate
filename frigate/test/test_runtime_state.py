@@ -131,6 +131,25 @@ class TestRuntimeStatePersistence(unittest.TestCase):
         self.store.clear_all()
         self.assertEqual(self.store.load(), {})
 
+    def test_clear_camera_removes_only_that_camera(self) -> None:
+        self.store.set("front_door", "enabled", False)
+        self.store.set("front_door", "detect", False)
+        self.store.set("back_yard", "audio", False)
+
+        self.store.clear_camera("front_door")
+
+        self.assertEqual(self.store.load(), {"back_yard": {"audio": False}})
+
+    def test_clear_camera_is_noop_for_unknown_camera(self) -> None:
+        self.store.set("front_door", "enabled", False)
+        self.store.clear_camera("side_gate")
+        self.assertEqual(self.store.load(), {"front_door": {"enabled": False}})
+
+    def test_clear_camera_is_safe_when_file_missing(self) -> None:
+        # No prior set() calls, so the file does not exist
+        self.store.clear_camera("front_door")
+        self.assertEqual(self.store.load(), {})
+
 
 if __name__ == "__main__":
     unittest.main()

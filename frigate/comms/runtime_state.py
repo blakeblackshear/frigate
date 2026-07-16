@@ -96,6 +96,25 @@ class RuntimeStatePersistence:
         except OSError:
             logger.exception("Failed to clear runtime state")
 
+    def clear_camera(self, camera: str) -> None:
+        """Drop every stored override for a single camera.
+
+        Called when a camera is deleted so a camera later added under the same
+        name does not inherit the removed camera's stale toggles.
+        """
+        try:
+            with FileLock(self._lock_path, timeout=self._lock_timeout):
+                data = self._read_locked()
+                cameras = data.get("cameras")
+                if not isinstance(cameras, dict) or camera not in cameras:
+                    return
+                del cameras[camera]
+                self._write_locked(data)
+        except Timeout:
+            logger.error("Timed out clearing runtime state for camera")
+        except OSError:
+            logger.exception("Failed to clear runtime state for camera")
+
     def clear_for_yaml_keys(self, dotted_keys: Iterable[str]) -> None:
         """Remove stored entries whose YAML key was just rewritten.
 
