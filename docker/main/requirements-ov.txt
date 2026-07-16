@@ -1,3 +1,2 @@
 numpy
-tensorflow
-openvino-dev>=2024.0.0
+openvino >= 2026.2.0
