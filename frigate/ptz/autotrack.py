@@ -198,7 +198,7 @@ class PtzAutoTrackerThread(threading.Thread):
 
     def run(self):
         while not self.stop_event.wait(1):
-            self.ptz_autotracker.config_subscriber.check_for_updates()
+            self.ptz_autotracker.check_for_updates()
 
             for camera, camera_config in list(self.config.cameras.items()):
                 if not camera_config.enabled:
@@ -257,6 +257,7 @@ class PtzAutoTracker:
             [
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.autotracking,
+                CameraConfigUpdateEnum.onvif,
             ],
         )
 
@@ -275,6 +276,29 @@ class PtzAutoTracker:
                 )
                 # Wait for the coroutine to complete
                 future.result()
+
+    def check_for_updates(self) -> None:
+        """Apply camera config updates and mirror autotracking state to ptz metrics.
+
+        The camera processes read autotracker_enabled rather than the config, so it
+        has to follow every path that can change autotracking, not just the mqtt
+        toggle that writes it directly.
+        """
+        updates = self.config_subscriber.check_for_updates()
+
+        for cameras in updates.values():
+            for camera in cameras:
+                camera_config = self.config.cameras.get(camera)
+                metrics = self.ptz_metrics.get(camera)
+
+                # a camera added at runtime gets its metrics from the maintainer on
+                # another thread, which seeds them from this same config value
+                if camera_config is None or metrics is None:
+                    continue
+
+                metrics.autotracker_enabled.value = (
+                    camera_config.onvif.autotracking.enabled
+                )
 
     async def _autotracker_setup(self, camera_config: CameraConfig, camera: str):
         logger.debug(f"{camera}: Autotracker init")
