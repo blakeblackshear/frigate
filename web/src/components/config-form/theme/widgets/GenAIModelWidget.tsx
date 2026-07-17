@@ -160,6 +160,7 @@ export function GenAIModelWidget(props: WidgetProps) {
     try {
       const res = await axios.post<ProbeResponse>("genai/probe", {
         provider: formProvider,
+        name: providerKey,
         api_key:
           typeof formEntry.api_key === "string" ? formEntry.api_key : null,
         base_url:
