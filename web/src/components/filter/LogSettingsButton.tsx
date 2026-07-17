@@ -129,7 +129,7 @@ export function GeneralFilterContent({
                 className="mx-2 w-full cursor-pointer text-primary smart-capitalize"
                 htmlFor={item}
               >
-                {item.replaceAll("_", " ")}
+                {t(`logger.logLevel.${item}`, { ns: "views/settings" })}
               </Label>
               <Switch
                 key={item}
