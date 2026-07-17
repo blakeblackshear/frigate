@@ -227,16 +227,18 @@ export function GenAIModelWidget(props: WidgetProps) {
               aria-expanded={open}
               disabled={disabled || readonly}
               className={cn(
-                "justify-between font-normal",
+                "min-w-0 justify-between font-normal",
                 !currentLabel && "text-muted-foreground",
                 fieldClassName,
               )}
             >
-              {currentLabel ??
-                t("configForm.genaiModel.placeholder", {
-                  ns: "views/settings",
-                  defaultValue: "Select or enter a model…",
-                })}
+              <span className="truncate">
+                {currentLabel ??
+                  t("configForm.genaiModel.placeholder", {
+                    ns: "views/settings",
+                    defaultValue: "Select or enter a model…",
+                  })}
+              </span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -263,12 +265,14 @@ export function GenAIModelWidget(props: WidgetProps) {
                       value={trimmedSearch}
                       onSelect={() => commit(trimmedSearch)}
                     >
-                      <Plus className="mr-2 h-4 w-4" />
-                      {t("configForm.genaiModel.useCustom", {
-                        ns: "views/settings",
-                        value: trimmedSearch,
-                        defaultValue: 'Use "{{value}}"',
-                      })}
+                      <Plus className="mr-2 h-4 w-4 shrink-0" />
+                      <span className="truncate">
+                        {t("configForm.genaiModel.useCustom", {
+                          ns: "views/settings",
+                          value: trimmedSearch,
+                          defaultValue: 'Use "{{value}}"',
+                        })}
+                      </span>
                     </CommandItem>
                   </CommandGroup>
                 )}
@@ -287,11 +291,11 @@ export function GenAIModelWidget(props: WidgetProps) {
                       >
                         <Check
                           className={cn(
-                            "mr-2 h-4 w-4",
+                            "mr-2 h-4 w-4 shrink-0",
                             value === model ? "opacity-100" : "opacity-0",
                           )}
                         />
-                        {model}
+                        <span className="truncate">{model}</span>
                       </CommandItem>
                     ))}
                   </CommandGroup>

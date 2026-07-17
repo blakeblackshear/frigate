@@ -684,22 +684,21 @@ class TrackedObjectProcessor(threading.Thread):
             # check for config updates
             updated_topics = self.camera_config_subscriber.check_for_updates()
 
-            if "enabled" in updated_topics:
-                for camera in updated_topics["enabled"]:
-                    if self.camera_states[camera].prev_enabled is None:
-                        self.camera_states[camera].prev_enabled = self.config.cameras[
-                            camera
-                        ].enabled
-            elif "add" in updated_topics:
-                for camera in updated_topics["add"]:
-                    self.config.cameras[camera] = (
-                        self.camera_config_subscriber.camera_configs[camera]
-                    )
-                    self.create_camera_state(camera)
-            elif "remove" in updated_topics:
+            # a single drain can carry several topics at once, so add and
+            # remove are handled independently rather than as exclusive branches
+            for camera in updated_topics.get("add", []):
+                self.config.cameras[camera] = (
+                    self.camera_config_subscriber.camera_configs[camera]
+                )
+                self.create_camera_state(camera)
+
+            if "remove" in updated_topics:
                 for camera in updated_topics["remove"]:
-                    removed_camera_state = self.camera_states[camera]
-                    removed_camera_state.shutdown()
+                    camera_state = self.camera_states.get(camera)
+                    if camera_state is None:
+                        continue
+
+                    camera_state.shutdown()
                     self.camera_states.pop(camera)
                     self.camera_activity.pop(camera, None)
                     self.last_motion_detected.pop(camera, None)

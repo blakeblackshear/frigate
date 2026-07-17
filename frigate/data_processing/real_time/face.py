@@ -288,6 +288,10 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
             ]
 
+        if face_frame.size == 0:
+            logger.debug(f"Empty face crop for {id}")
+            return
+
         res = self.recognizer.classify(face_frame)
 
         if not res:
