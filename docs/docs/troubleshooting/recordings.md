@@ -428,3 +428,19 @@ You'll want to:
 - [Tune your motion detection settings](/configuration/motion_detection) either by editing your config file or by using the UI's Motion Tuner.
 
 </FaqItem>
+
+<FaqItem id="my-timeline-previews-are-black-after-restarting-frigate-or-recreating-the-container" question="My timeline previews are black after restarting Frigate or recreating the container. Why?">
+
+The scrubbing previews (the timelapse clips shown when dragging the History timeline, the secondary-camera previews, and the preview that plays when hovering a review card) are not recorded continuously. Frigate caches low-resolution preview frames in `/tmp/cache` throughout each hour and only assembles them into a finished preview clip **at the top of the hour**.
+
+In the recommended configuration, `/tmp/cache` is a small in-memory (`tmpfs`) area. When Frigate starts, it tries to restore the current hour's cached frames, so a **soft restart from the UI** preserves them. But if you recreate the Docker container or stop Frigate forcibly by any other means partway through an hour, the in-memory cache is discarded, so no preview clip is produced for that partial hour.
+
+This is expected behavior, not a bug:
+
+- Previews for hours that already completed and were written to disk are unaffected.
+- The next full hour after a restart will generate previews normally.
+- This is unrelated to `shm_size`; increasing shared memory does not change it.
+
+To avoid the gap, use the **Restart Frigate** button in the UI's Settings menu rather than recreating the container when possible.
+
+</FaqItem>
