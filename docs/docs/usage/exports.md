@@ -34,7 +34,7 @@ All of your exports live on the **Exports** page, reachable from the main naviga
 - **Rename** it, and
 - **Delete** it: deleting is the only way an export is removed.
 
-You can also select multiple exports at once to **delete** them in bulk, or to **add them to** (or **remove them from**) a [case](#cases).
+You can also select multiple exports at once to **delete** them in bulk, or to **add them to** (or **remove them from**) a [case](#cases). To download multiple exports as a zip archive, add them to a **case** and use the Download button there.
 
 ## Cases
 

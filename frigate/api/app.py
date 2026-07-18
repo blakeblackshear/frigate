@@ -196,7 +196,7 @@ def genai_models(request: Request):
         "before saving the configuration."
     ),
 )
-async def genai_probe(body: GenAIProbeBody):
+async def genai_probe(request: Request, body: GenAIProbeBody):
     load_providers()
 
     provider_cls = PROVIDERS.get(body.provider)
@@ -205,6 +205,13 @@ async def genai_probe(body: GenAIProbeBody):
             status_code=400,
             content={"success": False, "message": "Unknown provider"},
         )
+
+    api_key = body.api_key
+    if api_key == REDACTED_CREDENTIAL_SENTINEL:
+        saved_cfg = (
+            request.app.frigate_config.genai.get(body.name) if body.name else None
+        )
+        api_key = saved_cfg.api_key if saved_cfg else None
 
     # The OpenAI-compatible SDKs accept "timeout" as a constructor kwarg via
     # provider_options; other plugins use GenAIClient.timeout passed below.
@@ -217,7 +224,7 @@ async def genai_probe(body: GenAIProbeBody):
     try:
         transient_cfg = GenAIConfig(
             provider=body.provider,
-            api_key=body.api_key,
+            api_key=api_key,
             base_url=body.base_url,
             provider_options=probe_provider_options,
             # model is required by the schema but irrelevant for listing.

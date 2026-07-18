@@ -232,6 +232,21 @@ No. Only one profile can be active at a time. Activating a new profile automatic
 
 When you delete a base zone or mask in the Frigate UI, any profile overrides for that entry are deleted automatically as part of the same operation. If you remove a base entry by editing your config file directly and leave a profile override behind, the config will fail validation at startup until the orphaned override is removed as well.
 
+### How do I make a YAML profile track no objects at all?
+
+Set the tracked object list explicitly to an empty list in the profile:
+
+```yaml
+cameras:
+  front_door:
+    profiles:
+      home:
+        objects:
+          track: []
+```
+
+Leaving the `objects` section empty (or omitting `track`) does not clear the list. Empty sections set no fields, so the profile inherits the full tracked object list from the base config, including anything set at the global level. The same applies to other lists, such as `audio.listen`.
+
 ### Why are some settings missing when I configure a profile override?
 
 Fields that require a Frigate restart to take effect cannot be overridden by profiles, since profiles are applied at runtime without restarting. Those fields are hidden when editing a profile override and can only be changed on the base configuration.

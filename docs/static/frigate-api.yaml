@@ -8244,6 +8244,11 @@ components:
       properties:
         provider:
           $ref: '#/components/schemas/GenAIProviderEnum'
+        name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Name
         api_key:
           anyOf:
             - type: string
