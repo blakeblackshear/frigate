@@ -78,7 +78,7 @@ All llama.cpp native options can be passed through `provider_options`, including
    - Set **Provider** to `llamacpp`
    - Set **Base URL** to your llama.cpp server address (e.g., `http://localhost:8080`)
    - Set **Model** to the name of your model
-   - Under **Provider Options**, set `context_size` to tell Frigate your context size so it can send the appropriate amount of information
+   - Optionally, under **Provider Options**, set `context_size` to override the context size Frigate detects from the server
 
 </TabItem>
 <TabItem value="yaml">
@@ -89,11 +89,13 @@ genai:
   base_url: http://localhost:8080
   model: your-model-name
   provider_options:
-    context_size: 16000 # Tell Frigate your context size so it can send the appropriate amount of information.
+    context_size: 16000 # Optional, overrides the context size reported by the server.
 ```
 
 </TabItem>
 </ConfigTabs>
+
+Frigate queries the llama.cpp server for the model's context size at startup and logs it along with the other detected capabilities. If `context_size` is set in `provider_options`, that value is always used instead, even when the server reports its own.
 
 ### Ollama
 
