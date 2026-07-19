@@ -491,6 +491,34 @@ class TestLlamaCppProvider(unittest.TestCase):
         final = _final_message(self._run_with_lines(client, lines, MULTIMODAL_MESSAGES))
         self.assertEqual(final["content"], "ok")
 
+    def _validated_client(self, server_context_size, provider_options=None):
+        """Build a client as if the server reported the given context size."""
+        cfg = GenAIConfig(
+            provider="llamacpp",
+            model="m",
+            base_url="http://localhost:9999",
+            provider_options=provider_options or {},
+        )
+        info = {
+            "context_size": server_context_size,
+            "supports_vision": False,
+            "supports_audio": False,
+            "supports_tools": False,
+            "supports_reasoning": False,
+            "media_marker": "<__media__>",
+        }
+        cls = PROVIDERS[GenAIProviderEnum.llamacpp]
+        with patch.object(cls, "_get_model_info", return_value=info):
+            return cls(cfg, timeout=5)
+
+    def test_server_context_size_used_without_override(self):
+        client = self._validated_client(4096)
+        self.assertEqual(client.get_context_size(), 4096)
+
+    def test_provider_options_context_size_overrides_server(self):
+        client = self._validated_client(4096, {"context_size": 32768})
+        self.assertEqual(client.get_context_size(), 32768)
+
 
 if __name__ == "__main__":
     unittest.main()

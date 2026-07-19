@@ -192,7 +192,7 @@ class LlamaCppClient(GenAIClient):
         logger.info(
             "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s, reasoning: %s",
             configured_model,
-            self._context_size or "unknown",
+            self.get_context_size(),
             self._supports_vision,
             self._supports_audio,
             self._supports_tools,
