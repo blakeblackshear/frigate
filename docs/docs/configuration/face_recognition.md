@@ -233,7 +233,7 @@ Once front-facing images are performing well, start choosing slightly off-angle 
 Start with the [Usage](#usage) section and re-read the [Model Requirements](#model-requirements) above.
 
 1. Enable debug logs to see exactly what Frigate is doing.
-   - Enable debug logs for face recognition by adding `frigate.data_processing.real_time.face: debug` to your `logger` configuration Restart Frigate after this change.
+   - Enable debug logs for face recognition by adding `frigate.data_processing.real_time.face: debug` to your `logger` configuration. Restart Frigate after this change.
 
      ```yaml
      logger:
