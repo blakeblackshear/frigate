@@ -270,7 +270,7 @@ class FrigateApp:
                 10
                 * len([c for c in self.config.cameras.values() if c.enabled_in_config]),
             ),
-            load_vec_extension=self.config.semantic_search.enabled,
+            load_vec_extension=True,
         )
         models = [
             Event,

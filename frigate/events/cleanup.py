@@ -366,9 +366,10 @@ class EventCleanup(threading.Thread):
                     logger.debug(f"Deleting {len(chunk)} events from the database")
                     Event.delete().where(Event.id << chunk).execute()
 
-                    if self.config.semantic_search.enabled:
-                        self.db.delete_embeddings_description(event_ids=chunk)
-                        self.db.delete_embeddings_thumbnail(event_ids=chunk)
-                        logger.debug(f"Deleted {len(ids_to_delete)} embeddings")
+                    # embeddings are always cleaned up, even when semantic search
+                    # is disabled, so that they don't outlive their events
+                    self.db.delete_embeddings_description(event_ids=chunk)
+                    self.db.delete_embeddings_thumbnail(event_ids=chunk)
+                    logger.debug(f"Deleted {len(chunk)} embeddings")
 
         logger.info("Exiting event cleanup...")

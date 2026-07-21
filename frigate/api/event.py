@@ -1538,15 +1538,18 @@ async def set_description(
     event.data["description"] = new_description
     event.save()
 
-    # If semantic search is enabled, update the index
-    if request.app.frigate_config.semantic_search.enabled:
-        context: EmbeddingsContext = request.app.embeddings
+    context: EmbeddingsContext | None = request.app.embeddings
+
+    if context is not None:
         if len(new_description) > 0:
-            context.update_description(
-                event_id,
-                new_description,
-            )
+            # If semantic search is enabled, update the index
+            if request.app.frigate_config.semantic_search.enabled:
+                context.update_description(
+                    event_id,
+                    new_description,
+                )
         else:
+            # embeddings are always cleaned up so they don't outlive their description
             context.db.delete_embeddings_description(event_ids=[event_id])
 
     response_message = (
@@ -1675,9 +1678,11 @@ async def delete_single_event(event_id: str, request: Request) -> dict:
     event.delete_instance()
     Timeline.delete().where(Timeline.source_id == event_id).execute()
 
-    # If semantic search is enabled, update the index
-    if request.app.frigate_config.semantic_search.enabled:
-        context: EmbeddingsContext = request.app.embeddings
+    # embeddings are always cleaned up, even when semantic search is disabled,
+    # so that they don't outlive their events
+    context: EmbeddingsContext | None = request.app.embeddings
+
+    if context is not None:
         context.db.delete_embeddings_thumbnail(event_ids=[event_id])
         context.db.delete_embeddings_description(event_ids=[event_id])
 
