@@ -444,10 +444,10 @@ export function ExportContent({
     }
 
     setRange({
-      before: latestTime,
-      after: latestTime - 3600,
+      before: currentTime + 1800,
+      after: currentTime - 1800,
     });
-  }, [activeTab, latestTime, range, setRange]);
+  }, [activeTab, currentTime, range, setRange]);
 
   const { data: events, isLoading: isEventsLoading } = useSWR<Event[]>(
     activeTab === "multi" && debouncedRange
@@ -817,7 +817,19 @@ export function ExportContent({
 
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as ExportTab)}
+        onValueChange={(value) => {
+          const tab = value as ExportTab;
+          if (tab === "multi") {
+            setRange({
+              before: currentTime + 1800,
+              after: currentTime - 1800,
+            });
+          } else {
+            onSelectTime(selectedOption);
+          }
+
+          setActiveTab(tab);
+        }}
         className={cn("w-full", !isDesktop && "flex min-h-0 flex-1 flex-col")}
       >
         <TabsList className="grid w-full grid-cols-2">

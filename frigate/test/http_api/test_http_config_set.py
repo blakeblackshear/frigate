@@ -91,6 +91,123 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
 
         return app, mock_publisher
 
+    def _create_app_with_dispatcher(self, dispatcher):
+        """Create app with a mocked config publisher and a real-ish dispatcher."""
+        from fastapi import Request
+
+        from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
+        from frigate.api.fastapi_app import create_fastapi_app
+
+        mock_publisher = Mock(spec=CameraConfigUpdatePublisher)
+        mock_publisher.publisher = MagicMock()
+
+        app = create_fastapi_app(
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            mock_publisher,
+            None,
+            dispatcher=dispatcher,
+            enforce_default_admin=False,
+        )
+
+        async def mock_get_current_user(request: Request):
+            username = request.headers.get("remote-user")
+            role = request.headers.get("remote-role")
+            return {"username": username, "role": role}
+
+        async def mock_get_allowed_cameras_for_filter(request: Request):
+            return list(self.minimal_config.get("cameras", {}).keys())
+
+        app.dependency_overrides[get_current_user] = mock_get_current_user
+        app.dependency_overrides[get_allowed_cameras_for_filter] = (
+            mock_get_allowed_cameras_for_filter
+        )
+
+        return app, mock_publisher
+
+    @patch("frigate.api.app.find_config_file")
+    def test_runtime_disabled_camera_survives_unrelated_save(self, mock_find_config):
+        """A camera turned off at runtime stays off when another camera is saved."""
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        dispatcher = MagicMock()
+        dispatcher.comms = []
+
+        # front_door was turned off via the UI: the override is on disk, and
+        # yaml still says enabled: true. Stand in for the real replay, which
+        # reads dispatcher.config - the object the endpoint just swapped in.
+        def fake_reapply():
+            dispatcher.config.cameras["front_door"].enabled = False
+
+        dispatcher.reapply_runtime_state_to_config.side_effect = fake_reapply
+
+        try:
+            app, _ = self._create_app_with_dispatcher(dispatcher)
+
+            with AuthTestClient(app) as client:
+                resp = client.put(
+                    "/config/set",
+                    json={
+                        "config_data": {
+                            "cameras": {"back_yard": {"detect": {"fps": 7}}}
+                        },
+                        "requires_restart": 0,
+                    },
+                )
+
+                self.assertEqual(resp.status_code, 200)
+                self.assertTrue(resp.json()["success"])
+
+                # the swap must be repaired: the new config object the API and
+                # dispatcher now share has to still show front_door as off
+                dispatcher.reapply_runtime_state_to_config.assert_called_once_with()
+                self.assertFalse(app.frigate_config.cameras["front_door"].enabled)
+                self.assertIs(dispatcher.config, app.frigate_config)
+
+                # yaml-wins ordering: the surgical clear for rewritten keys
+                # must run before the replay, or a save that rewrote a toggle
+                # would have its old override resurrected
+                call_names = [name for name, _, _ in dispatcher.mock_calls]
+                self.assertLess(
+                    call_names.index("clear_runtime_state_for_yaml_keys"),
+                    call_names.index("reapply_runtime_state_to_config"),
+                )
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_no_reapply_when_config_is_not_swapped(self, mock_find_config):
+        """A restart-required save with no update topic never swaps, so no replay."""
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        dispatcher = MagicMock()
+        dispatcher.comms = []
+
+        try:
+            app, _ = self._create_app_with_dispatcher(dispatcher)
+
+            with AuthTestClient(app) as client:
+                resp = client.put(
+                    "/config/set",
+                    json={
+                        "config_data": {"mqtt": {"host": "other"}},
+                        "requires_restart": 1,
+                    },
+                )
+
+                self.assertEqual(resp.status_code, 200)
+                dispatcher.reapply_runtime_state_to_config.assert_not_called()
+        finally:
+            os.unlink(config_path)
+
     def _write_config_file(self):
         """Write the minimal config to a temp YAML file and return the path."""
         yaml = ruamel.yaml.YAML()

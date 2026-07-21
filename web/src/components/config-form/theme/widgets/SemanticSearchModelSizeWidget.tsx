@@ -24,15 +24,19 @@ export function SemanticSearchModelSizeWidget(props: WidgetProps) {
     model !== "jinav1" &&
     model !== "jinav2";
 
-  // Clear model_size while on a provider (buildOverrides converts to ""
-  // which the backend treats as "remove"). Restore the schema default
-  // when returning to a Jina model so the field isn't left empty.
+  // model_size is unused on a GenAI provider. Only clear it (which the backend
+  // treats as "remove") for a non-default value, which can only come from the
+  // config file. A defaulted value is indistinguishable from unset in the
+  // resolved config, so clearing it would falsely dirty the field and delete a
+  // YAML key that isn't there. Restore the default when returning to a Jina model.
   const { value, onChange, schema } = props;
   const schemaDefault = schema?.default as string | undefined;
   useEffect(() => {
-    if (isProvider && value !== undefined) {
-      onChange(undefined);
-    } else if (!isProvider && value === undefined && schemaDefault) {
+    if (isProvider) {
+      if (value !== undefined && value !== schemaDefault) {
+        onChange(undefined);
+      }
+    } else if (value === undefined && schemaDefault) {
       onChange(schemaDefault);
     }
   }, [isProvider, value, onChange, schemaDefault]);

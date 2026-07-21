@@ -126,6 +126,40 @@ class TestRestoreRuntimeState(unittest.TestCase):
         self.dispatcher.restore_runtime_state()
         self.handler_mocks["detect"].assert_called_once_with("front_door", "ON")
 
+    def test_apply_runtime_state_replays_through_handlers(self) -> None:
+        """The extracted method replays every stored entry."""
+        with patch.object(
+            self.dispatcher._runtime_state,
+            "load",
+            return_value={"front_door": {"enabled": False, "detect": True}},
+        ):
+            self.dispatcher.apply_runtime_state()
+
+        self.handler_mocks["enabled"].assert_called_once_with("front_door", "OFF")
+        self.handler_mocks["detect"].assert_called_once_with("front_door", "ON")
+
+    def test_apply_runtime_state_returns_applied_entries(self) -> None:
+        """Callers get back what was replayed, for logging and assertions."""
+        with patch.object(
+            self.dispatcher._runtime_state,
+            "load",
+            return_value={"front_door": {"enabled": False}, "nope": {"enabled": True}},
+        ):
+            applied = self.dispatcher.apply_runtime_state()
+
+        self.assertEqual(applied, {"front_door": {"enabled": False}})
+
+    def test_restore_runtime_state_still_replays(self) -> None:
+        """The startup entry point keeps working after the extraction."""
+        with patch.object(
+            self.dispatcher._runtime_state,
+            "load",
+            return_value={"back_yard": {"snapshots": False}},
+        ):
+            self.dispatcher.restore_runtime_state()
+
+        self.handler_mocks["snapshots"].assert_called_once_with("back_yard", "OFF")
+
 
 class TestHandlersPersistViaSet(unittest.TestCase):
     """Verify each in-scope handler writes to the runtime state on success."""
@@ -211,6 +245,122 @@ class TestClearPassthrough(unittest.TestCase):
         dispatcher._runtime_state = MagicMock(spec=RuntimeStatePersistence)
         dispatcher.clear_runtime_state()
         dispatcher._runtime_state.clear_all.assert_called_once_with()
+
+    def test_clear_runtime_state_for_camera_passthrough(self) -> None:
+        dispatcher = _build_dispatcher({})
+        dispatcher._runtime_state = MagicMock(spec=RuntimeStatePersistence)
+        dispatcher.clear_runtime_state_for_camera("front_door")
+        dispatcher._runtime_state.clear_camera.assert_called_once_with("front_door")
+
+
+class TestReapplyRuntimeStateToConfig(unittest.TestCase):
+    """The silent re-apply corrects the config object with no side effects."""
+
+    def _dispatcher_with(
+        self, cameras: dict[str, MagicMock], state: dict
+    ) -> Dispatcher:
+        dispatcher = _build_dispatcher(cameras)
+        dispatcher._runtime_state = MagicMock(spec=RuntimeStatePersistence)
+        dispatcher._runtime_state.load.return_value = state
+        dispatcher.publish = MagicMock()
+        return dispatcher
+
+    def test_mutates_every_tracked_field(self) -> None:
+        cameras = {"front_door": _make_camera_mock()}
+        dispatcher = self._dispatcher_with(
+            cameras,
+            {
+                "front_door": {
+                    "enabled": False,
+                    "detect": False,
+                    "snapshots": False,
+                    "recordings": False,
+                    "audio": False,
+                }
+            },
+        )
+
+        dispatcher.reapply_runtime_state_to_config()
+
+        cam = cameras["front_door"]
+        self.assertFalse(cam.enabled)
+        self.assertFalse(cam.detect.enabled)
+        self.assertFalse(cam.snapshots.enabled)
+        self.assertFalse(cam.record.enabled)
+        self.assertFalse(cam.audio.enabled)
+
+    def test_makes_no_zmq_mqtt_or_disk_writes(self) -> None:
+        dispatcher = self._dispatcher_with(
+            {"front_door": _make_camera_mock()},
+            {"front_door": {"enabled": False}},
+        )
+
+        dispatcher.reapply_runtime_state_to_config()
+
+        dispatcher.config_updater.publish_update.assert_not_called()
+        dispatcher._runtime_state.set.assert_not_called()
+        dispatcher.publish.assert_not_called()
+
+    def test_respects_enabled_in_config_gate(self) -> None:
+        # an ON override for a camera disabled in yaml must not enable it
+        cameras = {
+            "front_door": _make_camera_mock(enabled=False, enabled_in_config=False)
+        }
+        dispatcher = self._dispatcher_with(cameras, {"front_door": {"enabled": True}})
+
+        dispatcher.reapply_runtime_state_to_config()
+
+        self.assertFalse(cameras["front_door"].enabled)
+
+    def test_respects_recordings_and_audio_gates(self) -> None:
+        # ON overrides for recordings/audio not enabled in yaml must be ignored
+        cameras = {
+            "front_door": _make_camera_mock(
+                record_enabled=False,
+                record_enabled_in_config=False,
+                audio_enabled=False,
+                audio_enabled_in_config=False,
+            )
+        }
+        dispatcher = self._dispatcher_with(
+            cameras, {"front_door": {"recordings": True, "audio": True}}
+        )
+
+        dispatcher.reapply_runtime_state_to_config()
+
+        self.assertFalse(cameras["front_door"].record.enabled)
+        self.assertFalse(cameras["front_door"].audio.enabled)
+
+    def test_applies_on_override_when_gate_passes(self) -> None:
+        # a camera off in yaml but enabled_in_config keeps its runtime-on state
+        cameras = {
+            "front_door": _make_camera_mock(enabled=False, enabled_in_config=True)
+        }
+        dispatcher = self._dispatcher_with(cameras, {"front_door": {"enabled": True}})
+
+        dispatcher.reapply_runtime_state_to_config()
+
+        self.assertTrue(cameras["front_door"].enabled)
+
+    def test_detect_on_couples_motion(self) -> None:
+        cam = _make_camera_mock(detect_enabled=False)
+        cam.motion.enabled = False
+        dispatcher = self._dispatcher_with(
+            {"front_door": cam}, {"front_door": {"detect": True}}
+        )
+
+        dispatcher.reapply_runtime_state_to_config()
+
+        self.assertTrue(cam.detect.enabled)
+        self.assertTrue(cam.motion.enabled)
+
+    def test_skips_camera_not_in_config(self) -> None:
+        dispatcher = self._dispatcher_with(
+            {"front_door": _make_camera_mock()}, {"ghost": {"enabled": False}}
+        )
+
+        # a stale entry for a deleted camera must be ignored, not raise
+        dispatcher.reapply_runtime_state_to_config()
 
 
 if __name__ == "__main__":

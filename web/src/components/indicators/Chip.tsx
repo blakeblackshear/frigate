@@ -3,6 +3,7 @@ import { LogSeverity } from "@/types/log";
 import { ReactNode, useMemo } from "react";
 import { isIOS } from "react-device-detect";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 type ChipProps = {
   className?: string;
@@ -50,6 +51,7 @@ type LogChipProps = {
   onClickSeverity?: () => void;
 };
 export function LogChip({ severity, onClickSeverity }: LogChipProps) {
+  const { t } = useTranslation(["views/settings"]);
   const severityClassName = useMemo(() => {
     switch (severity) {
       case "info":
@@ -73,7 +75,7 @@ export function LogChip({ severity, onClickSeverity }: LogChipProps) {
           }
         }}
       >
-        {severity}
+        {t(`logger.logLevel.${severity}`, { ns: "views/settings" })}
       </span>
     </div>
   );

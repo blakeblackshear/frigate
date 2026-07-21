@@ -115,6 +115,13 @@ class TestCheckWsAuthorization(unittest.TestCase):
             )
         )
 
+    def test_viewer_blocked_from_notification_test(self):
+        self.assertFalse(
+            _check_ws_authorization(
+                "notification_test", "viewer", self.DEFAULT_SEPARATOR
+            )
+        )
+
     # --- Admin access ---
 
     def test_admin_can_send_restart(self):
@@ -132,6 +139,13 @@ class TestCheckWsAuthorization(unittest.TestCase):
     def test_admin_can_send_camera_ptz(self):
         self.assertTrue(
             _check_ws_authorization("front_door/ptz", "admin", self.DEFAULT_SEPARATOR)
+        )
+
+    def test_admin_can_send_notification_test(self):
+        self.assertTrue(
+            _check_ws_authorization(
+                "notification_test", "admin", self.DEFAULT_SEPARATOR
+            )
         )
 
     # --- Comma-separated roles ---

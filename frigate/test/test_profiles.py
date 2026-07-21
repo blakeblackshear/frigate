@@ -786,8 +786,15 @@ class TestProfileManager(unittest.TestCase):
         dispatcher.clear_runtime_state.assert_not_called()
 
     @patch.object(ProfileManager, "_persist_active_profile")
-    def test_update_config_clears_when_active_profile_reapplies(self, mock_persist):
-        """After /api/config/set, an active-profile re-application drops state."""
+    def test_update_config_preserves_runtime_state_with_active_profile(
+        self, mock_persist
+    ):
+        """A config/set save must not wipe overrides it never rewrote.
+
+        The save path clears matching entries itself via
+        clear_runtime_state_for_yaml_keys; a broad wipe here would drop
+        overrides for unrelated cameras.
+        """
         dispatcher = MagicMock()
         manager = ProfileManager(self.config, self.mock_updater, dispatcher)
         manager.activate_profile("armed")
@@ -795,7 +802,20 @@ class TestProfileManager(unittest.TestCase):
 
         new_config = FrigateConfig(**self.config_data)
         manager.update_config(new_config)
-        dispatcher.clear_runtime_state.assert_called_once_with()
+        dispatcher.clear_runtime_state.assert_not_called()
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_update_config_still_reapplies_active_profile(self, mock_persist):
+        """Dropping the wipe must not disturb profile re-application."""
+        dispatcher = MagicMock()
+        manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+        manager.activate_profile("armed")
+
+        new_config = FrigateConfig(**self.config_data)
+        manager.update_config(new_config)
+
+        self.assertEqual(manager.config, new_config)
+        self.assertEqual(new_config.active_profile, "armed")
 
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_update_config_does_not_clear_when_no_active_profile(self, mock_persist):

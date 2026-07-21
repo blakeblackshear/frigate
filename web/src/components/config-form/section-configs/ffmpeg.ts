@@ -1,3 +1,4 @@
+import { parseRestreamStreamName } from "../theme/fields/streamSource";
 import type { SectionConfigOverrides } from "./types";
 
 const arrayAsTextWidget = {
@@ -40,6 +41,29 @@ const ffmpeg: SectionConfigOverrides = {
             return !value.startsWith("preset-");
           }
           return false;
+        },
+      },
+      {
+        key: "inputs-missing-go2rtc-stream",
+        field: "inputs",
+        position: "before",
+        messageKey: "configMessages.ffmpeg.inputsMissingGo2rtcStream",
+        severity: "warning",
+        docLink: "/configuration/restream",
+        condition: (ctx) => {
+          const streams = ctx.fullConfig?.go2rtc?.streams;
+          const inputs = ctx.formData?.inputs;
+          if (!Array.isArray(inputs)) {
+            return false;
+          }
+
+          return inputs.some((input) => {
+            const path = (input as { path?: unknown } | null)?.path;
+            const streamName = parseRestreamStreamName(
+              typeof path === "string" ? path : undefined,
+            );
+            return streamName !== undefined && !(streamName in (streams ?? {}));
+          });
         },
       },
     ],

@@ -171,6 +171,12 @@ export function CameraInputsField(props: FieldProps) {
   );
 
   useEffect(() => {
+    setSourceModeByIndex((previous) =>
+      Object.keys(previous).length > 0 ? {} : previous,
+    );
+  }, [formContext?.cameraName]);
+
+  useEffect(() => {
     setOpenByIndex((previous) => {
       const next: Record<number, boolean> = {};
       for (let index = 0; index < inputs.length; index += 1) {
@@ -222,18 +228,12 @@ export function CameraInputsField(props: FieldProps) {
   const handleSourceModeChange = useCallback(
     (index: number, nextMode: StreamSourceMode) => {
       const input = inputs[index];
-      const currentPath =
-        typeof input?.path === "string" ? input.path : undefined;
 
-      if (nextMode === "manual") {
-        // Only revert the preset we set ourselves; never clobber custom args.
-        if (input?.input_args === RESTREAM_PRESET) {
-          handleFieldValuesChange(index, { input_args: undefined });
-        }
-      } else if (!parseRestreamStreamName(currentPath)) {
-        // Entering restream with a non-restream path: clear it so the dropdown
-        // shows its placeholder until a stream is chosen.
-        handleFieldValuesChange(index, { path: undefined });
+      // Only revert the preset we set ourselves; never clobber custom args.
+      // The path is left alone until a stream is picked, so switching modes
+      // never discards a typed URL or empties a required field.
+      if (nextMode === "manual" && input?.input_args === RESTREAM_PRESET) {
+        handleFieldValuesChange(index, { input_args: undefined });
       }
 
       setSourceModeByIndex((previous) => ({ ...previous, [index]: nextMode }));

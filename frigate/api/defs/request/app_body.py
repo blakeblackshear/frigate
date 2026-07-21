@@ -14,6 +14,7 @@ class AppConfigSetBody(BaseModel):
 
 class GenAIProbeBody(BaseModel):
     provider: GenAIProviderEnum
+    name: str | None = None
     api_key: str | None = None
     base_url: str | None = None
     provider_options: dict[str, Any] = Field(default_factory=dict)

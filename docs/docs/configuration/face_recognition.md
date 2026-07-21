@@ -232,7 +232,21 @@ Once front-facing images are performing well, start choosing slightly off-angle 
 
 Start with the [Usage](#usage) section and re-read the [Model Requirements](#model-requirements) above.
 
-1. Ensure `person` is being _detected_. A `person` will automatically be scanned by Frigate for a face. Any detected faces will appear in the Recent Recognitions tab in the Frigate UI's Face Library.
+1. Enable debug logs to see exactly what Frigate is doing.
+   - Enable debug logs for face recognition by adding `frigate.data_processing.real_time.face: debug` to your `logger` configuration. Restart Frigate after this change.
+
+     ```yaml
+     logger:
+       default: info
+       logs:
+         # highlight-next-line
+         frigate.data_processing.real_time.face: debug
+     ```
+
+   - These logs report where the pipeline stopped for each `person` object, such as no face being found within the person's bounding box, the detected face being smaller than `min_area`, or a face being recognized but scoring too low.
+   - If you see no face-related messages at all, also add `frigate.embeddings.maintainer: debug` to confirm that the face processor was created at startup and that `person` updates are reaching it.
+
+2. Ensure `person` is being _detected_. A `person` will automatically be scanned by Frigate for a face. Any detected faces will appear in the Recent Recognitions tab in the Frigate UI's Face Library.
 
    If you are using a Frigate+ or `face` detecting model:
    - Watch the [debug view](/usage/live#the-single-camera-view) to ensure that `face` is being detected along with `person`.
@@ -242,7 +256,7 @@ Start with the [Usage](#usage) section and re-read the [Model Requirements](#mod
    - Check your `detect` stream resolution and ensure it is sufficiently high enough to capture face details on `person` objects.
    - You may need to lower your `detection_threshold` if faces are not being detected.
 
-2. Any detected faces will then be _recognized_.
+3. Any detected faces will then be _recognized_.
    - Make sure you have trained at least one face per the recommendations above.
    - Adjust `recognition_threshold` settings per the suggestions [above](#advanced-configuration).
 

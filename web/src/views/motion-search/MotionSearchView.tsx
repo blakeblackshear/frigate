@@ -770,6 +770,34 @@ export default function MotionSearchView({
     };
   }, [cancelMotionSearchJobViaBeacon]);
 
+  const handleBack = useCallback(() => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(-1);
+    }
+  }, [navigate, onBack]);
+
+  // Dismissing the entry dialog (escape / click outside) before a search has
+  // run leaves nothing behind it, so cancel the flow instead of revealing an
+  // empty page.
+  const handleSearchDialogOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (
+        !nextOpen &&
+        !isSearching &&
+        !hasSearched &&
+        searchResults.length === 0
+      ) {
+        handleBack();
+        return;
+      }
+
+      setIsSearchDialogOpen(nextOpen);
+    },
+    [handleBack, hasSearched, isSearching, searchResults.length],
+  );
+
   const handleNewSearch = useCallback(() => {
     if (jobId && jobCamera) {
       void cancelMotionSearchJob(jobId, jobCamera);
@@ -1238,7 +1266,7 @@ export default function MotionSearchView({
         <Toaster closeButton={true} position="top-center" />
         <MotionSearchDialog
           open={isSearchDialogOpen}
-          onOpenChange={setIsSearchDialogOpen}
+          onOpenChange={handleSearchDialogOpenChange}
           config={config}
           cameras={cameras}
           selectedCamera={selectedCamera}
@@ -1276,7 +1304,7 @@ export default function MotionSearchView({
                 className="flex items-center gap-2.5 rounded-lg"
                 aria-label={t("label.back", { ns: "common" })}
                 size="sm"
-                onClick={() => (onBack ? onBack() : navigate(-1))}
+                onClick={handleBack}
               >
                 <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
                 {isDesktop && (

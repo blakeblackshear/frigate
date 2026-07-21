@@ -404,38 +404,64 @@ class Dispatcher:
         for comm in self.comms:
             comm.stop()
 
-    def restore_runtime_state(self) -> None:
+    def apply_runtime_state(self) -> dict[str, dict[str, bool]]:
         """Replay persisted runtime overrides through the camera settings handlers.
 
-        Called once after Frigate startup completes so processing threads can
-        receive the resulting ``config_updater`` broadcasts. Unknown cameras
-        and topics are skipped; handler exceptions are logged and replay
-        continues for remaining entries.
+        Routing through the handlers (rather than mutating config directly) is
+        deliberate: they publish the ``config_updater`` broadcast and the
+        retained MQTT state as a side effect, so worker processes and the UI
+        converge on the replayed value. Unknown cameras and topics are skipped;
+        handler exceptions are logged and replay continues for the rest.
+
+        Returns:
+            The entries handed to a handler without raising, keyed by camera
+            then topic. A handler can still refuse the value internally (an ON
+            payload for a camera that is not enabled_in_config, for example),
+            so this is not proof the override took effect.
         """
         state = self._runtime_state.load()
+        applied: dict[str, dict[str, bool]] = {}
+
         for camera_name, features in state.items():
             if camera_name not in self.config.cameras:
                 continue
+
             for topic, value in features.items():
                 handler = self._camera_settings_handlers.get(topic)
+
                 if handler is None:
                     continue
+
                 payload = "ON" if value else "OFF"
+
                 try:
                     handler(camera_name, payload)
                 except Exception:
                     logger.exception(
-                        "Failed to restore runtime state %s.%s=%s",
+                        "Failed to apply runtime state %s.%s=%s",
                         camera_name,
                         topic,
                         payload,
                     )
                     continue
+
+                applied.setdefault(camera_name, {})[topic] = value
+
+        return applied
+
+    def restore_runtime_state(self) -> None:
+        """Replay persisted runtime overrides once Frigate startup completes.
+
+        Called after every ``config_updater`` subscriber is up so the resulting
+        broadcasts are not dropped by ZMQ PUB/SUB.
+        """
+        for camera_name, features in self.apply_runtime_state().items():
+            for topic, value in features.items():
                 logger.info(
                     "Restored runtime state: %s.%s=%s",
                     camera_name,
                     topic,
-                    payload,
+                    "ON" if value else "OFF",
                 )
 
     def clear_runtime_state_for_yaml_keys(self, dotted_keys: Iterable[str]) -> None:
@@ -457,6 +483,56 @@ class Dispatcher:
         profile-derived in-memory state.
         """
         self._runtime_state.clear_all()
+
+    def clear_runtime_state_for_camera(self, camera: str) -> None:
+        """Drop all persisted runtime overrides for a deleted camera.
+
+        Called by camera deletion so a camera later added under the same name
+        does not inherit the removed camera's stale toggles.
+        """
+        self._runtime_state.clear_camera(camera)
+
+    def reapply_runtime_state_to_config(self) -> None:
+        """Re-apply persisted runtime overrides to the swapped-in config object.
+
+        After config/set (or a camera delete) parses fresh yaml and swaps the
+        config, the worker processes still hold the live toggle values and the
+        overrides are already on disk, so only the in-process config object is
+        out of date. Unlike apply_runtime_state (used at startup, where workers
+        must be told), this makes no ZMQ, MQTT, or disk writes, it just corrects
+        the config the API and dispatcher read.
+
+        The field mutations and gates mirror the _on_*_command handlers; keep
+        the two in sync if a tracked toggle is added or its gate changes.
+        """
+        state = self._runtime_state.load()
+
+        for camera_name, features in state.items():
+            camera = self.config.cameras.get(camera_name)
+
+            if camera is None:
+                continue
+
+            for topic, value in features.items():
+                if topic == "enabled":
+                    if value and not camera.enabled_in_config:
+                        continue
+                    camera.enabled = value
+                elif topic == "detect":
+                    camera.detect.enabled = value
+                    # detection requires motion, mirror the handler coupling
+                    if value and not camera.motion.enabled:
+                        camera.motion.enabled = True
+                elif topic == "snapshots":
+                    camera.snapshots.enabled = value
+                elif topic == "recordings":
+                    if value and not camera.record.enabled_in_config:
+                        continue
+                    camera.record.enabled = value
+                elif topic == "audio":
+                    if value and not camera.audio.enabled_in_config:
+                        continue
+                    camera.audio.enabled = value
 
     def _on_detect_command(self, camera_name: str, payload: str) -> None:
         """Callback for detect topic."""

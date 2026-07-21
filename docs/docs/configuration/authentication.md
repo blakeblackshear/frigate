@@ -262,6 +262,19 @@ In this example:
 
 - Admin precedence: if the `admin` mapping matches, Frigate resolves the session to `admin` to avoid accidental downgrade when a user belongs to multiple groups (for example both `admin` and `viewer` groups).
 
+:::note
+
+If a user isn't getting the role you expect, enable debug logging to see exactly what headers Frigate is receiving from your proxy:
+
+```yaml
+logger:
+  default: info
+  logs:
+    frigate.api.auth: debug
+```
+
+:::
+
 #### Port Considerations
 
 **Authenticated Port (8971)**
