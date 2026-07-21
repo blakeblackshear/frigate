@@ -52,9 +52,10 @@ You can define custom prompts at the global level and per-object type. To config
 
 ```yaml
 genai:
-  provider: ollama
-  base_url: http://localhost:11434
-  model: qwen3-vl:8b-instruct
+  my_provider:
+    provider: ollama
+    base_url: http://localhost:11434
+    model: qwen3-vl:8b-instruct
 
 objects:
   genai:

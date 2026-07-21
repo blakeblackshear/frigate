@@ -73,8 +73,12 @@ classification:
         interval: 10 # also run every N seconds (optional)
         cameras:
           front:
-            crop: [0, 180, 220, 400]
+            # [x1, y1, x2, y2] as decimals between 0 and 1, relative to the
+            # camera's detect resolution
+            crop: [0.0, 0.25, 0.3, 0.85]
 ```
+
+Crop coordinates are normalized: each value is a fraction of the camera's `detect` width or height, not a pixel value. Drawing the crop in the UI wizard writes these values for you.
 
 An optional config, `save_attempts`, can be set as a key under the model name. This defines the number of classification attempts to save in the Recent Classifications tab. For state classification models, the default is 100.
 

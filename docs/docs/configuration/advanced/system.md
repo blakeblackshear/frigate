@@ -335,7 +335,7 @@ For example:
 ```
 services:
   frigate:
-    image: blakeblackshear/frigate:latest
+    image: ghcr.io/blakeblackshear/frigate:stable
     environment:
       - FRIGATE_BASE_PATH=/frigate
 ```

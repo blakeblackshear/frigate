@@ -130,7 +130,8 @@ go2rtc:
 
 ```yaml
 genai:
-  api_key: "{FRIGATE_GENAI_API_KEY}"
+  my_provider:
+    api_key: "{FRIGATE_GENAI_API_KEY}"
 ```
 
 ## Common configuration examples
