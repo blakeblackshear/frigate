@@ -19,28 +19,15 @@ genai:
     provider: ollama
     base_url: http://localhost:11434
     model: qwen3-vl:4b
+    roles:
+      - descriptions
+      - embeddings
+      - chat
 ```
 
 The examples on this page all use `my_provider`, but the name is arbitrary and is only used to reference the provider elsewhere in the config (for example, `semantic_search.model`).
 
-Each provider handles one or more **roles**: `chat`, `descriptions`, and `embeddings`. A provider handles all three by default, and each role may be assigned to exactly one provider. Define a single provider if you want it to do everything, or split the roles across several providers using the `roles` option:
-
-```yaml
-genai:
-  local:
-    provider: ollama
-    base_url: http://localhost:11434
-    model: qwen3-vl:4b
-    roles:
-      - descriptions
-      - embeddings
-  cloud:
-    provider: gemini
-    api_key: "{FRIGATE_GEMINI_API_KEY}"
-    model: gemini-2.5-flash
-    roles:
-      - chat
-```
+Each provider handles one or more **roles**: `chat`, `descriptions`, and `embeddings`. A provider handles all three by default, and each role may be assigned to exactly one provider. Define a single provider if you want it to do everything, or split the roles across several providers using the `roles` option.
 
 If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
