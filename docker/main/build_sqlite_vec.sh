@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-SQLITE_VEC_VERSION="0.1.3"
+SQLITE_VEC_VERSION="0.1.9"
 
 source /etc/os-release
 
