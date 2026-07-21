@@ -30,6 +30,7 @@ const sidebars: SidebarsConfig = {
     ],
     Configuration: [
       "configuration/config",
+      "configuration/config_overrides",
       {
         type: "category",
         label: "Detectors",

@@ -11,6 +11,8 @@ It is not recommended to copy this full configuration file. Only specify values 
 
 :::
 
+Sections marked `# NOTE: Can be overridden at the camera level` can be set globally and then adjusted per camera. See [Global and Camera-Level Configuration](../config_overrides.md) for how that works.
+
 ```yaml
 mqtt:
   # Optional: Enable mqtt server (default: shown below)
