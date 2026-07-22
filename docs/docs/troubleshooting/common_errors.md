@@ -181,7 +181,39 @@ See [Database is locked](/troubleshooting/faqs#error-database-is-locked).
 
 <FaqItem id="database-disk-image-is-malformed" question="database disk image is malformed">
 
-The SQLite database file is corrupted, typically after hard power loss, a network-share database, or a filesystem with unsafe write semantics. There is no automatic repair. If a `backup.db` exists next to your database (Frigate writes one before schema migrations), restoring it is the least destructive option. Otherwise, stop Frigate, delete `frigate.db`, and restart: Frigate recreates it, but existing recordings lose their metadata (events, review items). Moving the database off a network share prevents recurrence.
+The SQLite database file is corrupted, typically after hard power loss, a network-share database, or a filesystem with unsafe write semantics. Frigate does not repair it automatically, but the database can usually be recovered by hand.
+
+**Stop Frigate first**, then work on the database file directly (by default `/config/frigate.db`). Start by checking what is actually wrong:
+
+```bash
+sqlite3 frigate.db "PRAGMA integrity_check;"
+```
+
+If the only problems reported are index-related (lines such as `row 14 missing from index recordings_path` or `non-unique entry in index ...`), rebuilding the indexes is usually enough and is the least destructive fix:
+
+```bash
+sqlite3 frigate.db "REINDEX;"
+```
+
+If the integrity check reports page or byte-level corruption instead (for example `Multiple uses for byte 2706 of page 142272`), dump the readable contents into a new database:
+
+```bash
+# dump what can still be read
+sqlite3 frigate.db .dump > frigate.dump
+
+# keep the corrupt file, then rebuild from the dump
+mv frigate.db frigate.db.bak
+cat frigate.dump | sqlite3 frigate.db
+
+# confirm the rebuilt database is clean, this should print "ok"
+sqlite3 frigate.db "PRAGMA integrity_check;"
+```
+
+Rows stored in the corrupted pages cannot be recovered, so expect to lose some tracked objects, review items, or thumbnails. Recordings themselves are files on disk and are not affected.
+
+As a last resort, stop Frigate, delete `frigate.db`, and restart. Frigate recreates it, but existing recordings lose all of their metadata. If a `backup.db` exists next to your database, Frigate wrote it before the last schema migration and restoring it recovers everything up to that point.
+
+Repeat corruption usually points at the underlying storage: move the database off a network share, and on Raspberry Pi check power delivery and the SD card or SSD.
 
 </FaqItem>
 
