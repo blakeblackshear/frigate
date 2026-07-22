@@ -15,6 +15,7 @@ class GenAIProviderEnum(str, Enum):
     gemini = "gemini"
     ollama = "ollama"
     llamacpp = "llamacpp"
+    twelvelabs = "twelvelabs"
 
 
 class GenAIRoleEnum(str, Enum):

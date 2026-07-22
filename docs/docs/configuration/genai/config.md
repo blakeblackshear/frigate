@@ -9,7 +9,7 @@ import NavPath from "@site/src/components/NavPath";
 
 ## Configuration
 
-A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 4 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI-Compatible section below.
+A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently several native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI-Compatible section below.
 
 To use Generative AI, you must define a single provider at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
@@ -383,6 +383,40 @@ genai:
   base_url: https://instance.cognitiveservices.azure.com/openai/responses?api-version=2025-04-01-preview
   model: gpt-5-mini
   api_key: "{FRIGATE_OPENAI_API_KEY}"
+```
+
+</TabItem>
+</ConfigTabs>
+
+### TwelveLabs (Marengo embeddings)
+
+[TwelveLabs](https://twelvelabs.io) provides the Marengo multimodal model, which embeds text and images into a shared vector space. This makes it usable as the `embeddings` provider for Frigate's [Semantic Search](/configuration/semantic_search), letting a natural-language query match stored event thumbnails directly.
+
+This provider implements only the `embeddings` role. Use a separate provider (such as Ollama, Gemini, or OpenAI) for the `descriptions` and `chat` roles if you want generated descriptions as well.
+
+#### Get API Key
+
+Create an API key from the [TwelveLabs dashboard](https://playground.twelvelabs.io/dashboard/api-key). There is a generous free tier.
+
+#### Configuration
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `twelvelabs`
+   - Set **API key** to your TwelveLabs API key (or use an environment variable such as `{FRIGATE_TWELVELABS_API_KEY}`)
+   - Optionally set **Model** to override the default Marengo model (`marengo3.0`)
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+genai:
+  provider: twelvelabs
+  api_key: "{FRIGATE_TWELVELABS_API_KEY}"
+  roles:
+    - embeddings
 ```
 
 </TabItem>
