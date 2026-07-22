@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import CodeBlock from "@theme/CodeBlock";
 import ConfigTabs from "@site/src/components/ConfigTabs";
+import FrigateConfigMock from "@site/src/components/FrigateConfigMock";
 import TabItem from "@theme/TabItem";
+import { load } from "js-yaml";
 import { marked } from "marked";
 import styles from "./styles.module.css";
 
@@ -103,6 +105,40 @@ export default function ModelConfigDropdown({ models }) {
 
   const selectedModel = models[selectedModelIndex];
   const hasChoices = models.length > 1;
+  const mockConfig = useMemo(() => {
+    try {
+      const parsed = load(selectedModel.yaml) ?? {};
+      const model = parsed.model ?? {};
+      const legacyDetectors = Object.fromEntries(
+        Object.entries(parsed).filter(
+          ([key, value]) =>
+            key !== "model" &&
+            value &&
+            typeof value === "object" &&
+            typeof value.type === "string",
+        ),
+      );
+      const detectors = parsed.detectors ?? legacyDetectors;
+      const values = {
+        detectors,
+        ...model,
+      };
+      const targets = [
+        ...(Object.keys(detectors).length ? ["detectors"] : []),
+        ...(Object.keys(model).length
+          ? [
+              {
+                field: "custom_model",
+                hint: `Configure the custom detection model, input size, and input format for ${selectedModel.label}.`,
+              },
+            ]
+          : []),
+      ];
+      return { targets, values };
+    } catch {
+      return { targets: ["detectors"], values: { detectors: {} } };
+    }
+  }, [selectedModel.label, selectedModel.yaml]);
 
   const handleModelSelect = (index) => {
     setSelectedModelIndex(index);
@@ -158,7 +194,13 @@ export default function ModelConfigDropdown({ models }) {
           <h4 className={styles.stepTitle}>Step 3 — Configure the detector</h4>
           <ConfigTabs>
             <TabItem value="ui">
-              <Markdown>{selectedModel.ui}</Markdown>
+              <FrigateConfigMock
+                autoPlay={false}
+                key={selectedModel.key}
+                section="model"
+                targets={mockConfig.targets}
+                values={mockConfig.values}
+              />
             </TabItem>
             <TabItem value="yaml">
               <CodeBlock language="yaml">{selectedModel.yaml}</CodeBlock>

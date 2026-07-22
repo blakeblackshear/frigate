@@ -5,7 +5,7 @@ title: Masks
 
 import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
-import NavPath from "@site/src/components/NavPath";
+import FrigateConfigMock from "@site/src/components/FrigateConfigMock";
 
 Frigate has two kinds of masks: motion masks and object filter masks. Both are narrow tools for fine-tuning, **not for hiding an area from Frigate**. Masks should be used sparingly; in most cases where users reach for one, a [zone](zones.md) with [`required_zones`](zones.md#restricting-alerts-and-detections-to-specific-zones) is the right tool instead. See [Which tool do I need?](#which-tool-do-i-need) and [Common mistakes](#common-mistakes) below if you're new to Frigate's mask behavior.
 
@@ -25,19 +25,64 @@ Object filter masks can be used to filter out stubborn false positives in fixed 
 
 ## Which tool do I need?
 
-| What you're trying to do                                                                                                                                                                  | Recommended tool                                                                                            | How it works                                                                                                                                                                                |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Only get alerts/detections for activity in the areas you care about, ignoring activity elsewhere (e.g., alert when someone enters your yard, but not when they walk past on the sidewalk) | A [zone](zones.md) combined with [`required_zones`](zones.md#restricting-alerts-and-detections-to-specific-zones) | Frigate keeps detecting and tracking activity everywhere in the frame, but a review item is only created once the bottom-center of an object's bounding box enters a required zone. |
-| Stop a stubborn false positive at a specific fixed spot (e.g., a tree base that keeps being detected as a person)                                                                         | An **object filter mask** for that object type                                                              | Any detection of that object type whose bounding-box bottom-center lands inside the mask is treated as a false positive and discarded.                                                      |
-| Ignore motion in an area that obviously isn't an object of interest (e.g., the camera timestamp, sky, flags, treetops swaying)                                                            | A **motion mask**                                                                                           | Motion inside the mask is ignored when deciding whether to run object detection. Objects can still be detected in a motion masked area if motion elsewhere in the frame triggers detection. |
-| Stop tracking an object type altogether on this camera (e.g., you never care about cats)                                                                                                  | Remove the object from the camera's [`objects.track`](objects.md) list                                      | Frigate skips this object type entirely on this camera, regardless of where it appears.                                                                                                     |
+| What you're trying to do                                                                                                                                                                  | Recommended tool                                                                                                  | How it works                                                                                                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Only get alerts/detections for activity in the areas you care about, ignoring activity elsewhere (e.g., alert when someone enters your yard, but not when they walk past on the sidewalk) | A [zone](zones.md) combined with [`required_zones`](zones.md#restricting-alerts-and-detections-to-specific-zones) | Frigate keeps detecting and tracking activity everywhere in the frame, but a review item is only created once the bottom-center of an object's bounding box enters a required zone.         |
+| Stop a stubborn false positive at a specific fixed spot (e.g., a tree base that keeps being detected as a person)                                                                         | An **object filter mask** for that object type                                                                    | Any detection of that object type whose bounding-box bottom-center lands inside the mask is treated as a false positive and discarded.                                                      |
+| Ignore motion in an area that obviously isn't an object of interest (e.g., the camera timestamp, sky, flags, treetops swaying)                                                            | A **motion mask**                                                                                                 | Motion inside the mask is ignored when deciding whether to run object detection. Objects can still be detected in a motion masked area if motion elsewhere in the frame triggers detection. |
+| Stop tracking an object type altogether on this camera (e.g., you never care about cats)                                                                                                  | Remove the object from the camera's [`objects.track`](objects.md) list                                            | Frigate skips this object type entirely on this camera, regardless of where it appears.                                                                                                     |
 
 ## Using the mask creator
 
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select a camera. Use the mask editor to draw motion masks and object filter masks directly on the camera feed. Each mask can be given a friendly name and toggled on or off.
+<FrigateConfigMock
+level="camera"
+section="masksAndZones"
+steps={[
+{
+focus: "motionMasks",
+label: "Motion Mask",
+hint: "Motion masks prevent unwanted motion from triggering detection. Use them sparingly so object tracking is not disrupted.",
+},
+{
+focus: "motionMask.add",
+label: "New Motion Mask",
+hint: "Select the plus button beside Motion Mask to create a mask.",
+},
+{
+focus: "motionMask.canvas",
+label: "Draw the motion mask",
+hint: "Select points on the camera image, then close the polygon by selecting the first point again.",
+},
+{
+focus: "motionMask.options",
+label: "Motion mask options",
+hint: "Give the mask a friendly name and choose whether it is enabled.",
+},
+{
+focus: "objectMasks",
+label: "Object Masks",
+hint: "Object masks filter false positives according to the bottom center of an object's bounding box.",
+},
+{
+focus: "objectMask.add",
+label: "New Object Mask",
+hint: "Select the plus button beside Object Masks to create an object filter mask.",
+},
+{
+focus: "objectMask.canvas",
+label: "Draw the object mask",
+hint: "Draw a precise polygon over the fixed location that produces false positives.",
+},
+{
+focus: "objectMask.options",
+label: "Object mask options",
+hint: "Name the mask, select the object type it applies to, and save it.",
+},
+]}
+/>
 
 </TabItem>
 <TabItem value="yaml">

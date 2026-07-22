@@ -1149,6 +1149,11 @@ rknn:
         | **Model Input D Type**                   | `int` (Frigate's default value)                    |
         | **Object Detection Model Type**          | `yolo-generic`                                     |
       yaml: |-
+        detectors:
+          rknn:
+            type: rknn
+            num_cores: 0
+
         model: # required
           # name of model (will be automatically downloaded) or path to your own .rknn model file
           # possible values are:
@@ -1187,6 +1192,11 @@ rknn:
         | **Model Input D Type**                   | `int` (Frigate's default value)                                         |
         | **Object Detection Model Type**          | `yolonas`                                                               |
       yaml: |-
+        detectors:
+          rknn:
+            type: rknn
+            num_cores: 0
+
         model: # required
           # name of model (will be automatically downloaded) or path to your own .rknn model file
           # possible values are:
@@ -1222,6 +1232,11 @@ rknn:
         | **Model Input D Type**                   | `int` (Frigate's default value)                |
         | **Object Detection Model Type**          | `yolox`                                        |
       yaml: |-
+        detectors:
+          rknn:
+            type: rknn
+            num_cores: 0
+
         model: # required
           # name of model (will be automatically downloaded) or path to your own .rknn model file
           # possible values are:
@@ -1297,11 +1312,12 @@ degirumAiServer:
         | **Zoo** | `degirum/public` |
         | **Token** | your AI Hub token (optional for the public zoo) |
       yaml: |
-        degirum_detector:
-          type: degirum
-          location: degirum
-          zoo: degirum/public
-          token: dg_example_token
+        detectors:
+          degirum_detector:
+            type: degirum
+            location: degirum
+            zoo: degirum/public
+            token: dg_example_token
 degirumLocal:
   title: DeGirum Local
   models:
@@ -1318,11 +1334,12 @@ degirumLocal:
         | **Zoo** | `degirum/public` |
         | **Token** | your AI Hub token (optional for the public zoo) |
       yaml: |
-        degirum_detector:
-          type: degirum
-          location: @local
-          zoo: degirum/public
-          token: dg_example_token
+        detectors:
+          degirum_detector:
+            type: degirum
+            location: "@local"
+            zoo: degirum/public
+            token: dg_example_token
 degirumCloud:
   title: DeGirum AI Hub Cloud
   models:
@@ -1339,8 +1356,9 @@ degirumCloud:
         | **Zoo** | `degirum/public` |
         | **Token** | your AI Hub token (optional for the public zoo) |
       yaml: |
-        degirum_detector:
-          type: degirum
-          location: @cloud
-          zoo: degirum/public
-          token: dg_example_token
+        detectors:
+          degirum_detector:
+            type: degirum
+            location: "@cloud"
+            zoo: degirum/public
+            token: dg_example_token

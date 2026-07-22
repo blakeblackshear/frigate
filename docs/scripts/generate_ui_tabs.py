@@ -45,7 +45,7 @@ from lib.i18n_loader import load_i18n
 from lib.nav_map import ALL_CONFIG_SECTIONS
 from lib.schema_loader import load_schema
 from lib.section_config_parser import load_section_configs
-from lib.ui_generator import generate_ui_content, wrap_with_config_tabs
+from lib.ui_generator import generate_mock_content, generate_ui_content, wrap_with_config_tabs
 from lib.yaml_extractor import (
     extract_config_tabs_blocks,
     extract_yaml_blocks,
@@ -60,6 +60,7 @@ def process_file(
     inject: bool = False,
     verbose: bool = False,
     outpath: Path | None = None,
+    mock: bool = False,
 ) -> dict:
     """Process a single markdown file for initial injection of bare YAML blocks.
 
@@ -114,7 +115,8 @@ def process_file(
             continue
 
         # Generate UI content
-        ui_content = generate_ui_content(
+        generator = generate_mock_content if mock else generate_ui_content
+        ui_content = generator(
             block, schema, i18n, section_configs
         )
 
@@ -188,6 +190,7 @@ def regenerate_file(
     dry_run: bool = False,
     verbose: bool = False,
     outpath: Path | None = None,
+    mock: bool = False,
 ) -> dict:
     """Regenerate UI tabs in existing ConfigTabs blocks.
 
@@ -233,7 +236,8 @@ def regenerate_file(
             continue
 
         # Generate fresh UI content
-        new_ui = generate_ui_content(
+        generator = generate_mock_content if mock else generate_ui_content
+        new_ui = generator(
             yaml_block, schema, i18n, section_configs
         )
 
@@ -302,6 +306,7 @@ def check_file(
     i18n: dict,
     section_configs: dict,
     verbose: bool = False,
+    mock: bool = False,
 ) -> dict:
     """Check for drift between existing UI tabs and what would be generated.
 
@@ -333,7 +338,8 @@ def check_file(
             stats["skipped"] += 1
             continue
 
-        new_ui = generate_ui_content(
+        generator = generate_mock_content if mock else generate_ui_content
+        new_ui = generator(
             yaml_block, schema, i18n, section_configs
         )
 
@@ -406,6 +412,10 @@ def _ensure_imports(content: str) -> str:
         needed_imports.append(
             'import NavPath from "@site/src/components/NavPath";'
         )
+    if "<FrigateConfigMock" in content and 'import FrigateConfigMock' not in content:
+        needed_imports.append(
+            'import FrigateConfigMock from "@site/src/components/FrigateConfigMock";'
+        )
 
     if not needed_imports:
         return content
@@ -472,6 +482,11 @@ def main():
         action="store_true",
         help="Show detailed warnings and diagnostics",
     )
+    parser.add_argument(
+        "--mock",
+        action="store_true",
+        help="Generate focused Frigate UI mocks instead of text instructions",
+    )
     args = parser.parse_args()
 
     # Collect files and determine base directory for relative path computation
@@ -525,23 +540,25 @@ def main():
     print(f"Processing {len(files)} file(s)...\n", file=sys.stderr)
 
     if args.check:
-        _run_check(files, schema, i18n, section_configs, args.verbose)
+        _run_check(files, schema, i18n, section_configs, args.verbose, args.mock)
     elif args.regenerate:
         _run_regenerate(
             files, schema, i18n, section_configs,
             args.dry_run, args.verbose, file_outpaths,
+            args.mock,
         )
     else:
         _run_inject(
             files, schema, i18n, section_configs,
             args.inject, args.verbose, file_outpaths,
+            args.mock,
         )
 
     if outdir is not None:
         print(f"\nOutput written to: {outdir}", file=sys.stderr)
 
 
-def _run_inject(files, schema, i18n, section_configs, inject, verbose, file_outpaths):
+def _run_inject(files, schema, i18n, section_configs, inject, verbose, file_outpaths, mock):
     """Run default mode: preview or inject bare YAML blocks."""
     total_stats = {
         "files": 0,
@@ -557,6 +574,7 @@ def _run_inject(files, schema, i18n, section_configs, inject, verbose, file_outp
             filepath, schema, i18n, section_configs,
             inject=inject, verbose=verbose,
             outpath=file_outpaths.get(filepath),
+            mock=mock,
         )
 
         total_stats["files"] += 1
@@ -580,7 +598,7 @@ def _run_inject(files, schema, i18n, section_configs, inject, verbose, file_outp
     print("=" * 60, file=sys.stderr)
 
 
-def _run_regenerate(files, schema, i18n, section_configs, dry_run, verbose, file_outpaths):
+def _run_regenerate(files, schema, i18n, section_configs, dry_run, verbose, file_outpaths, mock):
     """Run regenerate mode: update existing ConfigTabs blocks."""
     total_stats = {
         "files": 0,
@@ -595,6 +613,7 @@ def _run_regenerate(files, schema, i18n, section_configs, dry_run, verbose, file
             filepath, schema, i18n, section_configs,
             dry_run=dry_run, verbose=verbose,
             outpath=file_outpaths.get(filepath),
+            mock=mock,
         )
 
         total_stats["files"] += 1
@@ -617,7 +636,7 @@ def _run_regenerate(files, schema, i18n, section_configs, dry_run, verbose, file
     print("=" * 60, file=sys.stderr)
 
 
-def _run_check(files, schema, i18n, section_configs, verbose):
+def _run_check(files, schema, i18n, section_configs, verbose, mock):
     """Run check mode: detect drift without modifying files."""
     total_stats = {
         "files": 0,
@@ -630,6 +649,7 @@ def _run_check(files, schema, i18n, section_configs, verbose):
     for filepath in files:
         stats = check_file(
             filepath, schema, i18n, section_configs, verbose=verbose,
+            mock=mock,
         )
 
         total_stats["files"] += 1

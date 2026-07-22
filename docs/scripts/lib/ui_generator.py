@@ -1,5 +1,6 @@
-"""Generate UI tab markdown content from parsed YAML blocks."""
+"""Generate UI tab content from parsed YAML blocks."""
 
+import json
 from typing import Any
 
 from .i18n_loader import get_field_description, get_field_label, get_value_label
@@ -7,6 +8,80 @@ from .nav_map import ALL_CONFIG_SECTIONS, detect_level, get_nav_path
 from .schema_loader import is_boolean_field, is_object_field
 from .section_config_parser import get_hidden_fields
 from .yaml_extractor import YamlBlock, get_leaf_paths
+
+
+def generate_mock_content(
+    block: YamlBlock,
+    schema: dict[str, Any],
+    i18n: dict[str, Any],
+    section_configs: dict[str, dict[str, Any]],
+) -> str | None:
+    """Generate a focused Frigate config mock for a YAML block."""
+    if block.section_key is None:
+        return None
+
+    if block.is_camera_level:
+        cameras = block.parsed.get("cameras", {})
+        camera_name = block.camera_name or next(iter(cameras), None)
+        if not camera_name or not isinstance(cameras.get(camera_name), dict):
+            return None
+        config = cameras[camera_name]
+        level = "camera"
+    else:
+        config = block.parsed
+        level = detect_level(block.section_key)
+        if level not in ("global", "camera"):
+            level = "global"
+
+    steps: list[dict[str, object]] = []
+    for section, section_data in config.items():
+        if section not in ALL_CONFIG_SECTIONS or not isinstance(
+            section_data, dict
+        ):
+            continue
+
+        hidden = get_hidden_fields(section_configs, section, level)
+        values: dict[str, object] = {}
+        for path, value in get_leaf_paths(section_data):
+            path_parts = list(path)
+            if not _is_hidden(path_parts[-1], path_parts, hidden):
+                values[".".join(path_parts)] = value
+
+        if values:
+            steps.append(
+                {
+                    "section": section,
+                    "level": level,
+                    "fields": list(values),
+                    "values": values,
+                    "focus": next(iter(values)),
+                }
+            )
+
+    if not steps:
+        return None
+
+    if len(steps) == 1:
+        step = steps[0]
+        return "\n".join(
+            [
+                "<FrigateConfigMock",
+                f'  section="{step["section"]}"',
+                f'  level="{step["level"]}"',
+                f"  fields={{{json.dumps(step['fields'])}}}",
+                f"  values={{{json.dumps(step['values'])}}}",
+                f'  focus="{step["focus"]}"',
+                "/>",
+            ]
+        )
+
+    return "\n".join(
+        [
+            "<FrigateConfigMock",
+            f"  steps={{{json.dumps(steps)}}}",
+            "/>",
+        ]
+    )
 
 
 def _format_value(

@@ -5,6 +5,7 @@ title: Object Detectors
 
 import CommunityBadge from '@site/src/components/CommunityBadge';
 import ConfigTabs from '@site/src/components/ConfigTabs';
+import FrigateConfigMock from '@site/src/components/FrigateConfigMock';
 import TabItem from '@theme/TabItem';
 import NavPath from '@site/src/components/NavPath';
 import ModelConfigDropdown from '@site/src/components/ModelConfigDropdown';
@@ -112,7 +113,17 @@ See [common Edge TPU troubleshooting steps](/troubleshooting/edgetpu) if the Edg
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`.
+<FrigateConfigMock
+  autoPlay={false}
+  section="model"
+  values={{ detectors: { coral: { type: "edgetpu", device: "usb" } } }}
+  targets={[
+    {
+      field: "detectors",
+      hint: "Add an EdgeTPU detector named coral and set its device to usb.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -132,7 +143,24 @@ detectors:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `usb:0` and `usb:1` as the device for each.
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  section="model"
+  values={{
+    detectors: {
+      coral1: { type: "edgetpu", device: "usb:0" },
+      coral2: { type: "edgetpu", device: "usb:1" },
+    },
+  }}
+  targets={[
+    {
+      field: "detectors",
+      hint:
+        "Add two EdgeTPU detectors and assign usb:0 and usb:1 as their devices.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -157,7 +185,19 @@ _warning: may have [compatibility issues](https://github.com/blakeblackshear/fri
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then leave the device field empty.
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  section="model"
+  values={{ detectors: { coral: { type: "edgetpu", device: "" } } }}
+  targets={[
+    {
+      field: "detectors",
+      hint:
+        "Add an EdgeTPU detector and leave Device empty so Frigate auto-detects the native Coral.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -177,7 +217,18 @@ detectors:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `pci`.
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  section="model"
+  values={{ detectors: { coral: { type: "edgetpu", device: "pci" } } }}
+  targets={[
+    {
+      field: "detectors",
+      hint: "Add an EdgeTPU detector named coral and set its device to pci.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -197,7 +248,24 @@ detectors:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `pci:0` and `pci:1` as the device for each.
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  section="model"
+  values={{
+    detectors: {
+      coral1: { type: "edgetpu", device: "pci:0" },
+      coral2: { type: "edgetpu", device: "pci:1" },
+    },
+  }}
+  targets={[
+    {
+      field: "detectors",
+      hint:
+        "Add two EdgeTPU detectors and assign pci:0 and pci:1 as their devices.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -220,7 +288,24 @@ detectors:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors with different device types (e.g., `usb` and `pci`).
+<FrigateConfigMock
+  autoPlay={false}
+  showNavigationSteps={false}
+  section="model"
+  values={{
+    detectors: {
+      coral_usb: { type: "edgetpu", device: "usb" },
+      coral_pci: { type: "edgetpu", device: "pci" },
+    },
+  }}
+  targets={[
+    {
+      field: "detectors",
+      hint:
+        "Add two EdgeTPU detectors and assign usb to one device and pci to the other.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">

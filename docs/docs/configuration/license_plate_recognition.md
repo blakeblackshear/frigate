@@ -4,6 +4,7 @@ title: License Plate Recognition (LPR)
 ---
 
 import ConfigTabs from "@site/src/components/ConfigTabs";
+import FrigateConfigMock from "@site/src/components/FrigateConfigMock";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 import FaqItem from "@site/src/components/FaqItem";
@@ -50,9 +51,11 @@ License plate recognition is disabled by default and must be enabled before it c
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
-
-- Set **Enable LPR** to on
+<FrigateConfigMock
+  section="lpr"
+  values={{ enabled: true }}
+  targets={["enabled"]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -70,7 +73,17 @@ Like other enrichments in Frigate, LPR **must be enabled globally** to use the f
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" /> for the desired camera and disable the **Enable LPR** toggle.
+<FrigateConfigMock
+  section="lpr"
+  level="camera"
+  values={{ enabled: false }}
+  targets={[
+    {
+      field: "enabled",
+      hint: "Disable the Enable LPR toggle for this camera.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -99,16 +112,40 @@ Fine-tune the LPR feature using these optional parameters. The only optional par
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
-
-- **Detection threshold**: License plate object detection confidence score required before recognition runs. This field only applies to the standalone license plate detection model; `threshold` and `min_score` object filters should be used for models like Frigate+ that have license plate detection built in.
-  - Default: `0.7`
-- **Minimum plate area**: Minimum area (in pixels) a license plate must be before recognition runs. This is an _area_ measurement (length x width). For reference, 1000 pixels represents a ~32x32 pixel square in your camera image. Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
-  - Default: `1000` pixels
-- **Device**: Device to use to run license plate detection _and_ recognition models. Auto-selected by Frigate and can be `CPU`, `GPU`, or the GPU's device number. For users without a model that detects license plates natively, using a GPU may increase performance of the YOLOv9 license plate detector model. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
-  - Default: `None`
-- **Model size**: The size of the model used to identify regions of text on plates. The `small` model is fast and identifies groups of Latin and Chinese characters. The `large` model identifies Latin characters only, and uses an enhanced text detector to find characters on multi-line plates. If your country or region does not use multi-line plates, you should use the `small` model.
-  - Default: `small`
+<FrigateConfigMock
+  showNavigationSteps={false}
+  section="lpr"
+  autoPlay={false}
+  values={{
+    enabled: true,
+    detection_threshold: 0.7,
+    min_area: 1000,
+    device: "CPU",
+    model_size: "small",
+  }}
+  targets={[
+    {
+      field: "detection_threshold",
+      hint:
+        "License plate object detection confidence score required before recognition runs. This field only applies to the standalone license plate detection model; threshold and min_score object filters should be used for models like Frigate+ that have license plate detection built in.",
+    },
+    {
+      field: "min_area",
+      hint:
+        "Minimum area (in pixels) a license plate must be before recognition runs. This is an area measurement (length x width). For reference, 1000 pixels represents a ~32x32 pixel square in your camera image. Depending on the resolution of your camera's detect stream, you can increase this value to ignore small or distant plates.",
+    },
+    {
+      field: "device",
+      hint:
+        "Device to use to run license plate detection and recognition models. Auto-selected by Frigate and can be CPU, GPU, or the GPU's device number. For users without a model that detects license plates natively, using a GPU may increase performance of the YOLOv9 license plate detector model. See the Hardware Accelerated Enrichments documentation.",
+    },
+    {
+      field: "model_size",
+      hint:
+        "The size of the model used to identify regions of text on plates. The small model is fast and identifies groups of Latin and Chinese characters. The large model identifies Latin characters only, and uses an enhanced text detector to find characters on multi-line plates. If your country or region does not use multi-line plates, you should use the small model.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -130,12 +167,34 @@ lpr:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
-
-- **Recognition threshold**: Recognition confidence score required to add the plate to the object as a `recognized_license_plate` and/or `sub_label`.
-  - Default: `0.9`
-- **Min plate length**: Minimum number of characters a detected license plate must have to be added as a `recognized_license_plate` and/or `sub_label`. Use this to filter out short, incomplete, or incorrect detections.
-- **Plate format regex**: A regular expression defining the expected format of detected plates. Plates that do not match this format will be discarded. Websites like https://regex101.com/ can help test regular expressions for your plates.
+<FrigateConfigMock
+  showNavigationSteps={false}
+  section="lpr"
+  autoPlay={false}
+  values={{
+    enabled: true,
+    recognition_threshold: 0.9,
+    min_plate_length: 4,
+    format: "^[A-Z]{2}[0-9]{2} [A-Z]{3}$",
+  }}
+  targets={[
+    {
+      field: "recognition_threshold",
+      hint:
+        "Recognition confidence score required to add the plate to the object as a recognized_license_plate and/or sub_label.",
+    },
+    {
+      field: "min_plate_length",
+      hint:
+        "Minimum number of characters a detected license plate must have to be added as a recognized_license_plate and/or sub_label. Use this to filter out short, incomplete, or incorrect detections.",
+    },
+    {
+      field: "format",
+      hint:
+        "A regular expression defining the expected format of detected plates. Plates that do not match this format will be discarded. Websites like https://regex101.com/ can help test regular expressions for your plates.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -156,10 +215,31 @@ lpr:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
-
-- **Known plates**: Assign custom `sub_label` values to `car` and `motorcycle` objects when a recognized plate matches a known value. These labels appear in the UI, filters, and notifications. Unknown plates are still saved but are added to the `recognized_license_plate` field rather than the `sub_label`.
-- **Match distance**: Allows for minor variations (missing/incorrect characters) when matching a detected plate to a known plate. For example, setting to `1` allows a plate `ABCDE` to match `ABCBE` or `ABCD`. This parameter will _not_ operate on known plates that are defined as regular expressions.
+<FrigateConfigMock
+  showNavigationSteps={false}
+  section="lpr"
+  autoPlay={false}
+  values={{
+    enabled: true,
+    match_distance: 1,
+    known_plates: {
+      "Wife's Car": ["ABC-1234"],
+      Johnny: ["J*N-*234"],
+    },
+  }}
+  targets={[
+    {
+      field: "match_distance",
+      hint:
+        "Allows for minor variations (missing/incorrect characters) when matching a detected plate to a known plate. For example, setting to 1 allows a plate ABCDE to match ABCBE or ABCD. This parameter will not operate on known plates that are defined as regular expressions.",
+    },
+    {
+      field: "known_plates",
+      hint:
+        "Assign custom sub_label values to car and motorcycle objects when a recognized plate matches a known value. These labels appear in the UI, filters, and notifications. Unknown plates are still saved but are added to the recognized_license_plate field rather than the sub_label.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -183,10 +263,19 @@ lpr:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
-
-- **Enhancement level**: A value between 0 and 10 that adjusts the level of image enhancement applied to captured license plates before they are processed for recognition. Higher values increase contrast, sharpen details, and reduce noise, but excessive enhancement can blur or distort characters. This setting is best adjusted at the camera level if running LPR on multiple cameras.
-  - Default: `0` (no enhancement)
+<FrigateConfigMock
+  showNavigationSteps={false}
+  section="lpr"
+  autoPlay={false}
+  values={{ enabled: true, enhancement: 1 }}
+  targets={[
+    {
+      field: "enhancement",
+      hint:
+        "A value between 0 and 10 that adjusts the level of image enhancement applied to captured license plates before they are processed for recognition. Higher values increase contrast, sharpen details, and reduce noise, but excessive enhancement can blur or distort characters. This setting is best adjusted at the camera level if running LPR on multiple cameras.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -207,17 +296,27 @@ If Frigate is already recognizing plates correctly, leave enhancement at the def
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
-
-Under **Replacement rules**, add regex rules to normalize detected plate strings before matching. Rules fire in order. For example:
-
-| Pattern          | Replacement | Description                                        |
-| ---------------- | ----------- | -------------------------------------------------- |
-| `[%#*?]`         | _(empty)_   | Remove noise symbols                               |
-| `[= ]`           | `-`         | Normalize `=` or space to dash                     |
-| `O`              | `0`         | Swap `O` to `0` (common OCR error)                 |
-| `I`              | `1`         | Swap `I` to `1`                                    |
-| `(\w{3})(\w{3})` | `\1-\2`     | Split 6 chars into groups (e.g., ABC123 → ABC-123) |
+<FrigateConfigMock
+  showNavigationSteps={false}
+  section="lpr"
+  autoPlay={false}
+  values={{
+    replace_rules: [
+      { pattern: "[%#*?]", replacement: "" },
+      { pattern: "[= ]", replacement: "-" },
+      { pattern: "O", replacement: "0" },
+      { pattern: "I", replacement: "1" },
+      { pattern: "(\\w{3})(\\w{3})", replacement: "\\1-\\2" },
+    ],
+  }}
+  targets={[
+    {
+      field: "replace_rules",
+      hint:
+        "Add regex rules to normalize detected plate strings before matching. Rules fire in order.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -252,9 +351,19 @@ These rules must be defined at the global level of your `lpr` config.
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
-
-- **Save debug plates**: Set to on to save captured text on plates for debugging. These images are stored in `/media/frigate/clips/lpr`, organized into subdirectories by `<camera>/<event_id>`, and named based on the capture timestamp.
+<FrigateConfigMock
+  showNavigationSteps={false}
+  section="lpr"
+  autoPlay={false}
+  values={{ enabled: true, debug_save_plates: true }}
+  targets={[
+    {
+      field: "debug_save_plates",
+      hint:
+        "Set to on to save captured text on plates for debugging. These images are stored in /media/frigate/clips/lpr and named based on the capture timestamp.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -279,17 +388,35 @@ These configuration parameters are available at the global level. The only optio
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
-
-| Field                          | Description                                                                                           |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| **Enable LPR**                 | Set to on                                                                                             |
-| **Minimum plate area**         | Set to `1500` to ignore plates with an area (length x width) smaller than 1500 pixels                  |
-| **Min plate length**           | Set to `4` to only recognize plates with 4 or more characters                                          |
-| **Known plates > Wife's Car**  | `ABC-1234`, `ABC-I234` (accounts for potential confusion between the number one and capital letter I) |
-| **Known plates > Johnny**      | `J*N-*234` (matches JHN-1234 and JMN-I234; `*` matches any number of characters)                      |
-| **Known plates > Sally**       | `[S5]LL 1234` (matches both SLL 1234 and 5LL 1234)                                                    |
-| **Known plates > Work Trucks** | `EMP-[0-9]{3}[A-Z]` (matches plates like EMP-123A, EMP-456Z)                                          |
+<FrigateConfigMock
+  showNavigationSteps={false}
+  section="lpr"
+  autoPlay={false}
+  values={{
+    enabled: true,
+    min_area: 1500,
+    min_plate_length: 4,
+    known_plates: {
+      "Wife's Car": ["ABC-1234", "ABC-I234"],
+      Johnny: ["J*N-*234"],
+      Sally: ["[S5]LL 1234"],
+      "Work Trucks": ["EMP-[0-9]{3}[A-Z]"],
+    },
+  }}
+  targets={[
+    { field: "enabled", hint: "Set to on." },
+    {
+      field: "min_area",
+      hint:
+        "Set to 1500 to ignore plates with an area (length x width) smaller than 1500 pixels.",
+    },
+    {
+      field: "min_plate_length",
+      hint: "Set to 4 to only recognize plates with 4 or more characters.",
+    },
+    "known_plates",
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -321,7 +448,18 @@ If a camera is configured to detect `car` or `motorcycle` but you don't want Fri
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" /> for the desired camera and disable the **Enable LPR** toggle.
+<FrigateConfigMock
+  autoPlay={false}
+  section="lpr"
+  level="camera"
+  values={{ enabled: false }}
+  targets={[
+    {
+      field: "enabled",
+      hint: "Disable the Enable LPR toggle for this camera.",
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -362,48 +500,93 @@ An example configuration for a dedicated LPR camera using a `license_plate`-dete
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" /> and set **Enable LPR** to on. Set **Device** to `CPU` (can also be `GPU` if available).
-
-Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> and add your camera streams.
-
-Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
-
-| Field                             | Description                                                                                                                    |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **Enable object detection**       | Set to on                                                                                                                      |
-| **Detect FPS**                    | Set to `5`. Increase to `10` if vehicles move quickly across your frame. Higher than 10 is unnecessary and is not recommended. |
-| **Minimum initialization frames** | Set to `2`                                                                                                                     |
-| **Detect width**                  | Set to `1920`                                                                                                                  |
-| **Detect height**                 | Set to `1080`                                                                                                                  |
-
-Navigate to <NavPath path="Settings > Camera configuration > Objects" />.
-
-| Field                                          | Description         |
-| ---------------------------------------------- | ------------------- |
-| **Objects to track**                           | Add `license_plate` |
-| **Object filters > License Plate > Threshold** | Set to `0.7`        |
-
-Navigate to <NavPath path="Settings > Camera configuration > Motion detection" />.
-
-| Field                | Description                                                           |
-| -------------------- | --------------------------------------------------------------------- |
-| **Motion threshold** | Set to `30`                                                           |
-| **Contour area**     | Set to `60`. Use an increased value to tune out small motion changes. |
-| **Improve contrast** | Set to off                                                            |
-
-Also add a motion mask over your camera's timestamp so it is not incorrectly detected as a license plate.
-
-Navigate to <NavPath path="Settings > Camera configuration > Recording" />.
-
-| Field                | Description                                              |
-| -------------------- | -------------------------------------------------------- |
-| **Enable recording** | Set to on. Disable recording if you only want snapshots. |
-
-Navigate to <NavPath path="Settings > Camera configuration > Snapshots" />.
-
-| Field                | Description |
-| -------------------- | ----------- |
-| **Enable snapshots** | Set to on   |
+<FrigateConfigMock
+  section="lpr"
+  autoPlay={false}
+  steps={[
+    {
+      section: "lpr",
+      level: "global",
+      values: { enabled: true, device: "CPU" },
+      targets: ["enabled", "device"],
+    },
+    {
+      section: "detect",
+      level: "camera",
+      values: {
+        enabled: true,
+        fps: 5,
+        min_initialized: 2,
+        width: 1920,
+        height: 1080,
+      },
+      targets: [
+        { field: "enabled", hint: "Set to on." },
+        {
+          field: "fps",
+          hint:
+            "Set to 5. Increase to 10 if vehicles move quickly across your frame. Higher than 10 is unnecessary and is not recommended.",
+        },
+        { field: "min_initialized", hint: "Set to 2." },
+        { field: "width", hint: "Set to 1920." },
+        { field: "height", hint: "Set to 1080." },
+      ],
+    },
+    {
+      section: "objects",
+      level: "camera",
+      values: {
+        track: ["license_plate"],
+        filters: { license_plate: { threshold: 0.7 } },
+      },
+      targets: [
+        { field: "track", hint: "Add license_plate." },
+        "filters",
+      ],
+    },
+    {
+      section: "motion",
+      level: "camera",
+      values: {
+        threshold: 30,
+        contour_area: 60,
+        improve_contrast: false,
+      },
+      targets: [
+        { field: "threshold", hint: "Set to 30." },
+        {
+          field: "contour_area",
+          hint:
+            "Set to 60. Use an increased value to tune out small motion changes.",
+        },
+        { field: "improve_contrast", hint: "Set to off." },
+      ],
+    },
+    {
+      section: "record",
+      level: "camera",
+      values: { enabled: true },
+      targets: [
+        {
+          field: "enabled",
+          hint: "Set to on. Disable recording if you only want snapshots.",
+        },
+      ],
+    },
+    {
+      section: "snapshots",
+      level: "camera",
+      values: { enabled: true },
+      targets: [{ field: "enabled", hint: "Set to on." }],
+    },
+    {
+      section: "review",
+      level: "camera",
+      values: { "detections.labels": ["license_plate"] },
+      targets: ["detections.labels"],
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -467,54 +650,104 @@ An example configuration for a dedicated LPR camera using the secondary pipeline
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" /> and set **Enable LPR** to on. Set **Device** to `CPU` (can also be `GPU` if available and the correct Docker image is used). Set **Detection threshold** to `0.7` (change if necessary).
-
-Navigate to <NavPath path="Settings > Camera configuration > License plate recognition" /> for your dedicated LPR camera.
-
-| Field                 | Description                                                                      |
-| --------------------- | -------------------------------------------------------------------------------- |
-| **Enable LPR**        | Set to on                                                                        |
-| **Enhancement level** | Set to `3` (optional, enhances the image before trying to recognize characters) |
-
-Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> and add your camera streams.
-
-Navigate to <NavPath path="Settings > Camera configuration > Object detection" />.
-
-| Field                       | Description                                                                                                                  |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Enable object detection** | Set to off to disable Frigate's standard object detection pipeline                                                           |
-| **Detect FPS**              | Set to `5`. Increase if necessary, though high values may slow down Frigate's enrichments pipeline and use considerable CPU. |
-| **Detect width**            | Set to `1920` (recommended value, but depends on your camera)                                                                |
-| **Detect height**           | Set to `1080` (recommended value, but depends on your camera)                                                                |
-
-Navigate to <NavPath path="Settings > Camera configuration > Objects" />.
-
-| Field                | Description                                                                            |
-| -------------------- | -------------------------------------------------------------------------------------- |
-| **Objects to track** | Set to an empty list, required when not using a Frigate+ model for dedicated LPR mode |
-
-Navigate to <NavPath path="Settings > Camera configuration > Motion detection" />.
-
-| Field                | Description                                                           |
-| -------------------- | --------------------------------------------------------------------- |
-| **Motion threshold** | Set to `30`                                                           |
-| **Contour area**     | Set to `60`. Use an increased value to tune out small motion changes. |
-| **Improve contrast** | Set to off                                                            |
-
-Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and add a motion mask over your camera's timestamp so it is not incorrectly detected as a license plate.
-
-Navigate to <NavPath path="Settings > Camera configuration > Recording" />.
-
-| Field                | Description                                              |
-| -------------------- | -------------------------------------------------------- |
-| **Enable recording** | Set to on. Disable recording if you only want snapshots. |
-
-Navigate to <NavPath path="Settings > Camera configuration > Review" />.
-
-| Field                                     | Description     |
-| ----------------------------------------- | --------------- |
-| **Detections config > Enable detections** | Set to on       |
-| **Detections config > Retain > Default**  | Set to `7` days |
+<FrigateConfigMock
+  steps={[
+    {
+      section: "lpr",
+      level: "global",
+      values: {
+        enabled: true,
+        device: "CPU",
+        detection_threshold: 0.7,
+      },
+      targets: ["enabled", "device", "detection_threshold"],
+    },
+    {
+      section: "lpr",
+      level: "camera",
+      values: { enabled: true, enhancement: 3 },
+      targets: [
+        { field: "enabled", hint: "Set to on." },
+        {
+          field: "enhancement",
+          hint:
+            "Set to 3. This optional setting enhances the image before trying to recognize characters.",
+        },
+      ],
+    },
+    {
+      section: "detect",
+      level: "camera",
+      values: { enabled: false, fps: 5, width: 1920, height: 1080 },
+      targets: [
+        {
+          field: "enabled",
+          hint: "Set to off to disable Frigate's standard object detection pipeline.",
+        },
+        {
+          field: "fps",
+          hint:
+            "Set to 5. Increase if necessary, though high values may slow down Frigate's enrichments pipeline and use considerable CPU.",
+        },
+        {
+          field: "width",
+          hint: "Set to 1920. The appropriate value depends on your camera.",
+        },
+        {
+          field: "height",
+          hint: "Set to 1080. The appropriate value depends on your camera.",
+        },
+      ],
+    },
+    {
+      section: "objects",
+      level: "camera",
+      values: { track: [] },
+      targets: [
+        {
+          field: "track",
+          hint:
+            "Set to an empty list. This is required when not using a Frigate+ model for dedicated LPR mode.",
+        },
+      ],
+    },
+    {
+      section: "motion",
+      level: "camera",
+      values: {
+        threshold: 30,
+        contour_area: 60,
+        improve_contrast: false,
+      },
+      targets: [
+        { field: "threshold", hint: "Set to 30." },
+        {
+          field: "contour_area",
+          hint:
+            "Set to 60. Use an increased value to tune out small motion changes.",
+        },
+        { field: "improve_contrast", hint: "Set to off." },
+      ],
+    },
+    {
+      section: "record",
+      level: "camera",
+      values: { enabled: true },
+      targets: [
+        {
+          field: "enabled",
+          hint: "Set to on. Disable recording if you only want snapshots.",
+        },
+      ],
+    },
+    {
+      section: "review",
+      level: "camera",
+      values: { "detections.enabled": true },
+      targets: ["detections.enabled"],
+    },
+  ]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
@@ -655,11 +888,13 @@ Start with ["Why isn't my license plate being detected and recognized?"](#why-is
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Enrichments > License plate recognition" />.
-
-- Set **Enable LPR** to on
-- Set **Device** to `CPU`
-- Set **Save debug plates** to on
+<FrigateConfigMock
+  autoPlay={false}
+  section="lpr"
+  showNavigationSteps={false}
+  values={{ enabled: true, device: "CPU", debug_save_plates: true }}
+  targets={["enabled", "device", "debug_save_plates"]}
+/>
 
 </TabItem>
 <TabItem value="yaml">
