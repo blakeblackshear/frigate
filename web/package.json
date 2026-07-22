@@ -123,7 +123,7 @@
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.8",
-    "eslint-plugin-vitest-globals": "^1.5.0",
+    "eslint-plugin-vitest-globals": "^1.6.1",
     "fake-indexeddb": "^6.0.0",
     "i18next-cli": "^1.5.11",
     "jest-websocket-mock": "^2.5.0",
