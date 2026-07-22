@@ -53,7 +53,7 @@
     "@rjsf/utils": "^6.4.1",
     "@rjsf/validator-ajv8": "^6.4.1",
     "apexcharts": "^3.52.0",
-    "axios": "^1.13.6",
+    "axios": "^1.15.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
