@@ -2,17 +2,31 @@
 
 import datetime
 import logging
-from zoneinfo import ZoneInfoNotFoundError
+from typing import Final
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError, available_timezones
 
-import pytz
 from tzlocal import get_localzone
 
 logger = logging.getLogger(__name__)
 
+TIMEZONE_CASEFOLD_INDEX: Final = {
+    timezone.casefold(): timezone for timezone in available_timezones()
+}
+
+
+def get_normalized_tz_name(tz_name: str) -> str:
+    tz = TIMEZONE_CASEFOLD_INDEX.get(tz_name.casefold())
+    if tz:
+        return tz
+
+    raise ValueError(f"Unknown timezone: {tz_name}")
+
 
 def get_tz_modifiers(tz_name: str) -> tuple[str, str, float]:
     seconds_offset = (
-        datetime.datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
+        datetime.datetime.now(ZoneInfo(get_normalized_tz_name(tz_name)))
+        .utcoffset()
+        .total_seconds()
     )
     hours_offset = int(seconds_offset / 60 / 60)
     minutes_offset = int(seconds_offset / 60 - hours_offset * 60)
@@ -25,7 +39,7 @@ def get_tomorrow_at_time(hour: int) -> datetime.datetime:
     """Returns the datetime of the following day at 2am."""
     try:
         tomorrow = datetime.datetime.now(get_localzone()) + datetime.timedelta(days=1)
-    except ZoneInfoNotFoundError:
+    except (ValueError, ZoneInfoNotFoundError):
         tomorrow = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=1)
         logger.warning(
             "Using utc for maintenance due to missing or incorrect timezone set"
@@ -45,7 +59,7 @@ def is_current_hour(timestamp: int) -> bool:
 
 def get_dst_transitions(
     tz_name: str, start_time: float, end_time: float
-) -> list[tuple[float, float]]:
+) -> list[tuple[float, float, int]]:
     """
     Find DST transition points and return time periods with consistent offsets.
 
@@ -59,8 +73,8 @@ def get_dst_transitions(
         continuous periods with the same UTC offset
     """
     try:
-        tz = pytz.timezone(tz_name)
-    except pytz.UnknownTimeZoneError:
+        tz = ZoneInfo(get_normalized_tz_name(tz_name))
+    except (ValueError, ZoneInfoNotFoundError):
         # If timezone is invalid, return single period with no offset
         return [(start_time, end_time, 0)]
 
@@ -68,14 +82,14 @@ def get_dst_transitions(
     current = start_time
 
     # Get initial offset
-    dt = datetime.datetime.utcfromtimestamp(current).replace(tzinfo=pytz.UTC)
+    dt = datetime.datetime.fromtimestamp(current, tz=datetime.UTC)
     local_dt = dt.astimezone(tz)
     prev_offset = local_dt.utcoffset().total_seconds()
     period_start = start_time
 
     # Check each day for offset changes
     while current <= end_time:
-        dt = datetime.datetime.utcfromtimestamp(current).replace(tzinfo=pytz.UTC)
+        dt = datetime.datetime.fromtimestamp(current, tz=datetime.UTC)
         local_dt = dt.astimezone(tz)
         current_offset = local_dt.utcoffset().total_seconds()
 

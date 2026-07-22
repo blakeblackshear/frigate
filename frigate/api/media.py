@@ -11,10 +11,10 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path as FilePath
 from typing import Any
 from urllib.parse import unquote
+from zoneinfo import ZoneInfo
 
 import cv2
 import numpy as np
-import pytz
 from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pathvalidate import sanitize_filename
@@ -53,6 +53,7 @@ from frigate.util.file import (
 )
 from frigate.util.image import get_image_from_recording, get_image_quality_params
 from frigate.util.media import get_keyframe_before
+from frigate.util.time import get_normalized_tz_name
 
 logger = logging.getLogger(__name__)
 
@@ -713,7 +714,9 @@ async def vod_hour(
     parts = year_month.split("-")
     start_date = (
         datetime(int(parts[0]), int(parts[1]), day, hour, tzinfo=UTC)
-        - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
+        - datetime.now(
+            ZoneInfo(get_normalized_tz_name(tz_name.replace(",", "/")))
+        ).utcoffset()
     )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()

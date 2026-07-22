@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import re
+from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -75,9 +76,20 @@ def create_fastapi_app(
     profile_manager: ProfileManager | None = None,
     enforce_default_admin: bool = True,
 ):
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        logger.info("FastAPI started")
+        asyncio.create_task(
+            debug_replay_auto_stop_watchdog(
+                replay_manager, frigate_config, config_publisher
+            )
+        )
+        yield
+
     logger.info("Starting FastAPI app")
     app = FastAPI(
         debug=False,
+        lifespan=lifespan,
         swagger_ui_parameters={"apisSorter": "alpha", "operationsSorter": "alpha"},
         dependencies=[Depends(require_admin_by_default())]
         if enforce_default_admin
@@ -112,15 +124,6 @@ def create_fastapi_app(
         if not database.is_closed():
             database.close()
         return response
-
-    @app.on_event("startup")
-    async def startup():
-        logger.info("FastAPI started")
-        asyncio.create_task(
-            debug_replay_auto_stop_watchdog(
-                replay_manager, frigate_config, config_publisher
-            )
-        )
 
     # Rate limiter (used for login endpoint)
     if frigate_config.auth.failed_login_rate_limit is None:
