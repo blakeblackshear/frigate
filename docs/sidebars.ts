@@ -166,6 +166,7 @@ const sidebars: SidebarsConfig = {
     ],
     Troubleshooting: [
       "troubleshooting/faqs",
+      "troubleshooting/common_errors",
       "troubleshooting/go2rtc",
       "troubleshooting/recordings",
       "troubleshooting/dummy-camera",
