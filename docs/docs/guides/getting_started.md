@@ -144,7 +144,7 @@ At this point you should be able to start Frigate and a basic config will be cre
 
 ### Step 2: Add a camera
 
-Click the **Add Camera** button in <NavPath path="Settings > Global configuration > Camera management" /> to use the camera setup wizard to get your first camera added into Frigate.
+Click the **Add Camera** button in <NavPath path="Settings > Global configuration > Camera management" /> to use the camera setup wizard to get your first camera added into Frigate. See [Adding a camera with the Add Camera Wizard](../configuration/cameras.md#adding-a-camera-with-the-add-camera-wizard) for a walkthrough of each step.
 
 ### Step 3: Configure hardware acceleration (recommended)
 

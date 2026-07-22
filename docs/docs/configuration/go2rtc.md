@@ -15,7 +15,7 @@ Frigate uses the bundled go2rtc to power a number of key features:
 
 :::tip[Most users no longer need to configure go2rtc by hand]
 
-The **camera setup wizard** is the recommended way to add cameras. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />, and the wizard probes your camera and writes its configuration for you, including the go2rtc restream and the live stream mapping, so go2rtc is set up automatically.
+The [**camera setup wizard**](cameras.md#adding-a-camera-with-the-add-camera-wizard) is the recommended way to add cameras. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />, and the wizard probes your camera and writes its configuration for you, including the go2rtc restream and the live stream mapping, so go2rtc is set up automatically.
 
 This guide is mainly useful if you are **upgrading from an older version and have existing cameras that don't yet use go2rtc**, or if you want to fine-tune a stream by hand (for example, to transcode a codec your browser can't play). The [go2rtc troubleshooting guide](/troubleshooting/go2rtc) applies regardless of how your cameras were added.
 
