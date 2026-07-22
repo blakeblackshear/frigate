@@ -9,9 +9,27 @@ import NavPath from "@site/src/components/NavPath";
 
 ## Configuration
 
-A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 4 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI-Compatible section below.
+A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 5 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI-Compatible section below.
 
-To use Generative AI, you must define a single provider at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
+`genai` is a map of named providers. Each key under `genai` is a name you choose, and its value is that provider's settings:
+
+```yaml
+genai:
+  my_provider: # any name you like
+    provider: ollama
+    base_url: http://localhost:11434
+    model: qwen3-vl:4b
+    roles:
+      - descriptions
+      - embeddings
+      - chat
+```
+
+The examples on this page all use `my_provider`, but the name is arbitrary and is only used to reference the provider elsewhere in the config (for example, `semantic_search.model`).
+
+Each provider handles one or more **roles**: `chat`, `descriptions`, and `embeddings`. A provider handles all three by default, and each role may be assigned to exactly one provider. Define a single provider if you want it to do everything, or split the roles across several providers using the `roles` option.
+
+If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
 ## Local Providers
 
@@ -85,11 +103,12 @@ All llama.cpp native options can be passed through `provider_options`, including
 
 ```yaml
 genai:
-  provider: llamacpp
-  base_url: http://localhost:8080
-  model: your-model-name
-  provider_options:
-    context_size: 16000 # Optional, overrides the context size reported by the server.
+  my_provider:
+    provider: llamacpp
+    base_url: http://localhost:8080
+    model: your-model-name
+    provider_options:
+      context_size: 16000 # Optional, overrides the context size reported by the server.
 ```
 
 </TabItem>
@@ -129,13 +148,14 @@ Note that Frigate will not automatically download the model you specify in your 
 
 ```yaml
 genai:
-  provider: ollama
-  base_url: http://localhost:11434
-  model: qwen3-vl:4b
-  provider_options: # other Ollama client options can be defined
-    keep_alive: -1
-    options:
-      num_ctx: 8192 # make sure the context matches other services that are using ollama
+  my_provider:
+    provider: ollama
+    base_url: http://localhost:11434
+    model: qwen3-vl:4b
+    provider_options: # other Ollama client options can be defined
+      keep_alive: -1
+      options:
+        num_ctx: 8192 # make sure the context matches other services that are using ollama
 ```
 
 </TabItem>
@@ -151,11 +171,12 @@ For OpenAI-compatible servers (such as llama.cpp) that don't expose the configur
 
 ```yaml
 genai:
-  provider: openai
-  base_url: http://your-llama-server
-  model: your-model-name
-  provider_options:
-    context_size: 8192 # Specify the configured context size
+  my_provider:
+    provider: openai
+    base_url: http://your-llama-server
+    model: your-model-name
+    provider_options:
+      context_size: 8192 # Specify the configured context size
 ```
 
 This ensures Frigate uses the correct context window size when generating prompts.
@@ -178,10 +199,11 @@ This ensures Frigate uses the correct context window size when generating prompt
 
 ```yaml
 genai:
-  provider: openai
-  base_url: http://your-server:port
-  api_key: your-api-key # May not be required for local servers
-  model: your-model-name
+  my_provider:
+    provider: openai
+    base_url: http://your-server:port
+    api_key: your-api-key # May not be required for local servers
+    model: your-model-name
 ```
 
 </TabItem>
@@ -219,19 +241,21 @@ Ollama also supports [cloud models](https://ollama.com/cloud), where model infer
 
 ```yaml
 genai:
-  provider: ollama
-  base_url: http://localhost:11434
-  model: cloud-model-name
+  my_provider:
+    provider: ollama
+    base_url: http://localhost:11434
+    model: cloud-model-name
 ```
 
 or when using Ollama Cloud directly
 
 ```yaml
 genai:
-  provider: ollama
-  base_url: https://ollama.com
-  model: cloud-model-name
-  api_key: your-api-key
+  my_provider:
+    provider: ollama
+    base_url: https://ollama.com
+    model: cloud-model-name
+    api_key: your-api-key
 ```
 
 </TabItem>
@@ -269,9 +293,10 @@ To start using Gemini, you must first get an API key from [Google AI Studio](htt
 
 ```yaml
 genai:
-  provider: gemini
-  api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-2.5-flash
+  my_provider:
+    provider: gemini
+    api_key: "{FRIGATE_GEMINI_API_KEY}"
+    model: gemini-2.5-flash
 ```
 
 </TabItem>
@@ -281,12 +306,13 @@ genai:
 
 To use a different Gemini-compatible API endpoint, set the `provider_options` with the `base_url` key to your provider's API URL. For example:
 
-```yaml {4,5}
+```yaml {5,6}
 genai:
-  provider: gemini
-  ...
-  provider_options:
-    base_url: https://...
+  my_provider:
+    provider: gemini
+    ...
+    provider_options:
+      base_url: https://...
 ```
 
 Other HTTP options are available, see the [python-genai documentation](https://github.com/googleapis/python-genai).
@@ -320,9 +346,10 @@ To start using OpenAI, you must first [create an API key](https://platform.opena
 
 ```yaml
 genai:
-  provider: openai
-  api_key: "{FRIGATE_OPENAI_API_KEY}"
-  model: gpt-4o
+  my_provider:
+    provider: openai
+    api_key: "{FRIGATE_OPENAI_API_KEY}"
+    model: gpt-4o
 ```
 
 </TabItem>
@@ -338,13 +365,14 @@ To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` env
 
 For OpenAI-compatible servers (such as llama.cpp) that don't expose the configured context size in the API response, you can manually specify the context size in `provider_options`:
 
-```yaml {5,6}
+```yaml {6,7}
 genai:
-  provider: openai
-  base_url: http://your-llama-server
-  model: your-model-name
-  provider_options:
-    context_size: 8192 # Specify the configured context size
+  my_provider:
+    provider: openai
+    base_url: http://your-llama-server
+    model: your-model-name
+    provider_options:
+      context_size: 8192 # Specify the configured context size
 ```
 
 This ensures Frigate uses the correct context window size when generating prompts.
@@ -379,10 +407,11 @@ To start using Azure OpenAI, you must first [create a resource](https://learn.mi
 
 ```yaml
 genai:
-  provider: azure_openai
-  base_url: https://instance.cognitiveservices.azure.com/openai/responses?api-version=2025-04-01-preview
-  model: gpt-5-mini
-  api_key: "{FRIGATE_OPENAI_API_KEY}"
+  my_provider:
+    provider: azure_openai
+    base_url: https://instance.cognitiveservices.azure.com/openai/responses?api-version=2025-04-01-preview
+    model: gpt-5-mini
+    api_key: "{FRIGATE_OPENAI_API_KEY}"
 ```
 
 </TabItem>

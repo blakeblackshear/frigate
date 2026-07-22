@@ -16,7 +16,7 @@ MQTT requires a network connection to your broker. This is typically local, but 
 ### `frigate/available`
 
 Designed to be used as an availability topic with Home Assistant. Possible message are:
-"online": published when Frigate is running (on startup)
+"online": published once Frigate is running and has published its initial state. Note that this is published on every connection to the broker, so it is republished if the broker restarts or the connection drops and recovers, without Frigate itself restarting.
 "stopped": published when Frigate is stopped normally
 "offline": published automatically by the MQTT broker if Frigate disconnects unexpectedly (via MQTT Will Message)
 

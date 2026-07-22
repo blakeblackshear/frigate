@@ -326,7 +326,7 @@ def get_ort_providers(
                     {
                         "device_id": device_id,
                         "trt_fp16_enable": requires_fp16
-                        and os.environ.get("USE_FP_16", "True") != "False",
+                        and os.environ.get("USE_FP16", "True") != "False",
                         "trt_timing_cache_enable": True,
                         "trt_engine_cache_enable": True,
                         "trt_timing_cache_path": os.path.join(

@@ -20,7 +20,7 @@ Settings are organized into two scopes:
 - **Global configuration**: values under <NavPath path="Settings > Global configuration" /> apply to every camera by default. This is where you set the baseline behavior for object detection, recording, snapshots, motion, and so on.
 - **Camera configuration**: values under <NavPath path="Settings > Camera configuration" /> apply to a single camera. Use the camera selector button at the top of these pages to choose which camera you are editing.
 
-When a camera-level section is left untouched, the camera simply inherits the global values. Changing a value on a camera page **overrides** the global value for that camera only: the global setting and every other camera are unaffected. This mirrors how the YAML works, where a value set under `cameras.<name>` takes precedence over the same value set at the top level.
+When a camera-level section is left untouched, the camera simply inherits the global values. Changing a value on a camera page **overrides** the global value for that camera only: the global setting and every other camera are unaffected. This mirrors how the YAML works, where a value set under `cameras.<name>` takes precedence over the same value set at the top level. See [Global and Camera-Level Configuration](./config_overrides.md) for the full details, including how lists and maps are handled and which settings must be enabled globally first.
 
 To undo an override and go back to inheriting from the parent scope, use the reset button at the bottom of the section:
 
@@ -130,7 +130,8 @@ go2rtc:
 
 ```yaml
 genai:
-  api_key: "{FRIGATE_GENAI_API_KEY}"
+  my_provider:
+    api_key: "{FRIGATE_GENAI_API_KEY}"
 ```
 
 ## Common configuration examples

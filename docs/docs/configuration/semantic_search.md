@@ -163,8 +163,8 @@ genai:
     model: your-model-name
     roles:
       - embeddings
-      - vision
-      - tools
+      - descriptions
+      - chat
 
 semantic_search:
   enabled: True

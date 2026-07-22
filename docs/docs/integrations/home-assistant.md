@@ -281,7 +281,7 @@ For advanced usecases, this behavior can be changed with the [RTSP URL
 template](#options) option. When set, this string will override the default stream
 address that is derived from the default behavior described above. This option supports
 [jinja2 templates](https://jinja.palletsprojects.com/) and has the `camera` dict
-variables from [Frigate API](../integrations/api)
+variables from [Frigate API](/integrations/api/frigate-http-api)
 available for the template. Note that no Home Assistant state is available to the
 template, only the camera dict from Frigate.
 

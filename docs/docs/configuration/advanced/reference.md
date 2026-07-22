@@ -11,6 +11,8 @@ It is not recommended to copy this full configuration file. Only specify values 
 
 :::
 
+Sections marked `# NOTE: Can be overridden at the camera level` can be set globally and then adjusted per camera. See [Global and Camera-Level Configuration](../config_overrides.md) for how that works.
+
 ```yaml
 mqtt:
   # Optional: Enable mqtt server (default: shown below)
@@ -171,13 +173,14 @@ model:
   # Valid values are rgb, bgr, or yuv. (default: shown below)
   input_pixel_format: rgb
   # Required: Object detection model input tensor format
-  # Valid values are nhwc or nchw (default: shown below)
+  # Valid values are nhwc, nchw, hwnc, or hwcn (default: shown below)
   input_tensor: nhwc
   # Optional: Data type of the model input tensor
   # Valid values are float, float_denorm, or int (default: shown below)
   input_dtype: int
-  # Required: Object detection model type, currently only used with the OpenVINO detector
-  # Valid values are ssd, yolox, yolonas (default: shown below)
+  # Required: Object detection model architecture, used by detectors that support more
+  # than one model type (openvino, onnx, rknn, memryx, axengine, synaptics, and others)
+  # Valid values are ssd, yolox, yolonas, yolo-generic, rfdetr, dfine (default: shown below)
   model_type: ssd
   # Required: Label name modifications. These are merged into the standard labelmap.
   labelmap:
@@ -468,8 +471,8 @@ review:
     detections: False
     # Optional: Activity Context Prompt to give context to the GenAI what activity is and is not suspicious.
     # It is important to be direct and detailed. See documentation for the default prompt structure.
-    activity_context_prompt: """Define what is and is not suspicious
-"""
+    activity_context_prompt: |
+      Define what is and is not suspicious
     # Optional: Image source for GenAI (default: preview)
     # Options: "preview" (uses cached preview frames at ~180p) or "recordings" (extracts frames from recordings at 480p)
     # Using "recordings" provides better image quality but uses more tokens per image.
@@ -813,7 +816,8 @@ classification:
         cameras:
           camera_name:
             # Required: Crop of image frame on this camera to run classification on
-            crop: [0, 180, 220, 400]
+            # [x1, y1, x2, y2] as decimals between 0 and 1, relative to the detect resolution
+            crop: [0.0, 0.25, 0.3, 0.85]
         # Optional: If classification should be run when motion is detected in the crop (default: shown below)
         motion: False
         # Optional: Interval to run classification on in seconds (default: shown below)
