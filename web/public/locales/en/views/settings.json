@@ -1191,7 +1191,14 @@
       "1hour": "Suspend for 1 hour",
       "12hours": "Suspend for 12 hours",
       "24hours": "Suspend for 24 hours",
+      "custom": "Suspend until...",
       "untilRestart": "Suspend until restart"
+    },
+    "customSuspension": {
+      "title": "Custom suspension time",
+      "description": "Suspend notifications for this camera until the selected time.",
+      "untilLabel": "Suspend until",
+      "invalidTime": "Pick a time in the future."
     },
     "cancelSuspension": "Cancel Suspension",
     "toast": {

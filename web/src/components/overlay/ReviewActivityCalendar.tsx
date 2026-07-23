@@ -1,6 +1,12 @@
 import { RecordingsSummary, ReviewSummary } from "@/types/review";
 import { Calendar } from "../ui/calendar";
-import { ButtonHTMLAttributes, useEffect, useMemo, useRef } from "react";
+import {
+  ButtonHTMLAttributes,
+  ComponentProps,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
 import { type DayButtonProps } from "react-day-picker";
@@ -156,12 +162,14 @@ type TimezoneAwareCalendarProps = {
   timezone?: string;
   selectedDay?: Date;
   onSelect: (day?: Date) => void;
+  disabled?: ComponentProps<typeof Calendar>["disabled"];
   recordingsSummary?: RecordingsSummary;
 };
 export function TimezoneAwareCalendar({
   timezone,
   selectedDay,
   onSelect,
+  disabled,
   recordingsSummary,
 }: TimezoneAwareCalendarProps) {
   const [weekStartsOn] = useUserPersistence("weekStartsOn", 0);
@@ -187,7 +195,7 @@ export function TimezoneAwareCalendar({
       timezone ? Math.round(getUTCOffset(new Date(), timezone)) : undefined,
     [timezone],
   );
-  const disabledDates = useMemo(() => {
+  const defaultDisabledDates = useMemo(() => {
     const tomorrow = new Date();
 
     if (timezoneOffset) {
@@ -205,6 +213,7 @@ export function TimezoneAwareCalendar({
     future.setFullYear(tomorrow.getFullYear() + 10);
     return { from: tomorrow, to: future };
   }, [timezoneOffset]);
+  const disabledDates = disabled ?? defaultDisabledDates;
 
   const today = useMemo(() => {
     if (!timezoneOffset) {
