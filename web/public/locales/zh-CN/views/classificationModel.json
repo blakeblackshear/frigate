@@ -178,7 +178,20 @@
     "title": "编辑分类模型",
     "descriptionState": "编辑此状态分类模型的类别；更改后需要重新训练模型。",
     "descriptionObject": "编辑此目标分类模型的目标类型和分类类型。",
-    "stateClassesInfo": "注意：更改状态类别后需使用更新后的类别重新训练模型。"
+    "stateClassesInfo": "模型已更新。请重新训练模型以使类别更改生效。",
+    "enabled": "开启",
+    "enabledDesc": "运行此模型。禁用后，它将停止运行且不再进行分类。",
+    "saveAttempts": "保存尝试",
+    "saveAttemptsDesc": "保存在近期分类记录界面中显示的分类快照数量。",
+    "motion": "画面变动时运行",
+    "motionDesc": "检测到配置的裁剪区域内发生移动时，运行分类。",
+    "interval": "间隔",
+    "intervalDesc": "定期分类运行之间的间隔秒数。留空则仅在检测到移动时运行。",
+    "intervalPlaceholder": "无间隔",
+    "errors": {
+      "saveAttemptsInvalid": "保存在近期分类记录数量必须是大于或等于 0 的整数",
+      "intervalInvalid": "间隔必须是大于 0 的整数"
+    }
   },
   "tooltip": {
     "trainingInProgress": "模型正在训练中",
@@ -188,5 +201,6 @@
   },
   "none": "无标签",
   "reclassifyImageAs": "重新分类图片为：",
-  "reclassifyImage": "重新分类图片"
+  "reclassifyImage": "重新分类图片",
+  "disabled": "关闭"
 }

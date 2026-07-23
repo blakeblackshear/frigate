@@ -1655,7 +1655,14 @@
       "keyLabel": "键",
       "valueLabel": "值",
       "keyPlaceholder": "新键名",
-      "remove": "移除"
+      "remove": "移除",
+      "providerNameLabel": "提供商名称",
+      "providerNamePlaceholder": "例如：openai、deepseek",
+      "variableNameLabel": "变量名",
+      "variableNamePlaceholder": "例如：MY_VARIABLE",
+      "loggerNameLabel": "日志模块名称",
+      "loggerNamePlaceholder": "例如：frigate.record",
+      "keyPatternError": "只能使用字母、数字、连字符和下划线（不包含空格）"
     },
     "roleMap": {
       "empty": "未配置权限组映射",
@@ -2174,7 +2181,7 @@
   },
   "review": {
     "imageSource": {
-      "recordings": "录制文件",
+      "recordings": "录制",
       "previews": "预览"
     }
   },
