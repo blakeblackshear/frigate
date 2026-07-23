@@ -1,23 +1,24 @@
 {
   "search": "Sök",
-  "documentTitle": "Export - Frigate",
+  "documentTitle": "Exporter - Frigate",
   "noExports": "Inga exporter hittade",
   "deleteExport": "Radera export",
-  "deleteExport.desc": "Är du säker att du vill radera {{exportName}}?",
+  "deleteExport.desc": "Är du säker på att du vill ta bort {{exportName}}?",
   "editExport": {
     "desc": "Ange ett nytt namn för denna export.",
-    "title": "Byt namn på Export",
-    "saveExport": "Spara Export"
+    "title": "Byt namn på export",
+    "saveExport": "Spara export"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Misslyckades att byta namn på export: {{errorMessage}}"
+      "renameExportFailed": "Det gick inte att byta namn på exporten: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Dela export",
-    "downloadVideo": "Ladda ner video",
+    "downloadVideo": "Ladda ned video",
     "editName": "Redigera namn",
     "deleteExport": "Ta bort export"
-  }
+  },
+  "selected_one": "{{count}} valt"
 }

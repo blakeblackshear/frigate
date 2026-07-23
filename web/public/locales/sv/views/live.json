@@ -1,9 +1,9 @@
 {
   "documentTitle": "Live - Frigate",
-  "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+  "documentTitle.withCamera": "{{camera}} – livevy - Frigate",
   "twoWayTalk": {
     "enable": "Aktivera tvåvägssamtal",
-    "disable": "Avaktivera tvåvägssamtal"
+    "disable": "Inaktivera tvåvägssamtal"
   },
   "cameraAudio": {
     "disable": "Inaktivera kameraljud",
@@ -31,15 +31,15 @@
         "enable": "Aktivera klick för att flytta"
       },
       "left": {
-        "label": "Flytta PTZ kamera till vänster"
+        "label": "Flytta PTZ-kameran åt vänster"
       },
       "down": {
-        "label": "Flytta PTZ kamera nedåt"
+        "label": "Flytta PTZ-kameran nedåt"
       }
     },
     "frame": {
       "center": {
-        "label": "Klicka i bilden för att centrera PTZ kamera"
+        "label": "Klicka i bilden för att centrera PTZ-kameran"
       }
     },
     "presets": "PTZ-kamerans förinställningar",
@@ -48,7 +48,7 @@
         "label": "Fokusera PTZ-kameran närmare"
       },
       "out": {
-        "label": "Fokusera PTZ-kameran ut"
+        "label": "Fokusera PTZ-kameran längre bort"
       }
     }
   },
@@ -58,52 +58,52 @@
   },
   "detect": {
     "enable": "Aktivera detektering",
-    "disable": "Avaktivera detektering"
+    "disable": "Inaktivera detektering"
   },
   "recording": {
     "enable": "Aktivera inspelning",
-    "disable": "Avaktivera inspelning"
+    "disable": "Inaktivera inspelning"
   },
   "snapshots": {
     "enable": "Aktivera ögonblicksbilder",
-    "disable": "Avaktivera ögonblicksbilder"
+    "disable": "Inaktivera ögonblicksbilder"
   },
   "audioDetect": {
-    "enable": "Aktivera ljudaktivering",
-    "disable": "Avaktivera ljudaktivering"
+    "enable": "Aktivera ljuddetektering",
+    "disable": "Inaktivera ljuddetektering"
   },
   "autotracking": {
-    "enable": "Aktivera Autospårning",
-    "disable": "Avaktivera Autospårning"
+    "enable": "Aktivera autospårning",
+    "disable": "Inaktivera autospårning"
   },
-  "notifications": "Notifikationer",
+  "notifications": "Aviseringar",
   "audio": "Ljud",
   "lowBandwidthMode": "Läge för låg bandbredd",
   "manualRecording": {
-    "failedToEnd": "Misslyckades med att avsluta manuell vid behov-inspelning.",
-    "started": "Starta manuell inspelning vid behov.",
+    "failedToEnd": "Det gick inte att avsluta den manuella inspelningen vid behov.",
+    "started": "Manuell inspelning vid behov har startats.",
     "title": "Vid behov",
-    "tips": "Ladda ner en omedelbar ögonblicksbild eller starta en manuell händelse baserat på kamerans inställningar för inspelningslagring.",
+    "tips": "Ladda ned en omedelbar ögonblicksbild eller starta en manuell händelse utifrån kamerans inställningar för lagring av inspelningar.",
     "playInBackground": {
       "label": "Spela upp i bakgrunden",
       "desc": "Strömma vidare när spelaren inte visas."
     },
     "showStats": {
-      "label": "Visa Statistik",
+      "label": "Visa statistik",
       "desc": "Visa statistik ovanpå kamerabilden."
     },
     "debugView": "Felsökningsvy",
     "start": "Starta inspelning vid behov",
-    "failedToStart": "Misslyckades med att starta manuell inspelning vid behov.",
+    "failedToStart": "Det gick inte att starta en manuell inspelning vid behov.",
     "recordDisabledTips": "Eftersom inspelning är inaktiverad eller begränsad i konfigurationen för den här kameran kommer endast en ögonblicksbild att sparas.",
-    "end": "Avsluta vid behov-inspelning",
-    "ended": "Avslutade manuell vid behov-inspelning."
+    "end": "Avsluta inspelning vid behov",
+    "ended": "Den manuella inspelningen vid behov har avslutats."
   },
   "cameraSettings": {
     "audioDetection": "Ljuddetektering",
     "title": "Inställningar för {{camera}}",
     "cameraEnabled": "Kamera Aktiverad",
-    "objectDetection": "Objektsdetektering",
+    "objectDetection": "Objektdetektering",
     "recording": "Inspelning",
     "snapshots": "Ögonblicksbilder",
     "autotracking": "Autospårning",
@@ -111,18 +111,18 @@
   },
   "effectiveRetainMode": {
     "modes": {
-      "active_objects": "Aktiva Objekt",
+      "active_objects": "Aktiva objekt",
       "all": "Allt",
       "motion": "Rörelse"
     },
     "notAllTips": "Din lagringskonfiguration för {{source}}-inspelning är inställd på <code>läge: {{effectiveRetainMode}}</code>, så den här inspelningen vid behov kommer endast att behålla segment av {{effectiveRetainModeName}}."
   },
   "editLayout": {
-    "label": "Redigera Layout",
+    "label": "Redigera layout",
     "group": {
-      "label": "Redigera Kameragrupp"
+      "label": "Redigera kameragrupp"
     },
-    "exitEdit": "Lämna Redigering"
+    "exitEdit": "Avsluta redigering"
   },
   "camera": {
     "enable": "Aktivera Kamera",
@@ -132,7 +132,7 @@
     "enable": "Slå av ljudet på alla kameror",
     "disable": "Slå på ljudet på alla kameror"
   },
-  "streamingSettings": "Inställningar för Streaming",
+  "streamingSettings": "Strömningsinställningar",
   "suspend": {
     "forTime": "Pausa för: "
   },
@@ -149,11 +149,11 @@
     "twoWayTalk": {
       "tips": "Din enhet måste stödja funktionen och WebRTC måste vara konfigurerat för tvåvägskommunikation.",
       "tips.documentation": "Läs dokumentationen: ",
-      "available": "tvåvägskommunikation är tillgängligt för den här strömmen",
-      "unavailable": "Tvåvägskommunikation är inte tillgängligt för den här strömmen"
+      "available": "Tvåvägskommunikation är tillgänglig för den här strömmen",
+      "unavailable": "Tvåvägskommunikation är inte tillgänglig för den här strömmen"
     },
     "lowBandwidth": {
-      "tips": "Livevisningen är i lägebandbreddsläge på grund av buffring eller strömningsfel.",
+      "tips": "Livevisningen använder lågbandbreddsläge på grund av buffring eller strömningsfel.",
       "resetStream": "Återställ ström"
     },
     "playInBackground": {
@@ -191,7 +191,7 @@
     }
   },
   "snapshot": {
-    "takeSnapshot": "Ladda ner omedelbar ögonblicksbild",
+    "takeSnapshot": "Ladda ned en omedelbar ögonblicksbild",
     "noVideoSource": "Ingen videokälla tillgänglig för ögonblicksbilden.",
     "captureFailed": "Misslyckades med att ta en ögonblicksbild.",
     "downloadStarted": "Nedladdning av ögonblicksbild har startat."
