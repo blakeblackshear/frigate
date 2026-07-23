@@ -32,6 +32,9 @@
           "ask_a": "Este acest obiect un <code>{{label}}</code>?",
           "ask_an": "Este acest obiect un <code>{{label}}</code>?",
           "ask_full": "Este acest obiect un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "toast": {
+          "error": "Trimiterea către Frigate+ a eșuat. Te rog să verifici conexiunea la rețea și să încerci din nou."
         }
       },
       "submitToPlus": {
@@ -96,7 +99,8 @@
       "error": {
         "failed": "Nu s-a putut adăuga exportul în coadă: {{error}}",
         "endTimeMustAfterStartTime": "Ora de sfârșit trebuie să fie după ora de început",
-        "noVaildTimeSelected": "Nu a fost selectat un interval de timp valid"
+        "noVaildTimeSelected": "Nu a fost selectat un interval de timp valid",
+        "noValidTimeSelected": "Niciun interval de timp valid selectat"
       },
       "view": "Vizualizează",
       "queued": "Export pus la coadă. Vezi progresul pe pagina de exporturi.",
@@ -145,7 +149,14 @@
       "queueingButton": "Se adaugă exporturile la coadă...",
       "exportButton_one": "Exportă 1 cameră",
       "exportButton_few": "Exportă {{count}} camere",
-      "exportButton_other": "Exportă {{count}} de camere"
+      "exportButton_other": "Exportă {{count}} de camere",
+      "searchOrSelectGroup": "Caută sau selectează un grup de camere...",
+      "selectAll": "Selectează toate camerele",
+      "clearSelection": "Șterge selecția",
+      "selectWithActivity": "Camere cu obiecte urmărite",
+      "selectGroup": "Selectează grupul",
+      "noMatchingCameras": "Nicio cameră nu corespunde căutării tale",
+      "selectedCount": "{{selected}} / {{total}} selectate"
     },
     "multi": {
       "title_one": "Exportă o revizuire",
