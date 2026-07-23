@@ -43,9 +43,9 @@
         "title": "Čas ukončenia",
         "label": "Vybrat čas ukončenia"
       },
-      "lastHour_one": "Minulu hodinu",
-      "lastHour_few": "Minule{{count}}hodiny",
-      "lastHour_other": "Minulych{{count}}hodin"
+      "lastHour_one": "Posledná hodina",
+      "lastHour_few": "Posledné {{count}} hodiny",
+      "lastHour_other": "Posledných {{count}} hodín"
     },
     "name": {
       "placeholder": "Pomenujte Export"

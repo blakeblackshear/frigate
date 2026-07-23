@@ -12,12 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Vymazaná Trieda",
-      "deletedCategory_few": "",
-      "deletedCategory_other": "",
-      "deletedImage_one": "Vymazané Obrázky",
-      "deletedImage_few": "",
-      "deletedImage_other": "",
+      "deletedCategory_one": "Vymazaná {{count}} trieda",
+      "deletedCategory_few": "Vymazané {{count}} triedy",
+      "deletedCategory_other": "Vymazaných {{count}} tried",
+      "deletedImage_one": "Vymazaný {{count}} obrázok",
+      "deletedImage_few": "Vymazané {{count}} obrázky",
+      "deletedImage_other": "Vymazaných {{count}} obrázkov",
       "categorizedImage": "Obrázok bol úspešne klasifikovaný",
       "trainedModel": "Úspešne vyškolený model.",
       "trainingModel": "Úspešne spustené trénovanie modelu.",
@@ -81,7 +81,7 @@
       "buttonText": "Vytvorte objektový model"
     },
     "state": {
-      "title": "Žiadne modely klasifikácie štátov",
+      "title": "Žiadne modely klasifikácie stavov",
       "description": "Vytvorte si vlastný model na monitorovanie a klasifikáciu zmien stavu v špecifických oblastiach kamery.",
       "buttonText": "Vytvorte model stavu"
     }
@@ -90,7 +90,7 @@
     "title": "Vytvorte novú klasifikáciu",
     "steps": {
       "nameAndDefine": "Názov a definícia",
-      "stateArea": "Štátna oblasť",
+      "stateArea": "Oblasť stavu",
       "chooseExamples": "Vyberte Príklady"
     },
     "step1": {
@@ -98,7 +98,7 @@
       "name": "Meno",
       "namePlaceholder": "Zadajte názov modelu...",
       "type": "Typ",
-      "typeState": "štátu",
+      "typeState": "Stav",
       "typeObject": "Objekt",
       "objectLabel": "Označenie objektu",
       "objectLabelPlaceholder": "Vyberte typ objektu...",
@@ -118,12 +118,12 @@
         "nameOnlyNumbers": "Názov modelu nemôže obsahovať iba čísla",
         "classRequired": "Vyžaduje sa aspoň 1 kurz",
         "classesUnique": "Názvy tried musia byť jedinečné",
-        "stateRequiresTwoClasses": "Modely štátov vyžadujú aspoň 2 triedy",
+        "stateRequiresTwoClasses": "Stavové modely vyžadujú aspoň 2 triedy",
         "objectLabelRequired": "Vyberte označenie objektu",
         "objectTypeRequired": "Vyberte typ klasifikácie",
         "noneNotAllowed": "Trieda 'none' nie je povolená"
       },
-      "states": "Štátov"
+      "states": "Stavy"
     },
     "step2": {
       "description": "Vyberte kamery a definujte oblasť, ktorú chcete pre každú kameru monitorovať. Model klasifikuje stav týchto oblastí.",
@@ -134,7 +134,7 @@
     },
     "step3": {
       "selectImagesPrompt": "Vybrať všetky obrázky s: {{className}}",
-      "selectImagesDescription": "Kliknite na obrázky a vyberte ich. Po dokončení tejto hodiny kliknite na tlačidlo Pokračovať.",
+      "selectImagesDescription": "Kliknite na obrázky a vyberte ich. Po dokončení tejto triedy kliknite na tlačidlo Pokračovať.",
       "generating": {
         "title": "Generovanie vzorových obrázkov",
         "description": "Frigate načítava reprezentatívne obrázky z vašich nahrávok. Môže to chvíľu trvať..."
@@ -155,9 +155,9 @@
         "classifyFailed": "Nepodarilo sa klasifikovať obrázky: {{error}}"
       },
       "generateSuccess": "Vzorové obrázky boli úspešne vygenerované",
-      "allImagesRequired_one": "Uveďte všetky obrázky. {{count}} obrázok zostáva.",
-      "allImagesRequired_few": "Uveďte všetky obrázky. {{count}} obrázky zostávajú.",
-      "allImagesRequired_other": "Uveďte všetky obrázky. {{count}} obrázkov zostávajú.",
+      "allImagesRequired_one": "Klasifikujte všetky obrázky. Zostáva {{count}} obrázok.",
+      "allImagesRequired_few": "Klasifikujte všetky obrázky. Zostávajú {{count}} obrázky.",
+      "allImagesRequired_other": "Klasifikujte všetky obrázky. Zostáva {{count}} obrázkov.",
       "modelCreated": "Model vytvorený úspešne. Použite aktuálne klasifikácie na pridanie obrázkov pre chýbajúce stavy a nasledne dajte trénovať model.",
       "missingStatesWarning": {
         "title": "Chýbajúce príklady stavov",
@@ -174,7 +174,7 @@
   },
   "menu": {
     "objects": "Objekty",
-    "states": "Štátov"
+    "states": "Stavy"
   },
   "details": {
     "scoreInfo": "Skóre predstavuje priemernú istotu klasifikácie naprieč všetkými detekciami tohoto objektu.",
