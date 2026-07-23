@@ -115,9 +115,11 @@ class PendingReviewSegment:
         if self._frame is not None:
             self.thumb_time = datetime.datetime.now().timestamp()
             self.has_frame = True
-            cv2.imwrite(
+            Path(self.frame_path).parent.mkdir(parents=True, exist_ok=True)
+            if not cv2.imwrite(
                 self.frame_path, self._frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
-            )
+            ):
+                logger.error("Failed to write review thumbnail to %s", self.frame_path)
 
     def save_full_frame(self, camera_config: CameraConfig, frame: np.ndarray) -> None:
         color_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
@@ -128,9 +130,11 @@ class PendingReviewSegment:
 
         if self._frame is not None:
             self.has_frame = True
-            cv2.imwrite(
+            Path(self.frame_path).parent.mkdir(parents=True, exist_ok=True)
+            if not cv2.imwrite(
                 self.frame_path, self._frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
-            )
+            ):
+                logger.error("Failed to write review thumbnail to %s", self.frame_path)
 
     def get_data(self, ended: bool) -> dict:
         end_time = None
