@@ -159,6 +159,8 @@ class FFMpegConverter(threading.Thread):
                 f"duration {self.frame_times[t_idx + 1] - self.frame_times[t_idx]}"
             )
 
+        Path(self.path).parent.mkdir(parents=True, exist_ok=True)
+
         try:
             p = sp.run(
                 self.ffmpeg_cmd.split(" "),
