@@ -30,6 +30,9 @@
           "label": "Bu etiketi Frigate+ için onaylayın",
           "ask_a": "Bu nesne bir <code>{{label}}</code> mi?",
           "ask_full": "Bu nesne bir <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) nesnesi mi?"
+        },
+        "toast": {
+          "error": "Frigate+'a gönderilemedi. Lütfen ağ bağlantınızı kontrol edin ve tekrar deneyin."
         }
       },
       "submitToPlus": {
@@ -62,7 +65,7 @@
     "toast": {
       "success": "Dışa aktarma başarıyla başlatıldı. Dosyayı dışa aktarmalar sayfasında görüntüleyebilirsiniz.",
       "error": {
-        "failed": "Dışa aktarım başlatılamadı: {{error}}",
+        "failed": "Dışa aktarım sıraya alınamadı: {{error}}",
         "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",
         "noVaildTimeSelected": "Geçerli bir zaman aralığı seçilmedi"
       },
