@@ -127,7 +127,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             os.path.join(MODEL_CACHE_DIR, "facedet/facedet.onnx"),
             config="",
             input_size=(320, 320),
-            score_threshold=0.5,
+            score_threshold=min(0.5, self.face_config.detection_threshold),
             nms_threshold=0.3,
         )
         self.faces_per_second.start()
