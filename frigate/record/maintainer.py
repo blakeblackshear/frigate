@@ -383,8 +383,11 @@ class RecordingMaintainer(threading.Thread):
                 return None
 
             # this segment has a valid duration and has video data, so publish an update
+            # publish the segment end time so the watchdog measures the age of the
+            # newest validated video data; the start time is already ~2x segment
+            # duration old by the time the next segment finishes and is validated
             self.recordings_publisher.publish(
-                (camera, start_time.timestamp(), cache_path),
+                (camera, end_time.timestamp(), cache_path),
                 RecordingsDataTypeEnum.valid.value,
             )
 
