@@ -7,7 +7,28 @@
       "connectionSettings": "Ühenduse seadistused",
       "port": "Port",
       "username": "Kasutajanimi",
-      "usernamePlaceholder": "Valikuline"
+      "usernamePlaceholder": "Valikuline",
+      "cameraName": "Kaamera nimi",
+      "cameraNamePlaceholder": "näiteks: eesmine_uks või Hoovi ülevaade",
+      "host": "Host/IP-aadress",
+      "cameraBrand": "Kaamera bränd",
+      "selectBrand": "Vali URL malli jaoks kaamera bränd",
+      "customUrl": "Kohandatud voo URL",
+      "brandInformation": "Brändi teave",
+      "brandUrlFormat": "Kaamerate puhul, mille RTSP URL-i vorming on järgmine: {{exampleUrl}}",
+      "selectTransport": "Valige transpordiprotokoll",
+      "description": "Sisestage oma kaamera andmed ja valige, kas soovite kaamerat tuvastada või valida tootja käsitsi.",
+      "onvifPort": "ONVIF port",
+      "probeMode": "Tuvasta kaamera",
+      "manualMode": "Manuaalne valik",
+      "errors": {
+        "nameRequired": "Kaamera nimi on kohustuslik",
+        "nameLength": "Kaamera nimi peab olema kuni 64 tähemärki pikk",
+        "invalidCharacters": "Kaamera nimi sisaldab sobimatuid märke",
+        "nameExists": "Kaamera nimi on juba olemas",
+        "brandOrCustomUrlRequired": "Valige kas kaamera bränd koos hosti/IP-aadressiga või valige „Muu” kohandatud URL-iga"
+      },
+      "detectionMethod": "Vootuvastus meetod"
     },
     "step3": {
       "streamUrlPlaceholder": "rtsp://kasutajanimi:salasõna@host:port/asukoht",
@@ -17,17 +38,37 @@
       "roles": "Rollid",
       "roleLabels": {
         "record": "Salvestamine",
-        "audio": "Heliriba"
+        "audio": "Heliriba",
+        "detect": "Objektituvastus"
       },
       "connected": "Ühendatud",
-      "featuresTitle": "Funktsionaalsused"
+      "featuresTitle": "Funktsionaalsused",
+      "selectStream": "Vali voog",
+      "selectQuality": "Valige kvaliteet",
+      "notConnected": "Pole ühendatud",
+      "testFailedTitle": "Test ebaõnnestus",
+      "testStream": "Testi ühendust",
+      "testSuccess": "Voo test edukas!",
+      "testFailed": "Voo test ebaõnnestus",
+      "selectResolution": "Vali resolutsioon",
+      "noStreamFound": "Voogu ei leitud",
+      "addAnotherStream": "Lisa järgmine voog",
+      "streamTitle": "Voog {{number}}",
+      "streamUrl": "Voo URL",
+      "addStream": "Lisa voog",
+      "description": "Seadista voogedastusrolle ja lisa oma kaamerale täiendavaid vooge.",
+      "streamsTitle": "Kaamera vood"
     },
     "steps": {
-      "probeOrSnapshot": "Võta proov või tee hetkvõte"
+      "probeOrSnapshot": "Võta proov või tee hetkvõte",
+      "nameAndConnection": "Nimi ja ühendus",
+      "streamConfiguration": "Voo seaded",
+      "validationAndTesting": "Valideerimine ja testimine"
     },
     "step2": {
       "testing": {
-        "fetchingSnapshot": "Laadin kaamera hetkvõtet alla..."
+        "fetchingSnapshot": "Laadin kaamera hetkvõtet alla...",
+        "probingMetadata": "Tuvastan kaamera metaandmeid..."
       },
       "retry": "Proovi uuesti",
       "manufacturer": "Tootja",
@@ -37,7 +78,30 @@
       "presets": "Eelseadistused",
       "useCandidate": "Kasuta",
       "uriCopy": "Kopeeri",
-      "connected": "Ühendatud"
+      "connected": "Ühendatud",
+      "testSuccess": "Ühenduse test õnnestus!",
+      "testFailed": "Ühenduse test ebaõnnestus. Palun kontrollige sisestatud andmeid ja proovige uuesti.",
+      "testFailedTitle": "Test ebaõnnestus",
+      "streamDetails": "Voo üksikasjad",
+      "probing": "Tuvastan kaamerat...",
+      "ptzSupport": "PTZ tugi",
+      "testConnection": "Testi ühendust",
+      "toggleUriView": "Klõpsake täieliku URI vaate sisse/välja lülitamiseks",
+      "notConnected": "Pole ühendatud",
+      "errors": {
+        "hostRequired": "Hosti/IP-aadress on kohustuslik"
+      },
+      "candidateStreamTitle": "Kandidaat {{number}}",
+      "probeSuccessful": "Tuvastamine õnnestus",
+      "probeError": "Tuvastamise viga",
+      "probeNoSuccess": "Tuvastamine ebaõnnestus",
+      "deviceInfo": "Seadme info",
+      "autotrackingSupport": "Automaatse jälgimise tugi",
+      "uriCopied": "URI kopeeriti lõikelauale",
+      "rtspCandidates": "RTSP kandidaadid",
+      "probingDevice": "Tuvastan seadet...",
+      "description": "Tuvasta kaamera vooge või seadista käsitsi seaded vastavalt valitud tuvastusmeetodile.",
+      "probeFailed": "Kaamera tuvastamine ebaõnnestus: {{error}}"
     },
     "testResultLabels": {
       "resolution": "Resolutsioon",
@@ -56,7 +120,17 @@
       "roles": "Rollid",
       "none": "Määramata",
       "error": "Viga"
-    }
+    },
+    "commonErrors": {
+      "noUrl": "Palun sisestage kehtiv voogesituse URL",
+      "testFailed": "Voo test ebaõnnestus: {{error}}"
+    },
+    "save": {
+      "success": "Uue kaamera '{{cameraName}}' salvestamine õnnestus.",
+      "failure": "Viga kaamera '{{cameraName}}' salvestamisel."
+    },
+    "title": "Lisa kaamera",
+    "description": "Uue kaamera lisamiseks oma Frigate paigaldisesse järgige alltoodud samme."
   },
   "users": {
     "updatePassword": "Lähtesta salasõna",
@@ -172,24 +246,32 @@
   },
   "documentTitle": {
     "default": "Seadistused - Frigate",
-    "authentication": "Autentimise seadistused - Frigate",
-    "cameraReview": "Kaamerate kordusvaatuste seadistused - Frigate",
-    "general": "Profiili seadistused - Frigate",
-    "frigatePlus": "Frigate+ seadistused - Frigate",
-    "notifications": "Teavituste seadistused - Frigate",
+    "authentication": "Autentimise seaded - Frigate",
+    "cameraReview": "Kaamerate kordusvaatuste seaded - Frigate",
+    "general": "Profiili seaded - Frigate",
+    "frigatePlus": "Frigate+ seaded - Frigate",
+    "notifications": "Teavituste seaded - Frigate",
     "cameraManagement": "Kaamerate haldus - Frigate",
     "masksAndZones": "Maskide ja tsoonide haldus - Frigate",
-    "object": "Silumine ja veaotsing - Frigate"
+    "object": "Silumine ja veaotsing - Frigate",
+    "enrichments": "Rikastamise seaded - Frigate",
+    "motionTuner": "Liikumise häälestaja – Frigate",
+    "globalConfig": "Globaalsed seaded – Frigate",
+    "cameraConfig": "Kaamera seaded - Frigate",
+    "detectorsAndModel": "Detektorid ja mudel – Frigate",
+    "maintenance": "Hooldus – Frigate",
+    "profiles": "Profiilid - Frigate"
   },
   "general": {
-    "title": "Profiili seadistused",
+    "title": "Kasutajaliidese seadistused",
     "cameraGroupStreaming": {
       "clearAll": "Kustuta kõik voogedastuse seadistused"
     },
     "liveDashboard": {
       "title": "Töölaud reaalajas",
       "automaticLiveView": {
-        "label": "Automaatne otseülekande vaade"
+        "label": "Automaatne otseülekande vaade",
+        "desc": "Aktiveerib automaatselt kaamera reaalajas vaate, kui tuvastatakse tegevus. Selle valiku keelamisel uuendatakse kaamerapilti töölaual ainult üks kord minutis."
       }
     },
     "calendar": {
@@ -335,7 +417,7 @@
   },
   "menu": {
     "ui": "Kasutajaliides",
-    "cameraManagement": "Haldus",
+    "cameraManagement": "Kaamera haldus",
     "masksAndZones": "Maskid ja tsoonid",
     "triggers": "Päästikud",
     "debug": "Silumine ja veaotsing",
@@ -373,7 +455,37 @@
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "go2rtc voogedastus",
     "integrationSemanticSearch": "Semantiline otsing",
-    "integrationGenerativeAi": "Generatiivne tehisaru"
+    "integrationGenerativeAi": "Generatiivne tehisaru",
+    "general": "Üldine",
+    "globalConfig": "Globaalsed seaded",
+    "system": "Süsteem",
+    "integrations": "Integratsioonid",
+    "cameras": "Kaamera seaded",
+    "integrationFaceRecognition": "Nöotuvastus",
+    "cameraDetect": "Objektituvastus",
+    "cameraFfmpeg": "Vood (FFmpeg)",
+    "cameraRecording": "Salvestus",
+    "cameraSnapshots": "Hetktõmmised",
+    "cameraMotion": "Liikumistuvastus",
+    "cameraObjects": "Objektid",
+    "cameraConfigReview": "Ülevaade",
+    "cameraAudioEvents": "audiotuvastus",
+    "cameraAudioTranscription": "Audio transkriptsioon",
+    "cameraNotifications": "Teated",
+    "cameraLivePlayback": "Otseülekanne",
+    "integrationAudioTranscription": "Audio transkriptsioon",
+    "integrationObjectClassification": "Objektide klassifitseerimine",
+    "cameraFaceRecognition": "Näotuvastus",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "Kaamera kasutajaliides",
+    "cameraTimestampStyle": "Ajatempli stiil",
+    "cameraMqtt": "Kaamera MQTT",
+    "maintenance": "Hooldus",
+    "mediaSync": "Meedia sünkroonimine",
+    "regionGrid": "Regioonide ruudustik",
+    "enrichments": "Andmete rikastamine",
+    "motionTuner": "Liikumistuvastuse seadistaja"
   },
   "dialog": {
     "unsavedChanges": {
@@ -389,7 +501,11 @@
     "semanticSearch": {
       "reindexNow": {
         "confirmButton": "Indekseeri uuesti",
-        "label": "Indekseeri uuesti kohe"
+        "label": "Indekseeri kohe uuesti",
+        "alreadyInProgress": "Ümberindekseerimine on juba käimas.",
+        "error": "Uuesti indekseerimise alustamine ebaõnnestus: {{errorMessage}}",
+        "success": "Ümberindekseerimine algas edukalt.",
+        "confirmTitle": "Kinnita uuesti indekseerimine"
       },
       "modelSize": {
         "small": {
@@ -397,7 +513,9 @@
         },
         "large": {
           "title": "suur"
-        }
+        },
+        "label": "Mudeli suurus",
+        "desc": "Semantilise otsingu manustamiseks kasutatava mudeli suurus."
       },
       "title": "Semantiline otsing"
     },
@@ -408,14 +526,23 @@
         },
         "large": {
           "title": "suur"
-        }
-      }
+        },
+        "label": "Mudeli suurus",
+        "desc": "Näotuvastuseks kasutatava mudeli suurus."
+      },
+      "title": "Näotuvastus"
     },
     "birdClassification": {
       "title": "Lindude klassifikatsioon"
     },
     "licensePlateRecognition": {
       "title": "Sõidukite numbrimärkide tuvastus"
+    },
+    "title": "Andmerikastuse seaded",
+    "restart_required": "Taaskäivitamine on vajalik (Andmerikastuse seadeid on muudetud)",
+    "toast": {
+      "success": "Andmerikastamise seaded on salvestatud. Muudatuste rakendamiseks taaskäivitage Frigate.",
+      "error": "Seadete muudatuste salvestamine ebaõnnestus: {{errorMessage}}"
     }
   },
   "cameraReview": {
@@ -496,6 +623,32 @@
     },
     "lpr": {
       "vehicleNotTracked": "Sõidukite numbrimärkide tuvastus eeldab, et auto või mootorratas on jälgitav. Lülita menüüst Objektid sell kaamera jaoks sisse valikud „auto“ või „mootorratas“."
+    }
+  },
+  "button": {
+    "overriddenGlobal": "Ülekirjutatud (Globaalne)",
+    "overriddenGlobalTooltip": "Käesolev kaamera kirjutab selles jaotises üle globaalsed seaded",
+    "overriddenGlobalHeading_one": "See kaamera sürjutab {{count}} üldise seadistuse välja:",
+    "overriddenGlobalHeading_other": "See kaamera sürjutab {{count}} üldise seadistuse välja:"
+  },
+  "saveAllPreview": {
+    "title": "Salvestatavad muudatused",
+    "triggerLabel": "Vaadake üle ootel olevad muudatused",
+    "empty": "Ootel muudatusi pole.",
+    "scope": {
+      "label": "Ulatus",
+      "global": "Globaalne",
+      "camera": "Kaamera: {{cameraName}}"
+    },
+    "profile": {
+      "label": "Profiil"
+    },
+    "field": {
+      "label": "Väli"
+    },
+    "value": {
+      "label": "Uus väärtus",
+      "reset": "Lähtesta"
     }
   }
 }

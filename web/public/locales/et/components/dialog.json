@@ -37,6 +37,9 @@
           "ask_an": "Kas see objekt on <code>{{label}}</code>?",
           "ask_full": "Kas see objekt on <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
           "label": "Kinnita see silt Frigate+ teenuse jaoks"
+        },
+        "toast": {
+          "error": "Frigate+ teenusesse saatmine ebaõnnestus. Palun kontrolli oma võrguühendust ja proovi uuesti."
         }
       },
       "submitToPlus": {
@@ -70,18 +73,79 @@
       "success": "Eksportimise käivitamine õnnestus. Faili leiad eksportimise lehelt.",
       "view": "Vaata",
       "error": {
-        "failed": "Eksportimise käivitamine ei õnnestunud: {{error}}",
+        "failed": "Eksportimise järjekorda lisamine ei õnnestunud: {{error}}",
         "endTimeMustAfterStartTime": "Ajavahemiku lõpp peab olema peale algust",
-        "noVaildTimeSelected": "Ühtegi kehtivat ajavahemikku pole valitud"
-      }
+        "noVaildTimeSelected": "Ühtegi kehtivat ajavahemikku pole valitud",
+        "noValidTimeSelected": "Ühtegi korrektset ajavahemikku pole valitud"
+      },
+      "queued": "Eksport on järjekorda lisatud. Vaata progressi eksportide lehelt.",
+      "batchSuccess_one": "Alustasin 1 ekspordiga. Avan juhtumi kohe.",
+      "batchSuccess_other": "Alustasin {{count}} ekspordiga. Avan juhtumi kohe.",
+      "batchPartial": "Alustasin {{successful}}/{{total}} ekspordiga. Ebaõnnestunud kaamerad: {{failedCameras}}",
+      "batchFailed": "{{total}} eksporti ebaõnnestus algatada. Ebaõnnestunud kaamerad: {{failedCameras}}",
+      "batchQueuedSuccess_one": "1 eksport järjekorda lisatud. Avan juhtumi kohe.",
+      "batchQueuedSuccess_other": "{{count}} eksporti järjekorda lisatud. Avan juhtumi kohe.",
+      "batchQueuedPartial": "{{successful}}/{{total}} ekspordist on järjekorda lisatud. Ebaõnnestunud kaamerad: {{failedCameras}}",
+      "batchQueueFailed": "{{total}} eksporti ebaõnnestus järjekorda lisada. Ebaõnnestunud kaamerad: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Salvesta eksporditud sisu",
-      "previewExport": "Eksporditud sisu eelvaade"
+      "previewExport": "Eksporditud sisu eelvaade",
+      "queueingExport": "Ekspordi järjekorda lisamine...",
+      "useThisRange": "Kasuta seda vahemikku"
     },
     "case": {
       "label": "Juhtum",
-      "placeholder": "Vali juhtum"
+      "placeholder": "Vali juhtum",
+      "newCaseOption": "Ava uus juhtum",
+      "newCaseNamePlaceholder": "Uue juhtumi nimi",
+      "newCaseDescriptionPlaceholder": "Juhtumi kirjeldus",
+      "nonAdminHelp": "Uus juhtum avatakse järnevatele eksportidele."
+    },
+    "queueing": "Ekspordi järjekorda lisamine...",
+    "tabs": {
+      "export": "Üksik kaamera",
+      "multiCamera": "Mitu kaamerat"
+    },
+    "multiCamera": {
+      "timeRange": "Ajavahemik",
+      "selectFromTimeline": "Vali ajajoonelt",
+      "cameraSelection": "Kaamerad",
+      "cameraSelectionHelp": "Selles ajavahemikus tuvastatud objektidega kaamerad on eelvalitud",
+      "searchOrSelectGroup": "Otsi või vali kaamera grupp...",
+      "selectAll": "Vali kõik kaamerad",
+      "clearSelection": "Tühista valik",
+      "selectWithActivity": "Jälgitud objektidega kaamerad",
+      "selectGroup": "Vali grupp",
+      "noMatchingCameras": "Ükski kaamera ei sobitunud otsinguga",
+      "selectedCount": "{{selected}} / {{total}} valitud",
+      "checkingActivity": "Kaamera aktiivsuse kontrollimine...",
+      "noCameras": "Ühtegi kaamerat pole saadaval",
+      "detectionCount_one": "1 jälgitav objekt",
+      "detectionCount_other": "{{count}} jälgitavat objekti",
+      "nameLabel": "Ekspordi nimi",
+      "namePlaceholder": "Valikuline baasnimi nendele eksportidele",
+      "queueingButton": "Ekspordi järjekorda lisamine...",
+      "exportButton_one": "Ekspordi 1 kaamera",
+      "exportButton_other": "Ekspordi {{count}} kaamerat"
+    },
+    "multi": {
+      "title_one": "Ekspordi 1 ülevaade",
+      "title_other": "Espordi {{count}} ülevaadet",
+      "description": "Ekspordi valitud ülevaated. Kõik ekspordid on grupeeritud ühte juhtumisse.",
+      "descriptionNoCase": "Ekspordi kõik valitud juhtumid.",
+      "caseNamePlaceholder": "Ülevaate eksport - {{date}}",
+      "exportButton_one": "Ekspordi 1 ülevaade",
+      "exportButton_other": "Ekspordi {{count}} ülevaadet",
+      "exportingButton": "Ekspordin...",
+      "toast": {
+        "started_one": "Alustasin 1 eksporti. Avan juhtumi kohe.",
+        "started_other": "Alustasin {{count}} ekspordiga. Avan juhtumi kohe.",
+        "startedNoCase_one": "Alustasin 1 ekspordiga.",
+        "startedNoCase_other": "Alustasin {{count}} ekspordiga.",
+        "partial": "Alustasin {{successful}}/{{total}} ekspordiga. Ebaõnnestusid: {{failedItems}}",
+        "failed": "{{total}} ekspordi algatamine ebaõnnestus. Ebaõnnestunud: {{failedItems}}"
+      }
     }
   },
   "streaming": {
@@ -114,6 +178,14 @@
         "success": "Selle ülevaadatava objektiga seotud videosisu on kustutatud.",
         "error": "Kustutamine ei õnnestunud: {{error}}"
       }
+    },
+    "shareTimestamp": {
+      "label": "Jaotise ajatempel",
+      "title": "Jaotise ajatempel",
+      "description": "Jaga praeguse esituskoha ajatempliga URL-i või vali kohandatud ajatempel. Arvesta, et see ei ole avalik jagamislink ja on kättesaadav ainult kasutajatele, kellel on ligipääs Frigate'ile ja sellele kaamerale.",
+      "custom": "Kohandatud ajatempel",
+      "button": "Jaga ajatempliga linki",
+      "shareTitle": "Frigate ülevaate ajatempel: {{camera}}"
     }
   },
   "imagePicker": {
