@@ -670,26 +670,42 @@ def get_intel_gpu_stats(
 
 def get_openvino_npu_stats() -> dict[str, str] | None:
     """Get NPU stats using openvino."""
-    NPU_RUNTIME_PATH = "/sys/devices/pci0000:00/0000:00:0b.0/power/runtime_active_time"
+    NPU_RUNTIME_PATHS = (
+        (
+            "/sys/devices/pci0000:00/0000:00:0b.0/power/runtime_active_time",
+            1_000,  # Milliseconds per second
+        ),
+        (
+            "/sys/class/accel/accel0/device/npu_busy_time_us",
+            1_000_000,  # Microseconds per second
+        ),
+    )
+
+    for runtime_path, units_per_second in NPU_RUNTIME_PATHS:
+        try:
+            with open(runtime_path) as f:
+                initial_runtime = float(f.read().strip())
+            break
+        except (FileNotFoundError, PermissionError, ValueError):
+            continue
+    else:
+        return None
 
     try:
-        with open(NPU_RUNTIME_PATH) as f:
-            initial_runtime = float(f.read().strip())
-
         initial_time = time.time()
 
         # Sleep for 1 second to get an accurate reading
         time.sleep(1.0)
 
         # Read runtime value again
-        with open(NPU_RUNTIME_PATH) as f:
+        with open(runtime_path) as f:
             current_runtime = float(f.read().strip())
 
         current_time = time.time()
 
         # Calculate usage percentage
         runtime_diff = current_runtime - initial_runtime
-        time_diff = (current_time - initial_time) * 1000.0  # Convert to milliseconds
+        time_diff = (current_time - initial_time) * units_per_second
 
         if time_diff > 0:
             usage = min(100.0, max(0.0, (runtime_diff / time_diff * 100.0)))

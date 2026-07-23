@@ -1,7 +1,12 @@
 import unittest
+from io import StringIO
 from unittest.mock import MagicMock, patch
 
-from frigate.util.services import get_amd_gpu_stats, get_intel_gpu_stats
+from frigate.util.services import (
+    get_amd_gpu_stats,
+    get_intel_gpu_stats,
+    get_openvino_npu_stats,
+)
 
 
 class TestGpuStats(unittest.TestCase):
@@ -16,6 +21,38 @@ class TestGpuStats(unittest.TestCase):
         sp.return_value = process
         amd_stats = get_amd_gpu_stats()
         assert amd_stats == {"gpu": "4.17%", "mem": "60.37%"}
+
+    @patch("frigate.util.services.time.sleep")
+    @patch("frigate.util.services.time.time", side_effect=[0.0, 1.0])
+    @patch(
+        "builtins.open",
+        side_effect=[StringIO("1000"), StringIO("1250")],
+    )
+    def test_openvino_npu_stats_runtime_active_time(self, open_file, time, sleep):
+        assert get_openvino_npu_stats() == {"npu": "25.0", "mem": "-%"}
+
+        assert open_file.call_args_list[0].args[0].endswith("runtime_active_time")
+
+    @patch("frigate.util.services.time.sleep")
+    @patch("frigate.util.services.time.time", side_effect=[0.0, 1.0])
+    @patch(
+        "builtins.open",
+        side_effect=[
+            FileNotFoundError,
+            StringIO("1000000"),
+            StringIO("1250000"),
+        ],
+    )
+    def test_openvino_npu_stats_busy_time_fallback(self, open_file, time, sleep):
+        assert get_openvino_npu_stats() == {"npu": "25.0", "mem": "-%"}
+
+        assert open_file.call_args_list[0].args[0].endswith("runtime_active_time")
+        assert open_file.call_args_list[1].args[0].endswith("npu_busy_time_us")
+
+    @patch("builtins.open", side_effect=FileNotFoundError)
+    def test_openvino_npu_stats_unavailable(self, open_file):
+        assert get_openvino_npu_stats() is None
+        assert open_file.call_count == 2
 
     @patch("frigate.stats.intel_gpu_info.intel_gpu_name_resolver.get_names")
     @patch("frigate.util.services.time.sleep")
