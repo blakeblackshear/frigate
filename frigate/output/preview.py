@@ -159,11 +159,6 @@ class FFMpegConverter(threading.Thread):
                 f"duration {self.frame_times[t_idx + 1] - self.frame_times[t_idx]}"
             )
 
-        # The preview directory is created once in PreviewRecorder.__init__, but
-        # record cleanup's remove_empty_directories() can delete it again while it
-        # is empty (e.g. a camera re-added after removal, or an hour with no
-        # retained previews). Recreate it here so the hourly export can never fail
-        # permanently with "No such file or directory".
         Path(self.path).parent.mkdir(parents=True, exist_ok=True)
 
         try:
