@@ -239,7 +239,8 @@
         "label": "Birdseye",
         "description": "Configurações para a visualização composta \"Birdseye\", que combina múltiplas transmissões de câmera em um único layout.",
         "enabled": {
-            "label": "Ativar Birdseye"
+            "label": "Ativar Birdseye",
+            "description": "Habilita ou desabilita a função Birdseye."
         }
     },
     "live": {
@@ -420,7 +421,9 @@
         "enhancement": {
             "label": "Nível de aprimoramento",
             "description": "Nível de aprimoramento (0-10) a ser aplicado aos recortes da placa antes do OCR; valores mais altos nem sempre melhoram os resultados, e níveis acima de 5 podem funcionar apenas com placas noturnas, devendo ser utilizados com cautela."
-        }
+        },
+        "label": "Reconhecimento de placa veicular",
+        "description": "Configurações de reconhecimento de placa veicular, incluindo limites de detecção, formatação e placas conhecidas."
     },
     "record": {
         "label": "Gravação",
@@ -553,6 +556,18 @@
             "description": "Configurações que definem para quais objetos rastreados são geradas detecções (sem gerar alerta) e como essas detecções são retidas.",
             "enabled": {
                 "label": "Ativar detecções"
+            },
+            "labels": {
+                "label": "Rótulos de detecção",
+                "description": "Lista de rótulos de objetos que são considerados eventos de detecção."
+            },
+            "required_zones": {
+                "label": "Zonas requeridas",
+                "description": "Zonas em que um objeto deve entrar para ser considerado detectado. Deixe em branco para permitir qualquer zona."
+            },
+            "cutoff_time": {
+                "label": "Tempo limite de detecção",
+                "description": "Segundos a esperar após o fim da atividade antes de encerrar a detecção."
             }
         }
     }
