@@ -10,8 +10,11 @@ body:
 
         Before submitting, read the [beta documentation][docs].
 
+        By posting here you agree to follow our [AI policy][ai-policy]. Posts that appear to be written by an AI on your behalf may be closed without a response.
+
         [docs]: https://docs-dev.frigate.video/
         [discussions]: https://github.com/blakeblackshear/frigate/discussions
+        [ai-policy]: https://github.com/blakeblackshear/frigate/blob/dev/AI_POLICY.md
   - type: textarea
     id: description
     attributes:

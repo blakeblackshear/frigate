@@ -7,6 +7,13 @@ assignees: ''
 
 ---
 
+<!--
+  By posting here you agree to follow our AI policy:
+  https://github.com/blakeblackshear/frigate/blob/dev/AI_POLICY.md
+
+  Requests that appear to be written by an AI on your behalf may be closed without a response.
+-->
+
 **Describe what you are trying to accomplish and why in non technical terms**
 I want to be able to ... so that I can ... 
 

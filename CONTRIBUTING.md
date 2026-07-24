@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to Frigate. This document covers the expectations and guidelines for contributions. Please read it before submitting a pull request.
 
+All participation in this project, including pull requests, issues, and discussions, is covered by our [AI policy](AI_POLICY.md).
+
 ## Before you start
 
 ### Bugfixes
@@ -21,28 +23,16 @@ Before writing code for a new feature:
 
 ## AI usage policy
 
-AI tools are a reality of modern development and we're not opposed to their use. But we need to understand your relationship with the code you're submitting. The more AI was involved, the more important it is that you've genuinely reviewed, tested, and understood what it produced.
+AI tools are a reality of modern development and we're not opposed to their use. But we need to understand your relationship with the code you're submitting, and we need to hear from you rather than from your AI assistant.
 
-### Requirements when AI is used
+**Read the [AI policy](AI_POLICY.md) before you open a pull request.** It is short, and it applies to everything you post here. The parts that most often catch people out:
 
-If AI is used to generate any portion of the code, contributors must adhere to the following requirements:
+- A person has to be in the loop. Don't wire a bot or agent up to open pull requests, issues, or discussions on your behalf.
+- Disclose how AI was used. The PR template asks for this. Be honest, it won't automatically disqualify your PR.
+- Review and test everything you submit, and be prepared to explain every line when asked.
+- Don't use AI to write your PR description or your replies to maintainers.
 
-1. **Explicitly disclose the manner in which AI was employed.** The PR template asks for this. Be honest — this won't automatically disqualify your PR. We'd rather have an honest disclosure than find out later. Trust matters more than method.
-2. **Perform a comprehensive manual review prior to submitting the pull request.** Don't submit code you haven't read carefully and tested locally.
-3. **Be prepared to explain every line of code they submitted when asked about it by a maintainer.** If you can't explain why something works the way it does, you're not ready to submit it.
-4. **It is strictly prohibited to use AI to write your posts for you** (bug reports, feature requests, pull request descriptions, GitHub discussions, responding to humans, etc.). We need to hear from _you_, not your AI assistant. These are the spaces where we build trust and understanding with contributors, and that only works if we're talking to each other.
-
-### Established contributors
-
-Contributors with a long history of thoughtful, quality contributions to Frigate have earned trust through that track record. The level of scrutiny we apply to AI usage naturally reflects that trust. This isn't a formal exemption — it's just how trust works. If you've been around, we know how you think and how you work. If you're new, we're still getting to know you, and clear disclosure helps build that relationship.
-
-### What this means in practice
-
-We're not trying to gatekeep how you write code. Use whatever tools make you productive. But there's a difference between using AI as a tool to implement something you understand and handing a feature request to an AI and submitting whatever comes back. The former is fine. The latter creates maintenance risk for the project.
-
-Some honest context: when we review a PR, we're not just evaluating whether the code works today. We're evaluating whether we can maintain it, debug it, and extend it long-term — often without the original author's involvement. Code that the author doesn't deeply understand is code that nobody understands, and that's a liability.
-
-One more thing worth saying directly: most maintainers already have access to the same AI tools you do. A PR that's entirely AI-generated — where the author can't explain the design, debug issues independently, or engage substantively in design discussions — doesn't offer something we couldn't produce ourselves. What makes a contribution genuinely valuable is the human judgment and domain understanding behind it, as well as the engagement during review that shapes it into something we can confidently take on long-term.
+Pull requests that appear to be unreviewed AI output will be closed without review.
 
 ## Pull request guidelines
 
