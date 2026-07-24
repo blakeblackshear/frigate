@@ -7,6 +7,49 @@ import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
+## Adding a camera with the Add Camera Wizard
+
+The Add Camera Wizard is the recommended way to add a camera. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />. The wizard connects to your camera, tests each stream, and writes the camera's configuration for you, including the [go2rtc](go2rtc.md) restream and the live view stream mapping, so a standard setup needs no hand-written YAML.
+
+### Step 1: Name and connection
+
+Enter a name for the camera along with its host or IP address and credentials, then choose how the wizard should find the camera's streams:
+
+- **Probe camera** queries the camera over ONVIF (the ONVIF port is usually 80 or 8080) and asks it for its stream URLs. Some cameras use a separate ONVIF/service account rather than the device admin user, and some require **Use digest authentication** to be enabled.
+- **Manual selection** builds a stream URL from a template for the camera brand you pick (Dahua/Amcrest/EmpireTech, Hikvision/Uniview/Annke, Ubiquiti, Reolink, Axis, TP-Link, or Foscam). Choose **Other** to enter a custom RTSP URL directly. Non-RTSP stream types must be [configured manually](#setting-up-camera-inputs).
+
+The name you enter is lowercased and spaces become underscores. If the result still isn't a valid config key, the wizard generates a safe name and stores what you typed as `friendly_name`.
+
+### Step 2: Probe or snapshot
+
+In probe mode, the wizard reports what the camera returned (manufacturer, model, firmware, profile count, and whether PTZ, presets, and [autotracking](autotracking.md) are supported) along with the RTSP URLs it discovered. Test each candidate to see its resolution, frame rate, and codecs together with a snapshot, then select the one you want to use.
+
+In manual mode, the wizard tests the templated URL and shows the same metadata and snapshot.
+
+If no RTSP URLs are found, the credentials may be wrong or the camera may not support ONVIF. Go back and use manual selection instead.
+
+### Step 3: Stream configuration
+
+Assign [roles](#setting-up-camera-inputs) to the stream, and use **Add Another Stream** to add the camera's other streams, for example a substream for `detect` alongside the main stream for `record`. At least one stream must have the `detect` role before you can continue.
+
+**Reduce connections to camera** routes that input through the go2rtc restream so Frigate and the live view share a single connection to the camera instead of each opening their own. See [restream](restream.md) for more detail.
+
+### Step 4: Validation and testing
+
+Connect each stream to get a live preview, an estimated bandwidth figure, and a list of validation results. The wizard checks for the most common misconfigurations, including:
+
+- A detect resolution that is too high (increased resource usage) or too low for reliable detection, or one it could not probe at all
+- A stream marked `record` whose audio codec is not AAC, or that has no audio at all
+- A stream marked `audio` that carries no audio stream
+- Using a restreamed input for the `record` role
+- Brand-specific issues, such as an RTSP stream on a Reolink camera that should use http-flv, or a Dahua/Hikvision substream selected for `detect`
+
+**Use stream compatibility mode** passes the stream through go2rtc's ffmpeg module. Enable it if a stream fails to load after several attempts. Note that this also prevents [two way talk](/configuration/live#two-way-talk) from being detected for that stream.
+
+**Save New Camera** writes the configuration and starts the camera right away. No restart is required.
+
+Other features, including [hardware acceleration](hardware_acceleration_video.md), [two way talk](/configuration/live#two-way-talk), and audio transcoding, is configured after the camera has been added. For camera model specific quirks, see the [camera specific](camera_specific.md) docs.
+
 ## Setting Up Camera Inputs
 
 Several inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create recordings from a higher resolution stream, or vice versa.
@@ -69,7 +112,7 @@ Additional cameras are simply added under the camera configuration section.
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Global configuration > Camera management" /> and use the add camera button to configure each additional camera.
+Navigate to <NavPath path="Settings > Global configuration > Camera management" /> and use the [Add Camera Wizard](#adding-a-camera-with-the-add-camera-wizard) to configure each additional camera.
 
 </TabItem>
 <TabItem value="yaml">
