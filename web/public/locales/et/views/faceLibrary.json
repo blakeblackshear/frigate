@@ -1,6 +1,11 @@
 {
   "button": {
-    "uploadImage": "Laadi pilt üles"
+    "uploadImage": "Laadi pilt üles",
+    "deleteFaceAttempts": "Kustuta näod",
+    "addFace": "Lisa nägu",
+    "renameFace": "Nimeta nägu ümber",
+    "deleteFace": "Kustuta nägu",
+    "reprocessFace": "Käivita näotuvastus uuesti"
   },
   "collections": "Kogumikud",
   "description": {
@@ -11,28 +16,41 @@
   },
   "documentTitle": "Näoteek - Frigate",
   "createFaceLibrary": {
-    "new": "Lisa uus nägu"
+    "new": "Lisa uus nägu",
+    "nextSteps": "Tugeva tuvastusaluse loomiseks:<li>Kasuta vahekaarti \"Hiljutised tuvastused\", et valida pilte ja treenida isikutuvastust.</li><li>Parima tulemuse saavutamiseks keskendu otsepiltidele; väldi nurga all olevaid nägusid treenimiseks.</li></ul>"
   },
   "deleteFaceLibrary": {
-    "title": "Kustuta nimi"
+    "title": "Kustuta nimi",
+    "desc": "Kas oled kindel, et soovid isiku '{{name}}' kollektsiooni kustutada? See kustutab jäädavalt kõik seotud näod."
   },
   "toast": {
     "error": {
       "addFaceLibraryFailed": "Näo sidumine nimega ei õnnestunud: {{errorMessage}}",
-      "updateFaceScoreFailed": "Näo punktiskoori uuendamine ei õnnestunud: {{errorMessage}}"
+      "updateFaceScoreFailed": "Näo punktiskoori uuendamine ei õnnestunud: {{errorMessage}}",
+      "uploadingImageFailed": "Pildi üleslaadimine ebaõnnestus: {{errorMessage}}",
+      "deleteFaceFailed": "Kustutamine ebaõnnestus: {{errorMessage}}",
+      "deleteNameFailed": "Nime kustutamine ebaõnnestus: {{errorMessage}}",
+      "renameFaceFailed": "Näo ümbernimetamine ebaõnnestus: {{errorMessage}}",
+      "trainFailed": "Treenimine ebaõnnestus: {{errorMessage}}",
+      "reclassifyFailed": "Näo ümberklassifitseerimine ebaõnnestus: {{errorMessage}}"
     },
     "success": {
-      "addFaceLibrary": "Lisamine Näoteeki õnnestus: {{name}}!",
+      "addFaceLibrary": "Lisamine nägude kogusse õnnestus: {{name}}!",
       "deletedFace_one": "{{count}} näo kustutamine õnnestus.",
       "deletedFace_other": "{{count}} näo kustutamine õnnestus.",
       "deletedName_one": "{{count}} näo kustutamine õnnestus.",
       "deletedName_other": "{{count}} näo kustutamine õnnestus.",
-      "updatedFaceScore": "Näo punktiskoori uuendamine õnnestus: {{name}} ({{score}})."
+      "updatedFaceScore": "Näo punktiskoori uuendamine õnnestus: {{name}} ({{score}}).",
+      "uploadedImage": "Pildi üleslaadimine õnnestus.",
+      "renamedFace": "Näo ümbernimetamine õnnestus, uus nimi on {{name}}",
+      "trainedFace": "Edukalt treenitud nägu.",
+      "reclassifiedFace": "Näo ümberklassifitseerimine õnnestus."
     }
   },
   "deleteFaceAttempts": {
     "desc_one": "Kas oled kindel, et soovid kustutada {{count}} näo? Seda tegevust ei saa tagasi pöörata.",
-    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} nägu? Seda tegevust ei saa tagasi pöörata."
+    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} nägu? Seda tegevust ei saa tagasi pöörata.",
+    "title": "Kustuta näod"
   },
   "details": {
     "timestamp": "Ajatampel",
@@ -42,5 +60,40 @@
   "uploadFaceImage": {
     "title": "Laadi näopilt üles",
     "desc": "Laadi üles pilt, et otsida sellelt nägusid ja lisada see {{pageToggle}}'i jaoks"
-  }
+  },
+  "steps": {
+    "faceName": "Lisa näole nimi",
+    "uploadFace": "Lae näopilt üles",
+    "nextSteps": "Järgmised sammud",
+    "description": {
+      "uploadFace": "Laadi üles pilt isikust '{{name}}', mis näitab tema nägu eestvaates. Ainult nägu ei pea pildilt välja lõikama."
+    }
+  },
+  "train": {
+    "title": "Hiljutised tuvastamised",
+    "titleShort": "Hiljutised",
+    "aria": "Vali hiljutised tuvastamised",
+    "empty": "Hiljutisi näotuvastuse katseid pole",
+    "emptyNoLibrary": {
+      "title": "Laadi üles nägu",
+      "description": "Näotuvastuse toimimiseks peate lisama vähemalt ühe näo kogusse."
+    }
+  },
+  "renameFace": {
+    "title": "Nimeta nägu ümber",
+    "desc": "Sisesta uus nimi isiku '{{name}}' jaoks"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Palun vali pildifail."
+    },
+    "dropActive": "Lohista pilt siia…",
+    "dropInstructions": "Lohistage või kleepige pilt siia või klõpsake valimiseks",
+    "maxSize": "Maksimum suurus: {{size}}MB"
+  },
+  "nofaces": "Nägusid pole saadaval",
+  "trainFaceAs": "Treeni nägu kui:",
+  "trainFace": "Treeni nägu",
+  "reclassifyFaceAs": "Liigita nägu ümber järgmiselt:",
+  "reclassifyFace": "Näo ümberklassifitseerimine"
 }

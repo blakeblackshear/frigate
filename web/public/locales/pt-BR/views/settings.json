@@ -296,7 +296,7 @@
       }
     },
     "motionMaskLabel": "Máscara de Movimento {{number}}",
-    "objectMaskLabel": "Máscara de Objeto {{number}} ({{label}})",
+    "objectMaskLabel": "Máscara de Objeto {{number}}",
     "form": {
       "zoneName": {
         "error": {
@@ -437,7 +437,7 @@
       "add": "Nova Máscara de Movimento",
       "edit": "Editar Máscara de Movimento",
       "context": {
-        "title": "Máscaras de movimento são usadas para prevenir tipos de movimento não desejados de ativarem uma detecção (exemplo: galhos de árvores, timestamps de câmeras). Máscaras de movimento devem ser usadas <em> com moderação </em>. Excesso de mascaramento tornará o rastreamento de objetos mais difícil.",
+        "title": "Máscaras de movimento são usadas para prevenir tipos de movimento não desejados de ativarem uma detecção (exemplo: galhos de árvores, timestamps de câmeras). Máscaras de movimento devem ser usadas <em>com moderação</em>. Excesso de mascaramento tornará o rastreamento de objetos mais difícil.",
         "documentation": "Leia a documentação"
       },
       "point_one": "{{count}} ponto",
@@ -723,7 +723,7 @@
       "title": "Configuração de Captura de Imagem",
       "desc": "Envios ao Frigate+ requerem tanto a captura de imagem normais quanto a captura de imagem <code>clean_copy</code> estarem habilitadas na sua configuração.",
       "documentation": "Leia a documentação",
-      "cleanCopyWarning": "Algumas câmeras possuem captura de imagem habilitada porém têm a cópia limpa desabilitada. Você precisa habilitar a <code>clean_copy</code> nas suas configurações de captura de imagem para poder submeter imagems dessa câmera ao Frigate+.",
+      "cleanCopyWarning": "Algumas câmeras estão com os snapshots desativados",
       "table": {
         "camera": "Câmera",
         "snapshots": "Capturas de Imagem",

@@ -6,5 +6,67 @@
     "error": "Midagi läks valesti. Palun proovi uuesti.",
     "processing": "Töötlen…",
     "toolsUsed": "Kasutatud: {{tools}}",
-    "similarity_score": "Sarnasus"
+    "similarity_score": "Sarnasus",
+    "showTools": "Näita tööriistu ({{count}})",
+    "hideTools": "Peida tööriistad",
+    "call": "Kutse",
+    "result": "Tulemus",
+    "arguments": "Argumendid:",
+    "response": "Vastus:",
+    "send": "Saada",
+    "new_chat": "Uus vestlus",
+    "settings": {
+        "title": "Vestluse sätted",
+        "show_stats": {
+            "title": "Näita statistikat",
+            "always": "Alati",
+            "desc": "Kuva vastuste genereerimise kiirus ja konteksti suurus.",
+            "while_generating": "Genereerimise ajal"
+        },
+        "auto_scroll": {
+            "title": "Automaatne kerimine",
+            "desc": "Jälgi uusi sõnumeid kohe, kui need saabuvad."
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} tokenit",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "starting_requests_prompts": {
+        "recap": "Mis juhtus kui ma olin ära?",
+        "watch_camera": "Jälgi ust ja anna mulle teada kui keegi tuleb",
+        "show_camera_status": "Milline on minu kaamerate praegune seis?",
+        "show_recent_events": "Näita mulle viimase tunni viimaseid sündmusi"
+    },
+    "starting_requests": {
+        "show_camera_status": "Näita kaamera olekut",
+        "show_recent_events": "Kuva hiljutised sündmused",
+        "recap": "Mis juhtus kui ma olin ära?",
+        "watch_camera": "Jälgi kaamerat aktiivsuse osas"
+    },
+    "suggested_requests": "Proovi küsida:",
+    "semantic_search_required": "Sarnaste objektide leidmiseks peab olema lubatud semantiline otsing.",
+    "no_similar_objects_found": "Sarnaseid objekte ei leitud.",
+    "quick_reply_when_else": "Millal seda veel nähti?",
+    "quick_reply_find_similar_text": "Leia sarnaseid vaatepilte.",
+    "quick_reply_tell_me_more_text": "Räägi mulle sellest lähemalt.",
+    "quick_reply_when_else_text": "Millal seda veel nähtud on?",
+    "attach_event_aria": "Lisa sündmus {{eventId}}",
+    "attachment_picker_paste_label": "Või kleebi sündmuse ID",
+    "attachment_picker_attach": "Lisa",
+    "attachment_picker_placeholder": "Lisa sündmus",
+    "quick_reply_find_similar": "Leia sarnaseid vaatlusi",
+    "quick_reply_tell_me_more": "Räägi mulle sellest lähemalt",
+    "attachment_chip_remove": "Eemalda manus",
+    "attachment_chip_label": "{{label}} kaameras {{camera}}",
+    "open_in_explore": "Ava uurimisvaates",
+    "anchor": "Viide",
+    "reasoning": {
+        "active": "Otsin põhjendust…",
+        "show": "Näita põhjendust",
+        "hide": "Peida põhjendus"
+    },
+    "thinking": {
+        "toggle": "Näita mõtlemise olekut või peida see"
+    }
 }

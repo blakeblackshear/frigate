@@ -147,7 +147,20 @@
     "title": "分類モデルを編集",
     "descriptionState": "この状態分類モデルのクラスを編集します。変更を反映するにはモデルの再学習が必要です。",
     "descriptionObject": "このオブジェクト分類モデルのオブジェクトタイプおよび分類タイプを編集します。",
-    "stateClassesInfo": "注意: 状態クラスを変更すると、更新後のクラスでモデルを再学習する必要があります。"
+    "stateClassesInfo": "モデルが更新されました。変更を反映させるには、モデルの再学習を行ってください。",
+    "enabled": "有効",
+    "enabledDesc": "このモデルを実行します。無効にすると実行が停止し、分類が行われなくなります。",
+    "saveAttempts": "試行回数の保存",
+    "saveAttemptsDesc": "「最近の分類」UIに保持する分類試行画像の数です。",
+    "motion": "動き検知時に実行",
+    "motionDesc": "設定されたクロップ範囲内で動きが検知された際に、分類を実行します。",
+    "interval": "間隔",
+    "intervalDesc": "定期的な分類実行の間隔（秒）。空欄のままにすると、動きが検知された時のみ実行されます。",
+    "intervalPlaceholder": "間隔なし",
+    "errors": {
+      "saveAttemptsInvalid": "セーブ回数は0以上の整数でなければなりません",
+      "intervalInvalid": "「間隔」は0より大きい整数である必要があります"
+    }
   },
   "deleteDatasetImages": {
     "title": "データセット画像を削除",
@@ -187,5 +200,6 @@
     }
   },
   "reclassifyImageAs": "画像を次として再分類:",
-  "reclassifyImage": "画像を再分類"
+  "reclassifyImage": "画像を再分類",
+  "disabled": "無効"
 }

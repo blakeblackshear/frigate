@@ -69,7 +69,7 @@
     "integrationObjectClassification": "オブジェクト分類",
     "integrationAudioTranscription": "音声文字起こし",
     "cameraDetect": "物体検知",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "ストリーム（FFmpeg）",
     "cameraRecording": "録画",
     "cameraSnapshots": "スナップショット",
     "cameraMotion": "モーション検知",
@@ -662,7 +662,7 @@
       },
       "createUser": {
         "title": "新規ユーザーを作成",
-        "desc": "新しいユーザーアカウントを追加し、Frigate UI へのアクセスロールを指定します。",
+        "desc": "新しいユーザーアカウントを追加し、Frigate UIの各エリアへのアクセス権限となる役割を指定します。",
         "usernameOnlyInclude": "ユーザー名に使用できるのは英数字、.、_ のみです",
         "confirmPassword": "パスワードを確認してください"
       },
@@ -1292,12 +1292,16 @@
       "details": {
         "edit": "カメラ詳細を編集",
         "title": "カメラ詳細を編集",
-        "description": "このカメラの表示名と外部 URL を更新します。Frigate UI 全体で使用されます。",
+        "description": "Frigate UI 全体で、このカメラに使用されている表示名、外部 URL、および公開設定を更新します。",
         "friendlyNameLabel": "表示名",
         "friendlyNameHelp": "Frigate UI 全体でこのカメラに表示される名前です。空欄にするとカメラ ID が使用されます。",
         "webuiUrlLabel": "カメラ Web UI の URL",
         "webuiUrlHelp": "デバッグビューからカメラの Web UI に直接アクセスするための URL です。空欄にするとリンクが無効になります。",
-        "webuiUrlInvalid": "有効な URL を入力してください (例: https://example.com)。"
+        "webuiUrlInvalid": "有効な URL を入力してください (例: https://example.com)。",
+        "dashboardLabel": "ライブダッシュボードに表示",
+        "dashboardHelp": "このカメラをライブダッシュボードに表示します。",
+        "reviewLabel": "レビューに表示",
+        "reviewHelp": "このカメラを、カメラフィルター、モーションレビュー、履歴ビューを含め、レビューに表示します。"
       }
     },
     "cameraConfig": {
@@ -1633,7 +1637,14 @@
       "keyLabel": "キー",
       "valueLabel": "値",
       "keyPlaceholder": "新しいキー",
-      "remove": "削除"
+      "remove": "削除",
+      "providerNameLabel": "プロバイダー名",
+      "providerNamePlaceholder": "例：openai",
+      "variableNameLabel": "変数名",
+      "variableNamePlaceholder": "例：MY_VARIABLE",
+      "loggerNameLabel": "ロガー名",
+      "loggerNamePlaceholder": "例：frigate.record",
+      "keyPatternError": "英字、数字、ハイフン、アンダースコアのみを使用してください（スペースは使用不可）"
     },
     "knownPlates": {
       "namePlaceholder": "例: 妻の車",
@@ -1685,7 +1696,17 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "ストリーム {{index}}"
+      "itemTitle": "ストリーム {{index}}",
+      "sourceMode": {
+        "restream": "リストリーム (go2rtc)",
+        "manual": "手動入力パス",
+        "go2rtcStreamLabel": "go2rtc ストリーム",
+        "go2rtcStreamPlaceholder": "go2rtc ストリームを選択",
+        "noGo2rtcStreams": "設定済みの go2rtc ストリームはありません",
+        "go2rtcStreamSearch": "ストリームを検索中...",
+        "availableStreams": "利用可能なストリーム",
+        "noMatchingStreams": "一致するストリームはありません"
+      }
     },
     "restartRequiredField": "再起動が必要",
     "restartRequiredFooter": "設定が変更されました - 再起動が必要です",
@@ -2054,7 +2075,11 @@
       "fpsGreaterThanFive": "検知 FPS を 5 より高く設定することは推奨されません。値を大きくしてもパフォーマンス上の問題を引き起こすだけで、メリットはありません。",
       "disabled": "物体検知が無効化されています。スナップショット、レビュー項目、顔認識、ナンバープレート認識、生成AI などのエンリッチメントは機能しません。",
       "resolutionShouldBeMultipleOfFour": "最良の結果を得るため、検知の幅と高さは 4 の倍数にしてください。他の偶数値でも動作しますが、検知ストリームに視覚的なノイズや軽微な歪みが生じる可能性があります。",
-      "aspectRatioMismatch": "入力した幅と高さは現在の検知解像度のアスペクト比と一致していません。映像が引き伸ばされたり歪んだりする可能性があります。"
+      "aspectRatioMismatch": "入力した幅と高さは現在の検知解像度のアスペクト比と一致していません。映像が引き伸ばされたり歪んだりする可能性があります。",
+      "maxFramesSet": "最大フレーム数を設定するとデフォルトの動作が上書きされ、静止物体の追跡が無効になります。これが必要な状況はごく稀ですので使用には注意が必要です。",
+      "squareResolution": "正方形の検出解像度は一般的ではありません。検出の幅と高さは、物体検出モデルの寸法ではなく、カメラのアスペクト比（例：16:9）に合わせる必要があります。アスペクト比が一致しないと、画像が引き伸ばされ、検出精度が低下する可能性があります。",
+      "resolutionHigh": "この検出解像度は推奨値よりも高く、検出精度が向上しないままリソース使用量が増加する可能性があります。ほとんどのカメラでは、1080p以下の検出解像度を推奨します。",
+      "globalResolutionMultipleCameras": "複数のカメラを設定する際は、グローバルな検出解像度が設定されます。すべてのカメラで解像度とアスペクト比が同一でない限り、各カメラのネイティブアスペクト比に合わせて、カメラごとに検出幅と検出高さを定義する必要があります。"
     },
     "objects": {
       "genaiNoDescriptionsProvider": "説明を生成するには「descriptions」ロールを持つ生成AIプロバイダを設定する必要があります。"
@@ -2087,6 +2112,13 @@
     },
     "onvif": {
       "autotrackingNoZones": "オートトラッキング機能を使用するには、少なくとも1つのゾーンが必要です。「マスク / ゾーン」でこのカメラ用のゾーンを定義し、以下でそれを必須ゾーンとして設定してください。"
+    },
+    "model": {
+      "optimizedFor320": "Frigateは320x320のモデルに最適化されており、これはほとんどのセットアップにおいて最適な選択です。640x640のモデルは処理速度が遅く、特定のシナリオでのみ有効です。",
+      "inputDimensionsNotDetectResolution": "モデルの入力幅と高さはオブジェクト検出モデルの入力寸法であり、カメラの検出解像度ではありません。これらは使用しているモデルの寸法と一致している必要があります。通常、320x320や640x640のような正方形のサイズになります。"
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "手動でのハードウェアアクセラレーション引数の指定は推奨されません。特定の要件がない限り、お使いのハードウェアに合ったプリセットを選択してください。"
     }
   }
 }

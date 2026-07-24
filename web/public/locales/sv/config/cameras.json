@@ -1,29 +1,54 @@
 {
-    "label": "KameraKonfiguration",
+    "label": "Kamerakonfiguration",
     "name": {
         "label": "Kameranamn",
         "description": "Kameranamn krävs"
     },
     "friendly_name": {
         "label": "Visningsnamn",
-        "description": "Visningsnamn för kamera i Frigate UI"
+        "description": "Kamerans visningsnamn i Frigates gränssnitt"
     },
     "enabled": {
         "label": "Aktiverad",
-        "description": "Aktiverad"
+        "description": "Anger om kameran är aktiverad"
     },
     "audio": {
         "label": "Ljuddetektering",
-        "description": "Inställningar för ljudbaserad händelsedetektering för denna kamera.",
+        "description": "Inställningar för ljudbaserad händelsedetektering för den här kameran.",
         "enabled": {
             "label": "Aktivera ljuddetektering",
-            "description": "Aktivera eller avaktivera ljudbaserad detektering för denna kamera."
+            "description": "Aktivera eller inaktivera ljudbaserad detektering för den här kameran."
         },
         "max_not_heard": {
-            "description": "Antal sekunder utan den konfigurerade ljudtypen innan en ljudbaserad händelse slutar."
+            "description": "Antalet sekunder utan den konfigurerade ljudtypen innan en ljudbaserad händelse avslutas.",
+            "label": "Maximal tid utan ljud"
         },
         "min_volume": {
-            "label": "Minsta ljudvolym"
+            "label": "Minsta ljudvolym",
+            "description": "Lägsta RMS-volym för ljuddetektering. Ett lägre värde ökar känsligheten (t.ex. 200 för hög, 500 för medelhög och 1 000 för låg känslighet)."
+        },
+        "listen": {
+            "label": "Ljudtyper att lyssna efter",
+            "description": "Lista över typer av ljudhändelser som ska detekteras (t.ex. hundskall, brandlarm, tal och skrik)."
+        },
+        "filters": {
+            "label": "Ljudfilter",
+            "description": "Filterinställningar för varje ljudtyp, till exempel en konfidenströskel som minskar antalet falska positiva resultat.",
+            "threshold": {
+                "label": "Lägsta konfidenströskel för ljud",
+                "description": "Lägsta konfidenströskel för att ljudhändelsen ska räknas."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Ursprunglig ljudkonfiguration",
+            "description": "Anger om ljuddetektering ursprungligen var aktiverad i den statiska konfigurationsfilen."
+        },
+        "num_threads": {
+            "label": "Trådar för ljuddetektering",
+            "description": "Antal trådar som ska användas för bearbetning av ljuddetektering."
         }
+    },
+    "audio_transcription": {
+        "label": "Ljudtranskription"
     }
 }

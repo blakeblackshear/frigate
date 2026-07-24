@@ -122,7 +122,7 @@
         "desc": "Arată întotdeauna numele camerelor într-un tag (chip) în dashboard-ul live multi-cameră."
       },
       "liveFallbackTimeout": {
-        "label": "Timeout Rezecție Player Live",
+        "label": "Timp de expirare pentru player-ul live",
         "desc": "Când stream-ul live de înaltă calitate nu este disponibil, comută pe modul de bandă redusă după acest număr de secunde. Implicit: 3."
       }
     },
@@ -1337,7 +1337,7 @@
         "reviewHelp": "Arată această cameră în revizuiri, inclusiv filtrul de camere, revizuirea mișcărilor și vizualizarea istoricului."
       },
       "label": "Stare cameră",
-      "description": "Setează starea de funcționare pentru fiecare cameră.<br /><br /><strong>Pornit</strong>: stream-urile sunt procesate normal.<br /><strong>Oprit</strong>: pune temporar pe pauză procesarea. Nu se menține după repornirile Frigate.<br /><strong>Dezactivat</strong>: oprește procesarea și salvează modificarea în configurația ta. Este necesară o repornire pentru a reactiva o cameră dezactivată.<br /><br /><em>Notă: Dezactivarea nu afectează restream-urile go2rtc.</em><br /><br />Trage de mâner pentru a reordona camerele active așa cum apar în interfață, inclusiv în panoul Live și în meniurile drop-down de selecție a camerei.",
+      "description": "Setează starea de funcționare pentru fiecare cameră.<br /><br /><strong>Pornit</strong>: stream-urile sunt procesate normal.<br /><strong>Oprit</strong>: pune temporar pe pauză procesarea. Nu se menține după repornirile Frigate.<br /><strong>Dezactivat</strong>: oprește procesarea și salvează modificarea în configurația ta. Este necesară o repornire pentru a reactiva o cameră dezactivată.<br /><br /><em>Notă: Dezactivarea nu afectează restream-urile go2rtc.</em><br /><br />Trage⋮ pentru a reordona camerele active așa cum apar în interfață, inclusiv în panoul Live și în meniurile drop-down de selecție a camerei.",
       "disabledSubheading": "Dezactivat în configurație",
       "status": {
         "on": "Pornit",
@@ -1643,7 +1643,14 @@
       "keyLabel": "Cheie",
       "valueLabel": "Valoare",
       "keyPlaceholder": "Cheie nouă",
-      "remove": "Elimină"
+      "remove": "Elimină",
+      "providerNamePlaceholder": "de ex., openai",
+      "providerNameLabel": "Nume furnizor",
+      "variableNameLabel": "Nume variabilă",
+      "variableNamePlaceholder": "de ex., MY_VARIABLE",
+      "loggerNameLabel": "Nume logger",
+      "loggerNamePlaceholder": "de ex., frigate.record",
+      "keyPatternError": "Folosește doar litere, cifre, cratime și linii de subliniere (fără spații)"
     },
     "timezone": {
       "defaultOption": "Folosește fusul orar al browserului"
@@ -2097,7 +2104,12 @@
       "autotrackingNoZones": "Autotracking-ul necesită cel puțin o zonă. Definește o zonă pentru această cameră în Măști / Zone, apoi seteaz-o ca zonă obligatorie mai jos."
     },
     "ffmpeg": {
-      "hwaccelManualNotRecommended": "Argumentele manuale pentru accelerarea hardware nu sunt recomandate. Dacă nu există o cerință specifică, selectează presetarea care se potrivește cu hardware-ul tău."
+      "hwaccelManualNotRecommended": "Argumentele manuale pentru accelerarea hardware nu sunt recomandate. Dacă nu există o cerință specifică, selectează presetarea care se potrivește cu hardware-ul tău.",
+      "inputsMissingGo2rtcStream": "Un câmp de mai jos indică o retransmisie go2rtc care nu mai există. Selectează o retransmisie existentă sau introdu manual URL-ul camerei, altfel această cameră nu se va putea conecta."
+    },
+    "model": {
+      "optimizedFor320": "Frigate este optimizat pentru un model de 320x320, care este cea mai bună alegere pentru majoritatea configurațiilor. Un model de 640x640 este mai lent și ajută doar în scenarii specifice.",
+      "inputDimensionsNotDetectResolution": "Lățimea și înălțimea de intrare ale modelului reprezintă dimensiunile de intrare ale modelului de detectare a obiectelor, nu rezoluția de detecție a camerei tale. Acestea ar trebui să se potrivească cu dimensiunile modelului pe care îl folosești — de obicei o dimensiune pătrată, cum ar fi 320x320 sau 640x640."
     }
   },
   "birdseye": {

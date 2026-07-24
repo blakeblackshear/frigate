@@ -34,6 +34,9 @@
           "label": "Bevestig dit label voor Frigate Plus",
           "ask_a": "Is dit object een <code>{{label}}</code>?",
           "ask_full": "Is dit object een <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "toast": {
+          "error": "Gefaald bij Frigate+ in te dienen. Controleer je netwerkverbinding en probeer opnieuw."
         }
       }
     },
@@ -104,7 +107,14 @@
       "namePlaceholder": "Optionele basisnaam voor deze exporten",
       "queueingButton": "Exporten in wachtrij plaatsen...",
       "exportButton_one": "Export 1 Camera",
-      "exportButton_other": "{{count}} camera's exporteren"
+      "exportButton_other": "{{count}} camera's exporteren",
+      "searchOrSelectGroup": "Zoek of selecteer een cameragroep...",
+      "selectAll": "Selecteer alle camera's",
+      "clearSelection": "Wis selectie",
+      "selectWithActivity": "Camera's met gevolgde objecten",
+      "selectGroup": "Selecteer groep",
+      "noMatchingCameras": "Geen camera's komen overeen met je zoekopdracht",
+      "selectedCount": "{{selected}} / {{total}} geselecteerd"
     },
     "multi": {
       "title_one": "Review 1 exporteren",

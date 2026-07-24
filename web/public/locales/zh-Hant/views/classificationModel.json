@@ -60,7 +60,20 @@
     "title": "編輯分類模型",
     "descriptionState": "編輯這個狀態分類模型的類別，變更將需要重新訓練模型。",
     "descriptionObject": "編輯這個物件分類模型的物件種類與分類種類。",
-    "stateClassesInfo": "注意: 變更狀態類別後需要以更新後的類別重新訓練模型。"
+    "stateClassesInfo": "注意: 變更狀態類別後需要以更新後的類別重新訓練模型。",
+    "enabled": "啟用",
+    "enabledDesc": "執行此模型。停用時，它將停止運行且不再進行分類。",
+    "saveAttempts": "儲存嘗試次數",
+    "saveAttemptsDesc": "要在近期分類使用者介面中保留的分類嘗試圖片數量。",
+    "motion": "在動作時執行",
+    "motionDesc": "當在設定的裁切範圍內偵測到動作時執行分類。",
+    "interval": "間隔",
+    "intervalDesc": "定期執行分類之間的秒數。若要僅在動作時執行，請保持空白。",
+    "intervalPlaceholder": "無間隔",
+    "errors": {
+      "saveAttemptsInvalid": "儲存嘗試次數必須是大於或等於 0 的整數",
+      "intervalInvalid": "間隔必須是大於 0 的整數"
+    }
   },
   "deleteDatasetImages": {
     "title": "刪除圖片資料集合",
@@ -187,5 +200,6 @@
   "categorizeImageAs": "圖片分類為：",
   "categorizeImage": "圖片分類",
   "reclassifyImageAs": "重新分類圖片為：",
-  "reclassifyImage": "重新分類圖片"
+  "reclassifyImage": "重新分類圖片",
+  "disabled": "停用"
 }

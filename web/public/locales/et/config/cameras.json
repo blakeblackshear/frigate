@@ -12,11 +12,20 @@
         "description": "Kasutusel"
     },
     "audio": {
-        "label": "Helisündmused"
+        "label": "Heli tuvastus",
+        "min_volume": {
+            "label": "Minimaalne helitase"
+        },
+        "filters": {
+            "label": "Audio filtrid"
+        }
     },
     "birdseye": {
         "mode": {
             "label": "Jälgimisrežiim"
+        },
+        "order": {
+            "label": "Positsioon"
         }
     },
     "label": "Kaameraseadistus",
@@ -25,7 +34,8 @@
             "threshold": {
                 "description": "Minimaalne sarnasuse punktiskoor (0-1), mis on vajalik selle päästiku käivitamiseks."
             }
-        }
+        },
+        "label": "Semantiline otsing"
     },
     "lpr": {
         "label": "Sõidukite numbrimärkide tuvastus",
@@ -34,6 +44,171 @@
     "review": {
         "genai": {
             "description": "Kontrollib generatiivse tehisaru kasutamist kirjelduste ja kokkuvõtete koostamiseks ülevaatamisele kuuluvate objektide jaoks."
+        },
+        "alerts": {
+            "enabled": {
+                "label": "Luba häired"
+            }
         }
+    },
+    "audio_transcription": {
+        "label": "Audio transkriptsioon",
+        "live_enabled": {
+            "label": "Reaalajas transkriptsioon"
+        },
+        "enabled": {
+            "label": "Luba heli üleskirjutamine tekstina"
+        }
+    },
+    "detect": {
+        "label": "Objekti tuvastus",
+        "enabled": {
+            "label": "Luba objektituvastus"
+        },
+        "height": {
+            "label": "Tuvastamise kõrgus"
+        },
+        "width": {
+            "label": "Tuvastamise laius"
+        },
+        "fps": {
+            "label": "Tuvastamise kaadrisagedus"
+        },
+        "stationary": {
+            "label": "Püsivate objektide sätted"
+        }
+    },
+    "face_recognition": {
+        "label": "Näotuvastus"
+    },
+    "ffmpeg": {
+        "path": {
+            "label": "FFmpeg asukoht"
+        },
+        "gpu": {
+            "label": "GPU indeks"
+        },
+        "inputs": {
+            "global_args": {
+                "label": "FFmpeg globaalsed argumendid"
+            }
+        }
+    },
+    "live": {
+        "label": "Reaalajas mahamängimine",
+        "height": {
+            "label": "Otseülekande kõrgus"
+        },
+        "quality": {
+            "label": "Otseülekande kvaliteet"
+        },
+        "streams": {
+            "label": "Otseülekande voo nimed"
+        }
+    },
+    "motion": {
+        "label": "Liikumistuvastus",
+        "frame_height": {
+            "label": "Kaadri kõrgus"
+        },
+        "enabled": {
+            "label": "Luba liikumistuvastus"
+        }
+    },
+    "objects": {
+        "label": "Objektid",
+        "filters": {
+            "min_area": {
+                "label": "Minimaalne objekti ala"
+            },
+            "max_area": {
+                "label": "Maksimaalne objekti ala"
+            }
+        },
+        "genai": {
+            "label": "GenAI objekti konfiguratsioon",
+            "required_zones": {
+                "label": "Nõutud tsoonid"
+            },
+            "debug_save_thumbnails": {
+                "label": "Salvesta pisipildid"
+            },
+            "enabled": {
+                "label": "Luba GenAI"
+            },
+            "use_snapshot": {
+                "label": "Kasuta hetktõmmiseid"
+            }
+        }
+    },
+    "mqtt": {
+        "label": "MQTT"
+    },
+    "notifications": {
+        "enabled": {
+            "label": "Luba teavitused"
+        },
+        "email": {
+            "label": "Teavituste email"
+        },
+        "label": "Teavitused"
+    },
+    "ui": {
+        "label": "Kaamera kasutajaliides"
+    },
+    "record": {
+        "label": "Salvestus",
+        "enabled": {
+            "label": "Luba salvestamine"
+        }
+    },
+    "snapshots": {
+        "enabled": {
+            "label": "Luba hetktõmmised"
+        }
+    },
+    "timestamp_style": {
+        "color": {
+            "red": {
+                "label": "Punane",
+                "description": "Punase komponent (0–255) ajatempli värvi jaoks."
+            },
+            "green": {
+                "label": "Roheline",
+                "description": "Rohelise komponent (0–255) ajatempli värvi jaoks."
+            },
+            "blue": {
+                "label": "Sinine",
+                "description": "Sinise komponent (0–255) ajatempli värvi jaoks."
+            },
+            "label": "Ajatempli värv",
+            "description": "Ajatempli teksti RGB värviväärtused (kõik väärtused 0–255)."
+        },
+        "thickness": {
+            "label": "Ajatempli paksus",
+            "description": "Ajatempli teksti joone paksus."
+        },
+        "effect": {
+            "label": "Ajatempli efekt",
+            "description": "Ajatempli teksti visuaalne efekt (puudub, ühtlane, vari)."
+        }
+    },
+    "onvif": {
+        "user": {
+            "label": "ONVIF kasutajanimi"
+        },
+        "password": {
+            "label": "ONVIF parool"
+        },
+        "port": {
+            "label": "ONVIF port"
+        },
+        "label": "ONVIF",
+        "host": {
+            "label": "ONVIF host"
+        }
+    },
+    "profiles": {
+        "label": "Profiilid"
     }
 }

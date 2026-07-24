@@ -17,32 +17,35 @@
       },
       "review": {
         "question": {
-          "ask_a": "Är detta objektet en/ett <code>{{label}}</code>?",
+          "ask_a": "Är detta objekt en/ett <code>{{label}}</code>?",
           "ask_an": "Är detta objekt en/ett <code>{{label}}</code>?",
-          "ask_full": "Är detta objektet en/ett <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
-          "label": "Bekräfta denna etikett för Frigate Plus"
+          "ask_full": "Är detta objekt en/ett <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
+          "label": "Bekräfta etiketten för Frigate+"
         },
         "state": {
           "submitted": "Inskickad"
+        },
+        "toast": {
+          "error": "Det gick inte att skicka till Frigate+. Kontrollera nätverksanslutningen och försök igen."
         }
       }
     },
     "video": {
-      "viewInHistory": "Se i Historik"
+      "viewInHistory": "Visa i historiken"
     }
   },
   "export": {
     "time": {
       "fromTimeline": "Välj från tidslinjen",
-      "lastHour_one": "Sista timma",
-      "lastHour_other": "Sista {{count}} timmar",
+      "lastHour_one": "Senaste timmen",
+      "lastHour_other": "Senaste {{count}} timmarna",
       "start": {
-        "title": "Start Tid",
-        "label": "Välj Start Tid"
+        "title": "Starttid",
+        "label": "Välj starttid"
       },
       "end": {
-        "title": "Slut Tid",
-        "label": "Välj Sluttid"
+        "title": "Sluttid",
+        "label": "Välj sluttid"
       },
       "custom": "Anpassad"
     },
@@ -50,12 +53,12 @@
       "placeholder": "Ge exporten ett namn"
     },
     "select": "Välj",
-    "export": "Export",
+    "export": "Exportera",
     "selectOrExport": "Välj eller exportera",
     "toast": {
-      "success": "Exporten har startats. Visa filen på exportsidan.",
+      "success": "Exporten har startat. Visa filen på exportsidan.",
       "error": {
-        "failed": "Misslyckades med att köa exporten: {{error}}",
+        "failed": "Det gick inte att köa exporten: {{error}}",
         "endTimeMustAfterStartTime": "Sluttiden måste vara efter starttiden",
         "noVaildTimeSelected": "Inget giltigt tidsintervall valt"
       },
@@ -64,75 +67,78 @@
       "batchSuccess_one": "Startade 1 export. Öppnar ärendet nu.",
       "batchSuccess_other": "Startade {{count}} exporter. Öppnar ärendet nu.",
       "batchPartial": "Startade {{successful}} av {{total}} exporter. Misslyckade kameror: {{failedCameras}}",
-      "batchFailed": "Misslyckades med att starta export av {{total}}. Kameror som inte fungerade: {{failedCameras}}",
+      "batchFailed": "Det gick inte att starta {{total}} exporter. Berörda kameror: {{failedCameras}}",
       "batchQueuedSuccess_one": "1 export har köats. Ärendet öppnas nu.",
       "batchQueuedSuccess_other": "{{count}} exporter har köats. Öppnar ärendet nu.",
       "batchQueuedPartial": "Köade {{successful}} av {{total}} exporter. Misslyckade kameror: {{failedCameras}}",
-      "batchQueueFailed": "Misslyckades med att köa {{total}} exporter. Felaktiga kameror: {{failedCameras}}"
+      "batchQueueFailed": "Det gick inte att köa {{total}} exporter. Berörda kameror: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Spara export",
       "previewExport": "Förhandsgranska export",
-      "queueingExport": "Export i kö...",
+      "queueingExport": "Köar export…",
       "useThisRange": "Använd detta intervall"
     },
     "case": {
       "newCaseOption": "Skapa nytt ärende",
-      "newCaseNamePlaceholder": "Nytt ärende namn",
-      "newCaseDescriptionPlaceholder": "Ärende beskrivning",
+      "newCaseNamePlaceholder": "Namn på nytt ärende",
+      "newCaseDescriptionPlaceholder": "Ärendebeskrivning",
       "label": "Ärende",
       "nonAdminHelp": "Ett nytt ärende kommer att skapas för dessa exporter.",
       "placeholder": "Välj ett ärende"
     },
-    "queueing": "Export i kö...",
+    "queueing": "Köar export…",
     "tabs": {
       "export": "Enskild kamera",
-      "multiCamera": "Flerkameror"
+      "multiCamera": "Flera kameror"
     },
     "multiCamera": {
       "timeRange": "Tidsintervall",
       "selectFromTimeline": "Välj från tidslinjen",
       "cameraSelection": "Kameror",
-      "cameraSelectionHelp": "Kameror med spårade objekt inom detta tidsintervall är förvalda",
-      "checkingActivity": "Kontrollerar kameraaktivitet...",
+      "cameraSelectionHelp": "Kameror med spårade objekt inom tidsintervallet är förvalda.",
+      "checkingActivity": "Kontrollerar kameraaktivitet…",
       "noCameras": "Inga kameror tillgängliga",
       "detectionCount_one": "1 spårat objekt",
       "detectionCount_other": "{{count}} spårade objekt",
       "nameLabel": "Exportnamn",
       "namePlaceholder": "Valfritt basnamn för dessa exporter",
-      "queueingButton": "Köar exporter...",
+      "queueingButton": "Köar exporter…",
       "exportButton_one": "Exportera 1 kamera",
       "exportButton_other": "Exportera {{count}} kameror",
       "selectAll": "Välj alla kameror",
       "selectWithActivity": "Kameror med spårade objekt",
       "selectGroup": "Välj grupp",
-      "noMatchingCameras": "Ingen kamera matchar din sökning"
+      "noMatchingCameras": "Ingen kamera matchar din sökning",
+      "searchOrSelectGroup": "Sök eller välj en kameragrupp…",
+      "clearSelection": "Rensa val",
+      "selectedCount": "{{selected}} / {{total}} valda"
     },
     "multi": {
-      "title_one": "Exportera 1 recension",
-      "title_other": "Exportera {{count}} recensioner",
-      "description": "Exportera varje vald recension. Alla exporter grupperas under ett enda ärende.",
-      "descriptionNoCase": "Exportera varje vald recension.",
-      "caseNamePlaceholder": "Granska export - {{date}}",
-      "exportButton_one": "Exportera 1 recension",
-      "exportButton_other": "Exportera {{count}} recensioner",
-      "exportingButton": "Exporterar...",
+      "title_one": "Exportera 1 granskningsobjekt",
+      "title_other": "Exportera {{count}} granskningsobjekt",
+      "description": "Exportera varje valt granskningsobjekt. Alla exporter grupperas i ett enda ärende.",
+      "descriptionNoCase": "Exportera varje valt granskningsobjekt.",
+      "caseNamePlaceholder": "Granskningsexport – {{date}}",
+      "exportButton_one": "Exportera 1 granskningsobjekt",
+      "exportButton_other": "Exportera {{count}} granskningsobjekt",
+      "exportingButton": "Exporterar…",
       "toast": {
         "started_one": "Startade 1 export. Öppnar ärendet nu.",
         "started_other": "Startade {{count}} exporter. Öppnar ärendet nu.",
         "startedNoCase_one": "Startade 1 export.",
         "startedNoCase_other": "Startade {{count}} exporter.",
-        "partial": "Startade {{successful}} av {{total}} exporter. Misslyckades: {{failedItems}}",
-        "failed": "Misslyckades med att starta exporten av {{total}}. Misslyckades: {{failedItems}}"
+        "partial": "Startade {{successful}} av {{total}} exporter. Följande misslyckades: {{failedItems}}",
+        "failed": "Det gick inte att starta {{total}} exporter. Följande misslyckades: {{failedItems}}"
       }
     }
   },
   "streaming": {
     "label": "Videoström",
     "restreaming": {
-      "disabled": "Omströmning är inte aktiverad för den här kameran.",
+      "disabled": "Vidareströmning är inte aktiverad för den här kameran.",
       "desc": {
-        "title": "Konfigurera go2rtc för ytterligare livevisningsalternativ och ljud för den här kameran.",
+        "title": "Konfigurera go2rtc för fler alternativ för livevisning och ljud från den här kameran.",
         "readTheDocumentation": "Läs dokumentationen"
       }
     },
@@ -140,31 +146,31 @@
       "label": "Visa strömstatistik",
       "desc": "Aktivera det här alternativet för att visa strömstatistik som ett överlägg över kameraflödet."
     },
-    "debugView": "Felsöknings vy"
+    "debugView": "Felsökningsvy"
   },
   "search": {
     "saveSearch": {
       "overwrite": "{{searchName}} finns redan. Om du sparar skrivs det befintliga värdet över.",
-      "success": "Sökningen ({{searchName}}) har sparats.",
+      "success": "Sökningen {{searchName}} har sparats.",
       "button": {
         "save": {
           "label": "Spara den här sökningen"
         }
       },
-      "label": "Spara Sökning",
+      "label": "Spara sökning",
       "desc": "Ange ett namn för den här sparade sökningen.",
       "placeholder": "Ange ett namn för din sökning"
     }
   },
   "recording": {
     "confirmDelete": {
-      "title": "Bekräfta radering",
+      "title": "Bekräfta borttagning",
       "desc": {
-        "selected": "Är du säker på att du vill radera all inspelad video som är kopplad till det här granskningsobjektet?<br /><br />Håll ner <em>Shift</em>-tangenten för att hoppa över den här dialogrutan i framtiden."
+        "selected": "Är du säker på att du vill ta bort all inspelad video som är kopplad till det här granskningsobjektet?<br /><br />Håll ned <em>Skift</em>-tangenten för att hoppa över den här dialogrutan i framtiden."
       },
       "toast": {
         "success": "Videoklipp som är kopplade till de valda granskningsobjekten har raderats.",
-        "error": "Misslyckades med att ta bort: {{error}}"
+        "error": "Det gick inte att ta bort: {{error}}"
       }
     },
     "button": {
@@ -178,16 +184,16 @@
       "title": "Dela tidsstämpel",
       "description": "Dela en tidsstämplad URL för spelarens nuvarande position eller välj en anpassad tidsstämpel. Observera att detta inte är en offentlig delnings-URL och endast är tillgänglig för användare med åtkomst till Frigate och den här kameran.",
       "custom": "Anpassad tidsstämpel",
-      "button": "Dela tidsstämpel-URL",
-      "shareTitle": "Frigate granskning tidsstämpel: {{camera}}"
+      "button": "Dela URL med tidsstämpel",
+      "shareTitle": "Tidsstämpel för Frigate-granskning: {{camera}}"
     }
   },
   "imagePicker": {
     "selectImage": "Välj miniatyrbilden för ett spårat objekt",
     "search": {
-      "placeholder": "Sök efter etikett eller underetikett..."
+      "placeholder": "Sök efter etikett eller underetikett…"
     },
     "noImages": "Inga miniatyrbilder hittades för den här kameran",
-    "unknownLabel": "Sparad triggerbild"
+    "unknownLabel": "Sparad utlösarbild"
   }
 }

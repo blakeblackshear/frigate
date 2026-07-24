@@ -1484,7 +1484,14 @@
       "keyLabel": "鍵",
       "valueLabel": "值",
       "keyPlaceholder": "新鍵名",
-      "remove": "移除"
+      "remove": "移除",
+      "providerNameLabel": "服務提供者名稱",
+      "providerNamePlaceholder": "例如：openai",
+      "variableNameLabel": "變數名稱",
+      "variableNamePlaceholder": "例如：MY_VARIABLE",
+      "loggerNameLabel": "日誌名稱",
+      "loggerNamePlaceholder": "例如：frigate.record",
+      "keyPatternError": "僅能使用英文字母、數字、連字號（-）和底線（_），且不得包含空格"
     },
     "knownPlates": {
       "namePlaceholder": "例如：老婆的車",

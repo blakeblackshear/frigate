@@ -2,7 +2,14 @@
   "documentTitle": {
     "general": "Üldine statistika - Frigate",
     "cameras": "Kaamerate statistika - Frigate",
-    "storage": "Andmeruumi statistika - Frigate"
+    "storage": "Andmeruumi statistika - Frigate",
+    "logs": {
+      "frigate": "Frigate logid - Frigate",
+      "go2rtc": "Go2RTC logid - Frigate",
+      "nginx": "Nginx logid - Frigate",
+      "websocket": "Sõnumite logid - Frigate"
+    },
+    "enrichments": "Rikastus statistika - Frigate"
   },
   "logs": {
     "download": {
@@ -16,11 +23,29 @@
     "websocket": {
       "filter": {
         "cameras_count_one": "{{count}} kaamera",
-        "cameras_count_other": "{{count}} kaamerat"
+        "cameras_count_other": "{{count}} kaamerat",
+        "camera": "Kaamera",
+        "all_cameras": "Kõik kaamerad",
+        "events": "Sündmused",
+        "reviews": "Ülevaated",
+        "system": "Süsteem",
+        "topics": "Teemad",
+        "all": "Kõik teemad",
+        "face_recognition": "Näotuvastus",
+        "classification": "Klassifikatsioon",
+        "camera_activity": "Kaamera aktiivsus",
+        "lpr": "Numbrimärgituvastus"
       },
       "empty": "Ühtegi sõnumit pole veel hõivatud",
       "count_one": "{{count}} sõnum",
-      "count_other": "{{count}} sõnumit"
+      "count_other": "{{count}} sõnumit",
+      "pause": "Peata",
+      "resume": "Jätka",
+      "label": "Sõnumid",
+      "clear": "Tühista",
+      "expanded": {
+        "payload": "Last"
+      }
     },
     "type": {
       "label": "Tüüp",
@@ -36,5 +61,170 @@
       }
     }
   },
-  "title": "Süsteem"
+  "title": "Süsteem",
+  "enrichments": {
+    "embeddings": {
+      "object_description_events_per_second": "Objekti kirjeldus",
+      "face_recognition": "Näotuvastus",
+      "plate_recognition": "Numbrimärgi tuvastus",
+      "object_description": "Objekti kirjeldus",
+      "review_description_events_per_second": "Ülevaate kirjeldus",
+      "review_description": "Ülevaate kirjeldus",
+      "yolov9_plate_detection": "YOLOv9 numbrimärgi tuvastus",
+      "yolov9_plate_detection_speed": "YOLOv9 numbrimärgi tuvastuskiirus",
+      "plate_recognition_speed": "Numbrimärgituvastuse kiirus",
+      "face_recognition_speed": "Näotuvastuse kiirus"
+    },
+    "title": "Andmerikastused"
+  },
+  "cameras": {
+    "connectionQuality": {
+      "reconnectsLastHour": "Uuesti ühendumisi (viimase tunni jooksul)",
+      "stallsLastHour": "Seiskumisi (viimase tunni jooksul)",
+      "title": "Ühenduse kvaliteet",
+      "excellent": "Suurepärane",
+      "fair": "Rahuldav",
+      "poor": "Kehv",
+      "unusable": "Mittekasutatav",
+      "fps": "Kaadrisagedus",
+      "expectedFps": "Eeldatav kaadrisagedus (FPS)"
+    },
+    "label": {
+      "camera": "kaamera",
+      "detect": "tuvasta",
+      "skipped": "vahele jäetud",
+      "ffmpeg": "FFmpeg",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraGpu": "{{camName}} GPU",
+      "cameraDetect": "{{camName}} tuvastus",
+      "overallFramesPerSecond": "kaadreid sekundis kokku",
+      "overallDetectionsPerSecond": "kogutuvastusi sekundis",
+      "overallSkippedDetectionsPerSecond": "vahelejäänud tuvastusi sekundis kokku",
+      "cameraFramesPerSecond": "{{camName}} kaadreid sekundis",
+      "cameraDetectionsPerSecond": "{{camName}} tuvastusi sekundis",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} vahelejäänud tuvastusi sekundis",
+      "capture": "jäädvustamine"
+    },
+    "noCameras": {
+      "title": "Ühtegi kaamerat ei leitud"
+    },
+    "framesAndDetections": "Kaadreid / Tuvastusi",
+    "info": {
+      "keyframes": {
+        "recordDisabled": "Selle kaamera salvestamine on välja lülitatud.",
+        "segmentLength": "Salvestuse segmendi pikkus:",
+        "recordStream": "Salvestusvoog:",
+        "keyframeCount": "Vaadeldud võtmekaadrid:",
+        "observedDuration": "Vaadeldud kestus:"
+      },
+      "audio": "Audio:",
+      "error": "Viga: {{error}}",
+      "codec": "Koodek:",
+      "resolution": "Resolutsioon:",
+      "video": "Video:",
+      "aspectRatio": "kuvasuhe",
+      "unknown": "Tundmatu",
+      "fetching": "Kaameraandmete toomine",
+      "stream": "Voog {{idx}}",
+      "streamDataFromFFPROBE": "Vooandmed saadakse <code>ffprobe</code> abil.",
+      "fps": "Kaadrisagedus (FPS):"
+    },
+    "title": "Kaamerad",
+    "overview": "Ülevaade"
+  },
+  "lastRefreshed": "Viimati uuendatud: ",
+  "stats": {
+    "healthy": "Süsteem on töökorras",
+    "detectIsSlow": "{{detect}} on aeglane ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} on väga aeglane ({{speed}} ms)",
+    "cameraIsOffline": "{{camera}} on ühenduseta"
+  },
+  "storage": {
+    "cameraStorage": {
+      "camera": "Kaamera",
+      "unused": {
+        "title": "Kasutamata",
+        "tips": "See väärtus ei pruugi Frigate'i jaoks saadaolevat vaba ruumi täpselt kajastada, kui teie draivil on lisaks Frigate'i salvestistele ka muid faile. Frigate ei jälgi salvestusruumi kasutamist väljaspool oma salvestisi."
+      },
+      "bandwidth": "Ribalaius",
+      "storageUsed": "Salvestusmaht",
+      "percentageOfTotalUsed": "protsent kogusummast",
+      "unusedStorageInformation": "Kasutamata salvestusmahu info",
+      "title": "Kaamera salvestusmaht"
+    },
+    "title": "Säilitus",
+    "overview": "Ülevaade",
+    "recordings": {
+      "title": "Salvestused",
+      "earliestRecording": "Varaseim saadaolev salvestis:"
+    },
+    "shm": {
+      "title": "SHM (jagatud mälu) eraldus",
+      "frameLifetime": {
+        "title": "Kaadri eluiga"
+      }
+    }
+  },
+  "metrics": "Süsteemi mõõdikud",
+  "general": {
+    "title": "Üldine",
+    "hardwareInfo": {
+      "gpuUsage": "GPU kasutus",
+      "gpuMemory": "GPU mälu",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo väljund",
+          "processOutput": "Protsessi väljund:",
+          "processError": "Protsessi viga:",
+          "returnCode": "Tagastuskood: {{code}}"
+        },
+        "closeInfo": {
+          "label": "Sulge GPU info"
+        },
+        "copyInfo": {
+          "label": "Kopeeri GPU info"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI väljund",
+          "name": "Nimi: {{name}}",
+          "driver": "Draiver: {{driver}}",
+          "cudaComputerCapability": "CUDA arvutusvõimekus: {{cuda_compute}}",
+          "vbios": "VBios info: {{vbios}}"
+        },
+        "toast": {
+          "success": "GPU info kopeeriti lõikelauale"
+        }
+      },
+      "gpuDecoder": "GPU dekooder",
+      "gpuTemperature": "GPU temperatuur",
+      "gpuEncoder": "GPU kodeerija",
+      "gpuCompute": "GPU arvutus / kodeerimine",
+      "title": "Riistvara info",
+      "npuUsage": "NPU kasutus",
+      "npuMemory": "NPU mälu",
+      "npuTemperature": "NPU temperatuur",
+      "intelGpuWarning": {
+        "title": "Inteli GPU statistika hoiatus",
+        "message": "GPU statistika pole saadaval"
+      }
+    },
+    "otherProcesses": {
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "salvestus",
+        "review_segment": "Segmendi ülevaade",
+        "audio_detector": "audio detektor"
+      },
+      "processCpuUsage": "Protsessi CPU kasutus",
+      "processMemoryUsage": "Protsessi mälukasutus"
+    },
+    "detector": {
+      "title": "Detektorid",
+      "memoryUsage": "Detektori mälukasutus",
+      "cpuUsage": "Detektori CPU kasutus",
+      "temperature": "Detektori temperatuur",
+      "inferenceSpeed": "Detektori järelduskiirus",
+      "cpuUsageInformation": "Protsessori võimsus, mida kasutatakse tuvastusmudelite sisend- ja väljundandmete ettevalmistamisel. See väärtus ei mõõda järelduste kasutamist isegi siis, kui kasutatakse graafikaprotsessorit või kiirendit."
+    }
+  }
 }

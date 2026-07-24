@@ -1,6 +1,6 @@
 {
   "noPreviewFound": "Ingen förhandsvisning hittad",
-  "noRecordingsFoundForThisTime": "Inga inspelningar hittade för denna tid",
+  "noRecordingsFoundForThisTime": "Inga inspelningar hittades vid den här tidpunkten",
   "noPreviewFoundFor": "Ingen förhandsvisning hittad för {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Skicka denna bild till Frigate+?",
@@ -9,8 +9,8 @@
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 eller senare krävs för den här typen av livestream.",
   "streamOffline": {
-    "title": "Ström ej tillgänglig",
-    "desc": "Inga bildrutor har tagits emot från {{cameraName}}-strömmen <code>detect</code>, kontrollera felloggarna"
+    "title": "Strömmen är inte tillgänglig",
+    "desc": "Inga bildrutor har tagits emot från <code>detect</code>-strömmen för {{cameraName}}. Kontrollera felloggarna."
   },
   "stats": {
     "streamType": {
@@ -25,28 +25,28 @@
       "title": "Latens:",
       "short": {
         "title": "Latens",
-        "value": "{{seconds}} sek"
+        "value": "{{seconds}} s"
       },
       "value": "{{seconds}} sekunder"
     },
-    "totalFrames": "Totala Bildrutor:",
+    "totalFrames": "Totalt antal bildrutor:",
     "droppedFrames": {
-      "title": "Bortfallna bildrutor:",
+      "title": "Förlorade bildrutor:",
       "short": {
-        "title": "Bortfallen",
-        "value": "{{droppedFrames}} Bildrutor"
+        "title": "Förlorade",
+        "value": "{{droppedFrames}} bildrutor"
       }
     },
     "decodedFrames": "Avkodade bildrutor:",
-    "droppedFrameRate": "Frekvens för bortfallna bildrutor:"
+    "droppedFrameRate": "Andel förlorade bildrutor:"
   },
   "cameraDisabled": "Kameran är inaktiverad",
   "toast": {
     "error": {
-      "submitFrigatePlusFailed": "Bildruta har skickats till Frigate+ med misslyckat resultat"
+      "submitFrigatePlusFailed": "Det gick inte att skicka bildrutan till Frigate+"
     },
     "success": {
-      "submittedFrigatePlus": "Bildruta har skickats till Frigate+ med lyckat resultat"
+      "submittedFrigatePlus": "Bildrutan har skickats till Frigate+"
     }
   },
   "cameraOff": "Kameran är avstängd"

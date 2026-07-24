@@ -1,4 +1,78 @@
 {
     "documentTitle": "Liikumise tuvastus - Frigate",
-    "title": "Liikumise otsing"
+    "title": "Liikumise otsing",
+    "cancelSearch": "Tühista",
+    "startSearch": "Alusta otsingut",
+    "selectCamera": "Liikumisotsingut laaditakse",
+    "description": "Joonesta hulknurk, et määratleda huvipakkuv piirkond, ja määra ajavahemik, mille jooksul otsida liikumise muutusi selles piirkonnas.",
+    "searchStarted": "Otsing alustatud",
+    "searchCancelled": "Otsing tühistatud",
+    "searching": "Otsing on pooleli.",
+    "searchComplete": "Otsing lõpetatud",
+    "noResultsYet": "Käivita otsing valitud piirkonnas liikumise muutuste leidmiseks",
+    "noChangesFound": "Valitud piirkonnas ei tuvastatud pikslimuutusi",
+    "results": "Tulemused",
+    "polygonControls": {
+        "drawMode": "Joonista",
+        "moveMode": "Liiguta",
+        "reset": "Lähtesta hulknurk",
+        "undo": "Tühista viimane punkt",
+        "points_one": "{{count}} punkt",
+        "points_other": "{{count}} punkti"
+    },
+    "newSearch": "Uus otsing",
+    "clearResults": "Tühista tulemused",
+    "clearROI": "Tühista hulknurk",
+    "dialog": {
+        "cameraLabel": "Kaamera",
+        "title": "Liikumisotsing",
+        "previewAlt": "Kaamera '{{camera}}' eelvaade"
+    },
+    "timeRange": {
+        "title": "Otsinguvahemik",
+        "start": "Algusaeg",
+        "end": "Lõppaeg"
+    },
+    "settings": {
+        "title": "Otsinguseaded",
+        "parallelMode": "Paralleelrežiim",
+        "parallelModeDesc": "Skanni mitut salvestusvahemikku korraga (kiirem; kasutab rohkem dekodeerimisressursse)",
+        "threshold": "Tundlikkuse lävi",
+        "thresholdDesc": "Väiksemad väärtused tuvastavad väiksemaid muutusi (1–255)",
+        "minArea": "Minimaalne muutusala",
+        "minAreaDesc": "Ühe liikuva piirkonna minimaalne suurus protsentides huvipakkuvast piirkonnast",
+        "maxResults": "Maksimaalselt tulemusi",
+        "maxResultsDesc": "Peata pärast nii paljude ajatemplite sobivust"
+    },
+    "errors": {
+        "noCamera": "Palun vali kaamera",
+        "noROI": "Palun joonistage huvipakkuv piirkond",
+        "noTimeRange": "Palun valige ajavahemik",
+        "invalidTimeRange": "Lõppaeg peab olema pärast algusaega",
+        "searchFailed": "Otsing ebaõnnestus: {{message}}",
+        "polygonTooSmall": "Hulknurgal peab olema vähemalt 3 punkti",
+        "unknown": "Tundmatu viga"
+    },
+    "changePercentage": "{{percentage}}% muutus",
+    "metrics": {
+        "title": "Otsingumõõdikud",
+        "segmentsScanned": "Skannitud segmente",
+        "segmentsProcessed": "Töödeldud",
+        "segmentsSkippedInactive": "Vahele jäetud (tegevust pole)",
+        "segmentsSkippedHeatmap": "Vahele jäetud (kattuvaid piirkondi pole)",
+        "fallbackFullRange": "Varurežiimis täisulatusega skaneerimine",
+        "framesDecoded": "Kaadreid dekodeeritud",
+        "wallTime": "Otsingu aeg",
+        "seconds": "{{seconds}}s",
+        "minutesSeconds": "{{minutes}}m {{seconds}}s",
+        "segmentErrors": "Segmendi vead",
+        "scanSummary": "{{segments}} segmenti · {{time}}"
+    },
+    "jumpToTime": "Hüppa sellele ajale",
+    "framesProcessed": "{{count}} kaadrit töödeldud",
+    "changesFound_one": "Tuvastatud {{count}} liikumine",
+    "changesFound_other": "Tuvastatud {{count}} liikumist",
+    "motionHeatmapLabel": "Liikumise soojakaart",
+    "showSegmentHeatmap": "Soojakaart",
+    "scanning": "Skannimine {{time}}"
 }
