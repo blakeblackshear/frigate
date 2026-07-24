@@ -378,6 +378,16 @@ class ReviewSegmentMaintainer(threading.Thread):
         """Forcibly end the pending segment for a camera."""
         segment = self.active_review_segments.get(camera)
         if segment:
+            if self.indefinite_events.get(camera):
+                self.indefinite_events[camera] = {}
+                now = datetime.datetime.now().timestamp()
+
+                if segment.last_alert_time == sys.maxsize:
+                    segment.last_alert_time = now
+
+                if segment.last_detection_time == sys.maxsize:
+                    segment.last_detection_time = now
+
             prev_data = segment.get_data(False)
             return self._publish_segment_end(segment, prev_data)
         return None
