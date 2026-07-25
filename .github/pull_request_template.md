@@ -1,4 +1,4 @@
-_Please read the [contributing guidelines](https://github.com/blakeblackshear/frigate/blob/dev/CONTRIBUTING.md) before submitting a PR._
+_Please read the [contributing guidelines](https://github.com/blakeblackshear/frigate/blob/dev/CONTRIBUTING.md) and the [AI policy](https://github.com/blakeblackshear/frigate/blob/dev/AI_POLICY.md) before submitting a PR. Every PR must be read and submitted by a person, and PRs that appear to be unreviewed AI output will be closed without review._
 
 ## Proposed change
 
