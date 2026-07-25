@@ -23,7 +23,7 @@ import {
   useState,
 } from "react";
 import { useForm } from "react-hook-form";
-import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
+import { LuCheck, LuChevronDown, LuExternalLink, LuX } from "react-icons/lu";
 import { CiCircleAlert } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -35,12 +35,12 @@ import {
   useNotificationTest,
 } from "@/api/ws";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { use24HourTime } from "@/hooks/use-date-utils";
 import FilterSwitch from "@/components/filter/FilterSwitch";
@@ -51,6 +51,7 @@ import { useDocDomain } from "@/hooks/use-doc-domain";
 import { isPWA } from "@/utils/isPWA";
 import { isIOS } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
+import CustomSuspensionDialog from "@/components/overlay/dialog/CustomSuspensionDialog";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { cn } from "@/lib/utils";
 import cloneDeep from "lodash/cloneDeep";
@@ -756,6 +757,8 @@ export function CameraNotificationSwitch({
     }
   }, [notificationSuspendUntil, notificationState]);
 
+  const [customDialogOpen, setCustomDialogOpen] = useState(false);
+
   const handleSuspend = (duration: string) => {
     setIsSuspended(true);
     if (duration == "off") {
@@ -763,6 +766,11 @@ export function CameraNotificationSwitch({
     } else {
       sendNotificationSuspend(parseInt(duration));
     }
+  };
+
+  const handleCustomSuspend = (totalMinutes: number) => {
+    setIsSuspended(true);
+    sendNotificationSuspend(totalMinutes);
   };
 
   const handleCancelSuspension = () => {
@@ -824,34 +832,41 @@ export function CameraNotificationSwitch({
       </div>
 
       {!isSuspended ? (
-        <Select onValueChange={handleSuspend}>
-          <SelectTrigger className="w-auto">
-            <SelectValue placeholder={t("notification.suspendTime.suspend")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="5">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="outline" className="flex gap-2">
+              {t("notification.suspendTime.suspend")}
+              <LuChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => handleSuspend("5")}>
               {t("notification.suspendTime.5minutes")}
-            </SelectItem>
-            <SelectItem value="10">
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSuspend("10")}>
               {t("notification.suspendTime.10minutes")}
-            </SelectItem>
-            <SelectItem value="30">
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSuspend("30")}>
               {t("notification.suspendTime.30minutes")}
-            </SelectItem>
-            <SelectItem value="60">
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSuspend("60")}>
               {t("notification.suspendTime.1hour")}
-            </SelectItem>
-            <SelectItem value="840">
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSuspend("840")}>
               {t("notification.suspendTime.12hours")}
-            </SelectItem>
-            <SelectItem value="1440">
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSuspend("1440")}>
               {t("notification.suspendTime.24hours")}
-            </SelectItem>
-            <SelectItem value="off">
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSuspend("off")}>
               {t("notification.suspendTime.untilRestart")}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setCustomDialogOpen(true)}>
+              {t("notification.suspendTime.custom")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ) : (
         <Button
           variant="destructive"
@@ -861,6 +876,12 @@ export function CameraNotificationSwitch({
           {t("notification.cancelSuspension")}
         </Button>
       )}
+
+      <CustomSuspensionDialog
+        open={customDialogOpen}
+        onOpenChange={setCustomDialogOpen}
+        onConfirm={handleCustomSuspend}
+      />
     </div>
   );
 }
