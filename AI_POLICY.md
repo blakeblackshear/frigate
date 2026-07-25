@@ -1,5 +1,18 @@
 # Frigate AI Policy
 
+## TL;DR
+
+- **Use AI tools if they help you.** We do too. This is about what you post, not which tools you use to write it.
+- **A person has to read it and send it.** Don't wire a bot or an agent up to post on your behalf.
+- **Write your posts yourself.** Your own words, the template filled in, and you answering maintainers rather than your assistant.
+- **Don't paste an AI's guess at the cause as though it were a diagnosis.** Tell us what you actually observed.
+- **Read your code before you submit it.** Disclose that AI was used, and be ready to explain every line.
+- **If we misjudge something you wrote, just say so.** We'll take you at your word.
+
+The rest of this document explains each of these, and why.
+
+## Scope
+
 AI tools are a reality of modern development and we're not opposed to their use. You are responsible for anything you submit, however it was produced, and we are responsible for anything we merge and release. We hold a high bar for both.
 
 This policy applies everywhere this project is discussed: issues, discussions, pull requests, code reviews, and commit comments.
