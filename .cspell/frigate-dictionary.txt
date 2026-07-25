@@ -82,6 +82,7 @@ frontdoor
 fstype
 fullchain
 fullscreen
+gatekeep
 genai
 generativeai
 genpts

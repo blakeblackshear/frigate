@@ -100,7 +100,13 @@ Contributions and posts that do not follow this policy will be closed. Depending
 
 Repeated violations may result in being blocked from contributing to Frigate.
 
-If you believe your contribution was closed in error, you are welcome to reach out to a maintainer to discuss it.
+### When we get it wrong
+
+There is no reliable way to detect this, and we're not going to pretend otherwise. Whether something reads as unreviewed AI output is a judgment call, usually made quickly, by a volunteer with limited time and no way to know for certain. These calls are subjective and we won't always get them right.
+
+If it happens to you, just say so. A short reply telling us you wrote it yourself is enough, and we'll take you at your word and pick the conversation back up. We would much rather occasionally reopen something we misjudged than treat everyone who posts here as a suspect.
+
+We'd ask for some understanding in return. These calls get made quickly because the volume is real, and time spent second-guessing them is time not spent helping the person in the next thread.
 
 ## Attribution
 
