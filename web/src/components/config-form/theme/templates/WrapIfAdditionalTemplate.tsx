@@ -15,6 +15,14 @@ import { useTranslation } from "react-i18next";
 import { LuTrash2 } from "react-icons/lu";
 import type { ConfigFormContext } from "@/types/configForm";
 
+const KEY_SIZE_CLASSES = {
+  sm: { key: "md:col-span-2", value: "md:col-span-9" },
+  md: { key: "md:col-span-4", value: "md:col-span-7" },
+  lg: { key: "md:col-span-7", value: "md:col-span-4" },
+} as const;
+
+type AdditionalPropertyKeySize = keyof typeof KEY_SIZE_CLASSES;
+
 export function WrapIfAdditionalTemplate<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -57,6 +65,14 @@ export function WrapIfAdditionalTemplate<
       ? uiOptions.additionalPropertyKeyPattern
       : undefined;
   const preventKeyRename = uiOptions.preventKeyRename === true;
+
+  const keySize =
+    typeof uiOptions.additionalPropertyKeySize === "string" &&
+    uiOptions.additionalPropertyKeySize in KEY_SIZE_CLASSES
+      ? (uiOptions.additionalPropertyKeySize as AdditionalPropertyKeySize)
+      : "sm";
+  const keySpanClass = KEY_SIZE_CLASSES[keySize].key;
+  const valueSpanClass = KEY_SIZE_CLASSES[keySize].value;
 
   const formContext = registry?.formContext as ConfigFormContext | undefined;
 
@@ -126,7 +142,7 @@ export function WrapIfAdditionalTemplate<
       style={style}
     >
       {!keyIsReadonly && (
-        <div className="col-span-12 space-y-2 md:col-span-2">
+        <div className={cn("col-span-12 space-y-2", keySpanClass)}>
           {displayLabel && <Label htmlFor={keyId}>{keyLabel}</Label>}
           {keyLocked ? (
             <div
@@ -158,7 +174,7 @@ export function WrapIfAdditionalTemplate<
       <div
         className={cn(
           "col-span-12 space-y-2",
-          !keyIsReadonly && "md:col-span-9",
+          !keyIsReadonly && valueSpanClass,
         )}
       >
         {!keyIsReadonly && displayLabel && (
