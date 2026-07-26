@@ -36,6 +36,9 @@
           "ask_a": "¿Es este objeto un <code>{{label}}</code>?",
           "ask_an": "¿Es este objeto un <code>{{label}}</code>?",
           "ask_full": "¿Es este objeto un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "toast": {
+          "error": "Error al enviarlo a Frigate+. Por favor, comprueba tu conexión a internet y prueba de nuevo."
         }
       }
     },
@@ -68,7 +71,8 @@
       "error": {
         "failed": "No se pudo iniciar la exportación: {{error}}",
         "noVaildTimeSelected": "No se seleccionó un rango de tiempo válido",
-        "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio"
+        "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio",
+        "noValidTimeSelected": "Rango de tiempo seleccionado no valido"
       },
       "success": "Exportación iniciada con éxito. Ver el archivo en la página exportaciones.",
       "view": "Vista",
