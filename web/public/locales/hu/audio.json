@@ -433,5 +433,22 @@
   "trickle": "Csörgedezés",
   "gush": "Folyás",
   "stir": "Kavarás",
-  "thump": "Puffanás"
+  "thump": "Puffanás",
+  "arrow": "Nyíl",
+  "bouncing": "Pattog",
+  "vibration": "Vibrálás",
+  "inside": "Belül",
+  "outside": "Kívül",
+  "mains_hum": "Hálózati zaj",
+  "distortion": "Torzulás",
+  "throbbing": "Lüktetés",
+  "flap": "Csapkodás",
+  "scratch": "Kapar",
+  "scrape": "Karcolás",
+  "rub": "Dörzsölés",
+  "roll": "Gördül",
+  "crushing": "Összenyom",
+  "crumpling": "Gyűrődés",
+  "beep": "Sípolás",
+  "clang": "Csengés"
 }
