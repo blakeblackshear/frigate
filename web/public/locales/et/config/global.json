@@ -1,10 +1,31 @@
 {
     "audio": {
-        "label": "Helisündmused"
+        "label": "Heli tuvastus",
+        "min_volume": {
+            "label": "Minimaalne helitase"
+        },
+        "filters": {
+            "label": "Audio filtrid"
+        }
     },
     "birdseye": {
         "mode": {
             "label": "Jälgimisrežiim"
+        },
+        "order": {
+            "label": "Positsioon"
+        },
+        "height": {
+            "label": "Kõrgus"
+        },
+        "width": {
+            "label": "Laius"
+        },
+        "layout": {
+            "label": "Paigutus",
+            "scaling_factor": {
+                "label": "Skaleerimistegur"
+            }
         }
     },
     "version": {
@@ -22,6 +43,15 @@
             "threshold": {
                 "label": "Punktiskoori lävend",
                 "description": "Punktiskoori lävend, mida kasutatakse klassifitseerimise oleku muutmiseks."
+            },
+            "enabled": {
+                "label": "Luba mudel"
+            },
+            "name": {
+                "label": "Mudeli nimi"
+            },
+            "save_attempts": {
+                "label": "Salvestamiskatsed"
             }
         }
     },
@@ -30,11 +60,25 @@
             "threshold": {
                 "description": "Minimaalne sarnasuse punktiskoor (0-1), mis on vajalik selle päästiku käivitamiseks."
             }
+        },
+        "label": "Semantiline otsing",
+        "model_size": {
+            "label": "Mudeli suurus"
+        },
+        "device": {
+            "label": "Seade"
         }
     },
     "face_recognition": {
         "unknown_score": {
             "label": "Tundmatu punktiskoori lävend"
+        },
+        "label": "Näotuvastus",
+        "model_size": {
+            "label": "Mudeli suurus"
+        },
+        "device": {
+            "label": "Seade"
         }
     },
     "lpr": {
@@ -42,15 +86,393 @@
         "description": "Sõidukite numbrimärkide tuvastuse seadistus sisaldab tuvastuse lävendeid, vormindust ja teadaolevaid numbrimärke.",
         "enabled": {
             "description": "Lülita sõidukite numbrimärkide tuvastus kõikide kaamerate jaoks sisse; seda saad kaamerakohaselt ka sürjutada."
+        },
+        "model_size": {
+            "label": "Mudeli suurus"
+        },
+        "device": {
+            "label": "Seade"
         }
     },
     "genai": {
         "label": "Generatiivse tehisaru seadistus",
-        "description": "Seadistsued generatiivse tehisaru teenusepakkujate kasutamisel kirjelduste ja kokkuvõtete loomiseks ülevaatamisele kuuluvate objektide jaoks."
+        "description": "Seadistsued generatiivse tehisaru teenusepakkujate kasutamisel kirjelduste ja kokkuvõtete loomiseks ülevaatamisele kuuluvate objektide jaoks.",
+        "model": {
+            "label": "Mudel"
+        },
+        "roles": {
+            "label": "Rollid"
+        },
+        "api_key": {
+            "label": "API võti"
+        },
+        "base_url": {
+            "label": "Baas-URL"
+        }
     },
     "review": {
         "genai": {
             "description": "Kontrollib generatiivse tehisaru kasutamist kirjelduste ja kokkuvõtete koostamiseks ülevaatamisele kuuluvate objektide jaoks."
+        },
+        "alerts": {
+            "enabled": {
+                "label": "Luba häired",
+                "description": "Luba või keela kõigi kaamerate häirete genereerimine; seda saab kaamerati eraldi muuta."
+            }
         }
+    },
+    "audio_transcription": {
+        "label": "Audio transkriptsioon",
+        "live_enabled": {
+            "label": "Reaalajas transkriptsioon"
+        },
+        "enabled": {
+            "label": "Luba heli üleskirjutamine tekstina",
+            "description": "Luba või keela automaatne heli üleskirjutamine tektina kõigi kaamerate jaoks; seda saad kaamerati eraldi muuta."
+        },
+        "language": {
+            "label": "Üleskirjutuse keel",
+            "description": "Üleskirjutuse/tõlkimise jaoks kasutatav keelekood (näiteks „en” inglise keele puhul). Toetatud keelekoodid leiad lehelt https://whisper-api.com/docs/languages/."
+        },
+        "device": {
+            "label": "Üleskirjutusseade"
+        },
+        "model_size": {
+            "label": "Mudeli suurus"
+        }
+    },
+    "detect": {
+        "label": "Objekti tuvastus",
+        "enabled": {
+            "label": "Luba objektituvastus"
+        },
+        "height": {
+            "label": "Tuvastamise kõrgus"
+        },
+        "width": {
+            "label": "Tuvastamise laius"
+        },
+        "fps": {
+            "label": "Tuvastamise kaadrisagedus"
+        },
+        "stationary": {
+            "label": "Püsivate objektide sätted"
+        }
+    },
+    "ffmpeg": {
+        "path": {
+            "label": "FFmpeg asukoht"
+        },
+        "gpu": {
+            "label": "GPU indeks"
+        },
+        "inputs": {
+            "global_args": {
+                "label": "FFmpeg globaalsed argumendid"
+            }
+        },
+        "label": "FFmpeg"
+    },
+    "live": {
+        "label": "Reaalajas mahamängimine",
+        "height": {
+            "label": "Otseülekande kõrgus"
+        },
+        "quality": {
+            "label": "Otseülekande kvaliteet"
+        },
+        "streams": {
+            "label": "Otseülekande voo nimed"
+        }
+    },
+    "motion": {
+        "label": "Liikumistuvastus",
+        "frame_height": {
+            "label": "Kaadri kõrgus"
+        },
+        "enabled": {
+            "label": "Luba liikumistuvastus"
+        }
+    },
+    "objects": {
+        "label": "Objektid",
+        "filters": {
+            "min_area": {
+                "label": "Minimaalne objekti ala"
+            },
+            "max_area": {
+                "label": "Maksimaalne objekti ala"
+            }
+        },
+        "genai": {
+            "label": "GenAI objekti konfiguratsioon",
+            "required_zones": {
+                "label": "Nõutud tsoonid"
+            },
+            "debug_save_thumbnails": {
+                "label": "Salvesta pisipildid"
+            },
+            "enabled": {
+                "label": "Luba GenAI"
+            },
+            "use_snapshot": {
+                "label": "Kasuta hetktõmmiseid"
+            }
+        }
+    },
+    "auth": {
+        "reset_admin_password": {
+            "label": "Lähtesta administraatori parool"
+        },
+        "cookie_name": {
+            "label": "JWT küpsise nimi"
+        },
+        "enabled": {
+            "label": "Luba autentimine"
+        },
+        "label": "Autentimine",
+        "session_length": {
+            "label": "Sessiooni pikkus"
+        }
+    },
+    "database": {
+        "label": "Andmebaas"
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "enabled": {
+            "label": "Luba MQTT"
+        },
+        "user": {
+            "label": "MQTT kasutajanimi"
+        },
+        "tls_ca_certs": {
+            "label": "TLS CA sertifikaat"
+        },
+        "tls_client_cert": {
+            "label": "Kliendi sertifikaat"
+        },
+        "host": {
+            "label": "MQTT host",
+            "description": "MQTT maakleri hostinimi või IP-aadress."
+        },
+        "port": {
+            "label": "MQTT port"
+        },
+        "client_id": {
+            "label": "Kliendi ID"
+        },
+        "stats_interval": {
+            "label": "Statistika intervall"
+        },
+        "tls_client_key": {
+            "label": "Kliendi võti"
+        },
+        "qos": {
+            "label": "MQTT QoS"
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc"
+    },
+    "notifications": {
+        "enabled": {
+            "label": "Luba teavitused"
+        },
+        "email": {
+            "label": "Teavituste email"
+        },
+        "label": "Teavitused"
+    },
+    "networking": {
+        "ipv6": {
+            "label": "IPv6 sätted",
+            "enabled": {
+                "label": "Luba IPv6"
+            }
+        },
+        "label": "Võrguühendus",
+        "listen": {
+            "internal": {
+                "label": "Sisemine port"
+            },
+            "external": {
+                "label": "Välimine port"
+            }
+        }
+    },
+    "proxy": {
+        "label": "Vaheserver",
+        "logout_url": {
+            "label": "Väljalogimise url"
+        },
+        "default_role": {
+            "label": "Vaikimisi roll"
+        }
+    },
+    "telemetry": {
+        "stats": {
+            "label": "Süsteemi statistika",
+            "amd_gpu_stats": {
+                "label": "AMD GPU statistika"
+            },
+            "intel_gpu_stats": {
+                "label": "Intel GPU statistika"
+            },
+            "intel_gpu_device": {
+                "label": "Intel GPU seade"
+            },
+            "network_bandwidth": {
+                "label": "Võrgu ribalaius"
+            }
+        },
+        "label": "Telemeetria",
+        "network_interfaces": {
+            "label": "Võrguliides"
+        },
+        "version_check": {
+            "label": "Versiooni kontroll",
+            "description": "Luba väljaminev ühendus, et kontrollida uuema Frigate versooni olemasolu."
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "enabled": {
+            "label": "Luba TLS"
+        }
+    },
+    "ui": {
+        "timezone": {
+            "label": "ajavöönd"
+        },
+        "label": "Kasutajaliides",
+        "description": "Kasutajaliidese eelistused nagu ajavöönd, aja ja kuupäeva formaat ning ühikud.",
+        "unit_system": {
+            "label": "Ühikute süsteem"
+        }
+    },
+    "detectors": {
+        "label": "Detektori riistvara",
+        "cpu": {
+            "label": "CPU"
+        },
+        "deepstack": {
+            "label": "DeepStack"
+        },
+        "edgetpu": {
+            "label": "EdgeTPU"
+        },
+        "onnx": {
+            "label": "ONNX",
+            "device": {
+                "label": "Seadme tüüp"
+            }
+        },
+        "rknn": {
+            "label": "RKNN"
+        },
+        "openvino": {
+            "label": "OpenVINO"
+        },
+        "tensorrt": {
+            "label": "TensorRT"
+        },
+        "teflon_tfl": {
+            "label": "Teflon"
+        },
+        "synaptics": {
+            "label": "Synaptics"
+        },
+        "memryx": {
+            "device": {
+                "label": "Seadme asukoht"
+            },
+            "label": "MemryX"
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L"
+        },
+        "zmq": {
+            "label": "ZMQ IPC"
+        },
+        "axengine": {
+            "label": "AXEngine NPU"
+        },
+        "degirum": {
+            "label": "DeGirum"
+        }
+    },
+    "logger": {
+        "label": "Logimine"
+    },
+    "model": {
+        "label": "Tuvastusmudel"
+    },
+    "record": {
+        "label": "Salvestus",
+        "enabled": {
+            "label": "Luba salvestamine",
+            "description": "Luba või keela salvestamine kõigi kaamerate jaoks; seda saab kaamerati eraldi muuta."
+        }
+    },
+    "snapshots": {
+        "enabled": {
+            "label": "Luba hetktõmmised",
+            "description": "Luba või keela kõigi kaamerate hetktõmmiste salvestamine; seda saab kaamerati eraldi muuta."
+        }
+    },
+    "timestamp_style": {
+        "color": {
+            "red": {
+                "label": "Punane",
+                "description": "Punase komponent (0–255) ajatempli värvi jaoks."
+            },
+            "green": {
+                "label": "Roheline",
+                "description": "Rohelise komponent (0–255) ajatempli värvi jaoks."
+            },
+            "blue": {
+                "label": "Sinine",
+                "description": "Sinise komponent (0–255) ajatempli värvi jaoks."
+            },
+            "label": "Ajatempli värv",
+            "description": "Ajatempli teksti RGB värviväärtused (kõik väärtused 0–255)."
+        },
+        "thickness": {
+            "label": "Ajatempli paksus",
+            "description": "Ajatempli teksti joone paksus."
+        },
+        "effect": {
+            "label": "Ajatempli efekt",
+            "description": "Ajatempli teksti visuaalne efekt (puudub, ühtlane, vari)."
+        }
+    },
+    "onvif": {
+        "user": {
+            "label": "ONVIF kasutajanimi"
+        },
+        "password": {
+            "label": "ONVIF parool"
+        },
+        "port": {
+            "label": "ONVIF port"
+        },
+        "label": "ONVIF",
+        "host": {
+            "label": "ONVIF host"
+        }
+    },
+    "camera_mqtt": {
+        "quality": {
+            "label": "JPEG kvaliteet",
+            "description": "MQTT-sse saadetud piltide JPEG-kvaliteet (0–100)."
+        },
+        "enabled": {
+            "label": "Saada pilt"
+        },
+        "label": "MQTT"
+    },
+    "profiles": {
+        "label": "Profiilid"
     }
 }
