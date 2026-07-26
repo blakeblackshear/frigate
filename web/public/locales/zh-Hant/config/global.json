@@ -1043,6 +1043,9 @@
             "max_concurrent": {
                 "label": "最大併發匯出數",
                 "description": "同時可處理的最大匯出任務數量。"
+            },
+            "chapters": {
+                "label": "匯出錄影時要嵌入的章節資訊"
             }
         },
         "preview": {

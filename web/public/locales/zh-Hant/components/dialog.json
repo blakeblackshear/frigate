@@ -59,7 +59,8 @@
       "error": {
         "failed": "匯出失敗：{{error}}",
         "endTimeMustAfterStartTime": "結束時間必須要在開始時間之後",
-        "noVaildTimeSelected": "沒有選取有效的時間範圍"
+        "noVaildTimeSelected": "沒有選取有效的時間範圍",
+        "noValidTimeSelected": "未選擇有效的時間範圍"
       },
       "view": "查看",
       "queued": "匯出已加入佇列。請在匯出頁面檢視進度。",
