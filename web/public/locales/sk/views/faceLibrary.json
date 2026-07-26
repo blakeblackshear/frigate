@@ -18,12 +18,12 @@
     "title": "Nahrať obrázok tváre",
     "desc": "Nahrajte obrázok na skenovanie tvárí a zahrňte ho do {{pageToggle}}"
   },
-  "collections": "Zbierky",
+  "collections": "Kolekcie",
   "createFaceLibrary": {
     "title": "Vytvoriť Zbierku",
     "desc": "Vytvoriť novú zbierku",
     "new": "Vytvoriť novú tvár",
-    "nextSteps": "Vybudovanie silného základu:<li>Použite kartu Nedávne rozpoznania na výber a trénovanie obrázkov pre každú rozpoznanú osobu.</li><li>Pre dosiahnutie najlepších výsledkov sa zamerajte na priame obrázky; vyhnite sa trénovaniu obrázkov, ktoré zachytávajú tváre pod uhlom.</li></ul>"
+    "nextSteps": "Vybudovanie silného základu:<li>Použite kartu Nedávno rozpoznané tváre na výber a trénovanie obrázkov pre každú rozpoznanú osobu.</li><li>Pre dosiahnutie najlepších výsledkov sa zamerajte na priame obrázky; vyhnite sa trénovaniu obrázkov, ktoré zachytávajú tváre pod uhlom.</li></ul>"
   },
   "steps": {
     "faceName": "Zadajte Meno tváre",
@@ -34,8 +34,8 @@
     }
   },
   "train": {
-    "title": "Nedávne uznania",
-    "aria": "Vyberte posledné rozpoznania",
+    "title": "Nedávno rozpoznané tváre",
+    "aria": "Vyberte nedávno rozpoznané tváre",
     "empty": "Neexistujú žiadne predchádzajúce pokusy o rozpoznávanie tváre"
   },
   "selectItem": "Vyberte {{item}}",
@@ -85,9 +85,10 @@
       "deletedName_one": "{{count}} tvár bola úspešne odstránená.",
       "deletedName_few": "{{count}} tváre boli úspešne odstránené.",
       "deletedName_other": "{{count}} tvárí bolo úspešne odstránených.",
-      "renamedFace": "Úspešne premenovaná tvár na {{name}}",
-      "trainedFace": "Úspešne natrénovaná tvár.",
-      "updatedFaceScore": "Úspešne aktualizované skóre tváre."
+      "renamedFace": "Tvár bola úspešne premenovaná na {{name}}.",
+      "trainedFace": "Tvár bola úspešne natrénovaná.",
+      "updatedFaceScore": "Skóre tváre bolo úspešne aktualizované na {{name}} ({{score}}).",
+      "reclassifiedFace": "Tvár bola úspešne preklasifikovaná."
     },
     "error": {
       "uploadingImageFailed": "Nepodarilo sa nahrať obrázok: {{errorMessage}}",
@@ -95,8 +96,9 @@
       "deleteFaceFailed": "Nepodarilo sa odstrániť: {{errorMessage}}",
       "deleteNameFailed": "Nepodarilo sa odstrániť meno: {{errorMessage}}",
       "renameFaceFailed": "Nepodarilo sa premenovať tvár: {{errorMessage}}",
-      "trainFailed": "Nepodarilo sa trénovať: {{errorMessage}}",
-      "updateFaceScoreFailed": "Nepodarilo sa aktualizovať skóre tváre: {{errorMessage}}"
+      "trainFailed": "Nepodarilo sa natrénovať tvár: {{errorMessage}}",
+      "updateFaceScoreFailed": "Nepodarilo sa aktualizovať skóre tváre: {{errorMessage}}",
+      "reclassifyFailed": "Nepodarilo sa preklasifikovať tvár: {{errorMessage}}"
     }
   }
 }

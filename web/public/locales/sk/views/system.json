@@ -3,7 +3,7 @@
     "cameras": "Štatistiky kamier - Frigate",
     "storage": "Štatistiky úložiska - Frigate",
     "general": "Všeobecné štatistiky - Frigate",
-    "enrichments": "Štatistiky obohatenia - Frigate",
+    "enrichments": "Štatistiky AI funkcií - Frigate",
     "logs": {
       "frigate": "Protokoly Frigate - Frigate",
       "go2rtc": "Protokoly Go2RTC - Frigate",
@@ -36,7 +36,7 @@
     }
   },
   "general": {
-    "title": "Hlavný",
+    "title": "Všeobecné",
     "detector": {
       "title": "Detektory",
       "inferenceSpeed": "Detekčná rýchlosť",
@@ -96,7 +96,7 @@
     }
   },
   "storage": {
-    "title": "Skladovanie",
+    "title": "Úložisko",
     "overview": "Prehľad",
     "recordings": {
       "title": "Nahrávky",
@@ -108,11 +108,11 @@
       "warning": "Aktuálna veľkosť SHM {{total}}MB je príliš malá. Zvýšte ju aspoň na {{min_shm}}MB."
     },
     "cameraStorage": {
-      "title": "Úložisko kamery",
+      "title": "Úložisko kamier",
       "camera": "Kamera",
-      "unusedStorageInformation": "Nepoužité informácie o úložisku",
-      "storageUsed": "Skladovanie",
-      "percentageOfTotalUsed": "Percento z celkového počtu",
+      "unusedStorageInformation": "Informácie o nevyužitom úložisku",
+      "storageUsed": "Úložisko",
+      "percentageOfTotalUsed": "Percento z celku",
       "bandwidth": "Šírka pásma",
       "unused": {
         "title": "Nepoužité",
@@ -125,7 +125,7 @@
     "overview": "Prehľad",
     "info": {
       "aspectRatio": "pomer strán",
-      "cameraProbeInfo": "{{camera}} Informácie o sonde kamery",
+      "cameraProbeInfo": "Údaje o kamere {{camera}}",
       "streamDataFromFFPROBE": "Údaje zo streamu sa získavajú pomocou príkazu <code>ffprobe</code>.",
       "fetching": "Načítavajú sa údaje z kamery",
       "stream": "Stream {{idx}}",
@@ -137,32 +137,33 @@
       "audio": "Zvuk:",
       "error": "Chyba: {{error}}",
       "tips": {
-        "title": "Informácie o kamerovej sonde"
+        "title": "Údaje o kamere"
       }
     },
-    "framesAndDetections": "Rámy / Detekcie",
+    "framesAndDetections": "Snímky / Detekcie",
     "label": {
       "camera": "kamera",
-      "detect": "odhaliť",
+      "detect": "detekcie",
       "skipped": "preskočené",
       "ffmpeg": "FFmpeg",
-      "capture": "zachytiť",
+      "capture": "zachytávanie",
       "cameraFfmpeg": "{{camName}} FFmpeg",
-      "cameraCapture": "zachytiť{{camName}}",
-      "cameraDetect": "Detekcia {{camName}}",
+      "cameraCapture": "{{camName}} zachytávanie",
+      "cameraDetect": "{{camName}} detekcie",
       "overallFramesPerSecond": "celkový počet snímok za sekundu",
       "overallDetectionsPerSecond": "celkový počet detekcií za sekundu",
-      "overallSkippedDetectionsPerSecond": "celkový počet vynechaných detekcií za sekundu",
+      "overallSkippedDetectionsPerSecond": "celkový počet preskočených detekcií za sekundu",
       "cameraFramesPerSecond": "{{camName}} snímky za sekundu",
-      "cameraDetectionsPerSecond": "{{camName}}detekcie za sekundu",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} vynechaných detekcií za sekundu"
+      "cameraDetectionsPerSecond": "{{camName}} detekcie za sekundu",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} preskočené detekcie za sekundu",
+      "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
       "success": {
-        "copyToClipboard": "Dáta sondy boli skopírované do schránky."
+        "copyToClipboard": "Údaje o kamere boli skopírované do schránky."
       },
       "error": {
-        "unableToProbeCamera": "Nepodarilo sa overiť kameru: {{errorMessage}}"
+        "unableToProbeCamera": "Nepodarilo sa načítať údaje z kamery: {{errorMessage}}"
       }
     }
   },
@@ -178,7 +179,7 @@
     "shmTooLow": "Alokácia /dev/shm ({{total}} MB) by sa mala zvýšiť aspoň na {{min}} MB."
   },
   "enrichments": {
-    "title": "Obohatenia",
+    "title": "AI funkcie",
     "infPerSecond": "Inferencie za sekundu",
     "embeddings": {
       "image_embedding": "Vkladanie obrázkov",

@@ -339,9 +339,9 @@
       },
       "add": "Pridať zónu",
       "edit": "Upraviť zónu",
-      "point_one": "{{count}}bod",
-      "point_few": "{{count}}body",
-      "point_other": "{{count}}bodov"
+      "point_one": "{{count}} bod",
+      "point_few": "{{count}} body",
+      "point_other": "{{count}} bodov"
     },
     "motionMasks": {
       "label": "Maska Detekcia pohybu",
@@ -380,8 +380,8 @@
       "add": "Pridať Masku Objektu",
       "edit": "Upraviť Masku Objektu",
       "context": "Masky filtrovania objektov slúžia na odfiltrovanie falošných poplachov konkrétneho typu objektu na základe jeho umiestnenia.",
-      "point_one": "{{count}}bod",
-      "point_few": "{{count}}body",
+      "point_one": "{{count}} bod",
+      "point_few": "{{count}} body",
       "point_other": "{{count}} bodov",
       "clickDrawPolygon": "Kliknutím nakreslite polygón do obrázku.",
       "objects": {
@@ -397,7 +397,7 @@
       }
     },
     "motionMaskLabel": "Maska Detekcia pohybu {{number}}",
-    "objectMaskLabel": "Maska Objektu {{number}} {{label}}"
+    "objectMaskLabel": "Maska objektu {{number}}"
   },
   "motionDetectionTuner": {
     "title": "Ladenie detekcie pohybu",
