@@ -36,6 +36,9 @@
           "ask_an": "Czy ten obiekt to <code>{{label}}</code>?",
           "ask_full": "Czy ten obiekt to <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
           "label": "Potwierdź tę etykietę dla Frigate Plus"
+        },
+        "toast": {
+          "error": "Nie udało się przesłać do Frigate+. Sprawdź połączenie sieciowe i spróbuj ponownie."
         }
       }
     },
@@ -70,7 +73,8 @@
       "error": {
         "failed": "Nie udało się zakolejkować eksportu: {{error}}",
         "endTimeMustAfterStartTime": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia",
-        "noVaildTimeSelected": "Nie wybrano prawidłowego zakresu czasu"
+        "noVaildTimeSelected": "Nie wybrano prawidłowego zakresu czasu",
+        "noValidTimeSelected": "Nie wybrano prawidłowego zakresu czasu"
       },
       "view": "Widok",
       "queued": "Eksport dodany do kolejki. Postęp można sprawdzić na stronie eksportów.",

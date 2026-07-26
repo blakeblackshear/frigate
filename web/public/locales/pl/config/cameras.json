@@ -192,7 +192,7 @@
         },
         "listen": {
             "label": "Typy nasłuchu",
-            "description": "Lista typów zdarzeń audio do wykrywania (na przykład: szczekanie, alarm pożarowy, krzyk, mowa, wrzask)."
+            "description": "Lista typów zdarzeń audio do wykrywania (na przykład: szczekanie, alarm pożarowy, mowa, krzyk)."
         },
         "filters": {
             "label": "Filtry audio",
@@ -322,7 +322,8 @@
             },
             "record": {
                 "description": "Domyślne argumenty wyjściowe dla strumieni z rolą zapisu."
-            }
+            },
+            "description": "Domyślne argumenty wyjściowe używane dla różnych ról FFmpeg, takich jak wykrywanie i nagrywanie."
         },
         "retry_interval": {
             "label": "Czas ponownej próby FFmpeg",
@@ -335,6 +336,13 @@
         "gpu": {
             "label": "Indeks GPU",
             "description": "Domyślny indeks karty graficznej używany do akceleracji sprzętowej, jeśli jest dostępna."
+        },
+        "description": "Wejścia strumienia kamery i opcje FFmpeg, w tym ścieżka do pliku binarnego, args, hwaccel oraz argumenty wyjściowe dla poszczególnych ról.",
+        "path": {
+            "description": "Ścieżka do pliku binarnego FFmpeg lub alias wersji („7.0” lub „8.0”)."
+        },
+        "global_args": {
+            "label": "Argumenty globalne FFmpeg"
         }
     }
 }
