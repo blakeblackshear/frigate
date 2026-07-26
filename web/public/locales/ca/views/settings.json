@@ -698,7 +698,7 @@
         "title": "Crear un nou usuari",
         "confirmPassword": "Siusplau, confirma la contrasenya",
         "usernameOnlyInclude": "El nom d'usuari només pot contenir lletres, números, . o _",
-        "desc": "Afegeix un nou compte d'usuari i especifica un rol per accedir a àrees de la interfície de Frigate."
+        "desc": "Afegeix un compte d'usuari nou i especifica un rol per a l'accés a les àrees de la interfície d'usuari de Frigate."
       }
     },
     "title": "Usuaris",
@@ -1323,7 +1323,7 @@
       "details": {
         "edit": "Edita els detalls de la càmera",
         "title": "Edita els detalls de la càmera",
-        "description": "Actualitza el nom de visualització, l'URL extern i la visibilitat utilitzada per a aquesta càmera a tota la interfície d'usuari de la Fragata.",
+        "description": "Actualitza el nom de visualització, l'URL extern i la visibilitat utilitzada per a aquesta càmera a tota la interfície d'usuari de Frigate.",
         "friendlyNameLabel": "Nom a mostrar",
         "friendlyNameHelp": "Nom amistós que es mostra per a aquesta càmera a tota la interfície d'usuari de Frigate. Deixeu-ho en blanc per utilitzar l'ID de la càmera.",
         "webuiUrlLabel": "URL de la interfície web de la càmera",
@@ -1484,7 +1484,7 @@
         "successMulti_other": "Configuració copiada a {{count}} càmeres",
         "successMultiWithRestart_one": "Configuració copiada a la càmera {{count}}. Reinicia Frigate per aplicar tots els canvis.",
         "successMultiWithRestart_many": "Configuració copiada a {{count}} càmeres. Reinicia Frigate per aplicar tots els canvis.",
-        "successMultiWithRestart_other": "Configuració copiada a {{count}} càmeres. Reinicia la fragata per aplicar tots els canvis.",
+        "successMultiWithRestart_other": "Configuració copiada a {{count}} càmeres. Reinicia Frigate per aplicar tots els canvis.",
         "partialFailure": "{{successCount}} seccions aplicades; «{{failedSection}}» ha fallat: {{errorMessage}}",
         "partialFailureMulti": "S'ha copiat a {{successCount}} càmera(es); ha fallat {{failed}}: {{errorMessage}}",
         "newCameraPartialFailure": "S'ha creat la càmera {{cameraName}} però no s'han pogut copiar alguns paràmetres: {{errorMessage}}",
@@ -1641,7 +1641,14 @@
       "keyLabel": "Clau",
       "valueLabel": "Valor",
       "keyPlaceholder": "Nou valor",
-      "remove": "Elimina"
+      "remove": "Elimina",
+      "providerNameLabel": "Nom del proveïdor",
+      "providerNamePlaceholder": "p. ex., openai",
+      "variableNameLabel": "Nom de la variable",
+      "variableNamePlaceholder": ". ex., La_Meva_Variable",
+      "loggerNameLabel": "Nom del registrador",
+      "loggerNamePlaceholder": "p. ex., friagte.registre",
+      "keyPatternError": "Utilitza només lletres, números, guions i guions baixos (sense espais)"
     },
     "timezone": {
       "defaultOption": "Utilitza la zona horària del navegador"
@@ -2096,7 +2103,8 @@
       "autotrackingNoZones": "Autotraquejar requereix al menys una zona. Defineix una zona per aquesta cámera a Mascares/Zones, després usa'l com a requerit a la part inferior."
     },
     "ffmpeg": {
-      "hwaccelManualNotRecommended": "No es recomanen arguments manuals d'acceleració de maquinari. Tret que existeixi un requisit específic, seleccioneu el predefinit que coincideixi amb el vostre maquinari."
+      "hwaccelManualNotRecommended": "No es recomanen arguments manuals d'acceleració de maquinari. Tret que existeixi un requisit específic, seleccioneu el predefinit que coincideixi amb el vostre maquinari.",
+      "inputsMissingGo2rtcStream": "Una entrada a sota apunta a un restream go2rtc que ja no existeix. Seleccioneu un restream existent o introduïu manualment l'URL de la càmera, en cas contrari aquesta càmera no es connectarà."
     },
     "model": {
       "optimizedFor320": "Frigate està optimitzada per a un model 320x320, que és la millor opció per a la majoria de configuracions. Un model 640x640 és més lent i només ajuda en escenaris específics.",
