@@ -24,6 +24,9 @@
         },
         "state": {
           "submitted": "Terkirim"
+        },
+        "toast": {
+          "error": "Gagal submit ke Frigate+. Harap periksa koneksi jaringan Anda dan coba lagi."
         }
       }
     },
@@ -57,7 +60,8 @@
       "view": "Melihat",
       "batchSuccess_other": "{{count}} Ekspor dimulai. Membuka kasusnya sekarang.",
       "batchPartial": "Ekspor berhasil dimulai sebanyak {{successful}} dari total {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
-      "batchFailed": "Gagal memulai ekspor sebanyak {{total}}. Kamera yang gagal: {{failedCameras}}"
+      "batchFailed": "Gagal memulai ekspor sebanyak {{total}}. Kamera yang gagal: {{failedCameras}}",
+      "batchQueuedPartial": "Antrian ekspor berhasil sebanyak {{successful}} dari total {{total}} ekspor. Kamera yang gagal: {{failedCameras}}"
     },
     "case": {
       "newCaseOption": "Membuat Kasus Baru",
@@ -87,7 +91,9 @@
       "selectGroup": "Pilih grup",
       "noMatchingCameras": "Tidak ada kamera yang sesuai dengan pencarian Anda",
       "selectedCount": "{{terpilih}} / {{total}} terpilih",
-      "namePlaceholder": "Nama dasar opsional untuk ekspor ini"
+      "namePlaceholder": "Nama dasar opsional untuk ekspor ini",
+      "searchOrSelectGroup": "Cari, atau pilih grup kamera...",
+      "selectAll": "Pilih semua kamera"
     },
     "multi": {
       "title_other": "Ekspor {{count}} Ulasan",
