@@ -3,7 +3,7 @@
     "downloadVideo": {
       "label": "Ladda ner video",
       "toast": {
-        "success": "Nedladdning påbörjad för granskningsobjekt."
+        "success": "Nedladdningen av granskningsobjektets video har startat."
       }
     }
   }

@@ -5,16 +5,16 @@
     "cameras": "Kamerastatistik - Frigate",
     "logs": {
       "frigate": "Frigate-loggar - Frigate",
-      "go2rtc": "Go2RTC loggar - Frigate",
-      "nginx": "Nginx loggar - Frigate"
+      "go2rtc": "go2rtc-loggar - Frigate",
+      "nginx": "Nginx-loggar - Frigate"
     },
-    "enrichments": "Förbättringsstatistik - Frigate"
+    "enrichments": "Berikningsstatistik - Frigate"
   },
   "logs": {
     "copy": {
       "label": "Kopiera till urklipp",
-      "success": "Kopierat loggarna till utklippstavlan",
-      "error": "Kunde inte kopiera loggarna till utklippstavlan"
+      "success": "Loggarna har kopierats till urklipp",
+      "error": "Det gick inte att kopiera loggarna till urklipp"
     },
     "download": {
       "label": "Ladda ned logg"
@@ -25,25 +25,25 @@
       "message": "Meddelande",
       "tag": "Tagg"
     },
-    "tips": "Loggarna strömmas från Server",
+    "tips": "Loggarna strömmas från servern",
     "toast": {
       "error": {
         "fetchingLogsFailed": "Fel vid hämtning av loggar: {{errorMessage}}",
-        "whileStreamingLogs": "Fel vid uppspelning av loggar: {{errorMessage}}"
+        "whileStreamingLogs": "Fel vid strömning av loggar: {{errorMessage}}"
       }
     }
   },
   "title": "System",
   "metrics": "Systemdetaljer",
   "general": {
-    "title": "Generellt",
+    "title": "Allmänt",
     "detector": {
       "title": "Detektorer",
-      "inferenceSpeed": "Detektorns inferenstid",
-      "temperature": "Detektor temperatur",
+      "inferenceSpeed": "Detektorns inferenshastighet",
+      "temperature": "Detektortemperatur",
       "cpuUsage": "Detektorns CPU-användning",
       "memoryUsage": "Detektorns minnesanvändning",
-      "cpuUsageInformation": "CPU som används för att förbereda in- och utdata till/från detekteringsmodeller. Detta värde mäter inte inferensanvändning, även om en GPU eller accelerator används."
+      "cpuUsageInformation": "CPU-användning för att förbereda in- och utdata till och från detekteringsmodeller. Värdet mäter inte inferensbelastningen, även om en GPU eller accelerator används."
     },
     "hardwareInfo": {
       "title": "Hårdvaruinformation",
@@ -53,11 +53,11 @@
       "gpuDecoder": "GPU-avkodare",
       "gpuInfo": {
         "nvidiaSMIOutput": {
-          "vbios": "VBios-information: {{vbios}}",
-          "title": "Nvidia SMI utdata",
+          "vbios": "VBIOS-information: {{vbios}}",
+          "title": "nvidia-smi-utdata",
           "name": "Namn: {{name}}",
           "driver": "Drivrutin: {{driver}}",
-          "cudaComputerCapability": "CUDA beräknings kapacitet: {{cuda_compute}}"
+          "cudaComputerCapability": "CUDA-beräkningskapacitet: {{cuda_compute}}"
         },
         "closeInfo": {
           "label": "Stäng GPU-info"
@@ -66,12 +66,12 @@
           "label": "Kopiera GPU-info"
         },
         "toast": {
-          "success": "Kopierade GPU-info till urklipp"
+          "success": "GPU-informationen har kopierats till urklipp"
         },
         "vainfoOutput": {
-          "title": "Vainfo resultat",
+          "title": "vainfo-utdata",
           "returnCode": "Returkod: {{code}}",
-          "processOutput": "Bearbeta utdata:",
+          "processOutput": "Processutdata:",
           "processError": "Processfel:"
         }
       },
@@ -85,7 +85,7 @@
     },
     "otherProcesses": {
       "title": "Övriga processer",
-      "processCpuUsage": "Process CPU-användning",
+      "processCpuUsage": "Processens CPU-användning",
       "processMemoryUsage": "Processminnesanvändning",
       "series": {
         "go2rtc": "go2rtc",
@@ -103,9 +103,9 @@
       "bandwidth": "Bandbredd",
       "unused": {
         "title": "Oanvänt",
-        "tips": "Det här värdet kanske inte korrekt representerar det lediga utrymmet tillgängligt för Frigate om du har andra filer lagrade på din hårddisk utöver Frigates inspelningar. Frigate spårar inte lagringsanvändning utanför sina egna inspelningar."
+        "tips": "Det här värdet kanske inte korrekt motsvarar det lediga utrymme som är tillgängligt för Frigate om hårddisken även innehåller andra filer än Frigates inspelningar. Frigate spårar inte lagringsanvändning utanför sina egna inspelningar."
       },
-      "title": "Kamera lagring",
+      "title": "Kameralagring",
       "camera": "Kamera",
       "unusedStorageInformation": "Information om oanvänd lagring"
     },
@@ -118,16 +118,16 @@
     },
     "shm": {
       "title": "SHM-allokering (delat minne)",
-      "warning": "Den nuvarande SHM-storleken på {{total}}MB är för liten. Öka den till minst {{min_shm}}MB."
+      "warning": "Den nuvarande SHM-storleken på {{total}} MB är för liten. Öka den till minst {{min_shm}} MB."
     }
   },
   "cameras": {
     "title": "Kameror",
     "overview": "Översikt",
     "info": {
-      "aspectRatio": "bildförhållande",
-      "cameraProbeInfo": "Kamerainformation för {{camera}}",
-      "streamDataFromFFPROBE": "Strömdata erhålls med <code>ffprobe</code>.",
+      "aspectRatio": "Bildförhållande",
+      "cameraProbeInfo": "Kameraanalys för {{camera}}",
+      "streamDataFromFFPROBE": "Strömdata har hämtats med <code>ffprobe</code>.",
       "codec": "Codec:",
       "resolution": "Upplösning:",
       "fps": "FPS:",
@@ -135,73 +135,73 @@
       "audio": "Ljud:",
       "error": "Fel: {{error}}",
       "tips": {
-        "title": "Kamera sond information"
+        "title": "Information från kameraanalysen"
       },
-      "fetching": "Hämtar kamera data",
+      "fetching": "Hämtar kameradata",
       "stream": "Ström {{idx}}",
       "video": "Video:"
     },
     "label": {
-      "detect": "detektera",
+      "detect": "detektering",
       "camera": "kamera",
       "skipped": "hoppade över",
       "ffmpeg": "FFmpeg",
-      "capture": "spela in",
-      "overallFramesPerSecond": "totalt antal bilder per sekund",
-      "overallDetectionsPerSecond": "totala detektioner per sekund",
-      "overallSkippedDetectionsPerSecond": "totalt antal hoppade detekteringar per sekund",
+      "capture": "bildinhämtning",
+      "overallFramesPerSecond": "totalt antal bildrutor per sekund",
+      "overallDetectionsPerSecond": "totalt antal detekteringar per sekund",
+      "overallSkippedDetectionsPerSecond": "totalt antal överhoppade detekteringar per sekund",
       "cameraFfmpeg": "{{camName}} FFmpeg",
-      "cameraCapture": "{{camName}} inspelning",
-      "cameraDetect": "{{camName}} upptäcka",
+      "cameraCapture": "{{camName}} bildinhämtning",
+      "cameraDetect": "{{camName}} detektering",
       "cameraFramesPerSecond": "{{camName}} bildrutor per sekund",
       "cameraDetectionsPerSecond": "{{camName}} detekteringar per sekund",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} hoppade över detekteringar per sekund"
+      "cameraSkippedDetectionsPerSecond": "{{camName}} överhoppade detekteringar per sekund"
     },
-    "framesAndDetections": "Ramar / Detektioner",
+    "framesAndDetections": "Bildrutor/detekteringar",
     "toast": {
       "success": {
-        "copyToClipboard": "Kopierade probdata till urklipp."
+        "copyToClipboard": "Analysdata har kopierats till urklipp."
       },
       "error": {
-        "unableToProbeCamera": "Kunde inte undersöka kameran: {{errorMessage}}"
+        "unableToProbeCamera": "Det gick inte att analysera kameran: {{errorMessage}}"
       }
     }
   },
   "lastRefreshed": "Senast uppdaterad: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} har hög FFmpeg CPU-användning ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} har hög CPU-användning vid detektering ({{detectAvg}}%)",
-    "healthy": "Systemet är hälsosamt",
-    "reindexingEmbeddings": "Omindexering av inbäddningar ({{processed}}% klar)",
+    "ffmpegHighCpuUsage": "{{camera}} har hög CPU-användning för FFmpeg ({{ffmpegAvg}} %)",
+    "detectHighCpuUsage": "{{camera}} har hög CPU-användning för detektering ({{detectAvg}} %)",
+    "healthy": "Systemet fungerar normalt",
+    "reindexingEmbeddings": "Omindexering av inbäddningar ({{processed}} % klart)",
     "cameraIsOffline": "{{camera}} är frånkopplad",
     "detectIsSlow": "{{detect}} är långsam ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} är väldigt långsam ({{speed}} ms)",
-    "shmTooLow": "/dev/shm allokeringen ({{total}} MB) bör ökas till minst {{min}} MB."
+    "detectIsVerySlow": "{{detect}} är mycket långsam ({{speed}} ms)",
+    "shmTooLow": "/dev/shm-allokeringen ({{total}} MB) bör ökas till minst {{min}} MB."
   },
   "enrichments": {
     "title": "Berikningar",
-    "infPerSecond": "Slutsatser per sekund",
+    "infPerSecond": "Inferenser per sekund",
     "embeddings": {
       "image_embedding": "Bildinbäddning",
       "text_embedding": "Textinbäddning",
       "face_recognition": "Ansiktsigenkänning",
-      "plate_recognition": "Nummerplåt igenkänning",
+      "plate_recognition": "Igenkänning av registreringsskyltar",
       "image_embedding_speed": "Bildinbäddningshastighet",
       "face_embedding_speed": "Hastighet för ansiktsinbäddning",
       "face_recognition_speed": "Ansiktsigenkänningshastighet",
-      "plate_recognition_speed": "Hastighet för igenkänning av nummerplåtar",
+      "plate_recognition_speed": "Hastighet för igenkänning av registreringsskyltar",
       "text_embedding_speed": "Textinbäddningshastighet",
-      "yolov9_plate_detection_speed": "Detekteringshastighet för YOLOv9-registreringsskyltar",
-      "yolov9_plate_detection": "YOLOv9 nummerplåt detektering",
-      "review_description": "Recensionsbeskrivning",
-      "review_description_speed": "Recensionsbeskrivning Hastighet",
-      "review_description_events_per_second": "Recensionsbeskrivning",
-      "object_description": "Objekt beskrivning",
-      "object_description_speed": "Objekt beskrivning hastighet",
-      "object_description_events_per_second": "Objekt beskrivning",
-      "classification_events_per_second": "{{name}} Klassificering Händelser per sekund",
-      "classification": "{{name}} Klassificering",
-      "classification_speed": "{{name}} Klassificeringshastighet"
+      "yolov9_plate_detection_speed": "Hastighet för YOLOv9-detektering av registreringsskyltar",
+      "yolov9_plate_detection": "YOLOv9-detektering av registreringsskyltar",
+      "review_description": "Granskningsbeskrivning",
+      "review_description_speed": "Hastighet för granskningsbeskrivning",
+      "review_description_events_per_second": "Granskningsbeskrivningar per sekund",
+      "object_description": "Objektbeskrivning",
+      "object_description_speed": "Hastighet för objektbeskrivning",
+      "object_description_events_per_second": "Objektbeskrivningar per sekund",
+      "classification_events_per_second": "{{name}}-klassificeringar per sekund",
+      "classification": "{{name}}-klassificering",
+      "classification_speed": "Klassificeringshastighet för {{name}}"
     },
     "averageInf": "Genomsnittlig inferenstid"
   }

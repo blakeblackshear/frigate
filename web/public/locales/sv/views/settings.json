@@ -2,33 +2,33 @@
   "documentTitle": {
     "camera": "Kamerainställningar - Frigate",
     "default": "Inställningar - Frigate",
-    "general": "Användargränssnitt Inställningar - Frigate",
+    "general": "Inställningar för användargränssnittet - Frigate",
     "authentication": "Autentiseringsinställningar - Frigate",
     "classification": "Klassificeringsinställningar - Frigate",
     "masksAndZones": "Maskerings- och zonverktyg - Frigate",
-    "enrichments": "Förbättringsinställningar - Frigate",
-    "frigatePlus": "Frigate+ Inställningar - Frigate",
-    "notifications": "Notifikations Inställningar - Frigate",
-    "motionTuner": "Rörelse inställning - Frigate",
-    "object": "Felsöka - Frigate",
+    "enrichments": "Berikningsinställningar - Frigate",
+    "frigatePlus": "Frigate+-inställningar - Frigate",
+    "notifications": "Aviseringsinställningar - Frigate",
+    "motionTuner": "Rörelsejustering - Frigate",
+    "object": "Felsökning - Frigate",
     "cameraManagement": "Hantera kameror - Frigate",
     "cameraReview": "Kameragranskningsinställningar - Frigate"
   },
   "general": {
-    "title": "UI inställningar",
+    "title": "Inställningar för användargränssnittet",
     "liveDashboard": {
       "automaticLiveView": {
-        "desc": "Växla automatiskt till kamerans livevy när aktivitet upptäcks. Om det här alternativet inaktiveras uppdateras statiska kamerabilder på livepanelen bara en gång per minut.",
+        "desc": "Växla automatiskt till kamerans livevy när aktivitet detekteras. Om alternativet inaktiveras uppdateras statiska kamerabilder på livepanelen endast en gång per minut.",
         "label": "Automatisk livevisning"
       },
       "playAlertVideos": {
         "desc": "Som standard spelas de senaste varningarna upp som små loopande videor på livepanelen. Inaktivera det här alternativet om du bara vill visa en statisk bild av de senaste varningarna på den här enheten/i den här webbläsaren.",
-        "label": "Spela upp Varnings videor"
+        "label": "Spela upp varningsvideor"
       },
       "title": "Livepanel",
       "displayCameraNames": {
         "label": "Visa alltid kameranamn",
-        "desc": "Visa alltid kameranamnen i ett chip i instrumentpanelen för livevisning med flera kameror."
+        "desc": "Visa alltid kameranamnen på kamerakorten i livepanelen med flera kameror."
       },
       "liveFallbackTimeout": {
         "label": "Reservtimeout för livespelare",
@@ -36,62 +36,62 @@
       }
     },
     "storedLayouts": {
-      "title": "Sparade Layouter",
-      "desc": "Layouten av kameror i en grupp kan dras för att ändra storlek. Positionerna lagras lokalt i din webbläsare.",
-      "clearAll": "Rensa Alla Layouter"
+      "title": "Sparade layouter",
+      "desc": "Du kan dra i kamerorna i en grupp för att ändra deras storlek och placering. Layouten lagras lokalt i webbläsaren.",
+      "clearAll": "Rensa alla layouter"
     },
     "cameraGroupStreaming": {
-      "desc": "Streaming inställningar för varje kameragrupp lagras lokalt i din webbläsare.",
-      "clearAll": "Rensa Alla Streaming Inställningar",
-      "title": "Kamera Grupp Streaming Inställningar"
+      "desc": "Strömningsinställningarna för varje kameragrupp lagras lokalt i webbläsaren.",
+      "clearAll": "Rensa alla strömningsinställningar",
+      "title": "Strömningsinställningar för kameragrupper"
     },
     "recordingsViewer": {
       "title": "Inspelningsvisare",
       "defaultPlaybackRate": {
-        "desc": "Standard uppspelningshastighet för inspelningar.",
-        "label": "Standard Uppspelningshastighet"
+        "desc": "Förvald uppspelningshastighet för inspelningar.",
+        "label": "Förvald uppspelningshastighet"
       }
     },
     "calendar": {
       "firstWeekday": {
         "sunday": "Söndag",
         "monday": "Måndag",
-        "label": "Första Veckodag",
-        "desc": "Den dag då veckorna i översynskalendern börjar."
+        "label": "Veckans första dag",
+        "desc": "Den veckodag som granskningskalendern börjar med."
       },
       "title": "Kalender"
     },
     "toast": {
       "success": {
-        "clearStoredLayout": "Rensa lagrad layout för {{cameraName}}",
-        "clearStreamingSettings": "Rensa streaminginställningar för samtliga kameragrupper."
+        "clearStoredLayout": "Den lagrade layouten för {{cameraName}} har rensats.",
+        "clearStreamingSettings": "Strömningsinställningarna för alla kameragrupper har rensats."
       },
       "error": {
-        "clearStoredLayoutFailed": "Misslyckades att rensa lagrad layout för: {{errorMessage}}",
-        "clearStreamingSettingsFailed": "Misslyckades med att rensa streaminginställningar: {{errorMessage}}"
+        "clearStoredLayoutFailed": "Det gick inte att rensa den lagrade layouten: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Det gick inte att rensa strömningsinställningarna: {{errorMessage}}"
       }
     }
   },
   "cameraSetting": {
-    "noCamera": "Ingen Kamera",
+    "noCamera": "Ingen kamera",
     "camera": "Kamera"
   },
   "enrichments": {
-    "unsavedChanges": "Osparade Förbättringsinställningar",
+    "unsavedChanges": "Osparade berikningsinställningar",
     "birdClassification": {
-      "title": "Fågel klassificering",
+      "title": "Fågelklassificering",
       "desc": "Fågelklassificering identifierar kända fåglar med hjälp av en kvantiserad Tensorflow-modell. När en känd fågel känns igen läggs dess vanliga namn till som en underetikett. Denna information inkluderas i användargränssnittet, filter och i aviseringar."
     },
-    "title": "Förbättringsinställningar",
+    "title": "Berikningsinställningar",
     "semanticSearch": {
       "title": "Semantisk sökning",
-      "desc": "Semantisk sökning i Frigate låter dig hitta spårade objekt i dina granskningsobjekt med hjälp av antingen själva bilden, en användardefinierad textbeskrivning eller en automatiskt genererad.",
+      "desc": "Med semantisk sökning i Frigate kan du hitta spårade objekt i granskningsobjekt med hjälp av själva bilden, en egen textbeskrivning eller en automatiskt genererad beskrivning.",
       "readTheDocumentation": "Läs dokumentationen",
       "reindexNow": {
         "label": "Omindexera nu",
-        "desc": "Omindexering kommer att generera inbäddningar för alla spårade objekt. Den här processen körs i bakgrunden och kan maximera din CPU och ta en hel del tid beroende på antalet spårade objekt du har.",
+        "desc": "Omindexeringen genererar inbäddningar för alla spårade objekt. Processen körs i bakgrunden och kan belasta processorn maximalt samt ta lång tid, beroende på antalet spårade objekt.",
         "confirmTitle": "Bekräfta omindexering",
-        "confirmDesc": "Är du säker på att du vill omindexera alla spårade objektinbäddningar? Den här processen körs i bakgrunden men den kan maximera din processor och ta en hel del tid. Du kan se förloppet på Utforska-sidan.",
+        "confirmDesc": "Är du säker på att du vill omindexera alla inbäddningar för spårade objekt? Processen körs i bakgrunden men kan belasta processorn maximalt och ta lång tid. Du kan följa förloppet på sidan Utforska.",
         "confirmButton": "Omindexera",
         "success": "Omindexeringen har startat.",
         "alreadyInProgress": "Omindexering pågår redan.",
@@ -99,40 +99,40 @@
       },
       "modelSize": {
         "label": "Modellstorlek",
-        "desc": "Storleken på modellen som används för semantiska sökinbäddningar.",
+        "desc": "Storleken på modellen som används för inbäddningar vid semantisk sökning.",
         "small": {
-          "title": "små",
-          "desc": "Att använda <em>small</em> använder en kvantiserad version av modellen som använder mindre RAM och körs snabbare på CPU med en mycket försumbar skillnad i inbäddningskvalitet."
+          "title": "Liten",
+          "desc": "Alternativet <em>small</em> använder en kvantiserad modellversion som kräver mindre RAM-minne och körs snabbare på processorn, med endast en försumbar skillnad i inbäddningskvalitet."
         },
         "large": {
-          "title": "stor",
-          "desc": "Att använda <em>large</em> använder hela Jina-modellen och körs automatiskt på GPU:n om tillämpligt."
+          "title": "Stor",
+          "desc": "Alternativet <em>large</em> använder hela Jina-modellen och körs automatiskt på GPU:n när det är möjligt."
         }
       }
     },
     "faceRecognition": {
-      "desc": "Ansiktsigenkänning gör att personer kan tilldelas namn och när deras ansikte känns igen kommer Frigate att tilldela personens namn som en underetikett. Denna information finns i användargränssnittet, filter och i aviseringar.",
+      "desc": "Med ansiktsigenkänning kan personer tilldelas namn. När ett ansikte känns igen lägger Frigate till personens namn som en underetikett. Informationen visas i användargränssnittet, filter och aviseringar.",
       "readTheDocumentation": "Läs dokumentationen",
       "modelSize": {
         "label": "Modellstorlek",
         "desc": "Storleken på modellen som används för ansiktsigenkänning.",
         "small": {
-          "title": "små",
-          "desc": "Att använda <em>small</em> använder en FaceNet-modell för ansiktsinbäddning som körs effektivt på de flesta processorer."
+          "title": "Liten",
+          "desc": "Alternativet <em>small</em> använder en FaceNet-modell för ansiktsinbäddning som körs effektivt på de flesta processorer."
         },
         "large": {
-          "title": "stor",
-          "desc": "Att använda <em>large</em> använder en ArcFace-modell för ansiktsinbäddning och körs automatiskt på GPU:n om tillämpligt."
+          "title": "Stor",
+          "desc": "Alternativet <em>large</em> använder en ArcFace-modell för ansiktsinbäddning och körs automatiskt på GPU:n när det är möjligt."
         }
       },
       "title": "Ansiktsigenkänning"
     },
     "licensePlateRecognition": {
       "title": "Igenkänning av registreringsskyltar",
-      "desc": "Frigate kan känna igen nummerplåt på fordon och automatiskt lägga till de upptäckta tecknen i fältet recognized_license_plate eller ett känt namn som en underetikett till objekt av typen bil. Ett vanligt användningsfall kan vara att läsa nummerplåtor på bilar som kör in på en uppfart eller bilar som passerar på en gata.",
+      "desc": "Frigate kan känna igen registreringsskyltar på fordon och automatiskt lägga till de detekterade tecknen i fältet <code>recognized_license_plate</code>, eller lägga till ett känt namn som underetikett för bilobjekt. Ett vanligt användningsfall är att läsa registreringsskyltar på bilar som kör in på en uppfart eller passerar på en gata.",
       "readTheDocumentation": "Läs dokumentationen"
     },
-    "restart_required": "Omstart krävs (berikningsinställningar har ändrats)",
+    "restart_required": "Omstart krävs eftersom berikningsinställningarna har ändrats",
     "toast": {
       "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar.",
       "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
@@ -140,18 +140,18 @@
   },
   "menu": {
     "ui": "Användargränssnitt",
-    "cameras": "Kamera Inställningar",
-    "masksAndZones": "Masker / Områden",
+    "cameras": "Kamerainställningar",
+    "masksAndZones": "Masker och zoner",
     "users": "Användare",
-    "notifications": "Notifikationer",
+    "notifications": "Aviseringar",
     "frigateplus": "Frigate+",
-    "enrichments": "Förbättringar",
-    "motionTuner": "Rörelsemottagare",
-    "debug": "Felsök",
+    "enrichments": "Berikningar",
+    "motionTuner": "Rörelsejustering",
+    "debug": "Felsökning",
     "triggers": "Utlösare",
     "roles": "Roller",
-    "cameraManagement": "Hantering",
-    "cameraReview": "Granska",
+    "cameraManagement": "Kamerahantering",
+    "cameraReview": "Granskning",
     "profiles": "Profiler"
   },
   "dialog": {
@@ -275,11 +275,11 @@
       },
       "speed": {
         "error": {
-          "mustBeGreaterOrEqualTo": "Gränsvärdet för hastigheten måste vara större eller lika med 0.1."
+          "mustBeGreaterOrEqualTo": "Hastighetsgränsen måste vara större än eller lika med 0,1."
         }
       },
       "polygonDrawing": {
-        "removeLastPoint": "Ta bort senaste punkten",
+        "removeLastPoint": "Ta bort den senaste punkten",
         "reset": {
           "label": "Rensa alla punkter"
         },
@@ -290,7 +290,7 @@
         "delete": {
           "title": "Bekräfta borttagning",
           "desc": "Är du säker på att du vill ta bort {{type}} <em>{{name}}</em>?",
-          "success": "{{name}} har raderats."
+          "success": "{{name}} har tagits bort."
         },
         "error": {
           "mustBeFinished": "Polygonritningen måste vara klar innan du sparar."
@@ -317,24 +317,24 @@
         "tips": "Namnet måste vara minst 2 tecken långt, måste innehålla minst en bokstav och får inte vara namnet på en kamera eller någon annan zon på den här kameran."
       },
       "inertia": {
-        "title": "Momentum",
-        "desc": "Anger hur många bildrutor ett objekt måste finnas i en zon innan de räknas som en del av zonen. <em>Standard: 3</em>"
+        "title": "Tröghet",
+        "desc": "Anger hur många bildrutor ett objekt måste finnas i en zon innan det räknas som en del av zonen. <em>Standard: 3</em>"
       },
       "objects": {
         "title": "Objekt",
         "desc": "Lista över objekt som gäller för den här zonen."
       },
       "allObjects": "Alla objekt",
-      "point_one": "{{count}} poäng",
-      "point_other": "{{count}} poäng",
+      "point_one": "{{count}} punkt",
+      "point_other": "{{count}} punkter",
       "clickDrawPolygon": "Klicka för att rita en polygon på bilden.",
       "loiteringTime": {
-        "title": "Tid någon hänger omkring",
-        "desc": "Ställer in en minsta tid i sekunder som objektet måste vara i zonen för att det ska aktiveras. <em>Standard: 0</em>"
+        "title": "Uppehållstid",
+        "desc": "Anger den minsta tid i sekunder som ett objekt måste befinna sig i zonen innan zonen aktiveras. <em>Standard: 0</em>"
       },
       "speedEstimation": {
         "title": "Hastighetsuppskattning",
-        "desc": "Aktivera hastighetsuppskattning för objekt i den här zonen. Zonen måste ha exakt fyra punkter.",
+        "desc": "Aktivera hastighetsuppskattning för objekt i zonen. Zonen måste ha exakt fyra punkter.",
         "lineADistance": "Avstånd till linje A ({{unit}})",
         "lineBDistance": "Avstånd till linje B ({{unit}})",
         "lineCDistance": "Avstånd till linje C ({{unit}})",
@@ -345,8 +345,8 @@
         "desc": "Anger en lägsta hastighet för objekt som ska beaktas i denna zon.",
         "toast": {
           "error": {
-            "pointLengthError": "Hastighetsuppskattning har inaktiverats för den här zonen. Zoner med hastighetsuppskattning måste ha exakt 4 punkter.",
-            "loiteringTimeError": "Zoner med uppehållstider större än 0 bör inte användas vid hastighetsuppskattning."
+            "pointLengthError": "Hastighetsuppskattning har inaktiverats för zonen. Zoner med hastighetsuppskattning måste ha exakt fyra punkter.",
+            "loiteringTimeError": "Zoner med en uppehållstid över 0 bör inte användas för hastighetsuppskattning."
           }
         }
       },
@@ -366,12 +366,12 @@
       "context": {
         "title": "Rörelsemasker används för att förhindra att oönskade typer av rörelser utlöser detektering (till exempel: trädgrenar, kameratidsstämplar). Rörelsemasker bör användas <em>mycket sparsamt</em>, övermaskering gör det svårare att spåra objekt."
       },
-      "point_one": "{{count}} poäng",
-      "point_other": "{{count}} poäng",
+      "point_one": "{{count}} punkt",
+      "point_other": "{{count}} punkter",
       "clickDrawPolygon": "Klicka för att rita en polygon på bilden.",
       "polygonAreaTooLarge": {
-        "title": "Rörelsemasken täcker {{polygonArea}}% av kamerabilden. Stora rörelsemasker rekommenderas inte.",
-        "tips": "Rörelsemasker förhindrar inte att objekt upptäcks. Du bör använda en obligatorisk zon istället."
+        "title": "Rörelsemasken täcker {{polygonArea}} % av kamerabilden. Stora rörelsemasker rekommenderas inte.",
+        "tips": "Rörelsemasker förhindrar inte att objekt detekteras. Använd i stället en obligatorisk zon."
       },
       "toast": {
         "success": {
@@ -383,8 +383,8 @@
     "objectMasks": {
       "label": "Objektmasker",
       "documentTitle": "Redigera objektmask - Frigate",
-      "point_one": "{{count}} poäng",
-      "point_other": "{{count}} poäng",
+      "point_one": "{{count}} punkt",
+      "point_other": "{{count}} punkter",
       "desc": {
         "title": "Objektfiltermasker används för att filtrera bort falska positiva resultat för en given objekttyp baserat på plats.",
         "documentation": "Dokumentation"
@@ -407,8 +407,8 @@
     }
   },
   "motionDetectionTuner": {
-    "title": "Rörelsedetekteringstuner",
-    "unsavedChanges": "Osparade ändringar i rörelsejusteraren ({{camera}})",
+    "title": "Rörelsejustering",
+    "unsavedChanges": "Osparade ändringar i rörelsejusteringen ({{camera}})",
     "desc": {
       "title": "Frigate använder rörelsedetektering som en första kontroll för att se om det händer något i bilden som är värt att kontrollera med objektdetektering.",
       "documentation": "Läs guiden för rörelsejustering"
@@ -430,25 +430,25 @@
     }
   },
   "debug": {
-    "title": "Felsök",
-    "detectorDesc": "Frigate använder dina detektorer ({{detectors}}) för att upptäcka objekt i kamerans videoström.",
-    "desc": "Felsökningsvyn visar en realtidsvy av spårade objekt och deras statistik. Objektlistan visar en tidsfördröjd sammanfattning av upptäckta objekt.",
-    "openCameraWebUI": "Öppna {{camera}}s webbgränssnitt",
+    "title": "Felsökning",
+    "detectorDesc": "Frigate använder detektorerna ({{detectors}}) för att detektera objekt i kamerans videoström.",
+    "desc": "Felsökningsvyn visar spårade objekt och deras statistik i realtid. Objektlistan visar en tidsfördröjd sammanfattning av detekterade objekt.",
+    "openCameraWebUI": "Öppna webbgränssnittet för {{camera}}",
     "debugging": "Felsökning",
     "objectList": "Objektlista",
-    "noObjects": "Inga föremål",
+    "noObjects": "Inga objekt",
     "audio": {
       "title": "Ljud",
       "noAudioDetections": "Inga ljuddetekteringar",
-      "score": "betyg",
+      "score": "poäng",
       "currentRMS": "Nuvarande RMS",
-      "currentdbFS": "Nuvarande dbFS"
+      "currentdbFS": "Nuvarande dBFS"
     },
     "boundingBoxes": {
-      "title": "Avgränsande rutor",
+      "title": "Avgränsningsrutor",
       "desc": "Visa avgränsningsrutor runt spårade objekt",
       "colors": {
-        "label": "Färger för objektgränser",
+        "label": "Färger för avgränsningsrutor",
         "info": "<li>Vid uppstart tilldelas olika färger till varje objektetikett</li><li>En mörkblå tunn linje indikerar att objektet inte detekteras vid denna aktuella tidpunkt</li><li>En grå tunn linje indikerar att objektet detekteras som stillastående</li><li>En tjock linje indikerar att objektet är föremål för autospårning (när det är aktiverat)</li>"
       }
     },
@@ -477,15 +477,15 @@
     "paths": {
       "title": "Vägar",
       "desc": "Visa viktiga punkter i det spårade objektets bana",
-      "tips": "<p><strong>Vägar</strong></p><br><p>Linjer och cirklar indikerar viktiga punkter som det spårade objektet har flyttat under sin livscykel.</p>"
+      "tips": "<p><strong>Banor</strong></p><br><p>Linjer och cirklar visar viktiga punkter längs det spårade objektets bana under dess livscykel.</p>"
     },
     "objectShapeFilterDrawing": {
       "title": "Ritning av objektformfilter",
       "desc": "Rita en rektangel på bilden för att visa detaljer om area och förhållande",
       "tips": "Aktivera det här alternativet för att rita en rektangel på kamerabilden för att visa dess area och förhållande. Dessa värden kan sedan användas för att ställa in parametrar för objektformsfilter i din konfiguration.",
       "score": "Betyg",
-      "ratio": "Förhållandet",
-      "area": "Område"
+      "ratio": "Förhållande",
+      "area": "Area"
     }
   },
   "users": {
@@ -495,13 +495,13 @@
       "desc": "Hantera användarkonton för denna Frigate-instans."
     },
     "addUser": "Lägg till användare",
-    "updatePassword": "Återställ lösenord",
+    "updatePassword": "Uppdatera lösenord",
     "toast": {
       "success": {
-        "createUser": "Användaren {{user}} har skapats",
-        "deleteUser": "Användaren {{user}} har raderats",
+        "createUser": "Användaren {{user}} har skapats.",
+        "deleteUser": "Användaren {{user}} har tagits bort.",
         "updatePassword": "Lösenordet har uppdaterats.",
-        "roleUpdated": "Rollen uppdaterades för {{user}}"
+        "roleUpdated": "Rollen för {{user}} har uppdaterats."
       },
       "error": {
         "setPasswordFailed": "Misslyckades med att spara lösenordet: {{errorMessage}}",
@@ -516,7 +516,7 @@
       "role": "Roll",
       "noUsers": "Inga användare hittades.",
       "changeRole": "Ändra användarroll",
-      "password": "Återställ Lösenord",
+      "password": "Uppdatera lösenord",
       "deleteUser": "Ta bort användare"
     },
     "dialog": {
@@ -570,11 +570,11 @@
         "title": "Skapa ny användare",
         "desc": "Lägg till ett nytt användarkonto och ange en roll för åtkomst till områden i Frigate-gränssnittet.",
         "usernameOnlyInclude": "Användarnamnet får endast innehålla bokstäver, siffror, . eller _",
-        "confirmPassword": "Vänligen bekräfta ditt lösenord"
+        "confirmPassword": "Bekräfta lösenordet"
       },
       "deleteUser": {
         "title": "Ta bort användare",
-        "desc": "Den här åtgärden kan inte ångras. Detta kommer att permanent radera användarkontot och all tillhörande data.",
+        "desc": "Åtgärden kan inte ångras. Användarkontot och alla tillhörande data tas bort permanent.",
         "warn": "Är du säker på att du vill ta bort <strong>{{username}}</strong>?"
       },
       "passwordSetting": {
@@ -597,8 +597,8 @@
           "intro": "Välj lämplig roll för den här användaren:",
           "admin": "Administratör",
           "adminDesc": "Full åtkomst till alla funktioner.",
-          "viewer": "Åskådare",
-          "viewerDesc": "Endast åtkomst till Live-paneler, Granskning, Utforska och Exporter.",
+          "viewer": "Visare",
+          "viewerDesc": "Har endast åtkomst till livepaneler, Granskning, Utforska och Exporter.",
           "customDesc": "Anpassad roll med specifik kameraåtkomst."
         }
       }
@@ -608,7 +608,7 @@
     "title": "Aviseringar",
     "notificationSettings": {
       "title": "Aviseringsinställningar",
-      "desc": "Frigate kan skicka push-notiser till din enhet när den körs i webbläsare eller installerad som PWA."
+      "desc": "Frigate kan skicka pushaviseringar till enheten när Frigate körs i en webbläsare eller är installerat som en PWA."
     },
     "globalSettings": {
       "title": "Övergripande inställningar",
@@ -616,26 +616,26 @@
     },
     "email": {
       "title": "E-post",
-      "placeholder": "t.ex. exempel@epost.se",
+      "placeholder": "t.ex. namn@exempel.se",
       "desc": "En giltig e-postadress krävs och kommer att användas för att meddela dig om det uppstår problem med push-tjänsten."
     },
     "cameras": {
       "title": "Kameror",
       "noCameras": "Inga kameror tillgängliga",
-      "desc": "Välj vilka kameror som notifikationer ska aktiveras för."
+      "desc": "Välj för vilka kameror aviseringar ska aktiveras."
     },
     "unregisterDevice": "Avregistrera enheten",
-    "sendTestNotification": "Skicka testnotis",
+    "sendTestNotification": "Skicka testavisering",
     "active": "Aviseringar är aktiva",
     "notificationUnavailable": {
-      "title": "Meddelanden otillgängliga",
-      "desc": "Webb push-meddelanden kräver en säker kontext (<code>https://…</code>). Detta är en begränsning i webbläsaren. Få säker åtkomst till Frigate för att använda meddelanden."
+      "title": "Aviseringar är inte tillgängliga",
+      "desc": "Web Push-aviseringar kräver en säker anslutning (<code>https://…</code>). Det är en begränsning i webbläsaren. Använd en säker anslutning till Frigate för att aktivera aviseringar."
     },
     "deviceSpecific": "Enhetsspecifika inställningar",
     "registerDevice": "Registrera den här enheten",
     "unsavedRegistrations": "Osparade aviseringsregistreringar",
-    "unsavedChanges": "Osparade ändringar till aviseringar",
-    "suspended": "Aviseringar avstängda {{time}}",
+    "unsavedChanges": "Osparade aviseringsändringar",
+    "suspended": "Aviseringar är pausade {{time}}",
     "suspendTime": {
       "suspend": "Pausa",
       "5minutes": "Pausa i 5 minuter",
@@ -646,7 +646,7 @@
       "24hours": "Pausa i 24 timmar",
       "untilRestart": "Pausa tills omstart"
     },
-    "cancelSuspension": "Avbryt pausning",
+    "cancelSuspension": "Avsluta pausen",
     "toast": {
       "success": {
         "registered": "Registreringen för aviseringar har lyckats. Omstart av Frigate krävs innan några aviseringar (inklusive en testavisering) kan skickas.",
@@ -664,22 +664,22 @@
       "cameras": "Kameror",
       "noRoles": "Inga anpassade roller hittades.",
       "editCameras": "Redigera kameror",
-      "deleteRole": "Radera roll",
+      "deleteRole": "Ta bort roll",
       "actions": "Åtgärder"
     },
     "toast": {
       "success": {
-        "createRole": "Roll {{role}} skapad",
-        "updateCameras": "Kameror uppdaterade för roll {{role}}",
-        "deleteRole": "Roll {{role}} raderad",
-        "userRolesUpdated_one": "{{count}} användare som tilldelats den här rollen har uppdaterats till 'tittare', vilket har åtkomst till alla kameror.",
-        "userRolesUpdated_other": "{{count}} användare som tilldelats den här rollen har uppdaterats till 'tittare', vilket har åtkomst till alla kameror."
+        "createRole": "Rollen {{role}} har skapats.",
+        "updateCameras": "Kamerorna för rollen {{role}} har uppdaterats.",
+        "deleteRole": "Rollen {{role}} har tagits bort.",
+        "userRolesUpdated_one": "{{count}} användare med den här rollen har fått rollen visare, som ger åtkomst till alla kameror.",
+        "userRolesUpdated_other": "{{count}} användare med den här rollen har fått rollen visare, som ger åtkomst till alla kameror."
       },
       "error": {
-        "createRoleFailed": "Misslyckades att skapa roll: {{errorMessage}}",
-        "updateCamerasFailed": "Misslyckades att uppdatera kameror: {{errorMessage}}",
-        "deleteRoleFailed": "Misslyckades att radera roll: {{errorMessage}}",
-        "userUpdateFailed": "Misslyckades att uppdatera användar-roller: {{errorMessage}}"
+        "createRoleFailed": "Det gick inte att skapa rollen: {{errorMessage}}",
+        "updateCamerasFailed": "Det gick inte att uppdatera kamerorna: {{errorMessage}}",
+        "deleteRoleFailed": "Det gick inte att ta bort rollen: {{errorMessage}}",
+        "userUpdateFailed": "Det gick inte att uppdatera användarrollerna: {{errorMessage}}"
       }
     },
     "dialog": {
@@ -688,19 +688,19 @@
         "desc": "Skapa en ny roll och ange behörigheter för kameraåtkomst."
       },
       "deleteRole": {
-        "title": "Radera roll",
-        "deleting": "Raderar...",
-        "desc": "Den här åtgärden kan inte ångras. Detta kommer att ta bort rollen permanent och tilldela alla användare med rollen 'tittare', vilket ger tittaren åtkomst till alla kameror.",
+        "title": "Ta bort roll",
+        "deleting": "Tar bort…",
+        "desc": "Åtgärden kan inte ångras. Rollen tas bort permanent och alla användare med rollen tilldelas rollen visare, som ger åtkomst till alla kameror.",
         "warn": "Är du säker på att du vill ta bort <strong>{{role}}</strong>?"
       },
       "form": {
         "role": {
           "placeholder": "Ange rollens namn",
-          "desc": "Enbart bokstäver, siffror, punkter och understreck tillåtna.",
+          "desc": "Endast bokstäver, siffror, punkter och understreck är tillåtna.",
           "roleIsRequired": "Rollens namn krävs",
           "roleExists": "En roll med detta namn finns redan.",
           "title": "Rollnamn",
-          "roleOnlyInclude": "Rollnamnet får endast innehålla bokstäver, siffror, . eller _"
+          "roleOnlyInclude": "Rollnamnet får endast innehålla bokstäver, siffror, punkter och understreck"
         },
         "cameras": {
           "title": "Kameror",
@@ -714,23 +714,23 @@
       }
     },
     "management": {
-      "title": "Hantering av tittarroller",
-      "desc": "Hantera anpassade tittarroller och deras kameraåtkomstbehörigheter för den här Frigate-instansen."
+      "title": "Hantering av visningsroller",
+      "desc": "Hantera anpassade visningsroller och deras behörigheter för kameraåtkomst i den här Frigate-instansen."
     }
   },
   "frigatePlus": {
-    "title": "Frigate+ Inställningar",
+    "title": "Frigate+-inställningar",
     "apiKey": {
-      "notValidated": "Frigate+ API-nyckeln upptäcktes inte eller validerades inte",
+      "notValidated": "Frigate+-API-nyckeln kunde inte identifieras eller valideras",
       "desc": "Frigate+ API-nyckeln möjliggör integration med Frigate+-tjänsten.",
       "plusLink": "Läs mer om Frigate+",
       "title": "Frigate+ API-nyckel",
-      "validated": "Frigate+ API-nyckeln har upptäckts och validerats"
+      "validated": "Frigate+-API-nyckeln har identifierats och validerats"
     },
     "snapshotConfig": {
-      "title": "Ögonblicksbild konfiguration",
+      "title": "Konfiguration av ögonblicksbilder",
       "desc": "För att skicka till Frigate+ måste ögonblicksbilder vara aktiverade i konfigurationen.",
-      "cleanCopyWarning": "Vissa kameror har ögonblicksbilder inaktiverade",
+      "cleanCopyWarning": "Ögonblicksbilder är inaktiverade för vissa kameror",
       "table": {
         "camera": "Kamera",
         "snapshots": "Ögonblicksbilder",
@@ -755,7 +755,7 @@
       "modelSelect": "Dina tillgängliga modeller på Frigate+ kan väljas här. Observera att endast modeller som är kompatibla med din nuvarande detektorkonfiguration kan väljas."
     },
     "unsavedChanges": "Osparade ändringar av inställningar för Frigate+",
-    "restart_required": "Omstart krävs (Frigate+ modell ändrad)",
+    "restart_required": "Omstart krävs eftersom Frigate+-modellen har ändrats",
     "toast": {
       "success": "Inställningarna för Frigate+ har sparats. Starta om Frigate för att tillämpa ändringarna.",
       "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
@@ -796,7 +796,7 @@
       },
       "editTrigger": {
         "title": "Redigera utlösare",
-        "desc": "Redigera inställningarna för utlösare på kameran {{camera}}"
+        "desc": "Redigera inställningarna för utlösaren på kameran {{camera}}"
       },
       "deleteTrigger": {
         "title": "Ta bort utlösare",
@@ -811,23 +811,23 @@
             "invalidCharacters": "Fältet får bara innehålla bokstäver, siffror, understreck och bindestreck.",
             "alreadyExists": "En utlösare med detta namn finns redan för den här kameran."
           },
-          "description": "Ange ett unikt namn eller en unik beskrivning för att identifiera den här utlösaren"
+          "description": "Ange ett unikt namn eller en beskrivning som identifierar utlösaren."
         },
         "enabled": {
-          "description": "Aktivera eller inaktivera den här utlösaren"
+          "description": "Aktivera eller inaktivera utlösaren."
         },
         "type": {
           "title": "Typ",
           "placeholder": "Välj utlösartyp",
-          "description": "Utlöses när en liknande beskrivning av spårat objekt detekteras",
-          "thumbnail": "Utlöses när en liknande miniatyrbild av ett spårat objekt upptäcks"
+          "description": "Utlöses när en liknande beskrivning av ett spårat objekt detekteras",
+          "thumbnail": "Utlöses när en miniatyrbild som liknar ett spårat objekt detekteras"
         },
         "content": {
           "title": "Innehåll",
           "imagePlaceholder": "Välj en miniatyrbild",
           "textPlaceholder": "Ange textinnehåll",
           "imageDesc": "Endast de senaste 100 miniatyrerna visas. Om du inte hittar önskad miniatyr kan du granska tidigare objekt i Utforska och skapa en utlösare från menyn där.",
-          "textDesc": "Ange text för att utlösa den här åtgärden när en liknande beskrivning av spårat objekt upptäcks.",
+          "textDesc": "Ange text som ska utlösa åtgärden när en liknande beskrivning av ett spårat objekt detekteras.",
           "error": {
             "required": "Innehåll krävs."
           }
@@ -835,14 +835,14 @@
         "threshold": {
           "title": "Tröskel",
           "error": {
-            "min": "Tröskelvärdet måste vara minst 0",
-            "max": "Tröskelvärdet får vara högst 1"
+            "min": "Tröskelvärdet måste vara minst 0.",
+            "max": "Tröskelvärdet får vara högst 1."
           },
-          "desc": "Ställ in likhetströskeln för denna utlösare. En högre tröskel innebär att en bättre matchning krävs för att utlösaren ska aktiveras."
+          "desc": "Ange likhetströskeln för utlösaren. Ett högre värde innebär att en bättre matchning krävs för att utlösaren ska aktiveras."
         },
         "actions": {
           "title": "Åtgärder",
-          "desc": "Som standard utlöser Frigate ett MQTT-meddelande för alla utlösare. Underetiketter lägger till utlösarnamnet till objektetiketten. Attribut är sökbara metadata som lagras separat i de spårade objektmetadata.",
+          "desc": "Som standard skickar Frigate ett MQTT-meddelande för alla utlösare. Underetiketter lägger till utlösarens namn i objektetiketten. Attribut är sökbara metadata som lagras separat i det spårade objektets metadata.",
           "error": {
             "min": "Minst en åtgärd måste väljas."
           }
@@ -858,7 +858,7 @@
       "success": {
         "createTrigger": "Utlösaren {{name}} har skapats.",
         "updateTrigger": "Utlösaren {{name}} har uppdaterats.",
-        "deleteTrigger": "Utlösaren {{name}} har raderats."
+        "deleteTrigger": "Utlösaren {{name}} har tagits bort."
       },
       "error": {
         "createTriggerFailed": "Misslyckades med att skapa utlösaren: {{errorMessage}}",
@@ -868,12 +868,12 @@
     },
     "semanticSearch": {
       "title": "Semantisk sökning är inaktiverad",
-      "desc": "Semantisk sökning måste vara aktiverad för att använda Utlösare."
+      "desc": "Semantisk sökning måste vara aktiverad för att utlösare ska kunna användas."
     },
     "wizard": {
       "title": "Skapa utlösare",
       "step1": {
-        "description": "Konfigurera grundinställningarna för din trigger."
+        "description": "Konfigurera utlösarens grundinställningar."
       },
       "step2": {
         "description": "Ställ in innehållet som ska utlösa den här åtgärden."
@@ -883,7 +883,7 @@
       },
       "steps": {
         "nameAndType": "Namn och typ",
-        "configureData": "Konfigurera data",
+        "configureData": "Konfigurera innehåll",
         "thresholdAndActions": "Tröskelvärde och åtgärder"
       }
     }
@@ -895,7 +895,7 @@
       "nameAndConnection": "Namn och anslutning",
       "streamConfiguration": "Strömkonfiguration",
       "validationAndTesting": "Validering och testning",
-      "probeOrSnapshot": "Prob eller ögonblicksbild"
+      "probeOrSnapshot": "Kameraanalys eller ögonblicksbild"
     },
     "save": {
       "success": "Ny kamera {{cameraName}} har sparats.",
@@ -908,13 +908,13 @@
       "fps": "FPS"
     },
     "commonErrors": {
-      "noUrl": "Ange en giltig strömnings länk",
+      "noUrl": "Ange en giltig ström-URL",
       "testFailed": "Strömtest misslyckades: {{error}}"
     },
     "step1": {
-      "description": "Ange dina kamerauppgifter och välj att undersöka kameran eller manuellt välja märke.",
+      "description": "Ange kamerans anslutningsuppgifter och välj om kameran ska analyseras eller om märket ska väljas manuellt.",
       "cameraName": "Kameranamn",
-      "cameraNamePlaceholder": "t.ex. ytterdörr eller Översikt över bakgård",
+      "cameraNamePlaceholder": "t.ex. ytterdörr eller översikt över bakgården",
       "host": "Värd-/IP-adress",
       "port": "Portnummer",
       "username": "Användarnamn",
@@ -924,10 +924,10 @@
       "selectTransport": "Välj transportprotokoll",
       "cameraBrand": "Kameramärke",
       "selectBrand": "Välj kameramärke för URL-mall",
-      "customUrl": "Anpassad ström länk",
+      "customUrl": "Anpassad ström-URL",
       "brandInformation": "Varumärkesinformation",
-      "brandUrlFormat": "För kameror med RTSP URL-formatet: {{exampleUrl}}",
-      "customUrlPlaceholder": "rtsp://användarnamn:passord@värd:port/text",
+      "brandUrlFormat": "För kameror med RTSP-URL-format: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://användarnamn:lösenord@värd:port/sökväg",
       "testConnection": "Testa anslutning",
       "testSuccess": "Anslutningstestet lyckades!",
       "testFailed": "Anslutningstestet misslyckades. Kontrollera dina indata och försök igen.",
@@ -936,7 +936,7 @@
         "noSnapshot": "Det gick inte att hämta en ögonblicksbild från den konfigurerade strömmen."
       },
       "errors": {
-        "brandOrCustomUrlRequired": "Välj antingen ett kameramärke med värd/IP eller välj \"Annat\" med en anpassad URL",
+        "brandOrCustomUrlRequired": "Välj antingen ett kameramärke och ange värd/IP-adress, eller välj Annat och ange en anpassad URL.",
         "nameRequired": "Kameranamn krävs",
         "nameLength": "Kameranamnet måste vara högst 64 tecken långt",
         "invalidCharacters": "Kameranamnet innehåller ogiltiga tecken",
@@ -944,7 +944,7 @@
         "brands": {
           "reolink-rtsp": "Reolink RTSP rekommenderas inte. Aktivera HTTP i kamerans firmwareinställningar och starta om guiden."
         },
-        "customUrlRtspRequired": "Anpassade webbadresser måste börja med \"rtsp://\". Manuell konfiguration krävs för kameraströmmar som inte använder RTSP."
+        "customUrlRtspRequired": "Anpassade URL:er måste börja med <code>rtsp://</code>. Manuell konfiguration krävs för kameraströmmar som inte använder RTSP."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
@@ -956,15 +956,15 @@
       "connectionSettings": "Anslutningsinställningar",
       "detectionMethod": "Strömdetekteringsmetod",
       "onvifPort": "ONVIF-port",
-      "probeMode": "Undersök kameran",
+      "probeMode": "Analysera kameran",
       "manualMode": "Manuellt val",
-      "detectionMethodDescription": "Undersök kameran med ONVIF (om det stöds) för att hitta kameraströms-URL:er, eller välj kameramärke manuellt för att använda fördefinierade URL:er. För att ange en anpassad RTSP-URL, välj den manuella metoden och välj \"Annat\".",
+      "detectionMethodDescription": "Analysera kameran med ONVIF, om det stöds, för att hitta URL:er till kameraströmmar. Du kan också välja kameramärke manuellt för att använda fördefinierade URL:er. Välj den manuella metoden och sedan Annat för att ange en egen RTSP-URL.",
       "onvifPortDescription": "För kameror som stöder ONVIF är detta vanligtvis 80 eller 8080.",
-      "useDigestAuth": "Använd digest-autentisering",
-      "useDigestAuthDescription": "Använd HTTP-sammanfattningsautentisering för ONVIF. Vissa kameror kan kräva ett dedikerat ONVIF-användarnamn/lösenord istället för standardadministratörsanvändaren."
+      "useDigestAuth": "Använd Digest-autentisering",
+      "useDigestAuthDescription": "Använd HTTP Digest-autentisering för ONVIF. Vissa kameror kan kräva separata ONVIF-inloggningsuppgifter i stället för administratörskontot."
     },
     "step2": {
-      "description": "Undersök kameran efter tillgängliga strömmar eller konfigurera manuella inställningar baserat på din valda detekteringsmetod.",
+      "description": "Analysera kameran efter tillgängliga strömmar eller konfigurera strömmarna manuellt utifrån den valda metoden.",
       "streamsTitle": "Kameraströmmar",
       "addStream": "Lägg till ström",
       "addAnotherStream": "Lägg till ytterligare en ström",
@@ -1001,31 +1001,31 @@
         "title": "Strömfunktioner",
         "description": "Använd go2rtc-omströmning för att minska anslutningar till din kamera."
       },
-      "streamDetails": "Streamdetaljer",
-      "probing": "Undersöker kameran...",
-      "retry": "Försöka igen",
+      "streamDetails": "Ströminformation",
+      "probing": "Analyserar kameran…",
+      "retry": "Försök igen",
       "testing": {
-        "probingMetadata": "Undersöker kamerans metadata...",
-        "fetchingSnapshot": "Hämtar kamerabild..."
+        "probingMetadata": "Analyserar kamerans metadata…",
+        "fetchingSnapshot": "Hämtar kamerabild…"
       },
-      "probeFailed": "Misslyckades med att undersöka kameran: {{error}}",
-      "probingDevice": "Undersöker enheten...",
-      "probeSuccessful": "Kontroll lyckades",
-      "probeError": "Kontroll fel",
-      "probeNoSuccess": "Kontroll misslyckades",
+      "probeFailed": "Det gick inte att analysera kameran: {{error}}",
+      "probingDevice": "Analyserar enheten…",
+      "probeSuccessful": "Analysen lyckades",
+      "probeError": "Analysfel",
+      "probeNoSuccess": "Analysen misslyckades",
       "deviceInfo": "Enhetsinformation",
       "manufacturer": "Tillverkare",
       "model": "Modell",
       "firmware": "Inbyggd programvara",
       "profiles": "Profiler",
       "ptzSupport": "PTZ-stöd",
-      "autotrackingSupport": "Stöd för Autospårning",
+      "autotrackingSupport": "Stöd för autospårning",
       "presets": "Förinställningar",
       "rtspCandidates": "RTSP-kandidater",
-      "rtspCandidatesDescription": "Följande RTSP-URL:er hittades från kamera kontrollen. Testa anslutningen för att visa strömmetadata.",
+      "rtspCandidatesDescription": "Följande RTSP-URL:er hittades vid kameraanalysen. Testa anslutningen för att visa strömmetadata.",
       "noRtspCandidates": "Inga RTSP-URL:er hittades från kameran. Dina inloggningsuppgifter kan vara felaktiga, eller så kanske kameran inte stöder ONVIF eller metoden som används för att hämta RTSP-URL:er. Gå tillbaka och ange RTSP-URL:en manuellt.",
       "candidateStreamTitle": "Kandidat {{number}}",
-      "useCandidate": "Använda",
+      "useCandidate": "Använd",
       "uriCopy": "Kopiera",
       "uriCopied": "URI kopierad till urklipp",
       "testConnection": "Testa anslutning",
@@ -1096,28 +1096,28 @@
         "audio": "Ljud"
       },
       "testStream": "Testa anslutning",
-      "testSuccess": "Streamtestet lyckades!",
+      "testSuccess": "Strömtestet lyckades!",
       "testFailed": "Strömtestet misslyckades",
       "testFailedTitle": "Testet misslyckades",
       "connected": "Ansluten",
       "notConnected": "Inte ansluten",
       "featuresTitle": "Funktioner",
       "go2rtc": "Minska anslutningar till kameran",
-      "detectRoleWarning": "Minst en ström måste ha rollen \"upptäck\" för att fortsätta.",
+      "detectRoleWarning": "Minst en ström måste ha rollen detektering för att du ska kunna fortsätta.",
       "rolesPopover": {
-        "title": "Stream-roller",
-        "detect": "Huvud kamera flöde för objektdetektering.",
-        "record": "Sparar segment av videoflödet baserat på konfigurationsinställningar.",
-        "audio": "Flöde för ljudbaserad detektering."
+        "title": "Strömroller",
+        "detect": "Kamerans huvudström för objektdetektering.",
+        "record": "Sparar segment av videoströmmen enligt konfigurationsinställningarna.",
+        "audio": "Ström för ljudbaserad detektering."
       },
       "featuresPopover": {
-        "title": "Streamfunktioner",
-        "description": "Använd go2rtc-omströmning för att minska anslutningar till din kamera."
+        "title": "Strömfunktioner",
+        "description": "Använd återströmning via go2rtc för att minska antalet anslutningar till kameran."
       }
     },
     "step4": {
       "description": "Slutgiltig validering och analys innan du sparar din nya kamera. Anslut varje ström innan du sparar.",
-      "validationTitle": "Ström validering",
+      "validationTitle": "Strömvalidering",
       "connectAllStreams": "Anslut alla strömmar",
       "reconnectionSuccess": "Återanslutningen lyckades.",
       "reconnectionPartial": "Vissa strömmar kunde inte återanslutas.",
@@ -1128,7 +1128,7 @@
       "valid": "Giltig",
       "failed": "Misslyckades",
       "notTested": "Inte testad",
-      "connectStream": "Ansluta",
+      "connectStream": "Anslut",
       "connectingStream": "Ansluter",
       "disconnectStream": "Koppla från",
       "estimatedBandwidth": "Uppskattad bandbredd",
@@ -1142,12 +1142,12 @@
       "saveAndApply": "Spara ny kamera",
       "saveError": "Ogiltig konfiguration. Kontrollera dina inställningar.",
       "issues": {
-        "title": "Ström validering",
+        "title": "Strömvalidering",
         "videoCodecGood": "Videokodeken är {{codec}}.",
         "audioCodecGood": "Ljudkodeken är {{codec}}.",
         "resolutionHigh": "En upplösning på {{resolution}} kan orsaka ökad resursanvändning.",
         "resolutionLow": "En upplösning på {{resolution}} kan vara för låg för tillförlitlig detektering av små objekt.",
-        "noAudioWarning": "Inget ljud upptäcktes för den här strömmen, inspelningarna kommer inte att ha ljud.",
+        "noAudioWarning": "Inget ljud detekterades i strömmen. Inspelningarna kommer inte att innehålla ljud.",
         "audioCodecRecordError": "AAC-ljudkodeken krävs för att stödja ljud i inspelningar.",
         "audioCodecRequired": "En ljudström krävs för att stödja ljuddetektering.",
         "restreamingWarning": "Att minska anslutningarna till kameran för inspelningsströmmen kan öka CPU-användningen något.",
@@ -1171,7 +1171,7 @@
     "selectCamera": "Välj en kamera",
     "backToSettings": "Tillbaka till kamerainställningar",
     "streams": {
-      "title": "Aktivera/avaktivera kameror",
+      "title": "Aktivera eller inaktivera kameror",
       "desc": "Inaktivera tillfälligt en kamera tills Frigate startar om. Om du inaktiverar en kamera helt stoppas Frigates bearbetning av kamerans strömmar. Detektering, inspelning och felsökning kommer inte att vara tillgängliga.<br /> <em>Obs! Detta inaktiverar inte go2rtc-återströmmar.</em>"
     },
     "cameraConfig": {
@@ -1181,7 +1181,7 @@
       "name": "Kameranamn",
       "nameRequired": "Kameranamn krävs",
       "nameLength": "Kameranamnet måste vara kortare än 64 tecken.",
-      "namePlaceholder": "t.ex. ytterdörr eller Översikt över bakgård",
+      "namePlaceholder": "t.ex. ytterdörr eller översikt över bakgården",
       "enabled": "Aktiverad",
       "ffmpeg": {
         "inputs": "Ingångsströmmar",
@@ -1208,34 +1208,34 @@
     "title": "Inställningar för kameragranskning",
     "object_descriptions": {
       "title": "Generativa AI-objektbeskrivningar",
-      "desc": "Aktivera/inaktivera generativa AI-objektbeskrivningar temporärt för den här kameran tills Frigate startas om. Vid inaktivering kommer AI-genererade beskrivningar inte att begäras för spårade objekt på den här kameran."
+      "desc": "Aktivera eller inaktivera tillfälligt generativa AI-objektbeskrivningar för kameran tills Frigate startar om. När funktionen är inaktiverad begärs inga AI-genererade beskrivningar för spårade objekt från kameran."
     },
     "review_descriptions": {
       "title": "Beskrivningar av generativa AI-granskningar",
-      "desc": "Aktivera/inaktivera generativa AI-granskningsbeskrivningar för den här kameran temporärt tills Frigate startas om. Vid inaktivering kommer AI-genererade beskrivningar inte att begäras för granskningsobjekt på den här kameran."
+      "desc": "Aktivera eller inaktivera tillfälligt generativa AI-granskningsbeskrivningar för kameran tills Frigate startar om. När funktionen är inaktiverad begärs inga AI-genererade beskrivningar för granskningsobjekt från kameran."
     },
     "review": {
       "title": "Granska",
-      "desc": "Tillfälligt aktivera/avaktivera varningar och detekteringar för den här kameran tills Frigate startar om. När den är avaktiverad genereras inga nya granskningsobjekt. ",
-      "alerts": "Aviseringar ",
-      "detections": "Detektioner "
+      "desc": "Aktivera eller inaktivera tillfälligt varningar och detekteringar för kameran tills Frigate startar om. När funktionen är inaktiverad skapas inga nya granskningsobjekt. ",
+      "alerts": "Varningar ",
+      "detections": "Detekteringar "
     },
     "reviewClassification": {
-      "title": "Granska klassificering",
-      "desc": "Frigate kategoriserar granskningsobjekt som Varningar och Detekteringar. Som standard betraktas alla <em>person</em>- och <em>bil</em>-objekt som Varningar. Du kan förfina kategoriseringen av dina granskningsobjekt genom att konfigurera obligatoriska zoner för dem.",
+      "title": "Granskningsklassificering",
+      "desc": "Frigate klassificerar granskningsobjekt som varningar eller detekteringar. Som standard betraktas alla <em>person</em>- och <em>bil</em>-objekt som varningar. Du kan förfina klassificeringen genom att ange obligatoriska zoner.",
       "noDefinedZones": "Inga zoner är definierade för den här kameran.",
-      "objectAlertsTips": "Alla {{alertsLabels}}-objekt på {{cameraName}} kommer att visas som Varningar.",
-      "zoneObjectAlertsTips": "Alla {{alertsLabels}} objekt som upptäcks i {{zone}} på {{cameraName}} kommer att visas som Varningar.",
-      "objectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} visas som detekteringar oavsett vilken zon de befinner sig i.",
+      "objectAlertsTips": "Alla {{alertsLabels}}-objekt på {{cameraName}} visas som varningar.",
+      "zoneObjectAlertsTips": "Alla {{alertsLabels}}-objekt som detekteras i {{zone}} på {{cameraName}} visas som varningar.",
+      "objectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte klassificeras på {{cameraName}} visas som detekteringar, oavsett vilken zon de befinner sig i.",
       "zoneObjectDetectionsTips": {
-        "text": "Alla {{detectionsLabels}}-objekt som inte kategoriseras i {{zone}} på {{cameraName}} kommer att visas som Detektioner.",
-        "notSelectDetections": "Alla {{detectionsLabels}} objekt som upptäckts i {{zone}} på {{cameraName}} och som inte kategoriserats som Varningar kommer att visas som Detekteringar oavsett vilken zon de befinner sig i.",
-        "regardlessOfZoneObjectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} kommer att visas som Detektioner oavsett vilken zon de befinner sig i."
+        "text": "Alla {{detectionsLabels}}-objekt som inte klassificeras i {{zone}} på {{cameraName}} visas som detekteringar.",
+        "notSelectDetections": "Alla {{detectionsLabels}}-objekt som detekteras i {{zone}} på {{cameraName}} och inte klassificeras som varningar visas som detekteringar, oavsett vilken zon de befinner sig i.",
+        "regardlessOfZoneObjectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte klassificeras på {{cameraName}} visas som detekteringar, oavsett vilken zon de befinner sig i."
       },
       "unsavedChanges": "Osparade inställningar för granskningsklassificering för {{camera}}",
-      "selectAlertsZones": "Välj zoner för Varningar",
-      "selectDetectionsZones": "Välj zoner för Detektioner",
-      "limitDetections": "Begränsa detektioner till specifika zoner",
+      "selectAlertsZones": "Välj zoner för varningar",
+      "selectDetectionsZones": "Välj zoner för detekteringar",
+      "limitDetections": "Begränsa detekteringar till specifika zoner",
       "toast": {
         "success": "Konfigurationen för granskning av klassificering har sparats. Starta om Frigate för att tillämpa ändringarna."
       }
