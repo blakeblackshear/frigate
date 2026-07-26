@@ -12,12 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Classe Apagada",
-      "deletedCategory_many": "Classes apagadas",
-      "deletedCategory_other": "",
-      "deletedImage_one": "Imagen Apagada",
-      "deletedImage_many": "Imagens Apagadas",
-      "deletedImage_other": "",
+      "deletedCategory_one": "{{count}} classe removida",
+      "deletedCategory_many": "{{count}} classes removidas",
+      "deletedCategory_other": "{{count}} classes removidas",
+      "deletedImage_one": "{{count}} imagem removida",
+      "deletedImage_many": "{{count}} imagens removidas",
+      "deletedImage_other": "{{count}} imagens removidas",
       "categorizedImage": "Imagem Classificada com Sucesso",
       "trainedModel": "Modelo treinado com sucesso.",
       "trainingModel": "Treinamento do modelo iniciado com sucesso.",

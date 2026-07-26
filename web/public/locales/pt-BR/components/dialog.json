@@ -19,8 +19,8 @@
         "question": {
           "label": "Confirmar esse rótulo para Frigate Plus",
           "ask_a": "Este objeto é um <code>{{label}}</code>?",
-          "ask_an": "Este objeto é um<code>{{label}}</code>?",
-          "ask_full": "Este objeto é um<code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+          "ask_an": "Este objeto é um <code>{{label}}</code>?",
+          "ask_full": "Este objeto é um <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Enviado"
@@ -71,7 +71,10 @@
       "batchQueueFailed": "Falha ao enfileirar {{total}} exportações. Câmeras com falha: {{failedCameras}}",
       "batchPartial": "Iniciadas {{successful}} de {{total}} exportações. Câmeras com falha: {{failedCameras}}",
       "batchFailed": "Falha ao iniciar {{total}} exportações. Câmeras com falha: {{failedCameras}}",
-      "queued": "Exportação na fila. Acompanhe o progresso na página de exportações."
+      "queued": "Exportação na fila. Acompanhe o progresso na página de exportações.",
+      "batchSuccess_one": "1 exportação iniciada. Abrindo o caso agora.",
+      "batchSuccess_many": "{{count}} exportações iniciadas. Abrindo o caso agora.",
+      "batchSuccess_other": "{{count}} exportações iniciadas. Abrindo o caso agora."
     },
     "fromTimeline": {
       "saveExport": "Salvar Exportação",
@@ -132,7 +135,10 @@
         "started_many": "Iniciadas {{count}} exportações. Abrindo o caso agora.",
         "started_other": "",
         "failed": "Falha ao iniciar {{total}} exportações. Falhas: {{failedItems}}",
-        "partial": "Iniciadas {{successful}} de {{total}} exportações. Falhas: {{failedItems}}"
+        "partial": "Iniciadas {{successful}} de {{total}} exportações. Falhas: {{failedItems}}",
+        "startedNoCase_one": "1 exportação iniciada.",
+        "startedNoCase_many": "{{count}} exportações iniciadas.",
+        "startedNoCase_other": "{{count}} exportações iniciadas."
       }
     }
   },
