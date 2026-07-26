@@ -188,7 +188,7 @@
     "title": "Rediger klassifiseringsmodell",
     "descriptionState": "Rediger klassene for denne tilstandsklassifiseringsmodellen. Endringer vil kreve at modellen trenes på nytt.",
     "descriptionObject": "Rediger objekttypen og klassifiseringstypen for denne objektklassifiseringsmodellen.",
-    "stateClassesInfo": "Merk: Endring av tilstandsklasser krever at modellen trenes på nytt med de oppdaterte klassene."
+    "stateClassesInfo": "Modellen ble oppdatert. Tren modellen på nytt for at endringene i klassene skal bli iverksatt."
   },
   "none": "Ingen",
   "reclassifyImageAs": "Reklassifiser bilde som:",
