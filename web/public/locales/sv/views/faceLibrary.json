@@ -3,7 +3,7 @@
     "person": "Person",
     "confidence": "Säkerhet",
     "face": "Ansiktsdetaljer",
-    "timestamp": "tidsstämpel",
+    "timestamp": "Tidsstämpel",
     "faceDesc": "Detaljer om det spårade objektet som genererade detta ansikte",
     "unknown": "Okänd",
     "subLabelScore": "Underetikettpoäng",
@@ -18,33 +18,33 @@
   "documentTitle": "Ansiktsbibliotek - Frigate",
   "steps": {
     "faceName": "Ange namn",
-    "uploadFace": "Ladda upp bild på ansikte",
+    "uploadFace": "Ladda upp ansiktsbild",
     "nextSteps": "Nästa steg",
     "description": {
-      "uploadFace": "Ladda upp en bild på {{name}} som visar deras ansikte framifrån. Bilden behöver inte beskäras till bara deras ansikte."
+      "uploadFace": "Ladda upp en bild av {{name}} där ansiktet visas framifrån. Bilden behöver inte vara beskuren till enbart ansiktet."
     }
   },
   "createFaceLibrary": {
     "title": "Skapa samling",
     "desc": "Skapa ny samling",
-    "nextSteps": "För att bygga en stark grund:<li>Använd fliken Senaste Igenkänningar för att välja och träna bilder för varje detekterad person.</li><li>Fokusera på raka bilder för bästa resultat; undvik att träna bilder som fångar ansikten i en vinkel.</li></ul>",
+    "nextSteps": "För att skapa en bra grund:<ul><li>Använd fliken Senaste igenkänningar för att välja och träna bilder för varje detekterad person.</li><li>Använd främst bilder tagna rakt framifrån för bästa resultat och undvik att träna med bilder där ansiktet visas i vinkel.</li></ul>",
     "new": "Skapa nytt ansikte"
   },
   "train": {
-    "title": "Senaste Igenkänningar",
+    "title": "Senaste igenkänningar",
     "aria": "Välj senaste igenkänningar",
-    "empty": "Det finns inga ny försök till ansiktsigenkänning",
+    "empty": "Det finns inga nya försök till ansiktsigenkänning",
     "titleShort": "Ny"
   },
   "uploadFaceImage": {
     "title": "Ladda upp ansiktsbild",
-    "desc": "Ladda upp en bild för att skanna efter ansikte och inkludera {{pageToggle}}"
+    "desc": "Ladda upp en bild som ska genomsökas efter ansikten och läggas till i {{pageToggle}}"
   },
   "selectItem": "Välj {{item}}",
   "collections": "Samlingar",
   "selectFace": "Välj ansikte",
   "deleteFaceLibrary": {
-    "title": "Ta bort namn",
+    "title": "Ta bort samling",
     "desc": "Är du säker på att du vill ta bort samlingen {{name}}? Detta kommer att ta bort alla associerade ansikten permanent."
   },
   "deleteFaceAttempts": {
@@ -55,7 +55,7 @@
   "imageEntry": {
     "dropActive": "Släpp bilden här…",
     "dropInstructions": "Dra och släpp eller klistra in en bild här, eller klicka för att välja",
-    "maxSize": "Maxstorlek: {{size}}MB",
+    "maxSize": "Maximal storlek: {{size}} MB",
     "validation": {
       "selectImage": "Välj en bildfil."
     }
@@ -63,28 +63,28 @@
   "nofaces": "Inga ansikten tillgängliga",
   "pixels": "{{area}}px",
   "readTheDocs": "Läs dokumentationen",
-  "trainFaceAs": "Träna ansikte som:",
-  "trainFace": "Träna ansikte",
+  "trainFaceAs": "Träna ansiktet som:",
+  "trainFace": "Träna ansiktet",
   "toast": {
     "success": {
       "uploadedImage": "Bilden har laddats upp.",
       "addFaceLibrary": "{{name}} har lagts till i ansiktsbiblioteket!",
-      "deletedFace_one": "{{count}} ansikte har raderats.",
-      "deletedFace_other": "{{count}} ansikten har raderats.",
-      "deletedName_one": "{{count}} ansikte har raderats.",
-      "deletedName_other": "{{count}} ansikten har raderats.",
-      "renamedFace": "Ansiktet har bytt namn till {{name}}",
-      "trainedFace": "Ansikte är tränant.",
+      "deletedFace_one": "{{count}} ansikte har tagits bort.",
+      "deletedFace_other": "{{count}} ansikten har tagits bort.",
+      "deletedName_one": "{{count}} samling har tagits bort.",
+      "deletedName_other": "{{count}} samlingar har tagits bort.",
+      "renamedFace": "Ansiktet har bytt namn till {{name}}.",
+      "trainedFace": "Ansiktet har tränats.",
       "updatedFaceScore": "Ansiktspoängen för {{name}} har uppdaterats till {{score}}."
     },
     "error": {
       "uploadingImageFailed": "Misslyckades med att ladda upp bilden: {{errorMessage}}",
-      "addFaceLibraryFailed": "Misslyckades med att ange ansiktsnamn: {{errorMessage}}",
+      "addFaceLibraryFailed": "Det gick inte att ange ansiktsnamnet: {{errorMessage}}",
       "deleteFaceFailed": "Misslyckades med att ta bort: {{errorMessage}}",
       "deleteNameFailed": "Misslyckades med att ta bort namnet: {{errorMessage}}",
-      "renameFaceFailed": "Misslyckades med att byta namn på ansikte: {{errorMessage}}",
+      "renameFaceFailed": "Det gick inte att byta namn på ansiktet: {{errorMessage}}",
       "trainFailed": "Misslyckades med att träna: {{errorMessage}}",
-      "updateFaceScoreFailed": "Misslyckades med att uppdatera ansiktspoäng: {{errorMessage}}"
+      "updateFaceScoreFailed": "Det gick inte att uppdatera ansiktspoängen: {{errorMessage}}"
     }
   },
   "renameFace": {

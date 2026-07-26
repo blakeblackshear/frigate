@@ -6,7 +6,7 @@
     },
     "label": "Etiketter",
     "count": "{{count}} Etiketter",
-    "count_one": "{{count}} Etikett",
+    "count_one": "{{count}} etikett",
     "count_other": "{{count}} etiketter"
   },
   "filter": "Filtrera",
@@ -19,7 +19,7 @@
   },
   "features": {
     "hasSnapshot": "Har ögonblicksbild",
-    "hasVideoClip": "Har ett video klipp",
+    "hasVideoClip": "Har videoklipp",
     "submittedToFrigatePlus": {
       "label": "Skickat till Frigate+",
       "tips": "Du måste först filtrera på spårade objekt som har en ögonblicksbild. <br /><br />Spårade objekt utan ögonblicksbild kan inte skickas till Frigate+."
@@ -27,19 +27,19 @@
     "label": "Detaljer"
   },
   "sort": {
-    "dateAsc": "Datum (Stigande)",
+    "dateAsc": "Datum (stigande)",
     "label": "Sortera",
-    "scoreAsc": "Objektpoäng (Stigande)",
-    "speedDesc": "Uppskattad Hastighet (Fallande)",
+    "scoreAsc": "Objektpoäng (stigande)",
+    "speedDesc": "Uppskattad hastighet (fallande)",
     "relevance": "Relevans",
-    "dateDesc": "Datum (Fallande)",
-    "scoreDesc": "Objektpoäng (Fallande)",
-    "speedAsc": "Uppskattad Hastighet (Stigande)"
+    "dateDesc": "Datum (fallande)",
+    "scoreDesc": "Objektpoäng (fallande)",
+    "speedAsc": "Uppskattad hastighet (stigande)"
   },
   "cameras": {
     "all": {
       "short": "Kameror",
-      "title": "Alla Kameror"
+      "title": "Alla kameror"
     },
     "label": "Kamerafilter"
   },
@@ -47,10 +47,10 @@
     "settings": {
       "title": "Inställningar",
       "defaultView": {
-        "title": "Standard Vy",
+        "title": "Standardvy",
         "summary": "Sammanfattning",
-        "desc": "När inga filter är valda, visa en översikt av de senaste spårade objekten per etikett eller visa ett ofiltrerat rutnät.",
-        "unfilteredGrid": "Ofiltrerat Rutnät"
+        "desc": "När inga filter är valda visas antingen en översikt över de senaste spårade objekten per etikett eller ett ofiltrerat rutnät.",
+        "unfilteredGrid": "Ofiltrerat rutnät"
       },
       "searchSource": {
         "options": {
@@ -58,11 +58,11 @@
           "thumbnailImage": "Miniatyrbild"
         },
         "label": "Sökkälla",
-        "desc": "Välj om du vill söka miniatyrbilderna eller beskrivningarna av de spårade objekten."
+        "desc": "Välj om sökningen ska göras i miniatyrbilder eller i beskrivningar av spårade objekt."
       },
       "gridColumns": {
-        "desc": "Välj antal kolumner i rutnätsvy.",
-        "title": "Kolumner i Rutnät"
+        "desc": "Välj antalet kolumner i rutnätsvyn.",
+        "title": "Kolumner i rutnätet"
       }
     },
     "date": {
@@ -72,10 +72,10 @@
     }
   },
   "review": {
-    "showReviewed": "Visa Kontrollerade"
+    "showReviewed": "Visa granskade"
   },
   "motion": {
-    "showMotionOnly": "Visa Endast Rörelse"
+    "showMotionOnly": "Visa endast rörelse"
   },
   "score": "Poäng",
   "dates": {
@@ -83,56 +83,56 @@
       "short": "Datum",
       "title": "Alla datum"
     },
-    "selectPreset": "Välj Förval…"
+    "selectPreset": "Välj förval…"
   },
   "recognizedLicensePlates": {
-    "noLicensePlatesFound": "Inga registreringsplåtar hittade.",
-    "selectPlatesFromList": "Välj en eller flera registreringsplåtar från listan.",
-    "title": "Igenkända Registreringsskyltar",
-    "loadFailed": "Misslyckades med att ladda igenkända registreringsskyltar.",
-    "placeholder": "Skriv för att söka registreringsskyltar…",
-    "loading": "Laddar igenkända registreringsskyltar…",
+    "noLicensePlatesFound": "Inga registreringsskyltar hittades.",
+    "selectPlatesFromList": "Välj en eller flera registreringsskyltar i listan.",
+    "title": "Igenkända registreringsskyltar",
+    "loadFailed": "Det gick inte att läsa in igenkända registreringsskyltar.",
+    "placeholder": "Skriv för att söka efter registreringsskyltar…",
+    "loading": "Läser in igenkända registreringsskyltar…",
     "selectAll": "Välj alla",
     "clearAll": "Rensa alla"
   },
   "more": "Fler filter",
   "reset": {
-    "label": "Nollställ filter"
+    "label": "Återställ filtren"
   },
   "subLabels": {
-    "label": "Under kategori",
-    "all": "Alla under kategorier"
+    "label": "Underetiketter",
+    "all": "Alla underetiketter"
   },
-  "estimatedSpeed": "Estimerad hastighet ({{unit}})",
+  "estimatedSpeed": "Uppskattad hastighet ({{unit}})",
   "classes": {
     "all": {
-      "title": "Alla Klasser"
+      "title": "Alla klasser"
     },
-    "count_one": "{{count}} Klass",
-    "count_other": "{{count}} Klasser",
+    "count_one": "{{count}} klass",
+    "count_other": "{{count}} klasser",
     "label": "Klasser"
   },
-  "timeRange": "Tidsspann",
+  "timeRange": "Tidsintervall",
   "logSettings": {
     "loading": {
       "title": "Laddar",
-      "desc": "När loggvyn är rullad till slutet, strömmas automatiskt nya loggar till vyn."
+      "desc": "När loggvyn har rullats till slutet strömmas nya loggar automatiskt till vyn."
     },
-    "filterBySeverity": "Filtrera logg på allvarlighetsgrad",
-    "disableLogStreaming": "Inaktivera strömning av logg",
+    "filterBySeverity": "Filtrera loggar efter allvarlighetsgrad",
+    "disableLogStreaming": "Inaktivera loggströmning",
     "allLogs": "Alla loggar",
-    "label": "Filtrera loggnivå"
+    "label": "Filtrera efter loggnivå"
   },
   "trackedObjectDelete": {
-    "title": "Bekräfta Borttagning",
+    "title": "Bekräfta borttagning",
     "toast": {
-      "success": "Spårade objekt borttagna.",
-      "error": "Misslyckades med att ta bort spårade objekt: {{errorMessage}}"
+      "success": "De spårade objekten har tagits bort.",
+      "error": "Det gick inte att ta bort spårade objekt: {{errorMessage}}"
     },
-    "desc": "Borttagning av dessa {{objectLength}} spårade objekt tar bort ögonblicksbild, sparade inbäddningar, och tillhörande livscykelposter. Inspelat material av dessa spårade objekt i Historievyn kommer <em>INTE</em> att tas bort.<br /><br />Vill du verkligen fortsätta?<br /><br />Håll ner <em>Skift</em>-tangenten för att hoppa över denna dialog i framtiden."
+    "desc": "Om du tar bort dessa {{objectLength}} spårade objekt tas ögonblicksbilder, sparade inbäddningar och tillhörande livscykelposter bort. Inspelat material med objekten i historikvyn tas <em>INTE</em> bort.<br /><br />Vill du fortsätta?<br /><br />Håll ned <em>Skift</em>-tangenten för att hoppa över den här dialogrutan i framtiden."
   },
   "zoneMask": {
-    "filterBy": "Filtrera på zonmaskering"
+    "filterBy": "Filtrera efter zonmask"
   },
   "attributes": {
     "label": "Klassificeringsattribut",

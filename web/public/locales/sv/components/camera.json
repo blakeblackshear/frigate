@@ -1,21 +1,21 @@
 {
   "group": {
     "label": "Kameragrupper",
-    "add": "Lägg till Kameragrupp",
-    "edit": "Ändra Kameragrupp",
+    "add": "Lägg till kameragrupp",
+    "edit": "Redigera kameragrupp",
     "delete": {
-      "label": "Radera kameragrupp",
+      "label": "Ta bort kameragrupp",
       "confirm": {
         "title": "Bekräfta borttagning",
         "desc": "Är du säker på att du vill ta bort kameragruppen <em>{{name}}</em>?"
       }
     },
-    "success": "Kameragruppen ({{name}}) har sparats.",
+    "success": "Kameragruppen {{name}} har sparats.",
     "name": {
       "label": "Namn",
       "placeholder": "Ange ett namn…",
       "errorMessage": {
-        "mustLeastCharacters": "Gruppnamnet för kameror måste vara minst 2 tecken.",
+        "mustLeastCharacters": "Kameragruppens namn måste vara minst 2 tecken långt.",
         "nameMustNotPeriod": "Kameragruppnamnet får inte innehålla en punkt.",
         "invalid": "Ogiltigt kameragruppnamn.",
         "exists": "Kameragruppnamnet finns redan."
@@ -24,10 +24,10 @@
     "icon": "Ikon",
     "camera": {
       "setting": {
-        "label": "inställningar för kameraströmning",
-        "title": "{{cameraName}} Streaminginställningar",
+        "label": "Inställningar för kameraströmning",
+        "title": "Strömningsinställningar för {{cameraName}}",
         "desc": "Ändra alternativen för livestreaming för den här kameragruppens instrumentpanel. <em>Dessa inställningar är enhets-/webbläsarspecifika.</em>",
-        "audioIsAvailable": "Ljud är tillgängligt för denna kameraström",
+        "audioIsAvailable": "Ljud är tillgängligt för den här kameraströmmen",
         "audioIsUnavailable": "Ljud är inte tillgängligt för den här kameraströmmen",
         "audio": {
           "tips": {
@@ -39,7 +39,7 @@
           "label": "Strömningsmetod",
           "method": {
             "smartStreaming": {
-              "desc": "Smart streaming uppdaterar kamerabilden en gång per minut när ingen detekterbar aktivitet sker för att spara bandbredd och resurser. När aktivitet detekteras växlar bilden sömlöst till en livestream.",
+              "desc": "Smart strömning uppdaterar kamerabilden en gång per minut när ingen detekterbar aktivitet förekommer, för att spara bandbredd och resurser. När aktivitet detekteras växlar bilden sömlöst till en liveström.",
               "label": "Smart strömning (rekommenderas)"
             },
             "continuousStreaming": {
@@ -51,26 +51,26 @@
             },
             "noStreaming": {
               "label": "Ingen strömning",
-              "desc": "Kamerabilderna uppdateras bara en gång per minut och ingen livestreaming kommer att ske."
+              "desc": "Kamerabilderna uppdateras bara en gång per minut och ingen liveström visas."
             }
           },
           "placeholder": "Välj en strömningsmetod"
         },
-        "stream": "Strömma",
+        "stream": "Ström",
         "placeholder": "Välj en ström",
         "compatibilityMode": {
           "label": "Kompatibilitetsläge",
           "desc": "Aktivera endast det här alternativet om kamerans livestream visar färgartefakter och har en diagonal linje på höger sida av bilden."
         }
       },
-      "birdseye": "Fågelöga"
+      "birdseye": "Fågelperspektiv"
     },
     "cameras": {
-      "desc": "Välj kameror för denna guppen.",
+      "desc": "Välj kameror för den här gruppen.",
       "label": "Kameror"
     },
     "showAll": "Visa alla kameragrupper",
-    "showLess": "Visa mindre",
+    "showLess": "Visa färre",
     "editGroups": "Redigera kameragrupper"
   },
   "debug": {
@@ -83,9 +83,9 @@
     "boundingBox": "Avgränsningsruta",
     "timestamp": "Tidsstämpel",
     "zones": "Zoner",
-    "mask": "Maskera",
+    "mask": "Masker",
     "motion": "Rörelse",
     "regions": "Regioner",
-    "paths": "Vägar"
+    "paths": "Spår"
   }
 }
