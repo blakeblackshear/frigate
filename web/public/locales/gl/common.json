@@ -10,5 +10,8 @@
     "untilRestart": "Ata o reinicio",
     "ago": "Fai {{timeAgo}}"
   },
-  "readTheDocumentation": "Ler a documentación"
+  "readTheDocumentation": "Ler a documentación",
+  "button": {
+    "save": "Gardar"
+  }
 }
