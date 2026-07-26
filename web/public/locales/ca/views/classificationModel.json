@@ -192,7 +192,20 @@
     "title": "Edita el model de classificació",
     "descriptionState": "Edita les classes per a aquest model de classificació d'estats. Els canvis requeriran tornar a entrenar el model.",
     "descriptionObject": "Edita el tipus d'objecte i el tipus de classificació per a aquest model de classificació d'objectes.",
-    "stateClassesInfo": "Nota: Canviar les classes d'estat requereix tornar a entrenar el model amb les classes actualitzades."
+    "stateClassesInfo": "S'ha actualitzat el model. Restringeix el model perquè els canvis de classe tinguin efecte.",
+    "enabled": "Habilitat",
+    "enabledDesc": "Executa aquest model. Quan està desactivat, deixa d'executar-se i ja no classifica.",
+    "saveAttempts": "Desa els intents",
+    "saveAttemptsDesc": "Nombre d'imatges de classificació que s'intenten mantenir per a les classificacions recents UI.",
+    "motion": "Executa en moviment",
+    "motionDesc": "Executa la classificació quan es detecta el moviment dins de l'escapçat configurat.",
+    "interval": "Interval",
+    "intervalDesc": "Segons entre les classificacions periòdiques. Deixeu-ho buit per a executar-se només en moviment.",
+    "intervalPlaceholder": "Sense interval",
+    "errors": {
+      "saveAttemptsInvalid": "Els intents de desar han de ser un nombre sencer de 0 o més",
+      "intervalInvalid": "L'interval ha de ser un nombre sencer més gran que 0"
+    }
   },
   "tooltip": {
     "trainingInProgress": "El model s'està entrenant actualment",
@@ -202,5 +215,6 @@
   },
   "none": "Cap",
   "reclassifyImageAs": "Reclassifica la imatge com a:",
-  "reclassifyImage": "Reclassifica la imatge"
+  "reclassifyImage": "Reclassifica la imatge",
+  "disabled": "Desactivat"
 }

@@ -493,6 +493,9 @@
             "max_concurrent": {
                 "label": "Màxim d'exportacions concurrents",
                 "description": "Nombre màxim de treballs d'exportació a processar al mateix temps."
+            },
+            "chapters": {
+                "label": "Metadades de capítol per incrustar en els enregistraments exportats"
             }
         },
         "preview": {

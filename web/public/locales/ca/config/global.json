@@ -380,6 +380,9 @@
             "max_concurrent": {
                 "label": "Màxim d'exportacions concurrents",
                 "description": "Nombre màxim de treballs d'exportació a processar al mateix temps."
+            },
+            "chapters": {
+                "label": "Metadades de capítol per incrustar en els enregistraments exportats"
             }
         },
         "preview": {
@@ -1917,7 +1920,7 @@
             },
             "model_type": {
                 "label": "Tipus de Model de detecció d'objecte",
-                "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) usat per l'optimització d'alguns detectors."
+                "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilitzat per alguns detectors per a l'optimització"
             }
         },
         "model_path": {
@@ -1966,7 +1969,7 @@
         },
         "model_type": {
             "label": "Tipus de model de detecció d'objectes",
-            "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas) utilitzat per alguns detectors per a l'optimització."
+            "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilitzat per alguns detectors per a l'optimització."
         }
     },
     "genai": {
