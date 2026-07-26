@@ -192,7 +192,20 @@
     "title": "Editează modelul de clasificare",
     "descriptionState": "Editează clasele pentru acest model de clasificare a stării. Modificările vor necesita reantrenarea modelului.",
     "descriptionObject": "Editează tipul de obiect și tipul de clasificare pentru acest model de clasificare a obiectelor.",
-    "stateClassesInfo": "Notă: Modificarea claselor de stare necesită reantrenarea modelului cu clasele actualizate."
+    "stateClassesInfo": "Model actualizat. Reantrenează modelul pentru ca modificările claselor să aibă efect.",
+    "enabled": "Activat",
+    "enabledDesc": "Rulează acest model. Când este dezactivat, se oprește și nu mai clasifică.",
+    "saveAttempts": "Încercări de salvare",
+    "saveAttemptsDesc": "Numărul de imagini cu încercări de clasificare de păstrat pentru interfața de clasificări recente.",
+    "motion": "Rulează la mișcare",
+    "motionDesc": "Rulează clasificarea atunci când este detectată mișcare în decupajul configurat.",
+    "interval": "Interval",
+    "intervalDesc": "Secunde între rulările periodice de clasificare. Lasă necompletat pentru a rula doar la mișcare.",
+    "intervalPlaceholder": "Niciun interval",
+    "errors": {
+      "saveAttemptsInvalid": "Încercările de salvare trebuie să fie un număr întreg de 0 sau mai mare",
+      "intervalInvalid": "Intervalul trebuie să fie un număr întreg mai mare decât 0"
+    }
   },
   "tooltip": {
     "trainingInProgress": "Modelul este în curs de antrenare",
@@ -202,5 +215,6 @@
   },
   "none": "Niciuna",
   "reclassifyImageAs": "Reclasifică imaginea ca:",
-  "reclassifyImage": "Reclasifică imaginea"
+  "reclassifyImage": "Reclasifică imaginea",
+  "disabled": "Dezactivat"
 }
