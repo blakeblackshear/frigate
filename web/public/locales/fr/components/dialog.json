@@ -67,7 +67,8 @@
       "error": {
         "failed": "Échec du démarrage de l'exportation : {{error}}",
         "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début.",
-        "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide."
+        "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide.",
+        "noValidTimeSelected": "Interval de temps invalide"
       },
       "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations.",
       "view": "Vue",
@@ -88,7 +89,9 @@
     "export": "Exporter",
     "fromTimeline": {
       "saveExport": "Enregistrer l'exportation",
-      "previewExport": "Aperçu de l'exportation"
+      "previewExport": "Aperçu de l'exportation",
+      "queueingExport": "Traitement de l'export...",
+      "useThisRange": "Utiliser cet interval"
     },
     "case": {
       "label": "Dossier",
@@ -195,6 +198,10 @@
       "markAsReviewed": "Marquer comme traité",
       "deleteNow": "Supprimer maintenant",
       "markAsUnreviewed": "Marquer comme non traité"
+    },
+    "shareTimestamp": {
+      "label": "Partager cette date",
+      "title": "Partager cette date"
     }
   },
   "imagePicker": {
