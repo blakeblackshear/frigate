@@ -67,7 +67,8 @@
       "error": {
         "failed": "未能加入导出队列：{{error}}",
         "endTimeMustAfterStartTime": "结束时间必须在开始时间之后",
-        "noVaildTimeSelected": "未选择有效的时间范围"
+        "noVaildTimeSelected": "未选择有效的时间范围",
+        "noValidTimeSelected": "未选择有效的时间范围"
       },
       "view": "查看",
       "queued": "导出已加入队列。请在导出页面查看进度。",
