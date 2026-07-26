@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Navegar para engadir unha nova colección á Libraría de Caras.",
+    "addFace": "Engade unha nova colección á Biblioteca de rostros subindo a túa primeira imaxe.",
     "placeholder": "Introduce un nome para esta colección",
     "invalidName": "Nome non válido. Os nomes só poden incluír letras, números, espazos, apóstrofes, guións baixos e guións."
   },

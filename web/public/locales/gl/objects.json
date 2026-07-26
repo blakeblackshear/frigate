@@ -3,9 +3,9 @@
   "bicycle": "Bicicleta",
   "airplane": "Avión",
   "motorcycle": "Motocicleta",
-  "bus": "Bus",
+  "bus": "Autobús",
   "train": "Tren",
-  "boat": "Bote",
+  "boat": "Barco",
   "traffic_light": "Luces de tráfico",
   "fire_hydrant": "Boca de incendio",
   "street_sign": "Sinal de tráfico",
@@ -14,5 +14,11 @@
   "bench": "Banco",
   "bird": "Paxaro",
   "cat": "Gato",
-  "car": "Coche"
+  "car": "Coche",
+  "horse": "Cabalo",
+  "goat": "Cabra",
+  "sheep": "Ovella",
+  "dog": "Can",
+  "animal": "Animal",
+  "bark": "Ladrido"
 }
