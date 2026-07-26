@@ -330,7 +330,7 @@
             },
             "model_type": {
                 "label": "Type objektdeteksjonsmodell",
-                "description": "Arkitekturtype for detektormodellen (ssd, yolox, yolonas) brukt av enkelte detektorer for optimalisering."
+                "description": "Arkitekturtype for detektormodellen (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) brukt av enkelte detektorer for optimalisering."
             }
         },
         "model_path": {
@@ -503,7 +503,7 @@
         },
         "model_type": {
             "label": "Type objektdeteksjonsmodell",
-            "description": "Arkitekturtype for detektormodellen (ssd, yolox, yolonas) brukt av enkelte detektorer for optimalisering."
+            "description": "Arkitekturtype for detektormodellen (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) brukt av enkelte detektorer for optimalisering."
         }
     },
     "genai": {

@@ -1722,7 +1722,10 @@
       "remove": "Fjern",
       "keyPlaceholder": "Ny nøkkel",
       "keyLabel": "Nøkkel",
-      "valueLabel": "Verdi"
+      "valueLabel": "Verdi",
+      "providerNamePlaceholder": "f.eks. openai",
+      "variableNameLabel": "Variabelnavn",
+      "variableNamePlaceholder": "f.eks MIN_VARIABEL"
     },
     "roleMap": {
       "remove": "Fjern",
