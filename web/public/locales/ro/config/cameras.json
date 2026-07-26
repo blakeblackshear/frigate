@@ -371,7 +371,7 @@
                 "description": "Folosește snapshot-urile obiectelor în loc de miniaturi pentru GenAI."
             },
             "prompt": {
-                "label": "Prompt descriere",
+                "label": "Prompt de descriere",
                 "description": "Șablonul de prompt implicit pentru descrierile GenAI."
             },
             "object_prompts": {
@@ -493,6 +493,9 @@
             "max_concurrent": {
                 "description": "Numărul maxim de sarcini de export de procesat în același timp.",
                 "label": "Număr maxim de exporturi simultane"
+            },
+            "chapters": {
+                "label": "Metadate de capitol de încorporat în înregistrările exportate"
             }
         },
         "preview": {
@@ -768,7 +771,7 @@
             "description": "Adresa de email folosită pentru notificări push sau cerută de anumiți furnizori de notificări."
         },
         "cooldown": {
-            "label": "Perioadă de răcire",
+            "label": "Perioadă de repaus",
             "description": "Timpul de așteptare (secunde) între notificări pentru a evita spamarea destinatarilor."
         },
         "enabled_in_config": {

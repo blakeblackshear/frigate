@@ -120,7 +120,7 @@
     },
     "editSubLabel": {
       "title": "Editează subeticheta",
-      "desc": "Introdu o sub-etichetă nouă pentru acest {{label}}",
+      "desc": "Introdu o sub-etichetă nouă pentru acest/această {{label}}",
       "descNoLabel": "Introduceți o nouă subetichetă pentru acest obiect urmărit"
     },
     "editLPR": {
