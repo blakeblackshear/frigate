@@ -34,11 +34,15 @@ The detect FFmpeg process exited on its own. This message is only the notificati
 
 </FaqItem>
 
-<FaqItem id="non-monotonically-increasing-dts" question="Application provided invalid, non monotonically increasing dts to muxer">
+<FaqItem id="non-monotonically-increasing-dts" question="Non-monotonic DTS / non monotonically increasing dts to muxer / Queue input is backward in time">
 
-An FFmpeg message meaning the camera sent packets with out-of-order timestamps. Because recordings are copied without re-encoding, FFmpeg cannot fix them, and the segment muxer often splits early, producing one-second segments and a cache backlog. The usual cause is a camera "Smart Codec" / H.264+ / H.265+ mode or a camera clock that jumps.
+These are FFmpeg messages indicating the camera sent packets with out-of-order timestamps, either on the video or the audio stream. Timestamp jitter like this is common with WiFi cameras and restreamed or proxied sources; other causes are a camera "Smart Codec" / H.264+ / H.265+ mode or a camera clock that jumps. A sustained flood of these messages usually precedes the stream stalling and the watchdog restarting FFmpeg.
 
-See [Recordings: segments are only 1 second long](/troubleshooting/recordings#segments-are-only-1-second-long).
+In most cases, the fix is to improve the network, reduce system resource usage, or switch to non-WiFi cameras. In general, WiFi cameras are [not recommended](https://ipcamtalk.com/threads/multiple-cameras-high-bandwidth.77100/#post-861110).
+
+On the video stream, this can affect recordings: because they are copied without re-encoding, FFmpeg cannot fix the timestamps, and the segment muxer often splits early, producing one-second segments and a cache backlog. See [Recordings: segments are only 1 second long](/troubleshooting/recordings#segments-are-only-1-second-long).
+
+On the audio stream, the messages can come from the output's audio encoding. If the audio stream is the problem, it may help to have go2rtc transcode it by adding `#audio=aac` to the camera's go2rtc stream to produce clean timestamps for everything consuming the restream.
 
 </FaqItem>
 
