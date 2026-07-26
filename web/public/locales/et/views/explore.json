@@ -5,7 +5,8 @@
   "noTrackedObjects": "Ühtegi jälgitavat objekti ei leidunud",
   "itemMenu": {
     "findSimilar": {
-      "aria": "Otsi sarnaseid jälgitavaid objekte"
+      "aria": "Otsi sarnaseid jälgitavaid objekte",
+      "label": "Leia sarnane"
     },
     "downloadSnapshot": {
       "label": "Laadi hetkvõte alla",
@@ -14,6 +15,14 @@
     "downloadCleanSnapshot": {
       "label": "Laadi puhas hetkvõte alla",
       "aria": "Laadi puhas hetkvõte alla"
+    },
+    "viewTrackingDetails": {
+      "label": "Vaata jälgimise üksikasju",
+      "aria": "Näita jälgimise üksikasju"
+    },
+    "downloadVideo": {
+      "label": "Laadi video alla",
+      "aria": "Laadi video alla"
     }
   },
   "trackingDetails": {
@@ -21,11 +30,22 @@
       "showAllZones": {
         "title": "Näita kõiki tsoone",
         "desc": "Kui objekt on sisenenud tsooni, siis alati näida tsooni märgistust."
+      },
+      "title": "Annotatsioonide seaded",
+      "offset": {
+        "desc": "Need andmed pärinevad teie kaamera tuvastusvoost, kuid on salvestusvoo piltide peal. On ebatõenäoline, et need kaks voogu on ideaalselt sünkroonis. Seetõttu ei joondu piirav kast ja kaader ideaalselt. Selle säte abil saad annotatsioone ajas edasi või tagasi nihutada, et need salvestatud kaadriga paremini joonduks.",
+        "millisecondsToOffset": "Millisekundid annotatsioonide tuvastuse nihutamiseks. <em>Vaikimisi: 0</em>",
+        "tips": "Vähendage väärtust, kui video taasesitus on kastidest ja teekonnapunktidest ees, ning suurendage väärtust, kui video taasesitus on neist maas. See väärtus võib olla negatiivne.",
+        "toast": {
+          "success": "Kaamera '{{camera}}' annotatsiooni nihe on konfiguratsioonifaili salvestatud."
+        },
+        "label": "Annotatsiooni nihe"
       }
     },
     "lifecycleItemDesc": {
       "attribute": {
-        "other": "{{label}} on tuvastatud kui {{attribute}}"
+        "other": "{{label}} on tuvastatud kui {{attribute}}",
+        "faceOrLicense_plate": "{{attribute}} tuvastatud objektil {{label}}"
       },
       "stationary": "{{label}} jäi paigale",
       "active": "{{label}} muutus aktiivseks",
@@ -37,7 +57,8 @@
         "area": "Ala",
         "score": "Punktiskoor",
         "computedScore": "Arvutatud punktiskoor",
-        "topScore": "Suuremad punktiskoorid"
+        "topScore": "Suuremad punktiskoorid",
+        "toggleAdvancedScores": "Täpsemate tulemuste sisse-/väljalülitamine"
       },
       "external": "{{label}} on tuvastatud",
       "heard": "{{label}} on kuuldud",
@@ -50,7 +71,11 @@
       "previous": "Eelmine slaid",
       "next": "Järgmine slaid"
     },
-    "count": "{{first}} / {{second}}"
+    "count": "{{first}} / {{second}}",
+    "adjustAnnotationSettings": "Korrigeeri annotatsioonide seadeid",
+    "scrollViewTips": "Klõpsake selle objekti elutsükli oluliste hetkede vaatamiseks.",
+    "autoTrackingTips": "Piirdekastide asukohad on automaatselt jälgivate kaamerate puhul ebatäpsed.",
+    "trackedPoint": "Jälgitav punkt"
   },
   "documentTitle": "Avasta - Frigate",
   "generativeAI": "Generatiivne tehisaru",
@@ -64,7 +89,22 @@
       },
       "startingUp": "Käivitun…",
       "estimatedTime": "Hinnanguliselt jäänud aega:",
-      "finishingShortly": "Lõpetan õige pea"
+      "finishingShortly": "Lõpetan õige pea",
+      "context": "Avastamist saab kasutada pärast seda, kui jälgitavate objektide manustamine on uuesti indekseerimise lõpetanud."
+    },
+    "title": "Avastamine pole saadaval",
+    "downloadingModels": {
+      "context": "Frigate laadib alla semantilise otsingu funktsiooni toetamiseks vajalikke manustamismudeleid. See võib võtta mitu minutit, olenevalt teie võrguühenduse kiirusest.",
+      "setup": {
+        "visionModel": "Nägemismudel",
+        "visionModelFeatureExtractor": "Nägemismudeli tunnuste eraldaja",
+        "textModel": "Tekstimudel",
+        "textTokenizer": "Teksti tokenisaator"
+      },
+      "tips": {
+        "context": "Pärast mudelite allalaadimist tuleks oma jälgitavate objektide manused uuesti indekseerida."
+      },
+      "error": "Tekkis viga. Kontrollige Frigate'i logisid."
     }
   },
   "type": {
@@ -107,8 +147,52 @@
     },
     "recognizedLicensePlate": "Tuvastatud sõiduki numbrimärk",
     "description": {
-      "aiTips": "Frigate ei küsi sinu generatiivse tehisaru teenusepakkujalt kirjeldust enne, kui jälgitava objekti elutsükkel on lõppenud."
+      "aiTips": "Frigate ei küsi sinu generatiivse tehisaru teenusepakkujalt kirjeldust enne, kui jälgitava objekti elutsükkel on lõppenud.",
+      "label": "Kirjeldus",
+      "placeholder": "Jälgitava objekti kirjeldus"
+    },
+    "label": "Silt",
+    "editSubLabel": {
+      "title": "Muuda alamsilti",
+      "desc": "Sisesta sildile '{{label}}' uus alamsilt",
+      "descNoLabel": "Sisesta sellele jälgitavale objektile uus alamsilt"
+    },
+    "camera": "Kaamera",
+    "zones": "Tsoonid",
+    "title": {
+      "label": "Pealkiri"
+    },
+    "button": {
+      "findSimilar": "Leia sarnane",
+      "regenerate": {
+        "title": "Taasloomine",
+        "label": "Jälgitava objekti kirjelduse uuesti genereerimine"
+      }
+    },
+    "topScore": {
+      "label": "Parim punktiskoor",
+      "info": "Kõrgeim skoor on jälgitava objekti kõrgeim mediaanskoor, seega võib see erineda otsingutulemuste pisipildil kuvatavast skoorist."
+    },
+    "objects": "Objektid",
+    "tips": {
+      "descriptionSaved": "Kirjeldus salvestati edukalt",
+      "saveDescriptionFailed": "Kirjelduse uuendamine ebaõnnestus: {{errorMessage}}"
+    },
+    "attributes": "Klassifikatsiooni atribuudid",
+    "estimatedSpeed": "Hinnanguline kiirus",
+    "editAttributes": {
+      "title": "Atribuutide muutmine",
+      "desc": "Valige selle sildi '{{label}}' jaoks klassifikatsiooniatribuudid"
     }
   },
-  "trackedObjectDetails": "Jälgitava objekti üksikasjad"
+  "trackedObjectDetails": "Jälgitava objekti üksikasjad",
+  "aiAnalysis": {
+    "title": "Tehisintellekti analüüs"
+  },
+  "concerns": {
+    "label": "Mured"
+  },
+  "objectLifecycle": {
+    "noImageFound": "Selle jälgitava objekti kohta ei leitud pilti."
+  }
 }

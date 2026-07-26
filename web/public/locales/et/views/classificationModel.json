@@ -43,5 +43,8 @@
   },
   "tooltip": {
     "trainingInProgress": "Mudel on parasjagu õppimas"
+  },
+  "train": {
+    "titleShort": "Hiljutised"
   }
 }

@@ -12,7 +12,48 @@
         "selectFromTimeline": "Vali",
         "starting": "Käivitan kordust…",
         "startLabel": "Algus",
-        "endLabel": "Lõpp"
+        "endLabel": "Lõpp",
+        "title": "Alusta silumise taasesitust",
+        "description": "Looge ajutine taasesituskaamera, mis kordab ajaloolist salvestist objektide tuvastamise ja jälgimise probleemide silumiseks. Taasesituskaameral on sama tuvastusseadistus mis lähtekaameral. Valige algusaeg.",
+        "toast": {
+            "error": "Silumise taasesitus ebaõnnestus: {{error}}",
+            "alreadyActive": "Kordusseanss on juba aktiivne",
+            "stopError": "Silumise taasesituse peatamine ebaõnnestus: {{error}}",
+            "goToReplay": "Mine kordusesse"
+        }
     },
-    "title": "Kordus veaotsinguks"
+    "title": "Kordus veaotsinguks",
+    "websocket_messages": "Sõnumid",
+    "description": "Mängi kaamera salvestisi veaotsinguks. Objektide loend näitab tuvastatud objektide ajalist viivitust ja vahekaart „Sõnumid” näitab Fregati sisemiste sõnumite voogu taasesituse materjalist.",
+    "page": {
+        "noSession": "Aktiivset silumis- ja taasesitusseanssi pole",
+        "noSessionDesc": "Alusta silumissalvestise taasesitust ajaloo vaates, klõpsates tööriistaribal nupul \"Toimingud\" ja valides silumissalvestise taasesituse.",
+        "goToRecordings": "Mine ajaloo vaatesse",
+        "preparingClip": "Klipi ettevalmistamine…",
+        "preparingClipDesc": "Frigate koondab valitud ajavahemiku salvestisi. Pikemate vahemike puhul võib see võtta kauem.",
+        "startingCamera": "Silumise taasesituse käivitamine…",
+        "startError": {
+            "title": "Silumise taasesituse käivitamine ebaõnnestus",
+            "back": "Tagasi ajaloo vaatesse"
+        },
+        "sourceCamera": "Lähtekaamera",
+        "replayCamera": "Taasesituse kaamera",
+        "initializingReplay": "Silumise taasesituse initsialiseerimine...",
+        "stoppingReplay": "Silumise taasesituse peatamine...",
+        "stopReplay": "Peata kordusesitus",
+        "confirmStop": {
+            "title": "Peata silumise kordusesitus?",
+            "description": "See peatab seansi ja kustutab kõik ajutised andmed. Kas oled kindel?",
+            "confirm": "Peata kordusesitus",
+            "cancel": "Tühista"
+        },
+        "activity": "Toimingud",
+        "objects": "Objekti loend",
+        "audioDetections": "Audio tuvastused",
+        "noActivity": "Ühtegi tegevust ei tuvastatud",
+        "activeTracking": "Aktiivne jälgimine",
+        "noActiveTracking": "Aktiivset jälgimist pole",
+        "configuration": "Seaded",
+        "configurationDesc": "Peenhäälesta liikumistuvastuse ja objektide jälgimise sätteid silumis- ja taasesituskaamera jaoks. Frigate'i konfiguratsiooni faili muudatusi ei salvestata."
+    }
 }
