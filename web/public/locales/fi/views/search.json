@@ -26,7 +26,8 @@
       "max_speed": "Maksimi nopeus",
       "recognized_license_plate": "Tunnistettu rekisterikilpi",
       "has_clip": "Leike löytyy",
-      "has_snapshot": "Tilannekuva löytyy"
+      "has_snapshot": "Tilannekuva löytyy",
+      "attributes": "Muuttujat"
     },
     "searchType": {
       "thumbnail": "Kuvake",
