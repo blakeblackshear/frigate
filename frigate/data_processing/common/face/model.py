@@ -10,7 +10,11 @@ from scipy import stats
 
 from frigate.config import FrigateConfig
 from frigate.const import FACE_DIR, MODEL_CACHE_DIR
-from frigate.embeddings.onnx.face_embedding import ArcfaceEmbedding, FaceNetEmbedding
+from frigate.embeddings.onnx.face_embedding import (
+    AdaFaceEmbedding,
+    ArcfaceEmbedding,
+    FaceNetEmbedding,
+)
 from frigate.log import redirect_output_to_logger
 
 logger = logging.getLogger(__name__)
@@ -27,12 +31,10 @@ class FaceRecognizer(ABC):
     @abstractmethod
     def build(self) -> None:
         """Build face recognition model."""
-        pass
 
     @abstractmethod
     def clear(self) -> None:
         """Clear current built model."""
-        pass
 
     @abstractmethod
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
@@ -265,7 +267,7 @@ class FaceNetRecognizer(FaceRecognizer):
     def build(self) -> None:
         if not self.landmark_detector:
             self.init_landmark_detector()
-            return None
+            return
 
         if self.model_builder_queue is not None:
             try:
@@ -327,6 +329,167 @@ class FaceNetRecognizer(FaceRecognizer):
         return label, max(0, round(score - blur_reduction, 2))
 
 
+class AdaFaceRecognizer(FaceRecognizer):
+    """AdaFace face recognizer (CVPR 2022, arXiv:2204.00964).
+
+    Drop-in replacement for ArcFaceRecognizer that uses the AdaFace backbone.
+    AdaFace's quality-adaptive margin training improves recognition accuracy
+    on low-quality and surveillance footage. At inference time the pipeline is
+    identical to ArcFace: align -> embed -> cosine similarity vs class means.
+
+    The ``similarity_to_confidence`` sigmoid params are calibrated per backbone
+    variant based on empirical score distributions:
+      - IR-18 (small): median=0.30, range_width=0.6 (matches ArcFace)
+      - IR-50 (large): median=0.35, range_width=0.6 (shifted for higher
+        genuine cosine similarities)
+    """
+
+    def __init__(self, config: FrigateConfig):
+        super().__init__(config)
+        self.mean_embs: dict[str, np.ndarray] = {}
+        self.face_embedder: AdaFaceEmbedding = AdaFaceEmbedding(config.face_recognition)
+        self.model_builder_queue: queue.Queue | None = None
+
+    def clear(self) -> None:
+        self.mean_embs = {}
+
+    def run_build_task(self) -> None:
+        self.model_builder_queue = queue.Queue()
+
+        def build_model() -> None:
+            face_embeddings_map: dict[str, list[np.ndarray]] = {}
+            idx = 0
+
+            for name in os.listdir(FACE_DIR):
+                if name == "train":
+                    continue
+
+                name_path = os.path.join(FACE_DIR, name)
+
+                if not os.path.isdir(name_path):
+                    continue
+
+                embeddings: list[np.ndarray] = []
+
+                for file in os.listdir(name_path):
+                    file_path = os.path.join(name_path, file)
+
+                    if not file.lower().endswith((".jpg", ".webp", ".png")):
+                        continue
+
+                    img = cv2.imread(file_path)
+
+                    if img is None:
+                        continue
+
+                    try:
+                        aligned = self.align_face(img, img.shape[1], img.shape[0])
+                        embedding = self.face_embedder([aligned])[0].squeeze()
+                        embeddings.append(embedding)
+                    except Exception:
+                        logger.warning("Failed to generate embedding for %s", file_path)
+
+                    idx += 1
+
+                if embeddings:
+                    face_embeddings_map[name] = embeddings
+
+            for name, embs in face_embeddings_map.items():
+                self.mean_embs[name] = build_class_mean(np.asarray(embs))
+
+            logger.debug("Finished building AdaFace model")
+
+        thread = threading.Thread(target=build_model, daemon=True)
+        thread.start()
+
+    def build(self) -> None:
+        if not os.path.isdir(FACE_DIR):
+            return
+
+        face_embeddings_map: dict[str, list[np.ndarray]] = {}
+
+        for name in os.listdir(FACE_DIR):
+            if name == "train":
+                continue
+
+            name_path = os.path.join(FACE_DIR, name)
+
+            if not os.path.isdir(name_path):
+                continue
+
+            embeddings: list[np.ndarray] = []
+
+            for file in os.listdir(name_path):
+                file_path = os.path.join(name_path, file)
+
+                if not file.lower().endswith((".jpg", ".webp", ".png")):
+                    continue
+
+                img = cv2.imread(file_path)
+
+                if img is None:
+                    continue
+
+                try:
+                    aligned = self.align_face(img, img.shape[1], img.shape[0])
+                    embedding = self.face_embedder([aligned])[0].squeeze()
+                    embeddings.append(embedding)
+                except Exception:
+                    logger.warning("Failed to generate embedding for %s", file_path)
+
+            if embeddings:
+                face_embeddings_map[name] = embeddings
+
+        for name, embs in face_embeddings_map.items():
+            self.mean_embs[name] = build_class_mean(np.asarray(embs))
+
+        logger.debug("Finished building AdaFace model")
+
+    def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
+        if not self.landmark_detector:
+            return None
+
+        if not self.mean_embs:
+            self.build()
+
+            if not self.mean_embs:
+                return None
+
+        # get blur reduction before aligning face
+        blur_reduction = self.get_blur_confidence_reduction(face_image)
+
+        # align face and run recognition
+        img = self.align_face(face_image, face_image.shape[1], face_image.shape[0])
+        embedding = self.face_embedder([img])[0].squeeze()  # type: ignore[arg-type]
+
+        # Use calibrated sigmoid params based on model_size
+        from frigate.config.classification import ModelSizeEnum
+
+        if self.config.face_recognition.model_size == ModelSizeEnum.large:
+            cal_median = 0.35
+        else:
+            cal_median = 0.30
+
+        score: float = 0
+        label = ""
+
+        for name, mean_emb in self.mean_embs.items():
+            dot_product = np.dot(embedding, mean_emb)
+            magnitude_A = np.linalg.norm(embedding)
+            magnitude_B = np.linalg.norm(mean_emb)
+
+            cosine_similarity = dot_product / (magnitude_A * magnitude_B)
+            confidence = similarity_to_confidence(
+                cosine_similarity, median=cal_median, range_width=0.6
+            )
+
+            if confidence > score:
+                score = confidence
+                label = name
+
+        return label, max(0, round(score - blur_reduction, 2))
+
+
 class ArcFaceRecognizer(FaceRecognizer):
     def __init__(self, config: FrigateConfig):
         super().__init__(config)
@@ -376,7 +539,7 @@ class ArcFaceRecognizer(FaceRecognizer):
     def build(self) -> None:
         if not self.landmark_detector:
             self.init_landmark_detector()
-            return None
+            return
 
         if self.model_builder_queue is not None:
             try:

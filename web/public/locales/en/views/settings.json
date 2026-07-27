@@ -251,7 +251,19 @@
         },
         "large": {
           "title": "large",
-          "desc": "Using <em>large</em> employs an ArcFace face embedding model and will automatically run on the GPU if applicable."
+          "desc": "Using <em>large</em> employs an ArcFace or AdaFace face embedding model and will automatically run on the GPU if applicable."
+        }
+      },
+      "model": {
+        "label": "Recognition Model",
+        "desc": "The backbone model used for face recognition. Only applies when model size is large.",
+        "arcface": {
+          "title": "ArcFace",
+          "desc": "ArcFace is the default face recognition backbone, optimized for high-quality face images."
+        },
+        "adaface": {
+          "title": "AdaFace",
+          "desc": "AdaFace (CVPR 2022) uses a quality-adaptive margin that improves recognition accuracy on low-quality and surveillance footage. When model size is small, uses IR-18 backbone (CPU-friendly); when large, uses IR-50 backbone (higher accuracy)."
         }
       }
     },
@@ -1971,5 +1983,9 @@
     "onvif": {
       "autotrackingNoZones": "Autotracking requires at least one zone. Define a zone for this camera in Masks / Zones, then set it as a required zone below."
     }
+  },
+  "faceModel": {
+    "arcface": "ArcFace",
+    "adaface": "AdaFace"
   }
 }

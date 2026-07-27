@@ -32,10 +32,15 @@ Frigate needs to first detect a `person` before it can detect and recognize a fa
 
 ### Face Recognition
 
-Frigate has support for two face recognition model types:
+Frigate has support for two face recognition model sizes:
 
 - **small**: Frigate will run a FaceNet embedding model to recognize faces, which runs locally on the CPU. This model is optimized for efficiency and is not as accurate.
-- **large**: Frigate will run a large ArcFace embedding model that is optimized for accuracy. It is only recommended to be run when an integrated or dedicated GPU / NPU is available.
+- **large**: Frigate will run a large face embedding model that is optimized for accuracy. It is only recommended to be run when an integrated or dedicated GPU / NPU is available.
+
+When using the **large** model size, you can also select which face recognition backbone to use via the `model` config field:
+
+- **arcface** (default): ArcFace is the standard face recognition backbone, optimized for high-quality face images.
+- **adaface**: AdaFace (CVPR 2022) uses a quality-adaptive margin during training that improves recognition accuracy on low-quality and surveillance footage. When `model_size` is `small`, uses the IR-18 backbone (CPU-friendly); when `large`, uses the IR-50 backbone (higher accuracy). Pretrained weights are MIT-licensed (Copyright (c) 2022 Minchul Kim).
 
 In both cases, a lightweight face landmark detection model is also used to align faces before running recognition.
 
@@ -110,6 +115,8 @@ face_recognition:
 Navigate to <NavPath path="Settings > Enrichments > Face recognition" />.
 
 - **Model size**: Which model size to use, options are `small` or `large`.
+- **Recognition model**: Which face recognition backbone to use, options are `arcface` (default) or `adaface`. AdaFace improves accuracy on low-quality and surveillance footage. Only applies when `model_size` is `large`.
+  - Default: `arcface`
 - **Unknown score threshold**: Min score to mark a person as a potential match; matches at or below this will be marked as unknown.
   - Default: `0.8`
 - **Recognition threshold**: Recognition confidence score required to add the face to the object as a sub label.
@@ -130,6 +137,7 @@ Navigate to <NavPath path="Settings > Enrichments > Face recognition" />.
 face_recognition:
   enabled: true
   model_size: small
+  model: arcface
   unknown_score: 0.8
   recognition_threshold: 0.9
   min_faces: 1

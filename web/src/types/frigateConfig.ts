@@ -22,6 +22,7 @@ export interface BirdseyeConfig {
 export interface FaceRecognitionConfig {
   enabled: boolean;
   model_size: SearchModelSize;
+  model: FaceRecognitionModel;
   unknown_score: number;
   detection_threshold: number;
   recognition_threshold: number;
@@ -29,6 +30,7 @@ export interface FaceRecognitionConfig {
 
 export type SearchModel = "jinav1" | "jinav2";
 export type SearchModelSize = "small" | "large";
+export type FaceRecognitionModel = "arcface" | "adaface";
 
 export interface CameraConfig {
   friendly_name: string;

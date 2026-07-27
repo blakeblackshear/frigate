@@ -1376,6 +1376,10 @@
       "label": "Model size",
       "description": "Model size to use for face embeddings (small/large); larger may require GPU."
     },
+    "model": {
+      "label": "Face recognition model",
+      "description": "Face recognition backbone to use when model_size is large. AdaFace (CVPR 2022) improves recognition accuracy on low-quality and surveillance footage compared to ArcFace."
+    },
     "unknown_score": {
       "label": "Unknown score threshold",
       "description": "Distance threshold below which a face is considered a potential match (higher = stricter)."

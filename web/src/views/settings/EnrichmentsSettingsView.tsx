@@ -1,5 +1,9 @@
 import Heading from "@/components/ui/heading";
-import { FrigateConfig, SearchModelSize } from "@/types/frigateConfig";
+import {
+  FrigateConfig,
+  FaceRecognitionModel,
+  SearchModelSize,
+} from "@/types/frigateConfig";
 import useSWR from "swr";
 import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -42,6 +46,7 @@ type EnrichmentsSettings = {
   face: {
     enabled?: boolean;
     model_size?: SearchModelSize;
+    model?: FaceRecognitionModel;
   };
   lpr: {
     enabled?: boolean;
@@ -70,7 +75,7 @@ export default function EnrichmentsSettingsView({
   const [enrichmentsSettings, setEnrichmentsSettings] =
     useState<EnrichmentsSettings>({
       search: { enabled: undefined, model_size: undefined },
-      face: { enabled: undefined, model_size: undefined },
+      face: { enabled: undefined, model_size: undefined, model: undefined },
       lpr: { enabled: undefined },
       bird: { enabled: undefined },
     });
@@ -78,7 +83,7 @@ export default function EnrichmentsSettingsView({
   const [origSearchSettings, setOrigSearchSettings] =
     useState<EnrichmentsSettings>({
       search: { enabled: undefined, model_size: undefined },
-      face: { enabled: undefined, model_size: undefined },
+      face: { enabled: undefined, model_size: undefined, model: undefined },
       lpr: { enabled: undefined },
       bird: { enabled: undefined },
     });
@@ -94,6 +99,7 @@ export default function EnrichmentsSettingsView({
           face: {
             enabled: config.face_recognition.enabled,
             model_size: config.face_recognition.model_size,
+            model: config.face_recognition.model,
           },
           lpr: { enabled: config.lpr.enabled },
           bird: {
@@ -110,6 +116,7 @@ export default function EnrichmentsSettingsView({
         face: {
           enabled: config.face_recognition.enabled,
           model_size: config.face_recognition.model_size,
+          model: config.face_recognition.model,
         },
         lpr: { enabled: config.lpr.enabled },
         bird: { enabled: config.classification.bird.enabled },
@@ -137,7 +144,7 @@ export default function EnrichmentsSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${enrichmentsSettings.search.enabled ? "True" : "False"}&semantic_search.model_size=${enrichmentsSettings.search.model_size}&face_recognition.enabled=${enrichmentsSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${enrichmentsSettings.face.model_size}&lpr.enabled=${enrichmentsSettings.lpr.enabled ? "True" : "False"}&classification.bird.enabled=${enrichmentsSettings.bird.enabled ? "True" : "False"}`,
+        `config/set?semantic_search.enabled=${enrichmentsSettings.search.enabled ? "True" : "False"}&semantic_search.model_size=${enrichmentsSettings.search.model_size}&face_recognition.enabled=${enrichmentsSettings.face.enabled ? "True" : "False"}&face_recognition.model_size=${enrichmentsSettings.face.model_size}&face_recognition.model=${enrichmentsSettings.face.model ?? "arcface"}&lpr.enabled=${enrichmentsSettings.lpr.enabled ? "True" : "False"}&classification.bird.enabled=${enrichmentsSettings.bird.enabled ? "True" : "False"}`,
         { requires_restart: 0 },
       )
       .then((res) => {
@@ -485,6 +492,64 @@ export default function EnrichmentsSettingsView({
                       )}
                     </SelectItem>
                   ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex max-w-5xl items-center pb-3">
+            <div className="flex items-center">
+              <div className="space-y-0.5">
+                <div>{t("enrichments.faceRecognition.model.label")}</div>
+                <div className="space-y-1 text-sm text-muted-foreground">
+                  <p>
+                    <Trans ns="views/settings">
+                      enrichments.faceRecognition.model.desc
+                    </Trans>
+                  </p>
+                  <ul className="list-disc pl-5 text-sm">
+                    <li>
+                      <Trans ns="views/settings">
+                        enrichments.faceRecognition.model.arcface.desc
+                      </Trans>
+                    </li>
+                    <li>
+                      <Trans ns="views/settings">
+                        enrichments.faceRecognition.model.adaface.desc
+                      </Trans>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <Select
+              value={enrichmentsSettings.face.model ?? "arcface"}
+              onValueChange={(value) =>
+                handleEnrichmentsConfigChange({
+                  face: {
+                    model: value as FaceRecognitionModel,
+                  },
+                })
+              }
+            >
+              <SelectTrigger className="w-24">
+                {t(
+                  `enrichments.faceRecognition.model.${enrichmentsSettings.face.model ?? "arcface"}.title`,
+                )}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {(["arcface", "adaface"] as FaceRecognitionModel[]).map(
+                    (model) => (
+                      <SelectItem
+                        key={model}
+                        className="cursor-pointer"
+                        value={model}
+                      >
+                        {t(`enrichments.faceRecognition.model.${model}.title`)}
+                      </SelectItem>
+                    ),
+                  )}
                 </SelectGroup>
               </SelectContent>
             </Select>

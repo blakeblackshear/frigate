@@ -5,19 +5,25 @@ from pydantic import ConfigDict, Field, field_validator
 from .base import FrigateBaseModel
 
 __all__ = [
+    "CameraAudioTranscriptionConfig",
     "CameraFaceRecognitionConfig",
     "CameraLicensePlateRecognitionConfig",
-    "CameraAudioTranscriptionConfig",
-    "FaceRecognitionConfig",
-    "SemanticSearchConfig",
     "CameraSemanticSearchConfig",
+    "FaceRecognitionConfig",
+    "FaceRecognitionModelEnum",
     "LicensePlateRecognitionConfig",
+    "SemanticSearchConfig",
 ]
 
 
 class SemanticSearchModelEnum(str, Enum):
     jinav1 = "jinav1"
     jinav2 = "jinav2"
+
+
+class FaceRecognitionModelEnum(str, Enum):
+    arcface = "arcface"
+    adaface = "adaface"
 
 
 class EnrichmentsDeviceEnum(str, Enum):
@@ -261,6 +267,11 @@ class FaceRecognitionConfig(FrigateBaseModel):
         default=ModelSizeEnum.small,
         title="Model size",
         description="Model size to use for face embeddings (small/large); larger may require GPU.",
+    )
+    model: FaceRecognitionModelEnum = Field(
+        default=FaceRecognitionModelEnum.arcface,
+        title="Face recognition model",
+        description="Face recognition backbone to use when model_size is large. AdaFace (CVPR 2022) improves recognition accuracy on low-quality and surveillance footage compared to ArcFace.",
     )
     unknown_score: float = Field(
         title="Unknown score threshold",
