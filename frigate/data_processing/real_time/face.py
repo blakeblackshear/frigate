@@ -19,8 +19,10 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.config.classification import FaceRecognitionModelEnum
 from frigate.const import FACE_DIR, MODEL_CACHE_DIR
 from frigate.data_processing.common.face.model import (
+    AdaFaceRecognizer,
     ArcFaceRecognizer,
     FaceNetRecognizer,
     FaceRecognizer,
@@ -88,7 +90,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         self.label_map: dict[int, str] = {}
 
-        if self.face_config.model_size == "small":
+        if self.face_config.model == FaceRecognitionModelEnum.adaface:
+            self.recognizer = AdaFaceRecognizer(self.config)
+        elif self.face_config.model_size == "small":
             self.recognizer = FaceNetRecognizer(self.config)
         else:
             self.recognizer = ArcFaceRecognizer(self.config)

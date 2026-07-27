@@ -99,17 +99,14 @@ class BaseModelRunner(ABC):
     @abstractmethod
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""
-        pass
 
     @abstractmethod
     def get_input_width(self) -> int:
         """Get the input width of the model."""
-        pass
 
     @abstractmethod
     def run(self, input: dict[str, Any]) -> Any | None:
         """Run inference with the model."""
-        pass
 
 
 class ONNXModelRunner(BaseModelRunner):
@@ -283,6 +280,7 @@ class OpenVINOModelRunner(BaseModelRunner):
             EnrichmentModelTypeEnum.jina_v1.value,
             EnrichmentModelTypeEnum.jina_v2.value,
             EnrichmentModelTypeEnum.arcface.value,
+            EnrichmentModelTypeEnum.adaface.value,
         ]
 
     @staticmethod
@@ -390,7 +388,10 @@ class OpenVINOModelRunner(BaseModelRunner):
         with _OPENVINO_LOCK:
             from frigate.embeddings.types import EnrichmentModelTypeEnum
 
-            if self.model_type in [EnrichmentModelTypeEnum.arcface.value]:
+            if self.model_type in [
+                EnrichmentModelTypeEnum.arcface.value,
+                EnrichmentModelTypeEnum.adaface.value,
+            ]:
                 # For face recognition models, create a fresh infer_request
                 # for each inference to avoid state pollution that causes incorrect results.
                 self.infer_request = self.compiled_model.create_infer_request()
@@ -504,7 +505,7 @@ class RKNNModelRunner(BaseModelRunner):
 
         if "vision" in model_name:
             return ["pixel_values"]
-        elif "arcface" in model_name:
+        elif "arcface" in model_name or "adaface" in model_name:
             return ["data"]
         else:
             # Default fallback - try to infer from model type
@@ -521,7 +522,7 @@ class RKNNModelRunner(BaseModelRunner):
         model_name = os.path.basename(self.model_path).lower()
         if "vision" in model_name:
             return 224  # CLIP V1 uses 224x224
-        elif "arcface" in model_name:
+        elif "arcface" in model_name or "adaface" in model_name:
             return 112
         # For detection models, we can't easily determine this from the RKNN model
         # The calling code should provide this information

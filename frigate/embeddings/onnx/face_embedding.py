@@ -5,6 +5,7 @@ import os
 
 import numpy as np
 
+from frigate.config.classification import ModelSizeEnum
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_runners import get_optimized_runner
 from frigate.embeddings.types import EnrichmentModelTypeEnum
@@ -187,6 +188,106 @@ class ArcfaceEmbedding(BaseEmbedding):
         frame[y_center : y_center + og_h, x_center : x_center + og_w] = og
 
         # run arcface normalization
+        frame = (frame / 127.5) - 1.0
+
+        frame = np.transpose(frame, (2, 0, 1))
+        frame = np.expand_dims(frame, axis=0)
+        return [{"data": frame}]
+
+
+class AdaFaceEmbedding(BaseEmbedding):
+    """AdaFace (CVPR 2022) face embedding model.
+
+    AdaFace uses a quality-adaptive margin during training that improves
+    recognition accuracy on low-quality and surveillance footage. At inference
+    time it is a vanilla ResNet-IR backbone producing 512-d L2-normalized
+    embeddings from 112x112 BGR input normalized to [-1, 1].
+
+    The ``model_size`` config field selects the backbone:
+      - ``small``  -> IR-18 (WebFace4M), ~96 MB, CPU-friendly
+      - ``large``  -> IR-50 (WebFace4M), ~174 MB, higher accuracy
+
+    Pretrained weights are MIT-licensed (Copyright (c) 2022 Minchul Kim).
+    See https://github.com/mk-minchul/AdaFace
+    """
+
+    def __init__(self, config: FaceRecognitionConfig):
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
+        is_large = config.model_size == ModelSizeEnum.large
+        model_file = "adaface_r50.onnx" if is_large else "adaface_r18.onnx"
+        super().__init__(
+            model_name="facedet",
+            model_file=model_file,
+            download_urls={
+                model_file: f"{GITHUB_ENDPOINT}/zaolin/frigate/releases/download/adaface-v1.0/{model_file}",
+            },
+        )
+        self.config = config
+        self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
+        self.tokenizer = None
+        self.feature_extractor = None
+        self.runner = None
+        files_names = list(self.download_urls.keys())
+
+        if not all(
+            os.path.exists(os.path.join(self.download_path, n)) for n in files_names
+        ):
+            logger.debug(f"starting model download for {self.model_name}")
+            self.downloader = ModelDownloader(
+                model_name=self.model_name,
+                download_path=self.download_path,
+                file_names=files_names,
+                download_func=self._download_model,
+            )
+            self.downloader.ensure_model_files()
+        else:
+            self.downloader = None
+            self._load_model_and_utils()
+            logger.debug(f"models are already downloaded for {self.model_name}")
+
+    def _load_model_and_utils(self):
+        if self.runner is None:
+            if self.downloader:
+                self.downloader.wait_for_download()
+
+            self.runner = get_optimized_runner(
+                os.path.join(self.download_path, self.model_file),
+                device=self.config.device or "GPU",
+                model_type=EnrichmentModelTypeEnum.adaface.value,
+            )
+
+    def _preprocess_inputs(self, raw_inputs):
+        # AdaFace expects BGR input (unlike ArcFace which converts to RGB).
+        # The raw_inputs are already BGR from OpenCV, so we skip the
+        # _bgr_to_rgb conversion that ArcfaceEmbedding performs.
+        pil = self._process_image(raw_inputs[0])
+
+        # handle images larger than input size
+        width, height = pil.size
+        if width != ARCFACE_INPUT_SIZE or height != ARCFACE_INPUT_SIZE:
+            if width > height:
+                new_height = int(((height / width) * ARCFACE_INPUT_SIZE) // 4 * 4)
+                pil = pil.resize((ARCFACE_INPUT_SIZE, new_height))
+            else:
+                new_width = int(((width / height) * ARCFACE_INPUT_SIZE) // 4 * 4)
+                pil = pil.resize((new_width, ARCFACE_INPUT_SIZE))
+
+        og = np.array(pil).astype(np.float32)
+
+        # Image must be 112x112
+        og_h, og_w, channels = og.shape
+        frame = np.zeros(
+            (ARCFACE_INPUT_SIZE, ARCFACE_INPUT_SIZE, channels), dtype=np.float32
+        )
+
+        # compute center offset
+        x_center = (ARCFACE_INPUT_SIZE - og_w) // 2
+        y_center = (ARCFACE_INPUT_SIZE - og_h) // 2
+
+        # copy img image into center of result image
+        frame[y_center : y_center + og_h, x_center : x_center + og_w] = og
+
+        # AdaFace normalization: (x / 255.0 - 0.5) / 0.5 == (x / 127.5) - 1.0
         frame = (frame / 127.5) - 1.0
 
         frame = np.transpose(frame, (2, 0, 1))

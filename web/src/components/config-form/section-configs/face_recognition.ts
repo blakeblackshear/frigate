@@ -33,6 +33,7 @@ const faceRecognition: SectionConfigOverrides = {
     fieldOrder: [
       "enabled",
       "model_size",
+      "model",
       "unknown_score",
       "detection_threshold",
       "recognition_threshold",
@@ -52,7 +53,7 @@ const faceRecognition: SectionConfigOverrides = {
       "blur_confidence_filter",
       "device",
     ],
-    restartRequired: ["enabled", "model_size", "device"],
+    restartRequired: ["enabled", "model_size", "model", "device"],
     fieldMessages: [
       {
         key: "model-size-large",
@@ -66,6 +67,9 @@ const faceRecognition: SectionConfigOverrides = {
     uiSchema: {
       model_size: {
         "ui:options": { size: "xs", enumI18nPrefix: "modelSize" },
+      },
+      model: {
+        "ui:options": { size: "xs", enumI18nPrefix: "faceModel" },
       },
     },
   },

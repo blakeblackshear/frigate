@@ -333,14 +333,6 @@
       "label": "AXEngine NPU",
       "description": "AXERA AX650N/AX8850N NPU detector running compiled .axmodel files via the AXEngine runtime."
     },
-    "cpu": {
-      "label": "CPU",
-      "description": "CPU TFLite detector that runs TensorFlow Lite models on the host CPU without hardware acceleration. Not recommended.",
-      "num_threads": {
-        "label": "Number of detection threads",
-        "description": "The number of threads used for CPU-based inference."
-      }
-    },
     "deepstack": {
       "label": "DeepStack",
       "description": "DeepStack/CodeProject.AI detector that sends images to a remote DeepStack HTTP API for inference. Not recommended.",
@@ -373,14 +365,6 @@
         "description": "Token for DeGirum Cloud access."
       }
     },
-    "edgetpu": {
-      "label": "EdgeTPU",
-      "description": "EdgeTPU detector that runs TensorFlow Lite models compiled for Coral EdgeTPU using the EdgeTPU delegate.",
-      "device": {
-        "label": "Device Type",
-        "description": "The device to use for EdgeTPU inference (e.g. 'usb', 'pci')."
-      }
-    },
     "hailo8l": {
       "label": "Hailo-8/Hailo-8L",
       "description": "Hailo-8/Hailo-8L detector using HEF models and the HailoRT SDK for inference on Hailo hardware.",
@@ -405,14 +389,6 @@
         "description": "The device to use for ONNX inference (e.g. 'AUTO', 'CPU', 'GPU')."
       }
     },
-    "openvino": {
-      "label": "OpenVINO",
-      "description": "OpenVINO detector for AMD and Intel CPUs, Intel GPUs and Intel VPU hardware.",
-      "device": {
-        "label": "Device Type",
-        "description": "The device to use for OpenVINO inference (e.g. 'CPU', 'GPU', 'NPU')."
-      }
-    },
     "rknn": {
       "label": "RKNN",
       "description": "RKNN detector for Rockchip NPUs; runs compiled RKNN models on Rockchip hardware.",
@@ -424,10 +400,6 @@
     "synaptics": {
       "label": "Synaptics",
       "description": "Synaptics NPU detector for models in .synap format using the Synap SDK on Synaptics hardware."
-    },
-    "teflon_tfl": {
-      "label": "Teflon",
-      "description": "Teflon delegate detector for TFLite using Mesa Teflon delegate library to accelerate inference on supported GPUs."
     },
     "tensorrt": {
       "label": "TensorRT",
@@ -1375,6 +1347,10 @@
     "model_size": {
       "label": "Model size",
       "description": "Model size to use for face embeddings (small/large); larger may require GPU."
+    },
+    "model": {
+      "label": "Face recognition model",
+      "description": "Face recognition backbone to use when model_size is large. AdaFace (CVPR 2022) improves recognition accuracy on low-quality and surveillance footage compared to ArcFace."
     },
     "unknown_score": {
       "label": "Unknown score threshold",
