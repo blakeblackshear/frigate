@@ -68,7 +68,7 @@ You must use a vision-capable model with Frigate. The following models are recom
 | `qwen3.6`  | Strong situational understanding, similar to qwen3-vl                                                                                                                |
 | `gemma4`   | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
 
-The `embeddings` role needs a different kind of model. Text queries are matched against image embeddings, so the model must place images and text in the same vector space. Chat and description models cannot do this.
+The `embeddings` role needs a different kind of model. Text queries are matched against the stored image embeddings, so the model must be trained to place images and text into the same vector space. A chat or description model will still return vectors when asked, but those vectors are not trained for retrieval and text searches will return poor matches with no error to indicate why.
 
 | Model                | Notes                                                                                                                                                               |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
