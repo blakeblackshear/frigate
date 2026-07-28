@@ -113,3 +113,7 @@ Many providers also have a public facing chat interface for their models. Downlo
 - OpenAI - [ChatGPT](https://chatgpt.com)
 - Gemini - [Google AI Studio](https://aistudio.google.com)
 - Ollama - [Open WebUI](https://docs.openwebui.com/)
+
+## Troubleshooting
+
+If descriptions are not being generated, or the generated descriptions are not what you expect, see [How do I debug GenAI issues?](/configuration/genai/genai_config#how-do-i-debug-genai-issues).

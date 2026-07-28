@@ -14,6 +14,7 @@ const logger: SectionConfigOverrides = {
         additionalProperties: {
           "ui:options": {
             enumI18nPrefix: "logger.logLevel",
+            additionalPropertyKeySize: "lg",
             additionalPropertyKeyLabel:
               "configForm.additionalProperties.loggerNameLabel",
             additionalPropertyKeyPlaceholder:

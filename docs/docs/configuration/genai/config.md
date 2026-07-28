@@ -6,12 +6,25 @@ title: Configuring Generative AI
 import ConfigTabs from "@site/src/components/ConfigTabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
+import FaqItem from "@site/src/components/FaqItem";
 
 ## Configuration
 
 A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 5 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI-Compatible section below.
 
 `genai` is a map of named providers. Each key under `genai` is a name you choose, and its value is that provider's settings:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Click **Add** and enter a **Provider name**. Any name of letters, numbers, hyphens, and underscores is accepted, but it cannot be changed from the UI after the provider is created.
+   - Set **Provider** to the service you are using (e.g., `ollama`)
+   - Set **Base URL**, **API key**, and **Model** as required by that provider
+   - Set **Roles** to the roles this provider should handle.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 genai:
@@ -24,6 +37,9 @@ genai:
       - embeddings
       - chat
 ```
+
+</TabItem>
+</ConfigTabs>
 
 The examples on this page all use `my_provider`, but the name is arbitrary and is only used to reference the provider elsewhere in the config (for example, `semantic_search.model`).
 
@@ -43,14 +59,19 @@ Running Generative AI models on CPU is not recommended, as high inference times 
 
 ### Recommended Local Models
 
-You must use a vision-capable model with Frigate. The following models are recommended for local deployment:
+You must use a vision-capable model with Frigate. The following models are recommended for local deployment of the `descriptions` and `chat` roles:
 
 | Model      | Notes                                                                                                                                                                |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `qwen3-vl` | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object.                                              |
-| `qwen3.5`  | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
-| `qwen3.6`  | Strong situational understanding, similar to qwen3-vl                                                                                                                |
+| `qwen3.6`  | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
 | `gemma4`   | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
+
+The `embeddings` role needs a different kind of model. Text queries are matched against the stored image embeddings, so the model must be trained to place images and text into the same vector space. A chat or description model will still return vectors when asked, but those vectors are not trained for retrieval and text searches will return poor matches with no error to indicate why.
+
+| Model                | Notes                                                                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qwen3-vl-embedding` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Must be served by llama.cpp started with `--embeddings` and `--mmproj`. |
 
 :::info
 
@@ -416,3 +437,82 @@ genai:
 
 </TabItem>
 </ConfigTabs>
+
+## FAQ
+
+<FaqItem id="how-do-i-debug-genai-issues" question="How do I debug GenAI issues?">
+
+Frigate's Generative AI features are configured and enabled separately. [Review descriptions and summaries](/configuration/genai/genai_review) live under `review.genai`, and [object descriptions](/configuration/genai/genai_objects) live under `objects.genai`. Configuring a provider on this page does not enable either feature, and enabling one does not enable the other. Decide which of the two is not working, then work through the steps below.
+
+1. Confirm a provider is available and holds the `descriptions` role.
+   - Review descriptions, review summaries, and object descriptions all use the provider that has the `descriptions` role assigned in <NavPath path="Settings > Enrichments > Generative AI > Roles" /> (`genai.<provider>.roles`).
+   - A provider is contacted the first time one of its roles is actually used. A provider holding the `embeddings` role for semantic search is initialized during startup, while a `descriptions` provider is not initialized until the first description is requested, which may be well after boot.
+   - In <NavPath path="Settings > Enrichments > Generative AI" />, use **Refresh models** next to the model field. It queries the provider for its model list and is a quick way to verify that the base URL, API key, and network path between Frigate and your provider are correct.
+
+2. Confirm the feature you expect is actually enabled.
+   - Object descriptions are disabled by default. Turn on <NavPath path="Settings > Global configuration > Objects > GenAI object config > Enable GenAI" /> (`objects.genai.enabled`), either globally or per camera. This is the most common reason custom prompts appear to be ignored while review summaries are still being generated.
+   - Review descriptions are disabled by default. Turn on <NavPath path="Settings > Global configuration > Review > GenAI config > Enable GenAI descriptions" /> (`review.genai.enabled`). Once enabled, alerts are described by default but detections are not, so a detection-only review item will never get a summary unless **Enable GenAI for detections** (`review.genai.detections`) is also on.
+
+3. If object descriptions are never requested, check the filters that skip generation.
+   - <NavPath path="Settings > Global configuration > Objects > GenAI object config > GenAI objects" /> (`objects.genai.objects`) limits generation to specific labels, and **Required zones** (`objects.genai.required_zones`) requires the object to have entered one of those zones. If either is set and does not match, Frigate skips the request silently.
+   - Thumbnails are only collected while an object is moving. Objects that go stationary early contribute fewer frames.
+   - **Use snapshots** (`objects.genai.use_snapshot`) requires snapshots to be enabled for the camera. If the snapshot cannot be read, Frigate logs `Cannot load snapshot for <id>, file not found` and no description is generated.
+   - **Send on end** (`objects.genai.send_triggers.tracked_object_end`) is on by default. If you have turned it off in favor of **Early GenAI trigger** (`objects.genai.send_triggers.after_significant_updates`), descriptions are only requested once that number of updates is reached.
+
+4. Enable debug logs to see exactly what Frigate is doing. Restart Frigate after this change. The next step also requires a restart, so turn both on at the same time to avoid restarting twice.
+
+   ```yaml
+   logger:
+     default: info
+     logs:
+       # highlight-start
+       frigate.genai: debug
+       frigate.data_processing.post.object_descriptions: debug
+       frigate.data_processing.post.review_descriptions: debug
+       # highlight-end
+   ```
+
+5. Save the exact images and prompts that were sent to your provider.
+   - Turn on **Save thumbnails** for the feature you are debugging (`review.genai.debug_save_thumbnails` or `objects.genai.debug_save_thumbnails`). Both features write to `/media/frigate/clips/genai-requests/`, and these files are admin-only.
+   - Review descriptions write `genai-requests/<review_id>/` containing the numbered frames that were sent, plus `prompt.txt` and `response.txt` with the exact prompt and the raw, unparsed model response.
+   - Review summary reports write `genai-requests/<start_ts>-<end_ts>/prompt.txt` and `response.txt`. No images are involved, since a report summarizes existing review descriptions.
+   - Object descriptions write `genai-requests/<event_id>/` containing the numbered thumbnails. The prompt for object descriptions is not written to a file, it is only visible in the debug logs from step 4.
+   - Look at the saved images before blaming the model. If the object is small, blurry, or out of frame, no prompt will fix the result. For object descriptions, consider turning on **Use snapshots** (`objects.genai.use_snapshot`) to send a higher quality image. For review items, consider setting **Review image source** (`review.genai.image_source`) to `recordings` for 480p frames instead of the lower resolution preview frames.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+For review descriptions, navigate to <NavPath path="Settings > Global configuration > Review" /> and set **GenAI config > Save thumbnails** to on.
+
+For object descriptions, navigate to <NavPath path="Settings > Global configuration > Objects" />, expand **GenAI object config**, and set **Save thumbnails** to on.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+review:
+  genai:
+    enabled: true
+    # highlight-next-line
+    debug_save_thumbnails: true
+
+objects:
+  genai:
+    enabled: true
+    # highlight-next-line
+    debug_save_thumbnails: true
+```
+
+</TabItem>
+</ConfigTabs>
+
+6. Verify the prompt is what you think it is.
+   - Object description prompts are the ones you control directly. A camera-level <NavPath path="Settings > Camera configuration > Objects > GenAI object config > Caption prompt" /> (`objects.genai.prompt`) overrides the global one, and an entry in **Object prompts** (`objects.genai.object_prompts`) for a label overrides both for that label. Only `{label}`, `{sub_label}`, and `{camera}` are substituted.
+   - Review description prompts are built by Frigate and request a structured JSON response, so they are not fully replaceable. The parts you control are <NavPath path="Settings > Global configuration > Review > GenAI config > Activity context prompt" /> (`review.genai.activity_context_prompt`) and **Additional concerns** (`review.genai.additional_concerns`). Keep the activity context prompt general, since overly specific rules will sway the model's threat level scoring.
+
+7. If descriptions are generated but the results are poor or inconsistent, look at the model and the context window.
+   - Empty fields, missing `shortSummary` values, or `Failed to parse review description` errors usually mean the model is not following the requested JSON schema. Smaller models struggle with structured output. Try a larger parameter size or one of the [recommended models](#recommended-local-models).
+   - Frigate calculates how many frames to send from the context size the provider reports. If your server reports a different value than it is actually running with, frames will be truncated or the request will fail. Pin the value by adding `context_size` under <NavPath path="Settings > Enrichments > Generative AI > Provider options" /> (`genai.<provider>.provider_options`), and for Ollama also confirm `options.num_ctx` there matches the context you have configured.
+   - Check **Review Description Speed** and **Object Description Speed** in <NavPath path="System metrics > Enrichments" />. If inference takes tens of seconds, requests will queue behind each other and descriptions will appear to stop. For Ollama, review `OLLAMA_NUM_PARALLEL`, `OLLAMA_MAX_QUEUE`, and `OLLAMA_MAX_LOADED_MODELS` so that concurrent requests from Frigate are handled the way you expect.
+
+</FaqItem>

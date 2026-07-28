@@ -226,12 +226,12 @@ class OvDetector(DetectionApi):
 
             conf_mask = (image_pred[:, 4] * class_conf.squeeze() >= 0.3).squeeze()
             # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
-            detections = np.concatenate(
+            predictions = np.concatenate(
                 (image_pred[:, :5], class_conf, class_pred), axis=1
             )
-            detections = detections[conf_mask]
+            predictions = predictions[conf_mask]
 
-            ordered = detections[detections[:, 5].argsort()[::-1]][:20]
+            ordered = predictions[predictions[:, 5].argsort()[::-1]][:20]
 
             for i, object_detected in enumerate(ordered):
                 detections[i] = self.process_yolo(
