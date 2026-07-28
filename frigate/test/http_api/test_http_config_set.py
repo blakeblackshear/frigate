@@ -375,6 +375,62 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
             os.unlink(config_path)
 
     @patch("frigate.api.app.find_config_file")
+    def test_global_birdseye_save_fans_out_resolved_camera_configs(
+        self, mock_find_config
+    ):
+        """A global birdseye save must also publish the per-camera values.
+
+        Global birdseye only seeds enabled and mode; the camera copies are what
+        the output process actually reads. Sending just the global object makes
+        a worker guess which cameras were inheriting, and the only available
+        guess (mode still equals the previous global) wrongly claims a camera
+        whose explicit yaml mode happens to match.
+        """
+        self.minimal_config["birdseye"] = {"enabled": True, "mode": "motion"}
+        # explicit override that matches the global value being replaced
+        self.minimal_config["cameras"]["front_door"]["birdseye"] = {"mode": "motion"}
+
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, mock_publisher = self._create_app_with_publisher()
+            with AuthTestClient(app) as client:
+                resp = client.put(
+                    "/config/set",
+                    json={
+                        "config_data": {"birdseye": {"mode": "continuous"}},
+                        "update_topic": "config/birdseye",
+                        "requires_restart": 0,
+                    },
+                )
+
+                self.assertEqual(resp.status_code, 200)
+
+                # the global object still goes out on its own topic
+                mock_publisher.publisher.publish.assert_called_once()
+                topic, settings = mock_publisher.publisher.publish.call_args[0]
+                self.assertEqual(topic, "config/birdseye")
+                self.assertEqual(settings.mode.value, "continuous")
+
+                published = {
+                    call[0][0].camera: call[0][1]
+                    for call in mock_publisher.publish_update.call_args_list
+                }
+                self.assertEqual(set(published), {"front_door", "back_yard"})
+
+                for call in mock_publisher.publish_update.call_args_list:
+                    self.assertEqual(
+                        call[0][0].update_type, CameraConfigUpdateEnum.birdseye
+                    )
+
+                # the override survives, the inheriting camera follows global
+                self.assertEqual(published["front_door"].mode.value, "motion")
+                self.assertEqual(published["back_yard"].mode.value, "continuous")
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
     def test_save_updates_the_config_holder(self, mock_find_config):
         """A save must move the holder onto the freshly parsed config.
 

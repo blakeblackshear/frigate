@@ -178,13 +178,10 @@ class OutputProcess(FrigateProcess):
             )
 
             if update_topic is not None and birdseye_config is not None:
-                previous_global_mode = self.config.birdseye.mode
+                # only the global-only fields are applied here; the per-camera
+                # enabled and mode arrive on config/cameras/<name>/birdseye,
+                # already resolved against yaml by the config parse
                 self.config.birdseye = birdseye_config
-
-                for camera_config in self.config.cameras.values():
-                    if camera_config.birdseye.mode == previous_global_mode:
-                        camera_config.birdseye.mode = birdseye_config.mode
-
                 logger.debug("Applied dynamic birdseye config update")
 
             # check if there is an updated config
