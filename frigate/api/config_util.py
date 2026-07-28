@@ -16,6 +16,10 @@ def swap_runtime_config(app: FastAPI, config: FrigateConfig) -> None:
     camera the user turned off would silently come back on.
     """
     app.frigate_config = config
+
+    if app.config_holder is not None:
+        app.config_holder.set(config)
+
     app.genai_manager.update_config(config)
 
     if app.profile_manager is not None:

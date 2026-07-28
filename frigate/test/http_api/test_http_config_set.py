@@ -13,6 +13,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdatePublisher,
     CameraConfigUpdateTopic,
 )
+from frigate.config.holder import ConfigHolder
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
@@ -370,6 +371,72 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
 
                 # Camera-level publish_update NOT called
                 mock_publisher.publish_update.assert_not_called()
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_save_updates_the_config_holder(self, mock_find_config):
+        """A save must move the holder onto the freshly parsed config.
+
+        FrigateApp reads the holder when the watchdog rebuilds a crashed
+        process; if the save leaves it on the boot config, that process comes
+        back having lost every change made since Frigate started.
+        """
+        from fastapi import Request
+
+        from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
+        from frigate.api.fastapi_app import create_fastapi_app
+
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        mock_publisher = Mock(spec=CameraConfigUpdatePublisher)
+        mock_publisher.publisher = MagicMock()
+        boot_config = FrigateConfig(**self.minimal_config)
+        holder = ConfigHolder(boot_config)
+
+        try:
+            app = create_fastapi_app(
+                boot_config,
+                self.db,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                mock_publisher,
+                None,
+                enforce_default_admin=False,
+                config_holder=holder,
+            )
+
+            async def mock_get_current_user(request: Request):
+                return {"username": "admin", "role": "admin"}
+
+            async def mock_get_allowed_cameras_for_filter(request: Request):
+                return list(self.minimal_config.get("cameras", {}).keys())
+
+            app.dependency_overrides[get_current_user] = mock_get_current_user
+            app.dependency_overrides[get_allowed_cameras_for_filter] = (
+                mock_get_allowed_cameras_for_filter
+            )
+
+            with AuthTestClient(app) as client:
+                resp = client.put(
+                    "/config/set",
+                    json={
+                        "config_data": {"birdseye": {"inactivity_threshold": 5}},
+                        "update_topic": "config/birdseye",
+                        "requires_restart": 0,
+                    },
+                )
+
+                self.assertEqual(resp.status_code, 200)
+
+            self.assertIsNot(holder.config, boot_config)
+            self.assertIs(holder.config, app.frigate_config)
+            self.assertEqual(holder.config.birdseye.inactivity_threshold, 5)
         finally:
             os.unlink(config_path)
 

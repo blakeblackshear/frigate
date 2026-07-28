@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from frigate.api.config_util import swap_runtime_config
+from frigate.config.holder import ConfigHolder
 
 
 class TestSwapRuntimeConfig(unittest.TestCase):
@@ -12,6 +13,7 @@ class TestSwapRuntimeConfig(unittest.TestCase):
     def _make_app(self) -> MagicMock:
         app = MagicMock()
         app.dispatcher.comms = [MagicMock(), MagicMock()]
+        app.config_holder = ConfigHolder(MagicMock(name="boot_config"))
         return app
 
     def test_rebinds_all_references(self) -> None:
@@ -37,11 +39,40 @@ class TestSwapRuntimeConfig(unittest.TestCase):
         # the swap rebuilds cameras from yaml, so overrides must be re-layered
         app.dispatcher.reapply_runtime_state_to_config.assert_called_once_with()
 
+    def test_updates_the_config_holder(self) -> None:
+        app = self._make_app()
+        holder = app.config_holder
+        config = MagicMock(name="new_config")
+
+        swap_runtime_config(app, config)
+
+        self.assertIs(holder.config, config)
+
+    def test_deferred_factory_builds_from_the_swapped_config(self) -> None:
+        """A watchdog-style factory must not rebuild from the boot config.
+
+        The factories in FrigateApp are lambdas evaluated when a process is
+        restarted, long after a user may have saved. Reading through the
+        holder is what keeps a rebuilt process from reverting every change
+        made since Frigate started.
+        """
+        app = self._make_app()
+        holder = app.config_holder
+        boot_config = holder.config
+        factory = lambda: holder.config  # noqa: E731
+        self.assertIs(factory(), boot_config)
+
+        config = MagicMock(name="new_config")
+        swap_runtime_config(app, config)
+
+        self.assertIs(factory(), config)
+
     def test_tolerates_missing_optional_collaborators(self) -> None:
         app = MagicMock()
         app.profile_manager = None
         app.stats_emitter = None
         app.dispatcher = None
+        app.config_holder = None
         config = MagicMock(name="new_config")
 
         # must not raise when the optional collaborators are absent
