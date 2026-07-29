@@ -83,6 +83,7 @@ def require_admin_by_default():
         "/nvinfo",
         "/labels",
         "/sub_labels",
+        "/categorized_object_names",
         "/plus/models",
         "/recognized_license_plates",
         "/timeline",
