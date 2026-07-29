@@ -574,11 +574,11 @@ async def vod_ts(
             Recordings.start_time,
         )
         .where(
-            Recordings.start_time.between(start_ts, end_ts)
-            | Recordings.end_time.between(start_ts, end_ts)
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
+            Recordings.camera == camera_name,
+            Recordings.start_time >= start_ts - MAX_SEGMENT_DURATION,
+            Recordings.start_time <= end_ts,
+            Recordings.end_time >= start_ts,
         )
-        .where(Recordings.camera == camera_name)
         .order_by(Recordings.start_time.asc())
         .iterator()
     )
