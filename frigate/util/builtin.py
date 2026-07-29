@@ -472,6 +472,18 @@ def sanitize_float(value):
     return value
 
 
+def has_non_finite_number(value: Any) -> bool:
+    """Return True if any number in a parsed JSON value is NaN or infinite."""
+    if isinstance(value, float):
+        return not math.isfinite(value)
+    if isinstance(value, dict):
+        return any(has_non_finite_number(v) for v in value.values())
+    if isinstance(value, list):
+        return any(has_non_finite_number(v) for v in value)
+
+    return False
+
+
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     return 1 - cosine_distance(a, b)
 
