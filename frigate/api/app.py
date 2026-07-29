@@ -71,6 +71,7 @@ from frigate.util.config import (
     find_config_file,
     redact_credential,
 )
+from frigate.util.object_names import get_categorized_object_names
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
     get_nvidia_driver_info,
@@ -1311,6 +1312,28 @@ def get_sub_labels(
 
     sub_labels.sort()
     return JSONResponse(content=sub_labels)
+
+
+@router.get(
+    "/categorized_object_names",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get known object names by object type",
+    description="""Returns the sub labels and attributes this install can attach,
+    grouped by object type. Unlike /sub_labels, which reflects what has already been
+    detected, this reads the config and model files, so it covers recognized face
+    names, named license plates, custom object classification categories, and the
+    detector attributes of tracked objects.""",
+)
+def categorized_object_names(
+    request: Request,
+    object_type: str | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
+    return JSONResponse(
+        content=get_categorized_object_names(
+            request.app.frigate_config, allowed_cameras, object_type
+        )
+    )
 
 
 @router.get("/audio_labels", dependencies=[Depends(allow_any_authenticated())])
