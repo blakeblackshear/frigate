@@ -1,6 +1,7 @@
 """Utilities for services."""
 
 import asyncio
+import glob
 import json
 import logging
 import os
@@ -670,19 +671,17 @@ def get_intel_gpu_stats(
 
 def get_openvino_npu_stats() -> dict[str, str] | None:
     """Get NPU stats using openvino."""
-    NPU_RUNTIME_PATHS = (
-        (
-            "/sys/devices/pci0000:00/0000:00:0b.0/power/runtime_active_time",
-            1_000,  # Milliseconds per second
-        ),
-        (
-            "/sys/class/accel/accel0/device/npu_busy_time_us",
-            1_000_000,  # Microseconds per second
-        ),
-    )
-
-    for runtime_path, units_per_second in NPU_RUNTIME_PATHS:
+    for accel_path in sorted(glob.glob("/sys/class/accel/accel*")):
         try:
+            driver = os.path.basename(os.readlink(f"{accel_path}/device/driver"))
+        except OSError:
+            continue
+
+        if driver != "intel_vpu":
+            continue
+
+        try:
+            runtime_path = f"{accel_path}/device/power/runtime_active_time"
             with open(runtime_path) as f:
                 initial_runtime = float(f.read().strip())
             break
@@ -705,7 +704,7 @@ def get_openvino_npu_stats() -> dict[str, str] | None:
 
         # Calculate usage percentage
         runtime_diff = current_runtime - initial_runtime
-        time_diff = (current_time - initial_time) * units_per_second
+        time_diff = (current_time - initial_time) * 1000.0  # Convert to milliseconds
 
         if time_diff > 0:
             usage = min(100.0, max(0.0, (runtime_diff / time_diff * 100.0)))
