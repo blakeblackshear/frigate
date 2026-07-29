@@ -1,7 +1,12 @@
 import unittest
+from io import StringIO
 from unittest.mock import MagicMock, patch
 
-from frigate.util.services import get_amd_gpu_stats, get_intel_gpu_stats
+from frigate.util.services import (
+    get_amd_gpu_stats,
+    get_intel_gpu_stats,
+    get_openvino_npu_stats,
+)
 
 
 class TestGpuStats(unittest.TestCase):
@@ -16,6 +21,88 @@ class TestGpuStats(unittest.TestCase):
         sp.return_value = process
         amd_stats = get_amd_gpu_stats()
         assert amd_stats == {"gpu": "4.17%", "mem": "60.37%"}
+
+    @patch("frigate.util.services.time.sleep")
+    @patch("frigate.util.services.time.time", side_effect=[0.0, 1.0])
+    @patch(
+        "frigate.util.services.os.readlink",
+        return_value="/sys/bus/pci/drivers/intel_vpu",
+    )
+    @patch(
+        "frigate.util.services.glob.glob",
+        return_value=["/sys/class/accel/accel0"],
+    )
+    @patch(
+        "builtins.open",
+        side_effect=[StringIO("1000"), StringIO("1250")],
+    )
+    def test_openvino_npu_stats_discovers_accel0(
+        self, open_file, glob, readlink, time, sleep
+    ):
+        assert get_openvino_npu_stats() == {"npu": "25.0", "mem": "-%"}
+
+        open_file.assert_any_call(
+            "/sys/class/accel/accel0/device/power/runtime_active_time"
+        )
+
+    @patch("frigate.util.services.time.sleep")
+    @patch("frigate.util.services.time.time", side_effect=[0.0, 1.0])
+    @patch(
+        "frigate.util.services.os.readlink",
+        side_effect=[
+            "/sys/bus/pci/drivers/other",
+            "/sys/bus/pci/drivers/intel_vpu",
+        ],
+    )
+    @patch(
+        "frigate.util.services.glob.glob",
+        return_value=[
+            "/sys/class/accel/accel0",
+            "/sys/class/accel/accel1",
+        ],
+    )
+    @patch(
+        "builtins.open",
+        side_effect=[StringIO("1000"), StringIO("1250")],
+    )
+    def test_openvino_npu_stats_skips_non_intel_accelerator(
+        self, open_file, glob, readlink, time, sleep
+    ):
+        assert get_openvino_npu_stats() == {"npu": "25.0", "mem": "-%"}
+
+        open_file.assert_any_call(
+            "/sys/class/accel/accel1/device/power/runtime_active_time"
+        )
+
+    @patch(
+        "frigate.util.services.os.readlink",
+        return_value="/sys/bus/pci/drivers/other",
+    )
+    @patch(
+        "frigate.util.services.glob.glob",
+        return_value=["/sys/class/accel/accel0"],
+    )
+    @patch("builtins.open")
+    def test_openvino_npu_stats_no_intel_accelerator(self, open_file, glob, readlink):
+        assert get_openvino_npu_stats() is None
+        open_file.assert_not_called()
+
+    @patch(
+        "frigate.util.services.os.readlink",
+        return_value="/sys/bus/pci/drivers/intel_vpu",
+    )
+    @patch(
+        "frigate.util.services.glob.glob",
+        return_value=["/sys/class/accel/accel0"],
+    )
+    @patch("builtins.open", side_effect=FileNotFoundError)
+    def test_openvino_npu_stats_runtime_counter_unavailable(
+        self, open_file, glob, readlink
+    ):
+        assert get_openvino_npu_stats() is None
+        open_file.assert_called_once_with(
+            "/sys/class/accel/accel0/device/power/runtime_active_time"
+        )
 
     @patch("frigate.stats.intel_gpu_info.intel_gpu_name_resolver.get_names")
     @patch("frigate.util.services.time.sleep")
