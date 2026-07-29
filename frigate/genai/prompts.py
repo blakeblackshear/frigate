@@ -262,6 +262,10 @@ def get_tool_definitions(
     `attribute` parameter is exposed for filtering by their labels. When the
     embeddings model only understands English (JinaV1), the `semantic_query`
     description instructs the model to write the query in English.
+
+    Descriptions here stay mechanical: which tool to reach for, and how the
+    filters relate to each other, is stated once in the system prompt so the
+    guidance is not paid for twice on every request.
     """
     search_objects_properties: dict[str, Any] = {
         "camera": {
@@ -270,26 +274,13 @@ def get_tool_definitions(
         },
         "label": {
             "type": "string",
-            "description": (
-                "Generic object class to filter by — one of the tracked detector "
-                "labels such as 'person', 'package', 'car', 'dog', 'bird'. Use "
-                "this for broad queries like 'show me all cars today'. Combine "
-                "with semantic_query when the user also describes appearance or "
-                "behavior (e.g. label='person', semantic_query='riding a lawn "
-                "mower')."
-            ),
+            "description": "Tracked object class to filter by.",
         },
         "sub_label": {
             "type": "string",
             "description": (
-                "Filter by a DISCRETE NAMED entity recognized in the detection. "
-                "Use this for: a known person's name ('John'), a delivery "
-                "company ('Amazon', 'UPS'), a recognized animal species or "
-                "breed ('blue jay', 'cardinal', 'golden retriever'), or a "
-                "license plate string. When filtering by a specific name, set "
-                "only sub_label and leave label unset. Do NOT use sub_label "
-                "for descriptions of appearance, clothing, or actions — those "
-                "belong in semantic_query."
+                "Name recognized in the detection: a person, delivery company, "
+                "animal species or breed, or license plate."
             ),
         },
         "after": {
@@ -313,20 +304,11 @@ def get_tool_definitions(
     }
 
     if attribute_classifications:
-        model_outline = "; ".join(
-            f"{m['name']} (applies to {', '.join(m['objects']) or 'any object'})"
-            for m in attribute_classifications
-        )
         search_objects_properties["attribute"] = {
             "type": "string",
             "description": (
-                "Filter by a classification attribute label produced by a "
-                "configured attribute classification model. Use this INSTEAD "
-                "of semantic_query when the user's request matches one of "
-                "these classifications. Configured models: "
-                f"{model_outline}. "
-                "Set the value to the attribute label that matches the user's "
-                "phrasing (case-sensitive)."
+                "Attribute label produced by a configured classification model "
+                "(case-sensitive)."
             ),
         }
 
@@ -334,29 +316,12 @@ def get_tool_definitions(
         search_objects_properties["semantic_query"] = {
             "type": "string",
             "description": (
-                "Optional natural-language description of a PHYSICAL "
-                "CHARACTERISTIC, APPEARANCE, or ACTIVITY the user mentioned, "
-                "used to semantically narrow results. Only set this when the "
-                "user describes something beyond what label and sub_label can "
-                "express on their own.\n"
-                "USE for descriptive phrases like: 'riding a lawn mower', "
-                "'wearing a red jacket', 'carrying a package', 'walking a "
-                "dog', 'on a bicycle', 'holding an umbrella'.\n"
-                "DO NOT USE for:\n"
-                "- specific named people, pets, or delivery companies → use sub_label\n"
-                "- animal species or breed names like 'blue jay', 'cardinal', "
-                "'golden retriever' → use sub_label\n"
-                "- license plate strings → use sub_label\n"
-                "- generic object queries like 'all cars today' or 'every "
-                "person' → use label alone with no semantic_query\n"
-                "When set, combine with label/time/camera/zone filters as "
-                "usual (e.g. label='person', semantic_query='riding a lawn "
-                "mower', after='2024-05-01T00:00:00Z')."
+                "Description of an appearance or activity, used to semantically "
+                "narrow results."
                 + (
-                    " The configured embeddings model only understands "
-                    "English, so always write semantic_query in English, "
-                    "translating the user's description if they phrased it "
-                    "in another language."
+                    " The configured embeddings model only understands English, so "
+                    "always write this in English, translating the user's "
+                    "description if they phrased it in another language."
                     if embeddings_language == "english"
                     else ""
                 )
@@ -364,26 +329,10 @@ def get_tool_definitions(
         }
 
     search_objects_description = (
-        "Search the historical record of detected objects in Frigate. "
-        "Use this ONLY for questions about the PAST — e.g. 'did anyone come by today?', "
-        "'when was the last car?', 'show me detections from yesterday'. "
-        "Do NOT use this for monitoring or alerting requests about future events — "
-        "use start_camera_watch instead for those. "
-        "An 'object' in Frigate represents a tracked detection (e.g., a person, package, car).\n\n"
-        "Choose filters based on what the user is asking for:\n"
-        "- Generic class query ('show me all cars today'): set `label` only.\n"
-        "- Specific NAMED entity (known person, delivery company, animal "
-        "species/breed like 'blue jay' or 'golden retriever', license "
-        "plate): set `sub_label` only and leave `label` unset.\n"
+        "Search the historical record of tracked detections. Use this ONLY for "
+        "questions about the PAST, e.g. 'did anyone come by today?', 'when was the "
+        "last car?'. For alerting on future events use start_camera_watch instead."
     )
-    if semantic_search_enabled:
-        search_objects_description += (
-            "- Physical CHARACTERISTIC, APPEARANCE, or ACTIVITY that is not a "
-            "discrete name ('person riding a lawn mower', 'someone in a red "
-            "jacket', 'person carrying a package'): set `semantic_query` with "
-            "the descriptive phrase, optionally alongside `label` for the "
-            "object class. Do NOT put descriptive phrases in sub_label."
-        )
 
     return [
         {
@@ -401,17 +350,31 @@ def get_tool_definitions(
         {
             "type": "function",
             "function": {
+                "name": "get_categorized_object_names",
+                "description": (
+                    "Every name that can be attached as a sub_label, grouped by object "
+                    "type: recognized faces, named license plates, classification "
+                    "categories, and delivery logos."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "object_type": {
+                            "type": "string",
+                            "description": "Optional object label (e.g. 'person', 'car'). Omit for all.",
+                        },
+                    },
+                    "required": [],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
                 "name": "find_similar_objects",
                 "description": (
-                    "Find tracked objects that are visually and semantically similar "
-                    "to a specific past event. Use this when the user references a "
-                    "particular object they have seen and wants to find other "
-                    "sightings of the same or similar one ('that green car', 'the "
-                    "person in the red jacket', 'the package that was delivered'). "
-                    "Prefer this over search_objects whenever the user's intent is "
-                    "'find more like this specific one.' Use search_objects first "
-                    "only if you need to locate the anchor event. Requires semantic "
-                    "search to be enabled."
+                    "Find tracked objects visually and semantically similar to a "
+                    "specific past event. Requires semantic search to be enabled."
                 ),
                 "parameters": {
                     "type": "object",
@@ -473,9 +436,8 @@ def get_tool_definitions(
             "function": {
                 "name": "set_camera_state",
                 "description": (
-                    "Change a camera's feature state (e.g., turn detection on/off, enable/disable recordings). "
-                    "Use camera='*' to apply to all cameras at once. "
-                    "Only call this tool when the user explicitly asks to change a camera setting. "
+                    "Change a camera's feature state, e.g. turn detection on or off. "
+                    "Only call this when the user explicitly asks to change a setting. "
                     "Requires admin privileges."
                 ),
                 "parameters": {
@@ -517,7 +479,7 @@ def get_tool_definitions(
                         },
                         "value": {
                             "type": "string",
-                            "description": "The value to set. ON or OFF for toggles, a number for thresholds, a profile name or 'none' for profile.",
+                            "description": "The value to set, as accepted by the chosen feature.",
                         },
                     },
                     "required": ["camera", "feature", "value"],
@@ -529,11 +491,9 @@ def get_tool_definitions(
             "function": {
                 "name": "get_live_context",
                 "description": (
-                    "Get the current live image and detection information for a single camera: objects being tracked, "
-                    "zones, timestamps. Use this to understand what is visible in the live view. "
-                    "Call this when answering questions about what is happening right now on a specific camera. "
-                    "Operates on one camera at a time; call the tool again for each additional camera. "
-                    "Wildcards and empty values are not accepted."
+                    "Current live image and detections (tracked objects, zones, "
+                    "timestamps) for one camera. Use this for questions about what is "
+                    "happening right now. Call it again for each additional camera."
                 ),
                 "parameters": {
                     "type": "object",
@@ -541,8 +501,8 @@ def get_tool_definitions(
                         "camera": {
                             "type": "string",
                             "description": (
-                                "Exact name of a single camera to get live context for. "
-                                "Wildcards (e.g. '*', 'all') and empty strings are not accepted."
+                                "Exact name of a single camera. Wildcards (e.g. '*', "
+                                "'all') and empty strings are not accepted."
                             ),
                         },
                     },
@@ -555,10 +515,9 @@ def get_tool_definitions(
             "function": {
                 "name": "start_camera_watch",
                 "description": (
-                    "Start a continuous VLM watch job that monitors a camera and sends a notification "
-                    "when a specified condition is met. Use this when the user wants to be alerted about "
-                    "a future event, e.g. 'tell me when guests arrive' or 'notify me when the package is picked up'. "
-                    "Only one watch job can run at a time. Returns a job ID."
+                    "Start a continuous watch job that monitors a camera and notifies "
+                    "the user when a condition is met, e.g. 'tell me when guests "
+                    "arrive'. Only one watch job can run at a time. Returns a job ID."
                 ),
                 "parameters": {
                     "type": "object",
@@ -598,10 +557,7 @@ def get_tool_definitions(
             "type": "function",
             "function": {
                 "name": "stop_camera_watch",
-                "description": (
-                    "Cancel the currently running VLM watch job. Use this when the user wants to "
-                    "stop a previously started watch, e.g. 'stop watching the front door'."
-                ),
+                "description": "Cancel the currently running watch job.",
                 "parameters": {
                     "type": "object",
                     "properties": {},
@@ -614,11 +570,9 @@ def get_tool_definitions(
             "function": {
                 "name": "get_profile_status",
                 "description": (
-                    "Get the current profile status including the active profile and "
-                    "timestamps of when each profile was last activated. Use this to "
-                    "determine time periods for recap requests — e.g. when the user asks "
-                    "'what happened while I was away?', call this first to find the relevant "
-                    "time window based on profile activation history."
+                    "Get the active profile and when each profile was last activated. "
+                    "Call this before get_recap to derive the time window for requests "
+                    "like 'what happened while I was away?'."
                 ),
                 "parameters": {
                     "type": "object",
@@ -632,11 +586,9 @@ def get_tool_definitions(
             "function": {
                 "name": "get_recap",
                 "description": (
-                    "Get a recap of all activity (alerts and detections) for a given time period. "
-                    "Use this after calling get_profile_status to retrieve what happened during "
-                    "a specific window — e.g. 'what happened while I was away?'. Returns a "
-                    "chronological list of activity with camera, objects, zones, and GenAI-generated "
-                    "descriptions when available. Summarize the results for the user."
+                    "Get all activity (alerts and detections) for a time period, as a "
+                    "chronological list with camera, objects, zones, and descriptions "
+                    "when available. Summarize the results for the user."
                 ),
                 "parameters": {
                     "type": "object",
@@ -723,14 +675,13 @@ def build_chat_system_prompt(
         )
         speed_units_section = f"\n\nReport object speeds to the user in {speed_unit}."
 
-    semantic_search_section = ""
+    filter_routing_section = (
+        "\n\nWhen routing a search_objects call, pick filters by the shape of the user's request:\n"
+        "- Generic class ('show me all cars today'): set `label` only.\n"
+        "- Specific named entity — a known person ('John'), delivery company ('Amazon'), animal species/breed ('blue jay', 'golden retriever'), or license plate: set `sub_label` only and leave `label` unset. Call get_categorized_object_names first and use the exact spelling it returns; a guessed spelling matches nothing. If the name is absent, say it is not configured rather than searching for it."
+    )
     if semantic_search_enabled:
-        semantic_search_section = (
-            "\n\nWhen routing a search_objects call, pick filters by the shape of the user's request:\n"
-            "- Generic class ('show me all cars today'): set `label` only.\n"
-            "- Specific named entity — a known person ('John'), delivery company ('Amazon'), animal species/breed ('blue jay', 'cardinal', 'golden retriever'), or license plate: set `sub_label` only and leave `label` unset.\n"
-            "- Physical characteristic, appearance, or activity that is NOT a discrete name ('find me people riding a lawn mower', 'someone in a red jacket', 'a person carrying a package'): set `semantic_query` with the descriptive phrase, optionally combined with `label` for the object class. Never put descriptive phrases in `sub_label`."
-        )
+        filter_routing_section += "\n- Physical characteristic, appearance, or activity that is NOT a discrete name ('riding a lawn mower', 'someone in a red jacket'): set `semantic_query` with the descriptive phrase, optionally combined with `label`. Never put descriptive phrases in `sub_label`."
 
     attribute_classification_section = ""
     if attribute_classifications:
@@ -739,9 +690,9 @@ def build_chat_system_prompt(
             for m in attribute_classifications
         )
         attribute_classification_section = (
-            "\n\nAttribute classification models are configured for the following object types:\n"
+            "\n\nConfigured attribute classification models:\n"
             f"{model_lines}\n"
-            "When the user's request matches one of these classifications, set the search_objects `attribute` field to the matching label rather than using `semantic_query`. Reserve `semantic_query` for descriptive phrases that fall outside the configured attribute labels."
+            "When the user's request matches one of these classifications, set the search_objects `attribute` field to the matching label (case-sensitive) rather than using `semantic_query`. Reserve `semantic_query` for descriptive phrases outside the configured attribute labels."
         )
 
     return f"""You are a helpful assistant for Frigate, a security camera NVR system. You help users answer questions about their cameras, detected objects, and events.
@@ -750,9 +701,6 @@ Current server local date and time: {current_date_str} at {current_time_str}
 
 Do not start your response with phrases like "I will check...", "Let me see...", or "Let me look...". Answer directly.
 
-Always present times to the user in the server's local timezone. When tool results include start_time_local and end_time_local, use those exact strings when listing or describing detection times—do not convert or invent timestamps. Do not use UTC or ISO format with Z for the user-facing answer unless the tool result only provides Unix timestamps without local time fields.
-When users ask about "today", "yesterday", "this week", etc., use the current date above as reference.
-When searching for objects or events, use ISO 8601 format for dates (e.g., {current_date_str}T00:00:00Z for the start of today).
-Always be accurate with time calculations based on the current date provided.
+Always present times in the server's local timezone. When tool results include start_time_local and end_time_local, quote those strings exactly; never convert or invent timestamps, and fall back to UTC or ISO format only when a result has no local time fields. Resolve relative dates like "today" or "this week" against the current date above, and pass dates to tools in ISO 8601 (e.g. {current_date_str}T00:00:00Z for the start of today).
 
-When a user refers to a specific object they have seen or describe with identifying details ("that green car", "the person in the red jacket", "a package left today"), prefer the find_similar_objects tool over search_objects. Use search_objects first only to locate the anchor event, then pass its id to find_similar_objects. For generic queries like "show me all cars today", keep using search_objects. If a user message begins with [attached_event:<id>], treat that event id as the anchor for any similarity or "tell me more" request in the same message and call find_similar_objects with that id.{semantic_search_section}{attribute_classification_section}{cameras_section}{speed_units_section}"""
+When the user refers to a specific object they have seen ("that green car", "the person in the red jacket", "a package left today"), prefer find_similar_objects over search_objects, using search_objects only to locate the anchor event and passing its id along. Keep search_objects for generic queries like "show me all cars today". If a user message begins with [attached_event:<id>], treat that id as the anchor for any similarity or "tell me more" request in the same message.{filter_routing_section}{attribute_classification_section}{cameras_section}{speed_units_section}"""
