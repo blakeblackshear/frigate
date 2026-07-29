@@ -1,11 +1,13 @@
 """Unit tests for recordings/media API endpoints."""
 
 from datetime import UTC, datetime
+from unittest.mock import patch
 
 import pytz
 from fastapi import Request
 
 from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
+from frigate.const import MAX_SEGMENT_DURATION
 from frigate.models import Recordings
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
@@ -403,6 +405,55 @@ class TestHttpMedia(BaseTestHttp):
             assert len(summary) == 1
             assert "2024-03-10" in summary
             assert summary["2024-03-10"] is True
+
+    def test_recordings_returns_overlapping_segment(self):
+        """Recordings include a segment that overlaps the requested range."""
+        after = 1000
+        before = 1100
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_recording("too_old", after - 10, after - 1)
+            super().insert_mock_recording(
+                "overlap",
+                after - MAX_SEGMENT_DURATION + 1,
+                after,
+            )
+            super().insert_mock_recording("too_new", before + 1, before + 10)
+
+            response = client.get(
+                "/front_door/recordings",
+                params={"after": after, "before": before},
+            )
+
+            assert response.status_code == 200
+            assert [recording["id"] for recording in response.json()] == ["overlap"]
+
+    def test_vod_returns_overlapping_segment(self):
+        """VOD mapping includes a segment that overlaps the requested range."""
+        start = 1000
+        end = 1100
+
+        with (
+            AuthTestClient(self.app) as client,
+            patch(
+                "frigate.api.media.get_keyframe_before",
+                return_value=None,
+            ),
+        ):
+            super().insert_mock_recording("too_old", start - 10, start - 1)
+            super().insert_mock_recording(
+                "overlap",
+                start - MAX_SEGMENT_DURATION + 2,
+                start + 1,
+            )
+            super().insert_mock_recording("too_new", end + 1, end + 10)
+
+            response = client.get(f"/vod/front_door/start/{start}/end/{end}")
+
+            assert response.status_code == 200
+            assert [
+                clip["path"] for clip in response.json()["sequences"][0]["clips"]
+            ] == ["overlap"]
 
     def test_recordings_unavailable_reports_gap_between_recordings(self):
         """A gap between two recordings is reported as an unavailable segment."""
