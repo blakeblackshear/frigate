@@ -25,7 +25,7 @@ from frigate.api.defs.query.recordings_query_parameters import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
-from frigate.const import RECORD_DIR
+from frigate.const import MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.util.time import get_dst_transitions
 
@@ -243,6 +243,7 @@ async def recordings(
         )
         .where(
             Recordings.camera == camera_name,
+            Recordings.start_time >= after - MAX_SEGMENT_DURATION,
             Recordings.end_time >= after,
             Recordings.start_time <= before,
         )
