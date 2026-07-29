@@ -1,6 +1,7 @@
 """Utilities for services."""
 
 import asyncio
+import glob
 import json
 import logging
 import os
@@ -670,19 +671,33 @@ def get_intel_gpu_stats(
 
 def get_openvino_npu_stats() -> dict[str, str] | None:
     """Get NPU stats using openvino."""
-    NPU_RUNTIME_PATH = "/sys/devices/pci0000:00/0000:00:0b.0/power/runtime_active_time"
+    for accel_path in sorted(glob.glob("/sys/class/accel/accel*")):
+        try:
+            driver = os.path.basename(os.readlink(f"{accel_path}/device/driver"))
+        except OSError:
+            continue
+
+        if driver != "intel_vpu":
+            continue
+
+        try:
+            runtime_path = f"{accel_path}/device/power/runtime_active_time"
+            with open(runtime_path) as f:
+                initial_runtime = float(f.read().strip())
+            break
+        except (FileNotFoundError, PermissionError, ValueError):
+            continue
+    else:
+        return None
 
     try:
-        with open(NPU_RUNTIME_PATH) as f:
-            initial_runtime = float(f.read().strip())
-
         initial_time = time.time()
 
         # Sleep for 1 second to get an accurate reading
         time.sleep(1.0)
 
         # Read runtime value again
-        with open(NPU_RUNTIME_PATH) as f:
+        with open(runtime_path) as f:
             current_runtime = float(f.read().strip())
 
         current_time = time.time()
