@@ -50,6 +50,7 @@ from frigate.jobs.vlm_watch import (
     stop_vlm_watch_job,
 )
 from frigate.models import Event
+from frigate.util.object_names import get_categorized_object_names
 
 logger = logging.getLogger(__name__)
 
@@ -539,6 +540,13 @@ async def execute_tool(
     if tool_name == "search_objects":
         return await _execute_search_objects(request, arguments, allowed_cameras)
 
+    if tool_name == "get_categorized_object_names":
+        return JSONResponse(
+            content=_execute_get_categorized_object_names(
+                request, arguments, allowed_cameras
+            )
+        )
+
     if tool_name == "find_similar_objects":
         result = await _execute_find_similar_objects(
             request, arguments, allowed_cameras
@@ -717,6 +725,29 @@ async def _execute_set_camera_state(
     return {"success": True, "camera": camera, "feature": feature, "value": value}
 
 
+def _execute_get_categorized_object_names(
+    request: Request,
+    arguments: dict[str, Any],
+    allowed_cameras: list[str],
+) -> dict[str, Any]:
+    object_type = arguments.get("object_type") or None
+    names = get_categorized_object_names(
+        request.app.frigate_config, allowed_cameras, object_type
+    )
+
+    if not names:
+        return {
+            "names": {},
+            "message": (
+                f"No names configured for '{object_type}'."
+                if object_type
+                else "No names configured; search by label or semantic_query."
+            ),
+        }
+
+    return {"names": names}
+
+
 async def _execute_tool_internal(
     tool_name: str,
     arguments: dict[str, Any],
@@ -741,6 +772,10 @@ async def _execute_tool_internal(
         except (json.JSONDecodeError, AttributeError) as e:
             logger.warning(f"Failed to extract tool result: {e}")
             return {"error": "Failed to parse tool result"}
+    elif tool_name == "get_categorized_object_names":
+        return _execute_get_categorized_object_names(
+            request, arguments, allowed_cameras
+        )
     elif tool_name == "find_similar_objects":
         return await _execute_find_similar_objects(request, arguments, allowed_cameras)
     elif tool_name == "set_camera_state":
@@ -773,8 +808,8 @@ async def _execute_tool_internal(
     else:
         logger.error(
             "Tool call failed: unknown tool %r. Expected one of: search_objects, find_similar_objects, "
-            "get_live_context, start_camera_watch, stop_camera_watch, get_profile_status, get_recap. "
-            "Arguments received: %s",
+            "get_categorized_object_names, get_live_context, start_camera_watch, stop_camera_watch, "
+            "get_profile_status, get_recap. Arguments received: %s",
             tool_name,
             json.dumps(arguments),
         )
