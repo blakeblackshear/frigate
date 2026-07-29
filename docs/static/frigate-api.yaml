@@ -2946,6 +2946,44 @@ paths:
         - frigateUserAuth: []
       x-required-role: any
       description: '**Access:** Any authenticated user.'
+  /categorized_object_names:
+    get:
+      tags:
+        - App
+      summary: Get known object names by object type
+      description: |-
+        **Access:** Any authenticated user.
+
+        Returns the sub labels and attributes this install can attach,
+            grouped by object type. Unlike /sub_labels, which reflects what has already been
+            detected, this reads the config and model files, so it covers recognized face
+            names, named license plates, custom object classification categories, and the
+            detector attributes of tracked objects.
+      operationId: categorized_object_names_categorized_object_names_get
+      parameters:
+        - name: object_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Object Type
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateUserAuth: []
+      x-required-role: any
   /audio_labels:
     get:
       tags:
