@@ -36,8 +36,8 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 import cv2
 import numpy as np
@@ -53,21 +53,31 @@ ARCFACE_INPUT_SIZE = 112
 # ---------------------------------------------------------------------------
 
 
+def _bgr_to_rgb(frame: np.ndarray) -> np.ndarray:
+    """Mirror BaseEmbedding._bgr_to_rgb."""
+    if isinstance(frame, np.ndarray) and frame.ndim == 3:
+        return np.ascontiguousarray(frame[:, :, ::-1])
+
+    return frame
+
+
 def _process_image_frigate(image: np.ndarray) -> Image.Image:
     """Mirror BaseEmbedding._process_image for an ndarray input.
 
-    NOTE: Frigate passes the output of `cv2.imread` (BGR) directly in. PIL's
-    `Image.fromarray` does NOT reorder channels, so the embedder effectively
-    receives a BGR-ordered tensor. We replicate that faithfully here. (Tested
-    — swapping to RGB produces near-identical embeddings; this model is
-    robust to channel order.)
+    `Image.fromarray` does not reorder channels, so whatever order it is
+    handed is what reaches the model. Callers swap to RGB first, exactly as
+    ArcfaceEmbedding._preprocess_inputs does.
     """
     return Image.fromarray(image)
 
 
 def arcface_preprocess(image_bgr: np.ndarray) -> np.ndarray:
-    """Mirror ArcfaceEmbedding._preprocess_inputs."""
-    pil = _process_image_frigate(image_bgr)
+    """Mirror ArcfaceEmbedding._preprocess_inputs.
+
+    Face crops arrive BGR from cv2 and #23712 added the swap to RGB before
+    embedding, so this script has to do it too.
+    """
+    pil = _process_image_frigate(_bgr_to_rgb(image_bgr))
 
     width, height = pil.size
     if width != ARCFACE_INPUT_SIZE or height != ARCFACE_INPUT_SIZE:
@@ -138,9 +148,7 @@ class LandmarkAligner:
         M[0, 2] += tX - eyesCenter[0]
         M[1, 2] += tY - eyesCenter[1]
 
-        aligned = cv2.warpAffine(
-            image, M, (out_w, out_h), flags=cv2.INTER_CUBIC
-        )
+        aligned = cv2.warpAffine(image, M, (out_w, out_h), flags=cv2.INTER_CUBIC)
         info = dict(
             angle=float(angle),
             eye_dist_px=dist,
@@ -433,9 +441,7 @@ def vector_outlier_test(
         if neg
         else np.array([])
     )
-    baseline_conf_neg = np.array(
-        [similarity_to_confidence(c) for c in baseline_neg]
-    )
+    baseline_conf_neg = np.array([similarity_to_confidence(c) for c in baseline_neg])
 
     print(
         f"\nBaseline (trim_mean only, {len(pos)} images):"
@@ -465,9 +471,7 @@ def vector_outlier_test(
         mean, keep = iterative_mean(all_embs, T)
         pos_sims = np.array([cosine(p.embedding, mean) for p in pos])
         neg_sims = (
-            np.array([cosine(n.embedding, mean) for n in neg])
-            if neg
-            else np.array([])
+            np.array([cosine(n.embedding, mean) for n in neg]) if neg else np.array([])
         )
         neg_conf = np.array([similarity_to_confidence(c) for c in neg_sims])
         margin = pos_sims.min() - (neg_sims.max() if len(neg_sims) else 0)
@@ -483,9 +487,7 @@ def vector_outlier_test(
     # Show which images get dropped at the shipped threshold + neighbors
     for T_show in (0.25, 0.30, 0.33):
         _, keep = iterative_mean(all_embs, T_show)
-        print(
-            f"\nAt T={T_show}, the {int((~keep).sum())} dropped positives are:"
-        )
+        print(f"\nAt T={T_show}, the {int((~keep).sum())} dropped positives are:")
         final_mean = stats.trim_mean(all_embs[keep], base_trim, axis=0)
         m_n = final_mean / (np.linalg.norm(final_mean) + 1e-9)
         for i, (p, k) in enumerate(zip(pos, keep)):
@@ -501,9 +503,7 @@ def vector_outlier_test(
                 )
 
 
-def degenerate_embedding_test(
-    pos: list[FaceSample], neg: list[FaceSample]
-) -> None:
+def degenerate_embedding_test(pos: list[FaceSample], neg: list[FaceSample]) -> None:
     """Detect whether negatives and low-quality positives share a degenerate
     'tiny/noisy face' region of the embedding space.
 
@@ -533,8 +533,7 @@ def degenerate_embedding_test(
         f"(how tightly negatives cluster together)"
     )
     print(
-        f"  pos<->pos mean cos : {np.nanmean(pp):.3f}   "
-        f"(how tightly positives cluster)"
+        f"  pos<->pos mean cos : {np.nanmean(pp):.3f}   (how tightly positives cluster)"
     )
     print(
         f"  pos<->neg mean cos : {pn.mean():.3f}   "
@@ -558,11 +557,7 @@ def degenerate_embedding_test(
         neg_scores = np.array([cosine(n.embedding, clean_mean) for n in neg])
         neg_confs = np.array([similarity_to_confidence(c) for c in neg_scores])
         pos_scores = np.array(
-            [
-                cosine(pos[i].embedding, clean_mean)
-                for i in range(len(pos))
-                if keep[i]
-            ]
+            [cosine(pos[i].embedding, clean_mean) for i in range(len(pos)) if keep[i]]
         )
         print(
             f"\n  mean_intra >= {thresh}: keeping {int(keep.sum())}/{len(pos)} positives"
@@ -585,9 +580,7 @@ def degenerate_embedding_test(
         )
 
 
-def contamination_analysis(
-    pos: list[FaceSample], neg: list[FaceSample]
-) -> None:
+def contamination_analysis(pos: list[FaceSample], neg: list[FaceSample]) -> None:
     """Check whether the positive collection contains a second identity.
 
     Two signals:
@@ -617,10 +610,7 @@ def contamination_analysis(
         "\nPositives closer to a negative than to their own class avg"
         "\n(these are candidates for mislabeled images):"
     )
-    print(
-        f"\n{'max_neg':>7}  {'mean_neg':>8}  {'mean_intra':>10}  "
-        f"{'delta':>6}  name"
-    )
+    print(f"\n{'max_neg':>7}  {'mean_neg':>8}  {'mean_intra':>10}  {'delta':>6}  name")
     rows = list(zip(pos_names, max_to_neg, mean_to_neg, mean_intra))
     rows.sort(key=lambda r: -(r[1] - r[3]))
     for nm, mxn, mnn, mi in rows[:15]:
@@ -704,7 +694,9 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    ap.add_argument("--positive", required=True, help="Training folder for one identity")
+    ap.add_argument(
+        "--positive", required=True, help="Training folder for one identity"
+    )
     ap.add_argument(
         "--negative",
         default=None,

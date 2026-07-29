@@ -30,6 +30,7 @@ from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.config.config import FrigateConfig
+from frigate.config.holder import ConfigHolder
 from frigate.config.profile_manager import ProfileManager
 from frigate.const import (
     CACHE_DIR,
@@ -122,7 +123,18 @@ class FrigateApp:
         self.processes: dict[str, int] = {}
         self.embeddings: EmbeddingsContext | None = None
         self.profile_manager: ProfileManager | None = None
-        self.config = config
+        self.config_holder = ConfigHolder(config)
+
+    @property
+    def config(self) -> FrigateConfig:
+        """The current config, not the one Frigate booted with.
+
+        Read through the holder so the deferred watchdog factories below build
+        a replacement process from the config as it is now. There is no setter
+        on purpose: a plain attribute would let a caller pin this back to a
+        single object and reintroduce the staleness.
+        """
+        return self.config_holder.config
 
     def ensure_dirs(self) -> None:
         dirs = [
@@ -645,6 +657,7 @@ class FrigateApp:
                     self.replay_manager,
                     self.dispatcher,
                     self.profile_manager,
+                    config_holder=self.config_holder,
                 ),
                 host="127.0.0.1",
                 port=5001,

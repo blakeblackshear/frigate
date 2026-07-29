@@ -31,7 +31,10 @@ from frigate.api.auth import (
     get_allowed_cameras_for_filter,
     require_role,
 )
-from frigate.api.config_util import swap_runtime_config
+from frigate.api.config_util import (
+    publish_camera_section_updates,
+    swap_runtime_config,
+)
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import (
     AppConfigSetBody,
@@ -962,6 +965,17 @@ def config_set(request: Request, body: AppConfigSetBody):
                         request.app.config_publisher.publisher.publish(
                             body.update_topic, settings
                         )
+
+                        # a config/cameras/* topic publishes camera copies, a
+                        # global topic the global object. FrigateConfig.parse
+                        # folds some global sections down into every camera,
+                        # and workers read both objects, so any such section
+                        # needs its camera copies sent alongside the global
+                        # publish above.
+                        if body.update_topic == "config/birdseye":
+                            publish_camera_section_updates(
+                                request.app, config, CameraConfigUpdateEnum.birdseye
+                            )
 
             return JSONResponse(
                 content=(

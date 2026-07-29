@@ -3,6 +3,30 @@
 from fastapi import FastAPI
 
 from frigate.config import FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateTopic,
+)
+
+
+def publish_camera_section_updates(
+    app: FastAPI, config: FrigateConfig, update_type: CameraConfigUpdateEnum
+) -> None:
+    """Broadcast every camera's re-resolved value for a global section.
+
+    Global sections are folded into each camera at parse time and the camera
+    copies are what workers read, so send them rather than leave a worker to
+    guess which cameras were inheriting.
+    """
+    for camera_name, camera_config in config.cameras.items():
+        settings = getattr(camera_config, update_type.name, None)
+
+        if settings is None:
+            continue
+
+        app.config_publisher.publish_update(
+            CameraConfigUpdateTopic(update_type, camera_name), settings
+        )
 
 
 def swap_runtime_config(app: FastAPI, config: FrigateConfig) -> None:
@@ -16,6 +40,10 @@ def swap_runtime_config(app: FastAPI, config: FrigateConfig) -> None:
     camera the user turned off would silently come back on.
     """
     app.frigate_config = config
+
+    if app.config_holder is not None:
+        app.config_holder.set(config)
+
     app.genai_manager.update_config(config)
 
     if app.profile_manager is not None:
