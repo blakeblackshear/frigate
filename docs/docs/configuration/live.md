@@ -334,7 +334,7 @@ When your browser runs into problems playing back your camera streams, it will l
 
 - **stalled**
   - What it means: Playback has stalled because the player has fallen too far behind live (extended buffering or no data arriving).
-  - What to try: This is usually indicative of the browser struggling to decode too many high-resolution streams at once. Try selecting a lower-bandwidth stream (substream), reduce the number of live streams open, improve the network connection, or lower the camera resolution. Also check your camera's keyframe (I-frame) interval: shorter intervals make playback start and recover faster. You can also try increasing the timeout value in the UI pane of Frigate's settings.
+  - What to try: This is usually indicative of the browser struggling to decode too many high-resolution streams at once. Try selecting a lower-bandwidth stream (substream), reduce the number of live streams open, improve the network connection, or lower the camera resolution. Also check your camera's keyframe (I-frame) interval: shorter intervals make playback start and recover faster. You can also try increasing the timeout value in <NavPath path="Settings > UI" /> .
 
   - Possible console messages from the player code:
     - `Buffer time (10 seconds) exceeded, browser may not be playing media correctly.`

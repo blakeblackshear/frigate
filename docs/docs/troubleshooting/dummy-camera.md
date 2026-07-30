@@ -39,7 +39,7 @@ The per-clip variation is typically quite low and is mostly an artifact of keyfr
 
 Debug Replay lets you re-run Frigate's detection pipeline against a section of recorded video without manually configuring a dummy camera. It automatically extracts the recording, creates a temporary camera with the same detection settings as the original, and loops the clip through the pipeline so you can observe detections in real time.
 
-The replay camera behaves like a live camera feed rather than History's video player: it loops the clip continuously as Frigate analyzes it and has no playback controls, so you cannot pause, scrub, or step through it frame by frame.
+The replay camera behaves like a live camera feed rather than History's video player: it loops the clip continuously as Frigate analyzes it and has no playback controls, so you cannot pause, scrub, or step through it frame by frame. The Debug Replay camera does not save recordings or snapshots or surface anything in Explore, but it otherwise behaves like a regular camera, including running enrichments such as Face Recognition, LPR, and custom classification.
 
 Debug Replay isn't intended to be a one-stop pane for all Frigate diagnostics or a comprehensive debugging environment for every Frigate feature. It merely makes it easier to spin up a "dummy camera" and perform some common adjustments in real time. You'll still need to use the normal tools (logs, an MQTT client, etc) to debug your feature.
 
