@@ -84,11 +84,6 @@ export default function Events() {
       .map((conf) => conf.name);
   }, [allowedCameras, config?.cameras]);
 
-  const reviewCamerasParam = useMemo(
-    () => reviewCameras.join(","),
-    [reviewCameras],
-  );
-
   const selectedMotionSearchCamera = useMemo(() => {
     if (!motionSearchCamera) {
       return null;
@@ -202,6 +197,19 @@ export default function Events() {
     });
     return true;
   });
+
+  const reviewCamerasParam = useMemo(() => {
+    const selected: string | undefined = reviewSearchParams["cameras"];
+
+    if (!selected) {
+      return reviewCameras.join(",");
+    }
+
+    const selectedCameras = new Set(selected.split(","));
+    return reviewCameras
+      .filter((camera) => selectedCameras.has(camera))
+      .join(",");
+  }, [reviewCameras, reviewSearchParams]);
 
   useSearchEffect("labels", (labels: string) => {
     setReviewFilter({
@@ -335,8 +343,12 @@ export default function Events() {
   }, []);
 
   const getKey = useCallback(() => {
+    if (!timezone) {
+      return null;
+    }
+
     const params = {
-      cameras: reviewSearchParams["cameras"],
+      cameras: reviewCamerasParam,
       labels: reviewSearchParams["labels"],
       zones: reviewSearchParams["zones"],
       reviewed: null, // We want both reviewed and unreviewed items as we filter in the UI
@@ -344,7 +356,7 @@ export default function Events() {
       after: reviewSearchParams["after"] || last24Hours.after,
     };
     return ["review", params];
-  }, [reviewSearchParams, last24Hours]);
+  }, [reviewSearchParams, reviewCamerasParam, last24Hours, timezone]);
 
   const { data: reviews, mutate: updateSegments } = useSWR<ReviewSegment[]>(
     getKey,
@@ -366,10 +378,6 @@ export default function Events() {
     const motion: ReviewSegment[] = [];
 
     reviews?.forEach((segment) => {
-      if (config?.cameras[segment.camera]?.ui?.review === false) {
-        return;
-      }
-
       all.push(segment);
 
       switch (segment.severity) {
@@ -391,7 +399,7 @@ export default function Events() {
       detection: detections,
       significant_motion: motion,
     };
-  }, [reviews, config?.cameras]);
+  }, [reviews]);
 
   // update review items in place when a review segment ends
   const reviewUpdate = useFrigateReviews();
@@ -460,7 +468,7 @@ export default function Events() {
           "review/summary",
           {
             timezone: timezone,
-            cameras: reviewSearchParams["cameras"] ?? reviewCamerasParam,
+            cameras: reviewCamerasParam,
             labels: reviewSearchParams["labels"] ?? null,
             zones: reviewSearchParams["zones"] ?? null,
           },
@@ -486,7 +494,7 @@ export default function Events() {
           "recordings/summary",
           {
             timezone: timezone,
-            cameras: reviewSearchParams["cameras"] ?? reviewCamerasParam,
+            cameras: reviewCamerasParam,
           },
         ]
       : null,
