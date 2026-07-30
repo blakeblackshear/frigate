@@ -499,7 +499,7 @@
         "webuiUrlHelp": "URL to visit the camera's web UI directly from the Debug view. Leave blank to disable the link.",
         "webuiUrlInvalid": "Must be a valid URL (e.g., https://example.com).",
         "dashboardLabel": "Show on Live dashboard",
-        "dashboardHelp": "Show this camera on the Live dashboard.",
+        "dashboardHelp": "Show this camera on the default All Cameras live dashboard. It remains available everywhere else, including camera groups.",
         "reviewLabel": "Show in Review",
         "reviewHelp": "Show this camera in Review, including the camera filter, motion review, and the history view."
       }

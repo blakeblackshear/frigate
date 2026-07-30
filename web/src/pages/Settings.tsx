@@ -706,12 +706,7 @@ export default function Settings() {
     }
 
     return Object.values(config.cameras)
-      .filter(
-        (conf) =>
-          conf.ui.dashboard &&
-          conf.enabled_in_config &&
-          !isReplayCamera(conf.name),
-      )
+      .filter((conf) => conf.enabled_in_config && !isReplayCamera(conf.name))
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
