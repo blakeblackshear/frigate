@@ -981,7 +981,9 @@ cameras:
       # Optional: Adjust sort order of cameras in the UI. Larger numbers come later (default: shown below)
       # By default the cameras are sorted alphabetically.
       order: 0
-      # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
+      # Optional: Whether or not to show the camera on the default All Cameras live dashboard.
+      # The camera is still available everywhere else, including camera groups and settings
+      # (default: shown below)
       dashboard: True
       # Optional: Whether this camera is visible in review (the review page and its camera
       # filter, motion review, and the history view) (default: shown below)

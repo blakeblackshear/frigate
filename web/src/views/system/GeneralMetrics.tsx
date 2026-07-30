@@ -540,6 +540,36 @@ export default function GeneralMetrics({
     return Object.keys(series).length > 0 ? Object.values(series) : undefined;
   }, [statsHistory]);
 
+  // Number of cards the hardware grid renders. Which ones appear depends on
+  // the vendor, so the column count follows the count rather than assuming a
+  // fixed set is present.
+  const hardwareCardCount = useMemo(() => {
+    if (!statsHistory[0]?.gpu_usages) {
+      return 0;
+    }
+
+    const hasNpu = statsHistory[0].npu_usages != undefined;
+
+    return (
+      1 + // gpu usage always renders alongside gpu_usages
+      (gpuMemSeries ? 1 : 0) +
+      (gpuEncSeries?.length ? 1 : 0) +
+      (gpuComputeSeries?.length ? 1 : 0) +
+      (gpuDecSeries?.length ? 1 : 0) +
+      (gpuTempSeries?.length ? 1 : 0) +
+      (hasNpu ? 1 : 0) +
+      (hasNpu && npuTempSeries?.length ? 1 : 0)
+    );
+  }, [
+    statsHistory,
+    gpuMemSeries,
+    gpuEncSeries,
+    gpuComputeSeries,
+    gpuDecSeries,
+    gpuTempSeries,
+    npuTempSeries,
+  ]);
+
   // other processes stats
 
   const hardwareType = useMemo(() => {
@@ -763,12 +793,9 @@ export default function GeneralMetrics({
             <div
               className={cn(
                 "mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2",
-                gpuTempSeries?.length && "md:grid-cols-3",
-                (gpuEncSeries?.length || gpuComputeSeries?.length) &&
-                  "xl:grid-cols-4",
-                (gpuEncSeries?.length || gpuComputeSeries?.length) &&
-                  gpuTempSeries?.length &&
-                  "3xl:grid-cols-5",
+                hardwareCardCount >= 3 && "lg:grid-cols-3",
+                hardwareCardCount >= 4 && "xl:grid-cols-4",
+                hardwareCardCount >= 5 && "3xl:grid-cols-5",
               )}
             >
               {statsHistory[0]?.gpu_usages && (
