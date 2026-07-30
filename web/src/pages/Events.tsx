@@ -84,6 +84,11 @@ export default function Events() {
       .map((conf) => conf.name);
   }, [allowedCameras, config?.cameras]);
 
+  const reviewCamerasParam = useMemo(
+    () => reviewCameras.join(","),
+    [reviewCameras],
+  );
+
   const selectedMotionSearchCamera = useMemo(() => {
     if (!motionSearchCamera) {
       return null;
@@ -450,15 +455,17 @@ export default function Events() {
   // review summary
 
   const { data: reviewSummary, mutate: updateSummary } = useSWR<ReviewSummary>(
-    [
-      "review/summary",
-      {
-        timezone: timezone,
-        cameras: reviewSearchParams["cameras"] ?? null,
-        labels: reviewSearchParams["labels"] ?? null,
-        zones: reviewSearchParams["zones"] ?? null,
-      },
-    ],
+    timezone
+      ? [
+          "review/summary",
+          {
+            timezone: timezone,
+            cameras: reviewSearchParams["cameras"] ?? reviewCamerasParam,
+            labels: reviewSearchParams["labels"] ?? null,
+            zones: reviewSearchParams["zones"] ?? null,
+          },
+        ]
+      : null,
     {
       revalidateOnFocus: true,
       refreshInterval: 30000,
@@ -473,13 +480,17 @@ export default function Events() {
 
   // recordings summary
 
-  const { data: recordingsSummary } = useSWR<RecordingsSummary>([
-    "recordings/summary",
-    {
-      timezone: timezone,
-      cameras: reviewSearchParams["cameras"] ?? null,
-    },
-  ]);
+  const { data: recordingsSummary } = useSWR<RecordingsSummary>(
+    timezone
+      ? [
+          "recordings/summary",
+          {
+            timezone: timezone,
+            cameras: reviewSearchParams["cameras"] ?? reviewCamerasParam,
+          },
+        ]
+      : null,
+  );
 
   // preview videos
   const previewTimes = useMemo(() => {

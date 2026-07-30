@@ -1024,6 +1024,9 @@ function MotionReview({
       if (!allowedCameras.includes(cam.name)) {
         return false;
       }
+      if (cam.ui?.review === false) {
+        return false;
+      }
       if (selectedCams && !selectedCams.includes(cam.name)) {
         return false;
       }
@@ -1032,6 +1035,11 @@ function MotionReview({
 
     return cameras.sort((a, b) => a.ui.order - b.ui.order);
   }, [config, filter, allowedCameras]);
+
+  const reviewCamerasParam = useMemo(
+    () => reviewCameras.map((cam) => cam.name).join(","),
+    [reviewCameras],
+  );
 
   const videoPlayersRef = useRef<{ [camera: string]: PreviewController }>({});
 
@@ -1052,7 +1060,7 @@ function MotionReview({
       before: alignedBefore,
       after: alignedAfter,
       scale: segmentDuration / 2,
-      cameras: filter?.cameras?.join(",") ?? null,
+      cameras: reviewCamerasParam,
     },
   ]);
 
@@ -1061,7 +1069,7 @@ function MotionReview({
     {
       before: alignedBefore,
       after: alignedAfter,
-      cameras: filter?.cameras?.join(",") ?? null,
+      cameras: reviewCamerasParam,
     },
   ]);
 
