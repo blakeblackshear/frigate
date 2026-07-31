@@ -16,6 +16,31 @@ logger = logging.getLogger(__name__)
 ### Post Processing
 
 
+def xyxy_to_xywh_for_nms(boxes: np.ndarray | list) -> np.ndarray:
+    """Convert [x1, y1, x2, y2] boxes to the [x, y, width, height] format
+    that cv2.dnn.NMSBoxes expects.
+
+    Passing corner coordinates directly makes OpenCV treat x2/y2 as the box
+    size, inflating every box toward the bottom-right by its distance from
+    the origin, which suppresses valid detections near other objects.
+
+    Args:
+        boxes: Array-like of shape (N, 4) in corner format.
+
+    Returns:
+        Float32 array of shape (N, 4) in top-left plus size format.
+    """
+    boxes = np.asarray(boxes, dtype=np.float32)
+
+    if boxes.size == 0:
+        return np.zeros((0, 4), dtype=np.float32)
+
+    xywh = boxes.copy()
+    xywh[:, 2] -= xywh[:, 0]
+    xywh[:, 3] -= xywh[:, 1]
+    return xywh
+
+
 def post_process_dfine(
     tensor_output: np.ndarray, width: int, height: int
 ) -> np.ndarray:
@@ -25,7 +50,9 @@ def post_process_dfine(
 
     input_shape = np.array([height, width, height, width])
     boxes = np.divide(boxes, input_shape, dtype=np.float32)
-    indices = cv2.dnn.NMSBoxes(boxes, scores, score_threshold=0.4, nms_threshold=0.4)
+    indices = cv2.dnn.NMSBoxes(
+        xyxy_to_xywh_for_nms(boxes), scores, score_threshold=0.4, nms_threshold=0.4
+    )
     detections = np.zeros((20, 6), np.float32)
 
     for i, (bbox, confidence, class_id) in enumerate(
@@ -78,7 +105,10 @@ def post_process_rfdetr(tensor_output: list[np.ndarray, np.ndarray]) -> np.ndarr
 
     # apply nms
     indices = cv2.dnn.NMSBoxes(
-        filtered_boxes, filtered_scores, score_threshold=0.4, nms_threshold=0.4
+        xyxy_to_xywh_for_nms(filtered_boxes),
+        filtered_scores,
+        score_threshold=0.4,
+        nms_threshold=0.4,
     )
     detections = np.zeros((20, 6), np.float32)
 
@@ -159,7 +189,7 @@ def __post_process_multipart_yolo(
                     all_class_ids.append(class_id)
 
     indices = cv2.dnn.NMSBoxes(
-        bboxes=all_boxes,
+        bboxes=xyxy_to_xywh_for_nms(all_boxes),
         scores=all_scores,
         score_threshold=0.4,
         nms_threshold=0.4,
@@ -206,7 +236,9 @@ def __post_process_nms_yolo(predictions: np.ndarray, width, height) -> np.ndarra
     boxes = boxes_xyxy
 
     # run NMS
-    indices = cv2.dnn.NMSBoxes(boxes, scores, score_threshold=0.4, nms_threshold=0.4)
+    indices = cv2.dnn.NMSBoxes(
+        xyxy_to_xywh_for_nms(boxes), scores, score_threshold=0.4, nms_threshold=0.4
+    )
     detections = np.zeros((20, 6), np.float32)
     for i, (bbox, confidence, class_id) in enumerate(
         zip(boxes[indices], scores[indices], class_ids[indices])
@@ -258,7 +290,7 @@ def post_process_yolox(
     scores = scores[np.arange(len(cls_inds)), cls_inds]
 
     indices = cv2.dnn.NMSBoxes(
-        boxes_xyxy, scores, score_threshold=0.4, nms_threshold=0.4
+        xyxy_to_xywh_for_nms(boxes_xyxy), scores, score_threshold=0.4, nms_threshold=0.4
     )
 
     detections = np.zeros((20, 6), np.float32)

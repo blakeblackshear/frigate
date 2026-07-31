@@ -9,6 +9,7 @@ from pydantic import ConfigDict, Field
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from frigate.util.model import xyxy_to_xywh_for_nms
 
 try:
     from tflite_runtime.interpreter import Interpreter, load_delegate
@@ -297,7 +298,7 @@ class EdgeTpuTfl(DetectionApi):
             # until after filtering out redundant boxes
             # Shift the logit scores to be non-negative (required by cv2)
             indices = cv2.dnn.NMSBoxes(
-                bboxes=boxes_filtered_decoded,
+                bboxes=xyxy_to_xywh_for_nms(boxes_filtered_decoded),
                 scores=max_scores_filtered_shiftedpositive,
                 score_threshold=(
                     self.min_logit_value + self.logit_shift_to_positive_values
