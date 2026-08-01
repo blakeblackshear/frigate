@@ -357,22 +357,6 @@
         "description": "Optional API key for authenticated DeepStack services."
       }
     },
-    "degirum": {
-      "label": "DeGirum",
-      "description": "DeGirum detector for running models via DeGirum cloud or local inference services.",
-      "location": {
-        "label": "Inference Location",
-        "description": "Location of the DeGirim inference engine (e.g. '@cloud', '127.0.0.1')."
-      },
-      "zoo": {
-        "label": "Model Zoo",
-        "description": "Path or URL to the DeGirum model zoo."
-      },
-      "token": {
-        "label": "DeGirum Cloud Token",
-        "description": "Token for DeGirum Cloud access."
-      }
-    },
     "edgetpu": {
       "label": "EdgeTPU",
       "description": "EdgeTPU detector that runs TensorFlow Lite models compiled for Coral EdgeTPU using the EdgeTPU delegate.",
