@@ -11,7 +11,7 @@ State classification allows you to train a custom MobileNetV2 classification mod
 
 :::info
 
-Training a custom state classification model requires a one-time internet connection to download MobileNetV2 base weights. Once trained, the model runs fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+Training a custom state classification model requires an internet connection to download MobileNetV2 base weights. By default these weights are not cached in `/config/`, so they are downloaded again after the container is recreated. Once trained, the model runs fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
 
 :::
 
