@@ -625,14 +625,18 @@ class OnvifController:
             return
 
         self.cams[camera_name]["active"] = True
-        self.ptz_metrics[camera_name].motor_stopped.clear()
-        logger.debug(
-            f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name].frame_time.value}"
-        )
-        self.ptz_metrics[camera_name].start_time.value = self.ptz_metrics[
-            camera_name
-        ].frame_time.value
-        self.ptz_metrics[camera_name].stop_time.value = 0
+
+        # only track start_time for autotracking
+        if self.ptz_metrics[camera_name].autotracker_enabled.value:
+            self.ptz_metrics[camera_name].motor_stopped.clear()
+            logger.debug(
+                f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name].frame_time.value}"
+            )
+            self.ptz_metrics[camera_name].start_time.value = self.ptz_metrics[
+                camera_name
+            ].frame_time.value
+            self.ptz_metrics[camera_name].stop_time.value = 0
+
         move_request = self.cams[camera_name]["relative_move_request"]
 
         # function takes in -1 to 1 for pan and tilt, interpolate to the values of the camera.
