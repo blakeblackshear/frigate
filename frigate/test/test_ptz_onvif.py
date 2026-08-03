@@ -1,4 +1,4 @@
-"""Tests for ONVIF init state that must not depend on the autotracking config.
+"""Tests for ONVIF state that must not depend on the autotracking config.
 
 Regression coverage for a camera that is initialized while autotracking is off and
 has it enabled later, which is the normal wizard flow: set the camera up first,
@@ -10,12 +10,17 @@ the tracking thread.
 
 The request objects are built from the locally parsed WSDL and cost no network, so
 they are always created and init=True now implies they exist.
+
+Also covers the inverse direction: the ptz movement timestamps must not be written
+for a camera that has autotracking off, because nothing clears them back out.
 """
 
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 
+from frigate.camera import PTZMetrics
 from frigate.config import FrigateConfig
+from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.ptz.onvif import OnvifController
 
 CAMERA = "ptz_cam"
@@ -97,6 +102,36 @@ def _make_controller(autotracking_enabled: bool) -> OnvifController:
     return controller
 
 
+def _make_move_controller(autotracking_enabled: bool) -> OnvifController:
+    """Build an already initialized controller for a camera that supports relative
+    FOV movement, with real metrics so the timestamp writes can be asserted on."""
+    config = _config(autotracking_enabled)
+    controller = OnvifController.__new__(OnvifController)
+    controller.config = config
+    controller.camera_configs = {CAMERA: config.cameras[CAMERA]}
+    controller.failed_cams = {}
+
+    ptz = MagicMock()
+    ptz.RelativeMove = AsyncMock()
+    controller.cams = {
+        CAMERA: {
+            "init": True,
+            "active": False,
+            "ptz": ptz,
+            "features": ["pt", "pt-r-fov"],
+            "relative_move_request": MagicMock(),
+            "relative_fov_range": {
+                "XRange": {"Min": -1.0, "Max": 1.0},
+                "YRange": {"Min": -1.0, "Max": 1.0},
+            },
+        }
+    }
+    controller.ptz_metrics = {
+        CAMERA: PTZMetrics(autotracker_enabled=autotracking_enabled)
+    }
+    return controller
+
+
 class TestOnvifInitRequests(unittest.IsolatedAsyncioTestCase):
     async def test_status_request_created_when_autotracking_disabled(self) -> None:
         # the wizard flow: onvif configured first, autotracking enabled later
@@ -141,6 +176,62 @@ class TestOnvifInitRequests(unittest.IsolatedAsyncioTestCase):
         ptz = controller.cams[CAMERA]["ptz"]
         ptz.GetServiceCapabilities.assert_not_called()
         ptz.GetStatus.assert_not_called()
+
+
+class TestManualRelativeMoveMetrics(unittest.IsolatedAsyncioTestCase):
+    """A manual move from the UI (click to move, drag to zoom) sends move_relative
+    for any camera that advertises pt-r-fov, autotracking or not."""
+
+    async def test_metrics_untouched_when_autotracking_disabled(self) -> None:
+        # only camera_maintenance polls get_camera_status, and only for autotracking
+        # cameras, so a manual move that starts the clock here is never stopped
+        controller = _make_move_controller(autotracking_enabled=False)
+        metrics = controller.ptz_metrics[CAMERA]
+        metrics.frame_time.value = 1000.0
+
+        await controller._move_relative(CAMERA, 0.25, -0.25, 0, 1)
+
+        controller.cams[CAMERA]["ptz"].RelativeMove.assert_awaited_once()
+        self.assertEqual(metrics.start_time.value, 0)
+        self.assertEqual(metrics.stop_time.value, 0)
+        self.assertTrue(metrics.motor_stopped.is_set())
+
+    async def test_detection_regions_not_suppressed_after_manual_move(self) -> None:
+        # the symptom of the bug: object detection stops entirely because motion
+        # boxes are never promoted to detection regions again
+        controller = _make_move_controller(autotracking_enabled=False)
+        metrics = controller.ptz_metrics[CAMERA]
+        metrics.frame_time.value = 1000.0
+
+        await controller._move_relative(CAMERA, 0.25, -0.25, 0, 1)
+
+        for later_frame_time in (1001.0, 1060.0, 4600.0):
+            with self.subTest(frame_time=later_frame_time):
+                self.assertFalse(
+                    ptz_moving_at_frame_time(
+                        later_frame_time,
+                        metrics.start_time.value,
+                        metrics.stop_time.value,
+                    )
+                )
+
+    async def test_metrics_written_when_autotracking_enabled(self) -> None:
+        # get_camera_status resets stop_time once the camera reports IDLE, so the
+        # autotracking path keeps its motion estimation timestamps
+        controller = _make_move_controller(autotracking_enabled=True)
+        metrics = controller.ptz_metrics[CAMERA]
+        metrics.frame_time.value = 1000.0
+
+        await controller._move_relative(CAMERA, 0.25, -0.25, 0, 1)
+
+        self.assertEqual(metrics.start_time.value, 1000.0)
+        self.assertEqual(metrics.stop_time.value, 0)
+        self.assertFalse(metrics.motor_stopped.is_set())
+        self.assertTrue(
+            ptz_moving_at_frame_time(
+                1001.0, metrics.start_time.value, metrics.stop_time.value
+            )
+        )
 
 
 if __name__ == "__main__":

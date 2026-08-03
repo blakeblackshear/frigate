@@ -34,6 +34,12 @@ The following models are downloaded automatically the first time their associate
 | [Custom classification](/configuration/custom_classification/state_classification) (training) | MobileNetV2 ImageNet base weights (via Keras)                              | Google storage       |
 | [Audio transcription](/configuration/advanced/system)                                         | Whisper or Sherpa-ONNX streaming model                                     | HuggingFace / OpenAI |
 
+:::note
+
+The MobileNetV2 base weights are the one exception to the `/config/model_cache/` rule. They are also the only entry that is not downloaded when the feature is enabled: Frigate fetches them when a training run actually starts.
+
+:::
+
 ### Hardware-Specific Detector Models
 
 If you are using one of the following hardware detectors and have not provided your own model file, a default model will be downloaded on first startup:
@@ -75,7 +81,7 @@ If your Frigate instance has restricted internet access, you can point model dow
 | `HF_ENDPOINT`                       | `https://huggingface.co`            | Semantic search, Sherpa-ONNX, AXEngine models |
 | `GITHUB_ENDPOINT`                   | `https://github.com`                | Face recognition, LPR, RKNN models            |
 | `GITHUB_RAW_ENDPOINT`               | `https://raw.githubusercontent.com` | Bird classification                           |
-| `TF_KERAS_MOBILENET_V2_WEIGHTS_URL` | Google storage (Keras default)      | Custom classification training                |
+| `TF_KERAS_MOBILENET_V2_WEIGHTS_URL` | Unset (Keras uses its own default)  | Custom classification training                |
 
 ## Optional Cloud Services
 
@@ -147,9 +153,23 @@ When running as a Home Assistant App, the go2rtc startup script queries the loca
 To run Frigate in an air-gapped or offline environment:
 
 1. **Pre-download models**: Start Frigate with internet access once with all desired features enabled. Models will be cached in `/config/model_cache/`.
-2. **Disable version check**: Set `telemetry.version_check: false` in your configuration.
-3. **Block outbound model requests**: Set the `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` environment variables to prevent HuggingFace and Transformers from attempting any network requests.
-4. **Avoid cloud features**: Do not configure Frigate+, Generative AI providers that require internet, or cloud MQTT brokers.
-5. **Use local model mirrors**: If limited internet is available, set the `HF_ENDPOINT`, `GITHUB_ENDPOINT`, and `GITHUB_RAW_ENDPOINT` environment variables to point to local mirrors.
+2. **Pre-download the training base weights**: If you plan to train custom classification models, set `TF_KERAS_MOBILENET_V2_WEIGHTS_URL` before training, then run one training job while online. Without this variable the base weights are cached outside `/config/` and are lost whenever the container is recreated, so a later training run will fail offline. If the machine never has internet access, copy the weights in manually as described below.
+3. **Disable version check**: Set `telemetry.version_check: false` in your configuration.
+4. **Block outbound model requests**: Set the `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` environment variables to prevent HuggingFace and Transformers from attempting any network requests.
+5. **Avoid cloud features**: Do not configure Frigate+, Generative AI providers that require internet, or cloud MQTT brokers.
+6. **Use local model mirrors**: If limited internet is available, set the `HF_ENDPOINT`, `GITHUB_ENDPOINT`, `GITHUB_RAW_ENDPOINT`, and `TF_KERAS_MOBILENET_V2_WEIGHTS_URL` environment variables to point to local mirrors.
 
 After these steps, Frigate will operate with no outbound internet connections.
+
+### Manually Copying the Training Base Weights
+
+On a machine with internet access, download the weights:
+
+```bash
+curl -L -o mobilenet_v2_weights.h5 \
+  "https://storage.googleapis.com/tensorflow/keras-applications/mobilenet_v2/mobilenet_v2_weights_tf_dim_ordering_tf_kernels_0.35_224_no_top.h5"
+```
+
+Copy the file into your Frigate config volume as `/config/model_cache/MobileNet/mobilenet_v2_weights.h5`, keeping that exact filename, then set the environment variable `TF_KERAS_MOBILENET_V2_WEIGHTS_URL` in your Docker compose file to the URL above and restart Frigate.
+
+The variable must be set even though the URL is never contacted. If it is unset, Frigate ignores the copied file and asks Keras to download the weights instead.

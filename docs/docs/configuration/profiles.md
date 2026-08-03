@@ -126,7 +126,7 @@ Only the fields you explicitly set in a profile override are applied. All other 
 
 ## Activating Profiles
 
-Profiles can be activated and deactivated via the Frigate UI, [MQTT](/integrations/mqtt#frigateprofileset), or the Home Assistant integration.
+Profiles can be activated and deactivated via the Frigate UI, [MQTT](/integrations/mqtt#frigateprofileset), the [HTTP API](../integrations/api/camera-set-camera-camera-name-set-feature-sub-command-put.api.mdx), or the Home Assistant integration.
 
 In the Frigate UI, open the Settings cog and select **Profiles** from the submenu to see all defined profiles. From there you can activate any profile or deactivate the current one. The active profile is indicated in the UI so you always know which profile is in effect.
 

@@ -19,6 +19,7 @@ import {
 import type { ConfigFormContext } from "@/types/configForm";
 import get from "lodash/get";
 import { isSubtreeModified } from "../utils";
+import { MapKeyInput } from "../components";
 
 type KnownPlatesData = Record<string, string[]>;
 
@@ -194,12 +195,16 @@ export function KnownPlatesField(props: FieldProps) {
                   className="space-y-2 rounded-md border p-3"
                 >
                   <div className="flex items-center gap-2">
-                    <Input
+                    <MapKeyInput
                       id={`${entryId}-key`}
-                      defaultValue={key}
+                      value={key}
                       placeholder={namePlaceholder}
                       disabled={disabled || readonly}
-                      onBlur={(e) => handleRenameKey(key, e.target.value)}
+                      onCommit={(next) => handleRenameKey(key, next)}
+                      isKeyTaken={(next) =>
+                        next !== key &&
+                        Object.prototype.hasOwnProperty.call(data, next)
+                      }
                       className="flex-1"
                     />
                     <Button

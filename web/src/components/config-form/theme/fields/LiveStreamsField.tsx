@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Command,
@@ -20,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { LuPlus, LuTrash2 } from "react-icons/lu";
+import { MapKeyInput } from "../components";
 import type { ConfigFormContext } from "@/types/configForm";
 import get from "lodash/get";
 import { isSubtreeModified } from "../utils";
@@ -288,12 +288,16 @@ export function LiveStreamsField(props: FieldProps) {
             >
               <div className="col-span-12 space-y-2 md:col-span-5">
                 <Label htmlFor={`${entryId}-key`}>{streamNameLabel}</Label>
-                <Input
+                <MapKeyInput
                   id={`${entryId}-key`}
-                  defaultValue={key}
+                  value={key}
                   placeholder={streamNamePlaceholder}
                   disabled={disabled || readonly}
-                  onBlur={(e) => handleRenameKey(key, e.target.value)}
+                  onCommit={(next) => handleRenameKey(key, next)}
+                  isKeyTaken={(next) =>
+                    next !== key &&
+                    Object.prototype.hasOwnProperty.call(data, next)
+                  }
                 />
               </div>
               <div className="col-span-10 space-y-2 md:col-span-6">
