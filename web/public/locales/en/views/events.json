@@ -74,7 +74,7 @@
     "menuItem": "View motion previews",
     "title": "Motion previews: {{camera}}",
     "mobileSettingsTitle": "Motion Preview Settings",
-    "mobileSettingsDesc": "Adjust playback speed and dimming, and choose a date to review motion-only clips.",
+    "mobileSettingsDesc": "Adjust playback speed, dimming, and cropping, and choose a date to review motion-only clips.",
     "dim": "Dim",
     "dimAria": "Adjust dimming intensity",
     "dimDesc": "Increase dimming to increase motion area visibility.",
@@ -87,6 +87,9 @@
     "seekAria": "Seek {{camera}} player to {{time}}",
     "filter": "Filter",
     "filterDesc": "Select areas to only show clips with motion in those regions.",
-    "filterClear": "Clear"
+    "filterClear": "Clear",
+    "crop": "Crop to filter",
+    "cropAria": "Toggle cropping previews to the filtered areas",
+    "cropDesc": "Zoom previews into the selected filter areas instead of showing the full frame."
   }
 }
