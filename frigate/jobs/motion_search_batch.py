@@ -71,5 +71,6 @@ def stream_time_to_absolute(
     idx = bisect_right(offsets, stream_time) - 1
     if idx < 0:
         idx = 0
-    stream_offset, abs_start, _duration = time_map[idx]
-    return abs_start + (stream_time - stream_offset)
+    stream_offset, abs_start, duration = time_map[idx]
+    segment_time = min(max(stream_time - stream_offset, 0.0), duration)
+    return abs_start + segment_time

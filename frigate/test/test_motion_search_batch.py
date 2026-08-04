@@ -53,6 +53,11 @@ class TestTimestampMapping(unittest.TestCase):
         self.assertAlmostEqual(stream_time_to_absolute(time_map, 12.0), 1012.0)
 
     def test_past_end_clamps(self):
+        run = [_Seg("a", 1000.0, 1010.0), _Seg("b", 1010.0, 1020.0)]
+        time_map = build_segment_time_map(run)
+        self.assertAlmostEqual(stream_time_to_absolute(time_map, 25.0), 1020.0)
+
+    def test_before_start_clamps(self):
         run = [_Seg("a", 1000.0, 1010.0)]
         time_map = build_segment_time_map(run)
-        self.assertAlmostEqual(stream_time_to_absolute(time_map, 9.9), 1009.9)
+        self.assertAlmostEqual(stream_time_to_absolute(time_map, -1.0), 1000.0)
