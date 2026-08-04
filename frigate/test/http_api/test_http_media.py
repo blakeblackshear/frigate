@@ -1,6 +1,7 @@
 """Unit tests for recordings/media API endpoints."""
 
 from datetime import UTC, datetime
+from unittest.mock import patch
 
 import pytz
 from fastapi import Request
@@ -43,6 +44,43 @@ class TestHttpMedia(BaseTestHttp):
         """Clean up after tests."""
         self.app.dependency_overrides.clear()
         super().tearDown()
+
+    def test_vod_excludes_recording_ending_at_requested_start(self):
+        """A recording with no overlap must not be included in the VOD mapping."""
+        with AuthTestClient(self.app) as client:
+            Recordings.insert_many(
+                [
+                    {
+                        "id": "recording_a",
+                        "path": "/media/recordings/a.mp4",
+                        "camera": "front_door",
+                        "start_time": 1000.0,
+                        "end_time": 1010.0,
+                        "duration": 10.0,
+                    },
+                    {
+                        "id": "recording_b",
+                        "path": "/media/recordings/b.mp4",
+                        "camera": "front_door",
+                        "start_time": 1010.0,
+                        "end_time": 1020.0,
+                        "duration": 10.0,
+                    },
+                ]
+            ).execute()
+
+            with patch("frigate.api.media.get_keyframe_before", return_value=8000):
+                response = client.get(
+                    "/vod/front_door/start/1010/end/1020",
+                    headers={
+                        "remote-user": "admin",
+                        "remote-role": "admin",
+                    },
+                )
+
+        assert response.status_code == 200
+        clips = response.json()["sequences"][0]["clips"]
+        assert [clip["path"] for clip in clips] == ["/media/recordings/b.mp4"]
 
     def test_recordings_summary_across_dst_spring_forward(self):
         """
