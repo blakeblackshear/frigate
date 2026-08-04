@@ -8,6 +8,7 @@ function useUserInteraction({ elementRef }: UseUserInteractionProps) {
   const [userInteracting, setUserInteracting] = useState(false);
   const interactionTimeout = useRef<NodeJS.Timeout>(undefined);
   const isProgrammaticScroll = useRef(false);
+  const userInteractingRef = useRef(false);
 
   const setProgrammaticScroll = useCallback(() => {
     isProgrammaticScroll.current = true;
@@ -16,13 +17,18 @@ function useUserInteraction({ elementRef }: UseUserInteractionProps) {
   useEffect(() => {
     const handleUserInteraction = () => {
       if (!isProgrammaticScroll.current) {
-        setUserInteracting(true);
+        // Only commit state on the leading edge
+        if (!userInteractingRef.current) {
+          userInteractingRef.current = true;
+          setUserInteracting(true);
+        }
 
         if (interactionTimeout.current) {
           clearTimeout(interactionTimeout.current);
         }
 
         interactionTimeout.current = setTimeout(() => {
+          userInteractingRef.current = false;
           setUserInteracting(false);
         }, 3000);
       } else {

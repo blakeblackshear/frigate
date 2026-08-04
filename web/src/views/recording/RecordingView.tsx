@@ -1199,7 +1199,7 @@ function Timeline({
             motion_events={motionData ?? []}
             noRecordingRanges={noRecordings ?? []}
             contentRef={contentRef}
-            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+            onHandlebarDraggingChange={setScrubbing}
             isZooming={isZooming}
             zoomDirection={zoomDirection}
             onZoomChange={handleZoomChange}
