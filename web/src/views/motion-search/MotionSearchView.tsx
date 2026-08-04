@@ -1489,7 +1489,7 @@ export default function MotionSearchView({
               isDesktop
                 ? mainCameraAspect === "tall"
                   ? "mr-2 h-full min-h-0 min-w-0 flex-1 items-center"
-                  : "mr-2 h-full min-h-0 min-w-0 flex-1"
+                  : "mx-2 h-full min-h-0 min-w-0 flex-1"
                 : mainCameraAspect === "tall"
                   ? "flex-1 portrait:h-[40dvh] portrait:max-h-[40dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto portrait:items-center portrait:justify-center"
                   : "flex-1 portrait:max-h-[40dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto landscape:items-center landscape:justify-center",
