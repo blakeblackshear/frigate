@@ -130,6 +130,7 @@ function useDraggableElement({
       }
       e.stopPropagation();
       setIsDragging(true);
+      pendingDragTimeRef.current = null;
 
       let clientY;
       if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {

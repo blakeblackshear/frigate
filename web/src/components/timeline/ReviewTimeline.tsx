@@ -327,17 +327,20 @@ export function ReviewTimeline({
       documentInstance?.addEventListener("touchmove", handleMouseMove);
       documentInstance?.addEventListener("mouseup", handleMouseUp);
       documentInstance?.addEventListener("touchend", handleMouseUp);
+      documentInstance?.addEventListener("touchcancel", handleMouseUp);
     } else {
       documentInstance?.removeEventListener("mousemove", handleMouseMove);
       documentInstance?.removeEventListener("touchmove", handleMouseMove);
       documentInstance?.removeEventListener("mouseup", handleMouseUp);
       documentInstance?.removeEventListener("touchend", handleMouseUp);
+      documentInstance?.removeEventListener("touchcancel", handleMouseUp);
     }
     return () => {
       documentInstance?.removeEventListener("mousemove", handleMouseMove);
       documentInstance?.removeEventListener("touchmove", handleMouseMove);
       documentInstance?.removeEventListener("mouseup", handleMouseUp);
       documentInstance?.removeEventListener("touchend", handleMouseUp);
+      documentInstance?.removeEventListener("touchcancel", handleMouseUp);
     };
   }, [handleMouseMove, handleMouseUp, isDragging]);
 
