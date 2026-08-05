@@ -8,6 +8,7 @@ amdgpu
 analyzeduration
 Annke
 apexcharts
+Aqara
 arange
 argmax
 argmin
@@ -64,6 +65,7 @@ dsize
 dtype
 ECONNRESET
 edgetpu
+Eufy
 facenet
 fastapi
 faststart

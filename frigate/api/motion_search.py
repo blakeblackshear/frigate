@@ -182,7 +182,7 @@ async def get_motion_search_status_endpoint(
         )
 
     job = get_motion_search_job(job_id)
-    if not job:
+    if not job or job.camera != camera_name:
         return JSONResponse(
             content={"success": False, "message": "Job not found"},
             status_code=404,
@@ -253,7 +253,7 @@ async def cancel_motion_search_endpoint(
         )
 
     job = get_motion_search_job(job_id)
-    if not job:
+    if not job or job.camera != camera_name:
         return JSONResponse(
             content={"success": False, "message": "Job not found"},
             status_code=404,

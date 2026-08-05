@@ -51,7 +51,12 @@ import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
 
-import { MotionData, REVIEW_PADDING, ZoomLevel } from "@/types/review";
+import {
+  MotionData,
+  REVIEW_PADDING,
+  ReviewSegment,
+  ZoomLevel,
+} from "@/types/review";
 import {
   ASPECT_VERTICAL_LAYOUT,
   ASPECT_WIDE_LAYOUT,
@@ -85,6 +90,7 @@ type MotionSearchViewProps = {
 };
 
 const DEFAULT_EXPORT_WINDOW_SECONDS = 60;
+const NO_REVIEW_EVENTS: ReviewSegment[] = [];
 
 export default function MotionSearchView({
   config,
@@ -512,6 +518,12 @@ export default function MotionSearchView({
           },
         ]
       : null,
+  );
+
+  const timelineMotionEvents = useMemo(() => motionData ?? [], [motionData]);
+  const timelineNoRecordings = useMemo(
+    () => noRecordings ?? [],
+    [noRecordings],
   );
 
   const recordingParams = useMemo(
@@ -1054,11 +1066,11 @@ export default function MotionSearchView({
           showHandlebar={true}
           handlebarTime={currentTime}
           setHandlebarTime={setCurrentTime}
-          events={[]}
-          motion_events={motionData ?? []}
-          noRecordingRanges={noRecordings ?? []}
+          events={NO_REVIEW_EVENTS}
+          motion_events={timelineMotionEvents}
+          noRecordingRanges={timelineNoRecordings}
           contentRef={contentRef}
-          onHandlebarDraggingChange={(dragging) => setScrubbing(dragging)}
+          onHandlebarDraggingChange={setScrubbing}
           showExportHandles={
             (exportMode === "timeline" || exportMode === "timeline_multi") &&
             Boolean(exportRange)
@@ -1489,7 +1501,7 @@ export default function MotionSearchView({
               isDesktop
                 ? mainCameraAspect === "tall"
                   ? "mr-2 h-full min-h-0 min-w-0 flex-1 items-center"
-                  : "mr-2 h-full min-h-0 min-w-0 flex-1"
+                  : "mx-2 h-full min-h-0 min-w-0 flex-1"
                 : mainCameraAspect === "tall"
                   ? "flex-1 portrait:h-[40dvh] portrait:max-h-[40dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto portrait:items-center portrait:justify-center"
                   : "flex-1 portrait:max-h-[40dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto landscape:items-center landscape:justify-center",

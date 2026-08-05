@@ -67,4 +67,6 @@ If your stream won't play, has no audio, uses excessive CPU, or otherwise misbeh
 
 ## Homekit Configuration
 
-To add camera streams to Homekit Frigate must be configured in docker to use `host` networking mode. Once that is done, you can use the go2rtc WebUI (accessed via port 1984, which is disabled by default) to export a camera to Homekit. Any changes made will automatically be saved to `/config/go2rtc_homekit.yml`.
+To export camera streams to HomeKit, Frigate must be configured in docker to use `host` networking mode. HomeKit settings are stored in `/config/go2rtc_homekit.yml` rather than in your Frigate config, and are edited through the go2rtc config editor at `http://<frigate_host>:1984/editor.html`. Pairings are saved back to that file automatically.
+
+See the [HomeKit integration docs](/integrations/homekit) for the full setup, including the video and audio requirements HomeKit places on the stream.
