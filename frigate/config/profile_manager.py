@@ -169,6 +169,93 @@ class ProfileManager:
                 self.config.active_profile = None
                 self._persist_active_profile(None)
 
+    def _validate_profile_name(self, profile_name: str | None) -> str | None:
+        """Return an error message if the name is not a defined profile."""
+        if profile_name is not None and profile_name not in self.config.profiles:
+            return f"Profile '{profile_name}' is not defined in the profiles section"
+
+        return None
+
+    def _apply_to_config(
+        self, profile_name: str | None
+    ) -> tuple[dict[str, set[str]], str | None]:
+        """Reset every camera to base, then apply the named profile on top.
+
+        Returns the changed camera/section pairs, plus an error message if
+        applying the profile failed partway through.
+        """
+        changed: dict[str, set[str]] = {}
+
+        self._reset_to_base(changed)
+
+        if profile_name is not None:
+            err = self._apply_profile_overrides(profile_name, changed)
+            if err:
+                return changed, err
+
+        return changed, None
+
+    def apply_profile_to_config(self, profile_name: str | None) -> str | None:
+        """Apply a profile to the in-memory config, without publishing it.
+
+        Safe to call ahead of activate_profile: both reset to the base config
+        first, so the later call re-derives the same state and still reports
+        every section as changed.
+
+        Returns:
+            None on success, or an error message string on failure.
+        """
+        err = self._validate_profile_name(profile_name)
+
+        if err:
+            return err
+
+        return self._apply_to_config(profile_name)[1]
+
+    def _persisted_profile_to_restore(self) -> str | None:
+        """Return the persisted profile name, if it still applies to a camera."""
+        persisted = self.load_persisted_profile()
+
+        if not persisted or not any(
+            persisted in cam.profiles for cam in self.config.cameras.values()
+        ):
+            return None
+
+        return persisted
+
+    def restore_persisted_profile_to_config(self) -> None:
+        """Restore the persisted profile into the config, without publishing.
+
+        Called before worker processes start, so they are handed a config that
+        already carries the profile rather than relying on the broadcast that
+        restore_persisted_profile() sends later.
+        """
+        persisted = self._persisted_profile_to_restore()
+
+        if persisted is None:
+            return
+
+        err = self.apply_profile_to_config(persisted)
+
+        if err:
+            logger.error("Failed to apply persisted profile '%s': %s", persisted, err)
+
+    def restore_persisted_profile(self) -> None:
+        """Re-activate the persisted profile once subscribers are connected.
+
+        The config already carries the profile; this pass publishes it for the
+        processes that start before the config can be corrected, and for the
+        retained MQTT states.
+        """
+        persisted = self._persisted_profile_to_restore()
+
+        if persisted is None:
+            return
+
+        logger.info("Restoring persisted profile '%s'", persisted)
+        # runtime overrides are layered on top by the dispatcher's replay
+        self.activate_profile(persisted, clear_runtime_overrides=False)
+
     def activate_profile(
         self,
         profile_name: str | None,
@@ -187,23 +274,16 @@ class ProfileManager:
         Returns:
             None on success, or an error message string on failure.
         """
-        if profile_name is not None:
-            if profile_name not in self.config.profiles:
-                return (
-                    f"Profile '{profile_name}' is not defined in the profiles section"
-                )
+        err = self._validate_profile_name(profile_name)
+
+        if err:
+            return err
 
         # Track which camera/section pairs get changed for ZMQ publishing
-        changed: dict[str, set[str]] = {}
+        changed, err = self._apply_to_config(profile_name)
 
-        # Reset all cameras to base config
-        self._reset_to_base(changed)
-
-        # Apply new profile overrides if activating
-        if profile_name is not None:
-            err = self._apply_profile_overrides(profile_name, changed)
-            if err:
-                return err
+        if err:
+            return err
 
         # Publish ZMQ updates only for sections that actually changed
         self._publish_updates(changed)

@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
+from frigate.app import FrigateApp
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.runtime_state import RuntimeStatePersistence
 
@@ -361,6 +362,95 @@ class TestReapplyRuntimeStateToConfig(unittest.TestCase):
 
         # a stale entry for a deleted camera must be ignored, not raise
         dispatcher.reapply_runtime_state_to_config()
+
+
+class TestStartupAppliesConfigLayersBeforeWorkersStart(unittest.TestCase):
+    """Both layers must reach the config before config-carrying workers start.
+
+    A worker started before a layer is applied keeps the yaml value for the
+    rest of the session: the config_updater broadcast sent later is dropped
+    for subscribers that have not connected yet, and nothing re-sends it.
+    """
+
+    CONFIG_LAYERS = (
+        "profile_manager.restore_persisted_profile_to_config",
+        "dispatcher.reapply_runtime_state_to_config",
+    )
+
+    # started with a copy of the camera config
+    CONFIG_CARRYING_WORKERS = (
+        "start_video_output_processor",
+        "start_ptz_autotracker",
+        "start_detected_frames_processor",
+        "start_camera_processor",
+        "start_audio_processor",
+    )
+
+    def _start_call_order(self) -> list[str]:
+        """Return the names FrigateApp.start() calls, in order."""
+        app = MagicMock()
+
+        with (
+            patch("frigate.app.set_file_limit"),
+            patch("frigate.app.cleanup_replay_cameras"),
+            patch("frigate.app.reap_stale_exports"),
+            patch("frigate.app.create_fastapi_app"),
+            patch("frigate.app.uvicorn"),
+        ):
+            FrigateApp.start(app)
+
+        return [name for name, _, _ in app.mock_calls]
+
+    def test_applied_before_any_config_carrying_worker(self) -> None:
+        order = self._start_call_order()
+
+        for layer in self.CONFIG_LAYERS:
+            for worker in self.CONFIG_CARRYING_WORKERS:
+                self.assertLess(order.index(layer), order.index(worker))
+
+    def test_applied_after_the_dispatcher_exists(self) -> None:
+        order = self._start_call_order()
+
+        for layer in self.CONFIG_LAYERS:
+            self.assertLess(order.index("init_dispatcher"), order.index(layer))
+
+    def test_applied_after_the_profile_base_is_snapshotted(self) -> None:
+        # ProfileManager snapshots the config as the "no profile" base that
+        # deactivation resets to, so neither layer may be in the config yet
+        order = self._start_call_order()
+
+        for layer in self.CONFIG_LAYERS:
+            self.assertLess(order.index("init_profile_manager"), order.index(layer))
+
+    def test_layers_applied_in_order(self) -> None:
+        # a runtime toggle is the layer the user set last, so it goes on top
+        order = self._start_call_order()
+
+        self.assertLess(
+            order.index("profile_manager.restore_persisted_profile_to_config"),
+            order.index("dispatcher.reapply_runtime_state_to_config"),
+        )
+
+    def test_overrides_still_re_applied_after_the_profile_is_restored(self) -> None:
+        # activation resets the sections it owns to the base first, so the
+        # overrides have to land on top again
+        order = self._start_call_order()
+
+        self.assertLess(
+            order.index("profile_manager.restore_persisted_profile"),
+            order.index("dispatcher.restore_runtime_state"),
+        )
+
+    def test_broadcast_replay_still_runs_at_the_end(self) -> None:
+        # the broadcast is the only channel for the recording, review, and
+        # embeddings processes, which start before the config can be corrected
+        order = self._start_call_order()
+
+        for replay in (
+            "profile_manager.restore_persisted_profile",
+            "dispatcher.restore_runtime_state",
+        ):
+            self.assertLess(order.index("start_audio_processor"), order.index(replay))
 
 
 if __name__ == "__main__":
