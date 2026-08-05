@@ -1,8 +1,16 @@
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from .base import FrigateBaseModel
 
 __all__ = ["IPv6Config", "ListenConfig", "NetworkingConfig"]
+
+
+def parse_listen_port(value: int | str) -> int:
+    """Return the port number from a bare port or an "address:port" value."""
+    if isinstance(value, str):
+        return int(value.split(":")[-1])
+
+    return value
 
 
 class IPv6Config(FrigateBaseModel):
@@ -24,6 +32,21 @@ class ListenConfig(FrigateBaseModel):
         title="External port",
         description="External listening port for Frigate (default 8971).",
     )
+
+    @property
+    def internal_port(self) -> int:
+        return parse_listen_port(self.internal)
+
+    @property
+    def external_port(self) -> int:
+        return parse_listen_port(self.external)
+
+    @model_validator(mode="after")
+    def validate_distinct_ports(self) -> "ListenConfig":
+        if self.internal_port == self.external_port:
+            raise ValueError("internal and external must listen on different ports")
+
+        return self
 
 
 class NetworkingConfig(FrigateBaseModel):

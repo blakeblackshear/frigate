@@ -293,6 +293,10 @@ networking:
 
 This setting is for advanced users. For the majority of use cases it's recommended to change the `ports` section of your Docker compose file or use the Docker `run` `--publish` option instead, e.g. `-p 443:8971`. Changing Frigate's ports may break some integrations.
 
+The internal and external ports must be different port numbers, and Frigate will refuse to start otherwise. Requests arriving on the internal port are treated as authenticated admins, so pointing both at the same port would remove authentication from the external one.
+
+Nginx binds these ports when it starts, so port changes only take effect after Frigate restarts.
+
 :::
 
 ### Customizing the Nginx configuration
