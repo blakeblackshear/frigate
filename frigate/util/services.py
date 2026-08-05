@@ -106,7 +106,15 @@ def get_cpu_stats() -> dict[str, dict]:
     """Get cpu usages for each process id"""
     usages = {}
     docker_memlimit = get_docker_memlimit_bytes() / 1024
-    total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
+    page_size = os.sysconf("SC_PAGE_SIZE")
+    total_mem = page_size * os.sysconf("SC_PHYS_PAGES") / 1024
+
+    # These values are invariant across the process loop below, so read them
+    # once per stats cycle instead of once per process. On hosts with many
+    # camera ffmpeg instances the per-process reads were a visible spike.
+    clk_tck = os.sysconf(os.sysconf_names["SC_CLK_TCK"])
+    with open("/proc/uptime") as f:
+        system_uptime_sec = int(float(f.read().split()[0]))
 
     system_cpu = psutil.cpu_percent(
         interval=None
@@ -133,11 +141,6 @@ def get_cpu_stats() -> dict[str, dict]:
             stime = int(stats[14])
             start_time = int(stats[21])
 
-            with open("/proc/uptime") as f:
-                system_uptime_sec = int(float(f.read().split()[0]))
-
-            clk_tck = os.sysconf(os.sysconf_names["SC_CLK_TCK"])
-
             process_utime_sec = utime // clk_tck
             process_stime_sec = stime // clk_tck
             process_start_time_sec = start_time // clk_tck
@@ -148,7 +151,7 @@ def get_cpu_stats() -> dict[str, dict]:
 
             with open(f"/proc/{pid}/statm") as f:
                 mem_stats = f.readline().split()
-            mem_res = int(mem_stats[1]) * os.sysconf("SC_PAGE_SIZE") / 1024
+            mem_res = int(mem_stats[1]) * page_size / 1024
 
             if docker_memlimit > 0:
                 mem_pct = round((mem_res / docker_memlimit) * 100, 1)

@@ -1251,6 +1251,14 @@ def get_image_from_recording(
 
 def get_histogram(image, x_min, y_min, x_max, y_max):
     image_bgr = cv2.cvtColor(image, cv2.COLOR_YUV2BGR_I420)
+    return get_histogram_from_bgr(image_bgr, x_min, y_min, x_max, y_max)
+
+
+def get_histogram_from_bgr(image_bgr, x_min, y_min, x_max, y_max):
+    """Compute a normalized BGR histogram for a region of an already-converted
+    BGR frame. Callers that need histograms for several regions of the same
+    frame should convert the frame to BGR once and reuse it here rather than
+    paying a full-frame YUV to BGR conversion per region."""
     image_bgr = image_bgr[y_min:y_max, x_min:x_max]
 
     hist = cv2.calcHist(
