@@ -31,7 +31,7 @@ from frigate.api.media_auth import (
     deny_response_for_media_uri,
     is_role_restricted,
 )
-from frigate.config import AuthConfig, NetworkingConfig, ProxyConfig
+from frigate.config import AuthConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 
@@ -620,18 +620,18 @@ def resolve_role(
 def auth(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
     proxy_config: ProxyConfig = request.app.frigate_config.proxy
-    networking_config: NetworkingConfig = request.app.frigate_config.networking
 
     success_response = Response("", status_code=202)
 
-    # handle case where internal port is a string with ip:port
-    internal_port = networking_config.listen.internal
-    if type(internal_port) is str:
-        internal_port = int(internal_port.split(":")[-1])
-
     # dont require auth if the request is on the internal port
-    # this header is set by Frigate's nginx proxy, so it cant be spoofed
-    if int(request.headers.get("x-server-port", default=0)) == internal_port:
+    # this header is set by Frigate's nginx proxy, so it cant be spoofed.
+    # the port is the boot-time snapshot rather than the live config value:
+    # nginx's listeners are fixed at container start, so an in-memory config
+    # change must never move the port that is trusted here
+    if (
+        int(request.headers.get("x-server-port", default=0))
+        == request.app.auth_internal_port
+    ):
         success_response.headers["remote-user"] = "anonymous"
         success_response.headers["remote-role"] = "admin"
         return success_response
