@@ -354,16 +354,12 @@ def get_tool_definitions(
                 "description": (
                     "Every name that can be attached as a sub_label, grouped by object "
                     "type: recognized faces, named license plates, classification "
-                    "categories, and delivery logos."
+                    "categories, and delivery logos. Takes no arguments and always "
+                    "returns the complete map."
                 ),
                 "parameters": {
                     "type": "object",
-                    "properties": {
-                        "object_type": {
-                            "type": "string",
-                            "description": "Optional object label (e.g. 'person', 'car'). Omit for all.",
-                        },
-                    },
+                    "properties": {},
                     "required": [],
                 },
             },
