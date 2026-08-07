@@ -363,7 +363,7 @@ ffmpeg:
 
 If running Frigate through Docker, you either need to run in privileged mode or map the required video and media devices into the container.
 
-```yaml {4-8}
+```yaml
 services:
   frigate:
     devices:
@@ -376,7 +376,7 @@ services:
 Device numbers may vary between Raspberry Pi OS releases and kernel versions.
 The Raspberry Pi 5 HEVC decoder devices can be identified with:
 
-```yaml
+```bash
 v4l2-ctl --list-devices
 ```
 
