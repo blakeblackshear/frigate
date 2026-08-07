@@ -33,7 +33,11 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 **Raspberry Pi 3/4**
 
-- [Raspberry Pi](#raspberry-pi-34): Frigate can utilize the media engine in the Raspberry Pi 3 and 4 to slightly accelerate video decoding.
+- [Raspberry Pi 3/4](#raspberry-pi-34): Frigate can utilize the media engine to slightly accelerate video decoding of both H.264 and H.265 (HEVC) streams.
+
+**Raspberry Pi 5**
+
+- [Raspberry Pi 5](#raspberry-pi-5): Hardware decoding is only available for H.265 (HEVC) streams. H.264 streams are decoded in software on the CPU.
 
 **Nvidia Jetson** <CommunityBadge />
 
@@ -344,6 +348,45 @@ done
 ```
 
 Or map in all the `/dev/video*` devices.
+
+:::
+
+## Raspberry Pi 5
+
+To enable H.265 (HEVC) hardware decoding on Raspberry Pi 5, configure Frigate as follows:
+
+```yaml
+ffmpeg:
+  hwaccel_args: -hwaccel drm
+```
+:::note
+
+If running Frigate through Docker, you either need to run in privileged mode or map the required video and media devices into the container.
+
+```yaml {4-8}
+services:
+  frigate:
+    devices:
+      - /dev/media0:/dev/media0
+      - /dev/media1:/dev/media1
+      - /dev/media2:/dev/media2
+      - /dev/video19:/dev/video19
+```
+
+Device numbers may vary between Raspberry Pi OS releases and kernel versions.
+The Raspberry Pi 5 HEVC decoder devices can be identified with:
+
+```yaml
+v4l2-ctl --list-devices
+```
+
+:::
+
+:::info Optional workaround for green or blank live view
+
+Some users have reported a green or blank live view when using hardware decoding on Raspberry Pi 5, particularly when Smart Streaming is enabled on the camera. The issue has been observed with recent Raspberry Pi OS and Linux kernel releases and appears to be related to camera stream compatibility, browser rendering, or underlying video decoding components rather than Frigate itself.
+
+As a workaround, changing the camera stream mode from Smart Streaming to Continuous Streaming may resolve the issue. Several users have reported that this restores normal video playback while hardware decoding continues to function correctly. This workaround may not be required on all systems and camera models.
 
 :::
 
