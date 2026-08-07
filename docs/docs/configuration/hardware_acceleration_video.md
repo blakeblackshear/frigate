@@ -33,7 +33,7 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 **Raspberry Pi 3/4**
 
-- [Raspberry Pi 3/4](#raspberry-pi-34): Frigate can utilize the media engine to slightly accelerate H.264 video decoding on Raspberry Pi 3 and both H.264 and H.265 (HEVC) video decoding on Raspberry Pi 4.
+- [Raspberry Pi 3/4](#raspberry-pi-34): Frigate can utilize the media engine in the Raspberry Pi 3 and 4 to slightly accelerate video decoding.
 
 **Raspberry Pi 5**
 
@@ -302,11 +302,11 @@ Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set 
 <TabItem value="yaml">
 
 ```yaml
-# if you want to decode a h264 stream
+# Raspberry Pi 3/4: decode H.264 stream
 ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 
-# if you want to decode a h265 (hevc) stream
+# Raspberry Pi 4 only: decode H.265 (HEVC) stream
 ffmpeg:
   hwaccel_args: preset-rpi-64-h265
 ```
