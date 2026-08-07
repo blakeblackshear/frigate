@@ -33,7 +33,7 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 **Raspberry Pi 3/4**
 
-- [Raspberry Pi 3/4](#raspberry-pi-34): Frigate can utilize the media engine to slightly accelerate video decoding of both H.264 and H.265 (HEVC) streams.
+- [Raspberry Pi 3/4](#raspberry-pi-34): Frigate can utilize the media engine to slightly accelerate H.264 video decoding on Raspberry Pi 3 and both H.264 and H.265 (HEVC) video decoding on Raspberry Pi 4.
 
 **Raspberry Pi 5**
 
