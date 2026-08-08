@@ -257,7 +257,7 @@ export default function GeneralSettings({
           className={
             isDesktop
               ? "scrollbar-container mr-5 w-72 overflow-y-auto"
-              : "max-h-[75dvh] overflow-hidden p-2"
+              : "max-h-[75dvh] overflow-hidden"
           }
         >
           {!isDesktop && (
@@ -270,7 +270,12 @@ export default function GeneralSettings({
               </DrawerDescription>
             </>
           )}
-          <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
+          <div
+            className={cn(
+              "scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden",
+              !isDesktop && "p-2",
+            )}
+          >
             {isMobile && (
               <div className="mb-2">
                 <DropdownMenuLabel>
