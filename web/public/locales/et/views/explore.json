@@ -129,6 +129,9 @@
         "error": {
           "updatedLPRFailed": "Sõiduki numbrimärgi uuendamine ei õnnestunud: {{errorMessage}}"
         }
+      },
+      "button": {
+        "share": "Jaga seda ülevaadatud objekti"
       }
     },
     "snapshotScore": {
