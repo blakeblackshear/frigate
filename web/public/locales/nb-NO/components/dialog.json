@@ -147,7 +147,7 @@
   "streaming": {
     "label": "Strøm",
     "restreaming": {
-      "disabled": "Restrømming er ikke aktivert for dette kameraet.",
+      "disabled": "Viderestrømming er ikke aktivert for dette kameraet.",
       "desc": {
         "readTheDocumentation": "Se dokumentasjonen",
         "title": "Konfigurer go2rtc for flere direktestrømmingsalternativer og lyd for dette kameraet."

@@ -235,7 +235,7 @@
         "label": "Direkteavspilling",
         "streams": {
             "label": "Navn på direktestrømmer",
-            "description": "Kobling mellom konfigurerte strøm-navn og restream/go2rtc-navn brukt for direkteavspilling."
+            "description": "Kobling mellom konfigurerte strøm-navn og viderestrøm/go2rtc-navn brukt for direkteavspilling."
         },
         "height": {
             "label": "Direktevisningshøyde",
