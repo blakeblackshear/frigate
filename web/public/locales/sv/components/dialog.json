@@ -97,7 +97,7 @@
       "timeRange": "Tidsintervall",
       "selectFromTimeline": "Välj från tidslinjen",
       "cameraSelection": "Kameror",
-      "cameraSelectionHelp": "Kameror med spårade objekt inom tidsintervallet är förvalda.",
+      "cameraSelectionHelp": "Kameror med spårade objekt inom tidsintervallet är förvalda",
       "checkingActivity": "Kontrollerar kameraaktivitet…",
       "noCameras": "Inga kameror tillgängliga",
       "detectionCount_one": "1 spårat objekt",
