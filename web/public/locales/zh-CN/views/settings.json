@@ -1388,7 +1388,7 @@
         "webuiUrlHelp": "从调试页面中直接访问摄像头管理网页界面。留空以禁用链接。",
         "webuiUrlInvalid": "必须是有效的 URL（例如：https://example.com）。",
         "dashboardLabel": "在实时监控面板上显示",
-        "dashboardHelp": "在实时监控面板显示该摄像头。",
+        "dashboardHelp": "在实时监控面板显示该摄像头，在分组等其他位置仍可见。",
         "reviewLabel": "在核查中显示",
         "reviewHelp": "在核查页面展示该摄像头，包括在筛选列表、画面变动核查以及历史视图。"
       },
@@ -2134,7 +2134,8 @@
       "autotrackingNoZones": "自动追踪至少需要一个区域。请先在“遮罩 / 区域”中为此摄像头定义一个区域，然后在下方将其设置为必需区域。"
     },
     "ffmpeg": {
-      "hwaccelManualNotRecommended": "不建议手动硬件加速参数。除非存在特定需求，否则选择与你的硬件匹配的预设。"
+      "hwaccelManualNotRecommended": "不建议手动硬件加速参数。除非存在特定需求，否则选择与你的硬件匹配的预设。",
+      "inputsMissingGo2rtcStream": "下面的输入指向了一个已不存在的 go2rtc 转流。请选择一个现有的转流或手动输入摄像头的 URL，否则此摄像头将无法连接。"
     },
     "model": {
       "optimizedFor320": "Frigate 针对了 320x320 的模型进行优化，这是大多数设置的最佳选择。640x640 模型速度较慢，仅在特定场景下有帮助。",
