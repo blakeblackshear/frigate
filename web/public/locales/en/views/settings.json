@@ -463,7 +463,7 @@
     "deleteCameraDialog": {
       "title": "Delete Camera",
       "description": "Deleting a camera will permanently remove all recordings, tracked objects, and configuration for that camera. Any go2rtc streams associated with this camera may still need to be manually removed.",
-      "selectPlaceholder": "Choose camera...",
+      "selectPlaceholder": "Choose camera…",
       "confirmTitle": "Are you sure?",
       "confirmWarning": "Deleting <strong>{{cameraName}}</strong> cannot be undone.",
       "deleteExports": "Also delete exports for this camera",
@@ -613,7 +613,6 @@
         }
       },
       "footer": {
-        "changeCount_zero": "No changes selected",
         "changeCount_one": "{{count}} change will be applied",
         "changeCount_other": "{{count}} changes will be applied",
         "restartNeeded": "Restart will be required for some changes.",
