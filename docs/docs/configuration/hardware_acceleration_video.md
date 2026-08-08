@@ -384,6 +384,7 @@ v4l2-ctl --list-devices
 ```
 
 :::warning Known issues
+
 On some systems running **Raspberry Pi OS Trixie with Linux kernel 6.18**, H.265 (HEVC) hardware decoding may cause **green or blank live-view previews** and **object detection may stop working**. Switching the camera from **Smart Streaming** to **Continuous Streaming** may restore the live-view preview, but it does **not** resolve the detection issue.
 
 Reports from users running **Bookworm OS with kernel 6.12** indicate that the same configuration can work correctly, including hardware decoding, detections, recordings, and live streaming.
