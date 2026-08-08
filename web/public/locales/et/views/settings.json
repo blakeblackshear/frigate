@@ -538,7 +538,7 @@
     "licensePlateRecognition": {
       "title": "Sõidukite numbrimärkide tuvastus"
     },
-    "title": "Andmerikastuse seaded",
+    "title": "Andmerikastuse seadistused",
     "restart_required": "Taaskäivitamine on vajalik (Andmerikastuse seadeid on muudetud)",
     "toast": {
       "success": "Andmerikastamise seaded on salvestatud. Muudatuste rakendamiseks taaskäivitage Frigate.",
