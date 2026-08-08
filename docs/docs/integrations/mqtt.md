@@ -541,18 +541,19 @@ Topic with current state of Birdseye for a camera. Published values are `ON` and
 
 Topic to set Birdseye mode for a camera. Birdseye offers different modes to customize under which circumstances the camera is shown.
 
-_Note: Changing the value from `CONTINUOUS` -> `MOTION | OBJECTS` will take up to 30 seconds for
+_Note: Changing the value from `CONTINUOUS` -> `MOTION | MOTION_OBJECTS | OBJECTS` will take up to 30 seconds for
 the camera to be removed from the view._
 
-| Command      | Description                                                       |
-| ------------ | ----------------------------------------------------------------- |
-| `CONTINUOUS` | Always included                                                   |
-| `MOTION`     | Show when detected motion within the last 30 seconds are included |
-| `OBJECTS`    | Shown if an active object tracked within the last 30 seconds      |
+| Command          | Description                                                                      |
+| ---------------- | -------------------------------------------------------------------------------- |
+| `CONTINUOUS`     | Always included                                                                  |
+| `MOTION`         | Shown if motion was detected within the last 30 seconds                          |
+| `MOTION_OBJECTS` | Shown if motion was detected or any object is tracked, including stationary ones |
+| `OBJECTS`        | Shown if an active object was tracked within the last 30 seconds                 |
 
 ### `frigate/<camera_name>/birdseye_mode/state`
 
-Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `OBJECTS`.
+Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `MOTION_OBJECTS`, `OBJECTS`.
 
 ### `frigate/<camera_name>/notifications/set`
 

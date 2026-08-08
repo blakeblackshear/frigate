@@ -575,7 +575,7 @@
     },
     "mode": {
       "label": "Tracking mode",
-      "description": "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'."
+      "description": "Mode for including cameras in Birdseye: 'objects', 'motion', 'motion_objects', or 'continuous'."
     },
     "restream": {
       "label": "Restream RTSP",

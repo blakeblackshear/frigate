@@ -25,6 +25,7 @@ Birdseye offers different modes to customize which cameras show under which circ
 - **continuous:** All cameras are always included
 - **motion:** Cameras that have detected motion within the last 30 seconds are included
 - **objects:** Cameras that have tracked an active object within the last 30 seconds are included
+- **motion_objects:** Cameras that have detected motion or are tracking an object, including stationary objects, are included
 
 ### Custom Birdseye Icon
 
@@ -44,7 +45,7 @@ To include a camera in Birdseye view only for specific circumstances, or exclude
 | Field               | Description                                                   |
 | ------------------- | ------------------------------------------------------------- |
 | **Enable Birdseye** | Whether this camera appears in Birdseye view                  |
-| **Tracking mode**   | When to show the camera: `continuous`, `motion`, or `objects` |
+| **Tracking mode**   | When to show the camera: `continuous`, `motion`, `motion_objects`, or `objects` |
 
 </TabItem>
 <TabItem value="yaml">

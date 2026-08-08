@@ -409,7 +409,11 @@ class BirdsEyeFrameManager:
         )
 
     def camera_active(
-        self, mode: Any, object_box_count: int, motion_box_count: int
+        self,
+        mode: BirdseyeModeEnum,
+        active_object_count: int,
+        tracked_object_count: int,
+        motion_box_count: int,
     ) -> bool:
         if mode == BirdseyeModeEnum.continuous:
             return True
@@ -417,7 +421,12 @@ class BirdsEyeFrameManager:
         if mode == BirdseyeModeEnum.motion and motion_box_count > 0:
             return True
 
-        if mode == BirdseyeModeEnum.objects and object_box_count > 0:
+        if mode == BirdseyeModeEnum.objects and active_object_count > 0:
+            return True
+
+        if mode == BirdseyeModeEnum.motion_objects and (
+            motion_box_count > 0 or tracked_object_count > 0
+        ):
             return True
 
         return False
@@ -725,7 +734,8 @@ class BirdsEyeFrameManager:
     def update(
         self,
         camera: str,
-        object_count: int,
+        active_object_count: int,
+        tracked_object_count: int,
         motion_count: int,
         frame_time: float,
         frame: np.ndarray,
@@ -754,7 +764,12 @@ class BirdsEyeFrameManager:
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame.copy()
         self.cameras[camera]["current_frame_time"] = frame_time
-        if self.camera_active(camera_config.birdseye.mode, object_count, motion_count):
+        if self.camera_active(
+            camera_config.birdseye.mode,
+            active_object_count,
+            tracked_object_count,
+            motion_count,
+        ):
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()
@@ -862,9 +877,20 @@ class Birdseye:
         frame_time: float,
         frame: np.ndarray,
     ) -> None:
+        active_object_count = 0
+        tracked_object_count = 0
+        for tracked_object in current_tracked_objects:
+            if tracked_object["false_positive"]:
+                continue
+
+            tracked_object_count += 1
+            if not tracked_object["stationary"]:
+                active_object_count += 1
+
         frame_changed, frame_layout_changed = self.birdseye_manager.update(
             camera,
-            len([o for o in current_tracked_objects if not o["stationary"]]),
+            active_object_count,
+            tracked_object_count,
             len(motion_boxes),
             frame_time,
             frame,

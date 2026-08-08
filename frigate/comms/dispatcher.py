@@ -882,8 +882,10 @@ class Dispatcher:
     def _on_birdseye_mode_command(self, camera_name: str, payload: str) -> None:
         """Callback for birdseye mode topic."""
 
-        if payload not in ["CONTINUOUS", "MOTION", "OBJECTS"]:
-            logger.info(f"Invalid birdseye_mode command: {payload}")
+        modes_by_payload = {mode.value.upper(): mode for mode in BirdseyeModeEnum}
+        mode = modes_by_payload.get(payload)
+        if mode is None:
+            logger.info("Invalid birdseye_mode command: %s", payload)
             return
 
         birdseye_settings = self.config.cameras[camera_name].birdseye
@@ -892,7 +894,7 @@ class Dispatcher:
             logger.info(f"Birdseye mode not enabled for {camera_name}")
             return
 
-        birdseye_settings.mode = BirdseyeModeEnum(payload.lower())
+        birdseye_settings.mode = mode
         logger.info(
             f"Setting birdseye mode for {camera_name} to {birdseye_settings.mode}"
         )
@@ -901,7 +903,9 @@ class Dispatcher:
             CameraConfigUpdateTopic(CameraConfigUpdateEnum.birdseye, camera_name),
             birdseye_settings,
         )
-        self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)
+        self.publish(
+            f"{camera_name}/birdseye_mode/state", mode.value.upper(), retain=True
+        )
 
     def _on_camera_notification_command(self, camera_name: str, payload: str) -> None:
         """Callback for camera level notifications topic."""

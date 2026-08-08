@@ -1845,6 +1845,7 @@
     "trackingMode": {
       "objects": "Objects",
       "motion": "Motion",
+      "motion_objects": "Motion or objects",
       "continuous": "Continuous"
     },
     "cameraOrder": {

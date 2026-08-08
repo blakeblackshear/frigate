@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.runtime_state import RuntimeStatePersistence
+from frigate.config import BirdseyeModeEnum
 
 
 def _make_camera_mock(
@@ -48,6 +49,35 @@ def _build_dispatcher(cameras: dict[str, MagicMock]) -> Dispatcher:
         patch("frigate.comms.dispatcher.AudioActivityManager"),
     ):
         return Dispatcher(config, config_updater, onvif, ptz_metrics, communicators)
+
+
+class TestBirdseyeModeCommands(unittest.TestCase):
+    """Verify Birdseye mode commands use the config enum as their contract."""
+
+    def setUp(self) -> None:
+        self.camera = _make_camera_mock()
+        self.camera.birdseye.enabled = True
+        self.dispatcher = _build_dispatcher({"front_door": self.camera})
+        self.dispatcher.publish = MagicMock()
+
+    def test_motion_objects_mode_is_accepted(self) -> None:
+        self.dispatcher._on_birdseye_mode_command("front_door", "MOTION_OBJECTS")
+
+        self.assertIs(
+            self.camera.birdseye.mode,
+            BirdseyeModeEnum.motion_objects,
+        )
+        self.dispatcher.config_updater.publish_update.assert_called_once()
+        self.dispatcher.publish.assert_called_once_with(
+            "front_door/birdseye_mode/state", "MOTION_OBJECTS", retain=True
+        )
+
+    def test_unknown_mode_is_rejected(self) -> None:
+        for payload in ("UNKNOWN", "motion_objects"):
+            with self.subTest(payload=payload):
+                self.dispatcher._on_birdseye_mode_command("front_door", payload)
+
+        self.dispatcher.config_updater.publish_update.assert_not_called()
 
 
 class TestRestoreRuntimeState(unittest.TestCase):

@@ -15,6 +15,7 @@ __all__ = [
 class BirdseyeModeEnum(str, Enum):
     objects = "objects"
     motion = "motion"
+    motion_objects = "motion_objects"
     continuous = "continuous"
 
     @classmethod
@@ -50,7 +51,7 @@ class BirdseyeConfig(FrigateBaseModel):
     mode: BirdseyeModeEnum = Field(
         default=BirdseyeModeEnum.objects,
         title="Tracking mode",
-        description="Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'.",
+        description="Mode for including cameras in Birdseye: 'objects', 'motion', 'motion_objects', or 'continuous'.",
     )
 
     restream: bool = Field(
@@ -105,7 +106,7 @@ class BirdseyeCameraConfig(BaseModel):
     mode: BirdseyeModeEnum = Field(
         default=BirdseyeModeEnum.objects,
         title="Tracking mode",
-        description="Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'.",
+        description="Mode for including cameras in Birdseye: 'objects', 'motion', 'motion_objects', or 'continuous'.",
     )
 
     order: int = Field(
