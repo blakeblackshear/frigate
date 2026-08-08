@@ -95,7 +95,7 @@
       "placeholder": "Выберите случай",
       "newCaseOption": "Создайте новый случай",
       "newCaseNamePlaceholder": "Имя нового случая",
-      "newCaseDescriptionPlaceholder": "Описание Случая",
+      "newCaseDescriptionPlaceholder": "Описание случая",
       "nonAdminHelp": "Для этих экспортов будет создан новый случай."
     },
     "queueing": "Помещаем Экспорт в очередь...",
