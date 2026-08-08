@@ -309,7 +309,8 @@
     "triggers": "Spouštěče",
     "cameraManagement": "Správa",
     "cameraReview": "Kontrola",
-    "roles": "Role"
+    "roles": "Role",
+    "profiles": "Profily"
   },
   "dialog": {
     "unsavedChanges": {

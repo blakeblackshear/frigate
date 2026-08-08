@@ -120,7 +120,19 @@
     "deleteNow": "Smazat hned",
     "next": "Další",
     "export": "Exportovat",
-    "continue": "Pokračovat"
+    "continue": "Pokračovat",
+    "add": "Přidat",
+    "applying": "Aplikuje se…",
+    "undo": "Vrátit",
+    "copiedToClipboard": "Zkopírováno do schránky",
+    "modified": "Upraveno",
+    "overridden": "Přepsáno",
+    "resetToGlobal": "Obnovit globální nastavení",
+    "resetToDefault": "Obnovit výchozí nastavení",
+    "saveAll": "Uložit vše",
+    "savingAll": "Ukládání…",
+    "undoAll": "Vrátit vše",
+    "retry": "Zkusit znovu"
   },
   "label": {
     "back": "Jdi zpět",
@@ -213,7 +225,9 @@
       "gl": "Galego (Galicijština)",
       "id": "Bahasa Indonesia (Indonéština)",
       "ur": "اردو (Urdština)",
-      "hr": "Hrvatski (Chorvatština)"
+      "hr": "Hrvatski (Chorvatština)",
+      "zhHant": "繁體中文 (Tradiční čínština)",
+      "bs": "Bosanski (Bosenština)"
     },
     "theme": {
       "highcontrast": "Vysoký kontrast",
@@ -251,7 +265,11 @@
     "faceLibrary": "Knihovna Obličejů",
     "configurationEditor": "Editor Konfigurace",
     "withSystem": "Systém",
-    "classification": "Klasifikace"
+    "classification": "Klasifikace",
+    "profiles": "Profily",
+    "actions": "Akce",
+    "features": "Funkce",
+    "chat": "Chat"
   },
   "pagination": {
     "previous": {
@@ -282,7 +300,8 @@
       "error": {
         "title": "Chyba při ukládání změn konfigurace: {{errorMessage}}",
         "noMessage": "Chyba při ukládání změn konfigurace"
-      }
+      },
+      "success": "Změny konfigurace byly úspěšně uloženy."
     }
   },
   "role": {
@@ -303,5 +322,10 @@
   },
   "information": {
     "pixels": "{{area}}px"
+  },
+  "no_items": "Žádné položky",
+  "validation_errors": "Chyby ověření",
+  "credentialField": {
+    "savedPlaceholder": "Uloženo – ponechte prázdné pro zachování aktuální hodnoty"
   }
 }

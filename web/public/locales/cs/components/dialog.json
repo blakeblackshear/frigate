@@ -6,7 +6,8 @@
       "title": "Frigate restartuje",
       "content": "Tato stránka bude obnovena za {{countdown}} sekund.",
       "button": "Vynutit opětovné načtení"
-    }
+    },
+    "description": "Frigate bude během restartu krátce nedostupný."
   },
   "explore": {
     "plus": {
@@ -19,6 +20,9 @@
         },
         "state": {
           "submitted": "Odesláno"
+        },
+        "toast": {
+          "error": "Odeslání do Frigate+ se nezdařilo. Zkontrolujte své síťové připojení a zkuste to znovu."
         }
       },
       "submitToPlus": {
@@ -74,7 +78,11 @@
         "endTimeMustAfterStartTime": "Čas konce musí být po čase začátku",
         "noVaildTimeSelected": "Není vybráno žádné platné časové období"
       },
-      "view": "Zobrazení"
+      "view": "Zobrazení",
+      "queued": "Export zařazen do fronty. Průběh zobrazíte na stránce Exporty.",
+      "batchSuccess_one": "Začal 1 export. Nyní se otevírá případ.",
+      "batchSuccess_few": "Začaly {{count}} exporty. Nyní se otevírá případ.",
+      "batchSuccess_other": "Začalo {{count}} exportů. Nyní se otevírá případ."
     },
     "fromTimeline": {
       "saveExport": "Uložit export",
@@ -82,6 +90,65 @@
     },
     "name": {
       "placeholder": "Jméno exportu"
+    },
+    "case": {
+      "newCaseOption": "Vytvořit nový případ",
+      "newCaseNamePlaceholder": "Název nového případu",
+      "newCaseDescriptionPlaceholder": "Popis případu",
+      "label": "Případ",
+      "nonAdminHelp": "Pro tyto exporty bude vytvořen nový případ.",
+      "placeholder": "Vyberte případ"
+    },
+    "queueing": "Přidávání exportu do fronty…",
+    "tabs": {
+      "export": "Jedna kamera",
+      "multiCamera": "Vícekamerový"
+    },
+    "multiCamera": {
+      "timeRange": "Časový rozsah",
+      "selectFromTimeline": "Vybrat z časové osy",
+      "cameraSelection": "Kamery",
+      "cameraSelectionHelp": "Kamery se sledovanými objekty v tomto časovém rozsahu jsou předem vybrány",
+      "searchOrSelectGroup": "Vyhledejte nebo vyberte skupinu kamer…",
+      "selectAll": "Vybrat všechny kamery",
+      "clearSelection": "Zrušit výběr",
+      "selectWithActivity": "Kamery se sledovanými objekty",
+      "selectGroup": "Vybrat skupinu",
+      "noMatchingCameras": "Žádná kamera neodpovídá vašemu hledání",
+      "selectedCount": "{{selected}} / {{total}} vybráno",
+      "checkingActivity": "Kontrola aktivity kamer…",
+      "noCameras": "Nejsou k dispozici žádné kamery",
+      "detectionCount_one": "1 sledovaný objekt",
+      "detectionCount_few": "{{count}} sledované objekty",
+      "detectionCount_other": "{{count}} sledovaných objektů",
+      "nameLabel": "Název exportu",
+      "namePlaceholder": "Volitelný základní název pro tyto exporty",
+      "queueingButton": "Příprava exportů…",
+      "exportButton_one": "Exportovat 1 kameru",
+      "exportButton_few": "Exportovat {{count}} kamery",
+      "exportButton_other": "Exportovat {{count}} kamer"
+    },
+    "multi": {
+      "title_one": "Exportovat 1 kontrolu",
+      "title_few": "Exportovat {{count}} kontroly",
+      "title_other": "Exportovat {{count}} kontrol",
+      "description": "Exportujte každou vybranou kontrolu. Všechny exporty budou seskupeny do jednoho případu.",
+      "descriptionNoCase": "Exportujte každou vybranou kontrolu.",
+      "caseNamePlaceholder": "Export kontroly – {{date}}",
+      "exportButton_one": "Exportovat 1 kontrolu",
+      "exportButton_few": "Exportovat {{count}} kontroly",
+      "exportButton_other": "Exportovat {{count}} kontrol",
+      "exportingButton": "Exportování…",
+      "toast": {
+        "started_one": "Spuštěn 1 export. Otevírá se případ.",
+        "started_few": "Spuštěny {{count}} exporty. Otevírá se případ.",
+        "started_other": "Spuštěno {{count}} exportů. Otevírá se případ.",
+        "startedNoCase_one": "Spuštěn 1 export.",
+        "startedNoCase_few": "Spuštěny {{count}} exporty.",
+        "startedNoCase_other": "Spuštěno {{count}} exportů.",
+        "partial": "Spuštěno {{successful}} z {{total}} exportů. Selhalo: {{failedItems}}",
+        "failed": "Nepodařilo se spustit {{total}} exportů. Selhalo: {{failedItems}}"
+      }
     }
   },
   "streaming": {
