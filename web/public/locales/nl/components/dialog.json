@@ -65,13 +65,16 @@
     "select": "Selecteer",
     "toast": {
       "error": {
-        "failed": "Exporteren is mislukt: {{error}}",
+        "failed": "Exporter naar wachtrij mislukt: {{error}}",
         "noVaildTimeSelected": "Geen geldig tijdsbereik geselecteerd",
-        "endTimeMustAfterStartTime": "Eindtijd moet na starttijd zijn"
+        "endTimeMustAfterStartTime": "Eindtijd moet na starttijd zijn",
+        "noValidTimeSelected": "Geen geldige tijd voor geselecteerd bereik"
       },
       "success": "Export is succesvol gestart. Bekijk het bestand op de exportpagina.",
       "view": "Weergeven",
-      "queued": "Export staat in de wachtrij. Bekijk voortgang op de exports pagina."
+      "queued": "Export staat in de wachtrij. Bekijk voortgang op de exports pagina.",
+      "batchSuccess_one": "1 export gestart. Zaak wordt aangemaakt.",
+      "batchSuccess_other": "{{count}} export gestart. Zaak wordt aangemaakt."
     },
     "fromTimeline": {
       "saveExport": "Export opslaan",
@@ -125,7 +128,9 @@
         "startedNoCase_one": "1 export gestart.",
         "startedNoCase_other": "{{count}} Exports gestart.",
         "partial": "{{successful}} van {{total}} exports gestart. Mislukte items: {{failedItems}}",
-        "failed": "Het starten van {{total}} exports is mislukt. Mislukt: {{failedItems}}"
+        "failed": "Het starten van {{total}} exports is mislukt. Mislukt: {{failedItems}}",
+        "started_one": "1 export gestart. Zaak wordt aangemaakt.",
+        "started_other": "{{count}} exports gestart. Zaak wordt aangemaakt."
       },
       "exportingButton": "Exporteren...",
       "exportButton_one": "Exporteer 1 revisie",
