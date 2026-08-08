@@ -296,6 +296,8 @@ These instructions were originally based on the [Jellyfin documentation](https:/
 Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
 If you are using the HA App, you may need to use the full access variant and turn off _Protection mode_ for hardware acceleration.
 
+To enable hardware decoding, configure Frigate as follows:
+
 ```yaml
 # Raspberry Pi 3/4: decode H.264 stream
 ffmpeg:
