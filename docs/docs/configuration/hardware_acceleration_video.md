@@ -296,14 +296,6 @@ These instructions were originally based on the [Jellyfin documentation](https:/
 Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
 If you are using the HA App, you may need to use the full access variant and turn off _Protection mode_ for hardware acceleration.
 
-<ConfigTabs>
-<TabItem value="ui">
-
-Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `Raspberry Pi (H.264)` (for H.264 streams) or `Raspberry Pi (H.265)` (for H.265/HEVC streams). For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" />.
-
-</TabItem>
-<TabItem value="yaml">
-
 ```yaml
 # Raspberry Pi 3/4: decode H.264 stream
 ffmpeg:
@@ -313,9 +305,6 @@ ffmpeg:
 ffmpeg:
   hwaccel_args: preset-rpi-64-h265
 ```
-
-</TabItem>
-</ConfigTabs>
 
 :::note
 
