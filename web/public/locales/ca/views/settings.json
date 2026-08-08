@@ -1330,7 +1330,7 @@
         "webuiUrlHelp": "URL per a visitar la interfície d'usuari web de la càmera directament des de la vista de depuració. Deixeu-ho en blanc per desactivar l'enllaç.",
         "webuiUrlInvalid": "Ha de ser un URL vàlid (p. ex., https://example.com).",
         "dashboardLabel": "Mostra al tauler en directe",
-        "dashboardHelp": "Mostra aquesta càmera al Tauler en viu.",
+        "dashboardHelp": "Mostra aquesta càmera al tauler de control en directe predeterminat de totes les càmeres. Es manté disponible a tot arreu, inclosos els grups de càmeres.",
         "reviewLabel": "Mostra a la ressenya",
         "reviewHelp": "Mostra aquesta càmera a Revisió, incloent el filtre de càmera, la revisió de moviment i la vista de l'historial."
       },
@@ -1377,7 +1377,7 @@
     "deleteCameraDialog": {
       "title": "Suprimeix la càmera",
       "description": "Suprimir una càmera eliminarà permanentment tots els enregistraments, els objectes rastrejats i la configuració d'aquesta càmera. Qualsevol flux go2rtc associat amb aquesta càmera encara pot haver de ser eliminat manualment.",
-      "selectPlaceholder": "Trieu la càmera...",
+      "selectPlaceholder": "Trieu la càmera…",
       "confirmTitle": "N'estàs segur?",
       "confirmWarning": "Suprimir <strong>{{cameraName}}</strong> no es pot desfer.",
       "deleteExports": "Elimina també les exportacions d'aquesta càmera",

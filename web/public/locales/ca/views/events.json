@@ -76,7 +76,7 @@
     "menuItem": "Visualitza les vistes prèvies del moviment",
     "title": "Vista prèvia del moviment: {{camera}}",
     "mobileSettingsTitle": "Configuració de la vista prèvia del moviment",
-    "mobileSettingsDesc": "Ajusteu la velocitat de reproducció i l'enfosquiment, i trieu una data per a revisar clips només en moviment.",
+    "mobileSettingsDesc": "Ajusteu la velocitat de reproducció, l'enfosquiment i l'escapçament, i trieu una data per a revisar clips només en moviment.",
     "dim": "Atenuar",
     "dimAria": "Ajusta la intensitat de l'enfosquiment",
     "dimDesc": "Incrementa l'enfosquiment per augmentar la visibilitat de l'àrea de moviment.",
@@ -89,6 +89,9 @@
     "seekAria": "Cerca el reproductor {{camera}} a {{time}}",
     "filter": "Filtre",
     "filterDesc": "Seleccioneu àrees per a mostrar només clips amb moviment en aquestes regions.",
-    "filterClear": "Neteja"
+    "filterClear": "Neteja",
+    "crop": "Escapça per filtrar",
+    "cropAria": "Commuta la vista prèvia d'escapçament a les àrees filtrades",
+    "cropDesc": "Amplia les vistes prèvies a les àrees de filtre seleccionades en lloc de mostrar el fotograma complet."
   }
 }
