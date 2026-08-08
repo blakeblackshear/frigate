@@ -380,14 +380,20 @@ The Raspberry Pi 5 HEVC decoder devices can be identified with:
 v4l2-ctl --list-devices
 ```
 
+:::warning Known issues
+On some systems running **Raspberry Pi OS Trixie with Linux kernel 6.18**, H.265 (HEVC) hardware decoding may cause **green or blank live-view previews** and **object detection may stop working**. Switching the camera from **Smart Streaming** to **Continuous Streaming** may restore the live-view preview, but it does **not** resolve the detection issue.
+
+Reports from users running **Bookworm OS with kernel 6.12** indicate that the same configuration can work correctly, including hardware decoding, detections, recordings, and live streaming.
+
 :::
 
-:::info Optional workaround for green or blank live view
+:::note
 
-Some users have reported a green or blank live view when using hardware decoding on Raspberry Pi 5, particularly when Smart Streaming is enabled on the camera. The issue has been observed with recent Raspberry Pi OS and Linux kernel releases and appears to be related to camera stream compatibility, browser rendering, or underlying video decoding components rather than Frigate itself.
+If you encounter errors such as 'Cannot allocate memory', increase the **CMA** allocation in `/boot/firmware/config.txt`:
 
-As a workaround, changing the camera stream mode from Smart Streaming to Continuous Streaming may resolve the issue. Several users have reported that this restores normal video playback while hardware decoding continues to function correctly. This workaround may not be required on all systems and camera models.
-
+```bash
+dtoverlay=vc4-kms-v3d,cma-512
+```
 :::
 
 # Community Supported
