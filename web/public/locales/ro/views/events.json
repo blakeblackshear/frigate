@@ -76,7 +76,7 @@
     "menuItem": "Vezi previzualizări mișcare",
     "title": "Previzualizări mișcare: {{camera}}",
     "mobileSettingsTitle": "Setări previzualizări mișcare",
-    "mobileSettingsDesc": "Ajustează viteza de redare și estomparea, și alege o dată pentru a revizui clipurile doar cu mișcare.",
+    "mobileSettingsDesc": "Ajustează viteza de redare, întunecarea și decuparea și alege o dată pentru a examina clipurile doar cu mișcare.",
     "dim": "Estompare",
     "dimAria": "Ajustează intensitatea estompării",
     "dimDesc": "Crește intensitatea estompării pentru a mări vizibilitatea zonei de mișcare.",
@@ -89,6 +89,9 @@
     "seekAria": "Derulează player-ul {{camera}} la {{time}}",
     "filter": "Filtru",
     "filterDesc": "Selectează zonele pentru a afișa doar clipurile cu mișcare în acele regiuni.",
-    "filterClear": "Șterge"
+    "filterClear": "Șterge",
+    "crop": "Decupează după filtru",
+    "cropDesc": "Mărește previzualizările pe zonele de filtrare selectate în loc să afișeze cadrul complet.",
+    "cropAria": "Comută decuparea previzualizărilor pe zonele filtrate"
   }
 }

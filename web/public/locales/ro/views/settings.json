@@ -1333,7 +1333,7 @@
         "webuiUrlInvalid": "Trebuie să fie un URL valid (de exemplu, https://exemplu.com).",
         "dashboardLabel": "Arată pe dashboard-ul Live",
         "reviewLabel": "Arată în Revizuire",
-        "dashboardHelp": "Arată această cameră pe dashboard-ul Live.",
+        "dashboardHelp": "Afișează această cameră pe tabloul de bord Live implicit „Toate camerele”. Aceasta rămâne disponibilă în restul interfeței, inclusiv în grupurile de camere.",
         "reviewHelp": "Arată această cameră în revizuiri, inclusiv filtrul de camere, revizuirea mișcărilor și vizualizarea istoricului."
       },
       "label": "Stare cameră",
@@ -1379,7 +1379,7 @@
     "deleteCameraDialog": {
       "title": "Șterge camera",
       "description": "Ștergerea unei camere va elimina definitiv toate înregistrările, obiectele urmărite și configurația pentru acea cameră. Orice fluxuri go2rtc asociate cu această cameră ar putea necesita în continuare eliminarea manuală.",
-      "selectPlaceholder": "Alege camera...",
+      "selectPlaceholder": "Alege camera…",
       "confirmTitle": "Ești sigur?",
       "confirmWarning": "Ștergerea <strong>{{cameraName}}</strong> nu poate fi anulată.",
       "deleteExports": "Șterge și exporturile pentru această cameră",

@@ -867,8 +867,8 @@
             "description": "Ordine numerică folosită pentru sortarea camerei în interfață (dashboard și liste); numerele mai mari apar mai târziu."
         },
         "dashboard": {
-            "label": "Arată în interfață",
-            "description": "Comută vizibilitatea acestei camere peste tot în interfața Frigate. Dezactivarea acestei opțiuni va necesita editarea manuală a configurației pentru a vedea din nou camera în interfață."
+            "label": "Afișează pe tabloul de bord Live",
+            "description": "Comută dacă această cameră este vizibilă pe tabloul de bord Live implicit „Toate camerele”. Camera rămâne disponibilă în restul interfeței, inclusiv în grupurile de camere și în setări."
         },
         "review": {
             "label": "Arată în Revizuire",
