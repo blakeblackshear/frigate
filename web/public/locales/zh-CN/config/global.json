@@ -1405,7 +1405,7 @@
             },
             "model_type": {
                 "label": "目标检测模型类型",
-                "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+                "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas、yolo-generic、rfdetr和dfine）。"
             }
         },
         "model_path": {
@@ -1454,7 +1454,7 @@
         },
         "model_type": {
             "label": "目标检测模型类型",
-            "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas）。"
+            "description": "某些检测器用于优化的检测器模型架构类型（ssd、yolox、yolonas、yolo-generic、rfdetr和dfine）。"
         }
     },
     "genai": {
@@ -1788,7 +1788,7 @@
             "description": "控制界面中显示的录像预览质量的设置。",
             "quality": {
                 "label": "预览质量",
-                "description": "预览质量级别（very_low、low、medium、high、very_high）。"
+                "description": "预览质量级别（非常低、低、中等、高、非常高）。"
             }
         },
         "enabled_in_config": {
@@ -2214,8 +2214,8 @@
             "description": "用于在页面中排序摄像头的顺序（只会影响默认仪表板和列表）；数值越大则在越后面。"
         },
         "dashboard": {
-            "label": "在页面中显示",
-            "description": "切换此摄像头在 Frigate 页面中是否可见。禁用后需要手动编辑配置才能再次在页面中查看此摄像头。"
+            "label": "在实时监控仪表盘中显示",
+            "description": "切换此摄像头是否在默认的“所有摄像头”实时监控仪表盘上可见。该摄像头在页面的其他位置（例如摄像头分组和设置页）仍然可见。"
         },
         "review": {
             "label": "在核查中显示",
