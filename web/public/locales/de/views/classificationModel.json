@@ -64,7 +64,20 @@
     "title": "Klassifikationsmodell bearbeiten",
     "descriptionState": "Bearbeite die Klassen für dieses Zustandsklassifikationsmodell. Änderungen erfordern ein erneutes Trainieren des Modells.",
     "descriptionObject": "Bearbeite den Objekttyp und Klassifizierungstyp für dieses Objektklassifikationsmodell.",
-    "stateClassesInfo": "Hinweis: Die Änderung der Statusklassen erfordert ein erneutes Trainieren des Modells mit den aktualisierten Klassen."
+    "stateClassesInfo": "Modell aktualisiert. Trainieren Sie das Modell neu, damit die Klassenänderungen wirksam werden.",
+    "enabled": "Aktiviert",
+    "enabledDesc": "Dieses Modell ausführen. Bei Deaktivierung wird es nicht mehr ausgeführt und führt keine Klassifizierung mehr durch.",
+    "saveAttempts": "Versuche speichern",
+    "saveAttemptsDesc": "Anzahl der für die Übersicht der letzten Klassifizierungen zu speichernden Bilder.",
+    "motion": "Bei Bewegung ausführen",
+    "motionDesc": "Klassifizierung bei Bewegung im konfigurierten Bildausschnitt ausführen.",
+    "interval": "Intervall",
+    "intervalDesc": "Sekundenabstand zwischen regelmäßigen Klassifizierungsläufen. Leer lassen, um die Klassifizierung nur bei Bewegung auszuführen.",
+    "intervalPlaceholder": "Kein Intervall",
+    "errors": {
+      "saveAttemptsInvalid": "Sparversuche müssen eine ganze Zahl von 0 oder mehr sein",
+      "intervalInvalid": "Intervall muss eine ganze Nummer sein größer als 0"
+    }
   },
   "deleteDatasetImages": {
     "title": "Datensatz Bilder löschen",
@@ -195,5 +208,6 @@
   },
   "none": "Keiner",
   "reclassifyImageAs": "Bild neu klassifizieren als:",
-  "reclassifyImage": "Bild neu klassifizieren"
+  "reclassifyImage": "Bild neu klassifizieren",
+  "disabled": "Deaktiviert"
 }

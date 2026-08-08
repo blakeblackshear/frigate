@@ -570,7 +570,7 @@
     "openCameraWebUI": "Web-Benutzeroberfläche von {{camera}} öffnen",
     "audio": {
       "title": "Audio",
-      "noAudioDetections": "Keine Audioerkennungen",
+      "noAudioDetections": "Kein Audio-Ereignis erkannt",
       "score": "Punktzahl",
       "currentRMS": "Aktueller Effektivwert",
       "currentdbFS": "Aktuelle dbFS"
@@ -1383,7 +1383,7 @@
         "webuiUrlHelp": "URL, um die Web-Benutzeroberfläche der Kamera direkt aus der Debug-Ansicht aufzurufen. Lassen Sie das Feld leer, um den Link zu deaktivieren.",
         "webuiUrlInvalid": "Es muss sich um eine gültige URL handeln (z. B. https://example.com).",
         "dashboardLabel": "Im Live-Dashboard anzeigen",
-        "dashboardHelp": "Diese Kamera im Live-Dashboard anzeigen.",
+        "dashboardHelp": "Zeige diese Kamera auf dem Standard Alle Kameras live dashboard. Es bleibt überall verfügbar, einschließlich Kameragruppen.",
         "reviewLabel": "In der Überprüfung anzeigen",
         "reviewHelp": "Zeige diese Kamera in der Übersicht an, einschließlich des Kamerafilters, der Bewegungsübersicht und der Verlaufsansicht."
       },
@@ -1430,7 +1430,7 @@
     "deleteCameraDialog": {
       "title": "Kamera löschen",
       "description": "Durch das Löschen einer Kamera werden alle Aufzeichnungen, erfassten Objekte und Konfigurationseinstellungen für diese Kamera endgültig entfernt. Alle mit dieser Kamera verbundenen go2rtc-Streams müssen möglicherweise noch manuell entfernt werden.",
-      "selectPlaceholder": "Kamera auswählen...",
+      "selectPlaceholder": "Kamera auswählen…",
       "confirmTitle": "Bist du dir sicher?",
       "confirmWarning": "Das Löschen von <strong>{{cameraName}}</strong> kann nicht rückgängig gemacht werden.",
       "deleteExports": "Lösche auch die Exporte für diese Kamera",
@@ -1720,7 +1720,14 @@
       "keyLabel": "Schlüssel",
       "valueLabel": "Wert",
       "keyPlaceholder": "Neuer Schlüssel",
-      "remove": "Entfernen"
+      "remove": "Entfernen",
+      "providerNameLabel": "Name des Anbieters",
+      "providerNamePlaceholder": "z.B. openai",
+      "variableNameLabel": "Variabler Name",
+      "variableNamePlaceholder": "z.B. MY_VARIABLE",
+      "loggerNameLabel": "Name des Loggers",
+      "loggerNamePlaceholder": "z.B. frigate.record",
+      "keyPatternError": "Verwenden Sie nur Buchstaben, Zahlen, Bindestriche und Unterstriche (keine Leerzeichen)"
     },
     "timezone": {
       "defaultOption": "Zeitzone des Browsers verwenden"

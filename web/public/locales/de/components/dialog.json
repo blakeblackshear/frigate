@@ -30,6 +30,9 @@
           "ask_a": "Ist dieses Objekt ein <code>{{label}}</code>?",
           "ask_an": "Ist dieses Objekt ein <code>{{label}}</code>?",
           "ask_full": "Ist dieses Objekt ein <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "toast": {
+          "error": "Übermittlung an Frigate+ fehlgeschlagen. Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut."
         }
       },
       "submitToPlus": {
@@ -65,7 +68,8 @@
       "error": {
         "endTimeMustAfterStartTime": "Die Endzeit darf nicht vor der Startzeit liegen",
         "failed": "Fehler beim Export in die Warteschlange: {{error}}",
-        "noVaildTimeSelected": "Kein gültiger Zeitraum ausgewählt"
+        "noVaildTimeSelected": "Kein gültiger Zeitraum ausgewählt",
+        "noValidTimeSelected": "Kein gültiger Zeitraum ausgewählt"
       },
       "success": "Export erfolgreich gestartet. Die Datei befindet sich auf der Exportseite.",
       "view": "Ansicht",
