@@ -502,7 +502,7 @@
             },
             "model_type": {
                 "label": "物体検知モデル種別",
-                "description": "一部の検出器が最適化に使用する検知モデルのアーキテクチャ種別（ssd, yolox, yolonas）。"
+                "description": "一部の検出器が最適化に使用する検知モデルのアーキテクチャ種別（ssd, yolox, yolonas, yolo-generic, rfdetr, dfine）。"
             }
         },
         "model_path": {
@@ -675,7 +675,7 @@
         },
         "model_type": {
             "label": "物体検知モデル種別",
-            "description": "一部の検出器が最適化に使用する検知モデルのアーキテクチャ種別（ssd, yolox, yolonas）。"
+            "description": "一部の検出器が最適化に使用する検知モデルのアーキテクチャ種別（ssd, yolox, yolonas, yolo-generic, rfdetr, dfine）。"
         }
     },
     "genai": {
@@ -1555,7 +1555,7 @@
             "description": "UI 内でのカメラの並び順に使用される数値（デフォルトダッシュボードとリスト）。値が大きいほど後ろに表示されます。"
         },
         "dashboard": {
-            "label": "UI に表示",
+            "label": "ライブダッシュボードに表示",
             "description": "このカメラを Frigate UI 全体に表示するかを切り替えます。無効化した場合、再表示するには設定ファイルを手動編集する必要があります。"
         },
         "review": {
