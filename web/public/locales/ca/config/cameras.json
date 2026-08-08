@@ -867,8 +867,8 @@
             "description": "Ordre numèric utilitzat per ordenar la càmera a la interfície d'usuari (taulell de control i llistes per defecte); els nombres més grans apareixen més tard."
         },
         "dashboard": {
-            "label": "Mostra a l'interfície d'usuari",
-            "description": "Estableix si aquesta càmera és visible a tot arreu a la interfície d'usuari de la Frigate. Desactivar això requerirà editar manualment la configuració per tornar a veure aquesta càmera a la interfície d'usuari."
+            "label": "Mostra al tauler en directe",
+            "description": "Alterna si aquesta càmera és visible al tauler de control en directe de totes les càmeres per defecte. La càmera roman disponible a tot arreu a la interfície d'usuari, inclosos els grups i la configuració de la càmera."
         },
         "review": {
             "label": "Mostra en la revisió",
