@@ -1123,7 +1123,7 @@
             },
             "model_type": {
                 "label": "Typ des Objekterkennungsmodells",
-                "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas), der von einigen Detektoren zur Optimierung verwendet wird."
+                "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine), der von einigen Detektoren zur Optimierung verwendet wird."
             }
         },
         "model_path": {
@@ -1400,6 +1400,9 @@
             "max_concurrent": {
                 "label": "Maximale Anzahl gleichzeitiger Exporte",
                 "description": "Maximale Anzahl der gleichzeitig zu verarbeitenden Exportaufträge."
+            },
+            "chapters": {
+                "label": "Kapitel-Metadaten zur Einbettung in exportierte Aufzeichnungen"
             }
         },
         "preview": {
@@ -1729,7 +1732,7 @@
         },
         "model_type": {
             "label": "Typ des Objekterkennungsmodells",
-            "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas), der von einigen Detektoren zur Optimierung verwendet wird."
+            "description": "Typ der Detektor-Modellarchitektur (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine), der von einigen Detektoren zur Optimierung verwendet wird."
         }
     },
     "genai": {
@@ -1932,8 +1935,8 @@
             "description": "Numerische Reihenfolge, nach der die Kamera in der Benutzeroberfläche sortiert wird (Standard-Dashboard und Listen); höhere Zahlen erscheinen später."
         },
         "dashboard": {
-            "label": "In der Benutzeroberfläche anzeigen",
-            "description": "Schalte ein, ob diese Kamera überall in der Benutzeroberfläche von „Frigate“ sichtbar ist. Wenn du diese Option deaktivierst, musst du die Konfiguration manuell bearbeiten, um diese Kamera wieder in der Benutzeroberfläche anzuzeigen."
+            "label": "Im Live-Dashboard anzeigen",
+            "description": "Legt fest, ob diese Kamera im Live-Dashboard ‚Alle Kameras‘ angezeigt wird. Die Kamera bleibt in allen anderen Bereichen der Benutzeroberfläche verfügbar, einschließlich Kamera-Gruppen und Einstellungen."
         },
         "review": {
             "label": "In der Überprüfung anzeigen",
