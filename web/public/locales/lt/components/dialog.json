@@ -20,6 +20,9 @@
         },
         "state": {
           "submitted": "Pateikta"
+        },
+        "toast": {
+          "error": "Pateikti į Frigate+ nepavyko. Prašau patikrinkite savo tinklo nustatymus ir bandykite dar kartą."
         }
       },
       "submitToPlus": {
@@ -79,7 +82,16 @@
         "noVaildTimeSelected": "Nėra pasirinkto tinkamo laikotarpio"
       },
       "view": "Žiūrėti"
-    }
+    },
+    "case": {
+      "newCaseOption": "Kurti naują užklausą",
+      "newCaseNamePlaceholder": "Naujos užklausos pavadinimas",
+      "newCaseDescriptionPlaceholder": "Užklausos aprašymas",
+      "label": "Užklausa",
+      "nonAdminHelp": "Nauja užklausa bus sukurta šiems išrašams",
+      "placeholder": "Pasirinkti užklausą"
+    },
+    "queueing": "Sudaroma išrašų eilė...."
   },
   "recording": {
     "button": {
