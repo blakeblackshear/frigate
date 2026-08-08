@@ -28,7 +28,8 @@
     "triggers": "Trigeriai",
     "roles": "Rolės",
     "cameraManagement": "Valdymas",
-    "cameraReview": "Peržiūra"
+    "cameraReview": "Peržiūra",
+    "profiles": "Profiliai"
   },
   "dialog": {
     "unsavedChanges": {

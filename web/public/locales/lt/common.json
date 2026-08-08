@@ -147,7 +147,19 @@
     "deleteNow": "Trinti Dabar",
     "next": "Kitas",
     "off": "OFF",
-    "continue": "Tęsti"
+    "continue": "Tęsti",
+    "add": "Pridėti",
+    "applying": "Pritaikoma…",
+    "undo": "Grąžinti",
+    "copiedToClipboard": "Nukopijuotą į iškarpinę",
+    "modified": "Modifikuota",
+    "overridden": "Perrašytas",
+    "resetToGlobal": "Sugąžinti į Globalius",
+    "resetToDefault": "Sugrąžinti į Numatytuosius",
+    "saveAll": "Išsaugoti Viską",
+    "savingAll": "Viskas Išsaugoma…",
+    "undoAll": "Grąžinti Viską",
+    "retry": "Pakartoti"
   },
   "menu": {
     "system": "Sistema",
@@ -199,7 +211,10 @@
       "bg": "Bulgarų",
       "gl": "Galician",
       "id": "Indonesian",
-      "ur": "Urdu"
+      "ur": "Urdu",
+      "zhHant": "Tradicinė Kinijos",
+      "hr": "Kroatų",
+      "bs": "Bosnių"
     },
     "appearance": "Išvaizda",
     "darkMode": {
@@ -249,7 +264,11 @@
       "setPassword": "Nustatyti Slaptažodi"
     },
     "uiPlayground": "UI Playground",
-    "classification": "Klasifikavimas"
+    "classification": "Klasifikavimas",
+    "profiles": "Profiliai",
+    "actions": "Veiksmai",
+    "features": "Ypatybės",
+    "chat": "Pokalbiai"
   },
   "toast": {
     "copyUrlToClipboard": "URL nukopijuotas į atmintį.",
@@ -258,7 +277,8 @@
       "error": {
         "title": "Nepavyko išsaugoti konfiguracijos pakeitimų: {{errorMessage}}",
         "noMessage": "Nepavyko išsaugoti konfiguracijos pakeitimų"
-      }
+      },
+      "success": "Konfiguracijos pokyčiai išsaugoti sėkmingai."
     }
   },
   "role": {
@@ -302,5 +322,10 @@
   "field": {
     "optional": "Pasirinktinis",
     "internalID": "Vidinį ID Frigate naudoja konfiguracijoje ir duombazėje"
+  },
+  "no_items": "Nėra įrašų",
+  "validation_errors": "Tikrinimo Klaidos",
+  "credentialField": {
+    "savedPlaceholder": "Išsaugota - palikite tuščia kad išliktų esamas"
   }
 }
