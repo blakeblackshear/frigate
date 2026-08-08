@@ -81,7 +81,7 @@
     },
     "go2rtc": {
         "label": "go2rtc",
-        "description": "Innstillinger for den integrerte go2rtc-tjenesten for videreformidling og oversettelse av direktestrømmer."
+        "description": "Innstillinger for den integrerte go2rtc-tjenesten for viderestrømming og oversettelse av direktestrømmer."
     },
     "mqtt": {
         "label": "MQTT",
@@ -586,7 +586,7 @@
             "description": "Modus for å inkludere kameraer i Fugleperspektiv: 'objects', 'motion' eller 'continuous'."
         },
         "restream": {
-            "label": "Videreformidle RTSP",
+            "label": "Viderestrøm RTSP",
             "description": "Videreformidle Fugleperspektiv-utdataen som en RTSP-strøm; aktivering av dette vil holde Fugleperspektiv kjørende kontinuerlig."
         },
         "width": {
@@ -756,10 +756,10 @@
     },
     "live": {
         "label": "Direkteavspilling",
-        "description": "Innstillinger for å kontrollere oppløsning og kvalitet på jsmpeg-direktestrømmer. Dette påvirker ikke kameraer som bruker go2rtc for direktevisning.",
+        "description": "Innstillinger for å kontrollere oppløsning og kvalitet på jsmpeg-direktestrømmer. Dette påvirker ikke vderestrømmede kameraer som bruker go2rtc for direktevisning.",
         "streams": {
             "label": "Navn på direktestrømmer",
-            "description": "Kobling mellom konfigurerte strøm-navn og restream/go2rtc-navn brukt for direkteavspilling."
+            "description": "Kobling mellom konfigurerte strøm-navn og viderestrøm/go2rtc-navn brukt for direkteavspilling."
         },
         "height": {
             "label": "Direktevisningshøyde",

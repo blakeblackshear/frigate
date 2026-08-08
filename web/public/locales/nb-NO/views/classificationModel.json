@@ -188,9 +188,23 @@
     "title": "Rediger klassifiseringsmodell",
     "descriptionState": "Rediger klassene for denne tilstandsklassifiseringsmodellen. Endringer vil kreve at modellen trenes på nytt.",
     "descriptionObject": "Rediger objekttypen og klassifiseringstypen for denne objektklassifiseringsmodellen.",
-    "stateClassesInfo": "Modellen ble oppdatert. Tren modellen på nytt for at endringene i klassene skal bli iverksatt."
+    "stateClassesInfo": "Modellen ble oppdatert. Tren modellen på nytt for at endringene i klassene skal bli iverksatt.",
+    "enabled": "Aktivert",
+    "enabledDesc": "Kjør denne modellen. Når den er deaktivert, stopper den og vil ikke lenger klassifisere.",
+    "saveAttempts": "Lagringsforsøk",
+    "saveAttemptsDesc": "Antall bilder fra klassifiseringsforsøk som skal lagres for visning av nylige klassifiseringer.",
+    "motion": "Utfør ved bevegelse",
+    "motionDesc": "Utfør klassifisering når bevegelse registreres innenfor det konfigurerte utsnittet.",
+    "interval": "Intervall",
+    "intervalDesc": "Sekunder mellom periodiske klassifiseringskjøringer. La stå tom for å kun kjøre ved bevegelse.",
+    "intervalPlaceholder": "Ingen intervall",
+    "errors": {
+      "saveAttemptsInvalid": "Lagringsforsøk må være et heltall på 0 eller høyere",
+      "intervalInvalid": "Intervall må være et heltall større enn 0"
+    }
   },
   "none": "Ingen",
   "reclassifyImageAs": "Reklassifiser bilde som:",
-  "reclassifyImage": "Reklassifiser bilde"
+  "reclassifyImage": "Reklassifiser bilde",
+  "disabled": "Deaktivert"
 }

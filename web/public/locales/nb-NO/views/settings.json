@@ -1305,7 +1305,7 @@
       },
       "featuresPopover": {
         "title": "Strømfunksjoner",
-        "description": "Bruk go2rtc-restrømming for å redusere antall tilkoblinger til kameraet."
+        "description": "Bruk go2rtc-viderestrømming for å redusere antall tilkoblinger til kameraet."
       }
     },
     "step4": {
@@ -1382,7 +1382,7 @@
       "saving": "Lagrer…",
       "saved": "Lagret",
       "label": "Kamerastatus",
-      "description": "Angi driftsstatus for hvert kamera.<br /><br /><strong>På</strong>: Strømmer behandles normalt.<br /><strong>Av</strong>: Setter behandlingen midlertidig på pause. Vedvarer ikke etter omstart av Frigate.<br /><strong>Deaktivert</strong>: Stopper behandlingen og lagrer endringen i konfigurasjonen din. En omstart kreves for å aktivere et deaktivert kamera igjen.<br /><br /><em>Merk: Deaktivering påvirker ikke videreformidling (restream) i go2rtc.</em><br /><br />Dra i ikonet for å endre rekkefølgen på aktive kameraer slik de vises i grensesnittet, inkludert Live-dashbordet og rullegardinmenyene for kameravalg.",
+      "description": "Angi driftsstatus for hvert kamera.<br /><br /><strong>På</strong>: Strømmer behandles normalt.<br /><strong>Av</strong>: Setter behandlingen midlertidig på pause. Vedvarer ikke etter omstart av Frigate.<br /><strong>Deaktivert</strong>: Stopper behandlingen og lagrer endringen i konfigurasjonen din. En omstart kreves for å aktivere et deaktivert kamera igjen.<br /><br /><em>Merk: Deaktivering påvirker ikke viderestrømming (restream) i go2rtc.</em><br /><br />Dra i ikonet for å endre rekkefølgen på aktive kameraer slik de vises i grensesnittet, inkludert Live-dashbordet og rullegardinmenyene for kameravalg.",
       "disabledSubheading": "Deaktivert i konfigurasjonen",
       "status": {
         "on": "På",
@@ -1670,8 +1670,8 @@
         "preset-rtmp-generic": "RTMP (Generisk)",
         "preset-rtsp-blue-iris": "RTSP - Blue Iris",
         "preset-rtsp-udp": "RTSP - UDP",
-        "preset-rtsp-restream": "RTSP - Videreformidling fra go2rtc",
-        "preset-rtsp-restream-low-latency": "RTSP - Videreformidling fra go2rtc (lav forsinkelse)",
+        "preset-rtsp-restream": "RTSP - Viderestrømming fra go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - Viderestrømming fra go2rtc (lav forsinkelse)",
         "preset-rtsp-generic": "RTSP (Generisk)",
         "preset-vaapi": "VAAPI (Intel/AMD GPU)"
       },
@@ -1725,7 +1725,11 @@
       "valueLabel": "Verdi",
       "providerNamePlaceholder": "f.eks. openai",
       "variableNameLabel": "Variabelnavn",
-      "variableNamePlaceholder": "f.eks MIN_VARIABEL"
+      "variableNamePlaceholder": "f.eks MIN_VARIABEL",
+      "providerNameLabel": "Tilbydernavn",
+      "loggerNameLabel": "Loggernavn",
+      "loggerNamePlaceholder": "f.eks. frigate.record",
+      "keyPatternError": "Bruk kun bokstaver, tall, bindestreker og understreker (ingen mellomrom)"
     },
     "roleMap": {
       "remove": "Fjern",
@@ -1775,7 +1779,7 @@
     "cameraInputs": {
       "itemTitle": "Strøm {{index}}",
       "sourceMode": {
-        "restream": "Videreformidling / Restream (go2rtc)",
+        "restream": "Viderestrøm (go2rtc)",
         "manual": "Manuell kildesti",
         "go2rtcStreamLabel": "go2rtc-strøm",
         "go2rtcStreamPlaceholder": "Velg en go2rtc-strøm",
@@ -1860,7 +1864,7 @@
     }
   },
   "go2rtcStreams": {
-    "description": "Administrer go2rtc-strømkonfigurasjoner for videreformidling av kamera-strømmer. Hver strøm har ett navn og én eller flere kilde-URL-er.",
+    "description": "Administrer go2rtc-strømkonfigurasjoner for viderestrømming av kamera-strømmer. Hver strøm har ett navn og én eller flere kilde-URL-er.",
     "ffmpeg": {
       "hardwareAuto": "Automatisk (anbefalt)",
       "useFfmpegModule": "Bruk kompatibilitetsmodus (ffmpeg)",
@@ -2010,7 +2014,8 @@
       "inputDimensionsNotDetectResolution": "Modellens inndata for bredde og høyde er dimensjonene til selve objektdeteksjonsmodellen, ikke kameraets deteksjonsoppløsning. De skal samsvare med dimensjonene til modellen du bruker – vanligvis en kvadratisk størrelse som 320x320 eller 640x640."
     },
     "ffmpeg": {
-      "hwaccelManualNotRecommended": "Manuelle argumenter for maskinvareakselerasjon anbefales ikke. Med mindre det foreligger et spesifikt behov, bør du velge forhåndsinnstillingen som samsvarer med maskinvaren din."
+      "hwaccelManualNotRecommended": "Manuelle argumenter for maskinvareakselerasjon anbefales ikke. Med mindre det foreligger et spesifikt behov, bør du velge forhåndsinnstillingen som samsvarer med maskinvaren din.",
+      "inputsMissingGo2rtcStream": "En innstrøm nedenfor peker til en go2rtc-viderestrøm som ikke lenger eksisterer. Velg en eksisterende viderestrømeller oppgi kameraets URL manuelt, ellers vil ikke kameraet klarer å koble til."
     },
     "onvif": {
       "autotrackingNoZones": "Autosporing krever minst én sone. Definer en sone for dette kameraet under Masker / Soner, og angi den deretter som en påkrevd sone nedenfor."
