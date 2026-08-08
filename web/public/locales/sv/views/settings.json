@@ -12,7 +12,8 @@
     "motionTuner": "Rörelsejustering - Frigate",
     "object": "Felsökning - Frigate",
     "cameraManagement": "Hantera kameror - Frigate",
-    "cameraReview": "Kameragranskningsinställningar - Frigate"
+    "cameraReview": "Kameragranskningsinställningar - Frigate",
+    "profiles": "Profiler - Frigate"
   },
   "general": {
     "title": "Inställningar för användargränssnittet",
@@ -152,7 +153,12 @@
     "roles": "Roller",
     "cameraManagement": "Kamerahantering",
     "cameraReview": "Granskning",
-    "profiles": "Profiler"
+    "profiles": "Profiler",
+    "maintenance": "Underhåll",
+    "cameraObjects": "Föremål",
+    "cameraUi": "Kameragränssnitt",
+    "cameraFaceRecognition": "Ansiktsigenkänning",
+    "cameraRecording": "Inspelning"
   },
   "dialog": {
     "unsavedChanges": {
@@ -1239,6 +1245,14 @@
       "toast": {
         "success": "Konfigurationen för granskning av klassificering har sparats. Starta om Frigate för att tillämpa ändringarna."
       }
+    }
+  },
+  "saveAllPreview": {
+    "value": {
+      "reset": "Återställ"
+    },
+    "field": {
+      "label": "Fält"
     }
   }
 }
