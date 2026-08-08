@@ -114,11 +114,15 @@ services:
 
 The following sections contain additional setup steps that are only required if you are using specific hardware. If you are not using any of these hardware types, you can skip to the [Docker](#docker) installation section.
 
-### Raspberry Pi 3/4
+### Raspberry Pi 3/4/5
 
-By default, the Raspberry Pi limits the amount of memory available to the GPU. In order to use ffmpeg hardware acceleration, you must increase the available memory by setting `gpu_mem` to the maximum recommended value in `config.txt` as described in the [official docs](https://www.raspberrypi.org/documentation/computers/config_txt.html#memory-options).
+By default, all variants of Raspberry Pi 3 and Raspberry Pi 4 limit the amount of memory available to the GPU. In order to use ffmpeg hardware acceleration, you must increase the available memory by setting `gpu_mem` to the maximum recommended value in `config.txt` as described in the [official docs](https://www.raspberrypi.com/documentation/computers/legacy_config_txt.html#legacy-memory-options)
 
-Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with its own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
+Raspberry Pi 5 does not allocate GPU memory on behalf of the OS, so the above settings have no effect.
+
+Hardware acceleration support differs between Raspberry Pi generations, and Raspberry Pi 3/4 and Raspberry Pi 5 require different configuration steps. See the [Hardware Acceleration](https://docs.frigate.video/configuration/hardware_acceleration_video/) section of the Frigate documentation for the recommended Raspberry Pi FFmpeg presets and configuration examples.
+
+Additionally, USB peripherals such as external hard drives, USB Coral TPUs, and other accessories can significantly increase the total power consumption of a Raspberry Pi system. Insufficient power delivery may result in instability, unexpected reboots, USB device disconnects, and other issues. You may need to purchase an external USB hub with its own power supply. Some users have reported success with [this](https://amzn.to/3a2mH0P) (affiliate link).
 
 ### Hailo-8
 

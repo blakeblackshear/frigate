@@ -33,7 +33,14 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 **Raspberry Pi 3/4**
 
-- [Raspberry Pi](#raspberry-pi-34): Frigate can utilize the media engine in the Raspberry Pi 3 and 4 to slightly accelerate video decoding.
+- [Raspberry Pi 3/4](#raspberry-pi-34): Frigate can utilize the media engine in the Raspberry Pi 3 and 4 to slightly accelerate video decoding.
+
+  - **Raspberry Pi 3:** H.264 only
+  - **Raspberry Pi 4:** H.264 and H.265 (HEVC)
+
+**Raspberry Pi 5**
+
+- [Raspberry Pi 5](#raspberry-pi-5): Hardware decoding is only available for H.265 (HEVC) streams. H.264 streams are decoded in software on the CPU.
 
 **Nvidia Jetson** <CommunityBadge />
 
@@ -289,26 +296,17 @@ These instructions were originally based on the [Jellyfin documentation](https:/
 Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
 If you are using the HA App, you may need to use the full access variant and turn off _Protection mode_ for hardware acceleration.
 
-<ConfigTabs>
-<TabItem value="ui">
-
-Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `Raspberry Pi (H.264)` (for H.264 streams) or `Raspberry Pi (H.265)` (for H.265/HEVC streams). For per-camera overrides, navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" />.
-
-</TabItem>
-<TabItem value="yaml">
+To enable hardware decoding, configure Frigate as follows:
 
 ```yaml
-# if you want to decode a h264 stream
+# Raspberry Pi 3/4: decode H.264 stream
 ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 
-# if you want to decode a h265 (hevc) stream
+# Raspberry Pi 4 only: decode H.265 (HEVC) stream
 ffmpeg:
   hwaccel_args: preset-rpi-64-h265
 ```
-
-</TabItem>
-</ConfigTabs>
 
 :::note
 
@@ -345,6 +343,52 @@ done
 
 Or map in all the `/dev/video*` devices.
 
+:::
+
+## Raspberry Pi 5
+
+To enable H.265 (HEVC) hardware decoding on Raspberry Pi 5, configure Frigate as follows:
+
+```yaml
+ffmpeg:
+  hwaccel_args: -hwaccel drm
+```
+:::note
+
+If running Frigate through Docker, you either need to run in privileged mode or map the required video and media devices into the container.
+
+```yaml
+services:
+  frigate:
+    devices:
+      - /dev/media0:/dev/media0
+      - /dev/media1:/dev/media1
+      - /dev/media2:/dev/media2
+      - /dev/video19:/dev/video19
+```
+
+Device numbers may vary between Raspberry Pi OS releases and kernel versions.
+The Raspberry Pi 5 HEVC decoder devices can be identified with:
+
+```bash
+v4l2-ctl --list-devices
+```
+
+:::warning Known issues
+
+On some configurations, particularly when running **Raspberry Pi OS Trixie with Linux kernel 6.18**, H.265 (HEVC) hardware decoding may cause **green or blank live-view previews** and **object detection may stop working**. Switching the camera from **Smart Streaming** to **Continuous Streaming** may restore the live-view preview, but it does **not** resolve the detection issue.
+
+Reports from users running **Raspberry Pi OS Bookworm with kernel 6.12** indicate that the same configuration can work correctly, including **hardware decoding, detections, recordings, and live streaming**.
+
+:::
+
+:::note
+
+If you encounter errors such as 'Cannot allocate memory', increase the **CMA** allocation in the **Raspberry Pi OS configuration** by editing '/boot/firmware/config.txt' and reboot the system to take effect:
+
+```bash
+dtoverlay=vc4-kms-v3d,cma-512
+```
 :::
 
 # Community Supported
