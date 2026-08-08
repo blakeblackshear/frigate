@@ -390,6 +390,18 @@ Topic to turn audio detection for a camera on and off. Expected values are `ON` 
 
 Topic with current state of audio detection for a camera. Published values are `ON` and `OFF`.
 
+### `frigate/<camera_name>/audio_transcription/set`
+
+Topic to turn [live audio transcription](/configuration/audio_detectors#live-transcription) for a camera on and off. Expected values are `ON` and `OFF`. Transcribed text is published to `frigate/<camera_name>/audio/transcription`.
+
+`ON` is ignored unless audio transcription is enabled in the config for the camera. Unlike the other camera toggles, this one is not persisted across Frigate restarts.
+
+**NOTE:** Requires audio detection and transcription to be enabled
+
+### `frigate/<camera_name>/audio_transcription/state`
+
+Topic with current state of live audio transcription for a camera. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/recordings/set`
 
 Topic to turn recordings for a camera on and off. Expected values are `ON` and `OFF`. The change is persisted across Frigate restarts (see [Runtime toggle persistence](/configuration/live#runtime-toggle-persistence)).

@@ -78,6 +78,11 @@ class MqttClient(Communicator):
                 retain=True,
             )
             self.publish(
+                f"{camera_name}/audio_transcription/state",
+                "ON" if camera.audio_transcription.live_enabled else "OFF",
+                retain=True,
+            )
+            self.publish(
                 f"{camera_name}/detect/state",
                 "ON" if camera.detect.enabled else "OFF",
                 retain=True,
@@ -258,6 +263,7 @@ class MqttClient(Communicator):
             "snapshots",
             "detect",
             "audio",
+            "audio_transcription",
             "motion",
             "improve_contrast",
             "ptz_autotracker",

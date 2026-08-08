@@ -256,7 +256,7 @@ The only field that is valid at the camera level is `enabled`.
 
 #### Live transcription
 
-The single camera Live view in the Frigate UI supports live transcription of audio for streams defined with the `audio` role. Use the Enable/Disable Live Audio Transcription button/switch to toggle transcription processing. When speech is heard, the UI will display a black box over the top of the camera stream with text. The MQTT topic `frigate/<camera_name>/audio/transcription` will also be updated in real-time with transcribed text.
+The single camera Live view in the Frigate UI supports live transcription of audio for streams defined with the `audio` role. Use the Enable/Disable Live Audio Transcription button/switch to toggle transcription processing, or toggle it outside of the UI with the [`frigate/<camera_name>/audio_transcription/set`](/integrations/mqtt#frigatecamera_nameaudio_transcriptionset) MQTT topic or the HTTP API. When speech is heard, the UI will display a black box over the top of the camera stream with text. The MQTT topic `frigate/<camera_name>/audio/transcription` will also be updated in real-time with transcribed text.
 
 Results can be error-prone due to a number of factors, including:
 

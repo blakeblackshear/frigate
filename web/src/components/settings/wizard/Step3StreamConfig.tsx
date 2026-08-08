@@ -491,7 +491,7 @@ export default function Step3StreamConfig({
                               </Button>
                             </div>
                           </DrawerTrigger>
-                          <DrawerContent className="mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-2">
+                          <DrawerContent className="mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl">
                             <div className="mt-2">
                               <Command>
                                 <CommandInput
@@ -500,7 +500,7 @@ export default function Step3StreamConfig({
                                   )}
                                   className="h-9"
                                 />
-                                <CommandList>
+                                <CommandList className="px-2">
                                   <CommandEmpty>
                                     {t("cameraWizard.step3.noStreamFound")}
                                   </CommandEmpty>

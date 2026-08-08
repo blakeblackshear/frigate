@@ -35,6 +35,11 @@ logger = logging.getLogger(__name__)
 GRID_SIZE = 8
 
 
+def create_empty_regions_grid() -> list[list[dict[str, Any]]]:
+    """Create a region grid with no learned sizes."""
+    return [[{"sizes": []} for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+
+
 def get_camera_regions_grid(
     name: str,
     detect: DetectConfig,
@@ -47,12 +52,7 @@ def get_camera_regions_grid(
         grid = regions.grid
         last_update = regions.last_update
     except DoesNotExist:
-        grid = []
-        for x in range(GRID_SIZE):
-            row = []
-            for y in range(GRID_SIZE):
-                row.append({"sizes": []})
-            grid.append(row)
+        grid = create_empty_regions_grid()
         last_update = 0
 
     # get events for timeline entries

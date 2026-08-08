@@ -30,6 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { StartExportResponse } from "@/types/export";
 import { ShareTimestampContent } from "./ShareTimestampDialog";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { cn } from "@/lib/utils";
 
 type DrawerMode =
   | "none"
@@ -518,9 +519,9 @@ export default function MobileReviewSettingsDrawer({
   } else if (drawerMode == "filter") {
     content = (
       <div className="scrollbar-container flex h-auto w-full flex-col overflow-y-auto overflow-x-hidden">
-        <div className="relative mb-2 h-8 w-full">
+        <div className="relative mb-4 h-8 w-full">
           <div
-            className="absolute left-0 text-selected"
+            className="absolute left-4 text-selected"
             onClick={() => setDrawerMode("select")}
           >
             {t("button.back", { ns: "common" })}
@@ -548,6 +549,7 @@ export default function MobileReviewSettingsDrawer({
             onUpdateFilter(resetFilter);
           }}
           onClose={() => setDrawerMode("select")}
+          contentClassName="px-4"
         />
       </div>
     );
@@ -685,7 +687,14 @@ export default function MobileReviewSettingsDrawer({
           </Button>
         </DrawerTrigger>
         <DrawerContent
-          className={`mx-1 flex max-h-[80dvh] flex-col items-center gap-2 rounded-t-2xl px-4 pb-4 ${drawerMode == "export" || drawerMode == "debug-replay" ? "overflow-visible" : "overflow-hidden"}`}
+          className={cn(
+            "mx-1 flex max-h-[80dvh] flex-col items-center gap-2 rounded-t-2xl pb-4",
+            // the filter content pads itself so its scrollbar reaches the drawer edge
+            drawerMode != "filter" && "px-4",
+            drawerMode == "export" || drawerMode == "debug-replay"
+              ? "overflow-visible"
+              : "overflow-hidden",
+          )}
         >
           {content}
         </DrawerContent>
