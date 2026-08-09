@@ -178,6 +178,24 @@ class TestUpdateYaml(unittest.TestCase):
         assert data["cameras"]["cam1"]["detect"]["fps"] == 5
         assert "# tuned for the pi" in self._read()
 
+    def test_replace_scalar_with_mapping(self):
+        """Writing a nested field replaces an existing scalar parent."""
+        self._write("birdseye:\n  mode: objects\n")
+
+        update_yaml_file_bulk(
+            self.config_path,
+            {
+                "birdseye.mode.motion": True,
+                "birdseye.mode.objects": True,
+            },
+        )
+
+        data = self._load()
+        assert data["birdseye"]["mode"] == {
+            "motion": True,
+            "objects": True,
+        }
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

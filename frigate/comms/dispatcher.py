@@ -11,7 +11,7 @@ from frigate.camera.activity_manager import AudioActivityManager, CameraActivity
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.runtime_state import RuntimeStatePersistence
 from frigate.comms.webpush import WebPushClient
-from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config import BirdseyeModeConfig, FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdatePublisher,
@@ -882,8 +882,7 @@ class Dispatcher:
     def _on_birdseye_mode_command(self, camera_name: str, payload: str) -> None:
         """Callback for birdseye mode topic."""
 
-        modes_by_payload = {mode.value.upper(): mode for mode in BirdseyeModeEnum}
-        mode = modes_by_payload.get(payload)
+        mode = BirdseyeModeConfig.from_mqtt_payload(payload)
         if mode is None:
             logger.info("Invalid birdseye_mode command: %s", payload)
             return
@@ -904,7 +903,7 @@ class Dispatcher:
             birdseye_settings,
         )
         self.publish(
-            f"{camera_name}/birdseye_mode/state", mode.value.upper(), retain=True
+            f"{camera_name}/birdseye_mode/state", mode.to_mqtt_payload(), retain=True
         )
 
     def _on_camera_notification_command(self, camera_name: str, payload: str) -> None:

@@ -399,7 +399,16 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
                 resp = client.put(
                     "/config/set",
                     json={
-                        "config_data": {"birdseye": {"mode": "continuous"}},
+                        "config_data": {
+                            "birdseye": {
+                                "mode": {
+                                    "continuous": True,
+                                    "motion": False,
+                                    "objects": False,
+                                    "stationary_objects": False,
+                                }
+                            }
+                        },
                         "update_topic": "config/birdseye",
                         "requires_restart": 0,
                     },
@@ -411,7 +420,7 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
                 mock_publisher.publisher.publish.assert_called_once()
                 topic, settings = mock_publisher.publisher.publish.call_args[0]
                 self.assertEqual(topic, "config/birdseye")
-                self.assertEqual(settings.mode.value, "continuous")
+                self.assertEqual(settings.mode.to_mqtt_payload(), "CONTINUOUS")
 
                 published = {
                     call[0][0].camera: call[0][1]
@@ -425,8 +434,12 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
                     )
 
                 # the override survives, the inheriting camera follows global
-                self.assertEqual(published["front_door"].mode.value, "motion")
-                self.assertEqual(published["back_yard"].mode.value, "continuous")
+                self.assertEqual(
+                    published["front_door"].mode.to_mqtt_payload(), "MOTION"
+                )
+                self.assertEqual(
+                    published["back_yard"].mode.to_mqtt_payload(), "CONTINUOUS"
+                )
         finally:
             os.unlink(config_path)
 

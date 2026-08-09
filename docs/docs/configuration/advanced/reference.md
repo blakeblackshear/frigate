@@ -251,12 +251,17 @@ birdseye:
   # Optional: Encoding quality of the mpeg1 feed (default: shown below)
   # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
   quality: 8
-  # Optional: Mode of the view. Available options are: objects, motion, motion_objects, and continuous
-  #   objects - cameras are included if they have had a tracked object within the last 30 seconds
-  #   motion - cameras are included if motion was detected in the last 30 seconds
-  #   motion_objects - cameras are included if motion was detected or an object is being tracked, including stationary objects
-  #   continuous - all cameras are included always
-  mode: objects
+  # Optional: Activity types that include cameras in Birdseye (default: shown below)
+  # Multiple activity types can be enabled at the same time.
+  mode:
+    # Optional: Always include the camera (default: shown below)
+    continuous: False
+    # Optional: Include the camera when motion was detected (default: shown below)
+    motion: False
+    # Optional: Include the camera when an active object was tracked (default: shown below)
+    objects: True
+    # Optional: Include the camera while a stationary object is tracked (default: shown below)
+    stationary_objects: False
   # Optional: Threshold for camera activity to stop showing camera (default: shown below)
   inactivity_threshold: 30
   # Optional: Configure the birdseye layout

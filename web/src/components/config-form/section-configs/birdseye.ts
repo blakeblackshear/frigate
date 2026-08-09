@@ -5,13 +5,18 @@ const birdseye: SectionConfigOverrides = {
     sectionDocs: "/configuration/birdseye",
     messages: [
       {
-        key: "objects-mode-detect-disabled",
-        messageKey: "configMessages.birdseye.objectsModeDetectDisabled",
+        key: "object-tracking-detect-disabled",
+        messageKey: "configMessages.birdseye.objectTrackingDetectDisabled",
         severity: "info",
         condition: (ctx) => {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
+          const mode = ctx.formData?.mode;
+          if (!mode || typeof mode !== "object" || Array.isArray(mode)) {
+            return false;
+          }
+
           return (
-            ctx.formData?.mode === "objects" &&
+            (mode.objects === true || mode.stationary_objects === true) &&
             ctx.fullCameraConfig.detect?.enabled === false
           );
         },
@@ -24,10 +29,10 @@ const birdseye: SectionConfigOverrides = {
     overrideFields: ["enabled", "mode"],
     uiSchema: {
       mode: {
-        "ui:size": "xs",
-        "ui:options": {
-          enumI18nPrefix: "birdseye.trackingMode",
-        },
+        continuous: { "ui:size": "xs" },
+        motion: { "ui:size": "xs" },
+        objects: { "ui:size": "xs" },
+        stationary_objects: { "ui:size": "xs" },
       },
     },
   },
@@ -55,7 +60,6 @@ const birdseye: SectionConfigOverrides = {
     ],
     uiSchema: {
       mode: {
-        "ui:size": "xs",
         "ui:after": { render: "BirdseyeCameraReorder" },
       },
     },

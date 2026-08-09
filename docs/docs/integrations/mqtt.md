@@ -539,21 +539,21 @@ Topic with current state of Birdseye for a camera. Published values are `ON` and
 
 ### `frigate/<camera_name>/birdseye_mode/set`
 
-Topic to set Birdseye mode for a camera. Birdseye offers different modes to customize under which circumstances the camera is shown.
+Topic to set the Birdseye activity types for a camera. Send one uppercase activity type or combine multiple types with commas, for example `MOTION,OBJECTS,STATIONARY_OBJECTS`.
 
-_Note: Changing the value from `CONTINUOUS` -> `MOTION | MOTION_OBJECTS | OBJECTS` will take up to 30 seconds for
+_Note: Changing the value from `CONTINUOUS` to non-continuous activity types will take up to 30 seconds for
 the camera to be removed from the view._
 
-| Command          | Description                                                                      |
-| ---------------- | -------------------------------------------------------------------------------- |
-| `CONTINUOUS`     | Always included                                                                  |
-| `MOTION`         | Shown if motion was detected within the last 30 seconds                          |
-| `MOTION_OBJECTS` | Shown if motion was detected or any object is tracked, including stationary ones |
-| `OBJECTS`        | Shown if an active object was tracked within the last 30 seconds                 |
+| Command              | Description                                                      |
+| -------------------- | ---------------------------------------------------------------- |
+| `CONTINUOUS`         | Always included                                                  |
+| `MOTION`             | Shown if motion was detected within the last 30 seconds          |
+| `OBJECTS`            | Shown if an active object was tracked within the last 30 seconds |
+| `STATIONARY_OBJECTS` | Shown while a stationary object is tracked                       |
 
 ### `frigate/<camera_name>/birdseye_mode/state`
 
-Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `MOTION_OBJECTS`, `OBJECTS`.
+Topic with the current Birdseye activity types for a camera. Multiple enabled types are published as a comma-separated value in the order `OBJECTS`, `MOTION`, `STATIONARY_OBJECTS`, `CONTINUOUS`.
 
 ### `frigate/<camera_name>/notifications/set`
 

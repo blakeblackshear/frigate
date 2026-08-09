@@ -325,7 +325,7 @@ def update_yaml(data, key_path, new_value):
             parent, parent_key = temp[key[0]], key[1]
             temp = temp[key[0]][key[1]]
         else:
-            if key not in temp or temp[key] is None:
+            if key not in temp or not isinstance(temp[key], Mapping):
                 temp[key] = {}
             parent, parent_key = temp, key
             temp = temp[key]
