@@ -170,7 +170,7 @@ class TestConfig(unittest.TestCase):
     def test_override_birdseye(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "birdseye": {"enabled": True, "mode": "continuous"},
+            "birdseye": {"enabled": True, "mode": {"continuous": True}},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -183,7 +183,10 @@ class TestConfig(unittest.TestCase):
                         "width": 1920,
                         "fps": 5,
                     },
-                    "birdseye": {"enabled": False, "mode": "motion"},
+                    "birdseye": {
+                        "enabled": False,
+                        "mode": {"continuous": False, "motion": True},
+                    },
                 }
             },
         }
@@ -199,7 +202,11 @@ class TestConfig(unittest.TestCase):
     def test_override_birdseye_non_inheritable(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "birdseye": {"enabled": True, "mode": "continuous", "height": 1920},
+            "birdseye": {
+                "enabled": True,
+                "mode": {"continuous": True},
+                "height": 1920,
+            },
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -222,7 +229,7 @@ class TestConfig(unittest.TestCase):
     def test_inherit_birdseye(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "birdseye": {"enabled": True, "mode": "continuous"},
+            "birdseye": {"enabled": True, "mode": {"continuous": True}},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -265,7 +272,7 @@ class TestConfig(unittest.TestCase):
         assert not mode.continuous
         assert not mode.objects
 
-    def test_birdseye_allows_no_activity_types(self):
+    def test_birdseye_requires_an_activity_type(self):
         config = {
             **self.minimal,
             "birdseye": {
@@ -278,9 +285,10 @@ class TestConfig(unittest.TestCase):
             },
         }
 
-        frigate_config = FrigateConfig(**config)
-        mode = frigate_config.cameras["back"].birdseye.mode
-        assert mode.to_mqtt_payload() == "NONE"
+        with self.assertRaisesRegex(
+            ValidationError, "must enable at least one Birdseye activity type"
+        ):
+            FrigateConfig(**config)
 
     def test_camera_can_disable_an_inherited_activity_type(self):
         config = {
@@ -293,6 +301,21 @@ class TestConfig(unittest.TestCase):
         mode = frigate_config.cameras["back"].birdseye.mode
         assert not mode.motion
         assert mode.objects
+
+    def test_profile_must_leave_an_activity_type_enabled(self):
+        config = {
+            **self.minimal,
+            "profiles": {"away": {"friendly_name": "Away"}},
+            "birdseye": {"mode": {"objects": True}},
+        }
+        config["cameras"]["back"]["profiles"] = {
+            "away": {"birdseye": {"mode": {"objects": False}}}
+        }
+
+        with self.assertRaisesRegex(
+            ValidationError, "must enable at least one Birdseye activity type"
+        ):
+            FrigateConfig(**config)
 
     def test_camera_birdseye_activity_types_override_global_values(self):
         config = {

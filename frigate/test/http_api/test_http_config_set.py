@@ -386,9 +386,19 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
         guess (mode still equals the previous global) wrongly claims a camera
         whose explicit yaml mode happens to match.
         """
-        self.minimal_config["birdseye"] = {"enabled": True, "mode": "motion"}
+        self.minimal_config["birdseye"] = {
+            "enabled": True,
+            "mode": {"motion": True},
+        }
         # explicit override that matches the global value being replaced
-        self.minimal_config["cameras"]["front_door"]["birdseye"] = {"mode": "motion"}
+        self.minimal_config["cameras"]["front_door"]["birdseye"] = {
+            "mode": {
+                "continuous": False,
+                "motion": True,
+                "objects": False,
+                "stationary_objects": False,
+            }
+        }
 
         config_path = self._write_config_file()
         mock_find_config.return_value = config_path

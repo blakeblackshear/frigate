@@ -73,10 +73,6 @@ cameras:
 </TabItem>
 </ConfigTabs>
 
-Legacy single values such as `mode: objects`, `mode: motion`, and `mode: continuous` remain supported. The boolean format is required to combine activity types.
-
-When every activity type is disabled, activity does not include the camera in Birdseye. This is represented as `NONE` by the MQTT mode topics.
-
 ### Birdseye Inactivity
 
 By default birdseye shows all cameras that have had the configured activity in the last 30 seconds. This threshold can be configured.

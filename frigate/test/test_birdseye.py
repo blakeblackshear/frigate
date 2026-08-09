@@ -5,7 +5,12 @@ import unittest
 from unittest.mock import Mock
 
 from frigate.config import BirdseyeModeConfig, FrigateConfig
-from frigate.output.birdseye import Birdseye, BirdsEyeFrameManager, get_canvas_shape
+from frigate.output.birdseye import (
+    Birdseye,
+    BirdseyeActivity,
+    BirdsEyeFrameManager,
+    get_canvas_shape,
+)
 
 
 class TestBirdseye(unittest.TestCase):
@@ -234,26 +239,37 @@ class TestBirdseyeActivity(unittest.TestCase):
         motion = BirdseyeModeConfig(motion=True)
         objects = BirdseyeModeConfig(objects=True)
 
-        assert self.manager.camera_active(continuous, False, False, False)
-        assert self.manager.camera_active(motion, False, False, True)
-        assert not self.manager.camera_active(motion, False, True, False)
-        assert self.manager.camera_active(objects, True, False, False)
-        assert not self.manager.camera_active(objects, False, True, False)
+        no_activity = BirdseyeActivity(False, False, False)
+        motion_activity = BirdseyeActivity(False, False, True)
+        stationary_activity = BirdseyeActivity(False, True, False)
+        active_object_activity = BirdseyeActivity(True, False, False)
+
+        assert self.manager.camera_active(continuous, no_activity)
+        assert self.manager.camera_active(motion, motion_activity)
+        assert not self.manager.camera_active(motion, stationary_activity)
+        assert self.manager.camera_active(objects, active_object_activity)
+        assert not self.manager.camera_active(objects, stationary_activity)
 
     def test_modes_can_be_combined(self):
         mode = BirdseyeModeConfig(motion=True, stationary_objects=True)
 
-        assert self.manager.camera_active(mode, False, False, True)
-        assert self.manager.camera_active(mode, False, True, False)
-        assert not self.manager.camera_active(mode, False, False, False)
+        assert self.manager.camera_active(mode, BirdseyeActivity(False, False, True))
+        assert self.manager.camera_active(mode, BirdseyeActivity(False, True, False))
+        assert not self.manager.camera_active(
+            mode, BirdseyeActivity(False, False, False)
+        )
 
     def test_stationary_objects_are_independent_from_active_objects(self):
         stationary_objects = BirdseyeModeConfig(stationary_objects=True)
 
-        assert self.manager.camera_active(stationary_objects, False, True, False)
-        assert not self.manager.camera_active(stationary_objects, True, False, False)
+        assert self.manager.camera_active(
+            stationary_objects, BirdseyeActivity(False, True, False)
+        )
+        assert not self.manager.camera_active(
+            stationary_objects, BirdseyeActivity(True, False, False)
+        )
 
-    def test_write_data_derives_confirmed_object_activity(self):
+    def test_write_data_preserves_active_and_confirms_stationary_activity(self):
         birdseye = Birdseye.__new__(Birdseye)
         birdseye.birdseye_manager = Mock()
         birdseye.birdseye_manager.update.return_value = (False, False)
@@ -263,9 +279,9 @@ class TestBirdseyeActivity(unittest.TestCase):
         birdseye.write_data(
             "front",
             [
-                {"stationary": True, "false_positive": False},
-                {"stationary": False, "false_positive": False},
                 {"stationary": True, "false_positive": True},
+                {"stationary": False, "false_positive": True},
+                {"stationary": True, "false_positive": False},
             ],
             [[0, 0, 10, 10]],
             1.0,
@@ -273,7 +289,26 @@ class TestBirdseyeActivity(unittest.TestCase):
         )
 
         birdseye.birdseye_manager.update.assert_called_once_with(
-            "front", True, True, True, 1.0, frame
+            "front", BirdseyeActivity(True, True, True), 1.0, frame
+        )
+
+    def test_stationary_false_positive_does_not_activate_birdseye(self):
+        birdseye = Birdseye.__new__(Birdseye)
+        birdseye.birdseye_manager = Mock()
+        birdseye.birdseye_manager.update.return_value = (False, False)
+        birdseye._idle_interval = None
+        frame = Mock()
+
+        birdseye.write_data(
+            "front",
+            [{"stationary": True, "false_positive": True}],
+            [],
+            1.0,
+            frame,
+        )
+
+        birdseye.birdseye_manager.update.assert_called_once_with(
+            "front", BirdseyeActivity(False, False, False), 1.0, frame
         )
 
 
@@ -283,7 +318,7 @@ class TestBirdseyeCameraOrder(unittest.TestCase):
     def setUp(self):
         config = {
             "mqtt": {"enabled": False},
-            "birdseye": {"enabled": True, "mode": "continuous"},
+            "birdseye": {"enabled": True, "mode": {"continuous": True}},
             "cameras": {
                 camera: {
                     "ffmpeg": {

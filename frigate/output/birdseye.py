@@ -9,6 +9,7 @@ import queue
 import subprocess as sp
 import threading
 import traceback
+from dataclasses import dataclass
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
@@ -26,6 +27,15 @@ from frigate.util.image import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, slots=True)
+class BirdseyeActivity:
+    """Activity signals used to decide whether a camera is shown in Birdseye."""
+
+    has_active_object: bool
+    has_stationary_object: bool
+    has_motion: bool
 
 
 def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
@@ -411,15 +421,13 @@ class BirdsEyeFrameManager:
     def camera_active(
         self,
         mode: BirdseyeModeConfig,
-        has_active_object: bool,
-        has_stationary_object: bool,
-        has_motion: bool,
+        activity: BirdseyeActivity,
     ) -> bool:
         return (
             mode.continuous
-            or (mode.motion and has_motion)
-            or (mode.objects and has_active_object)
-            or (mode.stationary_objects and has_stationary_object)
+            or (mode.motion and activity.has_motion)
+            or (mode.objects and activity.has_active_object)
+            or (mode.stationary_objects and activity.has_stationary_object)
         )
 
     def get_camera_coordinates(self) -> dict[str, dict[str, int]]:
@@ -725,9 +733,7 @@ class BirdsEyeFrameManager:
     def update(
         self,
         camera: str,
-        has_active_object: bool,
-        has_stationary_object: bool,
-        has_motion: bool,
+        activity: BirdseyeActivity,
         frame_time: float,
         frame: np.ndarray,
     ) -> tuple[bool, bool]:
@@ -757,9 +763,7 @@ class BirdsEyeFrameManager:
         self.cameras[camera]["current_frame_time"] = frame_time
         if self.camera_active(
             camera_config.birdseye.mode,
-            has_active_object,
-            has_stationary_object,
-            has_motion,
+            activity,
         ):
             self.cameras[camera]["last_active_frame"] = frame_time
 
@@ -871,22 +875,26 @@ class Birdseye:
         has_active_object = False
         has_stationary_object = False
         for tracked_object in current_tracked_objects:
-            if tracked_object["false_positive"]:
-                continue
-
             if tracked_object["stationary"]:
-                has_stationary_object = True
+                if not tracked_object["false_positive"]:
+                    has_stationary_object = True
             else:
+                # Preserve the existing objects activity behavior, which includes
+                # non-stationary trackers before they are confirmed.
                 has_active_object = True
 
             if has_active_object and has_stationary_object:
                 break
 
+        activity = BirdseyeActivity(
+            has_active_object=has_active_object,
+            has_stationary_object=has_stationary_object,
+            has_motion=bool(motion_boxes),
+        )
+
         frame_changed, frame_layout_changed = self.birdseye_manager.update(
             camera,
-            has_active_object,
-            has_stationary_object,
-            bool(motion_boxes),
+            activity,
             frame_time,
             frame,
         )

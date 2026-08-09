@@ -254,13 +254,13 @@ birdseye:
   # Optional: Activity types that include cameras in Birdseye (default: shown below)
   # Multiple activity types can be enabled at the same time.
   mode:
-    # Optional: Always include the camera (default: shown below)
+    # Optional: All cameras are included always (default: shown below)
     continuous: False
-    # Optional: Include the camera when motion was detected (default: shown below)
+    # Optional: Cameras are included if motion was detected in the last 30 seconds (default: shown below)
     motion: False
-    # Optional: Include the camera when an active object was tracked (default: shown below)
+    # Optional: Cameras are included if they have had an active tracked object within the last 30 seconds (default: shown below)
     objects: True
-    # Optional: Include the camera while a stationary object is tracked (default: shown below)
+    # Optional: Cameras are included while they have a stationary tracked object (default: shown below)
     stationary_objects: False
   # Optional: Threshold for camera activity to stop showing camera (default: shown below)
   inactivity_threshold: 30

@@ -76,7 +76,7 @@ class TestBirdseyeModeCommands(unittest.TestCase):
             retain=True,
         )
 
-    def test_legacy_single_mode_is_accepted(self) -> None:
+    def test_single_activity_type_is_accepted(self) -> None:
         self.dispatcher._on_birdseye_mode_command("front_door", "OBJECTS")
 
         self.assertEqual(
@@ -87,19 +87,12 @@ class TestBirdseyeModeCommands(unittest.TestCase):
             "front_door/birdseye_mode/state", "OBJECTS", retain=True
         )
 
-    def test_none_disables_all_activity_types(self) -> None:
-        self.dispatcher._on_birdseye_mode_command("front_door", "NONE")
-
-        self.assertEqual(self.camera.birdseye.mode, BirdseyeModeConfig())
-        self.dispatcher.publish.assert_called_once_with(
-            "front_door/birdseye_mode/state", "NONE", retain=True
-        )
-
     def test_unknown_mode_is_rejected(self) -> None:
         for payload in (
             "UNKNOWN",
             "motion",
             "MOTION_OBJECTS",
+            "NONE",
             "NONE,MOTION",
             "MOTION,MOTION",
             "MOTION,",

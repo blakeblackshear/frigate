@@ -1,7 +1,4 @@
-from enum import Enum
-from typing import Any
-
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 from ..base import FrigateBaseModel
 
@@ -10,23 +7,14 @@ __all__ = [
     "BirdseyeConfig",
     "BirdseyeLayoutConfig",
     "BirdseyeModeConfig",
-    "BirdseyeModeEnum",
 ]
 
-
-class BirdseyeModeEnum(str, Enum):
-    objects = "objects"
-    motion = "motion"
-    stationary_objects = "stationary_objects"
-    continuous = "continuous"
-
-    @classmethod
-    def get_index(cls, type):
-        return list(cls).index(type)
-
-    @classmethod
-    def get(cls, index):
-        return list(cls)[index]
+BIRDSEYE_ACTIVITY_TYPES = (
+    "objects",
+    "motion",
+    "stationary_objects",
+    "continuous",
+)
 
 
 class BirdseyeModeConfig(FrigateBaseModel):
@@ -51,49 +39,40 @@ class BirdseyeModeConfig(FrigateBaseModel):
         description="Include the camera in Birdseye while a stationary object is tracked.",
     )
 
-    @model_validator(mode="before")
-    @classmethod
-    def migrate_legacy_mode(cls, value: Any) -> Any:
-        """Convert the legacy single mode value to boolean mode options."""
-        if isinstance(value, (str, BirdseyeModeEnum)):
-            try:
-                mode = BirdseyeModeEnum(value)
-            except ValueError:
-                return value
-
-            return {
-                candidate.value: candidate == mode for candidate in BirdseyeModeEnum
-            }
-
-        return value
-
     @classmethod
     def from_mqtt_payload(cls, payload: str) -> "BirdseyeModeConfig | None":
         """Create mode options from an uppercase MQTT payload."""
-        if payload == "NONE":
-            return cls()
-
         raw_modes = payload.split(",")
         if not raw_modes or any(not mode for mode in raw_modes):
             return None
 
-        modes_by_payload = {mode.value.upper(): mode for mode in BirdseyeModeEnum}
-        try:
-            modes = [modes_by_payload[raw_mode] for raw_mode in raw_modes]
-        except KeyError:
+        modes = [mode.lower() for mode in raw_modes]
+        if any(
+            raw_mode != mode.upper() or mode not in BIRDSEYE_ACTIVITY_TYPES
+            for raw_mode, mode in zip(raw_modes, modes)
+        ):
             return None
 
         if len(modes) != len(set(modes)):
             return None
 
-        return cls(**{mode.value: True for mode in modes})
+        return cls(**{mode: True for mode in modes})
+
+    def has_enabled_activity(self) -> bool:
+        """Return whether at least one activity type is enabled."""
+        return any(getattr(self, activity) for activity in BIRDSEYE_ACTIVITY_TYPES)
 
     def to_mqtt_payload(self) -> str:
         """Serialize enabled mode options for MQTT state topics."""
         payload = ",".join(
-            mode.value.upper() for mode in BirdseyeModeEnum if getattr(self, mode.value)
+            activity.upper()
+            for activity in BIRDSEYE_ACTIVITY_TYPES
+            if getattr(self, activity)
         )
-        return payload or "NONE"
+        if not payload:
+            raise ValueError("At least one Birdseye activity type must be enabled")
+
+        return payload
 
 
 def default_birdseye_mode() -> BirdseyeModeConfig:
