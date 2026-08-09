@@ -405,6 +405,14 @@
         "description": "The device to use for ONNX inference (e.g. 'AUTO', 'CPU', 'GPU')."
       }
     },
+    "openvino": {
+      "label": "OpenVINO",
+      "description": "OpenVINO detector for AMD and Intel CPUs, Intel GPUs and Intel VPU hardware.",
+      "device": {
+        "label": "Device Type",
+        "description": "The device to use for OpenVINO inference (e.g. 'CPU', 'GPU', 'NPU')."
+      }
+    },
     "rknn": {
       "label": "RKNN",
       "description": "RKNN detector for Rockchip NPUs; runs compiled RKNN models on Rockchip hardware.",
