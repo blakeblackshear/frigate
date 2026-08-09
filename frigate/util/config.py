@@ -20,7 +20,7 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = "0.18-1"
+CURRENT_CONFIG_VERSION = "0.19-0"
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
 
 
@@ -148,12 +148,12 @@ def migrate_frigate_config(config_file: str):
             yaml.dump(new_config, f)
         previous_version = "0.18-0"
 
-    if previous_version < "0.18-1":
-        logger.info(f"Migrating frigate config from {previous_version} to 0.18-1...")
-        new_config = migrate_018_1(new_config)
+    if previous_version < "0.19-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.19-0...")
+        new_config = migrate_019_0(new_config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
-        previous_version = "0.18-1"
+        previous_version = "0.19-0"
 
     logger.info("Finished frigate config migration...")
 
@@ -681,8 +681,8 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
     return new_config
 
 
-def migrate_018_1(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    """Handle migrating Frigate config to 0.18-1."""
+def migrate_019_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Handle migrating Frigate config to 0.19-0."""
     new_config = config.copy()
 
     _migrate_birdseye_mode(new_config.get("birdseye"))
@@ -697,7 +697,7 @@ def migrate_018_1(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
         new_config["cameras"][name] = camera_config
 
-    new_config["version"] = "0.18-1"
+    new_config["version"] = "0.19-0"
     return new_config
 
 

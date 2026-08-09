@@ -7,10 +7,10 @@ from unittest.mock import patch
 
 from ruamel.yaml import YAML
 
-from frigate.util.config import migrate_018_1, migrate_frigate_config
+from frigate.util.config import migrate_019_0, migrate_frigate_config
 
 
-class TestConfigMigration018(unittest.TestCase):
+class TestConfigMigration019(unittest.TestCase):
     def test_migrates_birdseye_modes_at_each_override_level(self):
         config = {
             "version": "0.17-0",
@@ -23,7 +23,7 @@ class TestConfigMigration018(unittest.TestCase):
             },
         }
 
-        migrated = migrate_018_1(config)
+        migrated = migrate_019_0(config)
 
         self.assertEqual(
             migrated["birdseye"]["mode"],
@@ -56,7 +56,7 @@ class TestConfigMigration018(unittest.TestCase):
     def test_preserves_boolean_birdseye_mode(self):
         mode = {"motion": True, "objects": True}
 
-        migrated = migrate_018_1({"birdseye": {"mode": mode}})
+        migrated = migrate_019_0({"birdseye": {"mode": mode}})
 
         self.assertEqual(migrated["birdseye"]["mode"], mode)
 
@@ -73,7 +73,7 @@ class TestConfigMigration018(unittest.TestCase):
 
             migrated = YAML().load(config_path.read_text(encoding="utf-8"))
 
-        self.assertEqual(migrated["version"], "0.18-1")
+        self.assertEqual(migrated["version"], "0.19-0")
         self.assertEqual(
             migrated["birdseye"]["mode"],
             {
