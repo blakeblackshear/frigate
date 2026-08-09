@@ -539,7 +539,7 @@ Topic with current state of Birdseye for a camera. Published values are `ON` and
 
 ### `frigate/<camera_name>/birdseye_mode/set`
 
-Topic to set the Birdseye activity types for a camera. Send one uppercase activity type or combine multiple types with commas, for example `MOTION,OBJECTS,STATIONARY_OBJECTS`.
+Topic to set the Birdseye activity types for a camera. Send one uppercase activity type or combine multiple types with commas, for example `MOTION,OBJECTS,STATIONARY_OBJECTS`. Send `NONE` by itself to disable all activity types.
 
 _Note: Changing the value from `CONTINUOUS` to non-continuous activity types will take up to 30 seconds for
 the camera to be removed from the view._
@@ -550,10 +550,11 @@ the camera to be removed from the view._
 | `MOTION`             | Shown if motion was detected within the last 30 seconds          |
 | `OBJECTS`            | Shown if an active object was tracked within the last 30 seconds |
 | `STATIONARY_OBJECTS` | Shown while a stationary object is tracked                       |
+| `NONE`               | No activity includes the camera                                   |
 
 ### `frigate/<camera_name>/birdseye_mode/state`
 
-Topic with the current Birdseye activity types for a camera. Multiple enabled types are published as a comma-separated value in the order `OBJECTS`, `MOTION`, `STATIONARY_OBJECTS`, `CONTINUOUS`.
+Topic with the current Birdseye activity types for a camera. Multiple enabled types are published as a comma-separated value in the order `OBJECTS`, `MOTION`, `STATIONARY_OBJECTS`, `CONTINUOUS`. `NONE` is published when no activity types are enabled.
 
 ### `frigate/<camera_name>/notifications/set`
 

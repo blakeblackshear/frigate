@@ -468,7 +468,7 @@ def get_tool_definitions(
                             ],
                             "description": (
                                 "The feature to change. Most features accept ON or OFF. "
-                                "birdseye_mode accepts CONTINUOUS, MOTION, OBJECTS, STATIONARY_OBJECTS, or a comma-separated combination. "
+                                "birdseye_mode accepts CONTINUOUS, MOTION, OBJECTS, STATIONARY_OBJECTS, NONE by itself, or a comma-separated combination. "
                                 "motion_contour_area and motion_threshold accept a number. "
                                 "profile accepts a profile name or 'none' to deactivate (requires camera='*')."
                             ),

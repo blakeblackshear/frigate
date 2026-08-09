@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Self
+from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -67,17 +67,12 @@ class BirdseyeModeConfig(FrigateBaseModel):
 
         return value
 
-    @model_validator(mode="after")
-    def ensure_activity_type_enabled(self) -> Self:
-        """Require at least one activity type for a usable mode."""
-        if not any(getattr(self, mode.value) for mode in BirdseyeModeEnum):
-            raise ValueError("At least one Birdseye activity type must be enabled")
-
-        return self
-
     @classmethod
     def from_mqtt_payload(cls, payload: str) -> "BirdseyeModeConfig | None":
         """Create mode options from an uppercase MQTT payload."""
+        if payload == "NONE":
+            return cls()
+
         raw_modes = payload.split(",")
         if not raw_modes or any(not mode for mode in raw_modes):
             return None
@@ -95,9 +90,10 @@ class BirdseyeModeConfig(FrigateBaseModel):
 
     def to_mqtt_payload(self) -> str:
         """Serialize enabled mode options for MQTT state topics."""
-        return ",".join(
+        payload = ",".join(
             mode.value.upper() for mode in BirdseyeModeEnum if getattr(self, mode.value)
         )
+        return payload or "NONE"
 
 
 def default_birdseye_mode() -> BirdseyeModeConfig:

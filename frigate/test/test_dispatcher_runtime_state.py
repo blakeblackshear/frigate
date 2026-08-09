@@ -87,11 +87,20 @@ class TestBirdseyeModeCommands(unittest.TestCase):
             "front_door/birdseye_mode/state", "OBJECTS", retain=True
         )
 
+    def test_none_disables_all_activity_types(self) -> None:
+        self.dispatcher._on_birdseye_mode_command("front_door", "NONE")
+
+        self.assertEqual(self.camera.birdseye.mode, BirdseyeModeConfig())
+        self.dispatcher.publish.assert_called_once_with(
+            "front_door/birdseye_mode/state", "NONE", retain=True
+        )
+
     def test_unknown_mode_is_rejected(self) -> None:
         for payload in (
             "UNKNOWN",
             "motion",
             "MOTION_OBJECTS",
+            "NONE,MOTION",
             "MOTION,MOTION",
             "MOTION,",
         ):

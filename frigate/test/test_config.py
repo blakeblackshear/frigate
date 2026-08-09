@@ -265,7 +265,7 @@ class TestConfig(unittest.TestCase):
         assert not mode.continuous
         assert not mode.objects
 
-    def test_birdseye_requires_an_activity_type(self):
+    def test_birdseye_allows_no_activity_types(self):
         config = {
             **self.minimal,
             "birdseye": {
@@ -278,10 +278,21 @@ class TestConfig(unittest.TestCase):
             },
         }
 
-        with self.assertRaisesRegex(
-            ValidationError, "At least one Birdseye activity type must be enabled"
-        ):
-            FrigateConfig(**config)
+        frigate_config = FrigateConfig(**config)
+        mode = frigate_config.cameras["back"].birdseye.mode
+        assert mode.to_mqtt_payload() == "NONE"
+
+    def test_camera_can_disable_an_inherited_activity_type(self):
+        config = {
+            **self.minimal,
+            "birdseye": {"mode": {"motion": True, "objects": True}},
+        }
+        config["cameras"]["back"]["birdseye"] = {"mode": {"motion": False}}
+
+        frigate_config = FrigateConfig(**config)
+        mode = frigate_config.cameras["back"].birdseye.mode
+        assert not mode.motion
+        assert mode.objects
 
     def test_camera_birdseye_activity_types_override_global_values(self):
         config = {
