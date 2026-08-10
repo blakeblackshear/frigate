@@ -50,6 +50,31 @@ Connect each stream to get a live preview, an estimated bandwidth figure, and a 
 
 Other features, including [hardware acceleration](hardware_acceleration_video.md), [two way talk](/configuration/live#two-way-talk), and audio transcoding, is configured after the camera has been added. For camera model specific quirks, see the [camera specific](camera_specific.md) docs.
 
+## Deleting a camera
+
+Click **Delete Camera** in <NavPath path="Settings > Global configuration > Camera management" />, choose the camera, and confirm. Deleting a camera requires the `admin` role and cannot be undone.
+
+:::warning
+
+Deleting a camera permanently removes its recordings, tracked objects, and configuration. If you only want to stop processing a camera, set its state to **Off** or **Disabled** in <NavPath path="Settings > Global configuration > Camera management" /> instead. See [camera state](/configuration/live#camera-state).
+
+:::
+
+Deleting a camera removes:
+
+- The camera's section of your config file, along with its entries in any [role](authentication.md#user-roles) camera list. A custom role left with no cameras is removed as well.
+- Every database record for the camera: tracked objects, review items, recordings, previews, timeline entries, the saved region grid, and [triggers](semantic_search.md#triggers).
+- Every media file for the camera: recordings, snapshots, thumbnails, and preview clips.
+
+[Exports](/usage/exports) are kept by default, so saved footage survives the deletion of the camera it came from. Turn on **Also delete exports for this camera** in the confirmation step to remove those too.
+
+The camera's processes are stopped and the change takes effect immediately, so no restart is required. If the resulting config cannot be parsed, Frigate restores the previous config and reports an error instead of leaving Frigate in a broken state.
+
+Two things are not cleaned up for you:
+
+- **go2rtc streams.** Frigate makes a best effort to stop a running [go2rtc](go2rtc.md) stream named after the camera, but stream entries in your config file remain and are recreated on the next restart. Remove them in <NavPath path="Settings > System > go2rtc streams" /> or in your config file.
+- **Camera groups.** A deleted camera stays listed in any [camera group](#setting-up-camera-groups) that referenced it. The group skips the missing camera, so this is harmless, but you can edit the group to drop the stale entry.
+
 ## Setting Up Camera Inputs
 
 Several inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create recordings from a higher resolution stream, or vice versa.
