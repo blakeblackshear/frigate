@@ -388,10 +388,9 @@ v4l2-ctl --list-devices
 
 :::warning Known issues
 
-On some configurations, particularly **RPi Trixie OS with Linux kernel 6.18 and Frigate releases up to 0.17.x (bundled with FFmpeg 5)**, enabling **H.265 (HEVC) hardware decoding** with may cause **green or blank live-view previews** and **object detection to stop working correctly**. 
-Similar reports have also been observed on **Home Assistant OS 18.x**, which uses the **Linux 6.18 kernel series**.
+On some configurations, particularly **RPi Trixie OS with Linux kernel 6.18**, enabling **H.265 (HEVC) hardware decoding** may cause **green or blank live-view previews** and **object detection to stop working correctly**. Similar reports have also been observed on **Home Assistant OS 18.x**, which uses the **Linux 6.18 kernel series**.
 
-The latest known configuration reported to work reliably is **RPi Bookworm OS with Linux kernel 6.12 and Frigate up to 0.17.2**, as well as **Home Assistant OS 17.x**, where HEVC hardware decoding has been reported to work correctly without causing the issues described above.
+The latest known configuration reported to work reliably is **RPi Bookworm OS with Linux kernel 6.12**, where HEVC hardware decoding has been reported to work correctly without causing the issues described above.
 
 :::
 
