@@ -308,6 +308,8 @@ Publishes the current health status of each role that is enabled (`audio`, `dete
 - `offline`: Stream is offline and is being restarted
 - `disabled`: Camera is currently turned off (either at runtime via the `enabled/set` topic, or persistently via the configuration file). See [Camera state](/configuration/live#camera-state) for the distinction.
 
+These reflect the state of Frigate's process for that role, not the camera's reachability, so an unreachable camera alternates between `offline` and `online` as the watchdog restarts ffmpeg. Wait for the status to hold steady (for example with Home Assistant's `for:`) rather than acting on a single message.
+
 ### `frigate/<camera_name>/<object_name>`
 
 Publishes the count of objects for the camera for use as a sensor in Home Assistant.

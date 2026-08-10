@@ -22,7 +22,7 @@ Push notifications require internet access from the Frigate server to the browse
 
 In order to use notifications the following requirements must be met:
 
-- Frigate must be accessed via a secure `https` connection ([see the authorization docs](/configuration/authentication)).
+- Frigate must be accessed via a secure `https` connection while signed in as a Frigate user ([see the authorization docs](/configuration/authentication)).
 - A supported browser must be used. Currently Chrome, Firefox, and Safari are known to be supported.
 - In order for notifications to be usable externally, Frigate must be accessible externally.
 - For iOS devices, some users have also indicated that the Notifications switch needs to be enabled in iOS Settings --> Apps --> Safari --> Advanced --> Features.
@@ -87,6 +87,12 @@ cameras:
 ### Registration
 
 Once notifications are enabled, press the `Register This Device` button on all devices that you would like to receive notifications on. This will register the background worker. After this Frigate must be restarted and then notifications will begin to be sent.
+
+:::warning
+
+Each registration is attached to the Frigate user account you are signed in as, so you must register over a secure connection to the authenticated port (`8971`). Reverse proxies and tunnels should point at port `8971`.
+
+:::
 
 ## Supported Notifications
 
