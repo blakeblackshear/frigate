@@ -8,9 +8,8 @@ SECURE_TOKEN_MODULE_VERSION="1.5"
 SET_MISC_MODULE_VERSION="v0.33"
 NGX_DEVEL_KIT_VERSION="v0.3.3"
 
-source /etc/os-release
-
-if [[ "$VERSION_ID" == "12" ]]; then
+# enable deb-src entries in either deb822 or legacy sources format
+if [[ -f /etc/apt/sources.list.d/debian.sources ]]; then
     sed -i '/^Types:/s/deb/& deb-src/' /etc/apt/sources.list.d/debian.sources
 else
     cp /etc/apt/sources.list /etc/apt/sources.list.d/sources-src.list

@@ -18,14 +18,10 @@ from frigate.log import suppress_stderr_during
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.image import calculate_region
 from frigate.util.object import box_overlaps
+from frigate.util.tflite import Interpreter
 
 from ..types import DataProcessorMetrics
 from .api import DeferredRealtimeProcessorApi
-
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ModuleNotFoundError:
-    from ai_edge_litert.interpreter import Interpreter
 
 logger = logging.getLogger(__name__)
 

@@ -621,7 +621,7 @@ class MotionSearchRunner(threading.Thread):
     ) -> list[MotionSearchResult]:
         """Run detection while firing throttled progress as frames are scanned."""
 
-        def _gen() -> Generator[tuple[int, np.ndarray], None, None]:
+        def _gen() -> Generator[tuple[int, np.ndarray]]:
             for i, frame in indexed_frames:
                 if not self._should_stop():
                     self._emit_progress(timestamp_fn(i))

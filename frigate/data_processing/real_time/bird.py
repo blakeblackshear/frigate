@@ -15,14 +15,10 @@ from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.log import suppress_stderr_during
 from frigate.util.image import calculate_region
+from frigate.util.tflite import Interpreter
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
-
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ModuleNotFoundError:
-    from ai_edge_litert.interpreter import Interpreter
 
 logger = logging.getLogger(__name__)
 

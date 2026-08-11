@@ -31,15 +31,9 @@ RUN echo /opt/rocm/lib|tee /opt/rocm-dist/etc/ld.so.conf.d/rocm.conf
 #######################################################################
 FROM deps AS deps-prelim
 
-COPY docker/rocm/debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
-# install_deps.sh upgraded libstdc++6 from trixie for Battlemage; the matching
-# -dev package must also come from trixie or apt refuses to satisfy it.
-RUN echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y libnuma1 && \
-    apt-get install -qq -y -t bookworm-backports mesa-va-drivers mesa-vulkan-drivers && \
-    apt-get install -qq -y -t trixie libstdc++-14-dev && \
-    rm -f /etc/apt/sources.list.d/trixie.list && \
+    apt-get install -qq -y mesa-va-drivers mesa-vulkan-drivers libstdc++-14-dev && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/frigate

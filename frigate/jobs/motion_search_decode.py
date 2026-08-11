@@ -186,7 +186,7 @@ def _run_vod_decode(
     skip_nonkey: bool,
     fps_rate: float | None,
     software_retry: bool,
-) -> Generator[np.ndarray, None, None]:
+) -> Generator[np.ndarray]:
     """Run one VOD decode, yielding raw frames; retry in software if empty."""
     cmd = build_vod_decode_command(
         ffmpeg_path,
@@ -258,7 +258,7 @@ def iter_vod_frames(
     *,
     skip_nonkey: bool,
     fps_rate: float | None,
-) -> Generator[np.ndarray, None, None]:
+) -> Generator[np.ndarray]:
     """Decode a VOD HLS URL and yield raw frames in order.
 
     Pair keyframe-mode output with probed keyframe PTS; pair fallback output with

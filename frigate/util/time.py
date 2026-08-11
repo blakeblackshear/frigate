@@ -68,14 +68,14 @@ def get_dst_transitions(
     current = start_time
 
     # Get initial offset
-    dt = datetime.datetime.utcfromtimestamp(current).replace(tzinfo=pytz.UTC)
+    dt = datetime.datetime.fromtimestamp(current, tz=pytz.UTC)
     local_dt = dt.astimezone(tz)
     prev_offset = local_dt.utcoffset().total_seconds()
     period_start = start_time
 
     # Check each day for offset changes
     while current <= end_time:
-        dt = datetime.datetime.utcfromtimestamp(current).replace(tzinfo=pytz.UTC)
+        dt = datetime.datetime.fromtimestamp(current, tz=pytz.UTC)
         local_dt = dt.astimezone(tz)
         current_offset = local_dt.utcoffset().total_seconds()
 

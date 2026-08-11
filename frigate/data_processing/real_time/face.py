@@ -168,7 +168,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             h: int = int(raw_bbox[3] / scale_factor)
             bbox = (x, y, x + w, y + h)
 
-            if face is None or area(bbox) > area(face):  # type: ignore[unreachable]
+            if face is None or area(bbox) > area(face):
                 face = bbox
 
         return face
@@ -434,7 +434,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 img = cv2.imread(current_file)
 
             if img is None:
-                return {  # type: ignore[unreachable]
+                return {
                     "message": "Invalid image file.",
                     "success": False,
                 }

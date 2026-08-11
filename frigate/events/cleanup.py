@@ -201,7 +201,7 @@ class EventCleanup(threading.Thread):
             self.config.record.alerts.retain.days,
             self.config.record.detections.retain.days,
         )
-        file_extension = None  # mp4 clips are no longer stored in /clips
+        file_extension: str | None = None  # mp4 clips are no longer stored in /clips
         update_params = {"has_clip": False}
 
         # get expiration time for this label

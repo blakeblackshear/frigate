@@ -57,14 +57,14 @@ class PTZMetrics:
     reset: Event
 
     def __init__(self, *, autotracker_enabled: bool):
-        self.autotracker_enabled = mp.Value("i", autotracker_enabled)  # type: ignore[assignment]
+        self.autotracker_enabled = mp.Value("i", autotracker_enabled)
 
-        self.start_time = mp.Value("d", 0)  # type: ignore[assignment]
-        self.stop_time = mp.Value("d", 0)  # type: ignore[assignment]
-        self.frame_time = mp.Value("d", 0)  # type: ignore[assignment]
-        self.zoom_level = mp.Value("d", 0)  # type: ignore[assignment]
-        self.max_zoom = mp.Value("d", 0)  # type: ignore[assignment]
-        self.min_zoom = mp.Value("d", 0)  # type: ignore[assignment]
+        self.start_time = mp.Value("d", 0)
+        self.stop_time = mp.Value("d", 0)
+        self.frame_time = mp.Value("d", 0)
+        self.zoom_level = mp.Value("d", 0)
+        self.max_zoom = mp.Value("d", 0)
+        self.min_zoom = mp.Value("d", 0)
 
         self.tracking_active = mp.Event()
         self.motor_stopped = mp.Event()

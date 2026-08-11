@@ -353,7 +353,7 @@ class ObjectDetectProcess:
         logging.info("Detection process has exited...")
 
     def start_or_restart(self) -> None:
-        self.detection_start.value = 0.0  # type: ignore[attr-defined]
+        self.detection_start.value = 0.0
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
 

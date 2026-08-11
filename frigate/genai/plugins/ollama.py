@@ -430,7 +430,7 @@ class OllamaClient(GenAIClient):
         tools: list[dict[str, Any]] | None = None,
         tool_choice: str | None = "auto",
         enable_thinking: bool | None = None,
-    ) -> AsyncGenerator[tuple[str, Any], None]:
+    ) -> AsyncGenerator[tuple[str, Any]]:
         """Stream chat with tools; yields content deltas then final message.
 
         When tools are provided, Ollama streaming does not include tool_calls

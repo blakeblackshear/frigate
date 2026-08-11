@@ -12,36 +12,32 @@ apt-get -qq install --no-install-recommends -y \
     lbzip2 \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
-    python3.11 \
+    python3 \
     curl \
     lsof \
     jq \
     nethogs \
     libgl1 \
     libglib2.0-0 \
-    libusb-1.0.0 \
+    libusb-1.0-0 \
     python3-h2 \
     libgomp1  # memryx detector
-
-update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 mkdir -p -m 600 /root/.gnupg
 
 # install coral runtime
-wget -q -O /tmp/libedgetpu1-max.deb "https://github.com/feranick/libedgetpu/releases/download/16.0TF2.17.1-1/libedgetpu1-max_16.0tf2.17.1-1.bookworm_${TARGETARCH}.deb"
+wget -q -O /tmp/libedgetpu1-max.deb "https://github.com/feranick/libedgetpu/releases/download/16.0TF2.17.1-1/libedgetpu1-max_16.0tf2.17.1-1.trixie_${TARGETARCH}.deb"
 unset DEBIAN_FRONTEND
 yes | dpkg -i /tmp/libedgetpu1-max.deb && export DEBIAN_FRONTEND=noninteractive
 rm /tmp/libedgetpu1-max.deb
 
-# install mesa-teflon-delegate from bookworm-backports
+# install mesa-teflon-delegate
 # Only available for arm64 at the moment
 if [[ "${TARGETARCH}" == "arm64" ]]; then
     if [[ "${BASE_IMAGE}" == *"nvcr.io/nvidia/tensorrt"* ]]; then
         echo "Info: Skipping apt-get commands because BASE_IMAGE includes 'nvcr.io/nvidia/tensorrt' for arm64."
     else
-        echo "deb http://deb.debian.org/debian bookworm-backports main" | tee /etc/apt/sources.list.d/bookworm-backbacks.list
-        apt-get -qq update
-        apt-get -qq install --no-install-recommends --no-install-suggests -y mesa-teflon-delegate/bookworm-backports
+        apt-get -qq install --no-install-recommends --no-install-suggests -y mesa-teflon-delegate
     fi
 fi
 
@@ -79,10 +75,11 @@ fi
 
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
-  # Install non-free version of i965 driver
+  # Install non-free intel media and i965 drivers
   sed -i -E "/^Components: main$/s/main/main contrib non-free non-free-firmware/" "/etc/apt/sources.list.d/debian.sources" \
       && apt-get -qq update \
-      && apt-get install --no-install-recommends --no-install-suggests -y i965-va-driver-shaders \
+      && apt-get install --no-install-recommends --no-install-suggests -y \
+          i965-va-driver-shaders intel-media-va-driver-non-free \
       && sed -i -E "/^Components: main contrib non-free non-free-firmware$/s/main contrib non-free non-free-firmware/main/" "/etc/apt/sources.list.d/debian.sources" \
       && apt-get update
 
@@ -92,28 +89,18 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
         libva-drm2 \
         mesa-va-drivers radeontop
 
-    # intel packages use zst compression so we need to update dpkg
-    apt-get install -y dpkg
-
     # use intel apt repo for libmfx1 (legacy QSV, pre-Gen12)
     wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/gpu/ubuntu jammy client" | tee /etc/apt/sources.list.d/intel-gpu-jammy.list
     apt-get -qq update
 
-    # intel-media-va-driver-non-free is built from source in the
-    # intel-media-driver Dockerfile stage for Battlemage (Xe2) support
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         libmfx1
     rm -f /usr/share/keyrings/intel-graphics.gpg
     rm -f /etc/apt/sources.list.d/intel-gpu-jammy.list
 
-    # upgrade libva2, oneVPL runtime, and libvpl2 from trixie for Battlemage support
-    echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list
-    apt-get -qq update
-    apt-get -qq install -y -t trixie libva2 libva-drm2 libzstd1
-    apt-get -qq install -y -t trixie libmfx-gen1.2 libvpl2
-    rm -f /etc/apt/sources.list.d/trixie.list
-    apt-get -qq update
+    # oneVPL runtime for QSV support
+    apt-get -qq install -y libva2 libva-drm2 libmfx-gen1.2 libvpl2
     apt-get -qq install -y ocl-icd-libopencl1
 
     # install libtbb12 for NPU support

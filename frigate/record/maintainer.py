@@ -501,7 +501,7 @@ class RecordingMaintainer(threading.Thread):
         return None
 
     def _compute_motion_heatmap(
-        self, camera: str, motion_boxes: list[tuple[int, int, int, int]]
+        self, camera: str, motion_boxes: list[tuple[int, ...]]
     ) -> dict[str, int] | None:
         """Compute a 16x16 motion intensity heatmap from motion boxes.
 
@@ -560,7 +560,7 @@ class RecordingMaintainer(threading.Thread):
         active_count = 0
         region_count = 0
         motion_count = 0
-        all_motion_boxes: list[tuple[int, int, int, int]] = []
+        all_motion_boxes: list[tuple[int, ...]] = []
 
         for frame in self.object_recordings_info[camera]:
             # frame is after end time of segment

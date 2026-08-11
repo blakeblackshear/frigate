@@ -9,7 +9,7 @@ on:
       - ".github/ISSUE_TEMPLATE/**"
 
 env:
-  DEFAULT_PYTHON: 3.11
+  DEFAULT_PYTHON: 3.13
 
 jobs:
   web_lint:

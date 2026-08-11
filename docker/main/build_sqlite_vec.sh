@@ -4,9 +4,8 @@ set -euxo pipefail
 
 SQLITE_VEC_VERSION="0.1.9"
 
-source /etc/os-release
-
-if [[ "$VERSION_ID" == "12" ]]; then
+# enable deb-src entries in either deb822 or legacy sources format
+if [[ -f /etc/apt/sources.list.d/debian.sources ]]; then
     sed -i '/^Types:/s/deb/& deb-src/' /etc/apt/sources.list.d/debian.sources
 else
     cp /etc/apt/sources.list /etc/apt/sources.list.d/sources-src.list

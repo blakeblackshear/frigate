@@ -1,6 +1,6 @@
 [tool.ruff]
-target-version = "py311"
+target-version = "py313"
 
 [tool.ruff.lint]
-ignore = ["E501","E711","E712","UP031","UP032","UP042","G004"]
+ignore = ["E501","E711","E712","UP031","UP032","UP042","UP046","UP047","G004"]
 extend-select = ["I", "UP", "G", "ASYNC210", "B904"]

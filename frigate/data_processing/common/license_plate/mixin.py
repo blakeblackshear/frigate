@@ -10,7 +10,7 @@ import random
 import re
 import string
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import cv2
 import numpy as np
@@ -579,8 +579,8 @@ class LicensePlateProcessingMixin:
         boxes = []
         scores = []
 
-        for index in range(len(contours)):  # type: ignore[arg-type]
-            contour = contours[index]  # type: ignore[index]
+        for index in range(len(contours)):
+            contour = contours[index]
 
             # get minimum bounding box (rotated rectangle) around the contour and the smallest side length.
             points, sside = self._get_min_boxes(contour)
@@ -1199,7 +1199,7 @@ class LicensePlateProcessingMixin:
         """Look for license plates in image."""
         self.metrics.alpr_pps.value = self.plates_rec_second.eps()
         self.metrics.yolov9_lpr_pps.value = self.plates_det_second.eps()
-        camera = obj_data if dedicated_lpr else obj_data["camera"]
+        camera = cast(str, obj_data if dedicated_lpr else obj_data["camera"])
         current_time = int(datetime.datetime.now().timestamp())
         debug_frame_id = int(datetime.datetime.now().timestamp() * 1000)
 

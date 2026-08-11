@@ -3,9 +3,7 @@
 import datetime
 import logging
 import subprocess as sp
-import threading
 from abc import ABC, abstractmethod
-from multiprocessing import resource_tracker as _mprt
 from multiprocessing import shared_memory as _mpshm
 from string import printable
 from typing import Any, AnyStr
@@ -1015,9 +1013,12 @@ class FrameManager(ABC):
 
 
 class UntrackedSharedMemory(_mpshm.SharedMemory):
-    # https://github.com/python/cpython/issues/82300#issuecomment-2169035092
+    """SharedMemory that is not registered with the resource tracker.
 
-    __lock = threading.Lock()
+    Frigate manages the lifecycle of its shared memory segments across
+    processes, so resource tracker cleanup (and its noisy leak warnings)
+    is unwanted. https://github.com/python/cpython/issues/82300
+    """
 
     def __init__(
         self,
@@ -1027,35 +1028,7 @@ class UntrackedSharedMemory(_mpshm.SharedMemory):
         *,
         track: bool = False,
     ) -> None:
-        self._track = track
-
-        # if tracking, normal init will suffice
-        if track:
-            return super().__init__(name=name, create=create, size=size)
-
-        # lock so that other threads don't attempt to use the
-        # register function during this time
-        with self.__lock:
-            # temporarily disable registration during initialization
-            orig_register = _mprt.register
-            _mprt.register = self.__tmp_register
-
-            # initialize; ensure original register function is
-            # re-instated
-            try:
-                super().__init__(name=name, create=create, size=size)
-            finally:
-                _mprt.register = orig_register
-
-    @staticmethod
-    def __tmp_register(*args, **kwargs) -> None:
-        return
-
-    def unlink(self) -> None:
-        if _mpshm._USE_POSIX and self._name:
-            _mpshm._posixshmem.shm_unlink(self._name)
-            if self._track:
-                _mprt.unregister(self._name, "shared_memory")
+        super().__init__(name=name, create=create, size=size, track=track)
 
 
 class SharedMemoryFrameManager(FrameManager):

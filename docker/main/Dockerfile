@@ -6,8 +6,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Globally set pip break-system-packages option to avoid having to specify it every time
 ARG PIP_BREAK_SYSTEM_PACKAGES=1
 
-ARG BASE_IMAGE=debian:12
-ARG SLIM_BASE=debian:12-slim
+ARG BASE_IMAGE=debian:13
+ARG SLIM_BASE=debian:13-slim
 
 # A hook that allows us to inject commands right after the base images
 ARG BASE_HOOK=
@@ -18,7 +18,7 @@ ARG BASE_HOOK
 
 RUN sh -c "$BASE_HOOK"
 
-FROM --platform=${BUILDPLATFORM} debian:12 AS base_host
+FROM --platform=${BUILDPLATFORM} debian:13 AS base_host
 ARG PIP_BREAK_SYSTEM_PACKAGES
 
 FROM ${SLIM_BASE} AS slim-base
@@ -52,14 +52,6 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_sqlite_vec.sh
 
-# Build intel-media-driver from source against bookworm's system libva so it
-# works with Debian 12's glibc/libstdc++ (pre-built noble/trixie packages
-# require glibc 2.38 which is not available on bookworm).
-FROM base AS intel-media-driver
-ARG DEBIAN_FRONTEND
-RUN --mount=type=bind,source=docker/main/build_intel_media_driver.sh,target=/deps/build_intel_media_driver.sh \
-    /deps/build_intel_media_driver.sh
-
 FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
@@ -80,11 +72,12 @@ RUN --mount=type=bind,source=docker/main/install_tempio.sh,target=/deps/install_
 # Download and Convert OpenVino model
 FROM base_host AS ov-converter
 ARG DEBIAN_FRONTEND
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
 # Install OpenVINO for model conversion
 COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
-    && apt-get -qq install -y wget python3 python3-distutils \
+    && apt-get -qq install -y wget python3 \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip" \
@@ -157,6 +150,7 @@ FROM base AS wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
 ARG DEBUG=false
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
@@ -164,8 +158,8 @@ RUN apt-get -qq update \
     apt-transport-https wget unzip \
     && apt-get -qq update \
     && apt-get -qq install -y \
-    python3.11 \
-    python3.11-dev \
+    python3 \
+    python3-dev \
     # opencv dependencies
     build-essential cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
@@ -178,8 +172,6 @@ RUN apt-get -qq update \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
-
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
@@ -200,6 +192,10 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
         pip3 wheel --wheel-dir=/wheels -r /requirements-dev.txt; \
     fi
 
+# Build norfair separately with its numpy pin lifted
+RUN --mount=type=bind,source=docker/main/build_norfair.sh,target=/deps/build_norfair.sh \
+    /deps/build_norfair.sh
+
 # Install HailoRT & Wheels
 RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
     /deps/install_hailort.sh
@@ -208,7 +204,6 @@ RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 COPY --from=sqlite-vec /usr/local/lib/ /usr/local/lib/
-COPY --from=intel-media-driver /rootfs/ /
 COPY --from=go2rtc /rootfs/ /
 COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
@@ -222,6 +217,7 @@ COPY docker/main/rootfs/ /
 FROM slim-base AS deps
 ARG TARGETARCH
 ARG BASE_IMAGE
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
 ARG DEBIAN_FRONTEND
 # http://stackoverflow.com/questions/48162574/ddg#49462622
@@ -306,6 +302,7 @@ HEALTHCHECK --start-period=300s --start-interval=5s --interval=15s --timeout=5s 
 
 # Frigate deps with Node.js and NPM for devcontainer
 FROM deps AS devcontainer
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
 # Do not start the actual Frigate service on devcontainer as it will be started by VS Code
 # But start a fake service for simulating the logs

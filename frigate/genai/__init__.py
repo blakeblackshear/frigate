@@ -37,13 +37,13 @@ __all__ = [
     "register_genai_provider",
 ]
 
-PROVIDERS = {}
+PROVIDERS: dict[GenAIProviderEnum, type["GenAIClient"]] = {}
 
 
 def register_genai_provider(key: GenAIProviderEnum) -> Callable:
     """Register a GenAI provider."""
 
-    def decorator(cls: type) -> type:
+    def decorator(cls: type["GenAIClient"]) -> type["GenAIClient"]:
         PROVIDERS[key] = cls
         return cls
 
@@ -414,7 +414,7 @@ class GenAIClient:
         tools: list[dict[str, Any]] | None = None,
         tool_choice: str | None = "auto",
         enable_thinking: bool | None = None,
-    ) -> AsyncGenerator[tuple[str, Any], None]:
+    ) -> AsyncGenerator[tuple[str, Any]]:
         """Streaming counterpart to `chat_with_tools`.
 
         Yields ``(kind, value)`` tuples where ``kind`` is one of:

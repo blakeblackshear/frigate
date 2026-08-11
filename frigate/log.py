@@ -202,7 +202,7 @@ class LogRedirect(io.StringIO):
 
 
 @contextmanager
-def __redirect_fd_to_queue(queue: Queue[str]) -> Generator[None, None, None]:
+def __redirect_fd_to_queue(queue: Queue[str]) -> Generator[None]:
     """Redirect file descriptor 1 (stdout) to a pipe and capture output in a queue."""
     stdout_fd = os.dup(1)
     read_fd, write_fd = os.pipe()
@@ -329,7 +329,7 @@ def suppress_os_output(func: Callable) -> Callable:
 
 
 @contextmanager
-def suppress_stderr_during(operation_name: str) -> Generator[None, None, None]:
+def suppress_stderr_during(operation_name: str) -> Generator[None]:
     """
     Context manager to suppress stderr output during a specific operation.
 

@@ -10,14 +10,10 @@ from frigate.detectors.detection_runners import get_optimized_runner
 from frigate.embeddings.types import EnrichmentModelTypeEnum
 from frigate.log import suppress_stderr_during
 from frigate.util.downloader import ModelDownloader
+from frigate.util.tflite import Interpreter
 
 from ...config import FaceRecognitionConfig
 from .base_embedding import BaseEmbedding
-
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ModuleNotFoundError:
-    from ai_edge_litert.interpreter import Interpreter
 
 logger = logging.getLogger(__name__)
 

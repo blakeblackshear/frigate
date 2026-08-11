@@ -26,7 +26,7 @@ VISUAL_WEIGHT = 0.65
 DESCRIPTION_WEIGHT = 0.35
 
 
-def chunk_content(content: str, chunk_size: int = 80) -> Generator[str, None, None]:
+def chunk_content(content: str, chunk_size: int = 80) -> Generator[str]:
     """Yield content in word-aware chunks for streaming."""
     if not content:
         return

@@ -40,12 +40,7 @@ from frigate.log import LogPipe, suppress_stderr_during
 from frigate.util.builtin import get_ffmpeg_arg_list, load_labels
 from frigate.util.ffmpeg import start_or_restart_ffmpeg, stop_ffmpeg
 from frigate.util.process import FrigateProcess
-
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ModuleNotFoundError:
-    from ai_edge_litert.interpreter import Interpreter
-
+from frigate.util.tflite import Interpreter
 
 logger = logging.getLogger(__name__)
 
