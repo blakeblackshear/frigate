@@ -85,7 +85,7 @@ class EmbeddingMaintainer(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        metrics: DataProcessorMetrics | None,
+        metrics: DataProcessorMetrics,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
@@ -220,16 +220,6 @@ class EmbeddingMaintainer(threading.Thread):
         # post processors
         self.post_processors: list[PostProcessorApi] = []
 
-        if any(c.review.genai.enabled_in_config for c in self.config.cameras.values()):
-            self.post_processors.append(
-                ReviewDescriptionProcessor(
-                    self.config,
-                    self.requestor,
-                    self.metrics,
-                    self.genai_manager,
-                )
-            )
-
         if self.config.lpr.enabled:
             self.post_processors.append(
                 LicensePlatePostProcessor(
@@ -252,29 +242,19 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        semantic_trigger_processor: SemanticTriggerProcessor | None = None
         if self.config.semantic_search.enabled:
-            semantic_trigger_processor = SemanticTriggerProcessor(
-                db,
-                self.config,
-                self.requestor,
-                self.event_metadata_publisher,
-                metrics,
-                self.embeddings,
-            )
-            self.post_processors.append(semantic_trigger_processor)
-
-        if any(c.objects.genai.enabled_in_config for c in self.config.cameras.values()):
             self.post_processors.append(
-                ObjectDescriptionProcessor(
+                SemanticTriggerProcessor(
+                    db,
                     self.config,
-                    self.embeddings,
                     self.requestor,
-                    self.metrics,
-                    self.genai_manager,
-                    semantic_trigger_processor,
+                    self.event_metadata_publisher,
+                    metrics,
+                    self.embeddings,
                 )
             )
+
+        self._sync_genai_post_processors()
 
         self.stop_event = stop_event
 
@@ -284,7 +264,16 @@ class EmbeddingMaintainer(threading.Thread):
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
-            self.config_updater.check_for_updates()
+            updated_topics = self.config_updater.check_for_updates()
+            if {
+                CameraConfigUpdateEnum.add.name,
+                CameraConfigUpdateEnum.remove.name,
+                CameraConfigUpdateEnum.objects.name,
+                CameraConfigUpdateEnum.object_genai.name,
+                CameraConfigUpdateEnum.review.name,
+                CameraConfigUpdateEnum.review_genai.name,
+            } & updated_topics.keys():
+                self._sync_genai_post_processors()
             self._check_enrichment_config_updates()
             self._process_requests()
             self._process_updates()
@@ -311,6 +300,72 @@ class EmbeddingMaintainer(threading.Thread):
         self.embeddings_responder.stop()
         self.requestor.stop()
         logger.info("Exiting embeddings maintenance...")
+
+    def _sync_genai_post_processors(self) -> None:
+        """Match GenAI post processors to the current camera configuration."""
+        review_enabled = any(
+            camera.review.genai.enabled_in_config or camera.review.genai.enabled
+            for camera in self.config.cameras.values()
+        )
+        review_processor = next(
+            (
+                processor
+                for processor in self.post_processors
+                if isinstance(processor, ReviewDescriptionProcessor)
+            ),
+            None,
+        )
+
+        if review_enabled and review_processor is None:
+            self.post_processors.append(
+                ReviewDescriptionProcessor(
+                    self.config,
+                    self.requestor,
+                    self.metrics,
+                    self.genai_manager,
+                )
+            )
+            logger.info("Enabled GenAI review description processor")
+        elif not review_enabled and review_processor is not None:
+            self.post_processors.remove(review_processor)
+            logger.info("Disabled GenAI review description processor")
+
+        object_enabled = any(
+            camera.objects.genai.enabled_in_config or camera.objects.genai.enabled
+            for camera in self.config.cameras.values()
+        )
+        object_processor = next(
+            (
+                processor
+                for processor in self.post_processors
+                if isinstance(processor, ObjectDescriptionProcessor)
+            ),
+            None,
+        )
+
+        if object_enabled and object_processor is None:
+            semantic_trigger_processor = next(
+                (
+                    processor
+                    for processor in self.post_processors
+                    if isinstance(processor, SemanticTriggerProcessor)
+                ),
+                None,
+            )
+            self.post_processors.append(
+                ObjectDescriptionProcessor(
+                    self.config,
+                    self.embeddings,
+                    self.requestor,
+                    self.metrics,
+                    self.genai_manager,
+                    semantic_trigger_processor,
+                )
+            )
+            logger.info("Enabled GenAI object description processor")
+        elif not object_enabled and object_processor is not None:
+            self.post_processors.remove(object_processor)
+            logger.info("Disabled GenAI object description processor")
 
     def _check_enrichment_config_updates(self) -> None:
         """Check for enrichment config updates and delegate to processors."""
