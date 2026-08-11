@@ -318,12 +318,12 @@ export const formatSecondsToDuration = (
  * @param timezone string representation of the timezone the user is requesting
  * @returns number of minutes offset from UTC
  */
-export const getUTCOffset = (
-  date: Date,
-  timezone: string = getResolvedTimeZone(),
-): number => {
+export const getUTCOffset = (date: Date, timezone?: string | null): number => {
+  // ui.timezone comes back as null until the user sets one
+  const resolvedTimezone = timezone || getResolvedTimeZone();
+
   // If timezone is in UTC±HH:MM format, parse it to get offset
-  const utcOffsetMatch = timezone.match(/^UTC([+-])(\d{2}):(\d{2})$/);
+  const utcOffsetMatch = resolvedTimezone.match(/^UTC([+-])(\d{2}):(\d{2})$/);
   if (utcOffsetMatch) {
     const hours = parseInt(utcOffsetMatch[2], 10);
     const minutes = parseInt(utcOffsetMatch[3], 10);
@@ -334,7 +334,7 @@ export const getUTCOffset = (
   const utcDate = new Date(date.getTime());
   // locale of en-CA is required for proper locale format
   let iso = utcDate
-    .toLocaleString("en-CA", { timeZone: timezone, hour12: false })
+    .toLocaleString("en-CA", { timeZone: resolvedTimezone, hour12: false })
     .replace(", ", "T");
   iso += `.${utcDate.getMilliseconds().toString().padStart(3, "0")}`;
   let target = new Date(`${iso}Z`);

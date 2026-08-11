@@ -258,6 +258,7 @@ export default function ReviewFilterGroup({
           // not applicable as exports are not used
           camera=""
           latestTime={0}
+          earliestTime={0}
           currentTime={0}
           mode="none"
           setMode={() => {}}

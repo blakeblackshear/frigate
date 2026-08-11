@@ -677,6 +677,7 @@ export function RecordingView({
                 camera={mainCamera}
                 currentTime={currentTime}
                 latestTime={timeRange.before}
+                earliestTime={timeRange.after}
                 mode={exportMode}
                 range={exportRange}
                 showPreview={showExportPreview}
@@ -810,6 +811,7 @@ export function RecordingView({
               filter={filter}
               currentTime={currentTime}
               latestTime={timeRange.before}
+              earliestTime={timeRange.after}
               recordingsSummary={recordingsSummary}
               mode={exportMode}
               range={exportRange}
