@@ -39,6 +39,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 import {
   Command,
   CommandGroup,
@@ -62,7 +63,6 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
-import { useNavigate } from "react-router-dom";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { isReplayCamera } from "@/utils/cameraUtil";
 import { isValidIconName } from "@/utils/iconUtil";
@@ -79,9 +79,14 @@ const EXPORT_OPTIONS = [
 type ExportOption = (typeof EXPORT_OPTIONS)[number];
 export type ExportTab = "export" | "multi";
 
+// length of a range seeded around the current playback time
+const MULTI_CAMERA_RANGE_SECONDS = 3600;
+const TIMELINE_SELECTION_SECONDS = 60;
+
 type ExportDialogProps = {
   camera: string;
   latestTime: number;
+  earliestTime: number;
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
@@ -94,6 +99,7 @@ type ExportDialogProps = {
 export default function ExportDialog({
   camera,
   latestTime,
+  earliestTime,
   currentTime,
   range,
   mode,
@@ -107,9 +113,13 @@ export default function ExportDialog({
   const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>();
   const [singleNewCaseName, setSingleNewCaseName] = useState("");
   const [singleNewCaseDescription, setSingleNewCaseDescription] = useState("");
+  const [batchCaseSelection, setBatchCaseSelection] = useState("new");
+  const [newCaseName, setNewCaseName] = useState("");
+  const [newCaseDescription, setNewCaseDescription] = useState("");
   const [activeTab, setActiveTab] = useState<ExportTab>("export");
   const [isStartingExport, setIsStartingExport] = useState(false);
   const previousModeRef = useRef<ExportMode>(mode);
+  const preTimelineRangeRef = useRef<TimeRange | undefined>(undefined);
 
   useEffect(() => {
     const previousMode = previousModeRef.current;
@@ -188,6 +198,9 @@ export default function ExportDialog({
       setSelectedCaseId(undefined);
       setSingleNewCaseName("");
       setSingleNewCaseDescription("");
+      setBatchCaseSelection("new");
+      setNewCaseName("");
+      setNewCaseDescription("");
       setRange(undefined);
       setMode("none");
       return true;
@@ -223,14 +236,32 @@ export default function ExportDialog({
   ]);
 
   const handleCancel = useCallback(() => {
+    if (mode == "timeline_multi") {
+      setRange(preTimelineRangeRef.current);
+      setMode("select");
+      return;
+    }
+
     setName("");
     setSelectedCaseId(undefined);
     setSingleNewCaseName("");
     setSingleNewCaseDescription("");
+    setBatchCaseSelection("new");
+    setNewCaseName("");
+    setNewCaseDescription("");
     setMode("none");
     setRange(undefined);
     setActiveTab("export");
-  }, [setMode, setRange]);
+  }, [mode, setMode, setRange]);
+
+  const onSelectFromTimeline = useCallback(
+    (initialRange: TimeRange) => {
+      preTimelineRangeRef.current = range;
+      setRange(initialRange);
+      setMode("timeline_multi");
+    },
+    [range, setMode, setRange],
+  );
 
   const Overlay = isDesktop ? Dialog : Drawer;
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
@@ -304,12 +335,16 @@ export default function ExportDialog({
         >
           <ExportContent
             latestTime={latestTime}
+            earliestTime={earliestTime}
             currentTime={currentTime}
             range={range}
             name={name}
             selectedCaseId={selectedCaseId}
             singleNewCaseName={singleNewCaseName}
             singleNewCaseDescription={singleNewCaseDescription}
+            batchCaseSelection={batchCaseSelection}
+            newCaseName={newCaseName}
+            newCaseDescription={newCaseDescription}
             activeTab={activeTab}
             isStartingExport={isStartingExport}
             onStartExport={onStartExport}
@@ -318,8 +353,12 @@ export default function ExportDialog({
             setSelectedCaseId={setSelectedCaseId}
             setSingleNewCaseName={setSingleNewCaseName}
             setSingleNewCaseDescription={setSingleNewCaseDescription}
+            setBatchCaseSelection={setBatchCaseSelection}
+            setNewCaseName={setNewCaseName}
+            setNewCaseDescription={setNewCaseDescription}
             setRange={setRange}
             setMode={setMode}
+            onSelectFromTimeline={onSelectFromTimeline}
             onCancel={handleCancel}
           />
         </Content>
@@ -330,12 +369,16 @@ export default function ExportDialog({
 
 type ExportContentProps = {
   latestTime: number;
+  earliestTime: number;
   currentTime: number;
   range?: TimeRange;
   name: string;
   selectedCaseId?: string;
   singleNewCaseName: string;
   singleNewCaseDescription: string;
+  batchCaseSelection: string;
+  newCaseName: string;
+  newCaseDescription: string;
   activeTab: ExportTab;
   isStartingExport: boolean;
   onStartExport: () => Promise<boolean>;
@@ -344,19 +387,27 @@ type ExportContentProps = {
   setSelectedCaseId: (caseId: string | undefined) => void;
   setSingleNewCaseName: (name: string) => void;
   setSingleNewCaseDescription: (description: string) => void;
+  setBatchCaseSelection: (caseId: string) => void;
+  setNewCaseName: (name: string) => void;
+  setNewCaseDescription: (description: string) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
+  onSelectFromTimeline: (range: TimeRange) => void;
   onCancel: () => void;
 };
 
 export function ExportContent({
   latestTime,
+  earliestTime,
   currentTime,
   range,
   name,
   selectedCaseId,
   singleNewCaseName,
   singleNewCaseDescription,
+  batchCaseSelection,
+  newCaseName,
+  newCaseDescription,
   activeTab,
   isStartingExport,
   onStartExport,
@@ -365,12 +416,15 @@ export function ExportContent({
   setSelectedCaseId,
   setSingleNewCaseName,
   setSingleNewCaseDescription,
+  setBatchCaseSelection,
+  setNewCaseName,
+  setNewCaseDescription,
   setRange,
   setMode,
+  onSelectFromTimeline,
   onCancel,
 }: ExportContentProps) {
   const { t } = useTranslation(["components/dialog"]);
-  const navigate = useNavigate();
   const isAdmin = useIsAdmin();
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
   const { data: cases } = useSWR<ExportCase[]>(isAdmin ? "cases" : null);
@@ -379,13 +433,8 @@ export function ExportContent({
     range,
   );
   const [selectedCameraIds, setSelectedCameraIds] = useState<string[]>([]);
-  const [batchCaseSelection, setBatchCaseSelection] = useState<string>(
-    selectedCaseId || "none",
-  );
   const [hasManualCameraSelection, setHasManualCameraSelection] =
     useState(false);
-  const [newCaseName, setNewCaseName] = useState("");
-  const [newCaseDescription, setNewCaseDescription] = useState("");
   const [isStartingBatchExport, setIsStartingBatchExport] = useState(false);
   const [cameraSearch, setCameraSearch] = useState("");
   const [cameraMenuOpen, setCameraMenuOpen] = useState(false);
@@ -417,37 +466,46 @@ export function ExportContent({
   }, [activeTab, range]);
 
   useEffect(() => {
-    if (activeTab !== "multi") {
-      return;
-    }
-
-    if (selectedCaseId) {
-      setBatchCaseSelection(selectedCaseId);
-      return;
-    }
-
-    if ((cases?.length ?? 0) === 0) {
-      setBatchCaseSelection("new");
-      return;
-    }
-
-    setBatchCaseSelection("new");
-  }, [activeTab, cases?.length, selectedCaseId]);
-
-  useEffect(() => {
     setHasManualCameraSelection(false);
   }, [multiRangeKey]);
+
+  const buildRangeAroundCurrentTime = useCallback(
+    (durationSeconds: number): TimeRange => ({
+      after: Math.max(earliestTime, currentTime - durationSeconds / 2),
+      before: Math.min(latestTime, currentTime + durationSeconds / 2),
+    }),
+    [currentTime, earliestTime, latestTime],
+  );
+
+  const clampRangeToTimeline = useCallback(
+    (candidate?: TimeRange): TimeRange => {
+      const fallback = buildRangeAroundCurrentTime(TIMELINE_SELECTION_SECONDS);
+
+      if (!candidate) {
+        return fallback;
+      }
+
+      const after = Math.min(
+        latestTime,
+        Math.max(earliestTime, candidate.after),
+      );
+      const before = Math.min(
+        latestTime,
+        Math.max(earliestTime, candidate.before),
+      );
+
+      return before > after ? { after, before } : fallback;
+    },
+    [buildRangeAroundCurrentTime, earliestTime, latestTime],
+  );
 
   useEffect(() => {
     if (activeTab !== "multi" || range) {
       return;
     }
 
-    setRange({
-      before: currentTime + 1800,
-      after: currentTime - 1800,
-    });
-  }, [activeTab, currentTime, range, setRange]);
+    setRange(buildRangeAroundCurrentTime(MULTI_CAMERA_RANGE_SECONDS));
+  }, [activeTab, buildRangeAroundCurrentTime, range, setRange]);
 
   const { data: events, isLoading: isEventsLoading } = useSWR<Event[]>(
     activeTab === "multi" && debouncedRange
@@ -715,6 +773,16 @@ export function ExportContent({
           return result.error ? `${cameraName}: ${result.error}` : cameraName;
         })
         .join(", ");
+      const exportCaseId = response.data.export_case_id;
+      const viewCaseAction = exportCaseId ? (
+        <a
+          href={`${baseUrl}export?caseId=${exportCaseId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button>{t("export.toast.view")}</Button>
+        </a>
+      ) : undefined;
 
       if (failedResults.length > 0 && successfulResults.length > 0) {
         toast.success(
@@ -728,6 +796,7 @@ export function ExportContent({
           {
             position: "top-center",
             description: failedSummary,
+            action: viewCaseAction,
           },
         );
       } else if (failedResults.length > 0) {
@@ -748,7 +817,7 @@ export function ExportContent({
           t("export.toast.batchQueuedSuccess", {
             count: successfulResults.length,
           }),
-          { position: "top-center" },
+          { position: "top-center", action: viewCaseAction },
         );
       }
 
@@ -761,9 +830,6 @@ export function ExportContent({
         setRange(undefined);
         setMode("none");
         setActiveTab("export");
-        if (response.data.export_case_id) {
-          navigate(`/export?caseId=${response.data.export_case_id}`);
-        }
       }
     } catch (error) {
       const apiError = error as {
@@ -794,12 +860,14 @@ export function ExportContent({
     range,
     selectedCameraIds,
     setActiveTab,
+    setBatchCaseSelection,
     setMode,
     setName,
+    setNewCaseDescription,
+    setNewCaseName,
     setRange,
     setSelectedCaseId,
     t,
-    navigate,
   ]);
 
   return (
@@ -820,10 +888,8 @@ export function ExportContent({
         onValueChange={(value) => {
           const tab = value as ExportTab;
           if (tab === "multi") {
-            setRange({
-              before: currentTime + 1800,
-              after: currentTime - 1800,
-            });
+            setRange(buildRangeAroundCurrentTime(MULTI_CAMERA_RANGE_SECONDS));
+            setBatchCaseSelection(selectedCaseId ?? "new");
           } else {
             onSelectTime(selectedOption);
           }
@@ -975,23 +1041,18 @@ export function ExportContent({
                     className="size-9 shrink-0 p-0"
                     aria-label={t("export.multiCamera.selectFromTimeline")}
                     onClick={() => {
-                      if (!range) {
-                        setRange({
-                          before: currentTime + 30,
-                          after: currentTime - 30,
-                        });
-                      }
-
                       setActiveTab("multi");
-                      setMode("timeline_multi");
+                      onSelectFromTimeline(clampRangeToTimeline(range));
                     }}
                   >
                     <LuAudioLines className="size-4 -rotate-90" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  {t("export.multiCamera.selectFromTimeline")}
-                </TooltipContent>
+                <TooltipPortal>
+                  <TooltipContent>
+                    {t("export.multiCamera.selectFromTimeline")}
+                  </TooltipContent>
+                </TooltipPortal>
               </Tooltip>
             </div>
           </div>
@@ -1256,7 +1317,9 @@ export function ExportContent({
             disabled={isStartingExport}
             onClick={async () => {
               if (selectedOption == "timeline") {
-                setRange({ before: currentTime + 30, after: currentTime - 30 });
+                setRange(
+                  buildRangeAroundCurrentTime(TIMELINE_SELECTION_SECONDS),
+                );
                 setMode("timeline");
               } else {
                 const didQueue = await onStartExport();

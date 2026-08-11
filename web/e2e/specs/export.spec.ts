@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures/frigate-test";
+import { test, expect, type FrigateApp } from "../fixtures/frigate-test";
 import {
   expectBodyInteractive,
   waitForBodyInteractive,
@@ -575,7 +575,7 @@ test.describe("Multi-Review Export @high", () => {
     await expect(dialog.getByText(/None/)).toBeVisible();
   });
 
-  test("starting an export posts the expected payload and navigates to the case", async ({
+  test("starting an export posts the expected payload and stays on the review page", async ({
     frigateApp,
   }) => {
     test.skip(frigateApp.isMobile, "Desktop multi-select flow");
@@ -673,9 +673,15 @@ test.describe("Multi-Review Export @high", () => {
       "mex-review-002",
     ]);
 
-    await expect(frigateApp.page).toHaveURL(/caseId=new-case-xyz/, {
-      timeout: 5_000,
-    });
+    // Creating a case must not pull the user off the review they were
+    // working through — the case is offered as a link on the toast instead.
+    const viewCase = frigateApp.page.getByRole("link", { name: /view/i });
+    await expect(viewCase).toBeVisible({ timeout: 5_000 });
+    await expect(viewCase).toHaveAttribute(
+      "href",
+      /export\?caseId=new-case-xyz$/,
+    );
+    await expect(frigateApp.page).toHaveURL(/\/review(\?|$)/);
   });
 
   test("mobile opens a drawer (not a dialog) for the multi-review export flow", async ({
@@ -834,12 +840,128 @@ test.describe("Multi-Review Export @high", () => {
     expect(payload.new_case_description).toBeUndefined();
     expect(payload.items).toHaveLength(2);
 
-    // Navigate should hit /export. useSearchEffect consumes the caseId
-    // query param and strips it once the case is found in the cases list,
-    // so we assert on the path, not the query string.
-    await expect(frigateApp.page).toHaveURL(/\/export(\?|$)/, {
-      timeout: 5_000,
-    });
+    // Attaching to a case leaves the user on the review page; the case is
+    // reachable from the toast action.
+    const viewCase = frigateApp.page.getByRole("link", { name: /view/i });
+    await expect(viewCase).toBeVisible({ timeout: 5_000 });
+    await expect(viewCase).toHaveAttribute(
+      "href",
+      /export\?caseId=existing-case-abc$/,
+    );
+    await expect(frigateApp.page).toHaveURL(/\/review(\?|$)/);
+  });
+});
+
+test.describe("Multi-Camera Export from History @high", () => {
+  // The recording view seeds the multi-camera range around the playback
+  // position, so the deep link has to land close to the live edge for the
+  // seeded end to run past the end of the timeline.
+  const playbackTime = Math.floor(Date.now() / 1000) - 300;
+
+  async function openRecordingView(frigateApp: FrigateApp) {
+    // The recording view pulls these while the timeline renders; the preview
+    // server 500s on them, which the error collector would flag.
+    await frigateApp.page.route("**/api/*/recordings**", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await frigateApp.page.route("**/api/recordings/unavailable**", (route) =>
+      route.fulfill({ json: [] }),
+    );
+
+    await frigateApp.goto(`/review?timestamp=front_door_${playbackTime}`);
+  }
+
+  // Desktop opens the export form in a dialog from the Actions menu; mobile
+  // opens the same form inside the settings drawer.
+  async function openMultiCameraTab(frigateApp: FrigateApp) {
+    await openRecordingView(frigateApp);
+
+    if (frigateApp.isMobile) {
+      await frigateApp.page
+        .getByRole("button", { name: /filters/i })
+        .first()
+        .click({ timeout: 15_000 });
+      await frigateApp.page.getByRole("button", { name: /^export$/i }).click();
+    } else {
+      await frigateApp.page
+        .getByRole("button", { name: /actions/i })
+        .click({ timeout: 15_000 });
+      await frigateApp.page.getByRole("menuitem", { name: /export/i }).click();
+    }
+
+    const form = frigateApp.page.getByRole("dialog");
+    await expect(form).toBeVisible({ timeout: 5_000 });
+    await form.getByRole("tab", { name: /multi-camera/i }).click();
+
+    return form;
+  }
+
+  test("timeline selection renders both export handles on the timeline", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+    const form = await openMultiCameraTab(frigateApp);
+
+    await form
+      .getByRole("button", { name: "Select from Timeline" })
+      .click({ timeout: 5_000 });
+    await expect(form).toBeHidden({ timeout: 5_000 });
+
+    // A range seeded past the end of the timeline has no segment to anchor
+    // to, which leaves the handle unpositioned at the top of the timeline
+    // with an empty label until it is dragged.
+    for (const handle of [".export-start", ".export-end"]) {
+      const locator = frigateApp.page.locator(handle);
+      await expect(locator).toHaveText(/\d{1,2}:\d{2}/, { timeout: 5_000 });
+      await expect(locator).not.toHaveAttribute("style", /top:\s*0px/);
+    }
+  });
+
+  test("the time range picker opens without a configured timezone", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+    const form = await openMultiCameraTab(frigateApp);
+
+    // ui.timezone is null until the user sets one, which used to take the
+    // whole page down when the calendar worked out its disabled days
+    await form
+      .getByRole("button", { name: /^start time$/i })
+      .click({ timeout: 5_000 });
+
+    await expect(
+      frigateApp.page.getByRole("button", { name: /previous month/i }),
+    ).toBeVisible({ timeout: 5_000 });
+  });
+
+  test("canceling timeline selection reopens the form with the case intact", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+    const form = await openMultiCameraTab(frigateApp);
+
+    await form
+      .getByPlaceholder(/new case name/i)
+      .fill("Incident 7", { timeout: 5_000 });
+    await form
+      .getByPlaceholder(/case description/i)
+      .fill("Front gate follow-up");
+
+    await form.getByRole("button", { name: "Select from Timeline" }).click();
+    await expect(form).toBeHidden({ timeout: 5_000 });
+
+    await frigateApp.page.getByRole("button", { name: /cancel/i }).click();
+
+    await expect(form).toBeVisible({ timeout: 5_000 });
+    await expect(
+      form.getByRole("tab", { name: /multi-camera/i }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(form.getByPlaceholder(/new case name/i)).toHaveValue(
+      "Incident 7",
+    );
+    await expect(form.getByPlaceholder(/case description/i)).toHaveValue(
+      "Front gate follow-up",
+    );
   });
 });
 

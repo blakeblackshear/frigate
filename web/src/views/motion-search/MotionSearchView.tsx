@@ -1356,6 +1356,7 @@ export default function MotionSearchView({
                   camera={selectedCamera}
                   currentTime={currentTime}
                   latestTime={timeRange.before}
+                  earliestTime={timeRange.after}
                   mode={exportMode}
                   range={exportRange}
                   showPreview={showExportPreview}
@@ -1476,6 +1477,7 @@ export default function MotionSearchView({
               camera={selectedCamera}
               currentTime={currentTime}
               latestTime={timeRange.before}
+              earliestTime={timeRange.after}
               mode={exportMode}
               range={exportRange}
               showPreview={showExportPreview}

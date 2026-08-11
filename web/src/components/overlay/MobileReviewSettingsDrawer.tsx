@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { baseUrl } from "@/api/baseUrl";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
@@ -65,6 +65,7 @@ type MobileReviewSettingsDrawerProps = {
   filter?: ReviewFilter;
   currentSeverity?: ReviewSeverity;
   latestTime: number;
+  earliestTime: number;
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
@@ -90,6 +91,7 @@ export default function MobileReviewSettingsDrawer({
   filter,
   currentSeverity,
   latestTime,
+  earliestTime,
   currentTime,
   range,
   mode,
@@ -142,7 +144,22 @@ export default function MobileReviewSettingsDrawer({
   );
   const [singleNewCaseName, setSingleNewCaseName] = useState("");
   const [singleNewCaseDescription, setSingleNewCaseDescription] = useState("");
+  const [batchCaseSelection, setBatchCaseSelection] = useState("new");
+  const [newCaseName, setNewCaseName] = useState("");
+  const [newCaseDescription, setNewCaseDescription] = useState("");
   const [isStartingExport, setIsStartingExport] = useState(false);
+  const preTimelineRangeRef = useRef<TimeRange | undefined>(undefined);
+
+  const onSelectFromTimeline = useCallback(
+    (initialRange: TimeRange) => {
+      preTimelineRangeRef.current = range;
+      setRange(initialRange);
+      setMode("timeline_multi");
+      setDrawerMode("none");
+    },
+    [range, setMode, setRange],
+  );
+
   const onStartExport = useCallback(async () => {
     if (isStartingExport) {
       return false;
@@ -214,6 +231,9 @@ export default function MobileReviewSettingsDrawer({
       setSelectedCaseId(undefined);
       setSingleNewCaseName("");
       setSingleNewCaseDescription("");
+      setBatchCaseSelection("new");
+      setNewCaseName("");
+      setNewCaseDescription("");
       setRange(undefined);
       setMode("none");
       return true;
@@ -433,12 +453,16 @@ export default function MobileReviewSettingsDrawer({
     content = (
       <ExportContent
         latestTime={latestTime}
+        earliestTime={earliestTime}
         currentTime={currentTime}
         range={range}
         name={name}
         selectedCaseId={selectedCaseId}
         singleNewCaseName={singleNewCaseName}
         singleNewCaseDescription={singleNewCaseDescription}
+        batchCaseSelection={batchCaseSelection}
+        newCaseName={newCaseName}
+        newCaseDescription={newCaseDescription}
         activeTab={exportTab}
         isStartingExport={isStartingExport}
         onStartExport={onStartExport}
@@ -447,6 +471,9 @@ export default function MobileReviewSettingsDrawer({
         setSelectedCaseId={setSelectedCaseId}
         setSingleNewCaseName={setSingleNewCaseName}
         setSingleNewCaseDescription={setSingleNewCaseDescription}
+        setBatchCaseSelection={setBatchCaseSelection}
+        setNewCaseName={setNewCaseName}
+        setNewCaseDescription={setNewCaseDescription}
         setRange={setRange}
         setMode={(mode) => {
           setMode(mode);
@@ -455,12 +482,16 @@ export default function MobileReviewSettingsDrawer({
             setDrawerMode("none");
           }
         }}
+        onSelectFromTimeline={onSelectFromTimeline}
         onCancel={() => {
           setMode("none");
           setRange(undefined);
           setSelectedCaseId(undefined);
           setSingleNewCaseName("");
           setSingleNewCaseDescription("");
+          setBatchCaseSelection("new");
+          setNewCaseName("");
+          setNewCaseDescription("");
           setExportTab("export");
           setDrawerMode("select");
         }}
@@ -639,6 +670,14 @@ export default function MobileReviewSettingsDrawer({
           void onStartExport();
         }}
         onCancel={() => {
+          if (mode == "timeline_multi") {
+            setRange(preTimelineRangeRef.current);
+            setExportTab("multi");
+            setMode("select");
+            setDrawerMode("export");
+            return;
+          }
+
           setExportTab("export");
           setRange(undefined);
           setMode("none");
