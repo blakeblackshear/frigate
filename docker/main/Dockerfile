@@ -77,7 +77,8 @@ ARG PIP_BREAK_SYSTEM_PACKAGES
 # Install OpenVINO for model conversion
 COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
-    && apt-get -qq install -y wget python3 \
+    && apt-get -qq install -y wget python3.13 \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip" \
@@ -158,8 +159,8 @@ RUN apt-get -qq update \
     apt-transport-https wget unzip \
     && apt-get -qq update \
     && apt-get -qq install -y \
-    python3 \
-    python3-dev \
+    python3.13 \
+    python3.13-dev \
     # opencv dependencies
     build-essential cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
@@ -172,6 +173,8 @@ RUN apt-get -qq update \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
