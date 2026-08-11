@@ -183,10 +183,6 @@ COPY docker/main/requirements-dev.txt /requirements-dev.txt
 
 RUN pip3 install -r /requirements.txt
 
-# Build pysqlite3 from source
-COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
-RUN /build_pysqlite3.sh
-
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
     if [ "$DEBUG" = "true" ]; then \

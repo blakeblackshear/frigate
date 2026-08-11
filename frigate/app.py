@@ -276,6 +276,7 @@ class FrigateApp:
                 "auto_vacuum": "FULL",  # Does not defragment database
                 "cache_size": -512 * 1000,  # 512MB of cache,
                 "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
+                "temp_store": "MEMORY",  # Keep temp tables and indices in memory
             },
             timeout=max(
                 60,
