@@ -72,7 +72,6 @@ RUN --mount=type=bind,source=docker/main/install_tempio.sh,target=/deps/install_
 # Download and Convert OpenVino model
 FROM base_host AS ov-converter
 ARG DEBIAN_FRONTEND
-ARG PIP_BREAK_SYSTEM_PACKAGES
 
 # Install OpenVINO for model conversion
 COPY docker/main/requirements-ov.txt /requirements-ov.txt
@@ -151,7 +150,6 @@ FROM base AS wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
 ARG DEBUG=false
-ARG PIP_BREAK_SYSTEM_PACKAGES
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
@@ -220,7 +218,6 @@ COPY docker/main/rootfs/ /
 FROM slim-base AS deps
 ARG TARGETARCH
 ARG BASE_IMAGE
-ARG PIP_BREAK_SYSTEM_PACKAGES
 
 ARG DEBIAN_FRONTEND
 # http://stackoverflow.com/questions/48162574/ddg#49462622
@@ -305,7 +302,6 @@ HEALTHCHECK --start-period=300s --start-interval=5s --interval=15s --timeout=5s 
 
 # Frigate deps with Node.js and NPM for devcontainer
 FROM deps AS devcontainer
-ARG PIP_BREAK_SYSTEM_PACKAGES
 
 # Do not start the actual Frigate service on devcontainer as it will be started by VS Code
 # But start a fake service for simulating the logs
