@@ -19,9 +19,9 @@ If you already have Frigate installed through Docker or through a Home Assistant
 
 ## Setting up hardware
 
-This section guides you through setting up a server with Debian Trixie and Docker.
+This section guides you through setting up a server with Debian Bookworm and Docker.
 
-### Install Debian 13 (Trixie)
+### Install Debian 12 (Bookworm)
 
 There are many guides on how to install Debian Server, so this will be an abbreviated guide. Connect a temporary monitor and keyboard to your device so you can install a minimal server without a desktop environment.
 
