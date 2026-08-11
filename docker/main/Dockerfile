@@ -163,7 +163,7 @@ RUN apt-get -qq update \
     build-essential cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
-    gfortran openexr libatlas-base-dev libssl-dev\
+    gfortran openexr libssl-dev \
     libtbbmalloc2 libtbb-dev libdc1394-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
     # sqlite3 dependencies
