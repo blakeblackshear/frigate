@@ -220,6 +220,16 @@ class EmbeddingMaintainer(threading.Thread):
         # post processors
         self.post_processors: list[PostProcessorApi] = []
 
+        if metrics is not None:
+            self.post_processors.append(
+                ReviewDescriptionProcessor(
+                    self.config,
+                    self.requestor,
+                    metrics,
+                    self.genai_manager,
+                )
+            )
+
         if self.config.lpr.enabled:
             self.post_processors.append(
                 LicensePlatePostProcessor(
@@ -242,19 +252,29 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
+        semantic_trigger_processor: SemanticTriggerProcessor | None = None
         if self.config.semantic_search.enabled:
+            semantic_trigger_processor = SemanticTriggerProcessor(
+                db,
+                self.config,
+                self.requestor,
+                self.event_metadata_publisher,
+                metrics,
+                self.embeddings,
+            )
+            self.post_processors.append(semantic_trigger_processor)
+
+        if metrics is not None:
             self.post_processors.append(
-                SemanticTriggerProcessor(
-                    db,
+                ObjectDescriptionProcessor(
                     self.config,
-                    self.requestor,
-                    self.event_metadata_publisher,
-                    metrics,
                     self.embeddings,
+                    self.requestor,
+                    metrics,
+                    self.genai_manager,
+                    semantic_trigger_processor,
                 )
             )
-
-        self._ensure_genai_post_processors()
 
         self.stop_event = stop_event
 
@@ -264,15 +284,7 @@ class EmbeddingMaintainer(threading.Thread):
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
-            updated_topics = self.config_updater.check_for_updates()
-            if {
-                CameraConfigUpdateEnum.add.name,
-                CameraConfigUpdateEnum.objects.name,
-                CameraConfigUpdateEnum.object_genai.name,
-                CameraConfigUpdateEnum.review.name,
-                CameraConfigUpdateEnum.review_genai.name,
-            } & updated_topics.keys():
-                self._ensure_genai_post_processors()
+            self.config_updater.check_for_updates()
             self._check_enrichment_config_updates()
             self._process_requests()
             self._process_updates()
@@ -299,61 +311,6 @@ class EmbeddingMaintainer(threading.Thread):
         self.embeddings_responder.stop()
         self.requestor.stop()
         logger.info("Exiting embeddings maintenance...")
-
-    def _ensure_genai_post_processors(self) -> None:
-        """Add configured GenAI post processors that are not already running."""
-        if self.metrics is None:
-            return
-
-        review_enabled = any(
-            camera.review.genai.enabled_in_config or camera.review.genai.enabled
-            for camera in self.config.cameras.values()
-        )
-        has_review_processor = any(
-            isinstance(processor, ReviewDescriptionProcessor)
-            for processor in self.post_processors
-        )
-
-        if review_enabled and not has_review_processor:
-            self.post_processors.append(
-                ReviewDescriptionProcessor(
-                    self.config,
-                    self.requestor,
-                    self.metrics,
-                    self.genai_manager,
-                )
-            )
-            logger.info("Added GenAI review description processor")
-
-        object_enabled = any(
-            camera.objects.genai.enabled_in_config or camera.objects.genai.enabled
-            for camera in self.config.cameras.values()
-        )
-        has_object_processor = any(
-            isinstance(processor, ObjectDescriptionProcessor)
-            for processor in self.post_processors
-        )
-
-        if object_enabled and not has_object_processor:
-            semantic_trigger_processor = next(
-                (
-                    processor
-                    for processor in self.post_processors
-                    if isinstance(processor, SemanticTriggerProcessor)
-                ),
-                None,
-            )
-            self.post_processors.append(
-                ObjectDescriptionProcessor(
-                    self.config,
-                    self.embeddings,
-                    self.requestor,
-                    self.metrics,
-                    self.genai_manager,
-                    semantic_trigger_processor,
-                )
-            )
-            logger.info("Added GenAI object description processor")
 
     def _check_enrichment_config_updates(self) -> None:
         """Check for enrichment config updates and delegate to processors."""
