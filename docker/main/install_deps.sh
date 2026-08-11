@@ -106,7 +106,10 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     apt-get -qq install -y ocl-icd-libopencl1
 
     # install libtbb12 for NPU support
-    apt-get -qq install -y libtbb12
+    # --no-install-recommends is required on trixie: libtbb12 otherwise pulls
+    # libhwloc-plugins -> libze1, which file-conflicts with the level-zero deb
+    # installed below
+    apt-get -qq install --no-install-recommends -y libtbb12
 
     # install legacy and standard intel compute packages
     # see https://github.com/intel/compute-runtime/blob/master/LEGACY_PLATFORMS.md for more info
