@@ -14,8 +14,9 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
-# Note: jetson (jp6), rockchip, and synaptics builds are disabled until their
-# vendor runtimes support Python 3.13 (or a community member updates them).
+env:
+  PYTHON_VERSION: 3.13
+
 jobs:
   amd64_build:
     runs-on: ubuntu-22.04
@@ -76,6 +77,40 @@ jobs:
             rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
+  # Disabled: the Jetson image is based on NVIDIA's Ubuntu L4T base with
+  # Python 3.11 from deadsnakes, and NVIDIA does not provide a cp313
+  # onnxruntime-gpu wheel for JetPack. Deprecated until a community member
+  # updates it for Python 3.13.
+  jetson_jp6_build:
+    if: false
+    runs-on: ubuntu-22.04-arm
+    name: Jetson Jetpack 6
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push TensorRT (Jetson, Jetpack 6)
+        env:
+          ARCH: arm64
+          BASE_IMAGE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
+          SLIM_BASE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
+          TRT_BASE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
+        uses: docker/bake-action@v7
+        with:
+          source: .
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp6
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6,mode=max
   amd64_extra_builds:
     runs-on: ubuntu-22.04
     name: AMD64 Extra Build
@@ -117,6 +152,62 @@ jobs:
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-rocm,mode=max
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-rocm
+  # Disabled: rknn-toolkit2 / rknn-toolkit-lite2 publish wheels only up to
+  # cp312; re-enable once Rockchip ships cp313 wheels.
+  arm64_extra_builds:
+    if: false
+    runs-on: ubuntu-22.04-arm
+    name: ARM Extra Build
+    needs:
+      - arm64_build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Rockchip build
+        uses: docker/bake-action@v7
+        with:
+          source: .
+          push: true
+          targets: rk
+          files: docker/rockchip/rk.hcl
+          set: |
+            rk.tags=${{ steps.setup.outputs.image-name }}-rk
+            *.cache-from=type=gha
+  # Disabled: the synap-python vendor wheel is cp311-only (0.0.4-preview);
+  # re-enable once Synaptics ships a cp313 build.
+  synaptics_build:
+    if: false
+    runs-on: ubuntu-22.04-arm
+    name: Synaptics Build
+    needs:
+      - arm64_build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Synaptics build
+        uses: docker/bake-action@v7
+        with:
+          source: .
+          push: true
+          targets: synaptics
+          files: docker/synaptics/synaptics.hcl
+          set: |
+            synaptics.tags=${{ steps.setup.outputs.image-name }}-synaptics
+            *.cache-from=type=gha
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
