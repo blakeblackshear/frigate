@@ -100,10 +100,8 @@
       "exportButton_other": "Export {{count}} reviews",
       "exportingButton": "Exporting...",
       "toast": {
-        "started_one": "Started 1 export. Opening the case now.",
-        "started_other": "Started {{count}} exports. Opening the case now.",
-        "startedNoCase_one": "Started 1 export.",
-        "startedNoCase_other": "Started {{count}} exports.",
+        "started_one": "Started 1 export.",
+        "started_other": "Started {{count}} exports.",
         "partial": "Started {{successful}} of {{total}} exports. Failed: {{failedItems}}",
         "failed": "Failed to start {{total}} exports. Failed: {{failedItems}}"
       }
@@ -116,8 +114,8 @@
       "batchSuccess_other": "Started {{count}} exports. Opening the case now.",
       "batchPartial": "Started {{successful}} of {{total}} exports. Failed cameras: {{failedCameras}}",
       "batchFailed": "Failed to start {{total}} exports. Failed cameras: {{failedCameras}}",
-      "batchQueuedSuccess_one": "Queued 1 export. Opening the case now.",
-      "batchQueuedSuccess_other": "Queued {{count}} exports. Opening the case now.",
+      "batchQueuedSuccess_one": "Queued 1 export.",
+      "batchQueuedSuccess_other": "Queued {{count}} exports.",
       "batchQueuedPartial": "Queued {{successful}} of {{total}} exports. Failed cameras: {{failedCameras}}",
       "batchQueueFailed": "Failed to queue {{total}} exports. Failed cameras: {{failedCameras}}",
       "error": {
