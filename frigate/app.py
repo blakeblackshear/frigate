@@ -103,10 +103,21 @@ class FrigateApp:
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: DictProxy = self.metrics_manager.dict()
-        # The embeddings process is always running and enrichment features can be
-        # enabled dynamically, so its shared metrics must also always be available.
-        self.embeddings_metrics = DataProcessorMetrics(
-            self.metrics_manager, list(config.classification.custom.keys())
+        self.embeddings_metrics: DataProcessorMetrics | None = (
+            DataProcessorMetrics(
+                self.metrics_manager, list(config.classification.custom.keys())
+            )
+            if (
+                config.semantic_search.enabled
+                or any(
+                    c.objects.genai.enabled or c.review.genai.enabled
+                    for c in config.cameras.values()
+                )
+                or config.lpr.enabled
+                or config.face_recognition.enabled
+                or len(config.classification.custom) > 0
+            )
+            else None
         )
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}

@@ -85,7 +85,7 @@ class EmbeddingMaintainer(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        metrics: DataProcessorMetrics,
+        metrics: DataProcessorMetrics | None,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
@@ -254,7 +254,7 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        self._sync_genai_post_processors()
+        self._ensure_genai_post_processors()
 
         self.stop_event = stop_event
 
@@ -267,13 +267,12 @@ class EmbeddingMaintainer(threading.Thread):
             updated_topics = self.config_updater.check_for_updates()
             if {
                 CameraConfigUpdateEnum.add.name,
-                CameraConfigUpdateEnum.remove.name,
                 CameraConfigUpdateEnum.objects.name,
                 CameraConfigUpdateEnum.object_genai.name,
                 CameraConfigUpdateEnum.review.name,
                 CameraConfigUpdateEnum.review_genai.name,
             } & updated_topics.keys():
-                self._sync_genai_post_processors()
+                self._ensure_genai_post_processors()
             self._check_enrichment_config_updates()
             self._process_requests()
             self._process_updates()
@@ -301,22 +300,21 @@ class EmbeddingMaintainer(threading.Thread):
         self.requestor.stop()
         logger.info("Exiting embeddings maintenance...")
 
-    def _sync_genai_post_processors(self) -> None:
-        """Match GenAI post processors to the current camera configuration."""
+    def _ensure_genai_post_processors(self) -> None:
+        """Add configured GenAI post processors that are not already running."""
+        if self.metrics is None:
+            return
+
         review_enabled = any(
             camera.review.genai.enabled_in_config or camera.review.genai.enabled
             for camera in self.config.cameras.values()
         )
-        review_processor = next(
-            (
-                processor
-                for processor in self.post_processors
-                if isinstance(processor, ReviewDescriptionProcessor)
-            ),
-            None,
+        has_review_processor = any(
+            isinstance(processor, ReviewDescriptionProcessor)
+            for processor in self.post_processors
         )
 
-        if review_enabled and review_processor is None:
+        if review_enabled and not has_review_processor:
             self.post_processors.append(
                 ReviewDescriptionProcessor(
                     self.config,
@@ -325,25 +323,18 @@ class EmbeddingMaintainer(threading.Thread):
                     self.genai_manager,
                 )
             )
-            logger.info("Enabled GenAI review description processor")
-        elif not review_enabled and review_processor is not None:
-            self.post_processors.remove(review_processor)
-            logger.info("Disabled GenAI review description processor")
+            logger.info("Added GenAI review description processor")
 
         object_enabled = any(
             camera.objects.genai.enabled_in_config or camera.objects.genai.enabled
             for camera in self.config.cameras.values()
         )
-        object_processor = next(
-            (
-                processor
-                for processor in self.post_processors
-                if isinstance(processor, ObjectDescriptionProcessor)
-            ),
-            None,
+        has_object_processor = any(
+            isinstance(processor, ObjectDescriptionProcessor)
+            for processor in self.post_processors
         )
 
-        if object_enabled and object_processor is None:
+        if object_enabled and not has_object_processor:
             semantic_trigger_processor = next(
                 (
                     processor
@@ -362,10 +353,7 @@ class EmbeddingMaintainer(threading.Thread):
                     semantic_trigger_processor,
                 )
             )
-            logger.info("Enabled GenAI object description processor")
-        elif not object_enabled and object_processor is not None:
-            self.post_processors.remove(object_processor)
-            logger.info("Disabled GenAI object description processor")
+            logger.info("Added GenAI object description processor")
 
     def _check_enrichment_config_updates(self) -> None:
         """Check for enrichment config updates and delegate to processors."""
