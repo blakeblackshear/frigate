@@ -63,8 +63,10 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         """Handle an update to a frame for an object."""
         camera_config = self.config.cameras[camera]
 
-        # no need to save our own thumbnails if genai is not enabled
-        # or if the object has become stationary
+        if not camera_config.objects.genai.enabled:
+            return
+
+        # no need to save our own thumbnails if the object has become stationary
         if not data["stationary"]:
             if data["id"] not in self.tracked_events:
                 self.tracked_events[data["id"]] = []
