@@ -41,7 +41,7 @@ from .auth import AuthConfig
 from .base import FrigateBaseModel
 from .camera import CameraConfig, CameraLiveConfig
 from .camera.audio import AudioConfig, AudioFilterConfig
-from .camera.birdseye import BirdseyeConfig
+from .camera.birdseye import BirdseyeConfig, BirdseyeModeConfig
 from .camera.detect import DetectConfig
 from .camera.ffmpeg import FfmpegConfig
 from .camera.genai import GenAIConfig, GenAIRoleEnum
@@ -326,8 +326,20 @@ def verify_required_zones_exist(camera_config: CameraConfig) -> None:
 
 
 def verify_profile_overrides_match_base(camera_config: CameraConfig) -> None:
-    """Verify that profile zone and mask IDs reference entries defined on the base camera."""
+    """Verify profile overrides against the resolved base camera configuration."""
     for profile_name, profile in camera_config.profiles.items():
+        if profile.birdseye is not None:
+            overrides = profile.birdseye.mode.model_dump(exclude_unset=True)
+            base_mode = camera_config.birdseye.mode.model_dump()
+            resolved_mode = BirdseyeModeConfig.model_validate(
+                deep_merge(overrides, base_mode)
+            )
+            if not resolved_mode.has_enabled_activity():
+                raise ValueError(
+                    f"Camera '{camera_config.name}' profile '{profile_name}' must "
+                    "enable at least one Birdseye activity type"
+                )
+
         if profile.zones:
             for zone_name in profile.zones:
                 if zone_name not in camera_config.zones:
@@ -998,6 +1010,10 @@ class FrigateConfig(FrigateBaseModel):
             self.cameras[name] = camera_config
 
             verify_config_roles(camera_config)
+            if not camera_config.birdseye.mode.has_enabled_activity():
+                raise ValueError(
+                    f"Camera '{name}' must enable at least one Birdseye activity type"
+                )
             verify_valid_live_stream_names(self, camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)

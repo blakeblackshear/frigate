@@ -7,7 +7,7 @@ import numpy as np
 from pydantic import ValidationError
 from ruamel.yaml.constructor import DuplicateKeyError
 
-from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.util.builtin import deep_merge
@@ -170,7 +170,7 @@ class TestConfig(unittest.TestCase):
     def test_override_birdseye(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "birdseye": {"enabled": True, "mode": "continuous"},
+            "birdseye": {"enabled": True, "mode": {"continuous": True}},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -183,19 +183,30 @@ class TestConfig(unittest.TestCase):
                         "width": 1920,
                         "fps": 5,
                     },
-                    "birdseye": {"enabled": False, "mode": "motion"},
+                    "birdseye": {
+                        "enabled": False,
+                        "mode": {"continuous": False, "motion": True},
+                    },
                 }
             },
         }
 
         frigate_config = FrigateConfig(**config)
         assert not frigate_config.cameras["back"].birdseye.enabled
-        assert frigate_config.cameras["back"].birdseye.mode is BirdseyeModeEnum.motion
+        mode = frigate_config.cameras["back"].birdseye.mode
+        assert mode.motion
+        assert not mode.continuous
+        assert not mode.objects
+        assert not mode.stationary_objects
 
     def test_override_birdseye_non_inheritable(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "birdseye": {"enabled": True, "mode": "continuous", "height": 1920},
+            "birdseye": {
+                "enabled": True,
+                "mode": {"continuous": True},
+                "height": 1920,
+            },
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -218,7 +229,7 @@ class TestConfig(unittest.TestCase):
     def test_inherit_birdseye(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "birdseye": {"enabled": True, "mode": "continuous"},
+            "birdseye": {"enabled": True, "mode": {"continuous": True}},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -237,9 +248,89 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
         assert frigate_config.cameras["back"].birdseye.enabled
-        assert (
-            frigate_config.cameras["back"].birdseye.mode is BirdseyeModeEnum.continuous
-        )
+        mode = frigate_config.cameras["back"].birdseye.mode
+        assert mode.continuous
+        assert not mode.motion
+        assert not mode.objects
+        assert not mode.stationary_objects
+
+    def test_combine_birdseye_activity_types(self):
+        config = {
+            **self.minimal,
+            "birdseye": {
+                "mode": {
+                    "motion": True,
+                    "stationary_objects": True,
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        mode = frigate_config.cameras["back"].birdseye.mode
+        assert mode.motion
+        assert mode.stationary_objects
+        assert not mode.continuous
+        assert not mode.objects
+
+    def test_birdseye_requires_an_activity_type(self):
+        config = {
+            **self.minimal,
+            "birdseye": {
+                "mode": {
+                    "continuous": False,
+                    "motion": False,
+                    "objects": False,
+                    "stationary_objects": False,
+                }
+            },
+        }
+
+        with self.assertRaisesRegex(
+            ValidationError, "must enable at least one Birdseye activity type"
+        ):
+            FrigateConfig(**config)
+
+    def test_camera_can_disable_an_inherited_activity_type(self):
+        config = {
+            **self.minimal,
+            "birdseye": {"mode": {"motion": True, "objects": True}},
+        }
+        config["cameras"]["back"]["birdseye"] = {"mode": {"motion": False}}
+
+        frigate_config = FrigateConfig(**config)
+        mode = frigate_config.cameras["back"].birdseye.mode
+        assert not mode.motion
+        assert mode.objects
+
+    def test_profile_must_leave_an_activity_type_enabled(self):
+        config = {
+            **self.minimal,
+            "profiles": {"away": {"friendly_name": "Away"}},
+            "birdseye": {"mode": {"objects": True}},
+        }
+        config["cameras"]["back"]["profiles"] = {
+            "away": {"birdseye": {"mode": {"objects": False}}}
+        }
+
+        with self.assertRaisesRegex(
+            ValidationError, "must enable at least one Birdseye activity type"
+        ):
+            FrigateConfig(**config)
+
+    def test_camera_birdseye_activity_types_override_global_values(self):
+        config = {
+            **self.minimal,
+            "birdseye": {"mode": {"motion": True, "objects": True}},
+        }
+        config["cameras"]["back"]["birdseye"] = {
+            "mode": {"motion": False, "stationary_objects": True}
+        }
+
+        frigate_config = FrigateConfig(**config)
+        mode = frigate_config.cameras["back"].birdseye.mode
+        assert not mode.motion
+        assert mode.objects
+        assert mode.stationary_objects
 
     def test_override_tracked_objects(self):
         config = {

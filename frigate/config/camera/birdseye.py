@@ -1,5 +1,3 @@
-from enum import Enum
-
 from pydantic import BaseModel, Field
 
 from ..base import FrigateBaseModel
@@ -8,22 +6,78 @@ __all__ = [
     "BirdseyeCameraConfig",
     "BirdseyeConfig",
     "BirdseyeLayoutConfig",
-    "BirdseyeModeEnum",
+    "BirdseyeModeConfig",
 ]
 
+BIRDSEYE_ACTIVITY_TYPES = (
+    "objects",
+    "motion",
+    "stationary_objects",
+    "continuous",
+)
 
-class BirdseyeModeEnum(str, Enum):
-    objects = "objects"
-    motion = "motion"
-    continuous = "continuous"
+
+class BirdseyeModeConfig(FrigateBaseModel):
+    continuous: bool = Field(
+        default=False,
+        title="Continuous",
+        description="Always include the camera in Birdseye.",
+    )
+    motion: bool = Field(
+        default=False,
+        title="Motion",
+        description="Include the camera in Birdseye when motion is detected.",
+    )
+    objects: bool = Field(
+        default=False,
+        title="Active objects",
+        description="Include the camera in Birdseye while an active object is tracked.",
+    )
+    stationary_objects: bool = Field(
+        default=False,
+        title="Stationary objects",
+        description="Include the camera in Birdseye while a stationary object is tracked.",
+    )
 
     @classmethod
-    def get_index(cls, type):
-        return list(cls).index(type)
+    def from_mqtt_payload(cls, payload: str) -> "BirdseyeModeConfig | None":
+        """Create mode options from an uppercase MQTT payload."""
+        raw_modes = payload.split(",")
+        if not raw_modes or any(not mode for mode in raw_modes):
+            return None
 
-    @classmethod
-    def get(cls, index):
-        return list(cls)[index]
+        modes = [mode.lower() for mode in raw_modes]
+        if any(
+            raw_mode != mode.upper() or mode not in BIRDSEYE_ACTIVITY_TYPES
+            for raw_mode, mode in zip(raw_modes, modes)
+        ):
+            return None
+
+        if len(modes) != len(set(modes)):
+            return None
+
+        return cls(**{mode: True for mode in modes})
+
+    def has_enabled_activity(self) -> bool:
+        """Return whether at least one activity type is enabled."""
+        return any(getattr(self, activity) for activity in BIRDSEYE_ACTIVITY_TYPES)
+
+    def to_mqtt_payload(self) -> str:
+        """Serialize enabled mode options for MQTT state topics."""
+        payload = ",".join(
+            activity.upper()
+            for activity in BIRDSEYE_ACTIVITY_TYPES
+            if getattr(self, activity)
+        )
+        if not payload:
+            raise ValueError("At least one Birdseye activity type must be enabled")
+
+        return payload
+
+
+def default_birdseye_mode() -> BirdseyeModeConfig:
+    """Return the default Birdseye mode configuration."""
+    return BirdseyeModeConfig(objects=True)
 
 
 class BirdseyeLayoutConfig(FrigateBaseModel):
@@ -47,10 +101,10 @@ class BirdseyeConfig(FrigateBaseModel):
         title="Enable Birdseye",
         description="Enable or disable the Birdseye view feature.",
     )
-    mode: BirdseyeModeEnum = Field(
-        default=BirdseyeModeEnum.objects,
-        title="Tracking mode",
-        description="Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'.",
+    mode: BirdseyeModeConfig = Field(
+        default_factory=default_birdseye_mode,
+        title="Activity types",
+        description="Activity types that include cameras in Birdseye.",
     )
 
     restream: bool = Field(
@@ -102,10 +156,10 @@ class BirdseyeCameraConfig(BaseModel):
         title="Enable Birdseye",
         description="Enable or disable the Birdseye view feature.",
     )
-    mode: BirdseyeModeEnum = Field(
-        default=BirdseyeModeEnum.objects,
-        title="Tracking mode",
-        description="Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'.",
+    mode: BirdseyeModeConfig = Field(
+        default_factory=default_birdseye_mode,
+        title="Activity types",
+        description="Activity types that include cameras in Birdseye.",
     )
 
     order: int = Field(
