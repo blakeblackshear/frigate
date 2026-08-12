@@ -62,7 +62,7 @@ def get_latest_version(config: FrigateConfig) -> str:
 def stats_init(
     config: FrigateConfig,
     camera_metrics: DictProxy,
-    embeddings_metrics: DataProcessorMetrics | None,
+    embeddings_metrics: DataProcessorMetrics,
     detectors: dict[str, ObjectDetectProcess],
     processes: dict[str, int],
 ) -> StatsTrackingTypes:

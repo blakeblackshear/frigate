@@ -78,6 +78,16 @@ logger = logging.getLogger(__name__)
 
 MAX_THUMBNAILS = 10
 
+GENAI_UPDATE_TOPICS = frozenset(
+    {
+        CameraConfigUpdateEnum.add.name,
+        CameraConfigUpdateEnum.objects.name,
+        CameraConfigUpdateEnum.object_genai.name,
+        CameraConfigUpdateEnum.review.name,
+        CameraConfigUpdateEnum.review_genai.name,
+    }
+)
+
 
 class EmbeddingMaintainer(threading.Thread):
     """Handle embedding queue and post event updates."""
@@ -85,7 +95,7 @@ class EmbeddingMaintainer(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        metrics: DataProcessorMetrics | None,
+        metrics: DataProcessorMetrics,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
@@ -220,16 +230,6 @@ class EmbeddingMaintainer(threading.Thread):
         # post processors
         self.post_processors: list[PostProcessorApi] = []
 
-        if any(c.review.genai.enabled_in_config for c in self.config.cameras.values()):
-            self.post_processors.append(
-                ReviewDescriptionProcessor(
-                    self.config,
-                    self.requestor,
-                    self.metrics,
-                    self.genai_manager,
-                )
-            )
-
         if self.config.lpr.enabled:
             self.post_processors.append(
                 LicensePlatePostProcessor(
@@ -252,9 +252,9 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        semantic_trigger_processor: SemanticTriggerProcessor | None = None
+        self.semantic_trigger_processor: SemanticTriggerProcessor | None = None
         if self.config.semantic_search.enabled:
-            semantic_trigger_processor = SemanticTriggerProcessor(
+            self.semantic_trigger_processor = SemanticTriggerProcessor(
                 db,
                 self.config,
                 self.requestor,
@@ -262,9 +262,49 @@ class EmbeddingMaintainer(threading.Thread):
                 metrics,
                 self.embeddings,
             )
-            self.post_processors.append(semantic_trigger_processor)
+            self.post_processors.append(self.semantic_trigger_processor)
 
-        if any(c.objects.genai.enabled_in_config for c in self.config.cameras.values()):
+        self._sync_genai_processors()
+
+        self.stop_event = stop_event
+
+        # recordings data
+        self.recordings_available_through: dict[str, float] = {}
+
+    def _sync_genai_processors(self) -> None:
+        """Create GenAI post processors for cameras that have GenAI enabled.
+
+        Called at startup and again after camera config updates so enabling
+        GenAI on the first camera does not require a restart. Processors are
+        never removed once created.
+
+        A profile can turn GenAI on without setting enabled_in_config, so both
+        flags are checked.
+        """
+        cameras = self.config.cameras.values()
+
+        if any(
+            c.review.genai.enabled or c.review.genai.enabled_in_config for c in cameras
+        ) and not any(
+            isinstance(p, ReviewDescriptionProcessor) for p in self.post_processors
+        ):
+            logger.debug("Initializing review description processor")
+            self.post_processors.append(
+                ReviewDescriptionProcessor(
+                    self.config,
+                    self.requestor,
+                    self.metrics,
+                    self.genai_manager,
+                )
+            )
+
+        if any(
+            c.objects.genai.enabled or c.objects.genai.enabled_in_config
+            for c in cameras
+        ) and not any(
+            isinstance(p, ObjectDescriptionProcessor) for p in self.post_processors
+        ):
+            logger.debug("Initializing object description processor")
             self.post_processors.append(
                 ObjectDescriptionProcessor(
                     self.config,
@@ -272,19 +312,21 @@ class EmbeddingMaintainer(threading.Thread):
                     self.requestor,
                     self.metrics,
                     self.genai_manager,
-                    semantic_trigger_processor,
+                    self.semantic_trigger_processor,
                 )
             )
 
-        self.stop_event = stop_event
+    def _check_camera_config_updates(self) -> None:
+        """Apply camera config updates and register newly enabled processors."""
+        updated_topics = self.config_updater.check_for_updates()
 
-        # recordings data
-        self.recordings_available_through: dict[str, float] = {}
+        if updated_topics.keys() & GENAI_UPDATE_TOPICS:
+            self._sync_genai_processors()
 
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
-            self.config_updater.check_for_updates()
+            self._check_camera_config_updates()
             self._check_enrichment_config_updates()
             self._process_requests()
             self._process_updates()

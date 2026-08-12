@@ -8,7 +8,7 @@ from frigate.object_detection.base import ObjectDetectProcess
 
 class StatsTrackingTypes(TypedDict):
     camera_metrics: dict[str, CameraMetrics]
-    embeddings_metrics: DataProcessorMetrics | None
+    embeddings_metrics: DataProcessorMetrics
     detectors: dict[str, ObjectDetectProcess]
     started: int
     latest_frigate_version: str
