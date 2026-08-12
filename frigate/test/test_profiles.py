@@ -561,6 +561,25 @@ class TestProfileManager(unittest.TestCase):
         assert self.config.cameras["front"].enabled is False
 
     @patch.object(ProfileManager, "_persist_active_profile")
+    def test_profile_can_disable_inherited_birdseye_activity(self, mock_persist):
+        """A false-only mode override inherits the other base activity types."""
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
+        base_mode = self.config.cameras["front"].birdseye.mode
+        base_mode.motion = True
+        base_mode.objects = True
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            birdseye={"mode": {"motion": False}}
+        )
+        self.manager = ProfileManager(self.config, self.mock_updater)
+
+        err = self.manager.activate_profile("away")
+
+        assert err is None
+        mode = self.config.cameras["front"].birdseye.mode
+        assert not mode.motion
+        assert mode.objects
+
+    @patch.object(ProfileManager, "_persist_active_profile")
     def test_deactivate_restores_enabled(self, mock_persist):
         """Deactivating a profile restores the camera's base enabled state."""
         self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")

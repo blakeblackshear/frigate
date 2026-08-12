@@ -558,8 +558,24 @@
       "description": "Enable or disable the Birdseye view feature."
     },
     "mode": {
-      "label": "Tracking mode",
-      "description": "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'."
+      "label": "Activity types",
+      "description": "Activity types that include cameras in Birdseye.",
+      "continuous": {
+        "label": "Continuous",
+        "description": "Always include the camera in Birdseye."
+      },
+      "motion": {
+        "label": "Motion",
+        "description": "Include the camera in Birdseye when motion is detected."
+      },
+      "objects": {
+        "label": "Active objects",
+        "description": "Include the camera in Birdseye while an active object is tracked."
+      },
+      "stationary_objects": {
+        "label": "Stationary objects",
+        "description": "Include the camera in Birdseye while a stationary object is tracked."
+      }
     },
     "restream": {
       "label": "Restream RTSP",
