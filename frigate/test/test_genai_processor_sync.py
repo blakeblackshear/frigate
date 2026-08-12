@@ -260,6 +260,20 @@ class TestRemovedCameraUpdates(unittest.TestCase):
 
         mock_run_analysis.assert_not_called()
 
+    def test_lpr_state_is_expired_without_camera_config(self):
+        maintainer = EmbeddingMaintainer.__new__(EmbeddingMaintainer)
+        maintainer.config = MagicMock()
+        maintainer.config.cameras = {}
+        maintainer.detected_license_plates = {
+            "event-id": {"camera": "removed", "last_seen": 1}
+        }
+        maintainer.event_metadata_publisher = MagicMock()
+
+        maintainer._expire_dedicated_lpr()
+
+        self.assertEqual(maintainer.detected_license_plates, {})
+        maintainer.event_metadata_publisher.publish.assert_called_once()
+
     def test_regenerate_is_ignored_without_camera_config(self):
         processor = ObjectDescriptionProcessor.__new__(ObjectDescriptionProcessor)
         processor.config = MagicMock()

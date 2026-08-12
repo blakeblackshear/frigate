@@ -677,7 +677,8 @@ class EmbeddingMaintainer(threading.Thread):
             if not last_seen:
                 continue
 
-            if now - last_seen > self.config.cameras[data["camera"]].lpr.expire_time:
+            camera_config = self.config.cameras.get(data["camera"])
+            if camera_config is None or now - last_seen > camera_config.lpr.expire_time:
                 to_remove.append(id)
         for id in to_remove:
             self.event_metadata_publisher.publish(
