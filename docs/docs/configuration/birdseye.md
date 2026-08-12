@@ -18,13 +18,14 @@ Each camera tile in Birdseye is composed from the frames of the stream assigned 
 
 ## Birdseye Behavior
 
-### Birdseye Modes
+### Birdseye Activity Types
 
-Birdseye offers different modes to customize which cameras show under which circumstances.
+Birdseye offers independent activity types that control when cameras are shown. Multiple activity types can be enabled together.
 
-- **continuous:** All cameras are always included
-- **motion:** Cameras that have detected motion within the last 30 seconds are included
-- **objects:** Cameras that have tracked an active object within the last 30 seconds are included
+- **continuous:** The camera is always included
+- **motion:** The camera is included when motion was detected within the last 30 seconds
+- **objects:** The camera is included when an active object was tracked within the last 30 seconds
+- **stationary_objects:** The camera is included while a stationary object is tracked
 
 ### Custom Birdseye Icon
 
@@ -39,27 +40,30 @@ To include a camera in Birdseye view only for specific circumstances, or exclude
 
 **Global settings:** Navigate to <NavPath path="Settings > System > Birdseye" /> to configure the default Birdseye behavior for all cameras.
 
-**Per-camera overrides:** Navigate to <NavPath path="Settings > Camera configuration > Birdseye" /> to override the mode or disable Birdseye for a specific camera.
+**Per-camera overrides:** Navigate to <NavPath path="Settings > Camera configuration > Birdseye" /> to override the activity types or disable Birdseye for a specific camera.
 
-| Field               | Description                                                   |
-| ------------------- | ------------------------------------------------------------- |
-| **Enable Birdseye** | Whether this camera appears in Birdseye view                  |
-| **Tracking mode**   | When to show the camera: `continuous`, `motion`, or `objects` |
+| Field                  | Description                                                |
+| ---------------------- | ---------------------------------------------------------- |
+| **Enable Birdseye**    | Whether this camera appears in Birdseye view               |
+| **Activity types**     | Conditions that determine when to show the camera          |
 
 </TabItem>
 <TabItem value="yaml">
 
-```yaml {8-10,12-14}
+```yaml {8-11,13-15}
 # Include all cameras by default in Birdseye view
 birdseye:
   enabled: True
-  mode: continuous
+  mode:
+    continuous: True
 
 cameras:
   front:
     # Only include the "front" camera in Birdseye view when objects are detected
     birdseye:
-      mode: objects
+      mode:
+        continuous: False
+        objects: True
   back:
     # Exclude the "back" camera from Birdseye view
     birdseye:

@@ -20,7 +20,7 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = "0.18-0"
+CURRENT_CONFIG_VERSION = "0.19-0"
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
 
 
@@ -93,6 +93,7 @@ def migrate_frigate_config(config_file: str):
 
     logger.info("copying config as backup...")
     shutil.copy(config_file, os.path.join(CONFIG_DIR, "backup_config.yaml"))
+    new_config = config
 
     if previous_version < "0.14":
         logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
@@ -146,6 +147,13 @@ def migrate_frigate_config(config_file: str):
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.18-0"
+
+    if previous_version < "0.19-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.19-0...")
+        new_config = migrate_019_0(new_config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
+        previous_version = "0.19-0"
 
     logger.info("Finished frigate config migration...")
 
@@ -525,6 +533,21 @@ def _convert_legacy_mask_to_dict(
     return result
 
 
+def _migrate_birdseye_mode(birdseye: dict[str, Any] | None) -> None:
+    """Convert a scalar Birdseye mode to composable activity types."""
+    if not birdseye or not isinstance(birdseye.get("mode"), str):
+        return
+
+    legacy_mode = birdseye["mode"]
+    activity_types = ("continuous", "motion", "objects", "stationary_objects")
+    if legacy_mode not in activity_types:
+        return
+
+    birdseye["mode"] = {
+        activity_type: activity_type == legacy_mode for activity_type in activity_types
+    }
+
+
 def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.18-0"""
     new_config = config.copy()
@@ -655,6 +678,26 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
         del new_config["ui"]
 
     new_config["version"] = "0.18-0"
+    return new_config
+
+
+def migrate_019_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Handle migrating Frigate config to 0.19-0."""
+    new_config = config.copy()
+
+    _migrate_birdseye_mode(new_config.get("birdseye"))
+
+    for name, camera in new_config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
+        _migrate_birdseye_mode(camera_config.get("birdseye"))
+
+        for profile in camera_config.get("profiles", {}).values():
+            if isinstance(profile, dict):
+                _migrate_birdseye_mode(profile.get("birdseye"))
+
+        new_config["cameras"][name] = camera_config
+
+    new_config["version"] = "0.19-0"
     return new_config
 
 
