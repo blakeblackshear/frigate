@@ -43,7 +43,9 @@ SECTION_STATE_TOPICS: dict[str, list[tuple[str, Callable[[Any], Any]]]] = {
         ("birdseye", lambda c: "ON" if c.birdseye.enabled else "OFF"),
         (
             "birdseye_mode",
-            lambda c: c.birdseye.mode.value.upper() if c.birdseye.enabled else "OFF",
+            lambda c: (
+                c.birdseye.mode.to_mqtt_payload() if c.birdseye.enabled else "OFF"
+            ),
         ),
     ],
     "detect": [("detect", lambda c: "ON" if c.detect.enabled else "OFF")],

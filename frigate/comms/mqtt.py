@@ -125,7 +125,7 @@ class MqttClient(Communicator):
             self.publish(
                 f"{camera_name}/birdseye_mode/state",
                 (
-                    camera.birdseye.mode.value.upper()
+                    camera.birdseye.mode.to_mqtt_payload()
                     if camera.birdseye.enabled
                     else "OFF"
                 ),
