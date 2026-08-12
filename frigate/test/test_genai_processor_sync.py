@@ -27,6 +27,7 @@ from frigate.embeddings.maintainer import (  # noqa: E402
     PostProcessDataEnum,
     ReviewDescriptionProcessor,
 )
+from frigate.models import Event  # noqa: E402
 
 
 class TestGenAIProcessorSync(unittest.TestCase):
@@ -211,3 +212,70 @@ class TestObjectDescriptionCameraGating(unittest.TestCase):
 
         mock_create_thumbnail.assert_called_once()
         self.assertEqual(len(processor.tracked_events["1234.5-abcdef"]), 1)
+
+
+class TestRemovedCameraUpdates(unittest.TestCase):
+    """Queued updates for removed cameras must be ignored safely."""
+
+    def test_finalized_event_cleans_up_without_camera_config(self):
+        maintainer = EmbeddingMaintainer.__new__(EmbeddingMaintainer)
+        maintainer.config = MagicMock()
+        maintainer.config.cameras = {}
+        maintainer.event_end_subscriber = MagicMock()
+        maintainer.event_end_subscriber.check_for_update.side_effect = [
+            ("event-id", "removed", True),
+            None,
+        ]
+        maintainer.realtime_processors = []
+
+        object_processor = ObjectDescriptionProcessor.__new__(
+            ObjectDescriptionProcessor
+        )
+        object_processor.cleanup_event = MagicMock()
+        maintainer.post_processors = [object_processor]
+        maintainer.detected_license_plates = {"event-id": {"camera": "removed"}}
+
+        with patch.object(Event, "get") as mock_get_event:
+            maintainer._process_finalized()
+
+        object_processor.cleanup_event.assert_called_once_with("event-id")
+        self.assertEqual(maintainer.detected_license_plates, {})
+        mock_get_event.assert_not_called()
+
+    def test_review_update_is_ignored_without_camera_config(self):
+        processor = ReviewDescriptionProcessor.__new__(ReviewDescriptionProcessor)
+        processor.config = MagicMock()
+        processor.config.cameras = {}
+        processor.metrics = MagicMock()
+        processor.review_desc_dps = MagicMock()
+        processor.genai_manager = MagicMock()
+        processor.genai_manager.description_client = MagicMock()
+
+        with patch(
+            "frigate.data_processing.post.review_descriptions.run_analysis"
+        ) as mock_run_analysis:
+            processor.process_data(
+                {"after": {"camera": "removed"}}, PostProcessDataEnum.review
+            )
+
+        mock_run_analysis.assert_not_called()
+
+    def test_regenerate_is_ignored_without_camera_config(self):
+        processor = ObjectDescriptionProcessor.__new__(ObjectDescriptionProcessor)
+        processor.config = MagicMock()
+        processor.config.cameras = {}
+
+        event = MagicMock()
+        event.camera = "removed"
+        with patch.object(Event, "get", return_value=event):
+            with self.assertLogs(
+                "frigate.data_processing.post.object_descriptions", level="ERROR"
+            ) as logs:
+                processor.handle_request(
+                    "regenerate_description",
+                    {"event_id": "event-id", "source": "thumbnail", "force": False},
+                )
+
+        self.assertIn(
+            "Camera removed not found for description regeneration", logs.output[0]
+        )

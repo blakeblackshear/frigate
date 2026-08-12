@@ -151,7 +151,13 @@ class ObjectDescriptionProcessor(PostProcessorApi):
             logger.error(f"Event {event_id} not found for description regeneration")
             return
 
-        camera_config = self.config.cameras[str(event.camera)]
+        camera_config = self.config.cameras.get(str(event.camera))
+        if camera_config is None:
+            logger.error(
+                "Camera %s not found for description regeneration", event.camera
+            )
+            return
+
         if not camera_config.objects.genai.enabled and not force:
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return

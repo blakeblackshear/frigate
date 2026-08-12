@@ -585,6 +585,13 @@ class EmbeddingMaintainer(threading.Thread):
             for processor in self.realtime_processors:
                 processor.expire_object(event_id, camera)
 
+            if camera not in self.config.cameras:
+                for processor in self.post_processors:
+                    if isinstance(processor, ObjectDescriptionProcessor):
+                        processor.cleanup_event(event_id)
+                self.detected_license_plates.pop(event_id, None)
+                continue
+
             thumbnail: bytes | None = None
 
             if updated_db:
