@@ -526,9 +526,14 @@ class NorfairTracker(ObjectTracker):
 
         # Convert the frame to BGR once per call for histogram embeddings rather
         # than once per detection; every detection histograms a region of the
-        # same frame.
+        # same frame. Skipped when there are no detections, so a frame without
+        # objects costs no conversion at all.
         bgr_frame: np.ndarray | None = None
-        if yuv_frame is not None and self.ptz_metrics.autotracker_enabled.value:
+        if (
+            detections
+            and yuv_frame is not None
+            and self.ptz_metrics.autotracker_enabled.value
+        ):
             bgr_frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2BGR_I420)
 
         for obj in detections:
