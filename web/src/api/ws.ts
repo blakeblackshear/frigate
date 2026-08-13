@@ -205,7 +205,7 @@ function applyCameraActivity(payload: string) {
     );
     applyTopicUpdate(
       `${name}/notifications/suspended`,
-      notifications_suspended || 0,
+      String(notifications_suspended ?? 0),
     );
     applyTopicUpdate(
       `${name}/ptz_autotracker/state`,
@@ -806,7 +806,7 @@ export function useNotificationSuspend(camera: string): {
     `${camera}/notifications/suspended`,
     `${camera}/notifications/suspend`,
   );
-  return { payload: payload as string, send };
+  return { payload: String(payload ?? 0), send };
 }
 
 export function useNotificationTest(): {

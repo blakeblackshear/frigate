@@ -292,7 +292,9 @@ Topic with the currently active profile name. Published value is the profile nam
 
 ### `frigate/notifications/set`
 
-Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
+Topic to turn notifications on and off for all cameras. Expected values are `ON` and `OFF`.
+
+Only available when notifications are enabled in the config. Not persisted across Frigate restarts.
 
 ### `frigate/notifications/state`
 
@@ -570,16 +572,20 @@ Topic with current state of the Birdseye mode for a camera. Published values are
 
 ### `frigate/<camera_name>/notifications/set`
 
-Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
+Topic to turn notifications for a camera on and off. Expected values are `ON` and `OFF`.
+
+`ON` is ignored unless notifications are enabled in the config for the camera. This is not persisted across Frigate restarts. It is the same control the UI labels **Suspend until restart**.
 
 ### `frigate/<camera_name>/notifications/state`
 
-Topic with current state of notifications. Published values are `ON` and `OFF`.
+Topic with current state of notifications. Published values are `ON` and `OFF`. This is the authoritative topic for whether a camera will notify.
 
 ### `frigate/<camera_name>/notifications/suspend`
 
-Topic to suspend notifications for a certain number of minutes. Expected value is an integer.
+Topic to suspend notifications for a certain number of minutes. Expected value is an integer. Separate from `notifications/set`: it does not change `notifications/state`, and is ignored while notifications are off.
 
 ### `frigate/<camera_name>/notifications/suspended`
 
-Topic with timestamp that notifications are suspended until. Published value is a UNIX timestamp, or 0 if notifications are not suspended.
+Topic with timestamp that notifications are suspended until. Published value is a UNIX timestamp, or 0 if there is no timed suspension.
+
+`0` does not mean notifications are enabled: `notifications/set` `OFF` clears the timed suspension, so this publishes `0` while `notifications/state` is `OFF`.

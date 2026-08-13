@@ -228,15 +228,8 @@ export default function LiveContextMenu({
     useNotifications(camera);
   const { payload: notificationSuspendUntil, send: sendNotificationSuspend } =
     useNotificationSuspend(camera);
-  const [isSuspended, setIsSuspended] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (notificationSuspendUntil) {
-      setIsSuspended(
-        notificationSuspendUntil !== "0" || notificationState === "OFF",
-      );
-    }
-  }, [notificationSuspendUntil, notificationState]);
+  const isSuspended =
+    notificationSuspendUntil !== "0" || notificationState === "OFF";
 
   const handleSuspend = (duration: string) => {
     if (duration === "off") {
