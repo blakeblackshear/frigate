@@ -5093,6 +5093,7 @@ paths:
             NOTES:
             - Creating a manual event does not trigger an update to /events MQTT topic.
             - If a duration is set to null, the event will need to be ended manually by calling /events/{event_id}/end.
+            - The review item is an alert unless the label is listed in the camera's review -> detections -> labels config.
       operationId: create_event_events__camera_name___label__create_post
       parameters:
         - name: camera_name
