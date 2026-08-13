@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# norfair 2.3.0 declares numpy < 2 in its wheel metadata, but the code is
-# numpy 2 compatible. Build it without deps and lift the pin until upstream
-# publishes a numpy 2 compatible release.
+# norfair 2.3.0 declares numpy < 2 and rich < 15 in its wheel metadata, but
+# the code is compatible with both. Build it without deps and lift the pins
+# until upstream publishes updated requirements.
 
 set -euxo pipefail
 
@@ -26,6 +26,11 @@ with zipfile.ZipFile(path) as zin, zipfile.ZipFile(patched, "w", zipfile.ZIP_DEF
             data = re.sub(
                 rb"Requires-Dist: numpy.*",
                 b"Requires-Dist: numpy (>=1.23.0)",
+                data,
+            )
+            data = re.sub(
+                rb"Requires-Dist: rich.*",
+                b"Requires-Dist: rich (>=9.10.0)",
                 data,
             )
         zout.writestr(item, data)
