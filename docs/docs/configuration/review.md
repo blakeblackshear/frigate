@@ -125,9 +125,9 @@ cameras:
 
 Events created with the [create manual event API](../integrations/api/create-event-events-camera-name-label-create-post.api.mdx) are categorized with the same label lists, using the label from the request path:
 
-1. If the label is listed in `review -> alerts -> labels`, the review item is an alert.
-2. Otherwise, if the label is listed in `review -> detections -> labels`, the review item is a detection.
-3. If the label is in neither list, the review item is an alert.
+1. If alerts are enabled and the label is listed in `review -> alerts -> labels`, the review item is an alert.
+2. Otherwise, if detections are enabled and the label is listed in `review -> detections -> labels`, the review item is a detection.
+3. If the label is in neither list, the review item is an alert, or no review item is created if alerts are disabled.
 
 This means manual events are alerts unless you explicitly list their label as a detection label. For example, to have PIR sensors create detections instead of alerts, post to `/api/events/front_door/pir_sensor/create` with the following config:
 
@@ -142,7 +142,7 @@ cameras:
 
 :::note
 
-Required zones do not apply to manual events, since they are created through the API rather than by the object tracker.
+Required zones do not apply to manual events, since they are created through the API rather than by the object tracker. Setting `review -> alerts -> labels` to an empty list also does not stop manual events from becoming alerts, as a label in neither list still falls back to an alert.
 
 :::
 
