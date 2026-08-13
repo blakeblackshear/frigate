@@ -1172,6 +1172,28 @@ class LicensePlateProcessingMixin:
 
         return rep["plate"], rep["conf"], rep["char_confidences"], rep["area"]
 
+    def _passes_plate_filters(self, camera: str, plate: str) -> bool:
+        """Check a plate against the configured length and format filters."""
+        if len(plate) < self.lpr_config.min_plate_length:
+            logger.debug(
+                f"{camera}: Filtered out plate '{plate}' due to length ({len(plate)} < {self.lpr_config.min_plate_length})"
+            )
+            return False
+
+        if self.lpr_config.format:
+            try:
+                if not re.fullmatch(self.lpr_config.format, plate):
+                    logger.debug(
+                        f"{camera}: Filtered out plate '{plate}' due to format mismatch"
+                    )
+                    return False
+            except re.error:
+                logger.error(
+                    f"{camera}: Invalid regex in LPR format configuration: {self.lpr_config.format}"
+                )
+
+        return True
+
     def _generate_plate_event(self, camera: str, plate: str, plate_score: float) -> str:
         """Generate a unique ID for a plate event based on camera and text."""
         now = datetime.datetime.now().timestamp()
@@ -1511,10 +1533,14 @@ class LicensePlateProcessingMixin:
             plate_id = None
 
             for existing_id, data in self.detected_license_plates.items():
+                # entries from the object pipeline on this camera have no
+                # last_seen until they pass the filters below
+                last_seen = data.get("last_seen")
+
                 if (
                     data["camera"] == camera
-                    and data["last_seen"] is not None
-                    and current_time - data["last_seen"]
+                    and last_seen is not None
+                    and current_time - last_seen
                     <= self.config.cameras[camera].lpr.expire_time
                 ):
                     similarity = JaroWinkler.similarity(data["plate"], top_plate)
@@ -1525,6 +1551,11 @@ class LicensePlateProcessingMixin:
                         )
                         break
             if plate_id is None:
+                # the event id doubles as the cluster key, so a plate rejected
+                # after this point would leave an entry that never expires
+                if not self._passes_plate_filters(camera, top_plate):
+                    return
+
                 plate_id = self._generate_plate_event(camera, top_plate, avg_confidence)
                 logger.debug(
                     f"{camera}: New plate event for dedicated LPR camera {plate_id}: {top_plate}"
@@ -1569,26 +1600,11 @@ class LicensePlateProcessingMixin:
                 f"{camera}: Clustering changed top plate '{top_plate}' (conf: {avg_confidence:.3f}) to rep '{rep_plate}' (conf: {rep_conf:.3f})"
             )
 
-        # Apply length and format filters to the clustered representative
-        # rather than individual OCR readings, so noisy variants still
-        # contribute to clustering even when they don't pass on their own.
-        if len(rep_plate) < self.lpr_config.min_plate_length:
-            logger.debug(
-                f"{camera}: Filtered out clustered plate '{rep_plate}' due to length ({len(rep_plate)} < {self.lpr_config.min_plate_length})"
-            )
+        # filter the clustered representative rather than individual OCR
+        # readings, so noisy variants still contribute to clustering even
+        # when they don't pass on their own
+        if not self._passes_plate_filters(camera, rep_plate):
             return
-
-        if self.lpr_config.format:
-            try:
-                if not re.fullmatch(self.lpr_config.format, rep_plate):
-                    logger.debug(
-                        f"{camera}: Filtered out clustered plate '{rep_plate}' due to format mismatch"
-                    )
-                    return
-            except re.error:
-                logger.error(
-                    f"{camera}: Invalid regex in LPR format configuration: {self.lpr_config.format}"
-                )
 
         # Update stored rep
         self.detected_license_plates[id].update(
