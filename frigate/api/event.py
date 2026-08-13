@@ -1748,6 +1748,7 @@ async def delete_events(request: Request, body: EventsDeleteBody):
     NOTES:
     - Creating a manual event does not trigger an update to /events MQTT topic.
     - If a duration is set to null, the event will need to be ended manually by calling /events/{event_id}/end.
+    - The review item is an alert unless the label is listed in the camera's review -> detections -> labels config.
     """,
 )
 def create_event(
