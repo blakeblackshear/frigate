@@ -15,6 +15,7 @@ from typing import Any
 
 import numpy as np
 import psutil
+from anyio import Path as AsyncPath
 
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
@@ -105,11 +106,11 @@ class RecordingMaintainer(threading.Thread):
 
     async def move_files(self) -> None:
         cache_files = [
-            d
-            for d in os.listdir(CACHE_DIR)
-            if os.path.isfile(os.path.join(CACHE_DIR, d))
-            and d.endswith(".mp4")
-            and not d.startswith("preview_")
+            path.name
+            async for path in AsyncPath(CACHE_DIR).iterdir()
+            if await path.is_file()
+            and path.suffix == ".mp4"
+            and not path.name.startswith("preview_")
         ]
 
         # publish newest cached segment per camera (including in use files)
@@ -229,7 +230,7 @@ class RecordingMaintainer(threading.Thread):
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for rec in to_remove:
                     cache_path = rec["cache_path"]
-                    Path(cache_path).unlink(missing_ok=True)
+                    await AsyncPath(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
 
@@ -244,7 +245,7 @@ class RecordingMaintainer(threading.Thread):
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for rec in to_remove:
                     cache_path = rec["cache_path"]
-                    Path(cache_path).unlink(missing_ok=True)
+                    await AsyncPath(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
 
@@ -634,7 +635,7 @@ class RecordingMaintainer(threading.Thread):
         file_path = os.path.join(directory, file_name)
 
         try:
-            if not os.path.exists(file_path):
+            if not await AsyncPath(file_path).exists():
                 start_frame = datetime.datetime.now().timestamp()
 
                 # add faststart to kept segments to improve metadata reading
@@ -670,7 +671,9 @@ class RecordingMaintainer(threading.Thread):
                     # get the segment size of the cache file
                     # file without faststart is same size
                     segment_size = round(
-                        float(os.path.getsize(cache_path)) / pow(2, 20), 2
+                        float((await AsyncPath(cache_path).stat()).st_size)
+                        / pow(2, 20),
+                        2,
                     )
                 except OSError:
                     segment_size = 0
@@ -698,7 +701,7 @@ class RecordingMaintainer(threading.Thread):
                 }
         except Exception as e:
             logger.error(f"Unable to store recording segment {cache_path}")
-            Path(cache_path).unlink(missing_ok=True)
+            await AsyncPath(cache_path).unlink(missing_ok=True)
             logger.error(e)
 
         # clear end_time cache

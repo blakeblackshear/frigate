@@ -13,6 +13,7 @@ from pathlib import Path
 from urllib.parse import unquote
 
 import numpy as np
+from anyio import Path as AsyncPath
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
@@ -1455,10 +1456,10 @@ async def set_attributes(
         dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(model_key), "dataset")
         available_labels = set()
 
-        if os.path.exists(dataset_dir):
+        if await AsyncPath(dataset_dir).exists():
             for category_name in os.listdir(dataset_dir):
                 category_dir = os.path.join(dataset_dir, category_name)
-                if os.path.isdir(category_dir):
+                if await AsyncPath(category_dir).is_dir():
                     available_labels.add(category_name)
 
         if not available_labels:

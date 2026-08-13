@@ -4,9 +4,9 @@ import datetime as dt
 import logging
 from datetime import datetime, timedelta
 from functools import reduce
-from pathlib import Path
 from urllib.parse import unquote
 
+from anyio import Path as AsyncPath
 from fastapi import APIRouter, Depends, Request
 from fastapi import Path as PathParam
 from fastapi.responses import JSONResponse
@@ -443,7 +443,7 @@ async def delete_recordings(
         recording_ids.append(recording["id"])
 
         try:
-            Path(recording["path"]).unlink(missing_ok=True)
+            await AsyncPath(recording["path"]).unlink(missing_ok=True)
             deleted_count += 1
         except Exception as e:
             logger.error(f"Failed to delete recording file {recording['path']}: {e}")
