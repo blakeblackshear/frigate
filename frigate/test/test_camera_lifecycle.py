@@ -1,5 +1,6 @@
 """Regression tests for runtime camera add and delete handling."""
 
+import asyncio
 import unittest
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -11,6 +12,7 @@ from frigate.embeddings.maintainer import (
     EmbeddingMaintainer,
     LicensePlatePostProcessor,
 )
+from frigate.ptz.autotrack import PtzAutoTracker
 from frigate.review.maintainer import ReviewSegmentMaintainer
 from frigate.track.object_processing import TrackedObjectProcessor
 
@@ -181,3 +183,21 @@ class TestReviewMaintainerRemoval(unittest.TestCase):
 
         maintainer.forcibly_end_segment.assert_called_once_with("deleted_cam")
         self.assertNotIn("deleted_cam", maintainer.indefinite_events)
+
+
+class TestAutotrackerMoveQueue(unittest.TestCase):
+    def test_move_queue_drops_move_for_removed_camera(self):
+        tracker = PtzAutoTracker.__new__(PtzAutoTracker)
+        tracker.stop_event = MagicMock()
+        # one pass through the loop, then stop
+        tracker.stop_event.is_set.side_effect = [False, True]
+        tracker.ptz_metrics = {}
+        tracker.move_queues = {"deleted_cam": asyncio.Queue()}
+        tracker.move_queue_locks = {"deleted_cam": asyncio.Lock()}
+        tracker.onvif = MagicMock()
+        tracker.config = SimpleNamespace(cameras={})
+        tracker.move_queues["deleted_cam"].put_nowait((1234.5, 0.1, 0.1, 0.0))
+
+        asyncio.run(tracker._process_move_queue("deleted_cam"))
+
+        tracker.onvif._move_relative.assert_not_called()
