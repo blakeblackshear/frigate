@@ -1647,6 +1647,16 @@
       "summary": "{{count}} selected",
       "empty": "No zones available"
     },
+    "birdseyeModes": {
+      "summary": "{{count}} selected",
+      "options": {
+        "continuous": "Continuous",
+        "motion": "Motion",
+        "all_objects": "All objects",
+        "alerts": "Alerts",
+        "detections": "Detections"
+      }
+    },
     "inputRoles": {
       "summary": "{{count}} roles selected",
       "empty": "No roles available",
@@ -1846,11 +1856,6 @@
     }
   },
   "birdseye": {
-    "trackingMode": {
-      "objects": "Objects",
-      "motion": "Motion",
-      "continuous": "Continuous"
-    },
     "cameraOrder": {
       "label": "Camera order",
       "description": "Drag cameras to set their order in the Birdseye layout.",
