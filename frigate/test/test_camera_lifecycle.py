@@ -1,6 +1,7 @@
 """Regression tests for runtime camera add and delete handling."""
 
 import asyncio
+import threading
 import unittest
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -21,6 +22,7 @@ def _make_processor() -> TrackedObjectProcessor:
     """Build a processor with no cameras, bypassing __init__."""
     processor = TrackedObjectProcessor.__new__(TrackedObjectProcessor)
     processor.camera_states = {}
+    processor.camera_states_lock = threading.Lock()
     processor.config = SimpleNamespace(cameras={})
     processor.event_sender = MagicMock()
     processor.detection_publisher = MagicMock()
@@ -201,3 +203,25 @@ class TestAutotrackerMoveQueue(unittest.TestCase):
         asyncio.run(tracker._process_move_queue("deleted_cam"))
 
         tracker.onvif._move_relative.assert_not_called()
+
+
+class TestCameraStateAccessors(unittest.TestCase):
+    def test_get_camera_state_returns_none_for_unknown_camera(self):
+        processor = _make_processor()
+
+        self.assertIsNone(processor.get_camera_state("deleted_cam"))
+
+    def test_get_camera_states_returns_a_snapshot_not_a_view(self):
+        """A live values() view raises RuntimeError if the writer pops mid-iteration."""
+        processor = _make_processor()
+        processor.camera_states = {"one": MagicMock(), "two": MagicMock()}
+
+        states = processor.get_camera_states()
+        processor.camera_states.pop("one")
+
+        self.assertEqual(len(states), 2)
+
+    def test_get_current_frame_time_is_zero_for_unknown_camera(self):
+        processor = _make_processor()
+
+        self.assertEqual(processor.get_current_frame_time("deleted_cam"), 0.0)
