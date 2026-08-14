@@ -89,7 +89,9 @@ class WebPushClient(Communicator):
         # notification and auth config updater
         self.global_config_subscriber = ConfigSubscriber("config/")
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            self.config, self.config.cameras, [CameraConfigUpdateEnum.notifications]
+            self.config,
+            self.config.cameras,
+            [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.notifications],
         )
         self._refresh_user_cameras()
 
