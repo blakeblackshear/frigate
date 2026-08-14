@@ -609,10 +609,16 @@ class EmbeddingMaintainer(threading.Thread):
                 # Embed the thumbnail
                 self._embed_thumbnail(event_id, thumbnail)
 
-            # every post processor below reads config.cameras[camera]; the
-            # cleanup above must still run for a camera that was removed
+            # every post processor below reads config.cameras[camera], but
+            # tracked_events still has to be released or the thumbnails held
+            # for this event leak, same as the two exits above
             if camera not in self.config.cameras:
                 logger.debug("Skipping post processing for removed camera %s", camera)
+
+                for processor in self.post_processors:
+                    if isinstance(processor, ObjectDescriptionProcessor):
+                        processor.cleanup_event(event_id)
+
                 continue
 
             # call any defined post processors
