@@ -72,3 +72,19 @@ The model you use significantly impacts detector performance. Frigate provides d
 - Larger models (640x640): Slower inference, can sometimes have higher accuracy on very large objects that take up a majority of the frame.
 
 For more detail on picking the right size, see [Choosing a model size](../configuration/object_detectors.md#choosing-a-model-size).
+
+## 3. Reducing Detector CPU Usage
+
+**Priority: High**
+
+The **Detector CPU Usage** metric measures the CPU spent converting frames into the tensor format the model expects and post-processing the model's output. It does not include inference, so this value can be high even when you've configured a GPU, NPU, or Coral for object detection.
+
+This metric scales with how many detections per second Frigate runs and how expensive each one is to prepare. Tuning [motion detection](../configuration/motion_detection) is usually the first recommendation to reduce the number of detections. Additionally, you can:
+
+- **Lower `detect -> fps`.** 5 is the recommended value for nearly all cameras. Running at 10 doubles the frames eligible for detection and is one of the largest contributors to this metric.
+- **Use a 320x320 model.** A 640x640 model has 4 times as many pixels to transpose, convert, and copy on every inference.
+- **Prefer a model that takes integer input.** Models configured with `input_dtype: float` require each frame to be converted to float32 and normalized on the CPU first. Models taking `int` input, such as the tflite models used by the Edge TPU, skip that step.
+- **Do not match the detect resolution to the model resolution.** The detect stream should match your camera's aspect ratio, for example `1280x720`, not the model's input size. Frigate crops and scales regions of motion itself, so an oversized detect stream only adds work.
+- **Tune stationary object behavior.** Objects that never settle into a stationary state are re-detected continuously. Raising `detect -> stationary -> interval` reduces how often detection runs on objects that are already parked. See [stationary objects](../configuration/stationary_objects).
+
+Adding [more detector instances](#multiple-detector-instances) spreads this work across more CPU cores, but does not reduce the total CPU used.
