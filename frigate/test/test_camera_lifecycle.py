@@ -11,6 +11,7 @@ from frigate.embeddings.maintainer import (
     EmbeddingMaintainer,
     LicensePlatePostProcessor,
 )
+from frigate.review.maintainer import ReviewSegmentMaintainer
 from frigate.track.object_processing import TrackedObjectProcessor
 
 
@@ -167,3 +168,16 @@ class TestEmbeddingsUnknownCamera(unittest.TestCase):
         maintainer._expire_dedicated_lpr()
 
         self.assertEqual(maintainer.detected_license_plates, {})
+
+
+class TestReviewMaintainerRemoval(unittest.TestCase):
+    def test_camera_removal_ends_segment_and_clears_state(self):
+        maintainer = ReviewSegmentMaintainer.__new__(ReviewSegmentMaintainer)
+        maintainer.active_review_segments = {"deleted_cam": MagicMock()}
+        maintainer.indefinite_events = {"deleted_cam": {"1234.5-abcdef": 1.0}}
+        maintainer.forcibly_end_segment = MagicMock()
+
+        maintainer._handle_camera_removed("deleted_cam")
+
+        maintainer.forcibly_end_segment.assert_called_once_with("deleted_cam")
+        self.assertNotIn("deleted_cam", maintainer.indefinite_events)
