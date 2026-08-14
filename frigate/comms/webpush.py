@@ -215,6 +215,8 @@ class WebPushClient(Communicator):
                 self.suspended_cameras[camera] = 0
                 self.last_camera_notification_time[camera] = 0
 
+            self._refresh_user_cameras()
+
         if topic == "reviews":
             decoded = json.loads(payload)
             camera = decoded["before"]["camera"]
