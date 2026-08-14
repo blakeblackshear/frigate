@@ -21,6 +21,7 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.util.builtin import serialize
 from frigate.util.classification import kickoff_model_training
+from frigate.util.path import safe_join
 from frigate.util.process import FrigateProcess
 
 from .maintainer import EmbeddingMaintainer
@@ -234,11 +235,16 @@ class EmbeddingsContext:
         )
 
     def delete_face_ids(self, face: str, ids: list[str]) -> None:
-        folder = os.path.join(FACE_DIR, face)
-        for id in ids:
-            file_path = os.path.join(folder, id)
+        folder = safe_join(FACE_DIR, face)
 
-            if os.path.isfile(file_path):
+        if folder is None:
+            logger.warning("Not deleting faces for invalid name %s", face)
+            return
+
+        for id in ids:
+            file_path = safe_join(folder, id)
+
+            if file_path and os.path.isfile(file_path):
                 os.unlink(file_path)
 
         if face != "train" and len(os.listdir(folder)) == 0:

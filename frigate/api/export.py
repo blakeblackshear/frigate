@@ -13,7 +13,7 @@ from pathlib import Path
 import psutil
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
-from pathvalidate import sanitize_filename, sanitize_filepath
+from pathvalidate import sanitize_filename
 from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
@@ -72,6 +72,7 @@ from frigate.record.export import (
     PlaybackSourceEnum,
     validate_ffmpeg_args,
 )
+from frigate.util.path import sanitize_contained_path
 from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
@@ -129,18 +130,12 @@ def _validate_export_case(export_case_id: str | None) -> JSONResponse | None:
 def _sanitize_existing_image(
     image_path: str | None,
 ) -> tuple[str | None, JSONResponse | None]:
-    # sanitize_filepath normalizes "\" to "/" but leaves ".." intact, so a path
-    # like "clips\..\..\etc/passwd" passes the CLIPS_DIR prefix check yet still
-    # escapes the directory once resolved. A valid snapshot path never uses "..".
-    if image_path and ".." in image_path:
-        return None, JSONResponse(
-            content={"success": False, "message": "Invalid image path"},
-            status_code=400,
-        )
+    if not image_path:
+        return None, None
 
-    existing_image = sanitize_filepath(image_path) if image_path else None
+    existing_image = sanitize_contained_path(image_path, CLIPS_DIR)
 
-    if existing_image and not existing_image.startswith(CLIPS_DIR):
+    if existing_image is None:
         return None, JSONResponse(
             content={"success": False, "message": "Invalid image path"},
             status_code=400,
