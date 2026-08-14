@@ -498,14 +498,18 @@ class TrackedObjectProcessor(threading.Thread):
         # save the snapshot image
         (frame, event_id, camera) = payload
 
+        camera_state = self.camera_states.get(camera)
+
+        if camera_state is None:
+            logger.debug("Discarding LPR snapshot for unknown camera %s", camera)
+            return
+
         img = cv2.imdecode(
             np.frombuffer(base64.b64decode(frame), dtype=np.uint8),
             cv2.IMREAD_COLOR,
         )
 
-        self.camera_states[camera].save_manual_event_image(
-            img, event_id, "license_plate", {}
-        )
+        camera_state.save_manual_event_image(img, event_id, "license_plate", {})
 
     def create_manual_event(self, payload: tuple) -> None:
         (
@@ -522,13 +526,17 @@ class TrackedObjectProcessor(threading.Thread):
             pre_capture,
         ) = payload
 
+        camera_state = self.camera_states.get(camera_name)
+
+        if camera_state is None:
+            logger.debug("Discarding manual event for unknown camera %s", camera_name)
+            return
+
         # save the snapshot image
-        self.camera_states[camera_name].save_manual_event_image(
-            None, event_id, label, draw
-        )
+        camera_state.save_manual_event_image(None, event_id, label, draw)
         end_time = frame_time + duration if duration is not None else None
         start_time = (
-            frame_time - self.config.cameras[camera_name].record.event_pre_capture
+            frame_time - camera_state.camera_config.record.event_pre_capture
             if pre_capture is None
             else frame_time - pre_capture
         )
@@ -548,7 +556,7 @@ class TrackedObjectProcessor(threading.Thread):
                     "camera": camera_name,
                     "start_time": start_time,
                     "end_time": end_time,
-                    "has_clip": self.config.cameras[camera_name].record.enabled
+                    "has_clip": camera_state.camera_config.record.enabled
                     and include_recording,
                     "has_snapshot": True,
                     "snapshot_clean": True,
@@ -591,6 +599,12 @@ class TrackedObjectProcessor(threading.Thread):
             plate,
         ) = payload
 
+        camera_state = self.camera_states.get(camera_name)
+
+        if camera_state is None:
+            logger.debug("Discarding LPR event for unknown camera %s", camera_name)
+            return
+
         # send event to event maintainer
         self.event_sender.publish(
             (
@@ -605,9 +619,9 @@ class TrackedObjectProcessor(threading.Thread):
                     "score": score,
                     "camera": camera_name,
                     "start_time": frame_time
-                    - self.config.cameras[camera_name].record.event_pre_capture,
+                    - camera_state.camera_config.record.event_pre_capture,
                     "end_time": None,
-                    "has_clip": self.config.cameras[camera_name].record.enabled
+                    "has_clip": camera_state.camera_config.record.enabled
                     and include_recording,
                     "has_snapshot": True,
                     "snapshot_clean": True,
@@ -812,7 +826,11 @@ class TrackedObjectProcessor(threading.Thread):
                     break
 
                 event_id, camera, _ = update
-                self.camera_states[camera].finished(event_id)
+                camera_state = self.camera_states.get(camera)
+
+                # the camera may have been removed while its event was pending
+                if camera_state is not None:
+                    camera_state.finished(event_id)
 
         # shut down camera states
         for state in self.camera_states.values():
