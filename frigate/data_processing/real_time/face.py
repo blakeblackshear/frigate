@@ -28,6 +28,7 @@ from frigate.data_processing.common.face.model import (
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import area
+from frigate.util.path import safe_join, sanitize_path_component
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
@@ -409,9 +410,17 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 )
 
             # write face to library
-            folder = os.path.join(FACE_DIR, label)
+            sanitized_label = sanitize_path_component(label)
+            folder = safe_join(FACE_DIR, label)
+
+            if sanitized_label is None or folder is None:
+                return {
+                    "message": f"Invalid face name: {label}",
+                    "success": False,
+                }
+
             file = os.path.join(
-                folder, f"{label}_{datetime.datetime.now().timestamp()}.webp"
+                folder, f"{sanitized_label}_{datetime.datetime.now().timestamp()}.webp"
             )
             os.makedirs(folder, exist_ok=True)
 
