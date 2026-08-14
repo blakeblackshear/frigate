@@ -4,6 +4,13 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+# LicensePlatePostProcessor is imported via the maintainer rather than from
+# data_processing.post.license_plate, which circularly imports back through
+# frigate.embeddings before that package finishes initializing
+from frigate.embeddings.maintainer import (
+    EmbeddingMaintainer,
+    LicensePlatePostProcessor,
+)
 from frigate.track.object_processing import TrackedObjectProcessor
 
 
@@ -107,3 +114,56 @@ class TestObjectProcessorUnknownCamera(unittest.TestCase):
         processor.create_manual_event(payload)
 
         processor.event_sender.publish.assert_not_called()
+
+
+class TestEmbeddingsUnknownCamera(unittest.TestCase):
+    def _make_maintainer(self) -> EmbeddingMaintainer:
+        maintainer = EmbeddingMaintainer.__new__(EmbeddingMaintainer)
+        maintainer.config = SimpleNamespace(cameras={})
+        maintainer.event_end_subscriber = MagicMock()
+        maintainer.realtime_processors = [MagicMock()]
+        # spec is required: the dispatch loop is a chain of isinstance checks,
+        # and a bare MagicMock matches none of them, so the crashing branch
+        # would never run and the test would pass against unfixed code
+        maintainer.post_processors = [MagicMock(spec=LicensePlatePostProcessor)]
+        maintainer.detected_license_plates = {"1234.5-abcdef": {"obj_data": {}}}
+        maintainer.recordings_available_through = {"deleted_cam": 1234.5}
+        maintainer.event_metadata_publisher = MagicMock()
+        return maintainer
+
+    def test_process_finalized_skips_unknown_camera(self):
+        maintainer = self._make_maintainer()
+        # updated_db=False bypasses the Event.get branch, which would hit the
+        # database and mask the KeyError this test is about
+        maintainer.event_end_subscriber.check_for_update.side_effect = [
+            ("1234.5-abcdef", "deleted_cam", False),
+            None,
+        ]
+
+        maintainer._process_finalized()
+
+        maintainer.post_processors[0].process_data.assert_not_called()
+
+    def test_process_finalized_still_expires_realtime_state(self):
+        """The guard must not skip per-event cleanup, only post processing."""
+        maintainer = self._make_maintainer()
+        maintainer.event_end_subscriber.check_for_update.side_effect = [
+            ("1234.5-abcdef", "deleted_cam", False),
+            None,
+        ]
+
+        maintainer._process_finalized()
+
+        maintainer.realtime_processors[0].expire_object.assert_called_once_with(
+            "1234.5-abcdef", "deleted_cam"
+        )
+
+    def test_expire_dedicated_lpr_drops_entry_for_unknown_camera(self):
+        maintainer = self._make_maintainer()
+        maintainer.detected_license_plates = {
+            "1234.5-abcdef": {"camera": "deleted_cam", "last_seen": 1.0}
+        }
+
+        maintainer._expire_dedicated_lpr()
+
+        self.assertEqual(maintainer.detected_license_plates, {})
