@@ -37,7 +37,11 @@ mqtt:
   # NOTE: MQTT password can be specified with an environment variable or docker secrets that must begin with 'FRIGATE_'.
   #       e.g. password: '{FRIGATE_MQTT_PASSWORD}'
   password: password
-  # Optional: tls_ca_certs for enabling TLS using self-signed certs (default: None)
+  # Optional: tls_ca_certs for verifying a broker certificate signed by a private
+  # certificate authority, for example a self-signed one (default: None)
+  # NOTE: setting any of the tls_ options below enables TLS. Leave tls_ca_certs unset
+  #       if the broker certificate is signed by a public CA such as Let's Encrypt,
+  #       and the system certificate store is used instead.
   tls_ca_certs: /path/to/ca.crt
   # Optional: tls_client_cert and tls_client key in order to use self-signed client
   # certificates (default: None)
