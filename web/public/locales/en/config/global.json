@@ -275,172 +275,17 @@
       "description": "Unit system for display (metric or imperial) used in the UI and MQTT."
     }
   },
-  "detectors": {
-    "label": "Detector hardware",
-    "description": "Configuration for object detectors (CPU, GPU, ONNX backends) and any detector-specific model settings.",
-    "type": {
-      "label": "Type"
+  "models": {
+    "label": "Detection models",
+    "description": "Object detection models and the hardware each one runs on. Cameras pick a model by matching their detect.scene against a model's scene.",
+    "scene": {
+      "label": "Model scene",
+      "description": "The camera environment this model is used for. Cameras select a model by setting detect.scene to a matching value, and 'all' is used by any camera that does not set one."
     },
-    "model": {
-      "label": "Detector specific model configuration",
-      "description": "Detector-specific model configuration options (path, input size, etc.).",
-      "path": {
-        "label": "Custom object detector model path",
-        "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
-      },
-      "labelmap_path": {
-        "label": "Label map for custom object detector",
-        "description": "Path to a labelmap file that maps numeric classes to string labels for the detector."
-      },
-      "width": {
-        "label": "Object detection model input width",
-        "description": "Width of the model input tensor in pixels."
-      },
-      "height": {
-        "label": "Object detection model input height",
-        "description": "Height of the model input tensor in pixels."
-      },
-      "labelmap": {
-        "label": "Labelmap customization",
-        "description": "Overrides or remapping entries to merge into the standard labelmap."
-      },
-      "attributes_map": {
-        "label": "Map of object labels to their attribute labels",
-        "description": "Mapping from object labels to attribute labels used to attach metadata (for example 'car' -> ['license_plate'])."
-      },
-      "input_tensor": {
-        "label": "Model Input Tensor Shape",
-        "description": "Tensor format expected by the model: 'nhwc' or 'nchw'."
-      },
-      "input_pixel_format": {
-        "label": "Model Input Pixel Color Format",
-        "description": "Pixel colorspace expected by the model: 'rgb', 'bgr', or 'yuv'."
-      },
-      "input_dtype": {
-        "label": "Model Input D Type",
-        "description": "Data type of the model input tensor (for example 'float32')."
-      },
-      "model_type": {
-        "label": "Object Detection Model Type",
-        "description": "Detector model architecture type (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) used by some detectors for optimization."
-      }
+    "devices": {
+      "label": "Detection hardware",
+      "description": "Hardware this model runs on, as '<detector>' or '<detector>:<device>' (for example 'edgetpu:pci:0' or 'openvino:GPU'). Listing the same device more than once runs additional inference processes on it."
     },
-    "model_path": {
-      "label": "Detector specific model path",
-      "description": "File path to the detector model binary if required by the chosen detector."
-    },
-    "axengine": {
-      "label": "AXEngine NPU",
-      "description": "AXERA AX650N/AX8850N NPU detector running compiled .axmodel files via the AXEngine runtime."
-    },
-    "cpu": {
-      "label": "CPU",
-      "description": "CPU TFLite detector that runs TensorFlow Lite models on the host CPU without hardware acceleration. Not recommended.",
-      "num_threads": {
-        "label": "Number of detection threads",
-        "description": "The number of threads used for CPU-based inference."
-      }
-    },
-    "deepstack": {
-      "label": "DeepStack",
-      "description": "DeepStack/CodeProject.AI detector that sends images to a remote DeepStack HTTP API for inference. Not recommended.",
-      "api_url": {
-        "label": "DeepStack API URL",
-        "description": "The URL of the DeepStack API."
-      },
-      "api_timeout": {
-        "label": "DeepStack API timeout (in seconds)",
-        "description": "Maximum time allowed for a DeepStack API request."
-      },
-      "api_key": {
-        "label": "DeepStack API key (if required)",
-        "description": "Optional API key for authenticated DeepStack services."
-      }
-    },
-    "edgetpu": {
-      "label": "EdgeTPU",
-      "description": "EdgeTPU detector that runs TensorFlow Lite models compiled for Coral EdgeTPU using the EdgeTPU delegate.",
-      "device": {
-        "label": "Device Type",
-        "description": "The device to use for EdgeTPU inference (e.g. 'usb', 'pci')."
-      }
-    },
-    "hailo8l": {
-      "label": "Hailo-8/Hailo-8L",
-      "description": "Hailo-8/Hailo-8L detector using HEF models and the HailoRT SDK for inference on Hailo hardware.",
-      "device": {
-        "label": "Device Type",
-        "description": "The device to use for Hailo inference (e.g. 'PCIe', 'M.2')."
-      }
-    },
-    "memryx": {
-      "label": "MemryX",
-      "description": "MemryX MX3 detector that runs compiled DFP models on MemryX accelerators.",
-      "device": {
-        "label": "Device Path",
-        "description": "The device to use for MemryX inference (e.g. 'PCIe')."
-      }
-    },
-    "onnx": {
-      "label": "ONNX",
-      "description": "ONNX detector for running ONNX models; will use available acceleration backends (CUDA/ROCm/OpenVINO) when available.",
-      "device": {
-        "label": "Device Type",
-        "description": "The device to use for ONNX inference (e.g. 'AUTO', 'CPU', 'GPU')."
-      }
-    },
-    "openvino": {
-      "label": "OpenVINO",
-      "description": "OpenVINO detector for AMD and Intel CPUs, Intel GPUs and Intel VPU hardware.",
-      "device": {
-        "label": "Device Type",
-        "description": "The device to use for OpenVINO inference (e.g. 'CPU', 'GPU', 'NPU')."
-      }
-    },
-    "rknn": {
-      "label": "RKNN",
-      "description": "RKNN detector for Rockchip NPUs; runs compiled RKNN models on Rockchip hardware.",
-      "num_cores": {
-        "label": "Number of NPU cores to use.",
-        "description": "The number of NPU cores to use (0 for auto)."
-      }
-    },
-    "synaptics": {
-      "label": "Synaptics",
-      "description": "Synaptics NPU detector for models in .synap format using the Synap SDK on Synaptics hardware."
-    },
-    "teflon_tfl": {
-      "label": "Teflon",
-      "description": "Teflon delegate detector for TFLite using Mesa Teflon delegate library to accelerate inference on supported GPUs."
-    },
-    "tensorrt": {
-      "label": "TensorRT",
-      "description": "TensorRT detector for Nvidia Jetson devices using serialized TensorRT engines for accelerated inference.",
-      "device": {
-        "label": "GPU Device Index",
-        "description": "The GPU device index to use."
-      }
-    },
-    "zmq": {
-      "label": "ZMQ IPC",
-      "description": "ZMQ IPC detector that offloads inference to an external process via a ZeroMQ IPC endpoint.",
-      "endpoint": {
-        "label": "ZMQ IPC endpoint",
-        "description": "The ZMQ endpoint to connect to."
-      },
-      "request_timeout_ms": {
-        "label": "ZMQ request timeout in milliseconds",
-        "description": "Timeout for ZMQ requests in milliseconds."
-      },
-      "linger_ms": {
-        "label": "ZMQ socket linger in milliseconds",
-        "description": "Socket linger period in milliseconds."
-      }
-    }
-  },
-  "model": {
-    "label": "Detection model",
-    "description": "Settings to configure a custom object detection model and its input shape.",
     "path": {
       "label": "Custom object detector model path",
       "description": "Path to a custom detection model file (or plus://<model_id> for Frigate+ models)."
@@ -616,6 +461,10 @@
     "width": {
       "label": "Detect width",
       "description": "Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution."
+    },
+    "scene": {
+      "label": "Detect scene",
+      "description": "The environment this camera looks at, used to pick which of the configured models runs on it. Defaults to the model with a scene of 'all'."
     },
     "fps": {
       "label": "Detect FPS",

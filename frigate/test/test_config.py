@@ -11,6 +11,8 @@ from ruamel.yaml.constructor import DuplicateKeyError
 from frigate.config import BirdseyeModeEnum, FrigateConfig, RetainModeEnum
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
+from frigate.detectors.detector_config import SceneEnum
+from frigate.detectors.device import build_detector_config, runner_names
 from frigate.util.builtin import deep_merge
 
 
@@ -65,49 +67,171 @@ class TestConfig(unittest.TestCase):
 
     def test_config_class(self):
         frigate_config = FrigateConfig(**self.minimal)
-        assert "cpu" in frigate_config.detectors.keys()
-        assert frigate_config.detectors["cpu"].type == DetectorTypeEnum.cpu
-        assert frigate_config.detectors["cpu"].model.width == 320
+        model = frigate_config.primary_model
+        assert model.scene == SceneEnum.all
+        assert model.width == 320
+        assert frigate_config.devices_for_model(model)[0].detector == (
+            DetectorTypeEnum.cpu
+        )
 
     @patch("frigate.detectors.detector_config.load_labels")
-    def test_detector_custom_model_path(self, mock_labels):
+    def test_model_custom_path(self, mock_labels):
         mock_labels.return_value = {}
         config = {
-            "detectors": {
-                "cpu": {
-                    "type": "cpu",
-                    "model_path": "/cpu_model.tflite",
+            "models": [
+                # needs to be a file that will exist, doesn't matter what
+                {"path": "/etc/hosts", "width": 512, "devices": ["openvino:GPU"]},
+            ],
+        }
+
+        frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+        model = frigate_config.primary_model
+
+        assert model.path == "/etc/hosts"
+        assert model.width == 512
+
+        detector_config = build_detector_config(
+            frigate_config.devices_for_model(model)[0], model
+        )
+        assert detector_config.type == DetectorTypeEnum.openvino
+        assert detector_config.device == "GPU"
+        assert detector_config.model.path == "/etc/hosts"
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_model_default_paths_per_detector(self, mock_labels):
+        mock_labels.return_value = {}
+
+        for devices, expected in (
+            (["cpu"], "/cpu_model.tflite"),
+            (["edgetpu:pci:0"], "/edgetpu_model.tflite"),
+            (["openvino:CPU"], "/openvino-model/ssdlite_mobilenet_v2.xml"),
+        ):
+            config = {"models": [{"devices": devices}]}
+            frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+            assert frigate_config.primary_model.path == expected
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_camera_picks_model_by_scene(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [
+                {"scene": "outdoor", "devices": ["cpu"], "width": 320},
+                {"scene": "indoor", "devices": ["openvino:CPU"], "width": 300},
+            ],
+            "cameras": {
+                "back": {
+                    "detect": {"scene": "outdoor"},
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]},
+                        ]
+                    },
                 },
-                "edgetpu": {
-                    "type": "edgetpu",
-                    "model_path": "/edgetpu_model.tflite",
-                },
-                "openvino": {
-                    "type": "openvino",
+                "front": {
+                    "detect": {"scene": "indoor"},
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.2:554/video", "roles": ["detect"]},
+                        ]
+                    },
                 },
             },
-            # needs to be a file that will exist, doesn't matter what
-            "model": {"path": "/etc/hosts", "width": 512},
         }
 
         frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
 
-        assert "cpu" in frigate_config.detectors.keys()
-        assert "edgetpu" in frigate_config.detectors.keys()
-        assert "openvino" in frigate_config.detectors.keys()
+        assert frigate_config.model_for_camera("back").scene == SceneEnum.outdoor
+        assert frigate_config.model_for_camera("front").scene == SceneEnum.indoor
+        assert frigate_config.model_for_camera("back").width == 320
+        assert frigate_config.model_for_camera("front").width == 300
 
-        assert frigate_config.detectors["cpu"].type == DetectorTypeEnum.cpu
-        assert frigate_config.detectors["edgetpu"].type == DetectorTypeEnum.edgetpu
-        assert frigate_config.detectors["openvino"].type == DetectorTypeEnum.openvino
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_camera_requires_a_scene_without_a_default(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [
+                {"scene": "outdoor", "devices": ["cpu"]},
+                {"scene": "indoor", "devices": ["openvino:CPU"]},
+            ],
+        }
 
-        assert frigate_config.detectors["cpu"].num_threads == 3
-        assert frigate_config.detectors["edgetpu"].device is None
-        assert frigate_config.detectors["openvino"].device is None
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**(deep_merge(config, self.minimal)))
 
-        assert frigate_config.model.path == "/etc/hosts"
-        assert frigate_config.detectors["cpu"].model.path == "/cpu_model.tflite"
-        assert frigate_config.detectors["edgetpu"].model.path == "/edgetpu_model.tflite"
-        assert frigate_config.detectors["openvino"].model.path == "/etc/hosts"
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_camera_scene_must_match_a_model(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [{"devices": ["cpu"]}],
+            "cameras": {
+                "back": {
+                    "detect": {"scene": "outdoor"},
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]},
+                        ]
+                    },
+                },
+            },
+        }
+
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**(deep_merge(config, self.minimal)))
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_models_must_use_unique_scenes(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [
+                {"scene": "outdoor", "devices": ["cpu"]},
+                {"scene": "outdoor", "devices": ["openvino:CPU"]},
+            ],
+        }
+
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**(deep_merge(config, self.minimal)))
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_model_devices_must_share_a_detector(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {"models": [{"devices": ["cpu", "openvino:CPU"]}]}
+
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**(deep_merge(config, self.minimal)))
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_model_requires_a_known_detector(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {"models": [{"devices": ["not_a_detector:0"]}]}
+
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**(deep_merge(config, self.minimal)))
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_model_requires_a_device(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {"models": [{"devices": []}]}
+
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**(deep_merge(config, self.minimal)))
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_shareable_devices_may_repeat(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {"models": [{"devices": ["openvino:GPU", "openvino:GPU"]}]}
+
+        frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+        devices = frigate_config.devices_for_model(frigate_config.primary_model)
+
+        assert runner_names(devices) == ["openvino:GPU", "openvino:GPU#2"]
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_exclusive_devices_may_not_repeat(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {"models": [{"devices": ["edgetpu:pci:0", "edgetpu:pci:0"]}]}
+
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**(deep_merge(config, self.minimal)))
 
     def test_invalid_mqtt_config(self):
         config = {
@@ -1131,7 +1255,7 @@ class TestConfig(unittest.TestCase):
     def test_merge_labelmap(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "model": {"labelmap": {7: "truck"}},
+            "models": [{"labelmap": {7: "truck"}, "devices": ["cpu"]}],
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1152,7 +1276,7 @@ class TestConfig(unittest.TestCase):
         }
 
         frigate_config = FrigateConfig(**config)
-        assert frigate_config.model.merged_labelmap[7] == "truck"
+        assert frigate_config.primary_model.merged_labelmap[7] == "truck"
 
     def test_default_labelmap_empty(self):
         config = {
@@ -1177,12 +1301,12 @@ class TestConfig(unittest.TestCase):
         }
 
         frigate_config = FrigateConfig(**config)
-        assert frigate_config.model.merged_labelmap[0] == "person"
+        assert frigate_config.primary_model.merged_labelmap[0] == "person"
 
     def test_default_labelmap(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "model": {"width": 320, "height": 320},
+            "models": [{"width": 320, "height": 320, "devices": ["cpu"]}],
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1203,7 +1327,7 @@ class TestConfig(unittest.TestCase):
         }
 
         frigate_config = FrigateConfig(**config)
-        assert frigate_config.model.merged_labelmap[0] == "person"
+        assert frigate_config.primary_model.merged_labelmap[0] == "person"
 
     def test_plus_labelmap(self):
         with open(os.path.join(MODEL_CACHE_DIR, "test"), "w") as f:
@@ -1213,8 +1337,7 @@ class TestConfig(unittest.TestCase):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "detectors": {"cpu": {"type": "cpu"}},
-            "model": {"path": "plus://test"},
+            "models": [{"path": "plus://test", "devices": ["cpu"]}],
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1235,7 +1358,7 @@ class TestConfig(unittest.TestCase):
         }
 
         frigate_config = FrigateConfig(**config)
-        assert frigate_config.model.merged_labelmap[0] == "amazon"
+        assert frigate_config.primary_model.merged_labelmap[0] == "amazon"
 
     def test_fails_on_invalid_role(self):
         config = {

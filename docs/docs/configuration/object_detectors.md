@@ -68,11 +68,65 @@ Frigate supports multiple different detectors that work on different types of ha
 
 :::note
 
-Multiple detectors can not be mixed for object detection (ex: OpenVINO and Coral EdgeTPU can not be used for object detection at the same time).
+A single model can not be spread across different detector types (ex: OpenVINO and Coral EdgeTPU can not run the same model at the same time). Configuring more than one model, each on its own detector type, is supported.
 
 This does not affect using hardware for accelerating other tasks such as [semantic search](./semantic_search.md)
 
 :::
+
+### Configuring models and hardware
+
+Object detection is configured with a `models` list. Each entry describes one model and the hardware it runs on:
+
+```yaml
+models:
+  - devices:
+      - openvino:GPU
+    path: /config/model_cache/yolov9-s.onnx
+    model_type: yolo-generic
+    width: 320
+    height: 320
+```
+
+Each entry in `devices` is a detector type, optionally followed by a colon and a device for that detector, such as `edgetpu:pci:0`, `openvino:NPU`, or `tensorrt:0`. The per-detector sections below document the device values each one accepts. Listing several devices runs the model on all of them, and listing the **same** device more than once runs additional inference processes against it, which can improve throughput on hardware that keeps up with more than one stream:
+
+```yaml
+models:
+  - devices:
+      - openvino:GPU
+      - openvino:GPU
+```
+
+Coral EdgeTPU and MemryX accelerators can only be opened by one process, so those devices can not be repeated.
+
+### Running more than one model
+
+Cameras can be split across models by scene, which is useful when indoor and outdoor cameras benefit from differently trained models. Each model declares the `scene` it is for, and each camera picks one with `detect -> scene`:
+
+```yaml
+models:
+  - scene: outdoor
+    path: plus://your-outdoor-model
+    devices:
+      - edgetpu:pci:0
+  - scene: indoor
+    path: /config/model_cache/indoor.onnx
+    model_type: yolo-generic
+    devices:
+      - openvino:GPU
+
+cameras:
+  driveway:
+    detect:
+      scene: outdoor
+    ...
+  hallway:
+    detect:
+      scene: indoor
+    ...
+```
+
+Available scenes are `all`, `indoor`, `outdoor`, `indoor_thermal`, and `outdoor_thermal`. A model with a scene of `all` is used by every camera that does not set one, and `all` is the default when a model does not declare a scene. Changing a camera's scene requires a restart.
 
 ### Choosing a model size
 
@@ -92,11 +146,11 @@ The best detection accuracy comes from a model trained on images that look like 
 
 # Officially Supported Detectors
 
-Frigate provides a number of builtin detector types. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides a number of builtin detector types. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. Each of a model's devices runs in a dedicated process, and they pull from a common queue of detection requests from the cameras assigned to that model.
 
 ## Edge TPU Detector
 
-The Edge TPU detector type runs TensorFlow Lite models utilizing the Google Coral delegate for hardware acceleration. To configure an Edge TPU detector, set the `"type"` attribute to `"edgetpu"`.
+The Edge TPU detector type runs TensorFlow Lite models utilizing the Google Coral delegate for hardware acceleration. To use it, prefix a model's device with `edgetpu`.
 
 The Edge TPU device can be specified using the `"device"` attribute according to the [Documentation for the TensorFlow Lite Python API](https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api). If not set, the delegate will use the first device it finds.
 
@@ -117,10 +171,9 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and selec
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral:
-    type: edgetpu
-    device: usb
+models:
+  - devices:
+      - edgetpu:usb
 ```
 
 </TabItem>
@@ -137,13 +190,10 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and selec
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral1:
-    type: edgetpu
-    device: usb:0
-  coral2:
-    type: edgetpu
-    device: usb:1
+models:
+  - devices:
+      - edgetpu:usb:0
+      - edgetpu:usb:1
 ```
 
 </TabItem>
@@ -162,10 +212,9 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and selec
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral:
-    type: edgetpu
-    device: ""
+models:
+  - devices:
+      - 'edgetpu:'
 ```
 
 </TabItem>
@@ -182,10 +231,9 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and selec
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral:
-    type: edgetpu
-    device: pci
+models:
+  - devices:
+      - edgetpu:pci
 ```
 
 </TabItem>
@@ -202,13 +250,10 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and selec
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral1:
-    type: edgetpu
-    device: pci:0
-  coral2:
-    type: edgetpu
-    device: pci:1
+models:
+  - devices:
+      - edgetpu:pci:0
+      - edgetpu:pci:1
 ```
 
 </TabItem>
@@ -225,13 +270,10 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and selec
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral_usb:
-    type: edgetpu
-    device: usb
-  coral_pci:
-    type: edgetpu
-    device: pci
+models:
+  - devices:
+      - edgetpu:usb
+      - edgetpu:pci
 ```
 
 </TabItem>
@@ -273,7 +315,7 @@ Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-proc
 
 ## OpenVINO Detector
 
-The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel NPUs. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
+The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel NPUs. To use it, prefix a model's device with `openvino`.
 
 The OpenVINO device to be used is specified using the `"device"` attribute according to the naming conventions in the [Device Documentation](https://docs.openvino.ai/2025/openvino-workflow/running-inference/inference-devices-and-modes.html). The most common devices are `CPU`, `GPU`, or `NPU`.
 
@@ -286,13 +328,10 @@ OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will al
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
 
 ```yaml
-detectors:
-  ov_0:
-    type: openvino
-    device: GPU # or NPU
-  ov_1:
-    type: openvino
-    device: GPU # or NPU
+models:
+  - devices:
+      - openvino:GPU # or NPU
+      - openvino:GPU # or NPU
 ```
 
 :::
@@ -312,6 +351,12 @@ Intel NPUs cannot be used under Home Assistant OS, which does not include the NP
 ---
 
 ## Apple Silicon detector
+
+:::warning
+
+The network-based detectors (Deepstack, DeGirum, and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, DeGirum ignores `zoo` and `token`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
+
+:::
 
 The NPU in Apple Silicon can't be accessed from within a container, so the [Apple Silicon detector client](https://github.com/frigate-nvr/apple-silicon-detector) must first be setup. It is recommended to use the Frigate docker image with `-standard-arm64` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-standard-arm64`.
 
@@ -453,11 +498,10 @@ If the correct build is used for your GPU then the GPU will be detected and used
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
 
 ```yaml
-detectors:
-  onnx_0:
-    type: onnx
-  onnx_1:
-    type: onnx
+models:
+  - devices:
+      - onnx
+      - onnx
 ```
 
 :::
@@ -470,7 +514,7 @@ detectors:
 
 ## CPU Detector (not recommended)
 
-The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To configure a CPU based detector, set the `"type"` attribute to `"cpu"`.
+The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To use it, set a model's device to `cpu`.
 
 :::danger
 
@@ -480,7 +524,7 @@ The CPU detector is not recommended for general use. If you do not have GPU or E
 
 The number of threads used by the interpreter can be specified using the `"num_threads"` attribute, and defaults to `3.`
 
-A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with the model's `path`.
 
 ### Configuration {#configuration-cpu}
 
@@ -489,6 +533,12 @@ A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and 
 When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
 
 ## Deepstack / CodeProject.AI Server Detector
+
+:::warning
+
+The network-based detectors (Deepstack, DeGirum, and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, DeGirum ignores `zoo` and `token`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
+
+:::
 
 The Deepstack / CodeProject.AI Server detector for Frigate allows you to integrate Deepstack and CodeProject.AI object detection capabilities into Frigate. CodeProject.AI and DeepStack are open-source AI platforms that can be run on various devices such as the Raspberry Pi, Nvidia Jetson, and other compatible hardware. It is important to note that the integration is performed over the network, so the inference times may not be as fast as native Frigate detectors, but it still provides an efficient and reliable solution for object detection and tracking.
 
@@ -552,7 +602,7 @@ For detailed instructions on compiling models, refer to the [MemryX Compiler](ht
 
 3. Depending on the model, the compiler may also generate a cropped post-processing network. If present, it will be named with the suffix `_post.onnx`.
 
-4. Bind-mount the `.zip` file into the container and specify its path using `model.path` in your config.
+4. Bind-mount the `.zip` file into the container and specify its path using the model's `path` in your config.
 
 5. Update `labelmap_path` to match your custom model's labels.
 
@@ -682,13 +732,10 @@ If no custom model is provided, the RKNN detector downloads a default model from
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming NPU resources are available. An example configuration would be:
 
 ```yaml
-detectors:
-  rknn_0:
-    type: rknn
-    num_cores: 0
-  rknn_1:
-    type: rknn
-    num_cores: 0
+models:
+  - devices:
+      - rknn:0
+      - rknn:0
 ```
 
 :::
@@ -762,6 +809,101 @@ Explanation of the parameters:
   - **example**: Specifying `output_name = "frigate-{quant}-{input_basename}-{soc}-v{tk_version}"` could result in a model called `frigate-i8-my_model-rk3588-v2.3.0.rknn`.
 - `config`: Configuration passed to `rknn-toolkit2` for model conversion. For an explanation of all available parameters have a look at section "2.2. Model configuration" of [this manual](https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.2/03_Rockchip_RKNPU_API_Reference_RKNN_Toolkit2_V2.3.2_EN.pdf).
 
+<<<<<<< HEAD
+=======
+## DeGirum
+
+:::warning
+
+The network-based detectors (Deepstack, DeGirum, and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, DeGirum ignores `zoo` and `token`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
+
+:::
+
+DeGirum is a detector that can use any type of hardware listed on [their website](https://hub.degirum.com). DeGirum can be used with local hardware through a DeGirum AI Server, or through the use of `@local`. You can also connect directly to DeGirum's AI Hub to run inferences. **Please Note:** This detector _cannot_ be used for commercial purposes.
+
+### Configuration {#configuration-degirum}
+
+#### AI Server Inference
+
+Before starting with the config file for this section, you must first launch an AI server. DeGirum has an AI server ready to use as a docker container. Add this to your `docker-compose.yml` to get started:
+
+```yaml
+degirum_detector:
+  container_name: degirum
+  image: degirum/aiserver:latest
+  privileged: true
+  ports:
+    - "8778:8778"
+```
+
+All supported hardware will automatically be found on your AI server host as long as relevant runtimes and drivers are properly installed on your machine. Refer to [DeGirum's docs site](https://docs.degirum.com/pysdk/runtimes-and-drivers) if you have any trouble.
+
+Once completed, configure the detector as follows:
+
+<ModelConfigDropdown detectorTitle="DeGirum" models={objectDetectorsModels.degirumAiServer.models} />
+
+The model is set on the same `models` entry as the DeGirum device. You can set it to:
+
+- A model listed on the [AI Hub](https://hub.degirum.com)
+  - If this is what you choose to do, the correct model will be downloaded onto your machine before running.
+- A local directory acting as a zoo. See DeGirum's docs site [for more information](https://docs.degirum.com/pysdk/user-guide-pysdk/organizing-models#model-zoo-directory-structure).
+- A path to some model.json.
+
+```yaml
+models:
+  - devices:
+      - degirum:<location>
+    path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1 # directory to model .json and file
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
+```
+
+#### Local Inference
+
+It is also possible to eliminate the need for an AI server and run the hardware directly. The benefit of this approach is that you eliminate any bottlenecks that occur when transferring prediction results from the AI server docker container to the frigate one. However, the method of implementing local inference is different for every device and hardware combination, so it's usually more trouble than it's worth. A general guideline to achieve this would be:
+
+1. Ensuring that the frigate docker container has the runtime you want to use. So for instance, running `@local` for Hailo means making sure the container you're using has the Hailo runtime installed.
+2. To double check the runtime is detected by the DeGirum detector, make sure the `degirum sys-info` command properly shows whatever runtimes you mean to install.
+3. Create a DeGirum detector in your configuration.
+
+<ModelConfigDropdown detectorTitle="DeGirum" models={objectDetectorsModels.degirumLocal.models} />
+
+Once the DeGirum device is set up, you can choose a model on the same `models` entry in the `config.yml` file.
+
+```yaml
+models:
+  - devices:
+      - degirum:<location>
+    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
+```
+
+#### AI Hub Cloud Inference
+
+If you do not possess whatever hardware you want to run, there's also the option to run cloud inferences. Do note that your detection fps might need to be lowered as network latency does significantly slow down this method of detection. For use with Frigate, we highly recommend using a local AI server as described above. To set up cloud inferences,
+
+1. Sign up at [DeGirum's AI Hub](https://hub.degirum.com).
+2. Get an access token.
+3. Create a DeGirum detector in your configuration.
+
+<ModelConfigDropdown detectorTitle="DeGirum" models={objectDetectorsModels.degirumCloud.models} />
+
+Once the DeGirum device is set up, you can choose a model on the same `models` entry in the `config.yml` file.
+
+```yaml
+models:
+  - devices:
+      - degirum:<location>
+    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
+```
+
+>>>>>>> 34363affa (Refactor detector and model management)
 ## AXERA
 
 Hardware accelerated object detection is supported on the following SoCs:
