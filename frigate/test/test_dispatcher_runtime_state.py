@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 from frigate.app import FrigateApp
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.runtime_state import RuntimeStatePersistence
-from frigate.config import BirdseyeModeConfig
+from frigate.config import BirdseyeModeEnum
 
 
 def _make_camera_mock(
@@ -53,7 +53,7 @@ def _build_dispatcher(cameras: dict[str, MagicMock]) -> Dispatcher:
 
 
 class TestBirdseyeModeCommands(unittest.TestCase):
-    """Verify Birdseye mode commands use the boolean mode contract."""
+    """Verify Birdseye mode commands use the activity list contract."""
 
     def setUp(self) -> None:
         self.camera = _make_camera_mock()
@@ -62,30 +62,33 @@ class TestBirdseyeModeCommands(unittest.TestCase):
         self.dispatcher.publish = MagicMock()
 
     def test_combined_modes_are_accepted(self) -> None:
-        self.dispatcher._on_birdseye_mode_command(
-            "front_door", "STATIONARY_OBJECTS,MOTION"
-        )
+        self.dispatcher._on_birdseye_modes_command("front_door", "ALERTS,MOTION")
 
         self.assertEqual(
-            self.camera.birdseye.mode,
-            BirdseyeModeConfig(motion=True, stationary_objects=True),
+            self.camera.birdseye.modes,
+            [BirdseyeModeEnum.alerts, BirdseyeModeEnum.motion],
         )
         self.dispatcher.config_updater.publish_update.assert_called_once()
         self.dispatcher.publish.assert_called_once_with(
-            "front_door/birdseye_mode/state",
-            "MOTION,STATIONARY_OBJECTS",
+            "front_door/birdseye_modes/state",
+            "MOTION,ALERTS",
             retain=True,
         )
 
     def test_single_activity_type_is_accepted(self) -> None:
-        self.dispatcher._on_birdseye_mode_command("front_door", "OBJECTS")
+        self.dispatcher._on_birdseye_modes_command("front_door", "ALL_OBJECTS")
 
-        self.assertEqual(
-            self.camera.birdseye.mode,
-            BirdseyeModeConfig(objects=True),
-        )
+        self.assertEqual(self.camera.birdseye.modes, [BirdseyeModeEnum.all_objects])
         self.dispatcher.publish.assert_called_once_with(
-            "front_door/birdseye_mode/state", "OBJECTS", retain=True
+            "front_door/birdseye_modes/state", "ALL_OBJECTS", retain=True
+        )
+
+    def test_none_clears_every_activity_type(self) -> None:
+        self.dispatcher._on_birdseye_modes_command("front_door", "NONE")
+
+        self.assertEqual(self.camera.birdseye.modes, [])
+        self.dispatcher.publish.assert_called_once_with(
+            "front_door/birdseye_modes/state", "NONE", retain=True
         )
 
     def test_unknown_mode_is_rejected(self) -> None:
@@ -93,13 +96,12 @@ class TestBirdseyeModeCommands(unittest.TestCase):
             "UNKNOWN",
             "motion",
             "MOTION_OBJECTS",
-            "NONE",
             "NONE,MOTION",
             "MOTION,MOTION",
             "MOTION,",
         ):
             with self.subTest(payload=payload):
-                self.dispatcher._on_birdseye_mode_command("front_door", payload)
+                self.dispatcher._on_birdseye_modes_command("front_door", payload)
 
         self.dispatcher.config_updater.publish_update.assert_not_called()
 
