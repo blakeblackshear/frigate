@@ -11,7 +11,11 @@ from frigate.camera.activity_manager import AudioActivityManager, CameraActivity
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.runtime_state import RuntimeStatePersistence
 from frigate.comms.webpush import WebPushClient
-from frigate.config import BirdseyeModeConfig, FrigateConfig
+from frigate.config import (
+    FrigateConfig,
+    birdseye_modes_from_mqtt_payload,
+    birdseye_modes_to_mqtt_payload,
+)
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdatePublisher,
@@ -84,7 +88,7 @@ class Dispatcher:
             "recordings": self._on_recordings_command,
             "snapshots": self._on_snapshots_command,
             "birdseye": self._on_birdseye_command,
-            "birdseye_mode": self._on_birdseye_mode_command,
+            "birdseye_modes": self._on_birdseye_modes_command,
             "review_alerts": self._on_alerts_command,
             "review_detections": self._on_detections_command,
             "object_descriptions": self._on_object_description_command,
@@ -879,12 +883,12 @@ class Dispatcher:
         )
         self.publish(f"{camera_name}/birdseye/state", payload, retain=True)
 
-    def _on_birdseye_mode_command(self, camera_name: str, payload: str) -> None:
+    def _on_birdseye_modes_command(self, camera_name: str, payload: str) -> None:
         """Callback for birdseye mode topic."""
 
-        mode = BirdseyeModeConfig.from_mqtt_payload(payload)
-        if mode is None:
-            logger.info("Invalid birdseye_mode command: %s", payload)
+        modes = birdseye_modes_from_mqtt_payload(payload)
+        if modes is None:
+            logger.info("Invalid birdseye_modes command: %s", payload)
             return
 
         birdseye_settings = self.config.cameras[camera_name].birdseye
@@ -893,9 +897,9 @@ class Dispatcher:
             logger.info(f"Birdseye mode not enabled for {camera_name}")
             return
 
-        birdseye_settings.mode = mode
+        birdseye_settings.modes = modes
         logger.info(
-            f"Setting birdseye mode for {camera_name} to {birdseye_settings.mode}"
+            f"Setting birdseye mode for {camera_name} to {birdseye_settings.modes}"
         )
 
         self.config_updater.publish_update(
@@ -903,7 +907,9 @@ class Dispatcher:
             birdseye_settings,
         )
         self.publish(
-            f"{camera_name}/birdseye_mode/state", mode.to_mqtt_payload(), retain=True
+            f"{camera_name}/birdseye_modes/state",
+            birdseye_modes_to_mqtt_payload(modes),
+            retain=True,
         )
 
     def _on_camera_notification_command(self, camera_name: str, payload: str) -> None:

@@ -7,7 +7,7 @@ import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
 from frigate.comms.base_communicator import Communicator
-from frigate.config import FrigateConfig
+from frigate.config import FrigateConfig, birdseye_modes_to_mqtt_payload
 
 logger = logging.getLogger(__name__)
 
@@ -123,9 +123,9 @@ class MqttClient(Communicator):
                 retain=True,
             )
             self.publish(
-                f"{camera_name}/birdseye_mode/state",
+                f"{camera_name}/birdseye_modes/state",
                 (
-                    camera.birdseye.mode.to_mqtt_payload()
+                    birdseye_modes_to_mqtt_payload(camera.birdseye.modes)
                     if camera.birdseye.enabled
                     else "OFF"
                 ),
@@ -270,7 +270,7 @@ class MqttClient(Communicator):
             "motion_threshold",
             "motion_contour_area",
             "birdseye",
-            "birdseye_mode",
+            "birdseye_modes",
             "review_alerts",
             "review_detections",
             "object_descriptions",
