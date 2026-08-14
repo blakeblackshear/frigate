@@ -1313,7 +1313,7 @@ async def set_sub_label(
     if request.app.detected_frames_processor:
         tracked_obj: TrackedObject = None
 
-        for state in request.app.detected_frames_processor.camera_states.values():
+        for state in request.app.detected_frames_processor.get_camera_states():
             tracked_obj = state.tracked_objects.get(event_id)
 
             if tracked_obj is not None:
@@ -1372,7 +1372,7 @@ async def set_plate(
     if request.app.detected_frames_processor:
         tracked_obj: TrackedObject = None
 
-        for state in request.app.detected_frames_processor.camera_states.values():
+        for state in request.app.detected_frames_processor.get_camera_states():
             tracked_obj = state.tracked_objects.get(event_id)
 
             if tracked_obj is not None:
