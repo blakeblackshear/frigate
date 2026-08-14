@@ -747,25 +747,29 @@ class BirdsEyeFrameManager:
             return False, False
 
         force_update = False
+        camera_state = self.cameras.get(camera)
+
+        if camera_state is None:
+            return False, False
 
         # disabling birdseye is a little tricky
         if not camera_config.birdseye.enabled or not camera_config.enabled:
             # if we've rendered a frame (we have a value for last_active_frame)
             # then we need to set it to zero
-            if self.cameras[camera]["last_active_frame"] > 0:
-                self.cameras[camera]["last_active_frame"] = 0
+            if camera_state["last_active_frame"] > 0:
+                camera_state["last_active_frame"] = 0
                 force_update = True
             else:
                 return False, False
 
         # update the last active frame for the camera
-        self.cameras[camera]["current_frame"] = frame.copy()
-        self.cameras[camera]["current_frame_time"] = frame_time
+        camera_state["current_frame"] = frame.copy()
+        camera_state["current_frame_time"] = frame_time
         if self.camera_active(
             camera_config.birdseye.mode,
             activity,
         ):
-            self.cameras[camera]["last_active_frame"] = frame_time
+            camera_state["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()
 
