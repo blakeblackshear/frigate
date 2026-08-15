@@ -418,6 +418,11 @@ class ReviewSegmentMaintainer(threading.Thread):
 
         return None
 
+    def _handle_camera_removed(self, camera: str) -> None:
+        """Close out a deleted camera's segment so a reused name cannot inherit it."""
+        self.forcibly_end_segment(camera)
+        self.indefinite_events.pop(camera, None)
+
     def update_existing_segment(
         self,
         segment: PendingReviewSegment,
@@ -665,6 +670,10 @@ class ReviewSegmentMaintainer(threading.Thread):
             if "enabled" in updated_topics:
                 for camera in updated_topics["enabled"]:
                     self.forcibly_end_segment(camera)
+
+            if "remove" in updated_topics:
+                for camera in updated_topics["remove"]:
+                    self._handle_camera_removed(camera)
 
             result = self.detection_subscriber.check_for_update(timeout=1)
 

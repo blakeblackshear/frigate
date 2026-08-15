@@ -137,7 +137,10 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             return
 
         camera = data["after"]["camera"]
-        camera_config = self.config.cameras[camera]
+        camera_config = self.config.cameras.get(camera)
+
+        if camera_config is None:
+            return
 
         if not camera_config.review.genai.enabled:
             return
