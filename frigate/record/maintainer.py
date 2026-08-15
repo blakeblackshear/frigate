@@ -745,7 +745,9 @@ class RecordingMaintainer(threading.Thread):
                         regions,
                     ) = data
 
-                    if self.config.cameras[camera].record.enabled:
+                    camera_config = self.config.cameras.get(camera)
+
+                    if camera_config is not None and camera_config.record.enabled:
                         self.object_recordings_info[camera].append(
                             (
                                 frame_time,
@@ -762,7 +764,9 @@ class RecordingMaintainer(threading.Thread):
                         audio_detections,
                     ) = data
 
-                    if self.config.cameras[camera].record.enabled:
+                    camera_config = self.config.cameras.get(camera)
+
+                    if camera_config is not None and camera_config.record.enabled:
                         self.audio_recordings_info[camera].append(
                             (
                                 frame_time,

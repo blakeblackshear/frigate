@@ -597,7 +597,7 @@ async def _execute_get_live_context(
 
     try:
         frame_processor = request.app.detected_frames_processor
-        camera_state = frame_processor.camera_states.get(camera)
+        camera_state = frame_processor.get_camera_state(camera)
 
         if camera_state is None:
             return {
@@ -661,7 +661,7 @@ async def _get_live_frame_image_url(
         return None
     try:
         frame_processor = request.app.detected_frames_processor
-        if camera not in frame_processor.camera_states:
+        if frame_processor.get_camera_state(camera) is None:
             return None
         frame = frame_processor.get_current_frame(camera, {})
         if frame is None:
