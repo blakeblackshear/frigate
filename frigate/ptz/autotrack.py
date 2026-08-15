@@ -799,14 +799,24 @@ class PtzAutoTracker:
             except TimeoutError:
                 continue
 
+            # both are popped when the camera is deleted, so resolve them once
+            # here and use the locals for the rest of the move; a move already
+            # in flight then finishes against valid objects
+            metrics = self.ptz_metrics.get(camera)
+            camera_config = self.config.cameras.get(camera)
+
+            if metrics is None or camera_config is None:
+                logger.debug("%s: Dropping queued move, camera was removed", camera)
+                continue
+
             async with self.move_queue_locks[camera]:
                 frame_time, pan, tilt, zoom = move_data
 
                 # if we're receiving move requests during a PTZ move, ignore them
                 if ptz_moving_at_frame_time(
                     frame_time,
-                    self.ptz_metrics[camera].start_time.value,
-                    self.ptz_metrics[camera].stop_time.value,
+                    metrics.start_time.value,
+                    metrics.stop_time.value,
                 ):
                     logger.debug(
                         f"{camera}: Move queue: PTZ moving, dequeueing move request - frame time: {frame_time}, final pan: {pan}, final tilt: {tilt}, final zoom: {zoom}"
@@ -815,7 +825,7 @@ class PtzAutoTracker:
 
                 else:
                     if (
-                        self.config.cameras[camera].onvif.autotracking.zooming
+                        camera_config.onvif.autotracking.zooming
                         == ZoomingModeEnum.relative
                     ):
                         await self.onvif._move_relative(camera, pan, tilt, zoom, 1)
@@ -824,25 +834,22 @@ class PtzAutoTracker:
                             await self.onvif._move_relative(camera, pan, tilt, 0, 1)
 
                             # Wait until the camera finishes moving
-                            while not self.ptz_metrics[camera].motor_stopped.is_set():
+                            while not metrics.motor_stopped.is_set():
                                 await self.onvif.get_camera_status(camera)
 
-                        if (
-                            zoom > 0
-                            and self.ptz_metrics[camera].zoom_level.value != zoom
-                        ):
+                        if zoom > 0 and metrics.zoom_level.value != zoom:
                             await self.onvif._zoom_absolute(camera, zoom, 1)
 
                     # Wait until the camera finishes moving
-                    while not self.ptz_metrics[camera].motor_stopped.is_set():
+                    while not metrics.motor_stopped.is_set():
                         await self.onvif.get_camera_status(camera)
 
-                    if self.config.cameras[camera].onvif.autotracking.movement_weights:
+                    if camera_config.onvif.autotracking.movement_weights:
                         logger.debug(
                             f"{camera}: Predicted movement time: {self._predict_movement_time(camera, pan, tilt)}"
                         )
                         logger.debug(
-                            f"{camera}: Actual movement time: {self.ptz_metrics[camera].stop_time.value - self.ptz_metrics[camera].start_time.value}"
+                            f"{camera}: Actual movement time: {metrics.stop_time.value - metrics.start_time.value}"
                         )
 
                     # save metrics for better estimate calculations
@@ -851,21 +858,15 @@ class PtzAutoTracker:
                         and len(self.move_metrics[camera])
                         < AUTOTRACKING_MAX_MOVE_METRICS
                         and (pan != 0 or tilt != 0)
-                        and self.config.cameras[
-                            camera
-                        ].onvif.autotracking.calibrate_on_startup
+                        and camera_config.onvif.autotracking.calibrate_on_startup
                     ):
                         logger.debug(f"{camera}: Adding new values to move metrics")
                         self.move_metrics[camera].append(
                             {
                                 "pan": pan,
                                 "tilt": tilt,
-                                "start_timestamp": self.ptz_metrics[
-                                    camera
-                                ].start_time.value,
-                                "end_timestamp": self.ptz_metrics[
-                                    camera
-                                ].stop_time.value,
+                                "start_timestamp": metrics.start_time.value,
+                                "end_timestamp": metrics.stop_time.value,
                             }
                         )
 
