@@ -31,6 +31,10 @@
       "label": "Listen types",
       "description": "List of audio event types to detect (for example: bark, fire_alarm, speech, yell)."
     },
+    "labelmap": {
+      "label": "Audio labelmap customization",
+      "description": "Overrides or remapping entries to merge into the standard audio labelmap."
+    },
     "filters": {
       "label": "Audio filters",
       "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives.",

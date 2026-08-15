@@ -1070,6 +1070,28 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert frigate_config.model.merged_labelmap[7] == "truck"
 
+    def test_audio_labelmap_inheritance_is_separate_from_model_labelmap(self):
+        config = deep_merge(
+            {
+                "audio": {"labelmap": {69: "dogs", 70: "dogs"}},
+                "cameras": {
+                    "back": {
+                        "audio": {"labelmap": {75: "dogs"}},
+                    }
+                },
+            },
+            self.minimal,
+        )
+
+        frigate_config = FrigateConfig(**config)
+
+        assert frigate_config.cameras["back"].audio.labelmap == {
+            69: "dogs",
+            70: "dogs",
+            75: "dogs",
+        }
+        assert frigate_config.model.merged_labelmap[69] != "dogs"
+
     def test_default_labelmap_empty(self):
         config = {
             "mqtt": {"host": "mqtt"},

@@ -217,6 +217,8 @@ audio:
     - fire_alarm
     - speech
     - yell
+  # Optional: Audio label name modifications. These are merged into the standard audio labelmap.
+  labelmap: {}
   # Optional: Filters to configure detection.
   filters:
     # Label that matches label in listen config.
