@@ -51,8 +51,12 @@ def check_disabled_camera_update(
 
     for camera, last_update in write_times.items():
         offline_time = now - last_update
+        camera_config = config.cameras.get(camera)
 
-        if config.cameras[camera].enabled:
+        if camera_config is None:
+            continue
+
+        if camera_config.enabled:
             has_enabled_camera = True
         else:
             # flag camera as offline when it is disabled
@@ -62,8 +66,8 @@ def check_disabled_camera_update(
             # last camera update was more than 1 second ago
             # need to send empty data to birdseye because current
             # frame is now out of date
-            cam_width = config.cameras[camera].detect.width
-            cam_height = config.cameras[camera].detect.height
+            cam_width = camera_config.detect.width
+            cam_height = camera_config.detect.height
 
             if cam_width is None or cam_height is None:
                 raise ValueError(f"Camera {camera} detect dimensions not configured")
@@ -309,10 +313,11 @@ class OutputProcess(FrigateProcess):
                 regions,
             ) = data
 
-            frame = frame_manager.get(
-                frame_name, self.config.cameras[camera].frame_shape_yuv
-            )
-            frame_manager.close(frame_name)
+            camera_config = self.config.cameras.get(camera)
+
+            if camera_config is not None:
+                frame_manager.get(frame_name, camera_config.frame_shape_yuv)
+                frame_manager.close(frame_name)
 
         detection_subscriber.stop()
 
