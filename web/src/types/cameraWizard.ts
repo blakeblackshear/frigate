@@ -75,7 +75,7 @@ export const CAMERA_BRAND_VALUES = CAMERA_BRANDS.map(
 
 export type CameraBrand = (typeof CAMERA_BRANDS)[number]["value"];
 
-export type StreamRole = "detect" | "record" | "audio";
+export type StreamRole = "detect" | "record" | "record_sub" | "audio";
 
 export type StreamConfig = {
   id: string;

@@ -12,12 +12,42 @@ from typing import Any
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
-from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
+from frigate.const import (
+    CACHE_DIR,
+    CLIPS_DIR,
+    MAX_WAL_SIZE,
+    RECORD_DIR,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+)
 from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
 from frigate.util.builtin import clear_and_unlink
 from frigate.util.media import remove_empty_directories
 
 logger = logging.getLogger(__name__)
+
+
+def _filter_reviews_for_pass(
+    reviews: list[Any],
+    now: datetime.datetime,
+    alerts_days: float,
+    detections_days: float,
+) -> list[Any]:
+    """Limit reviews to those still within this pass's per-severity retention window.
+
+    Review rows survive to the longer of the main and sub retention windows,
+    so a pass that honored all of them would let extended sub retention keep
+    main recordings alive too. Filtering preserves sort order for the overlap
+    loop in expire_existing_camera_recordings.
+    """
+    alert_cutoff = (now - datetime.timedelta(days=alerts_days)).timestamp()
+    detection_cutoff = (now - datetime.timedelta(days=detections_days)).timestamp()
+    return [
+        r
+        for r in reviews
+        if r.end_time is None
+        or (r.end_time >= (alert_cutoff if r.severity == "alert" else detection_cutoff))
+    ]
 
 
 class RecordingCleanup(threading.Thread):
@@ -65,11 +95,14 @@ class RecordingCleanup(threading.Thread):
         self, config: CameraConfig, now: datetime.datetime
     ) -> set[Path]:
         """Delete review segments that are expired"""
-        alert_expire_date = (
-            now - datetime.timedelta(days=config.record.alerts.retain.days)
-        ).timestamp()
+        # review rows survive to the longer of the main and sub windows so
+        # they stay visible while either stream still has recordings
+        alert_days = config.record.effective_alert_days
+        detection_days = config.record.effective_detection_days
+
+        alert_expire_date = (now - datetime.timedelta(days=alert_days)).timestamp()
         detection_expire_date = (
-            now - datetime.timedelta(days=config.record.detections.retain.days)
+            now - datetime.timedelta(days=detection_days)
         ).timestamp()
         expired_reviews = (
             ReviewSegment.select(ReviewSegment.id, ReviewSegment.thumb_path)
@@ -109,8 +142,11 @@ class RecordingCleanup(threading.Thread):
 
     def expire_existing_camera_recordings(
         self,
+        stream_type: str,
         continuous_expire_date: float,
         motion_expire_date: float,
+        alerts_retain_mode: RetainModeEnum,
+        detections_retain_mode: RetainModeEnum,
         config: CameraConfig,
         reviews: list[Any],
     ) -> set[Path]:
@@ -130,6 +166,7 @@ class RecordingCleanup(threading.Thread):
             )
             .where(
                 (Recordings.camera == config.name)
+                & (Recordings.stream_type == stream_type)
                 & (
                     (
                         (Recordings.end_time < continuous_expire_date)
@@ -175,9 +212,9 @@ class RecordingCleanup(threading.Thread):
                 ):
                     keep = True
                     mode = (
-                        config.record.alerts.retain.mode
+                        alerts_retain_mode
                         if review.severity == "alert"
-                        else config.record.detections.retain.mode
+                        else detections_retain_mode
                     )
                     break
 
@@ -215,6 +252,10 @@ class RecordingCleanup(threading.Thread):
             Recordings.delete().where(
                 Recordings.id << deleted_recordings_list[i : i + max_deletes]
             ).execute()
+
+        # previews follow main retention, so only the main pass expires them
+        if stream_type != STREAM_TYPE_MAIN:
+            return maybe_empty_dirs
 
         previews = (
             Previews.select(
@@ -342,6 +383,20 @@ class RecordingCleanup(threading.Thread):
                 )
             ).timestamp()
 
+            # computed here so the reviews window below covers both passes
+            sub_continuous_expire_date = (
+                now - datetime.timedelta(days=config.record.sub.continuous.days)
+            ).timestamp()
+            sub_motion_expire_date = (
+                now
+                - datetime.timedelta(
+                    days=max(
+                        config.record.sub.motion.days,
+                        config.record.sub.continuous.days,
+                    )  # can't keep motion for less than continuous
+                )
+            ).timestamp()
+
             # Get all the reviews to check against
             reviews = (
                 ReviewSegment.select(
@@ -351,18 +406,46 @@ class RecordingCleanup(threading.Thread):
                 )
                 .where(
                     ReviewSegment.camera == camera,
-                    # candidate recordings can extend up to continuous_expire_date
-                    # (the no-motion no-audio branch of the recordings query),
-                    # so reviews must cover that full range to avoid deleting
-                    # segments that overlap recent alerts/detections.
-                    ReviewSegment.start_time < continuous_expire_date,
+                    # candidate recordings reach the later of the two passes'
+                    # continuous cutoffs, so reviews must cover that whole
+                    # range or segments overlapping recent alerts get deleted
+                    ReviewSegment.start_time
+                    < max(continuous_expire_date, sub_continuous_expire_date),
                 )
                 .order_by(ReviewSegment.start_time)
                 .namedtuples()
             )
 
             maybe_empty_dirs |= self.expire_existing_camera_recordings(
-                continuous_expire_date, motion_expire_date, config, reviews
+                STREAM_TYPE_MAIN,
+                continuous_expire_date,
+                motion_expire_date,
+                config.record.alerts.retain.mode,
+                config.record.detections.retain.mode,
+                config,
+                _filter_reviews_for_pass(
+                    reviews,
+                    now,
+                    config.record.alerts.retain.days,
+                    config.record.detections.retain.days,
+                ),
+            )
+
+            # runs even when sub recording is disabled so old rows still
+            # expire
+            maybe_empty_dirs |= self.expire_existing_camera_recordings(
+                STREAM_TYPE_SUB,
+                sub_continuous_expire_date,
+                sub_motion_expire_date,
+                config.record.sub.alerts.mode,
+                config.record.sub.detections.mode,
+                config,
+                _filter_reviews_for_pass(
+                    reviews,
+                    now,
+                    config.record.sub.alerts.days,
+                    config.record.sub.detections.days,
+                ),
             )
             logger.debug(f"End camera: {camera}.")
 
