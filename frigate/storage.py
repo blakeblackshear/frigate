@@ -61,7 +61,8 @@ class StorageMaintainer(threading.Thread):
             .limit(window)
             .alias("recent")
         )
-        return Recordings.select(fn.AVG(SQL("bw"))).from_(recent).scalar()
+        avg: float | None = Recordings.select(fn.AVG(SQL("bw"))).from_(recent).scalar()
+        return avg
 
     def calculate_camera_bandwidth(self) -> None:
         """Calculate an average MB/hr for each camera."""
@@ -87,7 +88,7 @@ class StorageMaintainer(threading.Thread):
                 # type and sum the rates; mixing streams would average small
                 # sub segments against large main segments and underestimate
                 # the true write rate
-                bandwidth = 0
+                bandwidth = 0.0
                 for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
                     avg_bw = self._recent_stream_bandwidth(camera, stream_type, 100)
                     if avg_bw is None:
