@@ -1100,7 +1100,7 @@ synaptics:
     - key: ssd
       label: SSD MobileNet
       recommended: true
-      download: A synap model is provided in the container at `/mobilenet.synap` and is used by this detector type by default. The model comes from the [Synap-release Github](https://github.com/synaptics-astra/synap-release/tree/v1.5.0/models/dolphin/object_detection/coco/model/mobilenet224_full80).
+      download: A synap model is provided in the container at `/synaptics/mobilenet.synap` and is used by this detector type by default. The model comes from the [Synap-release Github](https://github.com/synaptics-astra/synap-release/tree/v1.5.0/models/dolphin/object_detection/coco/model/mobilenet224_full80).
       ui: |-
         Navigate to **Settings > System > Detectors and model** and select **Synaptics** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
 
