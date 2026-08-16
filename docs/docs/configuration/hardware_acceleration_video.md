@@ -33,7 +33,14 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 **Raspberry Pi 3/4**
 
-- [Raspberry Pi](#raspberry-pi-34): Frigate can utilize the media engine in the Raspberry Pi 3 and 4 to slightly accelerate video decoding.
+- [Raspberry Pi 3/4](#raspberry-pi-34): Frigate can utilize the media engine in the Raspberry Pi 3 and 4 to slightly accelerate video decoding.
+
+  - **Raspberry Pi 3:** H.264 only
+  - **Raspberry Pi 4:** H.264 and H.265 (HEVC)
+
+**Raspberry Pi 5**
+
+- [Raspberry Pi 5](#raspberry-pi-5): Hardware decoding is only available for H.265 (HEVC) streams. H.264 streams are decoded in software on the CPU.
 
 **Nvidia Jetson** <CommunityBadge />
 
@@ -298,11 +305,11 @@ Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set 
 <TabItem value="yaml">
 
 ```yaml
-# if you want to decode a h264 stream
+# if you want to decode a h264 stream on Raspberry Pi 3/4:
 ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 
-# if you want to decode a h265 (hevc) stream
+# if you want to decode a h265 (hevc) stream on Raspberry Pi 4:
 ffmpeg:
   hwaccel_args: preset-rpi-64-h265
 ```
@@ -344,6 +351,56 @@ done
 ```
 
 Or map in all the `/dev/video*` devices.
+
+:::
+
+## Raspberry Pi 5
+
+H.265 (HEVC) hardware decoding can be enabled globally or per camera by configuring Frigate as follows:
+
+```yaml
+ffmpeg:
+  hwaccel_args: -hwaccel drm
+```
+
+:::note
+
+If running Frigate through Docker, you either need to run in privileged mode or map the required video and media devices into the container.
+
+```yaml
+services:
+  frigate:
+    devices:
+      - /dev/media0:/dev/media0
+      - /dev/media1:/dev/media1
+      - /dev/media2:/dev/media2
+      - /dev/video19:/dev/video19
+```
+
+Device numbers may vary between Raspberry Pi OS releases and kernel versions.
+The Raspberry Pi 5 HEVC decoder devices can be identified with:
+
+```bash
+v4l2-ctl --list-devices
+```
+
+:::
+
+:::warning Known issues
+
+On some configurations, particularly **RPi Trixie OS with Linux kernel 6.18**, enabling **H.265 (HEVC) hardware decoding** may cause **green or blank live-view previews** and **object detection to stop working correctly**. Similar reports have also been observed on **Home Assistant OS 18.x**, which uses the **Linux 6.18 kernel series**.
+
+The latest known configuration reported to work reliably is **RPi Bookworm OS with Linux kernel 6.12**, where HEVC hardware decoding has been reported to work correctly without causing the issues described above.
+
+:::
+
+:::note
+
+If you encounter errors such as 'cannot allocate memory' or 'alloc failed', increase the **CMA** allocation in the **Raspberry Pi OS configuration** by editing '/boot/firmware/config.txt' and reboot the system to take effect:
+
+```bash
+dtoverlay=vc4-kms-v3d,cma-512
+```
 
 :::
 
