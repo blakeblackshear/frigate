@@ -268,6 +268,7 @@ export default function Step4Validation({
       customUrl: wizardData.customUrl,
       streams: wizardData.streams,
       hasBackchannel: wizardData.hasBackchannel,
+      onvif: wizardData.onvif,
     };
 
     onSave(configData);
