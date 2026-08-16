@@ -1247,7 +1247,7 @@ function Timeline({
 
   const subOnlyRanges = useMemo(
     () =>
-      coverage?.spans.filter((span) => !span.streams.includes("main")) ?? [],
+      coverage?.spans?.filter((span) => !span.streams.includes("main")) ?? [],
     [coverage],
   );
 

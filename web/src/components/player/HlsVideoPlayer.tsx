@@ -715,7 +715,10 @@ export default function HlsVideoPlayer({
               }
 
               toast.error(
-                `Failed to play recordings (error ${mediaError.code}): ${mediaError.message}`,
+                t("toast.error.playRecordingsFailed", {
+                  code: mediaError.code,
+                  message: mediaError.message,
+                }),
                 {
                   position: "top-center",
                 },

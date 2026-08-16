@@ -332,7 +332,8 @@ export default function DynamicVideoPlayer({
   const autoLowQualityRef = useRef(false);
 
   const subAvailable = useMemo(
-    () => coverage?.spans.some((span) => span.streams.includes("sub")) ?? false,
+    () =>
+      coverage?.spans?.some((span) => span.streams.includes("sub")) ?? false,
     [coverage],
   );
 

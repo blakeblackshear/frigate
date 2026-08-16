@@ -60,7 +60,8 @@
       "submittedFrigatePlus": "Successfully submitted frame to Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Failed to submit frame to Frigate+"
+      "submitFrigatePlusFailed": "Failed to submit frame to Frigate+",
+      "playRecordingsFailed": "Failed to play recordings (error {{code}}): {{message}}"
     }
   }
 }
