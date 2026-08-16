@@ -16,22 +16,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { getUnitSize } from "@/utils/storageUtil";
+import { CameraStorage, StreamStorage } from "@/types/stats";
 
 import { CiCircleAlert } from "react-icons/ci";
 import { useTranslation } from "react-i18next";
-
-type CameraStorage = {
-  [key: string]: {
-    bandwidth: number;
-    usage: number;
-    usage_percent: number;
-  };
-};
 
 type TotalStorage = {
   used: number;
   camera: number;
   total: number;
+};
+
+type StorageRow = {
+  name: string;
+  usage: number;
+  bandwidth: number;
+  color: string;
+  streams?: {
+    main?: StreamStorage;
+    sub?: StreamStorage;
+  };
 };
 
 type CombinedStorageGraphProps = {
@@ -44,46 +48,59 @@ export function CombinedStorageGraph({
   cameraStorage,
   totalStorage,
 }: CombinedStorageGraphProps) {
-  const { t } = useTranslation(["views/system"]);
+  const { t } = useTranslation(["views/system", "components/player"]);
 
   const { theme, systemTheme } = useTheme();
+  const isDark = (systemTheme || theme) == "dark";
 
-  const entities = Object.keys(cameraStorage);
-  const colors = generateColors(entities.length);
+  const rows: StorageRow[] = useMemo(() => {
+    const entities = Object.keys(cameraStorage);
+    const colors = generateColors(entities.length);
 
-  const series = entities.map((entity, index) => ({
-    name: entity,
-    data: [(cameraStorage[entity].usage / totalStorage.total) * 100],
-    usage: cameraStorage[entity].usage,
-    bandwidth: cameraStorage[entity].bandwidth,
-    color: colors[index], // Assign the corresponding color
-  }));
+    return [
+      ...entities.map((entity, index) => ({
+        name: entity,
+        usage: cameraStorage[entity].usage ?? 0,
+        bandwidth: cameraStorage[entity].bandwidth,
+        color: colors[index],
+        streams: cameraStorage[entity].streams,
+      })),
+      {
+        name: "Other",
+        usage: totalStorage.used - totalStorage.camera,
+        bandwidth: 0,
+        color: isDark ? "#606060" : "#D5D5D5",
+      },
+      {
+        name: "Unused",
+        usage: totalStorage.total - totalStorage.used,
+        bandwidth: 0,
+        color: isDark ? "#404040" : "#E5E5E5",
+      },
+    ];
+  }, [cameraStorage, totalStorage, isDark]);
 
-  // Add the unused percentage to the series
-  series.push({
-    name: "Other",
-    data: [
-      ((totalStorage.used - totalStorage.camera) / totalStorage.total) * 100,
-    ],
-    usage: totalStorage.used - totalStorage.camera,
-    bandwidth: 0,
-    color: (systemTheme || theme) == "dark" ? "#606060" : "#D5D5D5",
-  });
-  series.push({
-    name: "Unused",
-    data: [
-      ((totalStorage.total - totalStorage.used) / totalStorage.total) * 100,
-    ],
-    usage: totalStorage.total - totalStorage.used,
-    bandwidth: 0,
-    color: (systemTheme || theme) == "dark" ? "#404040" : "#E5E5E5",
-  });
+  const series = useMemo(
+    () =>
+      rows.map((row) => ({
+        name: row.name,
+        data: [(row.usage / totalStorage.total) * 100],
+        usage: row.usage,
+        color: row.color,
+      })),
+    [rows, totalStorage.total],
+  );
+
+  const hasSubStorage = useMemo(
+    () => rows.some((row) => row.streams?.sub),
+    [rows],
+  );
 
   const options = useMemo(() => {
     return {
       chart: {
         id: graphId,
-        background: (systemTheme || theme) == "dark" ? "#404040" : "#E5E5E5",
+        background: isDark ? "#404040" : "#E5E5E5",
         selection: {
           enabled: false,
         },
@@ -164,7 +181,7 @@ export function CombinedStorageGraph({
         max: 100,
       },
     } as ApexCharts.ApexOptions;
-  }, [graphId, systemTheme, theme, series]);
+  }, [graphId, isDark, systemTheme, theme, series]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
@@ -181,6 +198,34 @@ export function CombinedStorageGraph({
       } else {
         return name.replaceAll("_", " ");
       }
+    },
+    [t],
+  );
+
+  const getStreamSplit = useCallback(
+    (row: StorageRow, field: keyof StreamStorage) => {
+      const sub = row.streams?.sub;
+
+      if (!sub) {
+        return null;
+      }
+
+      return (
+        <div className="text-xs text-primary-variant">
+          <div>
+            <span className="text-muted-foreground">
+              {t("quality.main", { ns: "components/player" })}
+            </span>{" "}
+            {getUnitSize(row.streams?.main?.[field] ?? 0)}
+          </div>
+          <div>
+            <span className="text-muted-foreground">
+              {t("quality.sub", { ns: "components/player" })}
+            </span>{" "}
+            {getUnitSize(sub[field])}
+          </div>
+        </div>
+      );
     },
     [t],
   );
@@ -206,7 +251,35 @@ export function CombinedStorageGraph({
           <TableHeader>
             <TableRow>
               <TableHead>{t("storage.cameraStorage.camera")}</TableHead>
-              <TableHead>{t("storage.cameraStorage.storageUsed")}</TableHead>
+              <TableHead>
+                <div className="flex flex-row items-center gap-1">
+                  {t("storage.cameraStorage.storageUsed")}
+                  {hasSubStorage && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className="focus:outline-none"
+                          aria-label={t(
+                            "storage.cameraStorage.subStream.information",
+                          )}
+                        >
+                          <CiCircleAlert
+                            className="size-5"
+                            aria-label={t(
+                              "storage.cameraStorage.subStream.information",
+                            )}
+                          />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <div className="space-y-2">
+                          {t("storage.cameraStorage.subStream.tips")}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
+              </TableHead>
               <TableHead>
                 {t("storage.cameraStorage.percentageOfTotalUsed")}
               </TableHead>
@@ -214,49 +287,56 @@ export function CombinedStorageGraph({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {series.map((item) => (
-              <TableRow key={item.name}>
-                <TableCell className="flex flex-row items-center gap-2 font-medium smart-capitalize">
-                  {" "}
-                  <div
-                    className="size-3 rounded-md"
-                    style={{ backgroundColor: item.color }}
-                  ></div>
-                  {getItemTitle(item.name)}
-                  {(item.name === "Unused" || item.name == "Other") && (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          className="focus:outline-none"
-                          aria-label={t(
-                            "storage.cameraStorage.unusedStorageInformation",
-                          )}
-                        >
-                          <CiCircleAlert
-                            className="size-5"
+            {rows.map((row) => {
+              const isAggregate = row.name == "Unused" || row.name == "Other";
+
+              return (
+                <TableRow key={row.name}>
+                  <TableCell className="flex flex-row items-center gap-2 font-medium smart-capitalize">
+                    <div
+                      className="size-3 rounded-md"
+                      style={{ backgroundColor: row.color }}
+                    ></div>
+                    {getItemTitle(row.name)}
+                    {isAggregate && (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            className="focus:outline-none"
                             aria-label={t(
                               "storage.cameraStorage.unusedStorageInformation",
                             )}
-                          />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80">
-                        <div className="space-y-2">
-                          {t("storage.cameraStorage.unused.tips")}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                </TableCell>
-                <TableCell>{getUnitSize(item.usage ?? 0)}</TableCell>
-                <TableCell>{item.data[0].toFixed(2)}%</TableCell>
-                <TableCell>
-                  {item.name === "Unused" || item.name == "Other"
-                    ? "—"
-                    : `${getUnitSize(item.bandwidth)} / hour`}
-                </TableCell>
-              </TableRow>
-            ))}
+                          >
+                            <CiCircleAlert
+                              className="size-5"
+                              aria-label={t(
+                                "storage.cameraStorage.unusedStorageInformation",
+                              )}
+                            />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                          <div className="space-y-2">
+                            {t("storage.cameraStorage.unused.tips")}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {getUnitSize(row.usage)}
+                    {getStreamSplit(row, "usage")}
+                  </TableCell>
+                  <TableCell>
+                    {((row.usage / totalStorage.total) * 100).toFixed(2)}%
+                  </TableCell>
+                  <TableCell>
+                    {isAggregate ? "—" : `${getUnitSize(row.bandwidth)} / hour`}
+                    {getStreamSplit(row, "bandwidth")}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

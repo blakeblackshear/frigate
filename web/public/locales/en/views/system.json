@@ -148,6 +148,10 @@
       "unused": {
         "title": "Unused",
         "tips": "This value may not accurately represent the free space available to Frigate if you have other files stored on your drive beyond Frigate's recordings. Frigate does not track storage usage outside of its recordings."
+      },
+      "subStream": {
+        "information": "Sub Stream Storage Information",
+        "tips": "Cameras that record a sub stream show their Original and Low quality usage separately, using the same names as the quality options in recording playback. Low quality recordings stay on disk until their retention period expires, so this breakdown can still appear for a camera after sub stream recording has been turned off."
       }
     }
   },
