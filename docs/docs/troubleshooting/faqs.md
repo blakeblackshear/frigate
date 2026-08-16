@@ -133,6 +133,12 @@ cameras:
       height: 720
 ```
 
+### What is the `version` key in my config file?
+
+`version` records the config format that your config was last migrated to. On startup Frigate compares it against the format the running version expects, and if it is older it copies your config to `/config/backup_config.yaml`, rewrites it to the new format, and updates `version` as the final step. A config with no `version` key is assumed to predate 0.14 and is migrated from there.
+
+Frigate manages this key for you, so do not set or edit it. Raising it makes Frigate skip migrations your config still needs, and lowering it re-runs migrations against config that has already been converted. Either can leave you with a config that no longer validates.
+
 ### Why does Frigate keep creating new tracked objects for my parked car?
 
 Stationary tracking is designed to _prevent_ this: a parked car should remain a single tracked object rather than generating new ones. If you're repeatedly getting new tracked objects for the same car, it's likely that Frigate is losing the object and re-detecting it as a new one.
