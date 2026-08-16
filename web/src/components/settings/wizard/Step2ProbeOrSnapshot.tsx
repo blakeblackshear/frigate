@@ -205,6 +205,7 @@ export default function Step2ProbeOrSnapshot({
 
         const update: Partial<WizardFormData> = {
           probeMode: true,
+          probeResult: response.data,
           probeCandidates: candidateUris,
           candidateTests: {},
         };
