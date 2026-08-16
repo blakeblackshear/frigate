@@ -8,13 +8,15 @@ import PreviewPlayer, {
 } from "@/components/player/PreviewPlayer";
 import { DynamicVideoController } from "@/components/player/dynamic/DynamicVideoController";
 import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
+import QualitySelector from "@/components/player/QualitySelector";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import DetailStream from "@/components/timeline/DetailStream";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import { usePersistence } from "@/hooks/use-persistence";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { ExportMode } from "@/types/filter";
+import { DEFAULT_DRAWER_FEATURES, ExportMode } from "@/types/filter";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
@@ -57,9 +59,13 @@ import { VideoResolutionType } from "@/types/live";
 import {
   ASPECT_VERTICAL_LAYOUT,
   ASPECT_WIDE_LAYOUT,
+  AutoQualityReason,
+  PlaybackQuality,
+  RecordingCoverage,
   RecordingSegment,
   RecordingStartingPoint,
 } from "@/types/record";
+import { isCodecFamilySupported } from "@/utils/codecSupport";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useTimezone } from "@/hooks/use-date-utils";
@@ -138,6 +144,15 @@ export function RecordingView({
     {
       timezone: timezone,
       cameras: mainCamera ?? null,
+    },
+  ]);
+
+  // feeds the quality selector's per-stream subtitles
+  const { data: coverage } = useSWR<RecordingCoverage>([
+    `${mainCamera}/recordings/coverage`,
+    {
+      before: timeRange.before,
+      after: timeRange.after,
     },
   ]);
 
@@ -280,14 +295,14 @@ export function RecordingView({
   const [playerTime, setPlayerTime] = useState(startTime);
 
   const updateSelectedSegment = useCallback(
-    (currentTime: number, updateStartTime: boolean) => {
+    (currentTime: number) => {
       const index = findChunkIndex(chunkedTimeRange, currentTime);
 
       if (index != -1) {
-        if (updateStartTime) {
-          setPlaybackStart(currentTime);
-        }
-
+        setPlaybackStart(currentTime);
+        // the outgoing chunk's player runs until the new source replaces
+        // it, reporting old positions while the new chunk loads
+        mainControllerRef.current?.pause();
         setSelectedRangeIdx(index);
       }
     },
@@ -300,7 +315,10 @@ export function RecordingView({
         currentTime > currentTimeRange.before + 60 ||
         currentTime < currentTimeRange.after - 60
       ) {
-        updateSelectedSegment(currentTime, false);
+        // the player rebuilds its source against playbackStart, and a
+        // stale anchor resolves to no startPosition, dropping playback
+        // at the start of the hour instead of the drag target
+        updateSelectedSegment(currentTime);
         return;
       }
 
@@ -328,9 +346,12 @@ export function RecordingView({
       setCurrentTime(time);
 
       if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
+        // a source reload mid-seek resumes from playbackStart, so the
+        // anchor has to follow explicit seeks
+        setPlaybackStart(time);
         mainControllerRef.current?.seekToTimestamp(time, play);
       } else {
-        updateSelectedSegment(time, true);
+        updateSelectedSegment(time);
       }
     },
     [currentTimeRange, updateSelectedSegment],
@@ -388,13 +409,15 @@ export function RecordingView({
               shouldPlayback = mainControllerRef.current.isPlaying();
             }
 
+            // see manuallySetCurrentTime
+            setPlaybackStart(currentTime);
             mainControllerRef.current.seekToTimestamp(
               currentTime,
               shouldPlayback,
             );
           }
         } else {
-          updateSelectedSegment(currentTime, true);
+          updateSelectedSegment(currentTime);
         }
       } else if (playerTime != currentTime && timelineType != "detail") {
         mainControllerRef.current?.play();
@@ -408,6 +431,58 @@ export function RecordingView({
     width: 0,
     height: 0,
   });
+
+  // playback quality
+
+  const [quality, setQuality] = usePersistence<PlaybackQuality>(
+    "recordingQuality",
+    "auto",
+  );
+
+  // lets the selector surface a downswitch instead of a mysterious drop
+  const [autoQualityLow, setAutoQualityLow] = useState<{
+    low: boolean;
+    reason?: AutoQualityReason;
+  }>({ low: false });
+
+  // the player re-notifies on every mount and quality reset, so keep the
+  // same state object when nothing changed
+  const onAutoQualityChange = useCallback(
+    (low: boolean, reason: AutoQualityReason | undefined) =>
+      setAutoQualityLow((prev) =>
+        prev.low === low && prev.reason === reason ? prev : { low, reason },
+      ),
+    [],
+  );
+
+  // shown on the Original pin so a doomed selection is labeled
+  const mainCodecUnsupported = useMemo(
+    () =>
+      coverage?.streams?.main
+        ? !isCodecFamilySupported(coverage.streams.main.video_codec)
+        : false,
+    [coverage],
+  );
+
+  // the pin is persisted globally, but the selector is hidden on cameras
+  // without a sub stream, leaving an inherited "sub" pin unable to unpin
+  const playerQuality = useMemo<PlaybackQuality | undefined>(
+    () =>
+      config && !config.cameras[mainCamera]?.record.sub.enabled
+        ? "auto"
+        : quality,
+    [config, mainCamera, quality],
+  );
+
+  // a quality change swaps the playlist source, so anchor playback start
+  // the same way camera switching does to resume in place
+  const onSetQuality = useCallback(
+    (newQuality: PlaybackQuality) => {
+      setPlaybackStart(currentTime);
+      setQuality(newQuality);
+    },
+    [currentTime, setQuality],
+  );
 
   const onSelectCamera = useCallback(
     (newCam: string) => {
@@ -768,6 +843,18 @@ export function RecordingView({
                 }}
               />
             )}
+            {!isMobileOnly &&
+              config?.cameras[mainCamera]?.record.enabled &&
+              config?.cameras[mainCamera]?.record.sub.enabled && (
+                <QualitySelector
+                  quality={quality ?? "auto"}
+                  onSetQuality={onSetQuality}
+                  streams={coverage?.streams}
+                  autoLow={(quality ?? "auto") === "auto" && autoQualityLow.low}
+                  autoLowReason={autoQualityLow.reason}
+                  mainUnsupported={mainCodecUnsupported}
+                />
+              )}
             {isDesktop ? (
               <ToggleGroup
                 className="*:rounded-md *:px-3 *:py-4"
@@ -807,6 +894,23 @@ export function RecordingView({
               />
             )}
             <MobileReviewSettingsDrawer
+              // tablets keep the header selector, so only phones get
+              // quality in the drawer
+              features={
+                isMobileOnly &&
+                config?.cameras[mainCamera]?.record.enabled &&
+                config?.cameras[mainCamera]?.record.sub.enabled
+                  ? [...DEFAULT_DRAWER_FEATURES, "quality"]
+                  : DEFAULT_DRAWER_FEATURES
+              }
+              quality={quality ?? "auto"}
+              onSetQuality={onSetQuality}
+              qualityStreams={coverage?.streams}
+              qualityAutoLow={
+                (quality ?? "auto") === "auto" && autoQualityLow.low
+              }
+              qualityAutoLowReason={autoQualityLow.reason}
+              qualityMainUnsupported={mainCodecUnsupported}
               camera={mainCamera}
               filter={filter}
               currentTime={currentTime}
@@ -929,6 +1033,8 @@ export function RecordingView({
                   setFullResolution={setFullResolution}
                   toggleFullscreen={toggleFullscreen}
                   containerRef={mainLayoutRef}
+                  quality={playerQuality}
+                  onAutoQualityChange={onAutoQualityChange}
                 />
               </div>
               {isDesktop && effectiveCameras.length > 1 && (
@@ -1131,6 +1237,20 @@ function Timeline({
     },
   ]);
 
+  const { data: coverage } = useSWR<RecordingCoverage>([
+    `${mainCamera}/recordings/coverage`,
+    {
+      before: alignedBefore,
+      after: alignedAfter,
+    },
+  ]);
+
+  const subOnlyRanges = useMemo(
+    () =>
+      coverage?.spans.filter((span) => !span.streams.includes("main")) ?? [],
+    [coverage],
+  );
+
   const [exportStart, setExportStartTime] = useState<number>(0);
   const [exportEnd, setExportEndTime] = useState<number>(0);
 
@@ -1200,6 +1320,7 @@ function Timeline({
             events={mainCameraReviewItems}
             motion_events={motionData ?? []}
             noRecordingRanges={noRecordings ?? []}
+            subOnlyRanges={subOnlyRanges}
             contentRef={contentRef}
             onHandlebarDraggingChange={setScrubbing}
             isZooming={isZooming}

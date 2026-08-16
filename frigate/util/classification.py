@@ -18,6 +18,7 @@ from frigate.const import (
     CLIPS_DIR,
     MODEL_CACHE_DIR,
     PROCESS_PRIORITY_LOW,
+    STREAM_TYPE_MAIN,
     UPDATE_MODEL_STATE,
 )
 from frigate.log import redirect_output_to_logger, suppress_stderr_during
@@ -555,6 +556,7 @@ def _extract_keyframes(
                     (timestamp >= Recordings.start_time)
                     & (timestamp <= Recordings.end_time)
                     & (Recordings.camera == camera)
+                    & (Recordings.stream_type == STREAM_TYPE_MAIN)
                 )
                 .order_by(Recordings.start_time.desc())
                 .limit(1)

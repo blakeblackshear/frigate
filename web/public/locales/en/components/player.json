@@ -13,6 +13,20 @@
     "desc": "No frames have been received on the {{cameraName}} <code>detect</code> stream, check error logs"
   },
   "cameraOff": "Camera is off",
+  "quality": {
+    "auto": "Auto",
+    "autoLow": "Playing low quality (limited bandwidth)",
+    "autoLowCodec": "Playing low quality (Original not supported by this browser)",
+    "autoLowSaveData": "Playing low quality (data saver)",
+    "main": "Original",
+    "sub": "Low",
+    "notSupportedBrowser": "Not supported by this browser",
+    "label": "Quality",
+    "noAudio": "No audio",
+    "audioRate": "{{rate}} kHz audio",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "No recordings in this time range"
+  },
   "stats": {
     "streamType": {
       "title": "Stream Type:",
