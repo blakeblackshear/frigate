@@ -12,6 +12,7 @@ import threading
 from collections.abc import Callable
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 import pytz  # type: ignore[import-untyped]
 from peewee import DoesNotExist
@@ -24,6 +25,8 @@ from frigate.const import (
     EXPORT_DIR,
     MAX_PLAYLIST_SECONDS,
     PREVIEW_FRAME_TYPE,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
 )
 from frigate.ffmpeg_presets import (
     EncodeTypeEnum,
@@ -283,6 +286,29 @@ class RecordingExporter(threading.Thread):
 
         return input_duration * factor
 
+    def _get_recordings_for_range(self, stream_type: str) -> list[Any]:
+        """Fetch one stream type's recording rows overlapping the export range."""
+        return list(
+            Recordings.select(
+                Recordings.start_time,
+                Recordings.end_time,
+            )
+            .where(
+                Recordings.start_time.between(self.start_time, self.end_time)
+                | Recordings.end_time.between(self.start_time, self.end_time)
+                | (
+                    (self.start_time > Recordings.start_time)
+                    & (self.end_time < Recordings.end_time)
+                )
+            )
+            .where(
+                (Recordings.camera == self.camera)
+                & (Recordings.stream_type == stream_type)
+            )
+            .order_by(Recordings.start_time.asc())
+            .iterator()
+        )
+
     def _sum_source_duration_seconds(self) -> float | None:
         """Sum saved-video seconds inside [start_time, end_time].
 
@@ -293,19 +319,12 @@ class RecordingExporter(threading.Thread):
         """
         try:
             if self.playback_source == PlaybackSourceEnum.recordings:
-                rows = (
-                    Recordings.select(Recordings.start_time, Recordings.end_time)
-                    .where(
-                        Recordings.start_time.between(self.start_time, self.end_time)
-                        | Recordings.end_time.between(self.start_time, self.end_time)
-                        | (
-                            (self.start_time > Recordings.start_time)
-                            & (self.end_time < Recordings.end_time)
-                        )
-                    )
-                    .where(Recordings.camera == self.camera)
-                    .iterator()
-                )
+                # never mix streams in one estimate; use main when available
+                # and fall back to sub for expired-main history
+                rows = self._get_recordings_for_range(STREAM_TYPE_MAIN)
+
+                if not rows:
+                    rows = self._get_recordings_for_range(STREAM_TYPE_SUB)
             else:
                 rows = (
                     Previews.select(Previews.start_time, Previews.end_time)
@@ -691,23 +710,12 @@ class RecordingExporter(threading.Thread):
         if type(internal_port) is str:
             internal_port = int(internal_port.split(":")[-1])
 
-        recordings = list(
-            Recordings.select(
-                Recordings.start_time,
-                Recordings.end_time,
-            )
-            .where(
-                Recordings.start_time.between(self.start_time, self.end_time)
-                | Recordings.end_time.between(self.start_time, self.end_time)
-                | (
-                    (self.start_time > Recordings.start_time)
-                    & (self.end_time < Recordings.end_time)
-                )
-            )
-            .where(Recordings.camera == self.camera)
-            .order_by(Recordings.start_time.asc())
-            .iterator()
-        )
+        # never mix streams in one playlist; use main when available and
+        # fall back to sub for expired-main history
+        recordings = self._get_recordings_for_range(STREAM_TYPE_MAIN)
+
+        if not recordings:
+            recordings = self._get_recordings_for_range(STREAM_TYPE_SUB)
 
         playlist_lines: list[str] = []
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:

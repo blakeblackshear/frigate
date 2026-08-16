@@ -25,8 +25,20 @@ from frigate.api.defs.query.recordings_query_parameters import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
-from frigate.const import MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import (
+    MAX_SEGMENT_DURATION,
+    RECORD_DIR,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+)
 from frigate.models import Event, Recordings
+from frigate.util.recording_coverage import (
+    coverage_spans,
+    known_video_codecs,
+    realized_timelines,
+    resolve_coverage,
+    stream_media_summary,
+)
 from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
@@ -149,28 +161,50 @@ async def recordings_summary(camera_name: str, timezone: str = "utc"):
         period_hour_modifier = f"{hours_offset} hour"
         period_minute_modifier = f"{minutes_offset} minute"
 
+        hour_expression = fn.strftime(
+            "%Y-%m-%d %H",
+            fn.datetime(
+                Recordings.start_time,
+                "unixepoch",
+                period_hour_modifier,
+                period_minute_modifier,
+            ),
+        )
+
+        # sub rows duplicate the camera's motion/object stats, so
+        # aggregating them too would double-count
         recording_groups = (
             Recordings.select(
-                fn.strftime(
-                    "%Y-%m-%d %H",
-                    fn.datetime(
-                        Recordings.start_time,
-                        "unixepoch",
-                        period_hour_modifier,
-                        period_minute_modifier,
-                    ),
-                ).alias("hour"),
+                hour_expression.alias("hour"),
                 fn.SUM(Recordings.duration).alias("duration"),
                 fn.SUM(Recordings.motion).alias("motion"),
                 fn.SUM(Recordings.objects).alias("objects"),
             )
             .where(
                 (Recordings.camera == camera_name)
+                & (Recordings.stream_type == STREAM_TYPE_MAIN)
                 & (Recordings.end_time >= period_start)
                 & (Recordings.start_time <= period_end)
             )
             .group_by((Recordings.start_time + period_offset).cast("int") / 3600)
             .order_by(Recordings.start_time.desc())
+            .namedtuples()
+        )
+
+        # sub recordings can outlive main, so hours covered only by sub
+        # rows are reported too, flagged as sub_only
+        sub_groups = (
+            Recordings.select(
+                hour_expression.alias("hour"),
+                fn.SUM(Recordings.duration).alias("duration"),
+            )
+            .where(
+                (Recordings.camera == camera_name)
+                & (Recordings.stream_type == STREAM_TYPE_SUB)
+                & (Recordings.end_time >= period_start)
+                & (Recordings.start_time <= period_end)
+            )
+            .group_by((Recordings.start_time + period_offset).cast("int") / 3600)
             .namedtuples()
         )
 
@@ -197,17 +231,43 @@ async def recordings_summary(camera_name: str, timezone: str = "utc"):
 
         event_map = {g.hour: g.count for g in event_groups}
 
-        for recording_group in recording_groups:
-            parts = recording_group.hour.split()
+        hour_stats = [
+            (
+                g.hour,
+                {
+                    "motion": g.motion,
+                    "objects": g.objects,
+                    "duration": round(g.duration),
+                },
+            )
+            for g in recording_groups
+        ]
+        main_hours = {group_hour for group_hour, _ in hour_stats}
+        hour_stats.extend(
+            (
+                g.hour,
+                {
+                    "motion": 0,
+                    "objects": 0,
+                    "duration": round(g.duration),
+                    "sub_only": True,
+                },
+            )
+            for g in sub_groups
+            if g.hour not in main_hours
+        )
+        # restore the most-recent-first ordering after merging in sub hours
+        hour_stats.sort(key=lambda entry: entry[0], reverse=True)
+
+        for group_hour, stats in hour_stats:
+            parts = group_hour.split()
             hour = parts[1]
             day = parts[0]
-            events_count = event_map.get(recording_group.hour, 0)
+            events_count = event_map.get(group_hour, 0)
             hour_data = {
                 "hour": hour,
                 "events": events_count,
-                "motion": recording_group.motion,
-                "objects": recording_group.objects,
-                "duration": round(recording_group.duration),
+                **stats,
             }
             if day in days:
                 # merge counts if already present (edge-case at DST boundary)
@@ -221,6 +281,35 @@ async def recordings_summary(camera_name: str, timezone: str = "utc"):
                 }
 
     return JSONResponse(content=list(days.values()))
+
+
+@router.get(
+    "/{camera_name}/recordings/coverage",
+    dependencies=[Depends(require_camera_access)],
+)
+async def recordings_coverage(
+    camera_name: str, after: float, before: float, timelines: bool = False
+):
+    """Returns merged recording coverage spans plus codec compatibility.
+
+    codecs_compatible is false only when more than one known video codec
+    appears across the range's rows, the case where the merged vod route
+    degrades to a single-stream manifest.
+    """
+    intervals = resolve_coverage(camera_name, after, before)
+
+    content = {
+        "spans": coverage_spans(intervals),
+        "codecs_compatible": len(known_video_codecs(intervals)) <= 1,
+        "streams": stream_media_summary(intervals),
+    }
+
+    # pure computation (shared plan_clip, record-time keyframe index), but
+    # opt-in for payload hygiene: day-level requests need only the spans
+    if timelines:
+        content["timelines"] = realized_timelines(intervals)
+
+    return JSONResponse(content=content)
 
 
 @router.get("/{camera_name}/recordings", dependencies=[Depends(require_camera_access)])
@@ -243,6 +332,7 @@ async def recordings(
         )
         .where(
             Recordings.camera == camera_name,
+            Recordings.stream_type == STREAM_TYPE_MAIN,
             Recordings.start_time >= after - MAX_SEGMENT_DURATION,
             Recordings.end_time >= after,
             Recordings.start_time <= before,

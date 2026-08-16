@@ -23,6 +23,12 @@ SHM_FRAMES_VAR = "SHM_MAX_FRAMES"
 
 REDACTED_CREDENTIAL_SENTINEL = "__FRIGATE_SAVED_CREDENTIAL__"
 
+# Stream type constants
+
+STREAM_TYPE_MAIN = "main"
+STREAM_TYPE_SUB = "sub"
+SUB_CACHE_TAG = "@sub"
+
 # Attribute & Object constants
 
 DEFAULT_ATTRIBUTE_LABEL_MAP = {

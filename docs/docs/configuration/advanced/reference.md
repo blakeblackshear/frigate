@@ -293,6 +293,8 @@ ffmpeg:
     detect: -threads 2 -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
     record: preset-record-generic
+    # Optional: output args for sub stream record streams (default: the record output args above)
+    # record_sub: preset-record-generic
   # Optional: Time in seconds to wait before ffmpeg retries connecting to the camera. (default: shown below)
   # If set too low, frigate will retry a connection to the camera's stream too frequently, using up the limited streams some cameras can allow at once
   # If set too high, then if a ffmpeg crash or camera stream timeout occurs, you could potentially lose up to a maximum of retry_interval second(s) of footage
@@ -643,6 +645,42 @@ record:
       #       For example, if the camera retain mode is "motion", the segments without motion are
       #       never stored, so setting the mode to "all" here won't bring them back.
       mode: motion
+  # Optional: Sub stream recording settings
+  # Records a second, lower quality stream for quality selection during playback
+  # and extended low quality retention. Requires the record_sub role to be assigned
+  # to one of the camera's inputs.
+  sub:
+    # Optional: Enable sub stream recording (default: shown below)
+    # NOTE: Recording must also be enabled for sub stream recording to run.
+    enabled: False
+    # Optional: Continuous retention settings for sub stream recordings
+    continuous:
+      # Optional: Number of days to retain sub stream recordings regardless of tracked objects or motion (default: shown below)
+      days: 0
+    # Optional: Motion retention settings for sub stream recordings
+    motion:
+      # Optional: Number of days to retain sub stream recordings triggered by motion (default: shown below)
+      days: 0
+    # Optional: Retention settings for sub stream recordings of alerts
+    # NOTE: Pre and post capture windows are taken from the main alerts config above.
+    alerts:
+      # Required: Retention days (default: shown below)
+      days: 10
+      # Optional: Mode for retention. (default: shown below)
+      #   all - save all sub stream recording segments for alerts regardless of activity
+      #   motion - save all sub stream recording segments for alerts with any detected motion
+      #   active_objects - save all sub stream recording segments for alerts with active/moving objects
+      mode: motion
+    # Optional: Retention settings for sub stream recordings of detections
+    # NOTE: Pre and post capture windows are taken from the main detections config above.
+    detections:
+      # Required: Retention days (default: shown below)
+      days: 10
+      # Optional: Mode for retention. (default: shown below)
+      #   all - save all sub stream recording segments for detections regardless of activity
+      #   motion - save all sub stream recording segments for detections with any detected motion
+      #   active_objects - save all sub stream recording segments for detections with active/moving objects
+      mode: motion
 
 # Optional: Configuration for the snapshots written to the clips directory for each tracked object
 # Timestamp, bounding_box, crop and height settings are applied by default to API requests for snapshots.
@@ -894,7 +932,7 @@ cameras:
         # Required: the path to the stream
         # NOTE: path may include environment variables or docker secrets, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: audio,detect,record
+          # Required: list of roles for this stream. valid values are: audio,detect,record,record_sub
           # NOTICE: In addition to assigning the audio, detect, and record roles
           # they must also be enabled in the camera config.
           roles:

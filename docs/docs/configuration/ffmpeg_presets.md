@@ -106,3 +106,5 @@ Output arguments are passed to FFmpeg after your camera source and control how r
 | preset-record-mjpeg              | Record - MJPEG Cameras          | Record an MJPEG stream              | Restreaming the MJPEG stream is recommended instead                                                                                                               |
 | preset-record-jpeg               | Record - JPEG Cameras           | Record a live JPEG                  | Restreaming the live JPEG is recommended instead                                                                                                                  |
 | preset-record-ubiquiti           | Record - Ubiquiti Cameras       | Record a Ubiquiti stream with audio | Handles Ubiquiti's non-standard audio format                                                                                                                      |
+
+These presets apply to the `record` output args. If [sub stream recording](/configuration/record#sub-stream-recording) is enabled, the same args are used for the `record_sub` role unless `output_args.record_sub` is set, which accepts the same presets and manual args.
