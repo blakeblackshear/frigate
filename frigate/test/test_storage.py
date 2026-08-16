@@ -11,8 +11,9 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config import FrigateConfig
+from frigate.const import STREAM_TYPE_MAIN, STREAM_TYPE_SUB
 from frigate.models import Event, Recordings
-from frigate.storage import StorageMaintainer
+from frigate.storage import MAX_CALCULATED_BANDWIDTH, StorageMaintainer
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 
@@ -114,8 +115,16 @@ class TestHttp(unittest.TestCase):
         )
         storage.calculate_camera_bandwidth()
         assert storage.camera_storage_stats == {
-            "front_door": {"bandwidth": 1440, "needs_refresh": True},
-            "back_door": {"bandwidth": 2880, "needs_refresh": True},
+            "front_door": {
+                "bandwidth": 1440,
+                "bandwidth_by_stream": {STREAM_TYPE_MAIN: 1440},
+                "needs_refresh": True,
+            },
+            "back_door": {
+                "bandwidth": 2880,
+                "bandwidth_by_stream": {STREAM_TYPE_MAIN: 2880},
+                "needs_refresh": True,
+            },
         }
 
     def test_segment_calculations_with_zero_segments(self):
@@ -136,7 +145,11 @@ class TestHttp(unittest.TestCase):
         )
         storage.calculate_camera_bandwidth()
         assert storage.camera_storage_stats == {
-            "front_door": {"bandwidth": 0, "needs_refresh": True},
+            "front_door": {
+                "bandwidth": 0,
+                "bandwidth_by_stream": {},
+                "needs_refresh": True,
+            },
         }
 
     def test_segment_calculations_with_recent_zero_segments(self):
@@ -171,8 +184,115 @@ class TestHttp(unittest.TestCase):
 
         storage.calculate_camera_bandwidth()
         assert storage.camera_storage_stats == {
-            "front_door": {"bandwidth": 1440, "needs_refresh": True},
+            "front_door": {
+                "bandwidth": 1440,
+                "bandwidth_by_stream": {STREAM_TYPE_MAIN: 1440},
+                "needs_refresh": True,
+            },
         }
+
+    def test_camera_usages_split_by_stream_type(self):
+        """Usage and bandwidth are reported per stream type."""
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        time_keep = datetime.datetime.now().timestamp()
+        _insert_mock_recording(
+            "1234567.frontdoor",
+            os.path.join(self.test_dir, "main.tmp"),
+            time_keep,
+            time_keep + 10,
+            seg_size=20,
+            seg_dur=10,
+            stream_type=STREAM_TYPE_MAIN,
+        )
+        _insert_mock_recording(
+            "1234568.frontdoor",
+            os.path.join(self.test_dir, "sub.tmp"),
+            time_keep,
+            time_keep + 10,
+            seg_size=2,
+            seg_dur=10,
+            stream_type=STREAM_TYPE_SUB,
+        )
+
+        storage.calculate_camera_bandwidth()
+        usages = storage.calculate_camera_usages()
+
+        assert usages["front_door"]["usage"] == 22
+        assert usages["front_door"]["bandwidth"] == 7920
+        assert usages["front_door"]["streams"] == {
+            STREAM_TYPE_MAIN: {"usage": 20, "bandwidth": 7200},
+            STREAM_TYPE_SUB: {"usage": 2, "bandwidth": 720},
+        }
+
+    def test_camera_usages_omits_streams_without_segments(self):
+        """A camera with no sub segments reports no sub entry."""
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        time_keep = datetime.datetime.now().timestamp()
+        _insert_mock_recording(
+            "1234567.frontdoor",
+            os.path.join(self.test_dir, "main.tmp"),
+            time_keep,
+            time_keep + 10,
+            seg_size=20,
+            seg_dur=10,
+        )
+
+        storage.calculate_camera_bandwidth()
+        usages = storage.calculate_camera_usages()
+
+        assert usages["front_door"]["usage"] == 20
+        assert usages["front_door"]["streams"] == {
+            STREAM_TYPE_MAIN: {"usage": 20, "bandwidth": 7200},
+        }
+
+    def test_camera_bandwidth_clamp_scales_stream_values(self):
+        """Clamping the total keeps the per stream values summing to it."""
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        time_keep = datetime.datetime.now().timestamp()
+        _insert_mock_recording(
+            "1234567.frontdoor",
+            os.path.join(self.test_dir, "main.tmp"),
+            time_keep,
+            time_keep + 10,
+            seg_size=40,
+            seg_dur=10,
+            stream_type=STREAM_TYPE_MAIN,
+        )
+        _insert_mock_recording(
+            "1234568.frontdoor",
+            os.path.join(self.test_dir, "sub.tmp"),
+            time_keep,
+            time_keep + 10,
+            seg_size=4,
+            seg_dur=10,
+            stream_type=STREAM_TYPE_SUB,
+        )
+
+        storage.calculate_camera_bandwidth()
+        stats = storage.camera_storage_stats["front_door"]
+
+        assert stats["bandwidth"] == MAX_CALCULATED_BANDWIDTH
+        assert (
+            round(sum(stats["bandwidth_by_stream"].values()), 2)
+            == MAX_CALCULATED_BANDWIDTH
+        )
+
+    def test_camera_usages_with_no_recordings(self):
+        """A camera with no segments reports zero usage and no streams."""
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        storage.calculate_camera_bandwidth()
+        usages = storage.calculate_camera_usages()
+
+        assert usages["front_door"]["usage"] == 0
+        assert usages["front_door"]["streams"] == {}
 
     def test_storage_cleanup(self):
         """Ensure that all recordings are cleaned up when necessary."""
@@ -332,6 +452,7 @@ def _insert_mock_recording(
     camera="front_door",
     seg_size=8,
     seg_dur=10,
+    stream_type=STREAM_TYPE_MAIN,
 ) -> Event:
     """Inserts a basic recording model with a given id."""
     # we must open the file so storage maintainer will delete it
@@ -348,4 +469,5 @@ def _insert_mock_recording(
         motion=True,
         objects=True,
         segment_size=seg_size,
+        stream_type=stream_type,
     ).execute()
