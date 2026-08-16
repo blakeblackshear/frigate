@@ -140,6 +140,7 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     wget https://github.com/oneapi-src/level-zero/releases/download/v1.28.2/level-zero_1.28.2+u22.04_amd64.deb
     wget https://github.com/intel/linux-npu-driver/releases/download/v1.28.0/linux-npu-driver-v1.28.0.20251218-20347000698-ubuntu2404.tar.gz
     tar -xf linux-npu-driver-v1.28.0.20251218-20347000698-ubuntu2404.tar.gz --strip-components=1
+    rm linux-npu-driver-v1.28.0.20251218-20347000698-ubuntu2404.tar.gz
 
     dpkg -i *.deb
     rm *.deb
