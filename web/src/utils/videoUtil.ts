@@ -61,15 +61,18 @@ export function calculateSeekPosition(
       return false;
     }
 
+    // playlist duration exceeds wall length when the clip carries
+    // keyframe back-snap lead-in
+    const wallLength = segment.end_time - segment.start_time;
+    const leadIn = Math.max(0, segment.duration - wallLength);
+
     if (segment.end_time < timestamp) {
-      // Add the full duration of this segment
-      seekSeconds += segment.end_time - segment.start_time;
+      seekSeconds += segment.duration;
       return true;
     }
 
     // We're in this segment - calculate position within it
-    seekSeconds +=
-      segment.end_time - segment.start_time - (segment.end_time - timestamp);
+    seekSeconds += leadIn + (timestamp - segment.start_time);
     return true;
   });
 

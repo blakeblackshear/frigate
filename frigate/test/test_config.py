@@ -1,13 +1,14 @@
 import json
 import os
 import unittest
+from copy import deepcopy
 from unittest.mock import patch
 
 import numpy as np
 from pydantic import ValidationError
 from ruamel.yaml.constructor import DuplicateKeyError
 
-from frigate.config import FrigateConfig
+from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.util.builtin import deep_merge
@@ -968,6 +969,162 @@ class TestConfig(unittest.TestCase):
         assert len(ffmpeg_cmds) == 1
         assert "clips" not in ffmpeg_cmds[0]["roles"]
 
+    def test_record_sub_cmd_writes_sub_cache_path(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect", "record"],
+                            },
+                            {
+                                "path": "rtsp://10.0.0.1:554/video2",
+                                "roles": ["record_sub"],
+                            },
+                        ]
+                    },
+                    "record": {"enabled": True, "sub": {"enabled": True}},
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        cmds = frigate_config.cameras["back"].ffmpeg_cmds
+        sub_cmds = [c for c in cmds if "record_sub" in c["roles"]]
+        assert len(sub_cmds) == 1
+        joined = " ".join(sub_cmds[0]["cmd"])
+        assert "back@sub@" in joined
+
+    def test_record_sub_disabled_no_sub_cache_path(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect", "record"],
+                            },
+                        ]
+                    },
+                    "record": {"enabled": True, "sub": {"enabled": False}},
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        cmds = frigate_config.cameras["back"].ffmpeg_cmds
+        assert all("@sub@" not in " ".join(c["cmd"]) for c in cmds)
+
+    def _sub_record_config(self, ffmpeg_extra: dict | None = None) -> dict:
+        return {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect", "record"],
+                            },
+                            {
+                                "path": "rtsp://10.0.0.1:554/video2",
+                                "roles": ["record_sub"],
+                            },
+                        ],
+                        **(ffmpeg_extra or {}),
+                    },
+                    "record": {"enabled": True, "sub": {"enabled": True}},
+                }
+            },
+        }
+
+    def _sub_record_cmd(self, config: dict) -> str:
+        cmds = FrigateConfig(**config).cameras["back"].ffmpeg_cmds
+        sub_cmds = [c for c in cmds if "record_sub" in c["roles"]]
+        assert len(sub_cmds) == 1
+        return " ".join(sub_cmds[0]["cmd"])
+
+    def test_record_sub_output_args_inherit_record(self):
+        config = self._sub_record_config(
+            {"output_args": {"record": "preset-record-generic-audio-copy"}}
+        )
+
+        cmd = self._sub_record_cmd(config)
+        # the customized record args, not the stock aac default
+        assert "-c copy" in cmd
+        assert "-c:a aac" not in cmd
+
+    def test_record_sub_output_args_override_record(self):
+        config = self._sub_record_config(
+            {
+                "output_args": {
+                    "record": "preset-record-generic-audio-aac",
+                    "record_sub": "preset-record-generic",
+                }
+            }
+        )
+
+        cmd = self._sub_record_cmd(config)
+        assert "-c copy -an" in cmd
+        assert "-c:a aac" not in cmd
+
+    def test_record_output_args_unaffected_by_record_sub(self):
+        config = self._sub_record_config(
+            {
+                "output_args": {
+                    "record": "preset-record-generic-audio-aac",
+                    "record_sub": "preset-record-generic",
+                }
+            }
+        )
+
+        cmds = FrigateConfig(**config).cameras["back"].ffmpeg_cmds
+        record_cmd = " ".join(next(c for c in cmds if "record" in c["roles"])["cmd"])
+        assert "-c:a aac" in record_cmd
+
+    def test_record_sub_manual_output_args(self):
+        config = self._sub_record_config(
+            {
+                "output_args": {
+                    "record_sub": "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -c:a aac -ar 16000"
+                }
+            }
+        )
+
+        assert "-ar 16000" in self._sub_record_cmd(config)
+
+    def test_fails_on_bad_record_sub_segment_time(self):
+        config = self._sub_record_config(
+            {
+                "output_args": {
+                    "record_sub": "-f segment -segment_time 70 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an"
+                }
+            }
+        )
+
+        self.assertRaisesRegex(
+            ValueError,
+            "segment_time",
+            lambda: FrigateConfig(**config).cameras,
+        )
+
+    def test_record_sub_segment_time_not_checked_when_disabled(self):
+        config = self._sub_record_config(
+            {
+                "output_args": {
+                    "record_sub": "-f segment -segment_time 70 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an"
+                }
+            }
+        )
+        config["cameras"]["back"]["record"]["sub"]["enabled"] = False
+
+        FrigateConfig(**config).cameras
+
     def test_max_disappeared_default(self):
         config = {
             "mqtt": {"host": "mqtt"},
@@ -1209,6 +1366,44 @@ class TestConfig(unittest.TestCase):
         }
 
         self.assertRaises(ValueError, lambda: FrigateConfig(**config))
+
+    def test_record_sub_config_defaults(self):
+        config = FrigateConfig(**self.minimal)
+        record = config.cameras["back"].record
+        assert record.sub.enabled is False
+        assert record.sub.continuous.days == 0
+        assert record.sub.alerts.mode == RetainModeEnum.motion
+
+    def test_record_sub_enabled_requires_role(self):
+        config = deepcopy(self.minimal)
+        config["cameras"]["back"]["ffmpeg"]["inputs"] = [
+            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect", "record"]},
+        ]
+        config["cameras"]["back"]["record"] = {
+            "enabled": True,
+            "sub": {"enabled": True},
+        }
+
+        # no record_sub role assigned -> must raise
+        self.assertRaisesRegex(
+            ValueError,
+            "record_sub is not assigned",
+            lambda: FrigateConfig(**config),
+        )
+
+    def test_record_sub_role_accepted(self):
+        config = deepcopy(self.minimal)
+        config["cameras"]["back"]["ffmpeg"]["inputs"] = [
+            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect", "record"]},
+            {"path": "rtsp://10.0.0.1:554/video2", "roles": ["record_sub"]},
+        ]
+        config["cameras"]["back"]["record"] = {
+            "enabled": True,
+            "sub": {"enabled": True, "continuous": {"days": 30}},
+        }
+
+        parsed = FrigateConfig(**config)
+        assert parsed.cameras["back"].record.sub.continuous.days == 30
 
     def test_works_on_missing_role_multiple_cams(self):
         config = {

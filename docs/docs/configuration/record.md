@@ -275,6 +275,163 @@ record:
 
 This configuration will retain recording segments that overlap with alerts and detections for 10 days. Because multiple tracked objects can reference the same recording segments, this avoids storing duplicate footage for overlapping tracked objects and reduces overall storage needs.
 
+## Sub Stream Recording
+
+In addition to the main recording stream, Frigate can record a second, lower quality stream for each camera. This serves two purposes:
+
+- **Quality selection during playback**: A quality selector (`Auto`, `Original`, or `Low`) appears in History view for cameras with sub stream recording enabled. `Original` and `Low` play only that stream's recordings. Time ranges where the selected stream has no footage are skipped during playback, and the selector notes when the selected stream has no recordings at all in the viewed time range. With `Auto` (the default), playback prefers the original quality and automatically falls back to the low quality stream when the connection cannot keep up, or for time ranges where the original recordings have expired. The selector shows each stream's video codec and audio details beneath the options; footage recorded by older Frigate versions shows no details.
+- **Extended retention**: Sub stream recordings have their own retention settings, fully independent of the main recordings. By giving the low quality recordings a longer retention period, you can keep weeks or months of low quality history using a fraction of the storage, and that history remains playable after the main recordings expire. Playback falls back to the low quality recordings automatically, and the timeline shows a muted treatment for time ranges where only low quality footage remains.
+
+### Configuring sub stream recording
+
+Sub stream recording uses the `record_sub` input role. This role can be assigned to the same input as `detect`, so in the common case where detect already uses the camera's sub stream, no additional camera connection is needed. Like the main recording stream, sub stream segments are copied directly from the camera stream without re-encoding, so the recording quality is determined by the source stream.
+
+The following examples keep 7 days of full quality continuous recordings and 60 days of low quality continuous recordings:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> and select the camera.
+
+- In **Camera inputs**, enable the **Record (Sub Stream)** role on the stream you want to record at low quality, commonly the same stream that has the **Detect** role. Only one stream may have this role, and it cannot be assigned to the same stream as the **Record** role.
+
+Navigate to <NavPath path="Settings > Camera configuration > Recording" /> and select the camera.
+
+- Set **Enable recording** to on
+- Set **Continuous retention > Retention days** to `7`
+- Set **Sub stream recording > Enable sub stream recording** to on
+- Set **Sub stream recording > Sub stream continuous retention > Retention days** to `60`
+
+The camera setup wizard also offers the **Record (Sub Stream)** role when assigning stream roles for a newly added camera.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+cameras:
+  front_door:
+    ffmpeg:
+      inputs:
+        - path: rtsp://camera/main
+          roles:
+            - record
+        - path: rtsp://camera/sub
+          roles:
+            - detect
+            - record_sub
+    record:
+      enabled: true
+      continuous:
+        days: 7
+      sub:
+        enabled: true
+        continuous:
+          days: 60
+```
+
+If your camera does not provide a suitable sub stream (or the sub stream is already used at a resolution you don't want to record), you can use a go2rtc transcode as the source for `record_sub` instead:
+
+```yaml
+go2rtc:
+  streams:
+    front_door: rtsp://camera/main
+    front_door_lq: ffmpeg:front_door#video=h264#width=854#hardware
+
+cameras:
+  front_door:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/front_door
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - record
+        - path: rtsp://127.0.0.1:8554/front_door_lq
+          input_args: preset-rtsp-restream
+          roles:
+            - record_sub
+    record:
+      enabled: true
+      continuous:
+        days: 7
+      sub:
+        enabled: true
+        continuous:
+          days: 60
+```
+
+</TabItem>
+</ConfigTabs>
+
+The `record.sub` config supports the same retention structure as the main recording config: `continuous`, `motion`, `alerts`, and `detections` each with their own `days` (and `mode` for alerts and detections). The pre-capture and post-capture windows for alerts and detections are taken from the main `record.alerts` and `record.detections` config. Extending `sub.alerts.days` or `sub.detections.days` beyond the main values also keeps those review items visible in the review timeline for the longer window, with playback falling back to the low quality stream once the main recordings expire.
+
+:::note
+
+Recording must be enabled (`record.enabled`) for sub stream recording to run, and Frigate will fail to start if `record.sub.enabled` is set without a `record_sub` role assigned to one of the camera's inputs.
+
+:::
+
+### How Auto picks a quality
+
+`Auto` measures throughput on every segment download and compares it against the original stream's bitrate (computed from the recorded footage itself). Playback drops to the low quality stream when any of these happen:
+
+- A freeze lasts 4 seconds (10 seconds when it starts within 2 seconds of a seek, since the seek target is rarely buffered), or freezes total 7 seconds within the last minute.
+- 3 downloads in a row measure below the original bitrate plus 10%, dropping quality before a stall ever becomes visible.
+- No first frame appears within 10 seconds, or loading fails outright.
+
+Playback returns to full quality only when measured throughput exceeds the original bitrate by 50%, checked continuously while playing the low quality stream and again at each new hour. The asymmetric thresholds (1.1x to drop, 1.5x to return) keep a borderline connection from switching back and forth.
+
+The most recent measurement is remembered on the device: a connection last measured below the original bitrate (or below 3 Mbps when the bitrate is not yet known) starts playback on the low quality stream so a first frame appears immediately, then upgrades within a few segments if the speed allows.
+
+The quality selector shows which stream Auto is currently playing and why. A browser with Data Saver enabled stays on the low quality stream, a browser that cannot decode the original stream's codec (for example H.265 without HEVC support) plays the low quality stream for that camera, and pinning `Original` or `Low` bypasses Auto entirely.
+
+### Sub stream output args
+
+By default the sub stream is recorded with the same [output args](/configuration/ffmpeg_presets#output-args-presets) as the main recording stream, so it inherits any customization made to `ffmpeg.output_args.record`. Setting `ffmpeg.output_args.record_sub` gives the sub stream its own args instead. Like all `ffmpeg` config, this can be set globally or per camera.
+
+The most common reason to set this is a pair of streams whose audio differs. Many cameras send AAC on the main stream but PCM on the sub stream, and PCM cannot be copied into an mp4 recording. Copying the main stream's audio avoids re-encoding audio that is already AAC, while the sub stream still needs to be transcoded:
+
+```yaml
+ffmpeg:
+  output_args:
+    # main stream audio is already AAC, so copy it
+    record: preset-record-generic-audio-copy
+    # sub stream audio is PCM, so transcode it to AAC
+    record_sub: preset-record-generic-audio-aac
+```
+
+Other reasons to set this are recording a sub stream whose codec needs a different preset than the main stream, such as `preset-record-mjpeg`, or forcing a matching audio sample rate across the two streams with manual args ending in `-c:a aac -ar 16000`.
+
+:::warning
+
+Avoid removing audio from only one of the two streams (for example with `-an`). When one stream has audio and the other does not, playback of time ranges that combine both qualities is silent, so stripping audio from the sub stream also silences the merged timeline.
+
+:::
+
+### Which stream do features use?
+
+As a general rule, features that read recordings prefer the main stream and fall back to the sub stream for time ranges where the main recordings have expired. Analytics features use only the main stream.
+
+| Feature                                                                                  | Stream used                                                                                                   |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Recording playback (History and Review)                                                  | Both (main preferred with sub fallback by default), or exactly one stream when a quality is selected manually |
+| Tracking details and Explore clip playback                                               | Main, falling back to sub where the main recordings have expired                                              |
+| Exports and clip downloads                                                               | Main; sub is used when no main recordings remain in the range (streams are never mixed in one file)           |
+| Frames grabbed from a recording in History (download snapshot, submit frame to Frigate+) | Main preferred, sub fallback                                                                                  |
+| Audio extraction (e.g., transcription)                                                   | Main preferred, sub fallback                                                                                  |
+| Motion search                                                                            | Main only                                                                                                     |
+| Review timeline motion data                                                              | Main only                                                                                                     |
+| Storage usage statistics                                                                 | Both streams counted                                                                                          |
+
+This table covers only features that read recordings from disk. Tracked object snapshots and thumbnails (the images shown in Explore and sent with notifications, and the images submitted to Frigate+ from a tracked object) are captured live from the `detect` stream as the object is tracked, never from recordings, so sub stream recording does not affect them.
+
+### Trade-offs
+
+- Recording a second stream increases overall storage use. The increase is typically small relative to the main recordings, since the low quality stream is much smaller.
+- The go2rtc transcode approach continuously encodes the low quality stream, which uses CPU or GPU resources. This cost only applies to the transcode path; recording the camera's native sub stream does not re-encode. See the [go2rtc hardware acceleration documentation](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg) for accelerating the transcode.
+- Many camera sub streams do not include audio. If the source stream has no audio, the low quality recordings will not have audio.
+- **Matching video codecs and audio settings between the two streams gives the smoothest playback.** When playback combines both qualities on one timeline (the default `Auto` behavior: for example original quality during events with low quality in between, or low quality history after the original recordings expire) and the streams use different video codecs or audio settings, for example H.265 on the main stream and H.264 on the sub stream, or 16 kHz audio on one and 8 kHz on the other, playback still works: Frigate inserts a decoder reset at each quality transition, which can cause a barely-perceptible pause there. Configuring both streams in the camera's firmware to use the same video codec, audio codec, and sample rate makes transitions fully seamless, and a mismatched audio sample rate can also be corrected with [sub stream output args](#sub-stream-output-args). If one stream has audio and the other does not, combined time ranges play **without audio**; selecting a single quality with the playback selector always keeps that stream's audio.
+
 ## Can I have "continuous" recordings, but only at certain times?
 
 Using Frigate UI, Home Assistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.

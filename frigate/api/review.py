@@ -33,6 +33,7 @@ from frigate.api.defs.response.review_response import (
     ReviewSummaryResponse,
 )
 from frigate.api.defs.tags import Tags
+from frigate.const import STREAM_TYPE_MAIN
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
@@ -598,6 +599,8 @@ def motion_activity(
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
     clauses.append(Recordings.motion > 0)
+    # sub rows duplicate the camera's motion stats, so only count main rows
+    clauses.append(Recordings.stream_type == STREAM_TYPE_MAIN)
 
     if cameras != "all":
         requested = set(cameras.split(","))

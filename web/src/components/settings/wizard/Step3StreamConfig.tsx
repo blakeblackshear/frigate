@@ -45,6 +45,13 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
+// Recording the sub stream from the same stream as record would just
+// re-record the main stream, so the two roles are mutually exclusive.
+const CONFLICTING_ROLES: Partial<Record<StreamRole, StreamRole>> = {
+  record: "record_sub",
+  record_sub: "record",
+};
+
 type Step3StreamConfigProps = {
   wizardData: Partial<WizardFormData>;
   onUpdate: (data: Partial<WizardFormData>) => void;
@@ -163,9 +170,12 @@ export default function Step3StreamConfig({
         const newRoles = stream.roles.filter((r) => r !== role);
         updateStream(streamId, { roles: newRoles });
       } else {
-        // Check if role is already used in another stream
         const usedRoles = getUsedRolesExcludingStream(streamId);
-        if (!usedRoles.has(role)) {
+        const conflictingRole = CONFLICTING_ROLES[role];
+        const hasConflict = conflictingRole
+          ? stream.roles.includes(conflictingRole)
+          : false;
+        if (!usedRoles.has(role) && !hasConflict) {
           // Allow adding the role
           const newRoles = [...stream.roles, role];
           updateStream(streamId, { roles: newRoles });
@@ -618,6 +628,10 @@ export default function Step3StreamConfig({
                             {t("cameraWizard.step3.rolesPopover.record")}
                           </div>
                           <div>
+                            <strong>record_sub</strong> -{" "}
+                            {t("cameraWizard.step3.rolesPopover.record_sub")}
+                          </div>
+                          <div>
                             <strong>audio</strong> -{" "}
                             {t("cameraWizard.step3.rolesPopover.audio")}
                           </div>
@@ -639,25 +653,35 @@ export default function Step3StreamConfig({
                 </div>
                 <div className="rounded-lg bg-background p-3">
                   <div className="flex flex-wrap gap-2">
-                    {(["detect", "record", "audio"] as const).map((role) => {
-                      const isUsedElsewhere = getUsedRolesExcludingStream(
-                        stream.id,
-                      ).has(role);
-                      const isChecked = stream.roles.includes(role);
-                      return (
-                        <div
-                          key={role}
-                          className="flex w-full items-center justify-between"
-                        >
-                          <span className="text-sm capitalize">{role}</span>
-                          <Switch
-                            checked={isChecked}
-                            onCheckedChange={() => toggleRole(stream.id, role)}
-                            disabled={!isChecked && isUsedElsewhere}
-                          />
-                        </div>
-                      );
-                    })}
+                    {(["detect", "record", "record_sub", "audio"] as const).map(
+                      (role) => {
+                        const isUsedElsewhere = getUsedRolesExcludingStream(
+                          stream.id,
+                        ).has(role);
+                        const conflictingRole = CONFLICTING_ROLES[role];
+                        const hasConflict = conflictingRole
+                          ? stream.roles.includes(conflictingRole)
+                          : false;
+                        const isChecked = stream.roles.includes(role);
+                        return (
+                          <div
+                            key={role}
+                            className="flex w-full items-center justify-between"
+                          >
+                            <span className="text-sm capitalize">{role}</span>
+                            <Switch
+                              checked={isChecked}
+                              onCheckedChange={() =>
+                                toggleRole(stream.id, role)
+                              }
+                              disabled={
+                                !isChecked && (isUsedElsewhere || hasConflict)
+                              }
+                            />
+                          </div>
+                        );
+                      },
+                    )}
                   </div>
                 </div>
               </div>

@@ -15,7 +15,7 @@ import numpy as np
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.const import UPDATE_JOB_STATE
+from frigate.const import STREAM_TYPE_MAIN, UPDATE_JOB_STATE
 from frigate.jobs.job import Job
 from frigate.jobs.manager import (
     get_job_by_id,
@@ -485,6 +485,7 @@ class MotionSearchRunner(threading.Thread):
                 )
             )
             .where(Recordings.camera == camera_name)
+            .where(Recordings.stream_type == STREAM_TYPE_MAIN)
             .order_by(Recordings.start_time.asc())
         )
 

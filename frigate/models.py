@@ -79,6 +79,12 @@ class Recordings(Model):
     segment_size = FloatField(default=0)  # this should be stored as MB
     regions = IntegerField(null=True)
     motion_heatmap = JSONField(null=True)  # 16x16 grid, 256 values (0-255)
+    keyframes = JSONField(null=True)  # ms offsets; NULL = unprobed (legacy rows)
+    stream_type = CharField(default="main", max_length=8)
+    has_audio = BooleanField(null=True)  # NULL = unknown (legacy rows)
+    audio_rate = IntegerField(null=True)  # Hz; NULL = unknown (legacy rows)
+    audio_codec = CharField(null=True, max_length=20)  # NULL = unknown (legacy rows)
+    video_codec = CharField(null=True, max_length=20)  # NULL = unknown (legacy rows)
 
 
 class ExportCase(Model):

@@ -1,10 +1,11 @@
 """Recordings Utilities."""
 
+import asyncio
+import contextlib
 import datetime
 import errno
 import logging
 import os
-import subprocess as sp
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -879,38 +880,43 @@ def sync_all_media(
     return results
 
 
-def get_keyframe_before(path: str, offset_ms: int) -> int | None:
-    """Get the timestamp (ms) of the last keyframe at or before offset_ms.
+async def get_keyframe_offsets(path: str) -> list[int] | None:
+    """Get every video keyframe offset (ms from segment start) in an mp4.
 
-    Uses ffprobe packet index to read keyframe positions from the mp4 file.
-    Returns None if ffprobe fails or no keyframe is found before the offset.
+    Runs at record time so playback never needs to probe. Returns None if
+    ffprobe fails, so the caller stores NULL and playback falls back to
+    serving whole files.
     """
+    proc = None
     try:
-        result = sp.run(
-            [
-                FFPROBE_PATH,
-                "-select_streams",
-                "v:0",
-                "-show_entries",
-                "packet=pts_time,flags",
-                "-of",
-                "csv=p=0",
-                "-loglevel",
-                "error",
-                path,
-            ],
-            capture_output=True,
-            timeout=5,
+        proc = await asyncio.create_subprocess_exec(
+            FFPROBE_PATH,
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "packet=pts_time,flags",
+            "-of",
+            "csv=p=0",
+            "-loglevel",
+            "error",
+            path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
         )
-    except (sp.TimeoutExpired, FileNotFoundError):
+        stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=5)
+    except (TimeoutError, FileNotFoundError):
+        if proc is not None and proc.returncode is None:
+            with contextlib.suppress(ProcessLookupError):
+                proc.kill()
+            with contextlib.suppress(TimeoutError):
+                await asyncio.wait_for(proc.communicate(), timeout=2)
         return None
 
-    if result.returncode != 0:
+    if proc.returncode != 0:
         return None
 
-    offset_s = offset_ms / 1000.0
-    best_ms = None
-    for line in result.stdout.decode().strip().splitlines():
+    offsets: list[int] = []
+    for line in stdout.decode().strip().splitlines():
         parts = line.strip().split(",")
         if len(parts) != 2:
             continue
@@ -918,12 +924,8 @@ def get_keyframe_before(path: str, offset_ms: int) -> int | None:
         if "K" not in flags:
             continue
         try:
-            ts = float(ts_str)
+            offsets.append(int(float(ts_str) * 1000))
         except ValueError:
             continue
-        if ts <= offset_s:
-            best_ms = int(ts * 1000)
-        else:
-            break
 
-    return best_ms
+    return offsets

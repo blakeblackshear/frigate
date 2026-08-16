@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isIOS } from "react-device-detect";
 import { useTimelineUtils } from "./use-timeline-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
@@ -9,6 +10,11 @@ import { useTranslation } from "react-i18next";
 import useUserInteraction from "./use-user-interaction";
 
 const DRAG_STATE_COMMIT_MS = 100;
+
+// iOS Safari synthesizes a click shortly after a drag's touchend even
+// though the touchend handler calls preventDefault; clicks observed in
+// traces arrive ~50ms after release
+const GHOST_CLICK_WINDOW_MS = 400;
 
 type DraggableElementProps = {
   contentRef: React.RefObject<HTMLElement | null>;
@@ -164,9 +170,28 @@ function useDraggableElement({
           setDraggableElementTime(pendingDragTimeRef.current);
           pendingDragTimeRef.current = null;
         }
+
+        // iOS Safari synthesizes a click after touchend despite the
+        // preventDefault, hit-tested at the drag origin where a segment
+        // now sits; its onClick would yank the handlebar back
+        if (isIOS && "TouchEvent" in window && e instanceof TouchEvent) {
+          const swallow = (clickEvent: MouseEvent) => {
+            cleanup();
+            if (timelineRef.current?.contains(clickEvent.target as Node)) {
+              clickEvent.preventDefault();
+              clickEvent.stopPropagation();
+            }
+          };
+          const cleanup = () => {
+            document.removeEventListener("click", swallow, true);
+            window.clearTimeout(timer);
+          };
+          const timer = window.setTimeout(cleanup, GHOST_CLICK_WINDOW_MS);
+          document.addEventListener("click", swallow, true);
+        }
       }
     },
-    [isDragging, setIsDragging, setDraggableElementTime],
+    [isDragging, setIsDragging, setDraggableElementTime, timelineRef],
   );
 
   const timestampToPixels = useCallback(
