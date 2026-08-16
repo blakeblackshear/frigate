@@ -89,7 +89,9 @@ class WebPushClient(Communicator):
         # notification and auth config updater
         self.global_config_subscriber = ConfigSubscriber("config/")
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            self.config, self.config.cameras, [CameraConfigUpdateEnum.notifications]
+            self.config,
+            self.config.cameras,
+            [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.notifications],
         )
         self._refresh_user_cameras()
 
@@ -212,6 +214,8 @@ class WebPushClient(Communicator):
             for camera in updates["add"]:
                 self.suspended_cameras[camera] = 0
                 self.last_camera_notification_time[camera] = 0
+
+            self._refresh_user_cameras()
 
         if topic == "reviews":
             decoded = json.loads(payload)
