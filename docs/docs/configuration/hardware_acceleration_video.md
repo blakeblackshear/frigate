@@ -498,7 +498,7 @@ cameras:
 
 ## Synaptics
 
-Hardware accelerated video de-/encoding is supported on Synpatics SL-series SoC.
+Hardware accelerated video de-/encoding is supported on Synaptics SL-series SoC.
 
 ### Prerequisites
 
@@ -530,5 +530,11 @@ output_args:
 :::warning
 
 Make sure that your SoC supports hardware acceleration for your input stream and your input stream is h264 encoding. For example, if your camera streams with h264 encoding, your SoC must be able to de- and encode with it. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
+
+:::
+
+:::warning
+
+On the ASUS GT-BE19000AI router AI board (SL1680, firmware kernel 5.15.140), enabling `-c:v h264_v4l2m2m` has been observed to trigger a kernel Oops in the vendor `vpu` driver when the decoder is closed, leaving the board in a state that requires a reboot. Until ASUS ships a firmware fix, leave `hwaccel_args` unset on this device and rely on software decoding.
 
 :::
