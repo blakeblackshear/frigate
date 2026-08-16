@@ -6022,6 +6022,65 @@ paths:
       security:
         - frigateUserAuth: []
       x-required-role: camera
+  /vod/{camera_name}/{stream}/start/{start_ts}/end/{end_ts}:
+    get:
+      tags:
+        - Media
+      summary: Vod Ts Stream
+      description: |-
+        **Access:** Authenticated user with access to the referenced camera.
+
+        Returns an HLS playlist pinned to one stream type (main or sub) for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.
+      operationId: 
+        vod_ts_stream_vod__camera_name___stream__start__start_ts__end__end_ts__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Camera Name
+        - name: stream
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/VodStreamPreference'
+        - name: start_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Ts
+        - name: end_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Ts
+        - name: force_discontinuity
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Force Discontinuity
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateUserAuth: []
+      x-required-role: camera
   /events/{event_id}/snapshot.jpg:
     get:
       tags:
@@ -6945,6 +7004,63 @@ paths:
             type: string
             default: utc
             title: Timezone
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateUserAuth: []
+      x-required-role: camera
+  /{camera_name}/recordings/coverage:
+    get:
+      tags:
+        - Recordings
+      summary: Recordings Coverage
+      description: |-
+        **Access:** Authenticated user with access to the referenced camera.
+
+        Returns merged recording coverage spans plus codec compatibility.
+
+        codecs_compatible is false only when more than one known video codec
+        appears across the range's rows, the case where the merged vod route
+        degrades to a single-stream manifest.
+      operationId: recordings_coverage__camera_name__recordings_coverage_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Camera Name
+        - name: after
+          in: query
+          required: true
+          schema:
+            type: number
+            title: After
+        - name: before
+          in: query
+          required: true
+          schema:
+            type: number
+            title: Before
+        - name: timelines
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Timelines
       responses:
         '200':
           description: Successful Response
@@ -8943,6 +9059,17 @@ components:
         - msg
         - type
       title: ValidationError
+    VodStreamPreference:
+      type: string
+      enum:
+        - main
+        - sub
+      title: VodStreamPreference
+      description: |-
+        Stream pin for the path-segment VOD route.
+
+        nginx-vod derives its mapping fetch URI from the playlist URL path
+        (query params are dropped), so the preference must be a path segment.
   securitySchemes:
     frigateAdminAuth:
       type: apiKey

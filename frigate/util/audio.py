@@ -6,10 +6,31 @@ import subprocess as sp
 
 from pathvalidate import sanitize_filename
 
-from frigate.const import CACHE_DIR
+from frigate.const import CACHE_DIR, STREAM_TYPE_MAIN, STREAM_TYPE_SUB
 from frigate.models import Recordings
 
 logger = logging.getLogger(__name__)
+
+
+def _get_recordings_for_range(
+    camera_name: str, start_ts: float, end_ts: float, stream_type: str
+) -> list[Recordings]:
+    """Fetch one stream type's recording rows overlapping the requested range."""
+    return list(
+        Recordings.select(
+            Recordings.path,
+            Recordings.start_time,
+            Recordings.end_time,
+        )
+        .where(
+            (Recordings.start_time.between(start_ts, end_ts))
+            | (Recordings.end_time.between(start_ts, end_ts))
+            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
+        )
+        .where(Recordings.camera == camera_name)
+        .where(Recordings.stream_type == stream_type)
+        .order_by(Recordings.start_time.asc())
+    )
 
 
 def get_audio_from_recording(
@@ -31,21 +52,16 @@ def get_audio_from_recording(
     Returns:
         Bytes of WAV audio data or None if extraction failed
     """
-    # Fetch all relevant recording segments
-    recordings = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.start_time,
-            Recordings.end_time,
-        )
-        .where(
-            (Recordings.start_time.between(start_ts, end_ts))
-            | (Recordings.end_time.between(start_ts, end_ts))
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
-        )
-        .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.asc())
+    # Fetch all relevant recording segments; never mix streams in one
+    # concat, so prefer main and fall back to sub for expired-main history
+    recordings = _get_recordings_for_range(
+        camera_name, start_ts, end_ts, STREAM_TYPE_MAIN
     )
+
+    if not recordings:
+        recordings = _get_recordings_for_range(
+            camera_name, start_ts, end_ts, STREAM_TYPE_SUB
+        )
 
     if not recordings:
         logger.debug(
