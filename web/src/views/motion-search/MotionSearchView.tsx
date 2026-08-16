@@ -615,16 +615,16 @@ export default function MotionSearchView({
   }, [selectedRangeIdx, chunkedTimeRange]);
 
   const updateSelectedSegment = useCallback(
-    (nextTime: number, updateStartTime: boolean) => {
+    (nextTime: number) => {
       const index = chunkedTimeRange.findIndex(
         (segment) => segment.after <= nextTime && segment.before >= nextTime,
       );
 
       if (index != -1) {
-        if (updateStartTime) {
-          setPlaybackStart(nextTime);
-        }
-
+        setPlaybackStart(nextTime);
+        // the outgoing chunk's player runs until the new source replaces
+        // it, reporting old positions while the new chunk loads
+        mainControllerRef.current?.pause();
         setSelectedRangeIdx(index);
       }
     },
@@ -638,7 +638,10 @@ export default function MotionSearchView({
         currentTime > currentTimeRange.before + 60 ||
         currentTime < currentTimeRange.after - 60
       ) {
-        updateSelectedSegment(currentTime, false);
+        // the player rebuilds its source against playbackStart, and a
+        // stale anchor resolves to no startPosition, dropping playback
+        // at the start of the hour instead of the drag target
+        updateSelectedSegment(currentTime);
         return;
       }
 
@@ -678,9 +681,12 @@ export default function MotionSearchView({
           currentTimeRange.after <= currentTime &&
           currentTimeRange.before >= currentTime
         ) {
+          // a source reload mid-seek resumes from playbackStart, so the
+          // anchor has to follow explicit seeks
+          setPlaybackStart(currentTime);
           mainControllerRef.current?.seekToTimestamp(currentTime, true);
         } else {
-          updateSelectedSegment(currentTime, true);
+          updateSelectedSegment(currentTime);
         }
       } else if (playerTime != currentTime) {
         mainControllerRef.current?.play();
@@ -700,9 +706,12 @@ export default function MotionSearchView({
       setCurrentTime(time);
 
       if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
+        // a source reload mid-seek resumes from playbackStart, so the
+        // anchor has to follow explicit seeks
+        setPlaybackStart(time);
         mainControllerRef.current?.seekToTimestamp(time, play);
       } else {
-        updateSelectedSegment(time, true);
+        updateSelectedSegment(time);
       }
     },
     [currentTimeRange, updateSelectedSegment],

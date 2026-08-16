@@ -147,6 +147,7 @@ class CameraWatchdog(threading.Thread):
         self.requestor = InterProcessRequestor()
         self.was_enabled = self.config.enabled
         self.was_record_enabled_in_config = self.config.record.enabled_in_config
+        self.was_record_sub_enabled = self.config.record.sub.enabled
 
         self.segment_subscriber = RecordingsDataSubscriber(RecordingsDataTypeEnum.all)
         self.latest_valid_segment_time: float = 0
@@ -310,6 +311,24 @@ class CameraWatchdog(threading.Thread):
                     self.record_enable_time = datetime.now().astimezone(UTC)
                     last_restart_time = datetime.now().timestamp()
                 self.was_record_enabled_in_config = record_enabled_in_config
+                continue
+
+            record_sub_enabled = self.config.record.sub.enabled
+            if record_sub_enabled != self.was_record_sub_enabled:
+                # adding and removing the record_sub output both require a
+                # restart, unlike the main record toggle
+                if record_enabled_in_config and enabled:
+                    self.logger.debug(
+                        f"Sub stream recording toggled in config for {self.config.name}, restarting ffmpeg"
+                    )
+                    self.stop_all_ffmpeg()
+                    self.start_all_ffmpeg()
+                    self.latest_valid_segment_time = 0
+                    self.latest_invalid_segment_time = 0
+                    self.latest_cache_segment_time = 0
+                    self.record_enable_time = datetime.now().astimezone(UTC)
+                    last_restart_time = datetime.now().timestamp()
+                self.was_record_sub_enabled = record_sub_enabled
                 continue
 
             if not enabled:

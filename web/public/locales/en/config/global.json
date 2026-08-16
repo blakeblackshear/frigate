@@ -707,6 +707,10 @@
       "record": {
         "label": "Record output arguments",
         "description": "Default output arguments for record role streams."
+      },
+      "record_sub": {
+        "label": "Sub stream record output arguments",
+        "description": "Output arguments for record_sub role streams. The record output arguments are used when this is not set."
       }
     },
     "retry_interval": {
@@ -1046,6 +1050,54 @@
       "quality": {
         "label": "Preview quality",
         "description": "Preview quality level (very_low, low, medium, high, very_high)."
+      }
+    },
+    "sub": {
+      "label": "Sub stream recording",
+      "description": "Settings for recording a second, lower quality stream.",
+      "enabled": {
+        "label": "Enable sub stream recording",
+        "description": "Enable recording of a second, lower quality stream for adaptive quality playback and extended retention."
+      },
+      "continuous": {
+        "label": "Sub stream continuous retention",
+        "description": "Number of days to retain sub stream recordings regardless of tracked objects or motion.",
+        "days": {
+          "label": "Retention days",
+          "description": "Days to retain recordings."
+        }
+      },
+      "motion": {
+        "label": "Sub stream motion retention",
+        "description": "Number of days to retain sub stream recordings triggered by motion.",
+        "days": {
+          "label": "Retention days",
+          "description": "Days to retain recordings."
+        }
+      },
+      "alerts": {
+        "label": "Sub stream alert retention",
+        "description": "Retention settings for sub stream recordings of alerts.",
+        "days": {
+          "label": "Retention days",
+          "description": "Number of days to retain recordings of detection events."
+        },
+        "mode": {
+          "label": "Retention mode",
+          "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
+        }
+      },
+      "detections": {
+        "label": "Sub stream detection retention",
+        "description": "Retention settings for sub stream recordings of detections.",
+        "days": {
+          "label": "Retention days",
+          "description": "Number of days to retain recordings of detection events."
+        },
+        "mode": {
+          "label": "Retention mode",
+          "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
+        }
       }
     },
     "enabled_in_config": {
