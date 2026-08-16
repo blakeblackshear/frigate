@@ -9,7 +9,12 @@ from pathlib import Path
 from peewee import SQL, fn
 
 from frigate.config import FrigateConfig
-from frigate.const import RECORD_DIR, REPLAY_CAMERA_PREFIX
+from frigate.const import (
+    RECORD_DIR,
+    REPLAY_CAMERA_PREFIX,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+)
 from frigate.models import Event, Recordings
 from frigate.util.builtin import clear_and_unlink
 
@@ -49,30 +54,43 @@ class StorageMaintainer(threading.Thread):
                     )
                 }
 
-                # calculate MB/hr from last 100 segments
-                try:
-                    # Subquery to get last 100 segments, then average their bandwidth
-                    last_100 = (
-                        Recordings.select(bandwidth_equation.alias("bw"))
-                        .where(Recordings.camera == camera, Recordings.segment_size > 0)
-                        .order_by(Recordings.start_time.desc())
-                        .limit(100)
-                        .alias("recent")
-                    )
-
-                    bandwidth = round(
-                        Recordings.select(fn.AVG(SQL("bw"))).from_(last_100).scalar()
-                        * 3600,
-                        2,
-                    )
-
-                    if bandwidth > MAX_CALCULATED_BANDWIDTH:
-                        logger.warning(
-                            f"{camera} has a bandwidth of {bandwidth} MB/hr which exceeds the expected maximum. This typically indicates an issue with the cameras recordings."
+                # calculate MB/hr from the last 100 segments of each stream
+                # type and sum the rates; mixing streams would average small
+                # sub segments against large main segments and underestimate
+                # the true write rate
+                bandwidth = 0
+                for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
+                    try:
+                        # Subquery to get last 100 segments, then average their bandwidth
+                        last_100 = (
+                            Recordings.select(bandwidth_equation.alias("bw"))
+                            .where(
+                                Recordings.camera == camera,
+                                Recordings.segment_size > 0,
+                                Recordings.stream_type == stream_type,
+                            )
+                            .order_by(Recordings.start_time.desc())
+                            .limit(100)
+                            .alias("recent")
                         )
-                        bandwidth = MAX_CALCULATED_BANDWIDTH
-                except TypeError:
-                    bandwidth = 0
+
+                        bandwidth += round(
+                            Recordings.select(fn.AVG(SQL("bw")))
+                            .from_(last_100)
+                            .scalar()
+                            * 3600,
+                            2,
+                        )
+                    except TypeError:
+                        pass
+
+                bandwidth = round(bandwidth, 2)
+
+                if bandwidth > MAX_CALCULATED_BANDWIDTH:
+                    logger.warning(
+                        f"{camera} has a bandwidth of {bandwidth} MB/hr which exceeds the expected maximum. This typically indicates an issue with the cameras recordings."
+                    )
+                    bandwidth = MAX_CALCULATED_BANDWIDTH
 
                 self.camera_storage_stats[camera]["bandwidth"] = bandwidth
                 logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")

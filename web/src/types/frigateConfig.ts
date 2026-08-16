@@ -96,6 +96,7 @@ export interface CameraConfig {
     output_args: {
       detect: string[];
       record: string;
+      record_sub: string | string[];
       rtmp: string;
     };
     retry_interval: number;
@@ -234,6 +235,9 @@ export interface CameraConfig {
     retain: {
       days: number;
       mode: string;
+    };
+    sub: {
+      enabled: boolean;
     };
   };
   review: {
@@ -492,6 +496,7 @@ export interface FrigateConfig {
     output_args: {
       detect: string[];
       record: string;
+      record_sub: string | string[];
       rtmp: string;
     };
     retry_interval: number;
