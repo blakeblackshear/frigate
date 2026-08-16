@@ -50,6 +50,7 @@ class MqttClient(Communicator):
         self._callback_queue: queue.Queue[tuple[Any, ...]] = queue.Queue()
         self._retained_lock = threading.Lock()
         self._pending_retained: dict[str, tuple[Any, bool]] = {}
+        self._inflight_retained: dict[int, tuple[str, Any]] = {}
         self._subscription_mid: int | None = None
         self._subscription_ready = False
         self._next_connect_time = 0.0
@@ -273,6 +274,7 @@ class MqttClient(Communicator):
         client.on_disconnect = self._on_disconnect
         client.on_message = self._on_message
         client.on_subscribe = self._on_subscribe
+        client.on_publish = self._on_publish
         client.will_set(
             self.mqtt_config.topic_prefix + "/available",
             payload="offline",
@@ -329,6 +331,9 @@ class MqttClient(Communicator):
                 self._publish_offline_availability()
                 self.connected = False
         finally:
+            # nothing drains the queue once the loop is gone, so release any
+            # waiter here or stop() blocks for the full flush timeout
+            self._requeue_disconnected_publishes()
             self._cleanup_client()
 
     def _publish_offline_availability(self) -> None:
@@ -412,6 +417,7 @@ class MqttClient(Communicator):
         self.connected = False
         self._subscription_ready = False
         self._subscription_mid = None
+        self._requeue_inflight_retained()
 
         client = self.client
         self.client = None
@@ -436,6 +442,19 @@ class MqttClient(Communicator):
         self._next_connect_time = time.monotonic() + MQTT_RECONNECT_INTERVAL
         logger.info("MQTT reconnect scheduled in %.1fs", MQTT_RECONNECT_INTERVAL)
         self._cleanup_client()
+
+    def _requeue_inflight_retained(self) -> None:
+        """Rebuffer retained publishes paho took but the broker never acked.
+
+        Dropping the client drops paho's outbound queue with it, and the session
+        is clean, so the broker will not resume delivery on the new one.
+        """
+        with self._retained_lock:
+            inflight = list(self._inflight_retained.values())
+            self._inflight_retained.clear()
+
+        for topic, payload in inflight:
+            self._queue_retained(topic, payload, True, overwrite=False)
 
     def _buffer_undelivered(
         self, queued_publish: QueuedPublish, overwrite: bool = True
@@ -486,6 +505,8 @@ class MqttClient(Communicator):
                 self._handle_subscribe_event(event[1], event[2])
             elif event_type == "message":
                 self._handle_inbound_message(event[1], event[2])
+            elif event_type == "published":
+                self._handle_publish_event(event[1])
 
     def _drain_publish_queue(self) -> None:
         """Publish queued work only after the session is fully subscribed."""
@@ -548,9 +569,23 @@ class MqttClient(Communicator):
             self._schedule_reconnect()
             return
 
+        # a successful rc only means paho accepted the message; above qos 0 it
+        # is not durable until the broker acks, so keep a copy for replay
+        if queued_publish.retain and not message_info.is_published():
+            with self._retained_lock:
+                self._inflight_retained[message_info.mid] = (
+                    queued_publish.topic,
+                    queued_publish.payload,
+                )
+
         if queued_publish.done is not None:
             self._wait_for_publish(message_info)
             queued_publish.done.set()
+
+    def _handle_publish_event(self, mid: int) -> None:
+        """Drop the replay copy once the broker has acknowledged the message."""
+        with self._retained_lock:
+            self._inflight_retained.pop(mid, None)
 
     def _wait_for_publish(self, message_info: mqtt.MQTTMessageInfo) -> None:
         """Pump the loop until a shutdown-critical publish is acknowledged."""
@@ -758,6 +793,25 @@ class MqttClient(Communicator):
     ) -> None:
         """Handle subscribe acknowledgements from paho."""
         self._callback_queue.put(("subscribed", mid, reason_codes))
+
+    def _on_publish(
+        self,
+        client: mqtt.Client,
+        userdata: Any,
+        mid: int,
+        reason_code: mqtt.ReasonCode,  # type: ignore[name-defined]
+        properties: Any,
+    ) -> None:
+        """Handle publish acknowledgements from paho.
+
+        Only tracked retained messages need an event. At the default qos 0
+        nothing is tracked, so this stays off the hot publish path.
+        """
+        with self._retained_lock:
+            if mid not in self._inflight_retained:
+                return
+
+        self._callback_queue.put(("published", mid))
 
     def _on_message(
         self,

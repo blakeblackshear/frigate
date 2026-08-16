@@ -399,8 +399,9 @@ class TestMqttClientLifecycle(unittest.TestCase):
         mock_client = MagicMock()
         mock_client.loop.return_value = mqtt.MQTT_ERR_SUCCESS
         self.client.client = mock_client
-        message_info = MagicMock(rc=mqtt.MQTT_ERR_SUCCESS)
-        message_info.is_published.side_effect = [False, True]
+        message_info = MagicMock(rc=mqtt.MQTT_ERR_SUCCESS, mid=1)
+        # inflight tracking checks once, then _wait_for_publish polls
+        message_info.is_published.side_effect = [False, False, True]
         mock_client.publish.return_value = message_info
         barrier = MagicMock()
 
@@ -452,6 +453,83 @@ class TestMqttClientLifecycle(unittest.TestCase):
         self.assertEqual(
             self.client._pending_retained["frigate/available"], ("stopped", True)
         )
+
+    def test_shutdown_barrier_releases_when_worker_crashes(self) -> None:
+        """stop() can queue the final publish just as the worker dies, and
+        nothing drains the queue after that."""
+        barrier = threading.Event()
+        self.client._publish_queue.put(
+            QueuedPublish("frigate/available", "stopped", True, barrier)
+        )
+
+        with patch.object(
+            self.client,
+            "_mqtt_loop_worker",
+            side_effect=RuntimeError("unexpected bug"),
+        ):
+            self.client._worker_main()
+
+        self.assertTrue(barrier.is_set())
+
+    def test_unacked_retained_publish_survives_reconnect(self) -> None:
+        """Above qos 0 a successful rc only means paho queued the message, and
+        dropping the client drops its outbound queue with it."""
+        mock_client = MagicMock()
+        message_info = MagicMock(rc=mqtt.MQTT_ERR_SUCCESS, mid=12)
+        message_info.is_published.return_value = False
+        mock_client.publish.return_value = message_info
+        self.client.client = mock_client
+        self.client.connected = True
+
+        self.client._publish_direct(
+            QueuedPublish("frigate/profile/state", "armed", True)
+        )
+        self.assertEqual(
+            self.client._inflight_retained[12], ("frigate/profile/state", "armed")
+        )
+
+        self.client._cleanup_client()
+
+        self.assertEqual(self.client._inflight_retained, {})
+        self.assertEqual(
+            self.client._pending_retained["frigate/profile/state"], ("armed", True)
+        )
+
+    def test_acked_retained_publish_is_not_replayed(self) -> None:
+        mock_client = MagicMock()
+        message_info = MagicMock(rc=mqtt.MQTT_ERR_SUCCESS, mid=12)
+        message_info.is_published.return_value = False
+        mock_client.publish.return_value = message_info
+        self.client.client = mock_client
+        self.client.connected = True
+
+        self.client._publish_direct(
+            QueuedPublish("frigate/profile/state", "armed", True)
+        )
+        self.client._on_publish(mock_client, None, 12, MagicMock(), None)
+        self.client._drain_callback_queue()
+
+        self.assertEqual(self.client._inflight_retained, {})
+
+        self.client._cleanup_client()
+
+        self.assertEqual(self.client._pending_retained, {})
+
+    def test_already_published_retained_is_not_tracked(self) -> None:
+        """At the default qos 0 paho reports the message as published inline,
+        so there is nothing to wait on."""
+        mock_client = MagicMock()
+        message_info = MagicMock(rc=mqtt.MQTT_ERR_SUCCESS, mid=12)
+        message_info.is_published.return_value = True
+        mock_client.publish.return_value = message_info
+        self.client.client = mock_client
+        self.client.connected = True
+
+        self.client._publish_direct(
+            QueuedPublish("frigate/profile/state", "armed", True)
+        )
+
+        self.assertEqual(self.client._inflight_retained, {})
 
     def test_wait_for_publish_survives_disconnect_during_wait(self) -> None:
         mock_client = MagicMock()
