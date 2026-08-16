@@ -450,10 +450,14 @@ class MqttClient(Communicator):
         is clean, so the broker will not resume delivery on the new one.
         """
         with self._retained_lock:
-            inflight = list(self._inflight_retained.values())
+            # mids are insertion ordered, so collapsing by topic keeps the
+            # newest value when several updates to one topic were in flight
+            latest = {
+                topic: payload for topic, payload in self._inflight_retained.values()
+            }
             self._inflight_retained.clear()
 
-        for topic, payload in inflight:
+        for topic, payload in latest.items():
             self._queue_retained(topic, payload, True, overwrite=False)
 
     def _buffer_undelivered(
@@ -540,47 +544,57 @@ class MqttClient(Communicator):
             self._publish_direct(QueuedPublish(topic, payload, retain))
 
     def _publish_direct(self, queued_publish: QueuedPublish) -> None:
-        """Publish a queued message from the worker thread's serialized context."""
-        if self.client is None:
-            self._buffer_undelivered(queued_publish)
-            return
+        """Publish a queued message from the worker thread's serialized context.
 
+        The waiter is released however this exits. The message is already off
+        the queue by now, so nothing else can recover it for a stop() that is
+        blocked waiting on it.
+        """
         try:
-            message_info = self.client.publish(
-                queued_publish.topic,
-                queued_publish.payload,
-                qos=self.config.mqtt.qos,
-                retain=queued_publish.retain,
-            )
-        except (OSError, mqtt.WebsocketConnectionError) as err:
-            logger.warning("MQTT publish failed for %s: %s", queued_publish.topic, err)
-            # a newer buffered value for this topic wins over the failed one
-            self._buffer_undelivered(queued_publish, overwrite=False)
-            self._schedule_reconnect()
-            return
+            if self.client is None:
+                self._buffer_undelivered(queued_publish)
+                return
 
-        if message_info.rc != mqtt.MQTT_ERR_SUCCESS:
-            logger.error(
-                "Unable to publish to %s: mqtt error %s",
-                queued_publish.topic,
-                message_info.rc,
-            )
-            self._buffer_undelivered(queued_publish, overwrite=False)
-            self._schedule_reconnect()
-            return
-
-        # a successful rc only means paho accepted the message; above qos 0 it
-        # is not durable until the broker acks, so keep a copy for replay
-        if queued_publish.retain and not message_info.is_published():
-            with self._retained_lock:
-                self._inflight_retained[message_info.mid] = (
+            try:
+                message_info = self.client.publish(
                     queued_publish.topic,
                     queued_publish.payload,
+                    qos=self.config.mqtt.qos,
+                    retain=queued_publish.retain,
                 )
+            except (OSError, mqtt.WebsocketConnectionError) as err:
+                logger.warning(
+                    "MQTT publish failed for %s: %s", queued_publish.topic, err
+                )
+                # a newer buffered value for this topic wins over the failed one
+                self._buffer_undelivered(queued_publish, overwrite=False)
+                self._schedule_reconnect()
+                return
 
-        if queued_publish.done is not None:
-            self._wait_for_publish(message_info)
-            queued_publish.done.set()
+            if message_info.rc != mqtt.MQTT_ERR_SUCCESS:
+                logger.error(
+                    "Unable to publish to %s: mqtt error %s",
+                    queued_publish.topic,
+                    message_info.rc,
+                )
+                self._buffer_undelivered(queued_publish, overwrite=False)
+                self._schedule_reconnect()
+                return
+
+            # a successful rc only means paho accepted the message; above qos 0
+            # it is not durable until the broker acks, so keep a copy for replay
+            if queued_publish.retain and not message_info.is_published():
+                with self._retained_lock:
+                    self._inflight_retained[message_info.mid] = (
+                        queued_publish.topic,
+                        queued_publish.payload,
+                    )
+
+            if queued_publish.done is not None:
+                self._wait_for_publish(message_info)
+        finally:
+            if queued_publish.done is not None:
+                queued_publish.done.set()
 
     def _handle_publish_event(self, mid: int) -> None:
         """Drop the replay copy once the broker has acknowledged the message."""

@@ -471,6 +471,52 @@ class TestMqttClientLifecycle(unittest.TestCase):
 
         self.assertTrue(barrier.is_set())
 
+    def test_shutdown_barrier_releases_when_publish_raises_unexpectedly(self) -> None:
+        """The message is off the queue by the time this runs, so crash cleanup
+        cannot recover it and only _publish_direct can release the waiter."""
+        self.client.client = MagicMock()
+        self.client.client.publish.side_effect = RuntimeError("unexpected bug")
+        barrier = threading.Event()
+
+        with self.assertRaises(RuntimeError):
+            self.client._publish_direct(
+                QueuedPublish("frigate/available", "stopped", True, barrier)
+            )
+
+        self.assertTrue(barrier.is_set())
+
+    def test_newest_inflight_retained_value_wins(self) -> None:
+        """Several updates to one topic can be unacked at once above qos 0, and
+        the newest is the one subscribers should end up with."""
+        mock_client = MagicMock()
+        self.client.client = mock_client
+        self.client.connected = True
+
+        for mid, payload in ((1, "ON"), (2, "OFF")):
+            message_info = MagicMock(rc=mqtt.MQTT_ERR_SUCCESS, mid=mid)
+            message_info.is_published.return_value = False
+            mock_client.publish.return_value = message_info
+            self.client._publish_direct(
+                QueuedPublish("frigate/front/detect/state", payload, True)
+            )
+
+        self.client._requeue_inflight_retained()
+
+        self.assertEqual(
+            self.client._pending_retained["frigate/front/detect/state"], ("OFF", True)
+        )
+
+    def test_inflight_retained_does_not_clobber_queued_value(self) -> None:
+        """Anything still queued was written later than anything in flight."""
+        self.client._pending_retained = {"frigate/front/detect/state": ("OFF", True)}
+        self.client._inflight_retained = {1: ("frigate/front/detect/state", "ON")}
+
+        self.client._requeue_inflight_retained()
+
+        self.assertEqual(
+            self.client._pending_retained["frigate/front/detect/state"], ("OFF", True)
+        )
+
     def test_unacked_retained_publish_survives_reconnect(self) -> None:
         """Above qos 0 a successful rc only means paho queued the message, and
         dropping the client drops its outbound queue with it."""
