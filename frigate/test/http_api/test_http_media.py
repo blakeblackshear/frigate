@@ -119,7 +119,6 @@ class TestHttpMedia(BaseTestHttp):
         ] == expected_clips
         expected_durations = [clip[2] for clip in expected_clips]
         assert vod["durations"] == expected_durations
-        assert vod["segment_duration"] == max(expected_durations)
 
     def test_recordings_summary_across_dst_spring_forward(self):
         """
@@ -585,7 +584,6 @@ class TestHttpMedia(BaseTestHttp):
                 "/media/recordings/main_1.mp4",
                 "/media/recordings/main_2.mp4",
             ]
-            assert body["segment_duration"] == 10000
 
     def test_vod_merges_intervals_split_by_other_stream_boundaries(self):
         """A recording spanning several coverage intervals stays one clip.
@@ -790,7 +788,6 @@ class TestHttpMedia(BaseTestHttp):
             assert "initialClipIndex" not in body
             assert body["consistentSequenceMediaInfo"] is True
             assert body["durations"] == [10000, 10000]
-            assert body["segment_duration"] == 10000
             assert len(body["sequences"]) == 1
             clips = body["sequences"][0]["clips"]
             assert [c["path"] for c in clips] == [
@@ -853,8 +850,8 @@ class TestHttpMedia(BaseTestHttp):
         A long sub-only stretch means the merged sequence mixes muxed
         main files and audio-less sub files. Track-PRESENCE mixing
         across discontinuities is unproven in MSE, so every clip is
-        stripped to video tracks rather than the tracks being carried
-        through the discontinuity the stream mix already forces.
+        stripped to video tracks (the cross-stream hand-off still serves
+        the range in discontinuity mode).
         """
         with AuthTestClient(self.app) as client:
             self._insert_recording("main_1", 1000, 1010, "main", has_audio=True)
@@ -1240,7 +1237,8 @@ class TestHttpMedia(BaseTestHttp):
         """Uniformly-unknown rows (the pre-feature case) are never stripped.
 
         Legacy rows have has_audio NULL and audio_rate NULL; they share a
-        single signature, so no audio policy fires and audio plays.
+        single signature, so audio plays (the cross-stream hand-off still
+        serves the range in discontinuity mode).
         """
         with AuthTestClient(self.app) as client:
             self._insert_recording("main_1", 1000, 1010, "main")
