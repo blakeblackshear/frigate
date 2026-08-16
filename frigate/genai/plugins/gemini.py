@@ -245,7 +245,7 @@ class GeminiClient(GenAIClient):
                     )
                     gemini_messages.append(
                         types.Content(
-                            role="function",
+                            role="user",
                             parts=[
                                 types.Part.from_function_response(
                                     name=msg.get("name")
@@ -501,7 +501,7 @@ class GeminiClient(GenAIClient):
                     )
                     gemini_messages.append(
                         types.Content(
-                            role="function",
+                            role="user",
                             parts=[
                                 types.Part.from_function_response(
                                     name=msg.get("name")
