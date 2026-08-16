@@ -72,7 +72,11 @@ class OnvifController:
         self.config_subscriber = CameraConfigUpdateSubscriber(
             self.config,
             self.config.cameras,
-            [CameraConfigUpdateEnum.onvif],
+            [
+                CameraConfigUpdateEnum.onvif,
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.remove,
+            ],
         )
 
         asyncio.run_coroutine_threadsafe(self._init_cameras(), self.loop)
@@ -101,6 +105,16 @@ class OnvifController:
                     if update_type == CameraConfigUpdateEnum.onvif.name:
                         for cam_name in cameras:
                             await self._reinit_camera(cam_name)
+                    elif update_type == CameraConfigUpdateEnum.add.name:
+                        # a camera added at runtime only needs ONVIF set up if
+                        # it actually has an onvif host configured
+                        for cam_name in cameras:
+                            cam = self.config.cameras.get(cam_name)
+                            if cam and cam.onvif.host:
+                                await self._reinit_camera(cam_name)
+                    elif update_type == CameraConfigUpdateEnum.remove.name:
+                        for cam_name in cameras:
+                            await self._remove_camera(cam_name)
             except Exception:
                 logger.error("Error checking for ONVIF config updates")
 
@@ -112,6 +126,18 @@ class OnvifController:
                 await cam_state["onvif"].close()
             except Exception:
                 logger.debug(f"Error closing ONVIF session for {cam_name}")
+
+    async def _remove_camera(self, cam_name: str) -> None:
+        """Tear down the ONVIF session for a camera removed at runtime."""
+        if cam_name not in self.cams and cam_name not in self.camera_configs:
+            return
+
+        logger.debug(f"Tearing down ONVIF for {cam_name} after camera removal")
+        await self._close_camera(cam_name)
+        self.cams.pop(cam_name, None)
+        self.camera_configs.pop(cam_name, None)
+        self.failed_cams.pop(cam_name, None)
+        self.status_locks.pop(cam_name, None)
 
     async def _reinit_camera(self, cam_name: str) -> None:
         """Re-initialize a camera after config change."""
