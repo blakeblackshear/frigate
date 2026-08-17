@@ -26,6 +26,7 @@ import { CalendarRangeFilterButton } from "./CalendarFilterButton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { isAttributeLabel } from "@/utils/modelUtil";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 
 type SearchFilterGroupProps = {
@@ -73,7 +74,7 @@ export default function SearchFilterGroup({
       }
 
       cameraConfig.objects.track.forEach((label) => {
-        if (!config.model.all_attributes.includes(label)) {
+        if (!isAttributeLabel(config, label)) {
           labels.add(label);
         }
       });
