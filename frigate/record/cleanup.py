@@ -168,6 +168,10 @@ class RecordingCleanup(threading.Thread):
                 (Recordings.camera == config.name)
                 & (Recordings.stream_type == stream_type)
                 & (
+                    Recordings.start_time
+                    < max(continuous_expire_date, motion_expire_date)
+                )
+                & (
                     (
                         (Recordings.end_time < continuous_expire_date)
                         & (Recordings.motion == 0)
@@ -333,27 +337,45 @@ class RecordingCleanup(threading.Thread):
         expire_before = (
             datetime.datetime.now() - datetime.timedelta(days=expire_days)
         ).timestamp()
-        no_camera_recordings = (
-            Recordings.select(
-                Recordings.id,
-                Recordings.path,
-            )
-            .where(
-                Recordings.camera.not_in(list(self.config.cameras.keys())),  # type: ignore[call-arg, arg-type, misc]
-                Recordings.end_time < expire_before,
-            )
-            .namedtuples()
-            .iterator()
-        )
+
+        # enumerate the distinct cameras with one index seek each
+        db_cameras: list[str] = []
+        last_camera: str | None = None
+        while True:
+            query = Recordings.select(Recordings.camera)
+            if last_camera is not None:
+                query = query.where(Recordings.camera > last_camera)
+            next_camera = query.order_by(Recordings.camera.asc()).limit(1).scalar()
+            if next_camera is None:
+                break
+            db_cameras.append(next_camera)
+            last_camera = next_camera
 
         maybe_empty_dirs = set()
 
         deleted_recordings = set()
-        for recording in no_camera_recordings:
-            recording_path = Path(recording.path)
-            recording_path.unlink(missing_ok=True)
-            deleted_recordings.add(recording.id)
-            maybe_empty_dirs.add(recording_path.parent)
+        for camera in db_cameras:
+            if camera in self.config.cameras:
+                continue
+
+            no_camera_recordings = (
+                Recordings.select(
+                    Recordings.id,
+                    Recordings.path,
+                )
+                .where(
+                    Recordings.camera == camera,
+                    Recordings.end_time < expire_before,
+                )
+                .namedtuples()
+                .iterator()
+            )
+
+            for recording in no_camera_recordings:
+                recording_path = Path(recording.path)
+                recording_path.unlink(missing_ok=True)
+                deleted_recordings.add(recording.id)
+                maybe_empty_dirs.add(recording_path.parent)
 
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
         # delete up to 100,000 at a time
