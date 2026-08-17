@@ -9,6 +9,10 @@ from pathlib import Path
 from peewee import SQL, Case, fn
 
 from frigate.config import FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     RECORD_DIR,
     REPLAY_CAMERA_PREFIX,
@@ -34,6 +38,41 @@ class StorageMaintainer(threading.Thread):
         self.config = config
         self.stop_event = stop_event
         self.camera_storage_stats: dict[str, dict] = {}
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [CameraConfigUpdateEnum.record],
+        )
+
+    def _recording_stream_types(self, camera: str) -> tuple[str, ...]:
+        """Return the stream types the camera is currently recording."""
+        camera_config = self.config.cameras.get(camera)
+
+        if camera_config is None or not camera_config.record.enabled:
+            return ()
+
+        if camera_config.record.sub.enabled:
+            return (STREAM_TYPE_MAIN, STREAM_TYPE_SUB)
+
+        return (STREAM_TYPE_MAIN,)
+
+    def expected_hourly_bandwidth(self) -> float:
+        """Return the MB/hr the cameras are expected to write.
+
+        Only the streams a camera currently records are counted, so toggling
+        recording or sub stream recording is reflected without waiting for the
+        existing segments of a stopped stream to expire.
+        """
+        total = 0.0
+
+        for camera, stats in self.camera_storage_stats.items():
+            stream_bandwidths = stats.get("bandwidth_by_stream", {})
+            total += sum(
+                stream_bandwidths.get(stream_type, 0)
+                for stream_type in self._recording_stream_types(camera)
+            )
+
+        return round(total, 2)
 
     def _recent_stream_bandwidth(
         self, camera: str, stream_type: str, window: int
@@ -175,9 +214,7 @@ class StorageMaintainer(threading.Thread):
         """Return if storage needs cleanup."""
         # currently runs cleanup if less than 1 hour of space is left
         # disk_usage should not spin up disks
-        hourly_bandwidth = sum(
-            [b["bandwidth"] for b in self.camera_storage_stats.values()]
-        )
+        hourly_bandwidth = self.expected_hourly_bandwidth()
         remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / pow(2, 20), 1)
         logger.debug(
             f"Storage cleanup check: {hourly_bandwidth} hourly with remaining storage: {remaining_storage}."
@@ -188,9 +225,7 @@ class StorageMaintainer(threading.Thread):
         """Remove oldest hour of recordings."""
         logger.debug("Starting storage cleanup.")
         deleted_segments_size = 0
-        hourly_bandwidth = sum(
-            [b["bandwidth"] for b in self.camera_storage_stats.values()]
-        )
+        hourly_bandwidth = self.expected_hourly_bandwidth()
 
         recordings = (
             Recordings.select(
@@ -350,10 +385,17 @@ class StorageMaintainer(threading.Thread):
         """Check every 5 minutes if storage needs to be cleaned up."""
         if self.config.safe_mode:
             logger.info("Safe mode enabled, skipping storage maintenance")
+            self.config_subscriber.stop()
             return
 
         self.calculate_camera_bandwidth()
         while not self.stop_event.wait(300):
+            updated_topics = self.config_subscriber.check_for_updates()
+
+            for camera in updated_topics.get(CameraConfigUpdateEnum.record.name, []):
+                if camera in self.camera_storage_stats:
+                    self.camera_storage_stats[camera]["needs_refresh"] = True
+
             if not self.camera_storage_stats or True in [
                 r["needs_refresh"] for r in self.camera_storage_stats.values()
             ]:
@@ -366,4 +408,5 @@ class StorageMaintainer(threading.Thread):
                 )
                 self.reduce_storage_consumption()
 
+        self.config_subscriber.stop()
         logger.info("Exiting storage maintainer...")

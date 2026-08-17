@@ -36,7 +36,10 @@ class TestHttp(unittest.TestCase):
                 "front_door": {
                     "ffmpeg": {
                         "inputs": [
-                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect", "record"],
+                            }
                         ]
                     },
                     "detect": {
@@ -44,6 +47,7 @@ class TestHttp(unittest.TestCase):
                         "width": 1920,
                         "fps": 5,
                     },
+                    "record": {"enabled": True},
                 }
             },
         }
@@ -325,6 +329,42 @@ class TestHttp(unittest.TestCase):
         assert streams[STREAM_TYPE_SUB]["usage"] == 120
         assert streams[STREAM_TYPE_SUB]["bandwidth"] is None
         assert streams[STREAM_TYPE_MAIN]["bandwidth"] == 7200
+
+    def test_expected_bandwidth_follows_recording_config(self):
+        """Only the streams a camera currently records count toward cleanup."""
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+        record = config.cameras["front_door"].record
+
+        time_keep = datetime.datetime.now().timestamp()
+        _insert_mock_recording(
+            "1234567.frontdoor",
+            os.path.join(self.test_dir, "main.tmp"),
+            time_keep,
+            time_keep + 10,
+            seg_size=20,
+            seg_dur=10,
+        )
+        _insert_mock_recording(
+            "1234568.frontdoor",
+            os.path.join(self.test_dir, "sub.tmp"),
+            time_keep,
+            time_keep + 10,
+            seg_size=2,
+            seg_dur=10,
+            stream_type=STREAM_TYPE_SUB,
+        )
+
+        storage.calculate_camera_bandwidth()
+
+        # sub segments are still on disk but the camera no longer records them
+        assert storage.expected_hourly_bandwidth() == 7200
+
+        record.sub.enabled = True
+        assert storage.expected_hourly_bandwidth() == 7920
+
+        record.enabled = False
+        assert storage.expected_hourly_bandwidth() == 0
 
     def test_camera_usages_with_no_recordings(self):
         """A camera with no segments reports zero usage and no streams."""
