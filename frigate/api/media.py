@@ -598,7 +598,15 @@ def _build_vod_clip(
     clip: dict[str, Any] = {"type": "source", "path": row.path}
     if plan.clip_from_ms is not None:
         clip["clipFrom"] = plan.clip_from_ms
-    clip["keyFrameDurations"] = [plan.duration_ms]
+    if plan.key_frame_durations is not None:
+        # real gaps enable keyframe-aligned sub-file segments (bootstrap
+        # ladder); the whole-clip fallback keeps one segment per file,
+        # the only safe cut without an index
+        if plan.first_key_frame_offset_ms > 0:
+            clip["firstKeyFrameOffset"] = plan.first_key_frame_offset_ms
+        clip["keyFrameDurations"] = plan.key_frame_durations
+    else:
+        clip["keyFrameDurations"] = [plan.duration_ms]
     logger.debug(
         "VOD: added clip %s duration_ms=%s clipFrom=%s",
         row.path,
@@ -740,14 +748,15 @@ async def _vod_response(
             NGINX_VOD_MAX_CLIPS,
         )
 
+    # segmentation comes from the vod_* nginx directives plus per-clip
+    # keyFrameDurations; a segment_duration field here was always ignored
+    # (nginx-vod parses only camelCase segmentDuration)
     hour_ago = datetime.now() - timedelta(hours=1)
     content = {
         "cache": hour_ago.timestamp() > start_ts,
         "discontinuity": force_discontinuity or use_discontinuity,
         "consistentSequenceMediaInfo": True,
         "durations": durations,
-        # aligns segments to recording file boundaries
-        "segment_duration": max(durations),
         "sequences": [{"clips": clips}],
     }
     if use_discontinuity:

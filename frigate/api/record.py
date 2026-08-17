@@ -71,7 +71,7 @@ def get_recordings_storage_usage(request: Request):
 
 
 @router.get("/recordings/summary", dependencies=[Depends(allow_any_authenticated())])
-def all_recordings_summary(
+async def all_recordings_summary(
     request: Request,
     params: MediaRecordingsSummaryQueryParams = Depends(),
     allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
@@ -88,18 +88,23 @@ def all_recordings_summary(
     else:
         camera_list = allowed_cameras
 
-    time_range_query = (
-        Recordings.select(
-            fn.MIN(Recordings.start_time).alias("min_time"),
-            fn.MAX(Recordings.start_time).alias("max_time"),
+    min_time: float | None = None
+    max_time: float | None = None
+    for camera in camera_list:
+        cam_min = (
+            Recordings.select(fn.MIN(Recordings.start_time))
+            .where(Recordings.camera == camera)
+            .scalar()
         )
-        .where(Recordings.camera << camera_list)
-        .dicts()
-        .get()
-    )
-
-    min_time = time_range_query.get("min_time")
-    max_time = time_range_query.get("max_time")
+        if cam_min is None:
+            continue
+        cam_max = (
+            Recordings.select(fn.MAX(Recordings.start_time))
+            .where(Recordings.camera == camera)
+            .scalar()
+        )
+        min_time = cam_min if min_time is None else min(min_time, cam_min)
+        max_time = cam_max if max_time is None else max(max_time, cam_max)
 
     if min_time is None or max_time is None:
         return JSONResponse(content={})
@@ -109,22 +114,60 @@ def all_recordings_summary(
     days: dict[str, bool] = {}
 
     for period_start, period_end, period_offset in dst_periods:
-        day_expr = ((Recordings.start_time + period_offset) / 86400).cast("int")
+        first_start = max(min_time, period_start - MAX_SEGMENT_DURATION)
+        first_day = int((first_start + period_offset) // 86400)
+        last_day = int((min(max_time, period_end) + period_offset) // 86400)
 
-        period_query = (
-            Recordings.select(day_expr.alias("day_idx"))
-            .where(
-                (Recordings.camera << camera_list)
-                & (Recordings.end_time >= period_start)
-                & (Recordings.start_time <= period_end)
+        day_idx = first_day
+        while day_idx <= last_day:
+            day_str = (dt.date(1970, 1, 1) + dt.timedelta(days=day_idx)).isoformat()
+            day_start = day_idx * 86400 - period_offset
+            day_end = day_start + 86400
+
+            if day_str in days:
+                day_idx += 1
+                continue
+
+            if day_end <= period_end:
+                upper = Recordings.start_time < day_end
+            else:
+                upper = Recordings.start_time <= period_end
+
+            has_recordings = (
+                Recordings.select(Recordings.id)
+                .where(
+                    (Recordings.camera << camera_list)
+                    & (Recordings.end_time >= period_start)
+                    & (Recordings.start_time >= day_start)
+                    & upper
+                )
+                .exists()
             )
-            .distinct()
-            .namedtuples()
-        )
+            if has_recordings:
+                days[day_str] = True
+                day_idx += 1
+                continue
 
-        for g in period_query:
-            day_str = (dt.date(1970, 1, 1) + dt.timedelta(days=g.day_idx)).isoformat()
-            days[day_str] = True
+            # empty day
+            next_start: float | None = None
+            for camera in camera_list:
+                cam_next = (
+                    Recordings.select(fn.MIN(Recordings.start_time))
+                    .where(
+                        Recordings.camera == camera,
+                        Recordings.start_time >= day_end,
+                        Recordings.start_time <= period_end,
+                    )
+                    .scalar()
+                )
+                if cam_next is not None and (
+                    next_start is None or cam_next < next_start
+                ):
+                    next_start = cam_next
+
+            if next_start is None:
+                break
+            day_idx = max(day_idx + 1, int((next_start + period_offset) // 86400))
 
     return JSONResponse(content=dict(sorted(days.items())))
 
@@ -373,22 +416,22 @@ async def no_recordings(
     )
     scale = params.scale
 
-    clauses = [
-        (Recordings.end_time >= after) & (Recordings.start_time <= before),
-        (Recordings.camera << camera_list),
-    ]
+    recordings: list[tuple[float, float]] = []
+    for camera in camera_list:
+        recordings.extend(
+            Recordings.select(Recordings.start_time, Recordings.end_time)
+            .where(
+                Recordings.camera == camera,
+                Recordings.start_time >= after - MAX_SEGMENT_DURATION,
+                Recordings.end_time >= after,
+                Recordings.start_time <= before,
+            )
+            .tuples()
+            .iterator()
+        )
 
-    # Get recording start times
-    data: list[Recordings] = (
-        Recordings.select(Recordings.start_time, Recordings.end_time)
-        .where(reduce(operator.and_, clauses))
-        .order_by(Recordings.start_time.asc())
-        .dicts()
-        .iterator()
-    )
-
-    # Convert recordings to list of (start, end) tuples, ordered by start_time
-    recordings = [(r["start_time"], r["end_time"]) for r in data]
+    # the merge pass below expects a single start-ordered timeline
+    recordings.sort()
 
     # Merge overlapping/adjacent recordings into covered intervals. The query
     # orders by start_time, so a single pass merges them

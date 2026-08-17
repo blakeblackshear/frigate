@@ -303,3 +303,74 @@ class TestVodManifestPolicy(CoverageDbTestCase):
         mapping = self._mapping(1000.0, 1020.0, stream="sub")
         assert mapping["discontinuity"] is False
         assert "initialClipIndex" not in mapping
+
+
+class TestClipKeyFrames(unittest.TestCase):
+    """Keyframe data emitted for nginx-vod segmentation."""
+
+    def _row(self, keyframes):
+        return SimpleNamespace(
+            path="/tmp/kf.mp4",
+            start_time=1000.0,
+            end_time=1010.0,
+            duration=10.0,
+            keyframes=keyframes,
+        )
+
+    def test_whole_file_clip_emits_keyframe_gaps(self):
+        keyframes = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        plan = plan_clip(self._row(keyframes), 1000.0, 1010.0)
+        assert plan.clip_from_ms is None
+        assert plan.key_frame_durations == [1000] * 9
+        assert plan.first_key_frame_offset_ms == 0
+
+    def test_mid_file_clip_offsets_are_clip_relative(self):
+        # start 3.5s in: clipFrom snaps back to the 3000ms keyframe, so
+        # the emitted offsets must be relative to that snapped start
+        keyframes = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+        plan = plan_clip(self._row(keyframes), 1003.5, 1010.0)
+        assert plan.clip_from_ms == 3000
+        assert plan.duration_ms == 7000
+        assert plan.key_frame_durations == [1000] * 6
+        assert plan.first_key_frame_offset_ms == 0
+
+    def test_no_index_reports_none(self):
+        plan = plan_clip(self._row(None), 1000.0, 1010.0)
+        assert plan.key_frame_durations is None
+
+    def test_single_keyframe_in_range_reports_none(self):
+        # one cut point cannot split anything; the manifest falls back
+        # to a whole-clip declaration
+        plan = plan_clip(self._row([0]), 1000.0, 1010.0)
+        assert plan.key_frame_durations is None
+
+    def test_keyframe_on_clip_end_excluded(self):
+        # a keyframe landing exactly on the clip end would only declare
+        # a zero-length tail segment
+        plan = plan_clip(self._row([0, 5000, 10000]), 1000.0, 1010.0)
+        assert plan.key_frame_durations == [5000]
+
+
+class TestVodManifestKeyFrames(CoverageDbTestCase):
+    """Mapping emission of real vs placeholder keyFrameDurations."""
+
+    def _clips(self, start, end):
+        response = asyncio.run(_vod_response("front_door", start, end))
+        return json.loads(response.body)["sequences"][0]["clips"]
+
+    def test_indexed_row_emits_real_gaps(self):
+        self._insert(
+            "m1",
+            1000.0,
+            1010.0,
+            "main",
+            keyframes=[0, 2000, 4000, 6000, 8000],
+        )
+        clips = self._clips(1000.0, 1010.0)
+        assert clips[0]["keyFrameDurations"] == [2000, 2000, 2000, 2000]
+        assert "firstKeyFrameOffset" not in clips[0]
+
+    def test_unindexed_row_keeps_whole_clip_placeholder(self):
+        self._insert("m1", 1000.0, 1010.0, "main")
+        clips = self._clips(1000.0, 1010.0)
+        assert clips[0]["keyFrameDurations"] == [10000]
