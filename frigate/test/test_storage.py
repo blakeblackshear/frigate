@@ -283,6 +283,49 @@ class TestHttp(unittest.TestCase):
             == MAX_CALCULATED_BANDWIDTH
         )
 
+    def test_stream_bandwidth_is_none_without_a_cached_sample(self):
+        """A stream that appears after the bandwidth cache freezes has no estimate.
+
+        Sub stream recording can be toggled on at runtime, so the cache can hold
+        a main-only sample while sub segments are already landing on disk.
+        Reporting 0 there would claim the sub stream costs nothing.
+        """
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        time_keep = datetime.datetime.now().timestamp()
+        for i in range(60):
+            _insert_mock_recording(
+                f"main_{i}.frontdoor",
+                os.path.join(self.test_dir, f"main_{i}.tmp"),
+                time_keep + i * 10,
+                time_keep + i * 10 + 10,
+                seg_size=20,
+                seg_dur=10,
+            )
+
+        # 50 or more segments flips needs_refresh off, freezing the cache
+        storage.calculate_camera_bandwidth()
+        assert storage.camera_storage_stats["front_door"]["needs_refresh"] is False
+
+        for i in range(60):
+            _insert_mock_recording(
+                f"sub_{i}.frontdoor",
+                os.path.join(self.test_dir, f"sub_{i}.tmp"),
+                time_keep + 5000 + i * 10,
+                time_keep + 5000 + i * 10 + 10,
+                seg_size=2,
+                seg_dur=10,
+                stream_type=STREAM_TYPE_SUB,
+            )
+
+        storage.calculate_camera_bandwidth()
+        streams = storage.calculate_camera_usages()["front_door"]["streams"]
+
+        assert streams[STREAM_TYPE_SUB]["usage"] == 120
+        assert streams[STREAM_TYPE_SUB]["bandwidth"] is None
+        assert streams[STREAM_TYPE_MAIN]["bandwidth"] == 7200
+
     def test_camera_usages_with_no_recordings(self):
         """A camera with no segments reports zero usage and no streams."""
         config = FrigateConfig(**self.minimal_config)

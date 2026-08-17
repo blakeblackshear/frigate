@@ -204,9 +204,12 @@ export function CombinedStorageGraph({
 
   const getStreamSplit = useCallback(
     (row: StorageRow, field: keyof StreamStorage) => {
-      const sub = row.streams?.sub;
+      const mainValue = row.streams?.main?.[field];
+      const subValue = row.streams?.sub?.[field];
 
-      if (!sub) {
+      // omit the split entirely when either side is unknown, rather than
+      // showing a zero that would read as "this stream costs nothing"
+      if (mainValue == null || subValue == null) {
         return null;
       }
 
@@ -216,13 +219,13 @@ export function CombinedStorageGraph({
             <span className="text-muted-foreground">
               {t("quality.main", { ns: "components/player" })}
             </span>{" "}
-            {getUnitSize(row.streams?.main?.[field] ?? 0)}
+            {getUnitSize(mainValue)}
           </div>
           <div>
             <span className="text-muted-foreground">
               {t("quality.sub", { ns: "components/player" })}
             </span>{" "}
-            {getUnitSize(sub[field])}
+            {getUnitSize(subValue)}
           </div>
         </div>
       );

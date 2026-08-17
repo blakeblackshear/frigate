@@ -156,11 +156,13 @@ class StorageMaintainer(threading.Thread):
                     "bandwidth", 0
                 ),
                 # only streams with segments on disk are reported, so a camera
-                # keeps its sub entry until sub retention expires those segments
+                # keeps its sub entry until sub retention expires those segments.
+                # bandwidth is null rather than 0 when the cache holds no sample
+                # for the stream, since 0 would claim it writes nothing
                 "streams": {
                     stream_type: {
                         "usage": stream_usages[stream_type],
-                        "bandwidth": stream_bandwidths.get(stream_type, 0),
+                        "bandwidth": stream_bandwidths.get(stream_type),
                     }
                     for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB)
                     if stream_usages.get(stream_type)

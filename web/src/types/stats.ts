@@ -103,7 +103,7 @@ export type StorageStats = {
 
 export type StreamStorage = {
   usage: number;
-  bandwidth: number;
+  bandwidth: number | null;
 };
 
 export type CameraStorage = {
