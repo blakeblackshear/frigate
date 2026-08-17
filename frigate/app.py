@@ -335,6 +335,7 @@ class FrigateApp:
             self.ptz_metrics,
             comms,
         )
+        self.dispatcher.start_communicators()
 
     def init_profile_manager(self) -> None:
         self.profile_manager = ProfileManager(
