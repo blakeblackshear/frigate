@@ -163,7 +163,13 @@ export default function ClassificationSelectionDialog({
           <DropdownMenuLabel>
             {dialogLabel ?? t("categorizeImageAs")}
           </DropdownMenuLabel>
-          <div className={cn("flex flex-col", isMobile && "gap-2 pb-4")}>
+          <div
+            className={cn(
+              "flex flex-col",
+              isMobile &&
+                "max-h-[40dvh] gap-2 overflow-y-auto overflow-x-hidden pb-4",
+            )}
+          >
             {filteredClasses
               .sort((a, b) => {
                 if (a === "none") return 1;
