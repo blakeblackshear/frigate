@@ -738,6 +738,53 @@ class TestProfileManager(unittest.TestCase):
         assert "objects" in api_base
         assert api_base["objects"]["track"] == ["person"]
 
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_update_config_reapplies_active_profile(self, mock_persist):
+        """Replacing the config preserves the active profile overrides."""
+        self.manager.activate_profile("armed")
+
+        new_config = FrigateConfig(**self.config_data)
+        self.manager.update_config(new_config)
+
+        assert self.manager.config.active_profile == "armed"
+        assert self.manager.config.cameras["front"].notifications.enabled is True
+        assert self.manager.config.cameras["front"].objects.track == [
+            "person",
+            "car",
+            "package",
+        ]
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_update_config_deactivates_removed_profile(self, mock_persist):
+        """Replacing the config clears the active profile if it no longer exists."""
+        self.manager.activate_profile("armed")
+
+        new_config_data = json.loads(json.dumps(self.config_data))
+        del new_config_data["profiles"]["armed"]
+        del new_config_data["cameras"]["front"]["profiles"]["armed"]
+        del new_config_data["cameras"]["back"]["profiles"]["armed"]
+
+        new_config = FrigateConfig(**new_config_data)
+        self.manager.update_config(new_config)
+
+        assert self.manager.config.active_profile is None
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_enabled_state_is_published_via_dispatcher_when_profile_changes(
+        self, mock_persist
+    ):
+        """Enabled state updates are published through the dispatcher when present."""
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            enabled=False
+        )
+        dispatcher = MagicMock()
+        self.manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+
+        self.manager.activate_profile("away")
+
+        dispatcher.publish.assert_any_call("front/enabled/state", "OFF", retain=True)
+
     def test_base_configs_for_api_are_json_serializable(self):
         """API base configs are JSON-serializable (mode='json')."""
         import json
