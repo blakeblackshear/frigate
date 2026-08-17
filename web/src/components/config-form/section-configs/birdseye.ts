@@ -10,29 +10,26 @@ const birdseye: SectionConfigOverrides = {
         severity: "info",
         condition: (ctx) => {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
-          const mode = ctx.formData?.mode;
-          if (!mode || typeof mode !== "object" || Array.isArray(mode)) {
+          const modes = ctx.formData?.modes;
+          if (!Array.isArray(modes)) {
             return false;
           }
 
           return (
-            (mode.objects === true || mode.stationary_objects === true) &&
+            modes.includes("all_objects") &&
             ctx.fullCameraConfig.detect?.enabled === false
           );
         },
       },
     ],
     restartRequired: [],
-    fieldOrder: ["enabled", "mode", "order"],
+    fieldOrder: ["enabled", "modes", "order"],
     hiddenFields: ["order"],
     advancedFields: [],
-    overrideFields: ["enabled", "mode"],
+    overrideFields: ["enabled", "modes"],
     uiSchema: {
-      mode: {
-        continuous: { "ui:size": "xs" },
-        motion: { "ui:size": "xs" },
-        objects: { "ui:size": "xs" },
-        stationary_objects: { "ui:size": "xs" },
+      modes: {
+        "ui:widget": "birdseyeModes",
       },
     },
   },
@@ -43,7 +40,7 @@ const birdseye: SectionConfigOverrides = {
       "width",
       "height",
       "quality",
-      "mode",
+      "modes",
       "layout",
       "inactivity_threshold",
       "idle_heartbeat_fps",
@@ -59,7 +56,7 @@ const birdseye: SectionConfigOverrides = {
       "idle_heartbeat_fps",
     ],
     uiSchema: {
-      mode: {
+      modes: {
         "ui:after": { render: "BirdseyeCameraReorder" },
       },
     },
