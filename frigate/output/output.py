@@ -188,6 +188,11 @@ class OutputProcess(FrigateProcess):
                 self.config.birdseye = birdseye_config
                 logger.debug("Applied dynamic birdseye config update")
 
+            # drain review updates every iteration, not just when birdseye is
+            # being consumed, so a dropped end never strands a camera
+            if birdseye is not None:
+                birdseye.check_review_updates()
+
             # check if there is an updated config
             updates = config_subscriber.check_for_updates()
 

@@ -252,16 +252,14 @@ birdseye:
   # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
   quality: 8
   # Optional: Activity types that include cameras in Birdseye (default: shown below)
-  # Multiple activity types can be enabled at the same time.
-  mode:
-    # Optional: All cameras are included always (default: shown below)
-    continuous: False
-    # Optional: Cameras are included if motion was detected in the last 30 seconds (default: shown below)
-    motion: False
-    # Optional: Cameras are included if they have had an active tracked object within the last 30 seconds (default: shown below)
-    objects: True
-    # Optional: Cameras are included while they have a stationary tracked object (default: shown below)
-    stationary_objects: False
+  # Multiple activity types can be listed at the same time.
+  #   continuous:  all cameras are included always
+  #   motion:      included if motion was detected within the inactivity threshold
+  #   all_objects: included if a tracked object was present within the inactivity threshold
+  #   alerts:      included while an alert review item is in progress
+  #   detections:  included while a detection review item is in progress
+  modes:
+    - all_objects
   # Optional: Threshold for camera activity to stop showing camera (default: shown below)
   inactivity_threshold: 30
   # Optional: Configure the birdseye layout

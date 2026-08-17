@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from frigate.config.camera.birdseye import birdseye_modes_to_mqtt_payload
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdatePublisher,
@@ -42,9 +43,11 @@ SECTION_STATE_TOPICS: dict[str, list[tuple[str, Callable[[Any], Any]]]] = {
     "birdseye": [
         ("birdseye", lambda c: "ON" if c.birdseye.enabled else "OFF"),
         (
-            "birdseye_mode",
+            "birdseye_modes",
             lambda c: (
-                c.birdseye.mode.to_mqtt_payload() if c.birdseye.enabled else "OFF"
+                birdseye_modes_to_mqtt_payload(c.birdseye.modes)
+                if c.birdseye.enabled
+                else "OFF"
             ),
         ),
     ],
