@@ -4,7 +4,12 @@ import multiprocessing as mp
 import unittest
 from unittest.mock import Mock
 
-from frigate.config import BirdseyeModeConfig, FrigateConfig
+from frigate.config import (
+    BirdseyeModeEnum,
+    FrigateConfig,
+    birdseye_modes_from_mqtt_payload,
+    birdseye_modes_to_mqtt_payload,
+)
 from frigate.output.birdseye import (
     Birdseye,
     BirdseyeActivity,
@@ -215,11 +220,7 @@ class TestBirdseyeActivity(unittest.TestCase):
             "mqtt": {"enabled": False},
             "birdseye": {
                 "enabled": True,
-                "mode": {
-                    "motion": True,
-                    "objects": True,
-                    "stationary_objects": True,
-                },
+                "modes": ["motion", "all_objects"],
             },
             "cameras": {
                 "front": {
@@ -234,53 +235,93 @@ class TestBirdseyeActivity(unittest.TestCase):
         }
         self.manager = BirdsEyeFrameManager(FrigateConfig(**config), mp.Event())
 
-    def test_existing_modes_keep_their_activity_rules(self):
-        continuous = BirdseyeModeConfig(continuous=True)
-        motion = BirdseyeModeConfig(motion=True)
-        objects = BirdseyeModeConfig(objects=True)
+    def test_each_mode_matches_only_its_own_activity(self):
+        motion_activity = BirdseyeActivity(
+            has_object=False, has_motion=True, severity=None
+        )
+        object_activity = BirdseyeActivity(
+            has_object=True, has_motion=False, severity=None
+        )
+        no_activity = BirdseyeActivity(
+            has_object=False, has_motion=False, severity=None
+        )
 
-        no_activity = BirdseyeActivity(False, False, False)
-        motion_activity = BirdseyeActivity(False, False, True)
-        stationary_activity = BirdseyeActivity(False, True, False)
-        active_object_activity = BirdseyeActivity(True, False, False)
+        assert self.manager.camera_threshold_active(
+            [BirdseyeModeEnum.motion], motion_activity
+        )
+        assert not self.manager.camera_threshold_active(
+            [BirdseyeModeEnum.motion], object_activity
+        )
+        assert self.manager.camera_threshold_active(
+            [BirdseyeModeEnum.all_objects], object_activity
+        )
+        assert not self.manager.camera_threshold_active(
+            [BirdseyeModeEnum.all_objects], motion_activity
+        )
+        assert self.manager.camera_live_active(
+            [BirdseyeModeEnum.continuous], no_activity
+        )
 
-        assert self.manager.camera_active(continuous, no_activity)
-        assert self.manager.camera_active(motion, motion_activity)
-        assert not self.manager.camera_active(motion, stationary_activity)
-        assert self.manager.camera_active(objects, active_object_activity)
-        assert not self.manager.camera_active(objects, stationary_activity)
+    def test_continuous_is_not_threshold_activity(self):
+        no_activity = BirdseyeActivity(
+            has_object=False, has_motion=False, severity=None
+        )
+
+        assert not self.manager.camera_threshold_active(
+            [BirdseyeModeEnum.continuous], no_activity
+        )
 
     def test_modes_can_be_combined(self):
-        mode = BirdseyeModeConfig(motion=True, stationary_objects=True)
+        modes = [BirdseyeModeEnum.motion, BirdseyeModeEnum.all_objects]
 
-        assert self.manager.camera_active(mode, BirdseyeActivity(False, False, True))
-        assert self.manager.camera_active(mode, BirdseyeActivity(False, True, False))
-        assert not self.manager.camera_active(
-            mode, BirdseyeActivity(False, False, False)
+        assert self.manager.camera_threshold_active(
+            modes, BirdseyeActivity(has_object=False, has_motion=True, severity=None)
+        )
+        assert self.manager.camera_threshold_active(
+            modes, BirdseyeActivity(has_object=True, has_motion=False, severity=None)
+        )
+        assert not self.manager.camera_threshold_active(
+            modes, BirdseyeActivity(has_object=False, has_motion=False, severity=None)
         )
 
-    def test_stationary_objects_are_independent_from_active_objects(self):
-        stationary_objects = BirdseyeModeConfig(stationary_objects=True)
+    def test_empty_modes_never_activate(self):
+        activity = BirdseyeActivity(has_object=True, has_motion=True, severity=None)
 
-        assert self.manager.camera_active(
-            stationary_objects, BirdseyeActivity(False, True, False)
+        assert not self.manager.camera_threshold_active([], activity)
+        assert not self.manager.camera_live_active([], activity)
+
+    def test_alerts_and_detections_match_review_severity(self):
+        alert = BirdseyeActivity(has_object=False, has_motion=False, severity="alert")
+        detection = BirdseyeActivity(
+            has_object=False, has_motion=False, severity="detection"
         )
-        assert not self.manager.camera_active(
-            stationary_objects, BirdseyeActivity(True, False, False)
+        idle = BirdseyeActivity(has_object=False, has_motion=False, severity=None)
+
+        assert self.manager.camera_live_active([BirdseyeModeEnum.alerts], alert)
+        assert not self.manager.camera_live_active([BirdseyeModeEnum.alerts], detection)
+        assert not self.manager.camera_live_active([BirdseyeModeEnum.alerts], idle)
+        assert self.manager.camera_live_active([BirdseyeModeEnum.detections], detection)
+        assert not self.manager.camera_live_active([BirdseyeModeEnum.detections], alert)
+
+    def test_review_severity_is_not_threshold_activity(self):
+        alert = BirdseyeActivity(has_object=False, has_motion=False, severity="alert")
+
+        assert not self.manager.camera_threshold_active(
+            [BirdseyeModeEnum.alerts, BirdseyeModeEnum.motion], alert
         )
 
-    def test_write_data_preserves_active_and_confirms_stationary_activity(self):
+    def test_all_objects_covers_active_and_stationary_objects(self):
         birdseye = Birdseye.__new__(Birdseye)
         birdseye.birdseye_manager = Mock()
         birdseye.birdseye_manager.update.return_value = (False, False)
         birdseye._idle_interval = None
+        birdseye.review_severity = {}
         frame = Mock()
 
         birdseye.write_data(
             "front",
             [
                 {"stationary": True, "false_positive": True},
-                {"stationary": False, "false_positive": True},
                 {"stationary": True, "false_positive": False},
             ],
             [[0, 0, 10, 10]],
@@ -289,26 +330,36 @@ class TestBirdseyeActivity(unittest.TestCase):
         )
 
         birdseye.birdseye_manager.update.assert_called_once_with(
-            "front", BirdseyeActivity(True, True, True), 1.0, frame
+            "front",
+            BirdseyeActivity(has_object=True, has_motion=True, severity=None),
+            1.0,
+            frame,
         )
 
-    def test_stationary_false_positive_does_not_activate_birdseye(self):
+    def test_false_positives_do_not_count_as_objects(self):
         birdseye = Birdseye.__new__(Birdseye)
         birdseye.birdseye_manager = Mock()
         birdseye.birdseye_manager.update.return_value = (False, False)
         birdseye._idle_interval = None
+        birdseye.review_severity = {}
         frame = Mock()
 
         birdseye.write_data(
             "front",
-            [{"stationary": True, "false_positive": True}],
+            [
+                {"stationary": True, "false_positive": True},
+                {"stationary": False, "false_positive": True},
+            ],
             [],
             1.0,
             frame,
         )
 
         birdseye.birdseye_manager.update.assert_called_once_with(
-            "front", BirdseyeActivity(False, False, False), 1.0, frame
+            "front",
+            BirdseyeActivity(has_object=False, has_motion=False, severity=None),
+            1.0,
+            frame,
         )
 
 
@@ -318,7 +369,7 @@ class TestBirdseyeCameraOrder(unittest.TestCase):
     def setUp(self):
         config = {
             "mqtt": {"enabled": False},
-            "birdseye": {"enabled": True, "mode": {"continuous": True}},
+            "birdseye": {"enabled": True, "modes": ["continuous"]},
             "cameras": {
                 camera: {
                     "ffmpeg": {
@@ -340,6 +391,7 @@ class TestBirdseyeCameraOrder(unittest.TestCase):
             camera_data["current_frame"] = None
             camera_data["current_frame_time"] = 1.0
             camera_data["last_active_frame"] = 1.0
+            camera_data["live_active"] = True
 
     def layout_order(self) -> list[str]:
         """Return the cameras in the order the current layout renders them."""
@@ -377,3 +429,155 @@ class TestBirdseyeCameraOrder(unittest.TestCase):
 
         assert not layout_changed
         assert self.layout_order() == ["back", "front", "side"]
+
+
+class TestBirdseyeLiveActivity(unittest.TestCase):
+    """Test that live activity bypasses the inactivity threshold."""
+
+    def setUp(self):
+        config = {
+            "mqtt": {"enabled": False},
+            "birdseye": {
+                "enabled": True,
+                "modes": ["continuous"],
+                "inactivity_threshold": 30,
+            },
+            "cameras": {
+                camera: {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                }
+                for camera in ("back", "front")
+            },
+        }
+        self.config = FrigateConfig(**config)
+        self.manager = BirdsEyeFrameManager(self.config, mp.Event())
+
+        for camera_data in self.manager.cameras.values():
+            camera_data["current_frame"] = None
+            camera_data["current_frame_time"] = 1000.0
+            camera_data["last_active_frame"] = 0.0
+            camera_data["live_active"] = False
+
+    def test_live_active_camera_is_shown_without_a_recent_active_frame(self):
+        self.manager.cameras["front"]["live_active"] = True
+
+        self.manager.update_frame()
+
+        assert self.manager.active_cameras == {"front"}
+
+    def test_live_active_camera_drops_out_immediately(self):
+        self.manager.cameras["front"]["live_active"] = True
+        self.manager.update_frame()
+        assert self.manager.active_cameras == {"front"}
+
+        self.manager.cameras["front"]["live_active"] = False
+        self.manager.update_frame()
+
+        assert self.manager.active_cameras == set()
+
+    def test_threshold_activity_lingers_then_expires(self):
+        self.manager.cameras["front"]["last_active_frame"] = 980.0
+        self.manager.update_frame()
+        assert self.manager.active_cameras == {"front"}
+
+        self.manager.cameras["front"]["last_active_frame"] = 960.0
+        self.manager.update_frame()
+
+        assert self.manager.active_cameras == set()
+
+    def test_max_cameras_ranks_live_active_cameras_first(self):
+        self.config.birdseye.layout.max_cameras = 1
+        self.manager.cameras["front"]["live_active"] = True
+        self.manager.cameras["back"]["last_active_frame"] = 995.0
+
+        self.manager.update_frame()
+
+        assert self.manager.active_cameras == {"front"}
+
+
+class TestBirdseyeModePayload(unittest.TestCase):
+    """Test the MQTT payload contract for Birdseye activity modes."""
+
+    def test_single_mode_round_trips(self):
+        modes = birdseye_modes_from_mqtt_payload("ALERTS")
+
+        assert modes == [BirdseyeModeEnum.alerts]
+        assert birdseye_modes_to_mqtt_payload(modes) == "ALERTS"
+
+    def test_combined_modes_are_published_in_enum_order(self):
+        modes = birdseye_modes_from_mqtt_payload("ALERTS,MOTION")
+
+        assert modes == [BirdseyeModeEnum.alerts, BirdseyeModeEnum.motion]
+        assert birdseye_modes_to_mqtt_payload(modes) == "MOTION,ALERTS"
+
+    def test_none_round_trips_to_an_empty_list(self):
+        assert birdseye_modes_from_mqtt_payload("NONE") == []
+        assert birdseye_modes_to_mqtt_payload([]) == "NONE"
+
+    def test_invalid_payloads_are_rejected(self):
+        for payload in (
+            "UNKNOWN",
+            "motion",
+            "MOTION_OBJECTS",
+            "NONE,MOTION",
+            "MOTION,MOTION",
+            "MOTION,",
+            "",
+        ):
+            with self.subTest(payload=payload):
+                assert birdseye_modes_from_mqtt_payload(payload) is None
+
+
+class TestBirdseyeReviewSeverity(unittest.TestCase):
+    """Test that review updates drive the per-camera severity map."""
+
+    def setUp(self):
+        self.birdseye = Birdseye.__new__(Birdseye)
+        self.birdseye.review_subscriber = Mock()
+        self.birdseye.review_severity = {}
+        self.birdseye.birdseye_manager = Mock()
+        self.birdseye.birdseye_manager.update.return_value = (False, False)
+        self.birdseye._idle_interval = None
+
+    def _drain(self, *updates):
+        self.birdseye.review_subscriber.check_for_update.side_effect = [*updates, None]
+        self.birdseye.check_review_updates()
+
+    def test_new_segment_sets_severity(self):
+        self._drain({"type": "new", "after": {"camera": "front", "severity": "alert"}})
+
+        assert self.birdseye.review_severity == {"front": "alert"}
+
+    def test_update_upgrades_severity(self):
+        self._drain(
+            {"type": "new", "after": {"camera": "front", "severity": "detection"}},
+            {"type": "update", "after": {"camera": "front", "severity": "alert"}},
+        )
+
+        assert self.birdseye.review_severity == {"front": "alert"}
+
+    def test_end_clears_severity(self):
+        self._drain(
+            {"type": "new", "after": {"camera": "front", "severity": "alert"}},
+            {"type": "end", "after": {"camera": "front", "severity": "alert"}},
+        )
+
+        assert self.birdseye.review_severity == {}
+
+    def test_write_data_passes_the_tracked_severity(self):
+        self.birdseye.review_severity = {"front": "alert"}
+        frame = Mock()
+
+        self.birdseye.write_data("front", [], [], 1.0, frame)
+
+        self.birdseye.birdseye_manager.update.assert_called_once_with(
+            "front",
+            BirdseyeActivity(has_object=False, has_motion=False, severity="alert"),
+            1.0,
+            frame,
+        )

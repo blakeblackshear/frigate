@@ -17,9 +17,11 @@ import cv2
 import numpy as np
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import BirdseyeModeConfig, FfmpegConfig, FrigateConfig
+from frigate.comms.review_updater import ReviewDataSubscriber
+from frigate.config import BirdseyeModeEnum, FfmpegConfig, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE, INSTALL_DIR, UPDATE_BIRDSEYE_LAYOUT
 from frigate.output.ws_auth import ws_has_camera_access
+from frigate.review.types import SeverityEnum
 from frigate.util.image import (
     SharedMemoryFrameManager,
     copy_yuv_to_position,
@@ -33,9 +35,9 @@ logger = logging.getLogger(__name__)
 class BirdseyeActivity:
     """Activity signals used to decide whether a camera is shown in Birdseye."""
 
-    has_active_object: bool
-    has_stationary_object: bool
+    has_object: bool
     has_motion: bool
+    severity: str | None
 
 
 def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
@@ -367,6 +369,7 @@ class BirdsEyeFrameManager:
                 settings.detect.height,
             ],
             "last_active_frame": 0.0,
+            "live_active": False,
             "current_frame": 0.0,
             "layout_frame": 0.0,
             "channel_dims": {
@@ -418,16 +421,32 @@ class BirdsEyeFrameManager:
             channel_dims,
         )
 
-    def camera_active(
+    def camera_threshold_active(
         self,
-        mode: BirdseyeModeConfig,
+        modes: list[BirdseyeModeEnum],
         activity: BirdseyeActivity,
     ) -> bool:
+        """Return whether activity subject to inactivity_threshold is present."""
+        return (BirdseyeModeEnum.motion in modes and activity.has_motion) or (
+            BirdseyeModeEnum.all_objects in modes and activity.has_object
+        )
+
+    def camera_live_active(
+        self,
+        modes: list[BirdseyeModeEnum],
+        activity: BirdseyeActivity,
+    ) -> bool:
+        """Return whether activity that ends the moment it stops is present."""
         return (
-            mode.continuous
-            or (mode.motion and activity.has_motion)
-            or (mode.objects and activity.has_active_object)
-            or (mode.stationary_objects and activity.has_stationary_object)
+            BirdseyeModeEnum.continuous in modes
+            or (
+                BirdseyeModeEnum.alerts in modes
+                and activity.severity == SeverityEnum.alert
+            )
+            or (
+                BirdseyeModeEnum.detections in modes
+                and activity.severity == SeverityEnum.detection
+            )
         )
 
     def get_camera_coordinates(self) -> dict[str, dict[str, int]]:
@@ -459,9 +478,15 @@ class BirdsEyeFrameManager:
                 and self.config.cameras[cam].birdseye.enabled
                 and self.config.cameras[cam].enabled_in_config
                 and self.config.cameras[cam].enabled
-                and cam_data["last_active_frame"] > 0
-                and cam_data["current_frame_time"] - cam_data["last_active_frame"]
-                < self.config.birdseye.inactivity_threshold
+                and (
+                    cam_data["live_active"]
+                    or (
+                        cam_data["last_active_frame"] > 0
+                        and cam_data["current_frame_time"]
+                        - cam_data["last_active_frame"]
+                        < self.config.birdseye.inactivity_threshold
+                    )
+                )
             ]
         )
         logger.debug(f"Active cameras: {active_cameras}")
@@ -478,7 +503,9 @@ class BirdsEyeFrameManager:
                 limited_active_cameras = sorted(
                     active_cameras,
                     key=lambda active_camera: (
-                        self.cameras[active_camera]["current_frame_time"]
+                        0.0
+                        if self.cameras[active_camera]["live_active"]
+                        else self.cameras[active_camera]["current_frame_time"]
                         - self.cameras[active_camera]["last_active_frame"]
                     ),
                 )
@@ -754,10 +781,10 @@ class BirdsEyeFrameManager:
 
         # disabling birdseye is a little tricky
         if not camera_config.birdseye.enabled or not camera_config.enabled:
-            # if we've rendered a frame (we have a value for last_active_frame)
-            # then we need to set it to zero
-            if camera_state["last_active_frame"] > 0:
+            # if we've rendered a frame (we have activity state) then clear it
+            if camera_state["last_active_frame"] > 0 or camera_state["live_active"]:
                 camera_state["last_active_frame"] = 0
+                camera_state["live_active"] = False
                 force_update = True
             else:
                 return False, False
@@ -765,11 +792,12 @@ class BirdsEyeFrameManager:
         # update the last active frame for the camera
         camera_state["current_frame"] = frame.copy()
         camera_state["current_frame_time"] = frame_time
-        if self.camera_active(
-            camera_config.birdseye.mode,
-            activity,
-        ):
+        modes = camera_config.birdseye.modes
+
+        if self.camera_threshold_active(modes, activity):
             camera_state["last_active_frame"] = frame_time
+
+        camera_state["live_active"] = self.camera_live_active(modes, activity)
 
         now = datetime.datetime.now().timestamp()
 
@@ -828,6 +856,8 @@ class Birdseye:
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
         self.requestor = InterProcessRequestor()
+        self.review_subscriber = ReviewDataSubscriber("")
+        self.review_severity: dict[str, str] = {}
         self.idle_fps: float = self.config.birdseye.idle_heartbeat_fps
         self._idle_interval: float | None = (
             (1.0 / self.idle_fps) if self.idle_fps > 0 else None
@@ -858,6 +888,21 @@ class Birdseye:
         self.birdseye_manager.clear_frame()
         self.__send_new_frame()
 
+    def check_review_updates(self) -> None:
+        """Drain review updates so each camera's active severity stays current."""
+        while True:
+            update = self.review_subscriber.check_for_update(timeout=0)
+
+            if update is None:
+                break
+
+            camera = update["after"]["camera"]
+
+            if update["type"] == "end":
+                self.review_severity.pop(camera, None)
+            else:
+                self.review_severity[camera] = update["after"]["severity"]
+
     def add_camera(self, camera: str) -> None:
         """Add a camera to the birdseye manager."""
         self.birdseye_manager.add_camera(camera)
@@ -866,6 +911,7 @@ class Birdseye:
     def remove_camera(self, camera: str) -> None:
         """Remove a camera from the birdseye manager."""
         self.birdseye_manager.remove_camera(camera)
+        self.review_severity.pop(camera, None)
         logger.debug(f"Removed camera {camera} from birdseye")
 
     def write_data(
@@ -876,24 +922,13 @@ class Birdseye:
         frame_time: float,
         frame: np.ndarray,
     ) -> None:
-        has_active_object = False
-        has_stationary_object = False
-        for tracked_object in current_tracked_objects:
-            if tracked_object["stationary"]:
-                if not tracked_object["false_positive"]:
-                    has_stationary_object = True
-            else:
-                # Preserve the existing objects activity behavior, which includes
-                # non-stationary trackers before they are confirmed.
-                has_active_object = True
-
-            if has_active_object and has_stationary_object:
-                break
-
         activity = BirdseyeActivity(
-            has_active_object=has_active_object,
-            has_stationary_object=has_stationary_object,
+            has_object=any(
+                not tracked_object["false_positive"]
+                for tracked_object in current_tracked_objects
+            ),
             has_motion=bool(motion_boxes),
+            severity=self.review_severity.get(camera),
         )
 
         frame_changed, frame_layout_changed = self.birdseye_manager.update(
@@ -919,5 +954,6 @@ class Birdseye:
                 self.__send_new_frame()
 
     def stop(self) -> None:
+        self.review_subscriber.stop()
         self.converter.join()
         self.broadcaster.join()

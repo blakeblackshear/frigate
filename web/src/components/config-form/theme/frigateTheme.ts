@@ -22,6 +22,7 @@ import { ObjectLabelSwitchesWidget } from "./widgets/ObjectLabelSwitchesWidget";
 import { AudioLabelSwitchesWidget } from "./widgets/AudioLabelSwitchesWidget";
 import { ReviewLabelSwitchesWidget } from "./widgets/ReviewLabelSwitchesWidget";
 import { ZoneSwitchesWidget } from "./widgets/ZoneSwitchesWidget";
+import { BirdseyeModesWidget } from "./widgets/BirdseyeModesWidget";
 import { ArrayAsTextWidget } from "./widgets/ArrayAsTextWidget";
 import { FfmpegArgsWidget } from "./widgets/FfmpegArgsWidget";
 import { GenAIModelWidget } from "./widgets/GenAIModelWidget";
@@ -87,6 +88,7 @@ export const frigateTheme: FrigateTheme = {
     audioLabels: AudioLabelSwitchesWidget,
     reviewLabels: ReviewLabelSwitchesWidget,
     zoneNames: ZoneSwitchesWidget,
+    birdseyeModes: BirdseyeModesWidget,
     timezoneSelect: TimezoneSelectWidget,
     optionalField: OptionalFieldWidget,
     semanticSearchModel: SemanticSearchModelWidget,
