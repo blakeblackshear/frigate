@@ -45,6 +45,16 @@ import { useUserPersistence } from "@/hooks/use-user-persistence";
 // a longer buffer cheap and it rides out connection variance better
 const SUB_STREAM_BUFFER_LENGTH_S = 30;
 
+// seeks rebuild the source starting at the seek target so the vod
+// bootstrap segment ladder applies to every seek; quantizing keeps
+// seek URLs repeatable for nginx's mapping/response caches
+const SOURCE_START_GRID_S = 10;
+
+// seeks beyond this bridge the source load with the preview player (the
+// held video frame is pre-seek content); continuations (quality switch,
+// natural chunk advance) keep the held frame
+const REPOSITION_PREVIEW_THRESHOLD_S = 2;
+
 /**
  * Dynamically switches between video playback and scrubbing preview player.
  */
@@ -157,6 +167,11 @@ export default function DynamicVideoPlayer({
 
   useEffect(() => {
     if (!isScrubbing) {
+      // never overwrite a pending timer: an orphaned one escapes
+      // onPlaying's clearTimeout and flashes loading mid-playback
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
       loadingTimeoutRef.current = setTimeout(() => setIsLoading(true), 1000);
     }
 
@@ -179,6 +194,85 @@ export default function DynamicVideoPlayer({
   // playlist, so the playback effect skips its loading indicator
   const modelOnlyUpdateRef = useRef(false);
 
+  // re-anchors quality-switch rebuilds and classifies rebuilds as
+  // repositioning vs continuation
+  const lastPlayedTimestampRef = useRef<number | undefined>(undefined);
+
+  // start of the current source window within the chunk; undefined plays
+  // from the chunk start. Follows explicit seeks (startTimestamp),
+  // cleared when a chunk change leaves the seek target behind
+  const [sourceAfter, setSourceAfter] = useState<number | undefined>(undefined);
+
+  // adjusted during render: an effect lands one commit late, briefly
+  // painting the stale video frame between drag preview and load bridge
+  const nextSourceAfter =
+    startTimestamp !== undefined &&
+    startTimestamp > timeRange.after &&
+    startTimestamp < timeRange.before
+      ? Math.max(
+          timeRange.after,
+          Math.floor(startTimestamp / SOURCE_START_GRID_S) *
+            SOURCE_START_GRID_S,
+        )
+      : undefined;
+
+  if (nextSourceAfter !== sourceAfter) {
+    setSourceAfter(nextSourceAfter);
+
+    const lastPlayed = lastPlayedTimestampRef.current;
+    if (
+      !isLoading &&
+      startTimestamp !== undefined &&
+      lastPlayed !== undefined &&
+      Math.abs(startTimestamp - lastPlayed) > REPOSITION_PREVIEW_THRESHOLD_S
+    ) {
+      setIsLoading(true);
+    }
+  }
+
+  // the release anchor lands one commit after isScrubbing flips false
+  // (the view writes playbackStart from an effect), which would flash
+  // the stale frame; hold one commit. The clearing effect runs before
+  // the parent's release effect, so clear and anchor batch into one render
+  const [releaseHold, setReleaseHold] = useState(false);
+  const [wasScrubbing, setWasScrubbing] = useState(isScrubbing);
+
+  if (isScrubbing !== wasScrubbing) {
+    setWasScrubbing(isScrubbing);
+    if (!isScrubbing) {
+      setReleaseHold(true);
+    }
+  }
+
+  useEffect(() => {
+    if (releaseHold) {
+      setReleaseHold(false);
+    }
+  }, [releaseHold]);
+
+  const recordingParams = useMemo(
+    () => ({
+      before: timeRange.before,
+      // clamp: during the adjust-render pass this memo can evaluate with
+      // the previous sourceAfter against a new timeRange
+      after:
+        sourceAfter !== undefined &&
+        sourceAfter > timeRange.after &&
+        sourceAfter < timeRange.before
+          ? sourceAfter
+          : timeRange.after,
+      timelines: true,
+    }),
+    [timeRange, sourceAfter],
+  );
+
+  // the window the current source covers; the seek model, in-range
+  // checks, and stale-report guard use this, not the chunk timeRange
+  const sourceTimeRange = useMemo<TimeRange>(
+    () => ({ after: recordingParams.after, before: recordingParams.before }),
+    [recordingParams],
+  );
+
   const onPlayerLoaded = useCallback(() => {
     sourceLoadedRef.current = true;
     governorRef.current?.sourceLoadEnded();
@@ -189,9 +283,9 @@ export default function DynamicVideoPlayer({
       return;
     }
 
-    // an anchor outside this chunk is stale (e.g. a natural clip
+    // an anchor outside this source window is stale (e.g. a natural clip
     // advance); the playlist already starts where playback should
-    if (anchor < timeRange.after || anchor > timeRange.before) {
+    if (anchor < sourceTimeRange.after || anchor > sourceTimeRange.before) {
       return;
     }
 
@@ -199,11 +293,7 @@ export default function DynamicVideoPlayer({
     // start it: a mid-drag chunk prefetch can audibly blip before
     // onPlaying pauses it. The release seek starts playback
     controller.seekToTimestamp(anchor, !isScrubbing);
-  }, [controller, timeRange, isScrubbing]);
-
-  // used to re-anchor the source when an auto quality switch rebuilds
-  // the playlist mid-playback
-  const lastPlayedTimestampRef = useRef<number | undefined>(undefined);
+  }, [controller, sourceTimeRange, isScrubbing]);
 
   // the range the controller's playback model was last built for; while
   // a chunk change awaits its coverage, the outgoing source reports
@@ -223,10 +313,10 @@ export default function DynamicVideoPlayer({
         return;
       }
 
-      // drop reports until the controller's model matches this chunk
+      // drop reports until the controller's model matches this source
       if (
-        modelTimeRangeRef.current?.after !== timeRange.after ||
-        modelTimeRangeRef.current?.before !== timeRange.before
+        modelTimeRangeRef.current?.after !== sourceTimeRange.after ||
+        modelTimeRangeRef.current?.before !== sourceTimeRange.before
       ) {
         return;
       }
@@ -249,7 +339,7 @@ export default function DynamicVideoPlayer({
       isBuffering,
       isLoading,
       isScrubbing,
-      timeRange,
+      sourceTimeRange,
     ],
   );
 
@@ -310,14 +400,6 @@ export default function DynamicVideoPlayer({
 
   // state of playback player
 
-  const recordingParams = useMemo(
-    () => ({
-      before: timeRange.before,
-      after: timeRange.after,
-      timelines: true,
-    }),
-    [timeRange],
-  );
   const { data: coverage } = useSWR<RecordingCoverage>(
     [`${camera}/recordings/coverage`, recordingParams],
     { revalidateOnFocus: false },
@@ -628,8 +710,8 @@ export default function DynamicVideoPlayer({
     const anchorTimestamp =
       qualityChanged &&
       lastPlayed !== undefined &&
-      lastPlayed >= timeRange.after &&
-      lastPlayed <= timeRange.before
+      lastPlayed >= recordingParams.after &&
+      lastPlayed <= recordingParams.before
         ? lastPlayed
         : startTimestamp;
     sourceAnchorRef.current = anchorTimestamp;
@@ -679,6 +761,10 @@ export default function DynamicVideoPlayer({
       HTMLMediaElement.HAVE_CURRENT_DATA;
 
     if (!modelOnlyUpdate) {
+      // an overwritten pending timer would escape onPlaying's clearTimeout
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
       loadingTimeoutRef.current = setTimeout(
         () => (hasDecodedFrame ? setIsBuffering(true) : setIsLoading(true)),
         1000,
@@ -687,9 +773,9 @@ export default function DynamicVideoPlayer({
 
     controller.newPlayback({
       recordings: recordings ?? [],
-      timeRange,
+      timeRange: sourceTimeRange,
     });
-    modelTimeRangeRef.current = timeRange;
+    modelTimeRangeRef.current = sourceTimeRange;
 
     // we only want this to change when controller or recordings update
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -733,7 +819,7 @@ export default function DynamicVideoPlayer({
         <HlsVideoPlayer
           videoRef={playerRef}
           containerRef={containerRef}
-          visible={!(isScrubbing || isLoading)}
+          visible={!(isScrubbing || isLoading || releaseHold)}
           currentSource={source}
           hotKeys={hotKeys}
           supportsFullscreen={supportsFullscreen}
@@ -788,7 +874,7 @@ export default function DynamicVideoPlayer({
       <PreviewPlayer
         className={cn(
           className,
-          isScrubbing || isLoading ? "visible" : "hidden",
+          isScrubbing || isLoading || releaseHold ? "visible" : "hidden",
         )}
         camera={camera}
         timeRange={timeRange}
