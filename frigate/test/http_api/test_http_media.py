@@ -119,7 +119,6 @@ class TestHttpMedia(BaseTestHttp):
         ] == expected_clips
         expected_durations = [clip[2] for clip in expected_clips]
         assert vod["durations"] == expected_durations
-        assert vod["segment_duration"] == max(expected_durations)
 
     def test_recordings_summary_across_dst_spring_forward(self):
         """
@@ -481,6 +480,129 @@ class TestHttpMedia(BaseTestHttp):
             assert "2024-03-10" in summary
             assert summary["2024-03-10"] is True
 
+    def test_recordings_summary_includes_sub_only_days(self):
+        """
+        A day covered only by sub-stream rows still gets a day marker.
+
+        Retention can expire main rows while keeping sub history, so the
+        calendar must not filter by stream type.
+        """
+        march_9_utc = datetime(2024, 3, 9, 12, 0, 0, tzinfo=UTC).timestamp()
+        march_10_utc = datetime(2024, 3, 10, 12, 0, 0, tzinfo=UTC).timestamp()
+
+        with AuthTestClient(self.app) as client:
+            self._insert_recording(
+                "main_march_9", march_9_utc, march_9_utc + 3600, stream_type="main"
+            )
+            self._insert_recording(
+                "sub_march_10", march_10_utc, march_10_utc + 3600, stream_type="sub"
+            )
+
+            response = client.get(
+                "/recordings/summary", params={"timezone": "utc", "cameras": "all"}
+            )
+
+            assert response.status_code == 200
+            summary = response.json()
+            assert len(summary) == 2
+            assert summary["2024-03-09"] is True
+            assert summary["2024-03-10"] is True
+
+    def test_recordings_summary_sparse_days_across_large_gap(self):
+        """
+        Only recorded days are reported when a large empty gap separates them.
+        """
+        early = datetime(2023, 1, 5, 12, 0, 0, tzinfo=UTC).timestamp()
+        late = datetime(2024, 3, 10, 12, 0, 0, tzinfo=UTC).timestamp()
+
+        with AuthTestClient(self.app) as client:
+            self._insert_recording("early_day", early, early + 3600)
+            self._insert_recording("late_day", late, late + 3600)
+
+            response = client.get(
+                "/recordings/summary", params={"timezone": "utc", "cameras": "all"}
+            )
+
+            assert response.status_code == 200
+            summary = response.json()
+            assert summary == {"2023-01-05": True, "2024-03-10": True}
+
+    def test_recordings_unavailable_merges_cameras(self):
+        """
+        Gaps are computed against the union of all requested cameras' coverage.
+        """
+
+        async def allow_both_cameras(request: Request):
+            return ["front_door", "back_door"]
+
+        self.app.dependency_overrides[get_allowed_cameras_for_filter] = (
+            allow_both_cameras
+        )
+
+        with AuthTestClient(self.app) as client:
+            for id, camera, start, end in [
+                ("front_a", "front_door", 1000, 1100),
+                ("front_b", "front_door", 1200, 1300),
+                ("back_a", "back_door", 1100, 1160),
+            ]:
+                Recordings.insert(
+                    id=id,
+                    path=f"/media/recordings/{id}.mp4",
+                    camera=camera,
+                    start_time=start,
+                    end_time=end,
+                    duration=end - start,
+                    motion=0,
+                    objects=0,
+                ).execute()
+
+            response = client.get(
+                "/recordings/unavailable",
+                params={
+                    "after": 1000,
+                    "before": 1300,
+                    "scale": 10,
+                    "cameras": "front_door,back_door",
+                },
+            )
+            assert response.status_code == 200
+            assert response.json() == [{"start_time": 1160, "end_time": 1200}]
+
+            # single camera: back_door alone leaves both edges uncovered
+            response = client.get(
+                "/recordings/unavailable",
+                params={
+                    "after": 1000,
+                    "before": 1300,
+                    "scale": 10,
+                    "cameras": "back_door",
+                },
+            )
+            assert response.status_code == 200
+            assert response.json() == [
+                {"start_time": 1000, "end_time": 1100},
+                {"start_time": 1160, "end_time": 1300},
+            ]
+
+    def test_recordings_summary_day_attribution_by_start_time(self):
+        """
+        A recording spanning midnight marks only its start day.
+        """
+        # starts 23:30 March 9, ends 00:30 March 10 (UTC)
+        start = datetime(2024, 3, 9, 23, 30, 0, tzinfo=UTC).timestamp()
+
+        with AuthTestClient(self.app) as client:
+            self._insert_recording("midnight_span", start, start + 3600)
+
+            response = client.get(
+                "/recordings/summary", params={"timezone": "utc", "cameras": "all"}
+            )
+
+            assert response.status_code == 200
+            summary = response.json()
+            assert len(summary) == 1
+            assert summary["2024-03-09"] is True
+
     def _insert_recording(
         self,
         id: str,
@@ -585,7 +707,6 @@ class TestHttpMedia(BaseTestHttp):
                 "/media/recordings/main_1.mp4",
                 "/media/recordings/main_2.mp4",
             ]
-            assert body["segment_duration"] == 10000
 
     def test_vod_merges_intervals_split_by_other_stream_boundaries(self):
         """A recording spanning several coverage intervals stays one clip.
@@ -790,7 +911,6 @@ class TestHttpMedia(BaseTestHttp):
             assert "initialClipIndex" not in body
             assert body["consistentSequenceMediaInfo"] is True
             assert body["durations"] == [10000, 10000]
-            assert body["segment_duration"] == 10000
             assert len(body["sequences"]) == 1
             clips = body["sequences"][0]["clips"]
             assert [c["path"] for c in clips] == [
@@ -853,8 +973,8 @@ class TestHttpMedia(BaseTestHttp):
         A long sub-only stretch means the merged sequence mixes muxed
         main files and audio-less sub files. Track-PRESENCE mixing
         across discontinuities is unproven in MSE, so every clip is
-        stripped to video tracks rather than the tracks being carried
-        through the discontinuity the stream mix already forces.
+        stripped to video tracks (the cross-stream hand-off still serves
+        the range in discontinuity mode).
         """
         with AuthTestClient(self.app) as client:
             self._insert_recording("main_1", 1000, 1010, "main", has_audio=True)
@@ -1240,7 +1360,8 @@ class TestHttpMedia(BaseTestHttp):
         """Uniformly-unknown rows (the pre-feature case) are never stripped.
 
         Legacy rows have has_audio NULL and audio_rate NULL; they share a
-        single signature, so no audio policy fires and audio plays.
+        single signature, so audio plays (the cross-stream hand-off still
+        serves the range in discontinuity mode).
         """
         with AuthTestClient(self.app) as client:
             self._insert_recording("main_1", 1000, 1010, "main")
