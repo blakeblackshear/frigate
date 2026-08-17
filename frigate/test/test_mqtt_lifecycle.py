@@ -187,6 +187,57 @@ class TestMqttClientLifecycle(unittest.TestCase):
             ("disarmed", True),
         )
 
+    def test_outage_buffer_replays_before_newer_queued_value(self) -> None:
+        """A topic that changed since the reconnect must not be reverted by the
+        replay of the value buffered during the outage."""
+        mock_client = MagicMock()
+        mock_client.publish.return_value = MagicMock(
+            rc=mqtt.MQTT_ERR_SUCCESS, mid=1, **{"is_published.return_value": True}
+        )
+        self.client._pending_retained = {"frigate/front/detect/state": ("OFF", True)}
+        self.client.client = mock_client
+        self.client.connected = True
+        self.client._subscription_ready = True
+        self.client._publish_queue.put(
+            QueuedPublish("frigate/front/detect/state", "ON", True)
+        )
+
+        self.client._drain_publish_queue()
+
+        published = [
+            (call.args[0], call.args[1]) for call in mock_client.publish.call_args_list
+        ]
+        self.assertEqual(
+            published,
+            [
+                ("frigate/front/detect/state", "OFF"),
+                ("frigate/front/detect/state", "ON"),
+            ],
+        )
+
+    def test_flush_failure_does_not_clobber_newer_queued_value(self) -> None:
+        """If the session dies mid-replay, the newer queued value that gets
+        rebuffered has to win over the older entries still being replayed."""
+        self.client._pending_retained = {
+            "frigate/a/detect/state": ("OLD", True),
+            "frigate/front/detect/state": ("OFF", True),
+        }
+        self.client.connected = True
+        self.client._subscription_ready = True
+        self.client._publish_queue.put(
+            QueuedPublish("frigate/front/detect/state", "ON", True)
+        )
+
+        mock_client = MagicMock()
+        mock_client.publish.side_effect = BrokenPipeError("broken pipe")
+        self.client.client = mock_client
+
+        self.client._drain_publish_queue()
+
+        self.assertEqual(
+            self.client._pending_retained["frigate/front/detect/state"], ("ON", True)
+        )
+
     def test_publish_buffers_messages_until_subscription_ready(self) -> None:
         self.client.connected = True
 

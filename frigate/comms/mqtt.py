@@ -513,9 +513,16 @@ class MqttClient(Communicator):
                 self._handle_publish_event(event[1])
 
     def _drain_publish_queue(self) -> None:
-        """Publish queued work only after the session is fully subscribed."""
+        """Publish queued work only after the session is fully subscribed.
+
+        Oldest first: the outage buffer replays before the queue, so a topic
+        that changed since the reconnect ends up on its newest value rather
+        than being reverted by the replay.
+        """
         if self.connected and not self._subscription_ready:
             return
+
+        self._flush_pending_retained()
 
         while True:
             try:
@@ -528,8 +535,6 @@ class MqttClient(Communicator):
                 continue
 
             self._publish_direct(queued_publish)
-
-        self._flush_pending_retained()
 
     def _flush_pending_retained(self) -> None:
         """Replay the latest retained state once the broker session is ready."""
@@ -552,7 +557,9 @@ class MqttClient(Communicator):
         """
         try:
             if self.client is None:
-                self._buffer_undelivered(queued_publish)
+                # never attempted, so anything already buffered for this topic
+                # was written later and has to survive
+                self._buffer_undelivered(queued_publish, overwrite=False)
                 return
 
             try:
