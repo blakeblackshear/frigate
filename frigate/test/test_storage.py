@@ -139,6 +139,41 @@ class TestHttp(unittest.TestCase):
             "front_door": {"bandwidth": 0, "needs_refresh": True},
         }
 
+    def test_segment_calculations_with_recent_zero_segments(self):
+        """A run of recent zero-size segments must not zero out the bandwidth.
+
+        Older nonzero segments still describe the camera's real write rate.
+        """
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        time_keep = datetime.datetime.now().timestamp()
+        for i in range(10):
+            _insert_mock_recording(
+                f"nonzero_{i}.frontdoor",
+                os.path.join(self.test_dir, f"nonzero_{i}.tmp"),
+                time_keep + i * 10,
+                time_keep + i * 10 + 10,
+                camera="front_door",
+                seg_size=4,
+                seg_dur=10,
+            )
+        for i in range(100):
+            _insert_mock_recording(
+                f"zero_{i}.frontdoor",
+                os.path.join(self.test_dir, f"zero_{i}.tmp"),
+                time_keep + 1000 + i * 10,
+                time_keep + 1000 + i * 10 + 10,
+                camera="front_door",
+                seg_size=0,
+                seg_dur=10,
+            )
+
+        storage.calculate_camera_bandwidth()
+        assert storage.camera_storage_stats == {
+            "front_door": {"bandwidth": 1440, "needs_refresh": True},
+        }
+
     def test_storage_cleanup(self):
         """Ensure that all recordings are cleaned up when necessary."""
         config = FrigateConfig(**self.minimal_config)

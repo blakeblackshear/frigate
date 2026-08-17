@@ -49,14 +49,19 @@ class TestRecordingCleanupSubRetention(unittest.TestCase):
         return RecordingCleanup(config, MagicMock())
 
     def _insert_recording(
-        self, id: str, stream_type: str, age_days: float, motion: int = 0
+        self,
+        id: str,
+        stream_type: str,
+        age_days: float,
+        motion: int = 0,
+        camera: str = "front_door",
     ) -> None:
         end_time = (
             datetime.datetime.now() - datetime.timedelta(days=age_days)
         ).timestamp()
         Recordings.create(
             id=id,
-            camera="front_door",
+            camera=camera,
             path=f"/media/frigate/recordings/{id}.mp4",
             start_time=end_time - 10,
             end_time=end_time,
@@ -208,3 +213,41 @@ class TestRecordingCleanupSubRetention(unittest.TestCase):
 
         assert Recordings.get_or_none(Recordings.id == "s_old") is None
         assert Recordings.get_or_none(Recordings.id == "s_new") is not None
+
+    def test_deleted_camera_recordings_expire(self):
+        # rows for a camera no longer in the config expire by the GLOBAL
+        # record retention window; newer orphan rows and configured-camera
+        # rows are untouched by the deleted-cameras sweep
+        config = FrigateConfig(
+            **{
+                "mqtt": {"host": "mqtt"},
+                "record": {"continuous": {"days": 7}},
+                "cameras": {
+                    "front_door": {
+                        "ffmpeg": {
+                            "inputs": [
+                                {
+                                    "path": "rtsp://10.0.0.1:554/video",
+                                    "roles": ["detect", "record"],
+                                },
+                            ]
+                        },
+                        "record": {"enabled": True, "continuous": {"days": 7}},
+                    }
+                },
+            }
+        )
+        cleanup = RecordingCleanup(config, MagicMock())
+        self._insert_recording("gone_old", "main", 10, camera="removed_cam")
+        self._insert_recording("gone_new", "main", 5, camera="removed_cam")
+        self._insert_recording("gone_blank", "main", 10, camera="")
+        self._insert_recording("kept", "main", 5)
+
+        cleanup.expire_recordings()
+
+        assert Recordings.get_or_none(Recordings.id == "gone_old") is None
+        assert Recordings.get_or_none(Recordings.id == "gone_new") is not None
+        # empty-string camera names sort before every real name and must
+        # still be enumerated by the sweep
+        assert Recordings.get_or_none(Recordings.id == "gone_blank") is None
+        assert Recordings.get_or_none(Recordings.id == "kept") is not None
