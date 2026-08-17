@@ -533,19 +533,26 @@ def _convert_legacy_mask_to_dict(
     return result
 
 
+# the 0.18 scalar Birdseye modes, mapped to their activity mode names
+_LEGACY_BIRDSEYE_MODES = {
+    "continuous": "continuous",
+    "motion": "motion",
+    "objects": "all_objects",
+}
+
+
 def _migrate_birdseye_mode(birdseye: dict[str, Any] | None) -> None:
-    """Convert a scalar Birdseye mode to composable activity types."""
+    """Convert a scalar Birdseye mode to an activity mode list."""
     if not birdseye or not isinstance(birdseye.get("mode"), str):
         return
 
     legacy_mode = birdseye["mode"]
-    activity_types = ("continuous", "motion", "objects", "stationary_objects")
-    if legacy_mode not in activity_types:
+
+    if legacy_mode not in _LEGACY_BIRDSEYE_MODES:
         return
 
-    birdseye["mode"] = {
-        activity_type: activity_type == legacy_mode for activity_type in activity_types
-    }
+    del birdseye["mode"]
+    birdseye["modes"] = [_LEGACY_BIRDSEYE_MODES[legacy_mode]]
 
 
 def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
