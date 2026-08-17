@@ -13,18 +13,18 @@ export interface UiConfig {
 export interface BirdseyeConfig {
   enabled: boolean;
   height: number;
-  mode: BirdseyeModeConfig;
+  modes: BirdseyeMode[];
   quality: number;
   restream: boolean;
   width: number;
 }
 
-export interface BirdseyeModeConfig {
-  continuous: boolean;
-  motion: boolean;
-  objects: boolean;
-  stationary_objects: boolean;
-}
+export type BirdseyeMode =
+  | "continuous"
+  | "motion"
+  | "all_objects"
+  | "alerts"
+  | "detections";
 
 export interface FaceRecognitionConfig {
   enabled: boolean;
@@ -56,7 +56,7 @@ export interface CameraConfig {
   best_image_timeout: number;
   birdseye: {
     enabled: boolean;
-    mode: BirdseyeModeConfig;
+    modes: BirdseyeMode[];
     order: number;
   };
   detect: {
