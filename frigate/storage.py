@@ -6,7 +6,7 @@ import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
-from peewee import SQL, fn
+from peewee import SQL, Case, fn
 
 from frigate.config import FrigateConfig
 from frigate.const import (
@@ -35,6 +35,35 @@ class StorageMaintainer(threading.Thread):
         self.stop_event = stop_event
         self.camera_storage_stats: dict[str, dict] = {}
 
+    def _recent_stream_bandwidth(
+        self, camera: str, stream_type: str, window: int
+    ) -> float | None:
+        """Average MB/s over a stream's most recent rows, or None if no sample.
+
+        Zero-size rows are excluded inside the projection, not the WHERE
+        clause: a segment_size predicate baits the planner into the
+        (camera, segment_size) index plus a full sort of the camera's
+        history instead of the time-ordered index.
+        """
+        recent = (
+            Recordings.select(
+                Case(
+                    None,
+                    [(Recordings.segment_size > 0, bandwidth_equation)],
+                    None,
+                ).alias("bw")
+            )
+            .where(
+                Recordings.camera == camera,
+                Recordings.stream_type == stream_type,
+            )
+            .order_by(Recordings.start_time.desc())
+            .limit(window)
+            .alias("recent")
+        )
+        avg: float | None = Recordings.select(fn.AVG(SQL("bw"))).from_(recent).scalar()
+        return avg
+
     def calculate_camera_bandwidth(self) -> None:
         """Calculate an average MB/hr for each camera."""
         for camera in self.config.cameras.keys():
@@ -47,9 +76,10 @@ class StorageMaintainer(threading.Thread):
             if self.camera_storage_stats.get(camera, {}).get("needs_refresh", True):
                 self.camera_storage_stats[camera] = {
                     "needs_refresh": (
-                        Recordings.select(fn.COUNT("*"))
+                        Recordings.select(Recordings.id)
                         .where(Recordings.camera == camera, Recordings.segment_size > 0)
-                        .scalar()
+                        .limit(50)
+                        .count()
                         < 50
                     )
                 }
@@ -58,31 +88,18 @@ class StorageMaintainer(threading.Thread):
                 # type and sum the rates; mixing streams would average small
                 # sub segments against large main segments and underestimate
                 # the true write rate
-                bandwidth = 0
+                bandwidth = 0.0
                 for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
-                    try:
-                        # Subquery to get last 100 segments, then average their bandwidth
-                        last_100 = (
-                            Recordings.select(bandwidth_equation.alias("bw"))
-                            .where(
-                                Recordings.camera == camera,
-                                Recordings.segment_size > 0,
-                                Recordings.stream_type == stream_type,
-                            )
-                            .order_by(Recordings.start_time.desc())
-                            .limit(100)
-                            .alias("recent")
+                    avg_bw = self._recent_stream_bandwidth(camera, stream_type, 100)
+                    if avg_bw is None:
+                        # the recent window can be all zero-size ingest
+                        # glitches; look further back before concluding
+                        # the stream writes nothing
+                        avg_bw = self._recent_stream_bandwidth(
+                            camera, stream_type, 1000
                         )
-
-                        bandwidth += round(
-                            Recordings.select(fn.AVG(SQL("bw")))
-                            .from_(last_100)
-                            .scalar()
-                            * 3600,
-                            2,
-                        )
-                    except TypeError:
-                        pass
+                    if avg_bw is not None:
+                        bandwidth += round(avg_bw * 3600, 2)
 
                 bandwidth = round(bandwidth, 2)
 

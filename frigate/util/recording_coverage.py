@@ -310,11 +310,18 @@ class ClipPlan:
 
     clip_from_ms is the keyframe-snapped clipFrom, or None when the whole
     file is served. skipped means the clip is omitted from the manifest.
+
+    key_frame_durations / first_key_frame_offset_ms carry clip-relative
+    keyframe data for nginx-vod sub-file segmentation; None means no
+    usable index, and the manifest declares one whole-clip segment (the
+    only safe cut without keyframe knowledge).
     """
 
     clip_from_ms: int | None
     duration_ms: int
     skipped: bool
+    key_frame_durations: list[int] | None = None
+    first_key_frame_offset_ms: int = 0
 
 
 def plan_clip(row: Any, start: float, end: float) -> ClipPlan:
@@ -378,7 +385,38 @@ def plan_clip(row: Any, start: float, end: float) -> ClipPlan:
         logger.warning(f"Recording clip is missing or empty: {row.path}")
         return ClipPlan(None, 0, True)
 
-    return ClipPlan(clip_from, duration, False)
+    return ClipPlan(
+        clip_from,
+        duration,
+        False,
+        *_clip_key_frames(row.keyframes, clip_from, duration),
+    )
+
+
+def _clip_key_frames(
+    keyframes: Any, clip_from: int | None, duration: int
+) -> tuple[list[int] | None, int]:
+    """Clip-relative keyframe gaps and first offset for a served range.
+
+    nginx-vod validates firstKeyFrameOffset against the clip duration,
+    so offsets are clip-relative. A keyframe exactly on the clip end is
+    excluded (it would declare a zero-length tail), and fewer than two
+    keyframes returns (None, 0): one cut point cannot split anything.
+    """
+    if not keyframes:
+        return None, 0
+
+    clip_start = clip_from if clip_from is not None else 0
+    relative = [
+        int(k) - clip_start
+        for k in keyframes
+        if clip_start <= k < clip_start + duration
+    ]
+
+    if len(relative) < 2:
+        return None, 0
+
+    return [b - a for a, b in zip(relative, relative[1:])], relative[0]
 
 
 def realized_timeline(
