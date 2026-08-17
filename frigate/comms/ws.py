@@ -466,7 +466,6 @@ class WebSocketClient(Communicator):
 
     def subscribe(self, receiver: Callable) -> None:
         self._dispatcher = receiver
-        self.start()
 
     def start(self) -> None:
         """Start the websocket client."""
