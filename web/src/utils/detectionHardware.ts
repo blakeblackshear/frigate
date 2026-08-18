@@ -45,7 +45,9 @@ export function summarizeDevices(
   const known = hardwareForDevices(hardware, devices);
 
   if (known) {
-    return devices.length > 1 ? `${known.name} ×${devices.length}` : known.name;
+    return devices.length > 1
+      ? `${known.name} (${devices.length})`
+      : known.name;
   }
 
   // hardware this system does not report, so fall back to the raw strings

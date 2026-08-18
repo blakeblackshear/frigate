@@ -108,10 +108,18 @@ test.describe("Detection models settings @high", () => {
     await expect(
       frigateApp.page.getByText("Detectors", { exact: true }),
     ).toBeVisible();
-    // three cameras in the mock config, so one detector is recommended and the
-    // count already sitting on it is labelled as such
+
+    // the trigger shows the bare count; the recommendation is a second line on
+    // the matching option, so the dropdown has to be open to see it
     await expect(
-      frigateApp.page.getByText("1 (recommended for 3 cameras)").first(),
+      frigateApp.page.locator("#models-0-detector-count"),
+    ).toHaveText("1");
+
+    await frigateApp.page.locator("#models-0-detector-count").click();
+
+    // three cameras in the mock config, so one detector is recommended
+    await expect(
+      frigateApp.page.getByText("Recommended for 3 cameras"),
     ).toBeVisible();
   });
 
@@ -123,7 +131,12 @@ test.describe("Detection models settings @high", () => {
     ]);
     await openPage(frigateApp);
 
-    await expect(frigateApp.page.getByText("recommended for")).toHaveCount(0);
+    // two detectors are configured while one is recommended, so the trigger
+    // carries no recommendation of its own
+    await expect(
+      frigateApp.page.locator("#models-0-detector-count"),
+    ).toHaveText("2");
+    await expect(frigateApp.page.getByText("Recommended for")).toHaveCount(0);
   });
 
   test("exclusive hardware offers one checkbox per unit", async ({
@@ -178,7 +191,7 @@ test.describe("Detection models settings @high", () => {
     await openPage(frigateApp);
 
     await expect(frigateApp.page.locator("#pageRoot")).toContainText(
-      "Intel GPU \u00d72",
+      "Intel GPU (2) \u2022 3 cameras",
     );
     await expect(frigateApp.page.locator("#pageRoot")).not.toContainText(
       "openvino:GPU, openvino:GPU",

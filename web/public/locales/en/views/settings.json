@@ -1958,10 +1958,10 @@
     "title": "Detection models",
     "description": "Configure the object detection models and the hardware each one runs on. Cameras choose a model by their scene in the camera's detect settings.",
     "addModel": "Add model",
+    "cameras_one": "{{count}} camera",
+    "cameras_other": "{{count}} cameras",
     "scene": {
       "label": "Scene",
-      "cameras_one": "{{count}} camera uses this model",
-      "cameras_other": "{{count}} cameras use this model",
       "description": "The environment this model is for. Cameras pick a model by setting the same scene in their detect settings, and the model with a scene of all is used by any camera that does not set one."
     },
     "scenes": {
@@ -1978,7 +1978,8 @@
       "none": "No hardware selected",
       "claimedBy": "used by {{scene}}",
       "detectorCount": "Detectors",
-      "countRecommended": "{{count}} (recommended for {{cameras}} cameras)",
+      "countRecommended_one": "Recommended for {{count}} camera",
+      "countRecommended_other": "Recommended for {{count}} cameras",
       "unrecognized": "This model is configured for hardware that was not found on this system: {{devices}}",
       "description": "The hardware this model runs its detection on.",
       "detectorCountDescription": "How many detection processes to run on this hardware. More detectors keep up with more cameras, at the cost of extra device memory.",

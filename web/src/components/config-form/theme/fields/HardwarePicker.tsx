@@ -233,19 +233,23 @@ export function HardwarePicker({
               id={`${idPrefix}-detector-count`}
               className="max-w-xs"
             >
-              <SelectValue />
+              {String(devices.length || 1)}
             </SelectTrigger>
             <SelectContent>
               {Array.from({ length: MAX_DETECTORS }, (_, index) => index + 1)
                 .filter((count) => count >= Math.max(selectedUnits.length, 1))
                 .map((count) => (
                   <SelectItem key={count} value={String(count)}>
-                    {count === recommended
-                      ? t("detectionModels.hardware.countRecommended", {
-                          count,
-                          cameras: cameraCount,
-                        })
-                      : String(count)}
+                    <div className="flex h-max flex-col justify-between">
+                      <div>{count}</div>
+                      {count === recommended ? (
+                        <div className="text-xs text-muted-foreground">
+                          {t("detectionModels.hardware.countRecommended", {
+                            count: cameraCount,
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
                   </SelectItem>
                 ))}
             </SelectContent>

@@ -337,6 +337,10 @@ export function ModelsField(props: FieldProps) {
                           hardware ?? [],
                           model.devices ?? [],
                         ) ?? t("detectionModels.hardware.none")}
+                        {" • "}
+                        {t("detectionModels.cameras", {
+                          count: cameraCountForScene(model.scene),
+                        })}
                       </span>
                     </CardTitle>
                   </CollapsibleTrigger>
@@ -407,11 +411,6 @@ export function ModelsField(props: FieldProps) {
                     </Select>
                     <p className="text-xs text-muted-foreground">
                       {t("detectionModels.scene.description")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {t("detectionModels.scene.cameras", {
-                        count: cameraCountForScene(model.scene),
-                      })}
                     </p>
                   </div>
 
