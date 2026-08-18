@@ -115,6 +115,10 @@ def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> Mode
     return cast(ModelSelect, query)
 
 
+class NoRecordingsError(ValueError):
+    """Raised when no recordings exist in the requested time range."""
+
+
 class DebugReplaySource(ABC):
     """Abstract source for a debug replay session.
 
@@ -187,7 +191,7 @@ class RecordingDebugReplaySource(DebugReplaySource):
             raise ValueError("End time must be after start time")
 
         if not query_recordings(self._camera, self._start_ts, self._end_ts).count():
-            raise ValueError(
+            raise NoRecordingsError(
                 f"No recordings found for camera '{self._camera}' in the specified time range"
             )
 

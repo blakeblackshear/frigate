@@ -21,6 +21,7 @@
     "toast": {
       "error": "Failed to start debug replay: {{error}}",
       "alreadyActive": "A replay session is already active",
+      "noRecordings": "No recordings found in the selected time range",
       "stopError": "Failed to stop debug replay: {{error}}",
       "goToReplay": "Go to Replay"
     }

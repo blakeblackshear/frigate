@@ -2,6 +2,7 @@
 
 from unittest.mock import patch
 
+from frigate.jobs.debug_replay import NoRecordingsError
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
@@ -65,6 +66,32 @@ class TestDebugReplayAPI(BaseTestHttp):
         # Message is hard-coded so we don't echo exception text back to clients
         # (CodeQL: information exposure through an exception).
         self.assertEqual(body["message"], "Invalid debug replay parameters")
+
+    def test_start_returns_404_when_no_recordings(self):
+        with patch(
+            "frigate.api.debug_replay.start_debug_replay_job",
+            side_effect=NoRecordingsError(
+                "No recordings found for camera 'front' in the specified time range"
+            ),
+        ):
+            with AuthTestClient(self.app) as client:
+                resp = client.post(
+                    "/debug_replay/start",
+                    json={
+                        "camera": "front",
+                        "start_time": 100,
+                        "end_time": 200,
+                    },
+                )
+
+        self.assertEqual(resp.status_code, 404)
+        body = resp.json()
+        self.assertFalse(body["success"])
+        # Message is hard-coded so we don't echo exception text back to clients
+        # (CodeQL: information exposure through an exception).
+        self.assertEqual(
+            body["message"], "No recordings found in the selected time range"
+        )
 
     def test_start_returns_409_when_session_already_active(self):
         with patch(
