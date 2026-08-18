@@ -119,8 +119,10 @@ test.describe("Detection models settings @high", () => {
 
     // three cameras in the mock config, so one detector is recommended
     await expect(
-      frigateApp.page.getByText("Recommended for 3 cameras"),
-    ).toBeVisible();
+      frigateApp.page.getByRole("option", {
+        name: /Recommended for 3 cameras/,
+      }),
+    ).toHaveText(/^1/);
   });
 
   test("a detector count above the recommendation is unlabelled", async ({
@@ -131,12 +133,17 @@ test.describe("Detection models settings @high", () => {
     ]);
     await openPage(frigateApp);
 
-    // two detectors are configured while one is recommended, so the trigger
-    // carries no recommendation of its own
+    // two detectors are configured while one is recommended, so neither the
+    // trigger nor the selected option carries a recommendation
     await expect(
       frigateApp.page.locator("#models-0-detector-count"),
     ).toHaveText("2");
-    await expect(frigateApp.page.getByText("Recommended for")).toHaveCount(0);
+
+    await frigateApp.page.locator("#models-0-detector-count").click();
+
+    await expect(
+      frigateApp.page.getByRole("option", { name: /^2/ }),
+    ).not.toContainText("Recommended");
   });
 
   test("exclusive hardware offers one checkbox per unit", async ({
