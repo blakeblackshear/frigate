@@ -1298,7 +1298,7 @@ class TestConfig(unittest.TestCase):
             70: "dogs",
             75: "dogs",
         }
-        assert frigate_config.model.merged_labelmap[69] != "dogs"
+        assert frigate_config.primary_model.merged_labelmap[69] != "dogs"
 
     def test_default_labelmap_empty(self):
         config = {
