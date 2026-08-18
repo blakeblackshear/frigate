@@ -31,7 +31,7 @@ const audio: SectionConfigOverrides = {
       detection: ["listen", "filters"],
       sensitivity: ["min_volume", "max_not_heard"],
     },
-    hiddenFields: ["enabled_in_config"],
+    hiddenFields: ["enabled_in_config", "labelmap"],
     advancedFields: ["min_volume", "max_not_heard", "num_threads"],
     uiSchema: {
       filters: {
