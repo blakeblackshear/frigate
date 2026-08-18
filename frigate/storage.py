@@ -28,6 +28,7 @@ bandwidth_equation = Recordings.segment_size / (
 )
 
 MAX_CALCULATED_BANDWIDTH = 10000  # 10Gb/hr
+BANDWIDTH_SAMPLE_TARGET = 50
 
 
 class StorageMaintainer(threading.Thread):
@@ -103,6 +104,31 @@ class StorageMaintainer(threading.Thread):
         avg: float | None = Recordings.select(fn.AVG(SQL("bw"))).from_(recent).scalar()
         return avg
 
+    def _stream_sample_count(self, camera: str, stream_type: str) -> int:
+        """Count a stream's non-zero segments, stopping at the sample target."""
+        return (
+            Recordings.select(Recordings.id)
+            .where(
+                Recordings.camera == camera,
+                Recordings.stream_type == stream_type,
+                Recordings.segment_size > 0,
+            )
+            .limit(BANDWIDTH_SAMPLE_TARGET)
+            .count()
+        )
+
+    def _needs_refresh(self, camera: str) -> bool:
+        """Return whether a stream the camera records still lacks samples.
+
+        Counted per stream rather than per camera: a stream that starts
+        recording later has no samples of its own yet, and a camera-wide count
+        would report it settled on the strength of another stream's history.
+        """
+        return any(
+            self._stream_sample_count(camera, stream_type) < BANDWIDTH_SAMPLE_TARGET
+            for stream_type in self._recording_stream_types(camera)
+        )
+
     def calculate_camera_bandwidth(self) -> None:
         """Calculate an average MB/hr for each camera."""
         for camera in self.config.cameras.keys():
@@ -110,56 +136,45 @@ class StorageMaintainer(threading.Thread):
             if camera.startswith(REPLAY_CAMERA_PREFIX):
                 continue
 
-            # cameras with < 50 segments should be refreshed to keep size accurate
-            # when few segments are available
-            if self.camera_storage_stats.get(camera, {}).get("needs_refresh", True):
-                self.camera_storage_stats[camera] = {
-                    "needs_refresh": (
-                        Recordings.select(Recordings.id)
-                        .where(Recordings.camera == camera, Recordings.segment_size > 0)
-                        .limit(50)
-                        .count()
-                        < 50
-                    )
-                }
+            if not self.camera_storage_stats.get(camera, {}).get("needs_refresh", True):
+                continue
 
-                # calculate MB/hr from the last 100 segments of each stream
-                # type and sum the rates; mixing streams would average small
-                # sub segments against large main segments and underestimate
-                # the true write rate
-                bandwidth_by_stream: dict[str, float] = {}
-                for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
-                    avg_bw = self._recent_stream_bandwidth(camera, stream_type, 100)
-                    if avg_bw is None:
-                        # the recent window can be all zero-size ingest
-                        # glitches; look further back before concluding
-                        # the stream writes nothing
-                        avg_bw = self._recent_stream_bandwidth(
-                            camera, stream_type, 1000
-                        )
-                    if avg_bw is not None:
-                        bandwidth_by_stream[stream_type] = round(avg_bw * 3600, 2)
+            # calculate MB/hr from the last 100 segments of each stream
+            # type and sum the rates; mixing streams would average small
+            # sub segments against large main segments and underestimate
+            # the true write rate
+            bandwidth_by_stream: dict[str, float] = {}
+            for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
+                avg_bw = self._recent_stream_bandwidth(camera, stream_type, 100)
+                if avg_bw is None:
+                    # the recent window can be all zero-size ingest
+                    # glitches; look further back before concluding
+                    # the stream writes nothing
+                    avg_bw = self._recent_stream_bandwidth(camera, stream_type, 1000)
+                if avg_bw is not None:
+                    bandwidth_by_stream[stream_type] = round(avg_bw * 3600, 2)
 
-                bandwidth = round(sum(bandwidth_by_stream.values()), 2)
+            bandwidth = round(sum(bandwidth_by_stream.values()), 2)
 
-                if bandwidth > MAX_CALCULATED_BANDWIDTH:
-                    logger.warning(
-                        f"{camera} has a bandwidth of {bandwidth} MB/hr which exceeds the expected maximum. This typically indicates an issue with the cameras recordings."
-                    )
-                    # scale each stream so the per stream values still sum to
-                    # the clamped total the UI displays alongside them
-                    scale = MAX_CALCULATED_BANDWIDTH / bandwidth
-                    bandwidth_by_stream = {
-                        stream_type: round(value * scale, 2)
-                        for stream_type, value in bandwidth_by_stream.items()
-                    }
-                    bandwidth = MAX_CALCULATED_BANDWIDTH
-
-                self.camera_storage_stats[camera]["bandwidth"] = bandwidth
-                self.camera_storage_stats[camera]["bandwidth_by_stream"] = (
-                    bandwidth_by_stream
+            if bandwidth > MAX_CALCULATED_BANDWIDTH:
+                logger.warning(
+                    f"{camera} has a bandwidth of {bandwidth} MB/hr which exceeds the expected maximum. This typically indicates an issue with the cameras recordings."
                 )
-                logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
+                # scale each stream so the per stream values still sum to
+                # the clamped total the UI displays alongside them
+                scale = MAX_CALCULATED_BANDWIDTH / bandwidth
+                bandwidth_by_stream = {
+                    stream_type: round(value * scale, 2)
+                    for stream_type, value in bandwidth_by_stream.items()
+                }
+                bandwidth = MAX_CALCULATED_BANDWIDTH
+
+            self.camera_storage_stats[camera] = {
+                "needs_refresh": self._needs_refresh(camera),
+                "bandwidth": bandwidth,
+                "bandwidth_by_stream": bandwidth_by_stream,
+            }
+            logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
 
     def calculate_camera_usages(self) -> dict[str, dict]:
         """Calculate the storage usage of each camera."""
