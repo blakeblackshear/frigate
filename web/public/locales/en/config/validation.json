@@ -31,5 +31,8 @@
   },
   "detect": {
     "dimensionMustBeEven": "Must be an even number."
+  },
+  "models": {
+    "defaultRequired": "One model must use a scene of 'All cameras'. Without it, any camera that does not choose a scene has no model to fall back to."
   }
 }

@@ -807,37 +807,37 @@ class FrigateConfig(FrigateBaseModel):
         }
         self._all_labels = labels
 
-    def _resolve_camera_model(self, name: str, scene: SceneEnum | None) -> ModelConfig:
+    def _resolve_camera_model(self, name: str, scene: SceneEnum) -> ModelConfig:
         """Resolve which model a camera runs on.
+
+        A camera may name a scene no model is configured for, which is valid as
+        long as an 'all' model is there to fall back to.
 
         Args:
             name: Name of the camera
-            scene: The camera's configured detect scene, if any
+            scene: The camera's detect scene, which defaults to 'all'
 
         Returns:
             The model the camera runs on
         """
         by_scene = {model.scene: model for model in self.models}
+        model = by_scene.get(scene)
 
-        if scene is not None:
-            model = by_scene.get(scene)
-
-            if model is None:
-                raise ValueError(
-                    f"Camera '{name}' has a detect scene of '{scene.value}', but no model is configured for that scene."
-                )
-
+        if model is not None:
             return model
 
-        default = by_scene.get(SceneEnum.all) or (
-            self.models[0] if len(self.models) == 1 else None
-        )
+        default = by_scene.get(SceneEnum.all)
 
         if default is None:
             raise ValueError(
-                f"Camera '{name}' must set detect -> scene, because more than one model is configured and none of them uses a scene of 'all'."
+                f"Camera '{name}' has a detect scene of '{scene.value}', but no model is configured for that scene or for 'all'."
             )
 
+        logger.warning(
+            "Camera '%s' has a detect scene of '%s', but no model is configured for that scene, so the 'all' model is used",
+            name,
+            scene.value,
+        )
         return default
 
     @model_validator(mode="after")

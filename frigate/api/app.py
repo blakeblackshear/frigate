@@ -1330,8 +1330,18 @@ def categorized_object_names(
 
 
 @router.get("/audio_labels", dependencies=[Depends(allow_any_authenticated())])
-def get_audio_labels():
+def get_audio_labels(request: Request):
     labels = load_labels("/audio-labelmap.txt", prefill=521)
+
+    # configured overrides group several audio classes under one label, and the
+    # detector merges them over the defaults at runtime. Offer them here too, or
+    # a grouped label could never be picked in the UI.
+    config: FrigateConfig = request.app.frigate_config
+    labels.update(config.audio.labelmap)
+
+    for camera in config.cameras.values():
+        labels.update(camera.audio.labelmap)
+
     return JSONResponse(content=labels)
 
 
