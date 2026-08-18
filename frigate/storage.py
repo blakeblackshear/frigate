@@ -106,7 +106,7 @@ class StorageMaintainer(threading.Thread):
 
     def _stream_sample_count(self, camera: str, stream_type: str) -> int:
         """Count a stream's non-zero segments, stopping at the sample target."""
-        return (
+        count: int = (
             Recordings.select(Recordings.id)
             .where(
                 Recordings.camera == camera,
@@ -116,6 +116,7 @@ class StorageMaintainer(threading.Thread):
             .limit(BANDWIDTH_SAMPLE_TARGET)
             .count()
         )
+        return count
 
     def _needs_refresh(self, camera: str) -> bool:
         """Return whether a stream the camera records still lacks samples.
