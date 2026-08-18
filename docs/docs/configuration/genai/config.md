@@ -59,13 +59,17 @@ Running Generative AI models on CPU is not recommended, as high inference times 
 
 ### Recommended Local Models
 
+#### Vision models
+
 You must use a vision-capable model with Frigate. The following models are recommended for local deployment of the `descriptions` and `chat` roles:
 
-| Model      | Notes                                                                                                                                                                |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl` | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object.                                              |
-| `qwen3.6`  | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
-| `gemma4`   | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
+| Model               | Notes                                                                                                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qwen3-vl`          | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object.                                              |
+| `qwen3.6`/`qwen3.8` | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
+| `gemma4`            | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
+
+#### Embedding models
 
 The `embeddings` role needs a different kind of model. Text queries are matched against the stored image embeddings, so the model must be trained to place images and text into the same vector space. A chat or description model will still return vectors when asked, but those vectors are not trained for retrieval and text searches will return poor matches with no error to indicate why.
 
