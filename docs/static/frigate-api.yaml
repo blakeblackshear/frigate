@@ -4010,6 +4010,49 @@ paths:
       security:
         - frigateAdminAuth: []
       x-required-role: admin
+  /hardware/probe:
+    get:
+      tags:
+        - Hardware
+      summary: Probe Hardware
+      description: |-
+        **Access:** Admin role required.
+
+        Get the object detection hardware attached to this system.
+
+        Args:
+            refresh: Probe again instead of returning the cached result
+
+        Returns:
+            Every kind of detection hardware that was found
+      operationId: probe_hardware_hardware_probe_get
+      parameters:
+        - name: refresh
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Refresh
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DetectionHardware'
+                title: Response Probe Hardware Hardware Probe Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
   /events:
     get:
       tags:
@@ -7842,6 +7885,46 @@ components:
       required:
         - ids
       title: DeleteFaceImagesBody
+    DetectionHardware:
+      properties:
+        key:
+          type: string
+          title: Hardware key
+          description: Stable identifier for this kind of hardware.
+        detector:
+          type: string
+          title: Detector type
+          description: The detector that drives this hardware.
+        name:
+          type: string
+          title: Hardware name
+          description: Human readable name for this kind of hardware.
+        units:
+          items:
+            $ref: '#/components/schemas/HardwareUnit'
+          type: array
+          title: Units
+          description: Each physical piece of this hardware that was found.
+        count:
+          type: integer
+          title: Unit count
+          description: How many units were found.
+        unlimited:
+          type: boolean
+          title: Unlimited detectors
+          description: Whether this hardware can run more inference processes 
+            than there are units.
+      type: object
+      required:
+        - key
+        - detector
+        - name
+        - units
+        - count
+        - unlimited
+      title: DetectionHardware
+      description: A kind of detection hardware, and every unit of it that was 
+        found.
     EventCreateResponse:
       properties:
         success:
@@ -8569,6 +8652,24 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    HardwareUnit:
+      properties:
+        device:
+          type: string
+          title: Device string
+          description: The value to put in a model's devices list, for example 
+            'edgetpu:pci:1'.
+        label:
+          type: string
+          title: Unit label
+          description: How to identify this unit among others of the same kind, 
+            for example 'PCIe 1'.
+      type: object
+      required:
+        - device
+        - label
+      title: HardwareUnit
+      description: One physical piece of hardware.
     Last24HoursReview:
       properties:
         reviewed_alert:

@@ -66,7 +66,7 @@ export interface CameraConfig {
     height: number;
     max_disappeared: number;
     min_initialized: number;
-    scene: string | null;
+    scene: string;
     stationary: {
       interval: number;
       max_frames: {

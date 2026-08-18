@@ -129,6 +129,8 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "close": "Close",
+    "expand": "Expand",
+    "collapse": "Collapse",
     "copy": "Copy",
     "copiedToClipboard": "Copied to clipboard",
     "back": "Back",

@@ -111,6 +111,21 @@ const detect: SectionConfigOverrides = {
         },
       },
       {
+        key: "detect-scene-without-model",
+        field: "scene",
+        position: "after",
+        messageKey: "configMessages.detect.sceneWithoutModel",
+        severity: "warning",
+        docLink: "/configuration/object_detectors#running-more-than-one-model",
+        condition: (ctx) => {
+          const scene = ctx.formData?.scene as string | undefined;
+          if (!scene || scene === "all") return false;
+          const models = ctx.fullConfig?.models;
+          if (!models) return false;
+          return !models.some((model) => model.scene === scene);
+        },
+      },
+      {
         key: "fps-greater-than-five",
         field: "fps",
         messageKey: "configMessages.detect.fpsGreaterThanFive",
@@ -153,6 +168,7 @@ const detect: SectionConfigOverrides = {
     ],
     fieldOrder: [
       "enabled",
+      "scene",
       "width",
       "height",
       "fps",
@@ -170,6 +186,11 @@ const detect: SectionConfigOverrides = {
       tracking: ["min_initialized", "max_disappeared"],
     },
     uiSchema: {
+      scene: {
+        "ui:options": {
+          enumI18nPrefix: "detectionModels.scenes",
+        },
+      },
       annotation_offset: {
         "ui:options": {
           signed: true,
@@ -186,6 +207,7 @@ const detect: SectionConfigOverrides = {
   },
   global: {
     restartRequired: [
+      "scene",
       "fps",
       "width",
       "height",
@@ -195,6 +217,7 @@ const detect: SectionConfigOverrides = {
   },
   camera: {
     restartRequired: [
+      "scene",
       "fps",
       "width",
       "height",
@@ -211,6 +234,7 @@ const detect: SectionConfigOverrides = {
     hiddenFields: [
       "enabled",
       "enabled_in_config",
+      "scene",
       "min_initialized",
       "max_disappeared",
       "annotation_offset",

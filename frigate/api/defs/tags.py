@@ -8,6 +8,7 @@ class Tags(Enum):
     chat = "Chat"
     events = "Events"
     export = "Export"
+    hardware = "Hardware"
     classification = "Classification"
     logs = "Logs"
     media = "Media"

@@ -315,7 +315,7 @@ def _resolve_intel_gpu_pdev(device: str | None) -> str | None:
     return pdev if _PCI_ADDRESS_RE.match(pdev) else None
 
 
-def _enumerate_drm_devices() -> dict[str, str]:
+def enumerate_drm_devices() -> dict[str, str]:
     """Map each PCI-attached DRM device to its bound kernel driver.
 
     Reads /sys/class/drm, which reflects every GPU on the host even when only
@@ -517,7 +517,7 @@ def get_intel_gpu_stats(
         )
         return None
 
-    drm_devices = _enumerate_drm_devices()
+    drm_devices = enumerate_drm_devices()
     intel_pdevs = {
         pdev: driver
         for pdev, driver in drm_devices.items()
