@@ -329,10 +329,13 @@ test.describe("UI settings import/export @medium", () => {
     expect(await readIdb(frigateApp.page, "weekStartsOn:admin")).toBe(1);
   });
 
-  test("merges imported streaming settings with existing groups", async ({
+  test("merges imported streaming settings with existing groups and cameras", async ({
     frigateApp,
   }) => {
-    const INDOOR_STREAMING = {
+    // indoor is a group the file never mentions. outdoor.backyard is a
+    // camera inside a group the file DOES mention, so a shallow group-level
+    // merge would silently drop it. Both must survive.
+    const EXISTING_STREAMING = {
       indoor: {
         garage: {
           streamName: "garage",
@@ -342,11 +345,20 @@ test.describe("UI settings import/export @medium", () => {
           volume: 0.5,
         },
       },
+      outdoor: {
+        backyard: {
+          streamName: "backyard",
+          streamType: "no-streaming",
+          compatibilityMode: false,
+          playAudio: false,
+          volume: 0,
+        },
+      },
     };
 
     await frigateApp.goto("/settings?page=uiSettings");
 
-    await writeIdb(frigateApp.page, { [STREAMING_KEY]: INDOOR_STREAMING });
+    await writeIdb(frigateApp.page, { [STREAMING_KEY]: EXISTING_STREAMING });
     await chooseImportFile(frigateApp.page, importPayload());
 
     await expect(
@@ -356,8 +368,11 @@ test.describe("UI settings import/export @medium", () => {
     await confirmImport(frigateApp.page);
 
     expect(await readIdb(frigateApp.page, STREAMING_KEY)).toEqual({
-      ...INDOOR_STREAMING,
-      ...STREAMING_SETTINGS,
+      indoor: EXISTING_STREAMING.indoor,
+      outdoor: {
+        ...EXISTING_STREAMING.outdoor,
+        ...STREAMING_SETTINGS.outdoor,
+      },
     });
   });
   test("rejects a file that is not valid JSON", async ({ frigateApp }) => {

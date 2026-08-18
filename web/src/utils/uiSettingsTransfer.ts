@@ -424,8 +424,9 @@ export async function applyImportPayload(
   ) {
     writes.push(
       (async () => {
-        // one key holds every group, so merge per group rather than
-        // replacing: groups configured only on this device must survive
+        // one key holds every group and every camera within it, so merge
+        // at camera level: a group or a camera configured only on this
+        // device must survive an import that does not mention it
         const existing =
           (await readTransferable(
             streamingEntry.key,
@@ -433,10 +434,15 @@ export async function applyImportPayload(
             username,
           )) ?? {};
 
-        await setData(storageKey(streamingEntry, username), {
+        const merged: UiSettingsFile["sections"]["streaming"] = {
           ...existing,
-          ...file.sections.streaming,
+        };
+
+        Object.entries(file.sections.streaming).forEach(([group, cameras]) => {
+          merged[group] = { ...(existing[group] ?? {}), ...cameras };
         });
+
+        await setData(storageKey(streamingEntry, username), merged);
       })(),
     );
   }
