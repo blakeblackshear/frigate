@@ -100,7 +100,7 @@
     },
     "scene": {
       "label": "Detect scene",
-      "description": "The environment this camera looks at, used to pick which of the configured models runs on it. Defaults to the model with a scene of 'all'."
+      "description": "The environment this camera looks at, used to pick which of the configured models runs on it. Cameras left on 'all' run the model configured with a scene of 'all'."
     },
     "fps": {
       "label": "Detect FPS",
