@@ -172,10 +172,9 @@ mqtt:
 ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 
-detectors:
-  coral:
-    type: edgetpu
-    device: usb
+models:
+  - devices:
+      - edgetpu:usb
 
 record:
   enabled: True
@@ -249,10 +248,9 @@ mqtt:
 ffmpeg:
   hwaccel_args: preset-vaapi
 
-detectors:
-  coral:
-    type: edgetpu
-    device: usb
+models:
+  - devices:
+      - edgetpu:usb
 
 record:
   enabled: True
@@ -329,15 +327,12 @@ mqtt:
 ffmpeg:
   hwaccel_args: preset-vaapi
 
-detectors:
-  ov:
-    type: openvino
-    device: AUTO
-
-model:
-  width: 300
-  height: 300
-  input_tensor: nhwc
+models:
+  - devices:
+      - openvino:AUTO
+    width: 300
+    height: 300
+    input_tensor: nhwc
   input_pixel_format: bgr
   path: /openvino-model/ssdlite_mobilenet_v2.xml
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt

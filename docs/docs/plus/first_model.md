@@ -36,10 +36,9 @@ Navigate to <NavPath path="Settings > System > Detectors and model" />. In the *
 <TabItem value="yaml">
 
 ```yaml
-detectors: ...
-
-model:
-  path: plus://<your_model_id>
+models:
+  - devices: ...
+    path: plus://<your_model_id>
 ```
 
 :::tip

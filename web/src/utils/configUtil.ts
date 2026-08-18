@@ -493,6 +493,7 @@ export interface SectionSavePayload {
 // ---------------------------------------------------------------------------
 
 import { resolveAndCleanSchema } from "@/lib/config-schema";
+import { getAllAttributes } from "@/utils/modelUtil";
 
 type SchemaWithDefinitions = RJSFSchema & {
   $defs?: Record<string, RJSFSchema>;
@@ -796,7 +797,7 @@ export function getEffectiveAttributeLabels(
   fullCameraConfig: CameraConfig | undefined,
   level: "global" | "camera" | "replay" | undefined,
 ): string[] {
-  const all = fullConfig?.model?.all_attributes ?? [];
+  const all = getAllAttributes(fullConfig);
   if (level !== "global" && fullCameraConfig?.type === "lpr") {
     return all.filter((attr) => attr !== "license_plate");
   }

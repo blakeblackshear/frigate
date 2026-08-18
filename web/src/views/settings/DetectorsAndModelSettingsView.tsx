@@ -49,6 +49,7 @@ import {
 import { ConfigSectionTemplate } from "@/components/config-form/sections";
 import { ConfigMessageBanner } from "@/components/config-form/ConfigMessageBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getPrimaryModel } from "@/utils/modelUtil";
 import {
   buildHiddenFieldContext,
   getSectionConfig,
@@ -115,8 +116,9 @@ const STATUS_BAR_KEY = "detectors_and_model";
 const EMPTY_PENDING: Record<string, ConfigSectionData> = {};
 
 const deriveInitialState = (config: FrigateConfig): PageState => {
-  const plusModelId = config.model?.plus?.id;
-  const modelPath = config.model?.path;
+  const primaryModel = getPrimaryModel(config);
+  const plusModelId = primaryModel?.plus?.id;
+  const modelPath = primaryModel?.path;
   const plusEnabled = Boolean(config.plus?.enabled);
 
   // The reliable signal that a Plus model is currently active is the
@@ -136,10 +138,12 @@ const deriveInitialState = (config: FrigateConfig): PageState => {
     modelTab = "custom";
   }
 
-  const { plus: _plus, ...modelWithoutPlus } = (config.model ?? {}) as Record<
-    string,
-    unknown
-  >;
+  const {
+    plus: _plus,
+    scene: _scene,
+    devices: _devices,
+    ...modelWithoutPlus
+  } = (primaryModel ?? {}) as Record<string, unknown>;
   // If a Plus model is active, the resolved `model.path` is auto-derived from
   // `plus.id` — drop it so the Custom tab starts clean and doesn't silently
   // re-save the same Plus model when the user thinks they switched modes.
@@ -148,7 +152,7 @@ const deriveInitialState = (config: FrigateConfig): PageState => {
   }
 
   return {
-    detectors: (config.detectors ?? {}) as ConfigSectionData,
+    detectors: { devices: primaryModel?.devices ?? [] } as ConfigSectionData,
     modelTab,
     plusModelId: plusModelId ?? undefined,
     customModel: modelWithoutPlus as ConfigSectionData,

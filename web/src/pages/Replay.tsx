@@ -49,6 +49,7 @@ import Logo from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
+import { getPrimaryModel } from "@/utils/modelUtil";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
 type DebugReplayStatus = {
@@ -642,7 +643,7 @@ function ObjectList({ cameraConfig, objects, config }: ObjectListProps) {
     if (!config) {
       return;
     }
-    return config.model?.colormap;
+    return getPrimaryModel(config)?.colormap;
   }, [config]);
 
   const getColorForObjectName = useCallback(
