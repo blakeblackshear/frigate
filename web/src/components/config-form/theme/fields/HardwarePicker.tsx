@@ -187,9 +187,13 @@ export function HardwarePicker({
             const claimedBy = claimedElsewhere[unit.device];
 
             return (
-              <div key={unit.device} className="flex items-center gap-2">
+              <div
+                key={unit.device}
+                className="mb-3 flex flex-row items-center space-x-3 space-y-0 last:mb-0"
+              >
                 <Checkbox
                   id={`${idPrefix}-${unit.device}`}
+                  className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
                   checked={devices.includes(unit.device)}
                   disabled={disabled || Boolean(claimedBy)}
                   onCheckedChange={(checked) =>

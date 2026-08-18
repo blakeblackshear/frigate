@@ -102,7 +102,7 @@ export function ModelSourcePicker({
     !detector || model.supportedDetectors.includes(detector);
 
   if (!plusEnabled) {
-    return <>{customFields}</>;
+    return <div className="space-y-6">{customFields}</div>;
   }
 
   const describe = (model: FrigatePlusModel) =>
@@ -165,7 +165,9 @@ export function ModelSourcePicker({
         </p>
       </TabsContent>
 
-      <TabsContent value="custom">{customFields}</TabsContent>
+      <TabsContent value="custom" className="space-y-6">
+        {customFields}
+      </TabsContent>
     </Tabs>
   );
 }

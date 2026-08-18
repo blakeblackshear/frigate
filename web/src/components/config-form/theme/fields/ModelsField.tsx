@@ -325,10 +325,10 @@ export function ModelsField(props: FieldProps) {
                 }))
               }
             >
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer p-4 transition-colors hover:bg-muted/50">
-                  <div className="flex items-center justify-between gap-4">
-                    <CardTitle className="text-sm">
+              <CardHeader className="p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <CollapsibleTrigger asChild>
+                    <CardTitle className="flex-1 cursor-pointer text-sm">
                       <span>
                         {t(`detectionModels.scenes.${model.scene ?? "all"}`)}
                       </span>
@@ -339,14 +339,47 @@ export function ModelsField(props: FieldProps) {
                         ) ?? t("detectionModels.hardware.none")}
                       </span>
                     </CardTitle>
-                    {open ? (
-                      <LuChevronDown className="h-4 w-4" />
-                    ) : (
-                      <LuChevronRight className="h-4 w-4" />
-                    )}
+                  </CollapsibleTrigger>
+                  <div className="flex shrink-0 items-center gap-1">
+                    {models.length > 1 ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveModel(index)}
+                            disabled={disabled || readonly}
+                            aria-label={t("button.delete", { ns: "common" })}
+                          >
+                            <LuTrash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {t("button.delete", { ns: "common" })}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : null}
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t(
+                          open ? "button.collapse" : "button.expand",
+                          { ns: "common" },
+                        )}
+                      >
+                        {open ? (
+                          <LuChevronDown className="h-4 w-4" />
+                        ) : (
+                          <LuChevronRight className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </CollapsibleTrigger>
                   </div>
-                </CardHeader>
-              </CollapsibleTrigger>
+                </div>
+              </CardHeader>
 
               <CollapsibleContent>
                 <CardContent className="space-y-4 p-4 pt-0">
@@ -401,28 +434,6 @@ export function ModelsField(props: FieldProps) {
                       renderField(index, fieldName),
                     )}
                   />
-
-                  {models.length > 1 ? (
-                    <div className="flex justify-end">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveModel(index)}
-                            disabled={disabled || readonly}
-                            aria-label={t("button.delete", { ns: "common" })}
-                          >
-                            <LuTrash2 className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {t("button.delete", { ns: "common" })}
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  ) : null}
                 </CardContent>
               </CollapsibleContent>
             </Collapsible>
