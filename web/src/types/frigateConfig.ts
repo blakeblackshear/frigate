@@ -66,6 +66,7 @@ export interface CameraConfig {
     height: number;
     max_disappeared: number;
     min_initialized: number;
+    scene: string | null;
     stationary: {
       interval: number;
       max_frames: {
@@ -405,6 +406,32 @@ export type GenAIAgentConfig = {
   runtime_options?: Record<string, unknown>;
 };
 
+export type DetectionModelConfig = {
+  scene: string;
+  devices: string[];
+  height: number;
+  input_pixel_format: string;
+  input_tensor: string;
+  labelmap: Record<string, unknown>;
+  labelmap_path: string | null;
+  model_type: string;
+  path: string | null;
+  width: number;
+  colormap: { [key: string]: [number, number, number] };
+  attributes_map: { [key: string]: string[] };
+  all_attributes: string[];
+  plus?: {
+    name: string;
+    id: string;
+    trainDate: string;
+    baseModel: string;
+    isBaseModel: boolean;
+    supportedDetectors: string[];
+    width: number;
+    height: number;
+  } | null;
+};
+
 export interface FrigateConfig {
   version: string;
   safe_mode: boolean;
@@ -468,23 +495,6 @@ export interface FrigateConfig {
     width: number | null;
   };
 
-  detectors: {
-    coral: {
-      device: string;
-      model: {
-        height: number;
-        input_pixel_format: string;
-        input_tensor: string;
-        labelmap: Record<string, string>;
-        labelmap_path: string | null;
-        model_type: string;
-        path: string;
-        width: number;
-      };
-      type: string;
-    };
-  };
-
   environment_vars: Record<string, unknown>;
 
   face_recognition: FaceRecognitionConfig;
@@ -524,29 +534,7 @@ export interface FrigateConfig {
     logs: Record<string, string>;
   };
 
-  model: {
-    height: number;
-    input_pixel_format: string;
-    input_tensor: string;
-    labelmap: Record<string, unknown>;
-    labelmap_path: string | null;
-    model_type: string;
-    path: string | null;
-    width: number;
-    colormap: { [key: string]: [number, number, number] };
-    attributes_map: { [key: string]: string[] };
-    all_attributes: string[];
-    plus?: {
-      name: string;
-      id: string;
-      trainDate: string;
-      baseModel: string;
-      isBaseModel: boolean;
-      supportedDetectors: string[];
-      width: number;
-      height: number;
-    } | null;
-  };
+  models: DetectionModelConfig[];
 
   motion: Record<string, unknown> | null;
 

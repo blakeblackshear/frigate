@@ -47,10 +47,10 @@ def get_categorized_object_names(
     """
     tracked_objects = _get_tracked_objects(config, allowed_cameras)
     names: dict[str, set[str]] = {}
-    logos = set(config.model.all_attribute_logos)
+    logos = set(config.all_attribute_logos)
 
     # 1. detector logo attributes, only for objects that are actually tracked
-    for label, label_attributes in config.model.attributes_map.items():
+    for label, label_attributes in config.all_attributes_map.items():
         if label not in tracked_objects:
             continue
 
@@ -126,7 +126,7 @@ def _objects_with_attribute(
     """
     objects = {
         label
-        for label, label_attributes in config.model.attributes_map.items()
+        for label, label_attributes in config.all_attributes_map.items()
         if attribute in label_attributes and label in tracked_objects
     }
 
