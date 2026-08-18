@@ -4,8 +4,8 @@ edgeTPU:
     - key: mobiledet
       label: Mobiledet
       recommended: true
-      download: A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
-      ui: Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`.
+      download: A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with a model's `path`.
+      ui: Navigate to **Settings > System > Detection models** and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown.
       yaml: |-
         models:
           - devices:
@@ -13,9 +13,9 @@ edgeTPU:
     - key: yolov9
       label: YOLOv9
       recommended: false
-      download: "[Download the model](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite), bind mount the file into the container, and provide the path with `model.path`. Note that the linked model requires a 17-label [labelmap file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) that includes only 17 COCO classes."
+      download: "[Download the model](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite), bind mount the file into the container, and provide the path with a model's `path`. Note that the linked model requires a 17-label [labelmap file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) that includes only 17 COCO classes."
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`. Then on the same page, in the **Custom Model** tab, configure the model settings:
+        Navigate to **Settings > System > Detection models** and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure the model settings:
 
         | Field                                    | Value                                                             |
         | ---------------------------------------- | ----------------------------------------------------------------- |
@@ -44,7 +44,7 @@ hailo8l:
       recommended: true
       download: If no custom model path or URL is provided, the Hailo detector automatically downloads the default model (YOLOv6n) from the Hailo Model Zoo on first startup based on the detected hardware. Once cached under `/config/model_cache/hailo`, the model works fully offline.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **Hailo-8/Hailo-8L** from the detector type dropdown and click **Add**, then set device to `PCIe`. Then on the same page, in the **Custom Model** tab, configure the model settings:
+        Navigate to **Settings > System > Detection models** and select **Hailo** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure the model settings:
 
         | Field                                    | Value                   |
         | ---------------------------------------- | ----------------------- |
@@ -86,7 +86,7 @@ hailo8l:
       recommended: false
       download: For SSD-based models, provide either a model path or URL to your compiled SSD model. The integration will first check the local path before downloading if necessary. The model file is cached under `/config/model_cache/hailo`.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **Hailo-8/Hailo-8L** from the detector type dropdown and click **Add**, then set device to `PCIe`. Then on the same page, in the **Custom Model** tab, configure the model settings:
+        Navigate to **Settings > System > Detection models** and select **Hailo** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure the model settings:
 
         | Field                                   | Value  |
         | --------------------------------------- | ------ |
@@ -143,7 +143,7 @@ openvino:
         EOF
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU` (or `NPU`). Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **Intel GPU** (or **Intel NPU**) from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
@@ -171,7 +171,7 @@ openvino:
       recommended: false
       download: An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU` (or `NPU`). Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **Intel GPU** (or **Intel NPU**) from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                      |
         | ---------------------------------------- | ------------------------------------------ |
@@ -206,7 +206,7 @@ openvino:
         python3 yolo_to_onnx.py -m yolov7-320
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU` (or `NPU`). Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **Intel GPU** (or **Intel NPU**) from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
@@ -243,7 +243,7 @@ openvino:
 
         The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **Intel GPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                             |
         | ---------------------------------------- | ------------------------------------------------- |
@@ -271,7 +271,7 @@ openvino:
       recommended: false
       download: YOLOx models can be downloaded [from the YOLOx repo](https://github.com/Megvii-BaseDetection/YOLOX/tree/main/demo/ONNXRuntime).
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **Intel GPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                 | Value                            |
         | ------------------------------------- | -------------------------------- |
@@ -308,7 +308,7 @@ openvino:
         EOF
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `GPU`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **Intel GPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                   | Value                             |
         | --------------------------------------- | --------------------------------- |
@@ -402,7 +402,7 @@ openvino:
         EOF
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **OpenVINO** from the detector type dropdown and click **Add**, then set device to `CPU`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **CPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                              |
         | ---------------------------------------- | ---------------------------------- |
@@ -455,7 +455,7 @@ appleSilicon:
         EOF
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **ZMQ IPC** from the detector type dropdown and click **Add**, then set the endpoint to `tcp://host.docker.internal:5555`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and add a model. The ZMQ endpoint is not reported by the hardware probe, so set `devices` to `zmq:tcp://host.docker.internal:5555` in YAML. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
@@ -491,7 +491,7 @@ appleSilicon:
         python3 yolo_to_onnx.py -m yolov7-320
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **ZMQ IPC** from the detector type dropdown and click **Add**, then set the endpoint to `tcp://host.docker.internal:5555`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and add a model. The ZMQ endpoint is not reported by the hardware probe, so set `devices` to `zmq:tcp://host.docker.internal:5555` in YAML. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
@@ -544,7 +544,7 @@ onnx:
         EOF
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select your GPU from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
@@ -588,7 +588,7 @@ onnx:
         EOF
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select your GPU from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                   | Value                             |
         | --------------------------------------- | --------------------------------- |
@@ -623,7 +623,7 @@ onnx:
 
         The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select your GPU from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                             |
         | ---------------------------------------- | ------------------------------------------------- |
@@ -651,7 +651,7 @@ onnx:
       recommended: false
       download: YOLOx models can be downloaded [from the YOLOx repo](https://github.com/Megvii-BaseDetection/YOLOX/tree/main/demo/ONNXRuntime).
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select your GPU from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
@@ -747,7 +747,7 @@ onnx:
         EOF
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select your GPU from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                       |
         | ---------------------------------------- | ------------------------------------------- |
@@ -783,7 +783,7 @@ onnx:
         python3 yolo_to_onnx.py -m yolov7-320
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **ONNX** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select your GPU from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                                    |
         | ---------------------------------------- | -------------------------------------------------------- |
@@ -812,9 +812,9 @@ cpu:
     - key: ssd
       label: MobileNet v2
       recommended: true
-      download: A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+      download: A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with a model's `path`.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **CPU** from the detector type dropdown and click **Add**. Configure the number of threads and click **Add** again to add additional CPU detectors as needed (one per camera is recommended).
+        Navigate to **Settings > System > Detection models** and select **CPU** from the **Hardware** dropdown and set **Detectors** to the number of detection processes to run (one per camera is recommended).
 
         | Field             | Value |
         | ----------------- | ----- |
@@ -832,7 +832,7 @@ deepstack:
       recommended: true
       download: This detector runs object detection over the network against a CodeProject.AI or DeepStack server, so no model is downloaded into Frigate itself. Visit the [CodeProject.AI official website](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) to download and install the AI server on your preferred device (e.g. Raspberry Pi, Nvidia Jetson, or other compatible hardware) before configuring the detector.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **DeepStack** from the detector type dropdown and click **Add**. Set the API URL to point to your CodeProject.AI server (e.g., `http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection`).
+        Navigate to **Settings > System > Detection models** and add a model. The CodeProject.AI server is not reported by the hardware probe, so set `devices` to `deepstack:http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection` in YAML.
 
         | Field         | Value                                                                  |
         | ------------- | ---------------------------------------------------------------------- |
@@ -859,7 +859,7 @@ memryx:
 
         MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **MemryX** from the detector type dropdown and click **Add**, then set device to `PCIe:0`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **MemryX MX3** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                             |
         | ---------------------------------------- | ------------------------------------------------- |
@@ -893,7 +893,7 @@ memryx:
 
         MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **MemryX** from the detector type dropdown and click **Add**, then set device to `PCIe:0`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **MemryX MX3** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                             |
         | ---------------------------------------- | ------------------------------------------------- |
@@ -926,7 +926,7 @@ memryx:
 
         MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **MemryX** from the detector type dropdown and click **Add**, then set device to `PCIe:0`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **MemryX MX3** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                   |
         | ---------------------------------------- | ----------------------- |
@@ -959,7 +959,7 @@ memryx:
 
         MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **MemryX** from the detector type dropdown and click **Add**, then set device to `PCIe:0`. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **MemryX MX3** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                   |
         | ---------------------------------------- | ----------------------- |
@@ -1005,7 +1005,7 @@ tensorrt:
             - USE_FP16=false
         ```
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **TensorRT** from the detector type dropdown and click **Add**, then set the device to `0` (the default GPU index). Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **NVIDIA Jetson** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                                        |
         | ---------------------------------------- | ------------------------------------------------------------ |
@@ -1035,7 +1035,7 @@ synaptics:
       recommended: true
       download: A synap model is provided in the container at `/mobilenet.synap` and is used by this detector type by default. The model comes from the [Synap-release Github](https://github.com/synaptics-astra/synap-release/tree/v1.5.0/models/dolphin/object_detection/coco/model/mobilenet224_full80).
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **Synaptics** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **Synaptics NPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                        |
         | ---------------------------------------- | ---------------------------- |
@@ -1068,7 +1068,7 @@ rknn:
 
         You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** select **Rockchip NPU** from the **Hardware** dropdown, then open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                              |
         | ---------------------------------------- | -------------------------------------------------- |
@@ -1108,7 +1108,7 @@ rknn:
 
         **Note:** The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** select **Rockchip NPU** from the **Hardware** dropdown, then open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                                                   |
         | ---------------------------------------- | ----------------------------------------------------------------------- |
@@ -1145,7 +1145,7 @@ rknn:
 
         You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** select **Rockchip NPU** from the **Hardware** dropdown, then open the **Custom Model** tab and configure:
 
         | Field                                    | Value                                          |
         | ---------------------------------------- | ---------------------------------------------- |
@@ -1182,7 +1182,7 @@ axengine:
       recommended: true
       download: A yolov9 axmodel is provided in the container at `/axmodels` and is used by this detector type by default. The AXEngine detector downloads its default model from HuggingFace on first startup; once cached, the model works fully offline.
       ui: |-
-        Navigate to **Settings > System > Detectors and model** and select **AXEngine NPU** from the detector type dropdown and click **Add**. Then on the same page, in the **Custom Model** tab, configure:
+        Navigate to **Settings > System > Detection models** and select **AXERA NPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
         | Field                                    | Value                   |
         | ---------------------------------------- | ----------------------- |
@@ -1195,20 +1195,6 @@ axengine:
         | **Model Input D Type**                   | `int`                   |
         | **Object Detection Model Type**          | `yolo-generic`          |
       yaml: |-
-<<<<<<< HEAD
-        detectors:
-          axengine:
-            type: axengine
-
-        model:
-          path: frigate-yolov9-tiny
-          model_type: yolo-generic
-          width: 320
-          height: 320
-          input_dtype: int
-          input_pixel_format: bgr
-          labelmap_path: /labelmap/coco-80.txt
-=======
         models:
           - devices:
               - axengine
@@ -1219,85 +1205,3 @@ axengine:
             input_dtype: int
             input_pixel_format: bgr
             labelmap_path: /labelmap/coco-80.txt
-degirumAiServer:
-  title: DeGirum AI Server
-  models:
-    - key: ai-server-inference
-      label: AI Server Inference
-      recommended: true
-      download: |-
-        Launch a DeGirum AI server as a Docker container, then point the detector at it. Add this to your `docker-compose.yml`:
-
-        ```yaml
-        degirum_detector:
-          container_name: degirum
-          image: degirum/aiserver:latest
-          privileged: true
-          ports:
-            - "8778:8778"
-        ```
-
-        Set `location` to the server's service name, container name, or `host:port`.
-      ui: |
-        Navigate to **Settings > System > Detectors and model** and select **DeGirum** from the detector type dropdown and click **Add**.
-
-        | Field | Value |
-        | --- | --- |
-        | **Location** | `degirum` |
-        | **Zoo** | `degirum/public` |
-        | **Token** | your AI Hub token (optional for the public zoo) |
-      yaml: |
-        models:
-          - devices:
-              - degirum:degirum
-            path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
-            width: 300
-            height: 300
-            input_pixel_format: rgb
-degirumLocal:
-  title: DeGirum Local
-  models:
-    - key: local-inference
-      label: Local Inference
-      recommended: true
-      download: Run hardware directly inside the Frigate container with `@local`, removing the AI server hop. The matching device runtime (e.g. the Hailo runtime) must be installed in the container; confirm it with `degirum sys-info`.
-      ui: |
-        Navigate to **Settings > System > Detectors and model** and select **DeGirum** from the detector type dropdown and click **Add**.
-
-        | Field | Value |
-        | --- | --- |
-        | **Location** | `@local` |
-        | **Zoo** | `degirum/public` |
-        | **Token** | your AI Hub token (optional for the public zoo) |
-      yaml: |
-        models:
-          - devices:
-              - degirum:@local
-            path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
-            width: 300
-            height: 300
-            input_pixel_format: rgb
-degirumCloud:
-  title: DeGirum AI Hub Cloud
-  models:
-    - key: ai-hub-cloud-inference
-      label: AI Hub Cloud Inference
-      recommended: true
-      download: Run inferences on DeGirum's [AI Hub](https://hub.degirum.com) cloud with `@cloud`. Sign up, create an access token, and set it as `token`. Network latency may require lowering your detection fps.
-      ui: |
-        Navigate to **Settings > System > Detectors and model** and select **DeGirum** from the detector type dropdown and click **Add**.
-
-        | Field | Value |
-        | --- | --- |
-        | **Location** | `@cloud` |
-        | **Zoo** | `degirum/public` |
-        | **Token** | your AI Hub token (optional for the public zoo) |
-      yaml: |
-        models:
-          - devices:
-              - degirum:@cloud
-            path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
-            width: 300
-            height: 300
-            input_pixel_format: rgb
->>>>>>> 34363affa (Refactor detector and model management)
