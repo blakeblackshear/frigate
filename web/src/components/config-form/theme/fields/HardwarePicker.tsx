@@ -143,7 +143,7 @@ export function HardwarePicker({
   const unrecognized = devices.length > 0 && !selected;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       <div className="space-y-1">
         <Label>{t("detectionModels.hardware.label")}</Label>
         <Select
@@ -151,7 +151,7 @@ export function HardwarePicker({
           onValueChange={handleHardwareChange}
           disabled={disabled}
         >
-          <SelectTrigger className="max-w-md">
+          <SelectTrigger className="max-w-xs">
             <SelectValue
               placeholder={t("detectionModels.hardware.placeholder")}
             />
@@ -231,7 +231,7 @@ export function HardwarePicker({
           >
             <SelectTrigger
               id={`${idPrefix}-detector-count`}
-              className="max-w-md"
+              className="max-w-xs"
             >
               <SelectValue />
             </SelectTrigger>

@@ -78,16 +78,16 @@ const models: SectionConfigOverrides = {
           "ui:options": { size: "md" },
         },
         input_pixel_format: {
-          "ui:options": { advanced: true },
+          "ui:options": { advanced: true, size: "xs" },
         },
         input_tensor: {
-          "ui:options": { advanced: true },
+          "ui:options": { advanced: true, size: "xs" },
         },
         input_dtype: {
-          "ui:options": { advanced: true },
+          "ui:options": { advanced: true, size: "xs" },
         },
         model_type: {
-          "ui:options": { advanced: true },
+          "ui:options": { advanced: true, size: "xs" },
         },
       },
     },

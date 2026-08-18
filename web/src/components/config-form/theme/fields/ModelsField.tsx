@@ -305,7 +305,7 @@ export function ModelsField(props: FieldProps) {
   const baseId = idSchema?.$id ?? "models";
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {models.map((model, index) => {
         const open = openByIndex[index] ?? true;
         const takenScenes = new Set(
@@ -382,7 +382,7 @@ export function ModelsField(props: FieldProps) {
               </CardHeader>
 
               <CollapsibleContent>
-                <CardContent className="space-y-4 p-4 pt-0">
+                <CardContent className="space-y-6 p-4 pt-0">
                   <div className="space-y-1">
                     <Label>{t("detectionModels.scene.label")}</Label>
                     <Select
@@ -390,7 +390,7 @@ export function ModelsField(props: FieldProps) {
                       onValueChange={(scene) => updateModel(index, { scene })}
                       disabled={disabled || readonly}
                     >
-                      <SelectTrigger className="max-w-md">
+                      <SelectTrigger className="max-w-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

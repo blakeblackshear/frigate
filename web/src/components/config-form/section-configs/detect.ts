@@ -111,6 +111,21 @@ const detect: SectionConfigOverrides = {
         },
       },
       {
+        key: "detect-scene-without-model",
+        field: "scene",
+        position: "after",
+        messageKey: "configMessages.detect.sceneWithoutModel",
+        severity: "warning",
+        docLink: "/configuration/object_detectors#running-more-than-one-model",
+        condition: (ctx) => {
+          const scene = ctx.formData?.scene as string | undefined;
+          if (!scene || scene === "all") return false;
+          const models = ctx.fullConfig?.models;
+          if (!models) return false;
+          return !models.some((model) => model.scene === scene);
+        },
+      },
+      {
         key: "fps-greater-than-five",
         field: "fps",
         messageKey: "configMessages.detect.fpsGreaterThanFive",

@@ -159,10 +159,31 @@ class TestConfig(unittest.TestCase):
             FrigateConfig(**(deep_merge(config, self.minimal)))
 
     @patch("frigate.detectors.detector_config.load_labels")
-    def test_camera_scene_must_match_a_model(self, mock_labels):
+    def test_camera_scene_without_a_model_falls_back_to_all(self, mock_labels):
         mock_labels.return_value = {}
         config = {
             "models": [{"devices": ["cpu"]}],
+            "cameras": {
+                "back": {
+                    "detect": {"scene": "outdoor"},
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]},
+                        ]
+                    },
+                },
+            },
+        }
+
+        frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+
+        assert frigate_config.model_for_camera("back").scene == SceneEnum.all
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_camera_scene_without_a_model_or_a_default(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [{"scene": "indoor", "devices": ["cpu"]}],
             "cameras": {
                 "back": {
                     "detect": {"scene": "outdoor"},

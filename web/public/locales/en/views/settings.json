@@ -1908,6 +1908,7 @@
     "detect": {
       "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit.",
       "disabled": "Object detection is disabled. Snapshots, review items, and enrichments such as face recognition, license plate recognition, and Generative AI will not function.",
+      "sceneWithoutModel": "No detection model is configured for this scene, so this camera falls back to the model with a scene of 'All cameras'. Add a model for this scene to give the camera its own.",
       "resolutionShouldBeMultipleOfFour": "For best results, detect width and height should be multiples of 4. Other even values may produce visual artifacts or slight distortion in the detect stream.",
       "aspectRatioMismatch": "The width and height you've entered don't match the aspect ratio of your current detect resolution. This may produce a stretched or distorted image.",
       "maxFramesSet": "Setting max frames overrides default behavior and disables stationary object tracking. There are very few situations where this is needed, use with caution.",
