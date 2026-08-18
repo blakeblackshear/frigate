@@ -180,6 +180,50 @@ class TestConfig(unittest.TestCase):
         assert frigate_config.model_for_camera("back").scene == SceneEnum.all
 
     @patch("frigate.detectors.detector_config.load_labels")
+    def test_model_for_camera_resolves_camera_added_after_parse(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [
+                {"devices": ["cpu"], "width": 320},
+                {"scene": "outdoor", "devices": ["openvino:CPU"], "width": 416},
+            ],
+        }
+
+        frigate_config = FrigateConfig(**(deep_merge(deepcopy(config), self.minimal)))
+
+        # runtime camera adds (wizard, clone, debug replay) insert an already
+        # resolved camera into the shared config without re-running parse
+        added = deepcopy(self.minimal)
+        added["cameras"]["new_cam"] = {
+            "detect": {"height": 1080, "width": 1920, "fps": 5, "scene": "outdoor"},
+            "ffmpeg": {
+                "inputs": [
+                    {"path": "rtsp://10.0.0.2:554/video", "roles": ["detect"]},
+                ]
+            },
+        }
+        new_config = FrigateConfig(**(deep_merge(deepcopy(config), added)))
+        frigate_config.cameras["new_cam"] = new_config.cameras["new_cam"]
+
+        assert frigate_config.model_for_camera("new_cam").scene == SceneEnum.outdoor
+        assert frigate_config.model_for_camera("new_cam").width == 416
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_model_for_camera_unknown_camera_uses_default_model(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [
+                {"devices": ["cpu"], "width": 320},
+                {"scene": "outdoor", "devices": ["openvino:CPU"], "width": 416},
+            ],
+        }
+
+        frigate_config = FrigateConfig(**(deep_merge(deepcopy(config), self.minimal)))
+
+        # a caller racing a runtime remove may still name the popped camera
+        assert frigate_config.model_for_camera("removed").scene == SceneEnum.all
+
+    @patch("frigate.detectors.detector_config.load_labels")
     def test_camera_scene_without_a_model_or_a_default(self, mock_labels):
         mock_labels.return_value = {}
         config = {
