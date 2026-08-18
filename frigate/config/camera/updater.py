@@ -96,6 +96,7 @@ class CameraConfigUpdateSubscriber:
             return
         elif update_type == CameraConfigUpdateEnum.remove:
             self.config.cameras.pop(camera, None)
+            self.config.drop_camera_model(camera)
             self.camera_configs.pop(camera, None)
             return
 
