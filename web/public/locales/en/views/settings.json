@@ -179,6 +179,31 @@
       "desc": "Streaming settings for each camera group are stored in your browser's local storage.",
       "clearAll": "Clear All Streaming Settings"
     },
+    "backupRestore": {
+      "title": "Backup & Restore",
+      "transfer": {
+        "label": "Device Settings File",
+        "desc": "Camera group layouts, streaming settings, and UI preferences are stored in your browser. Export them to a file to back them up or to move them to another device.",
+        "export": "Export Settings",
+        "import": "Import Settings"
+      },
+      "importDialog": {
+        "title": "Import Settings",
+        "desc": "Choose what to apply from this file. Frigate will reload when the import finishes.",
+        "exportedFrom": "Exported {{date}} from Frigate config version {{version}}",
+        "layouts_one": "Camera group layouts ({{count}} group)",
+        "layouts_other": "Camera group layouts ({{count}} groups)",
+        "streaming_one": "Streaming settings ({{count}} camera)",
+        "streaming_other": "Streaming settings ({{count}} cameras)",
+        "preferences_one": "UI preferences ({{count}} setting)",
+        "preferences_other": "UI preferences ({{count}} settings)",
+        "unknownGroups_one": "Camera group {{groups}} is not on this server. Its settings will be saved but unused.",
+        "unknownGroups_other": "Camera groups {{groups}} are not on this server. Their settings will be saved but unused.",
+        "unknownCameras_one": "Camera {{cameras}} is not on this server. Its streaming settings will be ignored.",
+        "unknownCameras_other": "Cameras {{cameras}} are not on this server. Their streaming settings will be ignored.",
+        "confirm": "Import"
+      }
+    },
     "recordingsViewer": {
       "title": "Recordings Viewer",
       "defaultPlaybackRate": {
@@ -198,11 +223,20 @@
     "toast": {
       "success": {
         "clearStoredLayout": "Cleared stored layout for {{cameraName}}",
-        "clearStreamingSettings": "Cleared streaming settings for all camera groups."
+        "clearStreamingSettings": "Cleared streaming settings for all camera groups.",
+        "exportUiSettings": "Exported settings",
+        "importUiSettings": "Imported settings"
       },
       "error": {
         "clearStoredLayoutFailed": "Failed to clear stored layout: {{errorMessage}}",
-        "clearStreamingSettingsFailed": "Failed to clear streaming settings: {{errorMessage}}"
+        "clearStreamingSettingsFailed": "Failed to clear streaming settings: {{errorMessage}}",
+        "exportUiSettingsFailed": "Failed to export settings",
+        "importNothingToApply": "Failed to import settings: file contains no settings",
+        "importInvalidJson": "Failed to import settings: file is not valid JSON",
+        "importWrongType": "Failed to import settings: file is not a Frigate settings export",
+        "importUnsupportedVersion": "Failed to import settings: file requires a newer version of Frigate",
+        "importInvalidSchema": "Failed to import settings: file is malformed",
+        "importUiSettingsFailed": "Failed to import settings"
       }
     }
   },
