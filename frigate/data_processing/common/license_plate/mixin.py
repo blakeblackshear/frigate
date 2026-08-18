@@ -72,7 +72,7 @@ class LicensePlateProcessingMixin:
         # Object config
         self.lp_objects: list[str] = []
 
-        for obj, attributes in self.config.model.attributes_map.items():
+        for obj, attributes in self.config.all_attributes_map.items():
             if "license_plate" in attributes:
                 self.lp_objects.append(obj)
 

@@ -481,7 +481,7 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                 if not object["sub_label"]:
                     segment.detections[object["id"]] = object["label"]
-                elif object["sub_label"][0] in self.config.model.all_attributes:
+                elif object["sub_label"][0] in self.config.all_attributes:
                     segment.detections[object["id"]] = object["sub_label"][0]
                 else:
                     segment.detections[object["id"]] = f"{object['label']}-verified"
@@ -619,7 +619,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             for object in activity.get_all_objects():
                 if not object["sub_label"]:
                     detections[object["id"]] = object["label"]
-                elif object["sub_label"][0] in self.config.model.all_attributes:
+                elif object["sub_label"][0] in self.config.all_attributes:
                     detections[object["id"]] = object["sub_label"][0]
                 else:
                     detections[object["id"]] = f"{object['label']}-verified"

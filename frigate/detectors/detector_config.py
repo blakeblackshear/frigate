@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from enum import Enum
-from typing import Any
+from typing import Any, ClassVar
 
 import requests
 from pydantic import BaseModel, ConfigDict, Field
@@ -14,6 +14,9 @@ from frigate.plus import PlusApi
 from frigate.util.builtin import generate_color_palette, load_labels
 
 logger = logging.getLogger(__name__)
+
+# attributes that are recognized rather than shown as a logo
+NON_LOGO_ATTRIBUTES = ["face", "license_plate"]
 
 
 class PixelFormatEnum(str, Enum):
@@ -44,7 +47,27 @@ class ModelTypeEnum(str, Enum):
     yologeneric = "yolo-generic"
 
 
+class SceneEnum(str, Enum):
+    """The camera environment a detection model is intended for."""
+
+    all = "all"
+    indoor = "indoor"
+    outdoor = "outdoor"
+    indoor_thermal = "indoor_thermal"
+    outdoor_thermal = "outdoor_thermal"
+
+
 class ModelConfig(BaseModel):
+    scene: SceneEnum = Field(
+        default=SceneEnum.all,
+        title="Model scene",
+        description="The camera environment this model is used for. Cameras select a model by setting detect.scene to a matching value, and 'all' is used by any camera that does not set one.",
+    )
+    devices: list[str] = Field(
+        default_factory=list,
+        title="Detection hardware",
+        description="Hardware this model runs on, as '<detector>' or '<detector>:<device>' (for example 'edgetpu:pci:0' or 'openvino:GPU'). Listing the same device more than once runs additional inference processes on it.",
+    )
     path: str | None = Field(
         None,
         title="Custom object detector model path",
@@ -111,7 +134,7 @@ class ModelConfig(BaseModel):
 
     @property
     def non_logo_attributes(self) -> list[str]:
-        return ["face", "license_plate"]
+        return NON_LOGO_ATTRIBUTES
 
     @property
     def all_attributes(self) -> list[str]:
@@ -201,9 +224,7 @@ class ModelConfig(BaseModel):
             unique_attributes.update(attributes)
 
         self._all_attributes = list(unique_attributes)
-        self._all_attribute_logos = list(
-            unique_attributes - set(["face", "license_plate"])
-        )
+        self._all_attribute_logos = list(unique_attributes - set(NON_LOGO_ATTRIBUTES))
 
         self._merged_labelmap = {
             **{int(key): val for key, val in model_info["labelMap"].items()},
@@ -234,6 +255,14 @@ class ModelConfig(BaseModel):
 
 
 class BaseDetectorConfig(BaseModel):
+    # how the trailing part of a device string ("openvino:GPU" -> "GPU") maps onto
+    # this detector's fields, and whether the same device may be listed more than
+    # once to run additional inference processes against it. Most accelerators
+    # multiplex fine, so this is opt-out rather than opt-in.
+    device_spec_field: ClassVar[str] = "device"
+    device_spec_type: ClassVar[type] = str
+    shareable: ClassVar[bool] = True
+
     # the type field must be defined in all subclasses
     type: str = Field(
         default="cpu",

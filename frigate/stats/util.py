@@ -322,19 +322,20 @@ async def set_gpu_stats(
 async def set_npu_usages(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
     stats: dict[str, dict] = {}
 
-    for detector in config.detectors.values():
-        if detector.type == "rknn":
-            # Rockchip NPU usage
-            rk_usage = get_rockchip_npu_stats()
-            stats["rockchip"] = rk_usage
-        elif detector.type == "openvino" and detector.device == "NPU":
-            # OpenVINO NPU usage
-            ov_usage = get_openvino_npu_stats()
-            stats["openvino"] = ov_usage
-        elif detector.type == "axengine":
-            # AXERA NPU usage
-            axcl_usage = get_axcl_npu_stats()
-            stats["axengine"] = axcl_usage
+    for model in config.models:
+        for device in config.devices_for_model(model):
+            if device.detector == "rknn":
+                # Rockchip NPU usage
+                rk_usage = get_rockchip_npu_stats()
+                stats["rockchip"] = rk_usage
+            elif device.detector == "openvino" and device.device == "NPU":
+                # OpenVINO NPU usage
+                ov_usage = get_openvino_npu_stats()
+                stats["openvino"] = ov_usage
+            elif device.detector == "axengine":
+                # AXERA NPU usage
+                axcl_usage = get_axcl_npu_stats()
+                stats["axengine"] = axcl_usage
 
     if stats:
         all_stats["npu_usages"] = stats

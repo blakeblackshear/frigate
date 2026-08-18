@@ -19,23 +19,16 @@ function collectLabelmapLabels(labelmap: unknown, labels: Set<string>) {
   });
 }
 
-// Read labelmap labels from the global model and detector models.
+// Read labelmap labels from every configured detection model.
 function getLabelmapLabels(context: FormContext): string[] {
   const labels = new Set<string>();
   const fullConfig = context.fullConfig as FrigateConfig | undefined;
 
-  if (fullConfig?.model) {
-    collectLabelmapLabels(fullConfig.model.labelmap, labels);
-  }
-
-  if (fullConfig?.detectors) {
-    // detectors is a map of detector configs; each may include a model labelmap.
-    Object.values(fullConfig.detectors).forEach((detector) => {
-      if (detector?.model?.labelmap) {
-        collectLabelmapLabels(detector.model.labelmap, labels);
-      }
-    });
-  }
+  fullConfig?.models?.forEach((model) => {
+    if (model?.labelmap) {
+      collectLabelmapLabels(model.labelmap, labels);
+    }
+  });
 
   return [...labels];
 }

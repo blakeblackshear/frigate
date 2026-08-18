@@ -11,7 +11,6 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    TypeAdapter,
     ValidationInfo,
     field_validator,
     model_validator,
@@ -19,8 +18,9 @@ from pydantic import (
 from ruamel.yaml import YAML
 
 from frigate.const import REGEX_JSON
-from frigate.detectors import DetectorConfig, ModelConfig
-from frigate.detectors.detector_config import BaseDetectorConfig
+from frigate.detectors import ModelConfig
+from frigate.detectors.detector_config import SceneEnum
+from frigate.detectors.device import DeviceParseError, DeviceSpec, parse_device
 from frigate.plus import PlusApi
 from frigate.util.builtin import (
     deep_merge,
@@ -79,9 +79,14 @@ logger = logging.getLogger(__name__)
 
 yaml = YAML()
 
-# Pydantic field default applied when an existing config omits `detectors:`.
+# Pydantic field default applied when an existing config omits `models:`.
 # Kept as cpu tflite for backwards compatibility with 0.17 configs.
-DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
+DEFAULT_MODELS = [{"devices": ["cpu"]}]
+
+
+def _default_models() -> list[ModelConfig]:
+    return [ModelConfig.model_validate(model) for model in DEFAULT_MODELS]
+
 
 # Used by the openvino branch below and rendered into the new-config YAML
 # template so first-time setups default to openvino on CPU.
@@ -93,7 +98,7 @@ DEFAULT_MODEL = {
     "path": "/openvino-model/ssdlite_mobilenet_v2.xml",
     "labelmap_path": "/openvino-model/coco_91cl_bkgr.txt",
 }
-NEW_CONFIG_DETECTORS = {"ov": {"type": "openvino", "device": "CPU"}}
+NEW_CONFIG_MODELS = [{"devices": ["openvino:CPU"], **DEFAULT_MODEL}]
 DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
 
 
@@ -109,7 +114,7 @@ DEFAULT_CONFIG = f"""
 mqtt:
   enabled: False
 
-{_render_default_yaml({"detectors": NEW_CONFIG_DETECTORS, "model": DEFAULT_MODEL})}
+{_render_default_yaml({"models": NEW_CONFIG_MODELS})}
 cameras: {{}}  # No cameras defined, UI wizard should be used
 version: {CURRENT_CONFIG_VERSION}
 """
@@ -520,16 +525,11 @@ class FrigateConfig(FrigateBaseModel):
         description="User interface preferences such as timezone, time/date formatting, and units.",
     )
 
-    # Detector config
-    detectors: dict[str, BaseDetectorConfig] = Field(
-        default=DEFAULT_DETECTORS,
-        title="Detector hardware",
-        description="Configuration for object detectors (CPU, GPU, ONNX backends) and any detector-specific model settings.",
-    )
-    model: ModelConfig = Field(
-        default_factory=ModelConfig,
-        title="Detection model",
-        description="Settings to configure a custom object detection model and its input shape.",
+    # Detection model config
+    models: list[ModelConfig] = Field(
+        default_factory=_default_models,
+        title="Detection models",
+        description="Object detection models and the hardware each one runs on. Cameras pick a model by matching their detect.scene against a model's scene.",
     )
 
     # GenAI config (named provider configs: name -> GenAIConfig)
@@ -644,10 +644,201 @@ class FrigateConfig(FrigateBaseModel):
     )
 
     _plus_api: PlusApi
+    _model_devices: dict[SceneEnum, list[DeviceSpec]]
+    _camera_models: dict[str, ModelConfig]
+    _all_attributes: list[str]
+    _all_attribute_logos: list[str]
+    _all_attributes_map: dict[str, list[str]]
+    _all_labels: set[str]
 
     @property
     def plus_api(self) -> PlusApi:
         return self._plus_api
+
+    @property
+    def all_attributes(self) -> list[str]:
+        """Every attribute label across all configured models."""
+        return self._all_attributes
+
+    @property
+    def all_attribute_logos(self) -> list[str]:
+        """Every logo attribute label across all configured models."""
+        return self._all_attribute_logos
+
+    @property
+    def all_attributes_map(self) -> dict[str, list[str]]:
+        """Object label to attribute labels, merged across all configured models."""
+        return self._all_attributes_map
+
+    @property
+    def all_labels(self) -> set[str]:
+        """Every object label across all configured models."""
+        return self._all_labels
+
+    @property
+    def primary_model(self) -> ModelConfig:
+        """The model used when no specific camera is in play."""
+        for model in self.models:
+            if model.scene == SceneEnum.all:
+                return model
+
+        return self.models[0]
+
+    def model_for_camera(self, camera_name: str) -> ModelConfig:
+        """Get the detection model a camera runs on.
+
+        Args:
+            camera_name: Name of the camera
+
+        Returns:
+            The model matching the camera's detect scene
+        """
+        return self._camera_models[camera_name]
+
+    def devices_for_model(self, model: ModelConfig) -> list[DeviceSpec]:
+        """Get the parsed hardware devices a model runs on.
+
+        Args:
+            model: One of the configured models
+
+        Returns:
+            The parsed device specs, in config order
+        """
+        return self._model_devices[model.scene]
+
+    def _load_model(self, model: ModelConfig, detector: str) -> ModelConfig:
+        """Apply detector specific defaults to a model and load its weights and labels.
+
+        Args:
+            model: The configured model
+            detector: The detector type the model runs on
+
+        Returns:
+            The loaded model
+        """
+        model_config = model.model_dump(exclude_unset=True, warnings="none")
+
+        if "path" not in model_config:
+            if detector == "cpu" or detector.endswith("_tfl"):
+                model_config["path"] = "/cpu_model.tflite"
+            elif detector == "edgetpu":
+                model_config["path"] = "/edgetpu_model.tflite"
+            elif detector == "openvino":
+                for default_key, default_value in DEFAULT_MODEL.items():
+                    model_config.setdefault(default_key, default_value)
+
+        loaded = ModelConfig.model_validate(model_config)
+        loaded.check_and_load_plus_model(self.plus_api, detector)
+        loaded.compute_model_hash()
+        return loaded
+
+    def _load_models(self) -> None:
+        """Validate the configured models and load each one."""
+        if not self.models:
+            raise ValueError("At least one model must be configured under models")
+
+        model_devices: dict[SceneEnum, list[DeviceSpec]] = {}
+        # device string -> the scene of the model that already claimed it
+        claimed_devices: dict[str, SceneEnum] = {}
+
+        for index, model in enumerate(self.models):
+            scene = model.scene.value
+
+            if model.scene in model_devices:
+                raise ValueError(
+                    f"Multiple models are configured with a scene of '{scene}'. Each model must use a different scene."
+                )
+
+            if not model.devices:
+                raise ValueError(
+                    f"Model '{scene}' must list at least one entry under devices."
+                )
+
+            try:
+                devices = [parse_device(device) for device in model.devices]
+            except DeviceParseError as err:
+                raise ValueError(
+                    f"Model '{scene}' has an invalid device: {err}"
+                ) from err
+
+            detectors = {device.detector for device in devices}
+
+            if len(detectors) > 1:
+                raise ValueError(
+                    f"Model '{scene}' mixes the {', '.join(sorted(detectors))} detectors. All of a model's devices must use the same detector."
+                )
+
+            for device in devices:
+                if device.raw in claimed_devices and not device.shareable:
+                    other = claimed_devices[device.raw]
+                    where = (
+                        f"twice by model '{scene}'"
+                        if other == model.scene
+                        else f"by both the '{other.value}' and '{scene}' models"
+                    )
+                    raise ValueError(
+                        f"Device '{device.raw}' is used {where}, but it can only run one detection process."
+                    )
+
+                claimed_devices[device.raw] = model.scene
+
+            self.models[index] = self._load_model(model, devices[0].detector)
+            model_devices[model.scene] = devices
+
+        attributes: set[str] = set()
+        attribute_logos: set[str] = set()
+        attributes_map: dict[str, set[str]] = {}
+        labels: set[str] = set()
+
+        for model in self.models:
+            attributes.update(model.all_attributes)
+            attribute_logos.update(model.all_attribute_logos)
+            labels.update(model.merged_labelmap.values())
+
+            for label, label_attributes in model.attributes_map.items():
+                attributes_map.setdefault(label, set()).update(label_attributes)
+
+        self._model_devices = model_devices
+        self._all_attributes = sorted(attributes)
+        self._all_attribute_logos = sorted(attribute_logos)
+        self._all_attributes_map = {
+            label: sorted(label_attributes)
+            for label, label_attributes in sorted(attributes_map.items())
+        }
+        self._all_labels = labels
+
+    def _resolve_camera_model(self, name: str, scene: SceneEnum | None) -> ModelConfig:
+        """Resolve which model a camera runs on.
+
+        Args:
+            name: Name of the camera
+            scene: The camera's configured detect scene, if any
+
+        Returns:
+            The model the camera runs on
+        """
+        by_scene = {model.scene: model for model in self.models}
+
+        if scene is not None:
+            model = by_scene.get(scene)
+
+            if model is None:
+                raise ValueError(
+                    f"Camera '{name}' has a detect scene of '{scene.value}', but no model is configured for that scene."
+                )
+
+            return model
+
+        default = by_scene.get(SceneEnum.all) or (
+            self.models[0] if len(self.models) == 1 else None
+        )
+
+        if default is None:
+            raise ValueError(
+                f"Camera '{name}' must set detect -> scene, because more than one model is configured and none of them uses a scene of 'all'."
+            )
+
+        return default
 
     @model_validator(mode="after")
     def post_validation(self, info: ValidationInfo) -> Self:
@@ -693,8 +884,10 @@ class FrigateConfig(FrigateBaseModel):
                     "'embeddings' in its roles for semantic search."
                 )
 
+        self._load_models()
+
         # set default min_score for object attributes
-        for attribute in self.model.all_attributes:
+        for attribute in self.all_attributes:
             existing = self.objects.filters.get(attribute)
             if existing is None:
                 self.objects.filters[attribute] = FilterConfig(min_score=0.7)
@@ -744,44 +937,7 @@ class FrigateConfig(FrigateBaseModel):
             exclude_unset=True,
         )
 
-        for key, detector in self.detectors.items():
-            adapter = TypeAdapter(DetectorConfig)
-            model_dict = (
-                detector
-                if isinstance(detector, dict)
-                else detector.model_dump(warnings="none")
-            )
-            detector_config: BaseDetectorConfig = adapter.validate_python(model_dict)
-
-            # users should not set model themselves
-            if detector_config.model:
-                logger.warning(
-                    "The model key should be specified at the root level of the config, not under detectors. The nested model key will be ignored."
-                )
-                detector_config.model = None
-
-            model_config = self.model.model_dump(exclude_unset=True, warnings="none")
-
-            if detector_config.model_path:
-                model_config["path"] = detector_config.model_path
-
-            if "path" not in model_config:
-                if detector_config.type == "cpu" or detector_config.type.endswith(
-                    "_tfl"
-                ):
-                    model_config["path"] = "/cpu_model.tflite"
-                elif detector_config.type == "edgetpu":
-                    model_config["path"] = "/edgetpu_model.tflite"
-                elif detector_config.type == "openvino":
-                    for default_key, default_value in DEFAULT_MODEL.items():
-                        model_config.setdefault(default_key, default_value)
-
-            model = ModelConfig.model_validate(model_config)
-            model.check_and_load_plus_model(self.plus_api, detector_config.type)
-            model.compute_model_hash()
-            labelmap_objects = model.merged_labelmap.values()
-            detector_config.model = model
-            self.detectors[key] = detector_config
+        self._camera_models = {}
 
         for name, camera in self.cameras.items():
             modified_global_config = global_config.copy()
@@ -807,6 +963,9 @@ class FrigateConfig(FrigateBaseModel):
             camera_config: CameraConfig = CameraConfig.model_validate(
                 {"name": name, **merged_config}
             )
+
+            camera_model = self._resolve_camera_model(name, camera_config.detect.scene)
+            self._camera_models[name] = camera_model
 
             if camera_config.ffmpeg.hwaccel_args == "auto":
                 camera_config.ffmpeg.hwaccel_args = self.ffmpeg.hwaccel_args
@@ -1028,7 +1187,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_profile_overrides_match_base(camera_config)
             verify_autotrack_zones(camera_config)
             verify_motion_and_detect(camera_config)
-            verify_objects_track(camera_config, labelmap_objects)
+            verify_objects_track(camera_config, camera_model.merged_labelmap.values())
             verify_lpr_and_face(self, camera_config)
 
         # Validate camera profiles reference top-level profile definitions
@@ -1045,8 +1204,16 @@ class FrigateConfig(FrigateBaseModel):
             config.name = name
 
         self.objects.parse_all_objects(self.cameras)
-        self.model.create_colormap(sorted(self.objects.all_objects))
-        self.model.check_and_load_plus_model(self.plus_api)
+
+        # every model shares one colormap so a label is drawn the same color no
+        # matter which model detected it, so filter attributes across all models
+        # rather than letting each model filter with only its own
+        colored_labels = sorted(
+            set(self.objects.all_objects) - set(self.all_attributes)
+        )
+
+        for model in self.models:
+            model.create_colormap(colored_labels)
 
         # Check audio transcription and audio detection requirements
         if self.audio_transcription.enabled:

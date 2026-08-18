@@ -56,17 +56,6 @@ mqtt:
   # 2 = exactly once
   qos: 0
 
-# Optional: Detectors configuration. Defaults to a single CPU detector
-detectors:
-  # Required: name of the detector
-  detector_name:
-    # Required: type of the detector
-    # Frigate provides many types, see https://docs.frigate.video/configuration/object_detectors for more details (default: shown below)
-    # Additional detector types can also be plugged in.
-    # Detectors may require additional configuration.
-    # Refer to the Detectors configuration page for more information.
-    type: cpu
-
 # Optional: Database configuration
 database:
   # The path to store the SQLite DB (default: shown below)
@@ -157,44 +146,56 @@ auth:
       - front_door
       - back_yard
 
-# Optional: model modifications
+# Optional: object detection models. Defaults to a single model on a CPU detector.
 # NOTE: The default values are for the EdgeTPU detector.
 # Other detectors will require the model config to be set.
-model:
-  # Required: path to the model. Frigate+ models use plus://<model_id> (default: automatic based on detector)
-  path: /edgetpu_model.tflite
-  # Required: path to the labelmap (default: shown below)
-  labelmap_path: /labelmap.txt
-  # Required: Object detection model input width (default: shown below)
-  width: 320
-  # Required: Object detection model input height (default: shown below)
-  height: 320
-  # Required: Object detection model input colorspace
-  # Valid values are rgb, bgr, or yuv. (default: shown below)
-  input_pixel_format: rgb
-  # Required: Object detection model input tensor format
-  # Valid values are nhwc, nchw, hwnc, or hwcn (default: shown below)
-  input_tensor: nhwc
-  # Optional: Data type of the model input tensor
-  # Valid values are float, float_denorm, or int (default: shown below)
-  input_dtype: int
-  # Required: Object detection model architecture, used by detectors that support more
-  # than one model type (openvino, onnx, rknn, memryx, axengine, synaptics, and others)
-  # Valid values are ssd, yolox, yolonas, yolo-generic, rfdetr, dfine (default: shown below)
-  model_type: ssd
-  # Required: Label name modifications. These are merged into the standard labelmap.
-  labelmap:
-    2: vehicle
-  # Optional: Map of object labels to their attribute labels (default: depends on model)
-  attributes_map:
-    person:
-      - amazon
-      - face
-    car:
-      - amazon
-      - fedex
-      - license_plate
-      - ups
+models:
+    # Optional: the camera environment this model is for (default: shown below)
+    # Cameras select a model by setting detect -> scene to a matching value, and
+    # a model with a scene of all is used by any camera that does not set one.
+    # Valid values are all, indoor, outdoor, indoor_thermal, outdoor_thermal
+  - scene: all
+    # Required: hardware this model runs on, as <detector> or <detector>:<device>
+    # See https://docs.frigate.video/configuration/object_detectors for the
+    # detectors available and the devices each one accepts. All of a model's
+    # devices must use the same detector. Listing the same device more than once
+    # runs additional inference processes on it.
+    devices:
+      - edgetpu:pci:0
+    # Required: path to the model. Frigate+ models use plus://<model_id> (default: automatic based on detector)
+    path: /edgetpu_model.tflite
+    # Required: path to the labelmap (default: shown below)
+    labelmap_path: /labelmap.txt
+    # Required: Object detection model input width (default: shown below)
+    width: 320
+    # Required: Object detection model input height (default: shown below)
+    height: 320
+    # Required: Object detection model input colorspace
+    # Valid values are rgb, bgr, or yuv. (default: shown below)
+    input_pixel_format: rgb
+    # Required: Object detection model input tensor format
+    # Valid values are nhwc, nchw, hwnc, or hwcn (default: shown below)
+    input_tensor: nhwc
+    # Optional: Data type of the model input tensor
+    # Valid values are float, float_denorm, or int (default: shown below)
+    input_dtype: int
+    # Required: Object detection model architecture, used by detectors that support more
+    # than one model type (openvino, onnx, rknn, memryx, axengine, synaptics, and others)
+    # Valid values are ssd, yolox, yolonas, yolo-generic, rfdetr, dfine (default: shown below)
+    model_type: ssd
+    # Required: Label name modifications. These are merged into the standard labelmap.
+    labelmap:
+      2: vehicle
+    # Optional: Map of object labels to their attribute labels (default: depends on model)
+    attributes_map:
+      person:
+        - amazon
+        - face
+      car:
+        - amazon
+        - fedex
+        - license_plate
+        - ups
 
 # Optional: Audio Events Configuration
 # NOTE: Can be overridden at the camera level
@@ -314,6 +315,10 @@ detect:
   width: 1280
   # Optional: height of the frame for the input with the detect role (default: use native stream resolution)
   height: 720
+  # Optional: the environment this camera looks at, which picks the model it runs on
+  # (default: the model with a scene of all)
+  # Valid values are all, indoor, outdoor, indoor_thermal, outdoor_thermal
+  scene: outdoor
   # Optional: desired fps for your camera for the input with the detect role (default: shown below)
   # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
   fps: 5
