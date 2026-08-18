@@ -27,6 +27,12 @@ type Model = {
   scene: string;
   devices: string[];
   path?: string | null;
+  input_tensor?: string;
+  input_pixel_format?: string;
+  input_dtype?: string;
+  model_type?: string;
+  labelmap?: Record<string, string>;
+  attributes_map?: Record<string, string[]>;
   plus?: { id: string; name: string } | null;
   width?: number;
   height?: number;
@@ -234,6 +240,35 @@ test.describe("Detection models settings @high", () => {
     await expect.poll(() => saves.length).toBeGreaterThan(0);
 
     expect(saves.at(-1)?.config_data?.models?.[0].path).toBe("plus://abc123");
+  });
+
+  test("a freshly opened page is not reported as modified", async ({
+    frigateApp,
+  }) => {
+    // `/api/config` serializes with exclude_none, so a nullable field such as
+    // labelmap_path is absent rather than null. The form materializes it, and
+    // that must not read as an edit.
+    await installRoutes(frigateApp.page, [
+      {
+        scene: "all",
+        devices: ["openvino:GPU", "openvino:GPU"],
+        path: "/config/model_cache/abc123",
+        width: 320,
+        height: 320,
+        input_tensor: "nchw",
+        input_pixel_format: "rgb",
+        input_dtype: "float",
+        model_type: "yolo-generic",
+        labelmap: {},
+        attributes_map: {},
+      },
+    ]);
+    await openPage(frigateApp);
+
+    await expect(
+      frigateApp.page.getByRole("button", { name: /^Save$/ }),
+    ).toBeVisible();
+    await expect(frigateApp.page.getByText("Modified")).toHaveCount(0);
   });
 
   test("saving writes the whole models list in one request", async ({
