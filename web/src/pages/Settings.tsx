@@ -115,6 +115,7 @@ import SaveAllPreviewPopover, {
   type SaveAllPreviewItem,
 } from "@/components/overlay/detail/SaveAllPreviewPopover";
 import { useRestart } from "@/api/ws";
+import { getPrimaryModel } from "@/utils/modelUtil";
 import {
   Tooltip,
   TooltipContent,
@@ -949,14 +950,16 @@ export default function Settings() {
           const pendingKeySet = Object.keys(
             sanitizedDetectors as JsonObject,
           ).sort();
-          const savedKeySet = Object.keys(config.detectors ?? {}).sort();
+          const savedKeySet = [
+            ...(getPrimaryModel(config)?.devices ?? []),
+          ].sort();
           detectorKeysChanged =
             JSON.stringify(pendingKeySet) !== JSON.stringify(savedKeySet);
         }
         let modelTabChanged = false;
         if (sanitizedModel && typeof sanitizedModel === "object") {
           const newPath = (sanitizedModel as { path?: string }).path;
-          const oldPath = config.model?.path;
+          const oldPath = getPrimaryModel(config)?.path;
           const newIsPlus =
             typeof newPath === "string" && newPath.startsWith("plus://");
           const oldIsPlus =

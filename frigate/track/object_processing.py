@@ -210,7 +210,7 @@ class TrackedObjectProcessor(threading.Thread):
                     if obj.obj_data.get("sub_label"):
                         sub_label = obj.obj_data["sub_label"][0]
 
-                        if sub_label in self.config.model.all_attribute_logos:
+                        if sub_label in self.config.all_attribute_logos:
                             self.dispatcher.publish(
                                 f"{camera}/{sub_label}/snapshot",
                                 jpg_bytes,

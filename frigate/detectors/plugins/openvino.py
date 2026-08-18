@@ -28,7 +28,7 @@ class OvDetectorConfig(BaseDetectorConfig):
 
     type: Literal[DETECTOR_KEY]
     device: str = Field(
-        default=None,
+        default="AUTO",
         title="Device Type",
         description="The device to use for OpenVINO inference (e.g. 'CPU', 'GPU', 'NPU').",
     )
