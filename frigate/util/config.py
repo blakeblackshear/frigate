@@ -23,6 +23,25 @@ logger = logging.getLogger(__name__)
 CURRENT_CONFIG_VERSION = "0.19-0"
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
 
+# the detector field that used to hold the device, for detectors that named it
+# something other than "device"
+DETECTOR_DEVICE_FIELDS = {
+    "cpu": "num_threads",
+    "rknn": "num_cores",
+    "deepstack": "api_url",
+    "degirum": "location",
+    "zmq": "endpoint",
+}
+
+# detector options that have no equivalent in a device string. The remote
+# detectors that use them are being reworked, so they are dropped rather than
+# carried over.
+DROPPED_DETECTOR_OPTIONS = {
+    "deepstack": ["api_timeout", "api_key"],
+    "degirum": ["zoo", "token"],
+    "zmq": ["request_timeout_ms", "linger_ms"],
+}
+
 
 def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
     """Resolve an ffmpeg version alias or custom path to a binary path.
@@ -87,7 +106,11 @@ def migrate_frigate_config(config_file: str):
 
     previous_version = str(config.get("version", "0.13"))
 
-    if previous_version == CURRENT_CONFIG_VERSION:
+    # 0.19 is unreleased, so a config may already be stamped with the current
+    # version and still use the pre-models detectors and model keys
+    needs_models = "detectors" in config or "model" in config
+
+    if previous_version == CURRENT_CONFIG_VERSION and not needs_models:
         logger.info("frigate config does not need migration...")
         return
 
@@ -154,6 +177,12 @@ def migrate_frigate_config(config_file: str):
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.19-0"
+
+    if needs_models:
+        logger.info("Migrating frigate detectors and model to models...")
+        new_config = migrate_models(new_config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
 
     logger.info("Finished frigate config migration...")
 
@@ -705,6 +734,89 @@ def migrate_019_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
         new_config["cameras"][name] = camera_config
 
     new_config["version"] = "0.19-0"
+    return new_config
+
+
+def migrate_models(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Merge the detectors and model keys into a single models list.
+
+    Every config before this change ran one model across all of its detectors,
+    so this always produces exactly one model.
+
+    Args:
+        config: The loaded config
+
+    Returns:
+        The config with a models list in place of detectors and model
+    """
+    # imported lazily so loading the detector plugins is not a cost of importing
+    # this module
+    from frigate.detectors.detector_types import config_types
+
+    new_config = config.copy()
+    detectors: dict[str, Any] = new_config.pop("detectors", None) or {}
+    model: dict[str, Any] = new_config.pop("model", None) or {}
+
+    devices: list[str] = []
+    model_path: str | None = None
+
+    for name, detector in detectors.items():
+        detector = detector or {}
+        detector_type = detector.get("type", "cpu")
+        device = detector.get(DETECTOR_DEVICE_FIELDS.get(detector_type, "device"))
+        device_string = detector_type if device is None else f"{detector_type}:{device}"
+
+        # repeating a device now means running an extra inference process on it,
+        # which is what several detectors on one device used to mean. Only
+        # collapse repeats of hardware that can serve a single process.
+        config_class = config_types.get(detector_type)
+        shareable = config_class.shareable if config_class else True
+
+        if shareable or device_string not in devices:
+            devices.append(device_string)
+
+        dropped = [
+            option
+            for option in DROPPED_DETECTOR_OPTIONS.get(detector_type, [])
+            if option in detector
+        ]
+
+        if dropped:
+            logger.error(
+                "Detector '%s' had the %s options set, which are no longer supported and have been removed",
+                name,
+                ", ".join(dropped),
+            )
+
+        detector_model_path = detector.get("model_path")
+
+        if detector_model_path:
+            if model_path is None:
+                model_path = detector_model_path
+            elif model_path != detector_model_path:
+                logger.warning(
+                    "Detector '%s' set a different model_path than an earlier detector, using '%s' for the migrated model",
+                    name,
+                    model_path,
+                )
+
+    detector_types = {device.partition(":")[0] for device in devices}
+
+    if len(detector_types) > 1:
+        logger.error(
+            "Detectors of more than one type (%s) were configured. A model now runs on one detector type, so the migrated config will need to be corrected by hand",
+            ", ".join(sorted(detector_types)),
+        )
+
+    entry: dict[str, Any] = {"scene": "all", **model}
+
+    if model_path:
+        entry["path"] = model_path
+
+    # a config with no detectors ran a single cpu detector
+    entry["devices"] = devices or ["cpu"]
+
+    new_config["models"] = [entry]
     return new_config
 
 

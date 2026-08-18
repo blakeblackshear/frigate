@@ -40,6 +40,7 @@ class CameraState:
         self.name = name
         self.config = config
         self.camera_config = config.cameras[name]
+        self.model = config.model_for_camera(name)
         self.frame_manager = frame_manager
         self.best_objects: dict[str, TrackedObject] = {}
         self.tracked_objects: dict[str, TrackedObject] = {}
@@ -106,9 +107,7 @@ class CameraState:
                         thickness = 1
                     else:
                         thickness = 2
-                        color = self.config.model.colormap.get(
-                            obj["label"], (255, 255, 255)
-                        )
+                        color = self.model.colormap.get(obj["label"], (255, 255, 255))
                 else:
                     thickness = 1
                     color = (255, 0, 0)
@@ -130,9 +129,7 @@ class CameraState:
                     and obj["frame_time"] == frame_time
                 ):
                     thickness = 5
-                    color = self.config.model.colormap.get(
-                        obj["label"], (255, 255, 255)
-                    )
+                    color = self.model.colormap.get(obj["label"], (255, 255, 255))
 
                     # debug autotracking zooming - show the zoom factor box
                     if (
@@ -266,9 +263,7 @@ class CameraState:
         if draw_options.get("paths"):
             for obj in tracked_objects.values():
                 if obj["frame_time"] == frame_time and obj["path_data"]:
-                    color = self.config.model.colormap.get(
-                        obj["label"], (255, 255, 255)
-                    )
+                    color = self.model.colormap.get(obj["label"], (255, 255, 255))
 
                     path_points = [
                         (
@@ -371,7 +366,7 @@ class CameraState:
         for id in new_ids:
             logger.debug(f"{self.name}: New tracked object ID: {id}")
             new_obj = tracked_objects[id] = TrackedObject(
-                self.config.model,
+                self.model,
                 self.camera_config,
                 self.config.ui,
                 self.frame_cache,
@@ -515,7 +510,7 @@ class CameraState:
                 sub_label = None
 
                 if obj.obj_data.get("sub_label"):
-                    if obj.obj_data["sub_label"][0] in self.config.model.all_attributes:
+                    if obj.obj_data["sub_label"][0] in self.model.all_attributes:
                         label = obj.obj_data["sub_label"][0]
                     else:
                         label = f"{object_type}-verified"

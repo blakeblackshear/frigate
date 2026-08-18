@@ -222,15 +222,12 @@ You need to refer to **Configure hardware acceleration** above to enable the con
 ```yaml {3-6,9-15,20-21}
 mqtt: ...
 
-detectors: # <---- add detectors
-  ov:
-    type: openvino  # <---- use openvino detector
-    device: GPU
-
-# We will use the default MobileNet_v2 model from OpenVINO.
-model:
-  width: 300
-  height: 300
+models: # <---- add models
+  - devices:
+      - openvino:GPU # <---- use the openvino detector on the GPU
+    # We will use the default MobileNet_v2 model from OpenVINO.
+    width: 300
+    height: 300
   input_tensor: nhwc
   input_pixel_format: bgr
   path: /openvino-model/ssdlite_mobilenet_v2.xml
@@ -281,10 +278,9 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a
 ```yaml {3-6,11-12}
 mqtt: ...
 
-detectors: # <---- add detectors
-  coral:
-    type: edgetpu
-    device: usb
+models: # <---- add models
+  - devices:
+      - edgetpu:usb
 
 cameras:
   name_of_your_camera:
@@ -321,10 +317,9 @@ If you are using YAML to configure Frigate instead of the UI, your configuration
 mqtt:
   enabled: False
 
-detectors:
-  coral:
-    type: edgetpu
-    device: usb
+models:
+  - devices:
+      - edgetpu:usb
 
 cameras:
   name_of_your_camera:
@@ -357,7 +352,7 @@ In order to review activity in the Frigate UI, recordings need to be enabled.
 ```yaml {16-17}
 mqtt: ...
 
-detectors: ...
+models: ...
 
 cameras:
   name_of_your_camera:

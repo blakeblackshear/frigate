@@ -62,10 +62,9 @@ Once you have [requested your first model](../plus/first_model.md) and gotten yo
 You can either choose the new model from the <NavPath path="Settings > System > Detectors and model" /> pane in the Frigate UI (the **Frigate+ Model** tab), or manually set the model at the root level in your config:
 
 ```yaml
-detectors: ...
-
-model:
-  path: plus://<your_model_id>
+models:
+  - devices: ...
+    path: plus://<your_model_id>
 ```
 
 :::note
@@ -79,10 +78,11 @@ Models are downloaded into the `/config/model_cache` folder and only downloaded 
 If needed, you can override the labelmap for Frigate+ models. This is not recommended as renaming labels will break the Submit to Frigate+ feature if the labels are not available in Frigate+.
 
 ```yaml
-model:
-  path: plus://<your_model_id>
-  labelmap:
-    3: animal
-    4: animal
-    5: animal
+models:
+  - devices: ...
+    path: plus://<your_model_id>
+    labelmap:
+      3: animal
+      4: animal
+      5: animal
 ```

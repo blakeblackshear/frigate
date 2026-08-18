@@ -18,6 +18,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
+from frigate.detectors.detector_config import NON_LOGO_ATTRIBUTES
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +179,7 @@ class CameraActivityManager:
             return
 
         for label in camera_config.objects.track:
-            if label in self.config.model.non_logo_attributes:
+            if label in NON_LOGO_ATTRIBUTES:
                 continue
 
             new_count = all_objects[label]

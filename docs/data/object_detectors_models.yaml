@@ -7,10 +7,9 @@ edgeTPU:
       download: A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
       ui: Navigate to **Settings > System > Detectors and model** and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`.
       yaml: |-
-        detectors:
-          coral:
-            type: edgetpu
-            device: usb
+        models:
+          - devices:
+              - edgetpu:usb
     - key: yolov9
       label: YOLOv9
       recommended: false
@@ -29,17 +28,14 @@ edgeTPU:
         | **Model Input D Type**                   | `int` (Frigate's default value)                                   |
         | **Object Detection Model Type**          | `yolo-generic`                                                    |
       yaml: |-
-        detectors:
-          coral:
-            type: edgetpu
-            device: usb
-
-        model:
-          model_type: yolo-generic
-          width: 320 # <--- should match the imgsize of the model, typically 320
-          height: 320 # <--- should match the imgsize of the model, typically 320
-          path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite
-          labelmap_path: /config/labels-coco17.txt
+        models:
+          - devices:
+              - edgetpu:usb
+            model_type: yolo-generic
+            width: 320 # <--- should match the imgsize of the model, typically 320
+            height: 320 # <--- should match the imgsize of the model, typically 320
+            path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite
+            labelmap_path: /config/labels-coco17.txt
 hailo8l:
   title: Hailo-8/Hailo-8L
   models:
@@ -62,32 +58,29 @@ hailo8l:
 
         The detector automatically selects the default model based on your hardware. Optionally, specify a local model path or URL to override.
       yaml: |-
-        detectors:
-          hailo:
-            type: hailo8l
-            device: PCIe
+        models:
+          - devices:
+              - hailo8l:PCIe
+            width: 320
+            height: 320
+            input_tensor: nhwc
+            input_pixel_format: rgb
+            input_dtype: int
+            model_type: yolo-generic
+            labelmap_path: /labelmap/coco-80.txt
 
-        model:
-          width: 320
-          height: 320
-          input_tensor: nhwc
-          input_pixel_format: rgb
-          input_dtype: int
-          model_type: yolo-generic
-          labelmap_path: /labelmap/coco-80.txt
-
-          # The detector automatically selects the default model based on your hardware:
-          # - For Hailo-8 hardware: YOLOv6n (default: yolov6n.hef)
-          # - For Hailo-8L hardware: YOLOv6n (default: yolov6n.hef)
-          #
-          # Optionally, you can specify a local model path to override the default.
-          # If a local path is provided and the file exists, it will be used instead of downloading.
-          # Example:
-          # path: /config/model_cache/hailo/yolov6n.hef
-          #
-          # You can also override using a custom URL:
-          # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov6n.hef
-          # just make sure to give it the write configuration based on the model
+            # The detector automatically selects the default model based on your hardware:
+            # - For Hailo-8 hardware: YOLOv6n (default: yolov6n.hef)
+            # - For Hailo-8L hardware: YOLOv6n (default: yolov6n.hef)
+            #
+            # Optionally, you can specify a local model path to override the default.
+            # If a local path is provided and the file exists, it will be used instead of downloading.
+            # Example:
+            # path: /config/model_cache/hailo/yolov6n.hef
+            #
+            # You can also override using a custom URL:
+            # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov6n.hef
+            # just make sure to give it the write configuration based on the model
     - key: ssd
       label: SSD MobileNet v1
       recommended: false
@@ -106,23 +99,20 @@ hailo8l:
 
         Specify the local model path or URL for SSD MobileNet v1.
       yaml: |-
-        detectors:
-          hailo:
-            type: hailo8l
-            device: PCIe
-
-        model:
-          width: 300
-          height: 300
-          input_tensor: nhwc
-          input_pixel_format: rgb
-          model_type: ssd
-          # Specify the local model path (if available) or URL for SSD MobileNet v1.
-          # Example with a local path:
-          # path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
-          #
-          # Or override using a custom URL:
-          # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/ssd_mobilenet_v1.hef
+        models:
+          - devices:
+              - hailo8l:PCIe
+            width: 300
+            height: 300
+            input_tensor: nhwc
+            input_pixel_format: rgb
+            model_type: ssd
+            # Specify the local model path (if available) or URL for SSD MobileNet v1.
+            # Example with a local path:
+            # path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
+            #
+            # Or override using a custom URL:
+            # path: https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/ssd_mobilenet_v1.hef
 openvino:
   title: OpenVINO
   models:
@@ -166,19 +156,16 @@ openvino:
         | **Model Input D Type**                   | `float`                                                  |
         | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
-        detectors:
-          ov:
-            type: openvino
-            device: GPU # or NPU
-
-        model:
-          model_type: yolo-generic
-          width: 320 # <--- should match the imgsize set during model export
-          height: 320 # <--- should match the imgsize set during model export
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/yolo.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - openvino:GPU
+            model_type: yolo-generic
+            width: 320 # <--- should match the imgsize set during model export
+            height: 320 # <--- should match the imgsize set during model export
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/yolo.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
     - key: ssd
       label: SSDLite MobileNet v2
       recommended: false
@@ -197,18 +184,15 @@ openvino:
         | **Model Input D Type**                   | `int` (Frigate's default value)            |
         | **Object Detection Model Type**          | `ssd` (Frigate's default value)            |
       yaml: |-
-        detectors:
-          ov:
-            type: openvino
-            device: GPU # Or NPU
-
-        model:
-          width: 300
-          height: 300
-          input_tensor: nhwc
-          input_pixel_format: bgr
-          path: /openvino-model/ssdlite_mobilenet_v2.xml
-          labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+        models:
+          - devices:
+              - openvino:GPU
+            width: 300
+            height: 300
+            input_tensor: nhwc
+            input_pixel_format: bgr
+            path: /openvino-model/ssdlite_mobilenet_v2.xml
+            labelmap_path: /openvino-model/coco_91cl_bkgr.txt
     - key: yolo-legacy
       label: YOLO (v3, v4, v7)
       recommended: false
@@ -235,19 +219,16 @@ openvino:
         | **Model Input D Type**                   | `float`                                                  |
         | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
-        detectors:
-          ov:
-            type: openvino
-            device: GPU # or NPU
-
-        model:
-          model_type: yolo-generic
-          width: 320 # <--- should match the imgsize set during model export
-          height: 320 # <--- should match the imgsize set during model export
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/yolo.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - openvino:GPU
+            model_type: yolo-generic
+            width: 320 # <--- should match the imgsize set during model export
+            height: 320 # <--- should match the imgsize set during model export
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/yolo.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
     - key: yolonas
       label: YOLO-NAS
       recommended: false
@@ -275,19 +256,16 @@ openvino:
         | **Model Input D Type**                   | `int` (Frigate's default value)                   |
         | **Object Detection Model Type**          | `yolonas`                                         |
       yaml: |-
-        detectors:
-          ov:
-            type: openvino
-            device: GPU
-
-        model:
-          model_type: yolonas
-          width: 320 # <--- should match whatever was set in notebook
-          height: 320 # <--- should match whatever was set in notebook
-          input_tensor: nchw
-          input_pixel_format: bgr
-          path: /config/yolo_nas_s.onnx
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - openvino:GPU
+            model_type: yolonas
+            width: 320 # <--- should match whatever was set in notebook
+            height: 320 # <--- should match whatever was set in notebook
+            input_tensor: nchw
+            input_pixel_format: bgr
+            path: /config/yolo_nas_s.onnx
+            labelmap_path: /labelmap/coco-80.txt
     - key: yolox
       label: YOLOX
       recommended: false
@@ -303,15 +281,12 @@ openvino:
         | **Model Input D Type**                | `int` (Frigate's default value)  |
         | **Object Detection Model Type**       | `yolox`                          |
       yaml: |-
-        detectors:
-          ov:
-            type: openvino
-            device: GPU
-
-        model:
-          model_type: yolox
-          path: /config/model_cache/yolox.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - openvino:GPU
+            model_type: yolox
+            path: /config/model_cache/yolox.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
     - key: rfdetr
       label: RF-DETR
       recommended: false
@@ -345,18 +320,15 @@ openvino:
         | **Model Input D Type**                  | `float`                           |
         | **Object Detection Model Type**         | `rfdetr`                          |
       yaml: |-
-        detectors:
-          ov:
-            type: openvino
-            device: GPU
-
-        model:
-          model_type: rfdetr
-          width: 320
-          height: 320
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/rfdetr.onnx # use the filename you generated above
+        models:
+          - devices:
+              - openvino:GPU
+            model_type: rfdetr
+            width: 320
+            height: 320
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/rfdetr.onnx # use the filename you generated above
     - key: dfine
       label: D-FINE / DEIMv2
       recommended: false
@@ -443,19 +415,16 @@ openvino:
         | **Model Input D Type**                   | `float`                            |
         | **Object Detection Model Type**          | `dfine`                            |
       yaml: |-
-        detectors:
-          ov:
-            type: openvino
-            device: CPU
-
-        model:
-          model_type: dfine
-          width: 640
-          height: 640
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/dfine-s.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - openvino:CPU
+            model_type: dfine
+            width: 640
+            height: 640
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/dfine-s.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
 appleSilicon:
   title: Apple Silicon
   models:
@@ -499,19 +468,16 @@ appleSilicon:
         | **Model Input D Type**                   | `float`                                                  |
         | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
-        detectors:
-          apple-silicon:
-            type: zmq
-            endpoint: tcp://host.docker.internal:5555
-
-        model:
-          model_type: yolo-generic
-          width: 320 # <--- should match the imgsize set during model export
-          height: 320 # <--- should match the imgsize set during model export
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/yolo.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - zmq:tcp://host.docker.internal:5555
+            model_type: yolo-generic
+            width: 320 # <--- should match the imgsize set during model export
+            height: 320 # <--- should match the imgsize set during model export
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/yolo.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
     - key: yolo-legacy
       label: YOLO (v3, v4, v7)
       recommended: false
@@ -538,19 +504,16 @@ appleSilicon:
         | **Model Input D Type**                   | `float`                                                  |
         | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
-        detectors:
-          apple-silicon:
-            type: zmq
-            endpoint: tcp://host.docker.internal:5555
-
-        model:
-          model_type: yolo-generic
-          width: 320 # <--- should match the imgsize set during model export
-          height: 320 # <--- should match the imgsize set during model export
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/yolo.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - zmq:tcp://host.docker.internal:5555
+            model_type: yolo-generic
+            width: 320 # <--- should match the imgsize set during model export
+            height: 320 # <--- should match the imgsize set during model export
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/yolo.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
 onnx:
   title: ONNX
   models:
@@ -594,18 +557,16 @@ onnx:
         | **Model Input D Type**                   | `float`                                                  |
         | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
-        detectors:
-          onnx:
-            type: onnx
-
-        model:
-          model_type: yolo-generic
-          width: 320 # <--- should match the imgsize set during model export
-          height: 320 # <--- should match the imgsize set during model export
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/yolo.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - onnx
+            model_type: yolo-generic
+            width: 320 # <--- should match the imgsize set during model export
+            height: 320 # <--- should match the imgsize set during model export
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/yolo.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
     - key: rfdetr
       label: RF-DETR
       recommended: false
@@ -639,17 +600,15 @@ onnx:
         | **Model Input D Type**                  | `float`                           |
         | **Object Detection Model Type**         | `rfdetr`                          |
       yaml: |-
-        detectors:
-          onnx:
-            type: onnx
-
-        model:
-          model_type: rfdetr
-          width: 320
-          height: 320
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/rfdetr.onnx # use the filename you generated above
+        models:
+          - devices:
+              - onnx
+            model_type: rfdetr
+            width: 320
+            height: 320
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/rfdetr.onnx # use the filename you generated above
     - key: yolonas
       label: YOLO-NAS
       recommended: false
@@ -677,18 +636,16 @@ onnx:
         | **Model Input D Type**                   | `int` (Frigate's default value)                   |
         | **Object Detection Model Type**          | `yolonas`                                         |
       yaml: |-
-        detectors:
-          onnx:
-            type: onnx
-
-        model:
-          model_type: yolonas
-          width: 320 # <--- should match whatever was set in notebook
-          height: 320 # <--- should match whatever was set in notebook
-          input_pixel_format: bgr
-          input_tensor: nchw
-          path: /config/yolo_nas_s.onnx
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - onnx
+            model_type: yolonas
+            width: 320 # <--- should match whatever was set in notebook
+            height: 320 # <--- should match whatever was set in notebook
+            input_pixel_format: bgr
+            input_tensor: nchw
+            path: /config/yolo_nas_s.onnx
+            labelmap_path: /labelmap/coco-80.txt
     - key: yolox
       label: YOLOX
       recommended: false
@@ -707,18 +664,16 @@ onnx:
         | **Model Input D Type**                   | `float_denorm`                                           |
         | **Object Detection Model Type**          | `yolox`                                                  |
       yaml: |-
-        detectors:
-          onnx:
-            type: onnx
-
-        model:
-          model_type: yolox
-          width: 416 # <--- should match the imgsize set during model export
-          height: 416 # <--- should match the imgsize set during model export
-          input_tensor: nchw
-          input_dtype: float_denorm
-          path: /config/model_cache/yolox_tiny.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - onnx
+            model_type: yolox
+            width: 416 # <--- should match the imgsize set during model export
+            height: 416 # <--- should match the imgsize set during model export
+            input_tensor: nchw
+            input_dtype: float_denorm
+            path: /config/model_cache/yolox_tiny.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
     - key: dfine
       label: D-FINE / DEIMv2
       recommended: false
@@ -805,18 +760,16 @@ onnx:
         | **Model Input D Type**                   | `float`                                     |
         | **Object Detection Model Type**          | `dfine`                                     |
       yaml: |-
-        detectors:
-          onnx:
-            type: onnx
-
-        model:
-          model_type: dfine
-          width: 640
-          height: 640
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/dfine_m_obj2coco.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - onnx
+            model_type: dfine
+            width: 640
+            height: 640
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/dfine_m_obj2coco.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
     - key: yolo-legacy
       label: YOLO (v3, v4, v7)
       recommended: false
@@ -843,18 +796,16 @@ onnx:
         | **Model Input D Type**                   | `float`                                                  |
         | **Object Detection Model Type**          | `yolo-generic`                                           |
       yaml: |-
-        detectors:
-          onnx:
-            type: onnx
-
-        model:
-          model_type: yolo-generic
-          width: 320 # <--- should match the imgsize set during model export
-          height: 320 # <--- should match the imgsize set during model export
-          input_tensor: nchw
-          input_dtype: float
-          path: /config/model_cache/yolo.onnx # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - onnx
+            model_type: yolo-generic
+            width: 320 # <--- should match the imgsize set during model export
+            height: 320 # <--- should match the imgsize set during model export
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/model_cache/yolo.onnx # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
 cpu:
   title: CPU
   models:
@@ -870,10 +821,9 @@ cpu:
         | **Detector type** | `cpu` |
         | **Num threads**   | `3`   |
       yaml: |-
-        detectors:
-          cpu1:
-            type: cpu
-            num_threads: 3
+        models:
+          - devices:
+              - cpu:3
 deepstack:
   title: DeepStack / CodeProject.AI
   models:
@@ -889,11 +839,9 @@ deepstack:
         | **API URL**   | `http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection`    |
         | **API Timeout** | `0.1` (seconds)                                                      |
       yaml: |-
-        detectors:
-          deepstack:
-            api_url: http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection
-            type: deepstack
-            api_timeout: 0.1 # seconds
+        models:
+          - devices:
+              - deepstack:http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection
 memryx:
   title: MemryX
   models:
@@ -923,23 +871,20 @@ memryx:
         | **Model Input D Type**                   | `float`                                           |
         | **Object Detection Model Type**          | `yolonas`                                         |
       yaml: |-
-        detectors:
-          memx0:
-            type: memryx
-            device: PCIe:0
-
-        model:
-          model_type: yolonas
-          width: 320 # (Can be set to 640 for higher resolution)
-          height: 320 # (Can be set to 640 for higher resolution)
-          input_tensor: nchw
-          input_dtype: float
-          labelmap_path: /labelmap/coco-80.txt
-          # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
-          # path: /config/yolonas.zip
-          # The .zip file must contain:
-          # ├── yolonas.dfp          (a file ending with .dfp)
-          # └── yolonas_post.onnx    (optional; only if the model includes a cropped post-processing network)
+        models:
+          - devices:
+              - memryx:PCIe:0
+            model_type: yolonas
+            width: 320 # (Can be set to 640 for higher resolution)
+            height: 320 # (Can be set to 640 for higher resolution)
+            input_tensor: nchw
+            input_dtype: float
+            labelmap_path: /labelmap/coco-80.txt
+            # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+            # path: /config/yolonas.zip
+            # The .zip file must contain:
+            # ├── yolonas.dfp          (a file ending with .dfp)
+            # └── yolonas_post.onnx    (optional; only if the model includes a cropped post-processing network)
     - key: yolov9
       label: YOLOv9
       recommended: false
@@ -960,22 +905,19 @@ memryx:
         | **Model Input D Type**                   | `float`                                           |
         | **Object Detection Model Type**          | `yolo-generic`                                    |
       yaml: |-
-        detectors:
-          memx0:
-            type: memryx
-            device: PCIe:0
-
-        model:
-          model_type: yolo-generic
-          width: 320 # (Can be set to 640 for higher resolution)
-          height: 320 # (Can be set to 640 for higher resolution)
-          input_tensor: nchw
-          input_dtype: float
-          labelmap_path: /labelmap/coco-80.txt
-          # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
-          # path: /config/yolov9.zip
-          # The .zip file must contain:
-          # ├── yolov9.dfp          (a file ending with .dfp)
+        models:
+          - devices:
+              - memryx:PCIe:0
+            model_type: yolo-generic
+            width: 320 # (Can be set to 640 for higher resolution)
+            height: 320 # (Can be set to 640 for higher resolution)
+            input_tensor: nchw
+            input_dtype: float
+            labelmap_path: /labelmap/coco-80.txt
+            # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+            # path: /config/yolov9.zip
+            # The .zip file must contain:
+            # ├── yolov9.dfp          (a file ending with .dfp)
     - key: yolox
       label: YOLOX
       recommended: false
@@ -996,22 +938,19 @@ memryx:
         | **Model Input D Type**                   | `float_denorm`          |
         | **Object Detection Model Type**          | `yolox`                 |
       yaml: |-
-        detectors:
-          memx0:
-            type: memryx
-            device: PCIe:0
-
-        model:
-          model_type: yolox
-          width: 640
-          height: 640
-          input_tensor: nchw
-          input_dtype: float_denorm
-          labelmap_path: /labelmap/coco-80.txt
-          # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
-          # path: /config/yolox.zip
-          # The .zip file must contain:
-          # ├── yolox.dfp          (a file ending with .dfp)
+        models:
+          - devices:
+              - memryx:PCIe:0
+            model_type: yolox
+            width: 640
+            height: 640
+            input_tensor: nchw
+            input_dtype: float_denorm
+            labelmap_path: /labelmap/coco-80.txt
+            # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+            # path: /config/yolox.zip
+            # The .zip file must contain:
+            # ├── yolox.dfp          (a file ending with .dfp)
     - key: ssd
       label: SSDLite MobileNet v2
       recommended: false
@@ -1032,23 +971,20 @@ memryx:
         | **Model Input D Type**                   | `float`                 |
         | **Object Detection Model Type**          | `ssd`                   |
       yaml: |-
-        detectors:
-          memx0:
-            type: memryx
-            device: PCIe:0
-
-        model:
-          model_type: ssd
-          width: 320
-          height: 320
-          input_tensor: nchw
-          input_dtype: float
-          labelmap_path: /labelmap/coco-80.txt
-          # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
-          # path: /config/ssdlite_mobilenet.zip
-          # The .zip file must contain:
-          # ├── ssdlite_mobilenet.dfp          (a file ending with .dfp)
-          # └── ssdlite_mobilenet_post.onnx    (optional; only if the model includes a cropped post-processing network)
+        models:
+          - devices:
+              - memryx:PCIe:0
+            model_type: ssd
+            width: 320
+            height: 320
+            input_tensor: nchw
+            input_dtype: float
+            labelmap_path: /labelmap/coco-80.txt
+            # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+            # path: /config/ssdlite_mobilenet.zip
+            # The .zip file must contain:
+            # ├── ssdlite_mobilenet.dfp          (a file ending with .dfp)
+            # └── ssdlite_mobilenet_post.onnx    (optional; only if the model includes a cropped post-processing network)
 tensorrt:
   title: TensorRT
   models:
@@ -1082,18 +1018,15 @@ tensorrt:
         | **Model Input D Type**                   | `int` (Frigate's default value)                              |
         | **Object Detection Model Type**          | `ssd` (Frigate's default value)                              |
       yaml: |-
-        detectors:
-          tensorrt:
-            type: tensorrt
-            device: 0 #This is the default, select the first GPU
-
-        model:
-          path: /config/model_cache/tensorrt/yolov7-320.trt # use the filename you generated above
-          labelmap_path: /labelmap/coco-80.txt
-          input_tensor: nchw
-          input_pixel_format: rgb
-          width: 320 # MUST match the chosen model i.e yolov7-320 -> 320, yolov4-416 -> 416
-          height: 320 # MUST match the chosen model i.e yolov7-320 -> 320 yolov4-416 -> 416
+        models:
+          - devices:
+              - tensorrt:0
+            path: /config/model_cache/tensorrt/yolov7-320.trt # use the filename you generated above
+            labelmap_path: /labelmap/coco-80.txt
+            input_tensor: nchw
+            input_pixel_format: rgb
+            width: 320 # MUST match the chosen model i.e yolov7-320 -> 320, yolov4-416 -> 416
+            height: 320 # MUST match the chosen model i.e yolov7-320 -> 320 yolov4-416 -> 416
 synaptics:
   title: Synaptics
   models:
@@ -1115,16 +1048,15 @@ synaptics:
         | **Model Input D Type**                   | `int` (Frigate's default value) |
         | **Object Detection Model Type**          | `ssd` (Frigate's default value) |
       yaml: |-
-        detectors: # required
-          synap_npu: # required
-            type: synaptics # required
-
-        model: # required
-          path: /synaptics/mobilenet.synap # required
-          width: 224 # required
-          height: 224 # required
-          input_tensor: nhwc # default value (optional. If you change the model, it is required)
-          labelmap_path: /labelmap/coco-80.txt # required
+        models:
+          -    # required
+            devices:
+              - synaptics
+            path: /synaptics/mobilenet.synap # required
+            width: 224 # required
+            height: 224 # required
+            input_tensor: nhwc # default value (optional. If you change the model, it is required)
+            labelmap_path: /labelmap/coco-80.txt # required
 rknn:
   title: RKNN
   models:
@@ -1149,21 +1081,23 @@ rknn:
         | **Model Input D Type**                   | `int` (Frigate's default value)                    |
         | **Object Detection Model Type**          | `yolo-generic`                                     |
       yaml: |-
-        model: # required
-          # name of model (will be automatically downloaded) or path to your own .rknn model file
-          # possible values are:
-          # - frigate-fp16-yolov9-t
-          # - frigate-fp16-yolov9-s
-          # - frigate-fp16-yolov9-m
-          # - frigate-fp16-yolov9-c
-          # - frigate-fp16-yolov9-e
-          # your yolo_model.rknn
-          path: frigate-fp16-yolov9-t
-          model_type: yolo-generic
-          width: 320
-          height: 320
-          input_tensor: nhwc
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - rknn
+            # name of model (will be automatically downloaded) or path to your own .rknn model file
+            # possible values are:
+            # - frigate-fp16-yolov9-t
+            # - frigate-fp16-yolov9-s
+            # - frigate-fp16-yolov9-m
+            # - frigate-fp16-yolov9-c
+            # - frigate-fp16-yolov9-e
+            # your yolo_model.rknn
+            path: frigate-fp16-yolov9-t
+            model_type: yolo-generic
+            width: 320
+            height: 320
+            input_tensor: nhwc
+            labelmap_path: /labelmap/coco-80.txt
     - key: yolonas
       label: YOLO-NAS
       recommended: false
@@ -1187,20 +1121,22 @@ rknn:
         | **Model Input D Type**                   | `int` (Frigate's default value)                                         |
         | **Object Detection Model Type**          | `yolonas`                                                               |
       yaml: |-
-        model: # required
-          # name of model (will be automatically downloaded) or path to your own .rknn model file
-          # possible values are:
-          # - deci-fp16-yolonas_s
-          # - deci-fp16-yolonas_m
-          # - deci-fp16-yolonas_l
-          # your yolonas_model.rknn
-          path: deci-fp16-yolonas_s
-          model_type: yolonas
-          width: 320
-          height: 320
-          input_pixel_format: bgr
-          input_tensor: nhwc
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - rknn
+            # name of model (will be automatically downloaded) or path to your own .rknn model file
+            # possible values are:
+            # - deci-fp16-yolonas_s
+            # - deci-fp16-yolonas_m
+            # - deci-fp16-yolonas_l
+            # your yolonas_model.rknn
+            path: deci-fp16-yolonas_s
+            model_type: yolonas
+            width: 320
+            height: 320
+            input_pixel_format: bgr
+            input_tensor: nhwc
+            labelmap_path: /labelmap/coco-80.txt
     - key: yolox
       label: YOLOx
       recommended: false
@@ -1222,20 +1158,22 @@ rknn:
         | **Model Input D Type**                   | `int` (Frigate's default value)                |
         | **Object Detection Model Type**          | `yolox`                                        |
       yaml: |-
-        model: # required
-          # name of model (will be automatically downloaded) or path to your own .rknn model file
-          # possible values are:
-          # - rock-i8-yolox_nano
-          # - rock-i8-yolox_tiny
-          # - rock-fp16-yolox_nano
-          # - rock-fp16-yolox_tiny
-          # your yolox_model.rknn
-          path: rock-i8-yolox_nano
-          model_type: yolox
-          width: 416
-          height: 416
-          input_tensor: nhwc
-          labelmap_path: /labelmap/coco-80.txt
+        models:
+          - devices:
+              - rknn
+            # name of model (will be automatically downloaded) or path to your own .rknn model file
+            # possible values are:
+            # - rock-i8-yolox_nano
+            # - rock-i8-yolox_tiny
+            # - rock-fp16-yolox_nano
+            # - rock-fp16-yolox_tiny
+            # your yolox_model.rknn
+            path: rock-i8-yolox_nano
+            model_type: yolox
+            width: 416
+            height: 416
+            input_tensor: nhwc
+            labelmap_path: /labelmap/coco-80.txt
 axengine:
   title: AXEngine
   models:
@@ -1257,6 +1195,7 @@ axengine:
         | **Model Input D Type**                   | `int`                   |
         | **Object Detection Model Type**          | `yolo-generic`          |
       yaml: |-
+<<<<<<< HEAD
         detectors:
           axengine:
             type: axengine
@@ -1269,3 +1208,96 @@ axengine:
           input_dtype: int
           input_pixel_format: bgr
           labelmap_path: /labelmap/coco-80.txt
+=======
+        models:
+          - devices:
+              - axengine
+            path: frigate-yolov9-tiny
+            model_type: yolo-generic
+            width: 320
+            height: 320
+            input_dtype: int
+            input_pixel_format: bgr
+            labelmap_path: /labelmap/coco-80.txt
+degirumAiServer:
+  title: DeGirum AI Server
+  models:
+    - key: ai-server-inference
+      label: AI Server Inference
+      recommended: true
+      download: |-
+        Launch a DeGirum AI server as a Docker container, then point the detector at it. Add this to your `docker-compose.yml`:
+
+        ```yaml
+        degirum_detector:
+          container_name: degirum
+          image: degirum/aiserver:latest
+          privileged: true
+          ports:
+            - "8778:8778"
+        ```
+
+        Set `location` to the server's service name, container name, or `host:port`.
+      ui: |
+        Navigate to **Settings > System > Detectors and model** and select **DeGirum** from the detector type dropdown and click **Add**.
+
+        | Field | Value |
+        | --- | --- |
+        | **Location** | `degirum` |
+        | **Zoo** | `degirum/public` |
+        | **Token** | your AI Hub token (optional for the public zoo) |
+      yaml: |
+        models:
+          - devices:
+              - degirum:degirum
+            path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+            width: 300
+            height: 300
+            input_pixel_format: rgb
+degirumLocal:
+  title: DeGirum Local
+  models:
+    - key: local-inference
+      label: Local Inference
+      recommended: true
+      download: Run hardware directly inside the Frigate container with `@local`, removing the AI server hop. The matching device runtime (e.g. the Hailo runtime) must be installed in the container; confirm it with `degirum sys-info`.
+      ui: |
+        Navigate to **Settings > System > Detectors and model** and select **DeGirum** from the detector type dropdown and click **Add**.
+
+        | Field | Value |
+        | --- | --- |
+        | **Location** | `@local` |
+        | **Zoo** | `degirum/public` |
+        | **Token** | your AI Hub token (optional for the public zoo) |
+      yaml: |
+        models:
+          - devices:
+              - degirum:@local
+            path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+            width: 300
+            height: 300
+            input_pixel_format: rgb
+degirumCloud:
+  title: DeGirum AI Hub Cloud
+  models:
+    - key: ai-hub-cloud-inference
+      label: AI Hub Cloud Inference
+      recommended: true
+      download: Run inferences on DeGirum's [AI Hub](https://hub.degirum.com) cloud with `@cloud`. Sign up, create an access token, and set it as `token`. Network latency may require lowering your detection fps.
+      ui: |
+        Navigate to **Settings > System > Detectors and model** and select **DeGirum** from the detector type dropdown and click **Add**.
+
+        | Field | Value |
+        | --- | --- |
+        | **Location** | `@cloud` |
+        | **Zoo** | `degirum/public` |
+        | **Token** | your AI Hub token (optional for the public zoo) |
+      yaml: |
+        models:
+          - devices:
+              - degirum:@cloud
+            path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+            width: 300
+            height: 300
+            input_pixel_format: rgb
+>>>>>>> 34363affa (Refactor detector and model management)

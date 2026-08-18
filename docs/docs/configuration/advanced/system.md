@@ -192,12 +192,14 @@ Navigate to <NavPath path="Settings > System > Detectors and model" /> and open 
 
 ```yaml
 # Optional: model config
-model:
-  path: /path/to/model
-  width: 320
-  height: 320
-  input_tensor: "nhwc"
-  input_pixel_format: "bgr"
+models:
+  - devices:
+      - openvino:GPU
+    path: /path/to/model
+    width: 320
+    height: 320
+    input_tensor: "nhwc"
+    input_pixel_format: "bgr"
 ```
 
 </TabItem>
@@ -214,15 +216,15 @@ If the labelmap is customized then the labels used for alerts will need to be ad
 The labelmap can be customized to your needs. A common reason to do this is to combine multiple object types that are easily confused when you don't need to be as granular such as car/truck. By default, truck is renamed to car because they are often confused. You cannot add new object types, but you can change the names of existing objects in the model.
 
 ```yaml
-model:
-  labelmap:
-    2: vehicle
-    3: vehicle
-    5: vehicle
-    7: vehicle
-    15: animal
-    16: animal
-    17: animal
+models:
+  - labelmap:
+      2: vehicle
+      3: vehicle
+      5: vehicle
+      7: vehicle
+      15: animal
+      16: animal
+      17: animal
 ```
 
 Note that if you rename objects in the labelmap, you will also need to update your `objects -> track` list as well.
