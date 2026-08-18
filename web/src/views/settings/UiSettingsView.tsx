@@ -1,6 +1,14 @@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ReactNode, useCallback, useContext, useEffect } from "react";
+import {
+  ChangeEvent,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { Button } from "../../components/ui/button";
 import useSWR from "swr";
@@ -26,8 +34,23 @@ import {
   CONTROL_COLUMN_CLASS_NAME,
 } from "@/components/card/SettingsGroupCard";
 import Heading from "@/components/ui/heading";
+import ImportUiSettingsDialog from "@/components/overlay/dialog/ImportUiSettingsDialog";
+import {
+  applyImportPayload,
+  buildExportPayload,
+  downloadJson,
+  exportFileName,
+  hasImportableContent,
+  ImportSummary,
+  ParseError,
+  parseUiSettingsFile,
+  summarizeImport,
+  TransferSection,
+  UiSettingsFile,
+} from "@/utils/uiSettingsTransfer";
 
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
+const IMPORT_FAILED_FLAG = "frigate-ui-settings-import-failed";
 
 type SwitchSettingRowProps = {
   id: string;
@@ -168,8 +191,130 @@ export default function UiSettingsView() {
       });
   }, [config, t, username]);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingImport, setPendingImport] = useState<{
+    name: string;
+    file: UiSettingsFile;
+    summary: ImportSummary;
+  } | null>(null);
+
+  const importErrorMessage = useCallback(
+    (error: ParseError) => {
+      // literal keys per branch: a template key would be invisible to
+      // npm run i18n:extract, which CI verifies
+      switch (error) {
+        case "invalid_json":
+          return t("general.toast.error.importInvalidJson");
+        case "wrong_type":
+          return t("general.toast.error.importWrongType");
+        case "unsupported_version":
+          return t("general.toast.error.importUnsupportedVersion");
+        case "invalid_schema":
+          return t("general.toast.error.importInvalidSchema");
+      }
+    },
+    [t],
+  );
+
+  const handleExport = useCallback(async () => {
+    if (!config || auth.isLoading) {
+      return;
+    }
+
+    let payload: UiSettingsFile;
+
+    try {
+      payload = await buildExportPayload(
+        Object.keys(config.camera_groups),
+        config.version,
+        username,
+      );
+    } catch {
+      toast.error(t("general.toast.error.exportUiSettingsFailed"), {
+        position: "top-center",
+      });
+      return;
+    }
+
+    downloadJson(payload, exportFileName(new Date()));
+    toast.success(t("general.toast.success.exportUiSettings"), {
+      position: "top-center",
+    });
+  }, [config, auth.isLoading, username, t]);
+
+  const handleFileSelected = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const selected = event.target.files?.[0];
+
+      // reset so choosing the same file again still fires a change event
+      event.target.value = "";
+
+      if (!selected || !config || auth.isLoading) {
+        return;
+      }
+
+      const result = parseUiSettingsFile(await selected.text());
+
+      if (!result.ok) {
+        toast.error(importErrorMessage(result.error), {
+          position: "top-center",
+        });
+        return;
+      }
+
+      const summary = summarizeImport(
+        result.file,
+        Object.keys(config.camera_groups),
+        Object.keys(config.cameras),
+      );
+
+      // a file exported from a browser with nothing stored is structurally
+      // valid, and would open a dialog with every switch disabled
+      if (!hasImportableContent(summary)) {
+        toast.error(t("general.toast.error.importNothingToApply"), {
+          position: "top-center",
+        });
+        return;
+      }
+
+      setPendingImport({ name: selected.name, file: result.file, summary });
+    },
+    [config, auth.isLoading, importErrorMessage, t],
+  );
+
+  const handleImportConfirm = useCallback(
+    async (sections: Record<TransferSection, boolean>) => {
+      if (!pendingImport || auth.isLoading) {
+        return;
+      }
+
+      try {
+        await applyImportPayload(pendingImport.file, sections, username);
+      } catch {
+        // writes are already in flight when one rejects, so reload anyway:
+        // staying mounted lets the persistence providers write their stale
+        // state back over whatever did land
+        sessionStorage.setItem(IMPORT_FAILED_FLAG, "1");
+      }
+
+      window.location.reload();
+    },
+    [pendingImport, auth.isLoading, username],
+  );
+
   useEffect(() => {
     document.title = t("documentTitle.general");
+  }, [t]);
+
+  useEffect(() => {
+    if (!sessionStorage.getItem(IMPORT_FAILED_FLAG)) {
+      return;
+    }
+
+    sessionStorage.removeItem(IMPORT_FAILED_FLAG);
+    toast.error(t("general.toast.error.importUiSettingsFailed"), {
+      position: "top-center",
+    });
   }, [t]);
 
   const [autoLive, setAutoLive] = useUserPersistence("autoLiveView", true);
@@ -300,6 +445,43 @@ export default function UiSettingsView() {
             </div>
           </SettingsGroupCard>
 
+          <SettingsGroupCard title={t("general.backupRestore.title")}>
+            <ValueSettingRow
+              id="ui-settings-transfer"
+              label={t("general.backupRestore.transfer.label")}
+              description={t("general.backupRestore.transfer.desc")}
+              control={
+                <div className="flex flex-col gap-2 md:flex-row">
+                  <Button
+                    id="ui-settings-export"
+                    aria-label={t("general.backupRestore.transfer.export")}
+                    className="w-full md:w-auto"
+                    disabled={auth.isLoading || !config}
+                    onClick={handleExport}
+                  >
+                    {t("general.backupRestore.transfer.export")}
+                  </Button>
+                  <Button
+                    id="ui-settings-import"
+                    aria-label={t("general.backupRestore.transfer.import")}
+                    className="w-full md:w-auto"
+                    disabled={auth.isLoading || !config}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {t("general.backupRestore.transfer.import")}
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/json,.json"
+                    className="hidden"
+                    onChange={handleFileSelected}
+                  />
+                </div>
+              }
+            />
+          </SettingsGroupCard>
+
           <SettingsGroupCard title={t("general.recordingsViewer.title")}>
             <ValueSettingRow
               id="default-playback-rate"
@@ -376,6 +558,21 @@ export default function UiSettingsView() {
           </SettingsGroupCard>
         </div>
       </div>
+
+      {pendingImport && (
+        <ImportUiSettingsDialog
+          open={pendingImport != null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPendingImport(null);
+            }
+          }}
+          fileName={pendingImport.name}
+          file={pendingImport.file}
+          summary={pendingImport.summary}
+          onConfirm={handleImportConfirm}
+        />
+      )}
     </div>
   );
 }
