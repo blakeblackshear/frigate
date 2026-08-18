@@ -687,13 +687,37 @@ class FrigateConfig(FrigateBaseModel):
     def model_for_camera(self, camera_name: str) -> ModelConfig:
         """Get the detection model a camera runs on.
 
+        Cameras added at runtime (wizard, clone, debug replay) are inserted
+        into cameras after parse, so they miss the cache built during
+        post_validation and are resolved here on first lookup.
+
         Args:
             camera_name: Name of the camera
 
         Returns:
             The model matching the camera's detect scene
         """
-        return self._camera_models[camera_name]
+        model = self._camera_models.get(camera_name)
+
+        if model is None:
+            camera = self.cameras.get(camera_name)
+            scene = camera.detect.scene if camera is not None else SceneEnum.all
+            model = self._resolve_camera_model(camera_name, scene)
+            self._camera_models[camera_name] = model
+
+        return model
+
+    def drop_camera_model(self, camera_name: str) -> None:
+        """Forget the cached model for a camera removed at runtime.
+
+        A later re-add resolves fresh, so a camera recreated under the same
+        name with a different detect scene doesn't inherit the removed
+        camera's model.
+
+        Args:
+            camera_name: Name of the removed camera
+        """
+        self._camera_models.pop(camera_name, None)
 
     def devices_for_model(self, model: ModelConfig) -> list[DeviceSpec]:
         """Get the parsed hardware devices a model runs on.
