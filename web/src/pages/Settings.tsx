@@ -51,7 +51,6 @@ import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import MediaSyncSettingsView from "@/views/settings/MediaSyncSettingsView";
 import RegionGridSettingsView from "@/views/settings/RegionGridSettingsView";
 import Go2RtcStreamsSettingsView from "@/views/settings/Go2RtcStreamsSettingsView";
-import DetectorsAndModelSettingsView from "@/views/settings/DetectorsAndModelSettingsView";
 import {
   SingleSectionPage,
   type SettingsPageProps,
@@ -96,14 +95,10 @@ import { mutate } from "swr";
 import { RJSFSchema } from "@rjsf/utils";
 import {
   buildConfigDataForPath,
-  buildHiddenFieldContext,
   flattenOverrides,
-  getSectionConfig,
   parseProfileFromSectionPath,
   prepareSectionSavePayload,
   PROFILE_ELIGIBLE_SECTIONS,
-  resolveHiddenFieldEntries,
-  sanitizeSectionData,
 } from "@/utils/configUtil";
 import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
@@ -115,7 +110,6 @@ import SaveAllPreviewPopover, {
   type SaveAllPreviewItem,
 } from "@/components/overlay/detail/SaveAllPreviewPopover";
 import { useRestart } from "@/api/ws";
-import { getPrimaryModel } from "@/utils/modelUtil";
 import {
   Tooltip,
   TooltipContent,
@@ -246,6 +240,7 @@ const SystemEnvironmentVariablesSettingsPage = createSectionPage(
 );
 const SystemTelemetrySettingsPage = createSectionPage("telemetry", "global");
 const SystemBirdseyeSettingsPage = createSectionPage("birdseye", "global");
+const SystemDetectionModelsPage = createSectionPage("models", "global");
 const NotificationsSettingsPage = createSectionPage("notifications", "global");
 
 const SystemMqttSettingsPage = createSectionPage("mqtt", "global");
@@ -408,7 +403,7 @@ const settingsGroups = [
       },
       {
         key: "systemDetectorsAndModel",
-        component: DetectorsAndModelSettingsView,
+        component: SystemDetectionModelsPage,
       },
       { key: "systemDatabase", component: SystemDatabaseSettingsPage },
       { key: "systemMqtt", component: SystemMqttSettingsPage },
@@ -560,8 +555,7 @@ const SYSTEM_SECTION_MAPPING: Record<string, SettingsType> = {
   environment_vars: "systemEnvironmentVariables",
   telemetry: "systemTelemetry",
   birdseye: "systemBirdseye",
-  detectors: "systemDetectorsAndModel",
-  model: "systemDetectorsAndModel",
+  models: "systemDetectorsAndModel",
 };
 
 const CAMERA_SECTION_KEYS = new Set<SettingsType>(
@@ -877,8 +871,7 @@ export default function Settings() {
 
   // Show save/undo all buttons only when at least one pending change lives
   // outside the currently visible page. Map each pending key to its menu key
-  // (e.g. both `detectors` and `model` collapse to `systemDetectorsAndModel`)
-  // so a composite page with two pending config-sections still counts as one.
+  // so a page hosting several config-sections still counts as one.
   const showSaveAllButtons = useMemo(() => {
     const pendingKeys = Object.keys(pendingDataBySection);
     if (pendingKeys.length === 0) return false;
@@ -911,111 +904,6 @@ export default function Settings() {
     // Pending entries that have been successfully PUT — cleared in one batch
     // after `mutate("config")` resolves
     const keysToClear: string[] = [];
-
-    // `detectors` and `model` are owned by DetectorsAndModelSettingsView
-    const hasPendingDetectors = "detectors" in pendingDataBySection;
-    const hasPendingModel = "model" in pendingDataBySection;
-    if (hasPendingDetectors || hasPendingModel) {
-      try {
-        const pendingDetectors = hasPendingDetectors
-          ? pendingDataBySection.detectors
-          : undefined;
-        const pendingModel = hasPendingModel
-          ? pendingDataBySection.model
-          : undefined;
-
-        // Hidden-field lists come from the section configs themselves so
-        // they stay in sync with what the embedded forms strip on render
-        const detectorHiddenFields = resolveHiddenFieldEntries(
-          getSectionConfig("detectors", "global").hiddenFields,
-          buildHiddenFieldContext(config, "global"),
-        );
-        const modelHiddenFields = resolveHiddenFieldEntries(
-          getSectionConfig("model", "global").hiddenFields,
-          buildHiddenFieldContext(config, "global"),
-        );
-        const sanitizedDetectors =
-          pendingDetectors !== undefined
-            ? sanitizeSectionData(pendingDetectors, detectorHiddenFields)
-            : undefined;
-        const sanitizedModel =
-          pendingModel !== undefined
-            ? sanitizeSectionData(pendingModel, modelHiddenFields)
-            : undefined;
-
-        // Pre-clear conditions: detector keys differ from saved config (rename
-        // or add/remove), OR the model save flips between Plus and Custom modes
-        let detectorKeysChanged = false;
-        if (sanitizedDetectors && typeof sanitizedDetectors === "object") {
-          const pendingKeySet = Object.keys(
-            sanitizedDetectors as JsonObject,
-          ).sort();
-          const savedKeySet = [
-            ...(getPrimaryModel(config)?.devices ?? []),
-          ].sort();
-          detectorKeysChanged =
-            JSON.stringify(pendingKeySet) !== JSON.stringify(savedKeySet);
-        }
-        let modelTabChanged = false;
-        if (sanitizedModel && typeof sanitizedModel === "object") {
-          const newPath = (sanitizedModel as { path?: string }).path;
-          const oldPath = getPrimaryModel(config)?.path;
-          const newIsPlus =
-            typeof newPath === "string" && newPath.startsWith("plus://");
-          const oldIsPlus =
-            typeof oldPath === "string" && oldPath.startsWith("plus://");
-          modelTabChanged = newIsPlus !== oldIsPlus;
-        }
-
-        if (detectorKeysChanged || modelTabChanged) {
-          try {
-            await axios.put("config/set", {
-              requires_restart: 0,
-              config_data: { detectors: null, model: null },
-            });
-          } catch {
-            // best-effort cleanup; the merge-write below will surface any
-            // real error.
-          }
-        }
-
-        const combinedConfigData: Record<string, unknown> = {};
-        if (sanitizedDetectors !== undefined) {
-          combinedConfigData.detectors = sanitizedDetectors;
-        }
-        if (sanitizedModel !== undefined) {
-          combinedConfigData.model = sanitizedModel;
-        }
-
-        await axios.put("config/set", {
-          requires_restart: 0,
-          config_data: combinedConfigData,
-        });
-
-        if (hasPendingDetectors) {
-          keysToClear.push("detectors");
-          savedKeys.push("detectors");
-        }
-        if (hasPendingModel) {
-          keysToClear.push("model");
-          savedKeys.push("model");
-        }
-
-        if (hasPendingDetectors || hasPendingModel) {
-          successCount++;
-          anyNeedsRestart = true;
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(
-          "Save All – error saving detectors/model atomically",
-          error,
-        );
-        if (hasPendingDetectors || hasPendingModel) {
-          failCount++;
-        }
-      }
-    }
 
     // go2rtc streams are owned by Go2RtcStreamsSettingsView
     if ("go2rtc_streams" in pendingDataBySection) {
@@ -1067,8 +955,7 @@ export default function Settings() {
     }
 
     const pendingKeys = Object.keys(pendingDataBySection).filter(
-      (key) =>
-        key !== "detectors" && key !== "model" && key !== "go2rtc_streams",
+      (key) => key !== "go2rtc_streams",
     );
 
     for (const key of pendingKeys) {

@@ -16,7 +16,7 @@ import { getEffectiveAttributeLabels } from "@/utils/configUtil";
  * Sections that require special handling at the global level.
  * Add new section paths here as needed.
  */
-const SPECIAL_CASE_SECTIONS = ["motion", "detectors", "genai"] as const;
+const SPECIAL_CASE_SECTIONS = ["motion", "genai"] as const;
 
 /**
  * Check if a section requires special case handling.
@@ -36,8 +36,6 @@ export function isSpecialCaseSection(
 /**
  * Modify schema for sections that need defaults stripped or other modifications.
  *
- * - detectors: Strip the "default" field to prevent RJSF from merging the
- *   default {"cpu": {"type": "cpu"}} with stored detector keys.
  * - genai: Inject a default provider value on the additionalProperties shape.
  * - objects: Promote tracked attribute labels (face, license_plate, courier
  *   logos) from `filters.additionalProperties` to explicit
@@ -61,12 +59,6 @@ export function modifySchemaForSection(
 
   if (!isSpecialCaseSection(sectionPath, level)) {
     return schema;
-  }
-
-  // detectors: Remove default to prevent merging with stored keys
-  if (sectionPath === "detectors" && "default" in schema) {
-    const { default: _, ...schemaWithoutDefault } = schema;
-    return schemaWithoutDefault;
   }
 
   if (sectionPath === "genai") {
@@ -270,8 +262,6 @@ function modifyObjectsSchema(
  * - motion: Has anyOf schema with [null, MotionConfig]. When stored value is
  *   null, derive defaults from the non-null anyOf branch to avoid showing
  *   changes when navigating to the page.
- * - detectors: Return empty object since the schema default would add unwanted
- *   keys to the stored configuration.
  */
 export function getEffectiveDefaultsForSection(
   sectionPath: string,
@@ -303,11 +293,6 @@ export function getEffectiveDefaultsForSection(
     }
 
     return applySchemaDefaults(motionSchema as RJSFSchema, {});
-  }
-
-  // detectors: Return empty object to avoid adding default keys
-  if (sectionPath === "detectors") {
-    return {};
   }
 
   return schemaDefaults;
@@ -423,27 +408,6 @@ export function sanitizeOverridesForSection(
     });
     return flattened;
   };
-
-  // detectors: Strip readonly model fields that are generated on startup
-  // and should never be persisted back to the config file.
-  if (sectionPath === "detectors") {
-    const overridesObj = overrides as JsonObject;
-    const cleaned: JsonObject = {};
-
-    Object.entries(overridesObj).forEach(([key, value]) => {
-      if (!isJsonObject(value)) {
-        cleaned[key] = value;
-        return;
-      }
-
-      const cleanedValue = { ...value } as JsonObject;
-      delete cleanedValue.model;
-      delete cleanedValue.model_path;
-      cleaned[key] = cleanedValue;
-    });
-
-    return cleaned;
-  }
 
   if (sectionPath === "logger") {
     const overridesObj = overrides as JsonObject;

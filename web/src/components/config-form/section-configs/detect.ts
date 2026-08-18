@@ -153,6 +153,7 @@ const detect: SectionConfigOverrides = {
     ],
     fieldOrder: [
       "enabled",
+      "scene",
       "width",
       "height",
       "fps",
@@ -186,6 +187,7 @@ const detect: SectionConfigOverrides = {
   },
   global: {
     restartRequired: [
+      "scene",
       "fps",
       "width",
       "height",
@@ -195,6 +197,7 @@ const detect: SectionConfigOverrides = {
   },
   camera: {
     restartRequired: [
+      "scene",
       "fps",
       "width",
       "height",
@@ -211,6 +214,7 @@ const detect: SectionConfigOverrides = {
     hiddenFields: [
       "enabled",
       "enabled_in_config",
+      "scene",
       "min_initialized",
       "max_disappeared",
       "annotation_offset",

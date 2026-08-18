@@ -72,8 +72,7 @@ const SECTIONS_WITHOUT_OVERRIDE_BADGE = new Set([
   "environment_vars",
   "telemetry",
   "birdseye",
-  "detectors",
-  "model",
+  "models",
 ]);
 
 type CameraEntryProps = {

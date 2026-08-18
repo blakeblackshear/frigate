@@ -1,8 +1,21 @@
 import type { SectionConfigOverrides } from "./types";
 
-const model: SectionConfigOverrides = {
+// scene and devices are rendered by ModelsField itself; the rest of each model
+// is delegated back to the schema form
+const modelFields = [
+  "path",
+  "labelmap_path",
+  "width",
+  "height",
+  "input_pixel_format",
+  "input_tensor",
+  "input_dtype",
+  "model_type",
+];
+
+const models: SectionConfigOverrides = {
   base: {
-    sectionDocs: "/configuration/object_detectors#model",
+    sectionDocs: "/configuration/object_detectors",
     fieldMessages: [
       {
         key: "model-optimized-for-320",
@@ -36,51 +49,46 @@ const model: SectionConfigOverrides = {
         },
       },
     ],
+    // every model field takes effect only when the detection processes restart
     restartRequired: [
-      "path",
-      "labelmap_path",
-      "width",
-      "height",
+      "scene",
+      "devices",
+      ...modelFields,
       "labelmap",
       "attributes_map",
-      "input_tensor",
-      "input_pixel_format",
-      "input_dtype",
-      "model_type",
-    ],
-    fieldOrder: [
-      "path",
-      "labelmap_path",
-      "width",
-      "height",
-      "input_pixel_format",
-      "input_tensor",
-      "input_dtype",
-      "model_type",
-    ],
-    advancedFields: [
-      "input_pixel_format",
-      "input_tensor",
-      "input_dtype",
-      "model_type",
-    ],
+    ].map((field) => `*.${field}`),
     hiddenFields: [
-      "labelmap",
-      "attributes_map",
-      "colormap",
-      "all_attributes",
-      "non_logo_attributes",
-      "plus",
+      "*.labelmap",
+      "*.attributes_map",
+      "*.colormap",
+      "*.all_attributes",
+      "*.non_logo_attributes",
+      "*.plus",
     ],
     uiSchema: {
-      path: {
-        "ui:options": { size: "md" },
-      },
-      labelmap_path: {
-        "ui:options": { size: "md" },
+      "ui:field": "ModelsField",
+      items: {
+        path: {
+          "ui:options": { size: "md" },
+        },
+        labelmap_path: {
+          "ui:options": { size: "md" },
+        },
+        input_pixel_format: {
+          "ui:options": { advanced: true },
+        },
+        input_tensor: {
+          "ui:options": { advanced: true },
+        },
+        input_dtype: {
+          "ui:options": { advanced: true },
+        },
+        model_type: {
+          "ui:options": { advanced: true },
+        },
       },
     },
   },
 };
 
-export default model;
+export default models;
