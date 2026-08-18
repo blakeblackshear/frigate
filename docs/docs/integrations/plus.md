@@ -59,7 +59,7 @@ You can view all of your submitted images at [https://plus.frigate.video](https:
 
 Once you have [requested your first model](../plus/first_model.md) and gotten your own model ID, it can be used with a special model path. No other information needs to be configured for Frigate+ models because it fetches the remaining config from Frigate+ automatically.
 
-You can either choose the new model from the <NavPath path="Settings > System > Detectors and model" /> pane in the Frigate UI (the **Frigate+ Model** tab), or manually set the model at the root level in your config:
+You can either choose the new model from the <NavPath path="Settings > System > Detection models" /> pane in the Frigate UI (on the **Frigate+** tab of the model you want to change), or set it on that model in your config:
 
 ```yaml
 models:

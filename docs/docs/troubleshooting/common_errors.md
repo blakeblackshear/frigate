@@ -131,7 +131,7 @@ The process was killed by the CPU for executing an unsupported instruction. Ther
 
 <FaqItem id="onnx-invalidprotobuf" question="ONNX Runtime InvalidProtobuf / failed to load model">
 
-ONNX Runtime could not parse the model file. The file exists but its contents are not a valid ONNX model, usually a corrupted or interrupted download in `model_cache`, or the wrong file pointed at by `model.path`. Delete the cached model file so Frigate re-downloads it, and confirm `model.path` points at an actual `.onnx` model. See [ONNX detector configuration](/configuration/object_detectors#onnx).
+ONNX Runtime could not parse the model file. The file exists but its contents are not a valid ONNX model, usually a corrupted or interrupted download in `model_cache`, or the wrong file pointed at by a model's `path`. Delete the cached model file so Frigate re-downloads it, and confirm the model's `path` points at an actual `.onnx` model. See [ONNX detector configuration](/configuration/object_detectors#onnx).
 
 </FaqItem>
 
