@@ -21,8 +21,11 @@ export const DETECTION_HARDWARE = [
     key: "openvino:GPU",
     detector: "openvino",
     name: "Intel GPU",
-    units: [{ device: "openvino:GPU", label: "0000:00:02.0" }],
-    count: 1,
+    units: [
+      { device: "openvino:GPU.0", label: "0000:00:02.0" },
+      { device: "openvino:GPU.1", label: "0000:03:00.0" },
+    ],
+    count: 2,
     unlimited: true,
   },
   {

@@ -101,7 +101,7 @@ test.describe("Detection models settings @high", () => {
 
   test("unlimited hardware offers a detector count", async ({ frigateApp }) => {
     await installRoutes(frigateApp.page, [
-      { scene: "all", devices: ["openvino:GPU"] },
+      { scene: "all", devices: ["openvino:GPU.0"] },
     ]);
     await openPage(frigateApp);
 
@@ -119,7 +119,7 @@ test.describe("Detection models settings @high", () => {
     frigateApp,
   }) => {
     await installRoutes(frigateApp.page, [
-      { scene: "all", devices: ["openvino:GPU", "openvino:GPU"] },
+      { scene: "all", devices: ["openvino:GPU.0", "openvino:GPU.0"] },
     ]);
     await openPage(frigateApp);
 
@@ -173,7 +173,7 @@ test.describe("Detection models settings @high", () => {
     frigateApp,
   }) => {
     await installRoutes(frigateApp.page, [
-      { scene: "all", devices: ["openvino:GPU", "openvino:GPU"] },
+      { scene: "all", devices: ["openvino:GPU.0", "openvino:GPU.0"] },
     ]);
     await openPage(frigateApp);
 
@@ -195,7 +195,7 @@ test.describe("Detection models settings @high", () => {
       [
         {
           scene: "all",
-          devices: ["openvino:GPU"],
+          devices: ["openvino:GPU.0"],
           path: "/config/model_cache/abc123",
           plus: PLUS_MODEL,
         },
@@ -220,7 +220,7 @@ test.describe("Detection models settings @high", () => {
       [
         {
           scene: "all",
-          devices: ["openvino:GPU"],
+          devices: ["openvino:GPU.0"],
           path: "/config/custom.onnx",
         },
       ],
@@ -251,7 +251,7 @@ test.describe("Detection models settings @high", () => {
     await installRoutes(frigateApp.page, [
       {
         scene: "all",
-        devices: ["openvino:GPU", "openvino:GPU"],
+        devices: ["openvino:GPU.0", "openvino:GPU.0"],
         path: "/config/model_cache/abc123",
         width: 320,
         height: 320,
@@ -275,7 +275,7 @@ test.describe("Detection models settings @high", () => {
     frigateApp,
   }) => {
     await installRoutes(frigateApp.page, [
-      { scene: "all", devices: ["openvino:GPU"] },
+      { scene: "all", devices: ["openvino:GPU.0"] },
     ]);
     await openPage(frigateApp);
 
@@ -321,6 +321,47 @@ test.describe("Detection models settings @high", () => {
     await expect(
       frigateApp.page.getByRole("button", { name: /^Save$/ }),
     ).toBeDisabled();
+  });
+
+  test("a second GPU can be assigned to a model", async ({ frigateApp }) => {
+    // shareable hardware can report several addressable units; every one of
+    // them must be reachable, not just the first
+    const saves = await installRoutes(frigateApp.page, [
+      { scene: "all", devices: ["openvino:GPU.0"] },
+    ]);
+    await openPage(frigateApp);
+
+    await frigateApp.page.locator("#models-0-openvino\\:GPU\\.1").click();
+    await frigateApp.page.getByRole("button", { name: /^Save$/ }).click();
+    await expect.poll(() => saves.length).toBeGreaterThan(0);
+
+    expect(saves.at(-1)?.config_data?.models?.[0].devices).toEqual([
+      "openvino:GPU.0",
+      "openvino:GPU.1",
+    ]);
+  });
+
+  test("detectors are spread across every selected GPU", async ({
+    frigateApp,
+  }) => {
+    const saves = await installRoutes(frigateApp.page, [
+      { scene: "all", devices: ["openvino:GPU.0", "openvino:GPU.1"] },
+    ]);
+    await openPage(frigateApp);
+
+    await frigateApp.page.locator("#models-0-detector-count").click();
+    await frigateApp.page
+      .getByRole("option", { name: "4", exact: true })
+      .click();
+    await frigateApp.page.getByRole("button", { name: /^Save$/ }).click();
+    await expect.poll(() => saves.length).toBeGreaterThan(0);
+
+    expect(saves.at(-1)?.config_data?.models?.[0].devices).toEqual([
+      "openvino:GPU.0",
+      "openvino:GPU.1",
+      "openvino:GPU.0",
+      "openvino:GPU.1",
+    ]);
   });
 
   test("saving writes the whole models list in one request", async ({

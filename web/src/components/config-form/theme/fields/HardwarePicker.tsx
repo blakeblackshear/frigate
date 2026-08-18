@@ -51,6 +51,31 @@ export function HardwarePicker({
     [cameraCount],
   );
 
+  // the units a model is assigned to, in the order the probe reports them. A
+  // shareable unit repeats in `devices` once per inference process, so the
+  // distinct entries are what is selected.
+  const selectedUnits = useMemo(() => {
+    if (!selected) {
+      return [];
+    }
+
+    return selected.units
+      .map((unit) => unit.device)
+      .filter((device) => devices.includes(device));
+  }, [selected, devices]);
+
+  /** Spread `count` detectors round robin over the selected units. */
+  const buildDevices = useCallback((units: string[], count: number) => {
+    if (units.length === 0) {
+      return [];
+    }
+
+    return Array.from(
+      { length: Math.max(count, units.length) },
+      (_, index) => units[index % units.length],
+    );
+  }, []);
+
   const handleHardwareChange = useCallback(
     (key: string) => {
       const entry = hardware?.find((candidate) => candidate.key === key);
@@ -59,39 +84,51 @@ export function HardwarePicker({
         return;
       }
 
-      if (entry.unlimited) {
-        onChange(Array(recommended).fill(entry.units[0].device));
+      // start with the first unit no other model has taken
+      const free = entry.units.find((unit) => !claimedElsewhere[unit.device]);
+
+      if (!free) {
+        onChange([]);
         return;
       }
 
-      // start with the first unit no other model has taken
-      const free = entry.units.find((unit) => !claimedElsewhere[unit.device]);
-      onChange(free ? [free.device] : []);
+      onChange(
+        entry.unlimited
+          ? buildDevices([free.device], recommended)
+          : [free.device],
+      );
     },
-    [hardware, claimedElsewhere, recommended, onChange],
+    [hardware, claimedElsewhere, recommended, buildDevices, onChange],
   );
 
   const handleUnitToggle = useCallback(
     (device: string, checked: boolean) => {
-      if (checked) {
-        onChange([...devices, device]);
-        return;
-      }
-
-      onChange(devices.filter((current) => current !== device));
-    },
-    [devices, onChange],
-  );
-
-  const handleCountChange = useCallback(
-    (value: string) => {
       if (!selected) {
         return;
       }
 
-      onChange(Array(Number(value)).fill(selected.units[0].device));
+      const units = selected.units
+        .map((unit) => unit.device)
+        .filter((candidate) =>
+          candidate === device ? checked : selectedUnits.includes(candidate),
+        );
+
+      if (!selected.unlimited) {
+        onChange(units);
+        return;
+      }
+
+      // keep the detector count while the set of units changes
+      onChange(buildDevices(units, devices.length));
     },
-    [selected, onChange],
+    [selected, selectedUnits, devices.length, buildDevices, onChange],
+  );
+
+  const handleCountChange = useCallback(
+    (value: string) => {
+      onChange(buildDevices(selectedUnits, Number(value)));
+    },
+    [selectedUnits, buildDevices, onChange],
   );
 
   if (isLoading) {
@@ -141,7 +178,7 @@ export function HardwarePicker({
         </p>
       ) : null}
 
-      {selected && !selected.unlimited ? (
+      {selected && (selected.units.length > 1 || !selected.unlimited) ? (
         <div className="space-y-2">
           <p className="text-xs text-muted-foreground">
             {t("detectionModels.hardware.unitsDescription")}
@@ -180,29 +217,33 @@ export function HardwarePicker({
 
       {selected?.unlimited ? (
         <div className="space-y-1">
-          <Label>{t("detectionModels.hardware.detectorCount")}</Label>
+          <Label htmlFor={`${idPrefix}-detector-count`}>
+            {t("detectionModels.hardware.detectorCount")}
+          </Label>
           <Select
             value={String(devices.length || 1)}
             onValueChange={handleCountChange}
             disabled={disabled}
           >
-            <SelectTrigger className="max-w-md">
+            <SelectTrigger
+              id={`${idPrefix}-detector-count`}
+              className="max-w-md"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Array.from(
-                { length: MAX_DETECTORS },
-                (_, index) => index + 1,
-              ).map((count) => (
-                <SelectItem key={count} value={String(count)}>
-                  {count === recommended
-                    ? t("detectionModels.hardware.countRecommended", {
-                        count,
-                        cameras: cameraCount,
-                      })
-                    : String(count)}
-                </SelectItem>
-              ))}
+              {Array.from({ length: MAX_DETECTORS }, (_, index) => index + 1)
+                .filter((count) => count >= Math.max(selectedUnits.length, 1))
+                .map((count) => (
+                  <SelectItem key={count} value={String(count)}>
+                    {count === recommended
+                      ? t("detectionModels.hardware.countRecommended", {
+                          count,
+                          cameras: cameraCount,
+                        })
+                      : String(count)}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
