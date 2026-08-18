@@ -373,6 +373,9 @@ export function ModelsField(props: FieldProps) {
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground">
+                      {t("detectionModels.scene.description")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
                       {t("detectionModels.scene.cameras", {
                         count: cameraCountForScene(model.scene),
                       })}

@@ -1960,7 +1960,8 @@
     "scene": {
       "label": "Scene",
       "cameras_one": "{{count}} camera uses this model",
-      "cameras_other": "{{count}} cameras use this model"
+      "cameras_other": "{{count}} cameras use this model",
+      "description": "The environment this model is for. Cameras pick a model by setting the same scene in their detect settings, and the model with a scene of all is used by any camera that does not set one."
     },
     "scenes": {
       "all": "All cameras",
@@ -1977,7 +1978,10 @@
       "claimedBy": "used by {{scene}}",
       "detectorCount": "Detectors",
       "countRecommended": "{{count}} (recommended for {{cameras}} cameras)",
-      "unrecognized": "This model is configured for hardware that was not found on this system: {{devices}}"
+      "unrecognized": "This model is configured for hardware that was not found on this system: {{devices}}",
+      "description": "The hardware this model runs its detection on.",
+      "detectorCountDescription": "How many detection processes to run on this hardware. More detectors keep up with more cameras, at the cost of extra device memory.",
+      "unitsDescription": "Each unit runs its own detection process. A unit already used by another model can not be selected."
     },
     "tabs": {
       "plus": "Frigate+",

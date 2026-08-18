@@ -128,6 +128,9 @@ export function HardwarePicker({
             ))}
           </SelectContent>
         </Select>
+        <p className="text-xs text-muted-foreground">
+          {t("detectionModels.hardware.description")}
+        </p>
       </div>
 
       {unrecognized ? (
@@ -140,6 +143,9 @@ export function HardwarePicker({
 
       {selected && !selected.unlimited ? (
         <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            {t("detectionModels.hardware.unitsDescription")}
+          </p>
           {selected.units.map((unit) => {
             const claimedBy = claimedElsewhere[unit.device];
 
@@ -199,6 +205,9 @@ export function HardwarePicker({
               ))}
             </SelectContent>
           </Select>
+          <p className="text-xs text-muted-foreground">
+            {t("detectionModels.hardware.detectorCountDescription")}
+          </p>
         </div>
       ) : null}
     </div>
