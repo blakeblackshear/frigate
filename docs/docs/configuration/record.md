@@ -421,7 +421,7 @@ As a general rule, features that read recordings prefer the main stream and fall
 | Audio extraction (e.g., transcription)                                                   | Main preferred, sub fallback                                                                                  |
 | Motion search                                                                            | Main only                                                                                                     |
 | Review timeline motion data                                                              | Main only                                                                                                     |
-| Storage usage statistics                                                                 | Both streams counted                                                                                          |
+| Storage usage statistics                                                                 | Both streams counted, and listed separately per camera                                                        |
 
 This table covers only features that read recordings from disk. Tracked object snapshots and thumbnails (the images shown in Explore and sent with notifications, and the images submitted to Frigate+ from a tracked object) are captured live from the `detect` stream as the object is tracked, never from recordings, so sub stream recording does not affect them.
 

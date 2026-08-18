@@ -101,6 +101,24 @@ export type StorageStats = {
   shm_frame_count?: number;
 };
 
+export type StreamStorage = {
+  usage: number;
+  bandwidth: number | null;
+};
+
+export type CameraStorage = {
+  [camera: string]: {
+    bandwidth: number;
+    usage: number;
+    usage_percent: number;
+    // absent for stream types with no segments on disk
+    streams?: {
+      main?: StreamStorage;
+      sub?: StreamStorage;
+    };
+  };
+};
+
 export type PotentialProblem = {
   text: string;
   color: string;

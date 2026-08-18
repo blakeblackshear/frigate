@@ -88,7 +88,7 @@ class StorageMaintainer(threading.Thread):
                 # type and sum the rates; mixing streams would average small
                 # sub segments against large main segments and underestimate
                 # the true write rate
-                bandwidth = 0.0
+                bandwidth_by_stream: dict[str, float] = {}
                 for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
                     avg_bw = self._recent_stream_bandwidth(camera, stream_type, 100)
                     if avg_bw is None:
@@ -99,17 +99,27 @@ class StorageMaintainer(threading.Thread):
                             camera, stream_type, 1000
                         )
                     if avg_bw is not None:
-                        bandwidth += round(avg_bw * 3600, 2)
+                        bandwidth_by_stream[stream_type] = round(avg_bw * 3600, 2)
 
-                bandwidth = round(bandwidth, 2)
+                bandwidth = round(sum(bandwidth_by_stream.values()), 2)
 
                 if bandwidth > MAX_CALCULATED_BANDWIDTH:
                     logger.warning(
                         f"{camera} has a bandwidth of {bandwidth} MB/hr which exceeds the expected maximum. This typically indicates an issue with the cameras recordings."
                     )
+                    # scale each stream so the per stream values still sum to
+                    # the clamped total the UI displays alongside them
+                    scale = MAX_CALCULATED_BANDWIDTH / bandwidth
+                    bandwidth_by_stream = {
+                        stream_type: round(value * scale, 2)
+                        for stream_type, value in bandwidth_by_stream.items()
+                    }
                     bandwidth = MAX_CALCULATED_BANDWIDTH
 
                 self.camera_storage_stats[camera]["bandwidth"] = bandwidth
+                self.camera_storage_stats[camera]["bandwidth_by_stream"] = (
+                    bandwidth_by_stream
+                )
                 logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
 
     def calculate_camera_usages(self) -> dict[str, dict]:
@@ -121,20 +131,42 @@ class StorageMaintainer(threading.Thread):
             if camera.startswith(REPLAY_CAMERA_PREFIX):
                 continue
 
-            camera_storage = (
-                Recordings.select(fn.SUM(Recordings.segment_size))
-                .where(Recordings.camera == camera, Recordings.segment_size != 0)
-                .scalar()
+            stream_usages = {
+                row["stream_type"]: row["usage"] or 0
+                for row in (
+                    Recordings.select(
+                        Recordings.stream_type,
+                        fn.SUM(Recordings.segment_size).alias("usage"),
+                    )
+                    .where(Recordings.camera == camera, Recordings.segment_size != 0)
+                    .group_by(Recordings.stream_type)
+                    .dicts()
+                )
+            }
+            stream_bandwidths = self.camera_storage_stats.get(camera, {}).get(
+                "bandwidth_by_stream", {}
             )
 
             camera_key = (
                 getattr(self.config.cameras[camera], "friendly_name", None) or camera
             )
             usages[camera_key] = {
-                "usage": camera_storage,
+                "usage": sum(stream_usages.values()),
                 "bandwidth": self.camera_storage_stats.get(camera, {}).get(
                     "bandwidth", 0
                 ),
+                # only streams with segments on disk are reported, so a camera
+                # keeps its sub entry until sub retention expires those segments.
+                # bandwidth is null rather than 0 when the cache holds no sample
+                # for the stream, since 0 would claim it writes nothing
+                "streams": {
+                    stream_type: {
+                        "usage": stream_usages[stream_type],
+                        "bandwidth": stream_bandwidths.get(stream_type),
+                    }
+                    for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB)
+                    if stream_usages.get(stream_type)
+                },
             }
 
         return usages
