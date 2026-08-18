@@ -271,6 +271,58 @@ test.describe("Detection models settings @high", () => {
     await expect(frigateApp.page.getByText("Modified")).toHaveCount(0);
   });
 
+  test("the scene, hardware and detector count fields are described", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      { scene: "all", devices: ["openvino:GPU"] },
+    ]);
+    await openPage(frigateApp);
+
+    const root = frigateApp.page.locator("#pageRoot");
+    await expect(root).toContainText("The environment this model is for");
+    await expect(root).toContainText(
+      "The hardware this model runs its detection on",
+    );
+    await expect(root).toContainText("How many detection processes to run");
+  });
+
+  test("per unit hardware explains why a claimed unit is unavailable", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      { scene: "all", devices: ["edgetpu:pci:0"] },
+    ]);
+    await openPage(frigateApp);
+
+    // the count dropdown is replaced by checkboxes, so it gets its own copy
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "Each unit runs its own detection process",
+    );
+  });
+
+  test("removing the default model blocks saving", async ({ frigateApp }) => {
+    // a camera that names no scene runs the "all" model, so deleting it would
+    // leave those cameras with nothing to fall back to
+    await installRoutes(frigateApp.page, [
+      { scene: "all", devices: ["cpu"] },
+      { scene: "outdoor", devices: ["edgetpu:pci:0"] },
+    ]);
+    await openPage(frigateApp);
+
+    await frigateApp.page
+      .getByRole("button", { name: "Delete" })
+      .first()
+      .click();
+
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "One model must use a scene of 'All cameras'",
+    );
+    await expect(
+      frigateApp.page.getByRole("button", { name: /^Save$/ }),
+    ).toBeDisabled();
+  });
+
   test("saving writes the whole models list in one request", async ({
     frigateApp,
   }) => {

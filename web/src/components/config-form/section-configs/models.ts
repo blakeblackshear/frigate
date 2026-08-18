@@ -16,6 +16,9 @@ const modelFields = [
 const models: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/object_detectors",
+    // the default-model rule must be enforced as the list is edited, not
+    // only when the form is submitted
+    liveValidate: true,
     fieldMessages: [
       {
         key: "model-optimized-for-320",
