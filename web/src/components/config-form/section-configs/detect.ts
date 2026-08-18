@@ -171,6 +171,11 @@ const detect: SectionConfigOverrides = {
       tracking: ["min_initialized", "max_disappeared"],
     },
     uiSchema: {
+      scene: {
+        "ui:options": {
+          enumI18nPrefix: "detectionModels.scenes",
+        },
+      },
       annotation_offset: {
         "ui:options": {
           signed: true,
