@@ -35,6 +35,10 @@ function plusModelId(path: unknown): string | undefined {
 
 type ModelSourcePickerProps = {
   path: unknown;
+  // Frigate+ metadata the backend attaches to a saved model, and the only
+  // reliable signal that one is active: it resolves `plus://<id>` to a local
+  // cache path before serving the config back
+  plus?: { id: string } | null;
   // the detector this model runs on, used to filter incompatible Plus models
   detector?: string;
   disabled?: boolean;
@@ -45,6 +49,7 @@ type ModelSourcePickerProps = {
 
 export function ModelSourcePicker({
   path,
+  plus,
   detector,
   disabled,
   onPathChange,
@@ -54,7 +59,9 @@ export function ModelSourcePicker({
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const plusEnabled = Boolean(config?.plus?.enabled);
-  const selectedId = plusModelId(path);
+  // an unsaved pick still carries the plus:// path, which wins over the
+  // metadata of whatever model was saved before it
+  const selectedId = plusModelId(path) ?? plus?.id;
 
   const { data: availableModels, isLoading } = useSWR<
     Record<string, FrigatePlusModel>

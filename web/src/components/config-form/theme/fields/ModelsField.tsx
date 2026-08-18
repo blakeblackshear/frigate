@@ -36,6 +36,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { ConfigFormContext } from "@/types/configForm";
+import useSWR from "swr";
+import { DetectionHardware } from "@/types/hardware";
+import { summarizeDevices } from "@/utils/detectionHardware";
 import { HardwarePicker } from "./HardwarePicker";
 import { ModelSourcePicker } from "./ModelSourcePicker";
 
@@ -141,6 +144,10 @@ export function ModelsField(props: FieldProps) {
 
   const [openByIndex, setOpenByIndex] = useState<Record<number, boolean>>({});
 
+  // shared with HardwarePicker through the SWR cache, so this is not a second
+  // request
+  const { data: hardware } = useSWR<DetectionHardware[]>("hardware/probe");
+
   useEffect(() => {
     setOpenByIndex((previous) => {
       const next: Record<number, boolean> = {};
@@ -152,6 +159,16 @@ export function ModelsField(props: FieldProps) {
   }, [models.length]);
 
   const cameras = formContext?.fullConfig?.cameras;
+  const savedModels = formContext?.fullConfig?.models;
+
+  // `plus` is a readonly field stripped from the form data, so read it from the
+  // full config. Match on scene rather than index, which shifts when a model is
+  // added or removed.
+  const savedPlusForScene = useCallback(
+    (scene: string | undefined) =>
+      savedModels?.find((saved) => saved.scene === scene)?.plus,
+    [savedModels],
+  );
 
   // a model serves the cameras naming its scene, plus every camera that names
   // no scene at all when it is the "all" model
@@ -316,9 +333,10 @@ export function ModelsField(props: FieldProps) {
                         {t(`detectionModels.scenes.${model.scene ?? "all"}`)}
                       </span>
                       <span className="mt-1 block text-xs font-normal text-muted-foreground">
-                        {(model.devices ?? []).length > 0
-                          ? (model.devices ?? []).join(", ")
-                          : t("detectionModels.hardware.none")}
+                        {summarizeDevices(
+                          hardware ?? [],
+                          model.devices ?? [],
+                        ) ?? t("detectionModels.hardware.none")}
                       </span>
                     </CardTitle>
                     {open ? (
@@ -372,6 +390,7 @@ export function ModelsField(props: FieldProps) {
 
                   <ModelSourcePicker
                     path={model.path}
+                    plus={savedPlusForScene(model.scene)}
                     detector={detectorForModel(model)}
                     disabled={disabled || readonly}
                     onPathChange={(path) => updateModel(index, { path })}

@@ -27,14 +27,29 @@ type Model = {
   scene: string;
   devices: string[];
   path?: string | null;
+  plus?: { id: string; name: string } | null;
   width?: number;
   height?: number;
 };
 
+const PLUS_MODEL = {
+  id: "abc123",
+  name: "yolov9-s",
+  baseModel: "yolov9",
+  trainDate: "2026-01-02T03:04:05Z",
+  isBaseModel: true,
+  supportedDetectors: ["openvino"],
+  width: 320,
+  height: 320,
+};
+
 type SavedConfig = { config_data?: { models?: Model[] } };
 
-async function installRoutes(page: Page, models: Model[]) {
-  const config = configFactory({ models } as never);
+async function installRoutes(page: Page, models: Model[], plusEnabled = false) {
+  const config = configFactory({
+    models,
+    plus: { enabled: plusEnabled },
+  } as never);
   const saves: SavedConfig[] = [];
 
   await page.route("**/api/config/schema.json", (route) =>
@@ -47,6 +62,9 @@ async function installRoutes(page: Page, models: Model[]) {
   );
   await page.route("**/api/config/raw_paths", (route) =>
     route.fulfill({ json: { models } }),
+  );
+  await page.route("**/api/plus/models", (route) =>
+    route.fulfill({ json: [PLUS_MODEL] }),
   );
   await page.route("**/api/config/set", async (route) => {
     saves.push(route.request().postDataJSON() as SavedConfig);
@@ -143,6 +161,79 @@ test.describe("Detection models settings @high", () => {
 
     // "all" is taken, so the new card takes the next available scene
     await expect(frigateApp.page.locator("#pageRoot")).toContainText("Indoor");
+  });
+
+  test("hardware is summarized rather than listed device by device", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      { scene: "all", devices: ["openvino:GPU", "openvino:GPU"] },
+    ]);
+    await openPage(frigateApp);
+
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "Intel GPU \u00d72",
+    );
+    await expect(frigateApp.page.locator("#pageRoot")).not.toContainText(
+      "openvino:GPU, openvino:GPU",
+    );
+  });
+
+  test("a saved Frigate+ model opens on the Frigate+ tab", async ({
+    frigateApp,
+  }) => {
+    // the backend resolves plus:// to a cache path before serving the config
+    // back, so the plus metadata is the only signal the model is a Plus one
+    await installRoutes(
+      frigateApp.page,
+      [
+        {
+          scene: "all",
+          devices: ["openvino:GPU"],
+          path: "/config/model_cache/abc123",
+          plus: PLUS_MODEL,
+        },
+      ],
+      true,
+    );
+    await openPage(frigateApp);
+
+    await expect(
+      frigateApp.page.getByRole("tab", { name: "Frigate+" }),
+    ).toHaveAttribute("data-state", "active");
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "yolov9-s",
+    );
+  });
+
+  test("picking a Frigate+ model stays on the tab and saves a plus path", async ({
+    frigateApp,
+  }) => {
+    const saves = await installRoutes(
+      frigateApp.page,
+      [
+        {
+          scene: "all",
+          devices: ["openvino:GPU"],
+          path: "/config/custom.onnx",
+        },
+      ],
+      true,
+    );
+    await openPage(frigateApp);
+
+    await frigateApp.page.getByRole("tab", { name: "Frigate+" }).click();
+    await frigateApp.page.getByRole("combobox").last().click();
+    await frigateApp.page.getByRole("option").first().click();
+
+    await expect(
+      frigateApp.page.getByRole("tab", { name: "Frigate+" }),
+    ).toHaveAttribute("data-state", "active");
+
+    await frigateApp.page.getByRole("button", { name: /^Save$/ }).click();
+    await expect.poll(() => saves.length).toBeGreaterThan(0);
+
+    expect(saves.at(-1)?.config_data?.models?.[0].path).toBe("plus://abc123");
   });
 
   test("saving writes the whole models list in one request", async ({

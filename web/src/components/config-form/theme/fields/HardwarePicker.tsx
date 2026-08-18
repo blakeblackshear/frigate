@@ -11,32 +11,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DetectionHardware } from "@/types/hardware";
-
-// one detector per this many cameras, so the recommendation grows with the
-// install without spawning a process per camera
-const CAMERAS_PER_DETECTOR = 8;
-const MAX_DETECTORS = 8;
-
-/** How many detectors to suggest for a model serving this many cameras. */
-function recommendedDetectorCount(cameraCount: number): number {
-  const scaled = Math.ceil(cameraCount / CAMERAS_PER_DETECTOR);
-  return Math.min(Math.max(scaled, 1), MAX_DETECTORS);
-}
-
-/** The hardware whose units cover every one of these device strings. */
-function hardwareForDevices(
-  hardware: DetectionHardware[],
-  devices: string[],
-): DetectionHardware | undefined {
-  if (devices.length === 0) {
-    return undefined;
-  }
-
-  return hardware.find((entry) => {
-    const known = new Set(entry.units.map((unit) => unit.device));
-    return devices.every((device) => known.has(device));
-  });
-}
+import {
+  hardwareForDevices,
+  MAX_DETECTORS,
+  recommendedDetectorCount,
+} from "@/utils/detectionHardware";
 
 type HardwarePickerProps = {
   // scopes the unit checkbox ids, since several models can list the same unit
