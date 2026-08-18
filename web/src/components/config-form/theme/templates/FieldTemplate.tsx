@@ -168,11 +168,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
     (!isArrayItemInAdditionalProp || showArrayItemDescription) &&
     !suppressDescription;
 
-  const translationPath = buildTranslationPath(
-    pathSegments,
-    sectionI18nPrefix,
-    formContext,
-  );
+  const translationPath = buildTranslationPath(pathSegments, formContext);
   const fieldPath = fieldPathId.path;
   const overrides = formContext?.overrides;
   const baselineFormData = formContext?.baselineFormData;

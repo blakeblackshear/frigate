@@ -165,7 +165,7 @@ See [common Edge TPU troubleshooting steps](/troubleshooting/edgetpu) if the Edg
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown.
 
 </TabItem>
 <TabItem value="yaml">
@@ -184,7 +184,7 @@ models:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `usb:0` and `usb:1` as the device for each.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown and check each Coral the model should run on.
 
 </TabItem>
 <TabItem value="yaml">
@@ -206,7 +206,7 @@ _warning: may have [compatibility issues](https://github.com/blakeblackshear/fri
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then leave the device field empty.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select the **Coral EdgeTPU** entry from the **Hardware** dropdown.
 
 </TabItem>
 <TabItem value="yaml">
@@ -225,7 +225,7 @@ models:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `pci`.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (PCIe)** from the **Hardware** dropdown.
 
 </TabItem>
 <TabItem value="yaml">
@@ -244,7 +244,7 @@ models:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `pci:0` and `pci:1` as the device for each.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (PCIe)** from the **Hardware** dropdown and check each Coral the model should run on.
 
 </TabItem>
 <TabItem value="yaml">
@@ -264,7 +264,7 @@ models:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors with different device types (e.g., `usb` and `pci`).
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown. USB and PCIe Corals are listed as separate hardware, so mixing the two on one model has to be done in YAML.
 
 </TabItem>
 <TabItem value="yaml">
@@ -354,7 +354,7 @@ Intel NPUs cannot be used under Home Assistant OS, which does not include the NP
 
 :::warning
 
-The network-based detectors (Deepstack, DeGirum, and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, DeGirum ignores `zoo` and `token`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
+The network-based detectors (Deepstack and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
 
 :::
 
@@ -536,7 +536,7 @@ When using CPU detectors, you can add one CPU detector per camera. Adding more d
 
 :::warning
 
-The network-based detectors (Deepstack, DeGirum, and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, DeGirum ignores `zoo` and `token`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
+The network-based detectors (Deepstack and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
 
 :::
 
@@ -809,101 +809,6 @@ Explanation of the parameters:
   - **example**: Specifying `output_name = "frigate-{quant}-{input_basename}-{soc}-v{tk_version}"` could result in a model called `frigate-i8-my_model-rk3588-v2.3.0.rknn`.
 - `config`: Configuration passed to `rknn-toolkit2` for model conversion. For an explanation of all available parameters have a look at section "2.2. Model configuration" of [this manual](https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.2/03_Rockchip_RKNPU_API_Reference_RKNN_Toolkit2_V2.3.2_EN.pdf).
 
-<<<<<<< HEAD
-=======
-## DeGirum
-
-:::warning
-
-The network-based detectors (Deepstack, DeGirum, and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, DeGirum ignores `zoo` and `token`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
-
-:::
-
-DeGirum is a detector that can use any type of hardware listed on [their website](https://hub.degirum.com). DeGirum can be used with local hardware through a DeGirum AI Server, or through the use of `@local`. You can also connect directly to DeGirum's AI Hub to run inferences. **Please Note:** This detector _cannot_ be used for commercial purposes.
-
-### Configuration {#configuration-degirum}
-
-#### AI Server Inference
-
-Before starting with the config file for this section, you must first launch an AI server. DeGirum has an AI server ready to use as a docker container. Add this to your `docker-compose.yml` to get started:
-
-```yaml
-degirum_detector:
-  container_name: degirum
-  image: degirum/aiserver:latest
-  privileged: true
-  ports:
-    - "8778:8778"
-```
-
-All supported hardware will automatically be found on your AI server host as long as relevant runtimes and drivers are properly installed on your machine. Refer to [DeGirum's docs site](https://docs.degirum.com/pysdk/runtimes-and-drivers) if you have any trouble.
-
-Once completed, configure the detector as follows:
-
-<ModelConfigDropdown detectorTitle="DeGirum" models={objectDetectorsModels.degirumAiServer.models} />
-
-The model is set on the same `models` entry as the DeGirum device. You can set it to:
-
-- A model listed on the [AI Hub](https://hub.degirum.com)
-  - If this is what you choose to do, the correct model will be downloaded onto your machine before running.
-- A local directory acting as a zoo. See DeGirum's docs site [for more information](https://docs.degirum.com/pysdk/user-guide-pysdk/organizing-models#model-zoo-directory-structure).
-- A path to some model.json.
-
-```yaml
-models:
-  - devices:
-      - degirum:<location>
-    path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1 # directory to model .json and file
-    width: 300 # width is in the model name as the first number in the "int"x"int" section
-    height: 300 # height is in the model name as the second number in the "int"x"int" section
-    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
-```
-
-#### Local Inference
-
-It is also possible to eliminate the need for an AI server and run the hardware directly. The benefit of this approach is that you eliminate any bottlenecks that occur when transferring prediction results from the AI server docker container to the frigate one. However, the method of implementing local inference is different for every device and hardware combination, so it's usually more trouble than it's worth. A general guideline to achieve this would be:
-
-1. Ensuring that the frigate docker container has the runtime you want to use. So for instance, running `@local` for Hailo means making sure the container you're using has the Hailo runtime installed.
-2. To double check the runtime is detected by the DeGirum detector, make sure the `degirum sys-info` command properly shows whatever runtimes you mean to install.
-3. Create a DeGirum detector in your configuration.
-
-<ModelConfigDropdown detectorTitle="DeGirum" models={objectDetectorsModels.degirumLocal.models} />
-
-Once the DeGirum device is set up, you can choose a model on the same `models` entry in the `config.yml` file.
-
-```yaml
-models:
-  - devices:
-      - degirum:<location>
-    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
-    width: 300 # width is in the model name as the first number in the "int"x"int" section
-    height: 300 # height is in the model name as the second number in the "int"x"int" section
-    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
-```
-
-#### AI Hub Cloud Inference
-
-If you do not possess whatever hardware you want to run, there's also the option to run cloud inferences. Do note that your detection fps might need to be lowered as network latency does significantly slow down this method of detection. For use with Frigate, we highly recommend using a local AI server as described above. To set up cloud inferences,
-
-1. Sign up at [DeGirum's AI Hub](https://hub.degirum.com).
-2. Get an access token.
-3. Create a DeGirum detector in your configuration.
-
-<ModelConfigDropdown detectorTitle="DeGirum" models={objectDetectorsModels.degirumCloud.models} />
-
-Once the DeGirum device is set up, you can choose a model on the same `models` entry in the `config.yml` file.
-
-```yaml
-models:
-  - devices:
-      - degirum:<location>
-    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
-    width: 300 # width is in the model name as the first number in the "int"x"int" section
-    height: 300 # height is in the model name as the second number in the "int"x"int" section
-    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
-```
-
->>>>>>> 34363affa (Refactor detector and model management)
 ## AXERA
 
 Hardware accelerated object detection is supported on the following SoCs:

@@ -108,7 +108,7 @@ class TestGpuStats(unittest.TestCase):
     @patch("frigate.util.services.time.sleep")
     @patch("frigate.util.services.time.monotonic")
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services.enumerate_drm_devices")
     def test_intel_gpu_stats_fdinfo(
         self, drm_devices, read_fdinfo, monotonic, sleep, get_names
     ):
@@ -187,7 +187,7 @@ class TestGpuStats(unittest.TestCase):
     @patch("frigate.util.services.time.sleep")
     @patch("frigate.util.services.time.monotonic")
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services.enumerate_drm_devices")
     def test_intel_gpu_stats_xe_capacity(
         self, drm_devices, read_fdinfo, monotonic, sleep, get_names
     ):
@@ -246,7 +246,7 @@ class TestGpuStats(unittest.TestCase):
     @patch("frigate.stats.intel_gpu_info.intel_gpu_name_resolver.get_names")
     @patch("frigate.util.services.time.sleep")
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services.enumerate_drm_devices")
     def test_intel_gpu_stats_no_clients_reports_idle(
         self, drm_devices, read_fdinfo, sleep, get_names
     ):
@@ -274,7 +274,7 @@ class TestGpuStats(unittest.TestCase):
 
     @patch("frigate.util.services.time.sleep")
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services.enumerate_drm_devices")
     def test_intel_gpu_stats_clients_without_engine_counters(
         self, drm_devices, read_fdinfo, sleep
     ):
@@ -301,7 +301,7 @@ class TestGpuStats(unittest.TestCase):
         read_fdinfo.assert_called_once()
 
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services.enumerate_drm_devices")
     def test_intel_gpu_stats_no_intel_device(self, drm_devices, read_fdinfo):
         # Only a non-Intel GPU is visible in sysfs; /proc is never scanned
         drm_devices.return_value = {"0000:01:00.0": "nvidia"}
@@ -310,7 +310,7 @@ class TestGpuStats(unittest.TestCase):
         read_fdinfo.assert_not_called()
 
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services.enumerate_drm_devices")
     @patch("frigate.util.services._resolve_intel_gpu_pdev")
     def test_intel_gpu_stats_unresolvable_device_hint(
         self, resolve_pdev, drm_devices, read_fdinfo
@@ -324,7 +324,7 @@ class TestGpuStats(unittest.TestCase):
         read_fdinfo.assert_not_called()
 
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services.enumerate_drm_devices")
     @patch("frigate.util.services._resolve_intel_gpu_pdev")
     def test_intel_gpu_stats_hint_resolves_to_non_intel_gpu(
         self, resolve_pdev, drm_devices, read_fdinfo
@@ -342,7 +342,7 @@ class TestGpuStats(unittest.TestCase):
         read_fdinfo.assert_not_called()
 
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services.enumerate_drm_devices")
     def test_intel_gpu_stats_unreadable_proc(self, drm_devices, read_fdinfo):
         # A scan failure (None) is a different condition than a scan that
         # finds no clients ({}) and must not report idle
@@ -355,7 +355,7 @@ class TestGpuStats(unittest.TestCase):
     @patch("frigate.util.services.time.sleep")
     @patch("frigate.util.services.time.monotonic")
     @patch("frigate.util.services._read_intel_drm_fdinfo")
-    @patch("frigate.util.services._enumerate_drm_devices")
+    @patch("frigate.util.services.enumerate_drm_devices")
     def test_intel_gpu_stats_clients_lost_between_samples(
         self, drm_devices, read_fdinfo, monotonic, sleep, get_names
     ):

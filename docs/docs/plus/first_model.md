@@ -30,7 +30,7 @@ Models available in Frigate+ can be used with a special model path. No other inf
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" />. In the **Detection Model** section, choose the **Frigate+** tab. Select your new Frigate+ model from the **Available Frigate+ models** dropdown, then click **Save**. Restart Frigate to apply the change.
+Navigate to <NavPath path="Settings > System > Detection models" />. On the model you want to change, choose the **Frigate+** tab and select your new Frigate+ model from the **Available Frigate+ models** dropdown, then click **Save**. Restart Frigate to apply the change.
 
 </TabItem>
 <TabItem value="yaml">
