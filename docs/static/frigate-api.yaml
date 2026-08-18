@@ -7109,7 +7109,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DebugReplayStartResponse'
         '400':
-          description: Invalid camera, time range, or no recordings
+          description: Invalid camera or time range
+        '404':
+          description: No recordings in the requested time range
         '409':
           description: A replay session is already active
         '422':
