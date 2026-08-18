@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends
 from frigate.api.auth import require_role
 from frigate.api.defs.tags import Tags
 from frigate.detectors.hardware import DetectionHardware, hardware_prober
+from frigate.util.hwaccel import HwaccelRecommendation, recommend_hwaccel
 
 logger = logging.getLogger(__name__)
 
@@ -28,3 +29,21 @@ def probe_hardware(refresh: bool = False) -> list[DetectionHardware]:
         Every kind of detection hardware that was found
     """
     return hardware_prober.probe(refresh=refresh)
+
+
+@router.get(
+    "/hardware/hwaccel",
+    response_model=HwaccelRecommendation,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def hwaccel_recommendation(detector: str | None = None) -> HwaccelRecommendation:
+    """Get the ffmpeg hwaccel preset recommended for this system.
+
+    Args:
+        detector: Hardware key of the detection hardware in use, which biases
+            the recommendation toward that hardware's GPU
+
+    Returns:
+        The recommended preset, empty when no hardware acceleration fits
+    """
+    return HwaccelRecommendation(preset=recommend_hwaccel(detector))

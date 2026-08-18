@@ -11,3 +11,7 @@ export type DetectionHardware = {
   count: number;
   unlimited: boolean;
 };
+
+export type HwaccelRecommendation = {
+  preset: string;
+};

@@ -30,6 +30,7 @@ const Chat = lazy(() => import("@/pages/Chat"));
 const Logs = lazy(() => import("@/pages/Logs"));
 const AccessDenied = lazy(() => import("@/pages/AccessDenied"));
 const Replay = lazy(() => import("@/pages/Replay"));
+const SetupWizard = lazy(() => import("@/pages/SetupWizard"));
 
 function App() {
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -64,6 +65,21 @@ function DefaultAppView() {
     return (
       <div className="size-full overflow-hidden">
         <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      </div>
+    );
+  }
+
+  // Show setup wizard for first-time users
+  if (config && config.onboarding?.setup_complete === false) {
+    return (
+      <div className="size-full overflow-hidden">
+        <Suspense
+          fallback={
+            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          }
+        >
+          <SetupWizard />
+        </Suspense>
       </div>
     );
   }

@@ -43,6 +43,7 @@ export interface ApiMockOverrides {
   configRaw?: string;
   configSchema?: Record<string, unknown>;
   hardware?: unknown[];
+  hwaccel?: { preset: string };
 }
 
 export class ApiMocker {
@@ -183,6 +184,11 @@ export class ApiMocker {
     // Detection hardware discovery
     await this.page.route("**/api/hardware/probe**", (route) =>
       route.fulfill({ json: overrides?.hardware ?? DETECTION_HARDWARE }),
+    );
+
+    // Hwaccel preset recommendation
+    await this.page.route("**/api/hardware/hwaccel**", (route) =>
+      route.fulfill({ json: overrides?.hwaccel ?? { preset: "" } }),
     );
 
     // Go2RTC streams

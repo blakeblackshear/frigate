@@ -17,6 +17,7 @@ from pydantic import (
 )
 from ruamel.yaml import YAML
 
+from frigate.config.onboarding import OnboardingConfig
 from frigate.const import REGEX_JSON
 from frigate.detectors import ModelConfig
 from frigate.detectors.detector_config import SceneEnum
@@ -634,6 +635,12 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=dict,
         title="Profiles",
         description="Named profile definitions with friendly names. Camera profiles must reference names defined here.",
+    )
+
+    onboarding: OnboardingConfig = Field(
+        default_factory=OnboardingConfig,
+        title="Onboarding",
+        description="First-time setup wizard state. Tracks whether the setup wizard has been completed or dismissed.",
     )
 
     active_profile: str | None = Field(
