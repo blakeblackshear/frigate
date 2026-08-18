@@ -204,8 +204,8 @@ You need to refer to **Configure hardware acceleration** above to enable the con
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `OpenVINO` and **Device** `GPU`
-2. On the same page, in the **Custom Model** tab, configure the model settings for OpenVINO:
+1. Navigate to <NavPath path="Settings > System > Detection models" /> and select **Intel GPU** from the **Hardware** dropdown
+2. On the same model, open the **Custom Model** tab and configure the model settings for OpenVINO:
 
 | Field                                    | Value                                      |
 | ---------------------------------------- | ------------------------------------------ |
@@ -270,7 +270,7 @@ services:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown.
 
 </TabItem>
 <TabItem value="yaml">

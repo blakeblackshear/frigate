@@ -75,7 +75,7 @@
     "systemTelemetry": "Telemetry",
     "systemBirdseye": "Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorsAndModel": "Detectors and model",
+    "systemDetectorsAndModel": "Detection models",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "go2rtc streams",
     "integrationSemanticSearch": "Semantic search",
@@ -1272,31 +1272,6 @@
       "error": "Failed to save config changes: {{errorMessage}}"
     }
   },
-  "detectorsAndModel": {
-    "title": "Detectors and model",
-    "description": "Configure the detector backend that runs object detection and the model it uses. Changes are saved together so the detector and model stay in sync.",
-    "cardTitles": {
-      "detector": "Detector Hardware",
-      "model": "Detection Model"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "Custom Model"
-    },
-    "mismatch": {
-      "warning": "The current Frigate+ model \"{{model}}\" requires the {{required}} detector. Pick a compatible model below or switch to Custom Model before saving."
-    },
-    "plusModel": {
-      "requiresDetector": "Requires: {{detector}}",
-      "noModelSelected": "Select a Frigate+ model"
-    },
-    "toast": {
-      "saveSuccess": "Detectors and model settings saved. Restart Frigate to apply changes.",
-      "saveError": "Failed to save detector and model settings"
-    },
-    "unsavedChanges": "Unsaved detector and model changes",
-    "restartRequired": "Restart required (detector or model changed)"
-  },
   "triggers": {
     "documentTitle": "Triggers",
     "semanticSearch": {
@@ -1616,16 +1591,6 @@
     "detect": {
       "title": "Detection Settings"
     },
-    "detectors": {
-      "title": "Detector Settings",
-      "singleType": "Only one {{type}} detector is allowed.",
-      "keyRequired": "Detector name is required.",
-      "keyDuplicate": "Detector name already exists.",
-      "noSchema": "No detector schemas are available.",
-      "none": "No detector instances configured.",
-      "add": "Add detector",
-      "addCustomKey": "Add custom key"
-    },
     "record": {
       "title": "Recording Settings"
     },
@@ -1943,6 +1908,7 @@
     "detect": {
       "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit.",
       "disabled": "Object detection is disabled. Snapshots, review items, and enrichments such as face recognition, license plate recognition, and Generative AI will not function.",
+      "sceneWithoutModel": "No detection model is configured for this scene, so this camera falls back to the model with a scene of 'All cameras'. Add a model for this scene to give the camera its own.",
       "resolutionShouldBeMultipleOfFour": "For best results, detect width and height should be multiples of 4. Other even values may produce visual artifacts or slight distortion in the detect stream.",
       "aspectRatioMismatch": "The width and height you've entered don't match the aspect ratio of your current detect resolution. This may produce a stretched or distorted image.",
       "maxFramesSet": "Setting max frames overrides default behavior and disables stationary object tracking. There are very few situations where this is needed, use with caution.",
@@ -1981,15 +1947,50 @@
     "snapshots": {
       "detectDisabled": "Object detection is disabled. Snapshots are generated from tracked objects and will not be created."
     },
-    "detectors": {
-      "mixedTypes": "All detectors must use the same type. Remove existing detectors to use a different type.",
-      "mixedTypesSuggestion": "All detectors must use the same type. Remove existing detectors or select {{type}}."
-    },
     "semanticSearch": {
       "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended."
     },
     "onvif": {
       "autotrackingNoZones": "Autotracking requires at least one zone. Define a zone for this camera in Masks / Zones, then set it as a required zone below."
+    }
+  },
+  "detectionModels": {
+    "title": "Detection models",
+    "description": "Configure the object detection models and the hardware each one runs on. Cameras choose a model by their scene in the camera's detect settings.",
+    "addModel": "Add model",
+    "cameras_one": "{{count}} camera",
+    "cameras_other": "{{count}} cameras",
+    "scene": {
+      "label": "Scene",
+      "description": "The environment this model is for. Cameras pick a model by setting the same scene in their detect settings, and the model with a scene of all is used by any camera that does not set one."
+    },
+    "scenes": {
+      "all": "All cameras",
+      "indoor": "Indoor",
+      "outdoor": "Outdoor",
+      "indoor_thermal": "Indoor thermal",
+      "outdoor_thermal": "Outdoor thermal"
+    },
+    "hardware": {
+      "label": "Hardware",
+      "placeholder": "Select hardware",
+      "loading": "Looking for detection hardware...",
+      "none": "No hardware selected",
+      "claimedBy": "used by {{scene}}",
+      "detectorCount": "Detectors",
+      "countRecommended_one": "Recommended for {{count}} camera",
+      "countRecommended_other": "Recommended for {{count}} cameras",
+      "unrecognized": "This model is configured for hardware that was not found on this system: {{devices}}",
+      "description": "The hardware this model runs its detection on.",
+      "detectorCountDescription": "How many detection processes to run on this hardware. More detectors keep up with more cameras, at the cost of extra device memory.",
+      "unitsDescription": "Each unit runs its own detection process. A unit already used by another model can not be selected."
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Custom Model"
+    },
+    "plusModel": {
+      "noModelSelected": "Select a Frigate+ model"
     }
   }
 }

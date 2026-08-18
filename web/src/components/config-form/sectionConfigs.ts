@@ -23,7 +23,6 @@ import birdseye from "./section-configs/birdseye";
 import classification from "./section-configs/classification";
 import database from "./section-configs/database";
 import detect from "./section-configs/detect";
-import detectors from "./section-configs/detectors";
 import environmentVars from "./section-configs/environment_vars";
 import faceRecognition from "./section-configs/face_recognition";
 import ffmpeg from "./section-configs/ffmpeg";
@@ -31,7 +30,7 @@ import genai from "./section-configs/genai";
 import live from "./section-configs/live";
 import logger from "./section-configs/logger";
 import lpr from "./section-configs/lpr";
-import model from "./section-configs/model";
+import models from "./section-configs/models";
 import motion from "./section-configs/motion";
 import mqtt from "./section-configs/mqtt";
 import networking from "./section-configs/networking";
@@ -76,8 +75,7 @@ export const sectionConfigs: Record<string, SectionConfigOverrides> = {
   logger,
   environment_vars: environmentVars,
   telemetry,
-  detectors,
-  model,
+  models,
   genai,
   classification,
 };

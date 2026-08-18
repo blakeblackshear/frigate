@@ -220,6 +220,26 @@ export function buildOverrides(
     ) {
       return undefined;
     }
+
+    // Same-length arrays get compared element by element rather than by
+    // identity, so an item carrying an explicit null where the base simply
+    // omits the key does not read as a change. `/api/config` serializes with
+    // exclude_none, so every nullable field a form materializes would
+    // otherwise look edited the moment the page opens.
+    if (Array.isArray(base) && base.length === current.length) {
+      const baseItems = base;
+      const defaultItems = Array.isArray(defaults) ? defaults : undefined;
+      const unchanged = current.every(
+        (item, index) =>
+          buildOverrides(item, baseItems[index], defaultItems?.[index]) ===
+          undefined,
+      );
+
+      if (unchanged) {
+        return undefined;
+      }
+    }
+
     return current;
   }
 

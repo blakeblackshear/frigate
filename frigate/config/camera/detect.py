@@ -62,10 +62,10 @@ class DetectConfig(FrigateBaseModel):
         title="Detect width",
         description="Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.",
     )
-    scene: SceneEnum | None = Field(
-        default=None,
+    scene: SceneEnum = Field(
+        default=SceneEnum.all,
         title="Detect scene",
-        description="The environment this camera looks at, used to pick which of the configured models runs on it. Defaults to the model with a scene of 'all'.",
+        description="The environment this camera looks at, used to pick which of the configured models runs on it. Cameras left on 'all' run the model configured with a scene of 'all'.",
     )
     fps: int = Field(
         default=5,
