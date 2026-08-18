@@ -5,7 +5,7 @@ import shutil
 import urllib.request
 import zipfile
 from queue import Queue
-from typing import Literal
+from typing import ClassVar, Literal
 
 import cv2
 import numpy as np
@@ -36,6 +36,9 @@ class MemryXDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(
         title="MemryX",
     )
+
+    # an accelerator can only be opened by one process
+    shareable: ClassVar[bool] = False
 
     type: Literal[DETECTOR_KEY]
     device: str = Field(

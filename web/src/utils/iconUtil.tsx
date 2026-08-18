@@ -56,8 +56,10 @@ export function getAttributeLabels(config?: FrigateConfig) {
 
   const labels = new Set();
 
-  Object.values(config.model.attributes_map).forEach((values) =>
-    values.forEach((label) => labels.add(label)),
+  config.models?.forEach((model) =>
+    Object.values(model.attributes_map ?? {}).forEach((values) =>
+      values.forEach((label) => labels.add(label)),
+    ),
   );
   return [...labels];
 }

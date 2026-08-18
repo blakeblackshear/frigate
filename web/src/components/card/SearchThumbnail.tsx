@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import useContextMenu from "@/hooks/use-contextmenu";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { isAttributeOfLabel } from "@/utils/modelUtil";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -58,9 +59,7 @@ export default function SearchThumbnail({
     }
 
     if (
-      config.model.attributes_map[searchResult.label]?.includes(
-        searchResult.sub_label,
-      )
+      isAttributeOfLabel(config, searchResult.label, searchResult.sub_label)
     ) {
       return searchResult.sub_label;
     }
@@ -82,9 +81,7 @@ export default function SearchThumbnail({
     }
 
     if (
-      config.model.attributes_map[searchResult.label]?.includes(
-        searchResult.sub_label,
-      )
+      isAttributeOfLabel(config, searchResult.label, searchResult.sub_label)
     ) {
       return "";
     }

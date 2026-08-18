@@ -3,11 +3,11 @@ import {
   SettingsGroupCard,
   SplitCardRow,
 } from "@/components/card/SettingsGroupCard";
-import type { FrigateConfig } from "@/types/frigateConfig";
+import type { DetectionModelConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
 
 type FrigatePlusCurrentModelSummaryProps = {
-  plusModel: FrigateConfig["model"]["plus"];
+  plusModel: DetectionModelConfig["plus"];
   action?: ReactNode;
 };
 

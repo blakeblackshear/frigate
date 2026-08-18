@@ -5,7 +5,19 @@ import threading
 
 from numpy import ndarray
 
-from frigate.detectors.detector_config import InputTensorEnum
+from frigate.detectors.detector_config import InputTensorEnum, ModelConfig
+
+
+def detection_frame_size(model: ModelConfig) -> int:
+    """Get the shared memory size a camera needs to hand frames to a model.
+
+    Args:
+        model: The model the camera runs on
+
+    Returns:
+        Size in bytes of one model input frame
+    """
+    return model.height * model.width * 3
 
 
 class RequestStore:

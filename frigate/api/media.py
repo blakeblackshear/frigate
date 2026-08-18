@@ -941,7 +941,7 @@ async def event_snapshot(
             timestamp_style=request.app.frigate_config.cameras[
                 event.camera
             ].timestamp_style,
-            colormap=request.app.frigate_config.model.colormap,
+            colormap=request.app.frigate_config.model_for_camera(event.camera).colormap,
         )
     except DoesNotExist:
         # see if the object is currently being tracked
