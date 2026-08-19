@@ -6,11 +6,13 @@ import logging
 import math
 import os
 import subprocess as sp
+import tempfile
 import time
+from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path as FilePath
-from typing import Any
+from typing import IO, Any
 from urllib.parse import unquote
 
 import cv2
@@ -47,6 +49,7 @@ from frigate.const import (
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
 from frigate.track.object_processing import TrackedObjectProcessor
+from frigate.util.ffmpeg import terminate_ffmpeg_stream
 from frigate.util.file import (
     get_event_snapshot_bytes,
     get_event_snapshot_path,
@@ -69,6 +72,12 @@ logger = logging.getLogger(__name__)
 # must match the patched MAX_CLIPS in docker/main/build_nginx.sh; a
 # normal hour needs ~360, one clip per recording file
 NGINX_VOD_MAX_CLIPS = 1080
+
+# tail of ffmpeg's stderr kept for the clip download failure log
+CLIP_STDERR_LOG_BYTES = 8192
+
+# how long a drained clip download waits for ffmpeg to exit on its own
+CLIP_FFMPEG_EXIT_TIMEOUT = 10
 
 
 class VodStreamPreference(str, Enum):
@@ -465,6 +474,53 @@ async def submit_recording_snapshot_to_plus(
         )
 
 
+def _read_stderr_tail(stderr_file: IO[bytes]) -> str:
+    """Read back the last CLIP_STDERR_LOG_BYTES of a captured stderr file."""
+    stderr_file.seek(0, os.SEEK_END)
+    stderr_file.seek(max(0, stderr_file.tell() - CLIP_STDERR_LOG_BYTES))
+    return stderr_file.read().decode("utf-8", "replace")
+
+
+def _run_clip_download(ffmpeg_cmd: list[str], file_path: str) -> Iterator[bytes]:
+    """Stream an ffmpeg concat remux to the client, always cleaning up after it."""
+    stderr_file = None
+    ffmpeg = None
+
+    try:
+        stderr_file = tempfile.TemporaryFile()
+        ffmpeg = sp.Popen(ffmpeg_cmd, stdout=sp.PIPE, stderr=stderr_file)
+
+        while True:
+            data = ffmpeg.stdout.read(8192)
+
+            if not data:
+                break
+
+            yield data
+
+        try:
+            # wait rather than signal, so the real exit code survives
+            ffmpeg.wait(timeout=CLIP_FFMPEG_EXIT_TIMEOUT)
+        except sp.TimeoutExpired:
+            pass
+    finally:
+        if ffmpeg is not None:
+            # read before terminating: a None here is our teardown, not a failure
+            exit_code = ffmpeg.poll()
+            terminate_ffmpeg_stream(ffmpeg)
+
+            if exit_code:
+                logger.error(
+                    "Failed to generate clip, ffmpeg logs: %s",
+                    _read_stderr_tail(stderr_file),
+                )
+
+        if stderr_file is not None:
+            stderr_file.close()
+
+        FilePath(file_path).unlink(missing_ok=True)
+
+
 @router.get(
     "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4",
     dependencies=[Depends(require_camera_access)],
@@ -476,26 +532,6 @@ async def recording_clip(
     start_ts: float,
     end_ts: float,
 ):
-    def run_download(ffmpeg_cmd: list[str], file_path: str):
-        with sp.Popen(
-            ffmpeg_cmd,
-            stderr=sp.PIPE,
-            stdout=sp.PIPE,
-            text=False,
-        ) as ffmpeg:
-            while True:
-                data = ffmpeg.stdout.read(8192)
-                if data is not None and len(data) > 0:
-                    yield data
-                else:
-                    if ffmpeg.returncode and ffmpeg.returncode != 0:
-                        logger.error(
-                            f"Failed to generate clip, ffmpeg logs: {ffmpeg.stderr.read()}"
-                        )
-                    else:
-                        FilePath(file_path).unlink(missing_ok=True)
-                    break
-
     def get_clip_query(stream_type: str):
         return (
             Recordings.select(
@@ -529,7 +565,9 @@ async def recording_clip(
             status_code=400,
         )
 
-    file_name = sanitize_filename(f"playlist_{camera_name}_{start_ts}-{end_ts}.txt")
+    file_name = sanitize_filename(
+        f"playlist_{camera_name}_{start_ts}-{end_ts}_{os.urandom(4).hex()}.txt"
+    )
     file_path = os.path.join(CACHE_DIR, file_name)
     with open(file_path, "w") as file:
         clip: Recordings
@@ -577,7 +615,7 @@ async def recording_clip(
     ]
 
     return StreamingResponse(
-        run_download(ffmpeg_cmd, file_path),
+        _run_clip_download(ffmpeg_cmd, file_path),
         media_type="video/mp4",
     )
 
