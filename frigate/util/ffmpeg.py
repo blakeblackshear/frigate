@@ -24,6 +24,25 @@ def stop_ffmpeg(ffmpeg_process: sp.Popen[Any], logger: logging.Logger):
     ffmpeg_process = None
 
 
+def terminate_ffmpeg_stream(proc: sp.Popen[Any]) -> None:
+    """Stop an ffmpeg process whose stdout is being read over a pipe."""
+    # Close the read end first so a blocked ffmpeg write unblocks (ffmpeg then
+    # sees a broken pipe), then signal it. The resulting ffmpeg write error is
+    # harmless and goes to the captured stderr.
+    if proc.stdout is not None:
+        try:
+            proc.stdout.close()
+        except OSError:
+            pass
+    if proc.poll() is None:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except sp.TimeoutExpired:
+            proc.kill()
+            proc.wait()
+
+
 def start_or_restart_ffmpeg(
     ffmpeg_cmd, logger, logpipe: LogPipe, frame_size=None, ffmpeg_process=None
 ) -> sp.Popen[Any]:
