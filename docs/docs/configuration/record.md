@@ -114,6 +114,18 @@ This configuration will retain recording segments that overlap with alerts and d
 
 **WARNING**: Recordings still must be enabled in the config. If a camera has recordings disabled in the config, enabling via the methods listed above will have no effect.
 
+### Image Previews
+
+The following settings control how long image previews are retained.  Previews are retained for the longer of the two time periods.
+```yaml
+record:
+  continuous:
+    days: 3  <--- This is the larger value, so it controls the preview retention period.
+  motion:
+    days: 2
+```
+Past this time window, previews are only kept for the hours that still have alert or detection recordings.
+
 ## Can I have "continuous" recordings, but only at certain times?
 
 Using Frigate UI, Home Assistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
