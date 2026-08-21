@@ -1,1 +1,72 @@
-{}
+{
+    "documentTitle": "Чат - Frigate",
+    "title": "Чат Frigate",
+    "subtitle": "Ваш ИИ-помощник для управления камерами и аналитики",
+    "placeholder": "Спросите что угодно…",
+    "error": "Что-то пошло не так. Попробуйте ещё раз.",
+    "processing": "Обработка…",
+    "toolsUsed": "Использовано: {{tools}}",
+    "showTools": "Показать инструменты ({{count}})",
+    "hideTools": "Скрыть инструменты",
+    "call": "Вызов",
+    "result": "Результат",
+    "arguments": "Аргументы:",
+    "response": "Ответ:",
+    "attachment_chip_label": "{{label}} на {{camera}}",
+    "attachment_chip_remove": "Удалить вложение",
+    "open_in_explore": "Открыть в Поиске событий",
+    "attach_event_aria": "Прикрепить событие {{eventId}}",
+    "attachment_picker_paste_label": "Или вставьте ID события",
+    "attachment_picker_attach": "Прикрепить",
+    "attachment_picker_placeholder": "Прикрепить событие",
+    "quick_reply_find_similar": "Найти похожие",
+    "quick_reply_tell_me_more": "Расскажи подробнее",
+    "quick_reply_when_else": "Когда ещё это видели?",
+    "quick_reply_find_similar_text": "Найди похожие появления этого объекта.",
+    "quick_reply_tell_me_more_text": "Расскажи подробнее об этом.",
+    "quick_reply_when_else_text": "Когда ещё это появлялось?",
+    "anchor": "Образец",
+    "similarity_score": "Сходство",
+    "no_similar_objects_found": "Похожие объекты не найдены.",
+    "semantic_search_required": "Для поиска похожих объектов должен быть включён семантический поиск.",
+    "send": "Отправить",
+    "suggested_requests": "Попробуйте спросить:",
+    "starting_requests": {
+        "show_recent_events": "Показать недавние события",
+        "show_camera_status": "Показать статус камер",
+        "recap": "Что произошло, пока меня не было?",
+        "watch_camera": "Следить за активностью на камере"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "Покажи недавние события за последний час",
+        "show_camera_status": "Какой сейчас статус моих камер?",
+        "recap": "Что произошло, пока меня не было?",
+        "watch_camera": "Следи за входной дверью и сообщи, если кто-нибудь появится"
+    },
+    "new_chat": "Новый чат",
+    "settings": {
+        "title": "Настройки чата",
+        "show_stats": {
+            "title": "Показывать статистику",
+            "desc": "Показывать скорость генерации и размер контекста для ответов чата.",
+            "while_generating": "Во время генерации",
+            "always": "Всегда"
+        },
+        "auto_scroll": {
+            "title": "Автопрокрутка",
+            "desc": "Следовать за новыми сообщениями по мере их появления."
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} токенов",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Думает…",
+        "show": "Показать рассуждения",
+        "hide": "Скрыть рассуждения"
+    },
+    "thinking": {
+        "toggle": "Режим рассуждений"
+    }
+}

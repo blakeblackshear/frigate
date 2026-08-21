@@ -119,7 +119,9 @@
       "noCameras": "Нет доступных камер",
       "detectionCount_one": "{{count}} отслеживаемый объект",
       "detectionCount_few": "{{count}} отслеживаемых объекта",
-      "detectionCount_many": "{{count}} отслеживаемых объектов"
+      "detectionCount_many": "{{count}} отслеживаемых объектов",
+      "nameLabel": "экспортируемое имя",
+      "namePlaceholder": "Необязательное базовое имя для экспорта"
     }
   },
   "streaming": {
