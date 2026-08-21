@@ -143,7 +143,7 @@
     "unsuspended": "Atnaujinti",
     "play": "Groti",
     "unselect": "Atžymėti",
-    "export": "Eksportuoti",
+    "export": "Sukurti išrašą",
     "deleteNow": "Trinti Dabar",
     "next": "Kitas",
     "off": "OFF",
@@ -253,7 +253,7 @@
     },
     "review": "Peržiūros",
     "explore": "Iškoti",
-    "export": "Eksportuoti",
+    "export": "Išrašas",
     "faceLibrary": "Veidų Biblioteka",
     "user": {
       "title": "Vartotojas",

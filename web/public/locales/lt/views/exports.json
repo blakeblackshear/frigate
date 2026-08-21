@@ -1,30 +1,32 @@
 {
   "search": "Paieška",
-  "documentTitle": "Eksportuoti - Frigate",
-  "noExports": "Eksportuotų įrašų nerasta",
-  "deleteExport": "Ištrinti Eksportuotą Įrašą",
+  "documentTitle": "Išrašai - Frigate",
+  "noExports": "Išrašų nerasta",
+  "deleteExport": {
+    "label": "Ištrinti Išrašą"
+  },
   "deleteExport.desc": "Esate įsitikinę, kad norite ištrinti {{exportName}}?",
   "editExport": {
-    "title": "Pervadinti Eksportuojamą įrašą",
-    "desc": "Įveskite nauja pavadinimą šiam eksportuojamam įrašui.",
-    "saveExport": "Išsaugoti Eksportuojamą Įrašą"
+    "title": "Pervadinti Išrašą",
+    "desc": "Įveskite nauja pavadinimą šiam išrašui.",
+    "saveExport": "Išsaugoti Išrašą"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Nepavyko pervadinti eksportuojamo įrašo: {{errorMessage}}",
+      "renameExportFailed": "Nepavyko pervadinti išrašo: {{errorMessage}}",
       "assignCaseFailed": "Nepavyko atnaujinti atvėjo užduoties: {{errorMessage}}"
     }
   },
   "tooltip": {
-    "shareExport": "Pasidalinti įrašu",
+    "shareExport": "Pasidalinti Išrašu",
     "downloadVideo": "Atsisiųsti video",
     "editName": "Koreguoti pavadinimą",
-    "deleteExport": "Ištrinti eksportus",
+    "deleteExport": "Ištrinti Išrašą",
     "assignToCase": "Pridėti prie atvėjo"
   },
   "headings": {
     "cases": "Atvėjai",
-    "uncategorizedExports": "Nekategorizuoti eksportai"
+    "uncategorizedExports": "Nekategorizuoti Išrašai"
   },
   "caseDialog": {
     "title": "Pridėti prie atvėjo",
@@ -33,5 +35,54 @@
     "descriptionLabel": "Aprašymas",
     "nameLabel": "Atvėjo pavadinimas",
     "description": "Pasirinkite jau egzisutojantį atvėjį arba sukurkite naują."
+  },
+  "toolbar": {
+    "addExport": "Pridėti Išrašą"
+  },
+  "deleteCase": {
+    "descKeepExports": "Išrašai liks prieinami kaip nekategorizuoti.",
+    "descDeleteExports": "Šioje kolekcijoje visi išrašai bus ištrinti negrįžtamai.",
+    "deleteExports": "Taip pat ištrinti išrašus"
+  },
+  "caseCard": {
+    "emptyCase": "Dar nėra išrašų"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} išrašas"
+  },
+  "caseView": {
+    "exportCount_one": "1 išrašas",
+    "exportCount_other": "{{count}} išrašų",
+    "emptyDescription": "Pridėkite nekategorizuotus išrašus į kolekciją.",
+    "emptyDescriptionNoExports": "Nėra nekategorizuotų išrašų."
+  },
+  "addExportDialog": {
+    "title": "Pridėti Išrašus į {{caseName}}",
+    "searchPlaceholder": "Ieškoti nekategorizuotų išrašų",
+    "empty": "Nėra nekategorizuotų išrašų atitinkančių paiešką.",
+    "addButton_one": "Pridėti 1 Išrašą",
+    "addButton_other": "Pridėti {{count}} išrašus",
+    "adding": "Pridedami..."
+  },
+  "bulkDelete": {
+    "title": "Trinti Išrašus",
+    "desc_one": "Esate įsitikine kad norite ištrinti {{count}} išrašą?",
+    "desc_other": "Esate įsitikine kad norite ištrinti {{count}} išrašus?"
+  },
+  "bulkRemoveFromCase": {
+    "desc_one": "Išimti {{count}} išrašą iš kolekcijos?",
+    "desc_other": "Ištrinti {{count}} išrašus iš kolekcijos?",
+    "descKeepExports": "Išrašai bus perkelti prie nekategorizuotų.",
+    "descDeleteExports": "Išrašai bus ištrinti negrįžtamai.",
+    "deleteExports": "Kaip alternatyva trinti išrašus"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Sėkmingai ištrinti išrašai",
+      "remove": "Iš kolekcijos sėkmingai pašalinti išrašai"
+    },
+    "error": {
+      "deleteFailed": "Nepavyko ištrinti išrašų: {{errorMessage}}"
+    }
   }
 }

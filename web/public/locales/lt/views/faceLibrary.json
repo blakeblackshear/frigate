@@ -33,7 +33,8 @@
       "addFaceLibrary": "{{name}} vardas buvo sėkmingai pridėtas į Veidų Katalogą!",
       "renamedFace": "Sėkmingai veidas pervadintas į {{name}}",
       "trainedFace": "Veidas apmokytas sėkmingai.",
-      "updatedFaceScore": "Veido balas atnaujintas sėkmingai į {{name}} {{score}}."
+      "updatedFaceScore": "Veido balas atnaujintas sėkmingai į {{name}} {{score}}.",
+      "reclassifiedFace": "Sėkmingai perklasifikuotas veidas."
     },
     "error": {
       "uploadingImageFailed": "Nepavyko įkelti nuotraukos: {{errorMessage}}",
@@ -42,7 +43,8 @@
       "deleteNameFailed": "Vardo ištrinti nepavyko: {{errorMessage}}",
       "renameFaceFailed": "Nepavyko pervardinti veido: {{errorMessage}}",
       "trainFailed": "Nepavyko apmokinti: {{errorMessage}}",
-      "updateFaceScoreFailed": "Veido balų atnaujinti nepavyko: {{errorMessage}}"
+      "updateFaceScoreFailed": "Veido balų atnaujinti nepavyko: {{errorMessage}}",
+      "reclassifyFailed": "Veido perklasifikuoti nepavyko: {{errorMessage}}"
     }
   },
   "createFaceLibrary": {
@@ -73,7 +75,11 @@
     "title": "Pastarieji Atpažinimai",
     "aria": "Pasirinkti pastaruosius atpažinimus",
     "empty": "Pastaruoju metu nebuvo atliktas veidų atpažinimas",
-    "titleShort": "Paskutiniai"
+    "titleShort": "Paskutiniai",
+    "emptyNoLibrary": {
+      "title": "Įkelti veido nuotrauką",
+      "description": "Privalote pridėti bent vieną nuotrauką į kolekciją kad veiktų veidų atpažinimas."
+    }
   },
   "selectFace": "Pasirinkti Veidą",
   "renameFace": {
@@ -99,5 +105,7 @@
   "nofaces": "Nėra veidų",
   "pixels": "{{area}}px",
   "trainFaceAs": "Apmokyti Veidą kaip:",
-  "trainFace": "Apmokyti Veidą"
+  "trainFace": "Apmokyti Veidą",
+  "reclassifyFaceAs": "Perklasifikuoti Veidą kaip:",
+  "reclassifyFace": "Perklasifikuoti Veidą"
 }

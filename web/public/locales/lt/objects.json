@@ -116,5 +116,16 @@
   "nzpost": "NZPost",
   "postnord": "PostNord",
   "gls": "GLS",
-  "dpd": "DPD"
+  "dpd": "DPD",
+  "canada_post": "Canados Paštas",
+  "royal_mail": "Karališkasis paštas",
+  "school_bus": "Mokyklos Autobusas",
+  "skunk": "Skunkas",
+  "kangaroo": "Kengura",
+  "baby": "Vaikas",
+  "baby_stroller": "Vaiko Vežimėlis",
+  "rickshaw": "Rikša",
+  "rodent": "Griaužikas",
+  "possum": "Oposumas",
+  "garbage_truck": "Šiukšliavežė"
 }
