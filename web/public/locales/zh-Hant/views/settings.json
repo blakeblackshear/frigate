@@ -620,7 +620,7 @@
         "webuiUrlHelp": "可從「偵錯」檢視中直接造訪攝影機網頁介面的網址。留空以停用此連結。",
         "webuiUrlInvalid": "必須是有效的網址（例如：https://example.com）。",
         "dashboardLabel": "在即時儀表板上顯示",
-        "dashboardHelp": "在即時儀表板上顯示此攝影機。",
+        "dashboardHelp": "將此攝影機顯示在預設的「所有攝影機」直播儀表板上。它仍會保留在其他位置（包含攝影機群組）的可用狀態。",
         "reviewLabel": "在審查中顯示",
         "reviewHelp": "在「審查」中顯示此攝影機，包括攝影機篩選器、移動審查以及歷史檢視。"
       }
@@ -1961,7 +1961,8 @@
       "inputDimensionsNotDetectResolution": "模型輸入的寬度與高度是物件偵測模型的輸入尺寸，而不是攝影機的偵測解析度。它們應該與您使用的模型尺寸相符 — 通常是像 320x320 或 640x640 這樣的正方形尺寸。"
     },
     "ffmpeg": {
-      "hwaccelManualNotRecommended": "不建議手動設定硬體加速參數。除非有特殊需求，否則請選擇符合您硬體的預設組態。"
+      "hwaccelManualNotRecommended": "不建議手動設定硬體加速參數。除非有特殊需求，否則請選擇符合您硬體的預設組態。",
+      "inputsMissingGo2rtcStream": "下方輸入的項目指向一個已不存在的 go2rtc 重播串流（restream）。請選擇一個現有的重播串流或手動輸入攝影機的 URL，否則此攝影機將無法連線。"
     },
     "onvif": {
       "autotrackingNoZones": "自動追蹤至少需要一個區域。請先在「遮罩 / 區域」中為此攝影機定義一個區域，然後在下方將其設定為必要區域。"
