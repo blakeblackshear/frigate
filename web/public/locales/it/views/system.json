@@ -168,7 +168,22 @@
       "tips": {
         "title": "Informazioni analisi telecamera"
       },
-      "aspectRatio": "rapporto d'aspetto"
+      "aspectRatio": "rapporto d'aspetto",
+      "keyframes": {
+        "title": "Analisi fotogramma chiave",
+        "analyzing": "Analisi dei fotogrammi chiave in corso... {{seconds}} secondi rimanenti",
+        "stillAnalyzing": "Analisi dei fotogrammi chiave ancora in corso...",
+        "recordStream": "Flusso di trasmissione:",
+        "keyframeCount": "Fotogrammi chiave rilevati:",
+        "observedDuration": "Durata osservata:",
+        "gap": "Intervallo fotogramma chiave (min / media / max):",
+        "segmentLength": "Lunghezza segmento di registrazione:",
+        "ok": "Fotogramma chiave ogni ~{{seconds}}s, ottimale per registrazione e riproduzione.",
+        "warning": "Fotogrammi chiave radi o variabili (intervallo massimo ~{{seconds}}s), probabile uso di codec intelligenti (H.264+/H.265+); configurazione non consigliata.",
+        "error": "L'intervallo tra i fotogrammi chiave (~{{seconds}}s) supera la lunghezza del segmento di registrazione ({{segmentTime}}s). Alcuni segmenti potrebbero non contenere fotogrammi chiave, compromettendo la riproduzione. Disabilita il codec intelligente/+ sulla telecamera o riduci l'intervallo dei fotogrammi chiave.",
+        "unknown": "Impossibile determinare la spaziatura dei fotogrammi chiave.",
+        "recordDisabled": "La registrazione è disabilitata per questa telecamera."
+      }
     },
     "title": "Telecamere",
     "overview": "Sommario",

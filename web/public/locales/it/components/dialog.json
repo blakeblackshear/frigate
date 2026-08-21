@@ -36,11 +36,14 @@
           "ask_a": "Questo oggetto è un <code>{{label}}</code>?",
           "ask_an": "Questo oggetto è un <code>{{label}}</code>?",
           "ask_full": "Questo oggetto è un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "toast": {
+          "error": "Invio a Frigate+ non riuscito. Verifica la connessione di rete e riprova."
         }
       }
     },
     "video": {
-      "viewInHistory": "Visualizza in Storico"
+      "viewInHistory": "Visualizza nella Cronologia"
     }
   },
   "export": {
@@ -66,7 +69,8 @@
       "error": {
         "failed": "Impossibile mettere in coda l'esportazione: {{error}}",
         "endTimeMustAfterStartTime": "L'ora di fine deve essere successiva all'ora di inizio",
-        "noVaildTimeSelected": "Nessun intervallo di tempo valido selezionato"
+        "noVaildTimeSelected": "Nessun intervallo di tempo valido selezionato",
+        "noValidTimeSelected": "Nessun intervallo temporale valido selezionato"
       },
       "view": "Visualizzazione",
       "queued": "Esportazione in coda. Visualizza lo stato di avanzamento nella pagina delle esportazioni.",
@@ -119,7 +123,14 @@
       "queueingButton": "Accodamento delle esportazioni...",
       "exportButton_one": "Esporta 1 telecamera",
       "exportButton_many": "Esporta {{count}} telecamere",
-      "exportButton_other": "Esporta {{count}} telecamere"
+      "exportButton_other": "Esporta {{count}} telecamere",
+      "searchOrSelectGroup": "Cerca, o seleziona un gruppo di telecamere...",
+      "selectAll": "Seleziona tutte le telecamere",
+      "clearSelection": "Annulla selezione",
+      "selectWithActivity": "Telecamere con oggetti tracciati",
+      "selectGroup": "Seleziona gruppo",
+      "noMatchingCameras": "Nessuna telecamera corrisponde alla tua ricerca",
+      "selectedCount": "Selezionati {{selected}} su {{total}}"
     },
     "multi": {
       "title_one": "Esporta 1 revisione",

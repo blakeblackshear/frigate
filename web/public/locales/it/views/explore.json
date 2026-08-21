@@ -179,8 +179,8 @@
       "aria": "Scarica istantanea"
     },
     "viewInHistory": {
-      "label": "Visualizza in Storico",
-      "aria": "Visualizza in Storico"
+      "label": "Visualizza nella Cronologia",
+      "aria": "Visualizza nella Cronologia"
     },
     "deleteTrackedObject": {
       "label": "Elimina questo oggetto tracciato"
@@ -224,8 +224,8 @@
       "aria": "Scarica istantanea pulita"
     },
     "debugReplay": {
-      "label": "Riproduzione di correzioni",
-      "aria": "Visualizza questo oggetto tracciato nella vista di riproduzione di correzioni"
+      "label": "Riproduzione correzioni",
+      "aria": "Visualizza questo oggetto tracciato nella vista di riproduzione correzioni"
     },
     "more": {
       "aria": "Altri"
@@ -233,7 +233,7 @@
   },
   "dialog": {
     "confirmDelete": {
-      "desc": "L'eliminazione di questo oggetto tracciato rimuove l'istantanea, eventuali incorporamenti salvati e tutte le voci associate ai dettagli di tracciamento. Il filmato registrato di questo oggetto tracciato nella vista Storico <em>NON</em> verrà eliminato.<br /><br />Vuoi davvero procedere?",
+      "desc": "L'eliminazione di questo oggetto tracciato rimuove l'istantanea, eventuali incorporamenti salvati e tutte le voci associate ai dettagli di tracciamento. Il filmato registrato di questo oggetto tracciato nella vista della Cronologia <em>NON</em> verrà eliminato.<br /><br />Vuoi davvero procedere?",
       "title": "Conferma eliminazione"
     },
     "toast": {
@@ -303,7 +303,7 @@
       },
       "offset": {
         "label": "Differenza annotazione",
-        "desc": "Questi dati provengono dal flusso di rilevamento della telecamera, ma vengono sovrapposti alle immagini del flusso di registrazione. È improbabile che i due flussi siano perfettamente sincronizzati. Di conseguenza, il riquadro di delimitazione e il filmato non saranno perfettamente allineati. È possibile utilizzare questa impostazione per spostare le annotazioni in avanti o indietro nel tempo per allinearle meglio al filmato registrato.",
+        "desc": "Questi dati provengono dal flusso di rilevamento della telecamera, ma vengono sovrapposti alle immagini del flusso di registrazione. È improbabile che i due flussi siano perfettamente sincronizzati. Di conseguenza, il riquadro di delimitazione e il video non saranno perfettamente allineati. È possibile utilizzare questa impostazione per spostare le annotazioni in avanti o indietro nel tempo per allinearle meglio al video registrato.",
         "millisecondsToOffset": "Millisecondi per compensare il rilevamento delle annotazioni. <em>Predefinito: 0</em>",
         "tips": "Ridurre il valore se la riproduzione video è in anticipo rispetto ai riquadri e ai punti del percorso, e aumentarlo se la riproduzione video è in ritardo rispetto ad essi. Questo valore può essere negativo.",
         "toast": {

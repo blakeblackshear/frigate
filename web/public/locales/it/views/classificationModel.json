@@ -192,7 +192,20 @@
     "title": "Modifica modello di classificazione",
     "descriptionState": "Modifica le classi per questo modello di classificazione dello stato. Le modifiche richiederanno un nuovo addestramento del modello.",
     "descriptionObject": "Modifica il tipo di oggetto e il tipo di classificazione per questo modello di classificazione degli oggetti.",
-    "stateClassesInfo": "Nota: la modifica delle classi di stato richiede il riaddestramento del modello con le classi aggiornate."
+    "stateClassesInfo": "Modello aggiornato. Riaddestra il modello affinché le modifiche alle classi abbiano effetto.",
+    "enabled": "Abilitato",
+    "enabledDesc": "Esegui questo modello. Quando disabilitato, il modello si arresta e non effettua più classificazioni.",
+    "saveAttempts": "Salvataggio Tentativi",
+    "saveAttemptsDesc": "Numero di immagini dei tentativi di classificazione da conservare per l'interfaccia delle classificazioni recenti.",
+    "motion": "Esegui su movimento",
+    "motionDesc": "Esegui la classificazione quando viene rilevato un movimento all'interno del ritaglio configurato.",
+    "interval": "Intervallo",
+    "intervalDesc": "Secondi tra le esecuzioni periodiche della classificazione. Lascia vuoto per eseguire solo su movimento.",
+    "intervalPlaceholder": "Nessun intervallo",
+    "errors": {
+      "saveAttemptsInvalid": "I tentativi salvati devono essere un numero intero pari a 0 o superiore",
+      "intervalInvalid": "L'intervallo deve essere un numero intero maggiore di 0"
+    }
   },
   "tooltip": {
     "trainingInProgress": "Il modello è attualmente in addestramento",
@@ -202,5 +215,6 @@
   },
   "none": "Nessuno",
   "reclassifyImageAs": "Riclassifica immagine come:",
-  "reclassifyImage": "Riclassifica immagine"
+  "reclassifyImage": "Riclassifica immagine",
+  "disabled": "Disabilitato"
 }
