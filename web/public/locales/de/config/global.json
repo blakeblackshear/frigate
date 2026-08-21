@@ -539,7 +539,7 @@
             },
             "network_bandwidth": {
                 "label": "Netzwerk Bandbreite",
-                "description": "Aktivieren Sie die prozessbezogene Überwachung der Netzwerkbandbreite für Kamera-FFmpeg-Prozesse und Detektoren (erfordert entsprechende Funktionen)."
+                "description": "Prozessbezogene Überwachung der Netzwerkbandbreite für Kamera-FFmpeg-Prozesse und Detektoren aktivieren (erfordert entsprechende Funktionen)."
             },
             "intel_gpu_device": {
                 "label": "Intel GPU",
@@ -1402,7 +1402,7 @@
                 "description": "Maximale Anzahl der gleichzeitig zu verarbeitenden Exportaufträge."
             },
             "chapters": {
-                "label": "Kapitel-Metadaten zur Einbettung in exportierte Aufzeichnungen"
+                "label": "Kapitel-Metadaten, die in exportierte Aufzeichnungen eingebettet werden sollen"
             }
         },
         "preview": {

@@ -56,9 +56,9 @@
   },
   "deleteModel": {
     "title": "Klassifizierungsmodell löschen",
-    "single": "Möchten Sie {{name}} wirklich löschen? Dadurch werden alle zugehörigen Daten, einschließlich Bilder und Trainingsdaten, dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
-    "desc_one": "Möchtest du {{count}} Modell wirklich löschen? Dadurch werden alle zugehörigen Daten, einschließlich Bilder und Trainingsdaten, dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
-    "desc_other": "Möchtest du {{count}} Modelle wirklich löschen? Dadurch werden alle zugehörigen Daten, einschließlich Bilder und Trainingsdaten, dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
+    "single": "{{name}} wirklich löschen? Dadurch werden alle zugehörigen Daten, einschließlich Bilder und Trainingsdaten, dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "desc_one": "{{count}} Modell wirklich löschen? Dadurch werden alle zugehörigen Daten, einschließlich Bilder und Trainingsdaten, dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "desc_other": "{{count}} Modelle wirklich löschen? Dadurch werden alle zugehörigen Daten, einschließlich Bilder und Trainingsdaten, dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "edit": {
     "title": "Klassifikationsmodell bearbeiten",
@@ -75,19 +75,19 @@
     "intervalDesc": "Sekundenabstand zwischen regelmäßigen Klassifizierungsläufen. Leer lassen, um die Klassifizierung nur bei Bewegung auszuführen.",
     "intervalPlaceholder": "Kein Intervall",
     "errors": {
-      "saveAttemptsInvalid": "Sparversuche müssen eine ganze Zahl von 0 oder mehr sein",
-      "intervalInvalid": "Intervall muss eine ganze Nummer sein größer als 0"
+      "saveAttemptsInvalid": "Die Anzahl der Speicherversuche muss eine ganze Zahl sein, die größer oder gleich 0 ist",
+      "intervalInvalid": "Intervall muss eine ganze Zahl sein, die größer als 0 ist"
     }
   },
   "deleteDatasetImages": {
     "title": "Datensatz Bilder löschen",
-    "desc_one": "Bist du sicher, dass {{count}} Bild von {{dataset}} gelöscht werden sollen? Diese Aktion kann nicht rückgängig gemacht werden und erfordert ein erneutes Trainieren des Modells.",
-    "desc_other": "Bist du sicher, dass {{count}} Bilder von {{dataset}} gelöscht werden sollen? Diese Aktion kann nicht rückgängig gemacht werden und erfordert ein erneutes Trainieren des Modells."
+    "desc_one": "Wirklich {{count}} Bild von {{dataset}} löschen? Diese Aktion kann nicht rückgängig gemacht werden und erfordert ein erneutes Trainieren des Modells.",
+    "desc_other": "Wirklich {{count}} Bilder von {{dataset}} löschen? Diese Aktion kann nicht rückgängig gemacht werden und erfordert ein erneutes Trainieren des Modells."
   },
   "deleteTrainImages": {
     "title": "Trainingsbilder löschen",
-    "desc_one": "Bist du sicher, dass du {{count}} Bild löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-    "desc_other": "Bist du sicher, dass du {{count}} Bilder löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+    "desc_one": "Wirklich {{count}} Bild löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "desc_other": "Wirklich {{count}} Bilder löschen? Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "renameCategory": {
     "title": "Klasse umbenennen",
@@ -98,7 +98,7 @@
   },
   "train": {
     "title": "Neue Klassifizierungen",
-    "titleShort": "frisch",
+    "titleShort": "Neu",
     "aria": "Neue Klassifizierungen auswählen"
   },
   "categories": "Klassen",

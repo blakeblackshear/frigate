@@ -1383,7 +1383,7 @@
         "webuiUrlHelp": "URL, um die Web-Benutzeroberfläche der Kamera direkt aus der Debug-Ansicht aufzurufen. Lassen Sie das Feld leer, um den Link zu deaktivieren.",
         "webuiUrlInvalid": "Es muss sich um eine gültige URL handeln (z. B. https://example.com).",
         "dashboardLabel": "Im Live-Dashboard anzeigen",
-        "dashboardHelp": "Zeige diese Kamera auf dem Standard Alle Kameras live dashboard. Es bleibt überall verfügbar, einschließlich Kameragruppen.",
+        "dashboardHelp": "Diese Kamera im Standard Dashboard \"Alle Live Kameras\" anzeigen. Sie bleibt überall sonst verfügbar einschließlich Kameragruppen.",
         "reviewLabel": "In der Überprüfung anzeigen",
         "reviewHelp": "Zeige diese Kamera in der Übersicht an, einschließlich des Kamerafilters, der Bewegungsübersicht und der Verlaufsansicht."
       },
@@ -1608,8 +1608,8 @@
     "overriddenInCameras": {
       "label_one": "In {{count}} Kamera überschrieben",
       "label_other": "In {{count}} Kameras überschrieben",
-      "tooltip_one": "Die Kamera mit der Nummer {{count}} überschreibt die Werte in diesem Abschnitt. Klicken Sie hier, um Details anzuzeigen.",
-      "tooltip_other": "Die Kamera mit der Nummer {{count}} überschreibt die Werte in diesem Abschnitt. Klicken Sie hier, um Details anzuzeigen.",
+      "tooltip_one": "Die Kamera mit der Nummer {{count}} überschreibt die Werte in diesem Abschnitt. Hier klicken, um Details anzuzeigen.",
+      "tooltip_other": "{{count}} Kameras überschreiben die Werte in diesem Abschnitt. Hier klicken, um Details anzuzeigen.",
       "heading_one": "Dieser globale Abschnitt enthält Felder, die in {{count}} Kamera überschrieben werden.",
       "heading_other": "Dieser globale Abschnitt enthält Felder, die bei {{count}} Kameras überschrieben werden.",
       "othersField_one": "{{count}} andere",
@@ -1721,13 +1721,13 @@
       "valueLabel": "Wert",
       "keyPlaceholder": "Neuer Schlüssel",
       "remove": "Entfernen",
-      "providerNameLabel": "Name des Anbieters",
-      "providerNamePlaceholder": "z.B. openai",
-      "variableNameLabel": "Variabler Name",
+      "providerNameLabel": "Anbietername",
+      "providerNamePlaceholder": "z. B. openai",
+      "variableNameLabel": "Variablenname",
       "variableNamePlaceholder": "z.B. MY_VARIABLE",
       "loggerNameLabel": "Name des Loggers",
       "loggerNamePlaceholder": "z.B. frigate.record",
-      "keyPatternError": "Verwenden Sie nur Buchstaben, Zahlen, Bindestriche und Unterstriche (keine Leerzeichen)"
+      "keyPatternError": "Verwende nur Buchstaben, Zahlen, Bindestriche und Unterstriche (keine Leerzeichen)"
     },
     "timezone": {
       "defaultOption": "Zeitzone des Browsers verwenden"
@@ -2142,7 +2142,8 @@
       "autotrackingNoZones": "Für die automatische Verfolgung ist mindestens eine Zone erforderlich. Definieren Sie unter „Masken / Zonen“ eine Zone für diese Kamera und legen Sie diese anschließend unten als erforderliche Zone fest."
     },
     "ffmpeg": {
-      "hwaccelManualNotRecommended": "Explizite Definitionen der Hardware-beschleunigungs Variablen sind nicht empfohlen. Wähle die Voreinstellung die zu deiner Hardware passt, außer wenn spezifische Anforderungen eine andere Konfiguration erfordern."
+      "hwaccelManualNotRecommended": "Explizite Definitionen der Hardware-beschleunigungs Variablen sind nicht empfohlen. Wähle die Voreinstellung die zu deiner Hardware passt, außer wenn spezifische Anforderungen eine andere Konfiguration erfordern.",
+      "inputsMissingGo2rtcStream": "Ein Eingabefeld unten verweist auf einen go2rtc-Restream, der nicht mehr existiert. Wählen Sie einen vorhandenen Restream aus oder geben Sie die URL der Kamera manuell ein. Andernfalls kann keine Verbindung zu dieser Kamera hergestellt werden."
     },
     "model": {
       "optimizedFor320": "Frigate ist für ein 320x320-Modell optimiert, was für die meisten Konfigurationen die beste Wahl ist. Ein 640x640-Modell ist langsamer und bietet nur in bestimmten Szenarien Vorteile.",
