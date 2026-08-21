@@ -48,5 +48,6 @@
     "success": {
       "submittedFrigatePlus": "Image soumise avec succès à Frigate+"
     }
-  }
+  },
+  "cameraOff": "La camera est éteinte"
 }
