@@ -63,15 +63,9 @@ go2rtc:
 
 ### `environment_vars`
 
-This section can be used to set environment variables for those unable to modify the environment of the container, like within Home Assistant OS. Docker users should set environment variables in their `docker run` command (`-e FRIGATE_MQTT_PASSWORD=secret`) or `docker-compose.yml` file (`environment:` section) instead. Note that values set here are stored in plain text in your config file, so if the goal is to keep credentials out of your configuration, use Docker environment variables or Docker secrets instead.
+This section sets environment variables in the Frigate process for those unable to modify the environment of the container, like within Home Assistant OS. It's meant for process settings such as `LIBVA_DRIVER_NAME` or the TensorFlow thread counts below. Docker users should set environment variables in their `docker run` command (`-e LIBVA_DRIVER_NAME=i965`) or `docker-compose.yml` file (`environment:` section) instead. Values set here are stored in plain text in your config file, so credentials belong in `secrets.yaml`, Docker environment variables, or Docker secrets instead.
 
-Variables prefixed with `FRIGATE_` can be referenced in config fields that support environment variable substitution (such as MQTT host and credentials, camera stream URLs, and ONVIF host and credentials) using the `{FRIGATE_VARIABLE_NAME}` syntax.
-
-:::note
-
-The `go2rtc` section is an exception. go2rtc runs as a separate process, so its stream definitions can only be substituted with variables that exist in the container's environment (set via Docker `-e`, the `environment:` section of `docker-compose.yml`, or Docker secrets). Variables defined in the `environment_vars` block above are not available to go2rtc streams. Home Assistant app users, who cannot set container environment variables, must instead put credentials directly in their go2rtc stream URLs.
-
-:::
+Names prefixed with `FRIGATE_` set here also take part in `{FRIGATE_VARIABLE_NAME}` substitution (see [below](#substitution-sources-and-precedence)), but `secrets.yaml` is the better home for them.
 
 <ConfigTabs>
 <TabItem value="ui">
@@ -80,23 +74,17 @@ Navigate to <NavPath path="Settings > System > Environment variables" /> to add 
 
 | Field             | Description                                               |
 | ----------------- | --------------------------------------------------------- |
-| **Variable name** | The environment variable name (e.g., `FRIGATE_MQTT_USER`) |
+| **Variable name** | The environment variable name (e.g., `LIBVA_DRIVER_NAME`) |
 | **Value**         | The value for the variable                                |
 
-Variables defined here can be referenced elsewhere in your configuration using the `{FRIGATE_VARIABLE_NAME}` syntax.
+Names prefixed with `FRIGATE_` can also be referenced elsewhere in your configuration using the `{FRIGATE_VARIABLE_NAME}` syntax.
 
 </TabItem>
 <TabItem value="yaml">
 
 ```yaml
 environment_vars:
-  FRIGATE_MQTT_USER: my_mqtt_user
-  FRIGATE_MQTT_PASSWORD: my_mqtt_password
-
-mqtt:
-  host: "{FRIGATE_MQTT_HOST}"
-  user: "{FRIGATE_MQTT_USER}"
-  password: "{FRIGATE_MQTT_PASSWORD}"
+  LIBVA_DRIVER_NAME: i965
 ```
 
 </TabItem>
@@ -129,6 +117,29 @@ environment_vars:
 
 </TabItem>
 </ConfigTabs>
+
+### `secrets.yaml`
+
+A `secrets.yaml` file in your config directory is an additional source of `FRIGATE_` variables, for installs that can't set container environment variables or mount Docker secrets. It's a flat map of names to values, and it is never read or written by the Frigate UI:
+
+```yaml
+FRIGATE_CAM_USER: viewer
+FRIGATE_CAM_PASS: "p@ss w0rd"
+FRIGATE_MQTT_HOST: mqtt.internal.example
+```
+
+Names must start with `FRIGATE_`, and nesting is not supported. `secrets.yaml` feeds `{FRIGATE_VARIABLE_NAME}` substitution, so the handful of variables Frigate reads straight from the process environment, such as `FRIGATE_JWT_SECRET`, still need a container environment variable or a Docker secret.
+
+### Substitution sources and precedence
+
+The same `{FRIGATE_VARIABLE_NAME}` placeholder resolves from four sources, listed strongest first. When a name is defined in more than one, the highest wins and a warning is logged:
+
+1. Docker secrets or the directory named by `CREDENTIALS_DIRECTORY` (defaults to `/run/secrets`)
+2. Container environment variables
+3. `secrets.yaml`
+4. The `environment_vars` block above
+
+Referencing a name that no source defines is a config validation error naming the field.
 
 ### `database`
 
