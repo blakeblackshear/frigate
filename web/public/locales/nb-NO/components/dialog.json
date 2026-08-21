@@ -75,8 +75,8 @@
       "batchQueueFailed": "Kunne ikke legge {{total}} eksporter i kø. Kameraer som feilet: {{failedCameras}}",
       "batchSuccess_one": "Startet 1 eksport. Åpner saken nå.",
       "batchSuccess_other": "Startet {{count}} eksporter. Åpner saken nå.",
-      "batchQueuedSuccess_one": "La 1 eksport i kø. Åpner saken nå.",
-      "batchQueuedSuccess_other": "La {{count}} eksporter i kø. Åpner saken nå."
+      "batchQueuedSuccess_one": "La 1 eksport i kø.",
+      "batchQueuedSuccess_other": "La {{count}} eksporter i kø."
     },
     "fromTimeline": {
       "previewExport": "Forhåndsvis eksport",
@@ -133,8 +133,8 @@
       "toast": {
         "partial": "Startet {{successful}} av {{total}} eksporter. Feilet: {{failedItems}}",
         "failed": "Kunne ikke starte {{total}} eksporter. Feilet: {{failedItems}}",
-        "started_one": "Startet 1 eksport. Åpner saken nå.",
-        "started_other": "Startet {{count}} eksporter. Åpner saken nå.",
+        "started_one": "Startet 1 eksport.",
+        "started_other": "Startet {{count}} eksporter.",
         "startedNoCase_one": "Startet 1 eksport.",
         "startedNoCase_other": "Startet {{count}} eksporter."
       },

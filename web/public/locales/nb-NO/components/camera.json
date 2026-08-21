@@ -40,7 +40,7 @@
         },
         "label": "Innstillinger for kamerastrømming",
         "title": "{{cameraName}} strømmeinnstillinger",
-        "desc": "Endre direktestrømmingsalternativene for denne kameragruppens dashbord. <em>Disse innstillingene er spesifikke for enhet/nettleser.</em>",
+        "desc": "Endre alternativene for direktestrømming for denne kameragruppens dashbord. <em>Disse innstillingene er spesifikke for enhet/nettleser.</em>",
         "audioIsAvailable": "Lyd er tilgjengelig for denne strømmen",
         "audioIsUnavailable": "Lyd er ikke tilgjengelig for denne strømmen",
         "audio": {

@@ -751,7 +751,7 @@
         },
         "enhancement": {
             "label": "Forbedringsnivå",
-            "description": "Forbedringsnivå (0-10) som brukes på kjennemerkebeskjæringer før OCR; høyere verdier forbedrer ikke alltid resultatet, nivåer over 5 fungerer ofte kun på nattbilder og bør brukes med forsiktighet."
+            "description": "Forbedringsnivå (0-10) som brukes på beskjærte kjennemerker før OCR; høyere verdier forbedrer ikke alltid resultatet, nivåer over 5 fungerer ofte kun på nattbilder og bør brukes med forsiktighet."
         },
         "expire_time": {
             "label": "Utløpstid (sekunder)",
@@ -865,13 +865,13 @@
     },
     "ui": {
         "dashboard": {
-            "description": "Velg om dette kameraet skal være synlig i Frigate-grensesnittet. Deaktivering krever manuell redigering av konfigurasjonen for å vise kameraet igjen.",
-            "label": "Vis i grensesnitt"
+            "description": "Velg om dette kameraet skal være synlig på standard dashbord for alle kameraer. Kameraet vil fortsatt være tilgjengelig alle andre steder i grensesnittet, inkludert i kameragrupper og innstillinger.",
+            "label": "Vis i Direkte-dashbordet"
         },
         "description": "Sortering og synlighet for kameraet i grensesnittet. Påvirker standard dashbord. For mer detaljert kontroll, bruk kameragrupper.",
         "label": "Brukergrensesnitt for kamera",
         "order": {
-            "description": "Numerisk rekkefølge for sortering av kameraet i grensesnittet; høyere tall vises senere.",
+            "description": "Numerisk rekkefølge for sortering av kameraet i grensesnittet (standard dashbord og lister); høyere tall vises senere.",
             "label": "Rekkefølge i UI"
         },
         "review": {
