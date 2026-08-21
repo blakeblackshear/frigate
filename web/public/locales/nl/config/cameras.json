@@ -29,7 +29,7 @@
         },
         "listen": {
             "label": "Luistercategorieën",
-            "description": "Lijst van luistercategorie gebeurtenissen voor detectie (zoals: blaffen, band_alarm, schreeuw, praten, roepen)."
+            "description": "Lijst van luistercategorie gebeurtenissen voor detectie (zoals: blaffen, band_alarm, praten, schreeuwen)."
         },
         "filters": {
             "label": "Geluidsfilters",
@@ -52,7 +52,7 @@
         "label": "Audiotranscriptie",
         "description": "Instellingen voor live en spraakgestuurde audiotranscriptie voor gebeurtenissen en live ondertitels.",
         "enabled": {
-            "label": "Spraaktranscriptie inschakelen",
+            "label": "Transcriptie inschakelen",
             "description": "Schakel transcriptie van handmatig getriggerde audiogebeurtenissen in of uit."
         },
         "enabled_in_config": {
@@ -84,7 +84,7 @@
         "description": "Instellingen voor de detectierol om objecten te detecteren en trackers te starten.",
         "enabled": {
             "label": "Detectie inschakelen",
-            "description": "Objectdetectie voor deze camera in- of uitschakelen. Detectie moet zijn ingeschakeld om objecttracking te laten werken."
+            "description": "Objectdetectie voor deze camera in- of uitschakelen."
         },
         "height": {
             "label": "Detectiehoogte",
@@ -183,11 +183,11 @@
         }
     },
     "ffmpeg": {
-        "label": "FFmpeg",
-        "description": "FFmpeg-instellingen inclusief binaire pad, argumenten, hardwareversnellingsopties en uitvoerargumenten per rol.",
+        "label": "Streams (FFmpeg)",
+        "description": "Camera-stream-inputs en FFmpeg-opties, waaronder het pad naar het binaire bestand, argumenten, hwaccel en uitvoerargumenten per rol.",
         "path": {
             "label": "FFmpeg-pad",
-            "description": "Pad naar het te gebruiken FFmpeg-binaire bestand of een versie-alias (\"5.0\" of \"7.0\")."
+            "description": "Pad naar het te gebruiken FFmpeg-binaire bestand of een versie-alias (\"7.0\" of \"8.0\")."
         },
         "global_args": {
             "label": "FFmpeg globale argumenten",
@@ -263,12 +263,14 @@
         "quality": {
             "label": "Live kwaliteit",
             "description": "Coderingskwaliteit voor de jsmpeg-stream (1 hoogste, 31 laagste)."
-        }
+        },
+        "description": "Instellingen die door de webinterface worden gebruikt om de selectie, resolutie en kwaliteit van livestreams te regelen."
     },
     "motion": {
         "label": "Bewegingsdetectie",
         "enabled": {
-            "label": "Bewegingsdetectie inschakelen"
+            "label": "Bewegingsdetectie inschakelen",
+            "description": "Schakel bewegingsdetectie voor deze camera in of uit."
         },
         "threshold": {
             "label": "Bewegingsdrempel",
@@ -316,7 +318,8 @@
         },
         "raw_mask": {
             "label": "Onbewerkt masker"
-        }
+        },
+        "description": "Standaardinstellingen voor bewegingsdetectie voor deze camera."
     },
     "objects": {
         "label": "Objecten",
@@ -717,18 +720,21 @@
     "face_recognition": {
         "label": "Gezichtsherkenning",
         "enabled": {
-            "label": "Gezichtsherkenning inschakelen"
+            "label": "Gezichtsherkenning inschakelen",
+            "description": "Schakel gezichtsherkenning in of uit."
         },
         "min_area": {
             "label": "Minimale gezichtsoppervlakte",
             "description": "Minimale oppervlakte (pixels) van een gedetecteerd gezichtskader om herkenning te proberen."
-        }
+        },
+        "description": "Instellingen voor gezichtsdetectie en -herkenning voor deze camera."
     },
     "lpr": {
         "label": "Kentekenherkenning",
         "description": "Instellingen voor kentekenherkenning inclusief detectiedrempels, opmaak en bekende kentekens.",
         "enabled": {
-            "label": "LPR inschakelen"
+            "label": "LPR inschakelen",
+            "description": "Schakel LPR op deze camera in of uit."
         },
         "min_area": {
             "label": "Minimale kentekenoppervlakte",

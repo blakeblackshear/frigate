@@ -36,7 +36,7 @@
     "settings": {
         "title": "Zoekinstellingen",
         "parallelMode": "Parallelle modus",
-        "parallelModeDesc": "Scan meerdere video segmenten tegelijk (sneller, maar significant meer CPU gebruik)",
+        "parallelModeDesc": "Meerdere opnamebereiken tegelijk scannen (sneller; vereist meer decoderingsbronnen)",
         "threshold": "Gevoeligheid drempel",
         "thresholdDesc": "Lagere waardes detecteren eerder veranderingen (1-255)",
         "minArea": "Minimaal wijzigings gebied",

@@ -15,7 +15,7 @@
         },
         "listen": {
             "label": "Luistercategorieën",
-            "description": "Lijst van luistercategorie gebeurtenissen voor detectie (zoals: blaffen, band_alarm, schreeuw, praten, roepen)."
+            "description": "Lijst van luistercategorie gebeurtenissen voor detectie (zoals: blaffen, band_alarm, praten, schreeuwen)."
         },
         "filters": {
             "label": "Geluidsfilters",
@@ -723,7 +723,7 @@
         "description": "FFmpeg-instellingen inclusief binaire pad, argumenten, hardwareversnellingsopties en uitvoerargumenten per rol.",
         "path": {
             "label": "FFmpeg-pad",
-            "description": "Pad naar het te gebruiken FFmpeg-binaire bestand of een versie-alias (\"5.0\" of \"7.0\")."
+            "description": "Pad naar het te gebruiken FFmpeg-binaire bestand of een versie-alias (\"7.0\" of \"8.0\")."
         },
         "global_args": {
             "label": "FFmpeg globale argumenten",
@@ -1517,7 +1517,7 @@
             "description": "Numerieke volgorde voor het sorteren van de camera in de UI (standaarddashboard en lijsten); grotere nummers verschijnen later."
         },
         "dashboard": {
-            "label": "Tonen in UI",
+            "label": "Weergeven op het live-dashboard",
             "description": "Schakel de zichtbaarheid van deze camera overal in de Frigate-UI in of uit. Uitschakelen vereist handmatige aanpassing van de configuratie om de camera opnieuw te bekijken."
         }
     },

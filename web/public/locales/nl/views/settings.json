@@ -1413,7 +1413,7 @@
     "deleteCameraDialog": {
       "title": "Verwijderen Camera",
       "description": "Het verwijderen van een camera verwijdert permanent alle opnames, gevolgde objecten en configuratie voor die camera. Eventuele go2rtc-streams die aan deze camera zijn gekoppeld, moeten mogelijk nog handmatig worden verwijderd.",
-      "selectPlaceholder": "Kies camera...",
+      "selectPlaceholder": "Kies camera…",
       "confirmTitle": "Weet je het zeker?",
       "confirmWarning": "Het verwijderen van <strong>{{cameraName}}</strong> kan niet ongedaan worden gemaakt.",
       "deleteExports": "Verwijder ook exports voor deze camera",
