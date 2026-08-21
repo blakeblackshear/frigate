@@ -34,6 +34,10 @@
         "enabled_in_config": {
             "label": "Orijinal ses durumu",
             "description": "Ses algılamanın statik yapılandırma dosyasında başlangıçta etkinleştirilip etkinleştirilmediğini belirtir."
+        },
+        "num_threads": {
+            "label": "Algılama işlemleri",
+            "description": "Ses algılama işleme için kullanılacak iş parçacığı sayısı."
         }
     },
     "version": {
@@ -57,9 +61,76 @@
                     "description": "Sabit bir nesneyi durdurmadan önce takip etmek için varsayılan maksimum kare sayısı."
                 },
                 "objects": {
-                    "label": "Nesne maksimum kare sayısı"
+                    "label": "Nesne maksimum kare sayısı",
+                    "description": "Sabit nesnelerin takip edileceği azami kare sayısı, nesne türüne göre ayrı ayrı geçersiz kılınabilir."
                 }
+            },
+            "label": "Sabit nesne yapılandırması",
+            "description": "Belirli bir süre boyunca sabit kalan nesneleri algılamak ve yönetmek için ayarlar.",
+            "interval": {
+                "label": "Sabit kalma aralığı",
+                "description": "Sabit bir nesnenin hâlâ orada olduğunu doğrulamak için algılama kontrolünün kaç karede bir yapılacağını belirler."
+            },
+            "classifier": {
+                "label": "Görsel sınıflandırıcıyı etkinleştir",
+                "description": "Çerçeve titreşimleri olsa bile, gerçekten sabit olan nesneleri algılamak için görsel sınıflandırıcıyı kullanır."
             }
+        },
+        "label": "Nesne Algılama",
+        "description": "Nesne algılamayı çalıştırmak ve izleyicileri başlatmak için kullanılan algılama/algılayıcı rolü ayarları.",
+        "enabled": {
+            "label": "Nesne algılamayı etkinleştir"
+        },
+        "height": {
+            "label": "Algılama yüksekliği",
+            "description": "Algılama akışı için kullanılan karelerin piksel cinsinden yüksekliği; yerel akış çözünürlüğünü kullanmak için boş bırakın."
+        },
+        "width": {
+            "label": "Algılama genişliği",
+            "description": "Algılama akışı için kullanılan karelerin piksel cinsinden genişliği; yerel akış çözünürlüğünü kullanmak için boş bırakın."
+        },
+        "fps": {
+            "label": "Algılama Hızı (FPS)",
+            "description": "Algılama için istenen saniyedeki kare sayısı; düşük değerler CPU kullanımını azaltır (önerilen değer 5'tir, yalnızca çok hızlı hareket eden nesneler takip ediliyorsa - en fazla 10 olacak şekilde - daha yüksek ayarlayın)."
+        },
+        "min_initialized": {
+            "label": "Minimum başlangıç karesi",
+            "description": "Takip edilen bir nesne oluşturulmadan önce art arda kaç kez algılanması gerektiğini belirler. Yanlış başlatmaları önlemek için bu değeri yükseltebilirsiniz. Varsayılan değer, FPS değerinin yarısıdır."
+        },
+        "max_disappeared": {
+            "label": "Maksimum kayıp kare sayısı",
+            "description": "Takip edilen bir nesnenin kaybolduğuna karar verilmeden önce, kaç kare boyunca algılanmaması gerektiğini belirler."
+        },
+        "annotation_offset": {
+            "label": "Açıklama ofseti",
+            "description": "Zaman çizelgesi çerçevelerini kayıtlarla daha iyi hizalamak için algılama açıklamalarını kaydıracak milisaniye miktarı; pozitif veya negatif olabilir."
         }
+    },
+    "audio_transcription": {
+        "label": "Ses transkripsiyonu",
+        "description": "Olaylar ve canlı altyazılar için sesin ve konuşmanın metne dökülme ayarları.",
+        "live_enabled": {
+            "label": "Canlı transkripsiyon",
+            "description": "Ses akışı alındıkça canlı transkripsiyonu etkinleştirir."
+        }
+    },
+    "birdseye": {
+        "label": "Kuşbakışı",
+        "description": "Kuşbakışı bileşik görünümü, birden fazla kamera yayınını tek bir düzende birleştiren ayarlar.",
+        "enabled": {
+            "label": "Kuşbakışı'nı etkinleştir",
+            "description": "Kuşbakışı görünüm özelliğini etkinleştirir veya devre dışı bırakır."
+        },
+        "mode": {
+            "label": "İzleme modu",
+            "description": "Kameraların Kuşbakışı'na dahil edilme modu: 'nesneler', 'hareket' veya 'sürekli'."
+        },
+        "order": {
+            "label": "Konum",
+            "description": "Kameranın Kuşbakışı düzenindeki sıralamasını belirleyen sayısal konum."
+        }
+    },
+    "face_recognition": {
+        "label": "Yüz tanıma"
     }
 }
