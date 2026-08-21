@@ -24,6 +24,54 @@
             "enabled_in_config": {
                 "label": "Oryginalny stan GenAI",
                 "description": "Wskazuje, czy GenAI było włączone w oryginalnej konfiguracji statycznej."
+            },
+            "enabled": {
+                "label": "Włącz GenAI",
+                "description": "Włącz domyślnie generowanie opisów obiektów śledzonych przez GenAI."
+            },
+            "use_snapshot": {
+                "label": "Korzystaj z migawek"
+            },
+            "prompt": {
+                "label": "Podpowiedź do podpisu",
+                "description": "Domyślny szablon monitu używany podczas generowania opisów za pomocą GenAI."
+            },
+            "object_prompts": {
+                "label": "Podpowiedzi dotyczące obiektów"
+            },
+            "objects": {
+                "label": "Obiekty GenAI"
+            }
+        },
+        "label": "Objekty",
+        "track": {
+            "label": "Obiekty do śledzenia",
+            "description": "Lista etykiet obiektów, które mają być śledzone przez tę kamerę."
+        },
+        "filters": {
+            "label": "Filtry obiektów",
+            "description": "Filtry stosowane do wykrytych obiektów w celu ograniczenia liczby fałszywych alarmów (powierzchnia, współczynnik, poziom pewności).",
+            "min_area": {
+                "label": "Minimalna powierzchnia obiektu"
+            },
+            "max_area": {
+                "label": "Maksymalna powierzchnia obiektu"
+            },
+            "min_ratio": {
+                "label": "Minimalny współczynnik proporcji",
+                "description": "Minimalny stosunek szerokości do wysokości wymagany, aby prostokąt ograniczający spełniał kryteria."
+            },
+            "max_ratio": {
+                "label": "Maksymalny współczynnik kształtu",
+                "description": "Maksymalny dopuszczalny stosunek szerokości do wysokości prostokąta ograniczającego, aby spełniał on wymagania."
+            },
+            "threshold": {
+                "label": "Poziom ufności",
+                "description": "Średni próg pewności wykrycia wymagany, aby obiekt został uznany za wynik prawdziwie pozytywny."
+            },
+            "min_score": {
+                "label": "Minimalny poziom ufności",
+                "description": "Minimalny poziom pewności wykrycia pojedynczej klatki wymagany do zaliczenia obiektu."
             }
         }
     },
@@ -318,12 +366,15 @@
         "label": "Strumienie (FFmpeg)",
         "output_args": {
             "detect": {
-                "description": "Domyślne argumenty wyjściowe dla strumieni z rolą detekcji."
+                "description": "Domyślne argumenty wyjściowe dla strumieni z rolą detekcji.",
+                "label": "Wykryj wyjściowe parametry"
             },
             "record": {
-                "description": "Domyślne argumenty wyjściowe dla strumieni z rolą zapisu."
+                "description": "Domyślne argumenty wyjściowe dla strumieni z rolą zapisu.",
+                "label": "Argumenty wyjściowe zapisu"
             },
-            "description": "Domyślne argumenty wyjściowe używane dla różnych ról FFmpeg, takich jak wykrywanie i nagrywanie."
+            "description": "Domyślne argumenty wyjściowe używane dla różnych ról FFmpeg, takich jak wykrywanie i nagrywanie.",
+            "label": "Wyjściowe parametry"
         },
         "retry_interval": {
             "label": "Czas ponownej próby FFmpeg",
@@ -339,10 +390,80 @@
         },
         "description": "Wejścia strumienia kamery i opcje FFmpeg, w tym ścieżka do pliku binarnego, args, hwaccel oraz argumenty wyjściowe dla poszczególnych ról.",
         "path": {
-            "description": "Ścieżka do pliku binarnego FFmpeg lub alias wersji („7.0” lub „8.0”)."
+            "description": "Ścieżka do pliku binarnego FFmpeg lub alias wersji („7.0” lub „8.0”).",
+            "label": "Ścieżka do FFmpeg"
         },
         "global_args": {
-            "label": "Argumenty globalne FFmpeg"
+            "label": "Argumenty globalne FFmpeg",
+            "description": "Globalne argumenty przekazywane do procesów FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Argumenty dotyczące akceleracji sprzętowej",
+            "description": "Parametry akceleracji sprzętowej FFmpeg. Rekomendowane jest użycie presetów dedykowanych dla danego sprzętu."
+        },
+        "input_args": {
+            "label": "Wejściowe parametry",
+            "description": "Argumenty wejściowe przekazywane strumieniom wejściowym FFmpeg"
+        },
+        "inputs": {
+            "path": {
+                "label": "Ścieżka wejścia",
+                "description": "URL lub ścieżka strumienia wejściowego kamery"
+            },
+            "global_args": {
+                "label": "Parametry globalne FFmpeg"
+            },
+            "label": "Wejścia kamery",
+            "description": "Lista definicji strumienia wejściowego (ścieżki i role) dla tej kamery.",
+            "hwaccel_args": {
+                "description": "Argumenty akceleracji sprzętowej dla tego strumienia wejściowego."
+            },
+            "input_args": {
+                "label": "Argumenty wejścia"
+            }
+        }
+    },
+    "motion": {
+        "label": "Detekcja ruchu",
+        "description": "Domyślne ustawienia detekcji ruchu dla tej kamery.",
+        "enabled": {
+            "label": "Włącz detekcje ruchu",
+            "description": "Włącz lub wyłącz detekcje ruchu dla tej kamery."
+        },
+        "threshold": {
+            "label": "Próg detekcji"
+        },
+        "lightning_threshold": {
+            "label": "Próg pioruna"
+        },
+        "skip_motion_threshold": {
+            "label": "Pomiń próg detekcji"
+        },
+        "improve_contrast": {
+            "label": "Popraw kontrast",
+            "description": "Przed analizą ruchu należy zastosować poprawę kontrastu klatek, aby ułatwić wykrywanie."
+        },
+        "contour_area": {
+            "label": "Obszar konturowy",
+            "description": "Minimalna powierzchnia konturu w pikselach wymagana do uwzględnienia konturu ruchu."
+        },
+        "delta_alpha": {
+            "label": "Delta alfa",
+            "description": "Współczynnik mieszania alfa stosowany przy obliczaniu różnic między klatkami w celu wyznaczenia ruchu."
+        },
+        "frame_alpha": {
+            "label": "Klatka alfa (przezroczystość ramki)"
+        },
+        "frame_height": {
+            "label": "Wysokość ramki"
+        },
+        "mqtt_off_delay": {
+            "label": "Opóźnienie wyłączenia MQTT",
+            "description": "Czas oczekiwania w sekundach od ostatniego ruchu przed opublikowaniem stanu „wyłączonego” w protokole MQTT."
+        },
+        "enabled_in_config": {
+            "label": "Pierwotny stan ruchu",
+            "description": "Wskazuje, czy w pierwotnej konfiguracji statycznej włączono wykrywanie ruchu."
         }
     }
 }

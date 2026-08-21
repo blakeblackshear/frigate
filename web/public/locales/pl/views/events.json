@@ -1,7 +1,7 @@
 {
   "camera": "Kamera",
-  "alerts": "Alerty",
-  "detections": "Wykrycia",
+  "alerts": "Alarmy",
+  "detections": "Detekcje",
   "motion": {
     "label": "Ruch",
     "only": "Tylko ruch"
@@ -27,7 +27,9 @@
   },
   "documentTitle": "Przegląd - Frigate",
   "recordings": {
-    "documentTitle": "Nagrania - Frigate"
+    "documentTitle": "Nagrania - Frigate",
+    "invalidSharedLink": "Nie można otworzyć linku do nagrania z oznaczeniem czasu z powodu błędu parsowania.",
+    "invalidSharedCamera": "Nie można otworzyć linku do nagrania z oznaczeniem czasu z powodu nieznanej lub nieautoryzowanej kamery."
   },
   "markAsReviewed": "Oznacz jako przejrzane",
   "markTheseItemsAsReviewed": "Oznacz te elementy jako przejrzane",
@@ -65,5 +67,31 @@
   "needsReview": "Wymaga manualnego sprawdzenia",
   "normalActivity": "Normalne",
   "select_all": "Wszystko",
-  "securityConcern": "Kwestie bezpieczeństwa"
+  "securityConcern": "Kwestie bezpieczeństwa",
+  "motionPreviews": {
+    "cropDesc": "Funkcja powiększania wyświetla podgląd wybranych obszarów filtru zamiast pokazywać całą klatkę.",
+    "menuItem": "Wyświetl podgląd ruchu",
+    "title": "Podgląd ruchu: {{camera}}",
+    "mobileSettingsTitle": "Ustawienia podglądu ruchu",
+    "mobileSettingsDesc": "Dostosuj prędkość odtwarzania, poziom przyciemnienia i kadrowanie, a następnie wybierz datę, aby przejrzeć klipy zawierające wyłącznie ruch.",
+    "dim": "Przyciemnianie",
+    "dimAria": "Ustaw poziom przyciemniania",
+    "dimDesc": "Zwiększ poziom przyciemnienia, aby poprawić widoczność obszaru wykrywania ruchu.",
+    "speed": "Prędkość",
+    "speedAria": "Wybierz prędkość odtwarzania",
+    "speedDesc": "Wybierz, z jaką prędkością mają być odtwarzane nagrania.",
+    "back": "Wstecz",
+    "empty": "Brak dostępnych podglądów",
+    "noPreview": "Podgląd niedostępny",
+    "seekAria": "Wyszukaj odtwarzacz {{camera}} o {{time}}",
+    "filter": "Filtr",
+    "filterDesc": "Wybierz obszary, aby wyświetlić tylko fragmenty zawierające ruch w tych obszarach.",
+    "filterClear": "Wyczyść",
+    "crop": "Przytnij, aby zastosować filtr",
+    "cropAria": "Przełącz podgląd kadrowania na obszary objęte filtrem"
+  },
+  "motionSearch": {
+    "menuItem": "Szukanie ruchu",
+    "openMenu": "Ustawienia kamery"
+  }
 }
