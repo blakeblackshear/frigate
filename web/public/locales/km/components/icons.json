@@ -1,1 +1,8 @@
-{}
+{
+  "iconPicker": {
+    "selectIcon": "ជ្រើសរើស រូបតំណាង",
+    "search": {
+      "placeholder": "ស្វែងរក រូបតំណាង…"
+    }
+  }
+}
