@@ -1,9 +1,9 @@
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import type { HwaccelRecommendation } from "@/types/hardware";
+import type { HwaccelFamily, HwaccelRecommendation } from "@/types/hardware";
 import axios from "axios";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -11,17 +11,22 @@ import useSWR from "swr";
 const AUTO = "auto";
 const NONE = "none";
 
-const HWACCEL_PRESETS = [
-  { value: "preset-vaapi", key: "vaapi" },
-  { value: "preset-nvidia", key: "cuda" },
-  { value: "preset-intel-qsv-h264", key: "qsv" },
-  { value: "preset-rkmpp", key: "rkmpp" },
-  { value: "preset-rpi-64-h264", key: "rpi" },
-  { value: "preset-jetson-h264", key: "jetson" },
-] as const;
+// the codec key of a preset that decodes anything
+const ANY_CODEC = "any";
+
+// ffprobe names h265 streams hevc
+const CODEC_ALIASES: Record<string, string> = { hevc: "h265" };
+
+function normalizeCodec(codec: string): string {
+  const lower = codec.toLowerCase();
+  return CODEC_ALIASES[lower] ?? lower;
+}
 
 type SetupHwAccelProps = {
   detectorHardwareKey?: string;
+  // detect stream codec of each camera added in the wizard, keyed by camera
+  // name. hwaccel only applies to the detect stream.
+  detectCodecs: Record<string, string>;
   // saved reports whether a config write happened, so the wizard knows
   // whether finishing requires a restart
   onNext: (saved: boolean) => void;
@@ -31,47 +36,123 @@ type SetupHwAccelProps = {
 
 export default function SetupHwAccel({
   detectorHardwareKey,
+  detectCodecs,
   onNext,
   onBack,
   onSkip,
 }: SetupHwAccelProps) {
   const { t } = useTranslation(["views/setup"]);
 
+  const cameraCodecs = useMemo(
+    () =>
+      Object.entries(detectCodecs).map(([camera, codec]) => ({
+        camera,
+        codec: normalizeCodec(codec),
+      })),
+    [detectCodecs],
+  );
+
+  const query = useMemo(() => {
+    const params = new URLSearchParams();
+
+    if (detectorHardwareKey) {
+      params.set("detector", detectorHardwareKey);
+    }
+
+    const codecs = [...new Set(cameraCodecs.map((entry) => entry.codec))];
+
+    if (codecs.length > 0) {
+      params.set("codecs", codecs.join(","));
+    }
+
+    return params.toString();
+  }, [detectorHardwareKey, cameraCodecs]);
+
   const {
     data: recommendation,
     isLoading,
     error: recommendError,
   } = useSWR<HwaccelRecommendation>(
-    detectorHardwareKey
-      ? `hardware/hwaccel?detector=${encodeURIComponent(detectorHardwareKey)}`
-      : "hardware/hwaccel",
+    query ? `hardware/hwaccel?${query}` : "hardware/hwaccel",
     { revalidateOnFocus: false },
   );
 
   const [selected, setSelected] = useState<string>(AUTO);
   const [saving, setSaving] = useState(false);
 
-  const derived = recommendation?.preset ?? "";
+  const families = useMemo(
+    () => recommendation?.available ?? [],
+    [recommendation],
+  );
+  const derived = recommendation?.recommended ?? "";
+
+  /** The config a family should be saved as, or null when it writes nothing. */
+  const configFor = useCallback(
+    (family: HwaccelFamily | undefined): Record<string, unknown> | null => {
+      if (!family) {
+        return null;
+      }
+
+      const shared = family.presets[ANY_CODEC];
+
+      if (shared) {
+        return { ffmpeg: { hwaccel_args: shared } };
+      }
+
+      // this family decodes one codec per preset, so each camera needs the
+      // preset matching its own detect stream
+      const perCamera = cameraCodecs
+        .map((entry) => ({ ...entry, preset: family.presets[entry.codec] }))
+        .filter((entry) => entry.preset);
+
+      if (perCamera.length === 0) {
+        // no camera to match, so fall back to the family's first preset
+        const fallback = Object.values(family.presets)[0];
+        return fallback ? { ffmpeg: { hwaccel_args: fallback } } : null;
+      }
+
+      const presets = new Set(perCamera.map((entry) => entry.preset));
+
+      if (presets.size === 1 && perCamera.length === cameraCodecs.length) {
+        // every camera wants the same preset, so one global value says it
+        return { ffmpeg: { hwaccel_args: [...presets][0] } };
+      }
+
+      // the global stays on auto, so cameras added later still get resolved
+      // at startup rather than inheriting one camera's codec
+      return {
+        cameras: Object.fromEntries(
+          perCamera.map((entry) => [
+            entry.camera,
+            { ffmpeg: { hwaccel_args: entry.preset } },
+          ]),
+        ),
+      };
+    },
+    [cameraCodecs],
+  );
 
   const handleSave = useCallback(async () => {
+    const key = selected === AUTO ? derived : selected;
+
+    const configData =
+      selected === NONE
+        ? // an empty string would make config/set delete the key (reviving the
+          // "auto" default), so an explicit no-hwaccel is an empty list
+          { ffmpeg: { hwaccel_args: [] } }
+        : configFor(families.find((family) => family.key === key));
+
     // Auto with nothing derived writes nothing: the config default of "auto"
     // stays in place and the backend decides at startup
-    if (selected === AUTO && !derived) {
+    if (!configData) {
       onNext(false);
       return;
     }
 
-    // an empty string would make config/set delete the key (reviving the
-    // "auto" default), so an explicit no-hwaccel is an empty list
-    const preset: string | string[] =
-      selected === AUTO ? derived : selected === NONE ? [] : selected;
-
     setSaving(true);
     try {
       await axios.put("config/set", {
-        config_data: {
-          ffmpeg: { hwaccel_args: preset },
-        },
+        config_data: configData,
         requires_restart: 1,
       });
       onNext(true);
@@ -80,7 +161,7 @@ export default function SetupHwAccel({
     } finally {
       setSaving(false);
     }
-  }, [selected, derived, onNext, t]);
+  }, [selected, derived, families, configFor, onNext, t]);
 
   if (isLoading) {
     return (
@@ -123,25 +204,27 @@ export default function SetupHwAccel({
           </div>
           <p className="ml-6 text-xs text-muted-foreground">
             {derived
-              ? t("setupWizard.hwaccel.autoResolved", { preset: derived })
+              ? t("setupWizard.hwaccel.autoResolved", {
+                  family: t(`setupWizard.hwaccel.families.${derived}`),
+                })
               : recommendError
                 ? t("setupWizard.hwaccel.recommendFailed")
                 : t("setupWizard.hwaccel.autoNone")}
           </p>
         </div>
 
-        {HWACCEL_PRESETS.map((preset) => (
-          <div key={preset.key} className="flex items-center space-x-2">
+        {families.map((family) => (
+          <div key={family.key} className="flex items-center space-x-2">
             <RadioGroupItem
-              value={preset.value}
-              id={`hwaccel-${preset.key}`}
-              className={radioClass(preset.value)}
+              value={family.key}
+              id={`hwaccel-${family.key}`}
+              className={radioClass(family.key)}
             />
             <label
-              htmlFor={`hwaccel-${preset.key}`}
+              htmlFor={`hwaccel-${family.key}`}
               className="cursor-pointer text-sm"
             >
-              {t(`setupWizard.hwaccel.presets.${preset.key}`)}
+              {t(`setupWizard.hwaccel.families.${family.key}`)}
             </label>
           </div>
         ))}
@@ -153,7 +236,7 @@ export default function SetupHwAccel({
             className={radioClass(NONE)}
           />
           <label htmlFor="hwaccel-none" className="cursor-pointer text-sm">
-            {t("setupWizard.hwaccel.presets.none")}
+            {t("setupWizard.hwaccel.families.none")}
           </label>
         </div>
       </RadioGroup>

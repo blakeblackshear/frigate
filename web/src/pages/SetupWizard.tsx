@@ -24,6 +24,8 @@ type WizardState = {
   currentStep: number;
   cameraNames: string[];
   detectorHardwareKey?: string;
+  // detect stream codec of each added camera, keyed by camera name
+  detectCodecs: Record<string, string>;
   // whether any step wrote config with requires_restart, which only takes
   // effect after a restart (camera adds apply live and don't count)
   restartRequired: boolean;
@@ -38,7 +40,11 @@ type WizardState = {
 type WizardAction =
   | { type: "NEXT_STEP" }
   | { type: "PREV_STEP" }
-  | { type: "CAMERAS_ADDED"; cameraNames: string[] }
+  | {
+      type: "CAMERAS_ADDED";
+      cameraNames: string[];
+      detectCodecs: Record<string, string>;
+    }
   | {
       type: "STEP_CONFIGURED";
       step: keyof WizardState["configuredSteps"];
@@ -50,6 +56,7 @@ type WizardAction =
 const initialState: WizardState = {
   currentStep: 0,
   cameraNames: [],
+  detectCodecs: {},
   restartRequired: false,
   configuredSteps: {
     camera: false,
@@ -73,6 +80,7 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         ...state,
         currentStep: state.currentStep + 1,
         cameraNames: action.cameraNames,
+        detectCodecs: action.detectCodecs,
         configuredSteps: { ...state.configuredSteps, camera: true },
       };
     case "STEP_CONFIGURED":
@@ -118,13 +126,20 @@ export default function SetupWizard() {
     }
   }, [t]);
 
-  const handleCameraNext = useCallback((cameraNames?: string[]) => {
-    if (cameraNames && cameraNames.length > 0) {
-      dispatch({ type: "CAMERAS_ADDED", cameraNames });
-    } else {
-      dispatch({ type: "SKIP_STEP" });
-    }
-  }, []);
+  const handleCameraNext = useCallback(
+    (cameraNames?: string[], detectCodecs?: Record<string, string>) => {
+      if (cameraNames && cameraNames.length > 0) {
+        dispatch({
+          type: "CAMERAS_ADDED",
+          cameraNames,
+          detectCodecs: detectCodecs ?? {},
+        });
+      } else {
+        dispatch({ type: "SKIP_STEP" });
+      }
+    },
+    [],
+  );
 
   const handleHwAccelNext = useCallback((saved: boolean) => {
     dispatch({ type: "STEP_CONFIGURED", step: "hwaccel", savedConfig: saved });
@@ -174,6 +189,7 @@ export default function SetupWizard() {
         return (
           <SetupHwAccel
             detectorHardwareKey={state.detectorHardwareKey}
+            detectCodecs={state.detectCodecs}
             onNext={handleHwAccelNext}
             onBack={handleBack}
             onSkip={handleSkipStep}

@@ -12,6 +12,14 @@ export type DetectionHardware = {
   unlimited: boolean;
 };
 
+export type HwaccelFamily = {
+  key: string;
+  // the preset for each codec this family decodes, or a single "any" preset
+  // when it decodes every codec
+  presets: Record<string, string>;
+};
+
 export type HwaccelRecommendation = {
-  preset: string;
+  recommended: string;
+  available: HwaccelFamily[];
 };

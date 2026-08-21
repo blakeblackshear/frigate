@@ -85,7 +85,19 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await frigateApp.installDefaults({
       // the base config snapshot predates the onboarding key, hence the cast
       config: { onboarding: { setup_complete: false } } as never,
-      hwaccel: { preset: "preset-vaapi" },
+      hwaccel: {
+        recommended: "vaapi",
+        available: [
+          { key: "vaapi", presets: { any: "preset-vaapi" } },
+          {
+            key: "intel-qsv",
+            presets: {
+              h264: "preset-intel-qsv-h264",
+              h265: "preset-intel-qsv-h265",
+            },
+          },
+        ],
+      },
     });
     const saves = await captureSaves(page);
 
@@ -109,8 +121,9 @@ test.describe("setup wizard hardware @high @mobile", () => {
     ]);
     expect(detectorSave?.config_data?.detect).toEqual({ enabled: true });
 
-    // Auto shows the preset derived from the chosen hardware and writes it
-    await expect(page.getByText("preset-vaapi")).toBeVisible();
+    // Auto names the family derived from the chosen hardware and writes its
+    // preset; VAAPI decodes any codec, so one global value covers every camera
+    await expect(page.getByText("Will use VAAPI (Intel/AMD)")).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
 
     const hwaccelSave = saves.find((save) => save.config_data?.ffmpeg);
@@ -161,7 +174,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     // with nothing derived, Auto advances without writing; skipping recording
     // leaves no pending saves, so finishing needs no restart
     const restarts = await captureRestarts(page);
-    await expect(page.getByText("No compatible GPU found")).toBeVisible();
+    await expect(page.getByText("No supported video card found")).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
     await page.getByRole("button", { name: "Skip" }).click();
     await expect(page.getByText("You're All Set!")).toBeVisible();
@@ -178,6 +191,84 @@ test.describe("setup wizard hardware @high @mobile", () => {
     const finishSave = saves.find((save) => save.config_data?.onboarding);
     expect(finishSave?.config_data?.onboarding).toEqual({
       setup_complete: true,
+    });
+  });
+
+  test("offers only the presets the hardware supports", async ({
+    frigateApp,
+    page,
+  }) => {
+    await frigateApp.installDefaults({
+      config: { onboarding: { setup_complete: false } } as never,
+      hardware: NVIDIA_HARDWARE,
+      hwaccel: {
+        recommended: "nvidia",
+        available: [{ key: "nvidia", presets: { any: "preset-nvidia" } }],
+      },
+    });
+    await captureSaves(page);
+
+    await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
+    await gotoDetectorStep(page);
+    await page
+      .getByRole("button", { name: "Continue without detection" })
+      .click();
+    await expect(page.getByText("Hardware Acceleration")).toBeVisible();
+
+    // an NVIDIA box has no business being offered Rockchip or Pi decoding
+    await expect(
+      page.getByRole("radio", { name: "CUDA (NVIDIA)" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("radio", { name: /Raspberry Pi/ }),
+    ).toBeHidden();
+    await expect(page.getByRole("radio", { name: /Rockchip/ })).toBeHidden();
+
+    // Auto and None are always available
+    await expect(page.getByRole("radio", { name: "Auto" })).toBeVisible();
+    await expect(
+      page.getByRole("radio", { name: "None (software decoding)" }),
+    ).toBeVisible();
+  });
+
+  test("a codec specific family falls back to h264 with no cameras", async ({
+    frigateApp,
+    page,
+  }) => {
+    await frigateApp.installDefaults({
+      config: { onboarding: { setup_complete: false } } as never,
+      hwaccel: {
+        recommended: "jetson",
+        available: [
+          {
+            key: "jetson",
+            presets: {
+              h264: "preset-jetson-h264",
+              h265: "preset-jetson-h265",
+            },
+          },
+        ],
+      },
+    });
+    const saves = await captureSaves(page);
+
+    await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
+    await gotoDetectorStep(page);
+    await page.getByRole("button", { name: "Next" }).click();
+    await expect(page.getByText("Hardware Acceleration")).toBeVisible();
+
+    // the family is named once, not split into codec variants the user would
+    // have to choose between
+    await expect(
+      page.getByRole("radio", { name: "NVIDIA Jetson" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Next" }).click();
+
+    // no camera was added through the wizard, so there is no codec to match
+    // and the family's first preset stands in
+    const hwaccelSave = saves.find((save) => save.config_data?.ffmpeg);
+    expect(hwaccelSave?.config_data?.ffmpeg).toEqual({
+      hwaccel_args: "preset-jetson-h264",
     });
   });
 

@@ -43,7 +43,10 @@ export interface ApiMockOverrides {
   configRaw?: string;
   configSchema?: Record<string, unknown>;
   hardware?: unknown[];
-  hwaccel?: { preset: string };
+  hwaccel?: {
+    recommended: string;
+    available?: { key: string; presets: Record<string, string> }[];
+  };
 }
 
 export class ApiMocker {
@@ -188,7 +191,13 @@ export class ApiMocker {
 
     // Hwaccel preset recommendation
     await this.page.route("**/api/hardware/hwaccel**", (route) =>
-      route.fulfill({ json: overrides?.hwaccel ?? { preset: "" } }),
+      route.fulfill({
+        json: {
+          recommended: "",
+          available: [],
+          ...(overrides?.hwaccel ?? {}),
+        },
+      }),
     );
 
     // Go2RTC streams

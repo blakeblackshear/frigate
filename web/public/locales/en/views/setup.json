@@ -27,16 +27,16 @@
       "description": "Speed up video decoding with your GPU.",
       "detecting": "Checking your hardware...",
       "auto": "Auto",
-      "autoResolved": "Will use {{preset}} based on your detection hardware.",
-      "autoNone": "No compatible GPU found. Frigate will decide at startup.",
+      "autoResolved": "Will use {{family}} for your cameras.",
+      "autoNone": "No supported video card found. Frigate will decide at startup.",
       "recommendFailed": "Hardware detection is unavailable. Frigate will decide at startup.",
-      "presets": {
+      "families": {
+        "nvidia": "CUDA (NVIDIA)",
         "vaapi": "VAAPI (Intel/AMD)",
-        "cuda": "CUDA (NVIDIA)",
-        "qsv": "QuickSync (Intel)",
+        "intel-qsv": "QuickSync (Intel)",
         "rkmpp": "RKMPP (Rockchip)",
-        "rpi": "V4L2 (Raspberry Pi)",
         "jetson": "NVIDIA Jetson",
+        "rpi": "V4L2 (Raspberry Pi)",
         "none": "None (software decoding)"
       }
     },
@@ -52,11 +52,26 @@
     },
     "recording": {
       "title": "Recordings",
-      "description": "Save video from your cameras for later review.",
+      "description": "Save video from your cameras so you can watch it later.",
       "enableRecording": "Enable recordings",
-      "retentionDays": "Days to retain recordings",
-      "storageEstimate": "With {{free}} GB free, you can store approximately {{days}} days of recordings for {{cameras}} camera(s).",
-      "noCameras": "You haven't added cameras yet. Recording will apply when you add cameras in Settings."
+      "retentionDays": "Keep recordings for (days)",
+      "storageEstimate": "With {{free}} GB free, {{cameras}} camera(s) recording around the clock fills the disk in roughly {{days}} days.",
+      "noCameras": "You haven't added cameras yet. Recording will apply when you add cameras in Settings.",
+      "modeLabel": "What to record",
+      "modes": {
+        "events": {
+          "label": "Only when something is spotted",
+          "description": "Saves video around people, cars, and other objects Frigate spots. Uses far less disk space."
+        },
+        "continuous": {
+          "label": "All the time",
+          "description": "Saves video around the clock, so you can go back to any moment. Uses much more disk space."
+        }
+      },
+      "retentionHint": {
+        "events": "Video of anything Frigate spots is kept this long, then deleted automatically.",
+        "continuous": "All video is kept this long, then deleted automatically."
+      }
     },
     "complete": {
       "title": "You're All Set!",

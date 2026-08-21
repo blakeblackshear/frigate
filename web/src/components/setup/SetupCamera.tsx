@@ -7,7 +7,10 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { FaCircleCheck } from "react-icons/fa6";
 
 type SetupCameraProps = {
-  onNext: (cameraNames?: string[]) => void;
+  onNext: (
+    cameraNames?: string[],
+    detectCodecs?: Record<string, string>,
+  ) => void;
   onBack: () => void;
 };
 
@@ -15,6 +18,7 @@ export default function SetupCamera({ onNext, onBack }: SetupCameraProps) {
   const { t } = useTranslation(["views/setup"]);
   const [showWizard, setShowWizard] = useState(false);
   const [addedCameras, setAddedCameras] = useState<string[]>([]);
+  const [detectCodecs, setDetectCodecs] = useState<Record<string, string>>({});
   const { mutate: mutateConfig } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -39,9 +43,18 @@ export default function SetupCamera({ onNext, onBack }: SetupCameraProps) {
     }, 1000);
   }, [mutateConfig, addedCameras]);
 
+  const handleCameraAdded = useCallback(
+    ({ name, detectCodec }: { name: string; detectCodec?: string }) => {
+      if (detectCodec) {
+        setDetectCodecs((previous) => ({ ...previous, [name]: detectCodec }));
+      }
+    },
+    [],
+  );
+
   const handleNext = useCallback(() => {
-    onNext(addedCameras.length > 0 ? addedCameras : undefined);
-  }, [onNext, addedCameras]);
+    onNext(addedCameras.length > 0 ? addedCameras : undefined, detectCodecs);
+  }, [onNext, addedCameras, detectCodecs]);
 
   return (
     <>
@@ -94,7 +107,11 @@ export default function SetupCamera({ onNext, onBack }: SetupCameraProps) {
           </div>
         </div>
       </div>
-      <CameraWizardDialog open={showWizard} onClose={handleClose} />
+      <CameraWizardDialog
+        open={showWizard}
+        onClose={handleClose}
+        onCameraAdded={handleCameraAdded}
+      />
     </>
   );
 }
