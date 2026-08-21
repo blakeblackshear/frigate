@@ -57,7 +57,20 @@
     "title": "Editar modelo de clasificación",
     "descriptionState": "Edita las clases para este modelo de clasificación de estados. Los cambios requerirán un reentrenamiento de modelo.",
     "descriptionObject": "Edita el tipo de objeto y el tipo de clasificación para este modelo de clasificación de objetos.",
-    "stateClassesInfo": "Nota: El cambio de las clases de estado requiere reentrenar el modelo con las clases actualizadas."
+    "stateClassesInfo": "Modelo actualizado. Vuelva a entrenar el modelo para que los cambios de clase surtan efecto.",
+    "enabled": "Activado",
+    "enabledDesc": "Ejecuta este modelo. Cuando se desactiva, deja de funcionar y ya no clasifica.",
+    "saveAttempts": "Guardar intentos",
+    "saveAttemptsDesc": "Número de imágenes de intentos de clasificación que se conservarán para la interfaz de usuario de clasificaciones recientes.",
+    "motion": "Ejecutar en movimiento",
+    "motionDesc": "Ejecutar la clasificación cuando se detecte movimiento dentro del cultivo configurado.",
+    "interval": "Intervalo",
+    "intervalDesc": "Segundos entre ciclos de clasificación periódica. Dejar en blanco para que se ejecute solo con detección de movimiento.",
+    "intervalPlaceholder": "Sin intervalo",
+    "errors": {
+      "saveAttemptsInvalid": "Los intentos de guardado deben ser un número entero de 0 o mayor",
+      "intervalInvalid": "El intervalo debe ser un número entero mayor que 0"
+    }
   },
   "tooltip": {
     "noChanges": "No se han realizado cambios en el conjunto de datos desde el último entrenamiento.",
@@ -201,5 +214,6 @@
     }
   },
   "reclassifyImage": "Reclasificar imagen",
-  "reclassifyImageAs": "Reclasificar imagen como:"
+  "reclassifyImageAs": "Reclasificar imagen como:",
+  "disabled": "Desactivado"
 }

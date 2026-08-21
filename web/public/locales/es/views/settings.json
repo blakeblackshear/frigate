@@ -691,7 +691,7 @@
         "multiDeviceAdmin": "También puede obligar a todos los usuarios a volver a autenticarse inmediatamente rotando su secreto JWT."
       },
       "createUser": {
-        "desc": "Añadir una nueva cuenta de usuario y especificar un rol para el acceso a áreas de la interfaz de usuario de Frigate.",
+        "desc": "Agregue una nueva cuenta de usuario y especifique un rol para el acceso a las áreas de la interfaz de usuario de Frigate.",
         "title": "Crear nuevo usuario",
         "usernameOnlyInclude": "El nombre de usuario solo puede incluir letras, números, . o _",
         "confirmPassword": "Por favor, confirma tu contraseña"
@@ -1308,7 +1308,7 @@
         "webuiUrlHelp": "URL para acceder directamente a la interfaz web de la cámara desde la vista de depuración. Déjala en blanco para deshabilitar el enlace.",
         "webuiUrlInvalid": "Debe ser una URL válida (p. ej., https://ejemplo.com).",
         "dashboardLabel": "Mostrar en el panel En directo",
-        "dashboardHelp": "Mostrar esta cámara en el panel en directo.",
+        "dashboardHelp": "Esta cámara se muestra en el panel de control predeterminado \"Todas las cámaras\". Permanece disponible en todas partes, incluidos los grupos de cámaras.",
         "reviewLabel": "Mostrar en Revisión",
         "reviewHelp": "Mostrar esta cámara en Revisión, incluido el filtro de cámaras, la revisión de movimiento y la vista de historial."
       },
@@ -1354,7 +1354,7 @@
     "deleteCameraDialog": {
       "description": "Eliminar una cámara borrará permanentemente todas las grabaciones, los objetos rastreados y la configuración de esa cámara. Es posible que sea necesario eliminar manualmente cualquier transmisión go2rtc asociada a esta cámara.",
       "title": "Eliminar cámara",
-      "selectPlaceholder": "Elegir cámara...",
+      "selectPlaceholder": "Elige una cámara…",
       "confirmTitle": "¿Estás seguro?",
       "confirmWarning": "Eliminar <strong>{{cameraName}}</strong> no se puede deshacer.",
       "deleteExports": "Eliminar también las exportaciones de esta cámara",
@@ -1668,7 +1668,14 @@
       "keyLabel": "Clave",
       "valueLabel": "Valor",
       "keyPlaceholder": "Nueva clave",
-      "remove": "Eliminar"
+      "remove": "Eliminar",
+      "providerNameLabel": "Nombre del proveedor",
+      "providerNamePlaceholder": "p. ej., openai",
+      "variableNameLabel": "Nombre de la variable",
+      "variableNamePlaceholder": "p. ej., MI_VARIABLE",
+      "loggerNameLabel": "Nombre del registrador",
+      "keyPatternError": "Utilice únicamente letras, números, guiones y guiones bajos (sin espacios)",
+      "loggerNamePlaceholder": "p. ej., frigate.record"
     },
     "knownPlates": {
       "namePlaceholder": "p. ej., Coche de mi mujer",
@@ -2032,7 +2039,12 @@
       "autotrackingNoZones": "El seguimiento automático requiere al menos una zona. Define una zona para esta cámara en Máscaras / Zonas y, a continuación, establécela como zona obligatoria a continuación."
     },
     "ffmpeg": {
-      "hwaccelManualNotRecommended": "No son remontados los argumentos de aceleración por hardware manual. A no ser que un requisito específico exista, seleccione la preselección que coincida con su hardware."
+      "hwaccelManualNotRecommended": "No son remontados los argumentos de aceleración por hardware manual. A no ser que un requisito específico exista, seleccione la preselección que coincida con su hardware.",
+      "inputsMissingGo2rtcStream": "El campo de entrada que aparece a continuación apunta a una retransmisión de go2rtc que ya no existe. Seleccione una retransmisión existente o introduzca la URL de la cámara manualmente; de lo contrario, la cámara no podrá conectarse."
+    },
+    "model": {
+      "optimizedFor320": "Frigate está optimizado para un modelo de 320x320, que es la mejor opción para la mayoría de las configuraciones. Un modelo de 640x640 es más lento y solo resulta útil en situaciones específicas.",
+      "inputDimensionsNotDetectResolution": "El ancho y alto de entrada del modelo son las dimensiones de entrada del modelo de detección de objetos, no la resolución de detección de la cámara. Deben coincidir con las dimensiones del modelo que esté utilizando, normalmente un tamaño cuadrado como 320x320 o 640x640."
     }
   },
   "resetToDefaultDescription": "Esto restablecerá todos los ajustes de esta sección a sus valores predeterminados. Esta acción no se puede deshacer.",
