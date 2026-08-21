@@ -86,6 +86,9 @@
     "birdseye": {
         "quality": {
             "label": "Qualité d'encodage"
+        },
+        "mode": {
+            "description": "Mode pour l'inclusion des caméras dans la vue à vol d'oiseau : 'objects', 'motion', ou 'continuous'."
         }
     },
     "detect": {
@@ -97,6 +100,12 @@
         "skip_motion_threshold": {
             "label": "Ignorer le seuil de détection de mouvement",
             "description": "Si une valeur entre 0,0 et 1,0 est définie, et que plus de cette fraction de l'image change en une seule trame, le détecteur ne retournera aucune zone de mouvement et se recalibrera immédiatement. Cela peut économiser du CPU et réduire les faux positifs lors d'éclairs, d'orages, etc., mais peut manquer des événements réels comme une caméra PTZ suivant automatiquement un objet. Le compromis est entre perdre quelques mégaoctets d'enregistrements ou visionner quelques courts clips. Laisser vide (None) pour désactiver cette fonctionnalité."
+        },
+        "lightning_threshold": {
+            "description": "Seuil permettant de détecter et d'ignorer les brusques pointes d'éclairage (plus la valeur est faible, plus la sensibilité est élevée, valeurs comprises entre 0.3 et 1.0). Cela ne permet pas d'éviter complètement la détection de mouvement mais simplement d'arrêter l'analyse d'autres images une fois que le seuil est dépassé. Les enregistrements basés sur le mouvement sont tout de même créés lors de ces événements."
+        },
+        "improve_contrast": {
+            "description": "Appliquer les amélioration du contraste aux images avant l'analyse de mouvement afin d'améliorer la détection."
         }
     },
     "objects": {
@@ -109,11 +118,229 @@
                 "description": "Zone de boite englobante maximum (pixels ou pourcentage) autorisée pour ce type d'objet. Peut être en pixels (entier) ou pourcentage (décimale entre 0,000001 and 0,99)."
             },
             "min_ratio": {
-                "label": "Rapport d'aspect minimal"
+                "label": "Rapport d'aspect minimal",
+                "description": "Rapport largeur/hauteur minimal requis pour que la boîte englobante soit prise en compte."
+            },
+            "max_ratio": {
+                "label": "Rapport d’aspect maximal",
+                "description": "Rapport largeur/hauteur maximal requis pour que la boîte englobante soit prise en compte."
+            },
+            "threshold": {
+                "label": "Seuil de confiance",
+                "description": "Seuil de confiance moyen requis pour que l'objet soit considéré comme un vrai positif."
+            },
+            "min_score": {
+                "label": "Confiance minimum",
+                "description": "Confiance minimum pour la détection basée sur une image pour que l'objet soit prise en compte."
+            },
+            "mask": {
+                "label": "Masque de filtre",
+                "description": "Coordonnées du polygone indiquant où le filtre s'applique dans l'image."
+            },
+            "raw_mask": {
+                "label": "Masque brut"
+            },
+            "label": "Filtres d'objets"
+        },
+        "mask": {
+            "label": "Masque de l'objet",
+            "description": "Masque du polygone à utiliser pour prévenir la détection d'objets dans des zones spécifiques."
+        },
+        "raw_mask": {
+            "label": "Masque brut"
+        },
+        "genai": {
+            "label": "Configuration d'objet GenAI",
+            "description": "Réglages GenAI pour décrire les objets suivis et envoyer images pour la génération.",
+            "enabled": {
+                "label": "Activer GenAI",
+                "description": "Activer la génération GenAI des descriptions pour les objets suivies par défaut."
+            },
+            "use_snapshot": {
+                "label": "Utiliser les instantanées",
+                "description": "Utiliser les objets instantanés à la place des miniatures pour la génération de description GenAI."
+            },
+            "prompt": {
+                "label": "Invite de légende",
+                "description": "Modèle d’invite par défaut utilisé lors de la génération de descriptions avec GenAI."
+            },
+            "object_prompts": {
+                "label": "Invites d'objets",
+                "description": "Invites par objets pour personnaliser les sorties GenAI pour des légendes spécifiques."
+            },
+            "objects": {
+                "label": "Objets GenAI",
+                "description": "Liste des légendes d'objets à envoyer à GenAI par défaut."
+            },
+            "required_zones": {
+                "label": "Zones requises",
+                "description": "Zones qui doivent être entrées pour que les objets soit pris en compte pour la génération de description GenAI."
+            },
+            "debug_save_thumbnails": {
+                "label": "Sauvegarder miniatures",
+                "description": "Sauvegarder les miniatures envoyés à GenAI pour le débogage et la revue."
+            },
+            "send_triggers": {
+                "label": "Activations GenAI",
+                "description": "Définition des images qui devraient être envoyés à GenAI (quand terminé, après màj, etc.).",
+                "tracked_object_end": {
+                    "label": "Envoyé quand terminé",
+                    "description": "Envoyé une requête à GenAI quand le suivi de l'objet se termine."
+                },
+                "after_significant_updates": {
+                    "label": "Déclenchement anticipé de GenAI",
+                    "description": "Envoyé une requête à GenAI après une nombre donné de mise à jour significatives pour l'objet suivi."
+                }
+            },
+            "enabled_in_config": {
+                "label": "État original de GenAI",
+                "description": "Indique si GenAI était activé dans la configuration statique original."
             }
         }
     },
     "audio_transcription": {
         "label": "Transcription audio"
+    },
+    "audio": {
+        "label": "Détection audio",
+        "listen": {
+            "description": "Liste des types d'événements audio à détecter (exemples : aboiements, alertes incendies, voix, cris)."
+        },
+        "filters": {
+            "threshold": {
+                "label": "Minimum de confiance audio",
+                "description": "Seuil de confiance minimum pour que l'événement audio soit pris en compte."
+            }
+        }
+    },
+    "ffmpeg": {
+        "path": {
+            "description": "Emplacement du fichier binaire de FFmpeg à utiliser ou un alias de version (peut être «7.0» ou «8.0»)."
+        },
+        "output_args": {
+            "description": "Arguments de sortie par défaut utilisés pour les différents rôles FFmpeg, tels que detect et record.",
+            "detect": {
+                "description": "Arguments de sortie par défaut pour les flux du rôle detect."
+            },
+            "record": {
+                "description": "Arguments de sortie par défaut pour les flux du rôle record."
+            }
+        },
+        "apple_compatibility": {
+            "description": "Activer l'étiquetage HEVC pour une meilleure compatibilité avec les lecteurs Apple lors de l'enregistrement H.265."
+        }
+    },
+    "record": {
+        "label": "Enregistrement",
+        "enabled": {
+            "label": "Activer enregistrement"
+        },
+        "expire_interval": {
+            "label": "Intervalle de nettoyage des enregistrements",
+            "description": "Nombre de minutes entre les opérations de nettoyage supprimant les segments d’enregistrement expirés."
+        },
+        "continuous": {
+            "label": "Rétention continue",
+            "description": "Nombre de jours de rétention des enregistrements sans prendre en compte les objets suivis ou les mouvements. Mettre à 0 si vous voulez seulement garder les enregistrements des alertes et des détections.",
+            "days": {
+                "label": "Nombre de jours de rétention",
+                "description": "Nombre de jours de rétention des enregistrements."
+            }
+        },
+        "motion": {
+            "label": "Rétention des mouvements",
+            "description": "Nombre de jours de rétention des enregistrements déclenchés par des mouvements sans prendre en compte les objets suivis. Mettre à 0 si vous voulez seulement garder les enregistrements des alertes et des détections.",
+            "days": {
+                "label": "Nombre de jours de rétention",
+                "description": "Nombre de jours de rétention des enregistrements."
+            }
+        },
+        "detections": {
+            "label": "Rétention des détections",
+            "description": "Réglages de la rétention des enregistrements pour les événements des détection incluant les durées de captures antérieur et postérieur.",
+            "pre_capture": {
+                "label": "Nombre de secondes antérieur à la capture",
+                "description": "Nombre de secondes antérieur à l'événement de détection à inclure dans l'enregistrement."
+            },
+            "post_capture": {
+                "label": "Nombre de secondes posterieur à l'événement",
+                "description": "Nombre de secondes posterieur à l'événement de détection à inclure dans l'enregistrement."
+            },
+            "retain": {
+                "label": "Rétention d'événement",
+                "description": "Réglages de la rétention pour les enregistrements d'événements de détection.",
+                "days": {
+                    "label": "Nombre de jours de rétention",
+                    "description": "Nombre de jours de rétention des enregistrements d'événements de détection."
+                },
+                "mode": {
+                    "label": "Mode de rétention",
+                    "description": "Mode de rétention : tout (sauvegarder tout les segments), mouvement (sauvegarder les segments avec mouvement), active_objects (sauvegarder les segments avec des objets actifs)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Rétention d'alerte",
+            "description": "Réglages de la rétention des enregistrements des événements d'alertes incluant les durées des captures antérieur et postérieur.",
+            "pre_capture": {
+                "label": "Nombre de secondes antérieur à la capture",
+                "description": "Nombre de secondes antérieur à l'événement de détection à inclure dans l'enregistrement."
+            },
+            "post_capture": {
+                "label": "Nombre de secondes postérieur à la capture",
+                "description": "Nombre de secondes postérieur à l'événement de capture à inclure dans l'enregistrement."
+            },
+            "retain": {
+                "label": "Rétention d'événement",
+                "description": "Réglages de la rétention pour les enregistrement d'événements de détection.",
+                "days": {
+                    "label": "Nombre de jours de rétention",
+                    "description": "Nombre de jours de rétention pour les enregistrements d'événements de détection."
+                },
+                "mode": {
+                    "label": "Mode de rétention",
+                    "description": "Mode de rétention : tout (sauvegarder tout les segments), mouvement (sauvegarder les segments avec mouvement), active_objects (sauvegarder les segments avec des objets actifs)."
+                }
+            }
+        },
+        "export": {
+            "label": "Exporter la configuration",
+            "description": "Réglages à utiliser lors de l'exportation des enregistrements tels que le timelapse et l'accélération matérielle.",
+            "hwaccel_args": {
+                "label": "Exporter les arguments hwaccel",
+                "description": "Arguments d’accélération matérielle à utiliser pour les opérations d’exportation et de transcodage."
+            },
+            "max_concurrent": {
+                "label": "Nombre maximum d'exports simultanés",
+                "description": "Nombre maximum de tâches d'exportation à effectuer en même temps."
+            }
+        },
+        "preview": {
+            "label": "Prévisualiser la configuration",
+            "quality": {
+                "label": "Prévisualisation qualité",
+                "description": "Niveau de qualité des prévisualisations (très_bas, bas, moyen, haut, très_haut)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "État original de l'enregistrement",
+            "description": "Indique si l'enregistrement était activé dans la configuration statique originale."
+        }
+    },
+    "review": {
+        "label": "Révision",
+        "alerts": {
+            "label": "Configuration des alertes",
+            "enabled": {
+                "label": "Active les alertes"
+            },
+            "labels": {
+                "label": "Étiquettes d'alertes",
+                "description": "Liste d'étiquettes d'objets considérés comme des alertes (par exemple : voiture, personne)."
+            },
+            "required_zones": {
+                "label": "Zones requises"
+            }
+        }
     }
 }
