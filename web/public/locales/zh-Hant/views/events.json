@@ -89,6 +89,9 @@
     "seekAria": "將 {{camera}} 播放器定位到 {{time}}",
     "filter": "篩選",
     "filterDesc": "選擇區域以僅顯示在這些區域中有畫面變動的片段。",
-    "filterClear": "清除"
+    "filterClear": "清除",
+    "crop": "裁剪過濾",
+    "cropAria": "切換裁切預覽至已過濾區域",
+    "cropDesc": "將預覽放大到選定的濾鏡區域，而不是顯示整個畫面。"
   }
 }
