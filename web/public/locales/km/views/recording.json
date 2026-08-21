@@ -1,1 +1,12 @@
-{}
+{
+  "export": "នាំចេញ",
+  "calendar": "ប្រតិទិន",
+  "filter": "តម្រង់",
+  "filters": "តម្រង",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "មិនបានជ្រើសរើសចន្លោះពេលត្រឹមត្រូវទេ",
+      "endTimeMustAfterStartTime": "ពេលវេលាបញ្ចប់ ត្រូវតែនៅក្រោយពេលវេលាចាប់ផ្តើម"
+    }
+  }
+}
