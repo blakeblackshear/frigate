@@ -26,7 +26,7 @@
           "submitted": "Inskickad"
         },
         "toast": {
-          "error": "Det gick inte att skicka till Frigate+. Kontrollera nätverksanslutningen och försök igen."
+          "error": "Misslyckades att skicka till Frigate+. Kontrollera din nätverksanslutning och prova igen."
         }
       }
     },
@@ -69,8 +69,8 @@
       "batchSuccess_other": "Startade {{count}} exporter. Öppnar ärendet nu.",
       "batchPartial": "Startade {{successful}} av {{total}} exporter. Misslyckade kameror: {{failedCameras}}",
       "batchFailed": "Det gick inte att starta {{total}} exporter. Berörda kameror: {{failedCameras}}",
-      "batchQueuedSuccess_one": "1 export har köats. Ärendet öppnas nu.",
-      "batchQueuedSuccess_other": "{{count}} exporter har köats. Öppnar ärendet nu.",
+      "batchQueuedSuccess_one": "1 export har köats.",
+      "batchQueuedSuccess_other": "{{count}} exporter har köats.",
       "batchQueuedPartial": "Köade {{successful}} av {{total}} exporter. Misslyckade kameror: {{failedCameras}}",
       "batchQueueFailed": "Det gick inte att köa {{total}} exporter. Berörda kameror: {{failedCameras}}"
     },
@@ -111,7 +111,7 @@
       "selectWithActivity": "Kameror med spårade objekt",
       "selectGroup": "Välj grupp",
       "noMatchingCameras": "Ingen kamera matchar din sökning",
-      "searchOrSelectGroup": "Sök eller välj en kameragrupp…",
+      "searchOrSelectGroup": "Sök, eller välj kameragrupp...",
       "clearSelection": "Rensa val",
       "selectedCount": "{{selected}} / {{total}} valda"
     },
@@ -125,8 +125,8 @@
       "exportButton_other": "Exportera {{count}} granskningsobjekt",
       "exportingButton": "Exporterar…",
       "toast": {
-        "started_one": "Startade 1 export. Öppnar ärendet nu.",
-        "started_other": "Startade {{count}} exporter. Öppnar ärendet nu.",
+        "started_one": "Startade 1 export.",
+        "started_other": "Startade {{count}} exporter.",
         "startedNoCase_one": "Startade 1 export.",
         "startedNoCase_other": "Startade {{count}} exporter.",
         "partial": "Startade {{successful}} av {{total}} exporter. Följande misslyckades: {{failedItems}}",

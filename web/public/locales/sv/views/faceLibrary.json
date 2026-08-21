@@ -73,7 +73,7 @@
       "deletedFace_other": "{{count}} ansikten har tagits bort.",
       "deletedName_one": "{{count}} samling har tagits bort.",
       "deletedName_other": "{{count}} samlingar har tagits bort.",
-      "renamedFace": "Ansiktet har bytt namn till {{name}}.",
+      "renamedFace": "Ansiktet har bytt namn till {{name}}",
       "trainedFace": "Ansiktet har tränats.",
       "updatedFaceScore": "Ansiktspoängen för {{name}} har uppdaterats till {{score}}."
     },
