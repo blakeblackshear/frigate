@@ -11,7 +11,12 @@
     "object": "اشکال‌زدایی - Frigate",
     "general": "تنظیمات رابط کاربری - فریگیت",
     "frigatePlus": "تنظیمات Frigate+ - Frigate",
-    "notifications": "تنظیمات اعلان‌ها - Frigate"
+    "notifications": "تنظیمات اعلان‌ها - Frigate",
+    "globalConfig": "پیکربندی سراسری - فریگیت",
+    "cameraConfig": "پیکربندی دوربین - فریگیت",
+    "detectorsAndModel": "آشکارسازها و مدل - فریگیت",
+    "maintenance": "نگهداری - فریگیت",
+    "profiles": "پروفایل‌ها - فریگیت"
   },
   "menu": {
     "ui": "رابط کاربری",
@@ -26,7 +31,65 @@
     "roles": "نقش‌ها",
     "notifications": "اعلان‌ها",
     "frigateplus": "فریگیت+",
-    "profiles": "پروفایل‌ها"
+    "profiles": "پروفایل‌ها",
+    "general": "عمومی",
+    "globalConfig": "پیکربندی سراسری",
+    "system": "سیستم",
+    "integrations": "یکپارچه‌سازی‌ها",
+    "cameras": "پیکربندی دوربین",
+    "uiSettings": "تنظیمات رابط کاربری",
+    "globalDetect": "تشخیص اشیاء",
+    "globalRecording": "ضبط",
+    "globalSnapshots": "عکس‌های فوری",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "تشخیص حرکت",
+    "globalObjects": "اشیاء",
+    "globalReview": "بازبینی",
+    "globalAudioEvents": "تشخیص صدا",
+    "globalLivePlayback": "پخش زنده",
+    "globalTimestampStyle": "سبک مهر زمانی",
+    "systemDatabase": "پایگاه داده",
+    "systemTls": "TLS",
+    "systemAuthentication": "احراز هویت",
+    "systemNetworking": "شبکه‌بندی",
+    "systemProxy": "پروکسی",
+    "systemUi": "رابط کاربری",
+    "systemLogging": "Logging",
+    "systemEnvironmentVariables": "متغیرهای محیطی",
+    "systemTelemetry": "تلمتری",
+    "systemBirdseye": "چشم پرنده",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorsAndModel": "آشکارسازها و مدل",
+    "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "جریان‌های go2rtc",
+    "integrationSemanticSearch": "جستجوی معنایی",
+    "integrationGenerativeAi": "هوش مصنوعی مولد",
+    "integrationFaceRecognition": "شناسایی چهره",
+    "integrationLpr": "تشخیص پلاک خودرو",
+    "integrationObjectClassification": "نحوه طبقه‌بندی اشیاء",
+    "integrationAudioTranscription": "رونویسی صدا",
+    "cameraDetect": "تشخیص اشیاء",
+    "cameraFfmpeg": "جریان‌ها (FFmpeg)",
+    "cameraRecording": "ضبط",
+    "cameraSnapshots": "عکس‌های فوری",
+    "cameraMotion": "تشخیص حرکت",
+    "cameraObjects": "اشیاء",
+    "cameraConfigReview": "بازبینی",
+    "cameraAudioEvents": "تشخیص صدا",
+    "cameraAudioTranscription": "رونویسی صدا",
+    "cameraNotifications": "اعلان‌ها",
+    "cameraLivePlayback": "پخش زنده",
+    "cameraBirdseye": "چشم پرنده",
+    "cameraFaceRecognition": "شناسایی چهره",
+    "cameraLpr": "تشخیص پلاک خودرو",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "رابط کاربری دوربین",
+    "cameraTimestampStyle": "سبک مهر زمانی",
+    "cameraMqtt": "MQTT دوربین",
+    "maintenance": "حفظ و نگهداری",
+    "mediaSync": "همگام‌سازی رسانه",
+    "regionGrid": "شبکه منطقه"
   },
   "general": {
     "title": "تنظیمات رابط کاربری",
@@ -118,11 +181,11 @@
         "label": "اندازهٔ مدل",
         "desc": "اندازهٔ مدلی که برای بردارهای جست‌وجوی معنایی استفاده می‌شود.",
         "small": {
-          "desc": "استفاده از <em>small </em> از نسخهٔ کوانتیزهٔ مدل استفاده می‌کند که RAM کم‌تری مصرف می‌کند و روی CPU سریع‌تر اجرا می‌شود، با تفاوت بسیار ناچیز در کیفیت داخلی.",
+          "desc": "استفاده از <em>small</em> از نسخهٔ کوانتیزهٔ مدل استفاده می‌کند که RAM کم‌تری مصرف می‌کند و روی CPU سریع‌تر اجرا می‌شود، با تفاوت بسیار ناچیز در کیفیت جاسازی.",
           "title": "کوچک"
         },
         "large": {
-          "desc": "استفاده از <em>large </em> از مدل کامل Jina استفاده می‌کند و در صورت امکان به‌طور خودکار روی GPU اجرا می‌شود.",
+          "desc": "استفاده از <em>large</em> از مدل کامل Jina استفاده می‌کند و در صورت امکان به‌طور خودکار روی GPU اجرا می‌شود.",
           "title": "بزرگ"
         }
       },
@@ -138,7 +201,7 @@
         },
         "large": {
           "title": "بزرگ",
-          "desc": "استفاده از <em>large </em> از مدل embedding چهرهٔ ArcFace استفاده می‌کند و در صورت امکان به‌طور خودکار روی GPU اجرا می‌شود."
+          "desc": "استفاده از <em>large</em> از مدل جاسازی چهرهٔ ArcFace استفاده می‌کند و در صورت امکان به‌طور خودکار روی GPU اجرا می‌شود."
         },
         "desc": "اندازه مدل مورد استفاده برای تشخیص چهره."
       },
@@ -338,7 +401,8 @@
         },
         "hikvision": {
           "substreamWarning": "زیرجریان ۱ روی وضوح پایین قفل شده است. بسیاری از دوربین‌های Hikvision از زیرجریان‌های اضافی پشتیبانی می‌کنند که باید در تنظیمات دوربین فعال شوند. توصیه می‌شود در صورت وجود، آن جریان‌ها را بررسی کرده و استفاده کنید."
-        }
+        },
+        "resolutionUnknown": "وضوح این جریان قابل بررسی نبود. باید وضوح تشخیص را به‌صورت دستی در تنظیمات یا پیکربندی خود تنظیم کنید."
       },
       "connecting": "در حال اتصال...",
       "description": "پیش از ذخیره کردن دوربین جدیدتان، اعتبارسنجی و تحلیل نهایی انجام می‌شود. پیش از ذخیره، هر استریم را متصل کنید."
@@ -351,7 +415,34 @@
     "backToSettings": "بازگشت به تنظیمات دوربین",
     "streams": {
       "title": "فعال‌سازی / غیرفعال‌سازی دوربین‌ها",
-      "desc": "یک دوربین را تا زمانی که Frigate دوباره راه‌اندازی شود، موقتاً غیرفعال کنید. غیرفعال‌کردن یک دوربین باعث می‌شود پردازش جریان‌های این دوربین توسط Frigate کاملاً متوقف شود. تشخیص، ضبط و اشکال‌زدایی در دسترس نخواهد بود.<br /><em>نکته: این کار بازپخش‌های go2rtc را غیرفعال نمی‌کند.</em>"
+      "desc": "یک دوربین را تا زمانی که Frigate دوباره راه‌اندازی شود، موقتاً غیرفعال کنید. غیرفعال‌کردن یک دوربین باعث می‌شود پردازش جریان‌های این دوربین توسط Frigate کاملاً متوقف شود. تشخیص، ضبط و اشکال‌زدایی در دسترس نخواهد بود.<br /><em>نکته: این کار بازپخش‌های go2rtc را غیرفعال نمی‌کند.</em>",
+      "label": "وضعیت دوربین",
+      "description": "تنظیم وضعیت عملیاتی هر دوربین.<br /><br /><strong>روشن</strong>: جریان‌ها به‌طور عادی پردازش می‌شوند.<br /><strong>خاموش</strong>: پردازش را موقتاً متوقف می‌کند. پس از بازراه‌اندازی فریگیت باقی نمی‌ماند.<br /><strong>غیرفعال</strong>: پردازش را متوقف کرده و تغییر را در پیکربندی ذخیره می‌کند. بازراه‌اندازی برای فعال‌سازی مجدد دوربین غیرفعال لازم است.<br /><br /><em>توجه: غیرفعال کردن روی بازپخش‌های go2rtc تأثیری ندارد.</em><br /><br />دستگیره را بکشید تا دوربین‌های فعال را همان‌طور که در سراسر رابط کاربری ظاهر می‌شوند مرتب کنید، از جمله داشبورد زنده و منوهای انتخاب دوربین.",
+      "disabledSubheading": "غیرفعال در پیکربندی",
+      "status": {
+        "on": "روشن",
+        "off": "خاموش",
+        "disabled": "غیرفعال"
+      },
+      "enableSuccess": "{{cameraName}} فعال شد. فریگیت را بازراه‌اندازی کنید تا اعمال شود.",
+      "disableSuccess": "{{cameraName}} غیرفعال شد و در پیکربندی ذخیره شد.",
+      "reorderHandle": "برای مرتب‌سازی بکشید",
+      "saving": "در حال ذخیره…",
+      "saved": "ذخیره شد",
+      "details": {
+        "edit": "ویرایش جزئیات دوربین",
+        "title": "ویرایش جزئیات دوربین",
+        "description": "به‌روزرسانی نام نمایشی، آدرس خارجی و قابلیت مشاهده استفاده‌شده برای این دوربین در سراسر رابط کاربری فریگیت.",
+        "friendlyNameLabel": "نام نمایشی",
+        "friendlyNameHelp": "نام دوستانه نمایش‌داده‌شده برای این دوربین در سراسر رابط کاربری فریگیت. خالی بگذارید تا از شناسه دوربین استفاده شود.",
+        "webuiUrlLabel": "آدرس رابط کاربری وب دوربین",
+        "webuiUrlHelp": "آدرس برای بازدید مستقیم رابط کاربری وب دوربین از نمای اشکال‌زدایی. خالی بگذارید تا پیوند غیرفعال شود.",
+        "webuiUrlInvalid": "باید یک آدرس اینترنتی معتبر باشد (مثلاً https://example.com).",
+        "dashboardLabel": "نمایش در داشبورد پخش زنده",
+        "dashboardHelp": "این دوربین را در داشبورد پیش‌فرض همه دوربین‌های زنده نشان دهید. در همه جای دیگر از جمله گروه‌های دوربین در دسترس باقی می‌ماند.",
+        "reviewLabel": "نمایش در بازبینی",
+        "reviewHelp": "این دوربین را در بازبینی نشان دهید، از جمله فیلتر دوربین، بازبینی حرکت و نمای تاریخچه."
+      }
     },
     "cameraConfig": {
       "add": "افزودن دوربین",
@@ -361,7 +452,7 @@
       "nameLength": "نام دوربین باید کمتر از ۶۴ کاراکتر باشد.",
       "nameRequired": "نام دوربین الزامی است",
       "namePlaceholder": "مثلاً front_door یا Back Yard Overview",
-      "enabled": "فعال",
+      "enabled": "فعال شده",
       "ffmpeg": {
         "inputs": "جریان‌های ورودی",
         "path": "مسیر جریان",
@@ -382,7 +473,121 @@
       },
       "addUrl": "افزودن نشانی"
     },
-    "editCamera": "ویرایش دوربین:"
+    "editCamera": "ویرایش دوربین:",
+    "description": "افزودن، ویرایش و حذف دوربین‌ها، کنترل وضعیت هر دوربین، و پیکربندی لغوهای به ازای پروفایل و نوع دوربین. برای پیکربندی جریان‌ها، تشخیص، حرکت و سایر تنظیمات خاص دوربین، بخش خاص را زیر پیکربندی دوربین انتخاب کنید.",
+    "deleteCamera": "حذف دوربین",
+    "deleteCameraDialog": {
+      "title": "حذف دوربین",
+      "description": "حذف یک دوربین به‌طور دائمی همه ضبط‌ها، اشیاء ردیابی‌شده و پیکربندی آن دوربین را حذف می‌کند. ممکن است جریان‌های go2rtc مرتبط با این دوربین همچنان نیاز به حذف دستی داشته باشند.",
+      "selectPlaceholder": "انتخاب دوربین…",
+      "confirmTitle": "آیا مطمئن هستید؟",
+      "confirmWarning": "حذف <strong>{{cameraName}}</strong> قابل بازگشت نیست.",
+      "deleteExports": "خروجی‌های این دوربین نیز حذف شوند",
+      "confirmButton": "حذف دائمی",
+      "success": "دوربین {{cameraName}} با موفقیت حذف شد",
+      "error": "حذف دوربین {{cameraName}} ناموفق بود"
+    },
+    "profiles": {
+      "title": "لغوهای دوربین پروفایل",
+      "selectLabel": "انتخاب پروفایل",
+      "description": "پیکربندی اینکه کدام دوربین‌ها هنگام فعال‌سازی یک پروفایل روشن یا خاموش شوند. دوربین‌های تنظیم‌شده روی «ارث‌بری» حالت پیش‌فرض خود را نگه می‌دارند.",
+      "inherit": "ارث‌بری",
+      "on": "روشن",
+      "off": "خاموش"
+    },
+    "cameraType": {
+      "title": "نوع دوربین",
+      "label": "نوع دوربین",
+      "description": "نوع هر دوربین را تنظیم کنید. دوربین‌های LPR اختصاصی دوربین‌های تک‌منظوره با زوم اپتیکی قدرتمند برای ثبت پلاک خودروهای دور هستند. اکثر دوربین‌ها باید از نوع دوربین عادی استفاده کنند مگر اینکه دوربین مخصوص LPR باشد و دید متمرکز روی پلاک‌ها داشته باشد.",
+      "normal": "عادی",
+      "dedicatedLpr": "LPR اختصاصی",
+      "saveSuccess": "نوع دوربین {{cameraName}} به‌روزرسانی شد. فریگیت را بازراه‌اندازی کنید تا تغییرات اعمال شود."
+    },
+    "clone": {
+      "sectionTitle": "کپی تنظیمات",
+      "sectionDescription": "کپی پیکربندی از یک دوربین به دوربین دیگر یا یک دوربین جدید.",
+      "button": "کپی تنظیمات",
+      "title": "کپی تنظیمات دوربین",
+      "description": "کپی پیکربندی یک دوربین به یک یا چند دوربین دیگر یا یک دوربین جدید. هویت (نام، نام دوستانه، آدرس رابط کاربری وب، ترتیب نمایش) هرگز کپی نمی‌شود.",
+      "source": {
+        "label": "دوربین منبع",
+        "placeholder": "یک دوربین منبع انتخاب کنید",
+        "required": "یک دوربین منبع انتخاب کنید"
+      },
+      "target": {
+        "legend": "مقصد",
+        "newRadio": "دوربین جدید",
+        "newNameLabel": "نام دوربین",
+        "newNamePlaceholder": "مثلاً back_door یا Back Door",
+        "newNameRequired": "نام دوربین الزامی است",
+        "newNameInvalid": "نام دوربین نامعتبر",
+        "newNameCollision": "دوربینی با این نام از قبل وجود دارد",
+        "newStreamsForced": "جریان‌ها همیشه برای دوربین جدید کپی می‌شوند.",
+        "existingCamerasRadio": "دوربین‌های موجود",
+        "allCameras": "همه دوربین‌ها",
+        "existingPlaceholder": "حداقل یک دوربین انتخاب کنید",
+        "existingDisabled": "دوربین دیگری برای کپی وجود ندارد"
+      },
+      "categories": {
+        "legend": "تنظیمات برای کپی",
+        "description": "انتخاب کنید کدام تنظیمات از دوربین منبع کپی شوند.",
+        "selectAll": "انتخاب همه",
+        "selectNone": "انتخاب هیچ‌کدام",
+        "resetDefaults": "بازنشانی به پیش‌فرض‌ها",
+        "general": "عمومی",
+        "spatial": "تنظیمات فضایی",
+        "streams": "جریان‌ها",
+        "spatialWarningTitle": "عدم تطابق وضوح",
+        "spatialWarning": "وضوح تشخیص دوربین منبع {{srcCamera}} ({{srcWidth}}×{{srcHeight}}) با این موارد متفاوت است: {{cameras}}. چندضلعی‌ها ممکن است روی آن دوربین‌ها تراز نباشند. این پیش‌فرض‌ها خاموش هستند؛ فعال کنید تا همان‌طور که هست کپی شوند.",
+        "restartHint": "بازراه‌اندازی لازم است",
+        "items": {
+          "record": "ضبط",
+          "snapshots": "عکس‌های فوری",
+          "review": "بازبینی",
+          "motion": "تشخیص حرکت",
+          "objects": "اشیاء",
+          "audio": "تشخیص صدا",
+          "audio_transcription": "رونویسی صدا",
+          "notifications": "اعلان‌ها",
+          "birdseye": "چشم پرنده",
+          "mqtt": "MQTT",
+          "timestamp_style": "سبک مهر زمانی",
+          "onvif": "ONVIF",
+          "lpr": "تشخیص پلاک خودرو",
+          "face_recognition": "شناسایی چهره",
+          "semantic_search": "جستجوی معنایی",
+          "genai": "هوش مصنوعی مولد",
+          "type": "نوع دوربین (عادی / LPR اختصاصی)",
+          "profiles": "پروفایل‌ها",
+          "detect": "ابعاد تشخیص",
+          "zones": "نواحی",
+          "motion_mask": "ماسک‌های حرکت",
+          "object_masks": "ماسک‌های اشیاء",
+          "ffmpeg_live": "آدرس‌ها و نقش‌های جریان"
+        }
+      },
+      "footer": {
+        "changeCount_one": "{{count}} تغییر اعمال خواهد شد",
+        "changeCount_other": "تعداد {{count}} تغییر اعمال خواهد شد",
+        "restartNeeded": "برای برخی تغییرات بازراه‌اندازی لازم خواهد بود.",
+        "liveOnly": "همه تغییرات به‌صورت زنده بدون بازراه‌اندازی اعمال می‌شوند.",
+        "submit": "ساخت کپی",
+        "submitting": "در حال کپی…"
+      },
+      "toast": {
+        "success": "تنظیمات به {{cameraName}} کپی شد",
+        "successWithRestart": "تنظیمات به {{cameraName}} کپی شد. فریگیت را بازراه‌اندازی کنید تا تغییرات اعمال شود.",
+        "successMulti_one": "تنظیمات به {{count}} دوربین کپی شد",
+        "successMulti_other": "تنظیمات به تعداد {{count}} دوربین کپی شد",
+        "successMultiWithRestart_one": "تنظیمات به {{count}} دوربین کپی شد. فریگیت را بازراه‌اندازی کنید تا همه تغییرات اعمال شود.",
+        "successMultiWithRestart_other": "تنظیمات به تعداد {{count}} دوربین کپی شد. فریگیت را بازراه‌اندازی کنید تا همه تغییرات اعمال شود.",
+        "partialFailure": "{{successCount}} بخش اعمال شد؛ «{{failedSection}}» ناموفق بود: {{errorMessage}}",
+        "partialFailureMulti": "به {{successCount}} دوربین کپی شد؛ ناموفق برای {{failed}}: {{errorMessage}}",
+        "newCameraPartialFailure": "دوربین {{cameraName}} ایجاد شد اما کپی برخی تنظیمات ناموفق بود: {{errorMessage}}",
+        "sourceMissing": "دوربین منبع دیگر وجود ندارد",
+        "submitError": "کپی دوربین ناموفق بود: {{errorMessage}}"
+      }
+    }
   },
   "cameraReview": {
     "title": "تنظیمات بازبینی دوربین",
@@ -392,7 +597,7 @@
     },
     "reviewClassification": {
       "title": "طبقه‌بندی بازبینی",
-      "desc": "Frigate موارد بازبینی را به‌عنوان اعلان‌ها و تشخیص‌ها دسته‌بندی می‌کند. به‌طور پیش‌فرض، همهٔ اشیای <em>person </em> و <em>car </em> به‌عنوان اعلان در نظر گرفته می‌شوند. می‌توانید با پیکربندی نواحی لازم برای آن‌ها، طبقه‌بندی موارد بازبینی خود را دقیق‌تر کنید.",
+      "desc": "Frigate موارد بازبینی را به‌عنوان اعلان‌ها و تشخیص‌ها دسته‌بندی می‌کند. به‌طور پیش‌فرض، همهٔ اشیای <em>person</em> و <em>car</em> به‌عنوان اعلان در نظر گرفته می‌شوند. می‌توانید با پیکربندی نواحی لازم برای آن‌ها، طبقه‌بندی موارد بازبینی خود را دقیق‌تر کنید.",
       "noDefinedZones": "هیچ ناحیه‌ای برای این دوربین تعریف نشده است.",
       "objectAlertsTips": "همهٔ اشیای {{alertsLabels}} در {{cameraName}} به‌صورت اعلان نمایش داده می‌شوند.",
       "zoneObjectAlertsTips": "همهٔ اشیای {{alertsLabels}} که در {{zone}} روی {{cameraName}} تشخیص داده می‌شوند، به‌صورت اعلان نمایش داده خواهند شد.",
@@ -458,6 +663,15 @@
         "removeLastPoint": "حذف آخرین نقطه",
         "error": {
           "mustBeFinished": "رسم چندضلعی باید قبل از ذخیره کامل شود."
+        },
+        "type": {
+          "zone": "منطقه",
+          "motion_mask": "ماسک حرکت",
+          "object_mask": "ماسک شیء"
+        },
+        "revertOverride": {
+          "title": "بازگشت به پیکربندی پایه",
+          "desc": "این کار لغو پروفایل برای {{type}} <em>{{name}}</em> را حذف کرده و به پیکربندی پایه بازمی‌گردد."
         }
       },
       "inertia": {
@@ -473,6 +687,17 @@
       "speed": {
         "error": {
           "mustBeGreaterOrEqualTo": "آستانهٔ سرعت باید بیشتر از یا مساوی ۰.۱ باشد."
+        }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "شناسه نباید خالی باشد.",
+          "alreadyExists": "یک ماسک با این شناسه از قبل برای این دوربین وجود دارد."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "نام نباید خالی باشد."
         }
       }
     },
@@ -526,12 +751,16 @@
       "inertia": {
         "title": "لختی",
         "desc": "تعداد فریم‌هایی را مشخص می‌کند که یک شیء باید در یک ناحیه باشد تا در آن ناحیه محسوب شود. <em>پیش‌فرض: ۳</em>"
+      },
+      "enabled": {
+        "title": "فعال شده",
+        "description": "آیا این منطقه در فایل پیکربندی فعال و روشن است. در صورت غیرفعال بودن، نمی‌تواند با MQTT فعال شود. مناطق غیرفعال در زمان اجرا نادیده گرفته می‌شوند."
       }
     },
     "motionMasks": {
       "label": "ماسک حرکت",
       "context": {
-        "title": "ماسک‌های حرکت برای جلوگیری از این‌که انواع ناخواستهٔ حرکت باعث فعال‌شدن تشخیص شوند استفاده می‌شوند (مثلاً شاخه‌های درخت، مهر زمانیِ دوربین). ماسک‌های حرکت باید <em>با نهایت صرفه‌جویی </em> استفاده شوند؛ ماسک‌گذاریِ بیش‌ازحد باعث می‌شود ردیابی اشیا دشوارتر شود."
+        "title": "ماسک‌های حرکت برای جلوگیری از این‌که انواع ناخواستهٔ حرکت باعث فعال‌شدن تشخیص شوند استفاده می‌شوند (مثلاً شاخه‌های درخت، مهر زمانیِ دوربین). ماسک‌های حرکت باید <em>با نهایت صرفه‌جویی</em> استفاده شوند؛ ماسک‌گذاریِ بیش‌ازحد باعث می‌شود ردیابی اشیا دشوارتر شود."
       },
       "point_one": "{{count}} نقطه",
       "point_other": "{{count}} نقطه ها",
@@ -552,6 +781,12 @@
       "desc": {
         "title": "ماسک‌های حرکت برای جلوگیری از فعال‌سازی تشخیص توسط انواع ناخواستهٔ حرکت استفاده می‌شوند. ماسک‌گذاری بیش‌ازحد ردیابی اشیا را دشوارتر می‌کند.",
         "documentation": "مستندات"
+      },
+      "defaultName": "ماسک حرکت {{number}}",
+      "name": {
+        "title": "نام",
+        "description": "یک نام دوستانه اختیاری برای این ماسک حرکت.",
+        "placeholder": "یک نام وارد کنید..."
       }
     },
     "objectMasks": {
@@ -577,6 +812,11 @@
         "title": "اشیا",
         "desc": "نوع شیئی که به این ماسک شیء مربوط می‌شود.",
         "allObjectTypes": "همهٔ انواع شیء"
+      },
+      "name": {
+        "title": "نام",
+        "description": "یک نام دوستانه اختیاری برای این ماسک شیء.",
+        "placeholder": "یک نام وارد کنید..."
       }
     },
     "restart_required": "نیاز به راه‌اندازی مجدد (ماسک‌ها/ناحیه‌ها تغییر کرده‌اند)",
@@ -589,7 +829,17 @@
       }
     },
     "motionMaskLabel": "ماسک حرکت {{number}}",
-    "objectMaskLabel": "ماسک شیء {{number}}"
+    "objectMaskLabel": "ماسک شیء {{number}}",
+    "disabledInConfig": "آیتم در فایل پیکربندی غیرفعال است",
+    "addDisabledProfile": "ابتدا به پیکربندی پایه اضافه کنید، سپس در پروفایل لغو کنید",
+    "profileBase": "(پایه)",
+    "profileOverride": "(لغو)",
+    "masks": {
+      "enabled": {
+        "title": "فعال شده",
+        "description": "آیا این ماسک در فایل پیکربندی فعال است. در صورت غیرفعال بودن، نمی‌تواند با MQTT فعال شود. ماسک‌های غیرفعال در زمان اجرا نادیده گرفته می‌شوند."
+      }
+    }
   },
   "motionDetectionTuner": {
     "title": "تنظیم‌گر تشخیص حرکت",
@@ -599,7 +849,7 @@
       "documentation": "راهنمای تنظیم تشخیص حرکت را بخوانید"
     },
     "improveContrast": {
-      "desc": "بهبود کنتراست برای صحنه‌های تاریک‌تر. <em>پیش‌فرض: روشن </em>",
+      "desc": "بهبود کنتراست برای صحنه‌های تاریک‌تر. <em>پیش‌فرض: روشن</em>",
       "title": "بهبود کنتراست"
     },
     "toast": {
@@ -858,7 +1108,8 @@
     },
     "notificationUnavailable": {
       "title": "اعلان‌ها در دسترس نیستند",
-      "desc": "اعلان‌های پوش وب نیاز به یک بستر امن دارند ( <code>https://… </code>). این محدودیت مرورگر است. برای استفاده از اعلان‌ها، به‌صورت امن به Frigate دسترسی پیدا کنید."
+      "desc": "اعلان‌های پوش وب نیاز به یک بستر امن دارند ( <code>https://… </code>). این محدودیت مرورگر است. برای استفاده از اعلان‌ها، به‌صورت امن به Frigate دسترسی پیدا کنید.",
+      "descPwa": "در iOS، اعلان‌های وب پوش فقط زمانی در دسترس هستند که فریگیت روی صفحه اصلی شما نصب شده باشد. منوی <strong>اشتراک‌گذاری</strong> را باز کنید، <strong>افزودن به صفحه اصلی</strong> را انتخاب کنید، سپس فریگیت را از آیکون جدید باز کنید تا این دستگاه برای اعلان‌ها ثبت شود."
     },
     "globalSettings": {
       "title": "تنظیمات عمومی",
@@ -914,7 +1165,7 @@
     "snapshotConfig": {
       "title": "پیکربندی عکس فوری",
       "desc": "ارسال به Frigate+ نیازمند فعال بودنِ هم «عکس‌های فوری» و هم عکس‌های فوریِ <code>clean_copy </code> در پیکربندی شماست.",
-      "cleanCopyWarning": "برای برخی دوربین‌ها عکس فوری فعال است اما clean copy غیرفعال است. برای این‌که بتوانید تصاویر این دوربین‌ها را به Frigate+ ارسال کنید، باید <code>clean_copy </code> را در پیکربندی عکس فوری خود فعال کنید.",
+      "cleanCopyWarning": "برخی دوربین‌ها عکس فوری غیرفعال دارند",
       "table": {
         "camera": "دوربین",
         "snapshots": "عکس‌های فوری",
@@ -936,7 +1187,15 @@
         "baseModel": "مدل پایه",
         "userModel": "بهینه‌شده"
       },
-      "supportedDetectors": "تشخیص‌دهنده‌های پشتیبانی‌شده"
+      "supportedDetectors": "تشخیص‌دهنده‌های پشتیبانی‌شده",
+      "noModelLoaded": "در حال حاضر هیچ مدل Frigate+ بارگذاری نشده است.",
+      "selectModel": "انتخاب یک مدل",
+      "noModelsAvailable": "مدلی در دسترس نیست",
+      "filter": {
+        "ariaLabel": "فیلتر مدل‌ها بر اساس نوع",
+        "baseModels": "مدل‌های پایه",
+        "fineTunedModels": "مدل‌های تنظیم‌شده"
+      }
     },
     "unsavedChanges": "تغییرات تنظیمات Frigate+ ذخیره‌نشده",
     "restart_required": "نیاز به راه‌اندازی مجدد (مدل Frigate+ تغییر کرد)",
@@ -944,7 +1203,15 @@
       "success": "تنظیمات Frigate+ ذخیره شد. برای اعمال تغییرات، Frigate را راه‌اندازی مجدد کنید.",
       "error": "ذخیرهٔ تغییرات پیکربندی ناموفق بود: {{errorMessage}}"
     },
-    "title": "تنظیمات Frigate+"
+    "title": "تنظیمات Frigate+",
+    "description": "Frigate+ یک سرویس اشتراکی است که دسترسی به ویژگی‌ها و قابلیت‌های اضافی برای نمونه فریگیت شما فراهم می‌کند، از جمله امکان استفاده از مدل‌های تشخیص اشیاء سفارشی آموزش‌دیده با داده‌های خودتان. می‌توانید تنظیمات مدل Frigate+ خود را اینجا مدیریت کنید.",
+    "cardTitles": {
+      "api": "API",
+      "currentModel": "مدل فعلی",
+      "otherModels": "سایر مدل‌ها",
+      "configuration": "پیکربندی"
+    },
+    "changeInDetectorsAndModel": "تغییر مدل"
   },
   "triggers": {
     "documentTitle": "تریگرها",
@@ -1066,5 +1333,648 @@
       }
     },
     "addTrigger": "افزودن محرک"
+  },
+  "button": {
+    "overriddenGlobal": "لغو‌شده (سراسری)",
+    "overriddenGlobalTooltip": "این دوربین تنظیمات پیکربندی سراسری را در این بخش لغو می‌کند",
+    "overriddenGlobalHeading_one": "این دوربین {{count}} فیلد از پیکربندی سراسری را لغو می‌کند:",
+    "overriddenGlobalHeading_other": "این دوربین تعداد {{count}} فیلد از پیکربندی سراسری را لغو می‌کند:",
+    "overriddenGlobalNoDeltas": "این دوربین پیکربندی سراسری را لغو می‌کند، اما هیچ مقدار فیلدی متفاوت نیست.",
+    "overriddenBaseConfig": "لغو‌شده (پیکربندی پایه)",
+    "overriddenBaseConfigTooltip": "پروفایل {{profile}} تنظیمات پیکربندی این بخش را لغو می‌کند",
+    "overriddenBaseConfigHeading_one": "پروفایل {{profile}} {{count}} فیلد از پیکربندی پایه را لغو می‌کند:",
+    "overriddenBaseConfigHeading_other": "پروفایل {{profile}} تعداد {{count}} فیلد از پیکربندی پایه را لغو می‌کند:",
+    "overriddenBaseConfigNoDeltas": "پروفایل {{profile}} این بخش را لغو می‌کند، اما هیچ مقدار فیلدی با پیکربندی پایه متفاوت نیست.",
+    "overriddenInCameras": {
+      "label_one": "در {{count}} دوربین لغو شده",
+      "label_other": "در تعداد {{count}} دوربین لغو شده",
+      "tooltip_one": "{{count}} دوربین مقادیر این بخش را لغو می‌کند. برای دیدن جزئیات کلیک کنید.",
+      "tooltip_other": "{{count}} دوربین مقادیر این بخش را لغو کرده‌اند. برای دیدن جزئیات کلیک کنید.",
+      "heading_one": "این بخش سراسری فیلدهایی دارد که در {{count}} دوربین لغو شده است.",
+      "heading_other": "این بخش سراسری فیلدهایی دارد که در تعداد {{count}} دوربین لغو شده است.",
+      "othersField_one": "{{count}} مورد دیگر",
+      "othersField_other": "{{count}} موارد دیگر",
+      "profilePrefix": "پروفایل {{profile}}: {{fields}}"
+    }
+  },
+  "menuDot": {
+    "overrideGlobal": "این بخش پیکربندی سراسری را لغو می‌کند",
+    "overrideProfile": "این بخش توسط پروفایل {{profile}} لغو شده است",
+    "unsaved": "این بخش تغییرات ذخیره‌نشده دارد"
+  },
+  "saveAllPreview": {
+    "title": "تغییرات برای ذخیره",
+    "triggerLabel": "بازبینی تغییرات معلق",
+    "empty": "تغییر معلقی وجود ندارد.",
+    "scope": {
+      "label": "محدوده",
+      "global": "سراسری",
+      "camera": "دوربین: {{cameraName}}"
+    },
+    "profile": {
+      "label": "پروفایل"
+    },
+    "field": {
+      "label": "فیلد"
+    },
+    "value": {
+      "label": "مقدار جدید",
+      "reset": "بازنشانی"
+    }
+  },
+  "timestampPosition": {
+    "tl": "بالا چپ",
+    "tr": "بالا راست",
+    "bl": "پایین چپ",
+    "br": "پایین راست"
+  },
+  "detectorsAndModel": {
+    "title": "آشکارسازها و مدل",
+    "description": "پیکربندی پس‌زمینه آشکارسازی که تشخیص اشیاء را اجرا می‌کند و مدلی که استفاده می‌کند. تغییرات با هم ذخیره می‌شوند تا آشکارساز و مدل همگام بمانند.",
+    "cardTitles": {
+      "detector": "سخت‌افزار آشکارساز",
+      "model": "مدل تشخیص"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "مدل سفارشی"
+    },
+    "mismatch": {
+      "warning": "مدل فعلی Frigate+ «{{model}}» به آشکارساز {{required}} نیاز دارد. یک مدل سازگار در زیر انتخاب کنید یا قبل از ذخیره به مدل سفارشی تغییر دهید."
+    },
+    "plusModel": {
+      "requiresDetector": "نیازمند: {{detector}}",
+      "noModelSelected": "انتخاب یک مدل Frigate+"
+    },
+    "toast": {
+      "saveSuccess": "تنظیمات آشکارساز و مدل ذخیره شد. فریگیت را بازراه‌اندازی کنید تا تغییرات اعمال شود.",
+      "saveError": "ذخیره تنظیمات آشکارساز و مدل ناموفق بود"
+    },
+    "unsavedChanges": "تغییرات ذخیره‌نشده آشکارساز و مدل",
+    "restartRequired": "بازراه‌اندازی لازم است (آشکارساز یا مدل تغییر کرد)"
+  },
+  "maintenance": {
+    "title": "حفظ و نگهداری",
+    "sync": {
+      "title": "همگام‌سازی رسانه",
+      "desc": "فریگیت به‌طور دوره‌ای رسانه‌ها را بر اساس پیکربندی نگهداری شما پاک‌سازی می‌کند. دیدن چند فایل یتیم در حین اجرای فریگیت طبیعی است. از این ویژگی برای حذف فایل‌های رسانه یتیم از دیسک که دیگر در پایگاه داده ارجاع نشده‌اند استفاده کنید.",
+      "started": "همگام‌سازی رسانه شروع شد.",
+      "alreadyRunning": "یک کار همگام‌سازی از قبل در حال اجراست",
+      "error": "شروع همگام‌سازی ناموفق بود",
+      "currentStatus": "وضعیت",
+      "jobId": "شناسه کار",
+      "startTime": "زمان شروع",
+      "endTime": "زمان پایان",
+      "statusLabel": "وضعیت",
+      "results": "نتایج",
+      "errorLabel": "خطا",
+      "mediaTypes": "انواع رسانه",
+      "allMedia": "همه رسانه‌ها",
+      "dryRun": "اجرای آزمایشی",
+      "dryRunEnabled": "هیچ فایلی حذف نخواهد شد",
+      "dryRunDisabled": "فایل‌ها حذف خواهند شد",
+      "force": "اجبار",
+      "forceDesc": "عبور از آستانه ایمنی و تکمیل همگام‌سازی حتی اگر بیش از ۵۰٪ فایل‌ها حذف شوند.",
+      "verbose": "پرگفتار",
+      "verboseDesc": "نوشتن فهرست کامل فایل‌های یتیم روی دیسک برای بازبینی.",
+      "running": "همگام‌سازی در حال اجرا...",
+      "start": "شروع همگام‌سازی",
+      "inProgress": "همگام‌سازی در حال انجام است. این صفحه غیرفعال است.",
+      "status": {
+        "queued": "در صف",
+        "running": "در حال اجرا",
+        "completed": "تکمیل‌شده",
+        "failed": "ناموفق",
+        "notRunning": "در حال اجرا نیست"
+      },
+      "resultsFields": {
+        "filesChecked": "فایل‌های بررسی‌شده",
+        "orphansFound": "یتیم‌های یافت‌شده",
+        "orphansDeleted": "یتیم‌های حذف‌شده",
+        "aborted": "لغو شد. حذف از آستانه ایمنی فراتر می‌رفت.",
+        "error": "خطا",
+        "totals": "مجموع‌ها"
+      },
+      "event_snapshots": "عکس‌های فوری اشیاء ردیابی‌شده",
+      "event_thumbnails": "تصاویر بندانگشتی اشیاء ردیابی‌شده",
+      "review_thumbnails": "عکس‌های بازبینی",
+      "previews": "پیش‌نمایش‌ها",
+      "exports": "خروجی‌ها",
+      "recordings": "ضبط‌ها"
+    },
+    "regionGrid": {
+      "title": "شبکه منطقه",
+      "desc": "شبکه منطقه یک بهینه‌سازی است که یاد می‌گیرد اشیاء با اندازه‌های مختلف معمولاً در کجای میدان دید هر دوربین ظاهر می‌شوند. فریگیت از این داده‌ها برای اندازه‌گذاری کارآمد مناطق تشخیص استفاده می‌کند. شبکه به‌مرور زمان از داده‌های اشیاء ردیابی‌شده به‌طور خودکار ساخته می‌شود.",
+      "clear": "پاک کردن شبکه منطقه",
+      "clearConfirmTitle": "پاک کردن شبکه منطقه",
+      "clearConfirmDesc": "پاک کردن شبکه منطقه توصیه نمی‌شود مگر اینکه اخیراً اندازه مدل آشکارساز را تغییر داده باشید یا موقعیت فیزیکی دوربین را تغییر داده باشید و مشکلات ردیابی اشیاء داشته باشید. شبکه به‌مرور زمان با ردیابی اشیاء به‌طور خودکار بازسازی می‌شود. بازراه‌اندازی فریگیت برای اعمال تغییرات لازم است.",
+      "clearSuccess": "شبکه منطقه با موفقیت پاک شد",
+      "clearError": "پاک کردن شبکه منطقه ناموفق بود",
+      "restartRequired": "برای اعمال تغییرات شبکه منطقه بازراه‌اندازی لازم است"
+    }
+  },
+  "configForm": {
+    "global": {
+      "title": "تنظیمات سراسری",
+      "description": "این تنظیمات برای همه دوربین‌ها اعمال می‌شود مگر اینکه در تنظیمات خاص دوربین لغو شود."
+    },
+    "camera": {
+      "title": "تنظیمات دوربین",
+      "description": "این تنظیمات فقط برای این دوربین اعمال می‌شود و تنظیمات سراسری را لغو می‌کند.",
+      "noCameras": "دوربینی در دسترس نیست"
+    },
+    "advancedSettingsCount": "تنظیمات پیشرفته ({{count}})",
+    "advancedCount": "پیشرفته ({{count}})",
+    "showAdvanced": "نمایش تنظیمات پیشرفته",
+    "tabs": {
+      "sharedDefaults": "پیش‌فرض‌های مشترک",
+      "system": "سیستم",
+      "integrations": "یکپارچه‌سازی‌ها"
+    },
+    "additionalProperties": {
+      "keyLabel": "کلید",
+      "valueLabel": "مقدار",
+      "keyPlaceholder": "کلید جدید",
+      "remove": "حذف",
+      "providerNameLabel": "نام ارائه‌دهنده",
+      "providerNamePlaceholder": "مثلاً openai",
+      "variableNameLabel": "نام متغیر",
+      "variableNamePlaceholder": "مثلاً MY_VARIABLE",
+      "loggerNameLabel": "نام لاگر",
+      "loggerNamePlaceholder": "مثلاً frigate.record",
+      "keyPatternError": "فقط از حروف، اعداد، خط تیره و زیرخط استفاده کنید (بدون فاصله)"
+    },
+    "knownPlates": {
+      "namePlaceholder": "مثلاً ماشین همسر",
+      "platePlaceholder": "شماره پلاک یا رجکس"
+    },
+    "liveStreams": {
+      "streamNameLabel": "نام جریان",
+      "streamNamePlaceholder": "مثلاً جریان HD اصلی",
+      "go2rtcStreamLabel": "جریان go2rtc",
+      "go2rtcStreamPlaceholder": "انتخاب یک جریان go2rtc",
+      "go2rtcStreamSearch": "جستجو یا وارد کردن نام جریان…",
+      "noGo2rtcStreams": "هیچ جریان go2rtc پیکربندی نشده است",
+      "availableStreams": "جریان‌های در دسترس",
+      "useCustom": "استفاده از «{{value}}»",
+      "addStream": "افزودن جریان"
+    },
+    "timezone": {
+      "defaultOption": "استفاده از منطقه زمانی مرورگر"
+    },
+    "roleMap": {
+      "empty": "بدون نگاشت نقش",
+      "roleLabel": "نقش",
+      "groupsLabel": "گروه‌ها",
+      "addMapping": "افزودن نگاشت نقش",
+      "remove": "حذف"
+    },
+    "ffmpegArgs": {
+      "preset": "پیش‌تنظیم",
+      "manual": "آرگومان‌های دستی",
+      "inherit": "ارث‌بری از تنظیمات دوربین",
+      "none": "هیچ‌کدام",
+      "useGlobalSetting": "ارث‌بری از تنظیمات سراسری",
+      "selectPreset": "انتخاب پیش‌تنظیم",
+      "manualPlaceholder": "وارد کردن آرگومان‌های FFmpeg",
+      "presetLabels": {
+        "preset-rpi-64-h264": "رزبری‌پای (H.264)",
+        "preset-rpi-64-h265": "رزبری‌پای (H.265)",
+        "preset-vaapi": "VAAPI (GPU اینتل/AMD)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "GPU ان‌ویدیا",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (عمومی)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (عمومی)",
+        "preset-http-reolink": "HTTP - دوربین‌های Reolink",
+        "preset-rtmp-generic": "RTMP (عمومی)",
+        "preset-rtsp-generic": "RTSP (عمومی)",
+        "preset-rtsp-restream": "RTSP - بازپخش از go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - بازپخش از go2rtc (تأخیر پایین)",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "ضبط (عمومی، بدون صدا)",
+        "preset-record-generic-audio-copy": "ضبط (عمومی + کپی صدا)",
+        "preset-record-generic-audio-aac": "ضبط (عمومی + صدا به AAC)",
+        "preset-record-mjpeg": "ضبط - دوربین‌های MJPEG",
+        "preset-record-jpeg": "ضبط - دوربین‌های JPEG",
+        "preset-record-ubiquiti": "ضبط - دوربین‌های Ubiquiti"
+      }
+    },
+    "cameraInputs": {
+      "itemTitle": "جریان {{index}}",
+      "sourceMode": {
+        "restream": "بازپخش (go2rtc)",
+        "manual": "مسیر ورودی دستی",
+        "go2rtcStreamLabel": "جریان go2rtc",
+        "go2rtcStreamPlaceholder": "انتخاب یک جریان go2rtc",
+        "noGo2rtcStreams": "هیچ جریان go2rtc پیکربندی نشده است",
+        "go2rtcStreamSearch": "جستجوی جریان‌ها...",
+        "availableStreams": "جریان‌های در دسترس",
+        "noMatchingStreams": "هیچ جریان منطبقی نیست"
+      }
+    },
+    "restartRequiredField": "بازراه‌اندازی لازم است",
+    "restartRequiredFooter": "پیکربندی تغییر یافت - بازراه‌اندازی لازم است",
+    "sections": {
+      "detect": "تشخیص",
+      "record": "ضبط",
+      "snapshots": "عکس‌های فوری",
+      "motion": "حرکت",
+      "objects": "اشیاء",
+      "review": "بازبینی",
+      "audio": "صدا",
+      "notifications": "اعلان‌ها",
+      "live": "نمای زنده",
+      "timestamp_style": "مهرهای زمانی",
+      "mqtt": "MQTT",
+      "database": "پایگاه داده",
+      "telemetry": "تلمتری",
+      "auth": "احراز هویت",
+      "tls": "TLS",
+      "proxy": "پروکسی",
+      "go2rtc": "go2rtc",
+      "ffmpeg": "FFmpeg",
+      "detectors": "آشکارسازها",
+      "model": "مدل",
+      "semantic_search": "جستجوی معنایی",
+      "genai": "GenAI",
+      "face_recognition": "شناسایی چهره",
+      "lpr": "تشخیص پلاک خودرو",
+      "birdseye": "چشم پرنده",
+      "masksAndZones": "ماسک‌ها / مناطق"
+    },
+    "detect": {
+      "title": "تنظیمات تشخیص"
+    },
+    "detectors": {
+      "title": "تنظیمات آشکارساز",
+      "singleType": "فقط یک آشکارساز {{type}} مجاز است.",
+      "keyRequired": "نام آشکارساز الزامی است.",
+      "keyDuplicate": "نام آشکارساز از قبل وجود دارد.",
+      "noSchema": "هیچ طرح‌واره آشکارسازی در دسترس نیست.",
+      "none": "هیچ نمونه آشکارسازی پیکربندی نشده است.",
+      "add": "افزودن آشکارساز",
+      "addCustomKey": "افزودن کلید سفارشی"
+    },
+    "record": {
+      "title": "تنظیمات ضبط"
+    },
+    "snapshots": {
+      "title": "تنظیمات عکس فوری"
+    },
+    "motion": {
+      "title": "تنظیمات حرکت"
+    },
+    "objects": {
+      "title": "تنظیمات اشیاء"
+    },
+    "audioLabels": {
+      "summary": "{{count}} برچسب صوتی انتخاب شد",
+      "empty": "برچسب صدایی در دسترس نیست"
+    },
+    "objectLabels": {
+      "summary": "{{count}} نوع شیء انتخاب شد",
+      "empty": "برچسب شیء‌ای در دسترس نیست"
+    },
+    "reviewLabels": {
+      "summary": "{{count}} برچسب انتخاب شد",
+      "empty": "برچسبی در دسترس نیست"
+    },
+    "filters": {
+      "objectFieldLabel": "{{field}} برای {{label}}"
+    },
+    "zoneNames": {
+      "summary": "{{count}} انتخاب شد",
+      "empty": "منطقه‌ای در دسترس نیست"
+    },
+    "inputRoles": {
+      "summary": "{{count}} نقش انتخاب شد",
+      "empty": "نقشی در دسترس نیست",
+      "options": {
+        "detect": "تشخیص",
+        "record": "ضبط فیلم",
+        "audio": "صدا"
+      }
+    },
+    "genaiRoles": {
+      "options": {
+        "embeddings": "جاسازی",
+        "descriptions": "توضیحات",
+        "chat": "گفتگو"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "انتخاب مدل…",
+      "builtIn": "مدل‌های داخلی",
+      "genaiProviders": "ارائه‌دهندگان GenAI"
+    },
+    "semanticSearchModelSize": {
+      "notApplicable": "برای ارائه‌دهندگان GenAI قابل اعمال نیست"
+    },
+    "review": {
+      "title": "تنظیمات بازبینی"
+    },
+    "audio": {
+      "title": "تنظیمات صدا"
+    },
+    "notifications": {
+      "title": "تنظیمات اعلان"
+    },
+    "live": {
+      "title": "تنظیمات نمای زنده"
+    },
+    "timestamp_style": {
+      "title": "تنظیمات مهر زمانی"
+    },
+    "searchPlaceholder": "جستجو...",
+    "addCustomLabel": "افزودن برچسب سفارشی...",
+    "genaiModel": {
+      "placeholder": "انتخاب یا وارد کردن مدل…",
+      "search": "جستجو یا وارد کردن مدل…",
+      "noModels": "مدلی در دسترس نیست",
+      "available": "مدل‌های در دسترس",
+      "useCustom": "استفاده از «{{value}}»",
+      "refresh": "بازخوانی مدل‌ها",
+      "probeFailed": "کاوش مدل‌ها ناموفق بود",
+      "fetchedModels": "فهرست مدل با موفقیت دریافت شد"
+    },
+    "ptzPresets": {
+      "placeholder": "انتخاب یا وارد کردن یک پیش‌تنظیم...",
+      "search": "جستجو یا وارد کردن پیش‌تنظیم...",
+      "noPresets": "پیش‌تنظیمی در دسترس نیست",
+      "available": "پیش‌تنظیم‌های دوربین",
+      "useCustom": "استفاده از «{{value}}»"
+    },
+    "defaultRole": {
+      "admin": "مدیر",
+      "viewer": "بیننده"
+    }
+  },
+  "globalConfig": {
+    "title": "پیکربندی سراسری",
+    "description": "پیکربندی تنظیمات سراسری که برای همه دوربین‌ها اعمال می‌شود مگر اینکه لغو شود.",
+    "toast": {
+      "success": "تنظیمات سراسری با موفقیت ذخیره شد",
+      "error": "ذخیره تنظیمات سراسری ناموفق بود",
+      "validationError": "اعتبارسنجی ناموفق بود"
+    }
+  },
+  "cameraConfig": {
+    "title": "پیکربندی دوربین",
+    "description": "پیکربندی تنظیمات برای دوربین‌های فردی. تنظیمات پیش‌فرض‌های سراسری را لغو می‌کند.",
+    "overriddenBadge": "لغو‌شده",
+    "resetToGlobal": "بازنشانی به سراسری",
+    "toast": {
+      "success": "تنظیمات دوربین با موفقیت ذخیره شد",
+      "error": "ذخیره تنظیمات دوربین ناموفق بود"
+    }
+  },
+  "toast": {
+    "success": "تنظیمات با موفقیت ذخیره شد",
+    "applied": "تنظیمات با موفقیت اعمال شد",
+    "successRestartRequired": "تنظیمات با موفقیت ذخیره شد. فریگیت را بازراه‌اندازی کنید تا تغییرات اعمال شود.",
+    "error": "ذخیره تنظیمات ناموفق بود",
+    "validationError": "اعتبارسنجی ناموفق بود: {{message}}",
+    "resetSuccess": "بازنشانی به پیش‌فرض‌های سراسری",
+    "resetError": "بازنشانی تنظیمات ناموفق بود",
+    "saveAllSuccess_one": "{{count}} بخش با موفقیت ذخیره شد.",
+    "saveAllSuccess_other": "همه {{count}} بخش با موفقیت ذخیره شد.",
+    "saveAllSuccessRestartRequired_one": "{{count}} بخش با موفقیت ذخیره شد. فریگیت را بازراه‌اندازی کنید تا تغییرات اعمال شود.",
+    "saveAllSuccessRestartRequired_other": "همه {{count}} بخش با موفقیت ذخیره شد. فریگیت را بازراه‌اندازی کنید تا تغییرات اعمال شود.",
+    "saveAllPartial_one": "{{successCount}} از {{totalCount}} بخش ذخیره شد. {{failCount}} ناموفق بود.",
+    "saveAllPartial_other": "{{successCount}} از تعداد {{totalCount}} بخش ذخیره شد. {{failCount}} ناموفق بود.",
+    "saveAllFailure": "ذخیره همه بخش‌ها ناموفق بود."
+  },
+  "profiles": {
+    "title": "پروفایل‌ها",
+    "activeProfile": "پروفایل فعال",
+    "noActiveProfile": "پروفایل فعالی وجود ندارد",
+    "active": "فعال",
+    "activated": "پروفایل «{{profile}}» فعال شد",
+    "activateFailed": "تنظیم پروفایل ناموفق بود",
+    "deactivated": "پروفایل غیرفعال شد",
+    "noProfiles": "پروفایلی تعریف نشده است.",
+    "noOverrides": "بدون لغو",
+    "cameraCount_one": "{{count}} دوربین",
+    "cameraCount_other": "تعداد {{count}} دوربین",
+    "columnCamera": "دوربین",
+    "columnOverrides": "لغوهای پروفایل",
+    "baseConfig": "پیکربندی پایه",
+    "addProfile": "افزودن پروفایل",
+    "newProfile": "پروفایل جدید",
+    "profileNamePlaceholder": "مثلاً مسلح، خارج از خانه، حالت شب",
+    "friendlyNameLabel": "نام پروفایل",
+    "profileIdLabel": "شناسه پروفایل",
+    "profileIdDescription": "شناسه داخلی استفاده‌شده در پیکربندی و اتوماسیون‌ها",
+    "nameInvalid": "فقط حروف کوچک، اعداد و زیرخط مجاز است",
+    "nameDuplicate": "پروفایلی با این نام از قبل وجود دارد",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "حداقل ۲ نویسه باید باشد",
+      "mustNotContainPeriod": "نباید نقطه داشته باشد",
+      "alreadyExists": "پروفایلی با این شناسه از قبل وجود دارد"
+    },
+    "renameProfile": "تغییر نام پروفایل",
+    "renameSuccess": "نام پروفایل به «{{profile}}» تغییر یافت",
+    "deleteProfile": "حذف پروفایل",
+    "deleteProfileConfirm": "پروفایل «{{profile}}» از همه دوربین‌ها حذف شود؟ این کار قابل بازگشت نیست.",
+    "deleteSuccess": "پروفایل «{{profile}}» حذف شد",
+    "createSuccess": "پروفایل «{{profile}}» ایجاد شد",
+    "removeOverride": "حذف لغو پروفایل",
+    "deleteSection": "حذف لغوهای بخش",
+    "deleteSectionConfirm": "لغوهای {{section}} برای پروفایل {{profile}} روی {{camera}} حذف شود؟",
+    "deleteSectionSuccess": "لغوهای {{section}} برای پروفایل {{profile}} حذف شد",
+    "enableSwitch": "فعال‌سازی پروفایل‌ها",
+    "enabledDescription": "پروفایل‌ها فعال هستند. یک پروفایل جدید در زیر ایجاد کنید، به بخش پیکربندی دوربین بروید تا تغییرات خود را اعمال کنید، و ذخیره کنید تا تغییرات اعمال شوند.",
+    "disabledDescription": "پروفایل‌ها به شما اجازه می‌دهند مجموعه‌های نام‌گذاری‌شده‌ای از لغوهای پیکربندی دوربین تعریف کنید (مثلاً مسلح، خارج از خانه، شب) که بتوانید در صورت نیاز فعال کنید."
+  },
+  "unsavedChanges": "شما تغییرات ذخیره‌نشده دارید",
+  "confirmReset": "تأیید بازنشانی",
+  "resetToDefaultDescription": "این کار همه تنظیمات این بخش را به مقادیر پیش‌فرض بازنشانی می‌کند. این عمل قابل بازگشت نیست.",
+  "resetToGlobalDescription": "این کار تنظیمات این بخش را به پیش‌فرض‌های سراسری بازنشانی می‌کند. این عمل قابل بازگشت نیست.",
+  "go2rtcStreams": {
+    "title": "جریان‌های go2rtc",
+    "description": "مدیریت پیکربندی جریان‌های go2rtc برای بازپخش دوربین. هر جریان یک نام و یک یا چند آدرس منبع دارد.",
+    "addStream": "افزودن جریان",
+    "addStreamDesc": "یک نام برای جریان جدید وارد کنید. این نام برای ارجاع به جریان در پیکربندی دوربین استفاده خواهد شد.",
+    "addUrl": "افزودن آدرس",
+    "sourceNumber": "منبع {{index}}",
+    "streamName": "نام جریان",
+    "streamNamePlaceholder": "مثلاً front_door",
+    "streamUrlPlaceholder": "مثلاً rtsp://user:pass@192.168.1.100/stream",
+    "deleteStream": "حذف جریان",
+    "deleteStreamConfirm": "آیا مطمئن هستید می‌خواهید جریان «{{streamName}}» را حذف کنید؟ دوربین‌هایی که به این جریان ارجاع می‌کنند ممکن است از کار بیفتند.",
+    "noStreams": "هیچ جریان go2rtc پیکربندی نشده است. یک جریان اضافه کنید تا شروع کنید.",
+    "validation": {
+      "nameRequired": "نام جریان الزامی است",
+      "nameDuplicate": "جریانی با این نام از قبل وجود دارد",
+      "nameInvalid": "نام جریان فقط می‌تواند شامل حروف، اعداد، زیرخط و خط تیره باشد",
+      "urlRequired": "حداقل یک آدرس الزامی است"
+    },
+    "renameStream": "تغییر نام جریان",
+    "renameStreamDesc": "یک نام جدید برای این جریان وارد کنید. تغییر نام جریان ممکن است دوربین‌ها یا جریان‌های دیگری که با نام به آن ارجاع می‌کنند را خراب کند.",
+    "newStreamName": "نام جریان جدید",
+    "ffmpeg": {
+      "useFfmpegModule": "استفاده از حالت سازگار (ffmpeg)",
+      "video": "ویدیو",
+      "audio": "صدا",
+      "hardware": "شتاب سخت‌افزاری",
+      "videoCopy": "کپی",
+      "videoH264": "تبدیل کد به H.264",
+      "videoH265": "تبدیل کد به H.265",
+      "videoExclude": "مستثنی",
+      "audioCopy": "کپی",
+      "audioAac": "تبدیل کد به AAC",
+      "audioOpus": "تبدیل کد به Opus",
+      "audioPcmu": "تبدیل کد به PCM μ-law",
+      "audioPcma": "تبدیل کد به PCM A-law",
+      "audioPcm": "تبدیل کد به PCM",
+      "audioMp3": "تبدیل کد به MP3",
+      "audioExclude": "مستثنی",
+      "hardwareNone": "بدون شتاب سخت‌افزاری",
+      "hardwareAuto": "خودکار (توصیه‌شده)",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "افزودن کدک ویدیو",
+      "addAudioCodec": "افزودن کدک صدا",
+      "removeCodec": "حذف کدک"
+    }
+  },
+  "birdseye": {
+    "trackingMode": {
+      "objects": "اشیاء",
+      "motion": "حرکت",
+      "continuous": "پیوسته"
+    },
+    "cameraOrder": {
+      "label": "ترتیب دوربین",
+      "description": "دوربین‌ها را بکشید تا ترتیب آن‌ها در چیدمان چشم پرنده تنظیم شود.",
+      "reorderHandle": "برای مرتب‌سازی بکشید",
+      "saving": "در حال ذخیره…",
+      "saved": "ذخیره شد"
+    }
+  },
+  "retainMode": {
+    "all": "همه",
+    "motion": "حرکت",
+    "active_objects": "اشیاء فعال"
+  },
+  "previewQuality": {
+    "very_high": "بسیار بالا",
+    "high": "بالا",
+    "medium": "متوسط",
+    "low": "پایین",
+    "very_low": "بسیار پایین"
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "مرورگر",
+      "12hour": "۱۲ ساعته",
+      "24hour": "۲۴ ساعته"
+    },
+    "unitSystem": {
+      "metric": "متریک",
+      "imperial": "امپریال"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "ضبط‌ها",
+      "previews": "پیش‌نمایش‌ها"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "اشکال‌زدایی",
+      "info": "اطلاعات",
+      "warning": "هشدار",
+      "error": "خطا",
+      "critical": "بحرانی"
+    }
+  },
+  "onvif": {
+    "profileAuto": "خودکار",
+    "profileLoading": "در حال بارگذاری پروفایل‌ها...",
+    "autotracking": {
+      "zooming": {
+        "disabled": "غیرفعال",
+        "absolute": "مطلق",
+        "relative": "نسبی"
+      }
+    }
+  },
+  "modelSize": {
+    "small": "کوچک",
+    "large": "بزرگ"
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "ضبط غیرفعال است، موارد بازبینی تولید نخواهند شد.",
+      "detectDisabled": "تشخیص اشیاء غیرفعال است. موارد بازبینی به اشیاء تشخیص‌داده‌شده برای دسته‌بندی هشدارها و تشخیص‌ها نیاز دارند.",
+      "allNonAlertDetections": "همه فعالیت‌های غیر هشدار به‌عنوان تشخیص گنجانده خواهند شد.",
+      "genaiImageSourceRecordingsRecordDisabled": "منبع تصویر روی «ضبط‌ها» تنظیم شده، اما ضبط غیرفعال است. فریگیت به تصاویر پیش‌نمایش بازمی‌گردد."
+    },
+    "audio": {
+      "noAudioRole": "هیچ جریانی نقش صدا تعریف‌شده ندارد. باید نقش صدا را فعال کنید تا تشخیص صدا کار کند."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "تشخیص صدا برای این دوربین فعال نیست. رونویسی صدا نیازمند فعال بودن تشخیص صدا است."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "تنظیم FPS تشخیص بالاتر از ۵ توصیه نمی‌شود. مقادیر بالاتر ممکن است باعث مشکلات عملکرد شود و هیچ فایده‌ای نخواهد داشت.",
+      "disabled": "تشخیص اشیاء غیرفعال است. عکس‌های فوری، موارد بازبینی و غنی‌سازی‌هایی مانند شناسایی چهره، تشخیص پلاک خودرو و هوش مصنوعی مولد کار نخواهند کرد.",
+      "resolutionShouldBeMultipleOfFour": "برای بهترین نتایج، عرض و ارتفاع تشخیص باید مضرب ۴ باشند. سایر مقادیر زوج ممکن است باعث مصنوعات بصری یا تحریف جزئی در جریان تشخیص شوند.",
+      "aspectRatioMismatch": "عرض و ارتفاعی که وارد کرده‌اید با نسبت ابعاد وضوح تشخیص فعلی شما مطابقت ندارد. این ممکن است تصویر کشیده یا تحریف‌شده تولید کند.",
+      "maxFramesSet": "تنظیم حداکثر فریم‌ها رفتار پیش‌فرض را لغو کرده و ردیابی اشیاء ثابت را غیرفعال می‌کند. شرایط بسیار کمی وجود دارد که به این کار نیاز باشد، با احتیاط استفاده کنید.",
+      "squareResolution": "وضوح تشخیص مربع غیرمعمول است. عرض و ارتفاع تشخیص باید با نسبت ابعاد دوربین شما مطابقت داشته باشد (مثلاً ۱۶:۹)، نه ابعاد مدل تشخیص اشیاء. عدم تطابق نسبت ابعاد می‌تواند تصویر را کشیده کرده و دقت تشخیص را کاهش دهد.",
+      "resolutionHigh": "این وضوح تشخیص بالاتر از حد توصیه‌شده است و ممکن است باعث افزایش مصرف منابع شود بدون اینکه دقت تشخیص را بهبود بخشد. وضوح تشخیص ۱۰۸۰p یا کمتر برای اکثر دوربین‌ها توصیه می‌شود.",
+      "globalResolutionMultipleCameras": "یک وضوح تشخیص سراسری تنظیم شده در حالی که چندین دوربین پیکربندی شده‌اند. مگر اینکه همه دوربین‌ها وضوح و نسبت ابعاد یکسانی داشته باشند، عرض و ارتفاع تشخیص باید به ازای هر دوربین تعریف شود تا با نسبت ابعاد بومی هر دوربین مطابقت داشته باشد."
+    },
+    "model": {
+      "optimizedFor320": "فریگیت برای مدل 320x320 بهینه شده است که بهترین انتخاب برای اکثر تنظیمات است. مدل 640x640 کندتر است و فقط در سناریوهای خاص کمک می‌کند.",
+      "inputDimensionsNotDetectResolution": "عرض و ارتفاع ورودی مدل ابعاد ورودی مدل تشخیص اشیاء هستند، نه وضوح تشخیص دوربین شما. باید با ابعاد مدلی که استفاده می‌کنید مطابقت داشته باشند — معمولاً اندازه مربعی مانند 320x320 یا 640x640."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "آرگومان‌های شتاب سخت‌افزاری دستی توصیه نمی‌شوند. مگر اینکه نیاز خاصی وجود داشته باشد، پیش‌تنظیمی که با سخت‌افزار شما مطابقت دارد را انتخاب کنید.",
+      "inputsMissingGo2rtcStream": "یک ورودی در زیر به یک بازپخش go2rtc اشاره می‌کند که دیگر وجود ندارد. یک بازپخش موجود انتخاب کنید یا آدرس دوربین را دستی وارد کنید، در غیر این صورت این دوربین در اتصال ناموفق خواهد بود."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "باید یک ارائه‌دهنده GenAI با نقش 'descriptions' پیکربندی کنید تا توضیحات تولید شوند."
+    },
+    "faceRecognition": {
+      "globalDisabled": "غنی‌سازی شناسایی چهره باید فعال باشد تا ویژگی‌های شناسایی چهره روی این دوربین کار کنند.",
+      "personNotTracked": "شناسایی چهره نیازمند ردیابی شیء 'person' است. 'person' را در اشیاء برای این دوربین فعال کنید.",
+      "modelSizeLarge": "مدل 'large' برای عملکرد معقول به GPU یا NPU نیاز دارد. در سیستم‌های فقط CPU از 'small' استفاده کنید."
+    },
+    "lpr": {
+      "globalDisabled": "غنی‌سازی تشخیص پلاک خودرو باید فعال باشد تا ویژگی‌های LPR روی این دوربین کار کنند.",
+      "vehicleNotTracked": "تشخیص پلاک خودرو نیازمند ردیابی 'car' یا 'motorcycle' است. 'car' یا 'motorcycle' را در اشیاء برای این دوربین فعال کنید.",
+      "modelSizeLarge": "مدل 'large' برای پلاک‌های چندخطی بهینه شده است. مدل 'small' عملکرد بهتری نسبت به 'large' دارد و باید استفاده شود مگر اینکه منطقه شما از قالب‌های پلاک چندخطی استفاده کند."
+    },
+    "record": {
+      "noRecordRole": "هیچ جریانی نقش ضبط تعریف‌شده ندارد. ضبط کار نخواهد کرد."
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "چشم پرنده روی حالت 'objects' تنظیم شده، اما تشخیص اشیاء برای این دوربین غیرفعال است. این دوربین در چشم پرنده ظاهر نخواهد شد."
+    },
+    "snapshots": {
+      "detectDisabled": "تشخیص اشیاء غیرفعال است. عکس‌های فوری از اشیاء ردیابی‌شده تولید می‌شوند و ایجاد نخواهند شد."
+    },
+    "detectors": {
+      "mixedTypes": "همه آشکارسازها باید از یک نوع استفاده کنند. آشکارسازهای موجود را حذف کنید تا از نوع دیگری استفاده کنید.",
+      "mixedTypesSuggestion": "همه آشکارسازها باید از یک نوع استفاده کنند. آشکارسازهای موجود را حذف کنید یا {{type}} را انتخاب کنید."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "اندازه 'small' با مدل Jina V2 هزینه RAM و استنتاج بالایی دارد. مدل 'large' با یک GPU مجزا توصیه می‌شود."
+    },
+    "onvif": {
+      "autotrackingNoZones": "ردیابی خودکار حداقل به یک منطقه نیاز دارد. یک منطقه برای این دوربین در ماسک‌ها / مناطق تعریف کنید، سپس آن را به‌عنوان منطقه مورد نیاز در زیر تنظیم کنید."
+    }
   }
 }
