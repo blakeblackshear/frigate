@@ -74,7 +74,13 @@
       "view": "Weergeven",
       "queued": "Export staat in de wachtrij. Bekijk voortgang op de exports pagina.",
       "batchSuccess_one": "1 export gestart. Zaak wordt aangemaakt.",
-      "batchSuccess_other": "{{count}} export gestart. Zaak wordt aangemaakt."
+      "batchSuccess_other": "{{count}} export gestart. Zaak wordt aangemaakt.",
+      "batchPartial": "Gestart met {{successful}} van {{total}} exports. Gefaalde camera's: {{failedCameras}}",
+      "batchFailed": "Gefaald {{total}} exports te starten. Gefaalde camera's: {{failedCameras}}",
+      "batchQueuedSuccess_one": "1 Export in de wachtrij gezet. De case wordt nu geopend.",
+      "batchQueuedSuccess_other": "{{count}} Exports in de wachtrij gezet. De case wordt nu geopend.",
+      "batchQueuedPartial": "{{successful}} van {{total}} exports in de wachtrij gezet. Gefaalde camera's: {{failedCameras}}",
+      "batchQueueFailed": "{{total}} Exports gefaald om in de wachtrij te zetten. Gefaalde camera's: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Export opslaan",
