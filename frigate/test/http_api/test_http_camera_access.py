@@ -390,7 +390,7 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
         intent and forward the request to go2rtc instead of short-circuiting with 400."""
         app = self._make_app(_MULTI_CAMERA_CONFIG)
         mock_response = type("R", (), {"ok": True, "status_code": 200, "text": "ok"})()
-        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+        with patch("frigate.util.services._GO2RTC_ARBITRARY_EXEC_ENV", "true"):
             with patch(
                 "frigate.api.camera.requests.put", return_value=mock_response
             ) as mock_put:
@@ -402,6 +402,20 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
                 mock_put.assert_called_once()
                 forwarded_src = mock_put.call_args.kwargs["params"]["src"]
                 assert forwarded_src == "exec:/tmp/something"
+
+    def test_add_stream_ignores_override_written_after_import(self):
+        """The override is read once at import. A value written into os.environ
+        later, which is what the config's environment_vars block does, must not
+        unlock restricted sources."""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+            with patch("frigate.api.camera.requests.put") as mock_put:
+                with AuthTestClient(app) as client:
+                    resp = client.put("/go2rtc/streams/legit?src=exec:/tmp/something")
+        # A live go2rtc would also answer 400, so assert on the forward.
+        mock_put.assert_not_called()
+        assert resp.status_code == 400
+        assert resp.json().get("success") is False
 
     def test_stream_alias_blocked_when_owning_camera_disallowed(self):
         """limited_user cannot access a stream alias that belongs to a camera they
