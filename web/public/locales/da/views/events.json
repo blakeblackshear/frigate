@@ -28,5 +28,8 @@
   "detail": {
     "aria": "Skift til detaljevisning"
   },
-  "timeline.aria": "Vælg tidslinje"
+  "timeline.aria": "Vælg tidslinje",
+  "motionPreviews": {
+    "crop": "Beskær til filter"
+  }
 }

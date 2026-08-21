@@ -1,1 +1,9 @@
-{}
+{
+    "metrics": {
+        "minutesSeconds": "{{minutes}}m {{seconds}}s",
+        "scanSummary": "{{segments}} segmentee · {{time}}"
+    },
+    "polygonControls": {
+        "moveMode": "Flyt"
+    }
+}
