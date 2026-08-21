@@ -1,1 +1,73 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "تشخیص سراسری",
+            "sensitivity": "حساسیت سراسری"
+        },
+        "cameras": {
+            "detection": "تشخیص",
+            "sensitivity": "حساسیت"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "ظاهر سراسری"
+        },
+        "cameras": {
+            "appearance": "ظاهر"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "حساسیت سراسری",
+            "algorithm": "الگوریتم سراسری"
+        },
+        "cameras": {
+            "sensitivity": "حساسیت",
+            "algorithm": "الگوریتم"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "نمایش سراسری"
+        },
+        "cameras": {
+            "display": "نمایش"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "وضوح سراسری",
+            "tracking": "ردیابی سراسری"
+        },
+        "cameras": {
+            "resolution": "وضوح",
+            "tracking": "ردیابی"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "ردیابی سراسری",
+            "filtering": "پالایش سراسری"
+        },
+        "cameras": {
+            "tracking": "ردیابی",
+            "filtering": "پالایش"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "نگهداری سراسری",
+            "events": "رویدادهای سراسری"
+        },
+        "cameras": {
+            "retention": "نگهداری",
+            "events": "رویدادها"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "آرگومان‌های FFmpeg اختصاصی دوربین"
+        }
+    }
+}

@@ -7,7 +7,8 @@
     "logs": {
       "frigate": "ثبت رخدادهای فریگیت - فریگیت",
       "go2rtc": "گزارش‌های Go2RTC - فریگیت",
-      "nginx": "گزارش‌های Nginx - فریگیت"
+      "nginx": "گزارش‌های Nginx - فریگیت",
+      "websocket": "گزارش‌های پیام‌ها - فریگیت"
     }
   },
   "title": "سیستم",
@@ -32,6 +33,33 @@
       "error": {
         "fetchingLogsFailed": "خطا در دریافت گزارش‌ها: {{errorMessage}}",
         "whileStreamingLogs": "خطا هنگام پخش زندهٔ گزارش‌ها: {{errorMessage}}"
+      }
+    },
+    "websocket": {
+      "label": "پیام‌ها",
+      "pause": "توقف",
+      "resume": "ادامه",
+      "clear": "پاک کردن",
+      "filter": {
+        "all": "همهٔ موضوعات",
+        "topics": "موضوعات",
+        "events": "رویدادها",
+        "reviews": "بازبینی‌ها",
+        "classification": "طبقه‌بندی",
+        "face_recognition": "شناسایی چهره",
+        "lpr": "پلاک‌خوان",
+        "camera_activity": "فعالیت دوربین",
+        "system": "سامانه",
+        "camera": "دوربین",
+        "all_cameras": "همهٔ دوربین‌ها",
+        "cameras_count_one": "{{count}} دوربین",
+        "cameras_count_other": "{{count}} دوربین"
+      },
+      "empty": "هنوز پیامی ثبت نشده است",
+      "count_one": "{{count}} پیام",
+      "count_other": "{{count}} پیام",
+      "expanded": {
+        "payload": "بار"
       }
     }
   },
@@ -72,7 +100,10 @@
         "title": "هشدار آمار GPU اینتل",
         "message": "آمار GPU در دسترس نیست",
         "description": "این یک باگ شناخته‌شده در ابزارهای گزارش‌دهی آمار GPU اینتل (intel_gpu_top) است که باعث می‌شود از کار بیفتد و حتی در مواردی که شتاب‌دهی سخت‌افزاری و تشخیص شیء به‌درستی روی (i)GPU اجرا می‌شوند، به‌طور مکرر میزان استفادهٔ GPU را ۰٪ برگرداند. این مشکل مربوط به Frigate نیست. می‌توانید میزبان را ری‌استارت کنید تا موقتاً مشکل برطرف شود و تأیید کنید که GPU درست کار می‌کند. این موضوع روی عملکرد تأثیری ندارد."
-      }
+      },
+      "gpuCompute": "محاسبات / رمزگذاری GPU",
+      "gpuTemperature": "دمای GPU",
+      "npuTemperature": "دمای NPU"
     },
     "title": "عمومی",
     "detector": {
@@ -86,7 +117,14 @@
     "otherProcesses": {
       "title": "فرایندهای دیگر",
       "processCpuUsage": "میزان استفادهٔ CPU فرایند",
-      "processMemoryUsage": "میزان استفادهٔ حافظهٔ فرایند"
+      "processMemoryUsage": "میزان استفادهٔ حافظهٔ فرایند",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "ضبط",
+        "review_segment": "بخش بازبینی",
+        "embeddings": "امبدینگ‌ها",
+        "audio_detector": "آشکارساز صدا"
+      }
     }
   },
   "storage": {
@@ -97,7 +135,11 @@
     },
     "shm": {
       "warning": "اندازهٔ فعلی SHM برابر {{total}}MB خیلی کوچک است. آن را دست‌کم به {{min_shm}}MB افزایش دهید.",
-      "title": "اختصاص SHM (حافظهٔ اشتراکی)"
+      "title": "اختصاص SHM (حافظهٔ اشتراکی)",
+      "frameLifetime": {
+        "title": "طول عمر فریم",
+        "description": "هر دوربین {{frames}} شیار فریم در حافظهٔ اشتراکی دارد. با نرخ فریم سریع‌ترین دوربین، هر فریم تقریباً به‌مدت {{lifetime}} ثانیه قبل از بازنویسی در دسترس است."
+      }
     },
     "cameraStorage": {
       "title": "ذخیره‌سازی دوربین",
@@ -131,6 +173,21 @@
       "error": "خطا: {{error}}",
       "tips": {
         "title": "اطلاعات بررسی دوربین"
+      },
+      "keyframes": {
+        "title": "تحلیل فریم‌کلیدی",
+        "analyzing": "در حال تحلیل فریم‌های کلیدی... {{seconds}} ثانیه باقی مانده است",
+        "stillAnalyzing": "هنوز در حال تحلیل فریم‌های کلیدی...",
+        "recordStream": "جریان ضبط:",
+        "keyframeCount": "فریم‌های کلیدی مشاهده‌شده:",
+        "observedDuration": "مدت مشاهده‌شده:",
+        "gap": "فاصلهٔ فریم کلیدی (حداقل / میانگین / حداکثر):",
+        "segmentLength": "طول بخش ضبط:",
+        "ok": "فریم‌های کلیدی هر ~{{seconds}} ثانیه، مناسب برای ضبط و پخش.",
+        "warning": "فریم‌های کلیدی پراکنده یا متغیر (طولانی‌ترین فاصله ~{{seconds}} ثانیه)، احتمالاً کدک هوشمند (H.264+/H.265+) است، توصیه نمی‌شود.",
+        "error": "فاصلهٔ فریم کلیدی (~{{seconds}} ثانیه) از طول بخش ضبط ({{segmentTime}} ثانیه) بیشتر است. ممکن است برخی بخش‌ها فریم کلیدی نداشته باشند که پخش را خراب می‌کند. کدک هوشمند/+ را روی دوربین غیرفعال کنید یا فاصلهٔ فریم کلیدی را کوتاه کنید.",
+        "unknown": "فاصله‌بندی فریم کلیدی قابل تشخیص نیست.",
+        "recordDisabled": "ضبط برای این دوربین غیرفعال است."
       }
     },
     "framesAndDetections": "فریم‌ها / تشخیص‌ها",
@@ -148,7 +205,8 @@
       "cameraDetect": "تشخیص {{camName}}",
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraFramesPerSecond": "{{camName}} فریم بر ثانیه",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} تشخیص‌های ردشده در ثانیه"
+      "cameraSkippedDetectionsPerSecond": "{{camName}} تشخیص‌های ردشده در ثانیه",
+      "cameraGpu": "GPU {{camName}}"
     },
     "toast": {
       "error": {
@@ -158,7 +216,21 @@
         "copyToClipboard": "داده‌های بررسی در کلیپ‌بورد کپی شد."
       }
     },
-    "title": "دوربین‌ها"
+    "title": "دوربین‌ها",
+    "noCameras": {
+      "title": "هیچ دوربینی یافت نشد"
+    },
+    "connectionQuality": {
+      "title": "کیفیت اتصال",
+      "excellent": "عالی",
+      "fair": "قابل قبول",
+      "poor": "ضعیف",
+      "unusable": "غیرقابل‌استفاده",
+      "fps": "FPS",
+      "expectedFps": "FPS مورد انتظار",
+      "reconnectsLastHour": "اتصال مجدد (ساعت گذشته)",
+      "stallsLastHour": "توقف‌ها (ساعت گذشته)"
+    }
   },
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} استفادهٔ CPU بالایی برای FFmpeg دارد ({{ffmpegAvg}}%)",
@@ -168,7 +240,8 @@
     "detectIsVerySlow": "{{detect}} بسیار کند است ({{speed}} ms)",
     "shmTooLow": "اختصاص /dev/shm ({{total}} MB) باید دست‌کم تا {{min}} MB افزایش یابد.",
     "healthy": "سامانه سالم است",
-    "detectIsSlow": "{{detect}} کند است ( {{speed}} میلی‌ثانیه )"
+    "detectIsSlow": "{{detect}} کند است ( {{speed}} میلی‌ثانیه )",
+    "debugReplayActive": "نشست بازپخش اشکال‌زدایی فعال است"
   },
   "enrichments": {
     "infPerSecond": "استنتاج‌ها در ثانیه",
