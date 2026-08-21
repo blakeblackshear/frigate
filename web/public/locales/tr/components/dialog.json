@@ -67,7 +67,8 @@
       "error": {
         "failed": "Dışa aktarım sıraya alınamadı: {{error}}",
         "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",
-        "noVaildTimeSelected": "Geçerli bir zaman aralığı seçilmedi"
+        "noVaildTimeSelected": "Geçerli bir zaman aralığı seçilmedi",
+        "noValidTimeSelected": "Geçerli bir zaman aralığı seçilmedi"
       },
       "view": "Görüntüle",
       "queued": "Dışa aktarımlar kuyruğa alındı. İlerlemeyi dışa aktarım sayfasından görebilirsiniz.",
