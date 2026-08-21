@@ -64,7 +64,7 @@
       },
       "view": "表示",
       "queued": "エクスポートがキューに追加されました。進捗状況はエクスポートページで確認できます。",
-      "batchQueuedSuccess_other": "{{count}} 件のエクスポートがキューに登録されました。現在ケースをオープンしています。",
+      "batchQueuedSuccess_other": "{{count}} 件のエクスポートがキューに登録されました。",
       "batchQueuedPartial": "{{total}} 件中 {{successful}} 件のエクスポートがキューに追加されました。失敗したカメラ: {{failedCameras}}",
       "batchQueueFailed": "{{total}} 件のエクスポートをキューに追加できませんでした。失敗したカメラ: {{failedCameras}}",
       "batchSuccess_other": "{{count}} 件のエクスポートを開始しました。ケースを開きます。",
@@ -118,7 +118,7 @@
       "exportButton_other": "{{count}} 件のレビューをエクスポート",
       "exportingButton": "エクスポート中...",
       "toast": {
-        "started_other": "{{count}} 件のエクスポートを開始しました。ケースを開きます。",
+        "started_other": "{{count}} 件のエクスポートを開始しました。",
         "startedNoCase_other": "{{count}} 件のエクスポートを開始しました。",
         "partial": "{{total}} 件中 {{successful}} 件のエクスポートを開始しました。失敗: {{failedItems}}",
         "failed": "{{total}} 件のエクスポートを開始できませんでした。失敗: {{failedItems}}"
