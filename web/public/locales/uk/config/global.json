@@ -21,6 +21,9 @@
         },
         "filters": {
             "label": "Фільтри звуку"
+        },
+        "enabled_in_config": {
+            "label": "Оригінальний стан аудіо"
         }
     },
     "audio_transcription": {

@@ -55,7 +55,8 @@
       "error": {
         "failed": "Не вдалося додати до черги експорт: {{error}}",
         "endTimeMustAfterStartTime": "Час закінчення повинен бути після часу початку",
-        "noVaildTimeSelected": "Не вибрано допустимий діапазон часу"
+        "noVaildTimeSelected": "Не вибрано допустимий діапазон часу",
+        "noValidTimeSelected": "Не вибрано дійсний діапазон часу"
       },
       "success": "Експорт успішно розпочато. Перегляньте файл на сторінці експорту.",
       "view": "Переглянути",
@@ -126,7 +127,14 @@
       "queueingButton": "Додаю експорти у чергу...",
       "exportButton_one": "Експорт {{count}} камери",
       "exportButton_few": "Експорт {{count}} камер",
-      "exportButton_many": "Експорт {{count}} камер"
+      "exportButton_many": "Експорт {{count}} камер",
+      "searchOrSelectGroup": "Пошук або вибір групи камер...",
+      "selectAll": "Вибрати всі камери",
+      "clearSelection": "Очистити вибір",
+      "selectWithActivity": "Камери з відстежуваними об'єктами",
+      "selectGroup": "Вибрати групу",
+      "noMatchingCameras": "Не знайшлось камер по вашему пошуку",
+      "selectedCount": "{{selected}}/{{total}} обрано"
     },
     "multi": {
       "title_one": "Експорт {{count}} рецензії",
