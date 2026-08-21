@@ -29,7 +29,7 @@
         },
         "listen": {
             "label": "Tipi di ascolto",
-            "description": "Elenco dei tipi di eventi audio da rilevare (ad esempio: abbaio, allarme antincendio, urlo, parlato, grido)."
+            "description": "Elenco dei tipi di eventi audio da rilevare (ad esempio: abbaio, allarme antincendio, parlato, grido)."
         },
         "filters": {
             "label": "Filtri audio",
@@ -51,9 +51,9 @@
     "ffmpeg": {
         "path": {
             "label": "Percorso FFmpeg",
-            "description": "Percorso del file binario FFmpeg da utilizzare o alias di versione (\"5.0\" o \"7.0\")."
+            "description": "Percorso del file binario FFmpeg da utilizzare o alias di versione (\"7.0\" o \"8.0\")."
         },
-        "label": "FFmpeg",
+        "label": "Flussi (FFmpeg)",
         "hwaccel_args": {
             "label": "Argomenti di accelerazione hardware",
             "description": "Argomenti di accelerazione hardware per FFmpeg. Si consiglia di utilizzare preimpostazioni specifiche del provider."
@@ -86,7 +86,7 @@
             "description": "Indice GPU predefinito utilizzato per l'accelerazione hardware, se disponibile.",
             "label": "Indice GPU"
         },
-        "description": "Impostazioni di FFmpeg, inclusi percorso binario, argomenti, opzioni hwaccel e argomenti di output per ruolo.",
+        "description": "Ingressi del flusso video della telecamera e opzioni di FFmpeg, inclusi percorso binario, argomenti, accelerazione hardware e argomenti di uscita per ruolo.",
         "global_args": {
             "label": "Argomenti globali di FFmpeg",
             "description": "Argomenti globali passati ai processi FFmpeg."
@@ -139,8 +139,8 @@
             "description": "Abilita la pubblicazione delle istantanee dell'immagine per gli oggetti sui topic MQTT per questa telecamera."
         },
         "timestamp": {
-            "label": "Aggiungi timestamp",
-            "description": "Sovraimprime un timestamp sulle immagini pubblicate su MQTT."
+            "label": "Aggiungi orario",
+            "description": "Sovrapponi un orario alle immagini pubblicate su MQTT."
         },
         "bounding_box": {
             "label": "Aggiungi riquadro di delimitazione",
@@ -312,8 +312,8 @@
         }
     },
     "review": {
-        "label": "Revisione",
-        "description": "Impostazioni che controllano gli avvisi, i rilevamenti e i riepiloghi di revisione GenAI utilizzati dall'interfaccia utente (UI) e dall'archiviazione per questa telecamera.",
+        "label": "Revisiona",
+        "description": "Impostazioni che controllano avvisi, rilevamenti e riepiloghi di revisione GenAI utilizzati dall'interfaccia utente e dall'archiviazione per questa telecamera.",
         "alerts": {
             "label": "Configurazione avvisi",
             "description": "Impostazioni relative a quali oggetti tracciati generano avvisi e alle modalità di conservazione degli avvisi stessi.",
@@ -323,7 +323,7 @@
             },
             "labels": {
                 "label": "Etichette avvisi",
-                "description": "Elenco delle etichette oggetto che si qualificano come avvisi (ad esempio: car, person)."
+                "description": "Elenco delle etichette oggetto che si qualificano come avvisi (ad esempio: automobile, persona)."
             },
             "required_zones": {
                 "label": "Zone richieste",
@@ -387,7 +387,7 @@
             },
             "debug_save_thumbnails": {
                 "label": "Salva miniature",
-                "description": "Salva le miniature inviate al provider GenAI per il debug e la revisione."
+                "description": "Salva le miniature inviate al provider GenAI per le correzioni e la revisione."
             },
             "enabled_in_config": {
                 "label": "Stato GenAI originale",
@@ -398,8 +398,8 @@
                 "description": "Lingua preferita da richiedere al provider GenAI per le risposte generate."
             },
             "activity_context_prompt": {
-                "label": "Prompt di contesto dell'attività",
-                "description": "Prompt personalizzato che descrive cosa costituisce o meno un'attività sospetta, per fornire contesto ai riepiloghi della GenAI."
+                "label": "Richiesta di contesto dell'attività",
+                "description": "Richiesta personalizzata che descrive cosa costituisce o meno un'attività sospetta, per fornire contesto ai riepiloghi della GenAI."
             }
         }
     },
@@ -419,6 +419,9 @@
             "max_concurrent": {
                 "label": "Esportazioni simultanee massime",
                 "description": "Numero massimo di processi di esportazione da elaborare contemporaneamente."
+            },
+            "chapters": {
+                "label": "Metadati dei capitoli da includere nelle registrazioni esportate"
             }
         },
         "description": "Impostazioni di registrazione e conservazione per questa telecamera.",
@@ -440,7 +443,7 @@
         },
         "motion": {
             "label": "Conservazione movimento",
-            "description": "Numero di giorni per cui conservare le registrazioni attivate dal movimento, indipendentemente dagli oggetti tracciati. Impostare su 0 se si desidera conservare solo le registrazioni relative ad allarmi e rilevamenti.",
+            "description": "Numero di giorni per cui conservare le registrazioni attivate dal movimento, indipendentemente dagli oggetti tracciati. Imposta a 0 se si desidera conservare solo le registrazioni relative ad allarmi e rilevamenti.",
             "days": {
                 "label": "Giorni di conservazione",
                 "description": "Numero di giorni di conservazione delle registrazioni."
@@ -496,10 +499,10 @@
         },
         "preview": {
             "label": "Configurazione anteprima",
-            "description": "Impostazioni che controllano la qualità delle anteprime di registrazione mostrate nell'interfaccia utente (UI).",
+            "description": "Impostazioni che controllano la qualità delle anteprime di registrazione mostrate nell'interfaccia utente.",
             "quality": {
                 "label": "Qualità anteprima",
-                "description": "Livello di qualità dell'anteprima (very_low, low, medium, high, very_high)."
+                "description": "Livello di qualità dell'anteprima (molto_bassa, bassa, media, alta, molto_alta)."
             }
         },
         "enabled_in_config": {
@@ -515,11 +518,11 @@
             "description": "Abilita o disabilita il salvataggio delle istantanee per questa telecamera."
         },
         "timestamp": {
-            "label": "Sovrimpressione timestamp",
-            "description": "Sovraimprime un timestamp sulle istantanee provenienti dalle API."
+            "label": "Sovrapposizione orario",
+            "description": "Sovrapponi un orario alle istantanee provenienti dalle API."
         },
         "bounding_box": {
-            "label": "Sovrimpressione riquadro di delimitazione",
+            "label": "Sovrapposizione riquadro di delimitazione",
             "description": "Disegna i riquadri di delimitazione per gli oggetti tracciati sulle istantanee provenienti dalle API."
         },
         "crop": {
@@ -588,10 +591,10 @@
         },
         "frame_alpha": {
             "description": "Valore alfa utilizzato durante la fusione dei fotogrammi per la preelaborazione del movimento.",
-            "label": "Frame alfa"
+            "label": "Fotogramma alfa"
         },
         "frame_height": {
-            "label": "Altezza del frame",
+            "label": "Altezza del fotogramma",
             "description": "Altezza in pixel alla quale ridimensionare i fotogrammi durante il calcolo del movimento."
         },
         "mask": {
@@ -710,9 +713,9 @@
     },
     "live": {
         "label": "Riproduzione in diretta",
-        "description": "Impostazioni utilizzate dall'interfaccia web per controllare la selezione, la risoluzione e la qualità della trasmissione Dal vivo.",
+        "description": "Impostazioni utilizzate dall'interfaccia web per controllare la selezione, la risoluzione e la qualità della trasmissione dal vivo.",
         "streams": {
-            "label": "Nomi dei flussi Dal vivo",
+            "label": "Nomi dei flussi dal vivo",
             "description": "Mappatura dei nomi dei flussi configurati ai nomi ritrasmissioni/go2rtc utilizzati per la riproduzione dal vivo."
         },
         "height": {
@@ -726,38 +729,38 @@
     },
     "timestamp_style": {
         "label": "Stile orario",
-        "description": "Opzioni di stile per i timestamp applicati alle istantanee e alla vista di Debug.",
+        "description": "Opzioni di stile per gli orari applicati alle istantanee e alla vista correzioni.",
         "position": {
-            "label": "Posizione timestamp",
-            "description": "Posizione del timestamp sull'immagine (tl/tr/bl/br)."
+            "label": "Posizione orario",
+            "description": "Posizione dell'orario sull'immagine (tl/tr/bl/br)."
         },
         "format": {
-            "label": "Formato timestamp",
-            "description": "Stringa di formato data/ora utilizzata per i timestamp (codici di formato datetime di Python)."
+            "label": "Formato orario",
+            "description": "Stringa di formato data/ora utilizzata per l'orario (codici di formato data e ora di Python)."
         },
         "color": {
-            "label": "Colore timestamp",
-            "description": "Valori di colore RGB per il testo del timestamp (tutti i valori da 0 a 255).",
+            "label": "Colore orario",
+            "description": "Valori di colore RGB per il testo dell'orario (tutti i valori da 0 a 255).",
             "red": {
                 "label": "Rosso",
-                "description": "Componente rosso (0-255) per il colore del timestamp."
+                "description": "Componente rosso (0-255) per il colore dell'orario."
             },
             "green": {
                 "label": "Verde",
-                "description": "Componente verde (0-255) per il colore del timestamp."
+                "description": "Componente verde (0-255) per il colore dell'orario."
             },
             "blue": {
                 "label": "Blu",
-                "description": "Componente blu (0-255) per il colore del timestamp."
+                "description": "Componente blu (0-255) per il colore dell'orario."
             }
         },
         "thickness": {
-            "label": "Spessore timestamp",
-            "description": "Spessore della linea del testo del timestamp."
+            "label": "Spessore orario",
+            "description": "Spessore della linea del testo dell'orario."
         },
         "effect": {
-            "label": "Effetto timestamp",
-            "description": "Effetto visivo per il testo del timestamp (none, solid, shadow)."
+            "label": "Effetto orario",
+            "description": "Effetto visivo per il testo dell'orario (nessuno, solido, ombra)."
         }
     },
     "notifications": {
@@ -823,7 +826,7 @@
             },
             "actions": {
                 "label": "Azioni dell'attivatore",
-                "description": "Elenco delle azioni da eseguire quando l'attivatore trova una corrispondenza (notification, sub_label, attribute)."
+                "description": "Elenco delle azioni da eseguire quando l'attivatore trova una corrispondenza (notifica, sottoetichetta, attributo)."
             }
         },
         "description": "Impostazioni per la ricerca semantica, che crea e interroga gli embedding degli oggetti per trovare elementi simili."
@@ -855,8 +858,8 @@
             "label": "Ordine interfaccia utente"
         },
         "dashboard": {
-            "label": "Mostra nell'interfaccia utente",
-            "description": "Abilita o disabilita la visualizzazione di questa telecamera in ogni punto dell'interfaccia utente di Frigate. Disabilitando questa opzione, sarà necessario modificare manualmente la configurazione per visualizzare nuovamente la telecamera nell'interfaccia utente."
+            "label": "Mostra nel cruscotto Dal vivo",
+            "description": "Abilita o disabilita la visualizzazione di questa telecamera nel cruscotto dal vivo predefinito \"Tutte le telecamere\". La telecamera rimarrà comunque disponibile in qualsiasi altra sezione dell'interfaccia, inclusi i gruppi di telecamere e le impostazioni."
         },
         "label": "Interfaccia utente telecamera",
         "review": {
@@ -872,7 +875,7 @@
         "label": "Zone",
         "friendly_name": {
             "label": "Nome zona",
-            "description": "Un nome intuitivo per la zona, visualizzato nell'interfaccia utente di Frigate. Se non specificato, verrà utilizzata una versione formattata del nome della zona."
+            "description": "Un nome descrittivo per la zona, visualizzato nell'interfaccia utente di Frigate. Se non specificato, verrà utilizzata una versione formattata del nome della zona."
         },
         "filters": {
             "raw_mask": {
@@ -909,7 +912,7 @@
                 "description": "Coordinate del poligono che definiscono la posizione di applicazione di questo filtro all'interno dell'inquadratura."
             }
         },
-        "description": "Le zone consentono di definire un'area specifica dell'inquadratura per determinare se un oggetto si trova o meno all'interno di una particolare area.",
+        "description": "Le zone consentono di definire un'area specifica dell'inquadratura, in modo da poter determinare se un oggetto si trova o meno all'interno di un'area particolare.",
         "enabled_in_config": {
             "label": "Mantieni traccia dello stato originale della zona."
         },
@@ -926,8 +929,8 @@
             "description": "Numero di fotogrammi consecutivi in cui un oggetto deve essere rilevato nella zona prima di essere considerato presente. Aiuta a filtrare i rilevamenti transitori."
         },
         "loitering_time": {
-            "label": "Secondi di stazionamento",
-            "description": "Numero di secondi per cui un oggetto deve rimanere nella zona per essere considerato in stazionamento nella stessa. Imposta a 0 per disabilitare il rilevamento dello stazionamento."
+            "label": "Secondi di permanenza",
+            "description": "Numero di secondi in cui un oggetto deve rimanere nella zona per essere considerato come stazionario. Impostare su 0 per disabilitare il rilevamento dello stazionamento."
         },
         "speed_threshold": {
             "label": "Velocità minima",
@@ -935,7 +938,7 @@
         },
         "objects": {
             "label": "Oggetti attivatori",
-            "description": "Elenco dei tipi di oggetto (dalla labelmap) che possono attivare questa zona. Può essere una stringa o un elenco di stringhe. Se vuoto, vengono considerati tutti gli oggetti."
+            "description": "Elenco dei tipi di oggetto (dalla mappa delle etichette) che possono attivare questa zona. Può essere una stringa o un elenco di stringhe. Se vuoto, vengono considerati tutti gli oggetti."
         }
     },
     "type": {

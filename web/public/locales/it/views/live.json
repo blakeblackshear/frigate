@@ -135,7 +135,7 @@
     "title": "Trasmissione",
     "audio": {
       "tips": {
-        "title": "L'audio deve essere trasmesso dalla tua telecamera e configurato in go2rtc per questa trasmissione.",
+        "title": "L'audio deve essere trasmesso dalla tua telecamera e configurato in go2rtc per questo flusso.",
         "documentation": "Leggi la documentazione "
       },
       "unavailable": "L'audio non è disponibile per questo flusso",

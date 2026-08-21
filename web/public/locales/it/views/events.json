@@ -76,7 +76,7 @@
   "motionPreviews": {
     "title": "Anteprime di movimento: {{camera}}",
     "mobileSettingsTitle": "Impostazioni di anteprima del movimento",
-    "mobileSettingsDesc": "Regola la velocità di riproduzione e la luminosità, poi scegli una data per rivedere i filmati che mostrano solo il movimento.",
+    "mobileSettingsDesc": "Regola la velocità di riproduzione, l'attenuazione della luminosità e il ritaglio, e scegli una data per esaminare le clip di solo movimento.",
     "dim": "Attenua",
     "dimAria": "Regola l'intensità della luce",
     "dimDesc": "Aumenta l'attenuazione per migliorare la visibilità delle aree in movimento.",
@@ -90,6 +90,9 @@
     "filter": "Filtro",
     "filterDesc": "Seleziona le aree per visualizzare solo i video con movimento in quelle regioni.",
     "filterClear": "Pulisci",
-    "menuItem": "Visualizza le anteprime del movimento"
+    "menuItem": "Visualizza le anteprime del movimento",
+    "crop": "Ritaglia in base al filtro",
+    "cropAria": "Abilita/disabilita il ritaglio delle anteprime sulle aree filtrate",
+    "cropDesc": "Ingrandisci le anteprime sulle aree selezionate del filtro anzichè mostrare l'intera immagine."
   }
 }

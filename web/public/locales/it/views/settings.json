@@ -132,7 +132,7 @@
     },
     "audio": {
       "title": "Audio",
-      "currentdbFS": "dbFS correnti",
+      "currentdbFS": "dbFS attuale",
       "noAudioDetections": "Nessun rilevamento audio",
       "score": "punteggio",
       "currentRMS": "RMS attuale"
@@ -489,7 +489,7 @@
     "integrationObjectClassification": "Classificazione oggetti",
     "integrationAudioTranscription": "Trascrizione audio",
     "cameraDetect": "Rilevamento oggetti",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "Flussi (FFmpeg)",
     "cameraRecording": "Registrazione",
     "cameraSnapshots": "Istantanee",
     "cameraMotion": "Rilevamento movimento",
@@ -1430,10 +1430,10 @@
         "webuiUrlLabel": "URL dell'interfaccia web della telecamera",
         "webuiUrlHelp": "URL per accedere direttamente all'interfaccia web della telecamera dalla vista Correzioni. Lasciare vuoto per disabilitare il collegamento.",
         "webuiUrlInvalid": "Deve essere un URL valido (ad esempio, https://esempio.com).",
-        "dashboardLabel": "Mostra nella schermata Dal vivo",
-        "dashboardHelp": "Mostra questa telecamera nella schermata Dal vivo.",
-        "reviewLabel": "Mostra in Revisiona",
-        "reviewHelp": "Mostra questa telecamera in Revisiona, incluso il filtro della telecamera, la revisione del movimento e la visualizzazione della cronologia."
+        "dashboardLabel": "Mostra nel cruscotto Dal vivo",
+        "dashboardHelp": "Mostra questa telecamera nel cruscotto dal vivo predefinito \"Tutte le telecamere\". Rimarrà comunque disponibile in qualsiasi altra sezione, inclusi i gruppi di telecamere.",
+        "reviewLabel": "Mostra in Revisione",
+        "reviewHelp": "Mostra questa telecamera in Revisione, incluso il filtro della telecamera, la revisione del movimento e la visualizzazione della cronologia."
       },
       "label": "Stato della telecamera",
       "description": "Imposta lo stato operativo per ciascuna telecamera.<br /><br /><strong>Accesa</strong>: i flussi vengono elaborati normalmente.<br /><strong>Spenta</strong>: mette temporaneamente in pausa l'elaborazione. Non viene mantenuta dopo il riavvio di Frigate.<br /><strong>Disabilitata</strong>: interrompe l'elaborazione e salva la modifica nella configurazione. È necessario riavviare Frigate per riattivare una telecamera disabilitata.<br /><br /><em>Nota: la disabilitazione non influisce sulle ritrasmissioni go2rtc.</em><br /><br />Trascina la maniglia per riordinare le telecamere attive nell'interfaccia utente, inclusi il pannello di controllo Dal vivo e i menu a tendina di selezione della telecamera.",
@@ -1489,7 +1489,7 @@
     "deleteCameraDialog": {
       "title": "Elimina telecamera",
       "description": "L'eliminazione di una telecamera rimuoverà in modo permanente tutte le registrazioni, gli oggetti tracciati e la configurazione relativi a tale telecamera. Potrebbe essere comunque necessario rimuovere manualmente gli eventuali flussi go2rtc associati a questa telecamera.",
-      "selectPlaceholder": "Scegli telecamera...",
+      "selectPlaceholder": "Scegli telecamera…",
       "confirmTitle": "Sei sicuro?",
       "confirmWarning": "L'eliminazione di <strong>{{cameraName}}</strong> è irreversibile.",
       "deleteExports": "Elimina anche le esportazioni per questa telecamera",
@@ -1744,7 +1744,14 @@
       "keyLabel": "Chiave",
       "valueLabel": "Valore",
       "keyPlaceholder": "Nuova chiave",
-      "remove": "Rimuovi"
+      "remove": "Rimuovi",
+      "providerNameLabel": "Nome del fornitore",
+      "providerNamePlaceholder": "ad es. openai",
+      "variableNameLabel": "Nome della variabile",
+      "variableNamePlaceholder": "ad es. MIA_VARIABILE",
+      "loggerNameLabel": "Nome del logger",
+      "loggerNamePlaceholder": "ad es. frigate.record",
+      "keyPatternError": "Utilizza solo lettere, numeri, trattini e trattini bassi (nessun spazio)"
     },
     "ffmpegArgs": {
       "preset": "Preimpostazione",
@@ -1782,7 +1789,17 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "Flusso {{index}}"
+      "itemTitle": "Flusso {{index}}",
+      "sourceMode": {
+        "restream": "Ritrasmissione (go2rtc)",
+        "manual": "Percorso ingresso manuale",
+        "go2rtcStreamLabel": "Flusso go2rtc",
+        "go2rtcStreamPlaceholder": "Seleziona un flusso go2rtc",
+        "noGo2rtcStreams": "Nessun flusso go2rtc configurato",
+        "go2rtcStreamSearch": "Cerca flussi...",
+        "availableStreams": "Flussi disponibili",
+        "noMatchingStreams": "Nessun flusso corrispondente"
+      }
     },
     "restartRequiredField": "Riavvio richiesto",
     "restartRequiredFooter": "Configurazione modificata - Riavvio necessario",
@@ -1879,7 +1896,7 @@
     "liveStreams": {
       "streamNameLabel": "Nome flusso",
       "streamNamePlaceholder": "p.es., flusso HD principale",
-      "go2rtcStreamLabel": "flusso go2rtc",
+      "go2rtcStreamLabel": "Flusso go2rtc",
       "go2rtcStreamPlaceholder": "Seleziona un flusso go2rtc",
       "go2rtcStreamSearch": "Cerca o inserisci il nome di un flusso…",
       "noGo2rtcStreams": "Nessun flusso go2rtc configurato",
@@ -2186,6 +2203,14 @@
     },
     "onvif": {
       "autotrackingNoZones": "Il tracciamento automatico richiede almeno una zona. Definisci una zona per questa telecamera in Maschere/Zone, quindi impostala come zona obbligatoria qui sotto."
+    },
+    "model": {
+      "optimizedFor320": "Frigate è ottimizzato per un modello 320x320, che rappresenta la scelta migliore per la maggior parte delle configurazioni. Un modello 640x640 è più lento e risulta utile solo in scenari specifici.",
+      "inputDimensionsNotDetectResolution": "La larghezza e l'altezza di ingresso del modello sono le dimensioni di ingresso del modello di rilevamento oggetti, non la risoluzione di rilevamento della telecamera. Devono corrispondere alle dimensioni del modello in uso — in genere una dimensione quadrata come 320x320 o 640x640."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "Gli argomenti manuali per l'accelerazione hardware non sono consigliati. A meno di esigenze specifiche, seleziona il preset corrispondente al tuo hardware.",
+      "inputsMissingGo2rtcStream": "Un ingresso sottostante punta ad una ritrasmissione go2rtc che non esiste più. Seleziona una ritrasmissione esistente o inserisci manualmente l'URL della telecamera, altrimenti la telecamera non riuscirà a connettersi."
     }
   },
   "saveAllPreview": {
