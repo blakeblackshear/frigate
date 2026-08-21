@@ -83,8 +83,8 @@
       "batchSuccess_other": "Alustasin {{count}} ekspordiga. Avan juhtumi kohe.",
       "batchPartial": "Alustasin {{successful}}/{{total}} ekspordiga. Ebaõnnestunud kaamerad: {{failedCameras}}",
       "batchFailed": "{{total}} eksporti ebaõnnestus algatada. Ebaõnnestunud kaamerad: {{failedCameras}}",
-      "batchQueuedSuccess_one": "1 eksport järjekorda lisatud. Avan juhtumi kohe.",
-      "batchQueuedSuccess_other": "{{count}} eksporti järjekorda lisatud. Avan juhtumi kohe.",
+      "batchQueuedSuccess_one": "1 eksportimine on lisatud järjekorda.",
+      "batchQueuedSuccess_other": "{{count}} eksportimist on lisatud järjekorda.",
       "batchQueuedPartial": "{{successful}}/{{total}} ekspordist on järjekorda lisatud. Ebaõnnestunud kaamerad: {{failedCameras}}",
       "batchQueueFailed": "{{total}} eksporti ebaõnnestus järjekorda lisada. Ebaõnnestunud kaamerad: {{failedCameras}}"
     },
@@ -139,8 +139,8 @@
       "exportButton_other": "Ekspordi {{count}} ülevaadet",
       "exportingButton": "Ekspordin...",
       "toast": {
-        "started_one": "Alustasin 1 eksporti. Avan juhtumi kohe.",
-        "started_other": "Alustasin {{count}} ekspordiga. Avan juhtumi kohe.",
+        "started_one": "Alustasin ühte eksportimist.",
+        "started_other": "Alustasin {{count}} eksportimisega.",
         "startedNoCase_one": "Alustasin 1 ekspordiga.",
         "startedNoCase_other": "Alustasin {{count}} ekspordiga.",
         "partial": "Alustasin {{successful}}/{{total}} ekspordiga. Ebaõnnestusid: {{failedItems}}",
