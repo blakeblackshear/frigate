@@ -61,12 +61,13 @@
       "error": {
         "failed": "Falha ao iniciar exportação: {{error}}",
         "endTimeMustAfterStartTime": "Tempo de finalização deve ser após tempo de início",
-        "noVaildTimeSelected": "Nenhuma faixa de tempo válida selecionada"
+        "noVaildTimeSelected": "Nenhuma faixa de tempo válida selecionada",
+        "noValidTimeSelected": "Intervalo de tempo selecionado inválido"
       },
       "view": "Ver",
       "batchQueuedSuccess_one": "1 exportação na fila. Abrindo o caso agora.",
       "batchQueuedSuccess_many": "{{count}} exportações colocadas na fila. Abrindo o caso agora.",
-      "batchQueuedSuccess_other": "",
+      "batchQueuedSuccess_other": "{{count}} exportações colocadas na fila. Abrindo o caso agora.",
       "batchQueuedPartial": "{{successful}} de {{total}} exportações na fila. Câmeras com falha: {{failedCameras}}",
       "batchQueueFailed": "Falha ao enfileirar {{total}} exportações. Câmeras com falha: {{failedCameras}}",
       "batchPartial": "Iniciadas {{successful}} de {{total}} exportações. Câmeras com falha: {{failedCameras}}",
@@ -133,7 +134,7 @@
       "toast": {
         "started_one": "Uma exportação iniciada. Abrindo o caso agora.",
         "started_many": "Iniciadas {{count}} exportações. Abrindo o caso agora.",
-        "started_other": "",
+        "started_other": "Iniciadas {{count}} exportações. Abrindo o caso agora.",
         "failed": "Falha ao iniciar {{total}} exportações. Falhas: {{failedItems}}",
         "partial": "Iniciadas {{successful}} de {{total}} exportações. Falhas: {{failedItems}}",
         "startedNoCase_one": "1 exportação iniciada.",

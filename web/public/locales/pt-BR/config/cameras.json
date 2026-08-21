@@ -227,10 +227,12 @@
             "description": "Mapeamento de nomes de fluxos configurados para nomes de restream/go2rtc usados na reprodução ao vivo."
         },
         "height": {
-            "description": "Altura (em pixels) para renderizar a transmissão ao vivo jsmpeg na interface web; deve ser menor ou igual à altura da transmissão de detecção."
+            "description": "Altura (em pixels) para renderizar a transmissão ao vivo jsmpeg na interface web; deve ser menor ou igual à altura da transmissão de detecção.",
+            "label": "Altura da transmissão"
         },
         "quality": {
-            "description": "Qualidade de codificação para o fluxo jsmpeg (1 para a mais alta, 31 para a mais baixa)."
+            "description": "Qualidade de codificação para o fluxo jsmpeg (1 para a mais alta, 31 para a mais baixa).",
+            "label": "Qualidade da transmissão"
         }
     },
     "motion": {
@@ -554,7 +556,258 @@
             "cutoff_time": {
                 "label": "Tempo limite de detecção",
                 "description": "Segundos a esperar após o fim da atividade antes de encerrar a detecção."
+            },
+            "enabled_in_config": {
+                "label": "Estado original de detecções",
+                "description": "Monitora se as detecções estavam originalmente habilitadas na configuração estática."
+            }
+        },
+        "genai": {
+            "label": "Configuração de IA generativa",
+            "description": "Controla o uso de IA generativa para produzir descrições e resumos de itens de avaliação.",
+            "detections": {
+                "label": "Ativar IA generativa para detecções",
+                "description": "Use IA generativa para gerar descrições para itens de detecção."
+            },
+            "image_source": {
+                "label": "Analisar fonte de imagem",
+                "description": "Fonte das imagens enviadas à IA generativa (\"prévia\" ou \"gravações\"); \"gravações\" usa quadros de maior qualidade, porém consome mais tokens."
+            },
+            "additional_concerns": {
+                "label": "Preocupações adicionais",
+                "description": "Uma lista de preocupações ou observações adicionais que a IA generativa deve levar em conta ao avaliar a atividade nesta câmera."
+            },
+            "debug_save_thumbnails": {
+                "label": "Salvar miniaturas",
+                "description": "Salve as miniaturas enviadas ao provedor de IA generativa para fins de depuração e revisão."
+            },
+            "enabled_in_config": {
+                "label": "Estado original da IA generativa",
+                "description": "Registra se a revisão por IA generativa estava originalmente habilitada na configuração estática."
+            },
+            "preferred_language": {
+                "label": "Língua preferencial",
+                "description": "Idioma preferencial a ser solicitado ao provedor de IA generativa para as respostas geradas."
+            },
+            "activity_context_prompt": {
+                "label": "Prompt de contexto da atividade",
+                "description": "Prompt personalizado que descreve o que é e o que não é atividade suspeita, para fornecer contexto aos resumos de IA generativa."
+            },
+            "enabled": {
+                "label": "Ativar descrições de IA generativa",
+                "description": "Ative ou desative descrições e resumos gerados por IA generativa para itens de revisão."
+            },
+            "alerts": {
+                "label": "Habilitar IA generativa para alertas",
+                "description": "Use IA generativa para gerar descrições para itens de alerta."
             }
         }
+    },
+    "semantic_search": {
+        "label": "Busca semântica",
+        "description": "Configurações para busca semântica que gera e consulta embeddings de objetos para encontrar itens semelhantes.",
+        "triggers": {
+            "label": "Gatilhos",
+            "description": "Ações e critérios de correspondência para gatilhos de busca semântica específicos de câmera.",
+            "friendly_name": {
+                "label": "Nome amigável",
+                "description": "Nome amigável opcional exibido na interface para este gatilho."
+            },
+            "enabled": {
+                "label": "Ative este gatilho",
+                "description": "Ative ou desative este gatilho de busca semântica."
+            },
+            "type": {
+                "label": "Tipo de gatilho",
+                "description": "Tipo de gatilho: 'miniatura' (correspondência com a imagem) ou \"descrição\" (correspondência com o texto)."
+            },
+            "data": {
+                "label": "Conteúdo sensível",
+                "description": "Frase de texto ou ID de miniatura para corresponder a objetos rastreados."
+            },
+            "threshold": {
+                "label": "Limiar de disparo",
+                "description": "Pontuação mínima de similaridade (0-1) necessária para ativar este gatilho."
+            },
+            "actions": {
+                "label": "Acionar ações",
+                "description": "Lista de ações a serem executadas quando o gatilho for acionado (notificação, sub-rótulo, atributo)."
+            }
+        }
+    },
+    "snapshots": {
+        "label": "Instantâneas",
+        "description": "Configurações para snapshots de objetos monitorados gerados via API para esta câmera.",
+        "enabled": {
+            "label": "Habilitar instantâneas",
+            "description": "Ative ou desative o salvamento de instantâneos para esta câmera."
+        },
+        "timestamp": {
+            "label": "Sobreposição de marca de tempo",
+            "description": "Sobreponha uma marca de tempo às capturas de imagem da API."
+        },
+        "bounding_box": {
+            "label": "Sobreposição de caixa delimitadora",
+            "description": "Desenhe caixas delimitadoras para objetos rastreados em capturas de imagem da API."
+        },
+        "crop": {
+            "label": "Cortar captura de imagem",
+            "description": "Recorte as capturas da API para a caixa delimitadora do objeto detectado."
+        },
+        "required_zones": {
+            "label": "Zonas obrigatórias",
+            "description": "Zonas nas quais um objeto deve entrar para que um snapshot seja salvo."
+        },
+        "height": {
+            "label": "Altura da captura",
+            "description": "Altura (pixels) para redimensionar as capturas da API; deixe em branco para preservar o tamanho original."
+        },
+        "retain": {
+            "label": "Retenção de capturas",
+            "description": "Configurações de retenção para capturas, incluindo dias padrão e substituições por objeto.",
+            "default": {
+                "label": "Retenção padrão",
+                "description": "Número padrão de dias para manter capturas."
+            },
+            "objects": {
+                "label": "Retenção de objetos",
+                "description": "Retenção de substituições por objeto para capturas em dias."
+            }
+        },
+        "quality": {
+            "label": "Qualidade da captura",
+            "description": "Qualidade de codificação das capturas salvas (0-100)."
+        }
+    },
+    "notifications": {
+        "enabled": {
+            "label": "Ativar notificações",
+            "description": "Ative ou desative as notificações para esta câmera."
+        },
+        "email": {
+            "label": "Notificação por E-mail",
+            "description": "Endereço de e-mail usado para notificações push ou exigido por determinados provedores de notificação."
+        },
+        "enabled_in_config": {
+            "label": "Estado original de notificações",
+            "description": "Indica se as notificações foram habilitadas na configuração estática original."
+        },
+        "label": "Notificações",
+        "description": "Configurações para ativar e controlar notificações para esta câmera."
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Configurações de conexão ONVIF e rastreamento automático PTZ para esta câmera.",
+        "host": {
+            "label": "Host ONVIF",
+            "description": "Host (e esquema opcional) para o serviço ONVIF desta câmera."
+        },
+        "port": {
+            "label": "Porta ONVIF",
+            "description": "Número da porta para o serviço ONVIF."
+        },
+        "user": {
+            "label": "Nome de usuário ONVIF",
+            "description": "Nome de usuário para autenticação ONVIF; alguns dispositivos exigem o usuário administrador para o ONVIF."
+        },
+        "password": {
+            "label": "Senha ONVIF",
+            "description": "Senha para autenticação ONVIF."
+        },
+        "tls_insecure": {
+            "label": "Desativar a verificação de TLS",
+            "description": "Ignore a verificação TLS e desative a autenticação digest para ONVIF (inseguro; use apenas em redes seguras)."
+        },
+        "profile": {
+            "label": "Perfil ONVIF",
+            "description": "Perfil de mídia ONVIF específico a ser utilizado para controle PTZ, identificado por token ou nome. Se não for definido, o primeiro perfil com configuração PTZ válida é selecionado automaticamente."
+        },
+        "autotracking": {
+            "label": "Rastreamento automático",
+            "description": "Rastreie automaticamente objetos em movimento e mantenha-os centralizados no enquadramento usando movimentos de câmera PTZ.",
+            "enabled": {
+                "label": "Ativar rastreamento automático",
+                "description": "Ative ou desative o rastreamento automático de objetos detectados pela câmera PTZ."
+            },
+            "calibrate_on_startup": {
+                "label": "Calibrar ao iniciar",
+                "description": "Meça as velocidades do motor PTZ na inicialização para melhorar a precisão do rastreamento. O Frigate atualizará a configuração com movement_weights após a calibração."
+            },
+            "zooming": {
+                "label": "Modo de zoom"
+            }
+        }
+    },
+    "timestamp_style": {
+        "label": "Estilo de marcação de tempo",
+        "description": "Opções de estilo para marcação de tempo aplicados as capturas e à visualização de depuração.",
+        "position": {
+            "label": "Posição de marcação de tempo",
+            "description": "Posição da marcação de tempo na imagem (se/sd/ie/id)."
+        },
+        "format": {
+            "label": "Formato da marcação de tempo",
+            "description": "String de formato de data e hora usada para marcação de tempo (formato para datetime do Python)."
+        },
+        "color": {
+            "label": "cor de marcação de tempo",
+            "description": "Valores de cor RGB para o texto da marcação de tempo (todos os valores de 0 a 255).",
+            "red": {
+                "label": "Vermelho",
+                "description": "Componente vermelho (0-255) para a cor da marcação de tempo."
+            },
+            "green": {
+                "label": "Verde",
+                "description": "Componente verde (0-255) para a cor da marcação de tempo."
+            },
+            "blue": {
+                "label": "Azul",
+                "description": "Componente azul (0-255) para a cor da marcação de tempo."
+            }
+        },
+        "thickness": {
+            "label": "Espessura da marcação de tempo",
+            "description": "Espessura da linha do texto da marcação de tempo."
+        },
+        "effect": {
+            "label": "Efeito da marcação de tempo",
+            "description": "Efeito visual para o texto do marcação de tempo (nenhum, sólido, sombra)."
+        }
+    },
+    "mqtt": {
+        "required_zones": {
+            "description": "Zonas nas quais um objeto deve entrar para que uma imagem MQTT seja publicada.",
+            "label": "Zonas obrigatórias"
+        },
+        "quality": {
+            "label": "Qualidade JPEG",
+            "description": "Qualidade JPEG para imagens publicadas via MQTT (0-100)."
+        },
+        "enabled": {
+            "label": "Enviar imagem",
+            "description": "Habilite a publicação de capturas de imagem de objetos em tópicos MQTT para esta câmera."
+        },
+        "timestamp": {
+            "label": "Adicionar marcação de tempo",
+            "description": "Sobreponha um marcação de tempo nas imagens publicadas no MQTT."
+        },
+        "bounding_box": {
+            "label": "Adicionar caixa delimitadora",
+            "description": "Desenhe caixas delimitadoras em imagens publicadas no MQTT."
+        },
+        "crop": {
+            "label": "Cortar imagem",
+            "description": "Recorte as imagens publicadas via MQTT de acordo com a caixa delimitadora do objeto detectado."
+        },
+        "height": {
+            "label": "Altura da imagem",
+            "description": "Altura (pixels) para redimensionar imagens publicadas via MQTT."
+        },
+        "label": "MQTT",
+        "description": "Configurações de publicação de imagens via MQTT."
+    },
+    "best_image_timeout": {
+        "label": "Tempo limite para a imagem ideal",
+        "description": "Quanto tempo aguardar pela imagem com a maior pontuação de confiança."
     }
 }
