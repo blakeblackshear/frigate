@@ -38,7 +38,7 @@
           "ask_full": "¿Es este objeto un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "toast": {
-          "error": "Error al enviarlo a Frigate+. Por favor, comprueba tu conexión a internet y prueba de nuevo."
+          "error": "No se pudo enviar a Frigate+. Verifique su conexión de red e inténtelo de nuevo."
         }
       }
     },

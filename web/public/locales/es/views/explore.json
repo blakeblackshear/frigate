@@ -302,7 +302,7 @@
       },
       "offset": {
         "label": "Desplazamiento de anotación",
-        "desc": "Estos datos provienen de la señal de detección de la cámara, pero se superponen a las imágenes de la señal de grabación. Es poco probable que ambas transmisiones estén perfectamente sincronizadas. Por lo tanto, el cuadro delimitador y el metraje no se alinearán perfectamente. Puede usar esta configuración para desplazar las anotaciones hacia adelante o hacia atrás en el tiempo para que se alineen mejor con el metraje grabado.",
+        "desc": "Estos datos provienen de la señal de detección de tu cámara, pero se superponen a las imágenes de la señal de grabación. Es poco probable que ambas señales estén perfectamente sincronizadas. Por lo tanto, el cuadro delimitador y la grabación no coincidirán a la perfección. Puedes usar esta configuración para desplazar las anotaciones hacia adelante o hacia atrás en el tiempo y así alinearlas mejor con la grabación.",
         "millisecondsToOffset": "Milisegundos para compensar la detección de anotaciones. <em>Predeterminado: 0</em>",
         "tips": "Disminuya el valor si la reproducción de vídeo se produce antes de los cuadros y los puntos de ruta, y auméntelo si se produce después de ellos. Este valor puede ser negativo.",
         "toast": {
