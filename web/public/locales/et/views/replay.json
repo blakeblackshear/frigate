@@ -19,7 +19,8 @@
             "error": "Silumise taasesitus ebaõnnestus: {{error}}",
             "alreadyActive": "Kordusseanss on juba aktiivne",
             "stopError": "Silumise taasesituse peatamine ebaõnnestus: {{error}}",
-            "goToReplay": "Mine kordusesse"
+            "goToReplay": "Mine kordusesse",
+            "noRecordings": "Valitud ajavahemikust ei leidu ühtegi salvestust"
         }
     },
     "title": "Kordus veaotsinguks",
