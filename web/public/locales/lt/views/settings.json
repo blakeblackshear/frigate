@@ -544,7 +544,7 @@
           "admin": "Admin",
           "adminDesc": "Pilna prieiga prie visų funkcijų.",
           "viewer": "Žiūrovas",
-          "viewerDesc": "Leidžiama prie Tiesioginio vaizdo tinklelio, Peržiūrų, Paieškų ir Eksportavimo funkcijų.",
+          "viewerDesc": "Leidžiama prie Tiesioginio vaizdo tinklelio, Peržiūrų, Paieškų ir Išrašų funkcijų.",
           "customDesc": "Specializuota rolė su prieiga prie konkrečios kameros."
         }
       }
@@ -1003,6 +1003,16 @@
       "estimatedBandwidth": "Tikėtinas Greitis",
       "roles": "Rolės",
       "ffmpegModule": "Naudoti srauto pritaikymo rėžimą"
+    }
+  },
+  "cameraManagement": {
+    "deleteCameraDialog": {
+      "deleteExports": "Taip pat ištrinti išrašus šiai kamerai"
+    }
+  },
+  "maintenance": {
+    "sync": {
+      "exports": "Išrašai"
     }
   }
 }

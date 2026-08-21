@@ -4,7 +4,8 @@
   "noPreviewFoundFor": "Peržiūrų nerasta {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Pateikti šį kadrą į Frigate+?",
-    "submit": "Pateikti"
+    "submit": "Pateikti",
+    "previewError": "Nepavyko užkrauti momentinės nuotraukos peržiūros. Irašas gali būti nepasikiamas šiuo momentu."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 ar naujesni yra privalomi šiam tiesioginės transliacijos tipui.",
   "streamOffline": {
@@ -47,5 +48,6 @@
     "error": {
       "submitFrigatePlusFailed": "Nepavyko pateikti kadro į Frigate+"
     }
-  }
+  },
+  "cameraOff": "Kamera yra išjungta"
 }

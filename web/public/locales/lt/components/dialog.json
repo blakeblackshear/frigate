@@ -54,7 +54,7 @@
       "lastHour_few": "Paskutinės {{count}} Valandos",
       "lastHour_other": "Paskutinės {{count}} Valandų",
       "fromTimeline": "Pasirinkit iš Laiko juostos",
-      "custom": "Pasirinkimas",
+      "custom": "Pasirinkti periodą",
       "start": {
         "title": "Pradžios Laikas",
         "label": "Pasirinkti Pradžios Laiką"
@@ -65,50 +65,119 @@
       }
     },
     "fromTimeline": {
-      "previewExport": "Peržiūrėti Eksportuotus",
-      "saveExport": "Išsaugoti Exportuojamą"
+      "previewExport": "Peržiūrėti Išrašus",
+      "saveExport": "Išsaugoti išrašą",
+      "queueingExport": "Kuriama išrašų eilė...",
+      "useThisRange": "Naudoti Šį Laiko Tarpą"
     },
     "name": {
-      "placeholder": "Pavadinti eksportuojamą įrašą"
+      "placeholder": "Pavadinti išrašą"
     },
     "select": "Pasirinkti",
-    "export": "Eksportuoti",
-    "selectOrExport": "Pasirinkti ar Eksportuoti",
+    "export": "Išrašas",
+    "selectOrExport": "Pasirinkti ar sukurti išrašą",
     "toast": {
-      "success": "Sėkmingai pradėtas eksportavimas. Peržiūrėti įrašą exports puslapyje.",
+      "success": "Sėkmingai pradėtas Išrašų kūrimas. Peržiūrėkite išrašų puslapyje.",
       "error": {
-        "failed": "Nepavyko pradėti eksportavimo: {{error}}",
+        "failed": "Nepavyko sudaryti išrašų eilės: {{error}}",
         "endTimeMustAfterStartTime": "Pabaigos Laikas privalo būti vėliau nei pradžios laikas",
-        "noVaildTimeSelected": "Nėra pasirinkto tinkamo laikotarpio"
+        "noVaildTimeSelected": "Nėra pasirinkto tinkamo laikotarpio",
+        "noValidTimeSelected": "Pasirinktas laiko tarpas nėra tinkamas"
       },
-      "view": "Žiūrėti"
+      "view": "Žiūrėti",
+      "queued": "Išrašo kūrimas įrašytas į eilę. Peržiūrėkite pasikeitimus išrašų puslapyje.",
+      "batchSuccess_one": "Pradėtas {{count}} išrašo kūrimas. Atidaroma kolekcija.",
+      "batchSuccess_few": "Pradėti {{count}} išrašų kūrimas. Atidaroma kolekcija.",
+      "batchSuccess_other": "Pradėti {{count}} išrašų kūrimą. Atidaroma kolekcija.",
+      "batchPartial": "Pradėta {{successful}} iš {{total}} išrašų. Nepavyko kamerų: {{failedCameras}}",
+      "batchFailed": "Nepavyko pradėti kurti {{total}} išrašų. Nepavyko kamerų: {{failedCameras}}",
+      "batchQueuedSuccess_one": "Eilėje {{count}} išrašas.",
+      "batchQueuedSuccess_few": "Eilėje {{count}} išrašai.",
+      "batchQueuedSuccess_other": "Eilėje {{count}}m išrašų.",
+      "batchQueuedPartial": "Eilėje {{successful}} iš {{total}} išrašų. Nepavyko kamerų: {{failedCameras}}",
+      "batchQueueFailed": "Nepavyko įrašyti į eilę {{total}} išrašų. Nepavyko kamerų: {{failedCameras}}"
     },
     "case": {
-      "newCaseOption": "Kurti naują užklausą",
-      "newCaseNamePlaceholder": "Naujos užklausos pavadinimas",
-      "newCaseDescriptionPlaceholder": "Užklausos aprašymas",
-      "label": "Užklausa",
-      "nonAdminHelp": "Nauja užklausa bus sukurta šiems išrašams",
-      "placeholder": "Pasirinkti užklausą"
+      "newCaseOption": "Kurti naują kolekciją",
+      "newCaseNamePlaceholder": "Naujos kolekcijos pavadinimas",
+      "newCaseDescriptionPlaceholder": "Kolekcijos aprašymas",
+      "label": "Kolekcija",
+      "nonAdminHelp": "Nauja kolekcija bus sukurta šiems išrašams.",
+      "placeholder": "Pasirinkti kolekciją"
     },
-    "queueing": "Sudaroma išrašų eilė...."
+    "queueing": "Sudaroma išrašų eilė....",
+    "tabs": {
+      "export": "Vienos Kameros",
+      "multiCamera": "Kelių Kamerų"
+    },
+    "multiCamera": {
+      "timeRange": "Laiko tarpas",
+      "selectFromTimeline": "Pasirinkti iš Laiko juostos",
+      "cameraSelection": "Kameros",
+      "cameraSelectionHelp": "Kameros yra išanksto parinktos kuriose yra susekti objektai pasirinktame laiko tarpsnyje",
+      "searchOrSelectGroup": "Ieškoti, ar pasirinkti kamerų grupę...",
+      "selectAll": "Pasirinkti visas kameras",
+      "clearSelection": "Panaikinti pasirinkimą",
+      "selectWithActivity": "Kameros su susektais objektais",
+      "selectGroup": "Pasirinkti grupę",
+      "noMatchingCameras": "Pagal jūsų paiešką kamerų nerasta",
+      "selectedCount": "{{selected}}/{{total}}pasirinkta",
+      "checkingActivity": "Tikrinama veikla kamerose...",
+      "noCameras": "Nėra pasiekiamų kamerų",
+      "detectionCount_one": "{{count}} susektas objektas",
+      "detectionCount_few": "{{count}} susekti objektai",
+      "detectionCount_other": "{{count}} susektų objektų",
+      "nameLabel": "Išrašo pavadinimas",
+      "namePlaceholder": "Pasirinktinis pirminis pavadinimas šiems išrašams",
+      "queueingButton": "Sudaroma išrašų eilė...",
+      "exportButton_one": "Išsaugoti išrašą {{count}} Kamerai",
+      "exportButton_few": "Išsaugoti išrašą {{count}} Kameroms",
+      "exportButton_other": "Išsaugoti išrašus {{count}} Kamerų"
+    },
+    "multi": {
+      "title_one": "{{count}} išrašo peržiūra",
+      "title_few": "{{count}} išrašų peržiūra",
+      "title_other": "{{count}} išrašų peržiūra",
+      "description": "Išsaugoti kiekvienos pasirinktos peržiūros išrašus. Visi išrašai bus sugrupuoti į vieną kolekciją.",
+      "descriptionNoCase": "Išsaugoti kiekvienos pasirinktos peržiūros išrašą.",
+      "caseNamePlaceholder": "Peržiūros išrašas - {{date}}",
+      "exportButton_one": "Išsaugoti {{count}} peržiūros išrašą",
+      "exportButton_few": "Išsaugoti {{count}} peržiūrų išrašus",
+      "exportButton_other": "Išsaugoti {{count}} peržiūrų išrašus",
+      "exportingButton": "Kuriami išrašai...",
+      "toast": {
+        "started_one": "{{count}} išrašo kurimas pradėtas.",
+        "started_few": "{{count}} išrašų kurimas pradėtas.",
+        "started_other": "{{count}} išrašų kurimas pradėtas.",
+        "partial": "Pradėti {{successful}} iš {{total}} išrašų. Nepavyko: {{failedItems}}",
+        "failed": "Nepavyko pradėti {{total}} išrašo kūrimo. Nepavyko: {{failedItems}}"
+      }
+    }
   },
   "recording": {
     "button": {
       "markAsReviewed": "Žymėti kaip peržiūrėtą",
-      "export": "Eksportuoti",
+      "export": "Kurti Išrašą",
       "deleteNow": "Ištrinti Dabar",
       "markAsUnreviewed": "Pažymėti kaip nematytą"
     },
     "confirmDelete": {
       "desc": {
-        "selected": "Ar esate įsitikinę, kad norite ištrinti visus įrašytus vaizdo įrašus susijusius su šiuo peržiūros elementu?<br /><br />Laikykite<em>Shift</em> norint ateityje praleisti šį pranešimą."
+        "selected": "Ar esate įsitikinę, kad norite ištrinti visus įrašytus vaizdo įrašus susijusius su šiuo peržiūros elementu?<br /><br />Laikykite <em>Shift</em> norint praleisti šį pranešimą ateityje."
       },
       "title": "Patvirtinti Ištrynimą",
       "toast": {
         "success": "Vaizdo įrašas susijęs su pasirinkta peržiūra buvo sėkmingai ištrintas.",
         "error": "Nepavyko ištrinti: {{error}}"
       }
+    },
+    "shareTimestamp": {
+      "label": "Pasidalinti Laiko tarpsniu",
+      "title": "Pasidalinti Laiko tarpsniu",
+      "description": "Pasidalinti URL su grotuvo dabartinės pozicijos laiko žyma arba pasirinkti laiko tarpsni. Pastaba, tai nėra vieša nuoroda ir bus pasiekiama tik tiems vartotojams kuri turi prieigą prie Frigate ir šios kameros.",
+      "custom": "Pasirinktas Laiko tarpsnis",
+      "button": "Dalintis Laiko Tarpsnio URL",
+      "shareTitle": "Frigate Peržiūros Laiko Juosta: {{camera}}"
     }
   },
   "search": {
