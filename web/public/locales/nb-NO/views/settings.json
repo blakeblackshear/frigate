@@ -1382,7 +1382,7 @@
       "saving": "Lagrer…",
       "saved": "Lagret",
       "label": "Kamerastatus",
-      "description": "Angi driftsstatus for hvert kamera.<br /><br /><strong>På</strong>: Strømmer behandles normalt.<br /><strong>Av</strong>: Setter behandlingen midlertidig på pause. Vedvarer ikke etter omstart av Frigate.<br /><strong>Deaktivert</strong>: Stopper behandlingen og lagrer endringen i konfigurasjonen din. En omstart kreves for å aktivere et deaktivert kamera igjen.<br /><br /><em>Merk: Deaktivering påvirker ikke viderestrømming (restream) i go2rtc.</em><br /><br />Dra i ikonet for å endre rekkefølgen på aktive kameraer slik de vises i grensesnittet, inkludert Live-dashbordet og rullegardinmenyene for kameravalg.",
+      "description": "Angi driftsstatus for hvert kamera.<br /><br /><strong>På</strong>: Strømmer behandles normalt.<br /><strong>Av</strong>: Setter behandlingen midlertidig på pause. Vedvarer ikke etter omstart av Frigate.<br /><strong>Deaktivert</strong>: Stopper behandlingen og lagrer endringen i konfigurasjonen din. En omstart kreves for å aktivere et deaktivert kamera igjen.<br /><br /><em>Merk: Deaktivering påvirker ikke viderestrømming (restream) i go2rtc.</em><br /><br />Dra i ikonet for å endre rekkefølgen på aktive kameraer slik de vises i grensesnittet, inkludert Direkte-dashbordet og rullegardinmenyene for kameravalg.",
       "disabledSubheading": "Deaktivert i konfigurasjonen",
       "status": {
         "on": "På",
@@ -1399,8 +1399,8 @@
         "webuiUrlLabel": "URL til kameraets webgrensesnitt",
         "webuiUrlHelp": "URL for å besøke kameraets webgrensesnitt direkte fra feilsøkingsvisningen (Debug). La stå tomt for å deaktivere lenken.",
         "webuiUrlInvalid": "Må være en gyldig URL (f.eks. https://example.com).",
-        "dashboardLabel": "Vis på Live-dashbordet",
-        "dashboardHelp": "Vis dette kameraet på Live-dashbordet.",
+        "dashboardLabel": "Vis på Direkte-dashbordet",
+        "dashboardHelp": "Vis dette kameraet på Direkte-dashbordet.",
         "reviewLabel": "Vis i Inspeksjons-modus",
         "reviewHelp": "Vis dette kameraet i Inspeksjon (Review), inkludert kamerafilteret, bevegelsesgjennomgang og historikkvisningen."
       }
@@ -1453,7 +1453,7 @@
       "confirmButton": "Slett permanent",
       "confirmWarning": "Sletting av <strong>{{cameraName}}</strong> kan ikke angres.",
       "description": "Sletting av et kamera vil fjerne alle opptak, sporede objekter og konfigurasjon for dette kameraet permanent. Eventuelle go2rtc-strømmer tilknyttet kameraet må eventuelt fjernes manuelt.",
-      "selectPlaceholder": "Velg kamera..."
+      "selectPlaceholder": "Velg kamera…"
     },
     "deleteCamera": "Slett kamera",
     "cameraType": {

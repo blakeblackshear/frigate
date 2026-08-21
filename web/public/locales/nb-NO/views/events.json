@@ -76,7 +76,7 @@
     "menuItem": "Vis forhåndsvisning av bevegelse",
     "title": "Bevegelsesvisning: {{camera}}",
     "mobileSettingsTitle": "Innstillinger for forhåndsvisning",
-    "mobileSettingsDesc": "Juster avspillingshastighet og dimming, og velg en dato for å inspisere klipp med kun bevegelse.",
+    "mobileSettingsDesc": "Juster avspillingshastighet, dimming og beskjæring, og velg en dato for å inspisere klipp med kun bevegelse.",
     "dim": "Dimming",
     "dimAria": "Juster dimmestyrke",
     "dimDesc": "Øk dimming for å gjøre bevegelsesområder tydeligere.",
@@ -89,6 +89,9 @@
     "seekAria": "Flytt {{camera}}-avspilleren til {{time}}",
     "filter": "Filter",
     "filterDesc": "Velg områder for å kun vise klipp med bevegelse i disse sonene.",
-    "filterClear": "Tøm"
+    "filterClear": "Tøm",
+    "crop": "Beskjær til filter",
+    "cropAria": "Slå av/på forhåndsvisning av beskjæring for de filtrerte områdene",
+    "cropDesc": "Zoom forhåndsvisninger inn på de valgte filterområdene i stedet for å vise hele bildet."
   }
 }
