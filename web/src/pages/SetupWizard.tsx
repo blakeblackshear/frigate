@@ -5,9 +5,12 @@ import SetupDetector from "@/components/setup/SetupDetector";
 import SetupHwAccel from "@/components/setup/SetupHwAccel";
 import SetupRecording from "@/components/setup/SetupRecording";
 import SetupWelcome from "@/components/setup/SetupWelcome";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTheme } from "@/context/theme-provider";
 import { useCallback, useReducer } from "react";
 import { useTranslation } from "react-i18next";
+import { LuMoon, LuSun } from "react-icons/lu";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -108,8 +111,11 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
 }
 
 export default function SetupWizard() {
-  const { t } = useTranslation(["views/setup"]);
+  const { t } = useTranslation(["views/setup", "common"]);
   const [state, dispatch] = useReducer(wizardReducer, initialState);
+  const { theme, systemTheme, setTheme } = useTheme();
+
+  const isDark = (theme === "system" ? systemTheme : theme) === "dark";
 
   const handleSkipSetup = useCallback(async () => {
     try {
@@ -219,6 +225,19 @@ export default function SetupWizard() {
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background p-4">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="fixed right-4 top-4 text-muted-foreground hover:text-primary"
+        aria-label={t(isDark ? "menu.darkMode.light" : "menu.darkMode.dark", {
+          ns: "common",
+        })}
+        onClick={() => setTheme(isDark ? "light" : "dark")}
+      >
+        {isDark ? <LuSun className="size-4" /> : <LuMoon className="size-4" />}
+      </Button>
+
       <Card className="w-full max-w-lg">
         <CardContent className="p-6">
           <StepIndicator
