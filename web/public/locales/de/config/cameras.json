@@ -547,7 +547,7 @@
                 "description": "Maximale Anzahl der gleichzeitig zu verarbeitenden Exportaufträge."
             },
             "chapters": {
-                "label": "Kapitel-Metadaten zur Einbettung in exportierte Aufzeichnungen"
+                "label": "Kapitel-Metadaten, die in exportierte Aufzeichnungen eingebettet werden sollen"
             }
         },
         "preview": {
@@ -772,7 +772,7 @@
         },
         "dashboard": {
             "label": "Im Live-Dashboard anzeigen",
-            "description": "Legt fest, ob diese Kamera im Live-Dashboard ‚Alle Kameras‘ angezeigt wird. Die Kamera bleibt in allen anderen Bereichen der Benutzeroberfläche verfügbar, einschließlich Kamera-Gruppen und Einstellungen."
+            "description": "Legt fest, ob diese Kamera im Standard-Live-Dashboard „Alle Kameras“ angezeigt wird. Die Kamera bleibt in allen anderen Bereichen der Benutzeroberfläche verfügbar, einschließlich Kameragruppen und Einstellungen."
         },
         "review": {
             "label": "In der Überprüfung anzeigen",

@@ -76,7 +76,7 @@
     "menuItem": "Bewegungsvorschau anzeigen",
     "title": "Bewegungsvorschau: {{camera}}",
     "mobileSettingsTitle": "Einstellungen für die Bewegungsvorschau",
-    "mobileSettingsDesc": "Passen Sie die Wiedergabegeschwindigkeit und die Dimmung an und wählen Sie ein Datum aus, um Clips mit nur Bewegungen anzusehen.",
+    "mobileSettingsDesc": "Passen Sie die Wiedergabegeschwindigkeit, die Dimmung und den Zuschnitt an und wählen Sie ein Datum aus, um Clips mit ausschließlich erkannten Bewegungen zu überprüfen.",
     "dim": "düster",
     "dimAria": "Dimmintensität einstellen",
     "dimDesc": "Erhöhen Sie die Dimmung, um die Sichtbarkeit des Bewegungsbereichs zu verbessern.",
@@ -89,6 +89,9 @@
     "seekAria": "{{camera}} Player suchen bis {{time}}",
     "filter": "Filter",
     "filterDesc": "Wählen Sie Bereiche aus, um nur Clips mit Bewegungen in diesen Regionen anzuzeigen.",
-    "filterClear": "Säubern"
+    "filterClear": "Säubern",
+    "crop": "Auf Filterbereich zuschneiden",
+    "cropAria": "Vorschauen auf die gefilterten Bereiche zuschneiden ein- oder ausschalten",
+    "cropDesc": "Zeigt eine vergrößerte Vorschau der ausgewählten Filterbereiche an, statt das vollständige Bild zu zeigen."
   }
 }
