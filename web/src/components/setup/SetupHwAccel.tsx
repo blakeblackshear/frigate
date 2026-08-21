@@ -11,7 +11,6 @@ import useSWR from "swr";
 const AUTO = "auto";
 const NONE = "none";
 
-// the codec key of a preset that decodes anything
 const ANY_CODEC = "any";
 
 // ffprobe names h265 streams hevc
@@ -24,11 +23,9 @@ function normalizeCodec(codec: string): string {
 
 type SetupHwAccelProps = {
   detectorHardwareKey?: string;
-  // detect stream codec of each camera added in the wizard, keyed by camera
-  // name. hwaccel only applies to the detect stream.
+  // camera name -> detect stream codec, the only stream hwaccel applies to
   detectCodecs: Record<string, string>;
-  // saved reports whether a config write happened, so the wizard knows
-  // whether finishing requires a restart
+  // saved tells the wizard whether finishing needs a restart
   onNext: (saved: boolean) => void;
   onBack: () => void;
   onSkip: () => void;
@@ -99,14 +96,11 @@ export default function SetupHwAccel({
         return { ffmpeg: { hwaccel_args: shared } };
       }
 
-      // this family decodes one codec per preset, so each camera needs the
-      // preset matching its own detect stream
       const perCamera = cameraCodecs
         .map((entry) => ({ ...entry, preset: family.presets[entry.codec] }))
         .filter((entry) => entry.preset);
 
       if (perCamera.length === 0) {
-        // no camera to match, so fall back to the family's first preset
         const fallback = Object.values(family.presets)[0];
         return fallback ? { ffmpeg: { hwaccel_args: fallback } } : null;
       }
@@ -114,12 +108,11 @@ export default function SetupHwAccel({
       const presets = new Set(perCamera.map((entry) => entry.preset));
 
       if (presets.size === 1 && perCamera.length === cameraCodecs.length) {
-        // every camera wants the same preset, so one global value says it
         return { ffmpeg: { hwaccel_args: [...presets][0] } };
       }
 
-      // the global stays on auto, so cameras added later still get resolved
-      // at startup rather than inheriting one camera's codec
+      // the global stays on auto so cameras added later resolve at startup
+      // instead of inheriting one camera's codec
       return {
         cameras: Object.fromEntries(
           perCamera.map((entry) => [
@@ -137,13 +130,12 @@ export default function SetupHwAccel({
 
     const configData =
       selected === NONE
-        ? // an empty string would make config/set delete the key (reviving the
-          // "auto" default), so an explicit no-hwaccel is an empty list
+        ? // an empty string would make config/set delete the key, reviving
+          // the "auto" default
           { ffmpeg: { hwaccel_args: [] } }
         : configFor(families.find((family) => family.key === key));
 
-    // Auto with nothing derived writes nothing: the config default of "auto"
-    // stays in place and the backend decides at startup
+    // nothing to write leaves the config default of "auto" in place
     if (!configData) {
       onNext(false);
       return;

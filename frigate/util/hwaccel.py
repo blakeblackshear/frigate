@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 # root the /proc reads use, so tests can point them at a fixture tree
 PROC_ROOT = "/proc"
 
-# stands in for the codec of a preset that decodes anything
 ANY_CODEC = "any"
 
 # a Raspberry Pi has no detection hardware of its own, so it gets a key here
@@ -35,11 +34,10 @@ RASPBERRY_PI = "raspberrypi"
 # ffprobe names h265 streams hevc
 CODEC_ALIASES = {"hevc": "h265"}
 
-# marketing name of a newer Intel CPU, e.g. "13th Gen Intel(R) Core(TM) i5-13500"
+# e.g. "13th Gen Intel(R) Core(TM) i5-13500"
 INTEL_GEN_PATTERN = re.compile(r"(\d+)th Gen")
-# Core Ultra dropped that prefix and is newer than every numbered generation
+# Core Ultra dropped the generation prefix and is newer than all of them
 INTEL_ULTRA_PATTERN = re.compile(r"Core\(TM\) Ultra")
-# stands in for a generation newer than any numbered one
 INTEL_GEN_LATEST = 99
 
 # per the hwaccel docs, gen13+ and Arc prefer qsv while older is safest on
@@ -47,8 +45,7 @@ INTEL_GEN_LATEST = 99
 INTEL_QSV_MIN_GEN = 13
 INTEL_QSV_SUPPORTED_GEN = 8
 
-# detection hardware whose GPU also decodes video, in recommendation priority
-# order
+# decode capable detection hardware, in recommendation priority order
 DECODE_HARDWARE = (
     "onnx:nvidia",
     "tensorrt",
@@ -150,7 +147,6 @@ def _intel_families(generation: int | None) -> list[HwaccelFamily]:
     if generation is not None and generation >= INTEL_QSV_MIN_GEN:
         return [FAMILY_QSV, FAMILY_VAAPI]
 
-    # gen8 to gen12 can do either, and the docs call vaapi the safer default
     return [FAMILY_VAAPI, FAMILY_QSV]
 
 
@@ -253,8 +249,8 @@ def hwaccel_options(
 def _recommend(families: list[HwaccelFamily], codecs_known: bool) -> str:
     """Pick the family to default to out of the ones this hardware can use."""
     if not codecs_known:
-        # nothing says which codec a camera will send, and a codec specific
-        # family would have to guess one, so anything that decodes them all wins
+        # a codec specific family would have to guess a codec for cameras
+        # that do not exist yet
         for family in families:
             if ANY_CODEC in family.presets:
                 return family.key

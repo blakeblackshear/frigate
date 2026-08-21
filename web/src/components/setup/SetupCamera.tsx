@@ -25,8 +25,8 @@ export default function SetupCamera({ onNext, onBack }: SetupCameraProps) {
 
   const handleClose = useCallback(() => {
     setShowWizard(false);
-    // Delay to let CameraWizardDialog's config save and go2rtc setup complete,
-    // then force a fresh fetch from the server (bypassing SWR cache)
+    // the dialog's config save and go2rtc setup need a moment to land, and
+    // the SWR cache would serve the pre-save config
     setTimeout(() => {
       fetch(`${window.baseUrl || ""}api/config`)
         .then((res) => res.json())
@@ -37,9 +37,7 @@ export default function SetupCamera({ onNext, onBack }: SetupCameraProps) {
             setAddedCameras(cameraNames);
           }
         })
-        .catch(() => {
-          // Fetch failed, stay on this step
-        });
+        .catch(() => {});
     }, 1000);
   }, [mutateConfig, addedCameras]);
 

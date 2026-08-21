@@ -24,10 +24,9 @@ type WizardState = {
   currentStep: number;
   cameraNames: string[];
   detectorHardwareKey?: string;
-  // detect stream codec of each added camera, keyed by camera name
+  // camera name -> detect stream codec
   detectCodecs: Record<string, string>;
-  // whether any step wrote config with requires_restart, which only takes
-  // effect after a restart (camera adds apply live and don't count)
+  // camera adds apply live, so they don't count toward needing a restart
   restartRequired: boolean;
   configuredSteps: {
     camera: boolean;

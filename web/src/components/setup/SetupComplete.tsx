@@ -87,7 +87,6 @@ export default function SetupComplete({
   const handleFinish = useCallback(async () => {
     setFinishing(true);
     try {
-      // Mark setup as complete
       await axios.put("config/set", {
         config_data: {
           onboarding: { setup_complete: true },
@@ -95,8 +94,7 @@ export default function SetupComplete({
         requires_restart: 0,
       });
 
-      // camera adds were applied live, so with no pending requires_restart
-      // saves the wizard can hand off without restarting
+      // camera adds were applied live, so nothing is waiting on a restart
       if (!restartRequired) {
         window.location.href = window.baseUrl || "/";
         return;
@@ -104,10 +102,8 @@ export default function SetupComplete({
 
       setRestarting(true);
 
-      // Trigger restart
       await axios.post("restart");
 
-      // Poll for server availability with max retries
       let retries = 0;
       const maxRetries = 60; // 2 minutes max
       pollRef.current = setInterval(async () => {
@@ -116,7 +112,6 @@ export default function SetupComplete({
           if (pollRef.current) {
             clearInterval(pollRef.current);
           }
-          // Give up polling, redirect anyway
           window.location.href = window.baseUrl || "/";
           return;
         }
@@ -129,7 +124,7 @@ export default function SetupComplete({
             window.location.href = window.baseUrl || "/";
           }
         } catch {
-          // Server not ready yet
+          // not back yet
         }
       }, 2000);
     } catch {

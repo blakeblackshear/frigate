@@ -20,8 +20,8 @@ import { LuExternalLink } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
 
-// detectors that ship no default model; configuring them without one leaves
-// the detector unable to start
+// these ship no default model, so configuring one without a model leaves the
+// detector unable to start
 const MODEL_REQUIRED_DETECTORS = ["onnx", "tensorrt"];
 
 const CPU_FALLBACK: DetectionHardware[] = [
@@ -64,7 +64,7 @@ export default function SetupDetector({
   });
   const plusEnabled = Boolean(config?.plus?.enabled);
 
-  // the cpu is always probed, so an empty or failed probe leaves a fallback
+  // the cpu is always probed, so an empty list means the probe failed
   const options = useMemo(
     () => (hardware && hardware.length > 0 ? hardware : CPU_FALLBACK),
     [hardware],
@@ -121,7 +121,6 @@ export default function SetupDetector({
 
   const handleSave = useCallback(async () => {
     if (needsModel && !plusModelId) {
-      // no model to run on this hardware yet, so leave the config untouched
       onSkip(selected.key);
       return;
     }

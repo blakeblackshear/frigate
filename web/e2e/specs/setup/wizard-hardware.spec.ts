@@ -57,16 +57,12 @@ async function captureRestarts(page: Page): Promise<string[]> {
 }
 
 async function gotoDetectorStep(page: Page) {
-  // welcome -> camera -> detector
   await page.getByRole("button", { name: "Get Started" }).click();
   await expect(page.getByText("Add Your First Camera")).toBeVisible();
 
-  // The camera step's Next button only renders once addedCameras is
-  // non-empty, and that state is local to the step (it isn't seeded from
-  // the cameras already in config). Opening and cancelling the add-camera
-  // dialog is enough: its close handler force-refetches /api/config, which
-  // picks up the cameras already present in the mocked config and reveals
-  // Next -- see SetupCamera.tsx's handleClose.
+  // the camera step's Next only renders once its local addedCameras fills,
+  // which SetupCamera does by refetching config when the dialog closes, so
+  // opening and cancelling the dialog is what reveals Next
   await page.getByRole("button", { name: "Add Camera" }).click();
   await page.getByRole("button", { name: "Cancel" }).click();
 
@@ -112,7 +108,6 @@ test.describe("setup wizard hardware @high @mobile", () => {
 
     await page.getByRole("button", { name: "Next" }).click();
 
-    // detector -> hwaccel
     await expect(page.getByText("Hardware Acceleration")).toBeVisible();
 
     const detectorSave = saves.find((save) => save.config_data?.models);
@@ -121,8 +116,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     ]);
     expect(detectorSave?.config_data?.detect).toEqual({ enabled: true });
 
-    // Auto names the family derived from the chosen hardware and writes its
-    // preset; VAAPI decodes any codec, so one global value covers every camera
+    // VAAPI decodes any codec, so one global value covers every camera
     await expect(page.getByText("Will use VAAPI (Intel/AMD)")).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
 
@@ -131,8 +125,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
       hwaccel_args: "preset-vaapi",
     });
 
-    // hwaccel -> recording (skipped) -> complete, where the saved steps only
-    // take effect after a restart and the primary action says so
+    // the saved steps only take effect after a restart
     const restarts = await captureRestarts(page);
     await page.getByRole("button", { name: "Skip" }).click();
     await expect(page.getByText("You're All Set!")).toBeVisible();
@@ -171,8 +164,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await expect(page.getByText("Hardware Acceleration")).toBeVisible();
     expect(saves.filter((save) => save.config_data?.models)).toHaveLength(0);
 
-    // with nothing derived, Auto advances without writing; skipping recording
-    // leaves no pending saves, so finishing needs no restart
+    // nothing derived and nothing saved, so finishing needs no restart
     const restarts = await captureRestarts(page);
     await expect(page.getByText("No supported video card found")).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
@@ -184,8 +176,8 @@ test.describe("setup wizard hardware @high @mobile", () => {
     ).toBeHidden();
     await page.getByRole("button", { name: "Go to Live View" }).click();
 
-    // hands off without restarting; the mocked config still reports
-    // onboarding incomplete, so the reload lands back on the wizard
+    // the mocked config still reports onboarding incomplete, so the reload
+    // lands back on the wizard
     await expect(page.getByText("Welcome to Frigate")).toBeVisible();
     expect(restarts).toHaveLength(0);
     const finishSave = saves.find((save) => save.config_data?.onboarding);
@@ -257,15 +249,12 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await page.getByRole("button", { name: "Next" }).click();
     await expect(page.getByText("Hardware Acceleration")).toBeVisible();
 
-    // the family is named once, not split into codec variants the user would
-    // have to choose between
     await expect(
       page.getByRole("radio", { name: "NVIDIA Jetson" }),
     ).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
 
-    // no camera was added through the wizard, so there is no codec to match
-    // and the family's first preset stands in
+    // no camera was added, so there is no codec to match
     const hwaccelSave = saves.find((save) => save.config_data?.ffmpeg);
     expect(hwaccelSave?.config_data?.ffmpeg).toEqual({
       hwaccel_args: "preset-jetson-h264",

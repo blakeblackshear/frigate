@@ -121,8 +121,7 @@ class TestIntelGeneration(HwaccelRecommendationTestCase):
         self.assertEqual(self.recommend(["openvino:GPU"], codecs={"h264"}), "intel-qsv")
 
     def test_gen13_prefers_qsv_for_mixed_codecs(self):
-        # every camera resolves the family to its own codec, so mixed streams
-        # are no longer a reason to drop to vaapi
+        # each camera resolves the family to its own codec
         self.write_cpuinfo("13th Gen Intel(R) Core(TM) i5-13500")
         self.assertEqual(
             self.recommend(["openvino:GPU"], codecs={"h264", "h265"}), "intel-qsv"

@@ -74,8 +74,7 @@ const STEPS = [
 type CameraWizardDialogProps = {
   open: boolean;
   onClose: () => void;
-  // reports each camera the wizard saves, so callers can act on the streams
-  // that were probed without probing them again
+  // lets callers reuse what was probed here instead of probing again
   onCameraAdded?: (camera: { name: string; detectCodec?: string }) => void;
 };
 

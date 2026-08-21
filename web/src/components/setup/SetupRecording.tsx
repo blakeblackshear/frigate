@@ -35,7 +35,6 @@ export default function SetupRecording({
 
   const { data: stats } = useSWR("stats", { revalidateOnFocus: false });
 
-  // Calculate storage estimate
   const storageInfo = stats?.service?.storage?.["/tmp/frigate/recordings"];
   const freeGb = storageInfo ? Math.round(storageInfo.free / 1024) : null;
   const cameraCount = cameraNames.length;
@@ -53,8 +52,7 @@ export default function SetupRecording({
       if (enabled) {
         record.alerts = { retain: { days: retentionDays } };
         record.detections = { retain: { days: retentionDays } };
-        // continuous keeps every segment, so it is the one that needs turning
-        // on. Its default of 0 already means "only what was detected".
+        // written even when off, so switching modes back turns it off again
         record.continuous = { days: mode === CONTINUOUS ? retentionDays : 0 };
       }
 
@@ -140,8 +138,7 @@ export default function SetupRecording({
               min={1}
               max={365}
               value={retentionDays}
-              // the spinner arrows are noise at this size, and the field is
-              // still typeable and arrow-key steppable without them
+              // drop the spinner arrows; typing and arrow keys still work
               className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               onChange={(e) =>
                 setRetentionDays(Math.max(1, parseInt(e.target.value) || 1))
