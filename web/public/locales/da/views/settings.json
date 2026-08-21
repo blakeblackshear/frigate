@@ -16,5 +16,31 @@
   "menu": {
     "ui": "Brugergrænseflade",
     "profiles": "Profiler"
+  },
+  "configMessages": {
+    "model": {
+      "optimizedFor320": "Frigate er optimeret til en 320x320 model, der er det bedste valg for de fleste konfigurationer. En 640x640 model er langsommere og hjælper kun i særlige scenarier"
+    }
+  },
+  "configForm": {
+    "cameraInputs": {
+      "sourceMode": {
+        "manual": "Manuel input sti"
+      }
+    }
+  },
+  "cameraManagement": {
+    "clone": {
+      "footer": {
+        "restartNeeded": "Genstart er nødvendig for visse ændringer.",
+        "liveOnly": "Alle ændringer vil blive aktiveret umiddelbart uden genstart.",
+        "submit": "Klone",
+        "submitting": "Kloner…"
+      },
+      "toast": {
+        "success": "Indstillinger kopieret til {{cameraName}}",
+        "successWithRestart": "Indstillinger kopieret til {{cameraName}}. Genstart Frigate for at aktivere alle ændringer."
+      }
+    }
   }
 }

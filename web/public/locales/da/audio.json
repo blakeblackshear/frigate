@@ -265,7 +265,7 @@
   "rhythm_and_blues": "Rhythm and Blues",
   "soul_music": "Soulmusik",
   "reggae": "Reggae",
-  "country": "Country",
+  "country": "Land",
   "disco": "Disko",
   "classical_music": "Klassisk musik",
   "electronic_music": "Elektronisk musik",
@@ -341,5 +341,7 @@
   "propeller": "Probel",
   "fixed-wing_aircraft": "Fastvingefly",
   "engine": "Motor",
-  "light_engine": "Lille motor"
+  "light_engine": "Lille motor",
+  "swing_music": "Swing musik",
+  "bluegrass": "Bluegrass"
 }

@@ -170,7 +170,10 @@
     "title": "Rediger kategoriseringsmodel",
     "descriptionState": "Rediger kategorierne for denne model til genstandstilstande. Ændringer kræver, at modellen trænes igen.",
     "descriptionObject": "Rediger genstandstypen og kategoriseringstypen for denne genstandskategoriseringsmodel.",
-    "stateClassesInfo": "Bemærk: Ændring af tilstandskategorier kræver, at modellen trænes igen med de opdaterede kategorier."
+    "stateClassesInfo": "Bemærk: Ændring af tilstandskategorier kræver, at modellen trænes igen med de opdaterede kategorier.",
+    "enabled": "Aktiveret",
+    "enabledDesc": "Kør denne model. Ved deaktivering stopper den med at køre og klassificerer ikke længere",
+    "saveAttempts": "Gem forsøg"
   },
   "deleteDatasetImages": {
     "title": "Slet billeder i datasættet",
