@@ -60,8 +60,8 @@
       "modeLabel": "What to record",
       "modes": {
         "events": {
-          "label": "Only when something is spotted",
-          "description": "Saves video around people, cars, and other objects Frigate spots. Uses far less disk space."
+          "label": "Only when something is detected",
+          "description": "Saves video around people, cars, and other objects Frigate detects. Uses far less disk space."
         },
         "continuous": {
           "label": "All the time",
@@ -69,12 +69,12 @@
         }
       },
       "retentionHint": {
-        "events": "Video of anything Frigate spots is kept this long, then deleted automatically.",
+        "events": "Video of anything Frigate detects is kept this long, then deleted automatically.",
         "continuous": "All video is kept this long, then deleted automatically."
       }
     },
     "complete": {
-      "title": "You're All Set!",
+      "title": "You're done!",
       "description": "Your Frigate system is configured. Here's what we set up:",
       "configured": "Configured",
       "notConfigured": "Not configured",

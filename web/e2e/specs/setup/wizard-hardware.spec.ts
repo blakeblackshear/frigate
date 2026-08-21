@@ -128,7 +128,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     // the saved steps only take effect after a restart
     const restarts = await captureRestarts(page);
     await page.getByRole("button", { name: "Skip" }).click();
-    await expect(page.getByText("You're All Set!")).toBeVisible();
+    await expect(page.getByText("You're done!")).toBeVisible();
 
     await expect(
       page.getByText("Frigate needs to restart to apply your settings"),
@@ -169,7 +169,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await expect(page.getByText("No supported video card found")).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
     await page.getByRole("button", { name: "Skip" }).click();
-    await expect(page.getByText("You're All Set!")).toBeVisible();
+    await expect(page.getByText("You're done!")).toBeVisible();
 
     await expect(
       page.getByText("Frigate needs to restart to apply your settings"),
