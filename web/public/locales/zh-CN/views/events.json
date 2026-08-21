@@ -77,7 +77,7 @@
     "menuItem": "查看画面变动预览",
     "title": "画面变动预览：{{camera}}",
     "mobileSettingsTitle": "画面变动预览设置",
-    "mobileSettingsDesc": "调整播放速度和变暗程度，并选择日期以仅查看画面变动的片段。",
+    "mobileSettingsDesc": "调整播放速度，亮度以及画面裁剪，并选择日期以仅查看画面变动的片段。",
     "dim": "变暗",
     "dimAria": "调整变暗强度",
     "dimDesc": "增加变暗程度可以提高画面变动区域的可见性。",
@@ -90,6 +90,9 @@
     "seekAria": "将 {{camera}} 播放器定位到 {{time}}",
     "filter": "筛选",
     "filterDesc": "选择区域以仅显示在这些区域中有画面变动的片段。",
-    "filterClear": "清除"
+    "filterClear": "清除",
+    "crop": "裁剪以筛选",
+    "cropAria": "切换裁剪预览至已筛选的区域",
+    "cropDesc": "缩放功能会放大显示所选区域，而不是显示整个画面。"
   }
 }
