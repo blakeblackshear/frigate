@@ -10,7 +10,7 @@
   "livePlayerRequiredIOSVersion": "iOS 17.1 eller senare krävs för den här typen av livestream.",
   "streamOffline": {
     "title": "Strömmen är inte tillgänglig",
-    "desc": "Inga bildrutor har tagits emot från <code>detect</code>-strömmen för {{cameraName}}. Kontrollera felloggarna."
+    "desc": "Inga bildrutor har mottagits på {{cameraName}} <code>detect</code>-strömmen, kontrollera felloggarna"
   },
   "stats": {
     "streamType": {

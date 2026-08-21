@@ -21,21 +21,21 @@
         },
         "max_not_heard": {
             "description": "Antalet sekunder utan den konfigurerade ljudtypen innan en ljudbaserad händelse avslutas.",
-            "label": "Maximal tid utan ljud"
+            "label": "Avsluta timeout"
         },
         "min_volume": {
             "label": "Minsta ljudvolym",
-            "description": "Lägsta RMS-volym för ljuddetektering. Ett lägre värde ökar känsligheten (t.ex. 200 för hög, 500 för medelhög och 1 000 för låg känslighet)."
+            "description": "Lägsta RMS-volymtröskel som krävs för att köra ljuddetektering; lägre värden ökar känsligheten (t.ex. 200 hög, 500 medel, 1000 låg)."
         },
         "listen": {
-            "label": "Ljudtyper att lyssna efter",
-            "description": "Lista över typer av ljudhändelser som ska detekteras (t.ex. hundskall, brandlarm, tal och skrik)."
+            "label": "Ljudtyper",
+            "description": "Lista över ljudhändelsetyper att detektera (till exempel: skällande, brandlarm, tal, skrik)."
         },
         "filters": {
             "label": "Ljudfilter",
-            "description": "Filterinställningar för varje ljudtyp, till exempel en konfidenströskel som minskar antalet falska positiva resultat.",
+            "description": "Filter för ljudtyper. Exempelvis konfidens för att minska falska positiva resultat.",
             "threshold": {
-                "label": "Lägsta konfidenströskel för ljud",
+                "label": "Minsta konfidens för ljud",
                 "description": "Lägsta konfidenströskel för att ljudhändelsen ska räknas."
             }
         },
@@ -49,6 +49,908 @@
         }
     },
     "audio_transcription": {
-        "label": "Ljudtranskription"
+        "label": "Ljudöversättning",
+        "description": "Inställningar för ljudtranskribering som används för händelser och liveundertexter.",
+        "enabled": {
+            "label": "Aktivera transkribrering",
+            "description": "Aktivera eller inaktivera manuellt utlöst transkription av ljudhändelser."
+        },
+        "enabled_in_config": {
+            "label": "Ursprungligt transkriptionstillstånd"
+        },
+        "live_enabled": {
+            "label": "Live-transkription",
+            "description": "Aktivera direktuppspelning av ljud när det tas emot."
+        }
+    },
+    "birdseye": {
+        "label": "Fågelöga",
+        "description": "Inställningar för Fågelöga-sammansattvyn som sammanställer flera kameraflöden i en enda layout.",
+        "enabled": {
+            "label": "Aktivera Fågelöga",
+            "description": "Aktivera eller inaktivera Fågelöga-vyn."
+        },
+        "mode": {
+            "label": "Spårningsläge",
+            "description": "Läge för att inkludera kameror i Fågelöga: 'objekt', 'rörelse' eller 'kontinuerlig'."
+        },
+        "order": {
+            "label": "Position",
+            "description": "Numerisk position som styr kamerans ordning i Fågelöga-layouten."
+        }
+    },
+    "detect": {
+        "label": "Objektdetektering",
+        "description": "Inställningar för rollen detektering/identifiering som används för att köra objektdetektering och initiera spårare.",
+        "enabled": {
+            "label": "Aktivera objektdetektering",
+            "description": "Aktivera eller inaktivera objektdetektering för den här kameran."
+        },
+        "height": {
+            "label": "Detektera höjd",
+            "description": "Höjd (pixlar) på bildrutor som används för detekteringsströmmen; lämna tomt för att använda den ursprungliga strömupplösningen."
+        },
+        "width": {
+            "label": "Detektera bredd",
+            "description": "Bredd (pixlar) på bildrutor som används för detekteringsströmmen; lämna tomt för att använda den ursprungliga strömupplösningen."
+        },
+        "fps": {
+            "label": "Identifiera FPS",
+            "description": "Önskat antal bildrutor per sekund att köra detektering på; lägre värden minskar CPU-användningen (rekommenderat värde är 5, sätt endast högre - högst 10 - om man spårar objekt som rör sig extremt snabbt)."
+        },
+        "min_initialized": {
+            "label": "Minsta initialiseringsramar",
+            "description": "Antal på varandra följande detekteringsträffar som krävs innan ett spårat objekt skapas. Öka för att minska falska initialiseringar. Standardvärdet är fps dividerat med 2."
+        },
+        "max_disappeared": {
+            "label": "Maximalt antal försvunna bildrutor",
+            "description": "Antal bildrutor utan detektering innan ett spårat objekt anses vara borta."
+        },
+        "stationary": {
+            "label": "Konfiguration av stationära objekt",
+            "description": "Inställningar för att upptäcka och hantera objekt som förblir stillastående under en viss tidsperiod.",
+            "interval": {
+                "label": "Stationärt intervall",
+                "description": "Hur ofta (i bildrutor) en detektionskontroll ska köras för att bekräfta ett stillastående objekt."
+            },
+            "threshold": {
+                "label": "Stationär tröskel",
+                "description": "Antal bildrutor utan positionsändring som krävs för att markera ett objekt som stillastående."
+            },
+            "max_frames": {
+                "label": "Max antal bildrutor",
+                "description": "Begränsar hur länge stationära objekt spåras innan de kasseras.",
+                "default": {
+                    "label": "Standardmaximum för bildrutor",
+                    "description": "Standardmaximalt antal bildrutor för att spåra ett stillastående objekt innan det stoppas."
+                },
+                "objects": {
+                    "label": "Objekt max bildrutor",
+                    "description": "Åsidosättningar per objekt för maximalt antal bildrutor för att spåra stationära objekt."
+                }
+            },
+            "classifier": {
+                "label": "Aktivera visuell klassificerare",
+                "description": "Använd en visuell klassificerare för att upptäcka verkligt stationära objekt även när avgränsningsrutor vibrerar."
+            }
+        },
+        "annotation_offset": {
+            "label": "Annoteringsförskjutning",
+            "description": "Millisekunder för att identifiera annoteringar för att bättre justera tidslinjens avgränsningsrutor med inspelningar; kan vara positiva eller negativa."
+        }
+    },
+    "face_recognition": {
+        "label": "Ansiktsigenkänning",
+        "description": "Inställningar för ansiktsigenkänning och -igenkänning för den här kameran.",
+        "enabled": {
+            "label": "Aktivera ansiktsigenkänning",
+            "description": "Aktivera eller inaktivera ansiktsigenkänning."
+        },
+        "min_area": {
+            "label": "Minsta ansiktsyta",
+            "description": "Minsta area (pixlar) av en detekterad ansiktsruta som krävs för att försöka igenkänna."
+        }
+    },
+    "ffmpeg": {
+        "label": "Strömmar (FFmpeg)",
+        "description": "Kameraströmsingångar och FFmpeg-alternativ, inklusive binär sökväg, argument, hwaccel och utdataargument per roll.",
+        "path": {
+            "label": "FFmpeg-sökväg",
+            "description": "Sökväg till FFmpeg-binärfilen som ska användas eller ett versionsalias (\"7.0\" eller \"8.0\")."
+        },
+        "global_args": {
+            "label": "FFmpeg globala argument",
+            "description": "Globala argument skickades till FFmpeg-processer."
+        },
+        "hwaccel_args": {
+            "label": "Argument för hårdvaruacceleration",
+            "description": "Argument för hårdvaruacceleration för FFmpeg. Leverantörsspecifika förinställningar rekommenderas."
+        },
+        "input_args": {
+            "label": "Inmatningsargument",
+            "description": "Indataargument tillämpade på FFmpeg-indataströmmar."
+        },
+        "output_args": {
+            "label": "Utdataargument",
+            "description": "Standardutdataargument som används för olika FFmpeg-roller, till exempel detektera och spela in.",
+            "detect": {
+                "label": "Identifiera utdataargument",
+                "description": "Standardutdataargument för att identifiera rollströmmar."
+            },
+            "record": {
+                "label": "Spela in utdataargument",
+                "description": "Standardutdataargument för postrollströmmar."
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg-återförsökstid",
+            "description": "Sekunder att vänta innan man försöker återansluta en kameraström efter ett misslyckande. Standardinställningen är 10."
+        },
+        "apple_compatibility": {
+            "label": "Apple-kompatibilitet",
+            "description": "Aktivera HEVC-taggning för bättre kompatibilitet med Apple-spelare vid inspelning av H.265."
+        },
+        "gpu": {
+            "label": "GPU index",
+            "description": "Standard-GPU-index som används för hårdvaruacceleration om tillgängligt."
+        },
+        "inputs": {
+            "label": "Kameraingångar",
+            "description": "Lista över definitioner av indataströmmar (sökvägar och roller) för den här kameran.",
+            "path": {
+                "label": "Inmatningsväg",
+                "description": "URL eller sökväg för kameraingångsström."
+            },
+            "roles": {
+                "label": "Inmatningsroller",
+                "description": "Roller för denna indataström."
+            },
+            "global_args": {
+                "label": "FFmpeg globala argument",
+                "description": "FFmpegs globala argument för denna indataström."
+            },
+            "hwaccel_args": {
+                "label": "Argument för hårdvaruacceleration",
+                "description": "Argument för hårdvaruacceleration för denna indataström."
+            },
+            "input_args": {
+                "label": "Inmatningsargument",
+                "description": "Inmatningsargument specifika för den här strömmen."
+            }
+        }
+    },
+    "live": {
+        "label": "Liveuppspelning",
+        "description": "Inställningar som används av webbgränssnittet för att styra val, upplösning och kvalitet för liveströmmar.",
+        "streams": {
+            "label": "Namn på livestreams",
+            "description": "Mappning av konfigurerade strömnamn till restream-/go2rtc-namn som används för liveuppspelning."
+        },
+        "height": {
+            "label": "Live höjd",
+            "description": "Höjd (pixlar) för att rendera jsmpeg-livestreamen i webbgränssnittet; måste vara <= detektera strömhöjd."
+        },
+        "quality": {
+            "label": "Livekvalitet",
+            "description": "Kodningskvalitet för jsmpeg-strömmen (1 högsta, 31 lägsta)."
+        }
+    },
+    "lpr": {
+        "label": "Registreringsskyltigenkänning",
+        "description": "Inställningar för registreringsskyltsigenkänning inklusive tröskelvärden för detektering, formatering och kända registreringsskyltar.",
+        "enabled": {
+            "label": "Aktivera LPR",
+            "description": "Aktivera eller inaktivera LPR på den här kameran."
+        },
+        "expire_time": {
+            "label": "Upphöra sekunder",
+            "description": "Tid i sekunder efter att en osynlig platta från spåraren har löpt ut (endast för dedikerade LPR-kameror)."
+        },
+        "min_area": {
+            "label": "Minsta area på registreringskylt",
+            "description": "Minsta yta för registreringsskylt (pixlar) som krävs för att försöka utföra igenkänning."
+        },
+        "enhancement": {
+            "label": "Förbättringsnivå",
+            "description": "Förbättringsnivå (0–10) som ska tillämpas på utsnitt av registreringsskyltar före OCR; högre värden ger inte alltid bättre resultat, och nivåer över 5 fungerar kanske bara för skyltar fotograferade nattetid och bör användas med försiktighet."
+        }
+    },
+    "motion": {
+        "label": "Rörelsedetektering",
+        "description": "Standardinställningar för rörelsedetektering för den här kameran.",
+        "enabled": {
+            "label": "Aktivera rörelsedetektering",
+            "description": "Aktivera eller avaktivera rörelsedetektering för denna kameran."
+        },
+        "threshold": {
+            "label": "Rörelsetröskel",
+            "description": "Pixelskillnadströskeln som används av rörelsedetektorn; högre värden minskar känsligheten (intervall 1–255)."
+        },
+        "lightning_threshold": {
+            "label": "Blixtgränsvärde",
+            "description": "Tröskelvärde för att detektera och ignorera korta ljustoppar (lägre är känsligare, värden mellan 0,3 och 1,0). Detta förhindrar inte rörelsedetektering helt; det gör bara att detektorn slutar analysera ytterligare bildrutor när tröskelvärdet överskrids. Rörelsebaserade inspelningar skapas fortfarande under dessa händelser."
+        },
+        "skip_motion_threshold": {
+            "label": "Tröskelvärde för hoppande rörelse",
+            "description": "Om värdet är satt till ett värde mellan 0,0 och 1,0, och mer än denna andel av bilden ändras i en enda bildruta, kommer detektorn att returnera rutor för att inte röra sig och omedelbart kalibrera om. Detta kan spara CPU och minska falska positiva resultat vid blixtnedslag, stormar etc., men kan missa verkliga händelser, till exempel en PTZ-kamera som automatiskt spårar ett objekt. Avvägningen är mellan att tappa några megabyte inspelningar kontra att granska ett par korta klipp. Lämna oinställd (Ingen) för att inaktivera den här funktionen."
+        },
+        "improve_contrast": {
+            "label": "Förbättra kontrasten",
+            "description": "Tillämpa kontrastförbättring på bildrutor före rörelseanalys för att underlätta detektering."
+        },
+        "contour_area": {
+            "label": "Konturområde",
+            "description": "Minsta konturarea i pixlar som krävs för att en rörelsekontur ska räknas."
+        },
+        "delta_alpha": {
+            "label": "Delta alfa",
+            "description": "Alfablandningsfaktor som används i bilddifferentiering för rörelseberäkning."
+        },
+        "frame_alpha": {
+            "label": "Bildalfa",
+            "description": "Alfavärde som används vid blandning av bildrutor för rörelseförbehandling."
+        },
+        "frame_height": {
+            "label": "Ramhöjd",
+            "description": "Höjd i pixlar att skala bildrutor till vid beräkning av rörelse."
+        },
+        "mask": {
+            "label": "Maskkoordinater",
+            "description": "Ordnade x-, y-koordinater som definierar rörelsemaskpolygonen som används för att inkludera/exkludera områden."
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT-avstängningsfördröjning",
+            "description": "Sekunder att vänta efter sista rörelsen innan ett MQTT-tillstånd \"av\" publiceras."
+        },
+        "enabled_in_config": {
+            "label": "Ursprungligt rörelsetillstånd",
+            "description": "Anger om rörelsedetektering var aktiverad i den ursprungliga statiska konfigurationen."
+        },
+        "raw_mask": {
+            "label": "Rå mask"
+        }
+    },
+    "objects": {
+        "label": "Objekt",
+        "description": "Standardinställningar för objektspårning, inklusive vilka etiketter som ska spåras och filter per objekt.",
+        "track": {
+            "label": "Objekt att spåra",
+            "description": "Lista över objektetiketter att spåra för den här kameran."
+        },
+        "filters": {
+            "label": "Objektfilter",
+            "description": "Filter tillämpas på detekterade objekt för att minska falska positiva resultat (area, förhållande, konfidens).",
+            "min_area": {
+                "label": "Minsta objektarea",
+                "description": "Minsta area för avgränsningsrutan (pixlar eller procent) som krävs för denna objekttyp. Kan vara pixlar (heltal) eller procent (flyttal mellan 0.000001 och 0.99)."
+            },
+            "max_area": {
+                "label": "Maximal objektarea",
+                "description": "Maximalt tillåtet område för avgränsningsrutan (pixlar eller procent) för denna objekttyp. Kan vara pixlar (heltal) eller procent (flyttal mellan 0.000001 och 0.99)."
+            },
+            "min_ratio": {
+                "label": "Minsta bildförhållande",
+                "description": "Minsta förhållande mellan bredd och höjd som krävs för att avgränsningsramen ska kvalificera."
+            },
+            "max_ratio": {
+                "label": "Maximalt bildförhållande",
+                "description": "Maximalt bredd/höjd-förhållande som tillåts för att avgränsningsramen ska kvalificera."
+            },
+            "threshold": {
+                "label": "Konfidensgräns",
+                "description": "Genomsnittligt tröskelvärde för detektionskonfidens som krävs för att objektet ska betraktas som ett verkligt positivt."
+            },
+            "min_score": {
+                "label": "Minsta säkerhet",
+                "description": "Minsta konfidens för detektering av en enda bildruta som krävs för att objektet ska räknas."
+            },
+            "mask": {
+                "label": "Filtermask",
+                "description": "Polygonkoordinater som definierar var detta filter gäller inom ramen."
+            },
+            "raw_mask": {
+                "label": "Rå mask"
+            }
+        },
+        "mask": {
+            "label": "Objektmask",
+            "description": "Maskpolygon som används för att förhindra objektdetektering i angivna områden."
+        },
+        "raw_mask": {
+            "label": "Rå mask"
+        },
+        "genai": {
+            "label": "GenAI-objektkonfiguration",
+            "description": "GenAI-alternativ för att beskriva spårade objekt och skicka ramar för generering.",
+            "enabled": {
+                "label": "Aktivera GenAI",
+                "description": "Aktivera GenAI-generering av beskrivningar för spårade objekt som standard."
+            },
+            "use_snapshot": {
+                "label": "Använd ögonblicksbilder",
+                "description": "Använd objektbilder istället för miniatyrbilder för att generera GenAI-beskrivningar."
+            },
+            "prompt": {
+                "label": "Textningsprompt",
+                "description": "Standardmall för prompt som används vid generering av beskrivningar med GenAI."
+            },
+            "object_prompts": {
+                "label": "Objektuppmaningar",
+                "description": "Uppmanar per objekt att anpassa GenAI-utdata för specifika etiketter."
+            },
+            "objects": {
+                "label": "GenAI-objekt",
+                "description": "Lista över objektetiketter som ska skickas till GenAI som standard."
+            },
+            "required_zones": {
+                "label": "Obligatoriska zoner",
+                "description": "Zoner som måste anges för att objekt ska kvalificera sig för GenAI-beskrivningsgenerering."
+            },
+            "debug_save_thumbnails": {
+                "label": "Spara miniatyrer",
+                "description": "Spara miniatyrbilder som skickats till GenAI för felsökning och granskning."
+            },
+            "send_triggers": {
+                "label": "GenAI-utlösare",
+                "description": "Definierar när ramar ska skickas till GenAI (på slutet, efter uppdateringar, osv.).",
+                "tracked_object_end": {
+                    "label": "Skicka på slutet",
+                    "description": "Skicka en begäran till GenAI när det spårade objektet avslutas."
+                },
+                "after_significant_updates": {
+                    "label": "Tidig GenAI-utlösare",
+                    "description": "Skicka en begäran till GenAI efter ett angivet antal betydande uppdateringar för det spårade objektet."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Ursprungligt GenAI-tillstånd",
+                "description": "Anger om GenAI var aktiverat i den ursprungliga statiska konfigurationen."
+            }
+        }
+    },
+    "record": {
+        "label": "Inspelning",
+        "description": "Inspelnings- och lagringsinställningar för den här kameran.",
+        "enabled": {
+            "label": "Aktivera inspelning",
+            "description": "Aktivera eller inaktivera inspelning för den här kameran."
+        },
+        "expire_interval": {
+            "label": "Intervall för rensning av inspelningar",
+            "description": "Minuter mellan rensningspass som tar bort utgångna inspelningssegment."
+        },
+        "continuous": {
+            "label": "Kontinuerlig retention",
+            "description": "Antal dagar som inspelningar ska sparas oavsett spårade objekt eller rörelse. Ställ in på 0 om du bara vill spara inspelningar av varningar och detekteringar.",
+            "days": {
+                "label": "Lagringsdagar",
+                "description": "Dagar att behålla inspelningar."
+            }
+        },
+        "motion": {
+            "label": "Rörelseretention",
+            "description": "Antal dagar som inspelningar som utlöses av rörelse ska sparas oavsett spårade objekt. Ställ in på 0 om du bara vill spara inspelningar av varningar och detekteringar.",
+            "days": {
+                "label": "Lagringsdagar",
+                "description": "Dagar att behålla inspelningar."
+            }
+        },
+        "detections": {
+            "label": "Detektionskvarhållning",
+            "description": "Inställningar för inspelningslagring för detekteringshändelser, inklusive varaktigheter före/efter inspelning.",
+            "pre_capture": {
+                "label": "Förinspelningssekunder",
+                "description": "Antal sekunder före detekteringshändelsen som ska inkluderas i inspelningen."
+            },
+            "post_capture": {
+                "label": "Sekunder efter inspelning",
+                "description": "Antal sekunder efter detekteringshändelsen som ska inkluderas i inspelningen."
+            },
+            "retain": {
+                "label": "Händelselagring",
+                "description": "Lagringsinställningar för inspelningar av detekteringshändelser.",
+                "days": {
+                    "label": "Lagringsdagar",
+                    "description": "Antal dagar att spara inspelningar av detekteringshändelser."
+                },
+                "mode": {
+                    "label": "Lagringsläge",
+                    "description": "Läge för kvarhållning: alla (spara alla segment), rörelse (spara segment med rörelse) eller aktiva_objekt (spara segment med aktiva objekt)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Lagring av varningar",
+            "description": "Inställningar för inspelningslagring för aviseringshändelser, inklusive varaktigheter före/efter inspelning.",
+            "pre_capture": {
+                "label": "Förinspelningssekunder",
+                "description": "Antal sekunder före detekteringshändelsen som ska inkluderas i inspelningen."
+            },
+            "post_capture": {
+                "label": "Sekunder efter inspelning",
+                "description": "Antal sekunder efter detekteringshändelsen som ska inkluderas i inspelningen."
+            },
+            "retain": {
+                "label": "Händelselagring",
+                "description": "Lagringsinställningar för inspelningar av detekteringshändelser.",
+                "days": {
+                    "label": "Lagringsdagar",
+                    "description": "Antal dagar att spara inspelningar av detekteringshändelser."
+                },
+                "mode": {
+                    "label": "Lagringsläge",
+                    "description": "Läge för kvarhållning: alla (spara alla segment), rörelse (spara segment med rörelse) eller aktiva_objekt (spara segment med aktiva objekt)."
+                }
+            }
+        },
+        "export": {
+            "label": "Exportera konfiguration",
+            "description": "Inställningar som används vid export av inspelningar, såsom timelapse och hårdvaruacceleration.",
+            "hwaccel_args": {
+                "label": "Exportera hwaccel-argument",
+                "description": "Hårdvaruaccelerationsargument som ska användas för export-/transkodningsoperationer."
+            },
+            "max_concurrent": {
+                "label": "Maximalt antal samtidiga exporter",
+                "description": "Maximalt antal exportjobb att bearbeta samtidigt."
+            },
+            "chapters": {
+                "label": "Kapitelmetadata att bädda in i exporterade inspelningar"
+            }
+        },
+        "preview": {
+            "label": "Förhandsgranska konfiguration",
+            "description": "Inställningar som styr kvaliteten på förhandsgranskningar av inspelningar som visas i användargränssnittet.",
+            "quality": {
+                "label": "Förhandsgranskningskvalitet",
+                "description": "Förhandsgranskningskvalitetsnivå (mycket_låg, låg, medel, hög, mycket_hög)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Ursprungligt inspelningsläge",
+            "description": "Anger om inspelning var aktiverad i den ursprungliga statiska konfigurationen."
+        }
+    },
+    "review": {
+        "label": "Granska",
+        "description": "Inställningar som styr varningar, detekteringar och GenAI-granskningssammanfattningar som används av användargränssnittet och lagring för den här kameran.",
+        "alerts": {
+            "label": "Varningskonfiguration",
+            "description": "Inställningar för vilka spårade objekt som genererar aviseringar och hur aviseringar behålls.",
+            "enabled": {
+                "label": "Aktivera aviseringar",
+                "description": "Aktivera eller inaktivera varningsgenerering för den här kameran."
+            },
+            "labels": {
+                "label": "Varningsetiketter",
+                "description": "Lista över objektetiketter som kvalificerar som varningar (till exempel: bil, person)."
+            },
+            "required_zones": {
+                "label": "Obligatoriska zoner",
+                "description": "Zoner som ett objekt måste komma in i för att betraktas som en varning; lämna tomt för att tillåta valfri zon."
+            },
+            "enabled_in_config": {
+                "label": "Ursprungligt varningsstatus",
+                "description": "Spårar om aviseringar ursprungligen var aktiverade i den statiska konfigurationen."
+            },
+            "cutoff_time": {
+                "label": "Avstängningstid för varningar",
+                "description": "Sekunder att vänta efter att ingen aktivitet som orsakar en varning har pågått innan en varning avbryts."
+            }
+        },
+        "detections": {
+            "label": "Konfiguration för detektioner",
+            "description": "Inställningar för vilka spårade objekt genererar detektioner (ej aviseringar) och hur detektioner behålls.",
+            "enabled": {
+                "label": "Aktivera detektioner",
+                "description": "Aktivera eller inaktivera detekteringshändelser för den här kameran."
+            },
+            "labels": {
+                "label": "Detektionsetiketter",
+                "description": "Lista över objektetiketter som kvalificerar som detekteringshändelser."
+            },
+            "required_zones": {
+                "label": "Obligatoriska zoner",
+                "description": "Zoner som ett objekt måste komma in i för att betraktas som en detektering; lämna tomt för att tillåta valfri zon."
+            },
+            "cutoff_time": {
+                "label": "Avstängningstid för detektioner",
+                "description": "Sekunder att vänta efter att ingen detekteringsorsakande aktivitet har skett innan en detektering avbryts."
+            },
+            "enabled_in_config": {
+                "label": "Ursprungligt detektionstillstånd",
+                "description": "Spårar om detektioner ursprungligen var aktiverade i den statiska konfigurationen."
+            }
+        },
+        "genai": {
+            "label": "GenAI-konfiguration",
+            "description": "Styr användningen av generativ AI för att producera beskrivningar och sammanfattningar av granskningsobjekt.",
+            "enabled": {
+                "label": "Aktivera GenAI-beskrivningar",
+                "description": "Aktivera eller inaktivera GenAI-genererade beskrivningar och sammanfattningar för granskningsobjekt."
+            },
+            "alerts": {
+                "label": "Aktivera GenAI för aviseringar",
+                "description": "Använd GenAI för att generera beskrivningar för varningsobjekt."
+            },
+            "detections": {
+                "label": "Aktivera GenAI för detektioner",
+                "description": "Använd GenAI för att generera beskrivningar för detektionsobjekt."
+            },
+            "image_source": {
+                "label": "Recensera bildkälla",
+                "description": "Källa för bilder som skickats till GenAI ('förhandsvisning' eller 'inspelningar'); 'inspelningar' använder bildrutor av högre kvalitet men fler tokens."
+            },
+            "additional_concerns": {
+                "label": "Ytterligare farhågor",
+                "description": "En lista över ytterligare problem eller anmärkningar som GenAI bör beakta vid utvärdering av aktivitet på den här kameran."
+            },
+            "debug_save_thumbnails": {
+                "label": "Spara miniatyrer",
+                "description": "Spara miniatyrbilder som skickas till GenAI-leverantören för felsökning och granskning."
+            },
+            "enabled_in_config": {
+                "label": "Ursprungligt GenAI-tillstånd",
+                "description": "Spårar om GenAI-granskning ursprungligen var aktiverad i den statiska konfigurationen."
+            },
+            "preferred_language": {
+                "label": "Önskat språk",
+                "description": "Föredraget språk att begära från GenAI-leverantören för genererade svar."
+            },
+            "activity_context_prompt": {
+                "label": "Uppmaning till aktivitetskontext",
+                "description": "Anpassad prompt som beskriver vad som är och inte är misstänkt aktivitet för att ge sammanhang för GenAI-sammanfattningar."
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "Semantisk sökning",
+        "description": "Inställningar för semantisk sökning som bygger och frågar efter objektinbäddningar för att hitta liknande objekt.",
+        "triggers": {
+            "label": "Utlösare",
+            "description": "Åtgärder och matchningskriterier för kameraspecifika semantiska sökutlösare.",
+            "friendly_name": {
+                "label": "Vänligt namn",
+                "description": "Valfritt vänligt namn som visas i användargränssnittet för den här utlösaren."
+            },
+            "enabled": {
+                "label": "Aktivera den här utlösaren",
+                "description": "Aktivera eller inaktivera denna semantiska sökutlösare."
+            },
+            "type": {
+                "label": "Utlösartyp",
+                "description": "Typ av utlösare: 'miniatyr' (matchning mot bild) eller 'beskrivning' (matchning mot text)."
+            },
+            "data": {
+                "label": "Utlösarinnehåll",
+                "description": "Textfras- eller miniatyr-ID för att matcha mot spårade objekt."
+            },
+            "threshold": {
+                "label": "Utlösartröskel",
+                "description": "Minsta likhetspoäng (0-1) krävs för att aktivera denna utlösare."
+            },
+            "actions": {
+                "label": "Utlösande åtgärder",
+                "description": "Lista över åtgärder som ska utföras när utlösaren matchar (meddelande, underetikett, attribut)."
+            }
+        }
+    },
+    "snapshots": {
+        "label": "Ögonblicksbilder",
+        "description": "Inställningar för API-genererade ögonblicksbilder av spårade objekt för den här kameran.",
+        "enabled": {
+            "label": "Aktivera ögonblicksbilder",
+            "description": "Aktivera eller inaktivera sparning av ögonblicksbilder för den här kameran."
+        },
+        "timestamp": {
+            "label": "Tidsstämpelöverlagring",
+            "description": "Lägg en tidsstämpel över ögonblicksbilder från API:et."
+        },
+        "bounding_box": {
+            "label": "Begränsningsbox överlägg",
+            "description": "Rita begränsningsrutor för spårade objekt på ögonblicksbilder från API."
+        },
+        "crop": {
+            "label": "Beskär ögonblicksbild",
+            "description": "Beskär ögonblicksbilder från API till det upptäckta objektets begränsningsram."
+        },
+        "required_zones": {
+            "label": "Obligatoriskt zoner",
+            "description": "Zoner som ett objekt måste gå in i för att en ögonblicksbild ska sparas."
+        },
+        "height": {
+            "label": "Snapshot höjd",
+            "description": "Höjd (pixlar) för att ändra storlek på ögonblicksbilder från API till; lämna tomt för att bevara originalstorlek."
+        },
+        "retain": {
+            "label": "Bevarande av ögonblicksbilder",
+            "description": "Inställningar för kvarhållning av ögonblicksbilder, inklusive standarddagar och åsidosättningar per objekt.",
+            "default": {
+                "label": "Standardlagring",
+                "description": "Standardantalet dagar för att behålla ögonblicksbilder."
+            },
+            "objects": {
+                "label": "Objektretention",
+                "description": "Åsidosättningar per objekt för lagringsdagar för ögonblicksbilder."
+            }
+        },
+        "quality": {
+            "label": "Ögonblicksbildskvalitet",
+            "description": "Kodningskvalitet för sparade ögonblicksbilder (0-100)."
+        }
+    },
+    "timestamp_style": {
+        "label": "Tidsstämpelstil",
+        "description": "Stilalternativ för tidsstämplar som tillämpas på ögonblicksbilder och felsökningsvyn.",
+        "position": {
+            "label": "Tidsstämpelposition",
+            "description": "Tidsstämpelns position på bilden (tl/tr/bl/br)."
+        },
+        "format": {
+            "label": "Tidsstämpelformat",
+            "description": "Datum- och tidsformatsträng som används för tidsstämplar (Python-koder för datum- och tidsformat)."
+        },
+        "color": {
+            "label": "Tidsstämpelns färg",
+            "description": "RGB-färgvärden för tidsstämpeltexten (alla värden 0–255).",
+            "red": {
+                "label": "Röd",
+                "description": "Röd komponent (0-255) för tidsstämpelns färg."
+            },
+            "green": {
+                "label": "Grön",
+                "description": "Grön komponent (0-255) för tidsstämpelns färg."
+            },
+            "blue": {
+                "label": "Blå",
+                "description": "Blå komponent (0-255) för tidsstämpelns färg."
+            }
+        },
+        "thickness": {
+            "label": "Tidsstämpelns tjocklek",
+            "description": "Linjetjockleken på tidsstämpelns text."
+        },
+        "effect": {
+            "label": "Tidsstämpeleffekt",
+            "description": "Visuell effekt för tidsstämpeltexten (ingen, heldragen, skugga)."
+        }
+    },
+    "best_image_timeout": {
+        "label": "Bästa timeout för bilder",
+        "description": "Hur länge man ska vänta på bilden med högst konfidenspoäng."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Inställningar för MQTT-bildpublicering.",
+        "enabled": {
+            "label": "Skicka bild",
+            "description": "Aktivera publicering av bildbilder för objekt till MQTT-ämnen för den här kameran."
+        },
+        "timestamp": {
+            "label": "Lägg till tidsstämpel",
+            "description": "Lägg en tidsstämpel över bilder som publiceras till MQTT."
+        },
+        "bounding_box": {
+            "label": "Lägg till avgränsningsruta",
+            "description": "Rita avgränsande rutor på bilder som publiceras via MQTT."
+        },
+        "crop": {
+            "label": "Beskär bilden",
+            "description": "Beskär bilder som publicerats till MQTT till det upptäckta objektets avgränsningsram."
+        },
+        "height": {
+            "label": "Bildhöjd",
+            "description": "Höjd (pixlar) för att ändra storlek på bilder publicerade via MQTT."
+        },
+        "required_zones": {
+            "label": "Obligatoriska zoner",
+            "description": "Zoner som ett objekt måste gå in i för att en MQTT-bild ska kunna publiceras."
+        },
+        "quality": {
+            "label": "JPEG-kvalitet",
+            "description": "JPEG-kvalitet för bilder publicerade till MQTT (0–100)."
+        }
+    },
+    "notifications": {
+        "label": "Aviseringar",
+        "description": "Inställningar för att aktivera och styra aviseringar för den här kameran.",
+        "enabled": {
+            "label": "Aktivera aviseringar",
+            "description": "Aktivera eller inaktivera aviseringar för den här kameran."
+        },
+        "email": {
+            "label": "E-postmeddelande med avisering",
+            "description": "E-postadress som används för push-meddelanden eller krävs av vissa aviseringsleverantörer."
+        },
+        "cooldown": {
+            "label": "Nedkylningsperiod",
+            "description": "Nedkylningstid (sekunder) mellan aviseringar för att undvika att skicka spammare."
+        },
+        "enabled_in_config": {
+            "label": "Ursprungligt aviseringsstatus",
+            "description": "Anger om aviseringar var aktiverade i den ursprungliga statiska konfigurationen."
+        }
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "ONVIF-anslutning och PTZ-autospårningsinställningar för den här kameran.",
+        "host": {
+            "label": "ONVIF-värd",
+            "description": "Värd (och valfritt schema) för ONVIF-tjänsten för den här kameran."
+        },
+        "port": {
+            "label": "ONVIF-port",
+            "description": "Portnummer för ONVIF-tjänsten."
+        },
+        "user": {
+            "label": "ONVIF-användarnamn",
+            "description": "Användarnamn för ONVIF-autentisering; vissa enheter kräver administratörsanvändare för ONVIF."
+        },
+        "password": {
+            "label": "ONVIF-lösenord",
+            "description": "Lösenord för ONVIF-autentisering."
+        },
+        "tls_insecure": {
+            "label": "Inaktivera TLS-verifiering",
+            "description": "Hoppa över TLS-verifiering och inaktivera digest-autentisering för ONVIF (osäkert; använd endast i säkra nätverk)."
+        },
+        "profile": {
+            "label": "ONVIF-profil",
+            "description": "Specifik ONVIF-medieprofil som ska användas för PTZ-kontroll, matchad av token eller namn. Om den inte är inställd väljs den första profilen med giltig PTZ-konfiguration automatiskt."
+        },
+        "autotracking": {
+            "label": "Automatisk spårning",
+            "description": "Spåra rörliga objekt automatiskt och håll dem centrerade i bilden med hjälp av PTZ-kamerarörelser.",
+            "enabled": {
+                "label": "Aktivera automatisk spårning",
+                "description": "Aktivera eller inaktivera automatisk PTZ-kameraspårning av detekterade objekt."
+            },
+            "calibrate_on_startup": {
+                "label": "Kalibrera vid start",
+                "description": "Mät PTZ-motorhastigheter vid uppstart för att förbättra spårningsnoggrannheten. Fregate kommer att uppdatera konfigurationen med movement_weights efter kalibrering."
+            },
+            "zooming": {
+                "label": "Zoomläge",
+                "description": "Kontroll zoom beteende: inaktiverat (endast panorering/tiltning), absolut (mest kompatibelt) eller relativt (samtidig panorering/tiltning/zoomning)."
+            },
+            "zoom_factor": {
+                "label": "Zoomfaktor",
+                "description": "Kontrollera zoom nivån på spårade objekt. Lägre värden håller mer av motivet synligt; högre värden zoomar in närmare men kan förlora spårningen. Värden mellan 0,1 och 0,75."
+            },
+            "track": {
+                "label": "Spårade objekt",
+                "description": "Lista över objekttyper som ska utlösa automatisk spårning."
+            },
+            "required_zones": {
+                "label": "Obligatoriska zoner",
+                "description": "Objekt måste komma in i en av dessa zoner innan automatisk spårning börjar."
+            },
+            "return_preset": {
+                "label": "Återgå förinställning",
+                "description": "ONVIF-förinställt namn som konfigurerats i kamerans firmware att återgå till efter att spårningen avslutats."
+            },
+            "timeout": {
+                "label": "Retur tidsgräns",
+                "description": "Vänta så här många sekunder efter att du tappat spårningen innan du återställer kameran till förinställd position."
+            },
+            "movement_weights": {
+                "label": "Rörelsevikter",
+                "description": "Kalibreringsvärden genereras automatiskt av kamerakalibrering. Ändra inte manuellt."
+            },
+            "enabled_in_config": {
+                "label": "Ursprungligt autospårningsläge",
+                "description": "Internt fält för att spåra om automatisk spårning var aktiverad i konfigurationen."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Ignorera tidsavvikelse",
+            "description": "Ignorera skillnader i tidssynkronisering mellan kamera och fregattserver för ONVIF-kommunikation."
+        }
+    },
+    "type": {
+        "label": "Kameratyp",
+        "description": "Kameratyp"
+    },
+    "ui": {
+        "label": "Kameragränssnitt",
+        "description": "Visa ordning och synlighet för den här kameran i användargränssnittet. Ordningen påverkar standardinstrumentpanelen. För mer detaljerad kontroll, använd kameragrupper.",
+        "order": {
+            "label": "UI-ordning",
+            "description": "Numerisk ordning som används för att sortera kameran i användargränssnittet (standardinstrumentpanel och listor); större siffror visas senare."
+        },
+        "dashboard": {
+            "label": "Visa på Live-instrumentpanelen",
+            "description": "Växla om den här kameran ska vara synlig på standardinstrumentpanelen för Alla kameror. Kameran är fortfarande tillgänglig överallt annars i användargränssnittet, inklusive kameragrupper och inställningar."
+        },
+        "review": {
+            "label": "Visa i granskning",
+            "description": "Växla om den här kameran är synlig i granskningen (granskningssidan och dess kamerafilter, rörelsegranskning och historikvyn)."
+        }
+    },
+    "webui_url": {
+        "label": "Kamera-URL",
+        "description": "URL för att besöka kameran direkt från systemsidan"
+    },
+    "profiles": {
+        "label": "Profiler",
+        "description": "Namngivna konfigurationsprofiler med partiella åsidosättningar som kan aktiveras vid körning."
+    },
+    "zones": {
+        "label": "Zoner",
+        "description": "Zoner låter dig definiera ett specifikt område av bilden så att du kan avgöra om ett objekt befinner sig inom ett visst område eller inte.",
+        "friendly_name": {
+            "label": "Zonnamn",
+            "description": "Ett användarvänligt namn för zonen, som visas i fregattgränssnittet. Om inget namn anges kommer en formaterad version av zonnamnet att användas."
+        },
+        "enabled": {
+            "label": "Aktiverad",
+            "description": "Aktivera eller inaktivera den här zonen. Inaktiverade zoner ignoreras vid körning."
+        },
+        "enabled_in_config": {
+            "label": "Håll koll på zonens ursprungliga tillstånd."
+        },
+        "filters": {
+            "label": "Zonfilter",
+            "description": "Filter som ska tillämpas på objekt inom den här zonen. Används för att minska falska positiva resultat eller begränsa vilka objekt som anses finnas i zonen.",
+            "min_area": {
+                "label": "Minsta objektarea",
+                "description": "Minsta area för avgränsningsrutan (pixlar eller procent) som krävs för denna objekttyp. Kan vara pixlar (heltal) eller procent (flyttal mellan 0.000001 och 0.99)."
+            },
+            "max_area": {
+                "label": "Maximal objektarea",
+                "description": "Maximalt tillåtet område för avgränsningsrutan (pixlar eller procent) för denna objekttyp. Kan vara pixlar (heltal) eller procent (flyttal mellan 0.000001 och 0.99)."
+            },
+            "min_ratio": {
+                "label": "Minsta bildförhållande",
+                "description": "Minsta förhållande mellan bredd och höjd som krävs för att avgränsningsramen ska kvalificera."
+            },
+            "max_ratio": {
+                "label": "Maximalt bildförhållande",
+                "description": "Maximalt bredd/höjd-förhållande som tillåts för att avgränsningsramen ska kvalificera."
+            },
+            "threshold": {
+                "label": "Konfidensgräns",
+                "description": "Genomsnittligt tröskelvärde för detektionskonfidens som krävs för att objektet ska betraktas som ett verkligt positivt."
+            },
+            "min_score": {
+                "label": "Minsta konfidens",
+                "description": "Minsta konfidens för detektering av en enda bildruta som krävs för att objektet ska räknas."
+            },
+            "mask": {
+                "label": "Filtermask",
+                "description": "Polygonkoordinater som definierar var detta filter gäller inom ramen."
+            },
+            "raw_mask": {
+                "label": "Rå mask"
+            }
+        },
+        "coordinates": {
+            "label": "Koordinater",
+            "description": "Polygonkoordinater som definierar zonområdet. Kan vara en kommaseparerad sträng eller en lista med koordinatsträngar. Koordinaterna ska vara relativa (0-1) eller absoluta (äldre)."
+        },
+        "distances": {
+            "label": "Verkliga avstånd",
+            "description": "Valfria verkliga avstånd för varje sida av zonens fyrkant, används för hastighets- eller avståndsberäkningar. Måste ha exakt 4 värden om de är inställda."
+        },
+        "inertia": {
+            "label": "Tröghetsramar",
+            "description": "Antalet på varandra följande bildrutor som ett objekt måste detekteras i zonen innan det anses vara närvarande. Hjälper till att filtrera bort transienta detektioner."
+        },
+        "loitering_time": {
+            "label": "Löjande sekunder",
+            "description": "Antal sekunder ett objekt måste stanna i zonen för att betraktas som löjande. Ställ in på 0 för att inaktivera löjande detektering."
+        },
+        "speed_threshold": {
+            "label": "Minsta hastighet",
+            "description": "Minsta hastighet (i verkliga enheter om avstånd är inställda) som krävs för att ett objekt ska anses finnas i zonen. Används för hastighetsbaserade zonutlösare."
+        },
+        "objects": {
+            "label": "Utlösarobjekt",
+            "description": "Lista över objekttyper (från labelmap) som kan utlösa den här zonen. Kan vara en sträng eller en lista med strängar. Om tomt räknas alla objekt."
+        }
+    },
+    "enabled_in_config": {
+        "label": "Ursprungligt kameratillstånd",
+        "description": "Håll koll på kamerans ursprungliga skick."
     }
 }

@@ -13,8 +13,8 @@
     "30minutes": "30 minuter",
     "1hour": "1 timme",
     "12hours": "12 timmar",
-    "pm": "pm",
-    "am": "am",
+    "pm": "e.m.",
+    "am": "f.m.",
     "yr": "{{time}} år",
     "mo": "{{time}} mån",
     "month_one": "{{time}} månad",
@@ -35,7 +35,7 @@
       "12hour": "d MMM, yyyy",
       "24hour": "d MMM, yyyy"
     },
-    "h": "{{time}} h",
+    "h": "{{time}} t",
     "hour_one": "{{time}} timme",
     "hour_other": "{{time}} timmar",
     "m": "{{time}} min",
@@ -172,7 +172,7 @@
       "gl": "Galego (Galiciska)",
       "id": "Bahasa Indonesia (Indonesiska)",
       "ur": "اردو (Urdu)",
-      "hr": "Hrvatski (kroatiska)",
+      "hr": "Hrvatski (Kroatiska)",
       "zhHant": "繁體中文 (Traditionell kinesisk)",
       "bs": "Bosanski (Bosniska)"
     },
