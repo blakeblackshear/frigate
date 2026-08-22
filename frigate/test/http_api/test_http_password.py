@@ -1,10 +1,8 @@
 """Tests for password change authorization."""
 
-from unittest.mock import patch
-
 from fastapi import Request
 
-from frigate.api.auth import get_current_user, hash_password
+from frigate.api.auth import get_current_user, hash_password, verify_password
 from frigate.models import Event, Recordings, ReviewSegment, User
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
@@ -12,7 +10,7 @@ from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 # "viewer" check used to let through.
 _CUSTOM_ROLE_CONFIG = {
     "mqtt": {"host": "mqtt"},
-    "auth": {"roles": {"neighbor": ["front_door"]}},
+    "auth": {"roles": {"neighbor": ["front_door"]}, "hash_iterations": 10},
     "cameras": {
         "front_door": {
             "ffmpeg": {
@@ -60,8 +58,6 @@ class TestUpdatePasswordAccess(BaseTestHttp):
             )
 
     def _admin_password_unchanged(self) -> bool:
-        from frigate.api.auth import verify_password
-
         return verify_password(ADMIN_PASSWORD, User.get_by_id("admin").password_hash)
 
     def test_custom_role_cannot_target_another_account(self):
@@ -89,9 +85,7 @@ class TestUpdatePasswordAccess(BaseTestHttp):
             notification_tokens=[],
         ).execute()
 
-        with patch("frigate.api.auth.hash_password", lambda p, iterations: "hashed"):
-            resp = self._change_password("admin", "admin", "neighbor", "")
-
+        resp = self._change_password("admin", "admin", "neighbor", "")
         assert resp.status_code == 200
 
     def test_non_admin_can_change_own_password(self):
@@ -102,11 +96,9 @@ class TestUpdatePasswordAccess(BaseTestHttp):
             notification_tokens=[],
         ).execute()
 
-        with patch("frigate.api.auth.hash_password", lambda p, iterations: "hashed"):
-            resp = self._change_password(
-                "neighbor", "neighbor", "neighbor", "neighbor-password"
-            )
-
+        resp = self._change_password(
+            "neighbor", "neighbor", "neighbor", "neighbor-password"
+        )
         assert resp.status_code == 200
 
     def test_non_admin_own_password_still_requires_old_password(self):
