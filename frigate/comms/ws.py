@@ -3,6 +3,8 @@
 import errno
 import json
 import logging
+import queue
+import socket
 import threading
 from collections.abc import Callable
 from typing import Any
@@ -73,6 +75,9 @@ _WS_VIEWER_TOPICS = frozenset(
 
 # Camera-scoped command topics a camera-authorized (non-admin) user may send.
 _WS_CAMERA_COMMAND_TOPICS = frozenset({"ptz"})
+
+# Max outbound messages waiting on a client's writer thread.
+WS_MAX_PENDING_MESSAGES = 256
 
 
 def _check_ws_authorization(
@@ -446,6 +451,63 @@ def _materialize_for_ws(
 
 
 class WebSocket(WebSocket_):  # type: ignore[misc]
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._send_queue: queue.Queue[tuple[Any, bool] | None] = queue.Queue(
+            maxsize=WS_MAX_PENDING_MESSAGES
+        )
+        self._writer: threading.Thread | None = None
+        self._aborted = False
+
+    def opened(self) -> None:
+        # every client gets its own writer so a client that stops reading only
+        # blocks itself, never the thread that called publish()
+        self._writer = threading.Thread(
+            target=self._drain_send_queue, name="ws_writer", daemon=True
+        )
+        self._writer.start()
+
+    def send(self, payload: Any, binary: bool = False) -> None:
+        try:
+            self._send_queue.put_nowait((payload, binary))
+        except queue.Full:
+            self._abort("Websocket client is not keeping up, disconnecting it")
+
+    def _drain_send_queue(self) -> None:
+        while True:
+            item = self._send_queue.get()
+            if item is None or self.terminated or self.sock is None:
+                return
+            try:
+                super().send(*item)
+            except Exception:
+                self._abort()
+                return
+
+    def _abort(self, reason: str | None = None) -> None:
+        # publish() keeps hitting a full queue until the manager thread removes
+        # the connection, so only act (and log) the first time
+        if self._aborted:
+            return
+        self._aborted = True
+        if reason:
+            logger.warning(reason)
+
+        # shutdown rather than close so the ws4py manager thread sees EOF and
+        # runs its normal unregister/terminate; this also unblocks a stuck sendall
+        sock = self.sock
+        if sock is not None:
+            try:
+                sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+
+    def closed(self, code: int, reason: str | None = None) -> None:
+        try:
+            self._send_queue.put_nowait(None)
+        except queue.Full:
+            pass
+
     def unhandled_error(self, error: Any) -> None:
         """
         Handles the unfriendly socket closures on the server side
@@ -580,10 +642,7 @@ class WebSocketClient(Communicator):
             )
             if message is None:
                 continue
-            try:
-                ws.send(message)
-            except (ConnectionResetError, BrokenPipeError, ValueError):
-                pass
+            ws.send(message)
 
     def stop(self) -> None:
         if self.websocket_server is not None:
