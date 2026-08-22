@@ -440,3 +440,44 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
             f"limited_user should be denied on alias back_door_main; "
             f"got {resp.status_code}"
         )
+
+
+class TestReviewSummaryAccess(BaseTestHttp):
+    """Tests for POST /review/summarize/start/{start_ts}/end/{end_ts}.
+
+    The endpoint is deliberately admin-only instead of camera scoped, since the
+    summary correlates each flagged event with overlapping activity on other
+    cameras. These tests pin that decision so the dependency is not loosened
+    without first scoping the query.
+
+    GenAI is not configured in unit tests, so an authorized request returns 400
+    while an unauthorized one is rejected with 403 before the handler runs.
+    """
+
+    def setUp(self):
+        super().setUp([Event, ReviewSegment, Recordings])
+        self.minimal_config = _MULTI_CAMERA_CONFIG
+        self.app = super().create_app()
+
+    def tearDown(self):
+        self.app.dependency_overrides.clear()
+        super().tearDown()
+
+    def _summarize(self, role: str):
+        with AuthTestClient(self.app) as client:
+            return client.post(
+                "/review/summarize/start/0/end/9999999999",
+                headers={"remote-user": "test", "remote-role": role},
+            )
+
+    def test_restricted_role_blocked(self):
+        assert self._summarize("limited_user").status_code == 403
+
+    def test_viewer_blocked(self):
+        assert self._summarize("viewer").status_code == 403
+
+    def test_admin_not_blocked(self):
+        resp = self._summarize("admin")
+        assert resp.status_code not in (401, 403), (
+            f"Admin should not be blocked; got {resp.status_code}"
+        )

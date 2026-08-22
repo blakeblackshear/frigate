@@ -743,6 +743,9 @@ async def set_not_reviewed(
     )
 
 
+# Admin-only and intentionally not camera scoped, as the summary correlates each
+# flagged event with overlapping activity on other cameras. Admin always has
+# access to every camera, so the unscoped query discloses nothing.
 @router.post(
     "/review/summarize/start/{start_ts}/end/{end_ts}",
     dependencies=[Depends(require_role(["admin"]))],
