@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import axios from "axios";
 import { FaCircleCheck } from "react-icons/fa6";
+import { dismissSetup } from "@/utils/setupWizard";
 
 type ConfiguredItem = {
   key: string;
@@ -86,14 +87,9 @@ export default function SetupComplete({
 
   const handleFinish = useCallback(async () => {
     setFinishing(true);
-    try {
-      await axios.put("config/set", {
-        config_data: {
-          onboarding: { setup_complete: true },
-        },
-        requires_restart: 0,
-      });
+    dismissSetup();
 
+    try {
       // camera adds were applied live, so nothing is waiting on a restart
       if (!restartRequired) {
         window.location.href = window.baseUrl || "/";

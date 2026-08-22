@@ -6,7 +6,7 @@ import Sidebar from "@/components/navigation/Sidebar";
 import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
 import Bottombar from "./components/navigation/Bottombar";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { Redirect } from "./components/navigation/Redirect";
 import { cn } from "./lib/utils";
 import { isPWA } from "./utils/isPWA";
@@ -15,6 +15,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "./types/frigateConfig";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { isRedirectingToLogin } from "@/api/auth-redirect";
+import { isSetupDismissed } from "@/utils/setupWizard";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -53,6 +54,18 @@ function DefaultAppView() {
     revalidateOnFocus: false,
   });
 
+  // decided once per load: adding the first camera part way through the
+  // wizard must not pull the wizard out from under the user
+  const [showWizard, setShowWizard] = useState<boolean>();
+
+  useEffect(() => {
+    if (config && showWizard === undefined) {
+      setShowWizard(
+        Object.keys(config.cameras ?? {}).length === 0 && !isSetupDismissed(),
+      );
+    }
+  }, [config, showWizard]);
+
   // Compute required roles for main routes, ensuring we have config first
   // to prevent race condition where custom roles are temporarily unavailable
   const mainRouteRoles = config?.auth?.roles
@@ -70,7 +83,7 @@ function DefaultAppView() {
   }
 
   // Show setup wizard for first-time users
-  if (config && config.onboarding?.setup_complete === false) {
+  if (showWizard) {
     return (
       <div className="size-full overflow-hidden">
         <Suspense

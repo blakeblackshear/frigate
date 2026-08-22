@@ -743,14 +743,6 @@ def migrate_019_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
         new_config["cameras"][name] = camera_config
 
-    # Set setup_complete to true for existing configs that already have cameras,
-    # so the setup wizard does not appear for users upgrading from older versions.
-    cameras = new_config.get("cameras", {})
-    if len(cameras) > 0:
-        onboarding = new_config.get("onboarding", {})
-        onboarding["setup_complete"] = True
-        new_config["onboarding"] = onboarding
-
     new_config["version"] = "0.19-0"
     return new_config
 

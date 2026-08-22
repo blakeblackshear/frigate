@@ -8,11 +8,10 @@ import SetupWelcome from "@/components/setup/SetupWelcome";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/context/theme-provider";
+import { dismissSetup } from "@/utils/setupWizard";
 import { useCallback, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { LuMoon, LuSun } from "react-icons/lu";
-import { toast } from "sonner";
-import axios from "axios";
 
 const STEPS = [
   "setupWizard.steps.welcome",
@@ -117,19 +116,10 @@ export default function SetupWizard() {
 
   const isDark = (theme === "system" ? systemTheme : theme) === "dark";
 
-  const handleSkipSetup = useCallback(async () => {
-    try {
-      await axios.put("config/set", {
-        config_data: {
-          onboarding: { setup_complete: true },
-        },
-        requires_restart: 0,
-      });
-      window.location.href = window.baseUrl || "/";
-    } catch {
-      toast.error(t("setupWizard.errors.saveFailed"));
-    }
-  }, [t]);
+  const handleSkipSetup = useCallback(() => {
+    dismissSetup();
+    window.location.href = window.baseUrl || "/";
+  }, []);
 
   const handleCameraNext = useCallback(
     (cameraNames?: string[], detectCodecs?: Record<string, string>) => {

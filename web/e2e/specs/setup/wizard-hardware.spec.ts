@@ -9,6 +9,8 @@
 
 import { test, expect } from "../../fixtures/frigate-test";
 import type { Page } from "@playwright/test";
+import { configFactory } from "../../fixtures/mock-data/config";
+import type { ApiMockOverrides } from "../../helpers/api-mocker";
 
 const NVIDIA_HARDWARE = [
   {
@@ -34,7 +36,6 @@ type SavedConfig = {
     models?: { devices: string[]; path?: string }[];
     detect?: { enabled?: boolean };
     ffmpeg?: { hwaccel_args?: string | string[] };
-    onboarding?: { setup_complete?: boolean };
   };
 };
 
@@ -56,7 +57,34 @@ async function captureRestarts(page: Page): Promise<string[]> {
   return calls;
 }
 
-async function gotoDetectorStep(page: Page) {
+/**
+ * Install mocks for a first run: the wizard shows when config has no cameras,
+ * so the config route starts empty and only reports cameras once the returned
+ * callback is fired, standing in for the camera the user adds.
+ */
+async function installFirstRun(
+  frigateApp: { installDefaults: (o?: ApiMockOverrides) => Promise<void> },
+  page: Page,
+  overrides?: ApiMockOverrides,
+): Promise<() => void> {
+  await frigateApp.installDefaults(overrides);
+
+  const full = configFactory(overrides?.config);
+  let cameras: unknown = {};
+
+  await page.route("**/api/config", (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({ json: { ...full, cameras } });
+    }
+    return route.fulfill({ json: { success: true } });
+  });
+
+  return () => {
+    cameras = full.cameras;
+  };
+}
+
+async function gotoDetectorStep(page: Page, addCamera: () => void) {
   await page.getByRole("button", { name: "Get Started" }).click();
   await expect(page.getByText("Add Your First Camera")).toBeVisible();
 
@@ -64,6 +92,7 @@ async function gotoDetectorStep(page: Page) {
   // which SetupCamera does by refetching config when the dialog closes, so
   // opening and cancelling the dialog is what reveals Next
   await page.getByRole("button", { name: "Add Camera" }).click();
+  addCamera();
   await page.getByRole("button", { name: "Cancel" }).click();
 
   await expect(page.getByRole("button", { name: "Next" })).toBeVisible({
@@ -78,9 +107,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    await frigateApp.installDefaults({
-      // the base config snapshot predates the onboarding key, hence the cast
-      config: { onboarding: { setup_complete: false } } as never,
+    const addCamera = await installFirstRun(frigateApp, page, {
       hwaccel: {
         recommended: "vaapi",
         available: [
@@ -98,7 +125,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     const saves = await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page);
+    await gotoDetectorStep(page, addCamera);
 
     // the default hardware mock reports two Corals, an Intel GPU, and the CPU
     await expect(
@@ -143,14 +170,13 @@ test.describe("setup wizard hardware @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    await frigateApp.installDefaults({
-      config: { onboarding: { setup_complete: false } } as never,
+    const addCamera = await installFirstRun(frigateApp, page, {
       hardware: NVIDIA_HARDWARE,
     });
     const saves = await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page);
+    await gotoDetectorStep(page, addCamera);
 
     await expect(
       page.getByRole("radio", { name: /NVIDIA GeForce RTX 3060/ }),
@@ -176,22 +202,16 @@ test.describe("setup wizard hardware @high @mobile", () => {
     ).toBeHidden();
     await page.getByRole("button", { name: "Go to Live View" }).click();
 
-    // the mocked config still reports onboarding incomplete, so the reload
-    // lands back on the wizard
-    await expect(page.getByText("Welcome to Frigate")).toBeVisible();
+    // hands off without restarting, and the wizard does not come back
+    await expect(page.getByText("Welcome to Frigate")).toBeHidden();
     expect(restarts).toHaveLength(0);
-    const finishSave = saves.find((save) => save.config_data?.onboarding);
-    expect(finishSave?.config_data?.onboarding).toEqual({
-      setup_complete: true,
-    });
   });
 
   test("offers only the presets the hardware supports", async ({
     frigateApp,
     page,
   }) => {
-    await frigateApp.installDefaults({
-      config: { onboarding: { setup_complete: false } } as never,
+    const addCamera = await installFirstRun(frigateApp, page, {
       hardware: NVIDIA_HARDWARE,
       hwaccel: {
         recommended: "nvidia",
@@ -201,7 +221,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page);
+    await gotoDetectorStep(page, addCamera);
     await page
       .getByRole("button", { name: "Continue without detection" })
       .click();
@@ -227,8 +247,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    await frigateApp.installDefaults({
-      config: { onboarding: { setup_complete: false } } as never,
+    const addCamera = await installFirstRun(frigateApp, page, {
       hwaccel: {
         recommended: "jetson",
         available: [
@@ -245,7 +264,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     const saves = await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page);
+    await gotoDetectorStep(page, addCamera);
     await page.getByRole("button", { name: "Next" }).click();
     await expect(page.getByText("Hardware Acceleration")).toBeVisible();
 
@@ -265,13 +284,11 @@ test.describe("setup wizard hardware @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    await frigateApp.installDefaults({
-      config: { onboarding: { setup_complete: false } } as never,
-    });
+    const addCamera = await installFirstRun(frigateApp, page);
     const saves = await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page);
+    await gotoDetectorStep(page, addCamera);
     await page.getByRole("button", { name: "Next" }).click();
     await expect(page.getByText("Hardware Acceleration")).toBeVisible();
 

@@ -657,9 +657,5 @@ export interface FrigateConfig {
     thickness: number;
   };
 
-  onboarding: {
-    setup_complete: boolean;
-  };
-
   ui: UiConfig;
 }
