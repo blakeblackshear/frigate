@@ -77,6 +77,8 @@ if [ ! \( -f "$letsencrypt_path/privkey.pem" -a -f "$letsencrypt_path/fullchain.
     openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
         -subj "/O=FRIGATE DEFAULT CERT/CN=*" \
         -keyout "$letsencrypt_path/privkey.pem" -out "$letsencrypt_path/fullchain.pem" 2>/dev/null
+    chmod 600 "$letsencrypt_path/privkey.pem"
+    chmod 644 "$letsencrypt_path/fullchain.pem"
 fi
 
 # build templates for optional FRIGATE_BASE_PATH environment variable
