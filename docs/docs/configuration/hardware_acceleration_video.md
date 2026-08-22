@@ -312,8 +312,9 @@ ffmpeg:
 
 :::note
 
-If running Frigate through Docker, you either need to run in privileged mode or
-map the `/dev/video*` devices to Frigate. With Docker Compose add:
+If running Frigate through Docker, map the relevant `/dev/video*` devices into
+the container. Running in privileged mode also works but grants far more access
+than needed. With Docker Compose add:
 
 ```yaml {4-5}
 services:
