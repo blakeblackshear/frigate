@@ -710,6 +710,7 @@ async def get_review(request: Request, review_id: str):
     dependencies=[Depends(allow_any_authenticated())],
 )
 async def set_not_reviewed(
+    request: Request,
     review_id: str,
     current_user: dict = Depends(get_current_user),
 ):
@@ -727,6 +728,8 @@ async def set_not_reviewed(
             ),
             status_code=404,
         )
+
+    await require_camera_access(review.camera, request=request)
 
     try:
         user_review = UserReviewStatus.get(

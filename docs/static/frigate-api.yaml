@@ -2308,8 +2308,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
         - frigateUserAuth: []
-      x-required-role: any
-      description: '**Access:** Any authenticated user.'
+      x-required-role: camera
+      description: '**Access:** Authenticated user with access to the referenced camera.'
   /review/summarize/start/{start_ts}/end/{end_ts}:
     post:
       tags:
