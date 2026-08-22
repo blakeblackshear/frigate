@@ -971,6 +971,7 @@ def delete_user(request: Request, username: str):
     summary="Update user password",
     description="Updates a user's password. Users can only change their own password unless they have admin role. Requires the current password to verify identity for non-admin users. Password must be at least 12 characters long. If user changes their own password, a new JWT cookie is automatically issued.",
 )
+@limiter.limit(limit_value=rateLimiter.get_limit)
 async def update_password(
     request: Request,
     username: str,
@@ -984,10 +985,11 @@ async def update_password(
     current_username = current_user.get("username")
     current_role = current_user.get("role")
 
-    # viewers can only change their own password
-    if current_role == "viewer" and current_username != username:
+    # Only admins may target another account. This has to cover every non-admin
+    # role rather than just viewer, since custom roles are arbitrary names
+    if current_role != "admin" and current_username != username:
         raise HTTPException(
-            status_code=403, detail="Viewers can only update their own password"
+            status_code=403, detail="Users can only update their own password"
         )
 
     HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
