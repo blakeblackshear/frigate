@@ -166,6 +166,29 @@ class TestCameraAccessEventReview(BaseTestHttp):
                 resp = client.get("/review/rev1")
                 assert resp.status_code == 403
 
+    def test_review_not_reviewed_access(self):
+        super().insert_mock_review_segment("rev1", camera="front_door")
+
+        # Allowed
+        async def mock_require_allowed(camera: str, request: Request = None):
+            if camera == "front_door":
+                return
+            raise HTTPException(status_code=403, detail="Access denied")
+
+        with patch("frigate.api.review.require_camera_access", mock_require_allowed):
+            with AuthTestClient(self.app) as client:
+                resp = client.delete("/review/rev1/viewed")
+                assert resp.status_code == 200
+
+        # Disallowed
+        async def mock_require_disallowed(camera: str, request: Request = None):
+            raise HTTPException(status_code=403, detail="Access denied")
+
+        with patch("frigate.api.review.require_camera_access", mock_require_disallowed):
+            with AuthTestClient(self.app) as client:
+                resp = client.delete("/review/rev1/viewed")
+                assert resp.status_code == 403
+
     def test_event_search_access(self):
         super().insert_mock_event("event1", camera="front_door")
         super().insert_mock_event("event2", camera="back_door")
