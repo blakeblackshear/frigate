@@ -60,10 +60,10 @@ ARG DEBIAN_FRONTEND
 RUN --mount=type=bind,source=docker/main/build_intel_media_driver.sh,target=/deps/build_intel_media_driver.sh \
     /deps/build_intel_media_driver.sh
 
-FROM scratch AS go2rtc
+FROM wget AS go2rtc
 ARG TARGETARCH
-WORKDIR /rootfs/usr/local/go2rtc/bin
-ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.14/go2rtc_linux_${TARGETARCH}" go2rtc
+RUN --mount=type=bind,source=docker/main/install_go2rtc.sh,target=/deps/install_go2rtc.sh \
+    /deps/install_go2rtc.sh
 
 FROM wget AS tempio
 ARG TARGETARCH
