@@ -2316,7 +2316,7 @@ paths:
         - Review
       summary: Generate Review Summary
       description: |-
-        **Access:** Admin role required.
+        **Access:** Authenticated user with access to all cameras.
 
         Use GenAI to summarize review items over a period of time.
       operationId: 
@@ -2347,8 +2347,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
-        - frigateAdminAuth: []
-      x-required-role: admin
+        - frigateUserAuth: []
+      x-required-role: all_cameras
   /:
     get:
       tags:
