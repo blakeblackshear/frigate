@@ -79,6 +79,28 @@ def parse_cache_segment_name(basename: str) -> tuple[str, str, str] | None:
     return (prefix, STREAM_TYPE_MAIN, date)
 
 
+def segment_path_time(cache_path: str) -> datetime.datetime | None:
+    """Timestamp a segment's recording path is built from, or None if unparsable.
+
+    Recording paths carry one second of resolution, and so does ffmpeg's cache
+    segment template, which makes a cache file name unique per camera stream
+    and second. Resolved start times are not: a stream cutting segments faster
+    than once a second resolves consecutive segments into the same second, and
+    building the path from those collides on the unique path index.
+    """
+    parsed = parse_cache_segment_name(Path(cache_path).stem)
+
+    if parsed is None:
+        return None
+
+    try:
+        return datetime.datetime.strptime(parsed[2], CACHE_SEGMENT_FORMAT).astimezone(
+            datetime.UTC
+        )
+    except ValueError:
+        return None
+
+
 class SegmentInfo:
     def __init__(
         self,
@@ -865,18 +887,20 @@ class RecordingMaintainer(threading.Thread):
         video_codec: str | None = None,
         keyframes: list[int] | None = None,
     ) -> dict[str, Any] | None:
-        # directory will be in utc due to start_time being in utc
+        path_time = segment_path_time(cache_path) or start_time
+
+        # directory will be in utc due to path_time being in utc
         # sub segments get a tagged directory to avoid filename collisions
         directory = os.path.join(
             RECORD_DIR,
-            start_time.strftime("%Y-%m-%d/%H"),
+            path_time.strftime("%Y-%m-%d/%H"),
             camera if stream_type == STREAM_TYPE_MAIN else f"{camera}{SUB_CACHE_TAG}",
         )
 
         os.makedirs(directory, exist_ok=True)
 
-        # file will be in utc due to start_time being in utc
-        file_name = f"{start_time.strftime('%M.%S.mp4')}"
+        # file will be in utc due to path_time being in utc
+        file_name = f"{path_time.strftime('%M.%S.mp4')}"
         file_path = os.path.join(directory, file_name)
 
         try:
