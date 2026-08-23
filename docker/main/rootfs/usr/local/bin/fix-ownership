@@ -59,6 +59,11 @@ if [[ -n "$sentinel" && -f "$sentinel" && "$(cat "$sentinel")" == "${schema}:${t
     exit 0
 fi
 
+# A sweep that could not chown everything must not be recorded as complete:
+# the sentinel would make every later boot skip it and the entries would stay
+# unreachable once services run unprivileged.
+swept_clean=1
+
 for path in "$@"; do
     if [[ ! -d "$path" ]]; then
         echo "[WARN] fix-ownership: $path does not exist, skipping"
@@ -80,8 +85,10 @@ for path in "$@"; do
     fi
 
     find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
-        -exec chown -h "${target_uid}:${target_gid}" {} + || \
+        -exec chown -h "${target_uid}:${target_gid}" {} + || {
+        swept_clean=0
         echo "[WARN] fix-ownership: some entries under ${path} could not be updated (deleted mid-sweep or chown denied); will retry on next mismatch"
+    }
 done
 
 # go2rtc (separate user) must be able to REACH its HomeKit state in /config.
@@ -96,6 +103,6 @@ if [[ "$dry_run" -eq 0 && -d /config ]]; then
     chmod g+rx /config 2>/dev/null || true
 fi
 
-if [[ "$dry_run" -eq 0 && -n "$sentinel" ]]; then
+if [[ "$dry_run" -eq 0 && -n "$sentinel" && "$swept_clean" -eq 1 ]]; then
     echo "${schema}:${target_uid}:${target_gid}" > "$sentinel"
 fi
