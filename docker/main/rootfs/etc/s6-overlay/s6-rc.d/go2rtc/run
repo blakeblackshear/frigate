@@ -110,6 +110,14 @@ fi
 readonly homekit_config_path="/config/go2rtc_homekit.yml"
 setup_homekit_config "${homekit_config_path}"
 
+if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+    chown go2rtc:go2rtc /dev/shm/go2rtc.yaml 2>/dev/null || true
+    # go2rtc rewrites this in place (os.WriteFile, no rename), so owning the
+    # file is enough; /config grants frigate-data traverse only
+    chown go2rtc:frigate-data "${homekit_config_path}"
+    chmod 664 "${homekit_config_path}"
+fi
+
 readonly config_path="/config"
 
 if [[ -x "${config_path}/go2rtc" ]]; then
@@ -125,4 +133,8 @@ echo "[INFO] Starting go2rtc..."
 # Use HomeKit config as the primary config so writebacks go there
 # The main config from Frigate will be loaded as a secondary config
 exec 2>&1
-exec "${binary_path}" -config="${homekit_config_path}" -config=/dev/shm/go2rtc.yaml
+if [[ "$(id -u)" -ne 0 || "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
+    exec "${binary_path}" -config="${homekit_config_path}" -config=/dev/shm/go2rtc.yaml
+else
+    exec s6-setuidgid go2rtc "${binary_path}" -config="${homekit_config_path}" -config=/dev/shm/go2rtc.yaml
+fi
