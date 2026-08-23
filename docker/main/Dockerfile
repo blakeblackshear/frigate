@@ -265,6 +265,23 @@ ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PA
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
 
+# Runtime users. frigate may be remapped at start via PUID/PGID (init-usermod)
+# or replaced entirely with docker's --user. go2rtc is intentionally separate
+# and more restricted. frigate-data is the shared group for /config access.
+# -o tolerates variant base images that already contain uid/gid 1000.
+RUN groupadd -o --gid 1000 frigate \
+    && useradd -o --uid 1000 --gid frigate --no-create-home --shell /usr/sbin/nologin frigate \
+    && groupadd --system go2rtc \
+    && useradd --system --gid go2rtc --no-create-home --shell /usr/sbin/nologin go2rtc \
+    && groupadd --system frigate-data \
+    && usermod -aG frigate-data frigate \
+    && usermod -aG frigate-data go2rtc \
+    && for grp in video render plugdev audio; do \
+         if getent group "$grp" >/dev/null; then \
+           usermod -aG "$grp" frigate && usermod -aG "$grp" go2rtc; \
+         fi; \
+       done
+
 ENV DEFAULT_FFMPEG_VERSION="8.0"
 ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:7.0:5.0"
 
@@ -306,6 +323,11 @@ HEALTHCHECK --start-period=300s --start-interval=5s --interval=15s --timeout=5s 
 
 # Frigate deps with Node.js and NPM for devcontainer
 FROM deps AS devcontainer
+
+# /config here is the developer's bind-mounted checkout, not a data volume, so
+# the prepare ownership sweep must not run: it would chown the source tree to
+# the runtime uid and lock out any container user that isn't 1000.
+ENV FRIGATE_RUN_AS_ROOT=true
 
 # Do not start the actual Frigate service on devcontainer as it will be started by VS Code
 # But start a fake service for simulating the logs
