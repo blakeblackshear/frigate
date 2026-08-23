@@ -859,9 +859,12 @@ def login(request: Request, body: AppPostLoginBody):
     user = body.user
     password = body.password
 
+    remote_addr = get_remote_addr(request)
+
     try:
         db_user: User = User.get_by_id(user)
     except DoesNotExist:
+        logger.warning(f"Login failed for unknown user '{user}' from {remote_addr}")
         return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
     password_hash = db_user.password_hash
@@ -889,6 +892,10 @@ def login(request: Request, body: AppPostLoginBody):
             request.app.frigate_config.auth.admin_first_time_login = False
 
         return response
+
+    logger.warning(
+        f"Login failed for user '{user}' (invalid password) from {remote_addr}"
+    )
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 
