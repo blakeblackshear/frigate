@@ -26,6 +26,7 @@ from frigate.const import (
     PROCESS_PRIORITY_HIGH,
     RECORD_STREAM_TYPES,
     ROLE_TO_STREAM_TYPE,
+    STREAM_TYPE_MAIN,
     STREAM_TYPE_SUB,
     STREAM_TYPE_TO_ROLE,
 )
@@ -357,8 +358,10 @@ class CameraWatchdog(threading.Thread):
                     # update camera status
                     now = datetime.now().timestamp()
                     self._send_detect_status("disabled", now)
-                    for stream_type in RECORD_STREAM_TYPES:
-                        self._send_record_status(stream_type, "disabled", now)
+                    self._send_record_status(STREAM_TYPE_MAIN, "disabled", now)
+                    # cameras without a sub stream never get a record_sub topic
+                    if self.config.record.sub.enabled:
+                        self._send_record_status(STREAM_TYPE_SUB, "disabled", now)
                 self.was_enabled = enabled
                 continue
 
