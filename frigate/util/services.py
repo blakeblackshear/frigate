@@ -965,12 +965,17 @@ def get_hailo_temps() -> dict[str, float]:
     return temps
 
 
+# Snapshot: environment_vars lands in os.environ after import and must not
+# be able to enable this.
+_GO2RTC_ARBITRARY_EXEC_ENV = os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC")
+
+
 def is_go2rtc_arbitrary_exec_allowed() -> bool:
     """Read the GO2RTC_ALLOW_ARBITRARY_EXEC override from env, docker
     secrets, or the Home Assistant add-on options file."""
     raw: str | None = None
-    if "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.environ:
-        raw = os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC")
+    if _GO2RTC_ARBITRARY_EXEC_ENV is not None:
+        raw = _GO2RTC_ARBITRARY_EXEC_ENV
     elif (
         os.path.isdir("/run/secrets")
         and os.access("/run/secrets", os.R_OK)

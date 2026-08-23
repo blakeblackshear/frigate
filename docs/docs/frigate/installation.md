@@ -612,6 +612,8 @@ Home Assistant OS users can install via the App repository.
 5. Start the App
 6. Use the _Open Web UI_ button to access the Frigate UI, then click in the _cog icon_ > _Configuration editor_ and configure Frigate to your liking
 
+App users who can't set container environment variables can put `FRIGATE_` values in a `secrets.yaml` next to `config.yml` in `/addon_configs/<addon_directory>` instead. See [`secrets.yaml`](../configuration/advanced/system.md#secretsyaml).
+
 There are several variants of the App available:
 
 | App Variant                | Description                                                |
