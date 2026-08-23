@@ -86,6 +86,7 @@ from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import UntrackedSharedMemory
+from frigate.util.ownership import chown_to_runtime
 from frigate.util.process import FrigateProcess
 from frigate.util.services import set_file_limit
 from frigate.version import VERSION
@@ -149,6 +150,7 @@ class FrigateApp:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d, exist_ok=True)
+                chown_to_runtime(d)
             else:
                 logger.debug(f"Skipping directory: {d}")
 

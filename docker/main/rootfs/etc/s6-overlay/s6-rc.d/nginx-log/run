@@ -1,4 +1,12 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
 
-exec logutil-service /dev/shm/logs/nginx
+if [[ "$(id -u)" -eq 0 ]]; then
+    # logutil-service drops to nobody and applies S6_LOGGING_SCRIPT
+    exec logutil-service /dev/shm/logs/nginx
+fi
+
+# Non-root (--user) fallback: logutil-service cannot change UID, so run
+# s6-log directly with the same directives S6_LOGGING_SCRIPT configures.
+# shellcheck disable=SC2086
+exec s6-log ${S6_LOGGING_SCRIPT:-T 1 n0 s10000000 T} /dev/shm/logs/nginx
