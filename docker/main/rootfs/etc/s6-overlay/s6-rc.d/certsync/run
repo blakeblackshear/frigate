@@ -49,7 +49,7 @@ do
     then
         echo "[INFO] Reloading nginx to refresh TLS certificate"
         echo "$lefile: $leprint"
-        /usr/local/nginx/sbin/nginx -s reload
+        /usr/local/nginx/sbin/nginx -c /tmp/nginx/conf/nginx.conf -s reload
     fi
 
     sleep 60

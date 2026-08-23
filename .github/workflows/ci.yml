@@ -91,7 +91,7 @@ jobs:
             echo "response carries frame-ancestors, which breaks cross-origin iframe embedding"
             exit 1
           fi
-          docker exec frigate /usr/local/nginx/sbin/nginx -t
+          docker exec frigate /usr/local/nginx/sbin/nginx -t -c /tmp/nginx/conf/nginx.conf
           docker exec frigate stat -c %a /etc/letsencrypt/live/frigate/privkey.pem | grep -qx 600
           docker exec frigate stat -c %a /dev/shm/go2rtc.yaml | grep -qx 640
       - name: Assert PUID/PGID remapping
