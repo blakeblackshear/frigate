@@ -241,8 +241,8 @@ class RecordingMaintainer(threading.Thread):
             and not d.startswith("preview_")
         ]
 
-        # publish newest cached segment per camera (including in use files)
-        newest_cache_segments: dict[str, dict[str, Any]] = {}
+        # publish newest cached segment per camera stream (including in use files)
+        newest_cache_segments: dict[tuple[str, str], dict[str, Any]] = {}
         for cache in cache_files:
             cache_path = os.path.join(CACHE_DIR, cache)
             basename = os.path.splitext(cache)[0]
@@ -254,38 +254,42 @@ class RecordingMaintainer(threading.Thread):
                 continue
             camera, stream_type, date = parsed
 
-            # this topic feeds main-stream health/sync consumers only
-            if stream_type == STREAM_TYPE_SUB:
-                continue
-
             start_time = datetime.datetime.strptime(
                 date, CACHE_SEGMENT_FORMAT
             ).astimezone(datetime.UTC)
+            key = (camera, stream_type)
             if (
-                camera not in newest_cache_segments
-                or start_time > newest_cache_segments[camera]["start_time"]
+                key not in newest_cache_segments
+                or start_time > newest_cache_segments[key]["start_time"]
             ):
-                newest_cache_segments[camera] = {
+                newest_cache_segments[key] = {
                     "start_time": start_time,
                     "cache_path": cache_path,
                 }
 
-        for camera, newest in newest_cache_segments.items():
+        for (camera, stream_type), newest in newest_cache_segments.items():
             self.recordings_publisher.publish(
                 (
                     camera,
+                    stream_type,
                     newest["start_time"].timestamp(),
                     newest["cache_path"],
                 ),
                 RecordingsDataTypeEnum.latest.value,
             )
-        # publish None for cameras with no cache files (but only if we know the camera exists)
-        for camera_name in self.config.cameras:
-            if camera_name not in newest_cache_segments:
-                self.recordings_publisher.publish(
-                    (camera_name, None, None),
-                    RecordingsDataTypeEnum.latest.value,
-                )
+        # publish None for streams with no cache files (but only if we know the camera exists)
+        for camera_name, camera_cfg in self.config.cameras.items():
+            stream_types = [STREAM_TYPE_MAIN]
+
+            if camera_cfg.record.sub.enabled:
+                stream_types.append(STREAM_TYPE_SUB)
+
+            for stream_type in stream_types:
+                if (camera_name, stream_type) not in newest_cache_segments:
+                    self.recordings_publisher.publish(
+                        (camera_name, stream_type, None, None),
+                        RecordingsDataTypeEnum.latest.value,
+                    )
 
         files_in_use = []
         for process in psutil.process_iter():
@@ -447,6 +451,7 @@ class RecordingMaintainer(threading.Thread):
                 self.recordings_publisher.publish(
                     (
                         camera,
+                        stream_type,
                         recordings[0]["start_time"].timestamp()
                         if camera_cfg and camera_cfg.record.enabled
                         else None,
@@ -542,11 +547,10 @@ class RecordingMaintainer(threading.Thread):
                 logger.warning(
                     f"Invalid or missing video stream in segment {cache_path}. Discarding."
                 )
-                if stream_type == STREAM_TYPE_MAIN:
-                    self.recordings_publisher.publish(
-                        (camera, start_time.timestamp(), cache_path),
-                        RecordingsDataTypeEnum.invalid.value,
-                    )
+                self.recordings_publisher.publish(
+                    (camera, stream_type, start_time.timestamp(), cache_path),
+                    RecordingsDataTypeEnum.invalid.value,
+                )
                 self.drop_segment(cache_path)
                 return None
 
@@ -584,20 +588,18 @@ class RecordingMaintainer(threading.Thread):
                     logger.warning(f"Failed to probe corrupt segment {cache_path}")
 
                 logger.warning(f"Discarding a corrupt recording segment: {cache_path}")
-                if stream_type == STREAM_TYPE_MAIN:
-                    self.recordings_publisher.publish(
-                        (camera, start_time.timestamp(), cache_path),
-                        RecordingsDataTypeEnum.invalid.value,
-                    )
+                self.recordings_publisher.publish(
+                    (camera, stream_type, start_time.timestamp(), cache_path),
+                    RecordingsDataTypeEnum.invalid.value,
+                )
                 self.drop_segment(cache_path)
                 return None
 
             # this segment has a valid duration and has video data, so publish an update
-            if stream_type == STREAM_TYPE_MAIN:
-                self.recordings_publisher.publish(
-                    (camera, start_time.timestamp(), cache_path),
-                    RecordingsDataTypeEnum.valid.value,
-                )
+            self.recordings_publisher.publish(
+                (camera, stream_type, start_time.timestamp(), cache_path),
+                RecordingsDataTypeEnum.valid.value,
+            )
 
         record_config = self.config.cameras[camera].record
 
