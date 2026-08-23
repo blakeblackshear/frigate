@@ -42,6 +42,61 @@ jobs:
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
           cache-to: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
+  smoke_test:
+    runs-on: ubuntu-22.04
+    name: AMD64 Smoke Test
+    needs:
+      - amd64_build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Start container
+        run: |
+          mkdir -p /tmp/frigate-config
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config/config.yml
+          docker run -d --name frigate --shm-size 256m \
+            -v /tmp/frigate-config:/config \
+            -p 5000:5000 -p 8971:8971 \
+            ${{ steps.setup.outputs.image-name }}-amd64
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do
+            curl -fs http://127.0.0.1:5000/api/version && exit 0
+            sleep 5
+          done
+          echo "API never came up"; docker logs frigate; exit 1
+      - name: Assert security headers and permissions
+        run: |
+          headers=$(curl -ksI https://127.0.0.1:8971/)
+          echo "$headers"
+          echo "$headers" | grep -qi "x-content-type-options: nosniff"
+          echo "$headers" | grep -qi "referrer-policy: strict-origin-when-cross-origin"
+          # server_tokens off: Server header must not include a version.
+          # written as an if rather than "! grep", because bash exempts a
+          # negated command from set -e and the assertion would never fail
+          if echo "$headers" | grep -qiE "^server: nginx/[0-9]"; then
+            echo "Server header leaks the nginx version; server_tokens is not off"
+            exit 1
+          fi
+          # Frigate never ships frame-ancestors: HA's Webpage card and iframe
+          # panels frame it cross-origin and it would break them silently
+          if echo "$headers" | grep -qi "frame-ancestors"; then
+            echo "response carries frame-ancestors, which breaks cross-origin iframe embedding"
+            exit 1
+          fi
+          docker exec frigate /usr/local/nginx/sbin/nginx -t
+          docker exec frigate stat -c %a /etc/letsencrypt/live/frigate/privkey.pem | grep -qx 600
+          docker exec frigate stat -c %a /dev/shm/go2rtc.yaml | grep -qx 640
+      - name: Teardown
+        if: always()
+        run: docker rm -f frigate || true
   arm64_build:
     runs-on: ubuntu-22.04-arm
     name: ARM Build
