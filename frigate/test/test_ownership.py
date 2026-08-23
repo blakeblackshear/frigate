@@ -11,6 +11,8 @@ class FakePwEntry:
     pw_gid = 1500
 
 
+# The devcontainer image exports FRIGATE_RUN_AS_ROOT, so any test that has to
+# reach past the escape-hatch check pins the variable instead of inheriting it.
 class TestGetRuntimeIds(unittest.TestCase):
     @patch("frigate.util.ownership.os.geteuid", return_value=1000)
     def test_returns_none_when_not_root(self, _):
@@ -21,11 +23,13 @@ class TestGetRuntimeIds(unittest.TestCase):
     def test_returns_none_with_escape_hatch(self, _):
         assert ownership.get_runtime_ids() is None
 
+    @patch.dict("os.environ", {"FRIGATE_RUN_AS_ROOT": "false"})
     @patch("frigate.util.ownership.pwd.getpwnam", side_effect=KeyError)
     @patch("frigate.util.ownership.os.geteuid", return_value=0)
     def test_returns_none_outside_frigate_image(self, *_):
         assert ownership.get_runtime_ids() is None
 
+    @patch.dict("os.environ", {"FRIGATE_RUN_AS_ROOT": "false"})
     @patch("frigate.util.ownership.pwd.getpwnam", return_value=FakePwEntry())
     @patch("frigate.util.ownership.os.geteuid", return_value=0)
     def test_returns_frigate_ids_as_root(self, *_):
