@@ -100,7 +100,7 @@ VS Code supports JSON schemas for automatically validating configuration files. 
 
 ## Environment Variable Substitution
 
-Frigate supports the use of environment variables starting with `FRIGATE_` **only** where specifically indicated in the [reference config](./advanced/reference.md). For example, the following values can be replaced at runtime by using environment variables:
+Frigate supports the use of environment variables starting with `FRIGATE_` **only** where specifically indicated in the [reference config](./advanced/reference.md). See [substitution sources and precedence](./advanced/system.md#substitution-sources-and-precedence) for where those values can come from, including `secrets.yaml`. For example, the following values can be replaced at runtime by using environment variables:
 
 ```yaml
 mqtt:

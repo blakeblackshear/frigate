@@ -63,7 +63,7 @@ from .classification import (
     SemanticSearchModelEnum,
 )
 from .database import DatabaseConfig
-from .env import EnvVars
+from .env import EnvVars, reload_sources
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .network import NetworkingConfig
@@ -1307,6 +1307,9 @@ class FrigateConfig(FrigateBaseModel):
 
     @classmethod
     def parse(cls, config, *, is_json=None, safe_load=False, **context):
+        # Pick up secrets.yaml edits without a restart.
+        reload_sources()
+
         # If config is a file, read its contents.
         if hasattr(config, "read"):
             fname = getattr(config, "name", None)
