@@ -157,3 +157,13 @@ if [[ "$(id -u)" -eq 0 ]]; then
             "${PUID:-1000}" "${PGID:-1000}" /config /media/frigate
     fi
 fi
+
+# Not in the image, and the runtime user cannot create it under root-owned
+# /media. Must stay after the sweep, which reads an absent /media/frigate as an
+# unmounted volume rather than a swept one.
+if [[ "$(id -u)" -eq 0 && ! -d /media/frigate ]]; then
+    mkdir -p /media/frigate
+    if [[ "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+        chown "${PUID:-1000}:${PGID:-1000}" /media/frigate
+    fi
+fi
