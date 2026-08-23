@@ -184,8 +184,10 @@
         "gap": "Keyframe gap (min / avg / max):",
         "segmentLength": "Recording segment length:",
         "ok": "Keyframes every ~{{seconds}}s, good for recording and playback.",
-        "warning": "Sparse or variable keyframes (longest gap ~{{seconds}}s), likely a smart codec (H.264+/H.265+), this is not recommended.",
-        "error": "Keyframe gap (~{{seconds}}s) exceeds the recording segment length ({{segmentTime}}s). Some segments may have no keyframe, which breaks playback. Disable the smart/+ codec on the camera or shorten its keyframe interval.",
+        "warningFixed": "Keyframes are evenly spaced but sparse (every ~{{seconds}}s). Recording still works, but live playback and seeking start more slowly. Set the camera's I-frame (keyframe) interval to match its frame rate.",
+        "warningVariable": "Keyframe spacing is inconsistent ({{minSeconds}}s to {{maxSeconds}}s), which usually means a smart codec (H.264+/H.265+) is enabled. This is not recommended.",
+        "errorFixed": "Keyframes every ~{{seconds}}s is longer than the recording segment length ({{segmentTime}}s), so some segments have no keyframe and will not play back. Shorten the camera's I-frame (keyframe) interval to match its frame rate.",
+        "errorVariable": "Keyframe gaps reach ~{{seconds}}s, longer than the recording segment length ({{segmentTime}}s). Some segments will have no keyframe, which breaks playback. Disable the smart/+ codec on the camera or shorten its keyframe interval.",
         "unknown": "Couldn't determine keyframe spacing.",
         "recordDisabled": "Recording is disabled for this camera."
       }

@@ -152,12 +152,19 @@ def get_record_segment_time(config: "CameraConfig") -> int:
 
 
 def load_labels(
-    path: str | None, encoding="utf-8", prefill=91, indexed: bool | None = None
+    path: str | None, encoding="utf-8", prefill=0, indexed: bool | None = None
 ):
     """Loads labels from file (with or without index numbers).
+
+    Only the indices the file defines are returned, so the result describes
+    exactly the classes a model can name. Callers must treat a missing index
+    as an unnamed class rather than assuming a contiguous range.
+
     Args:
       path: path to label file.
       encoding: label file encoding.
+      prefill: pad indices below this with "unknown" before reading the file.
+      indexed: whether lines start with an index; auto-detected when None.
     Returns:
       Dictionary mapping indices to labels.
     """
