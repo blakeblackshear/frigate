@@ -70,10 +70,17 @@ for path in "$@"; do
         continue
     fi
 
-    # find may transiently fail mid-walk on a live volume (file deleted under
-    # it); tolerate that rather than aborting the whole sweep under errexit
-    count=$(find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) -printf '.' 2>/dev/null | wc -c || true)
-    if [[ "${count:-0}" -eq 0 ]]; then
+    # find may fail mid-walk on a live volume (file deleted under it) or on a
+    # stale mount. Tolerate it rather than aborting under errexit, but never
+    # read a failed scan as "nothing to do": that would record the sweep as
+    # complete without having looked.
+    if ! count=$(find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) -printf '.' 2>/dev/null | wc -c); then
+        swept_clean=0
+        echo "[WARN] fix-ownership: could not scan ${path}; will retry on next boot"
+        continue
+    fi
+
+    if [[ "$count" -eq 0 ]]; then
         echo "[INFO] fix-ownership: $path already owned by ${target_uid}:${target_gid}, nothing to do"
         continue
     fi
