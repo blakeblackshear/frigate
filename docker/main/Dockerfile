@@ -324,6 +324,11 @@ HEALTHCHECK --start-period=300s --start-interval=5s --interval=15s --timeout=5s 
 # Frigate deps with Node.js and NPM for devcontainer
 FROM deps AS devcontainer
 
+# /config here is the developer's bind-mounted checkout, not a data volume, so
+# the prepare ownership sweep must not run: it would chown the source tree to
+# the runtime uid and lock out any container user that isn't 1000.
+ENV FRIGATE_RUN_AS_ROOT=true
+
 # Do not start the actual Frigate service on devcontainer as it will be started by VS Code
 # But start a fake service for simulating the logs
 COPY docker/main/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
