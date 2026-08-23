@@ -18,6 +18,20 @@ fi
 
 puid="${PUID:-1000}"
 pgid="${PGID:-1000}"
+
+if ! [[ "$puid" =~ ^[0-9]+$ && "$pgid" =~ ^[0-9]+$ ]]; then
+    echo "[ERROR] PUID and PGID must be numeric, got '${puid}' and '${pgid}'" >&2
+    exit 1
+fi
+
+# Remapping to 0 would make the frigate user root, so every service would keep
+# full privilege while reporting a successful migration.
+if [[ "$puid" -eq 0 || "$pgid" -eq 0 ]]; then
+    echo "[ERROR] PUID/PGID 0 would run the services as root and defeat the privilege separation." >&2
+    echo "[ERROR] Set FRIGATE_RUN_AS_ROOT=true if you want to keep running as root." >&2
+    exit 1
+fi
+
 current_uid="$(id -u frigate)"
 current_gid="$(id -g frigate)"
 
