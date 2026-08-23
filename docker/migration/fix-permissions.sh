@@ -28,6 +28,13 @@ media_dir="$2"
 puid="${3:-1000}"
 pgid="${4:-1000}"
 
+# The ids are interpolated into the container's bash -c source below, so
+# anything but digits would be reparsed as shell rather than passed through
+if ! [[ "$puid" =~ ^[0-9]+$ && "$pgid" =~ ^[0-9]+$ ]]; then
+    echo "[ERROR] PUID and PGID must be numeric, got '${puid}' and '${pgid}'" >&2
+    exit 2
+fi
+
 echo "[INFO] Using image ${IMAGE} (override with FRIGATE_IMAGE=...)"
 # shellcheck disable=SC2086
 docker run --rm \
