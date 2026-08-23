@@ -67,8 +67,12 @@ fi
 swept_clean=1
 
 for path in "$@"; do
+    # An absent root is an incomplete sweep, not a finished one: /media/frigate
+    # is not in the image, so a boot before the volume is mounted would
+    # otherwise record success and the volume would never be swept once added.
     if [[ ! -d "$path" ]]; then
-        echo "[WARN] fix-ownership: $path does not exist, skipping"
+        swept_clean=0
+        echo "[WARN] fix-ownership: $path does not exist, skipping; will retry on next boot"
         continue
     fi
 
