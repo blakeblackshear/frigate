@@ -1,6 +1,7 @@
 import type {
   DeviceConfig,
   DeviceMapping,
+  HardwareOption,
   VolumeMapping,
 } from "../config/types";
 import { hardwareMap } from "../config";
@@ -194,11 +195,30 @@ function buildExtraHosts(device: DeviceConfig): string[] {
 }
 
 function buildSecurityOpt(device: DeviceConfig): string[] {
-  if (!device.securityOpt?.length) return [];
+  // no-new-privileges is the baseline for every setup; device-specific entries
+  // are appended so only one security_opt key is ever emitted
   return [
     "    security_opt:",
-    ...device.securityOpt.map((s) => `      - ${s}`),
+    "      - no-new-privileges:true",
+    ...(device.securityOpt ?? []).map((s) => `      - ${s}`),
   ];
+}
+
+/**
+ * Emit privileged mode only for hardware that genuinely cannot work without it.
+ * Everything else gets device mappings, which grant far less access.
+ */
+function buildPrivileged(
+  device: DeviceConfig,
+  selectedHardware: HardwareOption[]
+): string[] {
+  const requiring = [device, ...selectedHardware].filter((c) => c.privileged);
+  if (!requiring.length) return [];
+  const reasons = requiring
+    .map((c) => c.privilegedReason)
+    .filter((r): r is string => Boolean(r));
+  const comment = reasons.length ? ` # ${reasons.join("; ")}` : "";
+  return [`    privileged: true${comment}`];
 }
 
 // ---------------------------------------------------------------------------
@@ -217,11 +237,14 @@ export function generateDockerCompose(input: GeneratorInput): string {
   const hwVolumes: VolumeMapping[] = [];
   const hwEnv: Record<string, string> = {};
 
+  const selectedHw: HardwareOption[] = [];
+
   for (const hwId of input.selectedHardware) {
     const hw = hardwareMap.get(hwId);
     if (!hw) continue;
     // Skip GPU device mapping for tensorrt images (it uses deploy instead)
     if (hw.id === "gpu" && device.imageTag === "stable-tensorrt") continue;
+    selectedHw.push(hw);
     hwDevices.push(...(hw.devices ?? []));
     hwVolumes.push(...(hw.volumes ?? []));
     Object.assign(hwEnv, hw.env ?? {});
@@ -231,7 +254,7 @@ export function generateDockerCompose(input: GeneratorInput): string {
     "services:",
     "  frigate:",
     "    container_name: frigate",
-    "    privileged: true # This may not be necessary for all setups",
+    ...buildPrivileged(device, selectedHw),
     "    restart: unless-stopped",
     "    stop_grace_period: 30s # Allow enough time to shut down the various services",
     ...buildImage(device),
