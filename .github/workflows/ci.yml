@@ -59,10 +59,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Start container
         run: |
-          mkdir -p /tmp/frigate-config
+          mkdir -p /tmp/frigate-config /tmp/frigate-media
           printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config/config.yml
+          # simulate a root-era install: root-owned 0600 jwt secret pre-exists
+          docker run --rm -v /tmp/frigate-config:/config --entrypoint bash \
+            ${{ steps.setup.outputs.image-name }}-amd64 \
+            -c "python3 -c 'import secrets; open(\"/config/.jwt_secret\",\"w\").write(secrets.token_hex(64))' && chmod 600 /config/.jwt_secret && chown 0:0 /config/.jwt_secret"
           docker run -d --name frigate --shm-size 256m \
             -v /tmp/frigate-config:/config \
+            -v /tmp/frigate-media:/media/frigate \
             -p 5000:5000 -p 8971:8971 \
             ${{ steps.setup.outputs.image-name }}-amd64
       - name: Wait for API
@@ -94,13 +99,66 @@ jobs:
           docker exec frigate /usr/local/nginx/sbin/nginx -t -c /tmp/nginx/conf/nginx.conf
           docker exec frigate stat -c %a /etc/letsencrypt/live/frigate/privkey.pem | grep -qx 600
           docker exec frigate stat -c %a /dev/shm/go2rtc.yaml | grep -qx 640
+      - name: Assert services run as non-root
+        run: |
+          ps_out=$(docker exec frigate ps -eo user=,comm=)
+          echo "$ps_out"
+          assert_nonroot() {
+            # the process must exist AND no instance of it may run as root
+            echo "$ps_out" | grep -qw "$1" || { echo "$1 is not running"; exit 1; }
+            if echo "$ps_out" | grep -w "$1" | grep -q '^root'; then
+              echo "$1 is running as root"; exit 1
+            fi
+          }
+          assert_nonroot python3
+          assert_nonroot go2rtc
+          assert_nonroot nginx
+          # root-era jwt secret must have been captured by the sweep and the
+          # auth stack must be functional: wrong creds => clean 401, not 500
+          docker exec frigate stat -c %u /config/.jwt_secret | grep -qx "$(docker exec frigate id -u frigate)"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:5000/api/login \
+            -H 'content-type: application/json' -d '{"user":"admin","password":"definitely-wrong"}')
+          [ "$code" = "401" ] || { echo "login endpoint returned $code"; exit 1; }
+          # runtime user can write recordings storage
+          docker exec frigate s6-setuidgid frigate touch /media/frigate/.write-probe
+          docker exec frigate rm /media/frigate/.write-probe
+      - name: Assert escape hatch restores root
+        run: |
+          mkdir -p /tmp/frigate-config-root
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-root/config.yml
+          # pre-seed a sentinel: the assertion below is that the escape hatch
+          # DELETES it. Against a fresh dir the absence check passes vacuously
+          # and proves nothing about the rm -f in the prepare script.
+          echo "2:1000:1000" > /tmp/frigate-config-root/.permissions_version
+          docker run -d --name frigate-root --shm-size 256m \
+            -e FRIGATE_RUN_AS_ROOT=true \
+            -v /tmp/frigate-config-root:/config \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-root curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "escape hatch container never healthy"; docker logs frigate-root; exit 1; fi
+          ps_out=$(docker exec frigate-root ps -eo user=,comm=)
+          echo "$ps_out"
+          echo "$ps_out" | grep -w python3 | grep -q '^root'
+          echo "$ps_out" | grep -w go2rtc  | grep -q '^root'
+          echo "$ps_out" | grep -w nginx   | grep -q '^root'
+          # escape hatch must have DELETED the pre-seeded sentinel. written as
+          # an if because bash exempts a negated command from set -e
+          if docker exec frigate-root test -f /config/.permissions_version; then
+            echo "escape hatch did not delete the sweep sentinel"; exit 1
+          fi
+          docker rm -f frigate-root
       - name: Assert PUID/PGID remapping
         run: |
-          mkdir -p /tmp/frigate-config-puid
+          mkdir -p /tmp/frigate-config-puid /tmp/frigate-media-puid
           printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-puid/config.yml
           docker run -d --name frigate-puid --shm-size 256m \
             -e PUID=1500 -e PGID=1500 \
             -v /tmp/frigate-config-puid:/config \
+            -v /tmp/frigate-media-puid:/media/frigate \
             ${{ steps.setup.outputs.image-name }}-amd64
           up=0
           for i in $(seq 1 60); do
