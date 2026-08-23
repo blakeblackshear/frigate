@@ -1,0 +1,101 @@
+#!/bin/bash
+# Single source of truth for aligning volume ownership with the runtime user.
+#
+# Usage: fix-ownership [--dry-run] [--sentinel FILE] UID GID PATH [PATH...]
+#
+#   --dry-run    report what would change, touch nothing
+#   --sentinel   skip entirely when FILE already records "SCHEMA:UID:GID";
+#                write it after a successful run (used by the boot path so
+#                multi-TB volumes are swept once per UID/schema change, not
+#                on every boot)
+#
+# Only files whose uid OR gid differs are touched, so re-runs are cheap.
+# Top-level /config additionally grants group frigate-data TRAVERSE ONLY
+# (g+rx) so the separate go2rtc user can reach its pre-created HomeKit file
+# on hosts where /config is mounted 0700. Never g+w: directory write means
+# unlink rights over frigate.db/config.yml, and would let a compromised
+# go2rtc plant /config/go2rtc, which the go2rtc run script executes
+# preferentially, as root under the escape hatch.
+
+set -o errexit -o nounset -o pipefail
+
+# Permissions-layout epoch. Bump to force a one-time re-sweep on upgrade
+# (e.g. when the privilege-drop release must capture files created as root
+# since the previous sweep).
+schema=1
+
+dry_run=0
+sentinel=""
+
+while [[ "${1:-}" == --* ]]; do
+    case "$1" in
+        --dry-run) dry_run=1; shift ;;
+        --sentinel)
+            if [[ -z "${2:-}" ]]; then
+                echo "[ERROR] fix-ownership: --sentinel requires a file argument" >&2
+                exit 2
+            fi
+            sentinel="$2"; shift 2 ;;
+        *) echo "[ERROR] fix-ownership: unknown option $1" >&2; exit 2 ;;
+    esac
+done
+
+if [[ $# -lt 3 ]]; then
+    echo "Usage: fix-ownership [--dry-run] [--sentinel FILE] UID GID PATH..." >&2
+    exit 2
+fi
+
+target_uid="$1"
+target_gid="$2"
+shift 2
+
+if [[ "$(id -u)" -ne 0 ]]; then
+    echo "[INFO] fix-ownership: not running as root, skipping (ownership is managed by the host in --user mode)"
+    exit 0
+fi
+
+if [[ -n "$sentinel" && -f "$sentinel" && "$(cat "$sentinel")" == "${schema}:${target_uid}:${target_gid}" ]]; then
+    echo "[INFO] fix-ownership: ${target_uid}:${target_gid} (schema ${schema}) already applied, skipping"
+    exit 0
+fi
+
+for path in "$@"; do
+    if [[ ! -d "$path" ]]; then
+        echo "[WARN] fix-ownership: $path does not exist, skipping"
+        continue
+    fi
+
+    # find may transiently fail mid-walk on a live volume (file deleted under
+    # it); tolerate that rather than aborting the whole sweep under errexit
+    count=$(find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) -printf '.' 2>/dev/null | wc -c || true)
+    if [[ "${count:-0}" -eq 0 ]]; then
+        echo "[INFO] fix-ownership: $path already owned by ${target_uid}:${target_gid}, nothing to do"
+        continue
+    fi
+
+    echo "[WARN] fix-ownership: adjusting ownership of ${count} entries under ${path}; on large recordings volumes this can take a long time"
+    if [[ "$dry_run" -eq 1 ]]; then
+        echo "[INFO] fix-ownership: dry run, not changing ${path}"
+        continue
+    fi
+
+    find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
+        -exec chown -h "${target_uid}:${target_gid}" {} + || \
+        echo "[WARN] fix-ownership: some entries under ${path} could not be updated (deleted mid-sweep or chown denied); will retry on next mismatch"
+done
+
+# go2rtc (separate user) must be able to REACH its HomeKit state in /config.
+# Write access is per-file, not per-directory: go2rtc's PatchConfig rewrites
+# the first -config file via os.WriteFile (in-place truncate, no rename,
+# verified against go2rtc v1.9.14 internal/app/config.go), and the file is
+# always pre-created by setup_homekit_config before go2rtc starts, so
+# O_CREATE never needs directory write. See header comment for why g+w is
+# forbidden here.
+if [[ "$dry_run" -eq 0 && -d /config ]]; then
+    chgrp frigate-data /config 2>/dev/null || true
+    chmod g+rx /config 2>/dev/null || true
+fi
+
+if [[ "$dry_run" -eq 0 && -n "$sentinel" ]]; then
+    echo "${schema}:${target_uid}:${target_gid}" > "$sentinel"
+fi
