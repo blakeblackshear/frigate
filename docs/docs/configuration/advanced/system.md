@@ -120,7 +120,7 @@ environment_vars:
 
 ### `secrets.yaml`
 
-A `secrets.yaml` file in your config directory is an additional source of `FRIGATE_` variables, for installs that can't set container environment variables or mount Docker secrets. It's a flat map of names to values, and it is never read or written by the Frigate UI:
+A `secrets.yaml` file next to your `config.yml` is an additional source of `FRIGATE_` variables, for installs that can't set container environment variables or mount Docker secrets. It's a flat map of names to values, and it is never read or written by the Frigate UI:
 
 ```yaml
 FRIGATE_CAM_USER: viewer
@@ -128,16 +128,38 @@ FRIGATE_CAM_PASS: "p@ss w0rd"
 FRIGATE_MQTT_HOST: mqtt.internal.example
 ```
 
+For Docker this is `/config/secrets.yaml` inside the container, so it lives in whatever host directory you mounted at `/config`. For the Home Assistant App it's `/addon_configs/<addon_directory>/secrets.yaml`, in the same folder as your `config.yml`; see [the App config directory](../config.md#accessing-app-config-dir) for the directory name for your variant.
+
 Names must start with `FRIGATE_`, and nesting is not supported. `secrets.yaml` feeds `{FRIGATE_VARIABLE_NAME}` substitution, so the handful of variables Frigate reads straight from the process environment, such as `FRIGATE_JWT_SECRET`, still need a container environment variable or a Docker secret.
 
 ### Substitution sources and precedence
 
-The same `{FRIGATE_VARIABLE_NAME}` placeholder resolves from four sources, listed strongest first. When a name is defined in more than one, the highest wins and a warning is logged:
+The same `{FRIGATE_VARIABLE_NAME}` placeholder resolves from four sources. When a name is defined in more than one, the higher one wins and a warning at startup names which source was used.
 
-1. Docker secrets or the directory named by `CREDENTIALS_DIRECTORY` (defaults to `/run/secrets`)
-2. Container environment variables
-3. `secrets.yaml`
-4. The `environment_vars` block above
+| Priority    | Source                | Where it's set                                                             | Who can use it                 |
+| ----------- | --------------------- | -------------------------------------------------------------------------- | ------------------------------ |
+| 1 (highest) | Docker secrets        | Files in `/run/secrets`, or the directory named by `CREDENTIALS_DIRECTORY` | Docker, systemd                |
+| 2           | Container environment | `docker run -e`, the `environment:` section of `docker-compose.yml`        | Docker                         |
+| 3           | `secrets.yaml`        | Next to `config.yml`, see above                                            | Everyone, including the HA App |
+| 4 (lowest)  | `environment_vars`    | The block in `config.yml` described above                                  | Everyone, including the HA App |
+
+For example, with this `secrets.yaml`:
+
+```yaml
+FRIGATE_MQTT_PASSWORD: from_secrets
+```
+
+and this `config.yml`:
+
+```yaml
+environment_vars:
+  FRIGATE_MQTT_PASSWORD: from_config
+
+mqtt:
+  password: "{FRIGATE_MQTT_PASSWORD}"
+```
+
+the password resolves to `from_secrets`, and the log shows `FRIGATE_MQTT_PASSWORD is defined in more than one place, using the value from secrets.yaml`. Add `-e FRIGATE_MQTT_PASSWORD=from_env` to the container and it resolves to `from_env` instead.
 
 Referencing a name that no source defines is a config validation error naming the field.
 
