@@ -144,3 +144,16 @@ rm -f /dev/shm/.frigate-is-stopping
 
 migrate_addon_config_dir
 migrate_db_from_media_to_config
+
+# Align volume ownership with the runtime user (one sweep per PUID/schema
+# change, guarded by the sentinel; see fix-ownership). The escape hatch
+# deletes the sentinel instead: ownership is never mutated while it is on,
+# so the next non-root boot must re-sweep whatever root created meanwhile.
+if [[ "$(id -u)" -eq 0 ]]; then
+    if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
+        rm -f /config/.permissions_version
+    else
+        /usr/local/bin/fix-ownership --sentinel /config/.permissions_version \
+            "${PUID:-1000}" "${PGID:-1000}" /config /media/frigate
+    fi
+fi
