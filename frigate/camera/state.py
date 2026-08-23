@@ -396,7 +396,6 @@ class CameraState:
                 "attributes": new_obj.obj_data["attributes"],
                 "current_estimated_speed": 0,
                 "velocity_angle": 0,
-                "path_data": [],
                 "recognized_license_plate": None,
                 "recognized_license_plate_score": None,
             }

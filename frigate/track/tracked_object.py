@@ -164,7 +164,6 @@ class TrackedObject:
                         "attributes": obj_data["attributes"],
                         "current_estimated_speed": self.current_estimated_speed,
                         "velocity_angle": self.velocity_angle,
-                        "path_data": self.path_data.copy(),
                         "recognized_license_plate": obj_data.get(
                             "recognized_license_plate"
                         ),
