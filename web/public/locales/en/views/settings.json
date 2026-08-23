@@ -1519,8 +1519,13 @@
       "keyPatternError": "Use only letters, numbers, hyphens, and underscores (no spaces)"
     },
     "knownPlates": {
+      "assignedTo": "Assigned to {{name}}",
+      "detected": "Detected plates",
       "namePlaceholder": "e.g., Wife's Car",
-      "platePlaceholder": "Plate number or regex"
+      "noneDetected": "No plates detected yet",
+      "platePlaceholder": "Plate number or regex",
+      "search": "Search or enter a plate",
+      "useCustom": "Use \"{{value}}\""
     },
     "liveStreams": {
       "streamNameLabel": "Stream name",
