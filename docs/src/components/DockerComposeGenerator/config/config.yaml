@@ -219,6 +219,8 @@ hardware:
       - host: "/run/mxa_manager"
         container: "/run/mxa_manager"
         comment: "MemryX manager"
+    privileged: true
+    privilegedReason: "required by MemryX to reach the max-manager"
 
   - id: "axera"
     label: "AXERA Accelerator"

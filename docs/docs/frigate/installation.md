@@ -514,7 +514,7 @@ Generate a Frigate Docker Compose configuration based on your hardware and requi
 services:
   frigate:
     container_name: frigate
-    privileged: true # this may not be necessary for all setups
+    # privileged: true # ONLY enable if your hardware requires it (see hardware-specific docs); prefer the device mappings below
     restart: unless-stopped
     stop_grace_period: 30s # allow enough time to shut down the various services
     image: ghcr.io/blakeblackshear/frigate:stable
@@ -545,6 +545,33 @@ services:
 ```
   </TabItem>
 </Tabs>
+
+### Recommended security options
+
+Frigate does not need elevated container privileges for most setups. The
+following hardens the container; add the `devices`/`group_add` entries your
+hardware requires (see the hardware acceleration docs):
+
+```yaml
+services:
+  frigate:
+    ...
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+```
+
+:::note
+
+`telemetry.stats.network_bandwidth` uses nethogs, which requires root with
+NET_ADMIN/NET_RAW capabilities. If you enable that stat, omit `cap_drop: [ALL]`
+or add `cap_add: [NET_ADMIN, NET_RAW]`.
+
+Platforms that genuinely require `privileged: true` (MemryX, some QNAP setups)
+are called out in their own sections and are unaffected by this guidance.
+
+:::
 
 **Docker CLI**
 

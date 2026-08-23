@@ -189,3 +189,6 @@ if config.get("birdseye", {}).get("restream", False):
 # Write go2rtc_config to /dev/shm/go2rtc.yaml
 with open("/dev/shm/go2rtc.yaml", "w") as f:
     yaml.dump(go2rtc_config, f)
+
+# config contains camera credentials; do not leave it world-readable
+os.chmod("/dev/shm/go2rtc.yaml", 0o640)
