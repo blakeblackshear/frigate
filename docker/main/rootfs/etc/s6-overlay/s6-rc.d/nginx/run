@@ -100,7 +100,7 @@ echo "$nginx_settings" | \
 
 if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
     chown -R frigate:frigate /tmp/nginx
-    # only the self-signed key we just generated; user-mounted certs may be :ro
+    # self-signed certs are root-generated; tolerant because mounted certs may be :ro
     if [ -f "$letsencrypt_path/privkey.pem" ]; then
         chown frigate:frigate "$letsencrypt_path/privkey.pem" "$letsencrypt_path/fullchain.pem" 2>/dev/null || true
     fi
