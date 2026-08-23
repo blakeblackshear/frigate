@@ -1,0 +1,47 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Remap the frigate user to PUID/PGID and register EXTRA_GROUPS.
+# No-op when: started with --user (euid != 0), FRIGATE_RUN_AS_ROOT=true,
+# or PUID/PGID already match.
+
+set -o errexit -o nounset -o pipefail
+
+if [[ "$(id -u)" -ne 0 ]]; then
+    # Started with docker --user; the host owns UID mapping entirely.
+    exit 0
+fi
+
+if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
+    echo "[INFO] FRIGATE_RUN_AS_ROOT=true: skipping user remapping"
+    exit 0
+fi
+
+puid="${PUID:-1000}"
+pgid="${PGID:-1000}"
+current_uid="$(id -u frigate)"
+current_gid="$(id -g frigate)"
+
+if [[ "$puid" != "$current_uid" || "$pgid" != "$current_gid" ]]; then
+    if [[ ! -w /etc/passwd ]]; then
+        echo "[ERROR] PUID/PGID remapping needs a writable /etc and is not compatible with read_only: true." >&2
+        echo "[ERROR] Either remove read_only and keep PUID, or drop PUID/PGID and use docker's user: ${puid}:${pgid} instead." >&2
+        echo "[ERROR] See https://docs.frigate.video/configuration/non_root for the compatibility matrix." >&2
+        exit 1
+    fi
+    echo "[INFO] Remapping frigate user to ${puid}:${pgid}"
+    groupmod -o -g "$pgid" frigate
+    usermod -o -u "$puid" frigate
+fi
+
+# EXTRA_GROUPS: numeric host GIDs granting device access (e.g. host render/video)
+if [[ -n "${EXTRA_GROUPS:-}" ]]; then
+    for gid in ${EXTRA_GROUPS//,/ }; do
+        if ! getent group "$gid" >/dev/null; then
+            groupadd -o -g "$gid" "frigate-extra-${gid}"
+        fi
+        group_name="$(getent group "$gid" | cut -d: -f1)"
+        usermod -aG "$group_name" frigate
+        usermod -aG "$group_name" go2rtc
+        echo "[INFO] Added frigate and go2rtc to supplementary group ${group_name} (gid ${gid})"
+    done
+fi
