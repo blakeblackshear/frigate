@@ -573,6 +573,11 @@ are called out in their own sections and are unaffected by this guidance.
 
 :::
 
+Frigate's services run as an unprivileged user inside the container. See
+[Running as a non-root user](../configuration/non_root.md) for the run modes,
+the one time volume ownership migration, and what each accelerator needs on the
+host.
+
 **Docker CLI**
 
 If you can't use Docker Compose, you can run the container with something similar to this:

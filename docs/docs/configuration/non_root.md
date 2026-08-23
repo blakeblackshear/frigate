@@ -1,0 +1,78 @@
+---
+id: non_root
+title: Running as a non-root user
+---
+
+Frigate's services run as an unprivileged user inside the container. The main Frigate process and nginx run as `frigate`, and go2rtc runs as its own more restricted `go2rtc` user. Only the s6 init system and the certsync helper stay root.
+
+By default the runtime user is uid/gid `1000:1000`. You can change it with `PUID`/`PGID`, or bypass Frigate's user handling entirely with Docker's own `user:`.
+
+## Run modes
+
+| Mode                             | How to enable                          | Ownership of `/config` and `/media/frigate`                | `read_only: true` |
+| -------------------------------- | -------------------------------------- | ---------------------------------------------------------- | ----------------- |
+| Default                          | nothing, this is the default           | Aligned to `1000:1000` on first boot                       | Not supported     |
+| `PUID`/`PGID`                    | `PUID=1001`, `PGID=1001`               | Aligned to the values you set, on first boot               | Not supported     |
+| Docker-native user               | `user: "1001:1001"`                    | You own it, Frigate never changes ownership                | Not supported     |
+| Root (escape hatch)              | `FRIGATE_RUN_AS_ROOT=true`             | Never touched                                              | Not supported     |
+
+`PUID`/`PGID` remapping runs `usermod` at startup, which writes to `/etc/passwd`, so it can't work with a read-only root filesystem. That combination fails fast at startup with a message pointing here rather than failing obscurely later.
+
+`FRIGATE_RUN_AS_ROOT` is matched against the exact lowercase string `true`. `True`, `TRUE`, and `1` are all ignored.
+
+## Migrating an existing install
+
+Volumes created by earlier versions of Frigate are owned by root. Ownership has to be aligned with the runtime user once.
+
+This happens automatically on the first boot after upgrading, but on large recordings volumes it's much better to do it from the host beforehand. The boot sweep runs before any service starts, so a multi-terabyte `/media/frigate` can hold the container in startup long enough for Docker's healthcheck to mark it unhealthy, and orchestrators that react to health will restart it mid-sweep. If you'd rather not run the script, raise the healthcheck start period instead (`--start-period=1800s`, or `start_period: 1800s` under `healthcheck:` in compose).
+
+Grab `fix-permissions.sh` from `docker/migration/` in the Frigate repo and dry run it first:
+
+```bash
+./fix-permissions.sh --dry-run /path/to/your/config /path/to/your/storage
+```
+
+That reports how many entries would change and touches nothing. When it looks right, run it without `--dry-run`:
+
+```bash
+./fix-permissions.sh /path/to/your/config /path/to/your/storage
+```
+
+Pass `PUID` and `PGID` as the third and fourth arguments if you're not using the default `1000:1000`. The script wraps the same `fix-ownership` helper the container uses, so it's the same logic either way. Override the image it pulls with `FRIGATE_IMAGE=...` if you're not on `stable`.
+
+Once the volumes are aligned, start Frigate normally. A sentinel at `/config/.permissions_version` records what was done, so later boots skip the sweep entirely unless you change `PUID`/`PGID`.
+
+## Rolling back
+
+Set `FRIGATE_RUN_AS_ROOT=true` and restart. Everything runs as root again, exactly as it did before.
+
+The escape hatch never changes ownership, and it deletes the sweep sentinel on startup, so switching back to non-root later re-sweeps whatever root created in the meantime. Toggling in either direction is safe.
+
+## Hardware device access
+
+Supplementary groups can't open a device node that's `root:root` with mode `0600`. If your accelerator's node isn't group readable on the host, no amount of container configuration will fix it, so the fix belongs on the host.
+
+Use `group_add` in compose (`--group-add` with `docker run`) to give the runtime user a host GID. `EXTRA_GROUPS` does the same thing and also covers the `go2rtc` user, which needs render and video access to run hardware accelerated restreams.
+
+| Hardware                  | Device(s)                                                   | Non-root requirement                                                                                                                                                          |
+| ------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Intel/AMD GPU (VAAPI/QSV) | `/dev/dri/renderD128`                                       | `group_add: ["<host render GID>"]` from `getent group render`, or `EXTRA_GROUPS`                                                                                               |
+| Intel/AMD NPU             | `/dev/accel`                                                | Host udev rule granting a group, then `group_add` that GID                                                                                                                    |
+| Coral USB                 | `/dev/bus/usb`                                              | Host udev rule granting plugdev, for example `SUBSYSTEMS=="usb", ATTRS{idVendor}=="1a6e", GROUP="plugdev"` and the same for `18d1` post-init, then `group_add` the plugdev GID |
+| Coral PCIe                | `/dev/apex_0`                                               | Host udev rule `SUBSYSTEM=="apex", GROUP="apex", MODE="0660"`, then `group_add` that GID                                                                                       |
+| Hailo                     | `/dev/hailo0`                                               | Host udev rule granting a group, then `group_add` that GID                                                                                                                    |
+| NVIDIA                    | nvidia runtime                                              | Works non-root with the nvidia-container-toolkit defaults                                                                                                                     |
+| AMD ROCm                  | `/dev/kfd`, `/dev/dri`                                      | `group_add` the host `video` and `render` GIDs                                                                                                                                |
+| Raspberry Pi              | `/dev/video11`                                              | `group_add` the host `video` GID                                                                                                                                              |
+| Rockchip                  | `/dev/dri`, `/dev/dma_heap`, `/dev/rga`, `/dev/mpp_service` | These are commonly `root:root` `0600`, so host udev rules are required. If you can't grant access to all four, use `FRIGATE_RUN_AS_ROOT=true`                                  |
+| Axera (AXCL)              | `/dev/ax_*` per the AXCL driver docs                        | Unverified. Node ownership is driver dependent, check it on your hardware before assuming this works                                                                           |
+| Synaptics SL1680          | per the Synaptics docs                                      | Unverified                                                                                                                                                                    |
+| MemryX                    | per the MemryX docs                                         | Still requires `privileged: true`, which means root. Out of scope for non-root operation                                                                                       |
+
+## Known limitations
+
+`telemetry.stats.network_bandwidth` uses nethogs, which needs `CAP_NET_ADMIN` and `CAP_NET_RAW` and therefore root. The stat is disabled automatically when Frigate isn't running as root, with one warning in the log. Use `FRIGATE_RUN_AS_ROOT=true` if you need it.
+
+go2rtc's ffmpeg processes no longer appear in Intel GPU stats. Frigate reads per-process GPU usage from `/proc/<pid>/fdinfo`, which the kernel won't let one user read for another user's processes, so anything go2rtc spawns is invisible to it. Overall GPU utilization is unaffected.
+
+If you mount your own TLS certificate at `/etc/letsencrypt/live/frigate`, the private key has to be readable by the runtime user. Frigate won't change ownership of a certificate you supplied, since the mount may be read-only.
