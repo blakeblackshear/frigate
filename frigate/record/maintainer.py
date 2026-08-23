@@ -300,10 +300,10 @@ class RecordingMaintainer(threading.Thread):
                 RecordingsDataTypeEnum.latest.value,
             )
         # publish None for streams with no cache files (but only if we know the camera exists)
-        for camera_name, camera_cfg in self.config.cameras.items():
+        for camera_name, camera_config in self.config.cameras.items():
             stream_types = [STREAM_TYPE_MAIN]
 
-            if camera_cfg.record.sub.enabled:
+            if camera_config.record.sub.enabled:
                 stream_types.append(STREAM_TYPE_SUB)
 
             for stream_type in stream_types:
