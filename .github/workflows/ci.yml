@@ -94,6 +94,34 @@ jobs:
           docker exec frigate /usr/local/nginx/sbin/nginx -t
           docker exec frigate stat -c %a /etc/letsencrypt/live/frigate/privkey.pem | grep -qx 600
           docker exec frigate stat -c %a /dev/shm/go2rtc.yaml | grep -qx 640
+      - name: Assert PUID/PGID remapping
+        run: |
+          mkdir -p /tmp/frigate-config-puid
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-puid/config.yml
+          docker run -d --name frigate-puid --shm-size 256m \
+            -e PUID=1500 -e PGID=1500 \
+            -v /tmp/frigate-config-puid:/config \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-puid curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "PUID container never became healthy"; docker logs frigate-puid; exit 1; fi
+          docker exec frigate-puid id -u frigate | grep -qx 1500
+          docker exec frigate-puid id -g frigate | grep -qx 1500
+          docker exec frigate-puid cat /config/.permissions_version | grep -qx "1:1500:1500"
+          # second boot must skip the sweep (sentinel hit). Poll rather than
+          # sleep: the string can only come from the second boot (the first
+          # had no sentinel), so grepping the full log is unambiguous.
+          docker restart frigate-puid
+          ok=0
+          for i in $(seq 1 30); do
+            docker logs frigate-puid 2>&1 | grep -q "already applied" && ok=1 && break
+            sleep 2
+          done
+          if [ "$ok" -ne 1 ]; then echo "sentinel skip never logged"; docker logs frigate-puid; exit 1; fi
+          docker rm -f frigate-puid
       - name: Teardown
         if: always()
         run: docker rm -f frigate || true
