@@ -41,6 +41,8 @@ from frigate.util.process import FrigateProcess
 
 logger = logging.getLogger(__name__)
 
+RECORD_GRACE_SECONDS = 90
+
 
 def capture_frames(
     ffmpeg_process: sp.Popen[Any],
@@ -161,6 +163,7 @@ class CameraWatchdog(threading.Thread):
         self.latest_invalid_segment_time: dict[str, float] = defaultdict(float)
         self.latest_cache_segment_time: dict[str, float] = defaultdict(float)
         self.record_enable_time: datetime | None = None
+        self.stream_grace_until: dict[str, datetime] = {}
 
         # `valid` segments are published with the segment's start time, so the
         # gap between consecutive publishes can reach 2 * segment_time. Pad the
@@ -212,14 +215,23 @@ class CameraWatchdog(threading.Thread):
         self.latest_valid_segment_time.clear()
         self.latest_invalid_segment_time.clear()
         self.latest_cache_segment_time.clear()
+        self.stream_grace_until.clear()
+
+    def _grant_restart_grace(self, stream_types: list[str], now_utc: datetime) -> None:
+        for stream_type in stream_types:
+            self.stream_grace_until[stream_type] = now_utc + timedelta(
+                seconds=RECORD_GRACE_SECONDS
+            )
 
     def _stream_staleness(self, stream_type: str, now_utc: datetime) -> str | None:
         """Return why the stream's segments are stale, or None if they're healthy."""
-        # Grace period: 90 seconds allows time for ffmpeg to start and create
-        # the first segment
-        in_grace_period = self.record_enable_time is not None and (
-            now_utc - self.record_enable_time
-        ) < timedelta(seconds=90)
+        # ffmpeg needs time to create a first segment after recording is
+        # enabled and after a restart, per stream
+        in_grace_period = (
+            self.record_enable_time is not None
+            and (now_utc - self.record_enable_time)
+            < timedelta(seconds=RECORD_GRACE_SECONDS)
+        ) or now_utc < self.stream_grace_until.get(stream_type, now_utc)
 
         if in_grace_period:
             return None
@@ -489,7 +501,7 @@ class CameraWatchdog(threading.Thread):
                             stale_stream = stream_type
                             break
 
-                    if stale_stream is not None:
+                    if stale_stream is not None and can_restart:
                         self.logger.error(
                             f"{stale_reason} for {self.config.name} ({stale_stream}) in the last {self.record_stale_threshold[stale_stream]}s. Restarting the ffmpeg record process..."
                         )
@@ -505,8 +517,11 @@ class CameraWatchdog(threading.Thread):
                                 f"{self.config.name}/status/{role.value}", "offline"
                             )
 
+                        self._grant_restart_grace(recorded_streams, now_utc)
+                        last_restart_time = now
+
                         continue
-                    else:
+                    elif stale_stream is None:
                         for stream_type in recorded_streams:
                             self._send_record_status(stream_type, "online", now)
 
@@ -545,6 +560,7 @@ class CameraWatchdog(threading.Thread):
                     )
                     self._send_record_status(STREAM_TYPE_SUB, "offline", now)
                     self.reset_capture_thread()
+                    self._grant_restart_grace([STREAM_TYPE_SUB], now_utc)
                     last_restart_time = now
 
             # Prune expired reconnect timestamps

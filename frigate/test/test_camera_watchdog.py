@@ -130,6 +130,41 @@ class TestCameraWatchdogStreamHealth(unittest.TestCase):
         disabled = self._build_watchdog(sub_enabled=False)
         assert disabled._recorded_streams(["detect", "record_sub"]) == []
 
+    def test_restart_grace_suppresses_repeat_staleness(self):
+        watchdog = self._build_watchdog()
+        now = datetime.now().astimezone(UTC)
+        stale = (now - timedelta(hours=1)).timestamp()
+
+        watchdog.latest_cache_segment_time[STREAM_TYPE_MAIN] = stale
+        watchdog.latest_valid_segment_time[STREAM_TYPE_MAIN] = stale
+        assert watchdog._stream_staleness(STREAM_TYPE_MAIN, now) is not None
+
+        watchdog._grant_restart_grace([STREAM_TYPE_MAIN], now)
+
+        assert watchdog._stream_staleness(STREAM_TYPE_MAIN, now) is None
+        assert (
+            watchdog._stream_staleness(STREAM_TYPE_MAIN, now + timedelta(seconds=89))
+            is None
+        )
+        assert (
+            watchdog._stream_staleness(STREAM_TYPE_MAIN, now + timedelta(seconds=91))
+            is not None
+        )
+
+    def test_restart_grace_is_per_stream(self):
+        watchdog = self._build_watchdog()
+        now = datetime.now().astimezone(UTC)
+        stale = (now - timedelta(hours=1)).timestamp()
+
+        for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
+            watchdog.latest_cache_segment_time[stream_type] = stale
+            watchdog.latest_valid_segment_time[stream_type] = stale
+
+        watchdog._grant_restart_grace([STREAM_TYPE_MAIN], now)
+
+        assert watchdog._stream_staleness(STREAM_TYPE_MAIN, now) is None
+        assert watchdog._stream_staleness(STREAM_TYPE_SUB, now) is not None
+
     def test_stale_threshold_follows_each_stream_segment_time(self):
         watchdog = self._build_watchdog(
             output_args={
