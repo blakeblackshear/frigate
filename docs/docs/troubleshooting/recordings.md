@@ -246,7 +246,7 @@ Read the rest of the Frigate and/or go2rtc log around the **first** occurrence. 
 
 When a camera stops producing usable recordings for two minutes, Frigate restarts that camera's record process to try to recover. The wording tells you how far the recordings got:
 
-- **`No new recording segments were created`**: nothing arrived at all, so ffmpeg cannot read the record stream. The camera is unreachable or refusing the connection, or the stream URL, path, or credentials are wrong. See [The record stream isn't connecting](#the-record-stream-isnt-connecting).
+- **`No new recording segments were created`**: no new segment file showed up in the cache at all, so ffmpeg isn't getting video out of the record stream. The camera is unreachable or refusing the connection, the stream URL, path, or credentials are wrong, or the camera accepted the connection and then sent nothing. See [The record stream isn't connecting](#the-record-stream-isnt-connecting).
 - **`No new valid recording segments were created`** and **`No valid segments created since last invalid segment`**: recordings are arriving, but they keep failing validation, so the camera is sending video that cannot be saved. See [Invalid or missing video stream in segment](#invalid-or-missing-video-stream-in-segment) above.
 
 The restart is Frigate recovering from a problem, not causing one. One of these after a camera reboot or a brief network drop is normal. Seeing them repeat every couple of minutes means the camera or the network is still failing, and the restarts can extend the damage, because each one cuts off the segment that was being written. Work from the earliest failure in that camera's log rather than from the restarts.

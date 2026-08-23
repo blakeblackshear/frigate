@@ -68,7 +68,7 @@ An FFmpeg message meaning it probed the stream but never saw enough decodable vi
 
 <FaqItem id="no-new-recording-segments" question="No new recording segments were created (or: No new valid recording segments were created / No valid segments created since last invalid segment) for <camera> in the last 120s">
 
-Frigate's record watchdog is restarting the record FFmpeg process because the camera stopped producing usable recordings. The wording distinguishes the cases: `No new recording segments` means nothing reached the cache, so ffmpeg cannot read the record stream at all; the two `valid` variants mean recordings are arriving but keep failing validation. Either way the fault is on the camera or network side, and the restart is Frigate trying to recover.
+Frigate's record watchdog is restarting the record FFmpeg process because the camera stopped producing usable recordings. The wording distinguishes the cases: `No new recording segments` means no new segment file reached the cache, so ffmpeg isn't getting video out of the record stream; the two `valid` variants mean recordings are arriving but keep failing validation. Either way the fault is on the camera or network side, and the restart is Frigate trying to recover.
 
 See [Recordings: no new recording segments were created](/troubleshooting/recordings#no-new-recording-segments-were-created).
 
