@@ -153,14 +153,21 @@ if [[ "$(id -u)" -eq 0 ]]; then
     if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
         rm -f /config/.permissions_version
     else
-        /usr/local/bin/fix-ownership --sentinel /config/.permissions_version \
+        # Only record the sentinel when something is mounted under /media: a
+        # sweep blessed against the container-local dir created below would let
+        # a volume attached later skip the sweep forever
+        sentinel_args=(--sentinel /config/.permissions_version)
+        if ! awk '$2 == "/media" || $2 ~ /^\/media\//' /proc/mounts | grep -q .; then
+            sentinel_args=()
+        fi
+        /usr/local/bin/fix-ownership "${sentinel_args[@]}" \
             "${PUID:-1000}" "${PGID:-1000}" /config /media/frigate
     fi
 fi
 
 # Not in the image, and the runtime user cannot create it under root-owned
 # /media. Must stay after the sweep, which reads an absent /media/frigate as an
-# unmounted volume rather than a swept one.
+# unmounted volume rather than a swept one
 if [[ "$(id -u)" -eq 0 && ! -d /media/frigate ]]; then
     mkdir -p /media/frigate
     if [[ "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
