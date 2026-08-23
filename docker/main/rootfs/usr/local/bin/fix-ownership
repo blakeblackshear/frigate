@@ -22,7 +22,7 @@ set -o errexit -o nounset -o pipefail
 # Permissions-layout epoch. Bump to force a one-time re-sweep on upgrade
 # (e.g. when the privilege-drop release must capture files created as root
 # since the previous sweep).
-schema=1
+schema=2
 
 dry_run=0
 sentinel=""

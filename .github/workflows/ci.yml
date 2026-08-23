@@ -110,7 +110,7 @@ jobs:
           if [ "$up" -ne 1 ]; then echo "PUID container never became healthy"; docker logs frigate-puid; exit 1; fi
           docker exec frigate-puid id -u frigate | grep -qx 1500
           docker exec frigate-puid id -g frigate | grep -qx 1500
-          docker exec frigate-puid cat /config/.permissions_version | grep -qx "1:1500:1500"
+          docker exec frigate-puid cat /config/.permissions_version | grep -qx "2:1500:1500"
           # second boot must skip the sweep (sentinel hit). Poll rather than
           # sleep: the string can only come from the second boot (the first
           # had no sentinel), so grepping the full log is unambiguous.
