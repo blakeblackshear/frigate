@@ -187,8 +187,23 @@ def get_physical_interfaces(interfaces) -> list:
     return physical_interfaces
 
 
+_bandwidth_warning_logged = False
+
+
 def get_bandwidth_stats(config) -> dict[str, dict]:
     """Get bandwidth usages for each ffmpeg process id"""
+    global _bandwidth_warning_logged
+
+    if os.geteuid() != 0:
+        if not _bandwidth_warning_logged:
+            logger.warning(
+                "Network bandwidth stats require root (nethogs needs CAP_NET_ADMIN/CAP_NET_RAW) "
+                "and are disabled; set FRIGATE_RUN_AS_ROOT=true or disable "
+                "telemetry.stats.network_bandwidth to silence this warning"
+            )
+            _bandwidth_warning_logged = True
+        return {}
+
     usages = {}
     top_command = ["nethogs", "-t", "-v0", "-c5", "-d1"] + get_physical_interfaces(
         config.telemetry.network_interfaces
