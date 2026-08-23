@@ -54,7 +54,9 @@ if [[ "$(id -u)" -ne 0 ]]; then
     exit 0
 fi
 
-if [[ -n "$sentinel" && -f "$sentinel" && "$(cat "$sentinel")" == "${schema}:${target_uid}:${target_gid}" ]]; then
+# A dry run always inspects: the sentinel records what a past sweep did, not
+# what the volume looks like now, and reporting from it would hide later drift.
+if [[ "$dry_run" -eq 0 && -n "$sentinel" && -f "$sentinel" && "$(cat "$sentinel")" == "${schema}:${target_uid}:${target_gid}" ]]; then
     echo "[INFO] fix-ownership: ${target_uid}:${target_gid} (schema ${schema}) already applied, skipping"
     exit 0
 fi
@@ -85,6 +87,13 @@ for path in "$@"; do
         continue
     fi
 
+    # find does not descend symlinks and chown -h retargets the link itself, so
+    # anything behind a symlinked directory is outside this sweep. Following
+    # them is not an option: a link could walk the chown out of the volume.
+    if [[ -n "$(find "$path" -type l -xtype d -print -quit 2>/dev/null)" ]]; then
+        echo "[WARN] fix-ownership: ${path} contains symlinked directories; ownership behind them is not managed and must be aligned by hand"
+    fi
+
     echo "[WARN] fix-ownership: adjusting ownership of ${count} entries under ${path}; on large recordings volumes this can take a long time"
     if [[ "$dry_run" -eq 1 ]]; then
         echo "[INFO] fix-ownership: dry run, not changing ${path}"
@@ -111,5 +120,6 @@ if [[ "$dry_run" -eq 0 && -d /config ]]; then
 fi
 
 if [[ "$dry_run" -eq 0 && -n "$sentinel" && "$swept_clean" -eq 1 ]]; then
-    echo "${schema}:${target_uid}:${target_gid}" > "$sentinel"
+    echo "${schema}:${target_uid}:${target_gid}" > "$sentinel" || \
+        echo "[WARN] fix-ownership: could not write ${sentinel}; the sweep will run again on next boot"
 fi
