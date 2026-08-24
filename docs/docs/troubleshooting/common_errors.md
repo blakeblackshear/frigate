@@ -66,17 +66,19 @@ An FFmpeg message meaning it probed the stream but never saw enough decodable vi
 
 ## Recording
 
-<FaqItem id="no-new-recording-segments" question="No new recording segments were created for <camera> in the last 120s">
+<FaqItem id="no-new-recording-segments" question="No new recording segments were created (or: No new valid recording segments were created / No valid segments created since last invalid segment) for <camera> in the last 120s">
 
-Frigate's record watchdog is restarting the record FFmpeg process because no valid segment has reached the cache. This means the record stream is not connecting or the segments are being rejected (see the audio-codec entry below).
+Frigate's record watchdog is restarting the record FFmpeg process because the camera stopped producing usable recordings. The wording distinguishes the cases: `No new recording segments` means no new segment file reached the cache, so ffmpeg isn't getting video out of the record stream; the two `valid` variants mean recordings are arriving but keep failing validation. Either way the fault is on the camera or network side, and the restart is Frigate trying to recover.
 
-See [Recordings: the record stream isn't connecting](/troubleshooting/recordings#the-record-stream-isnt-connecting).
+See [Recordings: no new recording segments were created](/troubleshooting/recordings#no-new-recording-segments-were-created).
 
 </FaqItem>
 
-<FaqItem id="invalid-or-missing-video-stream-in-segment" question="Invalid or missing video stream in segment. Discarding.">
+<FaqItem id="invalid-or-missing-video-stream-in-segment" question="Invalid or missing video stream in segment. Discarding. / Discarding a corrupt recording segment / Failed to probe corrupt segment / Invalid recording segment detected">
 
-A cached recording segment failed validation (no readable video stream) and was deleted. The most common cause is a segment that was truncated because the record FFmpeg process was killed mid-write, so this often appears alongside, and as a consequence of, the record-stream restarts above. A segment containing only audio triggers it too.
+A cached recording segment failed validation and was deleted, either because it had no readable video stream or because its length was impossible. This nearly always means the camera stopped sending usable video partway through the segment: a camera that rebooted, dropped the connection, or ran out of simultaneous connections, or an unreliable link such as WiFi or a failing switch port. Broken camera timestamps (a "Smart Codec" / H.264+ mode) cause the corrupt-segment variants. The same stream failure trips the record watchdog, so the restarts above usually appear alongside these messages.
+
+See [Recordings: invalid or missing video stream in segment](/troubleshooting/recordings#invalid-or-missing-video-stream-in-segment).
 
 </FaqItem>
 

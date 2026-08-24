@@ -9,7 +9,7 @@ import NavPath from "@site/src/components/NavPath";
 
 Recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM-DD/HH/<camera_name>/MM.SS.mp4` in **UTC time**. These recordings are written directly from your camera stream without re-encoding. Each camera supports a configurable retention policy. Frigate chooses the largest matching retention value between the recording retention and the tracked object retention when determining if a recording should be removed.
 
-New recording segments are written from the camera stream to cache, they are only moved to disk if they match the setup recording retention policy.
+New recording segments are written from the camera stream to cache, they are only moved to disk if they pass a validation check and match the setup recording retention policy.
 
 :::tip
 
