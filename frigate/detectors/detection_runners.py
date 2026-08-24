@@ -314,6 +314,12 @@ class OpenVINOModelRunner(BaseModelRunner):
         if device in ["GPU", "AUTO", "NPU"]:
             self.ov_core.set_property(device, {"PERFORMANCE_HINT": "LATENCY"})
 
+        if device in ["GPU", "AUTO"]:
+            try:
+                self.ov_core.set_property("GPU", {"GPU_QUEUE_THROTTLE": "LOW"})
+            except Exception as e:
+                logger.debug(f"GPU_QUEUE_THROTTLE not supported: {e}")
+
         if device == "NPU" and OpenVINOModelRunner.is_detection_model(model_type):
             try:
                 self.ov_core.set_property(device, {"NPU_TURBO": "YES"})
