@@ -326,6 +326,11 @@ class CameraWatchdog(threading.Thread):
         self.logger.info("Restarting ffmpeg...")
         self.start_ffmpeg_detect()
 
+        # this process produces the sub stream's segments too, so it gets the
+        # same startup grace however the reset was triggered
+        if self.detect_process_records_sub:
+            self._grant_restart_grace([STREAM_TYPE_SUB], datetime.now().astimezone(UTC))
+
     def run(self) -> None:
         if self._update_enabled_state():
             self.start_all_ffmpeg()
@@ -560,7 +565,6 @@ class CameraWatchdog(threading.Thread):
                     )
                     self._send_record_status(STREAM_TYPE_SUB, "offline", now)
                     self.reset_capture_thread()
-                    self._grant_restart_grace([STREAM_TYPE_SUB], now_utc)
                     last_restart_time = now
 
             # Prune expired reconnect timestamps

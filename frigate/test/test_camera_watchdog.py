@@ -165,6 +165,49 @@ class TestCameraWatchdogStreamHealth(unittest.TestCase):
         assert watchdog._stream_staleness(STREAM_TYPE_MAIN, now) is None
         assert watchdog._stream_staleness(STREAM_TYPE_SUB, now) is not None
 
+    def test_detect_reset_grants_the_shared_sub_stream_grace(self):
+        watchdog = self._build_watchdog()
+        watchdog.detect_process_records_sub = True
+        watchdog.ffmpeg_detect_process = MagicMock()
+        watchdog.capture_thread = MagicMock()
+        watchdog.capture_thread.is_alive.return_value = False
+        watchdog.start_ffmpeg_detect = MagicMock()
+
+        now = datetime.now().astimezone(UTC)
+        stale = (now - timedelta(hours=1)).timestamp()
+        watchdog.latest_cache_segment_time[STREAM_TYPE_SUB] = stale
+        watchdog.latest_valid_segment_time[STREAM_TYPE_SUB] = stale
+        assert watchdog._stream_staleness(STREAM_TYPE_SUB, now) is not None
+
+        watchdog.reset_capture_thread(terminate=False)
+
+        # the sub check runs later in the same tick against a stale can_restart,
+        # so without this grace it would kill the just-restarted process again
+        assert (
+            watchdog._stream_staleness(STREAM_TYPE_SUB, datetime.now().astimezone(UTC))
+            is None
+        )
+
+    def test_detect_reset_leaves_sub_alone_when_not_shared(self):
+        watchdog = self._build_watchdog()
+        watchdog.detect_process_records_sub = False
+        watchdog.ffmpeg_detect_process = MagicMock()
+        watchdog.capture_thread = MagicMock()
+        watchdog.capture_thread.is_alive.return_value = False
+        watchdog.start_ffmpeg_detect = MagicMock()
+
+        now = datetime.now().astimezone(UTC)
+        stale = (now - timedelta(hours=1)).timestamp()
+        watchdog.latest_cache_segment_time[STREAM_TYPE_SUB] = stale
+        watchdog.latest_valid_segment_time[STREAM_TYPE_SUB] = stale
+
+        watchdog.reset_capture_thread(terminate=False)
+
+        assert (
+            watchdog._stream_staleness(STREAM_TYPE_SUB, datetime.now().astimezone(UTC))
+            is not None
+        )
+
     def test_stale_threshold_follows_each_stream_segment_time(self):
         watchdog = self._build_watchdog(
             output_args={
