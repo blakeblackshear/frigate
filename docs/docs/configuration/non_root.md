@@ -77,4 +77,4 @@ go2rtc's ffmpeg processes no longer appear in Intel GPU stats. Frigate reads per
 
 If you mount your own TLS certificate at `/etc/letsencrypt/live/frigate`, the private key has to be readable by the runtime user. Frigate won't change ownership of a certificate you supplied, since the mount may be read-only.
 
-If you're debugging nginx, run the config check as the runtime user: `docker exec frigate /command/s6-setuidgid frigate nginx -t -c /tmp/nginx/conf/nginx.conf`. Running `nginx -t` as root hands nginx's runtime directories to root as a side effect, which breaks the running workers until the service restarts.
+If you're debugging nginx, run the config check as the runtime user with stdout discarded: `docker exec frigate /command/s6-setuidgid frigate bash -c 'nginx -t -c /tmp/nginx/conf/nginx.conf >/dev/null'`. Running `nginx -t` as root hands nginx's runtime directories to root as a side effect, which breaks the running workers until the service restarts, and the config's `/dev/stdout` logs can't be reopened through a root-owned `docker exec` pipe (the results print on stderr either way).

@@ -97,8 +97,11 @@ jobs:
             exit 1
           fi
           # -t must NOT run as root: ngx_create_paths would chown the live cache
-          # and temp dirs to the `user root` directive user, breaking the workers
-          docker exec frigate /command/s6-setuidgid frigate /usr/local/nginx/sbin/nginx -e stderr -t -c /tmp/nginx/conf/nginx.conf
+          # and temp dirs to the `user root` directive user, breaking the workers.
+          # stdout goes to /dev/null because -t reopens the config's
+          # error_log/access_log /dev/stdout by path, and the docker exec pipe
+          # is root-owned; -t reports on stderr, so nothing is lost
+          docker exec frigate /command/s6-setuidgid frigate bash -c '/usr/local/nginx/sbin/nginx -e stderr -t -c /tmp/nginx/conf/nginx.conf >/dev/null'
           docker exec frigate stat -c %a /etc/letsencrypt/live/frigate/privkey.pem | grep -qx 600
           docker exec frigate stat -c %a /dev/shm/go2rtc.yaml | grep -qx 640
       - name: Assert services run as non-root
