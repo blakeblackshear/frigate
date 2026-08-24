@@ -25,25 +25,31 @@ def is_arm64_platform() -> bool:
     return machine in ("aarch64", "arm64", "armv8", "armv7l")
 
 
-def get_ort_session_options(
-    is_complex_model: bool = False,
-) -> ort.SessionOptions | None:
+def get_ort_session_options(model_type: str | None = None) -> ort.SessionOptions | None:
     """Get ONNX Runtime session options with appropriate settings.
 
     Args:
-        is_complex_model: Whether the model needs basic optimization to avoid graph fusion issues.
+        model_type: Model being loaded, used to pin its graph optimization level.
 
     Returns:
-        SessionOptions with appropriate optimization level, or None for default settings.
+        SessionOptions with a pinned optimization level, or None for default settings.
     """
-    if is_complex_model:
-        sess_options = ort.SessionOptions()
-        sess_options.graph_optimization_level = (
-            ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
-        )
-        return sess_options
+    # Import here to avoid circular imports
+    from frigate.embeddings.types import EnrichmentModelTypeEnum
 
-    return None
+    if model_type == EnrichmentModelTypeEnum.jina_v2.value:
+        # below EXTENDED the CUDA EP returns an identical vector for every image,
+        # and ORT_ENABLE_ALL fails to build on CPU with a SimplifiedLayerNormFusion error
+        level = ort.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+    elif model_type == EnrichmentModelTypeEnum.jina_v1.value:
+        # aggressive optimizations create or expect nodes that don't exist
+        level = ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
+    else:
+        return None
+
+    sess_options = ort.SessionOptions()
+    sess_options.graph_optimization_level = level
+    return sess_options
 
 
 # Import OpenVINO only when needed to avoid circular dependencies
@@ -114,21 +120,6 @@ class BaseModelRunner(ABC):
 
 class ONNXModelRunner(BaseModelRunner):
     """Run ONNX models using ONNX Runtime."""
-
-    @staticmethod
-    def is_cpu_complex_model(model_type: str) -> bool:
-        """Check if model needs basic optimization level to avoid graph fusion issues.
-
-        Some models (like Jina-CLIP) have issues with aggressive optimizations like
-        SimplifiedLayerNormFusion that create or expect nodes that don't exist.
-        """
-        # Import here to avoid circular imports
-        from frigate.embeddings.types import EnrichmentModelTypeEnum
-
-        return model_type in [
-            EnrichmentModelTypeEnum.jina_v1.value,
-            EnrichmentModelTypeEnum.jina_v2.value,
-        ]
 
     @staticmethod
     def is_migraphx_complex_model(model_type: str) -> bool:
@@ -626,9 +617,7 @@ def get_optimized_runner(
     return ONNXModelRunner(
         ort.InferenceSession(
             model_path,
-            sess_options=get_ort_session_options(
-                ONNXModelRunner.is_cpu_complex_model(model_type)
-            ),
+            sess_options=get_ort_session_options(model_type),
             providers=providers,
             provider_options=options,
         ),
