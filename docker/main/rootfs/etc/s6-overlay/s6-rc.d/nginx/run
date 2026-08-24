@@ -100,6 +100,10 @@ echo "$nginx_settings" | \
 
 if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
     chown -R frigate:frigate /tmp/nginx
+    # error_log/access_log /dev/stdout make nginx REOPEN the s6 log pipe by
+    # path, and s6 created it root-owned 0600; without this the non-root
+    # master exits with "open() /dev/stdout failed (13: Permission denied)"
+    chown frigate /dev/stdout
     # self-signed certs are root-generated; tolerant because mounted certs may be :ro
     if [ -f "$letsencrypt_path/privkey.pem" ]; then
         chown frigate:frigate "$letsencrypt_path/privkey.pem" "$letsencrypt_path/fullchain.pem" 2>/dev/null || true
@@ -108,12 +112,14 @@ fi
 
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
 exec 2>&1
+# -e stderr: the compile-time default error log under /usr/local/nginx/logs
+# is not writable by the runtime user and would alert before config load
 if [[ "$(id -u)" -ne 0 || "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
     exec \
         s6-notifyoncheck -t 30000 -n 1 \
-        nginx -c /tmp/nginx/conf/nginx.conf
+        nginx -e stderr -c /tmp/nginx/conf/nginx.conf
 else
     exec \
         s6-notifyoncheck -t 30000 -n 1 \
-        s6-setuidgid frigate nginx -c /tmp/nginx/conf/nginx.conf
+        s6-setuidgid frigate nginx -e stderr -c /tmp/nginx/conf/nginx.conf
 fi
