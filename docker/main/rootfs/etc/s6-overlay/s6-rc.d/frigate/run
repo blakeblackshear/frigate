@@ -4,6 +4,13 @@
 
 set -o errexit -o nounset -o pipefail
 
+# $HOME is /root from the container env and survives s6-setuidgid, so cache
+# and telemetry writes (huggingface, openvino) fail after the drop. Set it
+# before opt_in_out so the opt-out marker lands where the service will look.
+if [[ "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+    export HOME=/config
+fi
+
 # opt out of openvino telemetry
 if [ -e /usr/local/bin/opt_in_out ]; then
   /usr/local/bin/opt_in_out --opt_out > /dev/null 2>&1
