@@ -100,6 +100,11 @@ echo "$nginx_settings" | \
 
 if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
     chown -R frigate:frigate /tmp/nginx
+    # heal the cache if a root `nginx -t` chowned it (ngx_create_paths chowns
+    # every cycle path to the `user` directive user when run as root)
+    if [ -d /dev/shm/nginx_cache ]; then
+        chown -R frigate:frigate /dev/shm/nginx_cache
+    fi
     # error_log/access_log /dev/stdout make nginx REOPEN the s6 log pipe by
     # path, and s6 created it root-owned 0600; without this the non-root
     # master exits with "open() /dev/stdout failed (13: Permission denied)"
