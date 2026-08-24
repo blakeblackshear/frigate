@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from typing import Any, Literal
 
 import numpy as np
@@ -13,6 +14,8 @@ from frigate.detectors.detector_config import BaseDetectorConfig
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "zmq"
+
+NOT_READY_LOG_INTERVAL_S = 60.0
 
 
 class ZmqDetectorConfig(BaseDetectorConfig):
@@ -37,6 +40,11 @@ class ZmqDetectorConfig(BaseDetectorConfig):
         default=0,
         title="ZMQ socket linger in milliseconds",
         description="Socket linger period in milliseconds.",
+    )
+    reinit_backoff_ms: int = Field(
+        default=5000,
+        title="ZMQ model re-initialization backoff in milliseconds",
+        description="Minimum interval between model re-initialization attempts in milliseconds.",
     )
 
 
@@ -65,6 +73,8 @@ class ZmqIpcDetector(DetectionApi):
     - On initialization, sends model request to check if model is available
     - If model not available, sends model data via ZMQ
     - Only starts inference after model is ready
+    - If initialization fails, it is retried with a backoff from the detect
+      path rather than requiring a full restart to recover
     """
 
     type_key = DETECTOR_KEY
@@ -76,12 +86,16 @@ class ZmqIpcDetector(DetectionApi):
         self._endpoint = detector_config.endpoint
         self._request_timeout_ms = detector_config.request_timeout_ms
         self._linger_ms = detector_config.linger_ms
+        self._reinit_backoff_ms = detector_config.reinit_backoff_ms
         self._socket = None
         self._create_socket()
 
         # Model management
         self._model_ready = False
         self._model_name = self._get_model_name()
+        self._last_init_attempt = 0.0
+        self._not_ready_last_log = 0.0
+        self._not_ready_suppressed = 0
 
         # Initialize model if needed
         self._initialize_model()
@@ -96,6 +110,14 @@ class ZmqIpcDetector(DetectionApi):
             except Exception:
                 pass
         self._socket = self._context.socket(zmq.REQ)
+        # Correlate replies with requests and relax the strict REQ state
+        # machine: a stale reply left over from an earlier request (e.g. a
+        # peer that answered after a timeout/reset cycle) is dropped by libzmq
+        # instead of being mistaken for the answer to the current request.
+        # REP peers echo the correlation envelope automatically, so this
+        # needs no server-side change.
+        self._socket.setsockopt(zmq.REQ_CORRELATE, 1)
+        self._socket.setsockopt(zmq.REQ_RELAXED, 1)
         # Apply timeouts and linger so calls don't block indefinitely
         self._socket.setsockopt(zmq.RCVTIMEO, self._request_timeout_ms)
         self._socket.setsockopt(zmq.SNDTIMEO, self._request_timeout_ms)
@@ -111,11 +133,20 @@ class ZmqIpcDetector(DetectionApi):
 
     def _initialize_model(self) -> None:
         """Initialize the model by checking availability and transferring if needed."""
+        self._last_init_attempt = time.monotonic()
+        self._model_ready = False
         try:
             logger.info(f"Initializing model: {self._model_name}")
 
-            # Check if model is available and transfer if needed
-            if self._check_and_transfer_model():
+            # Handshake on a fresh socket so nothing buffered from an earlier
+            # request generation can be mistaken for this handshake's reply.
+            self._create_socket()
+
+            # Require the ready handshake to be confirmed by a second
+            # exchange: one spurious reply (stale buffer, half-open peer)
+            # can satisfy at most one round-trip, so a peer that is really
+            # alive and loaded must answer twice in a row.
+            if self._check_and_transfer_model() and self._check_model_availability():
                 logger.info(f"Model {self._model_name} is ready")
                 self._model_ready = True
             else:
@@ -123,6 +154,38 @@ class ZmqIpcDetector(DetectionApi):
 
         except Exception as e:
             logger.error(f"Failed to initialize model: {e}")
+
+    def _recover(self) -> None:
+        """Backoff-gated re-initialization shared by every failure path.
+
+        Called whenever the plugin is not ready or a request failed. At most
+        one initialization attempt per reinit_backoff_ms, so a dead peer is
+        polled instead of hammered, and the plugin recovers by itself when
+        the peer returns instead of wedging until the next restart.
+        """
+        if (
+            time.monotonic() - self._last_init_attempt
+            >= self._reinit_backoff_ms / 1000.0
+        ):
+            try:
+                self._initialize_model()
+            except Exception:
+                pass
+
+    def _log_not_ready(self) -> None:
+        """Rate-limited not-ready warning so a wedged period cannot flood the log."""
+        now = time.monotonic()
+        if now - self._not_ready_last_log >= NOT_READY_LOG_INTERVAL_S:
+            suffix = (
+                f" ({self._not_ready_suppressed} similar warnings suppressed)"
+                if self._not_ready_suppressed
+                else ""
+            )
+            logger.warning(f"Model not ready, returning zero detections{suffix}")
+            self._not_ready_last_log = now
+            self._not_ready_suppressed = 0
+        else:
+            self._not_ready_suppressed += 1
 
     def _check_and_transfer_model(self) -> bool:
         """Check if model is available and transfer if needed in one atomic operation."""
@@ -299,8 +362,10 @@ class ZmqIpcDetector(DetectionApi):
 
     def detect_raw(self, tensor_input: np.ndarray) -> np.ndarray:
         if not self._model_ready:
-            logger.warning("Model not ready, returning zero detections")
-            return self._zero_result
+            self._recover()
+            if not self._model_ready:
+                self._log_not_ready()
+                return self._zero_result
 
         try:
             header_bytes = self._build_header(tensor_input)
@@ -316,21 +381,16 @@ class ZmqIpcDetector(DetectionApi):
             # Ensure output shape and dtype are exactly as expected
             return detections
         except zmq.Again:
-            # Timeout
-            logger.debug("ZMQ detector request timed out; resetting socket")
-            try:
-                self._create_socket()
-                self._initialize_model()
-            except Exception:
-                pass
+            # Timeout: mark not ready and require a fresh, confirmed
+            # handshake before trusting the peer again.
+            logger.debug("ZMQ detector request timed out; reinitializing")
+            self._model_ready = False
+            self._recover()
             return self._zero_result
         except zmq.ZMQError as exc:
-            logger.error(f"ZMQ detector ZMQError: {exc}; resetting socket")
-            try:
-                self._create_socket()
-                self._initialize_model()
-            except Exception:
-                pass
+            logger.error(f"ZMQ detector ZMQError: {exc}; reinitializing")
+            self._model_ready = False
+            self._recover()
             return self._zero_result
         except Exception as exc:  # noqa: BLE001
             logger.error(f"ZMQ detector unexpected error: {exc}")
