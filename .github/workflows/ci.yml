@@ -96,7 +96,9 @@ jobs:
             echo "response carries frame-ancestors, which breaks cross-origin iframe embedding"
             exit 1
           fi
-          docker exec frigate /usr/local/nginx/sbin/nginx -t -c /tmp/nginx/conf/nginx.conf
+          # -t must NOT run as root: ngx_create_paths would chown the live cache
+          # and temp dirs to the `user root` directive user, breaking the workers
+          docker exec frigate /command/s6-setuidgid frigate /usr/local/nginx/sbin/nginx -e stderr -t -c /tmp/nginx/conf/nginx.conf
           docker exec frigate stat -c %a /etc/letsencrypt/live/frigate/privkey.pem | grep -qx 600
           docker exec frigate stat -c %a /dev/shm/go2rtc.yaml | grep -qx 640
       - name: Assert services run as non-root
@@ -119,8 +121,15 @@ jobs:
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:5000/api/login \
             -H 'content-type: application/json' -d '{"user":"admin","password":"definitely-wrong"}')
           [ "$code" = "401" ] || { echo "login endpoint returned $code"; exit 1; }
+          # nginx runtime state must belong to the runtime user (a root nginx -t
+          # in the step above would have chowned it to root)
+          owners=$(docker exec frigate stat -c %U /tmp/nginx /dev/shm/nginx_cache)
+          echo "$owners"
+          if echo "$owners" | grep -qvx frigate; then
+            echo "nginx runtime dirs are not owned by frigate"; exit 1
+          fi
           # runtime user can write recordings storage
-          docker exec frigate s6-setuidgid frigate touch /media/frigate/.write-probe
+          docker exec frigate /command/s6-setuidgid frigate touch /media/frigate/.write-probe
           docker exec frigate rm /media/frigate/.write-probe
       - name: Assert escape hatch restores root
         run: |

@@ -76,3 +76,5 @@ Use `group_add` in compose (`--group-add` with `docker run`) to give the runtime
 go2rtc's ffmpeg processes no longer appear in Intel GPU stats. Frigate reads per-process GPU usage from `/proc/<pid>/fdinfo`, which the kernel won't let one user read for another user's processes, so anything go2rtc spawns is invisible to it. Overall GPU utilization is unaffected.
 
 If you mount your own TLS certificate at `/etc/letsencrypt/live/frigate`, the private key has to be readable by the runtime user. Frigate won't change ownership of a certificate you supplied, since the mount may be read-only.
+
+If you're debugging nginx, run the config check as the runtime user: `docker exec frigate /command/s6-setuidgid frigate nginx -t -c /tmp/nginx/conf/nginx.conf`. Running `nginx -t` as root hands nginx's runtime directories to root as a side effect, which breaks the running workers until the service restarts.
