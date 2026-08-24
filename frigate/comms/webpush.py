@@ -421,6 +421,7 @@ class WebPushClient(Communicator):
         # Don't notify if message is an update and important fields don't have an update
         if (
             state == "update"
+            and payload["before"]["severity"] == payload["after"]["severity"]
             and len(payload["before"]["data"]["objects"])
             == len(payload["after"]["data"]["objects"])
             and len(payload["before"]["data"]["zones"])
