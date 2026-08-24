@@ -36,6 +36,16 @@ if ! [[ "$puid" =~ ^[0-9]+$ && "$pgid" =~ ^[0-9]+$ ]]; then
 fi
 
 echo "[INFO] Using image ${IMAGE} (override with FRIGATE_IMAGE=...)"
+if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
+    echo "[INFO] ${IMAGE} is not present locally and has to be pulled first; this may take a while"
+fi
+
+if [[ -n "$dry_run_flag" ]]; then
+    echo "[INFO] Dry run: reporting what would change under ${config_dir} and ${media_dir}, changing nothing"
+else
+    echo "[INFO] Aligning ${config_dir} and ${media_dir} to ${puid}:${pgid}; this may take a while on large filesystems"
+fi
+
 # shellcheck disable=SC2086
 docker run --rm \
     -v "${config_dir}:/config" \

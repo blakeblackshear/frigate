@@ -38,6 +38,18 @@ That reports how many entries would change and touches nothing. When it looks ri
 ./fix-permissions.sh /path/to/your/config /path/to/your/storage
 ```
 
+Both the script and the boot sweep report progress as they go, so you can tell a slow sweep apart from a stuck one:
+
+```
+[INFO] fix-ownership: scanning /media/frigate for ownership mismatches; this may take a while on large filesystems
+[WARN] fix-ownership: adjusting ownership of 4823941 entries under /media/frigate
+[INFO] fix-ownership: /media/frigate 5% (241197/4823941 entries)
+[INFO] fix-ownership: /media/frigate 10% (482394/4823941 entries)
+[INFO] fix-ownership: finished /media/frigate in 12m 4s
+```
+
+The scan has no percentage behind it because the total isn't known until it finishes. Watch the boot sweep with `docker logs -f frigate`.
+
 Pass `PUID` and `PGID` as the third and fourth arguments if you're not using the default `1000:1000`. The script wraps the same `fix-ownership` helper the container uses, so it's the same logic either way. Override the image it pulls with `FRIGATE_IMAGE=...` if you're not on `stable`.
 
 Once the volumes are aligned, start Frigate normally. A sentinel at `/config/.permissions_version` records what was done, so later boots skip the sweep entirely unless you change `PUID`/`PGID`.

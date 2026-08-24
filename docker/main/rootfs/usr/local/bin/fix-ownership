@@ -76,6 +76,8 @@ for path in "$@"; do
         continue
     fi
 
+    echo "[INFO] fix-ownership: scanning ${path} for ownership mismatches; this may take a while on large filesystems"
+
     # find may fail mid-walk on a live volume (file deleted under it) or on a
     # stale mount. Tolerate it rather than aborting under errexit, but never
     # read a failed scan as "nothing to do": that would record the sweep as
@@ -98,17 +100,41 @@ for path in "$@"; do
         echo "[WARN] fix-ownership: ${path} contains symlinked directories; ownership behind them is not managed and must be aligned by hand"
     fi
 
-    echo "[WARN] fix-ownership: adjusting ownership of ${count} entries under ${path}; on large recordings volumes this can take a long time"
+    echo "[WARN] fix-ownership: adjusting ownership of ${count} entries under ${path}"
     if [[ "$dry_run" -eq 1 ]]; then
         echo "[INFO] fix-ownership: dry run, not changing ${path}"
         continue
     fi
 
-    find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
-        -exec chown -h "${target_uid}:${target_gid}" {} + || {
+    # -print feeds the progress counter while -exec {} + keeps the chown
+    # batched; the scan above is what makes a real percentage possible
+    started=$SECONDS
+    if find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
+        -print -exec chown -h "${target_uid}:${target_gid}" {} + \
+        | awk -v total="$count" -v path="$path" '
+            BEGIN { next_pct = 5 }
+            {
+                pct = int(NR * 100 / total)
+                if (pct > 100) pct = 100
+                if (pct >= next_pct) {
+                    printf "[INFO] fix-ownership: %s %d%% (%d/%d entries)\n", path, pct, NR, total
+                    # mawk block-buffers to a pipe; without this the whole
+                    # progress log arrives at once when the sweep ends
+                    fflush()
+                    while (next_pct <= pct) next_pct += 5
+                }
+            }'; then
+        elapsed=$((SECONDS - started))
+        if [[ "$elapsed" -ge 60 ]]; then
+            elapsed="$((elapsed / 60))m $((elapsed % 60))s"
+        else
+            elapsed="${elapsed}s"
+        fi
+        echo "[INFO] fix-ownership: finished ${path} in ${elapsed}"
+    else
         swept_clean=0
         echo "[WARN] fix-ownership: some entries under ${path} could not be updated (deleted mid-sweep or chown denied); will retry on next mismatch"
-    }
+    fi
 done
 
 # go2rtc (separate user) must be able to REACH its HomeKit state in /config.
