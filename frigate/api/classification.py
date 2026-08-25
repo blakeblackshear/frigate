@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.auth import require_role
+from frigate.api.auth import require_full_camera_access, require_role
 from frigate.api.defs.request.classification_body import (
     AudioTranscriptionBody,
     DeleteFaceImagesBody,
@@ -741,6 +741,7 @@ def get_classification_dataset(name: str):
 
 @router.get(
     "/classification/attributes",
+    dependencies=[Depends(require_full_camera_access)],
     summary="Get custom classification attributes",
     description="""Returns custom classification attributes for a given object type.
     Only includes models with classification_type set to 'attribute'.

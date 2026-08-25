@@ -1476,7 +1476,7 @@ paths:
         - Classification
       summary: Get custom classification attributes
       description: |-
-        **Access:** Admin role required.
+        **Access:** Authenticated user with access to all cameras.
 
         Returns custom classification attributes for a given object type.
             Only includes models with classification_type set to 'attribute'.
@@ -1510,8 +1510,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
-        - frigateAdminAuth: []
-      x-required-role: admin
+        - frigateUserAuth: []
+      x-required-role: all_cameras
   /classification/{name}/train:
     get:
       tags:
