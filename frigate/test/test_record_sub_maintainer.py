@@ -15,6 +15,7 @@ from frigate.record.maintainer import (
     RecordingMaintainer,
     SegmentInfo,
     parse_cache_segment_name,
+    segment_path_time,
 )
 
 
@@ -347,6 +348,98 @@ class TestSegmentAudioPresence(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(result[Recordings.audio_rate.name], audio_rate)
                 self.assertEqual(result[Recordings.audio_codec.name], audio_codec)
                 self.assertEqual(result[Recordings.video_codec.name], video_codec)
+
+
+class TestSegmentPathTime(unittest.IsolatedAsyncioTestCase):
+    """The recording path must stay unique when segments are shorter than a second."""
+
+    def _build_maintainer(self) -> RecordingMaintainer:
+        camera_config = MagicMock()
+        camera_config.record.enabled = True
+        camera_config.record.continuous.days = 1
+        camera_config.record.motion.days = 0
+
+        config = MagicMock()
+        config.cameras = {"test_cam": camera_config}
+
+        maintainer = RecordingMaintainer.__new__(RecordingMaintainer)
+        maintainer.config = config
+        maintainer.end_time_cache = {}
+        maintainer.object_recordings_info = defaultdict(list)
+        maintainer.audio_recordings_info = defaultdict(list)
+        maintainer.recordings_publisher = MagicMock()
+        maintainer.last_segment_end = {("test_cam", "main"): 0.0}
+        return maintainer
+
+    def test_parses_main_and_sub_names(self):
+        expected = datetime.datetime(2026, 6, 10, 14, 30, 22, tzinfo=datetime.UTC)
+        self.assertEqual(
+            segment_path_time("/tmp/cache/test_cam@20260610143022+0000.mp4"), expected
+        )
+        self.assertEqual(
+            segment_path_time("/tmp/cache/test_cam@sub@20260610143022+0000.mp4"),
+            expected,
+        )
+
+    def test_returns_none_for_unparsable_names(self):
+        self.assertIsNone(segment_path_time("/tmp/cache/garbage.mp4"))
+        self.assertIsNone(segment_path_time("/tmp/cache/test_cam@notadate.mp4"))
+
+    async def test_sub_second_segments_get_distinct_paths(self):
+        # two cache files a second apart whose resolved starts both land in
+        # second 22; deriving the path from the resolved start collides
+        segments = [
+            ("test_cam@20260610143022+0000.mp4", 100_000),
+            ("test_cam@20260610143023+0000.mp4", 980_000),
+        ]
+        paths = []
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            for name, microsecond in segments:
+                maintainer = self._build_maintainer()
+                maintainer.config.ffmpeg.ffmpeg_path = "ffmpeg"
+
+                start_time = datetime.datetime(
+                    2026, 6, 10, 14, 30, 22, microsecond, tzinfo=datetime.UTC
+                )
+                cache_path = os.path.join(tmpdir, name)
+                with open(cache_path, "wb") as f:
+                    f.write(b"\x00" * 16)
+
+                proc = MagicMock()
+                proc.returncode = 0
+                proc.wait = AsyncMock(return_value=0)
+
+                with (
+                    patch(
+                        "frigate.record.maintainer.RECORD_DIR",
+                        os.path.join(tmpdir, "recordings"),
+                    ),
+                    patch(
+                        "frigate.record.maintainer.asyncio.create_subprocess_exec",
+                        AsyncMock(return_value=proc),
+                    ),
+                ):
+                    result = await maintainer.move_segment(
+                        "test_cam",
+                        "main",
+                        start_time,
+                        start_time + datetime.timedelta(seconds=0.96),
+                        0.96,
+                        cache_path,
+                        SegmentInfo(0, 0, 0, 0),
+                    )
+
+                self.assertIsNotNone(result)
+                paths.append(result[Recordings.path.name])
+                # the row keeps the resolved start even though the path doesn't
+                self.assertEqual(
+                    result[Recordings.start_time.name], start_time.timestamp()
+                )
+
+        self.assertEqual(len(set(paths)), 2, paths)
+        self.assertTrue(paths[0].endswith("30.22.mp4"), paths[0])
+        self.assertTrue(paths[1].endswith("30.23.mp4"), paths[1])
 
 
 class TestSegmentStartChaining(unittest.IsolatedAsyncioTestCase):

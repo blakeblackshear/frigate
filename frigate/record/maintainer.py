@@ -79,6 +79,54 @@ def parse_cache_segment_name(basename: str) -> tuple[str, str, str] | None:
     return (prefix, STREAM_TYPE_MAIN, date)
 
 
+def format_segment_details(cache_path: str, segment_info: dict[str, Any]) -> str:
+    """Comma separated facts about a segment, for discard warnings."""
+    details: list[str] = []
+
+    duration = segment_info.get("duration", -1)
+
+    if duration != -1:
+        details.append(f"duration: {duration:.2f}s")
+
+    try:
+        details.append(f"size: {os.path.getsize(cache_path) / 1024:.1f} KB")
+    except OSError:
+        pass
+
+    details.append(f"video: {segment_info.get('video_codec') or 'none'}")
+
+    if segment_info.get("has_audio"):
+        audio = segment_info.get("audio_codec") or "unknown"
+        rate = segment_info.get("audio_rate")
+        details.append(f"audio: {audio} {rate}Hz" if rate else f"audio: {audio}")
+    else:
+        details.append("audio: none")
+
+    return ", ".join(details)
+
+
+def segment_path_time(cache_path: str) -> datetime.datetime | None:
+    """Timestamp a segment's recording path is built from, or None if unparsable.
+
+    Recording paths carry one second of resolution, and so does ffmpeg's cache
+    segment template, which makes a cache file name unique per camera stream
+    and second. Resolved start times are not: a stream cutting segments faster
+    than once a second resolves consecutive segments into the same second, and
+    building the path from those collides on the unique path index.
+    """
+    parsed = parse_cache_segment_name(Path(cache_path).stem)
+
+    if parsed is None:
+        return None
+
+    try:
+        return datetime.datetime.strptime(parsed[2], CACHE_SEGMENT_FORMAT).astimezone(
+            datetime.UTC
+        )
+    except ValueError:
+        return None
+
+
 class SegmentInfo:
     def __init__(
         self,
@@ -241,51 +289,55 @@ class RecordingMaintainer(threading.Thread):
             and not d.startswith("preview_")
         ]
 
-        # publish newest cached segment per camera (including in use files)
-        newest_cache_segments: dict[str, dict[str, Any]] = {}
+        # publish newest cached segment per camera stream (including in use files)
+        newest_cache_segments: dict[tuple[str, str], dict[str, Any]] = {}
         for cache in cache_files:
             cache_path = os.path.join(CACHE_DIR, cache)
             basename = os.path.splitext(cache)[0]
             parsed = parse_cache_segment_name(basename)
             if parsed is None:
                 if not self.unexpected_cache_files_logged:
-                    logger.warning("Skipping unexpected files in cache")
+                    logger.warning(f"Skipping unexpected files in cache, e.g. {cache}")
                     self.unexpected_cache_files_logged = True
                 continue
             camera, stream_type, date = parsed
 
-            # this topic feeds main-stream health/sync consumers only
-            if stream_type == STREAM_TYPE_SUB:
-                continue
-
             start_time = datetime.datetime.strptime(
                 date, CACHE_SEGMENT_FORMAT
             ).astimezone(datetime.UTC)
+            key = (camera, stream_type)
             if (
-                camera not in newest_cache_segments
-                or start_time > newest_cache_segments[camera]["start_time"]
+                key not in newest_cache_segments
+                or start_time > newest_cache_segments[key]["start_time"]
             ):
-                newest_cache_segments[camera] = {
+                newest_cache_segments[key] = {
                     "start_time": start_time,
                     "cache_path": cache_path,
                 }
 
-        for camera, newest in newest_cache_segments.items():
+        for (camera, stream_type), newest in newest_cache_segments.items():
             self.recordings_publisher.publish(
                 (
                     camera,
+                    stream_type,
                     newest["start_time"].timestamp(),
                     newest["cache_path"],
                 ),
                 RecordingsDataTypeEnum.latest.value,
             )
-        # publish None for cameras with no cache files (but only if we know the camera exists)
-        for camera_name in self.config.cameras:
-            if camera_name not in newest_cache_segments:
-                self.recordings_publisher.publish(
-                    (camera_name, None, None),
-                    RecordingsDataTypeEnum.latest.value,
-                )
+        # publish None for streams with no cache files (but only if we know the camera exists)
+        for camera_name, camera_config in self.config.cameras.items():
+            stream_types = [STREAM_TYPE_MAIN]
+
+            if camera_config.record.sub.enabled:
+                stream_types.append(STREAM_TYPE_SUB)
+
+            for stream_type in stream_types:
+                if (camera_name, stream_type) not in newest_cache_segments:
+                    self.recordings_publisher.publish(
+                        (camera_name, stream_type, None, None),
+                        RecordingsDataTypeEnum.latest.value,
+                    )
 
         files_in_use = []
         for process in psutil.process_iter():
@@ -314,7 +366,7 @@ class RecordingMaintainer(threading.Thread):
             parsed = parse_cache_segment_name(basename)
             if parsed is None:
                 if not self.unexpected_cache_files_logged:
-                    logger.warning("Skipping unexpected files in cache")
+                    logger.warning(f"Skipping unexpected files in cache, e.g. {cache}")
                     self.unexpected_cache_files_logged = True
                 continue
             camera, stream_type, date = parsed
@@ -447,6 +499,7 @@ class RecordingMaintainer(threading.Thread):
                 self.recordings_publisher.publish(
                     (
                         camera,
+                        stream_type,
                         recordings[0]["start_time"].timestamp()
                         if camera_cfg and camera_cfg.record.enabled
                         else None,
@@ -540,13 +593,13 @@ class RecordingMaintainer(threading.Thread):
 
             if not segment_info.get("has_valid_video", False):
                 logger.warning(
-                    f"Invalid or missing video stream in segment {cache_path}. Discarding."
+                    f"Invalid or missing video stream in segment {cache_path} "
+                    f"({format_segment_details(cache_path, segment_info)}). Discarding."
                 )
-                if stream_type == STREAM_TYPE_MAIN:
-                    self.recordings_publisher.publish(
-                        (camera, start_time.timestamp(), cache_path),
-                        RecordingsDataTypeEnum.invalid.value,
-                    )
+                self.recordings_publisher.publish(
+                    (camera, stream_type, start_time.timestamp(), cache_path),
+                    RecordingsDataTypeEnum.invalid.value,
+                )
                 self.drop_segment(cache_path)
                 return None
 
@@ -583,21 +636,22 @@ class RecordingMaintainer(threading.Thread):
                 if duration == -1:
                     logger.warning(f"Failed to probe corrupt segment {cache_path}")
 
-                logger.warning(f"Discarding a corrupt recording segment: {cache_path}")
-                if stream_type == STREAM_TYPE_MAIN:
-                    self.recordings_publisher.publish(
-                        (camera, start_time.timestamp(), cache_path),
-                        RecordingsDataTypeEnum.invalid.value,
-                    )
+                logger.warning(
+                    f"Discarding a corrupt recording segment: {cache_path} "
+                    f"({format_segment_details(cache_path, segment_info)})"
+                )
+                self.recordings_publisher.publish(
+                    (camera, stream_type, start_time.timestamp(), cache_path),
+                    RecordingsDataTypeEnum.invalid.value,
+                )
                 self.drop_segment(cache_path)
                 return None
 
             # this segment has a valid duration and has video data, so publish an update
-            if stream_type == STREAM_TYPE_MAIN:
-                self.recordings_publisher.publish(
-                    (camera, start_time.timestamp(), cache_path),
-                    RecordingsDataTypeEnum.valid.value,
-                )
+            self.recordings_publisher.publish(
+                (camera, stream_type, start_time.timestamp(), cache_path),
+                RecordingsDataTypeEnum.valid.value,
+            )
 
         record_config = self.config.cameras[camera].record
 
@@ -863,18 +917,20 @@ class RecordingMaintainer(threading.Thread):
         video_codec: str | None = None,
         keyframes: list[int] | None = None,
     ) -> dict[str, Any] | None:
-        # directory will be in utc due to start_time being in utc
+        path_time = segment_path_time(cache_path) or start_time
+
+        # directory will be in utc due to path_time being in utc
         # sub segments get a tagged directory to avoid filename collisions
         directory = os.path.join(
             RECORD_DIR,
-            start_time.strftime("%Y-%m-%d/%H"),
+            path_time.strftime("%Y-%m-%d/%H"),
             camera if stream_type == STREAM_TYPE_MAIN else f"{camera}{SUB_CACHE_TAG}",
         )
 
         os.makedirs(directory, exist_ok=True)
 
-        # file will be in utc due to start_time being in utc
-        file_name = f"{start_time.strftime('%M.%S.mp4')}"
+        # file will be in utc due to path_time being in utc
+        file_name = f"{path_time.strftime('%M.%S.mp4')}"
         file_path = os.path.join(directory, file_name)
 
         try:
@@ -946,10 +1002,9 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.video_codec.name: video_codec,
                     Recordings.keyframes.name: keyframes,
                 }
-        except Exception as e:
-            logger.error(f"Unable to store recording segment {cache_path}")
+        except Exception:
+            logger.exception(f"Unable to store recording segment {cache_path}")
             Path(cache_path).unlink(missing_ok=True)
-            logger.error(e)
 
         # clear end_time cache
         self.end_time_cache.pop(cache_path, None)
