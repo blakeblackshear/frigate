@@ -23,6 +23,7 @@ from frigate.const import (
     ATTRIBUTE_LABEL_DISPLAY_MAP,
     CACHE_DIR,
     CLIPS_DIR,
+    STREAM_TYPE_MAIN,
     UPDATE_REVIEW_DESCRIPTION,
 )
 from frigate.data_processing.types import PostProcessDataEnum
@@ -441,6 +442,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     )
                     .where((ts >= Recordings.start_time) & (ts <= Recordings.end_time))
                     .where(Recordings.camera == camera)
+                    .where(Recordings.stream_type == STREAM_TYPE_MAIN)
                     .order_by(Recordings.start_time.desc())
                     .limit(1)
                     .get()

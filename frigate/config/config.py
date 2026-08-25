@@ -269,6 +269,12 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
             f"Camera {camera_config.name} has sub stream recording enabled, but record_sub is not assigned to an input."
         )
 
+    for ffmpeg_input in camera_config.ffmpeg.inputs:
+        if "record" in ffmpeg_input.roles and "record_sub" in ffmpeg_input.roles:
+            raise ValueError(
+                f"Camera {camera_config.name} has record and record_sub assigned to the same input, which would record the same stream twice."
+            )
+
     if camera_config.audio.enabled and "audio" not in assigned_roles:
         raise ValueError(
             f"Camera {camera_config.name} has audio events enabled, but audio is not assigned to an input."

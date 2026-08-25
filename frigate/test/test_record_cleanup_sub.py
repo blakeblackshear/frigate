@@ -73,6 +73,21 @@ class TestRecordingCleanupSubRetention(unittest.TestCase):
             stream_type=stream_type,
         )
 
+    def _insert_preview(
+        self, id: str, age_days: float, camera: str = "front_door"
+    ) -> None:
+        end_time = (
+            datetime.datetime.now() - datetime.timedelta(days=age_days)
+        ).timestamp()
+        Previews.create(
+            id=id,
+            camera=camera,
+            path=f"/media/frigate/previews/{id}.mp4",
+            start_time=end_time - 10,
+            end_time=end_time,
+            duration=10,
+        )
+
     def test_sub_recordings_expire_independently(self):
         # main retention 7 days, sub retention 30 days; rows 10 days old
         # -> main row deleted, sub row kept
@@ -90,6 +105,60 @@ class TestRecordingCleanupSubRetention(unittest.TestCase):
 
         assert Recordings.get_or_none(Recordings.id == "m1") is None
         assert Recordings.get_or_none(Recordings.id == "s1") is not None
+
+    def test_previews_survive_while_sub_recordings_remain(self):
+        # main retention 7 days, sub retention 30 days; only the sub row
+        # survives at 10 days, and the preview covering it must survive too
+        cleanup = self._build_cleanup(
+            {
+                "enabled": True,
+                "continuous": {"days": 7},
+                "sub": {"enabled": True, "continuous": {"days": 30}},
+            }
+        )
+        self._insert_recording("m1", "main", 10)
+        self._insert_recording("s1", "sub", 10)
+        self._insert_preview("p1", 10)
+
+        cleanup.expire_recordings()
+
+        assert Recordings.get_or_none(Recordings.id == "m1") is None
+        assert Previews.get_or_none(Previews.id == "p1") is not None
+
+    def test_previews_expire_once_every_stream_has(self):
+        # both streams expired at 40 days -> the preview goes with them
+        cleanup = self._build_cleanup(
+            {
+                "enabled": True,
+                "continuous": {"days": 7},
+                "sub": {"enabled": True, "continuous": {"days": 30}},
+            }
+        )
+        self._insert_recording("m1", "main", 40)
+        self._insert_recording("s1", "sub", 40)
+        self._insert_preview("p1", 40)
+
+        cleanup.expire_recordings()
+
+        assert Recordings.get_or_none(Recordings.id == "s1") is None
+        assert Previews.get_or_none(Previews.id == "p1") is None
+
+    def test_preview_retention_unchanged_when_sub_disabled(self):
+        cleanup = self._build_cleanup(
+            {
+                "enabled": True,
+                "continuous": {"days": 7},
+                "sub": {"enabled": False},
+            }
+        )
+        self._insert_recording("m1", "main", 10)
+        self._insert_preview("p_old", 10)
+        self._insert_preview("p_new", 1)
+
+        cleanup.expire_recordings()
+
+        assert Previews.get_or_none(Previews.id == "p_old") is None
+        assert Previews.get_or_none(Previews.id == "p_new") is not None
 
     def test_sub_recordings_expire_after_sub_retention(self):
         # sub retention 30 days; sub row 40 days old -> deleted

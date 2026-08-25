@@ -149,8 +149,12 @@ class RecordingCleanup(threading.Thread):
         detections_retain_mode: RetainModeEnum,
         config: CameraConfig,
         reviews: list[Any],
-    ) -> set[Path]:
-        """Delete recordings for existing camera based on retention config."""
+    ) -> tuple[set[Path], list[tuple[float, float]]]:
+        """Delete recordings for one stream of an existing camera based on retention config.
+
+        Returns the directories to check for emptiness and the segments that
+        were kept, which the caller feeds to expire_camera_previews.
+        """
         # Get the timestamp for cutoff of retained days
 
         # Get recordings to check for expiration
@@ -257,9 +261,23 @@ class RecordingCleanup(threading.Thread):
                 Recordings.id << deleted_recordings_list[i : i + max_deletes]
             ).execute()
 
-        # previews follow main retention, so only the main pass expires them
-        if stream_type != STREAM_TYPE_MAIN:
-            return maybe_empty_dirs
+        return maybe_empty_dirs, kept_recordings
+
+    def expire_camera_previews(
+        self,
+        config: CameraConfig,
+        continuous_expire_date: float,
+        motion_expire_date: float,
+        kept_recordings: list[tuple[float, float]],
+    ) -> set[Path]:
+        """Delete previews that no longer have recordings on any stream.
+
+        Previews aren't recorded per stream, so the cutoffs must be the oldest
+        of the per stream values and kept_recordings must cover every stream,
+        sorted by start time. Otherwise a short main retention expires previews
+        the sub recordings still need.
+        """
+        maybe_empty_dirs: set[Path] = set()
 
         previews = (
             Previews.select(
@@ -438,7 +456,7 @@ class RecordingCleanup(threading.Thread):
                 .namedtuples()
             )
 
-            maybe_empty_dirs |= self.expire_existing_camera_recordings(
+            main_dirs, main_kept = self.expire_existing_camera_recordings(
                 STREAM_TYPE_MAIN,
                 continuous_expire_date,
                 motion_expire_date,
@@ -452,10 +470,11 @@ class RecordingCleanup(threading.Thread):
                     config.record.detections.retain.days,
                 ),
             )
+            maybe_empty_dirs |= main_dirs
 
             # runs even when sub recording is disabled so old rows still
             # expire
-            maybe_empty_dirs |= self.expire_existing_camera_recordings(
+            sub_dirs, sub_kept = self.expire_existing_camera_recordings(
                 STREAM_TYPE_SUB,
                 sub_continuous_expire_date,
                 sub_motion_expire_date,
@@ -468,6 +487,14 @@ class RecordingCleanup(threading.Thread):
                     config.record.sub.alerts.days,
                     config.record.sub.detections.days,
                 ),
+            )
+            maybe_empty_dirs |= sub_dirs
+
+            maybe_empty_dirs |= self.expire_camera_previews(
+                config,
+                min(continuous_expire_date, sub_continuous_expire_date),
+                min(motion_expire_date, sub_motion_expire_date),
+                sorted(main_kept + sub_kept),
             )
             logger.debug(f"End camera: {camera}.")
 
