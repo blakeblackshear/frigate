@@ -1229,6 +1229,36 @@ class TestConfig(unittest.TestCase):
             lambda: FrigateConfig(**config).cameras,
         )
 
+    def test_fails_on_record_and_record_sub_on_same_input(self):
+        config = self._sub_record_config()
+        config["cameras"]["back"]["ffmpeg"]["inputs"] = [
+            {
+                "path": "rtsp://10.0.0.1:554/video",
+                "roles": ["detect", "record", "record_sub"],
+            },
+            {"path": "rtsp://10.0.0.1:554/video2", "roles": ["audio"]},
+        ]
+
+        self.assertRaisesRegex(
+            ValueError,
+            "record and record_sub assigned to the same input",
+            lambda: FrigateConfig(**config).cameras,
+        )
+
+    def test_fails_on_record_sub_with_a_single_input(self):
+        # the single input case has record forced onto it, so record_sub can
+        # only ever duplicate that same stream
+        config = self._sub_record_config()
+        config["cameras"]["back"]["ffmpeg"]["inputs"] = [
+            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect", "record_sub"]},
+        ]
+
+        self.assertRaisesRegex(
+            ValueError,
+            "record and record_sub assigned to the same input",
+            lambda: FrigateConfig(**config).cameras,
+        )
+
     def test_record_sub_segment_time_not_checked_when_disabled(self):
         config = self._sub_record_config(
             {

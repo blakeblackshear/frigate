@@ -2,7 +2,7 @@ from enum import Enum
 
 from pydantic import Field
 
-from frigate.const import MAX_PRE_CAPTURE
+from frigate.const import MAX_PRE_CAPTURE, STREAM_TYPE_SUB
 from frigate.review.types import SeverityEnum
 
 from ..base import FrigateBaseModel
@@ -190,6 +190,13 @@ class RecordConfig(FrigateBaseModel):
         title="Original recording state",
         description="Indicates whether recording was enabled in the original static configuration.",
     )
+
+    def stream_enabled(self, stream_type: str) -> bool:
+        """Whether the given record stream type should currently be recording."""
+        if stream_type == STREAM_TYPE_SUB:
+            return self.enabled and self.sub.enabled
+
+        return self.enabled
 
     @property
     def effective_alert_days(self) -> float:
