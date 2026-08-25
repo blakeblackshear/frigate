@@ -220,15 +220,20 @@ class CameraConfig(FrigateBaseModel):
 
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
-            has_audio = "audio" in config["ffmpeg"]["inputs"][0].get("roles", [])
+            existing_roles = config["ffmpeg"]["inputs"][0].get("roles", [])
 
             config["ffmpeg"]["inputs"][0]["roles"] = [
                 "record",
                 "detect",
             ]
 
-            if has_audio:
+            if "audio" in existing_roles:
                 config["ffmpeg"]["inputs"][0]["roles"].append("audio")
+
+            # kept so role validation can report the real problem rather than
+            # claiming the role was never assigned
+            if "record_sub" in existing_roles:
+                config["ffmpeg"]["inputs"][0]["roles"].append("record_sub")
 
         super().__init__(**config)
 

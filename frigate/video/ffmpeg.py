@@ -5,7 +5,7 @@ import queue
 import subprocess as sp
 import threading
 import time
-from collections import deque
+from collections import defaultdict, deque
 from datetime import UTC, datetime, timedelta
 from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
@@ -22,7 +22,14 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
-from frigate.const import PROCESS_PRIORITY_HIGH
+from frigate.const import (
+    PROCESS_PRIORITY_HIGH,
+    RECORD_STREAM_TYPES,
+    ROLE_TO_STREAM_TYPE,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+    STREAM_TYPE_TO_ROLE,
+)
 from frigate.log import LogPipe
 from frigate.util.builtin import EventsPerSecond, get_record_segment_time
 from frigate.util.ffmpeg import start_or_restart_ffmpeg, stop_ffmpeg
@@ -33,6 +40,8 @@ from frigate.util.image import (
 from frigate.util.process import FrigateProcess
 
 logger = logging.getLogger(__name__)
+
+RECORD_GRACE_SECONDS = 90
 
 
 def capture_frames(
@@ -150,16 +159,26 @@ class CameraWatchdog(threading.Thread):
         self.was_record_sub_enabled = self.config.record.sub.enabled
 
         self.segment_subscriber = RecordingsDataSubscriber(RecordingsDataTypeEnum.all)
-        self.latest_valid_segment_time: float = 0
-        self.latest_invalid_segment_time: float = 0
-        self.latest_cache_segment_time: float = 0
+        self.latest_valid_segment_time: dict[str, float] = defaultdict(float)
+        self.latest_invalid_segment_time: dict[str, float] = defaultdict(float)
+        self.latest_cache_segment_time: dict[str, float] = defaultdict(float)
         self.record_enable_time: datetime | None = None
+        self.stream_grace_until: dict[str, datetime] = {}
 
         # `valid` segments are published with the segment's start time, so the
         # gap between consecutive publishes can reach 2 * segment_time. Pad the
         # staleness threshold so it's never tighter than that worst case.
-        segment_time = get_record_segment_time(self.config)
-        self.record_stale_threshold = max(120, 2 * segment_time + 30)
+        self.record_stale_threshold: dict[str, int] = {
+            stream_type: max(
+                120, 2 * get_record_segment_time(self.config, stream_type) + 30
+            )
+            for stream_type in RECORD_STREAM_TYPES
+        }
+
+        # the sub stream usually shares its input, and therefore its ffmpeg
+        # process, with detect, so it isn't in ffmpeg_other_processes and needs
+        # its own staleness check
+        self.detect_process_records_sub = False
 
         # Stall tracking (based on last processed frame)
         self._stall_timestamps: deque[float] = deque()
@@ -167,7 +186,7 @@ class CameraWatchdog(threading.Thread):
 
         # Status caching to reduce message volume
         self._last_detect_status: str | None = None
-        self._last_record_status: str | None = None
+        self._last_record_status: dict[str, str] = {}
         self._last_status_update_time: float = 0.0
 
     def _send_detect_status(self, status: str, now: float) -> None:
@@ -180,15 +199,77 @@ class CameraWatchdog(threading.Thread):
             self._last_detect_status = status
             self._last_status_update_time = now
 
-    def _send_record_status(self, status: str, now: float) -> None:
-        """Send record status only if changed or retry_interval has elapsed."""
+    def _send_record_status(self, stream_type: str, status: str, now: float) -> None:
+        """Send a record stream's status only if changed or retry_interval has elapsed."""
         if (
-            status != self._last_record_status
+            status != self._last_record_status.get(stream_type)
             or (now - self._last_status_update_time) >= self.sleeptime
         ):
-            self.requestor.send_data(f"{self.config.name}/status/record", status)
-            self._last_record_status = status
+            self.requestor.send_data(
+                f"{self.config.name}/status/{STREAM_TYPE_TO_ROLE[stream_type]}", status
+            )
+            self._last_record_status[stream_type] = status
             self._last_status_update_time = now
+
+    def _reset_segment_times(self) -> None:
+        self.latest_valid_segment_time.clear()
+        self.latest_invalid_segment_time.clear()
+        self.latest_cache_segment_time.clear()
+        self.stream_grace_until.clear()
+
+    def _grant_restart_grace(self, stream_types: list[str], now_utc: datetime) -> None:
+        for stream_type in stream_types:
+            self.stream_grace_until[stream_type] = now_utc + timedelta(
+                seconds=RECORD_GRACE_SECONDS
+            )
+
+    def _stream_staleness(self, stream_type: str, now_utc: datetime) -> str | None:
+        """Return why the stream's segments are stale, or None if they're healthy."""
+        # ffmpeg needs time to create a first segment after recording is
+        # enabled and after a restart, per stream
+        in_grace_period = (
+            self.record_enable_time is not None
+            and (now_utc - self.record_enable_time)
+            < timedelta(seconds=RECORD_GRACE_SECONDS)
+        ) or now_utc < self.stream_grace_until.get(stream_type, now_utc)
+
+        if in_grace_period:
+            return None
+
+        latest_cache = self.latest_cache_segment_time[stream_type]
+        latest_valid = self.latest_valid_segment_time[stream_type]
+        latest_invalid = self.latest_invalid_segment_time[stream_type]
+
+        def as_dt(timestamp: float) -> datetime:
+            if timestamp > 0:
+                return datetime.fromtimestamp(timestamp, tz=UTC)
+
+            return now_utc - timedelta(seconds=1)
+
+        stale_window = timedelta(seconds=self.record_stale_threshold[stream_type])
+
+        if now_utc > (as_dt(latest_cache) + stale_window):
+            return "No new recording segments were created"
+
+        if now_utc > (as_dt(latest_valid) + stale_window):
+            return "No new valid recording segments were created"
+
+        if (
+            latest_invalid > 0
+            and now_utc > (as_dt(latest_invalid) + stale_window)
+            and latest_valid <= latest_invalid
+        ):
+            return "No valid segments created since last invalid segment"
+
+        return None
+
+    def _recorded_streams(self, roles: list[Any]) -> list[str]:
+        """Record stream types the given roles cover that are currently recording."""
+        return [
+            stream_type
+            for role, stream_type in ROLE_TO_STREAM_TYPE.items()
+            if role in roles and self.config.record.stream_enabled(stream_type)
+        ]
 
     def _check_config_updates(self) -> dict[str, list[str]]:
         """Check for config updates and return the update dict."""
@@ -245,6 +326,11 @@ class CameraWatchdog(threading.Thread):
         self.logger.info("Restarting ffmpeg...")
         self.start_ffmpeg_detect()
 
+        # this process produces the sub stream's segments too, so it gets the
+        # same startup grace however the reset was triggered
+        if self.detect_process_records_sub:
+            self._grant_restart_grace([STREAM_TYPE_SUB], datetime.now().astimezone(UTC))
+
     def run(self) -> None:
         if self._update_enabled_state():
             self.start_all_ffmpeg()
@@ -267,9 +353,7 @@ class CameraWatchdog(threading.Thread):
                 )
                 self.stop_all_ffmpeg()
                 self.start_all_ffmpeg()
-                self.latest_valid_segment_time = 0
-                self.latest_invalid_segment_time = 0
-                self.latest_cache_segment_time = 0
+                self._reset_segment_times()
                 self.record_enable_time = datetime.now().astimezone(UTC)
                 last_restart_time = datetime.now().timestamp()
                 continue
@@ -281,9 +365,7 @@ class CameraWatchdog(threading.Thread):
                     self.start_all_ffmpeg()
 
                     # reset all timestamps and record the enable time for grace period
-                    self.latest_valid_segment_time = 0
-                    self.latest_invalid_segment_time = 0
-                    self.latest_cache_segment_time = 0
+                    self._reset_segment_times()
                     self.record_enable_time = datetime.now().astimezone(UTC)
                 else:
                     self.logger.debug(f"Disabling camera {self.config.name}")
@@ -293,7 +375,10 @@ class CameraWatchdog(threading.Thread):
                     # update camera status
                     now = datetime.now().timestamp()
                     self._send_detect_status("disabled", now)
-                    self._send_record_status("disabled", now)
+                    self._send_record_status(STREAM_TYPE_MAIN, "disabled", now)
+                    # cameras without a sub stream never get a record_sub topic
+                    if self.config.record.sub.enabled:
+                        self._send_record_status(STREAM_TYPE_SUB, "disabled", now)
                 self.was_enabled = enabled
                 continue
 
@@ -305,9 +390,7 @@ class CameraWatchdog(threading.Thread):
                     )
                     self.stop_all_ffmpeg()
                     self.start_all_ffmpeg()
-                    self.latest_valid_segment_time = 0
-                    self.latest_invalid_segment_time = 0
-                    self.latest_cache_segment_time = 0
+                    self._reset_segment_times()
                     self.record_enable_time = datetime.now().astimezone(UTC)
                     last_restart_time = datetime.now().timestamp()
                 self.was_record_enabled_in_config = record_enabled_in_config
@@ -323,9 +406,7 @@ class CameraWatchdog(threading.Thread):
                     )
                     self.stop_all_ffmpeg()
                     self.start_all_ffmpeg()
-                    self.latest_valid_segment_time = 0
-                    self.latest_invalid_segment_time = 0
-                    self.latest_cache_segment_time = 0
+                    self._reset_segment_times()
                     self.record_enable_time = datetime.now().astimezone(UTC)
                     last_restart_time = datetime.now().timestamp()
                 self.was_record_sub_enabled = record_sub_enabled
@@ -343,26 +424,25 @@ class CameraWatchdog(threading.Thread):
                 raw_topic, payload = update
                 if raw_topic and payload:
                     topic = str(raw_topic)
-                    camera, segment_time, _ = payload
+                    camera, stream_type, segment_time, _ = payload
 
                     if camera != self.config.name:
                         continue
 
                     if topic.endswith(RecordingsDataTypeEnum.invalid.value):
                         self.logger.warning(
-                            f"Invalid recording segment detected for {camera} at {segment_time}"
+                            f"Invalid recording segment detected for {camera} ({stream_type}) at {segment_time}"
                         )
-                        self.latest_invalid_segment_time = segment_time
+                        self.latest_invalid_segment_time[stream_type] = segment_time
                     elif topic.endswith(RecordingsDataTypeEnum.valid.value):
                         self.logger.debug(
-                            f"Latest valid recording segment time on {camera}: {segment_time}"
+                            f"Latest valid recording segment time on {camera} ({stream_type}): {segment_time}"
                         )
-                        self.latest_valid_segment_time = segment_time
+                        self.latest_valid_segment_time[stream_type] = segment_time
                     elif topic.endswith(RecordingsDataTypeEnum.latest.value):
-                        if segment_time is not None:
-                            self.latest_cache_segment_time = segment_time
-                        else:
-                            self.latest_cache_segment_time = 0
+                        self.latest_cache_segment_time[stream_type] = (
+                            segment_time if segment_time is not None else 0
+                        )
 
             now = datetime.now().timestamp()
 
@@ -409,63 +489,26 @@ class CameraWatchdog(threading.Thread):
             for p in self.ffmpeg_other_processes:
                 poll = p["process"].poll()
 
-                if self.config.record.enabled and "record" in p["roles"]:
+                recorded_streams = self._recorded_streams(p["roles"])
+
+                if recorded_streams:
                     now_utc = datetime.now().astimezone(UTC)
 
-                    # Check if we're within the grace period after enabling recording
-                    # Grace period: 90 seconds allows time for ffmpeg to start and create first segment
-                    in_grace_period = self.record_enable_time is not None and (
-                        now_utc - self.record_enable_time
-                    ) < timedelta(seconds=90)
+                    # ensure segments are still being created and that they have
+                    # valid video data. each stream is tracked separately so a
+                    # healthy one can't mask a stalled one.
+                    stale_stream = None
+                    stale_reason = None
+                    for stream_type in recorded_streams:
+                        stale_reason = self._stream_staleness(stream_type, now_utc)
 
-                    latest_cache_dt = (
-                        datetime.fromtimestamp(self.latest_cache_segment_time, tz=UTC)
-                        if self.latest_cache_segment_time > 0
-                        else now_utc - timedelta(seconds=1)
-                    )
+                        if stale_reason is not None:
+                            stale_stream = stream_type
+                            break
 
-                    latest_valid_dt = (
-                        datetime.fromtimestamp(self.latest_valid_segment_time, tz=UTC)
-                        if self.latest_valid_segment_time > 0
-                        else now_utc - timedelta(seconds=1)
-                    )
-
-                    latest_invalid_dt = (
-                        datetime.fromtimestamp(self.latest_invalid_segment_time, tz=UTC)
-                        if self.latest_invalid_segment_time > 0
-                        else now_utc - timedelta(seconds=1)
-                    )
-
-                    # ensure segments are still being created and that they have valid video data
-                    # Skip checks during grace period to allow segments to start being created
-                    stale_window = timedelta(seconds=self.record_stale_threshold)
-                    cache_stale = not in_grace_period and now_utc > (
-                        latest_cache_dt + stale_window
-                    )
-                    valid_stale = not in_grace_period and now_utc > (
-                        latest_valid_dt + stale_window
-                    )
-                    invalid_stale_condition = (
-                        self.latest_invalid_segment_time > 0
-                        and not in_grace_period
-                        and now_utc > (latest_invalid_dt + stale_window)
-                        and self.latest_valid_segment_time
-                        <= self.latest_invalid_segment_time
-                    )
-                    invalid_stale = invalid_stale_condition
-
-                    if cache_stale or valid_stale or invalid_stale:
-                        if cache_stale:
-                            reason = "No new recording segments were created"
-                        elif valid_stale:
-                            reason = "No new valid recording segments were created"
-                        else:  # invalid_stale
-                            reason = (
-                                "No valid segments created since last invalid segment"
-                            )
-
+                    if stale_stream is not None and can_restart:
                         self.logger.error(
-                            f"{reason} for {self.config.name} in the last {self.record_stale_threshold}s. Restarting the ffmpeg record process..."
+                            f"{stale_reason} for {self.config.name} ({stale_stream}) in the last {self.record_stale_threshold[stale_stream]}s. Restarting the ffmpeg record process..."
                         )
                         p["process"] = start_or_restart_ffmpeg(
                             p["cmd"],
@@ -479,10 +522,18 @@ class CameraWatchdog(threading.Thread):
                                 f"{self.config.name}/status/{role.value}", "offline"
                             )
 
+                        self._grant_restart_grace(recorded_streams, now_utc)
+                        last_restart_time = now
+
                         continue
-                    else:
-                        self._send_record_status("online", now)
-                        p["latest_segment_time"] = self.latest_cache_segment_time
+                    elif stale_stream is None:
+                        for stream_type in recorded_streams:
+                            self._send_record_status(stream_type, "online", now)
+
+                        p["latest_segment_time"] = max(
+                            self.latest_cache_segment_time[stream_type]
+                            for stream_type in recorded_streams
+                        )
 
                 if poll is None:
                     continue
@@ -496,6 +547,25 @@ class CameraWatchdog(threading.Thread):
                 p["process"] = start_or_restart_ffmpeg(
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
                 )
+
+            if (
+                self.detect_process_records_sub
+                and self.config.record.stream_enabled(STREAM_TYPE_SUB)
+                and self.capture_thread is not None
+                and self.capture_thread.is_alive()
+            ):
+                now_utc = datetime.now().astimezone(UTC)
+                stale_reason = self._stream_staleness(STREAM_TYPE_SUB, now_utc)
+
+                if stale_reason is None:
+                    self._send_record_status(STREAM_TYPE_SUB, "online", now)
+                elif can_restart:
+                    self.logger.error(
+                        f"{stale_reason} for {self.config.name} (sub, shared with detect) in the last {self.record_stale_threshold[STREAM_TYPE_SUB]}s. Restarting ffmpeg..."
+                    )
+                    self._send_record_status(STREAM_TYPE_SUB, "offline", now)
+                    self.reset_capture_thread()
+                    last_restart_time = now
 
             # Prune expired reconnect timestamps
             now = datetime.now().timestamp()
@@ -539,9 +609,9 @@ class CameraWatchdog(threading.Thread):
         self.segment_subscriber.stop()
 
     def start_ffmpeg_detect(self):
-        ffmpeg_cmd = [
-            c["cmd"] for c in self.config.ffmpeg_cmds if "detect" in c["roles"]
-        ][0]
+        detect_cmd = [c for c in self.config.ffmpeg_cmds if "detect" in c["roles"]][0]
+        ffmpeg_cmd = detect_cmd["cmd"]
+        self.detect_process_records_sub = "record_sub" in detect_cmd["roles"]
         self.ffmpeg_detect_process = start_or_restart_ffmpeg(
             ffmpeg_cmd, self.logger, self.logpipe, self.frame_size
         )

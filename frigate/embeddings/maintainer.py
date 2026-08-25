@@ -714,7 +714,9 @@ class EmbeddingMaintainer(threading.Thread):
             topic = str(raw_topic)
 
             if topic.endswith(RecordingsDataTypeEnum.saved.value):
-                camera, recordings_available_through_timestamp, _ = payload
+                camera, _stream_type, recordings_available_through_timestamp, _ = (
+                    payload
+                )
 
                 self.recordings_available_through[camera] = (
                     recordings_available_through_timestamp
