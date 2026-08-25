@@ -11,10 +11,14 @@ from typing import Any
 import cv2
 from fastapi import APIRouter, Depends, Request, UploadFile
 from fastapi.responses import JSONResponse
-from peewee import DoesNotExist
+from peewee import DoesNotExist, fn
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.auth import require_role
+from frigate.api.auth import (
+    allow_any_authenticated,
+    get_allowed_cameras_for_filter,
+    require_role,
+)
 from frigate.api.defs.request.classification_body import (
     AudioTranscriptionBody,
     DeleteFaceImagesBody,
@@ -739,18 +743,81 @@ def get_classification_dataset(name: str):
     )
 
 
+def get_observed_attributes(
+    model_attributes: dict[str, list[str]],
+    object_labels: set[str],
+    allowed_cameras: list[str],
+) -> dict[str, set[str]]:
+    """Get the attribute values recorded on the given cameras.
+
+    Args:
+        model_attributes: Labels each attribute model can emit, keyed by model name
+        object_labels: Object types those models run on
+        allowed_cameras: Cameras the caller has access to
+
+    Returns:
+        Values seen for each model, keyed by model name
+    """
+    if not model_attributes or not object_labels or not allowed_cameras:
+        return {}
+
+    model_names = list(model_attributes.keys())
+
+    query = (
+        Event.select(
+            *[
+                fn.json_extract(Event.data, f'$."{model_name}"')
+                for model_name in model_names
+            ]
+        )
+        .where(
+            (Event.camera << allowed_cameras) & (Event.label << sorted(object_labels))
+        )
+        .distinct()
+        .tuples()
+    )
+
+    targets = {
+        model_name: set(attributes)
+        for model_name, attributes in model_attributes.items()
+    }
+    observed: dict[str, set[str]] = {model_name: set() for model_name in model_names}
+
+    for row in query.iterator():
+        found = False
+
+        for model_name, value in zip(model_names, row):
+            if isinstance(value, str) and value not in observed[model_name]:
+                observed[model_name].add(value)
+                found = True
+
+        if found and all(
+            observed[model_name] >= targets[model_name] for model_name in model_names
+        ):
+            break
+
+    return observed
+
+
 @router.get(
     "/classification/attributes",
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get custom classification attributes",
     description="""Returns custom classification attributes for a given object type.
     Only includes models with classification_type set to 'attribute'.
+    Callers without access to every camera only receive values that have been
+    recorded on the cameras they can access.
     By default returns a flat sorted list of all attribute labels.
     If group_by_model is true, returns attributes grouped by model name.""",
 )
 def get_custom_attributes(
-    request: Request, object_type: str = None, group_by_model: bool = False
+    request: Request,
+    object_type: str = None,
+    group_by_model: bool = False,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     models_with_attributes = {}
+    objects_by_model = {}
 
     for (
         model_key,
@@ -781,6 +848,32 @@ def get_custom_attributes(
         if attributes:
             model_name = model_config.name or model_key
             models_with_attributes[model_name] = sorted(attributes)
+            objects_by_model[model_name] = model_objects
+
+    # the dataset holds every label a model can emit, including ones never
+    # applied to an event, so callers without full camera access are limited to
+    # the values actually recorded on the cameras they can see
+    all_cameras = set(request.app.frigate_config.cameras.keys())
+
+    if models_with_attributes and not all_cameras.issubset(allowed_cameras):
+        observed = get_observed_attributes(
+            models_with_attributes,
+            set().union(*objects_by_model.values()),
+            allowed_cameras,
+        )
+        models_with_attributes = {
+            model_name: [
+                attribute
+                for attribute in attributes
+                if attribute in observed.get(model_name, set())
+            ]
+            for model_name, attributes in models_with_attributes.items()
+        }
+        models_with_attributes = {
+            model_name: attributes
+            for model_name, attributes in models_with_attributes.items()
+            if attributes
+        }
 
     if group_by_model:
         return JSONResponse(content=models_with_attributes)
