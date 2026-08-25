@@ -79,6 +79,32 @@ def parse_cache_segment_name(basename: str) -> tuple[str, str, str] | None:
     return (prefix, STREAM_TYPE_MAIN, date)
 
 
+def format_segment_details(cache_path: str, segment_info: dict[str, Any]) -> str:
+    """Comma separated facts about a segment, for discard warnings."""
+    details: list[str] = []
+
+    duration = segment_info.get("duration", -1)
+
+    if duration != -1:
+        details.append(f"duration: {duration:.2f}s")
+
+    try:
+        details.append(f"size: {os.path.getsize(cache_path) / 1024:.1f} KB")
+    except OSError:
+        pass
+
+    details.append(f"video: {segment_info.get('video_codec') or 'none'}")
+
+    if segment_info.get("has_audio"):
+        audio = segment_info.get("audio_codec") or "unknown"
+        rate = segment_info.get("audio_rate")
+        details.append(f"audio: {audio} {rate}Hz" if rate else f"audio: {audio}")
+    else:
+        details.append("audio: none")
+
+    return ", ".join(details)
+
+
 def segment_path_time(cache_path: str) -> datetime.datetime | None:
     """Timestamp a segment's recording path is built from, or None if unparsable.
 
@@ -271,7 +297,7 @@ class RecordingMaintainer(threading.Thread):
             parsed = parse_cache_segment_name(basename)
             if parsed is None:
                 if not self.unexpected_cache_files_logged:
-                    logger.warning("Skipping unexpected files in cache")
+                    logger.warning(f"Skipping unexpected files in cache, e.g. {cache}")
                     self.unexpected_cache_files_logged = True
                 continue
             camera, stream_type, date = parsed
@@ -340,7 +366,7 @@ class RecordingMaintainer(threading.Thread):
             parsed = parse_cache_segment_name(basename)
             if parsed is None:
                 if not self.unexpected_cache_files_logged:
-                    logger.warning("Skipping unexpected files in cache")
+                    logger.warning(f"Skipping unexpected files in cache, e.g. {cache}")
                     self.unexpected_cache_files_logged = True
                 continue
             camera, stream_type, date = parsed
@@ -567,7 +593,8 @@ class RecordingMaintainer(threading.Thread):
 
             if not segment_info.get("has_valid_video", False):
                 logger.warning(
-                    f"Invalid or missing video stream in segment {cache_path}. Discarding."
+                    f"Invalid or missing video stream in segment {cache_path} "
+                    f"({format_segment_details(cache_path, segment_info)}). Discarding."
                 )
                 self.recordings_publisher.publish(
                     (camera, stream_type, start_time.timestamp(), cache_path),
@@ -609,7 +636,10 @@ class RecordingMaintainer(threading.Thread):
                 if duration == -1:
                     logger.warning(f"Failed to probe corrupt segment {cache_path}")
 
-                logger.warning(f"Discarding a corrupt recording segment: {cache_path}")
+                logger.warning(
+                    f"Discarding a corrupt recording segment: {cache_path} "
+                    f"({format_segment_details(cache_path, segment_info)})"
+                )
                 self.recordings_publisher.publish(
                     (camera, stream_type, start_time.timestamp(), cache_path),
                     RecordingsDataTypeEnum.invalid.value,
@@ -972,10 +1002,9 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.video_codec.name: video_codec,
                     Recordings.keyframes.name: keyframes,
                 }
-        except Exception as e:
-            logger.error(f"Unable to store recording segment {cache_path}")
+        except Exception:
+            logger.exception(f"Unable to store recording segment {cache_path}")
             Path(cache_path).unlink(missing_ok=True)
-            logger.error(e)
 
         # clear end_time cache
         self.end_time_cache.pop(cache_path, None)
