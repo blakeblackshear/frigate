@@ -1948,7 +1948,7 @@
     },
     "lpr": {
       "globalDisabled": "The license plate recognition enrichment must be enabled for LPR features to function on this camera.",
-      "vehicleNotTracked": "License plate recognition requires 'car' or 'motorcycle' to be tracked. Enable 'car' or 'motorcycle' in Objects for this camera.",
+      "vehicleNotTracked": "License plate recognition requires a vehicle to be tracked. Enable 'car' or another vehicle type in Objects for this camera.",
       "modelSizeLarge": "The 'large' model is optimized for multi-line license plates. The 'small' model provides better performance over 'large' and should be used unless your region uses multi-line plate formats."
     },
     "record": {

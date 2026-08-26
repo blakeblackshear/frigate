@@ -21,7 +21,12 @@ const lpr: SectionConfigOverrides = {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
           if (ctx.fullCameraConfig.type === "lpr") return false;
           const tracked = ctx.fullCameraConfig.objects?.track ?? [];
-          return !tracked.some((o) => ["car", "motorcycle"].includes(o));
+          const vehicles = Object.entries(
+            ctx.fullConfig.model?.attributes_map ?? {},
+          )
+            .filter(([, attributes]) => attributes.includes("license_plate"))
+            .map(([label]) => label);
+          return !tracked.some((o) => vehicles.includes(o));
         },
       },
     ],
