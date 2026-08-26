@@ -60,6 +60,11 @@ class CameraState:
         # face/LPR pipelines when using a model without built-in detection.
         self.face_recognition_min_obj_area: int = 0
         self.lpr_min_obj_area: int = 0
+        self.lp_objects = {
+            label
+            for label, attributes in config.model.attributes_map.items()
+            if "license_plate" in attributes
+        }
 
         if (
             self.camera_config.face_recognition.enabled
@@ -452,7 +457,7 @@ class CameraState:
                 and obj_area >= self.face_recognition_min_obj_area
                 and updated_obj.obj_data.get("sub_label") is None
             ) or (
-                obj_label in ("car", "motorcycle")
+                obj_label in self.lp_objects
                 and self.lpr_min_obj_area > 0
                 and obj_area >= self.lpr_min_obj_area
                 and updated_obj.obj_data.get("sub_label") is None
@@ -548,7 +553,7 @@ class CameraState:
                     current_best.thumbnail_data is not None
                     and obj.thumbnail_data is not None
                     and is_better_thumbnail(
-                        object_type,
+                        obj.thumbnail_attributes,
                         current_best.thumbnail_data,
                         obj.thumbnail_data,
                         self.camera_config.frame_shape,

@@ -54,6 +54,11 @@ class TrackedObject:
         self.obj_data = obj_data
         self.colormap = model_config.colormap
         self.logos = model_config.all_attribute_logos
+        self.thumbnail_attributes = [
+            attr
+            for attr in model_config.attributes_map.get(obj_data["label"], [])
+            if attr in model_config.non_logo_attributes
+        ]
         self.camera_config = camera_config
         self.ui_config = ui_config
         self.frame_cache = frame_cache
@@ -149,7 +154,7 @@ class TrackedObject:
         if not self.false_positive and has_valid_frame:
             # determine if this frame is a better thumbnail
             if self.thumbnail_data is None or is_better_thumbnail(
-                self.obj_data["label"],
+                self.thumbnail_attributes,
                 self.thumbnail_data,
                 obj_data,
                 self.camera_config.frame_shape,

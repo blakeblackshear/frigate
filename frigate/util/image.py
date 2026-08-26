@@ -67,7 +67,7 @@ def has_better_attr(current_thumb, new_obj, attr_label) -> bool:
 
 
 def is_better_thumbnail(
-    label: str,
+    label_attributes: list[str],
     current_thumb: dict[str, Any],
     new_obj: dict[str, Any],
     frame_shape: tuple[int, int],
@@ -76,20 +76,12 @@ def is_better_thumbnail(
     # cutoff images are less ideal, but they should also be smaller?
     # better scores are obviously better too
 
-    # check face on person
-    if label == "person":
-        if has_better_attr(current_thumb, new_obj, "face"):
+    for attr_label in label_attributes:
+        if has_better_attr(current_thumb, new_obj, attr_label):
             return True
-        # if the current thumb has a face attr, dont update unless it gets better
-        if any([a["label"] == "face" for a in current_thumb["attributes"]]):
-            return False
 
-    # check license_plate on car
-    if label in ["car", "motorcycle"]:
-        if has_better_attr(current_thumb, new_obj, "license_plate"):
-            return True
-        # if the current thumb has a license_plate attr, dont update unless it gets better
-        if any([a["label"] == "license_plate" for a in current_thumb["attributes"]]):
+        # if the current thumb has the attr, dont update unless it gets better
+        if any([a["label"] == attr_label for a in current_thumb["attributes"]]):
             return False
 
     # if the new_thumb is on an edge, and the current thumb is not

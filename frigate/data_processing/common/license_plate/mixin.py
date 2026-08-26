@@ -1290,7 +1290,7 @@ class LicensePlateProcessingMixin:
                 and obj_data.get("label") != "license_plate"
             ):
                 logger.debug(
-                    f"{camera}: Not a processing license plate for non car/motorcycle object."
+                    f"{camera}: Not a processing license plate for {obj_data.get('label', 'unknown')}."
                 )
                 return
 
@@ -1367,7 +1367,7 @@ class LicensePlateProcessingMixin:
 
                 if not license_plate:
                     logger.debug(
-                        f"{camera}: Detected no license plates for car/motorcycle object."
+                        f"{camera}: Detected no license plates for {obj_data.get('label', 'unknown')} object."
                     )
                     return
 
