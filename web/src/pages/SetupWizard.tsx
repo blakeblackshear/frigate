@@ -1,4 +1,5 @@
 import StepIndicator from "@/components/indicators/StepIndicator";
+import SetupAccount from "@/components/setup/SetupAccount";
 import SetupCamera from "@/components/setup/SetupCamera";
 import SetupComplete from "@/components/setup/SetupComplete";
 import SetupDetector from "@/components/setup/SetupDetector";
@@ -8,13 +9,16 @@ import SetupWelcome from "@/components/setup/SetupWelcome";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/context/theme-provider";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { dismissSetup } from "@/utils/setupWizard";
 import { useCallback, useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { LuMoon, LuSun } from "react-icons/lu";
+import useSWR from "swr";
 
 type StepKey =
   | "welcome"
+  | "account"
   | "camera"
   | "detector"
   | "hwaccel"
@@ -23,6 +27,7 @@ type StepKey =
 
 const STEP_KEYS: StepKey[] = [
   "welcome",
+  "account",
   "camera",
   "detector",
   "hwaccel",
@@ -122,7 +127,18 @@ export default function SetupWizard() {
   const [state, dispatch] = useReducer(wizardReducer, initialState);
   const { theme, systemTheme, setTheme } = useTheme();
 
-  const steps = STEP_KEYS;
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
+  // with native auth off there are no users to manage, so the step would lie
+  const steps = useMemo(
+    () =>
+      config?.auth?.enabled === false
+        ? STEP_KEYS.filter((key) => key !== "account")
+        : STEP_KEYS,
+    [config],
+  );
   const stepLabels = useMemo(
     () => steps.map((key) => `setupWizard.steps.${key}`),
     [steps],
@@ -181,6 +197,14 @@ export default function SetupWizard() {
           <SetupWelcome
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onSkip={handleSkipSetup}
+          />
+        );
+      case "account":
+        return (
+          <SetupAccount
+            onNext={handleSkipStep}
+            onBack={handleBack}
+            onSkip={handleSkipStep}
           />
         );
       case "camera":

@@ -34,6 +34,14 @@ export async function installFirstRun(
 
 export async function gotoDetectorStep(page: Page, addCamera: () => void) {
   await page.getByRole("button", { name: "Get Started" }).click();
+
+  // the account step sits between welcome and camera whenever auth is on,
+  // which the default mock config has it
+  await expect(
+    page.getByRole("heading", { name: "Secure your account" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Skip" }).click();
+
   await expect(page.getByText("Add Your First Camera")).toBeVisible();
 
   // the camera step's Next only renders once its local addedCameras fills,
