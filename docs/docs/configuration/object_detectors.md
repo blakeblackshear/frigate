@@ -707,6 +707,8 @@ detectors:
 
 `ppu` and `model_format` are independent: `ppu` says whether candidate selection already happened on the NPU, and `model_format` says how to read the boxes that come back. Both must match how the model was compiled.
 
+`model_format` is required whenever `ppu: true` is set. A PPU record has the same fixed-width layout for every variant, so unlike the raw output path there is no shape to infer the layout from — leaving it unset is rejected at startup rather than risking a silent anchor-free/anchor-based mismatch.
+
 DX-COM cannot compile `yolov10` or `yolov26` models with PPU support, since their heads already produce final detections. Combining either with `ppu: true` is rejected at startup.
 
 #### Multiple NPUs

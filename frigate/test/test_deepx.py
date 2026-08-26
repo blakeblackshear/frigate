@@ -3,6 +3,7 @@
 import unittest
 
 import numpy as np
+from pydantic import ValidationError
 
 from frigate.detectors.plugins.deepx import (
     ANCHOR_FORMATS,
@@ -10,6 +11,7 @@ from frigate.detectors.plugins.deepx import (
     NMS_IN_HEAD_FORMATS,
     PPU_ANCHORS,
     PPU_RECORD_SIZE,
+    DeepxDetectorConfig,
     ModelFormatEnum,
     decode_yolo_ppu_anchor,
     decode_yolo_ppu_anchor_free,
@@ -158,6 +160,29 @@ class TestDeepxModelFormats(unittest.TestCase):
         self.assertFalse(ANCHOR_FORMATS & ANCHOR_FREE_FORMATS)
         self.assertFalse(ANCHOR_FORMATS & NMS_IN_HEAD_FORMATS)
         self.assertFalse(ANCHOR_FREE_FORMATS & NMS_IN_HEAD_FORMATS)
+
+
+class TestDeepxDetectorConfig(unittest.TestCase):
+    def test_ppu_without_model_format_is_rejected(self):
+        """PPU records are fixed-width regardless of variant, so an unset
+        model_format can't be inferred and must not silently fall back to the
+        anchor decoder."""
+        with self.assertRaises(ValidationError):
+            DeepxDetectorConfig(type="deepx", ppu=True)
+
+    def test_ppu_with_anchor_free_model_format_is_accepted(self):
+        config = DeepxDetectorConfig(
+            type="deepx", ppu=True, model_format=ModelFormatEnum.yolov8
+        )
+
+        self.assertEqual(config.model_format, ModelFormatEnum.yolov8)
+
+    def test_raw_without_model_format_is_still_accepted(self):
+        # the raw path falls back to shape-based inference, so this remains
+        # optional when ppu is not set
+        config = DeepxDetectorConfig(type="deepx")
+
+        self.assertIsNone(config.model_format)
 
 
 class TestDeepxPpuAnchorFreeDecode(unittest.TestCase):

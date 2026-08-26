@@ -441,7 +441,8 @@ class DeepxDetectorConfig(BaseDetectorConfig):
         description="Selects how the model's output is decoded. Leave unset to "
         "infer the layout from the output shape, which cannot tell an "
         "anchor-based head from an anchor-free one and is only reliable for "
-        "YOLOv8 and newer.",
+        "YOLOv8 and newer. Required when ppu is true, since a PPU record's "
+        "layout is identical for every variant and cannot be inferred.",
     )
     score_threshold: float = Field(
         default=0.25,
@@ -460,6 +461,25 @@ class DeepxDetectorConfig(BaseDetectorConfig):
                 f"model_format '{self.model_format.value}' runs NMS in the "
                 "detection head and cannot be compiled with PPU support by "
                 "DX-COM. Set ppu to false."
+            )
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_ppu_requires_model_format(self):
+        """Reject an unset model_format when ppu is enabled.
+
+        A PPU record is the same fixed-width layout for every variant, so
+        unlike the raw output path there is no shape to infer the layout
+        from. Leaving model_format unset here used to silently default to
+        the anchor-based decoder, which corrupts detections from anchor-free
+        PPU models (e.g. YOLOv8) instead of failing loudly.
+        """
+        if self.ppu and self.model_format is None:
+            raise ValueError(
+                "model_format must be set when ppu is true. The PPU output "
+                "layout can't be inferred, and guessing wrong silently "
+                "corrupts detections."
             )
 
         return self
@@ -517,9 +537,9 @@ class Deepx(DetectionApi):
     def decode(self, outputs: list[np.ndarray]) -> np.ndarray:
         """Decode raw or PPU output according to the configured YOLO variant."""
         if self.ppu:
-            # An unset model_format keeps the original anchor-based behaviour,
-            # which is the only layout this detector decoded before the option
-            # existed.
+            # Config validation guarantees model_format is set to an anchor
+            # or anchor-free format whenever ppu is true, since PPU records
+            # give no other way to tell the two apart.
             if self.model_format in ANCHOR_FREE_FORMATS:
                 return decode_yolo_ppu_anchor_free(
                     outputs,
