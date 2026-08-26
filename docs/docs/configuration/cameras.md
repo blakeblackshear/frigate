@@ -9,7 +9,7 @@ import NavPath from "@site/src/components/NavPath";
 
 ## Adding a camera with the Add Camera Wizard
 
-The Add Camera Wizard is the recommended way to add a camera. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />. The wizard connects to your camera, tests each stream, and writes the camera's configuration for you, including the [go2rtc](go2rtc.md) restream and the live view stream mapping, so a standard setup needs no hand-written YAML.
+The Add Camera Wizard is the recommended way to add a camera. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />, or use it from the [setup wizard](../guides/getting_started.md#configuring-frigate) on a new install. The wizard connects to your camera, tests each stream, and writes the camera's configuration for you, including the [go2rtc](go2rtc.md) restream and the live view stream mapping, so a standard setup needs no hand-written YAML.
 
 ### Step 1: Name and connection
 
