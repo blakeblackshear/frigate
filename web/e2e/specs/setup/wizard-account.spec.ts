@@ -117,9 +117,7 @@ test.describe("setup wizard account @high @mobile", () => {
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
     await gotoAccountStep(page);
 
-    await expect(
-      page.getByText("This port doesn't require a login"),
-    ).toBeVisible();
+    await expect(page.getByText("doesn't require a login")).toBeVisible();
     await expect(page.getByText("You're signed in as")).toBeHidden();
   });
 
