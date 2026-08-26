@@ -577,6 +577,7 @@ class Deepx(DetectionApi):
         return post_process_yolo(outputs, self.width, self.height)
 
     def detect_raw(self, tensor_input):
+        """Run inference and decode the DEEPX model output."""
         outputs = self.session.run([tensor_input])
 
         if not isinstance(outputs, list):
