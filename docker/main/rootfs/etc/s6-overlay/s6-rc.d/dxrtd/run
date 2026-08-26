@@ -1,0 +1,32 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Start the DEEPX DX-RT runtime daemon (dxrtd)
+
+set -o errexit -o nounset -o pipefail
+
+# Logs should be sent to stdout so that s6 can collect them
+exec 2>&1
+
+# The DEEPX kernel driver runs on the Docker host, not in this container, and
+# exposes the NPU as /dev/dxrt* device nodes that are passed through. Without
+# them there is no NPU to serve, so exit cleanly and let the rest of Frigate
+# start normally: this service ships in the default image and most users do
+# not have DEEPX hardware.
+if ! compgen -G "/dev/dxrt*" > /dev/null; then
+    echo "[INFO] No DEEPX NPU device found, not starting dxrtd"
+    exec s6-svc -Od .
+fi
+
+# dxrtd is a system-wide singleton. If the host's own dxrt.service is still
+# running it will refuse to start, so surface that up front rather than
+# leaving the user to decode the daemon's own error.
+if pgrep -x dxrtd > /dev/null; then
+    echo "[ERROR] Another dxrtd instance is already running"
+    echo "[ERROR] dxrtd may only run once per system. Stop the host service with:"
+    echo "[ERROR]   sudo systemctl disable --now dxrt.service"
+    exit 1
+fi
+
+echo "[INFO] Starting dxrtd for DEEPX NPU device(s): $(echo /dev/dxrt*)"
+
+exec /usr/local/bin/dxrtd

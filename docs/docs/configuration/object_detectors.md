@@ -24,6 +24,7 @@ Frigate supports multiple different detectors that work on different types of ha
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB, Mini PCIe, and m.2 formats allowing for a wide range of compatibility with devices.
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
 - <CommunityBadge /> [MemryX](#memryx-mx3): The MX3 Acceleration module is available in m.2 format, offering broad compatibility across various platforms.
+- <CommunityBadge /> [DEEPX](#deepx-npu): The DEEPX NPU is available in m.2 format and as a HAT+ for the Raspberry Pi 5, offering broad compatibility across various platforms.
 
 **AMD**
 
@@ -632,6 +633,94 @@ For detailed instructions on compiling models, refer to the [MemryX Compiler](ht
 # The .zip file must contain:
 # ├── yolonas.dfp          (a file ending with .dfp)
 # └── yolonas_post.onnx    (optional; only if the model includes a cropped post-processing network)
+```
+
+---
+
+## DEEPX NPU
+
+This detector is available for use with the DEEPX NPU, both the DX-M1 M.2 module and the DX-M1M on the Sixfab AI HAT+ for the Raspberry Pi 5. The configuration below applies unchanged to either form factor. DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
+
+See the [installation docs](../frigate/installation.md#deepx-npu) for information on installing the DEEPX kernel driver and passing the NPU through to the container.
+
+To configure a DEEPX detector, set the `type` attribute to `deepx` and follow the configuration guide below.
+
+### Configuration {#configuration-deepx}
+
+<ModelConfigDropdown detectorTitle="DEEPX" models={objectDetectorsModels.deepx.models} />
+
+Frigate does not bundle a model for this detector. Models must be compiled to DEEPX's `.dxnn` format.
+
+The quickest way to get one is the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), which publishes pre-compiled `.dxnn` files for a range of YOLO variants alongside a JSON file describing how each was compiled. Pick a YOLO detection model, download the `.dxnn`, bind-mount it into the container, and point `model.path` at it. Note the variant you picked, as it determines the `model_format` value below.
+
+Alternatively, compile your own model with the DX-COM compiler.
+
+`model.width` and `model.height` must match the resolution the model was compiled for. Quantization parameters are baked into the `.dxnn` file at compile time, so no normalization is applied on the host and Frigate's default `input_tensor`, `input_pixel_format`, and `input_dtype` values do not need to be overridden.
+
+#### Label maps
+
+Models from the DEEPX ModelZoo are trained on the standard 80-class COCO label set, so `labelmap_path` must be set to `/labelmap/coco-80.txt`. Frigate's default label map uses an extended 91-class scheme, and leaving it in place will cause detections to be reported as the wrong object type.
+
+#### Model formats
+
+DX-COM preserves the detection head of the model it compiles, so the YOLO variant determines how the output has to be read. Set `model_format` to the variant your `.dxnn` file was compiled from:
+
+```yaml
+detectors:
+  deepx:
+    type: deepx
+    model_format: yolov8
+```
+
+Supported values fall into three decode families:
+
+| `model_format`                             | Output layout                                                            | PPU support |
+| ------------------------------------------ | ------------------------------------------------------------------------ | ----------- |
+| `yolov5`, `yolov7`                         | Anchor-based, with a separate objectness score                            | Yes         |
+| `yolov8`, `yolov9`, `yolov11`, `yolov12`   | Anchor-free, no objectness, boxes already in pixels                       | Yes         |
+| `yolov10`, `yolov26`                       | NMS runs in the detection head, output is final corner boxes              | No          |
+
+Leaving `model_format` unset falls back to inferring the layout from the output shape. That inference cannot distinguish an anchor-based head from an anchor-free one, so it is only reliable for YOLOv8 and newer. Setting it explicitly is recommended.
+
+Two mistakes this option prevents:
+
+- Decoding an anchor-free model with the anchor formula squares the box dimensions, producing boxes hundreds of thousands of pixels wide that clip to the entire frame.
+- Decoding an anchor-based model as anchor-free reads the objectness column as a class score, so confidences and class IDs are both wrong.
+
+`yolov10` and `yolov26` run NMS inside the head, so `nms_threshold` does not apply to them.
+
+#### PPU models
+
+Models compiled with Post-Processing Unit (PPU) support perform candidate selection on the NPU itself and emit a list of surviving detections rather than raw feature maps. This leaves only the box decode and NMS for the host, which lowers CPU usage.
+
+Set `ppu: true` on the detector when using such a model:
+
+```yaml
+detectors:
+  deepx:
+    type: deepx
+    model_format: yolov8
+    ppu: true
+    score_threshold: 0.25
+    nms_threshold: 0.45
+```
+
+`ppu` and `model_format` are independent: `ppu` says whether candidate selection already happened on the NPU, and `model_format` says how to read the boxes that come back. Both must match how the model was compiled.
+
+DX-COM cannot compile `yolov10` or `yolov26` models with PPU support, since their heads already produce final detections. Combining either with `ppu: true` is rejected at startup.
+
+#### Multiple NPUs
+
+By default the detector binds to every NPU it can find. To pin a detector to specific devices, set `device_ids` to the indices you want it to use. This allows multiple detectors to be configured against separate modules:
+
+```yaml
+detectors:
+  deepx_0:
+    type: deepx
+    device_ids: [0]
+  deepx_1:
+    type: deepx
+    device_ids: [1]
 ```
 
 ---
