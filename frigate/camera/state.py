@@ -553,6 +553,7 @@ class CameraState:
                     current_best.thumbnail_data is not None
                     and obj.thumbnail_data is not None
                     and is_better_thumbnail(
+                        obj.thumbnail_attributes,
                         current_best.thumbnail_data,
                         obj.thumbnail_data,
                         self.camera_config.frame_shape,

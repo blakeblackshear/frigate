@@ -67,6 +67,7 @@ def has_better_attr(current_thumb, new_obj, attr_label) -> bool:
 
 
 def is_better_thumbnail(
+    label_attributes: list[str],
     current_thumb: dict[str, Any],
     new_obj: dict[str, Any],
     frame_shape: tuple[int, int],
@@ -75,7 +76,7 @@ def is_better_thumbnail(
     # cutoff images are less ideal, but they should also be smaller?
     # better scores are obviously better too
 
-    for attr_label in ("face", "license_plate"):
+    for attr_label in label_attributes:
         if has_better_attr(current_thumb, new_obj, attr_label):
             return True
 
