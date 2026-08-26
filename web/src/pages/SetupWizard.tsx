@@ -9,17 +9,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/context/theme-provider";
 import { dismissSetup } from "@/utils/setupWizard";
-import { useCallback, useReducer } from "react";
+import { useCallback, useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { LuMoon, LuSun } from "react-icons/lu";
 
-const STEPS = [
-  "setupWizard.steps.welcome",
-  "setupWizard.steps.camera",
-  "setupWizard.steps.detector",
-  "setupWizard.steps.hwaccel",
-  "setupWizard.steps.recording",
-  "setupWizard.steps.complete",
+type StepKey =
+  | "welcome"
+  | "camera"
+  | "detector"
+  | "hwaccel"
+  | "recording"
+  | "complete";
+
+const STEP_KEYS: StepKey[] = [
+  "welcome",
+  "camera",
+  "detector",
+  "hwaccel",
+  "recording",
+  "complete",
 ];
 
 type WizardState = {
@@ -114,6 +122,12 @@ export default function SetupWizard() {
   const [state, dispatch] = useReducer(wizardReducer, initialState);
   const { theme, systemTheme, setTheme } = useTheme();
 
+  const steps = STEP_KEYS;
+  const stepLabels = useMemo(
+    () => steps.map((key) => `setupWizard.steps.${key}`),
+    [steps],
+  );
+
   const isDark = (theme === "system" ? systemTheme : theme) === "dark";
 
   const handleSkipSetup = useCallback(() => {
@@ -161,17 +175,17 @@ export default function SetupWizard() {
   }, []);
 
   const renderStep = () => {
-    switch (state.currentStep) {
-      case 0:
+    switch (steps[state.currentStep]) {
+      case "welcome":
         return (
           <SetupWelcome
             onNext={() => dispatch({ type: "NEXT_STEP" })}
             onSkip={handleSkipSetup}
           />
         );
-      case 1:
+      case "camera":
         return <SetupCamera onNext={handleCameraNext} onBack={handleBack} />;
-      case 2:
+      case "detector":
         return (
           <SetupDetector
             cameraCount={state.cameraNames.length}
@@ -180,7 +194,7 @@ export default function SetupWizard() {
             onSkip={handleDetectorSkip}
           />
         );
-      case 3:
+      case "hwaccel":
         return (
           <SetupHwAccel
             detectorHardwareKey={state.detectorHardwareKey}
@@ -190,7 +204,7 @@ export default function SetupWizard() {
             onSkip={handleSkipStep}
           />
         );
-      case 4:
+      case "recording":
         return (
           <SetupRecording
             cameraNames={state.cameraNames}
@@ -199,7 +213,7 @@ export default function SetupWizard() {
             onSkip={handleSkipStep}
           />
         );
-      case 5:
+      case "complete":
         return (
           <SetupComplete
             cameraNames={state.cameraNames}
@@ -231,7 +245,7 @@ export default function SetupWizard() {
       <Card className="w-full max-w-lg">
         <CardContent className="p-6">
           <StepIndicator
-            steps={STEPS}
+            steps={stepLabels}
             currentStep={state.currentStep}
             variant="dots"
             translationNameSpace="views/setup"
