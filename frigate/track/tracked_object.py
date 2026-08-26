@@ -149,7 +149,6 @@ class TrackedObject:
         if not self.false_positive and has_valid_frame:
             # determine if this frame is a better thumbnail
             if self.thumbnail_data is None or is_better_thumbnail(
-                self.obj_data["label"],
                 self.thumbnail_data,
                 obj_data,
                 self.camera_config.frame_shape,
