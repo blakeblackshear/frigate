@@ -18,11 +18,9 @@
     "account": {
       "title": "Secure your account",
       "descriptionSignedIn": "You're signed in as {{username}} using the temporary password from the Frigate logs. Set one you'll remember.",
-      "descriptionAnonymous": "This port doesn't require a login. Set a password for the admin account so you can sign in on the secured port.",
+      "descriptionAnonymous": "You're accessing Frigate on a port that doesn't require a login. Set a password for the admin account so you can sign in on the secured port.",
       "passwordSet": "Password set",
       "changePassword": "Change password",
-      "usersTitle": "Other users",
-      "usersDescription": "Add accounts for anyone else who needs access. Roles can be changed later in Settings.",
       "addUser": "Add user",
       "usersFailed": "Could not load the user list. You can still set the admin password.",
       "userFailed": "Failed to add the user. Please try again."

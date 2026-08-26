@@ -251,11 +251,7 @@ export default function SetupDetector({
           {t("setupWizard.actions.back")}
         </Button>
         <div className="flex flex-1 justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onSkip(selected.key)}
-          >
+          <Button type="button" onClick={() => onSkip(selected.key)}>
             {t("setupWizard.actions.skip")}
           </Button>
           <Button

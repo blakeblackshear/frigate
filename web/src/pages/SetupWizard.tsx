@@ -266,7 +266,7 @@ export default function SetupWizard() {
         {isDark ? <LuSun className="size-4" /> : <LuMoon className="size-4" />}
       </Button>
 
-      <Card className="w-full max-w-lg">
+      <Card className="w-full max-w-lg bg-background_alt">
         <CardContent className="p-6">
           <StepIndicator
             steps={stepLabels}

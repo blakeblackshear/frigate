@@ -238,7 +238,7 @@ export default function SetupHwAccel({
           {t("setupWizard.actions.back")}
         </Button>
         <div className="flex flex-1 justify-end gap-3">
-          <Button type="button" variant="outline" onClick={onSkip}>
+          <Button type="button" onClick={onSkip}>
             {t("setupWizard.actions.skip")}
           </Button>
           <Button

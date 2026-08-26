@@ -107,57 +107,49 @@ export default function SetupAccount({
         </p>
       </div>
 
-      <div className="flex items-center justify-between rounded-md border p-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium">{adminUsername}</span>
-          {passwordSet && (
-            <span className="flex items-center gap-2 text-xs text-muted-foreground">
-              <FaCircleCheck className="size-3 text-success" />
-              {t("setupWizard.account.passwordSet")}
-            </span>
-          )}
-        </div>
-        <Button
-          type="button"
-          variant="select"
-          onClick={() => setShowPassword(true)}
-        >
-          {t("setupWizard.account.changePassword")}
-        </Button>
-      </div>
-
       <div className="flex flex-col gap-2">
-        <div>
-          <h3 className="text-sm font-medium">
-            {t("setupWizard.account.usersTitle")}
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            {t("setupWizard.account.usersDescription")}
-          </p>
+        <div className="flex items-center justify-between rounded-md border p-3">
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium">{adminUsername}</span>
+            {passwordSet && (
+              <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                <FaCircleCheck className="size-3 text-success" />
+                {t("setupWizard.account.passwordSet")}
+              </span>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowPassword(true)}
+          >
+            {t("setupWizard.account.changePassword")}
+          </Button>
         </div>
-
-        {isLoading && <ActivityIndicator />}
-
-        {usersError && (
-          <p className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
-            {t("setupWizard.account.usersFailed")}
-          </p>
-        )}
 
         {otherUsers.map((user) => (
           <div
             key={user.username}
             className="flex items-center justify-between rounded-md border p-3"
           >
-            <span className="text-sm">{user.username}</span>
+            <span className="text-sm font-medium">{user.username}</span>
             <span className="text-xs text-muted-foreground">{user.role}</span>
           </div>
         ))}
+      </div>
 
+      {isLoading && <ActivityIndicator />}
+
+      {usersError && (
+        <p className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
+          {t("setupWizard.account.usersFailed")}
+        </p>
+      )}
+
+      <div className="flex flex-col items-center gap-3 py-4">
         <Button
-          type="button"
-          variant="outline"
-          className="self-start"
+          variant="select"
+          className="w-full"
           onClick={() => setShowCreate(true)}
         >
           {t("setupWizard.account.addUser")}
@@ -169,7 +161,7 @@ export default function SetupAccount({
           {t("setupWizard.actions.back")}
         </Button>
         <div className="flex flex-1 justify-end gap-3">
-          <Button type="button" variant="outline" onClick={onSkip}>
+          <Button type="button" onClick={onSkip}>
             {t("setupWizard.actions.skip")}
           </Button>
           <Button type="button" variant="select" onClick={onNext}>
