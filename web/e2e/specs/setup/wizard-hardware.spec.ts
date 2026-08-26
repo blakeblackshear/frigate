@@ -61,7 +61,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    const addCamera = await installFirstRun(frigateApp, page, {
+    await installFirstRun(frigateApp, page, {
       hwaccel: {
         recommended: "vaapi",
         available: [
@@ -79,7 +79,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     const saves = await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page, addCamera);
+    await gotoDetectorStep(page);
 
     // the default hardware mock reports two Corals, an Intel GPU, and the CPU
     await expect(
@@ -124,13 +124,13 @@ test.describe("setup wizard hardware @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    const addCamera = await installFirstRun(frigateApp, page, {
+    await installFirstRun(frigateApp, page, {
       hardware: NVIDIA_HARDWARE,
     });
     const saves = await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page, addCamera);
+    await gotoDetectorStep(page);
 
     await expect(
       page.getByRole("radio", { name: /NVIDIA GeForce RTX 3060/ }),
@@ -165,7 +165,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    const addCamera = await installFirstRun(frigateApp, page, {
+    await installFirstRun(frigateApp, page, {
       hardware: NVIDIA_HARDWARE,
       hwaccel: {
         recommended: "nvidia",
@@ -175,7 +175,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page, addCamera);
+    await gotoDetectorStep(page);
     await page
       .getByRole("button", { name: "Continue without detection" })
       .click();
@@ -201,7 +201,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    const addCamera = await installFirstRun(frigateApp, page, {
+    await installFirstRun(frigateApp, page, {
       hwaccel: {
         recommended: "jetson",
         available: [
@@ -218,7 +218,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     const saves = await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page, addCamera);
+    await gotoDetectorStep(page);
     await page.getByRole("button", { name: "Next" }).click();
     await expect(page.getByText("Hardware Acceleration")).toBeVisible();
 
@@ -238,11 +238,11 @@ test.describe("setup wizard hardware @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    const addCamera = await installFirstRun(frigateApp, page);
+    await installFirstRun(frigateApp, page);
     const saves = await captureSaves(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
-    await gotoDetectorStep(page, addCamera);
+    await gotoDetectorStep(page);
     await page.getByRole("button", { name: "Next" }).click();
     await expect(page.getByText("Hardware Acceleration")).toBeVisible();
 

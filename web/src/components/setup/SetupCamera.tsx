@@ -2,8 +2,6 @@ import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import { Button } from "@/components/ui/button";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import useSWR from "swr";
-import { FrigateConfig } from "@/types/frigateConfig";
 import { FaCircleCheck } from "react-icons/fa6";
 
 type SetupCameraProps = {
@@ -19,30 +17,18 @@ export default function SetupCamera({ onNext, onBack }: SetupCameraProps) {
   const [showWizard, setShowWizard] = useState(false);
   const [addedCameras, setAddedCameras] = useState<string[]>([]);
   const [detectCodecs, setDetectCodecs] = useState<Record<string, string>>({});
-  const { mutate: mutateConfig } = useSWR<FrigateConfig>("config", {
-    revalidateOnFocus: false,
-  });
-
   const handleClose = useCallback(() => {
     setShowWizard(false);
-    // the dialog's config save and go2rtc setup need a moment to land, and
-    // the SWR cache would serve the pre-save config
-    setTimeout(() => {
-      fetch(`${window.baseUrl || ""}api/config`)
-        .then((res) => res.json())
-        .then((freshConfig: FrigateConfig) => {
-          const cameraNames = Object.keys(freshConfig.cameras || {});
-          if (cameraNames.length > addedCameras.length) {
-            mutateConfig(freshConfig, { revalidate: false });
-            setAddedCameras(cameraNames);
-          }
-        })
-        .catch(() => {});
-    }, 1000);
-  }, [mutateConfig, addedCameras]);
+  }, []);
 
+  // the dialog fires this once its config write has succeeded, which is the
+  // only reliable signal that a camera was added
   const handleCameraAdded = useCallback(
     ({ name, detectCodec }: { name: string; detectCodec?: string }) => {
+      setAddedCameras((previous) =>
+        previous.includes(name) ? previous : [...previous, name],
+      );
+
       if (detectCodec) {
         setDetectCodecs((previous) => ({ ...previous, [name]: detectCodec }));
       }
@@ -51,8 +37,12 @@ export default function SetupCamera({ onNext, onBack }: SetupCameraProps) {
   );
 
   const handleNext = useCallback(() => {
-    onNext(addedCameras.length > 0 ? addedCameras : undefined, detectCodecs);
+    onNext(addedCameras, detectCodecs);
   }, [onNext, addedCameras, detectCodecs]);
+
+  const handleSkip = useCallback(() => {
+    onNext();
+  }, [onNext]);
 
   return (
     <>
@@ -97,9 +87,13 @@ export default function SetupCamera({ onNext, onBack }: SetupCameraProps) {
             {t("setupWizard.actions.back")}
           </Button>
           <div className="flex flex-1 justify-end gap-3">
-            {addedCameras.length > 0 && (
+            {addedCameras.length > 0 ? (
               <Button type="button" variant="select" onClick={handleNext}>
                 {t("setupWizard.actions.next")}
+              </Button>
+            ) : (
+              <Button type="button" variant="outline" onClick={handleSkip}>
+                {t("setupWizard.actions.skip")}
               </Button>
             )}
           </div>

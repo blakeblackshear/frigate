@@ -2,7 +2,9 @@
  * Shared setup-wizard e2e helpers.
  *
  * The wizard shows when config has no cameras, so a first run is mocked by
- * serving a camera-less config until the returned callback is fired.
+ * serving a camera-less config until the returned callback is fired. Firing
+ * it is only needed by tests that care what the rest of the app sees; the
+ * wizard itself tracks added cameras from the camera dialog's own callback.
  */
 
 import type { Page } from "@playwright/test";
@@ -32,7 +34,7 @@ export async function installFirstRun(
   };
 }
 
-export async function gotoDetectorStep(page: Page, addCamera: () => void) {
+export async function gotoDetectorStep(page: Page) {
   await page.getByRole("button", { name: "Get Started" }).click();
 
   // the account step sits between welcome and camera whenever auth is on,
@@ -43,17 +45,7 @@ export async function gotoDetectorStep(page: Page, addCamera: () => void) {
   await page.getByRole("button", { name: "Skip" }).click();
 
   await expect(page.getByText("Add Your First Camera")).toBeVisible();
+  await page.getByRole("button", { name: "Skip" }).click();
 
-  // the camera step's Next only renders once its local addedCameras fills,
-  // which SetupCamera does by refetching config when the dialog closes, so
-  // opening and cancelling the dialog is what reveals Next
-  await page.getByRole("button", { name: "Add Camera" }).click();
-  addCamera();
-  await page.getByRole("button", { name: "Cancel" }).click();
-
-  await expect(page.getByRole("button", { name: "Next" })).toBeVisible({
-    timeout: 10_000,
-  });
-  await page.getByRole("button", { name: "Next" }).click();
   await expect(page.getByText("Object Detection")).toBeVisible();
 }

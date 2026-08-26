@@ -155,7 +155,7 @@ test.describe("setup wizard account @high @mobile", () => {
     frigateApp,
     page,
   }) => {
-    const addCamera = await installFirstRun(frigateApp, page);
+    await installFirstRun(frigateApp, page);
     await captureUserCalls(page);
 
     await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
@@ -173,16 +173,8 @@ test.describe("setup wizard account @high @mobile", () => {
     await expect(page.getByText("Password set")).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
 
-    // the camera step has no Skip, so it is advanced the way the detector
-    // helper does, by opening and cancelling the add dialog
     await expect(page.getByText("Add Your First Camera")).toBeVisible();
-    await page.getByRole("button", { name: "Add Camera" }).click();
-    addCamera();
-    await page.getByRole("button", { name: "Cancel" }).click();
-    await expect(page.getByRole("button", { name: "Next" })).toBeVisible({
-      timeout: 10_000,
-    });
-    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Skip" }).click();
 
     // every remaining step is passed without writing config: Skip on the
     // detector, then Auto on hwaccel, which has nothing to derive and so
