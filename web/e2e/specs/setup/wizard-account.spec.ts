@@ -153,4 +153,54 @@ test.describe("setup wizard account @high @mobile", () => {
     await expect(page.getByText("Add Your First Camera")).toBeVisible();
     expect(sent).toHaveLength(0);
   });
+  test("an account change alone needs no restart", async ({
+    frigateApp,
+    page,
+  }) => {
+    const addCamera = await installFirstRun(frigateApp, page);
+    await captureUserCalls(page);
+
+    await frigateApp.gotoAndWait("/", "text=Welcome to Frigate");
+    await gotoAccountStep(page);
+
+    await page.getByRole("button", { name: "Change password" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog
+      .getByPlaceholder("Enter new password", { exact: true })
+      .fill("a-long-enough-password");
+    await dialog
+      .getByPlaceholder("Re-enter new password")
+      .fill("a-long-enough-password");
+    await dialog.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText("Password set")).toBeVisible();
+    await page.getByRole("button", { name: "Next" }).click();
+
+    // the camera step has no Skip, so it is advanced the way the detector
+    // helper does, by opening and cancelling the add dialog
+    await expect(page.getByText("Add Your First Camera")).toBeVisible();
+    await page.getByRole("button", { name: "Add Camera" }).click();
+    addCamera();
+    await page.getByRole("button", { name: "Cancel" }).click();
+    await expect(page.getByRole("button", { name: "Next" })).toBeVisible({
+      timeout: 10_000,
+    });
+    await page.getByRole("button", { name: "Next" }).click();
+
+    // every remaining step is passed without writing config: Skip on the
+    // detector, then Auto on hwaccel, which has nothing to derive and so
+    // saves nothing, then Skip on recording
+    await expect(page.getByText("Object Detection")).toBeVisible();
+    await page.getByRole("button", { name: "Skip" }).click();
+    await expect(page.getByText("Hardware Acceleration")).toBeVisible();
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Skip" }).click();
+
+    await expect(page.getByText("You're done!")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Go to Live View" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Frigate needs to restart to apply your settings"),
+    ).toBeHidden();
+  });
 });
