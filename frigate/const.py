@@ -44,7 +44,11 @@ DEFAULT_ATTRIBUTE_LABEL_MAP = {
         "ups",
         "usps",
     ],
+    "truck": ["license_plate"],
+    "garbage_truck": ["license_plate"],
     "motorcycle": ["license_plate"],
+    "bus": ["license_plate"],
+    "school_bus": ["license_plate"],
 }
 ATTRIBUTE_LABEL_DISPLAY_MAP = {
     "amazon": "Amazon",

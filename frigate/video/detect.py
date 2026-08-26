@@ -216,20 +216,10 @@ def process_frames(
 
     # remove license_plate from attributes if this camera is a dedicated LPR cam
     if camera_config.type == CameraTypeEnum.lpr:
-        modified_attributes_map = model_config.attributes_map.copy()
-
-        if (
-            "car" in modified_attributes_map
-            and "license_plate" in modified_attributes_map["car"]
-        ):
-            modified_attributes_map["car"] = [
-                attr
-                for attr in modified_attributes_map["car"]
-                if attr != "license_plate"
-            ]
-
-            attributes_map = modified_attributes_map
-
+        attributes_map = {
+            label: [attr for attr in attributes if attr != "license_plate"]
+            for label, attributes in model_config.attributes_map.items()
+        }
         all_attributes = [
             attr for attr in model_config.all_attributes if attr != "license_plate"
         ]
