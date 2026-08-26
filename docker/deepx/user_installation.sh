@@ -28,6 +28,13 @@
 set -euo pipefail
 
 driver_version="v2.6.0"
+# Commit the tag above resolves to, pinned so a later retag or repoint of
+# v2.6.0 upstream can't silently swap in different source between review and
+# build, before it's compiled and installed as root. DEEPX doesn't sign tags
+# or publish checksums for this repo, so an immutable commit is the strongest
+# verification available. Update both together when bumping driver_version:
+#   git ls-remote https://github.com/DEEPX-AI/dx_rt_npu_linux_driver.git "refs/tags/<version>"
+driver_commit="7074748e7104f470b02f517583abba652b3f05fa"
 firmware_version="v2.7.4"
 
 sudo apt-get update
@@ -39,9 +46,25 @@ if ! lspci -d 1ff4: | grep -q .; then
     exit 1
 fi
 
-git clone --depth 1 --branch "${driver_version}" \
-    https://github.com/DEEPX-AI/dx_rt_npu_linux_driver.git
-cd dx_rt_npu_linux_driver/modules
+# Fetch the pinned commit directly (GitHub allows fetching a public repo by
+# SHA, not just by branch/tag) rather than cloning "${driver_version}", so
+# driver_commit above is what actually determines the source, not a ref that
+# could move after this script was reviewed.
+mkdir dx_rt_npu_linux_driver
+cd dx_rt_npu_linux_driver
+git init -q
+git remote add origin https://github.com/DEEPX-AI/dx_rt_npu_linux_driver.git
+git fetch --depth 1 origin "${driver_commit}"
+git checkout -q FETCH_HEAD
+
+fetched_commit=$(git rev-parse HEAD)
+if [[ "${fetched_commit}" != "${driver_commit}" ]]; then
+    echo "Fetched commit ${fetched_commit} does not match pinned driver_commit ${driver_commit}."
+    echo "Refusing to build unverified driver source."
+    exit 1
+fi
+
+cd modules
 
 # --reload unloads any running modules and loads the newly built ones, so the
 # NPU is usable without a reboot.
