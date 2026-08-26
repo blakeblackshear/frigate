@@ -9,8 +9,7 @@
 
 import { test, expect } from "../../fixtures/frigate-test";
 import type { Page } from "@playwright/test";
-import { configFactory } from "../../fixtures/mock-data/config";
-import type { ApiMockOverrides } from "../../helpers/api-mocker";
+import { gotoDetectorStep, installFirstRun } from "../../helpers/setup-wizard";
 
 const NVIDIA_HARDWARE = [
   {
@@ -55,51 +54,6 @@ async function captureRestarts(page: Page): Promise<string[]> {
     return route.fulfill({ json: { success: true, message: "Restarting" } });
   });
   return calls;
-}
-
-/**
- * Install mocks for a first run: the wizard shows when config has no cameras,
- * so the config route starts empty and only reports cameras once the returned
- * callback is fired, standing in for the camera the user adds.
- */
-async function installFirstRun(
-  frigateApp: { installDefaults: (o?: ApiMockOverrides) => Promise<void> },
-  page: Page,
-  overrides?: ApiMockOverrides,
-): Promise<() => void> {
-  await frigateApp.installDefaults(overrides);
-
-  const full = configFactory(overrides?.config);
-  let cameras: unknown = {};
-
-  await page.route("**/api/config", (route) => {
-    if (route.request().method() === "GET") {
-      return route.fulfill({ json: { ...full, cameras } });
-    }
-    return route.fulfill({ json: { success: true } });
-  });
-
-  return () => {
-    cameras = full.cameras;
-  };
-}
-
-async function gotoDetectorStep(page: Page, addCamera: () => void) {
-  await page.getByRole("button", { name: "Get Started" }).click();
-  await expect(page.getByText("Add Your First Camera")).toBeVisible();
-
-  // the camera step's Next only renders once its local addedCameras fills,
-  // which SetupCamera does by refetching config when the dialog closes, so
-  // opening and cancelling the dialog is what reveals Next
-  await page.getByRole("button", { name: "Add Camera" }).click();
-  addCamera();
-  await page.getByRole("button", { name: "Cancel" }).click();
-
-  await expect(page.getByRole("button", { name: "Next" })).toBeVisible({
-    timeout: 10_000,
-  });
-  await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.getByText("Object Detection")).toBeVisible();
 }
 
 test.describe("setup wizard hardware @high @mobile", () => {

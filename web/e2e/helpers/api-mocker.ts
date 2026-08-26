@@ -47,6 +47,7 @@ export interface ApiMockOverrides {
     recommended: string;
     available?: { key: string; presets: Record<string, string> }[];
   };
+  users?: { username: string; role: string }[];
 }
 
 export class ApiMocker {
@@ -198,6 +199,16 @@ export class ApiMocker {
           ...(overrides?.hwaccel ?? {}),
         },
       }),
+    );
+
+    // Users. GET lists them; POST/PUT (create, password) just succeed, so
+    // tests assert on the intercepted request body instead of a response.
+    await this.page.route("**/api/users**", (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({
+            json: overrides?.users ?? [{ username: "admin", role: "admin" }],
+          })
+        : route.fulfill({ json: { message: "ok" } }),
     );
 
     // Go2RTC streams
