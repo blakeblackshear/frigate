@@ -1,5 +1,7 @@
+import io
 import os
 import tempfile
+import zipfile
 from unittest.mock import patch
 
 from frigate.jobs.export import (
@@ -1431,3 +1433,79 @@ class TestHttpExport(BaseTestHttp):
             )
 
         assert response.status_code == 403
+
+    def test_download_export_case_with_multibyte_name(self):
+        """A case name outside latin-1 must not break the response headers."""
+        case = ExportCase.create(
+            id="case_multibyte",
+            name="テスト事案",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video_path = os.path.join(tmpdir, "multibyte_export.mp4")
+            with open(video_path, "wb") as handle:
+                handle.write(b"video")
+
+            Export.create(
+                id="export_multibyte",
+                camera="front_door",
+                name="現場カメラ",
+                date=100,
+                video_path=video_path,
+                thumb_path=os.path.join(tmpdir, "multibyte_export.webp"),
+                in_progress=False,
+                export_case=case,
+            )
+
+            with AuthTestClient(self.app) as client:
+                response = client.get(f"/cases/{case.id}/download")
+
+        assert response.status_code == 200
+        # RFC 5987/6266: the UTF-8 name rides in filename*, and a latin-1 safe
+        # fallback stays in filename for old clients.
+        assert response.headers["content-disposition"] == (
+            'attachment; filename="case_multibyte.zip"; '
+            "filename*=UTF-8''%E3%83%86%E3%82%B9%E3%83%88%E4%BA%8B%E6%A1%88.zip"
+        )
+
+        archive = zipfile.ZipFile(io.BytesIO(response.content))
+        assert archive.namelist() == ["現場カメラ.mp4"]
+
+    def test_download_export_case_with_ascii_name(self):
+        """An ASCII case name still gets a plain, readable filename."""
+        case = ExportCase.create(
+            id="case_ascii",
+            name="Burglary 2026-08",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video_path = os.path.join(tmpdir, "ascii_export.mp4")
+            with open(video_path, "wb") as handle:
+                handle.write(b"video")
+
+            Export.create(
+                id="export_ascii",
+                camera="front_door",
+                name="Front door",
+                date=100,
+                video_path=video_path,
+                thumb_path=os.path.join(tmpdir, "ascii_export.webp"),
+                in_progress=False,
+                export_case=case,
+            )
+
+            with AuthTestClient(self.app) as client:
+                response = client.get(f"/cases/{case.id}/download")
+
+        assert response.status_code == 200
+        assert (
+            response.headers["content-disposition"]
+            == 'attachment; filename="Burglary 2026-08.zip"; '
+            "filename*=UTF-8''Burglary%202026-08.zip"
+        )
