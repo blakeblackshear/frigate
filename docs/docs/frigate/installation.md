@@ -381,6 +381,89 @@ If you can't use Docker Compose, you can run the container with something simila
 
 Finally, configure [hardware object detection](/configuration/object_detectors#memryx-mx3) to complete the setup.
 
+### DEEPX NPU
+
+The DEEPX NPU is available in two form factors, and Frigate supports both:
+
+- **DX-M1** in the M.2 2280 form factor (like an NVMe SSD), for x86 (Intel/AMD) PCs, the Raspberry Pi 5, and other ARM SBCs with an exposed PCIe M.2 slot.
+- **DX-M1M** on the [Sixfab AI HAT+](https://docs.sixfab.com/docs/ai-hat-plus-raspberry-pi-5-quickstart), a HAT+ board that connects to the Raspberry Pi 5 over PCIe Gen 3 x1.
+
+Both present the NPU through the same PCIe driver and DX-RT runtime, so the setup below and the detector configuration are identical for either one. Nothing needs to change when moving between them.
+
+DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
+
+#### Versions
+
+A DEEPX install has three separately versioned pieces, and all three have to agree. The DX-RT runtime is built into the Frigate image, so the two host-side pieces must be brought up to match it:
+
+| Component     | Version  | Installed on  | Installed by               |
+| ------------- | -------- | ------------- | -------------------------- |
+| DX-RT runtime | `v3.4.2` | Frigate image | Built in, no action needed |
+| Kernel driver | `v2.6.0` | Docker host   | `user_installation.sh`     |
+| NPU firmware  | `v2.7.4` | The module    | Flashed from the host      |
+
+:::warning
+
+A version mismatch does not produce a startup error. It typically shows up as inference requests that are accepted but never return a result, so detections simply stop appearing while Frigate looks healthy. If that happens after a Frigate upgrade, check all three versions before anything else.
+
+:::
+
+The firmware version cannot be read without the DX-RT runtime installed on the host, so checking or updating it is a manual step done before Frigate is running:
+
+1. Install the DX-RT runtime on the host by following DEEPX's own instructions. If you are using Sixfab hardware, their [AI HAT+ quickstart](https://docs.sixfab.com/docs/ai-hat-plus-raspberry-pi-5-quickstart) covers this.
+2. Check the reported firmware version and update the module if it does not match the table above.
+3. **Remove or disable the host runtime before starting the Frigate container.**
+
+:::danger
+
+Step 3 is not optional when running Frigate in Docker. The DX-RT daemon (`dxrtd`) may only run once per system, and Frigate runs its own copy inside the container. Leaving the host runtime active means two daemons competing for the same NPU, and the container's copy will fail to start.
+
+This only applies to Docker. If you run Frigate directly on the host, it uses the host's runtime and there is no conflict.
+
+:::
+
+#### Installation
+
+The DEEPX kernel driver must be installed on the host rather than in the container, because containers share the host kernel and cannot load kernel modules. Installing it creates the `/dev/dxrt*` device nodes that are passed through to Frigate.
+
+1. Copy or download [this script](https://github.com/blakeblackshear/frigate/blob/dev/docker/deepx/user_installation.sh).
+2. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
+3. Run the script with `./user_installation.sh`
+4. **Restart your computer** to complete driver installation.
+
+Confirm the NPU is visible before continuing:
+
+```bash
+ls /dev/dxrt*
+```
+
+:::note
+
+The installation script disables the host's `dxrt.service` if it finds one, for the reason described above. If you install or reinstall the DEEPX runtime on the host afterwards, disable it again before starting the container:
+
+```bash
+sudo systemctl disable --now dxrt.service
+```
+
+:::
+
+#### Setup
+
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
+
+Next, grant Docker access to the NPU by adding the device to your `docker-compose.yml` file:
+
+```yaml
+devices:
+  - /dev/dxrt0
+```
+
+If you can't use Docker Compose, add `--device /dev/dxrt0` to your `docker run` command.
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#deepx-npu) to complete the setup.
+
 ### Rockchip platform
 
 Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and necessary drivers (especially rkvdec2 and rknpu). To check, enter the following commands:
