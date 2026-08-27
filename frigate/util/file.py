@@ -20,14 +20,15 @@ logger = logging.getLogger(__name__)
 
 
 def get_event_thumbnail_bytes(event: Event) -> bytes | None:
+    # callers treat empty bytes as a valid image, so normalize them to None
     if event.thumbnail:
-        return base64.b64decode(event.thumbnail)
+        return base64.b64decode(event.thumbnail) or None
     else:
         try:
             with open(
                 os.path.join(THUMB_DIR, event.camera, f"{event.id}.webp"), "rb"
             ) as f:
-                return f.read()
+                return f.read() or None
         except Exception:
             return None
 
