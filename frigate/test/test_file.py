@@ -70,3 +70,19 @@ class TestFileUtils(TestCase):
             assert rendered_image is not None
             assert rendered_image.shape[0] == 40
             assert rendered_image.max() > 0
+
+    def test_get_event_thumbnail_bytes_ignores_empty_file(self):
+        """Verify empty thumbnail files are treated as missing."""
+        event = SimpleNamespace(id="empty-thumb", camera="front_door", thumbnail=None)
+
+        with (
+            tempfile.TemporaryDirectory() as thumb_dir,
+            patch.object(file_util, "THUMB_DIR", thumb_dir),
+        ):
+            camera_dir = os.path.join(thumb_dir, event.camera)
+            os.makedirs(camera_dir)
+
+            with open(os.path.join(camera_dir, f"{event.id}.webp"), "wb"):
+                pass
+
+            assert file_util.get_event_thumbnail_bytes(event) is None
