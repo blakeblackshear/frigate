@@ -1,0 +1,19 @@
+#!/bin/bash
+# Exit 0 when FRIGATE_ROOT_SERVICES names the given service.
+# Membership only: FRIGATE_RUN_AS_ROOT precedence and the euid check stay in
+# the callers, which each combine them differently.
+#
+# Usage: service-runs-as-root SERVICE
+
+set -o nounset
+
+service="${1:?usage: service-runs-as-root SERVICE}"
+
+IFS=',' read -ra entries <<< "${FRIGATE_ROOT_SERVICES:-}"
+for entry in "${entries[@]}"; do
+    entry="${entry//[[:space:]]/}"
+    if [[ "$entry" == "$service" ]]; then
+        exit 0
+    fi
+done
+exit 1
