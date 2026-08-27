@@ -16,6 +16,9 @@ class FakePwEntry:
 class TestGetRuntimeIds(unittest.TestCase):
     def setUp(self) -> None:
         ownership.get_runtime_ids.cache_clear()
+        # and again on the way out, so a value cached under this test's
+        # patches never leaks into later test modules in the same process
+        self.addCleanup(ownership.get_runtime_ids.cache_clear)
 
     @patch("frigate.util.ownership.os.geteuid", return_value=1000)
     def test_returns_none_when_not_root(self, _):
@@ -50,6 +53,9 @@ class TestGetRuntimeIds(unittest.TestCase):
 class TestChownToRuntime(unittest.TestCase):
     def setUp(self) -> None:
         ownership.get_runtime_ids.cache_clear()
+        # and again on the way out, so a value cached under this test's
+        # patches never leaks into later test modules in the same process
+        self.addCleanup(ownership.get_runtime_ids.cache_clear)
 
     @patch("frigate.util.ownership.os.chown")
     @patch("frigate.util.ownership.get_runtime_ids", return_value=None)
