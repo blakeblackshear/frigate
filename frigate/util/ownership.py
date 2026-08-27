@@ -1,5 +1,6 @@
 """Helpers for aligning created files with the non-root runtime user."""
 
+import functools
 import logging
 import os
 import pwd
@@ -9,12 +10,15 @@ logger = logging.getLogger(__name__)
 RUNTIME_USER = "frigate"
 
 
+@functools.lru_cache(maxsize=1)
 def get_runtime_ids() -> tuple[int, int] | None:
     """Return (uid, gid) that services run as, or None when chown is not applicable.
 
     None when: not root (docker --user, so the host already mapped us),
     FRIGATE_RUN_AS_ROOT=true (escape hatch must not mutate ownership),
     or outside the Frigate container image (no frigate user).
+    The result is cached for the process lifetime because the runtime user
+    cannot change after boot.
     """
     if os.geteuid() != 0:
         return None
