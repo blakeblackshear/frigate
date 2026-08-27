@@ -1,6 +1,5 @@
 """Export apis."""
 
-import asyncio
 import contextlib
 import datetime
 import logging
@@ -931,7 +930,7 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
     # move the file first so a rename that can't happen leaves the row alone
     if moved:
         try:
-            await asyncio.to_thread(os.rename, old_path, new_path)
+            os.rename(old_path, new_path)
         except OSError:
             logger.exception("Failed to rename export file for %s", event_id)
             return JSONResponse(
@@ -948,7 +947,7 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
         # the queue database has no transactions, so undo the move by hand
         if moved:
             with contextlib.suppress(OSError):
-                await asyncio.to_thread(os.rename, new_path, old_path)
+                os.rename(new_path, old_path)
 
         if isinstance(err, IntegrityError):
             logger.warning(
