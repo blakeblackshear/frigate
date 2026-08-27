@@ -119,10 +119,8 @@ setup_homekit_config "${homekit_config_path}"
 
 if [[ "$(id -u)" -eq 0 && "$runs_as_root" -eq 0 ]]; then
     chown go2rtc:go2rtc /dev/shm/go2rtc.yaml 2>/dev/null || true
-    # go2rtc rewrites this in place (os.WriteFile, no rename), so owning the
-    # file is enough; /config grants frigate-data traverse only. Tolerated so
-    # a chown-refusing mount (NFS root_squash) degrades pairing persistence
-    # instead of crash-looping the service
+    # go2rtc rewrites this in place, so owning the file is enough. Tolerated so
+    # a chown-refusing mount (NFS root_squash) degrades pairing, not the service
     chown go2rtc:frigate-data "${homekit_config_path}" 2>/dev/null && chmod 664 "${homekit_config_path}" 2>/dev/null || \
         echo "[WARN] Could not hand ${homekit_config_path} to the go2rtc user; HomeKit pairing changes may not persist"
 fi

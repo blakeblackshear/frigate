@@ -11,10 +11,8 @@ if [[ "$(id -u)" -eq 0 ]]; then
     fi
 fi
 
-# $HOME is /root from the container env and survives s6-setuidgid, so cache
-# and telemetry writes (huggingface, openvino) fail after the drop. Set it
-# before opt_in_out so the opt-out marker lands where the service will look.
-# When the service keeps root, /root stays correct.
+# /root survives s6-setuidgid and breaks cache writes after the drop; set
+# before opt_in_out so the opt-out marker lands where the service will look
 if [[ "$runs_as_root" -eq 0 ]]; then
     export HOME=/config
 fi

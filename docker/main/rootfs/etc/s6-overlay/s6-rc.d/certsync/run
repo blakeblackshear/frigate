@@ -6,10 +6,8 @@ set -o errexit -o nounset -o pipefail
 
 # Logs should be sent to stdout so that s6 can collect them
 
-# Signal the master directly rather than running `nginx -s reload`. That would
-# have root parse /tmp/nginx/conf, which the unprivileged nginx user can
-# rewrite, and nginx acts on path directives while loading a config: it creates
-# them and chowns them to the configured user.
+# Not `nginx -s reload`: that has root parse /tmp/nginx/conf, which the
+# unprivileged nginx user can rewrite, and nginx chowns path directives on load.
 function reload_nginx() {
     local pid
 

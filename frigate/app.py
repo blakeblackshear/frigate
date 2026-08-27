@@ -231,9 +231,8 @@ class FrigateApp:
 
         migrate_db.close()
 
-        # A root frigate service (FRIGATE_ROOT_SERVICES) creates these as
-        # root. The wal and shm journals can be recreated as root later in
-        # the run; the per-boot sweep of /config realigns those on restart.
+        # a root frigate service creates these as root; wal and shm recreated
+        # later in the run are realigned by the per-boot /config sweep
         for db_file in (
             self.config.database.path,
             f"{self.config.database.path}-wal",

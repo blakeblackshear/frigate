@@ -11,8 +11,7 @@
 #   --mode       append STRING to the sentinel, so changing it re-sweeps once
 #
 # Only files whose uid OR gid differs are touched, so re-runs are cheap.
-# lost+found is skipped: it belongs to the filesystem, not to Frigate, and
-# fsck puts recovered fragments of arbitrary files there under root-only 0700.
+# lost+found is skipped: fsck fills it with root-only recovered fragments.
 # Top-level /config additionally grants group frigate-data TRAVERSE ONLY
 # (g+rx) so the separate go2rtc user can reach its pre-created HomeKit file
 # on hosts where /config is mounted 0700. Never g+w: directory write means
@@ -64,10 +63,8 @@ if [[ "$(id -u)" -ne 0 ]]; then
     exit 0
 fi
 
-# The mode string folds the FRIGATE_ROOT_SERVICES list into the sentinel, so
-# entering or leaving a granular root mode re-sweeps once. That is the
-# backstop for anything a root service created that the per-boot sweep and
-# chown-at-create did not cover.
+# The list folds into the sentinel so entering or leaving a granular root mode
+# re-sweeps once, catching whatever the other ownership mechanisms missed.
 sentinel_content="${schema}:${target_uid}:${target_gid}"
 if [[ -n "$mode" ]]; then
     sentinel_content="${sentinel_content}:${mode}"
@@ -125,8 +122,7 @@ for path in "$@"; do
         continue
     fi
 
-    # -print feeds the progress counter while -exec {} + keeps the chown
-    # batched; the scan above is what makes a real percentage possible
+    # -print feeds the progress counter; -exec {} + keeps the chown batched
     started=$SECONDS
     if find "$path" -name lost+found -prune -o \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
         -print -exec chown -h "${target_uid}:${target_gid}" {} + \
@@ -137,8 +133,8 @@ for path in "$@"; do
                 if (pct > 100) pct = 100
                 if (pct >= next_pct) {
                     printf "[INFO] fix-ownership: %s %d%% (%d/%d entries)\n", path, pct, NR, total
-                    # mawk block-buffers to a pipe; without this the whole
-                    # progress log arrives at once when the sweep ends
+                    # mawk block-buffers to a pipe; without fflush the whole
+                    # progress log arrives at once
                     fflush()
                     while (next_pct <= pct) next_pct += 5
                 }

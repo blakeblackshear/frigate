@@ -19,8 +19,7 @@ if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
     exit 0
 fi
 
-# Validate before anything consumes the list: a typo silently dropping a
-# service to non-root would defeat the reason the user set it.
+# a typo must fail the boot, not silently drop a service to non-root
 if [[ -n "${FRIGATE_ROOT_SERVICES:-}" ]]; then
     IFS=',' read -ra root_services <<< "${FRIGATE_ROOT_SERVICES}"
     for entry in "${root_services[@]}"; do

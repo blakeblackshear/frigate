@@ -929,8 +929,7 @@ class RecordingMaintainer(threading.Thread):
         )
 
         os.makedirs(directory, exist_ok=True)
-        # makedirs creates the date and hour levels too; own every level so
-        # the host user can prune old recordings
+        # own every level makedirs creates so the host user can prune recordings
         level = directory
         while level != RECORD_DIR:
             chown_to_runtime(level)

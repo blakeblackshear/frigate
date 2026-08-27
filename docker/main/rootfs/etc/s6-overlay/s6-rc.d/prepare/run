@@ -153,14 +153,12 @@ if [[ "$(id -u)" -eq 0 ]]; then
     if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
         rm -f /config/.permissions_version
     else
-        # Only bless the sentinel when a mount backs /media/frigate itself or
-        # below it. A parent /media mount doesn't count: a dedicated
-        # /media/frigate volume added later would be shadowed and skipped.
+        # Only when a mount backs /media/frigate itself: under a parent /media
+        # mount, a dedicated volume added later would be shadowed and skipped
         sentinel_args=(--sentinel /config/.permissions_version)
         root_services_mode=""
         if [[ -n "${FRIGATE_ROOT_SERVICES:-}" ]]; then
-            # || true: grep -v exits non-zero on an all-empty list (e.g. ",")
-            # and errexit+pipefail would otherwise abort the boot over it
+            # || true: an all-empty list (",") fails grep -v and errexit would kill the boot
             root_services_mode=$(tr ',' '\n' <<< "${FRIGATE_ROOT_SERVICES//[[:space:]]/}" | grep -v '^$' | sort -u | paste -sd, - || true)
             if [[ -n "$root_services_mode" ]]; then
                 sentinel_args+=(--mode "$root_services_mode")
@@ -172,13 +170,10 @@ if [[ "$(id -u)" -eq 0 ]]; then
         /usr/local/bin/fix-ownership "${sentinel_args[@]}" \
             "${PUID:-1000}" "${PGID:-1000}" /config /media/frigate
 
-        # Root services write some files as root while running (clips
-        # stragglers, caches, stale db journals). These trees are small, so
-        # realign them on every boot. Recordings are chowned at create and
-        # stay behind the sentinel sweep above.
+        # Root services write clips stragglers and caches mid-run; realign the
+        # small trees every boot. Recordings are chowned at create instead.
         if [[ -n "$root_services_mode" ]]; then
-            # clips and exports don't exist until the frigate service has run
-            # once; a WARN about them on a normal first boot invites reports
+            # only sweep what exists; clips and exports appear after the first run
             boot_sweep_paths=(/config)
             for extra in /media/frigate/clips /media/frigate/exports; do
                 if [[ -d "$extra" ]]; then
@@ -191,8 +186,7 @@ if [[ "$(id -u)" -eq 0 ]]; then
     fi
 fi
 
-# Not in the image, and the runtime user cannot create it under root-owned
-# /media. Must stay after the sweep, which reads an absent /media/frigate as an
+# Must stay after the sweep, which reads an absent /media/frigate as an
 # unmounted volume rather than a swept one
 if [[ "$(id -u)" -eq 0 && ! -d /media/frigate ]]; then
     mkdir -p /media/frigate
@@ -201,8 +195,7 @@ if [[ "$(id -u)" -eq 0 && ! -d /media/frigate ]]; then
     fi
 fi
 
-# Usually a tmpfs mount, so it arrives root-owned and is outside the swept
-# volumes. The runtime user binds its ZMQ IPC sockets in here.
+# usually a tmpfs mount: root-owned on arrival and outside the swept volumes
 if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
     mkdir -p /tmp/cache
     chown "${PUID:-1000}:${PGID:-1000}" /tmp/cache

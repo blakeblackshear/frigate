@@ -1,7 +1,6 @@
 #!/bin/bash
-# Exit 0 when FRIGATE_ROOT_SERVICES names the given service.
-# Membership only: FRIGATE_RUN_AS_ROOT precedence and the euid check stay in
-# the callers, which each combine them differently.
+# Exit 0 when FRIGATE_ROOT_SERVICES names the given service. Membership only:
+# the euid and FRIGATE_RUN_AS_ROOT checks stay in the callers.
 #
 # Usage: service-runs-as-root SERVICE
 
