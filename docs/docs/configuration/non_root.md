@@ -32,9 +32,9 @@ The two cases this exists for:
 
 Prefer solving device access with `EXTRA_GROUPS` before reaching for this. The `frigate` service owns the API and every ffmpeg process decoding your camera streams, so listing it runs those as root too, not just the detectors.
 
-Recordings and exports are owned by `PUID`/`PGID` the moment they're written, even by a root service. Everything else (snapshots, thumbnails, and other files under `clips/`) is realigned on each restart, so files written mid-run can show as root-owned from the host until the next one.
+Recordings and exports are owned by `PUID`/`PGID` the moment they're written, even by a root service. Everything else (snapshots, thumbnails, and other files under `clips/`) is realigned on each restart, so files written mid-run can show as root-owned from the host until the next one. A listed service also keeps root's home directory, so library caches land in the container layer instead of `/config`, same as the escape hatch.
 
-Listing all three services is not the same as `FRIGATE_RUN_AS_ROOT=true`. The escape hatch never touches ownership at all; the list keeps the ownership machinery running. Unknown names in the list stop the container at startup rather than silently dropping a service you meant to keep root. Changing the list re-runs the full ownership sweep once on the next boot. With Docker's own `user:` the list has no effect, since the container never has root to keep.
+Listing all three services is not the same as `FRIGATE_RUN_AS_ROOT=true`. The escape hatch never touches ownership at all; the list keeps the ownership machinery running. Unknown names in the list stop the container at startup rather than silently dropping a service you meant to keep root. Changing the list re-runs the full ownership sweep once on the next boot. If both are set, `FRIGATE_RUN_AS_ROOT=true` wins and the list is ignored entirely. With Docker's own `user:` the list has no effect, since the container never has root to keep.
 
 ## Migrating an existing install
 
