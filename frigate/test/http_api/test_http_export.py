@@ -366,6 +366,91 @@ class TestHttpExport(BaseTestHttp):
         assert response.status_code == 200
         assert response.json() == [queued_job.to_dict()]
 
+    def test_rename_export_moves_the_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video = os.path.join(tmpdir, "front_door_20260823_020615_abc123.mp4")
+            thumb = os.path.join(tmpdir, "front_door_abc123.webp")
+            for path, data in ((video, b"video"), (thumb, b"thumb")):
+                with open(path, "wb") as handle:
+                    handle.write(data)
+
+            Export.create(
+                id="front_door_abc123",
+                camera="front_door",
+                name="front door 2026-08-23 02:06:15 2026-08-23 02:07:34",
+                date=100,
+                video_path=video,
+                thumb_path=thumb,
+                in_progress=False,
+            )
+
+            with patch("frigate.record.export.EXPORT_DIR", tmpdir):
+                with AuthTestClient(self.app) as client:
+                    response = client.patch(
+                        "/export/front_door_abc123/rename",
+                        json={"name": "Package thief"},
+                    )
+
+            assert response.status_code == 200
+
+            renamed = Export.get(Export.id == "front_door_abc123")
+            assert renamed.name == "Package thief"
+            assert os.path.basename(renamed.video_path) == "Package thief_abc123.mp4"
+            assert os.path.exists(renamed.video_path)
+            assert not os.path.exists(video)
+
+    def test_rename_export_rejected_while_in_progress(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video = os.path.join(tmpdir, "front_door_abc123.mp4")
+            with open(video, "wb") as handle:
+                handle.write(b"video")
+
+            Export.create(
+                id="front_door_running",
+                camera="front_door",
+                name="front door export",
+                date=100,
+                video_path=video,
+                thumb_path=os.path.join(tmpdir, "t.webp"),
+                in_progress=True,
+            )
+
+            with AuthTestClient(self.app) as client:
+                response = client.patch(
+                    "/export/front_door_running/rename",
+                    json={"name": "Package thief"},
+                )
+
+            assert response.status_code == 400
+            assert Export.get(Export.id == "front_door_running").video_path == video
+
+    def test_rename_export_missing_file_leaves_the_row_alone(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video = os.path.join(tmpdir, "front_door_gone_abc123.mp4")
+
+            Export.create(
+                id="front_door_gone",
+                camera="front_door",
+                name="front door export",
+                date=100,
+                video_path=video,
+                thumb_path=os.path.join(tmpdir, "t.webp"),
+                in_progress=False,
+            )
+
+            with patch("frigate.record.export.EXPORT_DIR", tmpdir):
+                with AuthTestClient(self.app) as client:
+                    response = client.patch(
+                        "/export/front_door_gone/rename",
+                        json={"name": "Package thief"},
+                    )
+
+            assert response.status_code == 500
+
+            unchanged = Export.get(Export.id == "front_door_gone")
+            assert unchanged.name == "front door export"
+            assert unchanged.video_path == video
+
     def test_reap_stale_exports_deletes_rows_with_no_file(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             stale_video = os.path.join(tmpdir, "stale.mp4")
