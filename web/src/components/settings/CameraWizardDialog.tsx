@@ -23,6 +23,7 @@ import type {
 import {
   processCameraName,
   calculateDetectDimensions,
+  hevcRecordingStreamId,
 } from "@/utils/cameraUtil";
 import { cn } from "@/lib/utils";
 
@@ -185,6 +186,11 @@ export default function CameraWizardDialog({
         wizardData.cameraName,
       );
 
+      // re-checked here: roles and codecs may have changed since it was set
+      const appleCompatibility =
+        !!wizardData.appleCompatibility &&
+        !!hevcRecordingStreamId(wizardData.streams);
+
       // Convert wizard data to Frigate config format
       const configData: CameraConfigData = {
         cameras: {
@@ -192,6 +198,7 @@ export default function CameraWizardDialog({
             enabled: true,
             ...(friendlyName && { friendly_name: friendlyName }),
             ffmpeg: {
+              ...(appleCompatibility && { apple_compatibility: true }),
               inputs: wizardData.streams.map((stream, index) => {
                 if (stream.restream) {
                   const go2rtcStreamName =
