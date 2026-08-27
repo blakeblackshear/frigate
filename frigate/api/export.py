@@ -948,7 +948,7 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
         # the queue database has no transactions, so undo the move by hand
         if moved:
             with contextlib.suppress(OSError):
-                os.rename(new_path, old_path)
+                await asyncio.to_thread(os.rename, new_path, old_path)
 
         if isinstance(err, IntegrityError):
             logger.warning(
