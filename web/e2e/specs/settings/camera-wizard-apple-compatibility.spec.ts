@@ -1,11 +1,10 @@
 /**
  * Add-camera wizard - Apple/HEVC compatibility switch on Step 3.
  *
- * It writes the camera-level `ffmpeg.apple_compatibility`, which tags both
- * record outputs, so it shows only when every recording stream is H.265 and
- * starts on for Apple browsers. That default is user-agent driven, so the
- * second describe pins an explicit Safari and Chrome UA instead of relying
- * on the project's own.
+ * It writes the camera-level `ffmpeg.apple_compatibility` and starts on for
+ * Apple browsers. That default is user-agent driven, so the second describe
+ * pins an explicit Safari and Chrome UA instead of relying on the project's
+ * own.
  *
  * The save tests drive Step 4, which registers go2rtc streams and renders MSE
  * previews; they mock those and assert only the captured config/set body.
@@ -63,12 +62,20 @@ function ffprobeJson(codec: string) {
   ];
 }
 
-/** Mock ffprobe, choosing the reported video codec per stream URL. */
-async function mockFfprobe(page: Page, codecByUri: Record<string, string>) {
+/** Mock ffprobe per stream URL; a null codec makes that probe fail. */
+async function mockFfprobe(
+  page: Page,
+  codecByUri: Record<string, string | null>,
+) {
   await page.route("**/api/ffprobe**", (route) => {
     const paths = new URL(route.request().url()).searchParams.get("paths");
     const match = Object.keys(codecByUri).find((uri) => paths?.includes(uri));
-    return route.fulfill({ json: ffprobeJson(codecByUri[match ?? ""] ?? "") });
+    const codec = match ? codecByUri[match] : null;
+    return route.fulfill({
+      json: codec
+        ? ffprobeJson(codec)
+        : [{ return_code: 1, stderr: ["probe failed"], stdout: "" }],
+    });
   });
 }
 
@@ -114,6 +121,15 @@ async function testStream(dialog: Locator, streamIndex = 0) {
   await expect(
     dialog.getByText("Connected", { exact: true }).nth(streamIndex),
   ).toBeVisible();
+}
+
+/** Run "Test Connection" on the nth stream card and wait for it to fail. */
+async function failStream(dialog: Locator, streamIndex: number) {
+  await dialog
+    .getByRole("button", { name: /Test Connection/i })
+    .nth(streamIndex)
+    .click();
+  await expect(dialog.getByText("Test Failed", { exact: true })).toBeVisible();
 }
 
 function appleSwitch(dialog: Locator) {
@@ -188,7 +204,7 @@ test.describe("Camera wizard Apple compatibility @medium @mobile", () => {
     await expect(dialog.getByText(APPLE_TITLE)).toBeVisible();
   });
 
-  test("hides when the two recording streams use different codecs", async ({
+  test("renders once when only one recording stream is H.265", async ({
     frigateApp,
   }) => {
     await mockFfprobe(frigateApp.page, {
@@ -204,8 +220,28 @@ test.describe("Camera wizard Apple compatibility @medium @mobile", () => {
     await roleSwitch(dialog, "record_sub", 1).click();
     await testStream(dialog, 1);
 
-    // the one camera-level flag cannot be right for both outputs
-    await expect(dialog.getByText(APPLE_TITLE)).toHaveCount(0);
+    // ffmpeg drops the tag on the H.264 output, so the H.265 one still wins
+    await expect(dialog.getByText(APPLE_TITLE)).toHaveCount(1);
+  });
+
+  test("stays visible when another recording stream fails to probe", async ({
+    frigateApp,
+  }) => {
+    await mockFfprobe(frigateApp.page, {
+      [MAIN_URI]: "hevc",
+      [SUB_URI]: null,
+    });
+    const dialog = await gotoStep3(frigateApp.page);
+
+    await roleSwitch(dialog, "record").click();
+    await testStream(dialog);
+    await expect(dialog.getByText(APPLE_TITLE)).toBeVisible();
+
+    await dialog.getByRole("button", { name: /Add Another Stream/i }).click();
+    await roleSwitch(dialog, "record_sub", 1).click();
+    await failStream(dialog, 1);
+
+    await expect(dialog.getByText(APPLE_TITLE)).toHaveCount(1);
   });
 });
 

@@ -218,21 +218,13 @@ function isRecordingStream(stream: StreamConfig): boolean {
 }
 
 /**
- * Stream to offer apple_compatibility on, or undefined if any recording
- * stream is not H.265 - one camera-level flag tags both record outputs.
+ * First recording stream probed as H.265. The other record output's codec
+ * doesn't matter: ffmpeg drops `-tag:v hvc1` on anything that isn't HEVC.
  */
 export function hevcRecordingStreamId(
   streams: StreamConfig[],
 ): string | undefined {
-  const recording = streams.filter(isRecordingStream);
-
-  if (
-    recording.some(
-      (s) => s.testResult?.videoCodec && !isHevcCodec(s.testResult.videoCodec),
-    )
-  ) {
-    return undefined;
-  }
-
-  return recording.find((s) => isHevcCodec(s.testResult?.videoCodec))?.id;
+  return streams.find(
+    (s) => isRecordingStream(s) && isHevcCodec(s.testResult?.videoCodec),
+  )?.id;
 }
