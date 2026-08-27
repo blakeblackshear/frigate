@@ -2,7 +2,7 @@
 # shellcheck shell=bash
 # Remap the frigate user to PUID/PGID and register EXTRA_GROUPS.
 # No-op when: started with --user (euid != 0), FRIGATE_RUN_AS_ROOT=true,
-# or PUID/PGID already match.
+# or PUID/PGID already match. FRIGATE_ROOT_SERVICES is validated here too.
 
 set -o errexit -o nounset -o pipefail
 
@@ -12,8 +12,30 @@ if [[ "$(id -u)" -ne 0 ]]; then
 fi
 
 if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
+    if [[ -n "${FRIGATE_ROOT_SERVICES:-}" ]]; then
+        echo "[INFO] FRIGATE_RUN_AS_ROOT=true: ignoring FRIGATE_ROOT_SERVICES"
+    fi
     echo "[INFO] FRIGATE_RUN_AS_ROOT=true: skipping user remapping"
     exit 0
+fi
+
+# Validate before anything consumes the list: a typo silently dropping a
+# service to non-root would defeat the reason the user set it.
+if [[ -n "${FRIGATE_ROOT_SERVICES:-}" ]]; then
+    IFS=',' read -ra root_services <<< "${FRIGATE_ROOT_SERVICES}"
+    for entry in "${root_services[@]}"; do
+        entry="${entry//[[:space:]]/}"
+        if [[ -z "$entry" ]]; then
+            continue
+        fi
+        case "$entry" in
+            frigate|go2rtc|nginx) ;;
+            *)
+                echo "[ERROR] FRIGATE_ROOT_SERVICES contains unknown service '${entry}'; valid names are frigate, go2rtc, nginx" >&2
+                exit 1
+                ;;
+        esac
+    done
 fi
 
 puid="${PUID:-1000}"
