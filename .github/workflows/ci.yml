@@ -139,6 +139,14 @@ jobs:
           # root-owned, and the ZMQ IPC sockets live in it
           docker exec frigate /command/s6-setuidgid frigate touch /tmp/cache/.write-probe
           docker exec frigate rm /tmp/cache/.write-probe
+          # bundled models must be readable by the runtime user: they are baked
+          # in as root, and archive members can carry root-only modes
+          docker exec frigate /command/s6-setuidgid frigate sh -c '
+            for f in /cpu_model.tflite /edgetpu_model.tflite /cpu_audio_model.tflite \
+                     /labelmap.txt /audio-labelmap.txt /openvino-model/*; do
+              [ -e "$f" ] || continue
+              test -r "$f" || { echo "$f is not readable by the runtime user"; exit 1; }
+            done'
       - name: Assert escape hatch restores root
         run: |
           mkdir -p /tmp/frigate-config-root

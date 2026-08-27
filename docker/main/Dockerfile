@@ -146,6 +146,10 @@ RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/da
 RUN wget -qO - https://www.kaggle.com/api/v1/models/google/yamnet/tfLite/classification-tflite/1/download | tar xvz && mv 1.tflite cpu_audio_model.tflite
 COPY audio-labelmap.txt .
 
+# tar restores the archive's modes and the yamnet member ships 0700, so without
+# this the unprivileged runtime user cannot read the audio model
+RUN chmod -R a+rX /rootfs
+
 
 FROM wget AS s6-overlay
 ARG TARGETARCH
