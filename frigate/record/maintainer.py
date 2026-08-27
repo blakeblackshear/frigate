@@ -929,7 +929,12 @@ class RecordingMaintainer(threading.Thread):
         )
 
         os.makedirs(directory, exist_ok=True)
-        chown_to_runtime(directory)
+        # makedirs creates the date and hour levels too; own every level so
+        # the host user can prune old recordings
+        level = directory
+        while level != RECORD_DIR:
+            chown_to_runtime(level)
+            level = os.path.dirname(level)
 
         # file will be in utc due to path_time being in utc
         file_name = f"{path_time.strftime('%M.%S.mp4')}"

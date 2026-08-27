@@ -442,6 +442,71 @@ class TestSegmentPathTime(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(paths[1].endswith("30.23.mp4"), paths[1])
 
 
+class TestMoveSegmentOwnership(unittest.IsolatedAsyncioTestCase):
+    """Every directory level makedirs creates must be handed to the runtime user."""
+
+    def _build_maintainer(self) -> RecordingMaintainer:
+        camera_config = MagicMock()
+        camera_config.record.enabled = True
+        camera_config.record.continuous.days = 1
+        camera_config.record.motion.days = 0
+
+        config = MagicMock()
+        config.cameras = {"test_cam": camera_config}
+
+        maintainer = RecordingMaintainer.__new__(RecordingMaintainer)
+        maintainer.config = config
+        maintainer.end_time_cache = {}
+        maintainer.object_recordings_info = defaultdict(list)
+        maintainer.audio_recordings_info = defaultdict(list)
+        maintainer.recordings_publisher = MagicMock()
+        maintainer.last_segment_end = {("test_cam", "main"): 0.0}
+        return maintainer
+
+    async def test_move_segment_chowns_all_created_levels(self):
+        maintainer = self._build_maintainer()
+        maintainer.config.ffmpeg.ffmpeg_path = "ffmpeg"
+
+        start_time = datetime.datetime(2026, 6, 10, 14, 30, 22, tzinfo=datetime.UTC)
+
+        proc = MagicMock()
+        proc.returncode = 0
+        proc.wait = AsyncMock(return_value=0)
+        chown = MagicMock()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            record_dir = os.path.join(tmpdir, "recordings")
+            cache_path = os.path.join(tmpdir, "test_cam@20260610143022+0000.mp4")
+            with open(cache_path, "wb") as f:
+                f.write(b"\x00" * 16)
+
+            with (
+                patch("frigate.record.maintainer.RECORD_DIR", record_dir),
+                patch(
+                    "frigate.record.maintainer.asyncio.create_subprocess_exec",
+                    AsyncMock(return_value=proc),
+                ),
+                patch("frigate.record.maintainer.chown_to_runtime", chown),
+            ):
+                result = await maintainer.move_segment(
+                    "test_cam",
+                    "main",
+                    start_time,
+                    start_time + datetime.timedelta(seconds=10),
+                    10.0,
+                    cache_path,
+                    SegmentInfo(0, 0, 0, 0),
+                )
+
+            self.assertIsNotNone(result)
+            camera_dir = os.path.join(record_dir, "2026-06-10", "14", "test_cam")
+            hour_dir = os.path.dirname(camera_dir)
+            date_dir = os.path.dirname(hour_dir)
+            file_path = os.path.join(camera_dir, "30.22.mp4")
+            chowned = [call.args[0] for call in chown.call_args_list]
+            self.assertEqual(chowned, [camera_dir, hour_dir, date_dir, file_path])
+
+
 class TestSegmentStartChaining(unittest.IsolatedAsyncioTestCase):
     """Contiguous segments must chain start times across filename truncation.
 
