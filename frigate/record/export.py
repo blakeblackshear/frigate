@@ -35,6 +35,7 @@ from frigate.ffmpeg_presets import (
 )
 from frigate.models import Export, Previews, Recordings, ReviewSegment
 from frigate.util.ffmpeg import run_ffmpeg_with_progress
+from frigate.util.ownership import chown_to_runtime
 from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
@@ -940,6 +941,8 @@ class RecordingExporter(threading.Thread):
         else:
             video_path = f"{EXPORT_DIR}/{self.camera}_{filename_start_datetime}-{filename_end_datetime}_{cleaned_export_id}.mp4"
         thumb_path = self.save_thumbnail(self.export_id)
+        if thumb_path:
+            chown_to_runtime(thumb_path)
 
         export_values = {
             Export.id: self.export_id,
@@ -1014,6 +1017,7 @@ class RecordingExporter(threading.Thread):
             Path(thumb_path).unlink(missing_ok=True)
             return
         else:
+            chown_to_runtime(video_path)
             self._emit_progress("finalizing", 100.0)
             Export.update({Export.in_progress: False}).where(
                 Export.id == self.export_id
