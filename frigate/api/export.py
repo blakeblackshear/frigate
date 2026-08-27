@@ -1,7 +1,10 @@
 """Export apis."""
 
+import asyncio
+import contextlib
 import datetime
 import logging
+import os
 import random
 import string
 import time
@@ -912,7 +915,7 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
             status_code=404,
         )
 
-    if export.in_progress or Path(export.video_path).name in _get_files_in_use():
+    if export.in_progress:
         return JSONResponse(
             content={
                 "success": False,
@@ -923,26 +926,43 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
 
     new_path = export_video_path(body.name, export.id)
     old_path = export.video_path
+    moved = new_path != old_path
+
+    # move the file first so a rename that can't happen leaves the row alone
+    if moved:
+        try:
+            await asyncio.to_thread(os.rename, old_path, new_path)
+        except OSError:
+            logger.exception("Failed to rename export file for %s", event_id)
+            return JSONResponse(
+                content={"success": False, "message": "Failed to rename export."},
+                status_code=500,
+            )
+
+    export.name = body.name
+    export.video_path = new_path
 
     try:
-        with Export._meta.database.atomic():
-            export.name = body.name
-            export.video_path = new_path
-            export.save()
+        export.save()
+    except DatabaseError as err:
+        # the queue database has no transactions, so undo the move by hand
+        if moved:
+            with contextlib.suppress(OSError):
+                os.rename(new_path, old_path)
 
-            if new_path != old_path:
-                Path(old_path).rename(new_path)
-    except IntegrityError:
-        logger.warning("Export %s cannot be renamed, %s is taken", event_id, new_path)
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": "Another export already uses that name.",
-            },
-            status_code=409,
-        )
-    except (OSError, DatabaseError):
-        logger.exception("Failed to rename export file for %s", event_id)
+        if isinstance(err, IntegrityError):
+            logger.warning(
+                "Export %s cannot be renamed, %s is taken", event_id, new_path
+            )
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Another export already uses that name.",
+                },
+                status_code=409,
+            )
+
+        logger.exception("Failed to save renamed export %s", event_id)
         return JSONResponse(
             content={"success": False, "message": "Failed to rename export."},
             status_code=500,
