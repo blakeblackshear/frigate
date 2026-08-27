@@ -156,8 +156,12 @@ if [[ "$(id -u)" -eq 0 ]]; then
         # Only record the sentinel when something is mounted under /media: a
         # sweep blessed against the container-local dir created below would let
         # a volume attached later skip the sweep forever
+        # Only bless the sentinel when persistent storage actually backs
+        # /media/frigate, i.e. a mount at that exact path or below it. A mount
+        # at the /media parent does not count: a dedicated /media/frigate volume
+        # added later would shadow the swept directory and be skipped forever.
         sentinel_args=(--sentinel /config/.permissions_version)
-        if ! awk '$2 == "/media" || $2 == "/media/frigate" || $2 ~ /^\/media\/frigate\//' /proc/mounts | grep -q .; then
+        if ! awk '$2 == "/media/frigate" || $2 ~ /^\/media\/frigate\//' /proc/mounts | grep -q .; then
             sentinel_args=()
         fi
         /usr/local/bin/fix-ownership "${sentinel_args[@]}" \

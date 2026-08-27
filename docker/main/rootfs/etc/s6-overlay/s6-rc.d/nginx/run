@@ -62,7 +62,13 @@ function set_worker_processes() {
     sed -i "s/worker_processes auto;/worker_processes ${cpus};/" /tmp/nginx/conf/nginx.conf
 }
 
-# copied whole so the conf tree's relative includes still resolve
+# Rebuilt root-owned and fresh every start. A previous unprivileged nginx owned
+# this tree, and the cp and tempio writes below run as root: without wiping it
+# first, a planted symlink here would let those writes land on any root file.
+# rm does not traverse symlinks, and the bare mkdir fails closed if /tmp/nginx
+# is raced into a symlink before we can create it.
+rm -rf /tmp/nginx
+mkdir /tmp/nginx
 mkdir -p /tmp/nginx/conf /tmp/nginx/client_body /tmp/nginx/proxy \
          /tmp/nginx/fastcgi /tmp/nginx/uwsgi /tmp/nginx/scgi
 cp -r /usr/local/nginx/conf/. /tmp/nginx/conf/
