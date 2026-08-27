@@ -6,6 +6,26 @@ set -o errexit -o nounset -o pipefail
 
 # Logs should be sent to stdout so that s6 can collect them
 
+# Signal the master directly rather than running `nginx -s reload`. That would
+# have root parse /tmp/nginx/conf, which the unprivileged nginx user can
+# rewrite, and nginx acts on path directives while loading a config: it creates
+# them and chowns them to the configured user.
+function reload_nginx() {
+    local pid
+
+    if ! pid=$(cat /tmp/nginx/nginx.pid 2>/dev/null); then
+        echo "[ERROR] No nginx pid file found, not reloading"
+        return 0
+    fi
+
+    if [[ ! "$pid" =~ ^[0-9]+$ ]] || [[ "$(cat "/proc/${pid}/comm" 2>/dev/null)" != "nginx" ]]; then
+        echo "[ERROR] nginx pid file does not name a running nginx process, not reloading"
+        return 0
+    fi
+
+    kill -HUP "$pid"
+}
+
 echo "[INFO] Starting certsync..."
 
 lefile="/etc/letsencrypt/live/frigate/fullchain.pem"
@@ -49,7 +69,7 @@ do
     then
         echo "[INFO] Reloading nginx to refresh TLS certificate"
         echo "$lefile: $leprint"
-        /usr/local/nginx/sbin/nginx -c /tmp/nginx/conf/nginx.conf -s reload
+        reload_nginx
     fi
 
     sleep 60
