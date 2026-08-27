@@ -119,6 +119,7 @@ export type WizardFormData = {
   probeCandidates?: string[]; // candidate URLs from probe
   candidateTests?: CandidateTestMap; // test results for candidates
   hasBackchannel?: boolean; // true if camera supports backchannel audio
+  appleCompatibility?: boolean; // camera level, covers both recording outputs
   onvif?: {
     enabled: boolean;
     host: string;
@@ -163,6 +164,7 @@ export type CameraConfigData = {
       enabled: boolean;
       friendly_name?: string;
       ffmpeg: {
+        apple_compatibility?: boolean;
         inputs: {
           path: string;
           roles: string[];

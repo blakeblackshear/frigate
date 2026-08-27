@@ -26,7 +26,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { isMobile } from "react-device-detect";
+import { isIOS, isMobile, isSafari } from "react-device-detect";
 import {
   LuInfo,
   LuExternalLink,
@@ -53,6 +53,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { hevcRecordingStreamId } from "@/utils/cameraUtil";
 
 // Recording the sub stream from the same stream as record would just
 // re-record the main stream, so the two roles are mutually exclusive.
@@ -388,6 +389,22 @@ export default function Step3StreamConfig({
   );
 
   const hasDetectRole = streams.some((s) => s.roles.includes("detect"));
+
+  const appleCompatibilityStreamId = useMemo(
+    () => hevcRecordingStreamId(streams),
+    [streams],
+  );
+
+  useEffect(() => {
+    // undefined, not false: a deliberate toggle-off must not be re-seeded
+    if (
+      (isSafari || isIOS) &&
+      appleCompatibilityStreamId &&
+      wizardData.appleCompatibility === undefined
+    ) {
+      onUpdate({ appleCompatibility: true });
+    }
+  }, [appleCompatibilityStreamId, wizardData.appleCompatibility, onUpdate]);
 
   return (
     <div className="space-y-6">
@@ -778,7 +795,7 @@ export default function Step3StreamConfig({
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div className="rounded-lg bg-background p-3">
+                <div className="space-y-3 rounded-lg bg-background p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">
                       {t("cameraWizard.step3.go2rtc")}
@@ -788,6 +805,27 @@ export default function Step3StreamConfig({
                       onCheckedChange={() => setRestream(stream.id)}
                     />
                   </div>
+
+                  {appleCompatibilityStreamId === stream.id && (
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="text-sm">
+                          {t("cameraWizard.step3.appleCompatibility.title")}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {t(
+                            "cameraWizard.step3.appleCompatibility.description",
+                          )}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={wizardData.appleCompatibility ?? false}
+                        onCheckedChange={(checked) =>
+                          onUpdate({ appleCompatibility: checked })
+                        }
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
