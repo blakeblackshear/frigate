@@ -1,13 +1,14 @@
 #!/bin/bash
 # Single source of truth for aligning volume ownership with the runtime user.
 #
-# Usage: fix-ownership [--dry-run] [--sentinel FILE] UID GID PATH [PATH...]
+# Usage: fix-ownership [--dry-run] [--sentinel FILE] [--mode STRING] UID GID PATH [PATH...]
 #
 #   --dry-run    report what would change, touch nothing
 #   --sentinel   skip entirely when FILE already records "SCHEMA:UID:GID";
 #                write it after a successful run (used by the boot path so
 #                multi-TB volumes are swept once per UID/schema change, not
 #                on every boot)
+#   --mode       append STRING to the sentinel, so changing it re-sweeps once
 #
 # Only files whose uid OR gid differs are touched, so re-runs are cheap.
 # lost+found is skipped: it belongs to the filesystem, not to Frigate, and
@@ -28,6 +29,7 @@ schema=2
 
 dry_run=0
 sentinel=""
+mode=""
 
 while [[ "${1:-}" == --* ]]; do
     case "$1" in
@@ -38,12 +40,18 @@ while [[ "${1:-}" == --* ]]; do
                 exit 2
             fi
             sentinel="$2"; shift 2 ;;
+        --mode)
+            if [[ -z "${2:-}" ]]; then
+                echo "[ERROR] fix-ownership: --mode requires a value" >&2
+                exit 2
+            fi
+            mode="$2"; shift 2 ;;
         *) echo "[ERROR] fix-ownership: unknown option $1" >&2; exit 2 ;;
     esac
 done
 
 if [[ $# -lt 3 ]]; then
-    echo "Usage: fix-ownership [--dry-run] [--sentinel FILE] UID GID PATH..." >&2
+    echo "Usage: fix-ownership [--dry-run] [--sentinel FILE] [--mode STRING] UID GID PATH..." >&2
     exit 2
 fi
 
@@ -56,9 +64,18 @@ if [[ "$(id -u)" -ne 0 ]]; then
     exit 0
 fi
 
+# The mode string folds the FRIGATE_ROOT_SERVICES list into the sentinel, so
+# entering or leaving a granular root mode re-sweeps once. That is the
+# backstop for anything a root service created that the per-boot sweep and
+# chown-at-create did not cover.
+sentinel_content="${schema}:${target_uid}:${target_gid}"
+if [[ -n "$mode" ]]; then
+    sentinel_content="${sentinel_content}:${mode}"
+fi
+
 # A dry run always inspects: the sentinel records what a past sweep did, not
 # what the volume looks like now, and reporting from it would hide later drift.
-if [[ "$dry_run" -eq 0 && -n "$sentinel" && -f "$sentinel" && "$(cat "$sentinel")" == "${schema}:${target_uid}:${target_gid}" ]]; then
+if [[ "$dry_run" -eq 0 && -n "$sentinel" && -f "$sentinel" && "$(cat "$sentinel")" == "$sentinel_content" ]]; then
     echo "[INFO] fix-ownership: ${target_uid}:${target_gid} (schema ${schema}) already applied, skipping"
     exit 0
 fi
@@ -152,6 +169,6 @@ if [[ "$dry_run" -eq 0 && -d /config ]]; then
 fi
 
 if [[ "$dry_run" -eq 0 && -n "$sentinel" && "$swept_clean" -eq 1 ]]; then
-    echo "${schema}:${target_uid}:${target_gid}" > "$sentinel" || \
+    echo "$sentinel_content" > "$sentinel" || \
         echo "[WARN] fix-ownership: could not write ${sentinel}; the sweep will run again on next boot"
 fi

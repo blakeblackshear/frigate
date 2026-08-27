@@ -157,11 +157,29 @@ if [[ "$(id -u)" -eq 0 ]]; then
         # below it. A parent /media mount doesn't count: a dedicated
         # /media/frigate volume added later would be shadowed and skipped.
         sentinel_args=(--sentinel /config/.permissions_version)
+        root_services_mode=""
+        if [[ -n "${FRIGATE_ROOT_SERVICES:-}" ]]; then
+            # || true: grep -v exits non-zero on an all-empty list (e.g. ",")
+            # and errexit+pipefail would otherwise abort the boot over it
+            root_services_mode=$(tr ',' '\n' <<< "${FRIGATE_ROOT_SERVICES//[[:space:]]/}" | grep -v '^$' | sort -u | paste -sd, - || true)
+            if [[ -n "$root_services_mode" ]]; then
+                sentinel_args+=(--mode "$root_services_mode")
+            fi
+        fi
         if ! awk '$2 == "/media/frigate" || $2 ~ /^\/media\/frigate\//' /proc/mounts | grep -q .; then
             sentinel_args=()
         fi
         /usr/local/bin/fix-ownership "${sentinel_args[@]}" \
             "${PUID:-1000}" "${PGID:-1000}" /config /media/frigate
+
+        # Root services write some files as root while running (clips
+        # stragglers, caches, stale db journals). These trees are small, so
+        # realign them on every boot. Recordings are chowned at create and
+        # stay behind the sentinel sweep above.
+        if [[ -n "$root_services_mode" ]]; then
+            /usr/local/bin/fix-ownership \
+                "${PUID:-1000}" "${PGID:-1000}" /config /media/frigate/clips /media/frigate/exports
+        fi
     fi
 fi
 
