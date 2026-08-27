@@ -22,7 +22,9 @@ The following ports are available to access the Frigate web UI.
 
 ## Onboarding
 
-On startup, an admin user and password are generated and printed in the logs. It is recommended to set a new password for the admin account after logging in for the first time under Settings > Users.
+On startup, an admin user and password are generated and printed in the logs. It is recommended to set a new password for the admin account after logging in for the first time.
+
+On a new install the [setup wizard](../guides/getting_started.md#configuring-frigate) offers this as its first step, along with creating accounts for anyone else who needs access. You can also do both at any time under <NavPath path="Settings > Users" />.
 
 ## Resetting admin password
 

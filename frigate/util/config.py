@@ -79,10 +79,20 @@ def redact_credential(obj: dict[str, Any], key: str) -> None:
 
 
 def find_config_file() -> str:
+    """Return the path of the config file to use.
+
+    Both .yml and .yaml are supported, so fall back to the other extension when
+    the configured path does not exist. If neither exists the configured path is
+    returned so a new config is created with the default .yml extension.
+    """
     config_path = os.environ.get("CONFIG_FILE", DEFAULT_CONFIG_FILE)
 
     if not os.path.isfile(config_path):
-        config_path = config_path.replace("yml", "yaml")
+        base, ext = os.path.splitext(config_path)
+        alternate = f"{base}.yaml" if ext == ".yml" else f"{base}.yml"
+
+        if os.path.isfile(alternate):
+            return alternate
 
     return config_path
 
