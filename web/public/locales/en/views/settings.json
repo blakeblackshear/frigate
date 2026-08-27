@@ -427,6 +427,10 @@
       "notConnected": "Not Connected",
       "featuresTitle": "Features",
       "go2rtc": "Reduce connections to camera",
+      "appleCompatibility": {
+        "title": "Improve playback on Apple devices",
+        "description": "Turn this on if you watch recordings in Safari or on an iPhone, iPad, or Mac."
+      },
       "detectRoleWarning": "At least one stream must have the \"detect\" role to proceed.",
       "rolesPopover": {
         "title": "Stream Roles",

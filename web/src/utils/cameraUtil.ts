@@ -1,6 +1,7 @@
 import { baseUrl } from "@/api/baseUrl";
 import { generateFixedHash, isValidId } from "./stringUtil";
 import type { LiveStreamMetadata } from "@/types/live";
+import type { StreamConfig } from "@/types/cameraWizard";
 
 /**
  * Processes a user-entered camera name and returns both the final camera name
@@ -204,4 +205,34 @@ const REPLAY_CAMERA_PREFIX = "_replay_";
  */
 export function isReplayCamera(name: string): boolean {
   return name.startsWith(REPLAY_CAMERA_PREFIX);
+}
+
+const HEVC_CODEC_NAMES = ["hevc", "h265"];
+
+function isHevcCodec(codec?: string): boolean {
+  return HEVC_CODEC_NAMES.includes((codec ?? "").trim().toLowerCase());
+}
+
+function isRecordingStream(stream: StreamConfig): boolean {
+  return stream.roles.includes("record") || stream.roles.includes("record_sub");
+}
+
+/**
+ * Stream to offer apple_compatibility on, or undefined if any recording
+ * stream is not H.265 - one camera-level flag tags both record outputs.
+ */
+export function hevcRecordingStreamId(
+  streams: StreamConfig[],
+): string | undefined {
+  const recording = streams.filter(isRecordingStream);
+
+  if (
+    recording.some(
+      (s) => s.testResult?.videoCodec && !isHevcCodec(s.testResult.videoCodec),
+    )
+  ) {
+    return undefined;
+  }
+
+  return recording.find((s) => isHevcCodec(s.testResult?.videoCodec))?.id;
 }
