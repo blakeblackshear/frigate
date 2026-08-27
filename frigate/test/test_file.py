@@ -72,6 +72,7 @@ class TestFileUtils(TestCase):
             assert rendered_image.max() > 0
 
     def test_get_event_thumbnail_bytes_ignores_empty_file(self):
+        """Verify empty thumbnail files are treated as missing."""
         event = SimpleNamespace(id="empty-thumb", camera="front_door", thumbnail=None)
 
         with (
