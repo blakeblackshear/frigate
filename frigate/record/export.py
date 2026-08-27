@@ -205,14 +205,20 @@ class PlaybackSourceEnum(str, Enum):
     preview = "preview"
 
 
+EXPORT_FILE_NAME_MAX_BYTES = 255
+
+
 def export_video_path(name: str, export_id: str) -> str:
     """Path an export's video is stored at once the user has named it.
 
     The id suffix keeps the path unique when two exports share a name, and
     keeps the result a single path component whatever the user typed.
     """
-    stem = sanitize_filename(name).strip(". ") or "export"
-    return os.path.join(EXPORT_DIR, f"{stem}_{export_id.split('_')[-1]}.mp4")
+    suffix = f"_{export_id.split('_')[-1]}.mp4"
+    budget = EXPORT_FILE_NAME_MAX_BYTES - len(suffix.encode())
+    stem = sanitize_filename(name).encode()[:budget].decode(errors="ignore")
+
+    return os.path.join(EXPORT_DIR, f"{stem.strip('. ') or 'export'}{suffix}")
 
 
 class RecordingExporter(threading.Thread):

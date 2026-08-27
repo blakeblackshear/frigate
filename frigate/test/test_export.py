@@ -148,6 +148,18 @@ class TestExportVideoPath(unittest.TestCase):
             export_video_path("clip", "front_door_def456"),
         )
 
+    def test_long_names_fit_the_filesystem_limit(self):
+        # Names are capped in bytes, not characters: 244 CJK characters is
+        # under any character cap and still 732 bytes on disk.
+        for name in ("A" * 256, "\u76e3" * 256, "\U0001f3a5" * 100):
+            file_name = Path(export_video_path(name, self.EXPORT_ID)).name
+            self.assertLessEqual(len(file_name.encode()), 255)
+
+    def test_truncation_keeps_the_name_decodable(self):
+        file_name = Path(export_video_path("\u76e3" * 256, self.EXPORT_ID)).name
+        self.assertTrue(file_name.endswith("_abc123.mp4"))
+        self.assertNotIn("\ufffd", file_name)
+
     def test_stays_inside_the_export_dir(self):
         for name in ("../../etc/passwd", "..", "a/b", "...", ""):
             path = Path(export_video_path(name, self.EXPORT_ID))

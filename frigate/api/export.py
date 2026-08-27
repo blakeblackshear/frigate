@@ -14,7 +14,7 @@ import psutil
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pathvalidate import sanitize_filename
-from peewee import DoesNotExist
+from peewee import DatabaseError, DoesNotExist, IntegrityError
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import (
@@ -932,7 +932,16 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
 
             if new_path != old_path:
                 Path(old_path).rename(new_path)
-    except OSError:
+    except IntegrityError:
+        logger.warning("Export %s cannot be renamed, %s is taken", event_id, new_path)
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Another export already uses that name.",
+            },
+            status_code=409,
+        )
+    except (OSError, DatabaseError):
         logger.exception("Failed to rename export file for %s", event_id)
         return JSONResponse(
             content={"success": False, "message": "Failed to rename export."},
