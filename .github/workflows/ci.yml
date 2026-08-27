@@ -176,6 +176,71 @@ jobs:
             echo "escape hatch did not delete the sweep sentinel"; exit 1
           fi
           docker rm -f frigate-root
+      - name: Assert granular root services
+        run: |
+          mkdir -p /tmp/frigate-config-granular /tmp/frigate-media-granular
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-granular/config.yml
+          docker run -d --name frigate-granular --shm-size 256m \
+            -e FRIGATE_ROOT_SERVICES=frigate \
+            -v /tmp/frigate-config-granular:/config \
+            -v /tmp/frigate-media-granular:/media/frigate \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-granular curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "granular container never became healthy"; docker logs frigate-granular; exit 1; fi
+          ps_out=$(docker exec frigate-granular ps -eo user=,comm=)
+          echo "$ps_out"
+          # the listed service runs as root
+          echo "$ps_out" | grep -w python3 | grep -q '^root'
+          # unlisted services still drop. written as ifs because bash exempts
+          # a negated command from set -e
+          if echo "$ps_out" | grep -w go2rtc | grep -q '^root'; then
+            echo "go2rtc is unexpectedly running as root"; exit 1
+          fi
+          if echo "$ps_out" | grep -w nginx | grep -q '^root'; then
+            echo "nginx is unexpectedly running as root"; exit 1
+          fi
+          # the sweep still ran and the sentinel records the mode
+          docker exec frigate-granular cat /config/.permissions_version | grep -qx "2:1000:1000:frigate"
+          # the root frigate process chowns the db it creates (first-boot immediacy)
+          docker exec frigate-granular stat -c %u /config/frigate.db | grep -qx 1000
+          # per-boot sweep guard: plant a root-owned straggler, restart, and
+          # it must come back owned by the runtime user
+          docker exec frigate-granular sh -c 'mkdir -p /media/frigate/clips && touch /media/frigate/clips/straggler.webp'
+          docker restart frigate-granular
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-granular curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "granular container never came back after restart"; docker logs frigate-granular; exit 1; fi
+          docker exec frigate-granular stat -c %u /media/frigate/clips/straggler.webp | grep -qx 1000
+          docker rm -f frigate-granular
+      - name: Assert unknown root service fails fast
+        run: |
+          mkdir -p /tmp/frigate-config-badsvc
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-badsvc/config.yml
+          docker run -d --name frigate-badsvc --shm-size 256m \
+            -e FRIGATE_ROOT_SERVICES=frigatee \
+            -v /tmp/frigate-config-badsvc:/config \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          found=0
+          for i in $(seq 1 12); do
+            if docker logs frigate-badsvc 2>&1 | grep -q "unknown service 'frigatee'"; then found=1; break; fi
+            sleep 5
+          done
+          if [ "$found" -ne 1 ]; then
+            echo "no fail-fast error for an unknown service name"; docker logs frigate-badsvc; exit 1
+          fi
+          # the failed oneshot must have blocked startup (prepare and every
+          # service depend on init-usermod transitively)
+          if docker exec frigate-badsvc curl -fs http://127.0.0.1:5000/api/version; then
+            echo "container came up despite an invalid FRIGATE_ROOT_SERVICES"; exit 1
+          fi
+          docker rm -f frigate-badsvc
       - name: Assert PUID/PGID remapping
         run: |
           mkdir -p /tmp/frigate-config-puid /tmp/frigate-media-puid
