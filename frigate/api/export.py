@@ -70,6 +70,7 @@ from frigate.record.export import (
     DEFAULT_TIME_LAPSE_FFMPEG_ARGS,
     ChaptersEnum,
     PlaybackSourceEnum,
+    export_video_path,
     validate_ffmpeg_args,
 )
 from frigate.util.path import sanitize_contained_path
@@ -403,14 +404,17 @@ class _StreamingZipBuffer:
 
 
 def _unique_archive_name(export: Export, used: set[str]) -> str:
-    base = sanitize_filename(export.name) if export.name else None
-    if not base:
-        base = f"{export.camera}_{int(export.date)}"
+    """Zip entry name for an export, de-duplicated within the archive.
 
-    candidate = f"{base}.mp4"
+    The on-disk name is the one the user sees either way: renaming an export
+    renames its file, so a zip entry and an individual download can't drift.
+    """
+    source = Path(export.video_path)
+    candidate = source.name
+
     counter = 1
     while candidate in used:
-        candidate = f"{base}_{counter}.mp4"
+        candidate = f"{source.stem}_{counter}{source.suffix}"
         counter += 1
 
     used.add(candidate)
@@ -908,8 +912,33 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
             status_code=404,
         )
 
-    export.name = body.name
-    export.save()
+    if export.in_progress or Path(export.video_path).name in _get_files_in_use():
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Export is still being written and can't be renamed yet.",
+            },
+            status_code=400,
+        )
+
+    new_path = export_video_path(body.name, export.id)
+    old_path = export.video_path
+
+    try:
+        with Export._meta.database.atomic():
+            export.name = body.name
+            export.video_path = new_path
+            export.save()
+
+            if new_path != old_path:
+                Path(old_path).rename(new_path)
+    except OSError:
+        logger.exception("Failed to rename export file for %s", event_id)
+        return JSONResponse(
+            content={"success": False, "message": "Failed to rename export."},
+            status_code=500,
+        )
+
     return JSONResponse(
         content=(
             {

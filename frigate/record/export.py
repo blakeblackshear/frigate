@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import pytz  # type: ignore[import-untyped]
+from pathvalidate import sanitize_filename
 from peewee import DoesNotExist
 
 from frigate.config import FfmpegConfig, FrigateConfig
@@ -202,6 +203,16 @@ def validate_ffmpeg_args(args: str) -> tuple[bool, str]:
 class PlaybackSourceEnum(str, Enum):
     recordings = "recordings"
     preview = "preview"
+
+
+def export_video_path(name: str, export_id: str) -> str:
+    """Path an export's video is stored at once the user has named it.
+
+    The id suffix keeps the path unique when two exports share a name, and
+    keeps the result a single path component whatever the user typed.
+    """
+    stem = sanitize_filename(name).strip(". ") or "export"
+    return os.path.join(EXPORT_DIR, f"{stem}_{export_id.split('_')[-1]}.mp4")
 
 
 class RecordingExporter(threading.Thread):
@@ -917,7 +928,11 @@ class RecordingExporter(threading.Thread):
             "%Y%m%d_%H%M%S"
         )
         cleaned_export_id = self.export_id.split("_")[-1]
-        video_path = f"{EXPORT_DIR}/{self.camera}_{filename_start_datetime}-{filename_end_datetime}_{cleaned_export_id}.mp4"
+
+        if self.user_provided_name:
+            video_path = export_video_path(self.user_provided_name, self.export_id)
+        else:
+            video_path = f"{EXPORT_DIR}/{self.camera}_{filename_start_datetime}-{filename_end_datetime}_{cleaned_export_id}.mp4"
         thumb_path = self.save_thumbnail(self.export_id)
 
         export_values = {
