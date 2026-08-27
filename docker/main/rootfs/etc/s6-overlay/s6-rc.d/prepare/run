@@ -177,8 +177,16 @@ if [[ "$(id -u)" -eq 0 ]]; then
         # realign them on every boot. Recordings are chowned at create and
         # stay behind the sentinel sweep above.
         if [[ -n "$root_services_mode" ]]; then
+            # clips and exports don't exist until the frigate service has run
+            # once; a WARN about them on a normal first boot invites reports
+            boot_sweep_paths=(/config)
+            for extra in /media/frigate/clips /media/frigate/exports; do
+                if [[ -d "$extra" ]]; then
+                    boot_sweep_paths+=("$extra")
+                fi
+            done
             /usr/local/bin/fix-ownership \
-                "${PUID:-1000}" "${PGID:-1000}" /config /media/frigate/clips /media/frigate/exports
+                "${PUID:-1000}" "${PGID:-1000}" "${boot_sweep_paths[@]}"
         fi
     fi
 fi
