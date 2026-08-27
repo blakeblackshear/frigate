@@ -74,11 +74,14 @@ const STEPS = [
 type CameraWizardDialogProps = {
   open: boolean;
   onClose: () => void;
+  // lets callers reuse what was probed here instead of probing again
+  onCameraAdded?: (camera: { name: string; detectCodec?: string }) => void;
 };
 
 export default function CameraWizardDialog({
   open,
   onClose,
+  onCameraAdded,
 }: CameraWizardDialogProps) {
   const { t } = useTranslation(["views/settings"]);
   const { mutate: updateConfig } = useSWR("config");
@@ -271,6 +274,13 @@ export default function CameraWizardDialog({
         .put("config/set", requestBody)
         .then((response) => {
           if (response.status === 200) {
+            onCameraAdded?.({
+              name: finalCameraName,
+              detectCodec: wizardData.streams?.find((stream) =>
+                stream.roles.includes("detect"),
+              )?.testResult?.videoCodec,
+            });
+
             // Configure go2rtc streams for all streams
             if (wizardData.streams && wizardData.streams.length > 0) {
               const go2rtcStreams: Record<string, string[]> = {};
@@ -393,7 +403,7 @@ export default function CameraWizardDialog({
           setIsLoading(false);
         });
     },
-    [updateConfig, t, onClose],
+    [updateConfig, t, onClose, onCameraAdded],
   );
 
   return (

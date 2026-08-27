@@ -4053,6 +4053,58 @@ paths:
       security:
         - frigateAdminAuth: []
       x-required-role: admin
+  /hardware/hwaccel:
+    get:
+      tags:
+        - Hardware
+      summary: Hwaccel Recommendation
+      description: |-
+        **Access:** Admin role required.
+
+        Get the hardware decoding this system can do.
+
+        Args:
+            detector: Hardware key of the detection hardware in use, which biases
+                the recommendation toward that hardware's GPU
+            codecs: Comma separated codecs of the streams that will be decoded,
+                used to drop families that cannot decode one of them
+
+        Returns:
+            The recommended family (empty when none fits) and every usable family
+      operationId: hwaccel_recommendation_hardware_hwaccel_get
+      parameters:
+        - name: detector
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Detector
+        - name: codecs
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Codecs
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HwaccelRecommendation'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
   /events:
     get:
       tags:
@@ -8670,6 +8722,43 @@ components:
         - label
       title: HardwareUnit
       description: One physical piece of hardware.
+    HwaccelFamily:
+      properties:
+        key:
+          type: string
+          title: Family key
+          description: Stable identifier for this kind of hardware decoding.
+        presets:
+          additionalProperties:
+            type: string
+          type: object
+          title: Presets
+          description: The ffmpeg preset for each codec this family decodes, or 
+            a single 'any' preset when it decodes every codec.
+      type: object
+      required:
+        - key
+        - presets
+      title: HwaccelFamily
+      description: A kind of hardware decoding, and the presets that drive it.
+    HwaccelRecommendation:
+      properties:
+        recommended:
+          type: string
+          title: Recommended family
+          description: Key of the family that fits this system best, or an empty
+            string when none does.
+        available:
+          items:
+            $ref: '#/components/schemas/HwaccelFamily'
+          type: array
+          title: Available families
+          description: Every family this system's hardware can use, best first.
+      type: object
+      required:
+        - recommended
+      title: HwaccelRecommendation
+      description: The hardware decoding this system can do.
     Last24HoursReview:
       properties:
         reviewed_alert:
