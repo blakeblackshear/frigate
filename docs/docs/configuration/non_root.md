@@ -15,10 +15,26 @@ By default the runtime user is uid/gid `1000:1000`. You can change it with `PUID
 | `PUID`/`PGID`                    | `PUID=1001`, `PGID=1001`               | Aligned to the values you set, on first boot               | Not supported     |
 | Docker-native user               | `user: "1001:1001"`                    | You own it, Frigate never changes ownership                | Not supported     |
 | Root (escape hatch)              | `FRIGATE_RUN_AS_ROOT=true`             | Never touched                                              | Not supported     |
+| Granular root                    | `FRIGATE_ROOT_SERVICES=frigate`        | Aligned at boot; recordings and exports also at create     | Not supported     |
 
 `PUID`/`PGID` remapping runs `usermod` at startup, which writes to `/etc/passwd`, so it can't work with a read-only root filesystem. That combination fails fast at startup with a message pointing here rather than failing obscurely later.
 
 `FRIGATE_RUN_AS_ROOT` is matched against the exact lowercase string `true`. `True`, `TRUE`, and `1` are all ignored.
+
+### Keeping individual services root
+
+`FRIGATE_ROOT_SERVICES` takes a comma-separated list of `frigate`, `go2rtc`, and `nginx`. A listed service keeps running as root while everything else about non-root operation still applies: `PUID`/`PGID` remapping, the ownership sweep, and ownership of the files those services create.
+
+The two cases this exists for:
+
+- Your detector hardware won't cooperate with [device access](#hardware-device-access) as an unprivileged user. `FRIGATE_ROOT_SERVICES=frigate` keeps the main process (and every detector it spawns) root while nginx and go2rtc stay unprivileged.
+- You want root behavior but still want your volumes owned by `PUID`/`PGID` instead of root. `FRIGATE_ROOT_SERVICES=frigate,go2rtc,nginx` runs everything as root and still keeps file ownership aligned.
+
+Prefer solving device access with `EXTRA_GROUPS` before reaching for this. The `frigate` service owns the API and every ffmpeg process decoding your camera streams, so listing it runs those as root too, not just the detectors.
+
+Recordings and exports are owned by `PUID`/`PGID` the moment they're written, even by a root service. Everything else (snapshots, thumbnails, and other files under `clips/`) is realigned on each restart, so files written mid-run can show as root-owned from the host until the next one.
+
+Listing all three services is not the same as `FRIGATE_RUN_AS_ROOT=true`. The escape hatch never touches ownership at all; the list keeps the ownership machinery running. Unknown names in the list stop the container at startup rather than silently dropping a service you meant to keep root. Changing the list re-runs the full ownership sweep once on the next boot. With Docker's own `user:` the list has no effect, since the container never has root to keep.
 
 ## Migrating an existing install
 
@@ -226,7 +242,7 @@ SUBSYSTEM=="hailo_chardev", MODE="0660", GROUP="hailo"
 
 ## Known limitations
 
-`telemetry.stats.network_bandwidth` uses nethogs, which needs `CAP_NET_ADMIN` and `CAP_NET_RAW` and therefore root. The stat is disabled automatically when Frigate isn't running as root, with one warning in the log. Use `FRIGATE_RUN_AS_ROOT=true` if you need it.
+`telemetry.stats.network_bandwidth` uses nethogs, which needs `CAP_NET_ADMIN` and `CAP_NET_RAW` and therefore root. The stat is disabled automatically when Frigate isn't running as root, with one warning in the log. Use `FRIGATE_ROOT_SERVICES=frigate` (or `FRIGATE_RUN_AS_ROOT=true`) if you need it.
 
 go2rtc's ffmpeg processes no longer appear in Intel GPU stats. Frigate reads per-process GPU usage from `/proc/<pid>/fdinfo`, which the kernel won't let one user read for another user's processes, so anything go2rtc spawns is invisible to it. Overall GPU utilization is unaffected.
 
