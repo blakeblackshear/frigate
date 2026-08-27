@@ -198,8 +198,8 @@ def get_bandwidth_stats(config) -> dict[str, dict]:
         if not _bandwidth_warning_logged:
             logger.warning(
                 "Network bandwidth stats require root (nethogs needs CAP_NET_ADMIN/CAP_NET_RAW) "
-                "and are disabled; set FRIGATE_RUN_AS_ROOT=true or disable "
-                "telemetry.stats.network_bandwidth to silence this warning"
+                "and are disabled; set FRIGATE_ROOT_SERVICES=frigate (or FRIGATE_RUN_AS_ROOT=true) "
+                "or disable telemetry.stats.network_bandwidth to silence this warning"
             )
             _bandwidth_warning_logged = True
         return {}
