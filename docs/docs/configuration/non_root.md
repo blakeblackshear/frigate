@@ -64,18 +64,27 @@ The escape hatch never changes ownership, and it deletes the sweep sentinel on s
 
 Supplementary groups can't open a device node that's `root:root` with mode `0600`. If your accelerator's node isn't group readable on the host, no amount of container configuration will fix it, so the fix belongs on the host.
 
-Use `group_add` in compose (`--group-add` with `docker run`) to give the runtime user a host GID. `EXTRA_GROUPS` does the same thing and also covers the `go2rtc` user, which needs render and video access to run hardware accelerated restreams.
+Give the runtime user access with `EXTRA_GROUPS`, a comma separated list of numeric host GIDs. They're added to both the `frigate` and `go2rtc` users at startup, which matters because go2rtc needs render and video access of its own to run hardware accelerated restreams.
+
+```yaml
+environment:
+  EXTRA_GROUPS: "104,44" # host render and video GIDs, from getent group render
+```
+
+Docker's `group_add` does not work in the default or `PUID` modes. `s6-setuidgid` rebuilds the supplementary group list from `/etc/group` when it drops privileges, which discards anything Docker added to the init process. Use `group_add` only with Docker-native `user:`, where no privilege drop happens and `EXTRA_GROUPS` in turn does nothing.
+
+`privileged: true` doesn't help either. It grants capabilities to root, and the runtime user isn't root, so normal file permissions on the device node still apply.
 
 | Hardware                  | Device(s)                                                   | Non-root requirement                                                                                                                                                          |
 | ------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Intel/AMD GPU (VAAPI/QSV) | `/dev/dri/renderD128`                                       | `group_add: ["<host render GID>"]` from `getent group render`, or `EXTRA_GROUPS`                                                                                               |
-| Intel/AMD NPU             | `/dev/accel`                                                | Host udev rule granting a group, then `group_add` that GID                                                                                                                    |
-| Coral USB                 | `/dev/bus/usb`                                              | Host udev rule granting plugdev, for example `SUBSYSTEMS=="usb", ATTRS{idVendor}=="1a6e", GROUP="plugdev"` and the same for `18d1` post-init, then `group_add` the plugdev GID |
-| Coral PCIe                | `/dev/apex_0`                                               | Host udev rule `SUBSYSTEM=="apex", GROUP="apex", MODE="0660"`, then `group_add` that GID                                                                                       |
-| Hailo                     | `/dev/hailo0`                                               | Host udev rule granting a group, then `group_add` that GID                                                                                                                    |
+| Intel/AMD GPU (VAAPI/QSV) | `/dev/dri/renderD128`                                       | `EXTRA_GROUPS` with the host render GID from `getent group render`                                                                                               |
+| Intel/AMD NPU             | `/dev/accel`                                                | Host udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                                                                              |
+| Coral USB                 | `/dev/bus/usb`                                              | Host udev rule granting plugdev, for example `SUBSYSTEMS=="usb", ATTRS{idVendor}=="1a6e", GROUP="plugdev"` and the same for `18d1` post-init, then the plugdev GID in `EXTRA_GROUPS` |
+| Coral PCIe                | `/dev/apex_0`                                               | Host udev rule `SUBSYSTEM=="apex", GROUP="apex", MODE="0660"`, then that GID in `EXTRA_GROUPS`                                                                                       |
+| Hailo                     | `/dev/hailo0`                                               | Host udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                                                                              |
 | NVIDIA                    | nvidia runtime                                              | Works non-root with the nvidia-container-toolkit defaults                                                                                                                     |
-| AMD ROCm                  | `/dev/kfd`, `/dev/dri`                                      | `group_add` the host `video` and `render` GIDs                                                                                                                                |
-| Raspberry Pi              | `/dev/video11`                                              | `group_add` the host `video` GID                                                                                                                                              |
+| AMD ROCm                  | `/dev/kfd`, `/dev/dri`                                      | The host `video` and `render` GIDs in `EXTRA_GROUPS`                                                                                                                                |
+| Raspberry Pi              | `/dev/video11`                                              | The host `video` GID in `EXTRA_GROUPS`                                                                                                                                              |
 | Rockchip                  | `/dev/dri`, `/dev/dma_heap`, `/dev/rga`, `/dev/mpp_service` | These are commonly `root:root` `0600`, so host udev rules are required. If you can't grant access to all four, use `FRIGATE_RUN_AS_ROOT=true`                                  |
 | Axera (AXCL)              | `/dev/ax_*` per the AXCL driver docs                        | Unverified. Node ownership is driver dependent, check it on your hardware before assuming this works                                                                           |
 | Synaptics SL1680          | per the Synaptics docs                                      | Unverified                                                                                                                                                                    |
