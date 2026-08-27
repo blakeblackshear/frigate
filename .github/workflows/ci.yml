@@ -68,6 +68,7 @@ jobs:
           docker run -d --name frigate --shm-size 256m \
             -v /tmp/frigate-config:/config \
             -v /tmp/frigate-media:/media/frigate \
+            --mount type=tmpfs,target=/tmp/cache,tmpfs-size=100000000 \
             -p 5000:5000 -p 8971:8971 \
             ${{ steps.setup.outputs.image-name }}-amd64
       - name: Wait for API
@@ -134,6 +135,10 @@ jobs:
           # runtime user can write recordings storage
           docker exec frigate /command/s6-setuidgid frigate touch /media/frigate/.write-probe
           docker exec frigate rm /media/frigate/.write-probe
+          # /tmp/cache is a tmpfs mount here, as the docs recommend: it arrives
+          # root-owned, and the ZMQ IPC sockets live in it
+          docker exec frigate /command/s6-setuidgid frigate touch /tmp/cache/.write-probe
+          docker exec frigate rm /tmp/cache/.write-probe
       - name: Assert escape hatch restores root
         run: |
           mkdir -p /tmp/frigate-config-root

@@ -174,3 +174,10 @@ if [[ "$(id -u)" -eq 0 && ! -d /media/frigate ]]; then
         chown "${PUID:-1000}:${PGID:-1000}" /media/frigate
     fi
 fi
+
+# Usually a tmpfs mount, so it arrives root-owned and is outside the swept
+# volumes. The runtime user binds its ZMQ IPC sockets in here.
+if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+    mkdir -p /tmp/cache
+    chown "${PUID:-1000}:${PGID:-1000}" /tmp/cache
+fi
