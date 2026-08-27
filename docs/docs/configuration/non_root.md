@@ -24,6 +24,8 @@ By default the runtime user is uid/gid `1000:1000`. You can change it with `PUID
 
 Volumes created by earlier versions of Frigate are owned by root. Ownership has to be aligned with the runtime user once.
 
+There are two independent prerequisites to upgrading, and doing one without the other is the most common way this goes wrong. This section covers volume ownership. If you use a Coral, a GPU, or any other accelerator, read [Hardware device access](#hardware-device-access) as well: those devices are reachable today because Frigate runs as root, and they need host side work that has nothing to do with your volumes.
+
 This happens automatically on the first boot after upgrading, but on large recordings volumes it's much better to do it from the host beforehand. The boot sweep runs before any service starts, so a multi-terabyte `/media/frigate` can hold the container in startup long enough for Docker's healthcheck to mark it unhealthy, and orchestrators that react to health will restart it mid-sweep. If you'd rather not run the script, raise the healthcheck start period instead (`--start-period=1800s`, or `start_period: 1800s` under `healthcheck:` in compose).
 
 Grab `fix-permissions.sh` from `docker/migration/` in the Frigate repo and dry run it first:
@@ -56,39 +58,130 @@ Once the volumes are aligned, start Frigate normally. A sentinel at `/config/.pe
 
 ## Rolling back
 
-Set `FRIGATE_RUN_AS_ROOT=true` and restart. Everything runs as root again, exactly as it did before.
+Set `FRIGATE_RUN_AS_ROOT=true` and restart. Everything runs as root again, exactly as it did before. This is the fastest way to get a broken install running while you work out a device permission problem, and it's the recommended fallback for hardware you can't grant access to.
 
 The escape hatch never changes ownership, and it deletes the sweep sentinel on startup, so switching back to non-root later re-sweeps whatever root created in the meantime. Toggling in either direction is safe.
 
 ## Hardware device access
 
-Supplementary groups can't open a device node that's `root:root` with mode `0600`. If your accelerator's node isn't group readable on the host, no amount of container configuration will fix it, so the fix belongs on the host.
+This is the part most likely to need work on your host, and it catches people out for a specific reason: your accelerator almost certainly works today *because* Frigate runs as root. Device nodes are commonly owned by `root:root`, and root either matches the file's group or bypasses the check entirely. The runtime user does neither, so a node that was fine yesterday can become unreadable with no change to your Frigate config at all.
 
-Give the runtime user access with `EXTRA_GROUPS`, a comma separated list of numeric host GIDs. They're added to both the `frigate` and `go2rtc` users at startup, which matters because go2rtc needs render and video access of its own to run hardware accelerated restreams.
+Nothing inside the container can fix that. Device node permissions are set by the host, so the fix belongs there too.
+
+### Read what your device actually requires
+
+Find the node and look at its owner, group, and mode:
+
+```bash
+ls -ln /dev/dri/renderD128
+crw-rw---- 1 0 105 226, 128 Jul  5 10:12 /dev/dri/renderD128
+#          ^ ^  ^
+#          | |  group GID 105
+#          | owner UID 0 (root)
+#          mode: owner rw, group rw, other none
+```
+
+Then ask which of the three permission sets the runtime user lands in. It isn't the owner (that's root), so it gets the group bits only if it belongs to that GID, and otherwise falls through to "other". In the example above "other" is empty, so without membership in group 105 the runtime user cannot open the node at all.
+
+The trap is a node that looks permissive but isn't. A USB Coral defaults to this:
+
+```bash
+ls -ln /dev/bus/usb/004/003
+crw-rw-r-- 1 0 0 189, 386 Jul  5 10:12 /dev/bus/usb/004/003
+```
+
+That's group `0`, so "other" applies to everyone else, and "other" here is read only. `libedgetpu` needs to *write* to the node, so detection fails with `No EdgeTPU was detected` as though no Coral were attached. Read access alone is not enough for most accelerators.
+
+### Grant access
+
+Give the runtime user the GID with `EXTRA_GROUPS`, a comma separated list of numeric host GIDs. They're added to both the `frigate` and `go2rtc` users at startup, which matters because go2rtc needs render and video access of its own to run hardware accelerated restreams.
 
 ```yaml
 environment:
-  EXTRA_GROUPS: "104,44" # host render and video GIDs, from getent group render
+  EXTRA_GROUPS: "105,44" # host render and video GIDs
 ```
 
-Docker's `group_add` does not work in the default or `PUID` modes. `s6-setuidgid` rebuilds the supplementary group list from `/etc/group` when it drops privileges, which discards anything Docker added to the init process. Use `group_add` only with Docker-native `user:`, where no privilege drop happens and `EXTRA_GROUPS` in turn does nothing.
+Use numeric GIDs from the host, not names. Group names don't have to agree between the host and the container, and the kernel only checks the number. If the GID doesn't exist in the image, Frigate creates a placeholder group for it.
 
-`privileged: true` doesn't help either. It grants capabilities to root, and the runtime user isn't root, so normal file permissions on the device node still apply.
+Two things that look like they should work and don't:
 
-| Hardware                  | Device(s)                                                   | Non-root requirement                                                                                                                                                          |
-| ------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Intel/AMD GPU (VAAPI/QSV) | `/dev/dri/renderD128`                                       | `EXTRA_GROUPS` with the host render GID from `getent group render`                                                                                               |
-| Intel/AMD NPU             | `/dev/accel`                                                | Host udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                                                                              |
-| Coral USB                 | `/dev/bus/usb`                                              | Host udev rule granting plugdev, for example `SUBSYSTEMS=="usb", ATTRS{idVendor}=="1a6e", GROUP="plugdev"` and the same for `18d1` post-init, then the plugdev GID in `EXTRA_GROUPS` |
-| Coral PCIe                | `/dev/apex_0`                                               | Host udev rule `SUBSYSTEM=="apex", GROUP="apex", MODE="0660"`, then that GID in `EXTRA_GROUPS`                                                                                       |
-| Hailo                     | `/dev/hailo0`                                               | Host udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                                                                              |
-| NVIDIA                    | nvidia runtime                                              | Works non-root with the nvidia-container-toolkit defaults                                                                                                                     |
-| AMD ROCm                  | `/dev/kfd`, `/dev/dri`                                      | The host `video` and `render` GIDs in `EXTRA_GROUPS`                                                                                                                                |
-| Raspberry Pi              | `/dev/video11`                                              | The host `video` GID in `EXTRA_GROUPS`                                                                                                                                              |
-| Rockchip                  | `/dev/dri`, `/dev/dma_heap`, `/dev/rga`, `/dev/mpp_service` | These are commonly `root:root` `0600`, so host udev rules are required. If you can't grant access to all four, use `FRIGATE_RUN_AS_ROOT=true`                                  |
-| Axera (AXCL)              | `/dev/ax_*` per the AXCL driver docs                        | Unverified. Node ownership is driver dependent, check it on your hardware before assuming this works                                                                           |
-| Synaptics SL1680          | per the Synaptics docs                                      | Unverified                                                                                                                                                                    |
-| MemryX                    | per the MemryX docs                                         | Still requires `privileged: true`, which means root. Out of scope for non-root operation                                                                                       |
+- Docker's `group_add` has no effect in the default or `PUID` modes. `s6-setuidgid` rebuilds the supplementary group list from `/etc/group` when it drops privileges, which discards whatever Docker gave the init process. It *is* the right tool with Docker-native `user:`, where no privilege drop happens and `EXTRA_GROUPS` in turn does nothing.
+- `privileged: true` doesn't help. It grants capabilities to root, and the runtime user isn't root, so ordinary file permissions on the node still apply.
+
+If the node's group is `root` or the mode denies the group, no `EXTRA_GROUPS` value can help. You need a udev rule first.
+
+### Verify before you rely on it
+
+Check the group landed, then check the runtime user can actually open the node. Test for write, not just read:
+
+```bash
+docker exec frigate id frigate
+docker exec frigate /command/s6-setuidgid frigate sh -c 'test -w /dev/dri/renderD128 && echo ok'
+docker exec frigate /command/s6-setuidgid go2rtc  sh -c 'test -w /dev/dri/renderD128 && echo ok'
+```
+
+Permission probes are still only a proxy for the driver working. These exercise the real libraries as the runtime user:
+
+```bash
+docker exec frigate /command/s6-setuidgid frigate vainfo
+docker exec frigate /command/s6-setuidgid frigate python3 -c "import openvino as ov; print(ov.Core().available_devices)"
+```
+
+`vainfo` should reach `va_openDriver() returns 0` and list profiles. Complaints about `XDG_RUNTIME_DIR` or an X server above that are normal and harmless. OpenVINO must list `GPU`; if it returns only `CPU`, detection has quietly fallen back and inference will be far slower without any error in the log.
+
+If something isn't working, the fastest way to tell a permissions problem from anything else is to start the container once with `FRIGATE_RUN_AS_ROOT=true`. If the device appears as root and not otherwise, it's node permissions and a udev rule is the fix. If it's missing either way, the problem is your device mapping or the host, and it isn't related to running non-root.
+
+### udev rules by device
+
+Rules go in `/etc/udev/rules.d/` on the host and take effect after:
+
+```bash
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+An already-connected device sometimes keeps its original ownership through a trigger. If `ls -ln` doesn't show the new group, replug it, or reboot for a built-in device.
+
+**Coral USB** needs two rules, because the device re-enumerates after firmware load. It appears as Global Unichip `1a6e` cold and Google `18d1` once running, with a different node each time. A rule covering only `1a6e` gives you a Coral that initializes once and then disappears mid-run.
+
+```
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1a6e", GROUP="plugdev", MODE="0664"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="18d1", GROUP="plugdev", MODE="0664"
+```
+
+Map the whole `/dev/bus/usb` rather than a single node, for the same re-enumeration reason. Most hosts already put `plugdev` at GID 46 and the image agrees, so you often need no `EXTRA_GROUPS` entry for a USB Coral. Confirm with `getent group plugdev` and add the number if your host differs.
+
+**Coral PCIe** is frequently `crw------- root root`, which nothing but root can open:
+
+```
+SUBSYSTEM=="apex", MODE="0660", GROUP="apex"
+```
+
+Create the group with `sudo groupadd -f apex`, then add its GID to `EXTRA_GROUPS`.
+
+**Hailo** follows the same shape. Grant `/dev/hailo0` a group and add that GID:
+
+```
+SUBSYSTEM=="hailo_chardev", MODE="0660", GROUP="hailo"
+```
+
+**Intel and AMD GPUs** usually need nothing beyond `EXTRA_GROUPS`, since distributions ship a `render` group owning `/dev/dri/renderD128` already. Note the GID often differs between host and image, so pass the host's number rather than assuming the name resolves. Debian based images have no `render` group at all.
+
+### Quick reference
+
+| Hardware                  | Device(s)                                                   | What non-root needs                                                                                             |
+| ------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Intel/AMD GPU (VAAPI/QSV) | `/dev/dri/renderD128`                                       | Host render GID in `EXTRA_GROUPS`, from `getent group render`                                                   |
+| Intel/AMD NPU             | `/dev/accel`                                                | udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                      |
+| Coral USB                 | `/dev/bus/usb`                                              | udev rules for both `1a6e` and `18d1`; usually already covered by `plugdev` 46                                   |
+| Coral PCIe                | `/dev/apex_0`                                               | udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                      |
+| Hailo                     | `/dev/hailo0`                                               | udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                      |
+| NVIDIA                    | nvidia runtime                                              | Nothing, works with the nvidia-container-toolkit defaults                                                        |
+| AMD ROCm                  | `/dev/kfd`, `/dev/dri`                                      | Host `video` and `render` GIDs in `EXTRA_GROUPS`                                                                 |
+| Raspberry Pi              | `/dev/video11`                                              | Host `video` GID in `EXTRA_GROUPS`                                                                               |
+| Rockchip                  | `/dev/dri`, `/dev/dma_heap`, `/dev/rga`, `/dev/mpp_service` | Commonly `root:root` `0600`, so all four need udev rules. If you can't grant all four, use `FRIGATE_RUN_AS_ROOT` |
+| Axera (AXCL)              | `/dev/ax_*` per the AXCL driver docs                        | Unverified. Check node ownership on your hardware before assuming this works                                    |
+| Synaptics SL1680          | per the Synaptics docs                                      | Unverified                                                                                                      |
+| MemryX                    | per the MemryX docs                                         | Still requires `privileged: true`, which means root. Out of scope for non-root operation                        |
 
 ## Known limitations
 
