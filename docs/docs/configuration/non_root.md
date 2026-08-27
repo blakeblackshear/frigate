@@ -56,6 +56,10 @@ Pass `PUID` and `PGID` as the third and fourth arguments if you're not using the
 
 Once the volumes are aligned, start Frigate normally. A sentinel at `/config/.permissions_version` records what was done, so later boots skip the sweep entirely unless you change `PUID`/`PGID`.
 
+`lost+found` is left alone. It belongs to the filesystem rather than to Frigate, and `fsck` recovers fragments of arbitrary files into it under root-only permissions, so handing it to the runtime user would expose whatever ends up there. Expect to see it still owned by root afterward, on any volume that's a dedicated mount.
+
+If something under your volumes genuinely can't be chowned, a read-only btrfs snapshot directory for example, the sweep warns and names the path, and it deliberately doesn't write the sentinel. That means it retries on the next boot rather than recording a migration that didn't finish. Either move those paths outside `/media/frigate` or expect the scan to repeat.
+
 ### Network storage
 
 Storing recordings on a NAS is common, and ownership behaves differently there. Check what you have before migrating anything:

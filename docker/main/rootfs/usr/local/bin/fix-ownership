@@ -10,6 +10,8 @@
 #                on every boot)
 #
 # Only files whose uid OR gid differs are touched, so re-runs are cheap.
+# lost+found is skipped: it belongs to the filesystem, not to Frigate, and
+# fsck puts recovered fragments of arbitrary files there under root-only 0700.
 # Top-level /config additionally grants group frigate-data TRAVERSE ONLY
 # (g+rx) so the separate go2rtc user can reach its pre-created HomeKit file
 # on hosts where /config is mounted 0700. Never g+w: directory write means
@@ -82,7 +84,7 @@ for path in "$@"; do
     # stale mount. Tolerate it rather than aborting under errexit, but never
     # read a failed scan as "nothing to do": that would record the sweep as
     # complete without having looked.
-    if ! count=$(find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) -printf '.' 2>/dev/null | wc -c); then
+    if ! count=$(find "$path" -name lost+found -prune -o \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) -printf '.' 2>/dev/null | wc -c); then
         swept_clean=0
         echo "[WARN] fix-ownership: could not scan ${path}; will retry on next boot"
         continue
@@ -109,7 +111,7 @@ for path in "$@"; do
     # -print feeds the progress counter while -exec {} + keeps the chown
     # batched; the scan above is what makes a real percentage possible
     started=$SECONDS
-    if find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
+    if find "$path" -name lost+found -prune -o \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
         -print -exec chown -h "${target_uid}:${target_gid}" {} + \
         | awk -v total="$count" -v path="$path" '
             BEGIN { next_pct = 5 }
