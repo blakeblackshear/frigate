@@ -56,6 +56,37 @@ Pass `PUID` and `PGID` as the third and fourth arguments if you're not using the
 
 Once the volumes are aligned, start Frigate normally. A sentinel at `/config/.permissions_version` records what was done, so later boots skip the sweep entirely unless you change `PUID`/`PGID`.
 
+### Network storage
+
+Storing recordings on a NAS is common, and ownership behaves differently there. Check what you have before migrating anything:
+
+```bash
+findmnt -T /path/to/your/storage -o TARGET,FSTYPE,OPTIONS
+```
+
+**SMB and CIFS** don't store ownership per file at all. It's synthesized from the mount options, so a per-file `chown` fails, and you don't need one. Mount the share as the uid and gid Frigate will run as, and every file already looks correct to the sweep:
+
+```
+//nas/frigate /media/frigate cifs credentials=/root/.smb,uid=1000,gid=1000,file_mode=0664,dir_mode=0775 0 0
+```
+
+**NFS** exports default to `root_squash` on most servers, which maps the container's root to `nobody`. The recursive chown then fails outright, you get `[WARN] fix-ownership: some entries under /media/frigate could not be updated`, and because the sweep didn't finish it deliberately doesn't write the sentinel, so it retries on the next boot and every boot after.
+
+The best fix is to not chown over NFS at all. Do it on the server, locally, where there's no squash and no network round trip per file:
+
+```bash
+# on the NAS itself, against the exported directory
+chown -R 1000:1000 /export/frigate
+```
+
+Frigate's own sweep then finds nothing to change and records the sentinel normally. If you can't get a shell on the server, the alternatives are to export temporarily with `no_root_squash`, migrate, and put it back, or to leave ownership alone and set `PUID`/`PGID` to whichever uid already owns the files.
+
+Either way the uid has to mean the same thing on both machines. NFS sends numeric uids, so container uid 1000 is simply uid 1000 on the server no matter what the usernames are.
+
+Expect the first boot to be slow even when nothing needs changing, because verifying ownership costs a round trip per file. The sentinel makes that a one-time price. **If the sweep runs on every boot rather than once, ownership isn't actually being applied**, and the warning above will tell you so.
+
+Keep `/config` on local storage regardless. Frigate's database is SQLite and network shares handle its locking poorly. That's a pre-existing recommendation, not something running non-root introduces.
+
 ## Rolling back
 
 Set `FRIGATE_RUN_AS_ROOT=true` and restart. Everything runs as root again, exactly as it did before. This is the fastest way to get a broken install running while you work out a device permission problem, and it's the recommended fallback for hardware you can't grant access to.
@@ -182,6 +213,12 @@ SUBSYSTEM=="hailo_chardev", MODE="0660", GROUP="hailo"
 | Axera (AXCL)              | `/dev/ax_*` per the AXCL driver docs                        | Unverified. Check node ownership on your hardware before assuming this works                                    |
 | Synaptics SL1680          | per the Synaptics docs                                      | Unverified                                                                                                      |
 | MemryX                    | per the MemryX docs                                         | Still requires `privileged: true`, which means root. Out of scope for non-root operation                        |
+| Nvidia Jetson             | nvidia runtime plus Jetson nodes                            | Unverified. The nvidia runtime handles mapping, but check `/dev/nvhost-*` ownership on your board                |
+| VeriSilicon NPU (Teflon)  | per the driver, commonly `/dev/galcore`                     | Unverified. Check node ownership on your hardware before assuming this works                                    |
+| CPU detector              | none                                                        | Nothing, no device is opened                                                                                    |
+| DeepStack, CodeProject.AI | none                                                        | Nothing, inference happens over the network                                                                     |
+| ZMQ detector              | none                                                        | Nothing, inference happens over a socket                                                                        |
+| Apple Silicon             | none                                                        | Nothing, the NPU client runs on the host and Frigate reaches it over the network                                |
 
 ## Known limitations
 
