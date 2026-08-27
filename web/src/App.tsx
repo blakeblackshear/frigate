@@ -6,7 +6,7 @@ import Sidebar from "@/components/navigation/Sidebar";
 import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
 import Bottombar from "./components/navigation/Bottombar";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useContext, useEffect, useState } from "react";
 import { Redirect } from "./components/navigation/Redirect";
 import { cn } from "./lib/utils";
 import { isPWA } from "./utils/isPWA";
@@ -15,6 +15,9 @@ import useSWR from "swr";
 import { FrigateConfig } from "./types/frigateConfig";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { isRedirectingToLogin } from "@/api/auth-redirect";
+import { AuthContext } from "@/context/auth-context";
+import { useIsAdmin } from "@/hooks/use-is-admin";
+import { isSetupDismissed } from "@/utils/setupWizard";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -30,6 +33,7 @@ const Chat = lazy(() => import("@/pages/Chat"));
 const Logs = lazy(() => import("@/pages/Logs"));
 const AccessDenied = lazy(() => import("@/pages/AccessDenied"));
 const Replay = lazy(() => import("@/pages/Replay"));
+const SetupWizard = lazy(() => import("@/pages/SetupWizard"));
 
 function App() {
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -52,6 +56,24 @@ function DefaultAppView() {
     revalidateOnFocus: false,
   });
 
+  // decided once per load: adding the first camera part way through the
+  // wizard must not pull the wizard out from under the user
+  const [showWizard, setShowWizard] = useState<boolean>();
+  const { auth } = useContext(AuthContext);
+  const isAdmin = useIsAdmin();
+
+  useEffect(() => {
+    // every step writes through admin only endpoints, and the role isn't
+    // known until the profile resolves
+    if (config && !auth.isLoading && showWizard === undefined) {
+      setShowWizard(
+        isAdmin &&
+          Object.keys(config.cameras ?? {}).length === 0 &&
+          !isSetupDismissed(),
+      );
+    }
+  }, [config, auth.isLoading, isAdmin, showWizard]);
+
   // Compute required roles for main routes, ensuring we have config first
   // to prevent race condition where custom roles are temporarily unavailable
   const mainRouteRoles = config?.auth?.roles
@@ -64,6 +86,21 @@ function DefaultAppView() {
     return (
       <div className="size-full overflow-hidden">
         <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      </div>
+    );
+  }
+
+  // Show setup wizard for first-time users
+  if (showWizard) {
+    return (
+      <div className="size-full overflow-hidden">
+        <Suspense
+          fallback={
+            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          }
+        >
+          <SetupWizard />
+        </Suspense>
       </div>
     );
   }

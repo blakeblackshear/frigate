@@ -4,6 +4,7 @@ title: Getting started
 ---
 
 import ConfigTabs from "@site/src/components/ConfigTabs";
+import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import NavPath from "@site/src/components/NavPath";
 
@@ -132,21 +133,68 @@ services:
       - "8554:8554" # RTSP feeds
 ```
 
-Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. On startup, an admin user and password will be created and outputted in the logs. You can see this by running `docker logs frigate`. Frigate should now be accessible at `https://server_ip:8971` where you can login with the `admin` user and finish configuration using the Settings UI.
+Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. On startup, an admin user and password will be created and outputted in the logs. You can see this by running `docker logs frigate`. Frigate should now be accessible at `https://server_ip:8971` where you can login with the `admin` user. With no cameras configured yet, the setup wizard runs on first login and walks you through the rest.
 
 ## Configuring Frigate
 
 This section assumes that you already have an environment setup as described in [Installation](../frigate/installation.md). You should also configure your cameras according to the [camera setup guide](/frigate/camera_setup). Pay particular attention to the section on choosing a detect resolution.
 
-### Step 1: Start Frigate
+<Tabs
+groupId="setup-method"
+defaultValue="wizard"
+values={[
+{ label: "Setup wizard", value: "wizard" },
+{ label: "Manual", value: "manual" },
+]}
+
+> <TabItem value="wizard">
+
+The first time you open Frigate with no cameras configured, the setup wizard walks you through the basics. Every step can be skipped, everything it sets can be changed later in Settings, and once you finish or dismiss it, it doesn't come back.
+
+:::note
+
+Frigate only sees hardware that has been passed into the container. If you plan to use a GPU, a Coral, or another accelerator, add the device to your `docker-compose.yml` and restart before running the wizard, otherwise it won't appear in the detection or hardware acceleration steps. The Manual tab shows the device entries for an Intel or AMD GPU and for a Coral, and the [hardware acceleration](../configuration/hardware_acceleration_video.md) and [object detectors](../configuration/object_detectors.md) docs cover the rest.
+
+:::
+
+**Account**
+
+Set a password for the `admin` account to replace the generated one from the logs, and add accounts for anyone else who needs access. This step is hidden if you have turned authentication off.
+
+**Add a camera**
+
+Opens the [Add Camera Wizard](../configuration/cameras.md#adding-a-camera-with-the-add-camera-wizard), which connects to the camera, tests each stream, and writes its configuration for you. You can add more than one before moving on.
+
+**Object detection**
+
+Lists the detection hardware Frigate found on your system, such as a Coral, an Intel GPU or NPU, or a discrete GPU, and configures the one you pick. NVIDIA and AMD GPUs need a model before detection can start, so the wizard offers your Frigate+ models if you have them, or lets you finish setup and add one later under <NavPath path="Settings > System > Detection models" />.
+
+**Hardware acceleration**
+
+Offers only the decoding methods your hardware supports. Auto picks one based on that hardware and the codec your camera sends, so a mixed h264 and h265 setup gets the right preset per camera.
+
+**Recording**
+
+Choose whether to record only when something is detected or around the clock, and how long to keep it.
+
+The last screen summarizes what was set up. If a step changed something that needs a restart, the button restarts Frigate and returns you to the Live view once it is back.
+
+The wizard configures the essentials only. Motion masks are not included and should be set up afterward, once you can identify the areas of the frame that trigger unwanted motion. See the [masks documentation](../configuration/masks.md). Zones, tracked object types, notifications, and MQTT are also configured in Settings.
+
+</TabItem>
+<TabItem value="manual">
+
+On a new install the setup wizard opens first. Click **Skip setup and configure manually** on its welcome screen to dismiss it, and the steps below apply. The wizard won't come back once dismissed.
+
+**Step 1: Start Frigate**
 
 At this point you should be able to start Frigate and a basic config will be created automatically.
 
-### Step 2: Add a camera
+**Step 2: Add a camera**
 
 Click the **Add Camera** button in <NavPath path="Settings > Global configuration > Camera management" /> to use the camera setup wizard to get your first camera added into Frigate. See [Adding a camera with the Add Camera Wizard](../configuration/cameras.md#adding-a-camera-with-the-add-camera-wizard) for a walkthrough of each step.
 
-### Step 3: Configure hardware acceleration (recommended)
+**Step 3: Configure hardware acceleration (recommended)**
 
 Now that you have a working camera configuration, set up hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](../configuration/hardware_acceleration_video.md) docs for examples applicable to your hardware.
 
@@ -190,7 +238,7 @@ cameras:
 </TabItem>
 </ConfigTabs>
 
-### Step 4: Configure detectors
+**Step 4: Configure detectors**
 
 By default, Frigate will use a single OpenVINO detector running on the CPU.
 
@@ -299,7 +347,7 @@ More details on available detectors can be found [here](../configuration/object_
 
 Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they can be configured in <NavPath path="Settings > Global configuration > Objects" /> or via the [configuration file reference](../configuration/advanced/reference.md).
 
-### Step 5: Setup motion masks
+**Step 5: Setup motion masks**
 
 Now that you have optimized your configuration for decoding the video stream, you will want to check to see where to implement motion masks. Click on the camera from the main dashboard, then select the gear icon in the top right, enable the [Debug view](/usage/live#the-single-camera-view), and finally enable the switch for Motion Boxes. Watch for areas that continuously trigger unwanted motion to be detected. Common areas to mask include camera timestamps and trees that frequently blow in the wind. The goal is to avoid wasting object detection cycles looking at these areas.
 
@@ -336,7 +384,7 @@ cameras:
           coordinates: "0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432"
 ```
 
-### Step 6: Enable recordings
+**Step 6: Enable recordings**
 
 In order to review activity in the Frigate UI, recordings need to be enabled.
 
@@ -385,7 +433,10 @@ If you only plan to use Frigate for recording, it is still recommended to define
 
 By default, Frigate will retain video of all tracked objects for 10 days. The full set of options for recording can be found [here](../configuration/advanced/reference.md).
 
-### Step 7: Complete config
+</TabItem>
+</Tabs>
+
+### Complete config
 
 At this point you have a complete config with basic functionality.
 
