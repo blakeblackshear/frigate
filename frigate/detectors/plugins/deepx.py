@@ -464,6 +464,68 @@ def decode_raw_anchor(
     )
 
 
+def decode_raw_anchor_free(
+    outputs: list[np.ndarray],
+    width: int,
+    height: int,
+    score_threshold: float,
+    nms_threshold: float,
+) -> np.ndarray:
+    """Decode raw output from an anchor-free head, or an unconfirmed layout.
+
+    The exported head emits a single tensor with no objectness column,
+    (4+C, N) channel-major or already transposed to (N, 4+C), and box columns
+    already in input pixels as (center_x, center_y, width, height). This is
+    also what `model_format: auto` falls back to: with only one output
+    tensor there is no objectness column to tell an anchor-based head from
+    an anchor-free one apart, so every column past the box is read as a
+    class score, which is only correct for an anchor-free head -- matching
+    `auto` being "only reliable for anchor-free heads" per its config
+    description.
+    """
+    predictions = outputs[0]
+
+    # Drop the batch axis without a blind squeeze, which would also collapse
+    # the box-count axis on the single-candidate frame case. Fold every
+    # leading axis into rows instead.
+    if predictions.ndim == 3 and predictions.shape[0] == 1:
+        predictions = predictions[0]
+
+    if predictions.ndim != 2:
+        return np.zeros((20, 6), np.float32)
+
+    # DX-COM may export channel-major (4+C, N); transpose to (N, 4+C) so
+    # rows are boxes, matching every other decoder in this file.
+    if predictions.shape[0] < predictions.shape[1]:
+        predictions = predictions.T
+
+    if predictions.shape[0] == 0 or predictions.shape[1] <= 4:
+        return np.zeros((20, 6), np.float32)
+
+    class_scores = predictions[:, 4:]
+    labels = np.argmax(class_scores, axis=1)
+    scores = class_scores[np.arange(len(labels)), labels]
+
+    box_w = predictions[:, 2]
+    box_h = predictions[:, 3]
+    x_min = predictions[:, 0] - box_w * 0.5
+    y_min = predictions[:, 1] - box_h * 0.5
+
+    order = run_nms(x_min, y_min, box_w, box_h, scores, score_threshold, nms_threshold)
+
+    return fill_detections(
+        x_min,
+        y_min,
+        x_min + box_w,
+        y_min + box_h,
+        scores,
+        labels,
+        width,
+        height,
+        order,
+    )
+
+
 def decode_raw_nms_in_head(
     outputs: list[np.ndarray],
     width: int,
@@ -1009,6 +1071,22 @@ class Deepx(DetectionApi):
         # helper already decodes with the same anchor formula.
         if self.model_format in ANCHOR_FORMATS and len(outputs) == 1:
             return decode_raw_anchor(
+                outputs,
+                self.width,
+                self.height,
+                self.score_threshold,
+                self.nms_threshold,
+            )
+
+        # `auto` (the default) and an explicit `anchor_free` both read a
+        # single tensor with no objectness column. Routing these through the
+        # dedicated decoder keeps them honoring this detector's own
+        # score_threshold and nms_threshold
+        if len(outputs) == 1 and (
+            self.model_format in ANCHOR_FREE_FORMATS
+            or self.model_format is ModelFormatEnum.auto
+        ):
+            return decode_raw_anchor_free(
                 outputs,
                 self.width,
                 self.height,

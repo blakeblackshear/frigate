@@ -20,6 +20,7 @@ from frigate.detectors.plugins.deepx import (
     decode_ppu_anchor,
     decode_ppu_anchor_free,
     decode_raw_anchor,
+    decode_raw_anchor_free,
     decode_raw_nms_in_head,
     decode_ssd_raw,
     parse_device_ids,
@@ -402,6 +403,84 @@ class TestDeepxRawAnchorDecode(unittest.TestCase):
         self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
         self.assertAlmostEqual(detections[0][4], 176 / 640, places=5)
         self.assertAlmostEqual(detections[0][5], 352 / 640, places=5)
+
+
+class TestDeepxRawAnchorFreeDecode(unittest.TestCase):
+    def build_raw_anchor_free_output(self, rows, num_classes=3, total_rows=10):
+        """Build an (1, N, 4+C) tensor -- already row-per-box -- with no
+        objectness column, padded with all-zero rows so N comfortably
+        outnumbers the channel count (4+C).
+
+        The decoder tells a channel-major export apart from a row-major one
+        purely by comparing those two sizes, the same way it would on a real
+        grid of thousands of anchors -- and that comparison only comes out
+        right when boxes outnumber channels, so a test with too few rows
+        would trip the same ambiguity `auto` accepts by design.
+        """
+        total_rows = max(total_rows, len(rows))
+        out = np.zeros((1, total_rows, 4 + num_classes), dtype=np.float32)
+
+        for i, (cx, cy, w, h, label, cls_score) in enumerate(rows):
+            out[0, i, 0:4] = [cx, cy, w, h]
+            out[0, i, 4 + label] = cls_score
+
+        return [out]
+
+    def test_keeps_a_detection_between_the_deepx_and_frigate_default_thresholds(self):
+        """Regression test: post_process_yolo hardcodes a 0.4 score
+        threshold, which would silently drop this 0.3-confidence detection
+        even though it clears the DEEPX decoder's own 0.25 default."""
+        outputs = self.build_raw_anchor_free_output(
+            [(320.0, 320.0, 40.0, 80.0, 2, 0.3)]
+        )
+
+        detections = decode_raw_anchor_free(outputs, 640, 640, 0.25, 0.45)
+
+        self.assertEqual(detections[0][0], 2)
+        self.assertAlmostEqual(detections[0][1], 0.3, places=5)
+
+    def test_drops_detections_below_the_score_threshold(self):
+        outputs = self.build_raw_anchor_free_output(
+            [(320.0, 320.0, 40.0, 80.0, 2, 0.1)]
+        )
+
+        detections = decode_raw_anchor_free(outputs, 640, 640, 0.25, 0.45)
+
+        self.assertTrue(np.all(detections == 0))
+
+    def test_transposes_a_channel_major_output(self):
+        """DX-COM may export (4+C, N) instead of (N, 4+C); both must decode
+        to the same result."""
+        row_major = self.build_raw_anchor_free_output(
+            [(320.0, 320.0, 40.0, 80.0, 2, 0.9)]
+        )
+        channel_major = [np.transpose(row_major[0], (0, 2, 1))]
+
+        row_major_detections = decode_raw_anchor_free(row_major, 640, 640, 0.25, 0.45)
+        channel_major_detections = decode_raw_anchor_free(
+            channel_major, 640, 640, 0.25, 0.45
+        )
+
+        np.testing.assert_array_almost_equal(
+            row_major_detections, channel_major_detections
+        )
+
+    def test_converts_center_form_to_normalized_corners(self):
+        outputs = self.build_raw_anchor_free_output(
+            [(320.0, 160.0, 64.0, 32.0, 0, 1.0)]
+        )
+
+        detections = decode_raw_anchor_free(outputs, 640, 640, 0.25, 0.45)
+
+        self.assertAlmostEqual(detections[0][2], 144 / 640, places=5)
+        self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
+        self.assertAlmostEqual(detections[0][4], 176 / 640, places=5)
+        self.assertAlmostEqual(detections[0][5], 352 / 640, places=5)
+
+    def test_returns_empty_detections_for_no_output(self):
+        out = np.zeros((1, 0, 84), dtype=np.float32)
+
+        self.assertTrue(np.all(decode_raw_anchor_free([out], 640, 640, 0.25, 0.45) == 0))
 
 
 class TestDeepxRawNmsInHeadDecode(unittest.TestCase):
