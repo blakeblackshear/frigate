@@ -1,0 +1,204 @@
+{
+  "restart": {
+    "title": "Сапраўды перазапусціць Frigate?",
+    "description": "Frigate ненадоўга спыніцца на час перазапуску.",
+    "button": "Перазапусціць",
+    "restarting": {
+      "title": "Frigate перазапускаецца",
+      "content": "Гэта старонка перазагрузіцца праз {{countdown}} с.",
+      "button": "Прымусова перазагрузіць зараз"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Адправіць у Frigate+",
+        "desc": "Аб'екты ў месцах, якія вы хочаце ігнараваць, не з'яўляюцца памылковымі спрацоўваннямі. Адпраўка іх як памылковых заблытае мадэль."
+      },
+      "review": {
+        "question": {
+          "label": "Пацвердзіце гэтую метку для Frigate Plus",
+          "ask_a": "Ці з'яўляецца гэты аб'ект <code>{{label}}</code>?",
+          "ask_an": "Ці з'яўляецца гэты аб'ект <code>{{label}}</code>?",
+          "ask_full": "Ці з'яўляецца гэты аб'ект <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Адпраўлена"
+        },
+        "toast": {
+          "error": "Не ўдалося адправіць у Frigate+. Праверце сеткавае злучэнне і паспрабуйце зноў."
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Паказаць у гісторыі"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Выбраць са шкалы часу",
+      "lastHour_one": "Апошняя {{count}} гадзіна",
+      "lastHour_few": "Апошнія {{count}} гадзіны",
+      "lastHour_many": "Апошнія {{count}} гадзін",
+      "custom": "Уласны",
+      "start": {
+        "title": "Час пачатку",
+        "label": "Выберыце час пачатку"
+      },
+      "end": {
+        "title": "Час заканчэння",
+        "label": "Выберыце час заканчэння"
+      }
+    },
+    "name": {
+      "placeholder": "Назавіце экспарт"
+    },
+    "case": {
+      "newCaseOption": "Стварыць новую справу",
+      "newCaseNamePlaceholder": "Назва новай справы",
+      "newCaseDescriptionPlaceholder": "Апісанне справы",
+      "label": "Справа",
+      "nonAdminHelp": "Для гэтых экспартаў будзе створана новая справа.",
+      "placeholder": "Выберыце справу"
+    },
+    "select": "Выбраць",
+    "export": "Экспарт",
+    "queueing": "Экспарт ставіцца ў чаргу…",
+    "selectOrExport": "Выбраць або экспартаваць",
+    "tabs": {
+      "export": "Адна камера",
+      "multiCamera": "Некалькі камер"
+    },
+    "multiCamera": {
+      "timeRange": "Прамежак часу",
+      "selectFromTimeline": "Выбраць са шкалы часу",
+      "cameraSelection": "Камеры",
+      "cameraSelectionHelp": "Камеры з аб'ектамі пад адсочваннем у гэтым прамежку выбраны загадзя",
+      "searchOrSelectGroup": "Шукайце або выберыце групу камер…",
+      "selectAll": "Выбраць усе камеры",
+      "clearSelection": "Зняць выбар",
+      "selectWithActivity": "Камеры з аб'ектамі пад адсочваннем",
+      "selectGroup": "Выбраць групу",
+      "noMatchingCameras": "Няма камер, якія адпавядаюць запыту",
+      "selectedCount": "Выбрана {{selected}} з {{total}}",
+      "checkingActivity": "Праверка актыўнасці камер…",
+      "noCameras": "Няма даступных камер",
+      "detectionCount_one": "{{count}} аб'ект пад адсочваннем",
+      "detectionCount_few": "{{count}} аб'екты пад адсочваннем",
+      "detectionCount_many": "{{count}} аб'ектаў пад адсочваннем",
+      "nameLabel": "Назва экспарту",
+      "namePlaceholder": "Неабавязковая базавая назва для гэтых экспартаў",
+      "queueingButton": "Экспарты ставяцца ў чаргу…",
+      "exportButton_one": "Экспартаваць {{count}} камеру",
+      "exportButton_few": "Экспартаваць {{count}} камеры",
+      "exportButton_many": "Экспартаваць {{count}} камер"
+    },
+    "multi": {
+      "title_one": "Экспартаваць {{count}} разгляд",
+      "title_few": "Экспартаваць {{count}} разгляды",
+      "title_many": "Экспартаваць {{count}} разглядаў",
+      "description": "Экспартаваць кожны выбраны разгляд. Усе экспарты будуць аб'яднаны ў адну справу.",
+      "descriptionNoCase": "Экспартаваць кожны выбраны разгляд.",
+      "caseNamePlaceholder": "Экспарт разгляду - {{date}}",
+      "exportButton_one": "Экспартаваць {{count}} разгляд",
+      "exportButton_few": "Экспартаваць {{count}} разгляды",
+      "exportButton_many": "Экспартаваць {{count}} разглядаў",
+      "exportingButton": "Экспартаванне…",
+      "toast": {
+        "started_one": "Пачаты {{count}} экспарт.",
+        "started_few": "Пачата {{count}} экспарты.",
+        "started_many": "Пачата {{count}} экспартаў.",
+        "partial": "Пачата {{successful}} з {{total}} экспартаў. Не ўдалося: {{failedItems}}",
+        "failed": "Не ўдалося пачаць {{total}} экспартаў. Не ўдалося: {{failedItems}}"
+      }
+    },
+    "toast": {
+      "success": "Экспарт пачаты. Файл даступны на старонцы экспартаў.",
+      "queued": "Экспарт пастаўлены ў чаргу. Ход выканання на старонцы экспартаў.",
+      "view": "Від",
+      "batchSuccess_one": "Пачаты {{count}} экспарт. Адкрываем справу.",
+      "batchSuccess_few": "Пачата {{count}} экспарты. Адкрываем справу.",
+      "batchSuccess_many": "Пачата {{count}} экспартаў. Адкрываем справу.",
+      "batchPartial": "Пачата {{successful}} з {{total}} экспартаў. Няўдалыя камеры: {{failedCameras}}",
+      "batchFailed": "Не ўдалося пачаць {{total}} экспартаў. Няўдалыя камеры: {{failedCameras}}",
+      "batchQueuedSuccess_one": "У чаргу пастаўлены {{count}} экспарт.",
+      "batchQueuedSuccess_few": "У чаргу пастаўлена {{count}} экспарты.",
+      "batchQueuedSuccess_many": "У чаргу пастаўлена {{count}} экспартаў.",
+      "batchQueuedPartial": "У чаргу пастаўлена {{successful}} з {{total}} экспартаў. Няўдалыя камеры: {{failedCameras}}",
+      "batchQueueFailed": "Не ўдалося паставіць у чаргу {{total}} экспартаў. Няўдалыя камеры: {{failedCameras}}",
+      "error": {
+        "failed": "Не ўдалося паставіць экспарт у чаргу: {{error}}",
+        "endTimeMustAfterStartTime": "Час заканчэння мусіць быць пазней за час пачатку",
+        "noValidTimeSelected": "Не выбраны сапраўдны прамежак часу"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Захаваць экспарт",
+      "queueingExport": "Экспарт ставіцца ў чаргу…",
+      "previewExport": "Перадпрагляд экспарту",
+      "useThisRange": "Ужыць гэты прамежак"
+    }
+  },
+  "streaming": {
+    "label": "Плынь",
+    "restreaming": {
+      "disabled": "Для гэтай камеры рэтрансляцыя не ўключана.",
+      "desc": {
+        "title": "Наладзьце go2rtc, каб атрымаць дадатковыя параметры жывога прагляду і гук для гэтай камеры."
+      }
+    },
+    "showStats": {
+      "label": "Паказваць статыстыку плыні",
+      "desc": "Уключыце гэты параметр, каб паказваць статыстыку плыні паверх відарыса камеры."
+    },
+    "debugView": "Адладачны выгляд"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Захаваць пошук",
+      "desc": "Задайце назву для гэтага захаванага пошуку.",
+      "placeholder": "Увядзіце назву пошуку",
+      "overwrite": "{{searchName}} ужо існуе. Захаванне перазапіша наяўнае значэнне.",
+      "success": "Пошук ({{searchName}}) захаваны.",
+      "button": {
+        "save": {
+          "label": "Захаваць гэты пошук"
+        }
+      }
+    }
+  },
+  "recording": {
+    "shareTimestamp": {
+      "label": "Падзяліцца меткай часу",
+      "title": "Падзяліцца меткай часу",
+      "description": "Падзяліцеся URL з меткай часу бягучай пазіцыі плэера або выберыце сваю метку часу. Гэта не публічная спасылка: яна даступна толькі карыстальнікам, якія маюць доступ да Frigate і да гэтай камеры.",
+      "custom": "Свая метка часу",
+      "button": "URL з меткай часу",
+      "shareTitle": "Метка часу разгляду Frigate: {{camera}}"
+    },
+    "confirmDelete": {
+      "title": "Пацвердзіце выдаленне",
+      "desc": {
+        "selected": "Сапраўды выдаліць усё запісанае відэа, звязанае з гэтым элементам разгляду?<br /><br />Утрымлівайце клавішу <em>Shift</em>, каб надалей прапускаць гэтае акно."
+      },
+      "toast": {
+        "success": "Відэа, звязанае з выбранымі элементамі разгляду, выдалена.",
+        "error": "Не ўдалося выдаліць: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Экспарт",
+      "markAsReviewed": "Пазначыць як разгледжанае",
+      "markAsUnreviewed": "Пазначыць як неразгледжанае",
+      "deleteNow": "Выдаліць зараз"
+    }
+  },
+  "imagePicker": {
+    "selectImage": "Выберыце паменшаную выяву аб'екта пад адсочваннем",
+    "unknownLabel": "Захаваны відарыс трыгера",
+    "search": {
+      "placeholder": "Пошук па метцы або падметцы…"
+    },
+    "noImages": "Для гэтай камеры паменшаных выяў не знойдзена"
+  }
+}

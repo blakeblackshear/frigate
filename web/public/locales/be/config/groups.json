@@ -1,0 +1,73 @@
+{
+    "audio": {
+        "global": {
+            "detection": "Глабальнае дэтэктаванне",
+            "sensitivity": "Глабальная адчувальнасць"
+        },
+        "cameras": {
+            "detection": "Дэтэктаванне",
+            "sensitivity": "Адчувальнасць"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Глабальны выгляд"
+        },
+        "cameras": {
+            "appearance": "Выгляд"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Глабальная адчувальнасць",
+            "algorithm": "Глабальны алгарытм"
+        },
+        "cameras": {
+            "sensitivity": "Адчувальнасць",
+            "algorithm": "Алгарытм"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Глабальнае адлюстраванне"
+        },
+        "cameras": {
+            "display": "Дысплэй"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Глабальнае разрозненне",
+            "tracking": "Глабальнае адсочванне"
+        },
+        "cameras": {
+            "resolution": "Разрозненне",
+            "tracking": "Адсочванне"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Глабальнае адсочванне",
+            "filtering": "Глабальная фільтрацыя"
+        },
+        "cameras": {
+            "tracking": "Адсочванне",
+            "filtering": "Фільтрацыя"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Глабальнае захоўванне",
+            "events": "Глабальныя падзеі"
+        },
+        "cameras": {
+            "retention": "Захоўванне",
+            "events": "Падзеі"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Аргументы FFmpeg для гэтай камеры"
+        }
+    }
+}
