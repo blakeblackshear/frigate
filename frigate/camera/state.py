@@ -63,7 +63,7 @@ class CameraState:
         self.lpr_min_obj_area: int = 0
         self.lp_objects = {
             label
-            for label, attributes in config.model.attributes_map.items()
+            for label, attributes in self.model.attributes_map.items()
             if "license_plate" in attributes
         }
 
