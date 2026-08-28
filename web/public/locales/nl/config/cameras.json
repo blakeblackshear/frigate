@@ -162,7 +162,19 @@
         }
     },
     "mqtt": {
-        "label": "MQTT"
+        "label": "MQTT",
+        "description": "MQTT‑instellingen voor het publiceren van afbeeldingen.",
+        "enabled": {
+            "label": "Verzend afbeelding",
+            "description": "Schakel het publiceren van afbeeldings‑snapshots van gedetecteerde objecten naar MQTT‑topics voor deze camera in of uit."
+        },
+        "timestamp": {
+            "label": "Tijdstempel toevoegen",
+            "description": "Plaats een tijdstempel als overlay op afbeeldingen die naar MQTT worden gepubliceerd."
+        },
+        "bounding_box": {
+            "label": "Voeg een kader toe rond gedetecteerde objecten"
+        }
     },
     "notifications": {
         "label": "Meldingen",
@@ -421,7 +433,8 @@
     "record": {
         "label": "Opname",
         "enabled": {
-            "label": "Opname inschakelen"
+            "label": "Opname inschakelen",
+            "description": "Opnemen in/uit schakelen voor deze camera."
         },
         "expire_interval": {
             "label": "Opruiminterval opnames",
@@ -501,6 +514,9 @@
             "max_concurrent": {
                 "label": "Maximaal aantal gelijktijdige exports",
                 "description": "Maximum aantal exporttaken dat tegelijk wordt verwerkt."
+            },
+            "chapters": {
+                "label": "Metadata hoofstuk om op te nemen in de geëxporteerde opnames"
             }
         },
         "preview": {
@@ -514,7 +530,8 @@
         "enabled_in_config": {
             "label": "Originele opnamestatus",
             "description": "Geeft aan of opname was ingeschakeld in de originele statische configuratie."
-        }
+        },
+        "description": "Instellingen opname en bewaarbeleid voor deze camera."
     },
     "review": {
         "label": "Beoordeling",
@@ -522,7 +539,8 @@
             "label": "Meldingsconfiguratie",
             "description": "Instellingen voor welke gevolgde objecten alerts genereren en hoe alerts worden bewaard.",
             "enabled": {
-                "label": "Alerts inschakelen"
+                "label": "Alerts inschakelen",
+                "description": "Schakel het genereren van waarschuwingen voor deze camera in of uit."
             },
             "labels": {
                 "label": "Meldingslabels",
@@ -545,7 +563,8 @@
             "label": "Detectieconfiguratie",
             "description": "Instellingen voor welke gevolgde objecten detecties genereren en hoe detecties worden bewaard.",
             "enabled": {
-                "label": "Detecties inschakelen"
+                "label": "Detecties inschakelen",
+                "description": "Schakel detectie‑events voor deze camera in of uit."
             },
             "labels": {
                 "label": "Detectielabels",
@@ -603,12 +622,14 @@
                 "label": "Activiteitscontextprompt",
                 "description": "Aangepaste prompt die beschrijft wat wel en niet verdachte activiteit is, als context voor GenAI-samenvattingen."
             }
-        }
+        },
+        "description": "Instellingen voor waarschuwingen, detecties en GenAI‑samenvattingen die worden gebruikt door de interface en de opslag van deze camera."
     },
     "snapshots": {
         "label": "Snapshots",
         "enabled": {
-            "label": "Snapshots inschakelen"
+            "label": "Snapshots inschakelen",
+            "description": "Schakel het opslaan van snapshots voor deze camera in of uit."
         },
         "timestamp": {
             "label": "Tijdstempel-overlay",
@@ -649,7 +670,8 @@
         "quality": {
             "label": "Snapshotkwaliteit",
             "description": "Coderingskwaliteit voor opgeslagen snapshots (0-100)."
-        }
+        },
+        "description": "Instellingen voor API‑gegenereerde snapshots van gedetecteerde objecten voor deze camera."
     },
     "timestamp_style": {
         "label": "Tijdstempelstijl",
@@ -684,7 +706,8 @@
         "effect": {
             "label": "Tijdstempeleffect",
             "description": "Visueel effect voor de tijdstempeltekst (geen, effen, schaduw)."
-        }
+        },
+        "description": "Stijlopties voor tijdstempels die worden toegepast op snapshots en de Debug‑weergave."
     },
     "semantic_search": {
         "label": "Semantisch zoeken",
@@ -715,7 +738,8 @@
                 "label": "Triggeracties",
                 "description": "Lijst van uit te voeren acties bij triggermatch (melding, sub_label, attribuut)."
             }
-        }
+        },
+        "description": "Instellingen voor semantisch zoeken, waarmee object‑embeddings worden opgebouwd en geraadpleegd om vergelijkbare items te vinden."
     },
     "face_recognition": {
         "label": "Gezichtsherkenning",
@@ -824,5 +848,9 @@
             "label": "Tijdsverschil negeren",
             "description": "Tijdsynchronisatieverschillen tussen camera en Frigate-server negeren voor ONVIF-communicatie."
         }
+    },
+    "best_image_timeout": {
+        "label": "Timeout voor het ophalen van de beste afbeelding",
+        "description": "Hoe lang er gewacht wordt op de afbeelding met de hoogste score van betrouwbaarheid"
     }
 }
