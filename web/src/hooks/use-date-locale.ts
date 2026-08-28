@@ -25,6 +25,7 @@ const localeMap: Record<string, () => Promise<Locale>> = {
   fa: () => import("date-fns/locale/fa-IR").then((module) => module.faIR),
   pl: () => import("date-fns/locale/pl").then((module) => module.pl),
   uk: () => import("date-fns/locale/uk").then((module) => module.uk),
+  be: () => import("date-fns/locale/be").then((module) => module.be),
   he: () => import("date-fns/locale/he").then((module) => module.he),
   el: () => import("date-fns/locale/el").then((module) => module.el),
   ro: () => import("date-fns/locale/ro").then((module) => module.ro),
