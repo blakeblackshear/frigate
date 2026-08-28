@@ -1530,7 +1530,7 @@ class TestHttpExport(BaseTestHttp):
         )
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            video_path = os.path.join(tmpdir, "multibyte_export.mp4")
+            video_path = os.path.join(tmpdir, "現場カメラ.mp4")
             with open(video_path, "wb") as handle:
                 handle.write(b"video")
 
