@@ -1040,6 +1040,9 @@
             "max_concurrent": {
                 "label": "Maximaal aantal gelijktijdige exports",
                 "description": "Maximum aantal exporttaken dat tegelijk wordt verwerkt."
+            },
+            "chapters": {
+                "label": "Metadata hoofstuk om op te nemen in de geëxporteerde opnames"
             }
         },
         "preview": {
