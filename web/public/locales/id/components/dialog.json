@@ -18,7 +18,7 @@
       "review": {
         "question": {
           "label": "Konfirmasi label ini untuk Frigate Plus",
-          "ask_a": "Apakah objek ini adalah sebuah<code>{{label}}</code>?",
+          "ask_a": "Apakah objek ini adalah sebuah <code>{{label}}</code>?",
           "ask_an": "Apakah objek ini <code>{{label}}</code>?",
           "ask_full": "Apakah ini object <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
@@ -61,7 +61,12 @@
       "batchSuccess_other": "{{count}} Ekspor dimulai. Membuka kasusnya sekarang.",
       "batchPartial": "Ekspor berhasil dimulai sebanyak {{successful}} dari total {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
       "batchFailed": "Gagal memulai ekspor sebanyak {{total}}. Kamera yang gagal: {{failedCameras}}",
-      "batchQueuedPartial": "Antrian ekspor berhasil sebanyak {{successful}} dari total {{total}} ekspor. Kamera yang gagal: {{failedCameras}}"
+      "batchQueuedPartial": "Antrian ekspor berhasil sebanyak {{successful}} dari total {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
+      "batchQueuedSuccess_other": "{{count}} ekspor antrian.",
+      "batchQueueFailed": "Gagal mengantrekan {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
+      "error": {
+        "failed": "Ekspor gagal mengantri: {{error}}"
+      }
     },
     "case": {
       "newCaseOption": "Membuat Kasus Baru",
@@ -90,7 +95,7 @@
       "selectWithActivity": "Kamera dengan objek yang dilacak",
       "selectGroup": "Pilih grup",
       "noMatchingCameras": "Tidak ada kamera yang sesuai dengan pencarian Anda",
-      "selectedCount": "{{terpilih}} / {{total}} terpilih",
+      "selectedCount": "{{selected}} / {{total}} terpilih",
       "namePlaceholder": "Nama dasar opsional untuk ekspor ini",
       "searchOrSelectGroup": "Cari, atau pilih grup kamera...",
       "selectAll": "Pilih semua kamera"
@@ -99,7 +104,7 @@
       "title_other": "Ekspor {{count}} Ulasan",
       "toast": {
         "startedNoCase_other": "{{count}} Ekspor Dimulai.",
-        "started_other": "{{count}} ekspor dimulai. Membuka kasusnya sekarang.",
+        "started_other": "{{count}} ekspor dimulai.",
         "partial": "Memulai {{successful}} dari {{total}} ekspor. Gagal: {{failedItems}}",
         "failed": "Gagal memulai {{total}} ekspor. Gagal: {{failedItems}}"
       },
@@ -107,13 +112,22 @@
       "descriptionNoCase": "Ekspor setiap ulasan yang dipilih.",
       "exportButton_other": "Ekspor {{count}} ulasan",
       "exportingButton": "Mengekspor...",
-      "caseNamePlaceholder": "Ekspor tinjauan - {{tanggal}}"
+      "caseNamePlaceholder": "Ekspor tinjauan - {{date}}"
     },
     "queueing": "Mengantrekan Ekspor..."
   },
   "search": {
     "saveSearch": {
-      "overwrite": "{{searchName}} sudah ada. Menyimpan akan menimpa file yang sudah ada."
+      "overwrite": "{{searchName}} sudah ada. Menyimpannya akan menimpa file yang sudah ada.",
+      "label": "Simpan Pencarian",
+      "desc": "Berikan nama untuk pencarian tersimpan ini.",
+      "placeholder": "Masukkan nama untuk pencarian Anda",
+      "success": "Pencarian ({{searchName}}) sudah tersimpan.",
+      "button": {
+        "save": {
+          "label": "Simpan pencarian ini"
+        }
+      }
     }
   },
   "streaming": {
@@ -125,6 +139,39 @@
     },
     "showStats": {
       "label": "Tampilkan statistik streaming"
+    },
+    "debugView": "Tampilan Debug"
+  },
+  "recording": {
+    "shareTimestamp": {
+      "label": "Bagikan Cap Waktu",
+      "title": "Bagikan Cap Waktu",
+      "custom": "Cap Waktu Kustom",
+      "button": "Bagikan URL Cap Waktu"
+    },
+    "confirmDelete": {
+      "title": "Konfirmasi Penghapusan",
+      "desc": {
+        "selected": "Anda yakin ingin menghapus semua video yang direkam terkait dengan item ulasan ini?<br /><br />Tekan terus tombol <em>Shift</em> untuk melewati dialog ini di masa mendatang."
+      },
+      "toast": {
+        "success": "Rekaman video terkait dengan item ulasan yang dipilih telah berhasil dihapus.",
+        "error": "Gagal untuk menghapus: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Ekspor",
+      "markAsReviewed": "Tandai sebagai sudah ditinjau",
+      "markAsUnreviewed": "Tandai sebagai belum ditinjau",
+      "deleteNow": "Hapus Sekarang"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Pilih gambar mini objek yang dilacak.",
+    "unknownLabel": "Gambar Pemicu Tersimpan",
+    "search": {
+      "placeholder": "Cari berdasarkan label atau sub-label..."
+    },
+    "noImages": "Tidak ada gambar kecil ditemukan untuk kamera ini"
   }
 }
