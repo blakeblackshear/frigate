@@ -59,9 +59,15 @@ if [[ "${actual_sha256}" != "${expected_sha256}" ]]; then
     exit 1
 fi
 
-apt-get -qq update
-apt-get -qq install -y "${deb_file}"
-rm -rf /var/lib/apt/lists/*
+# Install with dpkg rather than apt. install_deps.sh finishes by purging gnupg
+# and clearing /var/lib/apt/lists, so apt here would have to re-fetch about
+# 10 MB of package indexes over the network before it could resolve anything,
+# which is a build failure waiting to happen for no benefit. The package only
+# depends on libc6, libgcc-s1, libncurses6, libstdc++6 and libtinfo6, all of
+# which the deps stage already has, and its postinst does nothing but run
+# ldconfig and print where the files went. dpkg fails loudly if a dependency
+# ever goes missing.
+dpkg -i "${deb_file}"
 
 # The package bundles a dx_engine wheel per cpython ABI tag. Ask dpkg what it
 # installed rather than hardcoding a path, so this keeps working if DEEPX moves

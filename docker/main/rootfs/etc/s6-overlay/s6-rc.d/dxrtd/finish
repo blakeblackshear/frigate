@@ -15,9 +15,19 @@ readonly service="dxrtd"
 
 echo "[INFO] Service ${service} exited with code ${exit_code_service} (by signal ${exit_code_signal})"
 
-# A clean exit means the service took itself down because no DEEPX hardware is
-# present, which is the normal case on images without an NPU. Only a genuine
-# failure should bring the container down.
+# dxrtd takes itself down when the machine has no DEEPX NPU, which is the
+# normal case: this service ships in the default image and most users do not
+# have the hardware. That self-shutdown reaches this script as exit 256 /
+# signal 15, indistinguishable from an operator stopping the container, so
+# without the marker written by run every machine lacking a DEEPX NPU would
+# have Frigate halted at startup.
+if [[ -f /dev/shm/.dxrtd-no-hardware ]]; then
+  echo "[INFO] Service ${service} stopped because no DEEPX NPU is present; leaving the rest of Frigate running"
+  exit 0
+fi
+
+# Past this point the service really was running, so only a genuine failure
+# should bring the container down.
 if [[ "${exit_code_service}" -eq 256 ]]; then
   if [[ "${exit_code_container}" -eq 0 ]]; then
     echo $((128 + exit_code_signal)) >/run/s6-linux-init-container-results/exitcode

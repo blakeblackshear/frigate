@@ -651,7 +651,9 @@ To configure a DEEPX detector, set the `type` attribute to `deepx` and follow th
 
 Frigate does not bundle a model for this detector. Models must be compiled to DEEPX's `.dxnn` format.
 
-The quickest way to get one is the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), which publishes pre-compiled `.dxnn` files for a range of YOLO variants alongside a JSON file describing how each was compiled. Pick a YOLO detection model, download the `.dxnn`, bind-mount it into the container, and point `model.path` at it. Note the variant you picked, as it determines the `model_format` value below.
+The quickest way to get one is the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), which publishes pre-compiled `.dxnn` files for a range of object detection models alongside a JSON file describing how each was compiled: YOLO variants (`model_type: yolo-generic`), SSD (`model_type: ssd`), and DAMO-YOLO (`model_type: damo-yolo`). Pick a model, download the `.dxnn`, bind-mount it into the container, and point `model.path` at it. Note which one you picked, since it determines the `model_type` and `model_format` values below.
+
+`model_type` is set on the detector rather than on the root `model` block. Frigate ignores a `model` block nested under a detector, and the root `model.model_type` defaults to `ssd`, so leaving it unset would silently decode a YOLO model with the SSD decoder and report no detections at all. The detector's own `model_type` defaults to `yolo-generic` and overrides the root value.
 
 Alternatively, compile your own model with the DX-COM compiler.
 
@@ -659,47 +661,79 @@ Alternatively, compile your own model with the DX-COM compiler.
 
 #### Label maps
 
-Models from the DEEPX ModelZoo are trained on the standard 80-class COCO label set, so `labelmap_path` must be set to `/labelmap/coco-80.txt`. Frigate's default label map uses an extended 91-class scheme, and leaving it in place will cause detections to be reported as the wrong object type.
+YOLO and DAMO-YOLO models from the DEEPX ModelZoo are trained on the standard 80-class COCO label set, so `labelmap_path` must be set to `/labelmap/coco-80.txt`. SSD models are trained on Pascal VOC's 20-class label set instead, and need `labelmap_path` set to `/labelmap/voc-20.txt`. Frigate's default label map uses an extended 91-class COCO scheme, and leaving it in place will cause detections to be reported as the wrong object type for any of these.
 
-#### Model formats
+#### YOLO model formats {#deepx-yolo-model-formats}
 
-DX-COM preserves the detection head of the model it compiles, so the YOLO variant determines how the output has to be read. Set `model_format` to the variant your `.dxnn` file was compiled from:
+For `model_type: yolo-generic`, DX-COM preserves the detection head of the model it compiles, so the head's tensor layout determines how the output has to be read. Set `model_format` to the layout your `.dxnn` file was compiled with:
 
 ```yaml
 detectors:
   deepx:
     type: deepx
-    model_format: yolov8
+    model_format: anchor_free
 ```
 
-Supported values fall into three decode families:
+Supported values are three decode families:
 
-| `model_format`                             | Output layout                                                            | PPU support |
-| ------------------------------------------ | ------------------------------------------------------------------------ | ----------- |
-| `yolov5`, `yolov7`                         | Anchor-based, with a separate objectness score                            | Yes         |
-| `yolov8`, `yolov9`, `yolov11`, `yolov12`   | Anchor-free, no objectness, boxes already in pixels                       | Yes         |
-| `yolov10`, `yolov26`                       | NMS runs in the detection head, output is final corner boxes              | No          |
+| `model_format` | Output layout | PPU support |
+| -------------- | -------------- | ----------- |
+| `anchor` | Anchor-based, with a separate objectness score | Yes |
+| `anchor_free` | Anchor-free, no objectness, boxes already in pixels | Yes |
+| `nms_in_head` | NMS runs in the detection head, output is final corner boxes | No |
 
-Leaving `model_format` unset falls back to inferring the layout from the output shape. That inference cannot distinguish an anchor-based head from an anchor-free one, so it is only reliable for YOLOv8 and newer. Setting it explicitly is recommended.
+Leaving `model_format` at its `auto` default falls back to inferring the layout from the output shape. That inference cannot distinguish an anchor-based head from an anchor-free one, so it is only reliable for anchor-free heads. Setting it explicitly is recommended.
 
 Two mistakes this option prevents:
 
 - Decoding an anchor-free model with the anchor formula squares the box dimensions, producing boxes hundreds of thousands of pixels wide that clip to the entire frame.
 - Decoding an anchor-based model as anchor-free reads the objectness column as a class score, so confidences and class IDs are both wrong.
 
-`yolov10` and `yolov26` run NMS inside the head, so `nms_threshold` does not apply to them.
+`nms_in_head` models run NMS inside the head, so `nms_threshold` does not apply to them.
 
-#### PPU models
+#### SSD models
 
-Models compiled with Post-Processing Unit (PPU) support perform candidate selection on the NPU itself and emit a list of surviving detections rather than raw feature maps. This leaves only the box decode and NMS for the host, which lowers CPU usage.
-
-Set `ppu: true` on the detector when using such a model:
+For `model_type: ssd`, no `model_format` is needed. DX-COM keeps SSD's postprocessing inside the compiled model: the `.dxnn` runs the NPU head into a small CPU subgraph that concatenates the per-feature-map outputs, applies the softmax, and decodes the prior-box regression all the way to corner-form boxes. Only NMS is left for the host, so nothing about the backbone has to be named. This applies to all three ModelZoo backbones (MobileNetV1, MobileNetV2-Lite, VGG16) even though they emit different numbers of boxes (3000 and 8732).
 
 ```yaml
 detectors:
   deepx:
     type: deepx
-    model_format: yolov8
+    model_type: ssd
+
+model:
+  width: 300
+  height: 300
+  labelmap_path: /labelmap/voc-20.txt
+```
+
+#### DAMO-YOLO models
+
+For `model_type: damo-yolo`, no `model_format` is needed — all four sizes (TinyNAS-L20T, S, M, L) share one detection head, differing only in backbone depth/width. Leave `model_format` at its `auto` default:
+
+```yaml
+detectors:
+  deepx:
+    type: deepx
+    model_type: damo-yolo
+
+model:
+  width: 640
+  height: 640
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+#### PPU models
+
+Models compiled with Post-Processing Unit (PPU) support perform candidate selection on the NPU itself and emit a list of surviving detections rather than raw feature maps. This leaves only the box decode and NMS for the host, which lowers CPU usage. PPU support is currently only available for `model_type: yolo-generic` — there is no confirmed PPU record layout for SSD or DAMO-YOLO yet, and setting `ppu: true` with either is rejected at startup.
+
+Set `ppu: true` on the detector when using a PPU-compiled yolo-generic model:
+
+```yaml
+detectors:
+  deepx:
+    type: deepx
+    model_format: anchor_free
     ppu: true
     score_threshold: 0.25
     nms_threshold: 0.45
@@ -707,23 +741,25 @@ detectors:
 
 `ppu` and `model_format` are independent: `ppu` says whether candidate selection already happened on the NPU, and `model_format` says how to read the boxes that come back. Both must match how the model was compiled.
 
-`model_format` is required whenever `ppu: true` is set. A PPU record has the same fixed-width layout for every variant, so unlike the raw output path there is no shape to infer the layout from — leaving it unset is rejected at startup rather than risking a silent anchor-free/anchor-based mismatch.
+`model_format` is required whenever `ppu: true` is set. A PPU record has the same fixed-width layout for every yolo-generic variant, so unlike the raw output path there is no shape to infer the layout from — leaving it at `auto` is rejected at startup rather than risking a silent anchor-free/anchor-based mismatch.
 
-DX-COM cannot compile `yolov10` or `yolov26` models with PPU support, since their heads already produce final detections. Combining either with `ppu: true` is rejected at startup.
+DX-COM cannot compile `nms_in_head` models with PPU support, since their heads already produce final detections. Combining the two is rejected at startup.
 
 #### Multiple NPUs
 
-By default the detector binds to every NPU it can find. To pin a detector to specific devices, set `device_ids` to the indices you want it to use. This allows multiple detectors to be configured against separate modules:
+`device_ids` defaults to `auto`, which binds the detector to every NPU it can find. To pin a detector to specific devices, set it to a comma-separated list of the indices you want it to use. This allows multiple detectors to be configured against separate modules:
 
 ```yaml
 detectors:
   deepx_0:
     type: deepx
-    device_ids: [0]
+    device_ids: "0"
   deepx_1:
     type: deepx
-    device_ids: [1]
+    device_ids: "1,2"
 ```
+
+A yaml list (`device_ids: [0, 1]`) is accepted as well, but the comma-separated string is what the config UI writes.
 
 ---
 

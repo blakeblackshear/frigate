@@ -39,6 +39,7 @@ class InputDTypeEnum(str, Enum):
 
 
 class ModelTypeEnum(str, Enum):
+    damoyolo = "damo-yolo"
     dfine = "dfine"
     rfdetr = "rfdetr"
     ssd = "ssd"
@@ -116,7 +117,7 @@ class ModelConfig(BaseModel):
     model_type: ModelTypeEnum = Field(
         default=ModelTypeEnum.ssd,
         title="Object Detection Model Type",
-        description="Detector model architecture type (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) used by some detectors for optimization.",
+        description="Detector model architecture type (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine, damo-yolo) used by some detectors for optimization.",
     )
     _merged_labelmap: dict[int, str] | None = PrivateAttr()
     _colormap: dict[int, tuple[int, int, int]] = PrivateAttr()

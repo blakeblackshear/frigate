@@ -66,7 +66,7 @@ Frigate supports multiple different detectors that work on different types of ha
   - Runs best with tiny, small, or medium-size models
 
 - <CommunityBadge /> [DEEPX](#deepx-npu): The DEEPX NPU is available in m.2 format and as a HAT+ for the Raspberry Pi 5, allowing for a wide range of compatibility with devices.
-  - [Supports YOLO model architectures](../../configuration/object_detectors#deepx-npu)
+  - [Supports YOLO, SSD, and DAMO-YOLO model architectures](../../configuration/object_detectors#deepx-npu)
   - Runs best with tiny or small size models
   - Runs efficiently on low power hardware
 
@@ -267,7 +267,7 @@ Frigate supports the DEEPX NPU in both of its form factors: the **DX-M1** M.2 mo
 
 DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
 
-The NPU runs models compiled to the `.dxnn` format with DEEPX's DX-COM compiler. Pre-compiled YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), and models compiled with Post-Processing Unit (PPU) support move candidate selection onto the NPU, which reduces host CPU usage.
+The NPU runs models compiled to the `.dxnn` format with DEEPX's DX-COM compiler. Pre-compiled YOLO, SSD, and DAMO-YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), and YOLO models compiled with Post-Processing Unit (PPU) support move candidate selection onto the NPU, which reduces host CPU usage.
 
 The DEEPX kernel driver has to be installed on the Docker host before the NPU can be used. See the [installation docs](installation.md#deepx-npu) for the setup steps.
 
