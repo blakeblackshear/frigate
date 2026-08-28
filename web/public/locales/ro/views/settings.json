@@ -2078,7 +2078,7 @@
     },
     "lpr": {
       "globalDisabled": "Îmbogățirea pentru recunoașterea plăcuțelor de înmatriculare trebuie activată pentru ca funcțiile LPR să funcționeze pe această cameră.",
-      "vehicleNotTracked": "Recunoașterea plăcuțelor de înmatriculare necesită ca „car” sau „motorcycle” să fie urmărite.",
+      "vehicleNotTracked": "Recunoașterea plăcuțelor de înmatriculare necesită urmărirea unui vehicul. Activează „car” sau un alt tip de vehicul în Obiecte pentru această cameră.",
       "modelSizeLarge": "Modelul 'large' este optimizat pentru plăcuțele de înmatriculare pe mai multe rânduri. Modelul 'small' oferă o performanță mai bună decât 'large' și ar trebui folosit cu excepția cazului în care regiunea ta folosește formate de plăcuțe pe mai multe rânduri."
     },
     "record": {
