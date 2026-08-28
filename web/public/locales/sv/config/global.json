@@ -1037,6 +1037,29 @@
         "description": "Konfiguration för objektdetektorer (CPU, GPU, ONNX-backends) och eventuella detektorspecifika modellinställningar.",
         "type": {
             "label": "Typ"
+        },
+        "model": {
+            "label": "Detektorspecifik modellkonfiguration",
+            "description": "Detektorspecifika modellkonfigurationsalternativ (sökväg, ingångsstorlek etc.).",
+            "path": {
+                "label": "Sökväg för anpassad objektdetektormodell",
+                "description": "Sökväg till en anpassad detektionsmodellfil (eller plus://<modell_id> för Frigate+-modeller)."
+            },
+            "labelmap_path": {
+                "label": "Etikettkarta för anpassad objektdetektor",
+                "description": "Sökväg till en labelmap-fil som mappar numeriska klasser till strängetiketter för detektorn."
+            },
+            "width": {
+                "label": "Inmatningsbredd för objektdetekteringsmodell",
+                "description": "Bredd på modellens ingångstensor i pixlar."
+            },
+            "height": {
+                "label": "Ingångshöjd för objektdetekteringsmodell",
+                "description": "Höjden på modellens ingångstensor i pixlar."
+            },
+            "labelmap": {
+                "label": "Anpassning av etikettkarta"
+            }
         }
     }
 }
