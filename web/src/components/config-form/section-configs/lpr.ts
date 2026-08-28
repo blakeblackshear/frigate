@@ -1,3 +1,4 @@
+import { getModelForCamera } from "@/utils/modelUtil";
 import type { SectionConfigOverrides } from "./types";
 
 const lpr: SectionConfigOverrides = {
@@ -21,12 +22,10 @@ const lpr: SectionConfigOverrides = {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
           if (ctx.fullCameraConfig.type === "lpr") return false;
           const tracked = ctx.fullCameraConfig.objects?.track ?? [];
-          const vehicles = Object.entries(
-            ctx.fullConfig.model?.attributes_map ?? {},
-          )
-            .filter(([, attributes]) => attributes.includes("license_plate"))
-            .map(([label]) => label);
-          return !tracked.some((o) => vehicles.includes(o));
+          const model = getModelForCamera(ctx.fullConfig, ctx.cameraName);
+          return !tracked.some((o) =>
+            model?.attributes_map?.[o]?.includes("license_plate"),
+          );
         },
       },
     ],
