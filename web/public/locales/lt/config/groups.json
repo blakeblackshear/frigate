@@ -1,1 +1,73 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Visuotiniai Aptikimo Nustatymai",
+            "sensitivity": "Visuotiniai Jautrumo Nustatymai"
+        },
+        "cameras": {
+            "detection": "Aptikimas",
+            "sensitivity": "Jautrumas"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Visuotiniai Vaizdavimo Nustatymai"
+        },
+        "cameras": {
+            "appearance": "Vaizdavimo"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Visuotiniai Jautrumo Nustatymai",
+            "algorithm": "Visuotiniai Algoritmai"
+        },
+        "cameras": {
+            "sensitivity": "Jautrumas",
+            "algorithm": "Algoritmas"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Visuotiniai Rodymo Nustatymai"
+        },
+        "cameras": {
+            "display": "Rodymas"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Visuotinė Raiška",
+            "tracking": "Visuotiniai Sekimo Nusatymai"
+        },
+        "cameras": {
+            "resolution": "Raiška",
+            "tracking": "Sekimas"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Visuotiniai Sekimo Nustatymai",
+            "filtering": "Visuotiniai Filtrai"
+        },
+        "cameras": {
+            "tracking": "Sekimas",
+            "filtering": "Filtravimas"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Visuotinė Saugojimo Trukmė",
+            "events": "Visuotiniai Įvykiai"
+        },
+        "cameras": {
+            "retention": "Saugojimo Trukmė",
+            "events": "Įvykiai"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Kameros specifiniai FFmpeg argumentai"
+        }
+    }
+}

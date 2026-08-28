@@ -1,1 +1,60 @@
-{}
+{
+    "title": "Tirti Pakartojimą",
+    "description": "Pakartoti kameros įrašą tyrimui. Objektų sąrašas rodo aptiktų objektų užvėlintą santrauką, o žinučiu skiltis rodo srauto vidinius Frigate pranešimus iš pakartojimo įrašo.",
+    "websocket_messages": "Žinutės",
+    "dialog": {
+        "title": "Pradėti Pakartojimo Tyrimą",
+        "description": "Kurti laikiną kameros pakartojimą kuris cikliškai atkartoja istorinį įrašą objektų aptikimo tyrimui ir sekimo klaidoms aptikti. Kameros pakartojimas turės tą pačią aptikimo konfiguraciją kaip ir pirminė kamera. Pasirinkite periodą norėdami pradėti.",
+        "camera": "Pirminė Kamera",
+        "timeRange": "Laiko Periodas",
+        "preset": {
+            "1m": "Paskutinė 1 Minutė",
+            "5m": "Paskutinės 5 Minutės",
+            "timeline": "Iš Laiko Juostos",
+            "custom": "Parinktasis"
+        },
+        "startButton": "Leisti pakartojimą",
+        "selectFromTimeline": "Pasirinkti",
+        "starting": "Pradedamas pakartojimas...",
+        "startLabel": "Pradžia",
+        "endLabel": "Pabaiga",
+        "toast": {
+            "error": "Nepavyko paleisti pakartojimo tyrimo: {{error}}",
+            "alreadyActive": "Jau yra aktyvi pakartojimo sesija",
+            "noRecordings": "Pasirinktame periode įrašų nerasta",
+            "stopError": "Nepavyko sustabdyti pakartojimo tyrimo: {{error}}",
+            "goToReplay": "Eiti į Ppakartojimą"
+        }
+    },
+    "page": {
+        "noSession": "Nėra Aktyvių Pakartojimo Tyrimo Sesijų",
+        "noSessionDesc": "Pradėti Pakartojimo Tyrimą iš Istorinių vaizdų spaudžiant Veiksmo mygtuką įrankių meniu ir pasirenkant Tirti Pakartojimą.",
+        "goToRecordings": "Eiti į Istoriją",
+        "preparingClip": "Klipas ruošiamas…",
+        "preparingClipDesc": "Frigate sudurinėja įrašus kartu pasirinktam laikotarpiui. Tai gali užtrukti kelias minutes jei pasirinkti ilgesni periodai.",
+        "startingCamera": "Pradedamas Pakartojimo Tyrimas…",
+        "startError": {
+            "title": "Nepavyko pradėti Pakartojimo Tyrimo",
+            "back": "Atgal į Istoriją"
+        },
+        "sourceCamera": "Pirminė Kamera",
+        "replayCamera": "Pakartojimo Kamera",
+        "initializingReplay": "Inicijuojamas Pakartojimo Tyrimas...",
+        "stoppingReplay": "Standomas Pakartojimo Tyrimas...",
+        "stopReplay": "Stabdyti Pakartojimą",
+        "confirmStop": {
+            "title": "Stabdyti Pakartojimo Tyrimą?",
+            "description": "Tai sustabdys sesiją ir pašalins visus laikinus duomenis. Esate įsitikinę?",
+            "confirm": "Stabdyti Pakartojimą",
+            "cancel": "Atšaukti"
+        },
+        "activity": "Veikla",
+        "objects": "Objektų Sąrašas",
+        "audioDetections": "Garso Aptikimai",
+        "noActivity": "Jokia veikla neaptikta",
+        "activeTracking": "Aktyvai sekama",
+        "noActiveTracking": "Nėra aktyvaus sekimo",
+        "configuration": "Konfiguracija",
+        "configurationDesc": "Tikslinti judesių aptikimą ir objekto sekimo nustatymus Pakartojimo Tyrimo kamerai. Jokie pokyčiai nėra išsaugomi į jūsų Frigate konfiguracijos failą."
+    }
+}

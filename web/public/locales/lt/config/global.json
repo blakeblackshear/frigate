@@ -15,5 +15,12 @@
                 "label": "Epizodo metaduomenys bus įterpti į išsaugotuose įrašuose"
             }
         }
+    },
+    "lpr": {
+        "label": "Registracijos Numerių Atpažinimas",
+        "description": "Registracijos numerių atpažinimo nustatymai įskaitant aptikimo ribas, formatavima ir žinomus numerius.",
+        "enabled": {
+            "label": "Įjungti RNA"
+        }
     }
 }

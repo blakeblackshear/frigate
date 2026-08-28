@@ -3,8 +3,10 @@
     "label": "Judesys",
     "only": "Tik judesys"
   },
-  "allCameras": "Visos kameros",
-  "timeline": "Laiko juosta",
+  "allCameras": "Visas kameras",
+  "timeline": {
+    "label": "Laiko juosta"
+  },
   "timeline.aria": "Pasirink laiko juostą",
   "events": {
     "label": "Įvykiai",
@@ -14,8 +16,8 @@
   "calendarFilter": {
     "last24Hours": "Paskutinė para"
   },
-  "selected_one": "{{count}} pasirinktas",
-  "selected_other": "{{count}} pasirinkta",
+  "selected_one": "{{count}} parinkta",
+  "selected_other": "{{count}} parinkta",
   "camera": "Kamera",
   "alerts": "Įspėjimai",
   "detections": "Aptikimai",
@@ -30,7 +32,9 @@
   },
   "documentTitle": "Peržiūros - Frigate",
   "recordings": {
-    "documentTitle": "Įrašai - Frigate"
+    "documentTitle": "Įrašai - Frigate",
+    "invalidSharedLink": "Nepavyko atidaryti įrašo nuorodos su laiko žyme dėl duomenų išrinkimo klaidos.",
+    "invalidSharedCamera": "Nepavyko atidaryti įrašo nuorodos su laiko žyme dėl nežinomos ar neprieinamos kameros."
   },
   "markAsReviewed": "Pažymėti kaip peržiūrėtą",
   "markTheseItemsAsReviewed": "Pažymėti šiuos įrašus kaip peržiūrėtus",
@@ -63,5 +67,31 @@
   "select_all": "Viską",
   "normalActivity": "Normali veikla",
   "needsReview": "Reikalinga peržiūra",
-  "securityConcern": "Saugumo rūpestis"
+  "securityConcern": "Saugumo rūpestis",
+  "motionSearch": {
+    "menuItem": "Judesio Paieška",
+    "openMenu": "Kameros parinkimai"
+  },
+  "motionPreviews": {
+    "menuItem": "Žiūrėti judesių apžvalgas",
+    "title": "Judesių apžvalgos: {{camera}}",
+    "mobileSettingsTitle": "Judesių Peržiūros Nustatymai",
+    "mobileSettingsDesc": "Koreguokite leistuvo greitį, tamsinimą bei kadravimą ir pasirinkite datą, kad peržiūrėti tik judesį turinčius klipus.",
+    "dim": "Tamsinimas",
+    "dimAria": "Koreguoti tamsinimo intensyvumą",
+    "dimDesc": "Padidinti tamsinimą kad padidinti judesio ploto matomumą.",
+    "speed": "Greitis",
+    "speedAria": "Pasirinkti apžvalgos leidimo greitį",
+    "speedDesc": "Pasirinkite kaip staigiai leidžiami apžvalgų klipai.",
+    "back": "Atgal",
+    "empty": "Nėra apžvalgų",
+    "noPreview": "Apžvalga negalima",
+    "seekAria": "Perkelti {{camera}} grotuvą į {{time}}",
+    "filter": "Filtras",
+    "filterDesc": "Pasirinkite plotus, kad rodyti klipus su judesiu tik esančius juose.",
+    "filterClear": "Išvalyti",
+    "crop": "Kadruoti filtravimui",
+    "cropAria": "Perjungti apžvalgų kadravimą į filtruojamus plotus",
+    "cropDesc": "Priartinti apžvalgas į pasirinktus filtravimo plotus vietoj pilno kadro atvaizdavimo."
+  }
 }

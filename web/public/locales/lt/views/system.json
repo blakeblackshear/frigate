@@ -5,7 +5,8 @@
     "logs": {
       "frigate": "Frigate Žurnalas - Frigate",
       "go2rtc": "Go2RTC Žurnalas - Frigate",
-      "nginx": "Nginx Žurnalas - Frigate"
+      "nginx": "Nginx Žurnalas - Frigate",
+      "websocket": "Žinučių Išrašas - Frigate"
     },
     "general": "Bendroji Statistika - Frigate",
     "enrichments": "Pagerinimų Statistika - Frigate"
@@ -32,6 +33,33 @@
       "error": {
         "fetchingLogsFailed": "Klaida nuskaitant įrašus: {{errorMessage}}",
         "whileStreamingLogs": "Klaidai transliuojant įrašus: {{errorMessage}}"
+      }
+    },
+    "websocket": {
+      "label": "Žinutės",
+      "pause": "Pauzė",
+      "resume": "Atkurti",
+      "clear": "Išvalyti",
+      "filter": {
+        "all": "Visos temos",
+        "topics": "Temos",
+        "events": "Įvykiai",
+        "reviews": "Apžiūros",
+        "classification": "Klasifikacijos",
+        "face_recognition": "Veido Atpažinimas",
+        "lpr": "RNA",
+        "camera_activity": "Kameros veikla",
+        "system": "Systema",
+        "camera": "Kamera",
+        "all_cameras": "Visos kameros",
+        "cameras_count_one": "{{count}}Kamera",
+        "cameras_count_other": "{{count}} Kameros"
+      },
+      "empty": "Dar nėra pateiktų žinučių",
+      "count_one": "{{count}} žinutė",
+      "count_other": "{{count}} žinutės",
+      "expanded": {
+        "payload": "Duomenų Paketas"
       }
     }
   },
@@ -81,7 +109,10 @@
         "title": "Intel GPU statistikų įspėjimas",
         "message": "GPU statistika negalima",
         "description": "Tai žinoma problema su Intel GPU statistikos raportavimo įrankiu (intel_gpu_top), kai jis stringa ir pakartotinai grąžina GPU vartojimas 0% net tais atvejais kai hardware acceleration ir objektų aptikimas taisiklingai veikia naudojant (i)GPU. Tai nėra Frigate klaida. Laikinai padeda įrenginio perkrovimas, kad įsitikinti teisingu GPU funkcionavimu. Tai neįtakoja spartos."
-      }
+      },
+      "gpuCompute": "GPU Skaičiavimai / Transformavimas",
+      "gpuTemperature": "GPU Temperatūra",
+      "npuTemperature": "NPU Temperatūra"
     },
     "otherProcesses": {
       "title": "Kiti Procesai",
@@ -118,7 +149,11 @@
     },
     "shm": {
       "title": "SHM (bendrinama atmintis) priskyrimas",
-      "warning": "Esamas SHM dydis {{total}}MB yra per mažas. Pridėkite bent jau {{min_shm}}MB."
+      "warning": "Esamas SHM dydis {{total}}MB yra per mažas. Pridėkite bent jau {{min_shm}}MB.",
+      "frameLifetime": {
+        "title": "Kadro gyvavimo trukmė",
+        "description": "Kiekviena kamera turi {{frames}} kadrų vietas dalinamoje atmintyje. Grečiausiu kameros kadrų dažniu, kiekvienas kadras yra prieinamas maždaug {{lifetime}} prieš tai kaip jis yra užkeičiamas."
+      }
     }
   },
   "cameras": {
@@ -139,6 +174,21 @@
       "error": "Klaida:{{error}}",
       "tips": {
         "title": "Kameros Srauto Informacija"
+      },
+      "keyframes": {
+        "title": "Raktinių kadrų analizė",
+        "analyzing": "Analizuojami raktiniai kadrai... liko {{seconds}} sekundžių",
+        "stillAnalyzing": "Vis dar analizuojami Raktriniai Kadrai...",
+        "recordStream": "Įrašyti transliaciją:",
+        "keyframeCount": "Raktiniai kadrai peržvelgti:",
+        "observedDuration": "Peržvelgta trukmė:",
+        "gap": "Raktinių Kadrų tarpsnis (min / avg / max):",
+        "segmentLength": "Įrašo segmento trukmė:",
+        "ok": "Raktiniai Kadrai kas ~{{seconds}} sek., tinkama įrašinėjimui ar peržiūrėjimui.",
+        "warning": "Išsibarstę ar kintami Raktiniai Kadrai (ilgiausias tarpsnis ~{{seconds}} sek.), greičiausiai išmanus kodekas (H.264+/H.265+), tai yra nerekomenduojama.",
+        "error": "Raktinių Kadrų tarpsnis (~{{seconds}} sek.) viršyja įrašo segmento trukmę ({{segmentTime}} sek.). Kaikurie segmentai gali neturėti Raktinio Kadro, tai sugadina vaizdo leidimą. Nenaudokite išmanaus/+ kodeko kameroje arba sutrumpinkite Raktinio Kadro intervalą.",
+        "unknown": "Nepavyko nustatyti Raktinio Kadro išsidėstymo.",
+        "recordDisabled": "Įrašinėjimas šiai kamerai yra išjungtas."
       }
     },
     "framesAndDetections": "Kadrai / Aptikimai",
@@ -156,7 +206,8 @@
       "cameraDetect": "{{camName}} susekta",
       "cameraFramesPerSecond": "{{camName}} kadrai per sekundę",
       "cameraDetectionsPerSecond": "{{camName}} aptikimai per sekundę",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} praleista aptikimų per sekundę"
+      "cameraSkippedDetectionsPerSecond": "{{camName}} praleista aptikimų per sekundę",
+      "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
       "success": {
@@ -165,6 +216,20 @@
       "error": {
         "unableToProbeCamera": "Negalima gauti kameros mėginio: {{errorMessage}}"
       }
+    },
+    "noCameras": {
+      "title": "Kamerų Nerasta"
+    },
+    "connectionQuality": {
+      "title": "Ryšio Kokybė",
+      "excellent": "Puiki",
+      "fair": "Pakankama",
+      "poor": "Silpna",
+      "unusable": "Nepakankama",
+      "fps": "FPS",
+      "expectedFps": "Tikėtinas FPS",
+      "reconnectsLastHour": "Atkurti prisijungimai (paskutinę valandą)",
+      "stallsLastHour": "Strigimai (paskutinę valandą)"
     }
   },
   "lastRefreshed": "Paskutinį kartą atnaujinta: ",
@@ -176,7 +241,8 @@
     "cameraIsOffline": "{{camera}} yra nepasiekiama",
     "detectIsSlow": "{{detect}} yra lėtas ({{speed}}ms)",
     "detectIsVerySlow": "{{detect}} yra labai lėtas ({{speed}}ms)",
-    "shmTooLow": "/dev/shm priskirta ({{total}} MB) turi būti padidinta bent jau iki {{min}} MB."
+    "shmTooLow": "/dev/shm priskirta ({{total}} MB) turi būti padidinta bent jau iki {{min}} MB.",
+    "debugReplayActive": "Pakartojimo Tyrimo sesija aktyvi"
   },
   "enrichments": {
     "title": "Patobulinimai",
