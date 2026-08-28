@@ -78,5 +78,13 @@
       "temperature": "Ilmaisimen lämpötila"
     },
     "title": "Yleinen"
+  },
+  "enrichments": {
+    "embeddings": {
+      "classification_speed": "{{name}} Luokittelunopeus",
+      "classification_events_per_second": "{{name}} Luokittelutapahtumia Sekunnissa",
+      "object_description_events_per_second": "Objektin Kuvaus",
+      "classification": "{{name}} Luokittelu"
+    }
   }
 }
