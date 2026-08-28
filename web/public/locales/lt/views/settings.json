@@ -29,7 +29,9 @@
     "roles": "Rolės",
     "cameraManagement": "Valdymas",
     "cameraReview": "Peržiūra",
-    "profiles": "Profiliai"
+    "profiles": "Profiliai",
+    "integrationLpr": "Registracijos numerių atpažinimas",
+    "cameraLpr": "Registracijos numerių atpažinimas"
   },
   "dialog": {
     "unsavedChanges": {
@@ -749,7 +751,7 @@
     "snapshotConfig": {
       "title": "Momentinių kadrų Konfiguravimas",
       "desc": "Pateikti į Frigate+ reikalauja abiejų, momentinių kadrų ir <code>švarios_kopijos</code>momentinių kadrų įjungimo jūsų konfiguracijoje.",
-      "cleanCopyWarning": "Kai kurios kameros turi momentinius kadrus įjungtus tačiau švari kopija išjungta. Turite įjungti <code>švarią_kopiją</code> savo momentinės kopijos nustatymuose, kad galėtumėte teikti paveikslėlius į Frigate+.",
+      "cleanCopyWarning": "Kai kurios kameros turi momentinius kadrus išjungtus",
       "table": {
         "camera": "Kamera",
         "snapshots": "Momentiniai Kadrai",
