@@ -197,7 +197,7 @@ For cameras that support two-way talk, go2rtc will automatically establish an au
 To prevent this, you must configure two separate stream instances:
 
 1. One stream instance with `#backchannel=0` for Frigate's viewing, recording, and detection (prevents go2rtc from establishing the blocking backchannel)
-2. A second stream instance without `#backchannel=0` for two-way talk functionality (can be used by Frigate's WebRTC viewer or other applications)
+2. A second stream instance with no `#` parameters at all for two-way talk functionality (can be used by Frigate's WebRTC viewer or other applications)
 
 Configuration example:
 
@@ -214,6 +214,8 @@ In this configuration:
 
 - `front_door` stream is used by Frigate for viewing, recording, and detection. The `#backchannel=0` parameter prevents go2rtc from establishing the audio output backchannel, so it won't block two-way talk access.
 - `front_door_twoway` stream is used for two-way talk functionality. This stream can be used by Frigate's WebRTC viewer when two-way talk is enabled, or by other applications (like Home Assistant Advanced Camera Card) that need access to the camera's audio output channel.
+
+Any `#` parameter on a bare `rtsp://` source disables the backchannel unless the URL explicitly contains `#backchannel=1`. A two-way talk stream with something like `#video=h264` on it silently loses two-way audio, and Frigate will report that two-way talk is unavailable for that stream.
 
 ## Security: Restricted Stream Sources
 

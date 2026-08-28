@@ -78,7 +78,9 @@ go2rtc:
 
 :::warning
 
-The `#`-modifiers (`#video=`, `#audio=`, `#hardware`, `#backchannel=0`, …) **only take effect on a source that is prefixed with `ffmpeg:`**. Adding them to a bare `rtsp://…#audio=opus` source does nothing: go2rtc ignores them. Likewise, when a source references another stream by name (e.g. `ffmpeg:back#audio=aac`), the name must match the stream key **exactly** (it is case sensitive), or the transcode is silently never produced. This is the single most common configuration mistake. In the Frigate UI, the **Use compatibility mode (ffmpeg)** toggle adds the `ffmpeg:` prefix for you.
+The transcoding modifiers (`#video=`, `#audio=`, `#hardware`, …) **only take effect on a source that is prefixed with `ffmpeg:`**. Adding them to a bare `rtsp://…#audio=opus` source does nothing: go2rtc ignores them. Likewise, when a source references another stream by name (e.g. `ffmpeg:back#audio=aac`), the name must match the stream key **exactly** (it is case sensitive), or the transcode is silently never produced. This is the single most common configuration mistake. In the Frigate UI, the **Use compatibility mode (ffmpeg)** toggle adds the `ffmpeg:` prefix for you.
+
+A bare `rtsp://` source reads a different set of modifiers: `#backchannel=`, `#media=`, `#timeout=`, and `#transport=`. These do nothing on an `ffmpeg:` source. Adding **any** modifier to a bare `rtsp://` source also disables the camera's backchannel unless the URL explicitly contains `#backchannel=1`, so a stream dedicated to two-way talk should carry no modifiers at all.
 
 :::
 
@@ -153,7 +155,7 @@ WebRTC is only attempted when MSE fails or when using a camera's two-way talk fe
 
 - **Codec mismatch**: WebRTC cannot carry H.265 or AAC. The stream backing the WebRTC view must provide Opus (or PCMA/PCMU) audio and H.264 video. Add an `ffmpeg:back#audio=opus` source as shown above.
 - **Port `8555` not reachable, or no candidates set**: WebRTC needs port `8555` (both TCP and UDP) open and a reachable candidate advertised. On Docker installs running on a custom/overlay network, go2rtc may advertise unreachable container IPs as ICE candidates; setting `webrtc.filters.candidates: []` and supplying only your host's LAN IP resolves this. See [WebRTC extra configuration](/configuration/live#webrtc-extra-configuration).
-- **Two-way talk** additionally requires a secure context (HTTPS or the authenticated port `8971`, because browsers block microphone access on plain HTTP). The camera's RTSP backchannel must also be handled correctly: go2rtc seizes the backchannel by default, which blocks two-way audio for other consumers and can inject static. Disable it on the primary stream with `#backchannel=0` and use a separate dedicated stream for talk, as documented in [preventing go2rtc from blocking two-way audio](/configuration/restream#two-way-talk-restream).
+- **Two-way talk** additionally requires a secure context (HTTPS or the authenticated port `8971`, because browsers block microphone access on plain HTTP). The camera's RTSP backchannel must also be handled correctly: go2rtc seizes the backchannel by default, which blocks two-way audio for other consumers and can inject static. Disable it on the primary stream with `#backchannel=0` and use a separate dedicated stream for talk, carrying no `#` modifiers of any kind, as documented in [preventing go2rtc from blocking two-way audio](/configuration/restream#two-way-talk-restream).
 
 ## High CPU usage
 
