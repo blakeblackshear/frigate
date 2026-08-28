@@ -29,7 +29,7 @@
         },
         "listen": {
             "label": "Tipus d'escoltes",
-            "description": "Llista de tipus d'esdeveniment d'àudio a detectar (per exemple: escorça, focarmalarma, parla, crida)."
+            "description": "Llista de tipus d'esdeveniment d'àudio a detectar (per exemple: Lladruc, foc_alarma, parla, crida)."
         },
         "filters": {
             "label": "Filtres d'àudio",
@@ -564,7 +564,7 @@
         },
         "genai": {
             "label": "Configuració del GenAI",
-            "description": "Controla l'ús de la IA generativa per a la producció de descripcions i resums d'articles de revisió.",
+            "description": "Controla l'ús de la IA generativa per a la producció de descripcions i resums d'elements de revisió.",
             "enabled": {
                 "label": "Habilita les descripcions del GenAI",
                 "description": "Activa o desactiva les descripcions i resums generats per GenAI per als elements de revisió."

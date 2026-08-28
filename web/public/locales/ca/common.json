@@ -3,7 +3,7 @@
     "title": "Rol",
     "viewer": "Visualitzador",
     "admin": "Administrador",
-    "desc": "Els administradors tenen accés complet a totes les característiques de la interfície d'usuari de Frigate. Els visualitzadors es limiten a visualitzar càmeres, articles de revisió i imatges històriques a la interfície d'usuari."
+    "desc": "Els administradors tenen accés complet a totes les característiques de la interfície d'usuari de Frigate. Els visualitzadors es limiten a visualitzar càmeres, elements de revisió i imatges històriques a la interfície d'usuari."
   },
   "menu": {
     "language": {
