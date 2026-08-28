@@ -246,7 +246,7 @@
     "debugReplayActive": "La sessió de repetició de depuració està activa"
   },
   "enrichments": {
-    "title": "Enriquiments",
+    "title": "Anàlisi avançada",
     "embeddings": {
       "face_recognition_speed": "Velocitat de reconeixement facial",
       "image_embedding": "Vectors d'imatges",

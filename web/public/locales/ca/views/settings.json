@@ -27,7 +27,7 @@
     "notifications": "Notificacions",
     "debug": "Depuració",
     "frigateplus": "Frigate+",
-    "enrichments": "Enriquiments",
+    "enrichments": "Anàlisi avançada",
     "triggers": "Disparadors",
     "cameraManagement": "Gestió de la càmera",
     "cameraReview": "Revisió",
@@ -824,7 +824,7 @@
       "title": "Classificació d'ocells",
       "desc": "La classificació d’ocells identifica ocells coneguts mitjançant un model TensorFlow quantitzat. Quan es reconeix un ocell conegut, el seu nom comú s’afegeix com a subetiqueta. Aquesta informació es mostra a la interfície d’usuari, als filtres i també a les notificacions."
     },
-    "title": "Configuració dels enriquiments",
+    "title": "Configuració de l'anàlisi avançada",
     "toast": {
       "error": "No s'han pogut guardar els canvis de configuració: {{errorMessage}}",
       "success": "Els paràmetres complementaris s'han desat. Reinicia Frigate per aplicar els canvis."
@@ -1365,7 +1365,7 @@
         "inputsRequired": "Es requereix com a mínim un flux d'entrada",
         "roles": "Rols"
       },
-      "go2rtcStreams": "go2rtc Fluxos",
+      "go2rtcStreams": "Fluxos go2rtc",
       "streamUrls": "URL de flux",
       "addUrl": "Afegeix un URL",
       "addGo2rtcStream": "Afegeix go2rtc flux",
@@ -1510,7 +1510,7 @@
     },
     "reviewClassification": {
       "title": "Revisió de la classificació",
-      "desc": "Frigate categoritza els articles de revisió com Alertes i Deteccions. Per defecte, tots els objectes <em>persona</em> i <em>cotxe</em> es consideren Alertes. Podeu refinar la categorització dels elements de revisió configurant-los les zones requerides.",
+      "desc": "Frigate categoritza els elements de revisió com Alertes i Deteccions. Per defecte, tots els objectes <em>persona</em> i <em>cotxe</em> es consideren Alertes. Podeu refinar la categorització dels elements de revisió configurant-los les zones requerides.",
       "noDefinedZones": "No hi ha zones definides per a aquesta càmera.",
       "selectAlertsZones": "Selecciona zones per a les alertes",
       "selectDetectionsZones": "Selecció de zones per a les deteccions",
@@ -1699,7 +1699,7 @@
       "itemTitle": "Flux {{index}}",
       "sourceMode": {
         "restream": "Restream (go2rtc)",
-        "manual": "Camí d'entrada manual",
+        "manual": "Ruta d'entrada manual",
         "go2rtcStreamLabel": "flux go2rtc",
         "go2rtcStreamPlaceholder": "Selecciona un flux go2rtc",
         "noGo2rtcStreams": "No s'ha configurat cap flux go2rtc",
@@ -2050,7 +2050,7 @@
     "review": {
       "recordDisabled": "L'enregistrament està desactivat, els elements de revisió no es generaran.",
       "detectDisabled": "La detecció d'objectes està desactivada. Els elements de revisió requereixen objectes detectats per categoritzar alertes i deteccions.",
-      "allNonAlertDetections": "Totes les activitats no alertes s'inclouran com a deteccions.",
+      "allNonAlertDetections": "Totes les activitats que no siguin alertes s'inclouran com a deteccions.",
       "genaiImageSourceRecordingsRecordDisabled": "La font d'imatges està configurada com a 'enregistraments', però l'enregistrament està desactivat. Frigate tornarà a la vista prèvia de les imatges."
     },
     "audio": {
@@ -2061,7 +2061,7 @@
     },
     "detect": {
       "fpsGreaterThanFive": "No es recomana establir el detect FPS superior a 5. Els valors més alts poden causar problemes de rendiment i no proporcionaran cap benefici.",
-      "disabled": "La detecció d'objectes està desactivada. Les instantànies, articles de revisió i enriquiments com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran.",
+      "disabled": "La detecció d'objectes està desactivada. Les instantànies, elements de revisió i l'anàlisi avançada com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran.",
       "resolutionShouldBeMultipleOfFour": "Per obtenir els millors resultats, detectar l'amplada i l'alçada han de ser múltiples de 4. Altres valors parells poden produir artefactes visuals o una lleugera distorsió en el flux de detecció.",
       "aspectRatioMismatch": "L'amplada i alçada que heu introduït no coincideixen amb la relació d'aspecte de la resolució de detecció actual. Això pot produir una imatge estirada o distorsionada.",
       "maxFramesSet": "La configuració dels fotogrames màxims anul·la el comportament predeterminat i desactiva el seguiment d'objectes estacionaris. Hi ha molt poques situacions en què això sigui necessari, utilitzeu-lo amb precaució.",
