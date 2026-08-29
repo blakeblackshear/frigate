@@ -51,7 +51,7 @@ Volumes from earlier versions of Frigate are owned by root, so ownership has to 
 
 On large recordings volumes, do it from the host beforehand instead. The boot sweep runs before any service starts, so a multi-terabyte `/media/frigate` can hold the container in startup long enough for Docker's healthcheck to mark it unhealthy, and orchestrators that watch health will restart it mid-sweep. If you'd rather not run the script, raise the healthcheck start period instead (`--start-period=1800s`, or `start_period: 1800s` under `healthcheck:` in compose).
 
-Grab `fix-permissions.sh` from `docker/migration/` in the Frigate repo and dry run it first:
+Grab [`fix-permissions.sh`](https://github.com/blakeblackshear/frigate/blob/dev/docker/migration/fix-permissions.sh) from the Frigate repo and dry run it first:
 
 ```bash
 ./fix-permissions.sh --dry-run /path/to/your/config /path/to/your/storage
@@ -78,8 +78,6 @@ Both the script and the boot sweep report progress, so you can tell a slow sweep
 The scan has no percentage because the total isn't known until it finishes. Watch the boot sweep with `docker logs -f frigate`.
 
 Once the volumes are aligned, start Frigate normally. A file at `/config/.permissions_version` records what was done, so later boots skip the sweep unless you change `PUID`/`PGID`.
-
-`lost+found` is left alone. It belongs to the filesystem rather than to Frigate, and `fsck` recovers pieces of arbitrary files into it with root-only permissions, so handing it to the runtime user would expose whatever ends up there. Expect it to stay owned by root on any volume that's a dedicated mount.
 
 If something under your volumes can't be chowned, a read-only btrfs snapshot directory for example, the sweep warns and names the path and doesn't record the migration as finished. It retries on the next boot instead. Either move those paths outside `/media/frigate` or expect the scan to repeat.
 
@@ -239,9 +237,9 @@ SUBSYSTEM=="hailo_chardev", MODE="0660", GROUP="hailo"
 
 ### Quick reference
 
-| Hardware                  | Device(s)                                                   | What non-root needs                                                                                             |
-| ------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Intel/AMD GPU (VAAPI/QSV) | `/dev/dri/renderD128`                                       | Host render GID in `EXTRA_GROUPS`, from `getent group render`                                                   |
+| Hardware                  | Device(s)                                                   | What non-root needs                                                                                              |
+| ------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Intel/AMD GPU (VAAPI/QSV) | `/dev/dri/renderD128`                                       | Host render GID in `EXTRA_GROUPS`, from `getent group render`                                                    |
 | Intel/AMD NPU             | `/dev/accel`                                                | udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                      |
 | Coral USB                 | `/dev/bus/usb`                                              | udev rules for both `1a6e` and `18d1`; usually already covered by `plugdev` 46                                   |
 | Coral PCIe                | `/dev/apex_0`                                               | udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                      |
@@ -250,15 +248,15 @@ SUBSYSTEM=="hailo_chardev", MODE="0660", GROUP="hailo"
 | AMD ROCm                  | `/dev/kfd`, `/dev/dri`                                      | Host `video` and `render` GIDs in `EXTRA_GROUPS`                                                                 |
 | Raspberry Pi              | `/dev/video11`                                              | Host `video` GID in `EXTRA_GROUPS`                                                                               |
 | Rockchip                  | `/dev/dri`, `/dev/dma_heap`, `/dev/rga`, `/dev/mpp_service` | Commonly `root:root` `0600`, so all four need udev rules. If you can't grant all four, use `FRIGATE_RUN_AS_ROOT` |
-| Axera (AXCL)              | `/dev/ax_*` per the AXCL driver docs                        | Unverified. Check node ownership on your hardware before assuming this works                                    |
-| Synaptics SL1680          | per the Synaptics docs                                      | Unverified                                                                                                      |
-| MemryX                    | per the MemryX docs                                         | Still requires `privileged: true`, which means root. Out of scope for non-root operation                        |
+| Axera (AXCL)              | `/dev/ax_*` per the AXCL driver docs                        | Unverified. Check node ownership on your hardware before assuming this works                                     |
+| Synaptics SL1680          | per the Synaptics docs                                      | Unverified                                                                                                       |
+| MemryX                    | per the MemryX docs                                         | Still requires `privileged: true`, which means root. Out of scope for non-root operation                         |
 | Nvidia Jetson             | nvidia runtime plus Jetson nodes                            | Unverified. The nvidia runtime handles mapping, but check `/dev/nvhost-*` ownership on your board                |
-| VeriSilicon NPU (Teflon)  | per the driver, commonly `/dev/galcore`                     | Unverified. Check node ownership on your hardware before assuming this works                                    |
-| CPU detector              | none                                                        | Nothing, no device is opened                                                                                    |
-| DeepStack, CodeProject.AI | none                                                        | Nothing, inference happens over the network                                                                     |
-| ZMQ detector              | none                                                        | Nothing, inference happens over a socket                                                                        |
-| Apple Silicon             | none                                                        | Nothing, the NPU client runs on the host and Frigate reaches it over the network                                |
+| VeriSilicon NPU (Teflon)  | per the driver, commonly `/dev/galcore`                     | Unverified. Check node ownership on your hardware before assuming this works                                     |
+| CPU detector              | none                                                        | Nothing, no device is opened                                                                                     |
+| DeepStack, CodeProject.AI | none                                                        | Nothing, inference happens over the network                                                                      |
+| ZMQ detector              | none                                                        | Nothing, inference happens over a socket                                                                         |
+| Apple Silicon             | none                                                        | Nothing, the NPU client runs on the host and Frigate reaches it over the network                                 |
 
 ## Known limitations
 
