@@ -142,6 +142,40 @@ jobs:
               [ -e "$f" ] || continue
               test -r "$f" || { echo "$f is not readable by the runtime user"; exit 1; }
             done'
+      - name: Assert device access grants
+        run: |
+          # a fake accelerator node created after boot, then the oneshot re-run
+          docker exec frigate mknod /dev/apex_9 c 120 99
+          docker exec frigate /etc/s6-overlay/s6-rc.d/init-devices/run
+          acl=$(docker exec frigate getfacl -p /dev/apex_9)
+          echo "$acl"
+          echo "$acl" | grep -q "user:frigate:rw-"
+          echo "$acl" | grep -q "user:go2rtc:rw-"
+          # the usb tree gets recursive grants plus a default ACL that
+          # newly created nodes inherit (the Coral re-enumeration path)
+          docker exec frigate sh -c 'mkdir -p /dev/bus/usb/001 && mknod /dev/bus/usb/001/002 c 189 1'
+          docker exec frigate /etc/s6-overlay/s6-rc.d/init-devices/run
+          docker exec frigate getfacl -p /dev/bus/usb/001 | grep -q "user:frigate:rwx"
+          docker exec frigate sh -c 'mknod /dev/bus/usb/001/099 c 189 98 && chmod 664 /dev/bus/usb/001/099'
+          inherited=$(docker exec frigate getfacl -p /dev/bus/usb/001/099)
+          echo "$inherited"
+          echo "$inherited" | grep -q "user:frigate:rw-"
+          # getfacl prints granted perms even when the mask clamps them to
+          # nothing, with a trailing "#effective:" comment; a clamped ACL must
+          # fail this assertion, not sneak past it. The check is scoped to the
+          # runtime users because the inherited group:: entry is always clamped
+          # on a non-directory, so an unscoped grep could never pass.
+          if echo "$inherited" | grep -E "^user:(frigate|go2rtc):" | grep -q "effective"; then
+            echo "inherited ACL is mask-clamped and grants no real access"; exit 1
+          fi
+          # hardware that is absent must stay silent: the literal table entries
+          # are not globs, so nullglob does not drop them and only an existence
+          # check keeps them from warning on every boot
+          out=$(docker exec frigate /etc/s6-overlay/s6-rc.d/init-devices/run)
+          echo "$out"
+          if echo "$out" | grep -q "WARN"; then
+            echo "grant warned about device nodes that do not exist"; exit 1
+          fi
       - name: Assert escape hatch restores root
         run: |
           mkdir -p /tmp/frigate-config-root
