@@ -133,11 +133,13 @@ Set `FRIGATE_DEVICE_ACLS=false` if you manage device permissions yourself and wa
 
 Frigate grants access by adding an ACL entry for the runtime users. The device's owner and mode are unchanged, and nothing is made world accessible. One thing to know: `--device` nodes belong to the container, but a bind mounted `/dev/bus/usb` (the usual Coral USB setup) shares the host's device nodes, so the entry is visible on the host until udev recreates the node.
 
-The rest of this section is the manual fallback, for hardware the grant can't reach and for Docker's `user:` mode, where there's no root startup to do the granting.
+### Manual setup
+
+You only need this for hardware the automatic grant can't reach, or for Docker's `user:` mode, where there's no root startup to do the granting.
 
 Your accelerator most likely worked in older versions because Frigate ran as root. Device nodes are usually owned by `root:root`, and root either matches the group or skips the check entirely. The runtime user does neither, so a device that worked before can become unreadable with no change to your Frigate config.
 
-### Read what your device requires
+#### Read what your device requires
 
 Find the node and look at its owner, group, and mode:
 
@@ -161,7 +163,7 @@ crw-rw-r-- 1 0 0 189, 386 Jul  5 10:12 /dev/bus/usb/004/003
 
 The group is `0`, so "other" applies to the runtime user, and "other" here is read only. `libedgetpu` needs to write to the node, so detection fails with `No EdgeTPU was detected` as though no Coral were attached. Read access alone isn't enough for most accelerators.
 
-### Grant access
+#### Grant access
 
 Give the runtime user the GID with `EXTRA_GROUPS`, a comma separated list of numeric host GIDs. They're added to both the `frigate` and `go2rtc` users, which matters because go2rtc needs its own render and video access for hardware accelerated restreams.
 
@@ -179,7 +181,7 @@ Two things that look like they should work but don't:
 
 If the node's group is `root` or the mode denies the group, no `EXTRA_GROUPS` value will help. You need a udev rule first.
 
-### Verify access
+#### Verify access
 
 Check the group landed, then check the runtime user can open the node. Test for write, not just read:
 
@@ -200,7 +202,7 @@ docker exec frigate /command/s6-setuidgid frigate python3 -c "import openvino as
 
 To tell a permissions problem from anything else, start the container once with `FRIGATE_RUN_AS_ROOT=true`. If the device works as root and not otherwise, it's node permissions and a udev rule is the fix. If it's missing either way, the problem is your device mapping or the host, and isn't related to running non-root.
 
-### udev rules by device
+#### udev rules by device
 
 Rules go in `/etc/udev/rules.d/` on the host and take effect after:
 
@@ -235,7 +237,9 @@ SUBSYSTEM=="hailo_chardev", MODE="0660", GROUP="hailo"
 
 **Intel and AMD GPUs** usually need nothing beyond `EXTRA_GROUPS`, since most distributions ship a `render` group that owns `/dev/dri/renderD128`. The GID often differs between the host and the image, so pass the host's number rather than assuming the name resolves. Debian based images have no `render` group at all.
 
-### Quick reference
+#### Quick reference
+
+What each device needs when you're setting it up by hand. The automatic grant covers most of these already, so start here only if it didn't.
 
 | Hardware                  | Device(s)                                                   | What non-root needs                                                                                              |
 | ------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
