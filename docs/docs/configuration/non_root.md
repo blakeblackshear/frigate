@@ -42,7 +42,7 @@ Listing all three services is not the same as `FRIGATE_RUN_AS_ROOT=true`. The es
 
 Volumes created by earlier versions of Frigate are owned by root. Ownership has to be aligned with the runtime user once.
 
-There are two independent prerequisites to upgrading, and doing one without the other is the most common way this goes wrong. This section covers volume ownership. If you use a Coral, a GPU, or any other accelerator, read [Hardware device access](#hardware-device-access) as well: those devices are reachable today because Frigate runs as root, and they need host side work that has nothing to do with your volumes.
+There are two independent prerequisites to upgrading, and doing one without the other is the most common way this goes wrong. This section covers volume ownership. If you use a Coral, a GPU, or any other accelerator, skim [Hardware device access](#hardware-device-access) as well: Frigate grants those devices to the runtime user at startup, so most setups need nothing, but hardware the automatic grant can't reach still needs host side work that has nothing to do with your volumes.
 
 This happens automatically on the first boot after upgrading, but on large recordings volumes it's much better to do it from the host beforehand. The boot sweep runs before any service starts, so a multi-terabyte `/media/frigate` can hold the container in startup long enough for Docker's healthcheck to mark it unhealthy, and orchestrators that react to health will restart it mid-sweep. If you'd rather not run the script, raise the healthcheck start period instead (`--start-period=1800s`, or `start_period: 1800s` under `healthcheck:` in compose).
 
@@ -123,9 +123,9 @@ The sections below are the manual fallback for hardware the automatic grant cann
 
 One host-visible side effect to know about: `--device` nodes are private to the container, but a bind-mounted `/dev/bus/usb` (the documented Coral USB setup) shares the host's nodes, so the grant for the runtime user is briefly visible on the host until udev recreates the node. It's a per-user grant, not a mode change.
 
-This is the part most likely to need work on your host, and it catches people out for a specific reason: your accelerator almost certainly works today *because* Frigate runs as root. Device nodes are commonly owned by `root:root`, and root either matches the file's group or bypasses the check entirely. The runtime user does neither, so a node that was fine yesterday can become unreadable with no change to your Frigate config at all.
+The reason any of this needs explaining is that your accelerator almost certainly works today *because* Frigate runs as root. Device nodes are commonly owned by `root:root`, and root either matches the file's group or bypasses the check entirely. The runtime user does neither, so a node that was fine yesterday can become unreadable with no change to your Frigate config at all.
 
-Nothing inside the container can fix that. Device node permissions are set by the host, so the fix belongs there too.
+The automatic grant is what closes that gap: it adds a uid-scoped ACL entry for the runtime users and leaves the node's owner and mode alone. For anything it can't reach, device node permissions are the host's to set, so the fix belongs there.
 
 ### Read what your device actually requires
 
