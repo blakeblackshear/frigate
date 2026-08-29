@@ -21,6 +21,8 @@ By default the runtime user is uid/gid `1000:1000`. You can change it with `PUID
 
 `FRIGATE_RUN_AS_ROOT` is matched against the exact lowercase string `true`. `True`, `TRUE`, and `1` are all ignored.
 
+`FRIGATE_DEVICE_ACLS` follows the same exact-match rule: only the lowercase string `false` disables the automatic device grants.
+
 ### Keeping individual services root
 
 `FRIGATE_ROOT_SERVICES` takes a comma-separated list of `frigate`, `go2rtc`, and `nginx`. A listed service keeps running as root while everything else about non-root operation still applies: `PUID`/`PGID` remapping, the ownership sweep, and ownership of the files those services create.
@@ -114,6 +116,12 @@ Set `FRIGATE_RUN_AS_ROOT=true` and restart. Everything runs as root again, exact
 The escape hatch never changes ownership, and it deletes the sweep sentinel on startup, so switching back to non-root later re-sweeps whatever root created in the meantime. Toggling in either direction is safe.
 
 ## Hardware device access
+
+Frigate grants the runtime user access to mapped-in devices automatically at startup: pass your hardware with `--device` (or `devices:` in compose) and detection and hardware acceleration work with no group or udev setup. The grant covers the common accelerator and camera nodes (GPU render nodes, Coral, Hailo, Rockchip, Jetson, `/dev/video*`, and the USB bus). For hardware it misses, add your own paths with `DEVICE_ACL_PATHS` (comma-separated globs, for example `DEVICE_ACL_PATHS=/dev/mydev*`), or fall back to the manual setup below. Set `FRIGATE_DEVICE_ACLS=false` (exact lowercase) if you manage device permissions yourself and want Frigate to touch nothing.
+
+The sections below are the manual fallback for hardware the automatic grant cannot cover, and for `user:` mode, where there is no root startup to do the granting.
+
+One host-visible side effect to know about: `--device` nodes are private to the container, but a bind-mounted `/dev/bus/usb` (the documented Coral USB setup) shares the host's nodes, so the grant for the runtime user is briefly visible on the host until udev recreates the node. It's a per-user grant, not a mode change.
 
 This is the part most likely to need work on your host, and it catches people out for a specific reason: your accelerator almost certainly works today *because* Frigate runs as root. Device nodes are commonly owned by `root:root`, and root either matches the file's group or bypasses the check entirely. The runtime user does neither, so a node that was fine yesterday can become unreadable with no change to your Frigate config at all.
 
