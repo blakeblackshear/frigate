@@ -41,9 +41,14 @@ device_globs=(
 IFS=',' read -ra extra_globs <<< "${DEVICE_ACL_PATHS:-}"
 for extra in "${extra_globs[@]}"; do
     extra="${extra//[[:space:]]/}"
-    if [[ -n "$extra" ]]; then
-        device_globs+=("$extra")
+    if [[ -z "$extra" ]]; then
+        continue
     fi
+    if [[ "$extra" != /dev/* || "$extra" == *..* ]]; then
+        echo "[ERROR] DEVICE_ACL_PATHS entries must be under /dev, got '${extra}'" >&2
+        exit 1
+    fi
+    device_globs+=("$extra")
 done
 
 granted=0

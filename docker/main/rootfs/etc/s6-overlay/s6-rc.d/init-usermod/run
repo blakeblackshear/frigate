@@ -53,6 +53,15 @@ if [[ "$puid" -eq 0 || "$pgid" -eq 0 ]]; then
     exit 1
 fi
 
+# Colliding with the go2rtc ids would merge the two users and collapse the
+# separation between the main process and the network-facing restreamer.
+go2rtc_uid="$(id -u go2rtc)"
+go2rtc_gid="$(id -g go2rtc)"
+if [[ "$puid" -eq "$go2rtc_uid" || "$pgid" -eq "$go2rtc_gid" ]]; then
+    echo "[ERROR] PUID/PGID must not equal the go2rtc service ids (${go2rtc_uid}:${go2rtc_gid})." >&2
+    exit 1
+fi
+
 current_uid="$(id -u frigate)"
 current_gid="$(id -g frigate)"
 
@@ -71,6 +80,10 @@ fi
 # EXTRA_GROUPS: numeric host GIDs granting device access (e.g. host render/video)
 if [[ -n "${EXTRA_GROUPS:-}" ]]; then
     for gid in ${EXTRA_GROUPS//,/ }; do
+        if ! [[ "$gid" =~ ^[0-9]+$ ]] || [[ "$gid" -eq 0 ]]; then
+            echo "[ERROR] EXTRA_GROUPS must be nonzero numeric GIDs, got '${gid}'" >&2
+            exit 1
+        fi
         if ! getent group "$gid" >/dev/null; then
             groupadd -o -g "$gid" "frigate-extra-${gid}"
         fi

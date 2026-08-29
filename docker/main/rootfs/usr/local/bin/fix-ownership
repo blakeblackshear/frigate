@@ -70,11 +70,14 @@ if [[ -n "$mode" ]]; then
     sentinel_content="${sentinel_content}:${mode}"
 fi
 
-# A dry run always inspects: the sentinel records what a past sweep did, not
-# what the volume looks like now, and reporting from it would hide later drift.
-if [[ "$dry_run" -eq 0 && -n "$sentinel" && -f "$sentinel" && "$(cat "$sentinel")" == "$sentinel_content" ]]; then
-    echo "[INFO] fix-ownership: ${target_uid}:${target_gid} (schema ${schema}) already applied, skipping"
-    exit 0
+# safe-sentinel reports only a root-owned regular file, so a forged or
+# symlinked sentinel in the runtime-user-owned /config can't suppress the sweep
+if [[ "$dry_run" -eq 0 && -n "$sentinel" ]]; then
+    if existing=$(/usr/local/bin/safe-sentinel read "$sentinel" 2>/dev/null) && \
+        [[ "$existing" == "$sentinel_content" ]]; then
+        echo "[INFO] fix-ownership: ${target_uid}:${target_gid} (schema ${schema}) already applied, skipping"
+        exit 0
+    fi
 fi
 
 # A sweep that could not chown everything must not be recorded as complete:
@@ -122,10 +125,11 @@ for path in "$@"; do
         continue
     fi
 
-    # -print feeds the progress counter; -exec {} + keeps the chown batched
+    # -execdir chowns from the entry's own directory, so a parent swapped for a
+    # symlink mid-walk can't redirect the chown out of the volume
     started=$SECONDS
     if find "$path" -name lost+found -prune -o \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
-        -print -exec chown -h "${target_uid}:${target_gid}" {} + \
+        -print -execdir chown -h "${target_uid}:${target_gid}" {} + \
         | awk -v total="$count" -v path="$path" '
             BEGIN { next_pct = 5 }
             {
@@ -165,6 +169,6 @@ if [[ "$dry_run" -eq 0 && -d /config ]]; then
 fi
 
 if [[ "$dry_run" -eq 0 && -n "$sentinel" && "$swept_clean" -eq 1 ]]; then
-    echo "$sentinel_content" > "$sentinel" || \
+    /usr/local/bin/safe-sentinel write "$sentinel" "$sentinel_content" || \
         echo "[WARN] fix-ownership: could not write ${sentinel}; the sweep will run again on next boot"
 fi

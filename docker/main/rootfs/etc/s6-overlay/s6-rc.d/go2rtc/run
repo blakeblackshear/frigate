@@ -57,42 +57,6 @@ function set_libva_version() {
     export LIBAVFORMAT_VERSION_MAJOR
 }
 
-function setup_homekit_config() {
-    local config_path="$1"
-
-    if [[ ! -f "${config_path}" ]]; then
-        echo "[INFO] Creating empty config file for HomeKit..."
-        : > "${config_path}"
-    fi
-
-    # Convert YAML to JSON for jq processing
-    local temp_json="/tmp/cache/homekit_config.json"
-    yq eval -o=json "${config_path}" > "${temp_json}" 2>/dev/null || {
-        echo "[WARNING] Failed to convert HomeKit config to JSON, skipping cleanup"
-        return 0
-    }
-
-    # Use jq to extract the homekit section, if it exists
-    local homekit_json
-    homekit_json=$(jq '
-        if has("homekit") then {homekit: .homekit} else null end
-    ' "${temp_json}" 2>/dev/null) || homekit_json="null"
-
-    # If no homekit section, write an empty config file
-    if [[ "${homekit_json}" == "null" ]]; then
-        : > "${config_path}"
-    else
-        # Convert homekit JSON back to YAML and write to the config file
-        echo "${homekit_json}" | yq eval -P - > "${config_path}" 2>/dev/null || {
-            echo "[WARNING] Failed to convert cleaned config to YAML, creating minimal config"
-            : > "${config_path}"
-        }
-    fi
-
-    # Clean up temp files
-    rm -f "${temp_json}"
-}
-
 set_libva_version
 
 if [[ -f "/dev/shm/go2rtc.yaml" ]]; then
@@ -113,21 +77,23 @@ else
     echo "[WARNING] Unable to remove existing go2rtc config. Changes made to your frigate config file may not be recognized. Please remove the /dev/shm/go2rtc.yaml from your docker host manually."
 fi
 
-# HomeKit configuration persistence setup
+# HomeKit persistence. The helper is symlink-safe; hand off to go2rtc only when dropping.
 readonly homekit_config_path="/config/go2rtc_homekit.yml"
-setup_homekit_config "${homekit_config_path}"
-
 if [[ "$(id -u)" -eq 0 && "$runs_as_root" -eq 0 ]]; then
+    python3 /usr/local/go2rtc/prepare_homekit.py "${homekit_config_path}" --chown
     chown go2rtc:go2rtc /dev/shm/go2rtc.yaml 2>/dev/null || true
-    # go2rtc rewrites this in place, so owning the file is enough. Tolerated so
-    # a chown-refusing mount (NFS root_squash) degrades pairing, not the service
-    chown go2rtc:frigate-data "${homekit_config_path}" 2>/dev/null && chmod 664 "${homekit_config_path}" 2>/dev/null || \
-        echo "[WARN] Could not hand ${homekit_config_path} to the go2rtc user; HomeKit pairing changes may not persist"
+else
+    python3 /usr/local/go2rtc/prepare_homekit.py "${homekit_config_path}"
 fi
 
 readonly config_path="/config"
 
-if [[ -x "${config_path}/go2rtc" ]]; then
+# frigate owns /config after the sweep, so a /config/go2rtc override must not
+# be honored while this service runs as root
+if [[ "$runs_as_root" -eq 1 && -x "${config_path}/go2rtc" ]]; then
+  echo "[WARN] Ignoring '${config_path}/go2rtc' because this service is running as root; using the embedded binary"
+  readonly binary_path="/usr/local/go2rtc/bin/go2rtc"
+elif [[ -x "${config_path}/go2rtc" ]]; then
   readonly binary_path="${config_path}/go2rtc"
   echo "[WARN] Using go2rtc binary from '${binary_path}' instead of the embedded one"
 else

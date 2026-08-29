@@ -268,7 +268,7 @@ What each device needs when you're setting it up by hand. The automatic grant co
 
 go2rtc's ffmpeg processes no longer appear in Intel GPU stats. Frigate reads per-process GPU usage from `/proc/<pid>/fdinfo`, which the kernel won't let one user read for another user's processes, so anything go2rtc spawns is invisible to it. Overall GPU utilization is unaffected.
 
-If you mount your own TLS certificate at `/etc/letsencrypt/live/frigate`, the private key has to be readable by the runtime user. Frigate won't change ownership of a certificate you supplied, since the mount may be read-only.
+If you mount your own TLS certificate at `/etc/letsencrypt/live/frigate`, the private key has to be readable by the runtime user, which runs nginx. Frigate hands the key to that user at startup if the mount is writable; on a read-only mount, make the key readable by uid 1000 (or your `PUID`) yourself.
 
 If you're debugging nginx, run the config check as the runtime user with stdout discarded:
 
