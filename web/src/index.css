@@ -175,6 +175,21 @@ html {
   background-image: none !important;
 }
 
+/* Live masonry grid: only the bottom-right corner resizes, drawn as a corner
+   bracket on the real se handle (drop-shadow keeps it legible over footage). */
+.grid-layout .react-resizable-handle-se::after {
+  content: "";
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 12px;
+  height: 12px;
+  border-right: 2.5px solid rgba(233, 238, 246, 0.92);
+  border-bottom: 2.5px solid rgba(233, 238, 246, 0.92);
+  border-bottom-right-radius: 3px;
+  filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, 0.9));
+}
+
 .react-grid-item.react-grid-placeholder {
   border: 3px solid #a00000 !important;
   opacity: 0.5 !important;

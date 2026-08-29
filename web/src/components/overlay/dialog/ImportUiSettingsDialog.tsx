@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { LuTriangleAlert } from "react-icons/lu";
+import { LuInfo, LuTriangleAlert } from "react-icons/lu";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import {
+  importedLayoutsNaturalAspect,
   ImportSummary,
   TransferSection,
   UiSettingsFile,
@@ -25,6 +26,7 @@ type ImportUiSettingsDialogProps = {
   fileName: string;
   file: UiSettingsFile;
   summary: ImportSummary;
+  currentNaturalAspect: boolean;
   onConfirm: (sections: Record<TransferSection, boolean>) => Promise<void>;
 };
 
@@ -34,6 +36,7 @@ export default function ImportUiSettingsDialog({
   fileName,
   file,
   summary,
+  currentNaturalAspect,
   onConfirm,
 }: ImportUiSettingsDialogProps) {
   const { t } = useTranslation(["views/settings", "common"]);
@@ -89,6 +92,16 @@ export default function ImportUiSettingsDialog({
     () => (sections.streaming ? summary.unknownCameras : []),
     [sections.streaming, summary.unknownCameras],
   );
+
+  // importing layouts also applies the tile-sizing mode they were built for
+  const layoutsModeChange = useMemo(() => {
+    if (!sections.layouts) {
+      return null;
+    }
+
+    const mode = importedLayoutsNaturalAspect(file);
+    return mode === null || mode === currentNaturalAspect ? null : mode;
+  }, [sections.layouts, file, currentNaturalAspect]);
 
   const handleConfirm = useCallback(async () => {
     setIsImporting(true);
@@ -155,6 +168,19 @@ export default function ImportUiSettingsDialog({
             }
           />
         </div>
+
+        {layoutsModeChange !== null && (
+          <Alert variant="info">
+            <LuInfo className="size-5" />
+            <AlertDescription>
+              {t(
+                layoutsModeChange
+                  ? "general.backupRestore.importDialog.layoutsModeOn"
+                  : "general.backupRestore.importDialog.layoutsModeOff",
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
 
         {(visibleUnknownGroups.length > 0 ||
           visibleUnknownCameras.length > 0) && (

@@ -13,7 +13,26 @@ import type { Page } from "@playwright/test";
 const OUTDOOR_LAYOUT_KEY = "outdoor-draggable-layout:admin";
 const STREAMING_KEY = "streaming-settings:admin";
 
-const OUTDOOR_LAYOUT = [
+// the shape DraggableGridLayout writes
+const OUTDOOR_LAYOUT = {
+  version: 2,
+  naturalAspect: false,
+  layout: [
+    { i: "front_door", x: 0, y: 0, w: 32, h: 72 },
+    { i: "backyard", x: 32, y: 0, w: 32, h: 72 },
+  ],
+};
+
+const NATURAL_OUTDOOR_LAYOUT = {
+  version: 2,
+  naturalAspect: true,
+  layout: [
+    { i: "front_door", x: 0, y: 0, w: 32, h: 72 },
+    { i: "backyard", x: 32, y: 0, w: 24, h: 96 },
+  ],
+};
+
+const LEGACY_OUTDOOR_LAYOUT = [
   { i: "front_door", x: 0, y: 0, w: 6, h: 4 },
   { i: "backyard", x: 6, y: 0, w: 6, h: 4 },
 ];
@@ -157,6 +176,111 @@ test.describe("UI settings import/export @medium", () => {
     expect(payload.sections.layouts.outdoor).toEqual(OUTDOOR_LAYOUT);
     expect(payload.sections.streaming).toEqual(STREAMING_SETTINGS);
     expect(payload.sections.preferences.playbackRate).toBe(2);
+  });
+
+  test("round-trips a layout left unconverted by an upgrade", async ({
+    frigateApp,
+  }) => {
+    // DraggableGridLayout rewrites a pre-0.19 layout only when that group's
+    // dashboard is opened, so exporting first carries the bare array into the
+    // file. Import must accept it back rather than rejecting the whole file.
+    await frigateApp.goto("/settings?page=uiSettings");
+
+    await writeIdb(frigateApp.page, {
+      [OUTDOOR_LAYOUT_KEY]: LEGACY_OUTDOOR_LAYOUT,
+      "playbackRate:admin": 2,
+    });
+
+    const downloadPromise = frigateApp.page.waitForEvent("download");
+    await frigateApp.page
+      .getByRole("button", { name: "Export Settings" })
+      .click();
+    const download = await downloadPromise;
+    const contents = readFileSync((await download.path())!, "utf-8");
+
+    expect(JSON.parse(contents).sections.layouts.outdoor).toEqual(
+      LEGACY_OUTDOOR_LAYOUT,
+    );
+
+    await clearIdb(frigateApp.page);
+    await chooseImportText(frigateApp.page, contents);
+    await confirmImport(frigateApp.page);
+
+    expect(await readIdb(frigateApp.page, OUTDOOR_LAYOUT_KEY)).toEqual(
+      LEGACY_OUTDOOR_LAYOUT,
+    );
+    // the rest of the file must survive alongside it
+    expect(await readIdb(frigateApp.page, "playbackRate:admin")).toBe(2);
+  });
+
+  test("legacy layouts import turns natural aspect off so they display", async ({
+    frigateApp,
+  }) => {
+    // Bare-array layouts only render in bucketed mode; with natural aspect on
+    // they would be discarded and regenerated on the next dashboard visit. The
+    // import applies the mode the layouts were built for, and the file's own
+    // naturalAspectLayout preference must not override that.
+    await frigateApp.goto("/settings?page=uiSettings");
+    await writeIdb(frigateApp.page, { "naturalAspectLayout:admin": true });
+
+    await chooseImportFile(
+      frigateApp.page,
+      importPayload({
+        sections: {
+          layouts: { outdoor: LEGACY_OUTDOOR_LAYOUT },
+          streaming: {},
+          preferences: { naturalAspectLayout: true },
+        },
+      }),
+    );
+
+    const note = frigateApp.page.getByText(/standard tile sizing/);
+    await expect(note).toBeVisible();
+
+    // the note is about the layouts section, so it follows its switch
+    await frigateApp.page.getByText("Camera group layouts (1 group)").click();
+    await expect(note).toBeHidden();
+    await frigateApp.page.getByText("Camera group layouts (1 group)").click();
+    await expect(note).toBeVisible();
+
+    await confirmImport(frigateApp.page);
+
+    expect(await readIdb(frigateApp.page, OUTDOOR_LAYOUT_KEY)).toEqual(
+      LEGACY_OUTDOOR_LAYOUT,
+    );
+    expect(await readIdb(frigateApp.page, "naturalAspectLayout:admin")).toBe(
+      false,
+    );
+  });
+
+  test("natural aspect layouts import turns the setting on", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.goto("/settings?page=uiSettings");
+
+    await chooseImportFile(
+      frigateApp.page,
+      importPayload({
+        sections: {
+          layouts: { outdoor: NATURAL_OUTDOOR_LAYOUT },
+          streaming: {},
+          preferences: {},
+        },
+      }),
+    );
+
+    await expect(
+      frigateApp.page.getByText(/camera aspect ratio tile sizing/),
+    ).toBeVisible();
+
+    await confirmImport(frigateApp.page);
+
+    expect(await readIdb(frigateApp.page, OUTDOOR_LAYOUT_KEY)).toEqual(
+      NATURAL_OUTDOOR_LAYOUT,
+    );
+    expect(await readIdb(frigateApp.page, "naturalAspectLayout:admin")).toBe(
+      true,
+    );
   });
 
   test("omits settings that were never stored", async ({ frigateApp }) => {
