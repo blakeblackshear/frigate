@@ -1,0 +1,98 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Grant the runtime users access to mapped-in device nodes with POSIX ACLs,
+# so --device works without host-side group or udev setup.
+# No-op when: started with --user (euid != 0), FRIGATE_RUN_AS_ROOT=true,
+# or FRIGATE_DEVICE_ACLS=false.
+
+set -o errexit -o nounset -o pipefail
+
+if [[ "$(id -u)" -ne 0 ]]; then
+    exit 0
+fi
+
+if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
+    exit 0
+fi
+
+if [[ "${FRIGATE_DEVICE_ACLS:-true}" == "false" ]]; then
+    echo "[INFO] FRIGATE_DEVICE_ACLS=false: skipping device access grants"
+    exit 0
+fi
+
+shopt -s nullglob
+
+device_globs=(
+    "/dev/dri/*"
+    "/dev/apex_*"
+    "/dev/hailo*"
+    "/dev/video*"
+    "/dev/kfd"
+    "/dev/rknpu*"
+    "/dev/mpp_service"
+    "/dev/rga"
+    "/dev/dma_heap/*"
+    "/dev/nvhost*"
+    "/dev/nvmap"
+    "/dev/nvidia*"
+    "/dev/memx*"
+)
+
+IFS=',' read -ra extra_globs <<< "${DEVICE_ACL_PATHS:-}"
+for extra in "${extra_globs[@]}"; do
+    extra="${extra//[[:space:]]/}"
+    if [[ -n "$extra" ]]; then
+        device_globs+=("$extra")
+    fi
+done
+
+granted=0
+failed=0
+
+grant() {
+    local node="$1"
+    # nullglob only drops patterns that hold a metacharacter, so a literal
+    # table entry for absent hardware arrives here verbatim. Warn only about
+    # nodes that exist and could not be granted.
+    if [[ ! -e "$node" ]]; then
+        return 0
+    fi
+    local spec="u:frigate:rw,u:go2rtc:rw"
+    # directories need traverse or nothing under them is reachable
+    if [[ -d "$node" ]]; then
+        spec="u:frigate:rwx,u:go2rtc:rwx"
+    fi
+    if setfacl -m "$spec" "$node" 2>/dev/null; then
+        granted=$((granted + 1))
+    else
+        failed=$((failed + 1))
+        echo "[WARN] could not grant device access on ${node}; see EXTRA_GROUPS in the non-root docs for the fallback"
+    fi
+}
+
+for glob in "${device_globs[@]}"; do
+    # shellcheck disable=SC2231
+    for node in $glob; do
+        grant "$node"
+    done
+done
+
+# USB devices re-enumerate (the Coral uploads firmware and reattaches as a new
+# node), so the directories also get a default ACL new nodes inherit. The
+# inherited grant is clamped by the creating mode's group bits, which is rw on
+# udev hosts (0664) and nothing on raw devtmpfs (0600); hardware-verified.
+if [[ -d /dev/bus/usb ]]; then
+    while IFS= read -r -d '' node; do
+        grant "$node"
+    done < <(find /dev/bus/usb -mindepth 1 -print0)
+    while IFS= read -r -d '' dir; do
+        setfacl -d -m "u:frigate:rw,u:go2rtc:rw" "$dir" 2>/dev/null || \
+            echo "[WARN] could not set a default ACL on ${dir}; a re-enumerating USB device may lose access"
+    done < <(find /dev/bus/usb -type d -print0)
+fi
+
+if [[ "$failed" -gt 0 ]]; then
+    echo "[INFO] device access: granted ${granted} node(s), ${failed} failed"
+elif [[ "$granted" -gt 0 ]]; then
+    echo "[INFO] device access: granted ${granted} node(s) to the runtime users"
+fi
