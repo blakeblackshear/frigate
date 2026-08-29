@@ -258,7 +258,6 @@ What each device needs when you're setting it up by hand. The automatic grant co
 | Nvidia Jetson             | nvidia runtime plus Jetson nodes                            | Unverified. The nvidia runtime handles mapping, but check `/dev/nvhost-*` ownership on your board                |
 | VeriSilicon NPU (Teflon)  | per the driver, commonly `/dev/galcore`                     | Unverified. Check node ownership on your hardware before assuming this works                                     |
 | CPU detector              | none                                                        | Nothing, no device is opened                                                                                     |
-| DeepStack, CodeProject.AI | none                                                        | Nothing, inference happens over the network                                                                      |
 | ZMQ detector              | none                                                        | Nothing, inference happens over a socket                                                                         |
 | Apple Silicon             | none                                                        | Nothing, the NPU client runs on the host and Frigate reaches it over the network                                 |
 
