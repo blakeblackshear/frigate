@@ -19,6 +19,7 @@ import {
   useUserPersistence,
   deleteUserNamespacedKey,
 } from "@/hooks/use-user-persistence";
+import { isMobileOnly, isSafari } from "react-device-detect";
 import {
   Select,
   SelectContent,
@@ -368,14 +369,19 @@ export default function UiSettingsView() {
       checked: cameraNames,
       onCheckedChange: setCameraName,
     },
-    {
-      id: "natural-aspect",
-      label: t("general.liveDashboard.naturalAspectLayout.label"),
-      description: t("general.liveDashboard.naturalAspectLayout.desc"),
-      note: t("general.liveDashboard.naturalAspectLayout.descNote"),
-      checked: naturalAspect,
-      onCheckedChange: setNaturalAspect,
-    },
+    // phones use the static grid, so tile sizing has nothing to affect there
+    ...(isMobileOnly
+      ? []
+      : [
+          {
+            id: "natural-aspect",
+            label: t("general.liveDashboard.naturalAspectLayout.label"),
+            description: t("general.liveDashboard.naturalAspectLayout.desc"),
+            note: t("general.liveDashboard.naturalAspectLayout.descNote"),
+            checked: naturalAspect,
+            onCheckedChange: setNaturalAspect,
+          },
+        ]),
   ];
 
   return (

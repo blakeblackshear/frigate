@@ -181,6 +181,7 @@ test.describe("UI settings import/export @medium", () => {
   test("round-trips a layout left unconverted by an upgrade", async ({
     frigateApp,
   }) => {
+    test.skip(frigateApp.isMobile, "Layout import is desktop and tablet only");
     // DraggableGridLayout rewrites a pre-0.19 layout only when that group's
     // dashboard is opened, so exporting first carries the bare array into the
     // file. Import must accept it back rather than rejecting the whole file.
@@ -216,6 +217,7 @@ test.describe("UI settings import/export @medium", () => {
   test("legacy layouts import turns natural aspect off so they display", async ({
     frigateApp,
   }) => {
+    test.skip(frigateApp.isMobile, "Layout import is desktop and tablet only");
     // Bare-array layouts only render in bucketed mode; with natural aspect on
     // they would be discarded and regenerated on the next dashboard visit. The
     // import applies the mode the layouts were built for, and the file's own
@@ -256,6 +258,7 @@ test.describe("UI settings import/export @medium", () => {
   test("natural aspect layouts import turns the setting on", async ({
     frigateApp,
   }) => {
+    test.skip(frigateApp.isMobile, "Layout import is desktop and tablet only");
     await frigateApp.goto("/settings?page=uiSettings");
 
     await chooseImportFile(
@@ -314,12 +317,15 @@ test.describe("UI settings import/export @medium", () => {
     await expect(
       frigateApp.page.getByText("UI preferences (2 settings)"),
     ).toBeVisible();
-    await expect(frigateApp.page.getByText(/patio/)).toBeVisible();
+    // patio is layout-only, so its warning follows the layouts section
+    await expect(frigateApp.page.getByText(/patio/)).toBeVisible({
+      visible: !frigateApp.isMobile,
+    });
 
     await confirmImport(frigateApp.page);
 
     expect(await readIdb(frigateApp.page, OUTDOOR_LAYOUT_KEY)).toEqual(
-      OUTDOOR_LAYOUT,
+      frigateApp.isMobile ? null : OUTDOOR_LAYOUT,
     );
     expect(await readIdb(frigateApp.page, STREAMING_KEY)).toEqual(
       STREAMING_SETTINGS,
@@ -330,6 +336,7 @@ test.describe("UI settings import/export @medium", () => {
   test("hides the unknown-group warning when layouts are switched off", async ({
     frigateApp,
   }) => {
+    test.skip(frigateApp.isMobile, "Layout import is desktop and tablet only");
     await frigateApp.goto("/settings?page=uiSettings");
 
     // patio is a layout-only group absent from this server, so the warning
@@ -359,7 +366,39 @@ test.describe("UI settings import/export @medium", () => {
 
     expect(await readIdb(frigateApp.page, STREAMING_KEY)).toEqual({});
     expect(await readIdb(frigateApp.page, OUTDOOR_LAYOUT_KEY)).toEqual(
-      OUTDOOR_LAYOUT,
+      frigateApp.isMobile ? null : OUTDOOR_LAYOUT,
+    );
+  });
+
+  test("phones refuse layouts and say why @mobile", async ({ frigateApp }) => {
+    test.skip(!frigateApp.isMobile, "Phone-only");
+
+    await frigateApp.goto("/settings?page=uiSettings");
+    await writeIdb(frigateApp.page, { "naturalAspectLayout:admin": false });
+
+    await chooseImportFile(frigateApp.page, importPayload());
+
+    await expect(
+      frigateApp.page.getByText(/aren't imported on phones/),
+    ).toBeVisible();
+
+    // the section is still listed, but cannot be switched on
+    await expect(
+      frigateApp.page.getByText("Camera group layouts (2 groups)"),
+    ).toBeVisible();
+    await expect(
+      frigateApp.page.locator('[id="Camera group layouts (2 groups)"]'),
+    ).toBeDisabled();
+
+    await confirmImport(frigateApp.page);
+
+    expect(await readIdb(frigateApp.page, OUTDOOR_LAYOUT_KEY)).toBeNull();
+    expect(await readIdb(frigateApp.page, STREAMING_KEY)).toEqual(
+      STREAMING_SETTINGS,
+    );
+    // a layouts import is what flips this, so it must stay put
+    expect(await readIdb(frigateApp.page, "naturalAspectLayout:admin")).toBe(
+      false,
     );
   });
 
@@ -449,7 +488,7 @@ test.describe("UI settings import/export @medium", () => {
     await confirmImport(frigateApp.page);
 
     expect(await readIdb(frigateApp.page, OUTDOOR_LAYOUT_KEY)).toEqual(
-      OUTDOOR_LAYOUT,
+      frigateApp.isMobile ? null : OUTDOOR_LAYOUT,
     );
     expect(await readIdb(frigateApp.page, STREAMING_KEY)).toEqual(
       STREAMING_SETTINGS,

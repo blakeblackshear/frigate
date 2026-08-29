@@ -33,7 +33,7 @@ import { ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isEqual } from "lodash";
 import useSWR from "swr";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { IoClose } from "react-icons/io5";
@@ -152,7 +152,9 @@ export default function DraggableGridLayout({
     "naturalAspectLayout",
     false,
   );
-  const naturalAspectLayout = naturalAspectSetting ?? false;
+  // phones never reach this grid, and the setting is hidden there, so an
+  // imported or stale value must not take effect
+  const naturalAspectLayout = !isMobileOnly && (naturalAspectSetting ?? false);
 
   // Bucketed mode snaps every camera to one of three tile shapes, matching the
   // pre-masonry layout; the picture letterboxes inside its bucket.

@@ -200,6 +200,7 @@
         "desc": "Choose what to apply from this file. Frigate will reload when the import finishes.",
         "exportedFrom": "Exported {{date}} from Frigate config version {{version}}",
         "layouts_one": "Camera group layouts ({{count}} group)",
+        "layoutsPhone": "Camera group layouts aren't imported on phones, which always use the standard grid.",
         "layoutsModeOn": "These layouts use camera aspect ratio tile sizing, so importing them will also turn on \"Use Camera Aspect Ratios\".",
         "layoutsModeOff": "These layouts use standard tile sizing, so importing them will also turn off \"Use Camera Aspect Ratios\".",
         "layouts_other": "Camera group layouts ({{count}} groups)",
