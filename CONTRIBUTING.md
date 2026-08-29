@@ -2,8 +2,6 @@
 
 Thank you for your interest in contributing to Frigate. This document covers the expectations and guidelines for contributions. Please read it before submitting a pull request.
 
-All participation in this project, including pull requests, issues, and discussions, is covered by our [AI policy](AI_POLICY.md).
-
 ## Before you start
 
 ### Bugfixes
@@ -20,19 +18,6 @@ Before writing code for a new feature:
 
 1. **Check for existing discussion.** Search [feature requests](https://github.com/blakeblackshear/frigate/issues) and [discussions](https://github.com/blakeblackshear/frigate/discussions) to see if it's been proposed or discussed. Feature requests tagged with "planned" are on our radar — we plan to get to them, but we don't maintain a public roadmap or timeline. Check in with us first if you have interest in contributing to one.
 2. **Start a discussion or feature request first.** This helps ensure your idea aligns with Frigate's direction before you invest time building it. Community interest in a feature request helps us gauge demand, though a great idea is a great idea even without a crowd behind it.
-
-## AI usage policy
-
-AI tools are a reality of modern development and we're not opposed to their use. But we need to understand your relationship with the code you're submitting, and we need to hear from you rather than from your AI assistant.
-
-**Read the [AI policy](AI_POLICY.md) before you open a pull request.** It is short, and it applies to everything you post here. The parts that most often catch people out:
-
-- A person has to be in the loop. Don't wire a bot or agent up to open pull requests, issues, or discussions on your behalf.
-- Disclose how AI was used. The PR template asks for this. Be honest, it won't automatically disqualify your PR.
-- Review and test everything you submit, and be prepared to explain every line when asked.
-- Don't use AI to write your PR description or your replies to maintainers.
-
-Pull requests that appear to be unreviewed AI output will be closed without review.
 
 ## Pull request guidelines
 
