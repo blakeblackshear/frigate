@@ -39,6 +39,20 @@ To do this efficiently the following setup is required:
 
 When this is done correctly, the GPU will do the decoding and scaling which will result in a small increase in CPU usage but with better results.
 
+### How can I rotate my camera's video feed?
+
+Rotation is best done in the camera's firmware settings (usually called rotate, flip, or corridor mode) so the video arrives already rotated and no extra processing is needed. Check there first.
+
+If your camera does not support rotation, go2rtc's ffmpeg module can rotate the stream with the `#rotate` parameter (`90`, `180`, `270`, or `-90`), but this is not recommended: rotation requires transcoding (re-encoding) the video, which significantly increases CPU usage, especially for high resolution streams.
+
+```yaml
+go2rtc:
+  streams:
+    my_camera: "ffmpeg:rtsp://user:password@192.168.1.10:554/stream#video=h264#hardware#rotate=90"
+```
+
+Point the camera's inputs at the restream as described in the [restream docs](/configuration/restream.md), and swap `detect -> width` and `detect -> height` to match the rotated resolution.
+
 ### My mjpeg stream or snapshots look green and crazy
 
 This almost always means that the width/height defined for your camera are not correct. Double check the resolution with VLC or another player. Also make sure you don't have the width and height values backwards.
