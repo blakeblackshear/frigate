@@ -338,6 +338,8 @@ models:
 
 ### Intel NPU host requirements {#intel-npu-requirements}
 
+The NPU device must be passed into the container by adding `/dev/accel:/dev/accel` to the `devices` section of your compose file. Frigate grants the runtime user access to the device automatically; see [hardware device access](/configuration/non_root#hardware-device-access) if you manage device permissions yourself.
+
 The NPU firmware is loaded by the host kernel and is not part of the Frigate image. Everything else the NPU needs is bundled in the container, so host NPU libraries should never be mounted in.
 
 Frigate bundles a specific version of Intel's [linux-npu-driver](https://github.com/intel/linux-npu-driver/releases), and the host firmware must come from that release or a newer one. Firmware older than the bundled driver may fail with `MAPPED_INFERENCE_VERSION is NOT compatible with the ELF`, where `Expected` is the version the firmware supports and `received` is the version the bundled compiler produced. Distributions often package older firmware than the driver Frigate ships, so check the build date on the host with `sudo dmesg | grep -i vpu` and update it there if needed.
