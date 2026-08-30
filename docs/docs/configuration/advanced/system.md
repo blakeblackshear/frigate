@@ -397,6 +397,10 @@ To do this:
 2. Update the `ffmpeg.path` in your Frigate config to `/config/custom-ffmpeg`.
 3. Restart Frigate and the custom version will be used if the steps above were done correctly.
 
+Both binaries have to be executable by Frigate's unprivileged runtime user, so `chmod 755` them after extracting. The startup ownership sweep runs only once, so anything you add to `/config` later keeps whatever ownership and mode you gave it.
+
+There is one exception, and it only affects [`FRIGATE_ROOT_SERVICES`](/configuration/non_root#keeping-individual-services-root) listing `frigate`. That mode runs Frigate as root while still handing `/config` to the unprivileged runtime user, so anything running as that user could swap the binary and gain root. A build inside any of Frigate's writable volumes (`/config`, `/media/frigate`, the cache and shm dirs) is ignored there and the bundled one is used, with a warning in the log. Keep the build somewhere root-owned (any absolute `ffmpeg.path` works, so a read-only bind mount such as `/opt/custom-ffmpeg` is enough) if you need both. The default mode and `FRIGATE_RUN_AS_ROOT=true` are unaffected and behave exactly as they always have.
+
 ### Custom go2rtc version
 
 Frigate currently includes go2rtc v1.9.14, there may be certain cases where you want to run a different version of go2rtc.
@@ -405,8 +409,10 @@ To do this:
 
 1. Download the go2rtc build to the `/config` folder.
 2. Rename the build to `go2rtc`.
-3. Give `go2rtc` execute permission.
+3. Give `go2rtc` execute permission for all users (`chmod 755`). It runs as its own `go2rtc` user, which doesn't own the file, so owner-only execute permission isn't enough.
 4. Restart Frigate and the custom version will be used, you can verify by checking go2rtc logs.
+
+The same exception applies, and again only to [`FRIGATE_ROOT_SERVICES`](/configuration/non_root#keeping-individual-services-root) listing `go2rtc`: the binary is ignored there and the embedded one is used, with a warning in the log. Unlike `ffmpeg.path`, the go2rtc binary location is not configurable, so there is no outside-`/config` alternative. Use `FRIGATE_RUN_AS_ROOT=true` instead if you need both a custom go2rtc build and root. The default mode and the escape hatch both honor `/config/go2rtc` exactly as they always have.
 
 ## Validating your config.yml file updates
 

@@ -59,10 +59,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Start container
         run: |
-          mkdir -p /tmp/frigate-config
+          mkdir -p /tmp/frigate-config /tmp/frigate-media
           printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config/config.yml
+          # simulate a root-era install: root-owned 0600 jwt secret pre-exists
+          docker run --rm -v /tmp/frigate-config:/config --entrypoint bash \
+            ${{ steps.setup.outputs.image-name }}-amd64 \
+            -c "python3 -c 'import secrets; open(\"/config/.jwt_secret\",\"w\").write(secrets.token_hex(64))' && chmod 600 /config/.jwt_secret && chown 0:0 /config/.jwt_secret"
           docker run -d --name frigate --shm-size 256m \
             -v /tmp/frigate-config:/config \
+            -v /tmp/frigate-media:/media/frigate \
+            --mount type=tmpfs,target=/tmp/cache,tmpfs-size=100000000 \
             -p 5000:5000 -p 8971:8971 \
             ${{ steps.setup.outputs.image-name }}-amd64
       - name: Wait for API
@@ -91,16 +97,181 @@ jobs:
             echo "response carries frame-ancestors, which breaks cross-origin iframe embedding"
             exit 1
           fi
-          docker exec frigate /usr/local/nginx/sbin/nginx -t
+          # -t as root would chown the live cache and temp dirs to the `user`
+          # directive user; stdout discarded because -t reopens the config's
+          # /dev/stdout logs and the docker exec pipe is root-owned
+          docker exec frigate /command/s6-setuidgid frigate bash -c '/usr/local/nginx/sbin/nginx -e stderr -t -c /tmp/nginx/conf/nginx.conf >/dev/null'
           docker exec frigate stat -c %a /etc/letsencrypt/live/frigate/privkey.pem | grep -qx 600
           docker exec frigate stat -c %a /dev/shm/go2rtc.yaml | grep -qx 640
+      - name: Assert services run as non-root
+        run: |
+          ps_out=$(docker exec frigate ps -eo user=,comm=)
+          echo "$ps_out"
+          assert_nonroot() {
+            # the process must exist AND no instance of it may run as root
+            echo "$ps_out" | grep -qw "$1" || { echo "$1 is not running"; exit 1; }
+            if echo "$ps_out" | grep -w "$1" | grep -q '^root'; then
+              echo "$1 is running as root"; exit 1
+            fi
+          }
+          assert_nonroot python3
+          assert_nonroot go2rtc
+          assert_nonroot nginx
+          # root-era jwt secret must have been captured by the sweep and the
+          # auth stack must be functional: wrong creds => clean 401, not 500
+          docker exec frigate stat -c %u /config/.jwt_secret | grep -qx "$(docker exec frigate id -u frigate)"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:5000/api/login \
+            -H 'content-type: application/json' -d '{"user":"admin","password":"definitely-wrong"}')
+          [ "$code" = "401" ] || { echo "login endpoint returned $code"; exit 1; }
+          # a root nginx -t above would have chowned the runtime dirs to root
+          owners=$(docker exec frigate stat -c %U /tmp/nginx /dev/shm/nginx_cache)
+          echo "$owners"
+          if echo "$owners" | grep -qvx frigate; then
+            echo "nginx runtime dirs are not owned by frigate"; exit 1
+          fi
+          # runtime user can write recordings storage
+          docker exec frigate /command/s6-setuidgid frigate touch /media/frigate/.write-probe
+          docker exec frigate rm /media/frigate/.write-probe
+          # tmpfs mount per the docs: arrives root-owned, holds the ZMQ IPC sockets
+          docker exec frigate /command/s6-setuidgid frigate touch /tmp/cache/.write-probe
+          docker exec frigate rm /tmp/cache/.write-probe
+          # models are baked in as root and archive members can carry root-only modes
+          docker exec frigate /command/s6-setuidgid frigate sh -c '
+            for f in /cpu_model.tflite /edgetpu_model.tflite /cpu_audio_model.tflite \
+                     /labelmap.txt /audio-labelmap.txt /openvino-model/*; do
+              [ -e "$f" ] || continue
+              test -r "$f" || { echo "$f is not readable by the runtime user"; exit 1; }
+            done'
+      - name: Assert device access grants
+        run: |
+          # a fake accelerator node created after boot, then the oneshot re-run
+          docker exec frigate mknod /dev/apex_9 c 120 99
+          docker exec frigate /etc/s6-overlay/s6-rc.d/init-devices/run
+          acl=$(docker exec frigate getfacl -p /dev/apex_9)
+          echo "$acl"
+          echo "$acl" | grep -q "user:frigate:rw-"
+          echo "$acl" | grep -q "user:go2rtc:rw-"
+          # the usb tree gets recursive grants plus a default ACL that
+          # newly created nodes inherit (the Coral re-enumeration path)
+          docker exec frigate sh -c 'mkdir -p /dev/bus/usb/001 && mknod /dev/bus/usb/001/002 c 189 1'
+          docker exec frigate /etc/s6-overlay/s6-rc.d/init-devices/run
+          docker exec frigate getfacl -p /dev/bus/usb/001 | grep -q "user:frigate:rwx"
+          docker exec frigate sh -c 'mknod /dev/bus/usb/001/099 c 189 98 && chmod 664 /dev/bus/usb/001/099'
+          inherited=$(docker exec frigate getfacl -p /dev/bus/usb/001/099)
+          echo "$inherited"
+          echo "$inherited" | grep -q "user:frigate:rw-"
+          # getfacl prints granted perms even when the mask clamps them to
+          # nothing, with a trailing "#effective:" comment; a clamped ACL must
+          # fail this assertion, not sneak past it. The check is scoped to the
+          # runtime users because the inherited group:: entry is always clamped
+          # on a non-directory, so an unscoped grep could never pass.
+          if echo "$inherited" | grep -E "^user:(frigate|go2rtc):" | grep -q "effective"; then
+            echo "inherited ACL is mask-clamped and grants no real access"; exit 1
+          fi
+          # hardware that is absent must stay silent: the literal table entries
+          # are not globs, so nullglob does not drop them and only an existence
+          # check keeps them from warning on every boot
+          out=$(docker exec frigate /etc/s6-overlay/s6-rc.d/init-devices/run)
+          echo "$out"
+          if echo "$out" | grep -q "WARN"; then
+            echo "grant warned about device nodes that do not exist"; exit 1
+          fi
+      - name: Assert escape hatch restores root
+        run: |
+          mkdir -p /tmp/frigate-config-root
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-root/config.yml
+          # pre-seed so the absence check proves the rm -f, not a vacuous pass
+          echo "2:1000:1000" > /tmp/frigate-config-root/.permissions_version
+          docker run -d --name frigate-root --shm-size 256m \
+            -e FRIGATE_RUN_AS_ROOT=true \
+            -v /tmp/frigate-config-root:/config \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-root curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "escape hatch container never healthy"; docker logs frigate-root; exit 1; fi
+          ps_out=$(docker exec frigate-root ps -eo user=,comm=)
+          echo "$ps_out"
+          echo "$ps_out" | grep -w python3 | grep -q '^root'
+          echo "$ps_out" | grep -w go2rtc  | grep -q '^root'
+          echo "$ps_out" | grep -w nginx   | grep -q '^root'
+          # an if, not ! test: bash exempts negated commands from set -e
+          if docker exec frigate-root test -f /config/.permissions_version; then
+            echo "escape hatch did not delete the sweep sentinel"; exit 1
+          fi
+          docker rm -f frigate-root
+      - name: Assert granular root services
+        run: |
+          mkdir -p /tmp/frigate-config-granular /tmp/frigate-media-granular
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-granular/config.yml
+          docker run -d --name frigate-granular --shm-size 256m \
+            -e FRIGATE_ROOT_SERVICES=frigate \
+            -v /tmp/frigate-config-granular:/config \
+            -v /tmp/frigate-media-granular:/media/frigate \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-granular curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "granular container never became healthy"; docker logs frigate-granular; exit 1; fi
+          ps_out=$(docker exec frigate-granular ps -eo user=,comm=)
+          echo "$ps_out"
+          # the listed service runs as root
+          echo "$ps_out" | grep -w python3 | grep -q '^root'
+          # unlisted services still drop; ifs because set -e exempts negated commands
+          if echo "$ps_out" | grep -w go2rtc | grep -q '^root'; then
+            echo "go2rtc is unexpectedly running as root"; exit 1
+          fi
+          if echo "$ps_out" | grep -w nginx | grep -q '^root'; then
+            echo "nginx is unexpectedly running as root"; exit 1
+          fi
+          # the sweep still ran and the sentinel records the mode
+          docker exec frigate-granular cat /config/.permissions_version | grep -qx "2:1000:1000:frigate"
+          # the root frigate process chowns the db it creates (first-boot immediacy)
+          docker exec frigate-granular stat -c %u /config/frigate.db | grep -qx 1000
+          # plant a root-owned straggler; the per-boot sweep must reclaim it on restart
+          docker exec frigate-granular sh -c 'mkdir -p /media/frigate/clips && touch /media/frigate/clips/straggler.webp'
+          docker restart frigate-granular
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-granular curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "granular container never came back after restart"; docker logs frigate-granular; exit 1; fi
+          docker exec frigate-granular stat -c %u /media/frigate/clips/straggler.webp | grep -qx 1000
+          docker rm -f frigate-granular
+      - name: Assert unknown root service fails fast
+        run: |
+          mkdir -p /tmp/frigate-config-badsvc
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-badsvc/config.yml
+          docker run -d --name frigate-badsvc --shm-size 256m \
+            -e FRIGATE_ROOT_SERVICES=frigatee \
+            -v /tmp/frigate-config-badsvc:/config \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          found=0
+          for i in $(seq 1 12); do
+            if docker logs frigate-badsvc 2>&1 | grep -q "unknown service 'frigatee'"; then found=1; break; fi
+            sleep 5
+          done
+          if [ "$found" -ne 1 ]; then
+            echo "no fail-fast error for an unknown service name"; docker logs frigate-badsvc; exit 1
+          fi
+          # the failed oneshot blocks startup through the dependency chain
+          if docker exec frigate-badsvc curl -fs http://127.0.0.1:5000/api/version; then
+            echo "container came up despite an invalid FRIGATE_ROOT_SERVICES"; exit 1
+          fi
+          docker rm -f frigate-badsvc
       - name: Assert PUID/PGID remapping
         run: |
-          mkdir -p /tmp/frigate-config-puid
+          mkdir -p /tmp/frigate-config-puid /tmp/frigate-media-puid
           printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-puid/config.yml
           docker run -d --name frigate-puid --shm-size 256m \
             -e PUID=1500 -e PGID=1500 \
             -v /tmp/frigate-config-puid:/config \
+            -v /tmp/frigate-media-puid:/media/frigate \
             ${{ steps.setup.outputs.image-name }}-amd64
           up=0
           for i in $(seq 1 60); do
@@ -110,7 +281,7 @@ jobs:
           if [ "$up" -ne 1 ]; then echo "PUID container never became healthy"; docker logs frigate-puid; exit 1; fi
           docker exec frigate-puid id -u frigate | grep -qx 1500
           docker exec frigate-puid id -g frigate | grep -qx 1500
-          docker exec frigate-puid cat /config/.permissions_version | grep -qx "1:1500:1500"
+          docker exec frigate-puid cat /config/.permissions_version | grep -qx "2:1500:1500"
           # second boot must skip the sweep (sentinel hit). Poll rather than
           # sleep: the string can only come from the second boot (the first
           # had no sentinel), so grepping the full log is unambiguous.
