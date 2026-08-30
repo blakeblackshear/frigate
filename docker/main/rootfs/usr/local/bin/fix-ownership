@@ -85,6 +85,26 @@ fi
 # unreachable once services run unprivileged.
 swept_clean=1
 
+# Entries another mechanism deliberately owns. Chowning them undoes that work
+# and leaves the same "mismatch" waiting for the next boot, so /config could
+# never report itself clean: /config is chgrp'd to frigate-data below so go2rtc
+# can traverse it, and the HomeKit file is handed to the go2rtc user by the
+# go2rtc service. Only the GROUP on /config is exempt; a root-owned /config
+# must still be chowned or the runtime user cannot write there at all.
+# Shared by the counting and the chowning walk so the two cannot disagree.
+mismatch_expr=(
+    "(" -not -uid "$target_uid"
+        -o "(" -not -gid "$target_gid" -a ! -path /config ")"
+    ")"
+    -a ! -path /config/go2rtc_homekit.yml
+)
+if [[ -n "$sentinel" ]]; then
+    # safe-sentinel keeps the sentinel root-owned on purpose and rejects one
+    # owned by anybody else, so chowning it here would suppress the skip and
+    # make every boot re-sweep. Only the trailing write puts it back today.
+    mismatch_expr+=(-a ! -path "$sentinel")
+fi
+
 for path in "$@"; do
     # An absent root is an incomplete sweep, not a finished one: /media/frigate
     # is not in the image, so a boot before the volume is mounted would
@@ -101,7 +121,7 @@ for path in "$@"; do
     # stale mount. Tolerate it rather than aborting under errexit, but never
     # read a failed scan as "nothing to do": that would record the sweep as
     # complete without having looked.
-    if ! count=$(find "$path" -name lost+found -prune -o \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) -printf '.' 2>/dev/null | wc -c); then
+    if ! count=$(find "$path" -name lost+found -prune -o "${mismatch_expr[@]}" -printf '.' 2>/dev/null | wc -c); then
         swept_clean=0
         echo "[WARN] fix-ownership: could not scan ${path}; will retry on next boot"
         continue
@@ -128,7 +148,7 @@ for path in "$@"; do
     # -execdir chowns from the entry's own directory, so a parent swapped for a
     # symlink mid-walk can't redirect the chown out of the volume
     started=$SECONDS
-    if find "$path" -name lost+found -prune -o \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
+    if find "$path" -name lost+found -prune -o "${mismatch_expr[@]}" \
         -print -execdir chown -h "${target_uid}:${target_gid}" {} + \
         | awk -v total="$count" -v path="$path" '
             BEGIN { next_pct = 5 }
