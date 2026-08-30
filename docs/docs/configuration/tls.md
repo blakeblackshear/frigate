@@ -61,7 +61,7 @@ frigate:
 
 ```
 
-Frigate automatically compares the fingerprint of the certificate at `/etc/letsencrypt/live/frigate/fullchain.pem` against the fingerprint of the TLS cert in NGINX every minute. If these differ, the NGINX config is reloaded to pick up the updated certificate.
+Frigate automatically compares the fingerprint of the certificate it loaded, from either location, against the fingerprint of the TLS cert in NGINX every minute. If these differ, the NGINX config is reloaded to pick up the updated certificate.
 
 If you issue Frigate valid certificates you will likely want to configure it to run on port 443 so you can access it without a port number like `https://your-frigate-domain.com` by mapping 8971 to 443.
 
