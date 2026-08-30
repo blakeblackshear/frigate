@@ -43,6 +43,7 @@ from frigate.const import (
 from frigate.models import Recordings, ReviewSegment
 from frigate.review.types import SeverityEnum
 from frigate.util.media import get_keyframe_offsets
+from frigate.util.ownership import chown_to_runtime
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
@@ -928,6 +929,11 @@ class RecordingMaintainer(threading.Thread):
         )
 
         os.makedirs(directory, exist_ok=True)
+        # own every level makedirs creates so the host user can prune recordings
+        level = directory
+        while level != RECORD_DIR:
+            chown_to_runtime(level)
+            level = os.path.dirname(level)
 
         # file will be in utc due to path_time being in utc
         file_name = f"{path_time.strftime('%M.%S.mp4')}"
@@ -965,6 +971,8 @@ class RecordingMaintainer(threading.Thread):
                     logger.debug(
                         f"Copied {file_path} in {datetime.datetime.now().timestamp() - start_frame} seconds."
                     )
+
+                chown_to_runtime(file_path)
 
                 try:
                     # get the segment size of the cache file

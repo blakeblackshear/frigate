@@ -231,6 +231,17 @@ class FrigateApp:
 
         migrate_db.close()
 
+        # a root frigate service creates these as root; wal and shm recreated
+        # later in the run are realigned by the per-boot /config sweep
+        for db_file in (
+            self.config.database.path,
+            f"{self.config.database.path}-wal",
+            f"{self.config.database.path}-shm",
+            self.config.database.path.replace("frigate.db", "backup.db"),
+        ):
+            if os.path.exists(db_file):
+                chown_to_runtime(db_file)
+
     def init_go2rtc(self) -> None:
         for proc in psutil.process_iter(["pid", "name"]):
             if proc.info["name"] == "go2rtc":

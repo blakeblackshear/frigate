@@ -1,15 +1,17 @@
 #!/bin/bash
 # Single source of truth for aligning volume ownership with the runtime user.
 #
-# Usage: fix-ownership [--dry-run] [--sentinel FILE] UID GID PATH [PATH...]
+# Usage: fix-ownership [--dry-run] [--sentinel FILE] [--mode STRING] UID GID PATH [PATH...]
 #
 #   --dry-run    report what would change, touch nothing
 #   --sentinel   skip entirely when FILE already records "SCHEMA:UID:GID";
 #                write it after a successful run (used by the boot path so
 #                multi-TB volumes are swept once per UID/schema change, not
 #                on every boot)
+#   --mode       append STRING to the sentinel, so changing it re-sweeps once
 #
 # Only files whose uid OR gid differs are touched, so re-runs are cheap.
+# lost+found is skipped: fsck fills it with root-only recovered fragments.
 # Top-level /config additionally grants group frigate-data TRAVERSE ONLY
 # (g+rx) so the separate go2rtc user can reach its pre-created HomeKit file
 # on hosts where /config is mounted 0700. Never g+w: directory write means
@@ -22,10 +24,11 @@ set -o errexit -o nounset -o pipefail
 # Permissions-layout epoch. Bump to force a one-time re-sweep on upgrade
 # (e.g. when the privilege-drop release must capture files created as root
 # since the previous sweep).
-schema=1
+schema=2
 
 dry_run=0
 sentinel=""
+mode=""
 
 while [[ "${1:-}" == --* ]]; do
     case "$1" in
@@ -36,12 +39,18 @@ while [[ "${1:-}" == --* ]]; do
                 exit 2
             fi
             sentinel="$2"; shift 2 ;;
+        --mode)
+            if [[ -z "${2:-}" ]]; then
+                echo "[ERROR] fix-ownership: --mode requires a value" >&2
+                exit 2
+            fi
+            mode="$2"; shift 2 ;;
         *) echo "[ERROR] fix-ownership: unknown option $1" >&2; exit 2 ;;
     esac
 done
 
 if [[ $# -lt 3 ]]; then
-    echo "Usage: fix-ownership [--dry-run] [--sentinel FILE] UID GID PATH..." >&2
+    echo "Usage: fix-ownership [--dry-run] [--sentinel FILE] [--mode STRING] UID GID PATH..." >&2
     exit 2
 fi
 
@@ -54,17 +63,47 @@ if [[ "$(id -u)" -ne 0 ]]; then
     exit 0
 fi
 
-# A dry run always inspects: the sentinel records what a past sweep did, not
-# what the volume looks like now, and reporting from it would hide later drift.
-if [[ "$dry_run" -eq 0 && -n "$sentinel" && -f "$sentinel" && "$(cat "$sentinel")" == "${schema}:${target_uid}:${target_gid}" ]]; then
-    echo "[INFO] fix-ownership: ${target_uid}:${target_gid} (schema ${schema}) already applied, skipping"
-    exit 0
+# The list folds into the sentinel so entering or leaving a granular root mode
+# re-sweeps once, catching whatever the other ownership mechanisms missed.
+sentinel_content="${schema}:${target_uid}:${target_gid}"
+if [[ -n "$mode" ]]; then
+    sentinel_content="${sentinel_content}:${mode}"
+fi
+
+# safe-sentinel reports only a root-owned regular file, so a forged or
+# symlinked sentinel in the runtime-user-owned /config can't suppress the sweep
+if [[ "$dry_run" -eq 0 && -n "$sentinel" ]]; then
+    if existing=$(/usr/local/bin/safe-sentinel read "$sentinel" 2>/dev/null) && \
+        [[ "$existing" == "$sentinel_content" ]]; then
+        echo "[INFO] fix-ownership: ${target_uid}:${target_gid} (schema ${schema}) already applied, skipping"
+        exit 0
+    fi
 fi
 
 # A sweep that could not chown everything must not be recorded as complete:
 # the sentinel would make every later boot skip it and the entries would stay
 # unreachable once services run unprivileged.
 swept_clean=1
+
+# Entries another mechanism deliberately owns. Chowning them undoes that work
+# and leaves the same "mismatch" waiting for the next boot, so /config could
+# never report itself clean: /config is chgrp'd to frigate-data below so go2rtc
+# can traverse it, and the HomeKit file is handed to the go2rtc user by the
+# go2rtc service. Only the GROUP on /config is exempt; a root-owned /config
+# must still be chowned or the runtime user cannot write there at all.
+# Shared by the counting and the chowning walk so the two cannot disagree.
+mismatch_expr=(
+    "(" -not -uid "$target_uid"
+        -o "(" -not -gid "$target_gid" -a ! -path /config ")"
+    ")"
+    -a ! -path /config/go2rtc_homekit.yml
+)
+if [[ -n "$sentinel" ]]; then
+    # safe-sentinel keeps the sentinel root-owned on purpose and rejects one
+    # owned by anybody else, so chowning it here would suppress the skip and
+    # make every boot re-sweep. Only the trailing write puts it back today.
+    mismatch_expr+=(-a ! -path "$sentinel")
+fi
 
 for path in "$@"; do
     # An absent root is an incomplete sweep, not a finished one: /media/frigate
@@ -76,11 +115,13 @@ for path in "$@"; do
         continue
     fi
 
+    echo "[INFO] fix-ownership: scanning ${path} for ownership mismatches; this may take a while on large filesystems"
+
     # find may fail mid-walk on a live volume (file deleted under it) or on a
     # stale mount. Tolerate it rather than aborting under errexit, but never
     # read a failed scan as "nothing to do": that would record the sweep as
     # complete without having looked.
-    if ! count=$(find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) -printf '.' 2>/dev/null | wc -c); then
+    if ! count=$(find "$path" -name lost+found -prune -o "${mismatch_expr[@]}" -printf '.' 2>/dev/null | wc -c); then
         swept_clean=0
         echo "[WARN] fix-ownership: could not scan ${path}; will retry on next boot"
         continue
@@ -98,17 +139,41 @@ for path in "$@"; do
         echo "[WARN] fix-ownership: ${path} contains symlinked directories; ownership behind them is not managed and must be aligned by hand"
     fi
 
-    echo "[WARN] fix-ownership: adjusting ownership of ${count} entries under ${path}; on large recordings volumes this can take a long time"
+    echo "[WARN] fix-ownership: adjusting ownership of ${count} entries under ${path}"
     if [[ "$dry_run" -eq 1 ]]; then
         echo "[INFO] fix-ownership: dry run, not changing ${path}"
         continue
     fi
 
-    find "$path" \( -not -uid "$target_uid" -o -not -gid "$target_gid" \) \
-        -exec chown -h "${target_uid}:${target_gid}" {} + || {
+    # -execdir chowns from the entry's own directory, so a parent swapped for a
+    # symlink mid-walk can't redirect the chown out of the volume
+    started=$SECONDS
+    if find "$path" -name lost+found -prune -o "${mismatch_expr[@]}" \
+        -print -execdir chown -h "${target_uid}:${target_gid}" {} + \
+        | awk -v total="$count" -v path="$path" '
+            BEGIN { next_pct = 5 }
+            {
+                pct = int(NR * 100 / total)
+                if (pct > 100) pct = 100
+                if (pct >= next_pct) {
+                    printf "[INFO] fix-ownership: %s %d%% (%d/%d entries)\n", path, pct, NR, total
+                    # mawk block-buffers to a pipe; without fflush the whole
+                    # progress log arrives at once
+                    fflush()
+                    while (next_pct <= pct) next_pct += 5
+                }
+            }'; then
+        elapsed=$((SECONDS - started))
+        if [[ "$elapsed" -ge 60 ]]; then
+            elapsed="$((elapsed / 60))m $((elapsed % 60))s"
+        else
+            elapsed="${elapsed}s"
+        fi
+        echo "[INFO] fix-ownership: finished ${path} in ${elapsed}"
+    else
         swept_clean=0
         echo "[WARN] fix-ownership: some entries under ${path} could not be updated (deleted mid-sweep or chown denied); will retry on next mismatch"
-    }
+    fi
 done
 
 # go2rtc (separate user) must be able to REACH its HomeKit state in /config.
@@ -124,6 +189,6 @@ if [[ "$dry_run" -eq 0 && -d /config ]]; then
 fi
 
 if [[ "$dry_run" -eq 0 && -n "$sentinel" && "$swept_clean" -eq 1 ]]; then
-    echo "${schema}:${target_uid}:${target_gid}" > "$sentinel" || \
+    /usr/local/bin/safe-sentinel write "$sentinel" "$sentinel_content" || \
         echo "[WARN] fix-ownership: could not write ${sentinel}; the sweep will run again on next boot"
 fi

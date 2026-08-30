@@ -153,7 +153,50 @@ if [[ "$(id -u)" -eq 0 ]]; then
     if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]]; then
         rm -f /config/.permissions_version
     else
-        /usr/local/bin/fix-ownership --sentinel /config/.permissions_version \
+        # Only when a mount backs /media/frigate itself: under a parent /media
+        # mount, a dedicated volume added later would be shadowed and skipped
+        sentinel_args=(--sentinel /config/.permissions_version)
+        root_services_mode=""
+        if [[ -n "${FRIGATE_ROOT_SERVICES:-}" ]]; then
+            # || true: an all-empty list (",") fails grep -v and errexit would kill the boot
+            root_services_mode=$(tr ',' '\n' <<< "${FRIGATE_ROOT_SERVICES//[[:space:]]/}" | grep -v '^$' | sort -u | paste -sd, - || true)
+            if [[ -n "$root_services_mode" ]]; then
+                sentinel_args+=(--mode "$root_services_mode")
+            fi
+        fi
+        if ! awk '$2 == "/media/frigate" || $2 ~ /^\/media\/frigate\//' /proc/mounts | grep -q .; then
+            sentinel_args=()
+        fi
+        /usr/local/bin/fix-ownership "${sentinel_args[@]}" \
             "${PUID:-1000}" "${PGID:-1000}" /config /media/frigate
+
+        # Root services write clips stragglers and caches mid-run; realign the
+        # small trees every boot. Recordings are chowned at create instead.
+        if [[ -n "$root_services_mode" ]]; then
+            # only sweep what exists; clips and exports appear after the first run
+            boot_sweep_paths=(/config)
+            for extra in /media/frigate/clips /media/frigate/exports; do
+                if [[ -d "$extra" ]]; then
+                    boot_sweep_paths+=("$extra")
+                fi
+            done
+            /usr/local/bin/fix-ownership \
+                "${PUID:-1000}" "${PGID:-1000}" "${boot_sweep_paths[@]}"
+        fi
     fi
+fi
+
+# Must stay after the sweep, which reads an absent /media/frigate as an
+# unmounted volume rather than a swept one
+if [[ "$(id -u)" -eq 0 && ! -d /media/frigate ]]; then
+    mkdir -p /media/frigate
+    if [[ "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+        chown "${PUID:-1000}:${PGID:-1000}" /media/frigate
+    fi
+fi
+
+# usually a tmpfs mount: root-owned on arrival and outside the swept volumes
+if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+    mkdir -p /tmp/cache
+    chown "${PUID:-1000}:${PGID:-1000}" /tmp/cache
 fi

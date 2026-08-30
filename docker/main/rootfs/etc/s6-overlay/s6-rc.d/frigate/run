@@ -4,6 +4,19 @@
 
 set -o errexit -o nounset -o pipefail
 
+runs_as_root=0
+if [[ "$(id -u)" -eq 0 ]]; then
+    if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]] || /usr/local/bin/service-runs-as-root frigate; then
+        runs_as_root=1
+    fi
+fi
+
+# /root survives s6-setuidgid and breaks cache writes after the drop; set
+# before opt_in_out so the opt-out marker lands where the service will look
+if [[ "$runs_as_root" -eq 0 ]]; then
+    export HOME=/config
+fi
+
 # opt out of openvino telemetry
 if [ -e /usr/local/bin/opt_in_out ]; then
   /usr/local/bin/opt_in_out --opt_out > /dev/null 2>&1
@@ -30,4 +43,8 @@ cd /opt/frigate || echo "[ERROR] Failed to change working directory to /opt/frig
 
 # Replace the bash process with the Frigate process, redirecting stderr to stdout
 exec 2>&1
-exec python3 -u -m frigate
+if [[ "$(id -u)" -ne 0 || "$runs_as_root" -eq 1 ]]; then
+    exec python3 -u -m frigate
+else
+    exec s6-setuidgid frigate python3 -u -m frigate
+fi

@@ -4,6 +4,20 @@
 
 set -o errexit -o nounset -o pipefail
 
+runs_as_root=0
+if [[ "$(id -u)" -eq 0 ]]; then
+    if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]] || /usr/local/bin/service-runs-as-root go2rtc; then
+        runs_as_root=1
+    fi
+fi
+
+# Root via FRIGATE_ROOT_SERVICES only; the escape hatch sweeps nothing and
+# leaves no unprivileged service, so /config/go2rtc stays as safe as pre-drop.
+granular_root=0
+if [[ "$runs_as_root" -eq 1 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+    granular_root=1
+fi
+
 # Logs should be sent to stdout so that s6 can collect them
 
 function get_ip_and_port_from_supervisor() {
@@ -50,42 +64,6 @@ function set_libva_version() {
     export LIBAVFORMAT_VERSION_MAJOR
 }
 
-function setup_homekit_config() {
-    local config_path="$1"
-
-    if [[ ! -f "${config_path}" ]]; then
-        echo "[INFO] Creating empty config file for HomeKit..."
-        : > "${config_path}"
-    fi
-
-    # Convert YAML to JSON for jq processing
-    local temp_json="/tmp/cache/homekit_config.json"
-    yq eval -o=json "${config_path}" > "${temp_json}" 2>/dev/null || {
-        echo "[WARNING] Failed to convert HomeKit config to JSON, skipping cleanup"
-        return 0
-    }
-
-    # Use jq to extract the homekit section, if it exists
-    local homekit_json
-    homekit_json=$(jq '
-        if has("homekit") then {homekit: .homekit} else null end
-    ' "${temp_json}" 2>/dev/null) || homekit_json="null"
-
-    # If no homekit section, write an empty config file
-    if [[ "${homekit_json}" == "null" ]]; then
-        : > "${config_path}"
-    else
-        # Convert homekit JSON back to YAML and write to the config file
-        echo "${homekit_json}" | yq eval -P - > "${config_path}" 2>/dev/null || {
-            echo "[WARNING] Failed to convert cleaned config to YAML, creating minimal config"
-            : > "${config_path}"
-        }
-    fi
-
-    # Clean up temp files
-    rm -f "${temp_json}"
-}
-
 set_libva_version
 
 if [[ -f "/dev/shm/go2rtc.yaml" ]]; then
@@ -106,13 +84,23 @@ else
     echo "[WARNING] Unable to remove existing go2rtc config. Changes made to your frigate config file may not be recognized. Please remove the /dev/shm/go2rtc.yaml from your docker host manually."
 fi
 
-# HomeKit configuration persistence setup
+# HomeKit persistence. The helper is symlink-safe; hand off to go2rtc only when dropping.
 readonly homekit_config_path="/config/go2rtc_homekit.yml"
-setup_homekit_config "${homekit_config_path}"
+if [[ "$(id -u)" -eq 0 && "$runs_as_root" -eq 0 ]]; then
+    python3 /usr/local/go2rtc/prepare_homekit.py "${homekit_config_path}" --chown
+    chown go2rtc:go2rtc /dev/shm/go2rtc.yaml 2>/dev/null || true
+else
+    python3 /usr/local/go2rtc/prepare_homekit.py "${homekit_config_path}"
+fi
 
 readonly config_path="/config"
 
-if [[ -x "${config_path}/go2rtc" ]]; then
+# the sweep hands /config to uid 1000, so a root service must not exec from it
+if [[ "$granular_root" -eq 1 && -x "${config_path}/go2rtc" ]]; then
+  echo "[WARN] Ignoring '${config_path}/go2rtc' because FRIGATE_ROOT_SERVICES runs this service as root and /config is owned by the runtime user; using the embedded binary"
+  echo "[WARN] Use FRIGATE_RUN_AS_ROOT=true instead if you need both a custom go2rtc build and root"
+  readonly binary_path="/usr/local/go2rtc/bin/go2rtc"
+elif [[ -x "${config_path}/go2rtc" ]]; then
   readonly binary_path="${config_path}/go2rtc"
   echo "[WARN] Using go2rtc binary from '${binary_path}' instead of the embedded one"
 else
@@ -125,4 +113,8 @@ echo "[INFO] Starting go2rtc..."
 # Use HomeKit config as the primary config so writebacks go there
 # The main config from Frigate will be loaded as a secondary config
 exec 2>&1
-exec "${binary_path}" -config="${homekit_config_path}" -config=/dev/shm/go2rtc.yaml
+if [[ "$(id -u)" -ne 0 || "$runs_as_root" -eq 1 ]]; then
+    exec "${binary_path}" -config="${homekit_config_path}" -config=/dev/shm/go2rtc.yaml
+else
+    exec s6-setuidgid go2rtc "${binary_path}" -config="${homekit_config_path}" -config=/dev/shm/go2rtc.yaml
+fi
