@@ -320,7 +320,7 @@ This mode can also take `cap_drop: [ALL]`, which the default mode cannot: starti
 ### Per-variant exceptions
 
 - **Rockchip** needs `- /sys/:/sys/:ro` alongside its device nodes, in addition to everything above.
-- **MemryX** and **QNAP Container Station** still require `privileged: true` per their own documentation, which can't be combined with this layout.
+- **MemryX** and **QNAP Container Station** still require `privileged: true` per their own documentation, which gives back most of what this layout removes. MemryX also downloads its models to `/memryx_models` on the root filesystem, so it can't run read-only regardless.
 
 ## Known limitations
 
