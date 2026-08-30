@@ -11,6 +11,13 @@ if [[ "$(id -u)" -eq 0 ]]; then
     fi
 fi
 
+# Root via FRIGATE_ROOT_SERVICES only; the escape hatch sweeps nothing and
+# leaves no unprivileged service, so /config/go2rtc stays as safe as pre-drop.
+granular_root=0
+if [[ "$runs_as_root" -eq 1 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+    granular_root=1
+fi
+
 # Logs should be sent to stdout so that s6 can collect them
 
 function get_ip_and_port_from_supervisor() {
@@ -88,10 +95,10 @@ fi
 
 readonly config_path="/config"
 
-# frigate owns /config after the sweep, so a /config/go2rtc override must not
-# be honored while this service runs as root
-if [[ "$runs_as_root" -eq 1 && -x "${config_path}/go2rtc" ]]; then
-  echo "[WARN] Ignoring '${config_path}/go2rtc' because this service is running as root; using the embedded binary"
+# the sweep hands /config to uid 1000, so a root service must not exec from it
+if [[ "$granular_root" -eq 1 && -x "${config_path}/go2rtc" ]]; then
+  echo "[WARN] Ignoring '${config_path}/go2rtc' because FRIGATE_ROOT_SERVICES runs this service as root and /config is owned by the runtime user; using the embedded binary"
+  echo "[WARN] Use FRIGATE_RUN_AS_ROOT=true instead if you need both a custom go2rtc build and root"
   readonly binary_path="/usr/local/go2rtc/bin/go2rtc"
 elif [[ -x "${config_path}/go2rtc" ]]; then
   readonly binary_path="${config_path}/go2rtc"

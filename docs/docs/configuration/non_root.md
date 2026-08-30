@@ -36,6 +36,8 @@ There are two reasons to use it:
 
 Try the device grants and `EXTRA_GROUPS` first. The `frigate` service runs the API and every ffmpeg process that decodes your camera streams, so listing it puts those back on root as well, not just your detectors.
 
+A listed service also stops honoring a [custom ffmpeg or go2rtc build](/configuration/advanced/system#custom-dependencies) kept in `/config`, since that directory stays owned by the unprivileged user and a binary there would run as root. `FRIGATE_RUN_AS_ROOT=true` has no such restriction.
+
 Recordings and exports are owned by `PUID`/`PGID` as soon as they're written, even by a root service. Snapshots, thumbnails, and other files under `clips/` are corrected on each restart, so they can show as root-owned from the host until then. A listed service also keeps root's home directory, so library caches go to the container layer instead of `/config`.
 
 Listing all three services is not the same as `FRIGATE_RUN_AS_ROOT=true`. The escape hatch never touches ownership; the list keeps the ownership handling active. A few more details:

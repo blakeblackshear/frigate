@@ -4,11 +4,14 @@ import asyncio
 import logging
 import os
 import shutil
+from functools import cache
 from typing import Any
 
 from ruamel.yaml import YAML
 
 from frigate.const import (
+    BASE_DIR,
+    CACHE_DIR,
     CONFIG_DIR,
     DEFAULT_FFMPEG_VERSION,
     EXPORT_DIR,
@@ -43,13 +46,56 @@ DROPPED_DETECTOR_OPTIONS = {
 }
 
 
+# Trees the unprivileged runtime user can write. A root frigate service must
+# not execute a binary from any of them; a compromised uid-1000 process could
+# plant one and be root after the next restart.
+RUNTIME_USER_WRITABLE_DIRS = (CONFIG_DIR, BASE_DIR, CACHE_DIR, "/dev/shm", "/tmp")
+
+
+def frigate_service_is_granular_root() -> bool:
+    """Report whether FRIGATE_ROOT_SERVICES runs frigate as root.
+
+    The escape hatch is excluded: it never sweeps /config and leaves no
+    unprivileged service running, so custom binaries stay as safe as they
+    were before the privilege drop.
+    """
+    if os.geteuid() != 0:
+        return False
+
+    if os.environ.get("FRIGATE_RUN_AS_ROOT", "false") == "true":
+        return False
+
+    entries = os.environ.get("FRIGATE_ROOT_SERVICES", "").split(",")
+    return any("".join(entry.split()) == "frigate" for entry in entries)
+
+
+def _is_runtime_user_writable(path: str) -> bool:
+    """Report whether a path resolves inside a runtime-user-writable tree."""
+    resolved = os.path.realpath(path)
+    return any(
+        resolved == root or resolved.startswith(f"{root}{os.sep}")
+        for root in RUNTIME_USER_WRITABLE_DIRS
+    )
+
+
+@cache
+def _warn_ignored_ffmpeg_path(path: str) -> None:
+    """Warn once per path; resolution runs per camera and per binary."""
+    logger.warning(
+        "Ignoring ffmpeg.path %s because FRIGATE_ROOT_SERVICES runs frigate as root and that location is writable by the unprivileged user; using the bundled build",
+        path,
+    )
+
+
 def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
     """Resolve an ffmpeg version alias or custom path to a binary path.
 
     A bare version alias that is no longer bundled (for example one that was
     dropped when the default version changed) falls back to the default
     bundled version so existing configs keep working across an upgrade or a
-    revert. Custom install paths (anything absolute) are used as-is.
+    revert. Custom install paths (anything absolute) are used as-is, except
+    one in a runtime-user-writable tree while FRIGATE_ROOT_SERVICES makes
+    frigate root; see RUNTIME_USER_WRITABLE_DIRS.
     """
     if path == "default" or (
         not path.startswith("/") and path not in INCLUDED_FFMPEG_VERSIONS
@@ -58,7 +104,11 @@ def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
     elif path in INCLUDED_FFMPEG_VERSIONS:
         version = path
     else:
-        return f"{path}/bin/{binary}"
+        if not (frigate_service_is_granular_root() and _is_runtime_user_writable(path)):
+            return f"{path}/bin/{binary}"
+
+        _warn_ignored_ffmpeg_path(path)
+        version = DEFAULT_FFMPEG_VERSION
 
     return f"/usr/lib/ffmpeg/{version}/bin/{binary}"
 
