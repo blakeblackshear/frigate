@@ -291,7 +291,7 @@ services:
     tmpfs:
       - /tmp:size=256m
       - /tmp/cache:size=1000000000 # recording segments, sized as before
-      - /run:exec,mode=0755,size=16m
+      - /run:exec,nosuid,nodev,mode=0755,size=16m
     ports:
       - "8971:8971"
       - "8554:8554" # RTSP feeds
@@ -299,7 +299,7 @@ services:
       - "8555:8555/udp" # WebRTC over udp
 ```
 
-`/run` has to allow `exec`. With a read-only root filesystem s6 copies its service scripts into `/run` and runs them from there, and tmpfs mounts default to `noexec`. The equivalent for `docker run` is `--tmpfs /run:exec,mode=0755`.
+`/run` has to allow `exec`. With a read-only root filesystem s6 copies its service scripts into `/run` and runs them from there, and tmpfs mounts default to `noexec`. The equivalent for `docker run` is `--tmpfs /run:exec,nosuid,nodev,mode=0755`. Spelling out `nosuid` and `nodev` matters: passing any tmpfs options replaces Docker's defaults instead of adjusting them, so asking for `exec` alone would drop those two as well.
 
 Size `/tmp` deliberately. It now carries nginx's config copy and its five proxy temp directories as well as the recording cache. Keeping `/tmp/cache` as its own nested tmpfs, as above, leaves your existing [cache sizing](/frigate/installation#storage) untouched and adds a small allowance for nginx. If you'd rather use one tmpfs over all of `/tmp`, size it as your cache budget plus roughly 50MB, or recordings begin failing once the cache fills.
 

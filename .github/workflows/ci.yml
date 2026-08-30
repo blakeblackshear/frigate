@@ -301,7 +301,7 @@ jobs:
           # /run must allow exec: S6_READ_ONLY_ROOT has s6 copy its service
           # scripts there and run them, and --tmpfs defaults to noexec
           docker run -d --name frigate-ro --shm-size 256m \
-            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,mode=0755 \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,nosuid,nodev,mode=0755 \
             --user 1000:1000 \
             --security-opt no-new-privileges:true \
             -v /tmp/frigate-config-ro:/config \
@@ -331,7 +331,7 @@ jobs:
       - name: Assert PUID with read-only fails fast with clear error
         run: |
           docker run -d --name frigate-ro-puid --shm-size 256m \
-            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,mode=0755 \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,nosuid,nodev,mode=0755 \
             -e PUID=1500 -e PGID=1500 \
             -v /tmp/frigate-config-ro:/config \
             ${{ steps.setup.outputs.image-name }}-amd64
@@ -347,7 +347,7 @@ jobs:
       - name: Assert EXTRA_GROUPS with read-only fails fast with clear error
         run: |
           docker run -d --name frigate-ro-groups --shm-size 256m \
-            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,mode=0755 \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,nosuid,nodev,mode=0755 \
             -e EXTRA_GROUPS=44 \
             -v /tmp/frigate-config-ro:/config \
             -v /tmp/frigate-media-ro:/media/frigate \
