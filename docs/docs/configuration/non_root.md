@@ -265,7 +265,7 @@ What each device needs when you're setting it up by hand. The automatic grant co
 
 ## Hardened deployment
 
-Docker's `user:` mode is the only run mode that supports `read_only: true`. Together they're the strongest supported configuration: the container never starts as root, and it can't modify its own filesystem.
+Docker's `user:` mode is the only run mode that supports `read_only: true`. The container never starts as root and can't modify its own filesystem. The trade-off is that every service runs as the single uid you pass, so go2rtc no longer gets its own more restricted user the way it does in the default mode.
 
 ```yaml
 services:
