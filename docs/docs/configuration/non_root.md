@@ -313,7 +313,7 @@ To remove root from the container entirely, add Docker's `user:`:
     user: "1000:1000" # NOT compatible with PUID/PGID, see the run modes table
 ```
 
-Two things change. Every service then runs as that one uid, so go2rtc no longer gets its own restricted user. And the startup device grants can't run, because there is no root to run them, so pass your hardware with `group_add:` or a udev rule per [Manual setup](#manual-setup) instead. `/config` and `/media/frigate` have to be owned by that uid already, since Frigate never adjusts ownership in this mode.
+Two things change. Every service then runs as that one uid, so go2rtc no longer gets its own restricted user. And the startup device grants can't run, because there is no root to run them, so pass your hardware with `group_add:` or a udev rule per [Manual setup](#manual-setup) instead. `/config` and `/media/frigate` have to be owned by that uid already, since Frigate never adjusts ownership in this mode. Switching an existing install over also leaves `/config/go2rtc_homekit.yml` owned by the go2rtc user, which this mode can't write; `chown` it to your uid or HomeKit pairing changes stop persisting. Frigate warns and starts either way.
 
 This mode can also take `cap_drop: [ALL]`, which the default mode cannot: starting as root needs `CAP_CHOWN` for the ownership sweep, `CAP_SETUID` and `CAP_SETGID` to drop to the runtime user, and `CAP_FOWNER` for the device grants.
 

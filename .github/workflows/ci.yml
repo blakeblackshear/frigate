@@ -398,6 +398,24 @@ jobs:
           docker exec frigate-rod /etc/s6-overlay/s6-rc.d/init-devices/run
           docker exec frigate-rod getfacl -p /dev/apex_9 | grep -q "user:frigate:rw-"
           docker rm -f frigate-rod
+      - name: "Assert switching that install to user: still starts"
+        run: |
+          # the config dir above now holds a go2rtc-owned go2rtc_homekit.yml,
+          # which user: keeps readable but not writable (no supplementary groups)
+          docker run -d --name frigate-rod-user --shm-size 256m \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,nosuid,nodev,mode=0755 \
+            --user 1000:1000 \
+            -v /tmp/frigate-config-rod:/config \
+            -v /tmp/frigate-media-rod:/media/frigate \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-rod-user curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "container did not survive the switch to user:"; docker logs frigate-rod-user; exit 1; fi
+          docker logs frigate-rod-user 2>&1 | grep -q "HomeKit pairing changes will not persist"
+          docker rm -f frigate-rod-user
       - name: Teardown
         if: always()
         run: docker rm -f frigate || true
