@@ -344,6 +344,23 @@ jobs:
             echo "no fail-fast error for PUID with a read-only rootfs"; docker logs frigate-ro-puid; exit 1
           fi
           docker rm -f frigate-ro-puid
+      - name: Assert EXTRA_GROUPS with read-only fails fast with clear error
+        run: |
+          docker run -d --name frigate-ro-groups --shm-size 256m \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,mode=0755 \
+            -e EXTRA_GROUPS=44 \
+            -v /tmp/frigate-config-ro:/config \
+            -v /tmp/frigate-media-ro:/media/frigate \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          found=0
+          for i in $(seq 1 12); do
+            if docker logs frigate-ro-groups 2>&1 | grep -q "EXTRA_GROUPS needs a writable /etc"; then found=1; break; fi
+            sleep 5
+          done
+          if [ "$found" -ne 1 ]; then
+            echo "no fail-fast error for EXTRA_GROUPS with a read-only rootfs"; docker logs frigate-ro-groups; exit 1
+          fi
+          docker rm -f frigate-ro-groups
       - name: Teardown
         if: always()
         run: docker rm -f frigate || true

@@ -189,7 +189,14 @@ fi
 # Must stay after the sweep, which reads an absent /media/frigate as an
 # unmounted volume rather than a swept one
 if [[ "$(id -u)" -eq 0 && ! -d /media/frigate ]]; then
-    mkdir -p /media/frigate
+    # The image does not ship this directory, so on a read-only rootfs it can
+    # only come from a mount. Report that rather than failing under errexit.
+    if ! mkdir -p /media/frigate 2>/dev/null; then
+        echo "[ERROR] /media/frigate does not exist and could not be created, which is what happens with read_only: true and no recordings volume." >&2
+        echo "[ERROR] Mount a volume at /media/frigate." >&2
+        echo "[ERROR] See https://docs.frigate.video/configuration/non_root for the compatibility matrix." >&2
+        exit 1
+    fi
     if [[ "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
         chown "${PUID:-1000}:${PGID:-1000}" /media/frigate
     fi

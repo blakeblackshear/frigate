@@ -21,7 +21,7 @@ Most upgrades need nothing. Frigate aligns your volume ownership on the first bo
 | Root (escape hatch) | `FRIGATE_RUN_AS_ROOT=true`      | Never touched                                          | Not supported     |
 | Granular root       | `FRIGATE_ROOT_SERVICES=frigate` | Aligned at boot; recordings and exports also at create | Not supported     |
 
-`PUID`/`PGID` remapping runs `usermod` at startup, which writes to `/etc/passwd`, so it can't work with a read-only root filesystem. That combination stops at startup with a message pointing here. Docker's `user:` mode has no such startup work, which is why it's the one mode that supports `read_only: true`; see [Hardened deployment](#hardened-deployment).
+`PUID`/`PGID` remapping runs `usermod` at startup, which writes to `/etc/passwd`, so it can't work with a read-only root filesystem. That combination stops at startup with a message pointing here. `EXTRA_GROUPS` writes to `/etc/group` and stops the same way; use Docker's `group_add:` instead, which needs no writes inside the container. Docker's `user:` mode has no such startup work, which is why it's the one mode that supports `read_only: true`; see [Hardened deployment](#hardened-deployment).
 
 `FRIGATE_RUN_AS_ROOT` is matched against the exact lowercase string `true`. `True`, `TRUE`, and `1` are all ignored. `FRIGATE_DEVICE_ACLS` works the same way: only the lowercase string `false` turns off the automatic device grants.
 
