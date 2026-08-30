@@ -316,6 +316,9 @@ EXPOSE 8555/tcp 8555/udp
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
 # Do not fail on long-running download scripts
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+# Allow running with a read-only root filesystem: s6 copies its scan dir into
+# /run and executes service scripts from there, so /run must allow exec
+ENV S6_READ_ONLY_ROOT=1
 
 ENTRYPOINT ["/init"]
 CMD []
@@ -387,3 +390,7 @@ FROM deps AS frigate
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+
+# Pre-compile bytecode so a read-only rootfs doesn't force re-parsing the
+# source tree on every boot (pip-installed packages are already compiled)
+RUN python3 -m compileall -q -j0 /opt/frigate/frigate
