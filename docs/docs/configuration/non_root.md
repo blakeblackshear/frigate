@@ -17,11 +17,11 @@ Most upgrades need nothing. Frigate aligns your volume ownership on the first bo
 | ------------------- | ------------------------------- | ------------------------------------------------------ | ----------------- |
 | Default             | nothing, this is the default    | Aligned to `1000:1000` on first boot                   | Not supported     |
 | `PUID`/`PGID`       | `PUID=1001`, `PGID=1001`        | Aligned to the values you set, on first boot           | Not supported     |
-| Docker-native user  | `user: "1001:1001"`             | You own it, Frigate never changes ownership            | Not supported     |
+| Docker-native user  | `user: "1001:1001"`             | You own it, Frigate never changes ownership            | Supported         |
 | Root (escape hatch) | `FRIGATE_RUN_AS_ROOT=true`      | Never touched                                          | Not supported     |
 | Granular root       | `FRIGATE_ROOT_SERVICES=frigate` | Aligned at boot; recordings and exports also at create | Not supported     |
 
-`PUID`/`PGID` remapping runs `usermod` at startup, which writes to `/etc/passwd`, so it can't work with a read-only root filesystem. That combination stops at startup with a message pointing here.
+`PUID`/`PGID` remapping runs `usermod` at startup, which writes to `/etc/passwd`, so it can't work with a read-only root filesystem. That combination stops at startup with a message pointing here. Docker's `user:` mode has no such startup work, which is why it's the one mode that supports `read_only: true`; see [Hardened deployment](#hardened-deployment).
 
 `FRIGATE_RUN_AS_ROOT` is matched against the exact lowercase string `true`. `True`, `TRUE`, and `1` are all ignored. `FRIGATE_DEVICE_ACLS` works the same way: only the lowercase string `false` turns off the automatic device grants.
 
@@ -262,6 +262,55 @@ What each device needs when you're setting it up by hand. The automatic grant co
 | CPU detector              | none                                                        | Nothing, no device is opened                                                                                     |
 | ZMQ detector              | none                                                        | Nothing, inference happens over a socket                                                                         |
 | Apple Silicon             | none                                                        | Nothing, the NPU client runs on the host and Frigate reaches it over the network                                 |
+
+## Hardened deployment
+
+Docker's `user:` mode is the only run mode that supports `read_only: true`. Together they're the strongest supported configuration: the container never starts as root, and it can't modify its own filesystem.
+
+```yaml
+services:
+  frigate:
+    container_name: frigate
+    image: ghcr.io/blakeblackshear/frigate:stable
+    restart: unless-stopped
+    stop_grace_period: 30s
+    user: "1000:1000" # NOT compatible with PUID/PGID, see the run modes table
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    shm_size: "512mb" # size for your cameras, see the shm-size calculation
+    # Hardware: the automatic device grants need a root startup, which `user:`
+    # never has. Pass your devices as usual AND grant the uid access on the
+    # host yourself, with `group_add` or a udev rule. See Manual setup above.
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /path/to/your/config:/config # must be writable by uid 1000
+      - /path/to/your/storage:/media/frigate # must be writable by uid 1000
+    tmpfs:
+      - /tmp:size=256m
+      - /tmp/cache:size=1000000000 # recording segments, sized as before
+      - /run:exec,mode=0755,size=16m
+    ports:
+      - "8971:8971"
+      - "8554:8554" # RTSP feeds
+      - "8555:8555/tcp" # WebRTC over tcp
+      - "8555:8555/udp" # WebRTC over udp
+```
+
+`/run` has to allow `exec`. With a read-only root filesystem s6 copies its service scripts into `/run` and runs them from there, and tmpfs mounts default to `noexec`. The equivalent for `docker run` is `--tmpfs /run:exec,mode=0755`.
+
+Size `/tmp` deliberately. It now carries nginx's config copy and its five proxy temp directories as well as the recording cache. Keeping `/tmp/cache` as its own nested tmpfs, as above, leaves your existing [cache sizing](/frigate/installation#storage) untouched and adds a small allowance for nginx. If you'd rather use one tmpfs over all of `/tmp`, size it as your cache budget plus roughly 50MB, or recordings begin failing once the cache fills.
+
+The self signed certificate is written to `/config/tls`, which stays writable. Certificates you mount at `/etc/letsencrypt/live/frigate` work unchanged and still take precedence.
+
+Soak a hardened deployment for 24 hours against real cameras before relying on it. A read-only root filesystem turns an occasional write into a failure that startup won't reveal.
+
+### Per-variant exceptions
+
+- **Rockchip** needs `- /sys/:/sys/:ro` alongside its device nodes, in addition to everything above.
+- **MemryX** and **QNAP Container Station** still require `privileged: true` per their own documentation, which can't be combined with this layout.
 
 ## Known limitations
 

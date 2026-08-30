@@ -568,7 +568,7 @@ Platforms that genuinely require `privileged: true` (MemryX, some QNAP setups) a
 
 :::
 
-Frigate's services run as an unprivileged user inside the container. See [Running as a non-root user](../configuration/non_root.md) for the run modes, the one time volume ownership migration, and what each accelerator needs on the host.
+Frigate's services run as an unprivileged user inside the container. See [Running as a non-root user](../configuration/non_root.md) for the run modes, the one time volume ownership migration, what each accelerator needs on the host, and the [hardened deployment](../configuration/non_root.md#hardened-deployment) layout with a read-only root filesystem.
 
 **Docker CLI**
 
