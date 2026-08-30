@@ -293,6 +293,57 @@ jobs:
           done
           if [ "$ok" -ne 1 ]; then echo "sentinel skip never logged"; docker logs frigate-puid; exit 1; fi
           docker rm -f frigate-puid
+      - name: Assert read-only rootfs with --user works
+        run: |
+          mkdir -p /tmp/frigate-config-ro /tmp/frigate-media-ro
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-ro/config.yml
+          sudo chown -R 1000:1000 /tmp/frigate-config-ro /tmp/frigate-media-ro
+          # /run must allow exec: S6_READ_ONLY_ROOT has s6 copy its service
+          # scripts there and run them, and --tmpfs defaults to noexec
+          docker run -d --name frigate-ro --shm-size 256m \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,mode=0755 \
+            --user 1000:1000 \
+            --security-opt no-new-privileges:true \
+            -v /tmp/frigate-config-ro:/config \
+            -v /tmp/frigate-media-ro:/media/frigate \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-ro curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "read-only container never healthy"; docker logs frigate-ro; exit 1; fi
+          # an if, not "! grep": bash exempts a negated command from set -e and
+          # the assertion would never fail
+          if docker logs frigate-ro 2>&1 | grep -i "read-only file system"; then
+            echo "a service tried to write to the read-only rootfs"; exit 1
+          fi
+          # the self-signed cert has to land in /config, the only writable path
+          docker exec frigate-ro test -f /config/tls/privkey.pem
+          # and nginx must serve it, which is what proves the templated cert path
+          docker exec frigate-ro curl -ksSI https://127.0.0.1:8971/ >/dev/null
+          # logging must work via the s6-log fallback (no logutil-service as non-root)
+          docker exec frigate-ro test -s /dev/shm/logs/frigate/current
+          # runtime user can write recordings storage
+          docker exec frigate-ro touch /media/frigate/.write-probe
+          docker exec frigate-ro rm /media/frigate/.write-probe
+          docker rm -f frigate-ro
+      - name: Assert PUID with read-only fails fast with clear error
+        run: |
+          docker run -d --name frigate-ro-puid --shm-size 256m \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,mode=0755 \
+            -e PUID=1500 -e PGID=1500 \
+            -v /tmp/frigate-config-ro:/config \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          found=0
+          for i in $(seq 1 12); do
+            if docker logs frigate-ro-puid 2>&1 | grep -q "not compatible with read_only"; then found=1; break; fi
+            sleep 5
+          done
+          if [ "$found" -ne 1 ]; then
+            echo "no fail-fast error for PUID with a read-only rootfs"; docker logs frigate-ro-puid; exit 1
+          fi
+          docker rm -f frigate-ro-puid
       - name: Teardown
         if: always()
         run: docker rm -f frigate || true
