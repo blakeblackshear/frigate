@@ -91,14 +91,20 @@ if [ -f "$letsencrypt_path/privkey.pem" ] && [ -f "$letsencrypt_path/fullchain.p
 else
     cert_path="$selfsigned_path"
 
-    # The ownership sweep hands /config to the runtime user, so root must not
-    # create or chmod anything here: that user could plant a symlink and
-    # redirect openssl onto any root path (both follow symlinks). Generating as
-    # the runtime user keeps every write inside the privileges it already has.
-    # The escape hatch never sweeps, so /config stays root-owned and root writes.
+    # Root writing into /config follows any symlink planted there, and /config
+    # is owned by whoever the host mount says, not by root. Generate as the
+    # runtime user wherever we are going to drop to it; the escape hatch keeps
+    # root all the way through, so that path is refused rather than dropped.
     gen=()
     if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
         gen=(s6-setuidgid frigate)
+    elif [[ "$(id -u)" -eq 0 ]]; then
+        for link in "$cert_path" "$cert_path/privkey.pem" "$cert_path/fullchain.pem"; do
+            if [[ -L "$link" ]]; then
+                echo "[ERROR] ${link} is a symlink; refusing to write TLS material through it as root" >&2
+                exit 1
+            fi
+        done
     fi
 
     "${gen[@]}" mkdir -p "$cert_path"
