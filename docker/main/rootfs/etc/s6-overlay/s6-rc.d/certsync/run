@@ -26,9 +26,11 @@ function reload_nginx() {
 
 echo "[INFO] Starting certsync..."
 
-# Resolved once, to match the choice nginx made at its own startup: watching a
-# path nginx did not load would compare fingerprints that can never agree.
-if [ -f /etc/letsencrypt/live/frigate/fullchain.pem ]; then
+# Resolved once, and the condition must stay identical to the nginx run
+# script's. Testing only fullchain.pem here would pick the mounted cert on a
+# half-populated mount that nginx rejected, and the two fingerprints would then
+# never agree, reloading nginx every cycle forever.
+if [ -f /etc/letsencrypt/live/frigate/privkey.pem ] && [ -f /etc/letsencrypt/live/frigate/fullchain.pem ]; then
     lefile="/etc/letsencrypt/live/frigate/fullchain.pem"
 else
     lefile="/config/tls/fullchain.pem"
