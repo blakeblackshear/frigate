@@ -548,9 +548,7 @@ services:
 
 ### Recommended security options
 
-Frigate does not need elevated container privileges for most setups. The
-following hardens the container; add the `devices`/`group_add` entries your
-hardware requires (see the hardware acceleration docs):
+Frigate does not need elevated container privileges for most setups. The following hardens the container; add the `devices`/`group_add` entries your hardware requires (see the hardware acceleration docs):
 
 ```yaml
 services:
@@ -564,14 +562,13 @@ services:
 
 :::note
 
-`telemetry.stats.network_bandwidth` uses nethogs, which requires root with
-NET_ADMIN/NET_RAW capabilities. If you enable that stat, omit `cap_drop: [ALL]`
-or add `cap_add: [NET_ADMIN, NET_RAW]`.
+`telemetry.stats.network_bandwidth` uses nethogs, which requires root with NET_ADMIN/NET_RAW capabilities. If you enable that stat, omit `cap_drop: [ALL]` or add `cap_add: [NET_ADMIN, NET_RAW]`.
 
-Platforms that genuinely require `privileged: true` (MemryX, some QNAP setups)
-are called out in their own sections and are unaffected by this guidance.
+Platforms that genuinely require `privileged: true` (MemryX, some QNAP setups) are called out in their own sections and are unaffected by this guidance.
 
 :::
+
+Frigate's services run as an unprivileged user inside the container. See [Running as a non-root user](../configuration/non_root.md) for the run modes, the one time volume ownership migration, and what each accelerator needs on the host.
 
 **Docker CLI**
 
