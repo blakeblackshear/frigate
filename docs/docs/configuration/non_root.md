@@ -124,7 +124,7 @@ The escape hatch never changes ownership, and it clears the record of the last s
 
 Frigate grants the runtime user access to your devices at startup. Pass your hardware with `--device` (or `devices:` in compose) and detection and hardware acceleration work with no group or udev setup on the host.
 
-The grant covers the common accelerator and camera nodes: GPU render nodes, Coral, Hailo, Rockchip, Jetson, `/dev/video*`, and the USB bus. For hardware it misses, add your own paths with `DEVICE_ACL_PATHS`, a comma separated list of globs:
+The grant covers the common accelerator and camera nodes: GPU render nodes, Intel/AMD NPUs (`/dev/accel`), Coral, Hailo, Rockchip, Jetson, `/dev/video*`, and the USB bus. For hardware it misses, add your own paths with `DEVICE_ACL_PATHS`, a comma separated list of globs:
 
 ```yaml
 environment:

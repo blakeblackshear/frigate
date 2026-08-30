@@ -320,17 +320,28 @@ class OpenVINOModelRunner(BaseModelRunner):
             except Exception as e:
                 logger.debug(f"GPU_QUEUE_THROTTLE not supported: {e}")
 
+        # Some keys must be passed as compile-time config so that it can be caught
+        compile_config = {}
+
         if device == "NPU" and OpenVINOModelRunner.is_detection_model(model_type):
-            try:
-                self.ov_core.set_property(device, {"NPU_TURBO": "YES"})
-            except Exception as e:
-                logger.debug(f"NPU_TURBO not supported by driver: {e}")
+            compile_config["NPU_TURBO"] = "YES"
 
         # Compile model under the shared lock
         with _OPENVINO_LOCK:
-            self.compiled_model = self.ov_core.compile_model(
-                model=model_path, device_name=device
-            )
+            try:
+                self.compiled_model = self.ov_core.compile_model(
+                    model=model_path, device_name=device, config=compile_config
+                )
+            except RuntimeError as e:
+                if not compile_config:
+                    raise
+
+                logger.debug(
+                    f"Failed to compile with {compile_config}, retrying without: {e}"
+                )
+                self.compiled_model = self.ov_core.compile_model(
+                    model=model_path, device_name=device
+                )
 
             # Create reusable inference request
             self.infer_request = self.compiled_model.create_infer_request()
