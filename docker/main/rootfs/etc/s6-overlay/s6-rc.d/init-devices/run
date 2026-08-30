@@ -24,6 +24,7 @@ shopt -s nullglob
 
 device_globs=(
     "/dev/dri/*"
+    "/dev/accel/*"
     "/dev/apex_*"
     "/dev/hailo*"
     "/dev/video*"
