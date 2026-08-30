@@ -361,6 +361,43 @@ jobs:
             echo "no fail-fast error for EXTRA_GROUPS with a read-only rootfs"; docker logs frigate-ro-groups; exit 1
           fi
           docker rm -f frigate-ro-groups
+      - name: Assert read-only rootfs in the default mode works
+        run: |
+          mkdir -p /tmp/frigate-config-rod /tmp/frigate-media-rod
+          printf 'mqtt:\n  enabled: false\ncameras: {}\n' > /tmp/frigate-config-rod/config.yml
+          docker run -d --name frigate-rod --shm-size 256m \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,nosuid,nodev,mode=0755 \
+            --security-opt no-new-privileges:true \
+            -v /tmp/frigate-config-rod:/config \
+            -v /tmp/frigate-media-rod:/media/frigate \
+            ${{ steps.setup.outputs.image-name }}-amd64
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-rod curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "read-only default-mode container never healthy"; docker logs frigate-rod; exit 1; fi
+          if docker logs frigate-rod 2>&1 | grep -i "read-only file system"; then
+            echo "a service tried to write to the read-only rootfs"; exit 1
+          fi
+          # the point of this mode over docker's user:: the drop still happens
+          # and go2rtc still gets its own separate user
+          ps_out=$(docker exec frigate-rod ps -eo user=,comm=)
+          echo "$ps_out"
+          for svc in python3 nginx; do
+            if echo "$ps_out" | grep -w "$svc" | grep -q '^root'; then
+              echo "$svc is running as root"; exit 1
+            fi
+          done
+          echo "$ps_out" | grep -w go2rtc | grep -q '^go2rtc'
+          # the ownership sweep still ran and recorded itself in /config
+          docker exec frigate-rod cat /config/.permissions_version | grep -qx "2:1000:1000"
+          # setfacl under a read-only rootfs, which nothing else covers:
+          # init-devices exits early under --user, so that path is never reached
+          docker exec frigate-rod mknod /dev/apex_9 c 120 99
+          docker exec frigate-rod /etc/s6-overlay/s6-rc.d/init-devices/run
+          docker exec frigate-rod getfacl -p /dev/apex_9 | grep -q "user:frigate:rw-"
+          docker rm -f frigate-rod
       - name: Teardown
         if: always()
         run: docker rm -f frigate || true

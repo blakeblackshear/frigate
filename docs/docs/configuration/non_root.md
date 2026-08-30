@@ -15,13 +15,13 @@ Most upgrades need nothing. Frigate aligns your volume ownership on the first bo
 
 | Mode                | How to enable                   | Ownership of `/config` and `/media/frigate`            | `read_only: true` |
 | ------------------- | ------------------------------- | ------------------------------------------------------ | ----------------- |
-| Default             | nothing, this is the default    | Aligned to `1000:1000` on first boot                   | Not supported     |
+| Default             | nothing, this is the default    | Aligned to `1000:1000` on first boot                   | Supported         |
 | `PUID`/`PGID`       | `PUID=1001`, `PGID=1001`        | Aligned to the values you set, on first boot           | Not supported     |
 | Docker-native user  | `user: "1001:1001"`             | You own it, Frigate never changes ownership            | Supported         |
 | Root (escape hatch) | `FRIGATE_RUN_AS_ROOT=true`      | Never touched                                          | Not supported     |
 | Granular root       | `FRIGATE_ROOT_SERVICES=frigate` | Aligned at boot; recordings and exports also at create | Not supported     |
 
-`PUID`/`PGID` remapping runs `usermod` at startup, which writes to `/etc/passwd`, so it can't work with a read-only root filesystem. That combination stops at startup with a message pointing here. `EXTRA_GROUPS` writes to `/etc/group` and stops the same way; use Docker's `group_add:` instead, which needs no writes inside the container. Docker's `user:` mode has no such startup work, which is why it's the one mode that supports `read_only: true`; see [Hardened deployment](#hardened-deployment).
+`PUID`/`PGID` remapping runs `usermod` at startup, which writes to `/etc/passwd`, so it can't work with a read-only root filesystem. That combination stops at startup with a message pointing here. `EXTRA_GROUPS` writes to `/etc/group` and stops the same way; use Docker's `group_add:` instead, which needs no writes inside the container. The default mode and Docker's `user:` mode both work with `read_only: true`; see [Hardened deployment](#hardened-deployment).
 
 `FRIGATE_RUN_AS_ROOT` is matched against the exact lowercase string `true`. `True`, `TRUE`, and `1` are all ignored. `FRIGATE_DEVICE_ACLS` works the same way: only the lowercase string `false` turns off the automatic device grants.
 
@@ -265,7 +265,9 @@ What each device needs when you're setting it up by hand. The automatic grant co
 
 ## Hardened deployment
 
-Docker's `user:` mode is the only run mode that supports `read_only: true`. The container never starts as root and can't modify its own filesystem. The trade-off is that every service runs as the single uid you pass, so go2rtc no longer gets its own more restricted user the way it does in the default mode.
+A read-only root filesystem means the container can't modify itself, only the volumes you give it. It works in the default mode and under Docker's `user:`, but not with `PUID`/`PGID` or `EXTRA_GROUPS`, which both need to write to `/etc`.
+
+Start with the default mode. It keeps go2rtc on its own restricted user and still grants your hardware automatically, at the cost of a short root startup that finishes before any service runs.
 
 ```yaml
 services:
@@ -274,20 +276,16 @@ services:
     image: ghcr.io/blakeblackshear/frigate:stable
     restart: unless-stopped
     stop_grace_period: 30s
-    user: "1000:1000" # NOT compatible with PUID/PGID, see the run modes table
     read_only: true
     security_opt:
       - no-new-privileges:true
-    cap_drop:
-      - ALL
     shm_size: "512mb" # size for your cameras, see the shm-size calculation
-    # Hardware: the automatic device grants need a root startup, which `user:`
-    # never has. Pass your devices as usual AND grant the uid access on the
-    # host yourself, with `group_add` or a udev rule. See Manual setup above.
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128 # your hardware, granted at startup
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /path/to/your/config:/config # must be writable by uid 1000
-      - /path/to/your/storage:/media/frigate # must be writable by uid 1000
+      - /path/to/your/config:/config
+      - /path/to/your/storage:/media/frigate
     tmpfs:
       - /tmp:size=256m
       - /tmp/cache:size=1000000000 # recording segments, sized as before
@@ -306,6 +304,18 @@ Size `/tmp` deliberately. It now carries nginx's config copy and its five proxy 
 The self signed certificate is written to `/config/tls`, which stays writable. Certificates you mount at `/etc/letsencrypt/live/frigate` work unchanged and still take precedence.
 
 Soak a hardened deployment for 24 hours against real cameras before relying on it. A read-only root filesystem turns an occasional write into a failure that startup won't reveal.
+
+### Never starting as root
+
+To remove root from the container entirely, add Docker's `user:`:
+
+```yaml
+    user: "1000:1000" # NOT compatible with PUID/PGID, see the run modes table
+```
+
+Two things change. Every service then runs as that one uid, so go2rtc no longer gets its own restricted user. And the startup device grants can't run, because there is no root to run them, so pass your hardware with `group_add:` or a udev rule per [Manual setup](#manual-setup) instead. `/config` and `/media/frigate` have to be owned by that uid already, since Frigate never adjusts ownership in this mode.
+
+This mode can also take `cap_drop: [ALL]`, which the default mode cannot: starting as root needs `CAP_CHOWN` for the ownership sweep, `CAP_SETUID` and `CAP_SETGID` to drop to the runtime user, and `CAP_FOWNER` for the device grants.
 
 ### Per-variant exceptions
 
