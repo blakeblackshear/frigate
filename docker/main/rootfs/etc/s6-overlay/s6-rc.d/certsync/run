@@ -26,7 +26,13 @@ function reload_nginx() {
 
 echo "[INFO] Starting certsync..."
 
-lefile="/etc/letsencrypt/live/frigate/fullchain.pem"
+# Resolved once, to match the choice nginx made at its own startup: watching a
+# path nginx did not load would compare fingerprints that can never agree.
+if [ -f /etc/letsencrypt/live/frigate/fullchain.pem ]; then
+    lefile="/etc/letsencrypt/live/frigate/fullchain.pem"
+else
+    lefile="/config/tls/fullchain.pem"
+fi
 
 tls_enabled=`python3 /usr/local/nginx/get_nginx_settings.py | jq -r .tls.enabled`
 listen_external_port=`python3 /usr/local/nginx/get_nginx_settings.py | jq -r .listen.external_port`

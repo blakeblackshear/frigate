@@ -9,7 +9,7 @@ import NavPath from "@site/src/components/NavPath";
 
 # TLS
 
-Frigate's integrated NGINX server supports TLS certificates. By default Frigate will generate a self signed certificate that will be used for port 8971. Frigate is designed to make it easy to use whatever tool you prefer to manage certificates.
+Frigate's integrated NGINX server supports TLS certificates. By default Frigate will generate a self signed certificate that will be used for port 8971, stored in `/config/tls` so it survives container recreation. Frigate is designed to make it easy to use whatever tool you prefer to manage certificates.
 
 Frigate is often running behind a reverse proxy that manages TLS certificates for multiple services. You will likely need to set your reverse proxy to allow self signed certificates or you can disable TLS in Frigate's config. However, if you are running on a dedicated device that's separate from your proxy or if you expose Frigate directly to the internet, you may want to configure TLS with valid certificates.
 
@@ -45,7 +45,9 @@ frigate:
   ...
 ```
 
-Within the folder, the private key is expected to be named `privkey.pem` and the certificate is expected to be named `fullchain.pem`.
+Within the folder, the private key is expected to be named `privkey.pem` and the certificate is expected to be named `fullchain.pem`. Mounted certificates take precedence over the self signed pair in `/config/tls`.
+
+`privkey.pem` must be readable by the runtime user that runs NGINX. Frigate hands it over at startup when the mount is writable; on a `:ro` mount, make it readable by uid 1000 (or your `PUID`) yourself. See [Running as a non-root user](/configuration/non_root).
 
 Note that certbot uses symlinks, and those can't be followed by the container unless it has access to the targets as well, so if using certbot you'll also have to mount the `archive` folder for your domain, e.g.:
 
@@ -73,4 +75,4 @@ frigate:
 
 ## ACME Challenge
 
-Frigate also supports hosting the acme challenge files for the HTTP challenge method if needed. The challenge files should be mounted at `/etc/letsencrypt/www`.
+Frigate also supports hosting the acme challenge files for the HTTP challenge method if needed. The challenge files should be mounted at `/etc/letsencrypt/www`. With a read-only root filesystem this has to be a mounted volume, since Frigate cannot create the directory itself.

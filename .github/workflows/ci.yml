@@ -101,7 +101,7 @@ jobs:
           # directive user; stdout discarded because -t reopens the config's
           # /dev/stdout logs and the docker exec pipe is root-owned
           docker exec frigate /command/s6-setuidgid frigate bash -c '/usr/local/nginx/sbin/nginx -e stderr -t -c /tmp/nginx/conf/nginx.conf >/dev/null'
-          docker exec frigate stat -c %a /etc/letsencrypt/live/frigate/privkey.pem | grep -qx 600
+          docker exec frigate stat -c %a /config/tls/privkey.pem | grep -qx 600
           docker exec frigate stat -c %a /dev/shm/go2rtc.yaml | grep -qx 640
       - name: Assert services run as non-root
         run: |
