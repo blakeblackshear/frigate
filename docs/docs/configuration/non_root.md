@@ -322,6 +322,52 @@ This mode can also take `cap_drop: [ALL]`, which the default mode cannot: starti
 - **Rockchip** needs `- /sys/:/sys/:ro` alongside its device nodes, in addition to everything above.
 - **MemryX** and **QNAP Container Station** still require `privileged: true` per their own documentation, which gives back most of what this layout removes. MemryX also downloads its models to `/memryx_models` on the root filesystem, so it can't run read-only regardless.
 
+## Network isolation
+
+Everything above limits what a compromised container can do to the host. It doesn't limit what your cameras can do to your network. Camera firmware is closed source, rarely patched, and not something you can audit, and none of it needs internet access for Frigate to work.
+
+Put the cameras on their own VLAN or subnet, give the Frigate host a route into it, and deny that VLAN any route out. Frigate reaches in to pull streams, the cameras reach nothing. A second NIC on the Frigate host is the simplest version of this, and a tagged VLAN on the NIC you already have works just as well.
+
+Here's the deny as nftables on the router, with cameras on `vlan20` and the Frigate host at `192.168.10.5`:
+
+```
+table inet cameras {
+  chain forward {
+    type filter hook forward priority filter; policy accept;
+
+    ct state established,related accept
+    iifname "vlan20" ip daddr 192.168.10.5 accept
+    iifname "vlan20" drop
+  }
+}
+```
+
+It's in its own table so it can sit alongside an existing ruleset without touching it. Streams keep working because Frigate opens those connections and the return traffic is `established`. Cameras can still reach each other on their own VLAN, since that traffic never reaches the router, so use client isolation on the switch if that matters to you.
+
+Two things break when you do this. The manufacturer's phone app stops working, which is the point, and camera clocks drift, because most of them set their time over NTP and are bad at it. Point them at an NTP server on your own network rather than opening the VLAN back up, or their timestamps and Frigate's will disagree.
+
+Frigate itself needs some outbound access, though nearly all of it is optional. The startup version check is the only piece that's on by default, and `telemetry.version_check: false` turns it off. Everything else (model downloads for the enrichment features, push notifications, Frigate+, and cloud GenAI providers) only reaches out once you enable that feature. See [Network Requirements](/frigate/network_requirements) for the full list and how to run fully offline.
+
+For containers that only talk to each other, an internal compose network gets you the same isolation without involving the router:
+
+```yaml
+services:
+  frigate:
+    networks: [default, iot]
+    # the rest of your frigate service
+  mosquitto:
+    image: eclipse-mosquitto
+    networks: [iot]
+
+networks:
+  iot:
+    internal: true
+```
+
+`internal: true` gives that network no route off the host, so the broker isn't reachable from anywhere else on your LAN. Frigate sits on both networks and keeps its normal outbound path.
+
+One Docker specific trap: published ports are inserted ahead of the host firewall, so `ufw deny 8971` doesn't do what it looks like it does. Bind the port to the interface you want instead, like `127.0.0.1:8971:8971` for a reverse proxy on the same host, or your LAN address for everything else.
+
 ## Known limitations
 
 `telemetry.stats.network_bandwidth` uses nethogs, which needs `CAP_NET_ADMIN` and `CAP_NET_RAW` and therefore root. The stat is turned off automatically when Frigate isn't running as root, with one warning in the log. Use `FRIGATE_ROOT_SERVICES=frigate` (or `FRIGATE_RUN_AS_ROOT=true`) if you need it.
