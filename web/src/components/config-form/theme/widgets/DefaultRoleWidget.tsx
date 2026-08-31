@@ -12,6 +12,7 @@ import type { ConfigFormContext } from "@/types/configForm";
 import { getSizedFieldClassName } from "../utils";
 
 const BUILT_IN_ROLES = ["admin", "viewer"];
+const NONE_ROLE = "none";
 
 export function DefaultRoleWidget(props: WidgetProps) {
   const { id, value, disabled, readonly, onChange, schema, options, registry } =
@@ -25,13 +26,15 @@ export function DefaultRoleWidget(props: WidgetProps) {
     const configured = Object.keys(formContext?.fullConfig?.auth?.roles ?? {});
     // Keep admin/viewer first, then any custom roles in config order.
     const custom = configured.filter((r) => !BUILT_IN_ROLES.includes(r));
-    return [...BUILT_IN_ROLES, ...custom];
+    return [...BUILT_IN_ROLES, ...custom, NONE_ROLE];
   }, [formContext]);
 
   const selectedValue = typeof value === "string" && value ? value : "viewer";
 
   const getLabel = (role: string) =>
-    BUILT_IN_ROLES.includes(role) ? t(`configForm.defaultRole.${role}`) : role;
+    BUILT_IN_ROLES.includes(role) || role === NONE_ROLE
+      ? t(`configForm.defaultRole.${role}`)
+      : role;
 
   return (
     <Select
