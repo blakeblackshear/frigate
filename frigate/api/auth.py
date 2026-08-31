@@ -497,6 +497,7 @@ def resolve_role(
                      Admin matches short-circuit to admin.
                  - If no role_map is configured, treat the header as role names directly.
       2. If no valid role is found, return proxy_config.default_role if it's valid in config_roles, else 'viewer'.
+         The literal value 'none' is a valid default and means access should be denied.
 
     Args:
         headers (dict): Incoming request headers (case-insensitive).
@@ -509,10 +510,17 @@ def resolve_role(
     default_role = proxy_config.default_role
     role_header = proxy_config.header_map.role
 
-    # Validate default_role against config; fallback to 'viewer' if invalid
-    validated_default = default_role if default_role in config_roles else "viewer"
+    # Validate default_role against config; fallback to 'viewer' if invalid.
+    # "none" is a sentinel meaning "deny access when no mapping matches"; it is
+    # reserved in AuthConfig.validate_roles so it is never a configured role.
+    validated_default = (
+        default_role
+        if default_role in config_roles or default_role == "none"
+        else "viewer"
+    )
     if not config_roles:
-        validated_default = "viewer"  # Edge case: no roles defined
+        # Edge case: no roles defined
+        validated_default = "none" if default_role == "none" else "viewer"
 
     if not role_header:
         logger.debug(
@@ -617,6 +625,9 @@ def resolve_role(
             },
         },
         401: {"description": "Authentication Failed"},
+        403: {
+            "description": "Access Denied (proxy user resolved to a default role of 'none')"
+        },
     },
 )
 def auth(request: Request):
@@ -665,6 +676,10 @@ def auth(request: Request):
         # parse header and resolve a valid role
         config_roles_set = set(auth_config.roles.keys())
         role = resolve_role(request.headers, proxy_config, config_roles_set)
+
+        if role == "none":
+            logger.debug("Resolved role is 'none', denying access")
+            return Response("", status_code=403)
 
         success_response.headers["remote-role"] = role
 

@@ -1,7 +1,9 @@
 import unittest
 
+from pydantic import ValidationError
+
 from frigate.api.auth import resolve_role
-from frigate.config import HeaderMappingConfig, ProxyConfig
+from frigate.config import AuthConfig, HeaderMappingConfig, ProxyConfig
 from frigate.config.env import FRIGATE_ENV_VARS
 
 
@@ -92,6 +94,94 @@ class TestProxyRoleResolution(unittest.TestCase):
         headers = {"x-remote-role": "group_unknown"}
         role = resolve_role(headers, self.proxy_config, self.config_roles)
         self.assertEqual(role, self.proxy_config.default_role)
+
+
+class TestDefaultRoleNone(unittest.TestCase):
+    def setUp(self):
+        self.proxy_config = ProxyConfig(
+            auth_secret=None,
+            default_role="none",
+            separator="|",
+            header_map=HeaderMappingConfig(
+                user="x-remote-user",
+                role="x-remote-role",
+                role_map={
+                    "admin": ["group_admin"],
+                    "viewer": ["group_viewer"],
+                },
+            ),
+        )
+        self.config_roles = list(["admin", "viewer"])
+
+    def test_default_role_none_no_match(self):
+        """Unmatched groups resolve to 'none' when default_role is 'none'."""
+        headers = {"x-remote-role": "group_unknown"}
+        role = resolve_role(headers, self.proxy_config, self.config_roles)
+        self.assertEqual(role, "none")
+
+    def test_default_role_none_with_match(self):
+        """Matched groups still resolve normally when default_role is 'none'."""
+        headers = {"x-remote-role": "group_admin"}
+        role = resolve_role(headers, self.proxy_config, self.config_roles)
+        self.assertEqual(role, "admin")
+
+    def test_default_role_none_missing_header(self):
+        """A missing role header resolves to 'none'."""
+        headers = {}
+        role = resolve_role(headers, self.proxy_config, self.config_roles)
+        self.assertEqual(role, "none")
+
+    def test_default_role_none_empty_header(self):
+        """An empty role header resolves to 'none'."""
+        headers = {"x-remote-role": ""}
+        role = resolve_role(headers, self.proxy_config, self.config_roles)
+        self.assertEqual(role, "none")
+
+    def test_default_role_none_no_role_map(self):
+        """An invalid direct role name resolves to 'none' without a role_map."""
+        config = ProxyConfig(
+            auth_secret=None,
+            default_role="none",
+            separator="|",
+            header_map=HeaderMappingConfig(
+                user="x-remote-user",
+                role="x-remote-role",
+                role_map=None,
+            ),
+        )
+        headers = {"x-remote-role": "notarole"}
+        role = resolve_role(headers, config, self.config_roles)
+        self.assertEqual(role, "none")
+
+    def test_default_role_none_no_role_header_configured(self):
+        """Proxy configs without a role header resolve to 'none'."""
+        config = ProxyConfig(
+            auth_secret=None,
+            default_role="none",
+            separator="|",
+            header_map=HeaderMappingConfig(user="x-remote-user"),
+        )
+        role = resolve_role({}, config, self.config_roles)
+        self.assertEqual(role, "none")
+
+    def test_default_role_none_no_roles_configured(self):
+        """'none' survives the empty config_roles edge case."""
+        headers = {"x-remote-role": "group_admin"}
+        role = resolve_role(headers, self.proxy_config, set())
+        self.assertEqual(role, "none")
+
+
+class TestReservedRoleNames(unittest.TestCase):
+    def test_reserved_names_rejected(self):
+        """admin, viewer, and the 'none' deny sentinel cannot be custom roles."""
+        for name in ("admin", "viewer", "none"):
+            with self.subTest(role=name):
+                with self.assertRaises(ValidationError):
+                    AuthConfig(roles={name: ["front_door"]})
+
+    def test_custom_role_still_allowed(self):
+        config = AuthConfig(roles={"operator": ["front_door"]})
+        self.assertEqual(config.roles["operator"], ["front_door"])
 
 
 class TestProxyAuthSecretEnvString(unittest.TestCase):

@@ -78,8 +78,9 @@ class AuthConfig(FrigateBaseModel):
                     f"Invalid role name '{role}'. Must be alphanumeric with underscores."
                 )
 
-        # Ensure 'admin' and 'viewer' are not used as custom role names
-        reserved_roles = {"admin", "viewer"}
+        # Ensure built-in role names and the 'none' deny sentinel used by
+        # proxy.default_role are not used as custom role names
+        reserved_roles = {"admin", "viewer", "none"}
         if v.keys() & reserved_roles:
             raise ValueError(
                 f"Reserved roles {reserved_roles} cannot be used as custom roles."

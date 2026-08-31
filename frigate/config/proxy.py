@@ -43,7 +43,7 @@ class ProxyConfig(FrigateBaseModel):
     default_role: str | None = Field(
         default="viewer",
         title="Default role",
-        description="Default role assigned to proxy-authenticated users when no role mapping applies.",
+        description="Default role assigned to proxy-authenticated users when no role mapping applies. Set to 'none' to deny access to unmapped users.",
     )
     separator: str | None = Field(
         default=",",
