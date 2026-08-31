@@ -131,7 +131,7 @@
     "monaco-editor": "^0.52.2",
     "msw": "^2.3.5",
     "patch-package": "^8.0.1",
-    "postcss": "^8.5.8",
+    "postcss": "^8.5.12",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "tailwindcss": "^3.4.9",
