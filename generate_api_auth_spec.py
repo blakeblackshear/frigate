@@ -410,11 +410,10 @@ def enrich(spec: dict, access_map: dict) -> tuple[dict, list, list]:
 
 
 # Numeric defaults at or above this magnitude are treated as live Unix
-# timestamps baked into the schema at import time (e.g. the /{camera_name}
-# /recordings after/before params default to datetime.now()). They make the
-# export non-deterministic and document a meaningless frozen epoch, so they are
-# stripped. The proper fix is to default those route params to None and resolve
-# "now" inside the handler.
+# timestamps baked into the schema at import time. They make the export
+# non-deterministic and document a meaningless frozen epoch, so they are
+# stripped. No route defaults this way today, and route params that need "now"
+# resolve it inside the handler. Kept as a guard against the pattern returning.
 VOLATILE_DEFAULT_THRESHOLD = 1_000_000_000
 
 
