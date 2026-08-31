@@ -490,6 +490,12 @@ export default function HlsVideoPlayer({
                 clearTimeout(mobileCtrlTimeout);
               }
             }}
+            onSeeking={() => {
+              // iOS ManagedMediaSource gates hls.js fragment loading off
+              // while paused and never resumes it on seek, so a seek
+              // into unbuffered media would never complete
+              hlsRef.current?.resumeBuffering();
+            }}
             onWaiting={() => {
               if (onError != undefined) {
                 if (videoRef.current?.paused) {
