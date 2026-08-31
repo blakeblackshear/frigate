@@ -78,9 +78,11 @@ class AuthConfig(FrigateBaseModel):
                     f"Invalid role name '{role}'. Must be alphanumeric with underscores."
                 )
 
-        # 'none' is the deny sentinel for proxy.default_role, not a real role
-        reserved_roles = {"admin", "viewer", "none"}
-        used_reserved = sorted(v.keys() & reserved_roles)
+        # 'none' is the deny sentinel for proxy.default_role, where it is matched
+        # case-insensitively, so every casing of it has to be reserved here
+        used_reserved = sorted(
+            r for r in v if r in ("admin", "viewer") or r.lower() == "none"
+        )
         if used_reserved:
             raise ValueError(
                 f"Reserved role name(s) {', '.join(used_reserved)} cannot be used as custom roles."

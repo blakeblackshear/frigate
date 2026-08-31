@@ -214,6 +214,18 @@ class TestReservedRoleNames(unittest.TestCase):
             AuthConfig(roles={"none": ["front_door"], "admin": ["front_door"]})
         self.assertIn("admin, none", str(ctx.exception))
 
+    def test_none_reserved_in_every_casing(self):
+        """proxy.default_role folds case, so a 'None' role would be unreachable."""
+        for name in ("None", "NONE", "nOnE"):
+            with self.subTest(role=name):
+                with self.assertRaises(ValidationError):
+                    AuthConfig(roles={name: ["front_door"]})
+
+    def test_case_variant_of_a_normal_role_still_allowed(self):
+        """Only 'none' folds case; other role names are untouched."""
+        config = AuthConfig(roles={"Operator": ["front_door"]})
+        self.assertEqual(config.roles["Operator"], ["front_door"])
+
 
 class TestProxyAuthSecretEnvString(unittest.TestCase):
     def setUp(self):
