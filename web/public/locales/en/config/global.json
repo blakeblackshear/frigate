@@ -212,7 +212,7 @@
     },
     "default_role": {
       "label": "Default role",
-      "description": "Default role assigned to proxy-authenticated users when no role mapping applies."
+      "description": "Default role assigned to proxy-authenticated users when no role mapping applies. Set to 'none' to deny access to unmapped users."
     },
     "separator": {
       "label": "Separator character",
