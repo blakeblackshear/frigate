@@ -95,7 +95,7 @@
     "strftime": "^0.10.3",
     "swr": "^2.4.1",
     "tailwind-merge": "^2.4.0",
-    "tailwind-scrollbar": "^3.1.0",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
     "use-long-press": "^3.2.0",
     "vaul": "^1.1.2",
