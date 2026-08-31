@@ -174,7 +174,6 @@ export default function JSMpegPlayer({
             streamType: "jsmpeg",
             bandwidth: Math.round(bitrate),
             totalFrames: frameCount,
-            latency: undefined,
             droppedFrames: undefined,
             decodedFrames: undefined,
             droppedFrameRate: undefined,

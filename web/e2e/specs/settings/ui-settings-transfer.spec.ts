@@ -18,15 +18,20 @@ const OUTDOOR_LAYOUT = [
   { i: "backyard", x: 6, y: 0, w: 6, h: 4 },
 ];
 
+// a camera as an export from before streaming technology selection carries
+// it, so tests can assert both what a pre-feature file writes and what the
+// technology adds on top
+const FRONT_DOOR_WITHOUT_TECHNOLOGY = {
+  streamName: "front_door",
+  streamType: "smart",
+  compatibilityMode: false,
+  playAudio: false,
+  volume: 1,
+};
+
 const STREAMING_SETTINGS = {
   outdoor: {
-    front_door: {
-      streamName: "front_door",
-      streamType: "smart",
-      compatibilityMode: false,
-      playAudio: false,
-      volume: 1,
-    },
+    front_door: { ...FRONT_DOOR_WITHOUT_TECHNOLOGY, playerMode: "webrtc" },
   },
 };
 
@@ -340,6 +345,7 @@ test.describe("UI settings import/export @medium", () => {
         garage: {
           streamName: "garage",
           streamType: "continuous",
+          playerMode: "jsmpeg",
           compatibilityMode: true,
           playAudio: true,
           volume: 0.5,
@@ -375,6 +381,77 @@ test.describe("UI settings import/export @medium", () => {
       },
     });
   });
+
+  test("drops only the streaming technology when its value is unrecognized", async ({
+    frigateApp,
+  }) => {
+    // a hand-edited file, or an export from a future Frigate that added a
+    // technology this build does not know: the camera's other settings still
+    // import rather than the whole file failing validation
+    await frigateApp.goto("/settings?page=uiSettings");
+
+    await chooseImportFile(
+      frigateApp.page,
+      importPayload({
+        sections: {
+          layouts: {},
+          streaming: {
+            outdoor: {
+              front_door: {
+                ...FRONT_DOOR_WITHOUT_TECHNOLOGY,
+                playerMode: "quantum",
+              },
+            },
+          },
+          preferences: {},
+        },
+      }),
+    );
+
+    await expect(
+      frigateApp.page.getByText("Streaming settings (1 camera)"),
+    ).toBeVisible();
+
+    await confirmImport(frigateApp.page);
+
+    expect(await readIdb(frigateApp.page, STREAMING_KEY)).toEqual({
+      outdoor: { front_door: FRONT_DOOR_WITHOUT_TECHNOLOGY },
+    });
+  });
+
+  test("clears a stored streaming technology when the file predates it", async ({
+    frigateApp,
+  }) => {
+    // import replaces whole camera objects, as it already does for streamName
+    // and volume, so a pre-feature export resets the technology rather than
+    // leaving the local choice in place
+    await frigateApp.goto("/settings?page=uiSettings");
+
+    await writeIdb(frigateApp.page, { [STREAMING_KEY]: STREAMING_SETTINGS });
+    await chooseImportFile(
+      frigateApp.page,
+      importPayload({
+        sections: {
+          layouts: {},
+          streaming: {
+            outdoor: { front_door: FRONT_DOOR_WITHOUT_TECHNOLOGY },
+          },
+          preferences: {},
+        },
+      }),
+    );
+
+    await expect(
+      frigateApp.page.getByText("Streaming settings (1 camera)"),
+    ).toBeVisible();
+
+    await confirmImport(frigateApp.page);
+
+    expect(await readIdb(frigateApp.page, STREAMING_KEY)).toEqual({
+      outdoor: { front_door: FRONT_DOOR_WITHOUT_TECHNOLOGY },
+    });
+  });
+
   test("rejects a file that is not valid JSON", async ({ frigateApp }) => {
     await frigateApp.goto("/settings?page=uiSettings");
 

@@ -10,6 +10,7 @@ export type TransferSection = "layouts" | "streaming" | "preferences";
 const cameraStreamingSettingsSchema = z.object({
   streamName: z.string(),
   streamType: z.enum(["no-streaming", "smart", "continuous"]),
+  playerMode: z.enum(["mse", "webrtc", "jsmpeg"]).optional().catch(undefined),
   compatibilityMode: z.boolean(),
   playAudio: z.boolean(),
   volume: z.number(),

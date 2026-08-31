@@ -36,14 +36,6 @@
       "title": "Bandwidth:",
       "short": "Bandwidth"
     },
-    "latency": {
-      "title": "Latency:",
-      "value": "{{seconds}} seconds",
-      "short": {
-        "title": "Latency",
-        "value": "{{seconds}} sec"
-      }
-    },
     "totalFrames": "Total Frames:",
     "droppedFrames": {
       "title": "Dropped Frames:",

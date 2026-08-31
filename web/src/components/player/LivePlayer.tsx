@@ -98,7 +98,6 @@ export default function LivePlayer({
   const [stats, setStats] = useState<PlayerStatsType>({
     streamType: "-",
     bandwidth: 0, // in kBps
-    latency: undefined, // in seconds
     totalFrames: 0,
     droppedFrames: undefined,
     decodedFrames: 0,
@@ -363,7 +362,11 @@ export default function LivePlayer({
       {cameraEnabled &&
         !offline &&
         (!showStillWithoutActivity || isReEnabling) &&
-        !liveReady && <ActivityIndicator />}
+        !liveReady && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ActivityIndicator />
+          </div>
+        )}
 
       {((showStillWithoutActivity && !liveReady) || liveReady) &&
         objects.length > 0 && (
