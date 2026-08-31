@@ -7197,13 +7197,17 @@ paths:
           in: query
           required: false
           schema:
-            type: number
+            anyOf:
+              - type: number
+              - type: 'null'
             title: After
         - name: before
           in: query
           required: false
           schema:
-            type: number
+            anyOf:
+              - type: number
+              - type: 'null'
             title: Before
       responses:
         '200':
