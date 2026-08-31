@@ -1,4 +1,4 @@
-aiofiles == 24.1.*
+aiofiles == 25.1.*
 click == 8.1.*
 # FastAPI
 aiohttp == 3.12.*
