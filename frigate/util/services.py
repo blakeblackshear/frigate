@@ -911,8 +911,8 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
         return results
 
 
-def get_jetson_stats() -> dict[int, dict] | None:
-    results = {}
+def get_jetson_stats() -> dict[str, str] | None:
+    results: dict[str, str] = {}
 
     try:
         results["mem"] = "-"  # no discrete gpu memory
