@@ -165,16 +165,22 @@ export default function LiveCameraView({
       Object.values(camera.live.streams)[0],
     );
 
-  const [userPreferredLiveMode, setUserPreferredLiveMode] =
-    useUserPersistence<LivePlayerMode>(
-      `${camera.name}-preferred-live-mode`,
-      "mse",
-    );
-
-  const [forceLowBandwidth, setForceLowBandwidth] = useUserPersistence<boolean>(
-    `${camera.name}-force-low-bandwidth`,
-    false,
+  const [
+    userPreferredLiveMode,
+    setUserPreferredLiveMode,
+    userPreferredLiveModeLoaded,
+  ] = useUserPersistence<LivePlayerMode>(
+    `${camera.name}-preferred-live-mode`,
+    "mse",
   );
+
+  const [forceLowBandwidth, setForceLowBandwidth, forceLowBandwidthLoaded] =
+    useUserPersistence<boolean>(`${camera.name}-force-low-bandwidth`, false);
+
+  // useUserPersistence seeds state with the defaults and loads asynchronously,
+  // so until this is true the values above are not the user's choices.
+  const preferencesLoaded =
+    streamNameLoaded && userPreferredLiveModeLoaded && forceLowBandwidthLoaded;
 
   const isRestreamed = useMemo(
     () =>
@@ -216,6 +222,11 @@ export default function LiveCameraView({
   const { globallyAvailable: webRTCGloballyAvailable } =
     useWebRTCGloballyAvailable();
 
+  // "checking" means the probe has not answered yet, and it re-enters that on
+  // every mount, so treating it as unavailable downgrades the saved choice.
+  const webRTCVerdictPending = webRTCAvailability.reason === "checking";
+  const webRTCUsable = isWebRTCAvailable || webRTCVerdictPending;
+
   // Resolves the saved preference without overwriting it. Transient error
   // fallbacks layer on top in preferredLiveMode.
   const resolvedUserMode = useMemo<LivePlayerMode>(() => {
@@ -229,14 +240,14 @@ export default function LiveCameraView({
       !userPreferredLiveMode || userPreferredLiveMode === "jsmpeg"
         ? "mse"
         : userPreferredLiveMode;
-    if (requested === "webrtc" && !isWebRTCAvailable) {
+    if (requested === "webrtc" && !webRTCUsable) {
       return mseSupported ? "mse" : "jsmpeg";
     }
     if (requested === "mse" && !mseSupported) {
-      return isWebRTCAvailable ? "webrtc" : "jsmpeg";
+      return webRTCUsable ? "webrtc" : "jsmpeg";
     }
     return requested;
-  }, [userPreferredLiveMode, isWebRTCAvailable, isRestreamed]);
+  }, [userPreferredLiveMode, webRTCUsable, isRestreamed]);
 
   const { twoWayAudio: supports2WayTalk, audioOutput: supportsAudioOutput } =
     useMemo(() => detectCameraAudioFeatures(cameraMetadata), [cameraMetadata]);
@@ -456,6 +467,14 @@ export default function LiveCameraView({
     setLowBandwidth(false);
   }, [userPreferredLiveMode, streamName, forceLowBandwidth]);
 
+  // A fallback chosen before the verdict arrived was made on incomplete info.
+  useEffect(() => {
+    if (!webRTCVerdictPending) {
+      setWebRTC(false);
+      setLowBandwidth(false);
+    }
+  }, [webRTCVerdictPending]);
+
   useKeyboardListener(["m", "Escape"], (key, modifiers) => {
     if (!modifiers.down) {
       return true;
@@ -566,10 +585,9 @@ export default function LiveCameraView({
   const handleError = useCallback(
     (e: LivePlayerError) => {
       if (e) {
-        // Without the availability guard, a configured-but-unusable WebRTC
-        // (e.g. a default stun:8555 that can't connect) latches on with no mode
-        // change, and the disconnected MSE player never reconnects to fall back.
-        if (!webRTC && isWebRTCAvailable) {
+        // WebRTC can now be the user's own choice, so the fallback flag no
+        // longer implies untried: hopping to the mode that just failed sticks.
+        if (preferredLiveMode !== "webrtc" && webRTCUsable) {
           setWebRTC(true);
         } else {
           setWebRTC(false);
@@ -577,7 +595,7 @@ export default function LiveCameraView({
         }
       }
     },
-    [isWebRTCAvailable, webRTC],
+    [preferredLiveMode, webRTCUsable],
   );
 
   return (
@@ -844,6 +862,7 @@ export default function LiveCameraView({
                   micEnabled={mic}
                   iOSCompatFullScreen={isIOS}
                   preferredLiveMode={preferredLiveMode}
+                  autoLive={preferencesLoaded}
                   useWebGL={true}
                   streamName={streamName ?? ""}
                   pip={pip}
