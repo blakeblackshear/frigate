@@ -5,7 +5,7 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from collections import deque
-from multiprocessing import Queue, Value
+from multiprocessing import Event, Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
@@ -330,6 +330,7 @@ class ObjectDetectProcess:
         self.detection_queue = detection_queue
         self.avg_inference_speed = Value("d", 0.01)
         self.detection_start = Value("d", 0.0)
+        self.process_stop_event: MpEvent | None = None
         self.detect_process: FrigateProcess | None = None
         self.config = config
         self.detector_config = detector_config
@@ -338,11 +339,17 @@ class ObjectDetectProcess:
 
     def stop(self) -> None:
         # if the process has already exited on its own, just return
-        if self.detect_process and self.detect_process.exitcode:
+        if self.detect_process and self.detect_process.exitcode is not None:
             return
 
         if self.detect_process is None:
             return
+
+        # Retire this detector generation before waiting for it. If an in-flight
+        # inference returns during the grace period, the runner exits instead of
+        # re-entering detection_queue.get() and risking a locked queue on kill.
+        if self.process_stop_event is not None:
+            self.process_stop_event.set()
 
         logging.info("Waiting for detection process to exit gracefully...")
         self.detect_process.join(timeout=30)
@@ -353,9 +360,11 @@ class ObjectDetectProcess:
         logging.info("Detection process has exited...")
 
     def start_or_restart(self) -> None:
-        self.detection_start.value = 0.0  # type: ignore[attr-defined]
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
+
+        self.detection_start.value = 0.0  # type: ignore[attr-defined]
+        self.process_stop_event = Event()
 
         # Async path for MemryX
         if self.detector_config.type == "memryx":
@@ -367,7 +376,7 @@ class ObjectDetectProcess:
                 self.detection_start,
                 self.config,
                 self.detector_config,
-                self.stop_event,
+                self.process_stop_event,
             )
         else:
             self.detect_process = DetectorRunner(
@@ -378,7 +387,7 @@ class ObjectDetectProcess:
                 self.detection_start,
                 self.config,
                 self.detector_config,
-                self.stop_event,
+                self.process_stop_event,
             )
         self.detect_process.start()
 
