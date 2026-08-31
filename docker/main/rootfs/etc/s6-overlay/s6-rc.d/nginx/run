@@ -80,21 +80,48 @@ cp -r /usr/local/nginx/conf/. /tmp/nginx/conf/
 
 set_worker_processes
 
-# ensure the directory for ACME challenges exists
-mkdir -p /etc/letsencrypt/www
-
-# Create self signed certs if needed
+# TLS certs: user-mounted certs at /etc/letsencrypt/live/frigate (documented
+# contract) always win; otherwise fall back to a self-signed cert persisted in
+# /config/tls, which stays writable under a read-only root filesystem.
 letsencrypt_path=/etc/letsencrypt/live/frigate
-mkdir -p $letsencrypt_path
+selfsigned_path=/config/tls
 
-if [ ! \( -f "$letsencrypt_path/privkey.pem" -a -f "$letsencrypt_path/fullchain.pem" \) ]; then
-    echo "[INFO] No TLS certificate found. Generating a self signed certificate..."
-    openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
-        -subj "/O=FRIGATE DEFAULT CERT/CN=*" \
-        -keyout "$letsencrypt_path/privkey.pem" -out "$letsencrypt_path/fullchain.pem" 2>/dev/null
-    chmod 600 "$letsencrypt_path/privkey.pem"
-    chmod 644 "$letsencrypt_path/fullchain.pem"
+if [ -f "$letsencrypt_path/privkey.pem" ] && [ -f "$letsencrypt_path/fullchain.pem" ]; then
+    cert_path="$letsencrypt_path"
+else
+    cert_path="$selfsigned_path"
+
+    # Root writing into /config follows any symlink planted there, and /config
+    # is owned by whoever the host mount says, not by root. Generate as the
+    # runtime user wherever we are going to drop to it; the escape hatch keeps
+    # root all the way through, so that path is refused rather than dropped.
+    gen=()
+    if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+        gen=(s6-setuidgid frigate)
+    elif [[ "$(id -u)" -eq 0 ]]; then
+        for link in "$cert_path" "$cert_path/privkey.pem" "$cert_path/fullchain.pem"; do
+            if [[ -L "$link" ]]; then
+                echo "[ERROR] ${link} is a symlink; refusing to write TLS material through it as root" >&2
+                exit 1
+            fi
+        done
+    fi
+
+    "${gen[@]}" mkdir -p "$cert_path"
+
+    if [ ! \( -f "$cert_path/privkey.pem" -a -f "$cert_path/fullchain.pem" \) ]; then
+        echo "[INFO] No TLS certificate found. Generating a self signed certificate..."
+        "${gen[@]}" openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
+            -subj "/O=FRIGATE DEFAULT CERT/CN=*" \
+            -keyout "$cert_path/privkey.pem" -out "$cert_path/fullchain.pem" 2>/dev/null
+        "${gen[@]}" chmod 600 "$cert_path/privkey.pem"
+        "${gen[@]}" chmod 644 "$cert_path/fullchain.pem"
+    fi
 fi
+
+# ACME challenges are only served from a writable rootfs; skipping the mkdir
+# under read_only leaves the location 404ing, which is the same as unused
+mkdir -p /etc/letsencrypt/www 2>/dev/null || true
 
 # nginx settings are read once; both templates consume them
 nginx_settings=$(python3 /usr/local/nginx/get_nginx_settings.py)
@@ -104,8 +131,10 @@ echo "$nginx_settings" | \
     tempio -template /usr/local/nginx/templates/base_path.gotmpl \
            -out /tmp/nginx/conf/base_path.conf
 
-# build templates for additional network settings
+# build templates for additional network settings; listen.conf is the only
+# template that needs the resolved cert directory
 echo "$nginx_settings" | \
+    jq --arg p "$cert_path" '.tls.cert_path = $p' | \
     tempio -template /usr/local/nginx/templates/listen.gotmpl \
            -out /tmp/nginx/conf/listen.conf
 
@@ -118,9 +147,12 @@ if [[ "$(id -u)" -eq 0 && "$runs_as_root" -eq 0 ]]; then
     # nginx reopens /dev/stdout by path for its logs, and s6 made the pipe
     # root-owned 0600; without this the non-root master exits EACCES
     chown frigate /dev/stdout
-    # self-signed certs are root-generated; tolerant because mounted certs may be :ro
-    if [ -f "$letsencrypt_path/privkey.pem" ]; then
-        chown frigate:frigate "$letsencrypt_path/privkey.pem" "$letsencrypt_path/fullchain.pem" 2>/dev/null || true
+    # Only mounted certs need handing over; the self-signed pair is already
+    # owned by the runtime user that generated it. Never chown the /config copy:
+    # chown follows symlinks, so it would retarget onto any root file the
+    # runtime user pointed it at. Tolerant because mounted certs may be :ro.
+    if [ "$cert_path" = "$letsencrypt_path" ] && [ -f "$cert_path/privkey.pem" ]; then
+        chown frigate:frigate "$cert_path/privkey.pem" "$cert_path/fullchain.pem" 2>/dev/null || true
     fi
 fi
 

@@ -66,7 +66,17 @@ def main() -> int:
     path = sys.argv[1]
     do_chown = "--chown" in sys.argv[2:]
 
-    fd = open_nofollow(path)
+    try:
+        fd = open_nofollow(path)
+    except PermissionError:
+        print(
+            f"[WARN] {path} is not writable by uid {os.geteuid()}, so HomeKit "
+            "pairing changes will not persist. It is owned by the go2rtc user "
+            "from an earlier run in the default mode. To fix, on the host run: "
+            f"chown {os.geteuid()}:{os.getegid()} <your config dir>/{os.path.basename(path)}"
+        )
+        return 0
+
     try:
         content = os.read(fd, MAX_BYTES).decode("utf-8", "replace")
         normalized = normalize(content)

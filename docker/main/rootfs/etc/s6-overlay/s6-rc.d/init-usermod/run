@@ -79,6 +79,15 @@ fi
 
 # EXTRA_GROUPS: numeric host GIDs granting device access (e.g. host render/video)
 if [[ -n "${EXTRA_GROUPS:-}" ]]; then
+    # groupadd and usermod -aG both write /etc/group. Checked up front so a
+    # read-only rootfs reports the real problem instead of dying mid-loop.
+    if [[ ! -w /etc/group ]]; then
+        echo "[ERROR] EXTRA_GROUPS needs a writable /etc and is not compatible with read_only: true." >&2
+        echo "[ERROR] Use docker's group_add: with the same GIDs instead; it needs no writes inside the container." >&2
+        echo "[ERROR] See https://docs.frigate.video/configuration/non_root for the compatibility matrix." >&2
+        exit 1
+    fi
+
     for gid in ${EXTRA_GROUPS//,/ }; do
         if ! [[ "$gid" =~ ^[0-9]+$ ]] || [[ "$gid" -eq 0 ]]; then
             echo "[ERROR] EXTRA_GROUPS must be nonzero numeric GIDs, got '${gid}'" >&2
