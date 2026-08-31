@@ -170,6 +170,31 @@ class TestDefaultRoleNone(unittest.TestCase):
         role = resolve_role(headers, self.proxy_config, set())
         self.assertEqual(role, "none")
 
+    def test_default_role_none_is_case_insensitive(self):
+        """Capitalized spellings must deny, not fall back to viewer."""
+        for spelling in ("None", "NONE", "nOnE", " none "):
+            with self.subTest(default_role=spelling):
+                config = ProxyConfig(
+                    auth_secret=None,
+                    default_role=spelling,
+                    separator="|",
+                    header_map=HeaderMappingConfig(
+                        user="x-remote-user",
+                        role="x-remote-role",
+                        role_map={"admin": ["group_admin"]},
+                    ),
+                )
+                self.assertEqual(config.default_role, "none")
+                role = resolve_role(
+                    {"x-remote-role": "group_unknown"}, config, self.config_roles
+                )
+                self.assertEqual(role, "none")
+
+    def test_other_role_names_stay_case_sensitive(self):
+        """Only the deny sentinel is normalized; role names are untouched."""
+        config = ProxyConfig(default_role="Operator")
+        self.assertEqual(config.default_role, "Operator")
+
 
 class TestReservedRoleNames(unittest.TestCase):
     def test_reserved_names_rejected(self):
@@ -182,6 +207,12 @@ class TestReservedRoleNames(unittest.TestCase):
     def test_custom_role_still_allowed(self):
         config = AuthConfig(roles={"operator": ["front_door"]})
         self.assertEqual(config.roles["operator"], ["front_door"])
+
+    def test_error_names_the_offending_role(self):
+        """The message must say which name to rename, in a stable order."""
+        with self.assertRaises(ValidationError) as ctx:
+            AuthConfig(roles={"none": ["front_door"], "admin": ["front_door"]})
+        self.assertIn("admin, none", str(ctx.exception))
 
 
 class TestProxyAuthSecretEnvString(unittest.TestCase):

@@ -78,12 +78,12 @@ class AuthConfig(FrigateBaseModel):
                     f"Invalid role name '{role}'. Must be alphanumeric with underscores."
                 )
 
-        # Ensure built-in role names and the 'none' deny sentinel used by
-        # proxy.default_role are not used as custom role names
+        # 'none' is the deny sentinel for proxy.default_role, not a real role
         reserved_roles = {"admin", "viewer", "none"}
-        if v.keys() & reserved_roles:
+        used_reserved = sorted(v.keys() & reserved_roles)
+        if used_reserved:
             raise ValueError(
-                f"Reserved roles {reserved_roles} cannot be used as custom roles."
+                f"Reserved role name(s) {', '.join(used_reserved)} cannot be used as custom roles."
             )
 
         # Ensure no role has an empty camera list
