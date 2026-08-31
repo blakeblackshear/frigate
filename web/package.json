@@ -63,7 +63,7 @@
     "framer-motion": "^12.38.0",
     "hls.js": "^1.6.15",
     "i18next": "^24.2.0",
-    "i18next-http-backend": "^3.0.1",
+    "i18next-http-backend": "^3.0.5",
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",
     "js-yaml": "^4.1.1",
