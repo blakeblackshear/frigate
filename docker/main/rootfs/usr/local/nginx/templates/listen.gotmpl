@@ -8,8 +8,8 @@ listen {{ .listen.internal }};
     listen {{ .listen.external }} ssl;
     {{ if .ipv6.enabled }}listen [::]:{{ .listen.external_port }} ssl;{{ end }}
 
-    ssl_certificate /etc/letsencrypt/live/frigate/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/frigate/privkey.pem;
+    ssl_certificate {{ .tls.cert_path }}/fullchain.pem;
+    ssl_certificate_key {{ .tls.cert_path }}/privkey.pem;
 
     # generated 2024-06-01, Mozilla Guideline v5.7, nginx 1.25.3, OpenSSL 1.1.1w, modern configuration, no OCSP
     # https://ssl-config.mozilla.org/#server=nginx&version=1.25.3&config=modern&openssl=1.1.1w&ocsp=false&guideline=5.7
