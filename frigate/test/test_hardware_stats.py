@@ -12,6 +12,7 @@ from frigate.stats import hardware
 from frigate.stats.hardware import (
     HardwarePollResult,
     HardwareStats,
+    _gpu_device_nodes_exist,
     _hwaccel_hardware,
     get_hardware_temperatures,
 )
@@ -35,6 +36,13 @@ class HardwareStatsTestCase(unittest.TestCase):
         self.subscriber = subscriber.start()
         self.addCleanup(subscriber.stop)
         self.subscriber.return_value.check_for_updates.return_value = {}
+
+        # probed hardware is treated as passed into the container by default
+        device_nodes = patch(
+            "frigate.stats.hardware._gpu_device_nodes_exist", return_value=True
+        )
+        self.device_nodes = device_nodes.start()
+        self.addCleanup(device_nodes.stop)
 
         hardware._is_amd_vaapi.cache_clear()
         self.addCleanup(hardware._is_amd_vaapi.cache_clear)
@@ -114,6 +122,33 @@ class TestHwaccelHardware(HardwareStatsTestCase):
             hardware.hardware_prober, "probe", return_value=[found("cpu")]
         ):
             self.assertIsNone(_hwaccel_hardware("preset-vulkan"))
+
+
+class TestGpuDeviceNodes(HardwareStatsTestCase):
+    def test_host_gpu_without_device_nodes_is_skipped(self):
+        # /proc and /sys show the host's nvidia card even when it is not
+        # passed into the container, so resolution falls to the intel GPU
+        self.device_nodes.side_effect = lambda name: name != "nvidia"
+
+        with patch.object(
+            hardware.hardware_prober,
+            "probe",
+            return_value=[found("onnx:nvidia"), found("openvino:GPU")],
+        ):
+            self.assertEqual(hardware._present_gpu(), "intel_gpu")
+
+    def test_device_node_globs(self):
+        with patch("frigate.stats.hardware.glob", return_value=[]):
+            self.assertFalse(_gpu_device_nodes_exist("nvidia"))
+            self.assertFalse(_gpu_device_nodes_exist("intel_gpu"))
+            self.assertFalse(_gpu_device_nodes_exist("amd_gpu"))
+            self.assertTrue(_gpu_device_nodes_exist("jetson"))
+
+        with patch(
+            "frigate.stats.hardware.glob", return_value=["/dev/nvidia0"]
+        ) as dev_glob:
+            self.assertTrue(_gpu_device_nodes_exist("nvidia"))
+            dev_glob.assert_called_with("/dev/nvidia*")
 
 
 class TestScanFfmpeg(HardwareStatsTestCase):

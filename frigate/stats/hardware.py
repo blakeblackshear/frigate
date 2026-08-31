@@ -7,6 +7,7 @@ from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
 from functools import cache, partial
+from glob import glob
 from typing import Any
 
 from frigate.config import FrigateConfig
@@ -16,7 +17,7 @@ from frigate.config.camera.updater import (
 )
 from frigate.config.classification import SemanticSearchModelEnum
 from frigate.const import FFMPEG_HWACCEL_AMF, FFMPEG_HWACCEL_VULKAN
-from frigate.detectors.hardware import hardware_prober
+from frigate.detectors.hardware import DEV_ROOT, hardware_prober
 from frigate.util.services import (
     get_amd_gpu_stats,
     get_axcl_npu_stats,
@@ -66,12 +67,27 @@ def _present_hardware() -> set[str]:
     return {hardware.key for hardware in hardware_prober.probe()}
 
 
+def _gpu_device_nodes_exist(name: str) -> bool:
+    """Whether the GPU's device nodes are visible to this container.
+
+    The prober reads /proc and /sys, which show the host kernel's hardware
+    even when a device was not passed into the container, so a GPU is only
+    usable when its device nodes exist too.
+    """
+    if name == "nvidia":
+        return bool(glob(f"{DEV_ROOT}/nvidia*"))
+    elif name in ("amd_gpu", "intel_gpu"):
+        return bool(glob(f"{DEV_ROOT}/dri/*"))
+
+    return True
+
+
 def _present_gpu() -> str | None:
-    """The hardware name of the first GPU found on this system, if any."""
+    """The hardware name of the first usable GPU found on this system, if any."""
     present = _present_hardware()
 
     for key, name in GPU_HARDWARE_KEYS.items():
-        if key in present:
+        if key in present and _gpu_device_nodes_exist(name):
             return name
 
     return None
@@ -439,6 +455,7 @@ class HardwareStats:
         if (
             any(c.enabled and c.device == "GPU" for c in transcription_configs)
             and "onnx:nvidia" in _present_hardware()
+            and _gpu_device_nodes_exist("nvidia")
         ):
             names.add("nvidia")
 
