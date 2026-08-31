@@ -1,7 +1,8 @@
 """Unit tests for recordings/media API endpoints."""
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from unittest.mock import patch
 
 import pytz
 from fastapi import Request
@@ -1837,6 +1838,27 @@ class TestHttpMedia(BaseTestHttp):
                     assert [
                         recording["id"] for recording in response.json()
                     ] == expected_ids
+
+    def test_recordings_default_range_follows_the_request_clock(self):
+        """Omitted bounds resolve at request time, not at module import time."""
+        uptime = timedelta(hours=2)
+        recorded_at = (datetime.now() + uptime).timestamp()
+
+        class UptimeDatetime(datetime):
+            """Stands in for a process that booted `uptime` ago."""
+
+            @classmethod
+            def now(cls, tz=None):
+                return datetime.now(tz) + uptime
+
+        with AuthTestClient(self.app) as client:
+            self._insert_recording("after_boot", recorded_at - 20, recorded_at - 10)
+
+            with patch("frigate.api.record.datetime", UptimeDatetime):
+                response = client.get("/front_door/recordings")
+
+            assert response.status_code == 200
+            assert [recording["id"] for recording in response.json()] == ["after_boot"]
 
     def test_vod_handles_all_range_relations(self):
         """VOD clips every interval relation with positive playback duration."""
