@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { baseUrl } from "@/api/baseUrl";
+import { resetAppState } from "@/api/auth-redirect";
 
 import { useTranslation } from "react-i18next";
 
@@ -58,7 +58,9 @@ export default function RestartDialog({
 
   useEffect(() => {
     if (countdown === 0) {
-      window.location.href = baseUrl;
+      // A full page reload here could open a browser overlay in an
+      // installed PWA, so reset the app client-side instead
+      resetAppState();
     }
   }, [countdown]);
 
@@ -68,7 +70,7 @@ export default function RestartDialog({
   };
 
   const handleForceReload = () => {
-    window.location.href = baseUrl;
+    resetAppState();
   };
 
   return (

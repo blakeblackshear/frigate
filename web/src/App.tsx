@@ -1,12 +1,12 @@
 import Providers from "@/context/providers";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Wrapper from "@/components/Wrapper";
 import Sidebar from "@/components/navigation/Sidebar";
 
 import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
 import Bottombar from "./components/navigation/Bottombar";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { Redirect } from "./components/navigation/Redirect";
 import { cn } from "./lib/utils";
 import { isPWA } from "./utils/isPWA";
@@ -14,7 +14,11 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import useSWR from "swr";
 import { FrigateConfig } from "./types/frigateConfig";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { isRedirectingToLogin } from "@/api/auth-redirect";
+import {
+  isRedirectingToLogin,
+  registerAppStateReset,
+  registerLoginNavigator,
+} from "@/api/auth-redirect";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -30,21 +34,61 @@ const Chat = lazy(() => import("@/pages/Chat"));
 const Logs = lazy(() => import("@/pages/Logs"));
 const AccessDenied = lazy(() => import("@/pages/AccessDenied"));
 const Replay = lazy(() => import("@/pages/Replay"));
+const LoginPage = lazy(() => import("@/pages/LoginPage"));
 
 function App() {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
 
+  // Incremented to remount the whole provider tree, giving the app a
+  // freshly-loaded state (auth, caches, websocket) without the document
+  // navigation a real reload would need (see resetAppState).
+  const [appEpoch, setAppEpoch] = useState(0);
+
+  useEffect(() => {
+    registerAppStateReset(() => setAppEpoch((epoch) => epoch + 1));
+    return () => registerAppStateReset(null);
+  }, []);
+
   return (
-    <Providers>
+    <Providers key={appEpoch}>
       <BrowserRouter basename={window.baseUrl}>
+        <LoginNavigatorRegistrar />
         <Wrapper>
-          {config?.safe_mode ? <SafeAppView /> : <DefaultAppView />}
+          <Suspense
+            fallback={
+              <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+            }
+          >
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/*"
+                element={
+                  config?.safe_mode ? <SafeAppView /> : <DefaultAppView />
+                }
+              />
+            </Routes>
+          </Suspense>
         </Wrapper>
       </BrowserRouter>
     </Providers>
   );
+}
+
+// Makes client-side navigation available to the login redirect helper so
+// auth failures never trigger a full document navigation, which can open
+// an out-of-scope browser overlay in an installed PWA.
+function LoginNavigatorRegistrar() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    registerLoginNavigator(navigate);
+    return () => registerLoginNavigator(null);
+  }, [navigate]);
+
+  return null;
 }
 
 function DefaultAppView() {

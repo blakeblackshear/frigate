@@ -2,11 +2,7 @@ import { useContext, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { AuthContext } from "@/context/auth-context";
 import ActivityIndicator from "../indicators/activity-indicator";
-import {
-  isRedirectingToLogin,
-  setRedirectingToLogin,
-} from "@/api/auth-redirect";
-import { baseUrl } from "@/api/baseUrl";
+import { isRedirectingToLogin, redirectToLogin } from "@/api/auth-redirect";
 
 export default function ProtectedRoute({
   requiredRoles,
@@ -15,17 +11,13 @@ export default function ProtectedRoute({
 }) {
   const { auth } = useContext(AuthContext);
 
-  // Redirect to login page when not authenticated
-  // don't use <Navigate> because we need a full page load to reset state
+  // Redirect to the login page when not authenticated. This uses
+  // client-side navigation so an installed PWA stays inside its own
+  // window. State is reset after a successful login instead of through
+  // a full page load (see resetAppState).
   useEffect(() => {
-    if (
-      !auth.isLoading &&
-      auth.isAuthenticated &&
-      !auth.user &&
-      !isRedirectingToLogin()
-    ) {
-      setRedirectingToLogin(true);
-      window.location.href = `${baseUrl}login`;
+    if (!auth.isLoading && auth.isAuthenticated && !auth.user) {
+      redirectToLogin();
     }
   }, [auth.isLoading, auth.isAuthenticated, auth.user]);
 

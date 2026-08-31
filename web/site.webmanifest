@@ -2,6 +2,7 @@
   "name": "Frigate",
   "short_name": "Frigate",
   "start_url": "/BASE_PATH/",
+  "scope": "/BASE_PATH/",
   "icons": [
     {
       "src": "/BASE_PATH/images/android-chrome-512x512.png",

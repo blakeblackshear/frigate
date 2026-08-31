@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { baseUrl } from "../../api/baseUrl";
+import { resetAppState } from "../../api/auth-redirect";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         username: profileRes.data.username,
         role: profileRes.data.role || "viewer",
       });
-      window.location.href = baseUrl;
+      // A full page reload here could open a browser overlay in an
+      // installed PWA, so reset the app client-side instead
+      resetAppState();
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const err = error as AxiosError;
