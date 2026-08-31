@@ -62,6 +62,9 @@ paths:
                 type: string
         '401':
           description: Authentication Failed
+        '403':
+          description: Access Denied (proxy user resolved to a default role of 
+            'none')
       security: []
       x-required-role: public
   /profile:

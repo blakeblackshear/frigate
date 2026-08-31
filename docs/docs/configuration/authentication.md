@@ -216,9 +216,9 @@ A default role can be provided. Any value in the mapped `role` header will overr
 
 Navigate to <NavPath path="Settings > System > Proxy" /> and set the default role.
 
-| Field            | Description                                                   |
-| ---------------- | ------------------------------------------------------------- |
-| **Default role** | Fallback role when no role header is present (e.g., `viewer`) |
+| Field            | Description                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| **Default role** | Fallback role when no role header is present (e.g., `viewer`), or `None (deny access)` to reject unmapped users |
 
 </TabItem>
 <TabItem value="yaml">
@@ -231,6 +231,14 @@ proxy:
 
 </TabItem>
 </ConfigTabs>
+
+Setting `default_role` to `none` denies access instead of falling back to a role. Any proxy-authenticated user whose headers do not match an explicit `role_map` entry receives a 403 response. This is useful when the upstream proxy authenticates a broader set of users than should reach Frigate, so that only mapped groups are allowed in.
+
+```yaml
+proxy:
+  ...
+  default_role: none
+```
 
 ## Role mapping
 
@@ -257,7 +265,7 @@ In this example:
 - If the proxy passes a role header containing `sysadmins` or `access-level-security`, the user is assigned the `admin` role.
 - If the proxy passes a role header containing `camera-viewer`, the user is assigned the `viewer` role.
 - If the proxy passes a role header containing `operators`, the user is assigned the `operator` custom role.
-- If no mapping matches, Frigate falls back to `default_role` if configured.
+- If no mapping matches, Frigate falls back to `default_role` if configured, or denies access if `default_role` is `none`.
 - If `role_map` is not defined, Frigate assumes the role header directly contains `admin`, `viewer`, or a custom role name.
 
 **Note on matching semantics:**
@@ -331,7 +339,7 @@ Frigate supports user roles to control access to certain features in the UI and 
 
 - **admin**: Full access to all features, including user management and configuration.
 - **viewer**: Read-only access to the UI and API, including viewing cameras, review items, and historical footage. Configuration editor and settings in the UI are inaccessible.
-- **Custom Roles**: Arbitrary role names (alphanumeric, dots/underscores) with specific camera permissions. These extend the system for granular access (e.g., "operator" for select cameras).
+- **Custom Roles**: Arbitrary role names (alphanumeric, dots/underscores) with specific camera permissions. These extend the system for granular access (e.g., "operator" for select cameras). The names `admin`, `viewer`, and `none` are reserved and cannot be used.
 
 ### Custom Roles and Camera Access
 
