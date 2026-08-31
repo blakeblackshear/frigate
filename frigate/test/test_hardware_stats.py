@@ -398,25 +398,6 @@ class TestUpdateStats(HardwareStatsTestCase):
 
         self.assertLess(time.monotonic() - start, 0.35)
 
-    def test_bandwidth_gated_by_telemetry(self):
-        config = self.make_config(telemetry={"stats": {"network_bandwidth": True}})
-        stats = self.make_stats(config)
-
-        with patch(
-            "frigate.stats.hardware.get_bandwidth_stats",
-            return_value={"123": {"bandwidth": 1.5}},
-        ):
-            all_stats = self.run_stats(stats)
-
-        self.assertEqual(all_stats["bandwidth_usages"], {"123": {"bandwidth": 1.5}})
-
-        stats = self.make_stats(self.make_config())
-
-        with patch("frigate.stats.hardware.get_bandwidth_stats") as bandwidth:
-            self.run_stats(stats)
-
-        bandwidth.assert_not_called()
-
 
 class TestHardwareTemperatures(unittest.TestCase):
     @patch("frigate.stats.hardware.read_temperature", side_effect=[45.0, 55.0])

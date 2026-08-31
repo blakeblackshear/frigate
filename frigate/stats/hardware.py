@@ -21,7 +21,6 @@ from frigate.detectors.hardware import DEV_ROOT, hardware_prober
 from frigate.util.services import (
     get_amd_gpu_stats,
     get_axcl_npu_stats,
-    get_bandwidth_stats,
     get_cpu_stats,
     get_hailo_temps,
     get_intel_gpu_stats,
@@ -294,17 +293,7 @@ class HardwareStats:
             hardware_futures[self._executor.submit(poll)] = name
 
         cpu_future = self._executor.submit(get_cpu_stats)
-        bandwidth_future = (
-            self._executor.submit(get_bandwidth_stats, self.config)
-            if self.config.telemetry.stats.network_bandwidth
-            else None
-        )
-
         futures: list[Future[Any]] = [*hardware_futures, cpu_future]
-
-        if bandwidth_future is not None:
-            futures.append(bandwidth_future)
-
         done, _ = wait(futures, timeout=POLL_TIMEOUT_SECONDS)
 
         gpu_usages: dict[str, dict[str, Any]] = {}
@@ -343,15 +332,6 @@ class HardwareStats:
             else:
                 if cpu_stats:
                     all_stats["cpu_usages"] = cpu_stats
-
-        if bandwidth_future is not None and bandwidth_future in done:
-            try:
-                bandwidth_stats = bandwidth_future.result()
-            except Exception:
-                logger.exception("Failed to collect bandwidth stats")
-            else:
-                if bandwidth_stats:
-                    all_stats["bandwidth_usages"] = bandwidth_stats
 
     def stop(self) -> None:
         self._config_subscriber.stop()
@@ -463,6 +443,10 @@ class HardwareStats:
 
 
 def read_temperature(path: str) -> float | None:
+    """Read a sysfs temperature file, converting millidegrees to degrees.
+
+    Returns None when the file does not exist.
+    """
     if os.path.isfile(path):
         with open(path) as f:
             line = f.readline().strip()

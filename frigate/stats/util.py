@@ -18,6 +18,7 @@ from frigate.stats.hardware import HardwareStats, get_hardware_temperatures
 from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
     calculate_shm_requirements,
+    get_bandwidth_stats,
     get_fs_type,
 )
 from frigate.version import VERSION
@@ -245,6 +246,12 @@ def stats_snapshot(
             )
 
     hardware_stats.update_stats(stats)
+
+    if config.telemetry.stats.network_bandwidth:
+        bandwidth_stats = get_bandwidth_stats(config)
+
+        if bandwidth_stats:
+            stats["bandwidth_usages"] = bandwidth_stats
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
