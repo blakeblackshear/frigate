@@ -1,8 +1,6 @@
 """Utilities for stats."""
 
-import asyncio
 import logging
-import os
 import shutil
 import time
 from json import JSONDecodeError
@@ -16,28 +14,15 @@ from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.object_detection.base import ObjectDetectProcess
+from frigate.stats.hardware import HardwareStats, get_hardware_temperatures
 from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
     calculate_shm_requirements,
-    get_amd_gpu_stats,
-    get_axcl_npu_stats,
-    get_bandwidth_stats,
-    get_cpu_stats,
     get_fs_type,
-    get_hailo_temps,
-    get_intel_gpu_stats,
-    get_jetson_stats,
-    get_nvidia_gpu_stats,
-    get_openvino_npu_stats,
-    get_rockchip_gpu_stats,
-    get_rockchip_npu_stats,
-    is_vaapi_amd_driver,
 )
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
-
-HWACCEL_ERROR_COOLDOWN_SECONDS = 3600
 
 
 def get_latest_version(config: FrigateConfig) -> str:
@@ -78,64 +63,6 @@ def stats_init(
     return stats_tracking
 
 
-def read_temperature(path: str) -> float | None:
-    if os.path.isfile(path):
-        with open(path) as f:
-            line = f.readline().strip()
-            return int(line) / 1000
-    return None
-
-
-def get_temperatures() -> dict[str, float]:
-    temps = {}
-
-    # Get temperatures for all attached Corals
-    base = "/sys/class/apex/"
-    if os.path.isdir(base):
-        for apex in os.listdir(base):
-            temp = read_temperature(os.path.join(base, apex, "temp"))
-            if temp is not None:
-                temps[apex] = temp
-
-    # Get temperatures for Hailo devices
-    temps.update(get_hailo_temps())
-
-    return temps
-
-
-def get_detector_temperature(
-    detector_type: str,
-    detector_index_by_type: dict[str, int],
-) -> float | None:
-    """Get temperature for a specific detector based on its type."""
-    if detector_type == "edgetpu":
-        # Get temperatures for all attached Corals
-        base = "/sys/class/apex/"
-        if os.path.isdir(base):
-            apex_devices = sorted(os.listdir(base))
-            index = detector_index_by_type.get("edgetpu", 0)
-            if index < len(apex_devices):
-                apex_name = apex_devices[index]
-                temp = read_temperature(os.path.join(base, apex_name, "temp"))
-                if temp is not None:
-                    return temp
-    elif detector_type == "hailo8l":
-        # Get temperatures for Hailo devices
-        hailo_temps = get_hailo_temps()
-        if hailo_temps:
-            hailo_device_names = sorted(hailo_temps.keys())
-            index = detector_index_by_type.get("hailo8l", 0)
-            if index < len(hailo_device_names):
-                device_name = hailo_device_names[index]
-                return hailo_temps[device_name]
-    elif detector_type == "rknn":
-        # Rockchip temperatures are handled by the GPU / NPU stats
-        # as there are not detector specific temperatures
-        pass
-
-    return None
-
-
 def get_detector_stats(
     stats_tracking: StatsTrackingTypes,
 ) -> dict[str, dict[str, Any]]:
@@ -161,190 +88,20 @@ def get_detector_stats(
             "pid": pid,
         }
 
-        temp = get_detector_temperature(detector_type, {detector_type: current_index})
+        temps = get_hardware_temperatures(detector_type)
 
-        if temp is not None:
-            detector_stat["temperature"] = round(temp, 1)
+        if current_index < len(temps) and temps[current_index] is not None:
+            detector_stat["temperature"] = round(temps[current_index], 1)
 
         detector_stats[name] = detector_stat
 
     return detector_stats
 
 
-def get_processing_stats(
-    config: FrigateConfig,
-    stats: dict[str, str],
-    hwaccel_errors: dict[str, float],
-) -> None:
-    """Get stats for cpu / gpu."""
-
-    async def run_tasks() -> None:
-        stats_tasks = [
-            asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
-            asyncio.create_task(set_cpu_stats(stats)),
-            asyncio.create_task(set_npu_usages(config, stats)),
-        ]
-
-        if config.telemetry.stats.network_bandwidth:
-            stats_tasks.append(asyncio.create_task(set_bandwidth_stats(config, stats)))
-
-        await asyncio.wait(stats_tasks)
-
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(run_tasks())
-    loop.close()
-
-
-async def set_cpu_stats(all_stats: dict[str, Any]) -> None:
-    """Set cpu usage from top."""
-    cpu_stats = get_cpu_stats()
-
-    if cpu_stats:
-        all_stats["cpu_usages"] = cpu_stats
-
-
-async def set_bandwidth_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
-    """Set bandwidth from nethogs."""
-    bandwidth_stats = get_bandwidth_stats(config)
-
-    if bandwidth_stats:
-        all_stats["bandwidth_usages"] = bandwidth_stats
-
-
-async def set_gpu_stats(
-    config: FrigateConfig,
-    all_stats: dict[str, Any],
-    hwaccel_errors: dict[str, float],
-) -> None:
-    """Parse GPUs from hwaccel args and use for stats."""
-    hwaccel_args = []
-
-    for camera in config.cameras.values():
-        args = camera.ffmpeg.hwaccel_args
-
-        if isinstance(args, list):
-            args = " ".join(args)
-
-        if args and args not in hwaccel_args:
-            hwaccel_args.append(args)
-
-        for stream_input in camera.ffmpeg.inputs:
-            args = stream_input.hwaccel_args
-
-            if isinstance(args, list):
-                args = " ".join(args)
-
-            if args and args not in hwaccel_args:
-                hwaccel_args.append(args)
-
-    stats: dict[str, dict] = {}
-    intel_gpu_collected = False
-    now = time.monotonic()
-
-    for args in hwaccel_args:
-        last_error = hwaccel_errors.get(args)
-        if last_error is not None:
-            if now - last_error < HWACCEL_ERROR_COOLDOWN_SECONDS:
-                continue
-            hwaccel_errors.pop(args, None)
-
-        if "cuvid" in args or "nvidia" in args:
-            # nvidia GPU
-            nvidia_usage = get_nvidia_gpu_stats()
-
-            if nvidia_usage:
-                for i in range(len(nvidia_usage)):
-                    stats[nvidia_usage[i]["name"]] = {
-                        "vendor": "nvidia",
-                        "gpu": str(round(float(nvidia_usage[i]["gpu"]), 2)) + "%",
-                        "mem": str(round(float(nvidia_usage[i]["mem"]), 2)) + "%",
-                        "enc": str(round(float(nvidia_usage[i]["enc"]), 2)) + "%",
-                        "dec": str(round(float(nvidia_usage[i]["dec"]), 2)) + "%",
-                        "temp": str(nvidia_usage[i]["temp"]),
-                    }
-
-            else:
-                stats["nvidia-gpu"] = {"vendor": "nvidia", "gpu": "", "mem": ""}
-                hwaccel_errors[args] = time.monotonic()
-        elif "nvmpi" in args or "jetson" in args:
-            # nvidia Jetson
-            jetson_usage = get_jetson_stats()
-
-            if jetson_usage:
-                stats["jetson-gpu"] = {"vendor": "nvidia", **jetson_usage}
-            else:
-                stats["jetson-gpu"] = {"vendor": "nvidia", "gpu": "", "mem": ""}
-                hwaccel_errors[args] = time.monotonic()
-        elif "qsv" in args or ("vaapi" in args and not is_vaapi_amd_driver()):
-            if not config.telemetry.stats.intel_gpu_stats:
-                continue
-
-            if not intel_gpu_collected:
-                # intel GPU (QSV or VAAPI both use the same physical GPU)
-                intel_gpu_collected = True
-                intel_usage = get_intel_gpu_stats(
-                    config.telemetry.stats.intel_gpu_device
-                )
-
-                if intel_usage:
-                    for entry in intel_usage.values():
-                        name = entry.pop("name")
-                        stats[name] = entry
-                else:
-                    stats["intel-gpu"] = {"vendor": "intel", "gpu": "", "mem": ""}
-                    hwaccel_errors[args] = time.monotonic()
-        elif "vaapi" in args:
-            if not config.telemetry.stats.amd_gpu_stats:
-                continue
-
-            # AMD VAAPI GPU
-            amd_usage = get_amd_gpu_stats()
-
-            if amd_usage:
-                stats["amd-vaapi"] = {"vendor": "amd", **amd_usage}
-            else:
-                stats["amd-vaapi"] = {"vendor": "amd", "gpu": "", "mem": ""}
-                hwaccel_errors[args] = time.monotonic()
-        elif "preset-rk" in args:
-            rga_usage = get_rockchip_gpu_stats()
-
-            if rga_usage:
-                stats["rockchip"] = {"vendor": "rockchip", **rga_usage}
-        elif "v4l2m2m" in args or "rpi" in args:
-            # RPi v4l2m2m is currently not able to get usage stats
-            stats["rpi-v4l2m2m"] = {"vendor": "rpi", "gpu": "", "mem": ""}
-
-    if stats:
-        all_stats["gpu_usages"] = stats
-
-
-async def set_npu_usages(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
-    stats: dict[str, dict] = {}
-
-    for model in config.models:
-        for device in config.devices_for_model(model):
-            if device.detector == "rknn":
-                # Rockchip NPU usage
-                rk_usage = get_rockchip_npu_stats()
-                stats["rockchip"] = rk_usage
-            elif device.detector == "openvino" and device.device == "NPU":
-                # OpenVINO NPU usage
-                ov_usage = get_openvino_npu_stats()
-                stats["openvino"] = ov_usage
-            elif device.detector == "axengine":
-                # AXERA NPU usage
-                axcl_usage = get_axcl_npu_stats()
-                stats["axengine"] = axcl_usage
-
-    if stats:
-        all_stats["npu_usages"] = stats
-
-
 def stats_snapshot(
     config: FrigateConfig,
     stats_tracking: StatsTrackingTypes,
-    hwaccel_errors: dict[str, float],
+    hardware_stats: HardwareStats,
 ) -> dict[str, Any]:
     """Get a snapshot of the current stats that are being tracked."""
     camera_metrics = stats_tracking["camera_metrics"]
@@ -487,7 +244,7 @@ def stats_snapshot(
                 embeddings_metrics.classification_cps[key].value, 2
             )
 
-    get_processing_stats(config, stats, hwaccel_errors)
+    hardware_stats.update_stats(stats)
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
