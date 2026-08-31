@@ -353,9 +353,23 @@ class ObjectDetectProcess:
         logging.info("Detection process has exited...")
 
     def start_or_restart(self) -> None:
-        self.detection_start.value = 0.0  # type: ignore[attr-defined]
         if (self.detect_process is not None) and self.detect_process.is_alive():
-            self.stop()
+            logging.info("Waiting for detection process to exit gracefully...")
+            self.detect_process.join(timeout=30)
+            if self.detect_process.exitcode is None:
+                # detection_start is set only after detection_queue.get()
+                # returns. If it was reset during the grace period, the process
+                # recovered and may be waiting on the shared queue again.
+                if self.detection_start.value == 0.0:  # type: ignore[attr-defined]
+                    logging.info("Detection process recovered before restart")
+                    return
+
+                logging.info("Detection process didn't exit. Force killing...")
+                self.detect_process.kill()
+                self.detect_process.join()
+            logging.info("Detection process has exited...")
+
+        self.detection_start.value = 0.0  # type: ignore[attr-defined]
 
         # Async path for MemryX
         if self.detector_config.type == "memryx":
