@@ -106,7 +106,7 @@
     "start": "開始應需錄影",
     "started": "開始手動應需錄影。",
     "failedToStart": "手動開始應需錄影失敗。",
-    "recordDisabledTips": "因為此鏡頭的錄影功能被停用或限制，因此僅會保存截圖。",
+    "recordDisabledTips": "因為此鏡頭的錄影功能被停用或限制，因此僅會儲存截圖。",
     "end": "結束應需錄影",
     "ended": "已結束手動應需錄影。",
     "failedToEnd": "結束手動應需錄影失敗。"
@@ -186,7 +186,7 @@
   },
   "noCameras": {
     "title": "未設定攝影機",
-    "description": "準備開始連線攝影機至 Frigate 。",
+    "description": "準備開始連線攝影機至 Frigate。",
     "buttonText": "新增攝影機",
     "restricted": {
       "title": "無可用攝影機",

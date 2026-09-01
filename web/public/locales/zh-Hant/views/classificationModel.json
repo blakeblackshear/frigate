@@ -41,8 +41,8 @@
   },
   "tooltip": {
     "trainingInProgress": "模型正在訓練中",
-    "noNewImages": "沒有新的圖片可用於訓練。請先對數據集中的更多圖片進行分類。",
-    "noChanges": "自上次訓練以來，數據集未作任何更改。",
+    "noNewImages": "沒有新的圖片可用於訓練。請先對資料集中的更多圖片進行分類。",
+    "noChanges": "自上次訓練以來，資料集未作任何更改。",
     "modelNotReady": "模型尚未準備好進行訓練"
   },
   "deleteCategory": {
@@ -105,20 +105,20 @@
       "objectLabelPlaceholder": "請選擇物件類型...",
       "classificationType": "分類類型",
       "classificationTypeTip": "學習更多有關分類類型",
-      "description": "狀態模型監視固定攝像頭區域的變化（例如：開關門）。物件模型為檢測到的物件（例如：已知動物、送貨員等等）添加分類。",
+      "description": "狀態模型監視固定攝影機區域的變化（例如：開關門）。物件模型為偵測到的物件（例如：已知動物、送貨員等等）新增分類。",
       "name": "名稱",
       "namePlaceholder": "請輸入模型名稱...",
       "type": "類別",
       "typeState": "狀態",
       "typeObject": "物件",
-      "classificationTypeDesc": "子標籤會為目標標籤新增附加文字（例如：“人員：美團”）。屬性是可搜尋的元資料，獨立儲存在目標的元資訊中。",
+      "classificationTypeDesc": "子標籤會為目標標籤新增附加文字（例如：「人員：UPS」）。屬性是可搜尋的中繼資料，獨立儲存在目標的中繼資料中。",
       "classificationSubLabel": "子標籤",
       "classificationAttribute": "屬性",
       "classes": "類別",
       "states": "狀態",
       "classesTip": "瞭解類別",
-      "classesStateDesc": "定義攝影機區域內可能出現的不同狀態。例如：車庫門的“開啟”和“關閉”。",
-      "classesObjectDesc": "定義用於分類偵測目標的不同類別。例如：人員分類中的“快遞員”、“居民”、“陌生人”。",
+      "classesStateDesc": "定義攝影機區域內可能出現的不同狀態。例如：車庫門的「開啟」和「關閉」。",
+      "classesObjectDesc": "定義用於分類偵測目標的不同類別。例如：人員分類中的「送貨員」、「鄰居」、「陌生人」。",
       "classPlaceholder": "請輸入分類名稱……",
       "errors": {
         "nameRequired": "模型名稱為必填項",
@@ -147,7 +147,7 @@
     },
     "step3": {
       "selectImagesPrompt": "選擇所有屬於 {{className}} 的圖片",
-      "selectImagesDescription": "點選影像進行選擇，完成該類別後點選“繼續”。",
+      "selectImagesDescription": "點選影像進行選擇，完成該類別後點選「繼續」。",
       "allImagesRequired_other": "請對所有圖片進行分類。還有 {{count}} 張圖片需要分類。",
       "generating": {
         "title": "正在生成樣本圖片",
@@ -161,23 +161,23 @@
       "noImages": "未生成樣本影像",
       "classifying": "正在分類與訓練……",
       "trainingStarted": "已開始模型訓練",
-      "modelCreated": "模型建立成功。請在“最近分類”頁面為缺失的狀態新增圖片，然後訓練模型。",
+      "modelCreated": "模型建立成功。請在最近分類頁面為缺失的狀態新增圖片，然後訓練模型。",
       "errors": {
         "noCameras": "未配置攝影機",
         "noObjectLabel": "未選擇目標標籤",
-        "generateFailed": "示例生成失敗：{{error}}",
+        "generateFailed": "範例生成失敗：{{error}}",
         "generationFailed": "生成失敗，請重試。",
         "classifyFailed": "圖片分類失敗：{{error}}"
       },
       "generateSuccess": "樣本圖片生成成功",
-      "refreshExamples": "生成新示例",
+      "refreshExamples": "生成新範例",
       "refreshConfirm": {
-        "title": "需要生成新示例？",
-        "description": "此操作將生成一組新的圖片，並清除所有選擇內容（包括之前的所有類別）。你需要為所有類別重新選擇示例。"
+        "title": "需要生成新範例？",
+        "description": "此操作將生成一組新的圖片，並清除所有選擇內容（包括之前的所有類別）。你需要為所有類別重新選擇範例。"
       },
       "missingStatesWarning": {
-        "title": "缺失分類示例",
-        "description": "並非所有類別都有示例。可嘗試生成新示例以查詢缺失的類別，或繼續該步驟，之後透過 “最近分類” 頁面新增圖片。"
+        "title": "分類範例遺失",
+        "description": "並非所有類別都有範例。可嘗試生成新範例以查詢遺失的類別，或繼續該步驟，之後透過「最近分類」頁面新增圖片。"
       }
     }
   },

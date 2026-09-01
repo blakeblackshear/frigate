@@ -36,8 +36,8 @@
         }
     },
     "version": {
-        "label": "當前配置版本",
-        "description": "用於標識當前生效配置的版本號（數字或字串均可），幫助辨識配置遷移或格式是否發生變更。"
+        "label": "目前設定檔版本",
+        "description": "用於標識目前生效配置的版本號（數字或字串均可），幫助辨識配置遷移或格式是否發生變更。"
     },
     "safe_mode": {
         "label": "安全模式",
@@ -92,7 +92,7 @@
         },
         "trusted_proxies": {
             "label": "受信任的代理",
-            "description": "用於確定客戶端 IP 以進行速率限制的受信任代理 IP 清單。"
+            "description": "用於確定用戶端 IP 以進行速率限制的受信任代理 IP 清單。"
         },
         "hash_iterations": {
             "label": "雜湊迭代次數",
@@ -109,7 +109,7 @@
     },
     "database": {
         "label": "資料庫",
-        "description": "Frigate 用於儲存追蹤目標和錄影元資料的 SQLite 資料庫設定。",
+        "description": "Frigate 用於儲存追蹤目標和錄影中繼資料的 SQLite 資料庫設定。",
         "path": {
             "label": "資料庫路徑",
             "description": "Frigate SQLite 資料庫檔案的儲存路徑。"
@@ -117,7 +117,7 @@
     },
     "go2rtc": {
         "label": "go2rtc",
-        "description": "整合的 go2rtc 轉發服務設定，用於即時監控流轉發和轉碼。"
+        "description": "整合的 go2rtc 轉發服務設定，用於即時監控流轉發和轉檔。"
     },
     "mqtt": {
         "label": "MQTT",
@@ -128,7 +128,7 @@
         },
         "host": {
             "label": "MQTT 主機",
-            "description": "MQTT 代理的主機名或 IP 地址。"
+            "description": "MQTT 代理的主機名稱或 IP 位址。"
         },
         "port": {
             "label": "MQTT 埠",
@@ -139,8 +139,8 @@
             "description": "所有 Frigate 主題的 MQTT 主題字首；如果執行多個例項，必須唯一。"
         },
         "client_id": {
-            "label": "客戶端 ID",
-            "description": "連線到 MQTT 代理時使用的客戶端辨識符號；每個例項應該唯一。"
+            "label": "用戶端 ID",
+            "description": "連線到 MQTT 代理時使用的用戶端辨識符號；每個例項應該唯一。"
         },
         "stats_interval": {
             "label": "統計資訊間隔",
@@ -159,12 +159,12 @@
             "description": "用於 TLS 連線到代理的 CA 證書路徑（用於自簽名證書）。"
         },
         "tls_client_cert": {
-            "label": "客戶端證書",
-            "description": "TLS 雙向認證的客戶端證書路徑；使用客戶端證書時不要設定使用者名稱/密碼。"
+            "label": "用戶端憑證",
+            "description": "TLS 雙向認證的用戶端憑證路徑；使用用戶端憑證時不要設定使用者名稱/密碼。"
         },
         "tls_client_key": {
-            "label": "客戶端金鑰",
-            "description": "客戶端證書的私鑰路徑。"
+            "label": "用戶端金鑰",
+            "description": "用戶端憑證的私鑰路徑。"
         },
         "tls_insecure": {
             "label": "TLS 不安全連線",
@@ -183,8 +183,8 @@
             "description": "為所有攝影機啟用或停用通知；可按攝影機覆蓋。"
         },
         "email": {
-            "label": "通知郵箱",
-            "description": "用於推送通知或某些通知提供商要求的郵箱地址。"
+            "label": "通知電子信箱",
+            "description": "用於推送通知或某些通知提供商要求的電子信箱位址。"
         },
         "cooldown": {
             "label": "冷卻時間",
@@ -251,7 +251,7 @@
             "description": "當沒有權限組對映適用時分配給代理認證使用者的預設權限組（admin 或 viewer）。"
         },
         "separator": {
-            "label": "分隔符",
+            "label": "分隔符號",
             "description": "用於分割代理請求頭中多個值的字元。"
         }
     },
@@ -279,7 +279,7 @@
             },
             "intel_gpu_device": {
                 "label": "Intel GPU 裝置",
-                "description": "當系統存在多個 Intel 顯示卡時，用於將顯示卡執行資料繫結到指定裝置的 PCI 匯流排地址或 DRM 裝置路徑（示例：/dev/dri/card1）。"
+                "description": "當系統存在多個 Intel 顯示卡時，用於將顯示卡執行資料繫結到指定裝置的 PCI 匯流排位址或 DRM 裝置路徑（範例：/dev/dri/card1）。"
             }
         },
         "version_check": {
@@ -300,7 +300,7 @@
         "description": "使用者介面偏好設定，如時區、時間/日期格式和單位。",
         "timezone": {
             "label": "時區",
-            "description": "UI 中顯示的可選時區（如果未設定，則預設為瀏覽器本地時間）。"
+            "description": "UI 中顯示的可選時區（如果未設定，則預設為瀏覽器本機時間）。"
         },
         "time_format": {
             "label": "時間格式",
@@ -350,7 +350,7 @@
             },
             "attributes_map": {
                 "label": "目標標籤到其屬性標籤的對映",
-                "description": "用於繫結元資料的目標標籤 → 屬性標籤對映關係（例如：'car'→ ['license_plate'] 為將車牌屬性繫結到車輛上）。"
+                "description": "用於連結中繼資料的目標標籤 → 屬性標籤對映關係（例如：'car'→ ['license_plate'] 為將車牌屬性繫結到車輛上）。"
             },
             "input_tensor": {
                 "label": "模型輸入張量形狀",
@@ -523,7 +523,7 @@
         },
         "attributes_map": {
             "label": "目標標籤到屬性標籤的對映",
-            "description": "從目標標籤到屬性標籤的對映，用於附加元資料（例如 'car' -> ['license_plate']）。"
+            "description": "從目標標籤到屬性標籤的對映，用於附加中繼資料（例如 'car' -> ['license_plate']）。"
         },
         "input_tensor": {
             "label": "模型輸入張量形狀",
@@ -567,7 +567,7 @@
         },
         "provider_options": {
             "label": "提供商選項",
-            "description": "要傳遞給生成式 AI 客戶端的、與服務提供商相關的額外配置項。"
+            "description": "要傳遞給生成式 AI 用戶端的、與服務提供商相關的額外配置選項。"
         },
         "runtime_options": {
             "label": "執行時選項",
@@ -734,7 +734,7 @@
             "description": "該攝影機的所有輸入流配置清單（包含路徑和功能）。",
             "path": {
                 "label": "輸入路徑",
-                "description": "攝影機輸入影片流的地址或路徑。"
+                "description": "攝影機輸入影片串流的 URL 或路徑。"
             },
             "roles": {
                 "label": "輸入流功能",
@@ -891,7 +891,7 @@
             },
             "object_prompts": {
                 "label": "目標提示",
-                "description": "按目標設定提示詞，讓生成式 AI 對不同標籤的輸出進行定製。"
+                "description": "按目標設定提示詞，讓生成式 AI 對不同標籤的輸出進行自訂。"
             },
             "objects": {
                 "label": "生成式 AI 目標",
@@ -1450,7 +1450,7 @@
         },
         "format": {
             "label": "車牌格式正則",
-            "description": "用於驗證辨識的車牌字串是否符合預期格式的可選正則表示式。"
+            "description": "用於驗證辨識的車牌字串是否符合預期格式的可選正規表示式。"
         },
         "match_distance": {
             "label": "匹配距離",
@@ -1458,7 +1458,7 @@
         },
         "known_plates": {
             "label": "已知車牌",
-            "description": "要特別追蹤或報警的車牌或正則表示式清單。"
+            "description": "要特別追蹤或報警的車牌或正規表示式清單。"
         },
         "enhancement": {
             "label": "增強級別",
@@ -1473,13 +1473,13 @@
             "description": "這是一個覆蓋選項，用於指定特定裝置。請參閱 https://onnxruntime.ai/docs/execution-providers/ 瞭解更多資訊"
         },
         "replace_rules": {
-            "label": "替換規則",
-            "description": "用於在匹配之前規範化偵測到的車牌字串的正則替換規則。",
+            "label": "取代規則",
+            "description": "用於在符合之前規範化偵測到的車牌字串的正規表示式。",
             "pattern": {
-                "label": "正則模式"
+                "label": "正規模式"
             },
             "replacement": {
-                "label": "替換字串"
+                "label": "取代字串"
             }
         },
         "expire_time": {
@@ -1513,7 +1513,7 @@
     },
     "active_profile": {
         "label": "啟用設定檔",
-        "description": "當前啟用的設定檔名稱。僅在執行時使用，不會寫入 YAML 設定檔中。"
+        "description": "目前啟用的設定檔名稱。僅在執行時使用，不會寫入 YAML 設定檔中。"
     },
     "camera_mqtt": {
         "label": "MQTT",
@@ -1549,7 +1549,7 @@
     },
     "camera_ui": {
         "label": "攝影機頁面",
-        "description": "此攝影機在頁面中的顯示順序和可見性。顯示順序僅影響預設儀表板。如需更精細的控制，請使用“攝影機組”。",
+        "description": "此攝影機在頁面中的顯示順序和可見性。顯示順序僅影響預設儀表板。如需更精細的控制，請使用「攝影機群組」。",
         "order": {
             "label": "UI 順序",
             "description": "用於在頁面中排序攝影機的順序（只會影響預設儀表板和清單）；數值越大則在越後面。"
@@ -1607,7 +1607,7 @@
             },
             "zoom_factor": {
                 "label": "變焦因子",
-                "description": "控制追蹤目標的變焦級別。數值越低保持更多場景可見；數值越高放大更近但可能丟失追蹤。數值範圍 0.1 到 0.75。"
+                "description": "控制追蹤目標的變焦級別。數值越低保持更多場景可見；數值越高放大更近但可能失去追蹤。數值範圍 0.1 到 0.75。"
             },
             "track": {
                 "label": "追蹤目標",

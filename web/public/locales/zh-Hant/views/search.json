@@ -6,7 +6,7 @@
     "clear": "清空搜尋",
     "filterActive": "過濾中",
     "save": "儲存搜尋",
-    "delete": "刪除保存的搜尋",
+    "delete": "刪除已儲存的搜尋",
     "filterInformation": "過濾資訊"
   },
   "trackedObjectId": "追蹤物件編號",

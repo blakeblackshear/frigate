@@ -5,7 +5,7 @@
   "submitFrigatePlus": {
     "title": "提交此畫面至 Frigate+？",
     "submit": "提交",
-    "previewError": "無法載入快照預覽。該錄製當前可能不可用。"
+    "previewError": "無法載入快照預覽。這個錄製目前可能無法使用。"
   },
   "streamOffline": {
     "desc": "{{cameraName}} 的 <code>detect</code> 串流未接收到任何畫面，請檢查錯誤日誌",

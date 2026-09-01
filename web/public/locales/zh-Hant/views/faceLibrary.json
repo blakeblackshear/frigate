@@ -3,7 +3,7 @@
     "addFace": "上傳您的第一張照片至臉部資料庫以新增一個新的集合。",
     "placeholder": "輸入此集合的名稱",
     "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。",
-    "nameCannotContainHash": "名稱中不允許包含“#”符號。"
+    "nameCannotContainHash": "名稱中不允許包含「#」符號。"
   },
   "details": {
     "person": "人",
