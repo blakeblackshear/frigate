@@ -214,7 +214,8 @@
       "ur": "Urdu",
       "zhHant": "Tradicinė Kinijos",
       "hr": "Kroatų",
-      "bs": "Bosnių"
+      "bs": "Bosnių",
+      "be": "Baltarusų"
     },
     "appearance": "Išvaizda",
     "darkMode": {
@@ -252,8 +253,8 @@
       }
     },
     "review": "Peržiūros",
-    "explore": "Iškoti",
-    "export": "Išrašas",
+    "explore": "Ieškoti",
+    "export": "Išrašai",
     "faceLibrary": "Veidų Biblioteka",
     "user": {
       "title": "Vartotojas",

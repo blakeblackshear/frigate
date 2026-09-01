@@ -228,8 +228,8 @@
       "label": "Slėpti objektų kelią"
     },
     "downloadCleanSnapshot": {
-      "label": "Atsisiųsti švarią nuotrauką",
-      "aria": "Atsisiųsti švarią nuotrauką"
+      "label": "Atsisiųsti nuotrauką",
+      "aria": "Atsisiųsti nuotrauką"
     },
     "viewTrackingDetails": {
       "label": "Žiūrėti sekimo detales",

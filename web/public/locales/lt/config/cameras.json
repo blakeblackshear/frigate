@@ -1,7 +1,7 @@
 {
     "record": {
         "export": {
-            "label": "Išrašų konfiguracija",
+            "label": "Išrašo konfiguracija",
             "description": "Nustatymai naudojami kuriant įrašų išrašus tokie kaip timelaps ir hardware acceleration.",
             "hwaccel_args": {
                 "label": "Išrašų hwaccel args",
@@ -23,5 +23,8 @@
             "label": "Įjungti RNA",
             "description": "Įjungti ar išjungti RNA šiai kamerai."
         }
+    },
+    "enabled": {
+        "label": "Įjungta"
     }
 }
