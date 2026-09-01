@@ -497,8 +497,8 @@ class TestHttpReview(BaseTestHttp):
             )
             assert user_review.has_been_reviewed == True
 
-    def test_post_reviews_viewed_concurrent_duplicate_does_not_raise(self):
-        """Regression: concurrent requests marking the same review must not 500.
+    def test_reviews_concurrent_insert_peewee_ignore(self):
+        """Validates that on_conflict_ignore() silently skips a duplicate insert
 
         Two requests can both SELECT and find no existing status, then both try
         to INSERT, hitting the unique (user_id, review_segment) constraint.
