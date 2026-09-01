@@ -2076,7 +2076,7 @@
     },
     "lpr": {
       "globalDisabled": "L'enriquiment de reconeixement de matrícules ha d'estar habilitat perquè les funcions LPR funcionin en aquesta càmera.",
-      "vehicleNotTracked": "El reconeixement de la matrícula requereix que es faci un seguiment del 'cotxe' o de la 'motocicleta'.",
+      "vehicleNotTracked": "El reconeixement de la matrícula requereix un seguiment del vehicle. Habilita el 'cotxe' o un altre tipus de vehicle en Objectes per a aquesta càmera.",
       "modelSizeLarge": "El model 'gran' està optimitzat per a matrícules multilínies. El model 'petit' proporciona un millor rendiment sobre 'gran' i s'ha d'utilitzar tret que la vostra regió utilitzi formats de placa multilínia."
     },
     "record": {
