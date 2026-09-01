@@ -1010,11 +1010,19 @@
   "cameraManagement": {
     "deleteCameraDialog": {
       "deleteExports": "Taip pat ištrinti išrašus šiai kamerai"
+    },
+    "streams": {
+      "saved": "Išsaugota"
     }
   },
   "maintenance": {
     "sync": {
-      "exports": "Išrašai"
+      "exports": "Išrašus"
+    }
+  },
+  "birdseye": {
+    "cameraOrder": {
+      "saved": "Išsaugota"
     }
   }
 }

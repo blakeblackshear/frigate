@@ -74,7 +74,7 @@
       "placeholder": "Pavadinti išrašą"
     },
     "select": "Pasirinkti",
-    "export": "Išrašas",
+    "export": "Išrašai",
     "selectOrExport": "Pasirinkti ar sukurti išrašą",
     "toast": {
       "success": "Sėkmingai pradėtas Išrašų kūrimas. Peržiūrėkite išrašų puslapyje.",
