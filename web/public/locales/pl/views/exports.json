@@ -1,6 +1,6 @@
 {
   "search": "Szukaj",
-  "documentTitle": "Eksportuj - Frigate",
+  "documentTitle": "Eksporty - Frigate",
   "noExports": "Nie znaleziono eksportów",
   "deleteExport": {
     "label": "Usuń eksport"
@@ -13,7 +13,10 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Nie udało się zmienić nazwy eksportu: {{errorMessage}}"
+      "renameExportFailed": "Nie udało się zmienić nazwy eksportu: {{errorMessage}}",
+      "assignCaseFailed": "Nie udało się zaktualizować przypisania do sprawy: {{errorMessage}}",
+      "caseSaveFailed": "Nie udało się zapisać sprawy: {{errorMessage}}",
+      "caseDeleteFailed": "Nie udało się usunąć sprawy: {{errorMessage}}"
     }
   },
   "tooltip": {
@@ -21,10 +24,105 @@
     "downloadVideo": "Pobierz wideo",
     "editName": "Edytuj nazwę",
     "deleteExport": "Usuń eksport",
-    "assignToCase": "Dodaj do sprawy"
+    "assignToCase": "Dodaj do sprawy",
+    "removeFromCase": "Usuń ze sprawy"
   },
   "headings": {
-    "cases": "Przypadki",
-    "uncategorizedExports": "Bez kategorii Eksport"
+    "cases": "Sprawy",
+    "uncategorizedExports": "Nieskategoryzowane eksporty"
+  },
+  "toolbar": {
+    "newCase": "Nowa sprawa",
+    "addExport": "Dodaj eksport",
+    "editCase": "Edytuj sprawę",
+    "deleteCase": "Usuń sprawę"
+  },
+  "deleteCase": {
+    "label": "Usuń sprawę",
+    "desc": "Czy na pewno chcesz usunąć sprawę {{caseName}}?",
+    "descKeepExports": "Eksporty pozostaną dostępne jako nieskategoryzowane.",
+    "descDeleteExports": "Wszystkie eksporty w tej sprawie zostaną trwale usunięte.",
+    "deleteExports": "Usuń także eksporty"
+  },
+  "caseDialog": {
+    "title": "Dodaj do sprawy",
+    "description": "Wybierz istniejącą sprawę lub utwórz nową.",
+    "selectLabel": "Sprawa",
+    "newCaseOption": "Utwórz nową sprawę",
+    "nameLabel": "Nazwa sprawy",
+    "descriptionLabel": "Opis"
+  },
+  "caseCard": {
+    "emptyCase": "Brak eksportów"
+  },
+  "jobCard": {
+    "defaultName": "Eksport {{camera}}",
+    "queued": "W kolejce",
+    "running": "W trakcie",
+    "preparing": "Przygotowywanie",
+    "copying": "Kopiowanie",
+    "encoding": "Kodowanie",
+    "encodingRetry": "Kodowanie (ponowna próba)",
+    "finalizing": "Finalizowanie"
+  },
+  "caseView": {
+    "noDescription": "Brak opisu",
+    "createdAt": "Utworzono {{value}}",
+    "exportCount_one": "1 eksport",
+    "exportCount_other": "{{count}} eksportów",
+    "cameraCount_one": "1 kamera",
+    "cameraCount_other": "{{count}} kamer",
+    "showMore": "Pokaż więcej",
+    "showLess": "Pokaż mniej",
+    "emptyTitle": "Ta sprawa jest pusta",
+    "emptyDescription": "Dodaj istniejące nieskategoryzowane eksporty, aby zachować porządek w sprawie.",
+    "emptyDescriptionNoExports": "Brak dostępnych nieskategoryzowanych eksportów do dodania."
+  },
+  "caseEditor": {
+    "createTitle": "Utwórz sprawę",
+    "editTitle": "Edytuj sprawę",
+    "namePlaceholder": "Nazwa sprawy",
+    "descriptionPlaceholder": "Dodaj notatki lub kontekst dla tej sprawy"
+  },
+  "addExportDialog": {
+    "title": "Dodaj eksport do {{caseName}}",
+    "searchPlaceholder": "Szukaj nieskategoryzowanych eksportów",
+    "empty": "Brak nieskategoryzowanych eksportów pasujących do tego wyszukiwania.",
+    "addButton_one": "Dodaj 1 eksport",
+    "addButton_other": "Dodaj {{count}} eksportów",
+    "adding": "Dodawanie..."
+  },
+  "selected_one": "Wybrano {{count}}",
+  "selected_other": "Wybrano {{count}}",
+  "bulkActions": {
+    "addToCase": "Dodaj do sprawy",
+    "moveToCase": "Przenieś do sprawy",
+    "removeFromCase": "Usuń ze sprawy",
+    "delete": "Usuń",
+    "deleteNow": "Usuń teraz"
+  },
+  "bulkDelete": {
+    "title": "Usuń eksporty",
+    "desc_one": "Czy na pewno chcesz usunąć {{count}} eksport?",
+    "desc_other": "Czy na pewno chcesz usunąć {{count}} eksportów?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Usuń ze sprawy",
+    "desc_one": "Usunąć {{count}} eksport z tej sprawy?",
+    "desc_other": "Usunąć {{count}} eksportów z tej sprawy?",
+    "descKeepExports": "Eksporty zostaną przeniesione do nieskategoryzowanych.",
+    "descDeleteExports": "Eksporty zostaną trwale usunięte.",
+    "deleteExports": "Zamiast tego trwale usuń eksporty"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Pomyślnie usunięto eksporty",
+      "reassign": "Pomyślnie zaktualizowano przypisanie do sprawy",
+      "remove": "Pomyślnie usunięto eksporty ze sprawy"
+    },
+    "error": {
+      "deleteFailed": "Nie udało się usunąć eksportów: {{errorMessage}}",
+      "reassignFailed": "Nie udało się zaktualizować przypisania do sprawy: {{errorMessage}}"
+    }
   }
 }

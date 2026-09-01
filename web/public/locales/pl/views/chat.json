@@ -1,4 +1,72 @@
 {
     "documentTitle": "Czat - Frigate",
-    "title": "Frigate Czat"
+    "title": "Czat Frigate",
+    "subtitle": "Twój asystent AI do zarządzania kamerami i analizy zdarzeń",
+    "placeholder": "Zapytaj o cokolwiek...",
+    "error": "Coś poszło nie tak. Spróbuj ponownie.",
+    "processing": "Przetwarzanie...",
+    "toolsUsed": "Użyto: {{tools}}",
+    "showTools": "Pokaż narzędzia ({{count}})",
+    "hideTools": "Ukryj narzędzia",
+    "call": "Wywołanie",
+    "result": "Wynik",
+    "arguments": "Argumenty:",
+    "response": "Odpowiedź:",
+    "attachment_chip_label": "{{label}} na kamerze {{camera}}",
+    "attachment_chip_remove": "Usuń załącznik",
+    "open_in_explore": "Otwórz w Przeglądaj",
+    "attach_event_aria": "Załącz zdarzenie {{eventId}}",
+    "attachment_picker_paste_label": "Lub wklej identyfikator zdarzenia",
+    "attachment_picker_attach": "Załącz",
+    "attachment_picker_placeholder": "Załącz zdarzenie",
+    "quick_reply_find_similar": "Znajdź podobne obserwacje",
+    "quick_reply_tell_me_more": "Powiedz mi więcej na ten temat",
+    "quick_reply_when_else": "Kiedy jeszcze to widziano?",
+    "quick_reply_find_similar_text": "Znajdź podobne obserwacje do tej.",
+    "quick_reply_tell_me_more_text": "Opowiedz mi więcej o tym obiekcie.",
+    "quick_reply_when_else_text": "Kiedy jeszcze to zarejestrowano?",
+    "anchor": "Odnośnik",
+    "similarity_score": "Podobieństwo",
+    "no_similar_objects_found": "Nie znaleziono podobnych obiektów.",
+    "semantic_search_required": "Wyszukiwanie semantyczne musi być włączone, aby znaleźć podobne obiekty.",
+    "send": "Wyślij",
+    "suggested_requests": "Spróbuj zapytać:",
+    "starting_requests": {
+        "show_recent_events": "Pokaż ostatnie zdarzenia",
+        "show_camera_status": "Pokaż stan kamer",
+        "recap": "Co się wydarzyło pod moją nieobecność?",
+        "watch_camera": "Obserwuj aktywność na kamerze"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "Pokaż mi ostatnie zdarzenia z ostatniej godziny",
+        "show_camera_status": "Jaki jest aktualny stan moich kamer?",
+        "recap": "Co się wydarzyło pod moją nieobecność?",
+        "watch_camera": "Obserwuj drzwi wejściowe i daj mi znać, jeśli ktoś się pojawi"
+    },
+    "new_chat": "Nowy czat",
+    "settings": {
+        "title": "Ustawienia czatu",
+        "show_stats": {
+            "title": "Pokaż statystyki",
+            "desc": "Pokaż szybkość generowania i rozmiar kontekstu dla odpowiedzi czatu.",
+            "while_generating": "Podczas generowania",
+            "always": "Zawsze"
+        },
+        "auto_scroll": {
+            "title": "Automatyczne przewijanie",
+            "desc": "Podążaj za nowymi wiadomościami w miarę ich napływu."
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} tokenów",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Rozumowanie…",
+        "show": "Pokaż proces rozumowania",
+        "hide": "Ukryj proces rozumowania"
+    },
+    "thinking": {
+        "toggle": "Przełącz myślenie"
+    }
 }
