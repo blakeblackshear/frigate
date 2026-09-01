@@ -212,7 +212,6 @@ COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
-COPY --from=wheels /rootfs/ /
 COPY docker/main/rootfs/ /
 
 
