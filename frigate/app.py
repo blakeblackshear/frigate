@@ -50,6 +50,7 @@ from frigate.debug_replay import (
     cleanup_replay_cameras,
 )
 from frigate.detectors.detector_config import SceneEnum
+from frigate.detectors.detector_types import api_types
 from frigate.detectors.device import build_detector_config, runner_names
 from frigate.embeddings import EmbeddingProcess, EmbeddingsContext
 from frigate.events.audio import AudioProcessor
@@ -88,6 +89,7 @@ from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import UntrackedSharedMemory
 from frigate.util.ownership import chown_to_runtime
 from frigate.util.process import FrigateProcess
+from frigate.util.runtime_deps import RuntimeDependencyError
 from frigate.util.services import set_file_limit
 from frigate.version import VERSION
 from frigate.watchdog import FrigateWatchdog
@@ -361,6 +363,26 @@ class FrigateApp:
         )
         self.dispatcher.profile_manager = self.profile_manager
 
+    def ensure_detector_dependencies(self) -> None:
+        """Install runtimes for the configured detector types.
+
+        Runs before any detector process starts so one install serves them
+        all and the user site is on sys.path before the forkserver copies it.
+        A failure is logged and startup continues; the detector process then
+        fails on its own with a clear import error.
+        """
+        detector_types = {
+            spec.detector
+            for model in self.config.models
+            for spec in self.config.devices_for_model(model)
+        }
+
+        for detector_type in sorted(detector_types):
+            try:
+                api_types[detector_type].ensure_dependencies()
+            except RuntimeDependencyError as err:
+                logger.error("Unable to prepare the %s runtime: %s", detector_type, err)
+
     def start_detectors(self) -> None:
         model_cameras: dict[SceneEnum, list[str]] = {
             model.scene: [] for model in self.config.models
@@ -590,6 +612,7 @@ class FrigateApp:
 
         # Ensure global state.
         self.ensure_dirs()
+        self.ensure_detector_dependencies()
 
         # Set soft file limits.
         set_file_limit()
