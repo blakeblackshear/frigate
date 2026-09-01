@@ -258,9 +258,46 @@ def __post_process_nms_yolo(predictions: np.ndarray, width, height) -> np.ndarra
     return detections
 
 
-def post_process_yolo(output: list[np.ndarray], width: int, height: int) -> np.ndarray:
+def __post_process_end_to_end_yolo(
+    predictions: np.ndarray, width: int, height: int
+) -> np.ndarray:
+    """Convert end-to-end YOLO [x1, y1, x2, y2, score, class] output."""
+    predictions = np.asarray(predictions)
+    if predictions.ndim == 3 and predictions.shape[0] == 1:
+        predictions = predictions[0]
+
+    detections = np.zeros((20, 6), np.float32)
+    predictions = predictions[predictions[:, 4] > 0.4]
+    if predictions.size == 0:
+        return detections
+
+    predictions = predictions[np.argsort(predictions[:, 4])[::-1]][:20]
+    boxes = predictions[:, :4].astype(np.float32)
+    scores = predictions[:, 4]
+    class_ids = np.rint(predictions[:, 5])
+
+    boxes[:, [0, 2]] /= width
+    boxes[:, [1, 3]] /= height
+    boxes = np.clip(boxes, 0.0, 1.0)
+    count = len(predictions)
+    detections[:count, 0] = class_ids
+    detections[:count, 1] = scores
+    detections[:count, 2] = boxes[:, 1]
+    detections[:count, 3] = boxes[:, 0]
+    detections[:count, 4] = boxes[:, 3]
+    detections[:count, 5] = boxes[:, 2]
+    return detections
+
+
+def post_process_yolo(
+    output: list[np.ndarray],
+    width: int,
+    height: int,
+) -> np.ndarray:
     if len(output) > 1:
         return __post_process_multipart_yolo(output, width, height)
+    elif output[0].shape[-1] == 6:
+        return __post_process_end_to_end_yolo(output[0], width, height)
     else:
         return __post_process_nms_yolo(output[0], width, height)
 

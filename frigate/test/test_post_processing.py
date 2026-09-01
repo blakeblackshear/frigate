@@ -82,6 +82,31 @@ class TestYoloNmsPostProcess(unittest.TestCase):
         np.testing.assert_allclose(detections[0], [0, 0.90, *A_ROW], atol=2e-3)
 
 
+class TestYoloEndToEndPostProcess(unittest.TestCase):
+    def test_converts_pixel_xyxy_output(self):
+        output = np.zeros((1, 300, 6), dtype=np.float32)
+        output[0, 0] = [393, 499, 484, 620, 0.90, 0]
+        output[0, 1] = [527, 499, 618, 620, 0.85, 1]
+
+        detections = kept(post_process_yolo([output], WIDTH, HEIGHT))
+
+        self.assertEqual(len(detections), 2)
+        np.testing.assert_allclose(detections[0], [0, 0.90, *A_ROW], atol=2e-3)
+        np.testing.assert_allclose(detections[1], [1, 0.85, *B_ROW], atol=2e-3)
+
+    def test_filters_and_sorts_detections(self):
+        output = np.zeros((1, 300, 6), dtype=np.float32)
+        output[0, 0] = [393, 499, 484, 620, 0.50, 0]
+        output[0, 1] = [527, 499, 618, 620, 0.90, 1]
+        output[0, 2] = [100, 100, 200, 200, 0.40, 2]
+
+        detections = kept(post_process_yolo([output], WIDTH, HEIGHT))
+
+        self.assertEqual(len(detections), 2)
+        self.assertEqual(detections[0, 0], 1)
+        self.assertEqual(detections[1, 0], 0)
+
+
 class TestMultipartYoloPostProcess(unittest.TestCase):
     def _multipart_output(self) -> list[np.ndarray]:
         """Build a 3-scale anchor-based YOLO output containing boxes A and B,
