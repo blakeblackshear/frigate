@@ -26,7 +26,7 @@ function loadMockJson(filename: string): unknown {
 }
 
 // 1x1 transparent PNG
-const PLACEHOLDER_PNG = Buffer.from(
+export const PLACEHOLDER_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
   "base64",
 );

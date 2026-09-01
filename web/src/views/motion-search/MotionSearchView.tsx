@@ -153,6 +153,7 @@ export default function MotionSearchView({
   const allPreviews = useCameraPreviews(timeRange, {
     camera: selectedCamera ?? undefined,
     fetchPreviews: !isSearchDialogOpen,
+    refreshOnHourRollover: true,
   });
 
   // ROI state

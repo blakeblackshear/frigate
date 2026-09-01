@@ -385,6 +385,16 @@ export function isCurrentHour(timestamp: number) {
   return timestamp > now.getTime() / 1000;
 }
 
+// a just-ended hour has no mp4 yet but may still have cached frames, so it
+// stays eligible for the frame-based players
+export function isCurrentOrPreviousHour(timestamp: number) {
+  const previousHour = new Date();
+  previousHour.setUTCMinutes(0, 0, 0);
+  previousHour.setUTCHours(previousHour.getUTCHours() - 1);
+
+  return timestamp > previousHour.getTime() / 1000;
+}
+
 export const convertLocalDateToTimestamp = (dateString: string): number => {
   // Ensure the date string is in the correct format (8 digits)
   if (!/^\d{8}$/.test(dateString)) {
