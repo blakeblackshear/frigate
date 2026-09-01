@@ -2,11 +2,13 @@ import { Preview } from "@/types/preview";
 import { TimeRange } from "@/types/timeline";
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
+import { useHourRollover } from "@/hooks/use-hour-rollover";
 
 type OptionalCameraPreviewProps = {
   camera?: string;
   autoRefresh?: boolean;
   fetchPreviews?: boolean;
+  refreshOnHourRollover?: boolean;
 };
 export function useCameraPreviews(
   initialTimeRange: TimeRange,
@@ -14,6 +16,7 @@ export function useCameraPreviews(
     camera = "all",
     autoRefresh = true,
     fetchPreviews = true,
+    refreshOnHourRollover = false,
   }: OptionalCameraPreviewProps,
 ) {
   const [timeRange, setTimeRange] = useState(initialTimeRange);
@@ -22,33 +25,52 @@ export function useCameraPreviews(
     setTimeRange(initialTimeRange);
   }, [initialTimeRange]);
 
-  const { data: allPreviews } = useSWR<Preview[]>(
+  const { data: allPreviews, mutate: refreshPreviews } = useSWR<Preview[]>(
     fetchPreviews
       ? `preview/${camera}/start/${Math.round(timeRange.after)}/end/${Math.round(timeRange.before)}`
       : null,
     { revalidateOnFocus: autoRefresh, revalidateOnReconnect: autoRefresh },
   );
 
+  // an hour's mp4 is written after that hour ends, so it is never in the
+  // response the page loaded with
+  useHourRollover(refreshPreviews, refreshOnHourRollover && fetchPreviews);
+
   return fetchPreviews ? allPreviews : [];
 }
-
-// we need to add a buffer of 5 seconds to the end preview times
-// this ensures that if preview generation is running slowly
-// and the previews are generated 1-5 seconds late
-// it is not falsely thrown out.
-const PREVIEW_END_BUFFER = 5; // seconds
 
 export function getPreviewForTimeRange(
   allPreviews: Preview[],
   camera: string,
   timeRange: TimeRange,
 ) {
-  return allPreviews.find(
-    (preview) =>
-      preview.camera == camera &&
-      Math.ceil(preview.start) >= timeRange.after &&
-      Math.floor(preview.end) <= timeRange.before + PREVIEW_END_BUFFER,
-  );
+  let best: Preview | undefined = undefined;
+  let bestOverlap = 0;
+
+  for (const preview of allPreviews) {
+    // a preview belongs to the hour it starts in. a camera whose feed drops
+    // across the boundary produces one ending minutes into the next hour, and
+    // without this it would claim that hour's slot as well.
+    if (
+      preview.camera != camera ||
+      Math.ceil(preview.start) < timeRange.after
+    ) {
+      continue;
+    }
+
+    // the slot for the live hour is stamped at page load and never grows, so
+    // an hour-long preview never fits inside it. rank by overlap instead.
+    const overlap =
+      Math.min(preview.end, timeRange.before) -
+      Math.max(preview.start, timeRange.after);
+
+    if (overlap > bestOverlap) {
+      bestOverlap = overlap;
+      best = preview;
+    }
+  }
+
+  return best;
 }
 
 export function usePreviewForTimeRange(
