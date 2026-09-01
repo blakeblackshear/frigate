@@ -2116,7 +2116,7 @@
     },
     "lpr": {
       "globalDisabled": "Die Erweiterung zur Kennzeichenerkennung muss aktiviert sein, damit die LPR-Funktionen bei dieser Kamera funktionieren.",
-      "vehicleNotTracked": "Für die Kennzeichenerkennung muss entweder „Auto“ oder „Motorrad“ erfasst werden. Aktivieren Sie „Auto“ oder „Motorrad“ unter „Objekte“ für diese Kamera.",
+      "vehicleNotTracked": "Die Kennzeichenerkennung erfordert, dass ein Fahrzeug verfolgt wird. Aktiviere ‘Auto’ oder einen anderen Fahrzeugtyp in den Objekten für diese Kamera.",
       "modelSizeLarge": "Das „große“ Modell ist für mehrzeilige Kennzeichen optimiert. Das „kleine“ Modell bietet eine bessere Leistung als das „große“ und sollte verwendet werden, sofern in Ihrer Region keine mehrzeiligen Kennzeichenformate verwendet werden."
     },
     "record": {
