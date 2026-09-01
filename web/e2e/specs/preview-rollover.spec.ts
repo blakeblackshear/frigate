@@ -87,7 +87,7 @@ async function openAtRollover(frigateApp: {
   };
 }
 
-test.describe("Preview hour rollover — desktop @medium", () => {
+test.describe("Preview hour rollover: desktop @medium", () => {
   // one alternation regex, not two entries: Playwright's isFixtureTuple reads a
   // two-element array as [value, options]
   test.use({
@@ -124,7 +124,7 @@ test.describe("Preview hour rollover — desktop @medium", () => {
   });
 });
 
-test.describe("Preview hour rollover — mobile @medium @mobile", () => {
+test.describe("Preview hour rollover: mobile @medium @mobile", () => {
   test.use({
     expectedErrors: [/no supported source was found|MEDIA_ELEMENT_ERROR/i],
   });
@@ -163,7 +163,7 @@ test.describe("Preview hour rollover — mobile @medium @mobile", () => {
  * A review with no mp4 at all (aged out, camera offline, generation failed)
  * used to fade to black on hover, since playback hides the thumbnail.
  */
-test.describe("Review card without a preview — desktop @medium", () => {
+test.describe("Review card without a preview: desktop @medium", () => {
   test("hovering keeps the thumbnail instead of blanking the card", async ({
     frigateApp,
   }, testInfo) => {
