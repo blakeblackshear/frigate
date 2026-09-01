@@ -47,11 +47,42 @@
   "score": "Skor",
   "estimatedSpeed": "Perkiraan Kecepatan {{unit}}",
   "features": {
-    "label": "Fitur"
+    "label": "Fitur",
+    "hasSnapshot": "Memiliki Cuplikan",
+    "hasVideoClip": "Memiliki Klip Video",
+    "submittedToFrigatePlus": {
+      "label": "Dikirim ke Frigate+"
+    }
   },
   "cameras": {
     "all": {
-      "short": "Kamera"
+      "short": "Kamera",
+      "title": "Semua Kamera"
+    },
+    "label": "Filter Kamera"
+  },
+  "sort": {
+    "label": "Urutkan",
+    "dateAsc": "Tanggal (Terlama)",
+    "dateDesc": "Tanggal (Terbaru)",
+    "scoreAsc": "Skor Objek (Terendah)",
+    "scoreDesc": "Skor Objek (Tertinggi)",
+    "speedAsc": "Estimasi Kecepatan (Terendah)",
+    "speedDesc": "Estimasi Kecepatan (Tercepat)",
+    "relevance": "Relevansi"
+  },
+  "review": {
+    "showReviewed": "Tunjukan Pratinjau"
+  },
+  "motion": {
+    "showMotionOnly": "Hanya Tampilkan Gerakan"
+  },
+  "explore": {
+    "settings": {
+      "title": "Pengaturan",
+      "defaultView": {
+        "title": "Tampilan Default"
+      }
     }
   }
 }
