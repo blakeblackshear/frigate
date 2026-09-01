@@ -146,7 +146,7 @@
       "toast": {
         "started_one": "Un export a démarré. Ouverture du dossier en cours.",
         "started_many": "{{count}} exports ont démarré. Ouverture du dossier en cours.",
-        "started_other": "{{count}} exports ont démarré. Ouverture du dossier en cours",
+        "started_other": "{{count}} exports ont démarré. Ouverture du dossier en cours.",
         "startedNoCase_one": "Un export a démarré.",
         "startedNoCase_many": "{{count}} exports ont démarré.",
         "startedNoCase_other": "{{count}} exports ont démarré.",

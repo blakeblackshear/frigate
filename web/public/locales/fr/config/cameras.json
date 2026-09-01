@@ -493,6 +493,9 @@
             "max_concurrent": {
                 "label": "Nombre maximum d'exports simultanés",
                 "description": "Nombre maximum de tâches d'exportation à effectuer en même temps."
+            },
+            "chapters": {
+                "label": "Métadonnées des chapitres à incorporer dans les enregistrements exportés"
             }
         },
         "preview": {
@@ -500,7 +503,8 @@
             "quality": {
                 "label": "Prévisualisation qualité",
                 "description": "Niveau de qualité des prévisualisations (très_bas, bas, moyen, haut, très_haut)."
-            }
+            },
+            "description": "Réglages de la qualité des aperçus d'enregistrement montrés dans l'interface utilisateur."
         },
         "enabled_in_config": {
             "label": "État original de l'enregistrement",
@@ -522,6 +526,61 @@
             },
             "required_zones": {
                 "label": "Zones requises"
+            },
+            "enabled_in_config": {
+                "label": "État des alertes originales",
+                "description": "Vérifie si les alertes étaient initialement activées dans la configuration statique."
+            },
+            "cutoff_time": {
+                "label": "Temps de coupure des alertes",
+                "description": "Délai en secondes après l'absence d'activité déclenchant une alerte avant de la couper."
+            }
+        },
+        "detections": {
+            "label": "Configuration des détections",
+            "description": "Paramètres pour lesquels les objets suivis génèrent des détections (hors alerte) et comment les détections sont conservées.",
+            "enabled": {
+                "label": "Activer les détections",
+                "description": "Activer ou désactiver les événements de détection pour cette caméra."
+            },
+            "labels": {
+                "label": "Étiquettes de détection",
+                "description": "Liste des étiquettes d'objets qui correspondent à des événements de détection."
+            },
+            "required_zones": {
+                "label": "Zones obligatoires",
+                "description": "Zones dans lesquelles un objet doit pénétrer pour être considéré comme une détection ; laisser vide pour autoriser n’importe quelle zone."
+            },
+            "cutoff_time": {
+                "label": "Délai limite de détection",
+                "description": "Nombre de secondes à attendre après l'absence d'activité susceptible de déclencher une détection avant d'interrompre celle-ci."
+            },
+            "enabled_in_config": {
+                "label": "État initial des détections",
+                "description": "Vérifie si les détections étaient activées initialement dans la configuration statique."
+            }
+        },
+        "genai": {
+            "label": "Configuration de l'IA générative",
+            "description": "Contrôle l'utilisation de l'IA générative pour la production de descriptions et de résumés des éléments d'évaluation.",
+            "enabled": {
+                "label": "Activer les descriptions de l'IA générative",
+                "description": "Activer ou désactiver les descriptions et les résumés générés par l'IA générative pour les éléments à examiner."
+            },
+            "alerts": {
+                "label": "Activer l'IA générative pour les alertes",
+                "description": "Utilisez l'IA générative pour générer des descriptions pour les éléments d'alerte."
+            },
+            "detections": {
+                "label": "Activer l'IA générative pour les détections",
+                "description": "Utilisez l'IA générative pour générer des descriptions pour les éléments de détection."
+            },
+            "image_source": {
+                "label": "Source de l'image de la revue",
+                "description": "Source des images envoyées à l'IA générative (« aperçu » ou « enregistrements ») ; « enregistrements » utilise des images de meilleure qualité mais plus de jetons d'IA."
+            },
+            "additional_concerns": {
+                "label": "Autres préoccupations"
             }
         }
     }
