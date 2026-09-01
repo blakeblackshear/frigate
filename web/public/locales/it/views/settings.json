@@ -2182,7 +2182,7 @@
     },
     "lpr": {
       "globalDisabled": "Per il corretto funzionamento delle funzioni LPR (riconoscimento targhe) su questa telecamera, è necessario abilitare la funzione di arricchimento del riconoscimento delle targhe.",
-      "vehicleNotTracked": "Il riconoscimento della targa richiede che venga tracciato 'automobile' o 'moto'. Abilita 'automobile' o 'moto' nella sezione oggetti per questa telecamera.",
+      "vehicleNotTracked": "Il riconoscimento della targa richiede che il veicolo sia tracciato. Abilita 'auto' o un altro tipo di veicolo nella sezione Oggetti per questa telecamera.",
       "modelSizeLarge": "Il modello 'grande' è ottimizzato per le targhe multilinea. Il modello 'piccolo' offre prestazioni migliori rispetto al modello 'grande' e dovrebbe essere utilizzato a meno che nella vostra regione non siano in vigore formati di targa multilinea."
     },
     "record": {
