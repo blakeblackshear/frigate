@@ -16,7 +16,8 @@
     "globalConfig": "Configuration globale - Frigate",
     "cameraConfig": "Configuration de la caméra - Frigate",
     "maintenance": "Maintenance - Frigate",
-    "profiles": "Profils - Frigate"
+    "profiles": "Profils - Frigate",
+    "detectorsAndModel": "Détecteurs et modèle - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -90,7 +91,7 @@
     "maintenance": "Maintenance",
     "uiSettings": "Paramètres IU",
     "profiles": "Profils",
-    "systemGo2rtcStreams": "Streams go2rtc"
+    "systemGo2rtcStreams": "Flux go2rtc"
   },
   "dialog": {
     "unsavedChanges": {
@@ -1363,9 +1364,9 @@
     "deleteCameraDialog": {
       "title": "Supprimer la caméra",
       "description": "Supprimer la caméra va supprimer de façon permanente les enregistrements, les objets suivis, et la configuration de la caméra. Tous les streams go2rtc associés à la caméra devront être supprimés manuellement.",
-      "selectPlaceholder": "Choisir une caméra...",
-      "confirmTitle": "Êtes-vous sûr?",
-      "confirmWarning": "Supprimer <strong>\n{{cameraName}}\n</strong> ne peut être annulé.",
+      "selectPlaceholder": "Choisir une caméra …",
+      "confirmTitle": "Êtes-vous certain ?",
+      "confirmWarning": "La suppression de la caméra <strong>{{cameraName}}</strong> ne peut être annulé.",
       "deleteExports": "Supprimer aussi les exports de cette caméra",
       "confirmButton": "Suppression permanente",
       "success": "Caméra {{cameraName}} supprimée avec succès",
