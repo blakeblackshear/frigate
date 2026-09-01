@@ -55,7 +55,7 @@
     "errors": {
         "noCamera": "Vennligst velg et kamera",
         "noROI": "Vennligst tegn et interesseområde",
-        "noTimeRange": "Vennligst velg en tidsperiode",
+        "noTimeRange": "Vennligst velg en tidsrom",
         "invalidTimeRange": "Sluttid må være etter starttid",
         "searchFailed": "Søk mislyktes: {{message}}",
         "polygonTooSmall": "Polygonet må ha minst 3 punkter",

@@ -65,7 +65,7 @@
         "failed": "Kunne ikke legge eksport i kø: {{error}}",
         "noVaildTimeSelected": "Ingen gyldig tidsperiode valgt",
         "endTimeMustAfterStartTime": "Sluttid må være etter starttid",
-        "noValidTimeSelected": "Ingen gyldig tidsperiode valgt"
+        "noValidTimeSelected": "Ingen gyldig tidsrom valgt"
       },
       "view": "Vis",
       "queued": "Eksport lagt i kø. Se fremdrift på eksportsiden.",

@@ -2000,7 +2000,7 @@
     },
     "lpr": {
       "globalDisabled": "Utvidelse for identifisering av kjennemerker må være aktivert for at LPR-funksjoner skal fungere på dette kameraet.",
-      "vehicleNotTracked": "Identifisering av kjennemerker krever at 'bil' eller 'motorsykkel' spores. Aktiver 'bil' eller 'motorsykkel' under Objekter for dette kameraet.",
+      "vehicleNotTracked": "Identifisering av kjennemerker krever at et kjøretøy spores. Aktiver 'bil' eller et annet kjøretøy under Objekter for dette kameraet.",
       "modelSizeLarge": "Den store (large) modellen er optimalisert for kjennemerker over flere linjer. Den lille (small) modellen gir bedre ytelse og bør brukes med mindre din region bruker skiltformater med flere linjer."
     },
     "objects": {
