@@ -31,7 +31,11 @@
     "aria": "Wybierz ostatnio rozpoznane",
     "title": "Ostatnie rozpoznania",
     "empty": "Nie podjęto ostatnio żadnych prób rozpoznawania twarzy",
-    "titleShort": "Ostatnie"
+    "titleShort": "Ostatnie",
+    "emptyNoLibrary": {
+      "title": "Prześlij twarz",
+      "description": "Musisz dodać co najmniej jedną twarz do biblioteki, aby rozpoznawanie twarzy mogło działać."
+    }
   },
   "selectFace": "Wybierz twarz",
   "deleteFaceLibrary": {
@@ -66,7 +70,8 @@
       "addFaceLibrary": "{{name}} został pomyślnie dodany do Biblioteki Twarzy!",
       "trainedFace": "Pomyślnie wytrenowano twarz.",
       "updatedFaceScore": "Pomyślnie zaktualizowano wynik twarzy do {{name}} {{score}}.",
-      "renamedFace": "Pomyślnie zmieniono nazwę twarzy na {{name}}"
+      "renamedFace": "Pomyślnie zmieniono nazwę twarzy na {{name}}",
+      "reclassifiedFace": "Pomyślnie przeklasyfikowano twarz."
     },
     "error": {
       "addFaceLibraryFailed": "Nie udało się ustawić nazwy twarzy: {{errorMessage}}",
@@ -75,7 +80,8 @@
       "trainFailed": "Nie udało się przeprowadzić treningu: {{errorMessage}}",
       "updateFaceScoreFailed": "Nie udało się zaktualizować wyniku twarzy: {{errorMessage}}",
       "uploadingImageFailed": "Nie udało się wgrać obrazu: {{errorMessage}}",
-      "renameFaceFailed": "Nie udało się zmienić nazwy twarzy: {{errorMessage}}"
+      "renameFaceFailed": "Nie udało się zmienić nazwy twarzy: {{errorMessage}}",
+      "reclassifyFailed": "Nie udało się przeklasyfikować twarzy: {{errorMessage}}"
     }
   },
   "readTheDocs": "Przeczytaj dokumentację",
@@ -101,5 +107,7 @@
     "desc_many": "Czy na pewno chcesz usunąć {{count}} twarzy? Tej czynności nie można cofnąć."
   },
   "nofaces": "Brak dostępnych twarzy",
-  "pixels": "{{area}}px"
+  "pixels": "{{area}}px",
+  "reclassifyFaceAs": "Przeklasyfikuj twarz jako:",
+  "reclassifyFace": "Przeklasyfikuj twarz"
 }

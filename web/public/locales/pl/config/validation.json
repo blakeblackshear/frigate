@@ -3,16 +3,33 @@
     "maximum": "Może wynosić najwyżej {{limit}}",
     "exclusiveMinimum": "Musi być większe niż {{limit}}",
     "exclusiveMaximum": "Musi być mniejsze niż {{limit}}",
-    "minLength": "Musi być co najmniej {{limit}} znaków",
-    "maxLength": "Maksymalnie może być {{limit}} znaków",
-    "minItems": "Musi zawierać co najmniej {{limit}} pozycji",
-    "maxItems": "Maksymalnie {{limit}} pozycji",
+    "minLength": "Musi zawierać co najmniej {{limit}} znaków",
+    "maxLength": "Może zawierać maksymalnie {{limit}} znaków",
+    "minItems": "Musi zawierać co najmniej {{limit}} elementów",
+    "maxItems": "Może zawierać maksymalnie {{limit}} elementów",
     "pattern": "Nieprawidłowy format",
-    "required": "To pole jest obowiązkowe",
+    "required": "To pole jest wymagane",
     "type": "Nieprawidłowy typ wartości",
     "enum": "Musi to być jedna z dozwolonych wartości",
-    "const": "Wartość niezgodna z oczekiwaną stałą",
-    "uniqueItems": "Wszystkie pozycje muszą być unikalne",
+    "const": "Wartość nie jest zgodna z oczekiwaną stałą",
+    "uniqueItems": "Wszystkie elementy muszą być unikalne",
     "format": "Nieprawidłowy format",
-    "additionalProperties": "Nieznana właściwość jest niedozwolona"
+    "additionalProperties": "Nieznana właściwość jest niedozwolona",
+    "oneOf": "Musi pasować dokładnie do jednego z dozwolonych schematów",
+    "anyOf": "Musi pasować do co najmniej jednego z dozwolonych schematów",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Nagłówek roli jest wymagany, gdy skonfigurowano mapowanie ról."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Każda rola może być przypisana tylko do jednego strumienia wejściowego.",
+            "detectRequired": "Co najmniej jeden strumień wejściowy musi mieć przypisaną rolę 'detect'.",
+            "hwaccelDetectOnly": "Tylko strumień wejściowy z rolą 'detect' może definiować argumenty akceleracji sprzętowej."
+        }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Musi być liczbą parzystą."
+    }
 }

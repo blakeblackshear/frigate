@@ -40,8 +40,8 @@
     "label": "Zobacz nowe elementy do przeglądu",
     "button": "Nowe elementy do przeglądu"
   },
-  "selected_one": "{{count}} wybrane",
-  "selected_other": "{{count}} wybrane",
+  "selected_one": "Wybrano {{count}}",
+  "selected_other": "Wybrano {{count}}",
   "detected": "wykryto",
   "suspiciousActivity": "Podejrzana aktywność",
   "threateningActivity": "Niebezpieczne działania",

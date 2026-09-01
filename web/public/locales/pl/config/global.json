@@ -1,8 +1,9 @@
 {
     "audio": {
-        "label": "Wykrywanie dźwięku",
+        "label": "Dźwięk",
         "enabled": {
-            "label": "Włącz detekcję audio"
+            "label": "Włącz wykrywanie dźwięku",
+            "description": "Włącz lub wyłącz detekcję zdarzeń dźwiękowych dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
         },
         "max_not_heard": {
             "label": "Limit czasu zakończenia",
@@ -31,14 +32,31 @@
         "num_threads": {
             "label": "Wątki detekcji",
             "description": "Liczba wątków używanych do przetwarzania detekcji audio."
-        }
+        },
+        "description": "Ustawienia detekcji zdarzeń na podstawie dźwięku dla wszystkich kamer; mogą być nadpisane dla poszczególnych kamer."
     },
     "audio_transcription": {
-        "label": "Transkrypcja audio",
-        "description": "Ustawienia transkrypcji audio na żywo i mowy, używane do zdarzeń i napisów na żywo.",
+        "label": "Transkrypcja dźwięku",
+        "description": "Ustawienia transkrypcji dźwięku na żywo i mowy, używanej dla zdarzeń i napisów na żywo.",
         "live_enabled": {
             "label": "Transkrypcja na żywo",
             "description": "Włącz transkrypcję strumieniową audio na żywo w momencie jego odbierania."
+        },
+        "enabled": {
+            "label": "Włącz transkrypcję dźwięku",
+            "description": "Włącz lub wyłącz automatyczną transkrypcję dźwięku dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
+        },
+        "language": {
+            "label": "Język",
+            "description": "Kod języka używany do transkrypcji/tłumaczenia (np. \"pl\" dla polskiego, \"en\" dla angielskiego). Zobacz https://whisper-api.com/docs/languages/ aby sprawdzić listę obsługiwanych kodów języków."
+        },
+        "device": {
+            "label": "Urządzenie",
+            "description": "Klucz urządzenia (CPU/GPU), na którym ma być uruchamiany model transkrypcji. Obecnie tylko karty NVIDIA CUDA GPU są obsługiwane dla transkrypcji."
+        },
+        "model_size": {
+            "label": "Rozmiar modelu",
+            "description": "Rozmiar modelu używanego do transkrypcji zdarzeń dźwiękowych offline."
         }
     },
     "version": {
@@ -67,31 +85,108 @@
     },
     "auth": {
         "label": "Uwierzytelnianie",
-        "description": "Ustawienia związane z uwierzytelnianiem i sesjami, w tym opcje dotyczące plików cookie i ograniczeń częstotliwości.",
+        "description": "Ustawienia uwierzytelniania natywnego i sesji użytkowników.",
         "enabled": {
             "label": "Włącz uwierzytelnianie",
-            "description": "Włącz natywne uwierzytelnianie dla interfejsu Frigate."
+            "description": "Włącz lub wyłącz natywne uwierzytelnianie we Frigate."
+        },
+        "reset_admin_password": {
+            "label": "Zresetuj hasło administratora",
+            "description": "Jeśli true, resetuje hasło administratora przy starcie i wypisuje nowe hasło w logach."
+        },
+        "cookie_name": {
+            "label": "Nazwa ciasteczka JWT",
+            "description": "Nazwa pliku cookie używanego do przechowywania tokenu JWT."
+        },
+        "cookie_secure": {
+            "label": "Flaga Secure ciasteczka",
+            "description": "Ustaw flagę secure na ciasteczku auth; powinno być true przy korzystaniu z TLS."
+        },
+        "session_length": {
+            "label": "Czas trwania sesji",
+            "description": "Czas trwania sesji w sekundach dla sesji opartych na JWT."
+        },
+        "refresh_time": {
+            "label": "Okno odświeżania sesji",
+            "description": "Gdy sesja zbliży się do wygaśnięcia o tę liczbę sekund, odśwież ją do pełnego czasu trwania."
+        },
+        "failed_login_rate_limit": {
+            "label": "Limity nieudanych logowań",
+            "description": "Reguły ograniczania częstotliwości nieudanych prób logowania w celu ochrony przed atakami brute-force."
+        },
+        "trusted_proxies": {
+            "label": "Zaufane proxy",
+            "description": "Lista zaufanych adresów IP serwerów proxy do określania IP klienta dla limitów żądań."
+        },
+        "hash_iterations": {
+            "label": "Liczba iteracji haszowania",
+            "description": "Liczba iteracji PBKDF2-SHA256 używanych podczas haszowania haseł użytkowników."
+        },
+        "roles": {
+            "label": "Mapowanie ról",
+            "description": "Mapuj role na listy kamer. Pusta lista przyznaje dostęp do wszystkich kamer."
+        },
+        "admin_first_time_login": {
+            "label": "Flaga pierwszego logowania administratora",
+            "description": "Gdy włączone, interfejs wyświetla link pomocy informujący, jak się zalogować po resecie hasła. "
         }
     },
     "birdseye": {
         "mode": {
-            "label": "Tryb śledzenia",
-            "description": "Tryb uwzględniania kamer w widoku z lotu ptaka: „obiekty”, „ruch” lub „ciągły”."
+            "label": "Tryb Birdseye",
+            "description": "Określa, kiedy kamery pojawiają się w Birdseye: objects (tylko obiekty), motion (ruch) lub continuous (ciągły)."
         },
         "order": {
-            "label": "Pozycja",
-            "description": "Pozycja numeryczna określająca kolejność kamery w układzie widoku z lotu ptaka."
+            "label": "Kolejność kamer",
+            "description": "Pozycja numeryczna kontrolująca kolejność kamery w układzie Birdseye."
         },
-        "label": "Widok z lotu ptaka",
-        "description": "Ustawienia widoku z lotu ptaka „Birdseye”, który łączy obraz z wielu kamer w jeden układ.",
+        "label": "Birdseye",
+        "description": "Ustawienia widoku łączonego Birdseye, który składa obrazy z wielu kamer w jeden układ.",
         "enabled": {
-            "label": "Włącz widok z lotu ptaka",
-            "description": "Włącz lub wyłącz funkcję widoku z lotu ptaka."
+            "label": "Włącz Birdseye",
+            "description": "Włącz lub wyłącz widok Birdseye."
+        },
+        "restream": {
+            "label": "Retransmisja Birdseye",
+            "description": "Retransmituj wyjście Birdseye jako strumień RTSP; włączenie tej opcji sprawi, że Birdseye będzie działał nieprzerwanie."
+        },
+        "width": {
+            "label": "Szerokość",
+            "description": "Szerokość widoku Birdseye w pikselach."
+        },
+        "height": {
+            "label": "Wysokość",
+            "description": "Wysokość widoku Birdseye w pikselach."
+        },
+        "quality": {
+            "label": "Jakość",
+            "description": "Jakość kodowania dla strumienia mpeg1 Birdseye (1 najwyższa jakość, 31 najniższa)."
+        },
+        "inactivity_threshold": {
+            "label": "Próg nieaktywności (sekundy)",
+            "description": "Liczba sekund bezczynności przed usunięciem kamery z widoku Birdseye."
+        },
+        "layout": {
+            "label": "Układ kamer",
+            "description": "Ustawienia rozmieszczenia kamer w widoku Birdseye.",
+            "scaling_factor": {
+                "label": "Współczynnik skalowania",
+                "description": "Współczynnik skalowania używany przez kalkulator układu (zakres 1.0 do 5.0)."
+            },
+            "max_cameras": {
+                "label": "Maksymalna liczba kamer",
+                "description": "Maksymalna liczba kamer wyświetlanych jednocześnie w Birdseye; pokazuje najnowsze kamery."
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "Liczba klatek FPS sygnału tętna w stanie bezczynności",
+            "description": "Liczba klatek na sekundę, z jaką ma być ponownie wysyłana ostatnia złożona klatka Birdseye w stanie bezczynności; ustaw 0, aby wyłączyć."
         }
     },
     "detect": {
         "enabled": {
-            "label": "Włącz wykrywanie obiektów"
+            "label": "Włącz wykrywanie obiektów",
+            "description": "Włącz lub wyłącz detekcję obiektów dla wszystkich kamer; można nadpisać dla pojedynczej kamery."
         },
         "stationary": {
             "label": "Konfiguracja obiektów stacjonarnych",
@@ -151,11 +246,45 @@
     "face_recognition": {
         "label": "Rozpoznawanie twarzy",
         "enabled": {
-            "label": "Włącz rozpoznawanie twarzy"
+            "label": "Włącz rozpoznawanie twarzy",
+            "description": "Włącz lub wyłącz rozpoznawanie twarzy dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
         },
         "min_area": {
-            "label": "Minimalny obszar twarzy",
-            "description": "Minimalny obszar twarzy (w pikselach) wymagany do podjęcia próby rozpoznania."
+            "label": "Minimalna powierzchnia twarzy",
+            "description": "Minimalna powierzchnia (w pikselach) ramki wykrytej twarzy wymagana do podjęcia próby rozpoznania."
+        },
+        "description": "Ustawienia detekcji i rozpoznawania twarzy dla wszystkich kamer; mogą być nadpisane dla poszczególnych kamer.",
+        "model_size": {
+            "label": "Rozmiar modelu",
+            "description": "Rozmiar modelu rozpoznawania twarzy (small dla CPU, large dla GPU/NPU)."
+        },
+        "unknown_score": {
+            "label": "Próg oceny nieznanej twarzy",
+            "description": "Próg odległości, poniżej którego twarz jest uważana za potencjalne dopasowanie (wyższy = bardziej restrykcyjny)."
+        },
+        "detection_threshold": {
+            "label": "Próg detekcji",
+            "description": "Minimalna pewność detekcji wymagana, aby uznać detekcję twarzy za prawidłową."
+        },
+        "recognition_threshold": {
+            "label": "Próg rozpoznawania",
+            "description": "Próg pewności wymagany do przypisania rozpoznanej twarzy jako podetykiety."
+        },
+        "min_faces": {
+            "label": "Minimalna liczba twarzy",
+            "description": "Minimalna liczba rozpoznań twarzy wymagana przed przypisaniem rozpoznanej podetykiety do osoby."
+        },
+        "save_attempts": {
+            "label": "Zapisuj próby",
+            "description": "Liczba obrazów twarzy do zapisania w celach treningowych i weryfikacji."
+        },
+        "blur_confidence_filter": {
+            "label": "Filtr pewności na podstawie rozmycia",
+            "description": "Koryguj wyniki pewności na podstawie rozmycia obrazu, aby zmniejszyć liczbę fałszywych dopasowań dla twarzy o słabej jakości."
+        },
+        "device": {
+            "label": "Urządzenie",
+            "description": "Nadpisanie urządzenia docelowego. Więcej informacji: https://onnxruntime.ai/docs/execution-providers/"
         }
     },
     "ffmpeg": {
@@ -197,39 +326,52 @@
         },
         "input_args": {
             "label": "Wejściowe parametry",
-            "description": "Argumenty wejściowe przekazywane strumieniom wejściowym FFmpeg"
+            "description": "Argumenty wejściowe przekazywane do strumieni wejściowych FFmpeg."
         },
         "inputs": {
             "path": {
                 "label": "Ścieżka wejścia",
-                "description": "URL lub ścieżka strumienia wejściowego kamery"
+                "description": "Adres URL lub ścieżka strumienia wejściowego kamery."
             },
             "global_args": {
-                "label": "Parametry globalne FFmpeg"
+                "label": "Parametry globalne FFmpeg",
+                "description": "Globalne argumenty FFmpeg dla tego strumienia wejściowego."
             },
             "label": "Wejścia kamery",
             "description": "Lista definicji strumienia wejściowego (ścieżki i role) dla tej kamery.",
             "hwaccel_args": {
-                "description": "Argumenty akceleracji sprzętowej dla tego strumienia wejściowego."
+                "description": "Argumenty akceleracji sprzętowej dla tego strumienia wejściowego.",
+                "label": "Argumenty akceleracji sprzętowej"
             },
             "input_args": {
-                "label": "Argumenty wejścia"
+                "label": "Argumenty wejścia",
+                "description": "Argumenty wejściowe specyficzne dla tego strumienia."
+            },
+            "roles": {
+                "label": "Role wejściowe",
+                "description": "Role przypisane do tego strumienia wejściowego."
             }
-        }
+        },
+        "label": "FFmpeg",
+        "description": "Ustawienia FFmpeg, w tym ścieżka do pliku binarnego, argumenty globalne, akceleracja sprzętowa i parametry wyjściowe."
     },
     "motion": {
-        "label": "Detekcja ruchu",
+        "label": "Ruch",
         "enabled": {
-            "label": "Włącz detekcje ruchu"
+            "label": "Włącz detekcje ruchu",
+            "description": "Włącz lub wyłącz detekcję ruchu dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
         },
         "threshold": {
-            "label": "Próg detekcji"
+            "label": "Próg detekcji",
+            "description": "Próg różnicy pikseli używany przez detektor ruchu; wyższe wartości zmniejszają czułość (zakres 1-255)."
         },
         "lightning_threshold": {
-            "label": "Próg pioruna"
+            "label": "Próg pioruna",
+            "description": "Próg do wykrywania i ignorowania krótkich skoków oświetlenia (niższe wartości są bardziej czułe, zakres od 0.3 do 1.0). Nie zapobiega to całkowicie detekcji ruchu; powoduje jedynie, że detektor przestaje analizować kolejne klatki po przekroczeniu progu. Nagrania oparte na ruchu są nadal tworzone podczas tych zdarzeń."
         },
         "skip_motion_threshold": {
-            "label": "Pomiń próg detekcji"
+            "label": "Pomiń próg detekcji",
+            "description": "Jeśli ustawiono wartość z przedziału od 0.0 do 1.0, a w pojedynczej klatce zmieni się większa część obrazu, detektor nie zwróci ramek ruchu i natychmiast przeprowadzi rekalibrację. Może to zaoszczędzić czas procesora i zmniejszyć liczbę fałszywych alarmów podczas wyładowań atmosferycznych, burz itp., ale może pominąć prawdziwe zdarzenia, takie jak auto-śledzenie obiektu przez kamerę PTZ. Kompromis polega na utracie kilku megabajtów nagrań w porównaniu z przeglądaniem kilku krótkich klipów. Pozostaw nieustawione (None), aby wyłączyć tę funkcję."
         },
         "improve_contrast": {
             "label": "Popraw kontrast",
@@ -244,10 +386,12 @@
             "description": "Współczynnik mieszania alfa stosowany przy obliczaniu różnic między klatkami w celu wyznaczenia ruchu."
         },
         "frame_alpha": {
-            "label": "Klatka alfa (przezroczystość ramki)"
+            "label": "Klatka alfa (przezroczystość ramki)",
+            "description": "Wartość alfa używana podczas mieszania klatek do wstępnego przetwarzania ruchu."
         },
         "frame_height": {
-            "label": "Wysokość ramki"
+            "label": "Wysokość ramki",
+            "description": "Wysokość w pikselach, do której skalowane są klatki podczas obliczania ruchu."
         },
         "mqtt_off_delay": {
             "label": "Opóźnienie wyłączenia MQTT",
@@ -256,21 +400,32 @@
         "enabled_in_config": {
             "label": "Pierwotny stan ruchu",
             "description": "Wskazuje, czy w pierwotnej konfiguracji statycznej włączono wykrywanie ruchu."
-        }
+        },
+        "mask": {
+            "label": "Współrzędne maski",
+            "description": "Uporządkowane współrzędne x,y definiujące wielokąt maski ruchu."
+        },
+        "raw_mask": {
+            "label": "Maska surowa (Raw Mask)"
+        },
+        "description": "Domyślne ustawienia detekcji ruchu stosowane do kamer, o ile nie zostaną nadpisane dla poszczególnych kamer."
     },
     "objects": {
-        "label": "Objekty",
+        "label": "Obiekty",
         "track": {
-            "label": "Obiekty do śledzenia"
+            "label": "Śledzone obiekty",
+            "description": "Lista etykiet obiektów do śledzenia dla wszystkich kamer; może być nadpisana dla poszczególnych kamer."
         },
         "filters": {
             "label": "Filtry obiektów",
-            "description": "Filtry stosowane do wykrytych obiektów w celu ograniczenia liczby fałszywych alarmów (powierzchnia, współczynnik, poziom pewności).",
+            "description": "Domyślne filtry obiektów (powierzchnia, proporcje, progi pewności).",
             "min_area": {
-                "label": "Minimalna powierzchnia obiektu"
+                "label": "Minimalna powierzchnia obiektu",
+                "description": "Minimalna powierzchnia ramki ograniczającej (w pikselach lub procentach) wymagana dla tego typu obiektu. Może być liczbą całkowitą (piksele) lub ułamkiem dziesiętnym (od 0.000001 do 0.99 dla procentów)."
             },
             "max_area": {
-                "label": "Maksymalna powierzchnia obiektu"
+                "label": "Maksymalna powierzchnia obiektu",
+                "description": "Maksymalna powierzchnia ramki ograniczającej (w pikselach lub procentach) dozwolona dla tego typu obiektu. Może być liczbą całkowitą (piksele) lub ułamkiem dziesiętnym (od 0.000001 do 0.99 dla procentów)."
             },
             "min_ratio": {
                 "label": "Minimalny współczynnik proporcji",
@@ -287,6 +442,13 @@
             "min_score": {
                 "label": "Minimalny poziom ufności",
                 "description": "Minimalny poziom pewności wykrycia pojedynczej klatki wymagany do zaliczenia obiektu."
+            },
+            "mask": {
+                "label": "Maska filtra",
+                "description": "Współrzędne wielokąta definiujące, gdzie ten filtr ma zastosowanie w kadrze."
+            },
+            "raw_mask": {
+                "label": "Maska surowa (Raw Mask)"
             }
         },
         "genai": {
@@ -295,18 +457,1158 @@
                 "description": "Włącz domyślnie generowanie opisów obiektów śledzonych przez GenAI."
             },
             "use_snapshot": {
-                "label": "Korzystaj z migawek"
+                "label": "Korzystaj z migawek",
+                "description": "Używaj migawek obiektów zamiast miniatur do generowania opisów GenAI."
             },
             "prompt": {
                 "label": "Podpowiedź do podpisu",
                 "description": "Domyślny szablon monitu używany podczas generowania opisów za pomocą GenAI."
             },
             "object_prompts": {
-                "label": "Podpowiedzi dotyczące obiektów"
+                "label": "Podpowiedzi dotyczące obiektów",
+                "description": "Monity specyficzne dla poszczególnych obiektów do personalizacji odpowiedzi GenAI dla konkretnych etykiet."
             },
             "objects": {
-                "label": "Obiekty GenAI"
+                "label": "Obiekty GenAI",
+                "description": "Lista etykiet obiektów domyślnie wysyłanych do GenAI."
+            },
+            "label": "Konfiguracja GenAI dla obiektów",
+            "description": "Opcje GenAI do opisywania śledzonych obiektów i wysyłania klatek do generowania opisów.",
+            "required_zones": {
+                "description": "Strefy, do których obiekt musi wejść, aby kwalifikował się do generowania opisu GenAI.",
+                "label": "Wymagane strefy"
+            },
+            "debug_save_thumbnails": {
+                "label": "Zapisuj miniatury",
+                "description": "Zapisuj miniatury wysyłane do GenAI w celach debugowania i weryfikacji."
+            },
+            "send_triggers": {
+                "label": "Wyzwalacze GenAI",
+                "description": "Definiuje, kiedy klatki powinny być wysyłane do GenAI (po zakończeniu zdarzenia, po aktualizacjach itp.).",
+                "tracked_object_end": {
+                    "label": "Wysyłaj po zakończeniu",
+                    "description": "Wyślij żądanie do GenAI po zakończeniu śledzenia obiektu."
+                },
+                "after_significant_updates": {
+                    "label": "Wczesny wyzwalacz GenAI",
+                    "description": "Wyślij żądanie do GenAI po określonej liczbie istotnych aktualizacji śledzonego obiektu."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Pierwotny stan GenAI",
+                "description": "Wskazuje, czy GenAI było włączone w pierwotnej konfiguracji statycznej."
             }
+        },
+        "description": "Domyślne ustawienia śledzenia obiektów dla wszystkich kamer.",
+        "mask": {
+            "label": "Maska obiektów",
+            "description": "Współrzędne wielokąta określające obszar wykluczony z detekcji."
+        },
+        "raw_mask": {
+            "label": "Maska surowa (Raw Mask)"
+        },
+        "filters_attribute": {
+            "label": "Filtry atrybutów",
+            "description": "Filtry stosowane do wykrytych atrybutów w celu zmniejszenia fałszywych alarmów (powierzchnia, proporcje, pewność).",
+            "min_area": {
+                "label": "Minimalna powierzchnia atrybutu",
+                "description": "Minimalna powierzchnia ramki ograniczającej (w pikselach lub procentach) wymagana dla tego atrybutu. Może być liczbą całkowitą (piksele) lub ułamkiem dziesiętnym (od 0.000001 do 0.99 dla procentów)."
+            },
+            "max_area": {
+                "label": "Maksymalna powierzchnia atrybutu",
+                "description": "Maksymalna powierzchnia ramki ograniczającej (w pikselach lub procentach) dozwolona dla tego atrybutu. Może być liczbą całkowitą (piksele) lub ułamkiem dziesiętnym (od 0.000001 do 0.99 dla procentów)."
+            },
+            "min_ratio": {
+                "label": "Minimalne proporcje",
+                "description": "Minimalny stosunek szerokości do wysokości ramki ograniczającej."
+            },
+            "max_ratio": {
+                "label": "Maksymalne proporcje",
+                "description": "Maksymalny stosunek szerokości do wysokości ramki ograniczającej."
+            },
+            "threshold": {
+                "label": "Próg pewności",
+                "description": "Średni próg pewności detekcji wymagany, aby atrybut został uznany za prawidłowy."
+            },
+            "min_score": {
+                "label": "Minimalna pewność",
+                "description": "Minimalna pewność detekcji w pojedynczej klatce wymagana do powiązania tego atrybutu z obiektem nadrzędnym."
+            },
+            "mask": {
+                "label": "Maska filtra",
+                "description": "Współrzędne wielokąta definiujące obszar zastosowania filtra."
+            },
+            "raw_mask": {
+                "label": "Maska surowa (Raw Mask)"
+            }
+        }
+    },
+    "live": {
+        "label": "Odtwarzanie na żywo",
+        "streams": {
+            "label": "Nazwy strumieni na żywo",
+            "description": "Mapowanie skonfigurowanych nazw strumieni na nazwy go2rtc używane do odtwarzania na żywo."
+        },
+        "height": {
+            "label": "Wysokość na żywo",
+            "description": "Wysokość (w pikselach) do renderowania strumienia na żywo jsmpeg w interfejsie WWW; musi być <= wysokości strumienia detekcji."
+        },
+        "quality": {
+            "label": "Jakość na żywo",
+            "description": "Jakość kodowania strumienia jsmpeg (1 najwyższa, 31 najniższa)."
+        },
+        "description": "Ustawienia kontrolujące rozdzielczość i jakość strumienia na żywo jsmpeg. Nie ma to wpływu na kamery retransmitowane, które używają go2rtc do podglądu na żywo."
+    },
+    "lpr": {
+        "label": "Rozpoznawanie tablic rejestracyjnych",
+        "description": "Ustawienia rozpoznawania tablic rejestracyjnych, w tym progi detekcji, formatowanie i znane tablice.",
+        "enabled": {
+            "label": "Włącz LPR",
+            "description": "Włącz lub wyłącz rozpoznawanie tablic rejestracyjnych dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
+        },
+        "expire_time": {
+            "label": "Czas wygaśnięcia (sekundy)",
+            "description": "Czas w sekundach, po którym niewidziana tablica wygasa z modułu śledzenia (dla kamer dedykowanych LPR)."
+        },
+        "min_area": {
+            "label": "Minimalna powierzchnia tablicy",
+            "description": "Minimalna powierzchnia tablicy rejestracyjnej (w pikselach) wymagana do podjęcia próby rozpoznania."
+        },
+        "enhancement": {
+            "label": "Poziom ulepszania",
+            "description": "Poziom ulepszania (0-10) stosowany do wycinków tablic przed OCR; wyższe wartości nie zawsze poprawiają wyniki, poziomy powyżej 5 mogą działać tylko z tablicami nocnymi i należy ich używać ostrożnie."
+        },
+        "model_size": {
+            "label": "Rozmiar modelu",
+            "description": "Rozmiar modelu LPR (small dla standardowych tablic jednowierszowych, large dla wielowierszowych)."
+        },
+        "detection_threshold": {
+            "label": "Próg detekcji",
+            "description": "Próg pewności detekcji, od którego rozpoczyna się uruchamianie OCR na podejrzanej tablicy."
+        },
+        "recognition_threshold": {
+            "label": "Próg rozpoznawania",
+            "description": "Próg pewności wymagany do przypisania tekstu rozpoznanej tablicy jako podetykiety."
+        },
+        "min_plate_length": {
+            "label": "Minimalna długość tablicy",
+            "description": "Minimalna liczba znaków, którą musi zawierać rozpoznana tablica, aby została uznana za prawidłową."
+        },
+        "format": {
+            "label": "Wyrażenie regularne formatu tablicy",
+            "description": "Opcjonalne wyrażenie regularne do sprawdzania poprawności rozpoznanych tablic względem oczekiwanego formatu."
+        },
+        "match_distance": {
+            "label": "Dystans dopasowania",
+            "description": "Liczba dopuszczalnych niezgodności znaków podczas porównywania wykrytych tablic ze znanymi tablicami."
+        },
+        "known_plates": {
+            "label": "Znane tablice",
+            "description": "Lista znanych tablic rejestracyjnych z przyjaznymi nazwami."
+        },
+        "debug_save_plates": {
+            "label": "Zapisuj tablice do debugowania",
+            "description": "Zapisuj wycinki tablic do debugowania działania modułu LPR."
+        },
+        "device": {
+            "label": "Urządzenie",
+            "description": "Nadpisanie urządzenia docelowego. Więcej informacji: https://onnxruntime.ai/docs/execution-providers/"
+        },
+        "replace_rules": {
+            "label": "Reguły zastępowania",
+            "description": "Reguły zastępowania regex używane do normalizacji wykrytych ciągów tablic przed dopasowaniem.",
+            "pattern": {
+                "label": "Wzorzec regex"
+            },
+            "replacement": {
+                "label": "Ciąg zastępczy"
+            }
+        }
+    },
+    "record": {
+        "export": {
+            "max_concurrent": {
+                "label": "Maksymalna liczba równoległych eksportów",
+                "description": "Maksymalna liczba zadań eksportu przetwarzanych jednocześnie."
+            },
+            "chapters": {
+                "label": "Metadane rozdziałów do osadzenia w eksportowanych nagraniach"
+            },
+            "label": "Konfiguracja eksportu",
+            "description": "Ustawienia używane podczas eksportowania nagrań, takie jak timelapse i akceleracja sprzętowa.",
+            "hwaccel_args": {
+                "label": "Argumenty hwaccel eksportu",
+                "description": "Argumenty akceleracji sprzętowej dla operacji eksportu/transkodowania."
+            }
+        },
+        "detections": {
+            "pre_capture": {
+                "label": "Sekundy przed zdarzeniem",
+                "description": "Liczba sekund nagrania przed zdarzeniem do dołączenia do klipu."
+            },
+            "post_capture": {
+                "label": "Sekundy po zdarzeniu",
+                "description": "Liczba sekund nagrania po ustaniu zdarzenia do dołączenia do klipu."
+            },
+            "retain": {
+                "days": {
+                    "label": "Dni retencji",
+                    "description": "Liczba dni przechowywania nagrań detekcji."
+                },
+                "label": "Retencja zdarzeń",
+                "description": "Ustawienia retencji nagrań detekcji.",
+                "mode": {
+                    "label": "Tryb retencji",
+                    "description": "Tryb retencji: all (wszystkie segmenty), motion (segmenty z ruchem), active_objects (segmenty z aktywnymi obiektami)."
+                }
+            },
+            "label": "Retencja detekcji",
+            "description": "Ustawienia retencji nagrań dla zdarzeń detekcji, w tym czasy trwania pre/post-capture."
+        },
+        "alerts": {
+            "pre_capture": {
+                "label": "Sekundy przed zdarzeniem",
+                "description": "Liczba sekund nagrania przed zdarzeniem do dołączenia do klipu."
+            },
+            "post_capture": {
+                "label": "Sekundy po zdarzeniu",
+                "description": "Liczba sekund nagrania po ustaniu zdarzenia do dołączenia do klipu."
+            },
+            "retain": {
+                "days": {
+                    "label": "Dni retencji",
+                    "description": "Liczba dni przechowywania nagrań alertów."
+                },
+                "label": "Retencja zdarzeń",
+                "description": "Ustawienia retencji dla nagrań zdarzeń detekcji.",
+                "mode": {
+                    "label": "Tryb retencji",
+                    "description": "Tryb retencji: all (wszystkie segmenty), motion (segmenty z ruchem), active_objects (segmenty z aktywnymi obiektami)."
+                }
+            },
+            "label": "Retencja alertów",
+            "description": "Ustawienia retencji nagrań dla zdarzeń detekcji, w tym czasy trwania pre/post-capture."
+        },
+        "label": "Nagrywanie",
+        "description": "Ustawienia nagrywania i retencji stosowane do kamer, o ile nie zostaną nadpisane dla poszczególnych kamer.",
+        "enabled": {
+            "label": "Włącz nagrywanie",
+            "description": "Włącz lub wyłącz nagrywanie dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
+        },
+        "expire_interval": {
+            "label": "Interwał czyszczenia nagrań",
+            "description": "Liczba minut między kolejnymi przebiegami czyszczenia wygasłych segmentów nagrań."
+        },
+        "continuous": {
+            "label": "Retencja ciągła",
+            "description": "Liczba dni przechowywania nagrań niezależnie od śledzonych obiektów czy ruchu. Ustaw na 0, jeśli chcesz zachowywać wyłącznie nagrania alertów i detekcji.",
+            "days": {
+                "label": "Dni retencji",
+                "description": "Dni przechowywania nagrań ciągłych."
+            }
+        },
+        "motion": {
+            "label": "Retencja ruchu",
+            "description": "Liczba dni przechowywania nagrań wywołanych ruchem niezależnie od śledzonych obiektów. Ustaw na 0, jeśli chcesz zachowywać wyłącznie nagrania alertów i detekcji.",
+            "days": {
+                "label": "Dni retencji",
+                "description": "Dni przechowywania nagrań ruchu."
+            }
+        },
+        "preview": {
+            "label": "Konfiguracja podglądu",
+            "description": "Ustawienia kontrolujące jakość podglądów nagrań wyświetlanych w interfejsie użytkownika.",
+            "quality": {
+                "label": "Jakość podglądu",
+                "description": "Poziom jakości podglądu (very_low, low, medium, high, very_high)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Pierwotny stan nagrywania",
+            "description": "Wskazuje, czy nagrywanie było włączone w pierwotnej konfiguracji."
+        }
+    },
+    "review": {
+        "label": "Przegląd",
+        "alerts": {
+            "label": "Konfiguracja alertów",
+            "description": "Ustawienia określające, które śledzone obiekty generują alerty i jak alerty są przechowywane.",
+            "labels": {
+                "label": "Etykiety alertów",
+                "description": "Lista etykiet obiektów kwalifikujących się jako alerty (na przykład: car, person)."
+            },
+            "required_zones": {
+                "description": "Strefy, w których obiekt musi się znaleźć, aby został uznany za alert; pozostaw puste, aby zezwolić na dowolną strefę.",
+                "label": "Wymagane strefy"
+            },
+            "enabled": {
+                "label": "Włącz alerty",
+                "description": "Włącz lub wyłącz generowanie alertów dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
+            },
+            "enabled_in_config": {
+                "label": "Pierwotny stan alertów",
+                "description": "Śledzi pierwotny stan włączenia alertów w konfiguracji."
+            },
+            "cutoff_time": {
+                "label": "Czas odcięcia alertu",
+                "description": "Liczba sekund oczekiwania po ustaniu aktywności wywołującej alert przed jego zakończeniem."
+            }
+        },
+        "detections": {
+            "label": "Konfiguracja detekcji",
+            "description": "Ustawienia określające, które śledzone obiekty generują detekcje (niebędące alertami) i jak detekcje są przechowywane.",
+            "labels": {
+                "description": "Lista etykiet obiektów kwalifikujących się jako zdarzenia detekcji.",
+                "label": "Etykiety detekcji"
+            },
+            "required_zones": {
+                "description": "Strefy, w których obiekt musi się znaleźć, aby został uznany za detekcję; pozostaw puste, aby zezwolić na dowolną strefę.",
+                "label": "Wymagane strefy"
+            },
+            "cutoff_time": {
+                "label": "Czas odcięcia detekcji",
+                "description": "Liczba sekund oczekiwania po ustaniu aktywności wywołującej detekcję przed jej zakończeniem."
+            },
+            "enabled_in_config": {
+                "label": "Pierwotny stan detekcji",
+                "description": "Śledzi pierwotny stan włączenia detekcji w konfiguracji."
+            },
+            "enabled": {
+                "label": "Włącz detekcje",
+                "description": "Włącz lub wyłącz zdarzenia detekcji dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
+            }
+        },
+        "genai": {
+            "label": "Konfiguracja GenAI",
+            "description": "Kontroluje użycie generatywnej sztucznej inteligencji do tworzenia opisów i podsumowań elementów przeglądu.",
+            "enabled": {
+                "label": "Włącz opisy GenAI",
+                "description": "Włącz lub wyłącz generowanie opisów i podsumowań GenAI dla elementów przeglądu."
+            },
+            "alerts": {
+                "label": "Włącz GenAI dla alertów",
+                "description": "Używaj GenAI do generowania opisów dla elementów alertów."
+            },
+            "detections": {
+                "label": "Włącz GenAI dla detekcji",
+                "description": "Używaj GenAI do generowania opisów dla elementów detekcji."
+            },
+            "image_source": {
+                "label": "Źródło obrazu dla przeglądu",
+                "description": "Źródło obrazów wysyłanych do GenAI (\"preview\" lub \"recordings\"); \"recordings\" używa klatek wyższej jakości, ale zużywa więcej tokenów."
+            },
+            "additional_concerns": {
+                "label": "Dodatkowe uwagi",
+                "description": "Lista dodatkowych uwag lub notatek, które model GenAI powinien wziąć pod uwagę podczas oceny aktywności na tej kamerze."
+            },
+            "debug_save_thumbnails": {
+                "label": "Zapisuj miniatury",
+                "description": "Zapisuj miniatury wysyłane do dostawcy GenAI w celach debugowania i przeglądu."
+            },
+            "enabled_in_config": {
+                "label": "Pierwotny stan GenAI",
+                "description": "Śledzi pierwotny stan włączenia GenAI w konfiguracji."
+            },
+            "preferred_language": {
+                "label": "Preferowany język",
+                "description": "Preferowany język odpowiedzi generowanych przez GenAI."
+            },
+            "activity_context_prompt": {
+                "label": "Monit kontekstu aktywności",
+                "description": "Niestandardowy monit opisujący, co jest, a co nie jest podejrzaną aktywnością, aby zapewnić kontekst dla podsumowań GenAI."
+            }
+        },
+        "description": "Ustawienia kontrolujące alerty, detekcje oraz podsumowania przeglądu GenAI używane przez interfejs i pamięć masową."
+    },
+    "semantic_search": {
+        "label": "Wyszukiwanie semantyczne",
+        "triggers": {
+            "label": "Wyzwalacze",
+            "description": "Akcje i kryteria dopasowania dla specyficznych dla kamery wyzwalaczy wyszukiwania semantycznego.",
+            "friendly_name": {
+                "label": "Przyjazna nazwa",
+                "description": "Przyjazna nazwa wyświetlana w interfejsie użytkownika."
+            },
+            "enabled": {
+                "label": "Włącz ten wyzwalacz",
+                "description": "Włącz lub wyłącz wyzwalacz wyszukiwania semantycznego."
+            },
+            "type": {
+                "label": "Typ wyzwalacza",
+                "description": "Typ wyzwalacza: \"thumbnail\" (dopasowanie do obrazu) lub \"description\" (dopasowanie do tekstu)."
+            },
+            "data": {
+                "label": "Zawartość wyzwalacza",
+                "description": "Fraza tekstowa lub ID miniatury do dopasowania."
+            },
+            "threshold": {
+                "label": "Próg wyzwalacza",
+                "description": "Minimalny próg podobieństwa (0-1) aktywujący wyzwalacz."
+            },
+            "actions": {
+                "label": "Akcje wyzwalacza",
+                "description": "Lista akcji do wykonania po dopasowaniu wyzwalacza (notification, sub_label, attribute)."
+            }
+        },
+        "description": "Ustawienia wyszukiwania semantycznego opartego na wektorach cech obrazów i tekstu.",
+        "enabled": {
+            "label": "Włącz wyszukiwanie semantyczne",
+            "description": "Włącz lub wyłącz funkcję wyszukiwania semantycznego."
+        },
+        "reindex": {
+            "label": "Przeindeksuj przy starcie",
+            "description": "Uruchom pełne przeindeksowanie historycznych obiektów do bazy wektorowej."
+        },
+        "model": {
+            "label": "Model wyszukiwania lub dostawca GenAI",
+            "description": "Model wektoryzacji (embeddings) do użycia w wyszukiwaniu semantycznym (np. \"jinav1\") lub nazwa dostawcy GenAI z rolą \"embeddings\"."
+        },
+        "model_size": {
+            "label": "Rozmiar modelu",
+            "description": "Wybierz rozmiar modelu; \"small\" działa na CPU, a \"large\" zazwyczaj wymaga GPU."
+        },
+        "device": {
+            "label": "Urządzenie obliczeniowe",
+            "description": "Nadpisanie urządzenia docelowego (np. CPU, GPU). Więcej informacji: https://onnxruntime.ai/docs/execution-providers/"
+        }
+    },
+    "snapshots": {
+        "label": "Migawki",
+        "enabled": {
+            "label": "Włącz migawki",
+            "description": "Włącz lub wyłącz zapisywanie migawek dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
+        },
+        "timestamp": {
+            "label": "Nakładka znacznika czasu",
+            "description": "Nakładaj znacznik czasu na migawki z API."
+        },
+        "bounding_box": {
+            "label": "Nakładka ramki ograniczającej",
+            "description": "Rysuj ramki ograniczające wokół obiektów na migawkach z API."
+        },
+        "crop": {
+            "label": "Kadruj migawkę",
+            "description": "Kadruj migawki z API do ramki ograniczającej wykrytego obiektu."
+        },
+        "required_zones": {
+            "label": "Wymagane strefy",
+            "description": "Strefy, w których obiekt musi się znaleźć, aby zapisać migawkę."
+        },
+        "height": {
+            "label": "Wysokość migawki",
+            "description": "Wysokość (w pikselach), do której mają być przeskalowane migawki z API; pozostaw puste, aby zachować oryginalny rozmiar."
+        },
+        "retain": {
+            "label": "Retencja migawek",
+            "description": "Ustawienia retencji migawek, w tym domyślna liczba dni i nadpisania dla poszczególnych obiektów.",
+            "default": {
+                "label": "Domyślna retencja",
+                "description": "Domyślna liczba dni przechowywania migawek."
+            },
+            "objects": {
+                "label": "Retencja obiektów",
+                "description": "Nadpisania liczby dni retencji dla poszczególnych typów obiektów."
+            }
+        },
+        "quality": {
+            "label": "Jakość migawki",
+            "description": "Jakość kodowania zapisywanych migawek (0-100)."
+        },
+        "description": "Ustawienia generowania przez API migawek śledzonych obiektów dla wszystkich kamer; mogą być nadpisane dla poszczególnych kamer."
+    },
+    "timestamp_style": {
+        "label": "Styl znacznika czasu",
+        "position": {
+            "label": "Pozycja znacznika czasu",
+            "description": "Pozycja znacznika czasu na obrazie (tl/tr/bl/br)."
+        },
+        "format": {
+            "label": "Format znacznika czasu",
+            "description": "Ciąg formatujący datę i czas używany dla znaczników (kody formatu datetime w Pythonie)."
+        },
+        "color": {
+            "label": "Kolor znacznika czasu",
+            "description": "Wartości kolorów RGB tekstu znacznika (0-255).",
+            "red": {
+                "label": "Czerwony",
+                "description": "Składowa czerwona (0-255) koloru znacznika czasu."
+            },
+            "green": {
+                "label": "Zielony",
+                "description": "Składowa zielona (0-255) koloru znacznika czasu."
+            },
+            "blue": {
+                "label": "Niebieski",
+                "description": "Składowa niebieska (0-255) koloru znacznika czasu."
+            }
+        },
+        "thickness": {
+            "label": "Grubość znacznika czasu",
+            "description": "Grubość linii tekstu znacznika czasu."
+        },
+        "effect": {
+            "label": "Efekt znacznika czasu",
+            "description": "Efekt wizualny tekstu znacznika czasu (none, solid, shadow)."
+        },
+        "description": "Opcje stylizacji znaczników czasu na podglądzie debugowania i migawkach."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Ustawienia łączenia i publikowania telemetrii, migawek oraz szczegółów zdarzeń do brokera MQTT.",
+        "enabled": {
+            "label": "Włącz MQTT",
+            "description": "Włącz lub wyłącz integrację MQTT dla stanów, zdarzeń i migawek."
+        },
+        "host": {
+            "label": "Host brokera",
+            "description": "Adres IP lub nazwa hosta brokera MQTT."
+        },
+        "port": {
+            "label": "Port brokera",
+            "description": "Port brokera MQTT (zazwyczaj 1883 lub 8883 dla TLS)."
+        },
+        "topic_prefix": {
+            "label": "Prefiks tematów",
+            "description": "Prefiks dla wszystkich tematów MQTT publikowanych przez Frigate (domyślnie frigate)."
+        },
+        "client_id": {
+            "label": "Identyfikator klienta",
+            "description": "Identyfikator klienta używany podczas łączenia z brokerem MQTT; powinien być unikalny dla każdej instancji."
+        },
+        "stats_interval": {
+            "label": "Interwał statystyk",
+            "description": "Interwał w sekundach dla publikowania statystyk systemu i kamer do MQTT."
+        },
+        "user": {
+            "label": "Użytkownik",
+            "description": "Opcjonalna nazwa użytkownika MQTT; może być przekazana za pomocą zmiennych środowiskowych lub sekretów."
+        },
+        "password": {
+            "label": "Hasło",
+            "description": "Opcjonalne hasło MQTT; może być przekazane za pomocą zmiennych środowiskowych lub sekretów."
+        },
+        "tls_ca_certs": {
+            "label": "Certyfikaty CA dla TLS",
+            "description": "Ścieżka do pliku certyfikatów CA dla bezpiecznych połączeń MQTT przez TLS."
+        },
+        "tls_client_cert": {
+            "label": "Certyfikat klienta",
+            "description": "Ścieżka do certyfikatu klienta dla wzajemnego uwierzytelniania TLS; nie ustawiaj użytkownika/hasła przy używaniu certyfikatów klienta."
+        },
+        "tls_client_key": {
+            "label": "Klucz prywatny klienta",
+            "description": "Ścieżka do klucza prywatnego dla certyfikatu klienta."
+        },
+        "tls_insecure": {
+            "label": "Zezwalaj na niezabezpieczony TLS",
+            "description": "Ignoruj błędy weryfikacji certyfikatów TLS brokera MQTT."
+        },
+        "qos": {
+            "label": "Jakość usługi MQTT (QoS)",
+            "description": "Poziom jakości usługi QoS dla publikacji/subskrypcji MQTT (0, 1 lub 2)."
+        }
+    },
+    "notifications": {
+        "label": "Powiadomienia",
+        "enabled": {
+            "label": "Włącz powiadomienia",
+            "description": "Włącz lub wyłącz powiadomienia dla wszystkich kamer; może być nadpisane dla poszczególnych kamer."
+        },
+        "email": {
+            "label": "Adres e-mail powiadomień",
+            "description": "Adres e-mail używany do powiadomień push lub wymagany przez niektórych dostawców powiadomień."
+        },
+        "cooldown": {
+            "label": "Czas odnowienia (sekundy)",
+            "description": "Czas odnowienia (w sekundach) między powiadomieniami, aby uniknąć zalewania odbiorców powiadomieniami."
+        },
+        "enabled_in_config": {
+            "label": "Pierwotny stan powiadomień",
+            "description": "Wskazuje, czy powiadomienia były włączone w pierwotnej konfiguracji."
+        },
+        "description": "Ustawienia włączania i kontrolowania powiadomień dla wszystkich kamer; mogą być nadpisane dla poszczególnych kamer."
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Domyślne ustawienia protokołu ONVIF dla sterowania PTZ i zdarzeń kamer.",
+        "host": {
+            "label": "Host",
+            "description": "Host (oraz opcjonalnie schemat/protokół) dla usługi ONVIF tej kamery."
+        },
+        "port": {
+            "label": "Port",
+            "description": "Numer portu usługi ONVIF."
+        },
+        "user": {
+            "label": "Użytkownik",
+            "description": "Nazwa użytkownika do uwierzytelniania ONVIF; niektóre urządzenia wymagają użytkownika z uprawnieniami administratora dla ONVIF."
+        },
+        "password": {
+            "label": "Hasło",
+            "description": "Hasło użytkownika ONVIF."
+        },
+        "tls_insecure": {
+            "label": "Zezwalaj na niezabezpieczony TLS",
+            "description": "Pomiń weryfikację TLS i wyłącz uwierzytelnianie digest dla ONVIF (niebezpieczne; używaj tylko w zaufanych sieciach)."
+        },
+        "profile": {
+            "label": "Profil ONVIF",
+            "description": "Określony profil multimedialny ONVIF do użycia w sterowaniu PTZ, dopasowywany po tokenie lub nazwie. Jeśli nie jest ustawiony, pierwszy profil z prawidłową konfiguracją PTZ zostanie wybrany automatycznie."
+        },
+        "autotracking": {
+            "label": "Auto-śledzenie",
+            "description": "Automatycznie śledź poruszające się obiekty i utrzymuj je w centrum kadru za pomocą ruchów kamery PTZ.",
+            "enabled": {
+                "label": "Włącz auto-śledzenie",
+                "description": "Włącz automatyczne sterowanie ruchem kamery PTZ."
+            },
+            "calibrate_on_startup": {
+                "label": "Kalibruj przy uruchomieniu",
+                "description": "Zmierz prędkości silników PTZ przy uruchomieniu, aby poprawić dokładność śledzenia. Frigate zaktualizuje konfigurację o movement_weights po kalibracji."
+            },
+            "zooming": {
+                "label": "Przybliżanie (Zoom)",
+                "description": "Kontrola zachowania zoomu: disabled (tylko obrót/pochylenie), absolute (najbardziej kompatybilny) lub relative (jednoczesny obrót/pochylenie/zoom)."
+            },
+            "zoom_factor": {
+                "label": "Współczynnik przybliżenia",
+                "description": "Kontrola poziomu przybliżenia śledzonych obiektów. Niższe wartości utrzymują szerszy widok sceny; wyższe wartości przybliżają mocniej, ale mogą spowodować utratę śledzenia. Wartości od 0.1 do 0.75."
+            },
+            "track": {
+                "label": "Śledzone obiekty",
+                "description": "Typy obiektów wywołujące auto-śledzenie."
+            },
+            "required_zones": {
+                "label": "Wymagane strefy",
+                "description": "Strefy, w których obiekt musi się pojawić, aby rozpocząć auto-śledzenie."
+            },
+            "return_preset": {
+                "label": "Preset powrotny",
+                "description": "Preset PTZ, do którego kamera ma powrócić po zakończeniu śledzenia."
+            },
+            "timeout": {
+                "label": "Czas oczekiwania na powrót",
+                "description": "Liczba sekund bezczynności przed powrotem do presetu powrotnego."
+            },
+            "movement_weights": {
+                "label": "Wagi ruchu",
+                "description": "Wartości kalibracji wygenerowane automatycznie przez kalibrację kamery. Nie modyfikuj ręcznie."
+            },
+            "enabled_in_config": {
+                "label": "Pierwotny stan auto-śledzenia",
+                "description": "Wewnętrzne pole śledzące, czy auto-śledzenie było włączone w konfiguracji."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Ignoruj rozbieżność czasu",
+            "description": "Ignoruj różnice w synchronizacji czasu między kamerą a serwerem Frigate w komunikacji ONVIF."
+        }
+    },
+    "profiles": {
+        "label": "Profile",
+        "description": "Definicje nazwanych profili z przyjaznymi nazwami. Profile kamer muszą odwoływać się do nazw zdefiniowanych tutaj.",
+        "friendly_name": {
+            "label": "Przyjazna nazwa",
+            "description": "Nazwa wyświetlana dla tego profilu w interfejsie użytkownika."
+        }
+    },
+    "database": {
+        "label": "Baza danych",
+        "description": "Ustawienia bazy danych SQLite używanej przez Frigate do przechowywania metadanych.",
+        "path": {
+            "label": "Ścieżka do bazy danych",
+            "description": "Ścieżka w systemie plików, gdzie przechowywany jest plik bazy SQLite."
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "Ustawienia zintegrowanej usługi retransmisji go2rtc do strumieniowania na żywo."
+    },
+    "networking": {
+        "label": "Sieć",
+        "description": "Ustawienia sieciowe, w tym obsługa IPv6 i porty nasłuchiwania.",
+        "ipv6": {
+            "label": "Konfiguracja IPv6",
+            "description": "Ustawienia specyficzne dla protokołu IPv6 w usługach sieciowych Frigate.",
+            "enabled": {
+                "label": "Włącz IPv6",
+                "description": "Włącz obsługę protokołu IPv6 dla usług Frigate."
+            }
+        },
+        "listen": {
+            "label": "Konfiguracja portów nasłuchiwania",
+            "description": "Konfiguracja wewnętrznych i zewnętrznych portów nasłuchiwania. Jest to opcja dla zaawansowanych użytkowników. W większości przypadków zaleca się zmianę sekcji ports w pliku Docker Compose.",
+            "internal": {
+                "label": "Port wewnętrzny",
+                "description": "Wewnętrzny port nasłuchiwania dla Frigate (domyślnie 5000)."
+            },
+            "external": {
+                "label": "Port zewnętrzny",
+                "description": "Zewnętrzny port nasłuchiwania dla Frigate (domyślnie 8971)."
+            }
+        }
+    },
+    "proxy": {
+        "label": "Serwer proxy (Reverse Proxy)",
+        "description": "Ustawienia integracji Frigate za serwerem reverse proxy przekazującym nagłówki uwierzytelnionych użytkowników.",
+        "header_map": {
+            "label": "Mapowanie nagłówków",
+            "description": "Mapuj przychodzące nagłówki proxy na pola użytkowników i ról we Frigate.",
+            "user": {
+                "label": "Nagłówek użytkownika",
+                "description": "Nagłówek zawierający nazwę uwierzytelnionego użytkownika z proxy."
+            },
+            "role": {
+                "label": "Nagłówek roli",
+                "description": "Nagłówek zawierający rolę lub grupy użytkownika z serwera proxy."
+            },
+            "role_map": {
+                "label": "Mapowanie ról",
+                "description": "Mapuj grupy z serwera proxy na role Frigate (np. mapuj grupę admin na rolę administratora)."
+            }
+        },
+        "logout_url": {
+            "label": "Adres URL wylogowania",
+            "description": "Adres URL, na który użytkownicy są przekierowywani podczas wylogowywania przez proxy."
+        },
+        "auth_secret": {
+            "label": "Sekret proxy",
+            "description": "Opcjonalny sekret weryfikowany z nagłówkiem X-Proxy-Secret w celu uwierzytelnienia zaufanego proxy."
+        },
+        "default_role": {
+            "label": "Domyślna rola",
+            "description": "Domyślna rola przypisywana użytkownikom uwierzytelnionym przez proxy, jeśli nie ma zastosowania żadne mapowanie ról."
+        },
+        "separator": {
+            "label": "Znak separatora",
+            "description": "Znak używany do rozdzielania wielu wartości w nagłówkach proxy."
+        }
+    },
+    "telemetry": {
+        "label": "Telemetria",
+        "description": "Opcje telemetrii i statystyk systemowych, w tym monitorowanie GPU i przepustowości sieci.",
+        "network_interfaces": {
+            "label": "Interfejsy sieciowe",
+            "description": "Lista prefiksów nazw interfejsów sieciowych monitorowanych pod kątem przepustowości."
+        },
+        "stats": {
+            "label": "Statystyki systemowe",
+            "description": "Opcje włączania/wyłączania zbierania statystyk systemowych i GPU.",
+            "amd_gpu_stats": {
+                "label": "Statystyki AMD GPU",
+                "description": "Włącz zbieranie statystyk karty graficznej AMD."
+            },
+            "intel_gpu_stats": {
+                "label": "Statystyki Intel GPU",
+                "description": "Włącz zbieranie statystyk układu graficznego Intel."
+            },
+            "network_bandwidth": {
+                "label": "Przepustowość sieci",
+                "description": "Włącz monitorowanie przepustowości sieci dla poszczególnych procesów FFmpeg kamer oraz detektorów (wymaga odpowiednich uprawnień capabilities)."
+            },
+            "intel_gpu_device": {
+                "label": "Urządzenie Intel GPU",
+                "description": "Adres magistrali PCI lub ścieżka urządzenia DRM (np. /dev/dri/card1) używane do przypisania statystyk Intel GPU do konkretnego urządzenia, gdy występuje ich kilka."
+            }
+        },
+        "version_check": {
+            "label": "Sprawdzanie wersji",
+            "description": "Włącz sprawdzanie dostępności nowszej wersji Frigate."
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "Ustawienia protokołu TLS dla punktów końcowych sieci WWW Frigate (port 8971).",
+        "enabled": {
+            "label": "Włącz TLS",
+            "description": "Włącz bezpieczne połączenie TLS dla panelu WWW i API Frigate."
+        }
+    },
+    "ui": {
+        "label": "Interfejs użytkownika (UI)",
+        "description": "Preferencje interfejsu użytkownika, takie jak strefa czasowa, formatowanie czasu/daty i jednostki.",
+        "timezone": {
+            "label": "Strefa czasowa",
+            "description": "Strefa czasowa wyświetlana w interfejsie (domyślnie czas lokalny przeglądarki)."
+        },
+        "time_format": {
+            "label": "Format czasu",
+            "description": "Format czasu używany w UI (browser, 12hour lub 24hour)."
+        },
+        "unit_system": {
+            "label": "System jednostek",
+            "description": "System jednostek wyświetlania (metric lub imperial) używany w UI i MQTT."
+        }
+    },
+    "detectors": {
+        "label": "Detektory",
+        "description": "Konfiguracja sprzętu akceleracji detekcji (Coral TPU, OpenVINO, TensorRT, CPU itp.).",
+        "type": {
+            "label": "Typ detektora"
+        },
+        "model": {
+            "label": "Ścieżka modelu",
+            "description": "Opcje konfiguracji modelu specyficzne dla detektora (ścieżka, rozmiar wejściowy itp.).",
+            "path": {
+                "label": "Ścieżka do niestandardowego modelu detektora",
+                "description": "Ścieżka do pliku niestandardowego modelu detekcji (lub plus://<model_id> dla modeli Frigate+)."
+            },
+            "labelmap_path": {
+                "label": "Mapa etykiet dla niestandardowego detektora",
+                "description": "Ścieżka do pliku mapy etykiet przypisującego numeryczne klasy do etykiet tekstowych."
+            },
+            "width": {
+                "label": "Szerokość wejściowa modelu detekcji",
+                "description": "Szerokość tensora wejściowego modelu w pikselach."
+            },
+            "height": {
+                "label": "Wysokość wejściowa modelu detekcji",
+                "description": "Wysokość tensora wejściowego modelu w pikselach."
+            },
+            "labelmap": {
+                "label": "Personalizacja mapy etykiet",
+                "description": "Wpisy nadpisujące lub remapujące do scalenia ze standardową mapą etykiet."
+            },
+            "attributes_map": {
+                "label": "Mapa etykiet obiektów do ich etykiet atrybutów",
+                "description": "Mapowanie etykiet obiektów na etykiety atrybutów używane do dołączania metadanych (np. car -> [license_plate])."
+            },
+            "input_tensor": {
+                "label": "Kształt tensora wejściowego modelu",
+                "description": "Format tensora oczekiwany przez model: nhwc lub nchw."
+            },
+            "input_pixel_format": {
+                "label": "Format kolorów pikseli wejściowych modelu",
+                "description": "Przestrzeń barw oczekiwana przez model: rgb, bgr lub yuv."
+            },
+            "input_dtype": {
+                "label": "Typ danych wejściowych modelu (dtype)",
+                "description": "Typ danych wejściowego tensora modelu (np. float32)."
+            },
+            "model_type": {
+                "label": "Typ modelu detekcji obiektów",
+                "description": "Typ architektury modelu detektora (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) używany do optymalizacji."
+            }
+        },
+        "model_path": {
+            "label": "Ścieżka do modelu detektora",
+            "description": "Ścieżka do pliku binarnego modelu detektora, jeśli jest wymagana przez wybrany detektor."
+        },
+        "axengine": {
+            "label": "AXEngine NPU",
+            "description": "Detektor AXERA AX650N/AX8850N NPU uruchamiający skompilowane pliki .axmodel za pośrednictwem środowiska wykonawczego AXEngine."
+        },
+        "cpu": {
+            "label": "CPU",
+            "description": "Detektor CPU uruchamiający modele TensorFlow Lite na procesorze hosta. Nie jest zalecany do zastosowań produkcyjnych z powodu dużego obciążenia procesora.",
+            "num_threads": {
+                "label": "Liczba wątków",
+                "description": "Liczba wątków procesora używanych przez detektor."
+            }
+        },
+        "deepstack": {
+            "label": "DeepStack",
+            "description": "Detektor DeepStack/CodeProject.AI wysyłający obrazy do zdalnego API HTTP DeepStack. Nie jest zalecany.",
+            "api_url": {
+                "label": "Adres URL API DeepStack",
+                "description": "Adres URL API DeepStack."
+            },
+            "api_timeout": {
+                "label": "Limit czasu API DeepStack (sekundy)",
+                "description": "Limit czasu żądania do API DeepStack w sekundach."
+            },
+            "api_key": {
+                "label": "Klucz API DeepStack (jeśli wymagany)",
+                "description": "Opcjonalny klucz API dla uwierzytelnionych usług DeepStack."
+            }
+        },
+        "edgetpu": {
+            "label": "EdgeTPU",
+            "description": "Detektor EdgeTPU uruchamiający modele TensorFlow Lite skompilowane dla akceleratorów Coral EdgeTPU.",
+            "device": {
+                "label": "Typ urządzenia",
+                "description": "Urządzenie używane do inferencji EdgeTPU (np. usb, pci)."
+            }
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L",
+            "description": "Detektor Hailo-8/Hailo-8L używający modeli HEF i SDK HailoRT do inferencji na akceleratorach Hailo.",
+            "device": {
+                "label": "Typ urządzenia",
+                "description": "Urządzenie używane do inferencji Hailo (np. PCIe, M.2)."
+            }
+        },
+        "memryx": {
+            "label": "MemryX",
+            "description": "Detektor MemryX MX3 uruchamiający skompilowane modele DFP na akceleratorach MemryX.",
+            "device": {
+                "label": "Ścieżka urządzenia",
+                "description": "Urządzenie używane do inferencji MemryX (np. PCIe)."
+            }
+        },
+        "onnx": {
+            "label": "ONNX",
+            "description": "Detektor ONNX do uruchamiania modeli ONNX; korzysta z dostępnych backendów akceleracji (CUDA/ROCm/OpenVINO).",
+            "device": {
+                "label": "Typ urządzenia",
+                "description": "Urządzenie używane do inferencji ONNX (np. AUTO, CPU, GPU)."
+            }
+        },
+        "openvino": {
+            "label": "OpenVINO",
+            "description": "Detektor OpenVINO dla procesorów AMD i Intel, układów graficznych Intel GPU oraz akceleratorów Intel VPU.",
+            "device": {
+                "label": "Typ urządzenia",
+                "description": "Urządzenie używane do inferencji OpenVINO (np. CPU, GPU, NPU)."
+            }
+        },
+        "rknn": {
+            "label": "RKNN",
+            "description": "Detektor RKNN dla układów NPU Rockchip; uruchamia skompilowane modele RKNN na sprzęcie Rockchip.",
+            "num_cores": {
+                "label": "Liczba rdzeni NPU do użycia.",
+                "description": "Liczba rdzeni NPU do użycia (0 dla automatycznego)."
+            }
+        },
+        "synaptics": {
+            "label": "Synaptics",
+            "description": "Detektor Synaptics NPU dla modeli w formacie .synap przy użyciu Synap SDK."
+        },
+        "teflon_tfl": {
+            "label": "Teflon",
+            "description": "Detektor delegata Teflon dla TFLite wykorzystujący bibliotekę Mesa Teflon do akceleracji inferencji na obsługiwanych GPU."
+        },
+        "tensorrt": {
+            "label": "TensorRT",
+            "description": "Detektor TensorRT dla urządzeń NVIDIA i kart graficznych GeForce/Jetson wykorzystujący silniki TensorRT do akceleracji inferencji.",
+            "device": {
+                "label": "Indeks urządzenia GPU",
+                "description": "Indeks urządzenia GPU do użycia."
+            }
+        },
+        "zmq": {
+            "label": "ZMQ IPC",
+            "description": "Detektor ZMQ IPC oddelegowujący inferencję do zewnętrznego procesu przez punkt końcowy ZeroMQ IPC.",
+            "endpoint": {
+                "label": "Punkt końcowy ZMQ IPC",
+                "description": "Punkt końcowy ZMQ do połączenia."
+            },
+            "request_timeout_ms": {
+                "label": "Limit czasu żądania ZMQ w milisekundach",
+                "description": "Limit czasu dla żądań ZMQ w milisekundach."
+            },
+            "linger_ms": {
+                "label": "Czas oczekiwania gniazda ZMQ w milisekundach",
+                "description": "Okres oczekiwania gniazda ZMQ (linger) w milisekundach."
+            }
+        }
+    },
+    "model": {
+        "label": "Model detekcji",
+        "description": "Ustawienia konfiguracji niestandardowego modelu detekcji obiektów i jego kształtu wejściowego.",
+        "path": {
+            "label": "Ścieżka do modelu",
+            "description": "Ścieżka do pliku niestandardowego modelu detekcji (lub plus://<model_id> dla modeli Frigate+)."
+        },
+        "labelmap_path": {
+            "label": "Ścieżka mapy etykiet",
+            "description": "Ścieżka do pliku mapy etykiet, który mapuje klasy numeryczne na etykiety tekstowe dla detektora."
+        },
+        "width": {
+            "label": "Szerokość wejściowa",
+            "description": "Szerokość wejściowa modelu detekcji w pikselach (np. 320 lub 640)."
+        },
+        "height": {
+            "label": "Wysokość wejściowa",
+            "description": "Wysokość wejściowa modelu detekcji w pikselach (np. 320 lub 640)."
+        },
+        "labelmap": {
+            "label": "Personalizacja mapy etykiet",
+            "description": "Wpisy nadpisujące lub remapujące do scalenia ze standardową mapą etykiet."
+        },
+        "attributes_map": {
+            "label": "Mapa etykiet obiektów do ich etykiet atrybutów",
+            "description": "Mapowanie etykiet obiektów na etykiety atrybutów używane do dołączania metadanych (np. car -> [license_plate])."
+        },
+        "input_tensor": {
+            "label": "Kształt tensora wejściowego modelu",
+            "description": "Format tensora oczekiwany przez model: nhwc lub nchw."
+        },
+        "input_pixel_format": {
+            "label": "Format kolorów pikseli wejściowych modelu",
+            "description": "Przestrzeń barw oczekiwana przez model: rgb, bgr lub yuv."
+        },
+        "input_dtype": {
+            "label": "Typ danych wejściowych modelu (dtype)",
+            "description": "Typ danych wejściowego tensora modelu (np. float32)."
+        },
+        "model_type": {
+            "label": "Typ modelu detekcji obiektów",
+            "description": "Typ architektury modelu detektora (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) używany do optymalizacji."
+        }
+    },
+    "genai": {
+        "label": "Generative AI (GenAI)",
+        "description": "Ustawienia integracji z dostawcami Generative AI (OpenAI, Gemini, Ollama itp.) do generowania podsumowań i opisów.",
+        "api_key": {
+            "label": "Klucz API",
+            "description": "Klucz API wymagany przez niektórych dostawców (może być również ustawiony za pomocą zmiennych środowiskowych)."
+        },
+        "base_url": {
+            "label": "Podstawowy adres URL",
+            "description": "Podstawowy adres URL dla dostawców hostowanych lokalnie lub kompatybilnych (na przykład instancji Ollama)."
+        },
+        "model": {
+            "label": "Model",
+            "description": "Identyfikator modelu AI (np. gpt-4o-mini, gemini-1.5-flash)."
+        },
+        "provider": {
+            "label": "Dostawca",
+            "description": "Nazwa dostawcy GenAI (openai, gemini, ollama itp.)."
+        },
+        "roles": {
+            "label": "Role dostawcy",
+            "description": "Role przypisane do tego dostawcy (chat, descriptions, embeddings)."
+        },
+        "provider_options": {
+            "label": "Opcje dostawcy",
+            "description": "Dodatkowe opcje specyficzne dla dostawcy przekazywane do klienta GenAI."
+        },
+        "runtime_options": {
+            "label": "Opcje wykonawcze",
+            "description": "Opcje wykonawcze przekazywane dostawcy przy każdym wywołaniu inferencji."
+        }
+    },
+    "classification": {
+        "label": "Klasyfikacja niestandardowa",
+        "description": "Ustawienia niestandardowych modeli klasyfikacji obrazów (np. rozpoznawanie zwierząt, roślin, pojazdów).",
+        "bird": {
+            "label": "Konfiguracja klasyfikacji ptaków",
+            "description": "Ustawienia specyficzne dla modeli klasyfikacji ptaków.",
+            "enabled": {
+                "label": "Klasyfikacja ptaków",
+                "description": "Włącz lub wyłącz klasyfikację gatunków ptaków."
+            },
+            "threshold": {
+                "label": "Minimalna ocena",
+                "description": "Minimalna ocena klasyfikacji wymagana do zaakceptowania gatunku ptaka."
+            }
+        },
+        "custom": {
+            "label": "Niestandardowe modele klasyfikacji",
+            "description": "Konfiguracja niestandardowych modeli klasyfikacji używanych do detekcji obiektów lub stanów.",
+            "enabled": {
+                "label": "Włącz model",
+                "description": "Włącz lub wyłącz niestandardowy model klasyfikacji."
+            },
+            "name": {
+                "label": "Nazwa modelu",
+                "description": "Identyfikator używanego niestandardowego modelu klasyfikacji."
+            },
+            "threshold": {
+                "label": "Próg oceny",
+                "description": "Próg oceny używany do zmiany stanu klasyfikacji."
+            },
+            "save_attempts": {
+                "label": "Zapisuj próby",
+                "description": "Liczba prób klasyfikacji zapisywanych na potrzeby widoku ostatnich klasyfikacji."
+            },
+            "object_config": {
+                "objects": {
+                    "label": "Klasyfikuj obiekty",
+                    "description": "Lista typów obiektów, dla których ma być uruchamiana klasyfikacja obiektów."
+                },
+                "classification_type": {
+                    "label": "Typ klasyfikacji",
+                    "description": "Stosowany typ klasyfikacji: sub_label (dodaje podetykietę) lub inne obsługiwane typy."
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "Kamery klasyfikacji",
+                    "description": "Ustawienia kadrowania i konfiguracji klasyfikacji stanów dla poszczególnych kamer.",
+                    "crop": {
+                        "label": "Kadr klasyfikacji",
+                        "description": "Współrzędne kadru używane do uruchamiania klasyfikacji na tej kamerze."
+                    }
+                },
+                "motion": {
+                    "label": "Uruchamiaj przy ruchu",
+                    "description": "Jeśli włączone, uruchamiaj klasyfikację po wykryciu ruchu w określonym kadrze."
+                },
+                "interval": {
+                    "label": "Interwał klasyfikacji",
+                    "description": "Interwał (w sekundach) między okresowymi uruchomieniami klasyfikacji stanów."
+                }
+            }
+        }
+    },
+    "camera_groups": {
+        "label": "Grupy kamer",
+        "description": "Konfiguracja nazwanych grup kamer używanych do organizowania kamer w interfejsie użytkownika.",
+        "cameras": {
+            "label": "Kamery w grupie",
+            "description": "Lista kamer należących do tej grupy."
+        },
+        "icon": {
+            "label": "Ikona grupy",
+            "description": "Ikona wyświetlana dla tej grupy w interfejsie."
+        },
+        "order": {
+            "label": "Kolejność grupy",
+            "description": "Kolejność numeryczna używana do sortowania grup kamer w interfejsie; większe liczby pojawiają się później."
+        }
+    },
+    "active_profile": {
+        "label": "Aktywny profil",
+        "description": "Profil domyślnie aktywowany przy uruchomieniu Frigate."
+    },
+    "camera_mqtt": {
+        "label": "MQTT kamery",
+        "description": "Domyślne ustawienia publikowania obrazów MQTT dla kamer.",
+        "enabled": {
+            "label": "Wysyłaj obraz",
+            "description": "Włącz publikowanie migawek obrazów dla obiektów do tematów MQTT dla tej kamery."
+        },
+        "timestamp": {
+            "label": "Dodaj znacznik czasu",
+            "description": "Nakładaj znacznik czasu na obrazy publikowane przez MQTT."
+        },
+        "bounding_box": {
+            "label": "Dodaj ramkę ograniczającą",
+            "description": "Rysuj ramki ograniczające na obrazach publikowanych przez MQTT."
+        },
+        "crop": {
+            "label": "Kadruj obraz",
+            "description": "Kadruj obrazy publikowane do MQTT do ramki wykrytego obiektu."
+        },
+        "height": {
+            "label": "Wysokość obrazu",
+            "description": "Wysokość w pikselach dla obrazów publikowanych przez MQTT."
+        },
+        "required_zones": {
+            "label": "Wymagane strefy",
+            "description": "Strefy, w których obiekt musi się znaleźć, aby opublikować obraz MQTT."
+        },
+        "quality": {
+            "label": "Jakość JPEG",
+            "description": "Jakość JPEG dla obrazów publikowanych do MQTT (0-100)."
+        }
+    },
+    "camera_ui": {
+        "label": "Interfejs kamery",
+        "description": "Kolejność wyświetlania i widoczność tej kamery w interfejsie użytkownika. Kolejność wpływa na domyślny pulpit nawigacyjny. Aby uzyskać bardziej szczegółową kontrolę, użyj grup kamer.",
+        "order": {
+            "label": "Kolejność w UI",
+            "description": "Kolejność numeryczna używana do sortowania kamery w interfejsie (domyślny pulpit i listy); większe liczby pojawiają się później."
+        },
+        "dashboard": {
+            "label": "Pokazuj na pulpicie Na żywo",
+            "description": "Przełącz, czy ta kamera ma być widoczna na domyślnym pulpicie Na żywo (Wszystkie kamery). Kamera pozostaje dostępna we wszystkich innych miejscach interfejsu, w tym w grupach kamer i ustawieniach."
+        },
+        "review": {
+            "label": "Pokazuj w Przeglądzie",
+            "description": "Przełącz, czy ta kamera ma być widoczna w przeglądzie (strona przeglądu, filtr kamer, przegląd ruchu oraz widok historii)."
         }
     }
 }

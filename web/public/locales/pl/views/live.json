@@ -58,7 +58,8 @@
   },
   "recording": {
     "enable": "Włącz nagrywanie",
-    "disable": "Wyłącz nagrywanie"
+    "disable": "Wyłącz nagrywanie",
+    "disabledInConfig": "Nagrywanie musi być najpierw włączone w Ustawieniach dla tej kamery."
   },
   "snapshots": {
     "enable": "Włącz zrzuty ekranu",
@@ -129,7 +130,8 @@
     "snapshots": "Zrzuty ekranu",
     "audioDetection": "Wykrywanie dźwięku",
     "autotracking": "Automatyczne śledzenie",
-    "transcription": "Stenogram"
+    "transcription": "Stenogram",
+    "camera": "Kamera"
   },
   "effectiveRetainMode": {
     "modes": {
@@ -152,7 +154,9 @@
   },
   "camera": {
     "disable": "Wyłącz kamerę",
-    "enable": "Włącz kamerę"
+    "enable": "Włącz kamerę",
+    "turnOn": "Włącz kamerę",
+    "turnOff": "Wyłącz kamerę"
   },
   "autotracking": {
     "enable": "Włącz automatyczne śledzenie",

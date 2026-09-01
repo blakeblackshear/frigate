@@ -62,7 +62,20 @@
     "title": "Edytuj model klasyfikacji",
     "descriptionObject": "Zmień typ obiektu i kryteria dla tego modelu klasyfikacji.",
     "stateClassesInfo": "Uwaga: Zmiana typu klasyfikacji wymaga treningu nowego modelu.",
-    "descriptionState": "Edycja klas dla tego modelu klasyfikacji stanu. Zmiany będą wymagały przekwalifikowania modelu."
+    "descriptionState": "Edycja klas dla tego modelu klasyfikacji stanu. Zmiany będą wymagały przekwalifikowania modelu.",
+    "enabled": "Włączony",
+    "enabledDesc": "Uruchamiaj ten model. Po wyłączeniu model przestanie działać i nie będzie już klasyfikować.",
+    "saveAttempts": "Zapisuj próby",
+    "saveAttemptsDesc": "Liczba obrazów prób klasyfikacji do zachowania na potrzeby widoku ostatnich klasyfikacji.",
+    "motion": "Uruchamiaj przy ruchu",
+    "motionDesc": "Uruchamiaj klasyfikację po wykryciu ruchu w skonfigurowanym kadrze.",
+    "interval": "Interwał",
+    "intervalDesc": "Liczba sekund między okresowymi uruchomieniami klasyfikacji. Pozostaw puste, aby uruchamiać tylko przy wykryciu ruchu.",
+    "intervalPlaceholder": "Brak interwału",
+    "errors": {
+      "saveAttemptsInvalid": "Liczba prób do zapisania musi być liczbą całkowitą równą 0 lub większą",
+      "intervalInvalid": "Interwał musi być liczbą całkowitą większą od 0"
+    }
   },
   "tooltip": {
     "trainingInProgress": "Trwa trenowanie modelu",
@@ -202,5 +215,6 @@
     }
   },
   "reclassifyImageAs": "Klasyfikuj jako:",
-  "reclassifyImage": "Zmiana klasyfikacji obrazu"
+  "reclassifyImage": "Zmiana klasyfikacji obrazu",
+  "disabled": "Wyłączony"
 }
