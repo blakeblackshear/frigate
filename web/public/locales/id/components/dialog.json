@@ -65,7 +65,8 @@
       "batchQueuedSuccess_other": "{{count}} ekspor antrian.",
       "batchQueueFailed": "Gagal mengantrekan {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
       "error": {
-        "failed": "Ekspor gagal mengantri: {{error}}"
+        "failed": "Ekspor gagal mengantri: {{error}}",
+        "noValidTimeSelected": "Rentang waktu yang dipilih tidak valid"
       }
     },
     "case": {
@@ -114,7 +115,13 @@
       "exportingButton": "Mengekspor...",
       "caseNamePlaceholder": "Ekspor tinjauan - {{date}}"
     },
-    "queueing": "Mengantrekan Ekspor..."
+    "queueing": "Mengantrekan Ekspor...",
+    "fromTimeline": {
+      "saveExport": "Simpan ektraksi",
+      "queueingExport": "Antrean Ekspor...",
+      "previewExport": "Pratinjau Ekspor",
+      "useThisRange": "Gunakan Rentang Ini"
+    }
   },
   "search": {
     "saveSearch": {
@@ -138,7 +145,8 @@
       }
     },
     "showStats": {
-      "label": "Tampilkan statistik streaming"
+      "label": "Tampilkan statistik streaming",
+      "desc": "Aktifkan opsi ini untuk menampilkan statistik streaming sebagai overlay pada tampilan kamera."
     },
     "debugView": "Tampilan Debug"
   },
@@ -147,7 +155,9 @@
       "label": "Bagikan Cap Waktu",
       "title": "Bagikan Cap Waktu",
       "custom": "Cap Waktu Kustom",
-      "button": "Bagikan URL Cap Waktu"
+      "button": "Bagikan URL Cap Waktu",
+      "description": "Bagikan URL bertanda waktu sesuai posisi pemutar saat ini atau pilih tanda waktu kustom. Perlu dicatat bahwa ini bukan URL bagikan publik dan hanya dapat diakses oleh pengguna yang memiliki akses ke Frigate dan kamera ini.",
+      "shareTitle": "Pratinjau Penunjuk Waktu Frigate : {{camera}}"
     },
     "confirmDelete": {
       "title": "Konfirmasi Penghapusan",
