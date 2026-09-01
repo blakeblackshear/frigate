@@ -11,7 +11,7 @@
     "motionTuner": "移動偵測調教器 - Frigate",
     "object": "除錯 - Frigate",
     "cameraManagement": "管理鏡頭 - Frigate",
-    "cameraReview": "相機預覽設置 - Frigate",
+    "cameraReview": "攝影機預覽設定 - Frigate",
     "globalConfig": "全域性配置 - Frigate",
     "cameraConfig": "攝影機配置 - Frigate",
     "detectorsAndModel": "偵測器與模型 - Frigate",
@@ -32,7 +32,7 @@
     "cameraManagement": "管理",
     "cameraReview": "預覽",
     "roles": "角色",
-    "general": "常規",
+    "general": "一般",
     "globalConfig": "全域性配置",
     "system": "系統",
     "integrations": "整合",
@@ -93,7 +93,7 @@
   },
   "dialog": {
     "unsavedChanges": {
-      "title": "你有未保存的變更。",
+      "title": "你有未儲存的變更。",
       "desc": "再繼續之前，你想先儲存你的變更嗎？"
     }
   },
@@ -136,7 +136,7 @@
       "title": "錄影檢視器",
       "defaultPlaybackRate": {
         "label": "預設播放速度",
-        "desc": "錄影回放的預設播放速度。"
+        "desc": "錄影重播的預設播放速度。"
       }
     },
     "calendar": {
@@ -219,7 +219,7 @@
     }
   },
   "cameraWizard": {
-    "title": "新增相機",
+    "title": "新增攝影機",
     "testResultLabels": {
       "resolution": "解析度",
       "video": "影像",
@@ -228,22 +228,22 @@
     },
     "commonErrors": {
       "testFailed": "串流測試失敗: {{error}}",
-      "noUrl": "請提供正確的影片流地址"
+      "noUrl": "請提供正確的影片串流 URL"
     },
     "step1": {
-      "description": "輸入相機詳細資訊並選擇自動偵測或手動選擇相機品牌。",
-      "cameraName": "相機名稱",
+      "description": "輸入攝影機詳細資訊並選擇探測或手動選擇攝影機品牌。",
+      "cameraName": "攝影機名稱",
       "cameraNamePlaceholder": "例: 前門 / 後院",
       "host": "主機/IP 位置",
       "port": "埠",
-      "username": "用戶名稱",
+      "username": "使用者名稱",
       "usernamePlaceholder": "選填",
       "password": "密碼",
       "passwordPlaceholder": "選填",
       "selectTransport": "選擇協議",
-      "cameraBrand": "相機品牌",
-      "selectBrand": "選擇攝影機品牌用於生成URL地址模板",
-      "customUrl": "自訂影片流地址",
+      "cameraBrand": "攝影機品牌",
+      "selectBrand": "選擇攝影機品牌用於生成 URL 模板",
+      "customUrl": "自訂影片串流 URL",
       "brandInformation": "品牌資訊",
       "brandUrlFormat": "對於採用RTSP URL格式的攝影機，其格式為：{{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://使用者名稱:密碼@主機或ip位址:通訊埠/路徑",
@@ -252,17 +252,17 @@
       "onvifPort": "ONVIF 埠",
       "probeMode": "探測攝影機",
       "manualMode": "手動選擇",
-      "detectionMethodDescription": "如果攝影機支援 ONVIF 協議，將使用該協議探測攝影機，以自動獲取攝影機影片流地址；若不支援，也可手動選擇攝影機品牌來使用預設地址。如需輸入自訂RTSP地址，請選擇“手動選擇”並選擇“其他”選項。",
+      "detectionMethodDescription": "如果攝影機支援 ONVIF 協議，將使用該協議探測攝影機，以自動獲取攝影機影片串流 URL；若不支援，也可手動選擇攝影機品牌來使用預設 URL。如需輸入自訂 RTSP URL，請選擇「手動選擇」並選擇「其他」選項。",
       "onvifPortDescription": "對於支援ONVIF協議的攝影機，該埠通常為80或8080。",
       "useDigestAuth": "使用摘要認證",
       "useDigestAuthDescription": "為 ONVIF 協議啟用 HTTP 摘要認證。部分攝影機可能需要專用的 ONVIF 使用者名稱/密碼，而非預設的 admin 帳戶。",
       "errors": {
-        "brandOrCustomUrlRequired": "請選擇攝影機品牌並配置主機/ IP 地址，或選擇“其他”後手動配置影片流地址",
+        "brandOrCustomUrlRequired": "請選擇攝影機品牌並配置主機/IP 位址，或選擇「其他」後自訂 URL",
         "nameRequired": "攝影機名稱為必填項",
         "nameLength": "攝影機名稱要少於64個字元",
         "invalidCharacters": "攝影機名稱內有不允許使用的字元",
         "nameExists": "該攝影機名稱已存在",
-        "customUrlRtspRequired": "自訂 URL 必須以“rtsp://”開頭；對於非 RTSP 協議的攝影機流，需手動新增至設定檔。"
+        "customUrlRtspRequired": "自訂 URL 必須以「rtsp://」開頭；對於非 RTSP 協議的攝影機串流，需手動新增至設定檔。"
       }
     },
     "description": "請按照以下步驟新增攝影機至 Frigate 中。",
@@ -288,11 +288,11 @@
         "probingMetadata": "正在查詢攝影機引數……",
         "fetchingSnapshot": "正在獲取攝影機快照……"
       },
-      "probeFailed": "偵測攝影機失敗：{{error}}",
+      "probeFailed": "探測攝影機失敗：{{error}}",
       "probingDevice": "尋找裝置中……",
-      "probeSuccessful": "偵測成功",
-      "probeError": "偵測遇到錯誤",
-      "probeNoSuccess": "偵測未成功",
+      "probeSuccessful": "探測成功",
+      "probeError": "探測發生錯誤",
+      "probeNoSuccess": "探測未成功",
       "deviceInfo": "裝置資訊",
       "manufacturer": "製造商",
       "model": "型號",
@@ -301,9 +301,9 @@
       "ptzSupport": "支援 PTZ",
       "autotrackingSupport": "支援自動追蹤",
       "presets": "預設配置",
-      "rtspCandidates": "RTSP候選地址",
-      "rtspCandidatesDescription": "透過攝影機自動偵測發現了以下RTSP地址。測試連線以檢視影片流引數。",
-      "noRtspCandidates": "未從攝影機偵測到任何 RTSP 地址。可能是你的帳號密碼錯誤，或者攝影機不支援 ONVIF 協議，亦或是當前採用的 RTSP 地址獲取方式無效。請返回上一步，嘗試手動輸入RTSP地址。",
+      "rtspCandidates": "RTSP 候選位址",
+      "rtspCandidatesDescription": "透過攝影機探測發現了以下 RTSP 位址。測試連線以檢視影片串流中繼資料。",
+      "noRtspCandidates": "未從攝影機偵測到任何 RTSP 位址。可能是你的帳號密碼錯誤，或者攝影機不支援 ONVIF 協議，亦或是當前採用的 RTSP 位址獲取方式無效。請返回上一步，嘗試手動輸入 RTSP 位址。",
       "candidateStreamTitle": "候選{{number}}",
       "useCandidate": "使用",
       "uriCopy": "複製",
@@ -313,7 +313,7 @@
       "connected": "已連線",
       "notConnected": "未連線",
       "errors": {
-        "hostRequired": "主機/IP地址為必填"
+        "hostRequired": "主機/IP 位址為必填"
       }
     },
     "step3": {
@@ -322,12 +322,12 @@
       "addStream": "新增影片流",
       "addAnotherStream": "新增其他影片流",
       "streamTitle": "{{number}} 號影片流",
-      "streamUrl": "影片流地址",
+      "streamUrl": "影片串流 URL",
       "streamUrlPlaceholder": "rtsp://使用者名稱:密碼@主機:埠/路徑",
       "selectStream": "選擇一個影片流",
       "searchCandidates": "搜尋候選項……",
       "noStreamFound": "沒有找到影片流",
-      "url": "URL地址",
+      "url": "URL",
       "resolution": "解析度",
       "selectResolution": "選擇解析度",
       "quality": "品質",
@@ -376,7 +376,7 @@
       "disconnectStream": "斷開連線",
       "estimatedBandwidth": "預估頻寬",
       "roles": "功能",
-      "ffmpegModule": "使用影片流相容模式",
+      "ffmpegModule": "使用影片串流相容模式",
       "ffmpegModuleDescription": "若多次嘗試後仍無法載入影片流，可嘗試啟用此功能。啟用後，Frigate 將透過 go2rtc 呼叫 ffmpeg 模組。這可能會提升與部分攝影機影片流的相容性。",
       "none": "無",
       "error": "錯誤",
@@ -390,14 +390,14 @@
         "audioCodecGood": "音訊編解碼器為 {{codec}}。",
         "resolutionHigh": "使用 {{resolution}} 解析度可能導致資源使用率增加。",
         "resolutionLow": "{{resolution}} 解析度可能過低，難以可靠偵測小型目標或物體。",
-        "resolutionUnknown": "無法偵測此影片流的解析度。你需要在設定或設定檔中手動指定偵測解析度。",
+        "resolutionUnknown": "無法探測此影片流的解析度。你需要在設定或設定檔中手動指定偵測解析度。",
         "noAudioWarning": "偵測到該影片流無音訊訊號，錄製影片將沒有聲音。",
         "audioCodecRecordError": "錄製功能需要 AAC 音訊編解碼器以實現音訊支援。",
         "audioCodecRequired": "要實現音訊偵測功能，必須要有音訊流。",
         "restreamingWarning": "為錄製流開啟“減少與攝影機的連線數”可能會略微增加 CPU 使用率。",
         "brands": {
-          "reolink-rtsp": "不建議使用 Reolink 的 RTSP 協議。請在攝影機後臺設定中啟用 HTTP協議，並重新啟動向導。",
-          "reolink-http": "Reolink HTTP 影片流應該使用 FFmpeg 以獲得更好的相容性，為此影片流啟用“使用流相容模式”。"
+          "reolink-rtsp": "不建議使用 Reolink 的 RTSP 協議。請在攝影機後臺設定中啟用 HTTP 協議，並重新啟動嚮導。",
+          "reolink-http": "Reolink HTTP 影片流應該使用 FFmpeg 以獲得更好的相容性，為此影片流啟用「使用影片串流相容模式」。"
         },
         "dahua": {
           "substreamWarning": "子碼流1當前被鎖定為低解析度。多數大華、安訊士、EmpireTech品牌的攝影機都支援額外的子碼流，這些子碼流需要在攝影機設定中手動啟用。如果你的裝置支援，建議你檢查並使用這些高解析度子碼流。"
@@ -462,7 +462,7 @@
       },
       "deleteTrigger": {
         "title": "刪除觸發器",
-        "desc": "你確定要刪除觸發器 <strong>{{triggerName}}</strong> 嗎？此操作不可撤銷。"
+        "desc": "你確定要刪除觸發器 <strong>{{triggerName}}</strong> 嗎？此操作不可復原。"
       },
       "form": {
         "name": {
@@ -504,7 +504,7 @@
         },
         "actions": {
           "title": "動作",
-          "desc": "預設情況下，Frigate 會為所有觸發器傳送 MQTT 訊息。子標籤會將觸發器名稱新增到目標標籤中。屬性是可搜尋的元資料，獨立儲存在追蹤目標的元資料中。",
+          "desc": "預設情況下，Frigate 會為所有觸發器傳送 MQTT 訊息。子標籤會將觸發器名稱新增到目標標籤中。屬性是可搜尋的中繼資料，獨立儲存在追蹤目標的中繼資料中。",
           "error": {
             "min": "必須至少選擇一項動作。"
           }
@@ -576,7 +576,7 @@
       "description": "刪除攝影機將永久移除該攝影機的所有錄影、跟蹤目標以及配置。任何與該攝影機關聯的 go2rtc 流可能仍需手動刪除。",
       "selectPlaceholder": "選擇攝影機…",
       "confirmTitle": "你確定嗎？",
-      "confirmWarning": "刪除 <strong>{{cameraName}}</strong> 後將無法撤銷。",
+      "confirmWarning": "刪除 <strong>{{cameraName}}</strong> 後將無法復原。",
       "deleteExports": "同時刪除該攝影機匯出的影片",
       "confirmButton": "永久刪除",
       "success": "攝影機 {{cameraName}} 刪除完成",
@@ -636,8 +636,8 @@
       "enabled": "開啟",
       "ffmpeg": {
         "inputs": "影片流輸入",
-        "path": "影片流地址",
-        "pathRequired": "影片流地址為必填項",
+        "path": "影片串流路徑",
+        "pathRequired": "影片串流路徑為必填",
         "pathPlaceholder": "rtsp://...",
         "roles": "功能",
         "rolesRequired": "至少選擇一個功能",
@@ -647,8 +647,8 @@
         "inputsRequired": "至少需要一個輸入影片流"
       },
       "go2rtcStreams": "go2rtc 影片流",
-      "streamUrls": "影片流地址",
-      "addUrl": "新增地址",
+      "streamUrls": "影片串流 URL",
+      "addUrl": "新增 URL",
       "addGo2rtcStream": "新增 go2rtc 影片流",
       "toast": {
         "success": "攝影機 {{cameraName}} 已儲存"
@@ -657,7 +657,7 @@
     "profiles": {
       "title": "設定檔的攝影機覆蓋項",
       "selectLabel": "選擇設定檔",
-      "description": "配置在啟用某個設定檔時，哪些攝影機應被開啟或關閉。設定為“繼承”的攝影機會沿用它原本的啟用/停用狀態。",
+      "description": "配置在啟用某個設定檔時，哪些攝影機應被開啟或關閉。設定為「繼承」的攝影機會沿用它原本的啟用/停用狀態。",
       "inherit": "繼承",
       "enabled": "開啟",
       "disabled": "關閉",
@@ -829,7 +829,7 @@
           "mustNotBeSameWithCamera": "區域名稱不能與攝影機名稱相同。",
           "alreadyExists": "該攝影機已有相同的區域名稱。",
           "mustNotContainPeriod": "區域名稱不能包含句點。",
-          "hasIllegalCharacter": "區域名稱包含非法字元。",
+          "hasIllegalCharacter": "區域名稱包含無效字元。",
           "mustHaveAtLeastOneLetter": "區域名稱必須至少包含一個字母。"
         }
       },
@@ -1162,7 +1162,7 @@
         },
         "currentPassword": {
           "title": "當前密碼",
-          "placeholder": "請輸入當前密碼"
+          "placeholder": "請輸入目前密碼"
         },
         "usernameIsRequired": "使用者名稱為必填項",
         "passwordIsRequired": "必須輸入密碼"
@@ -1175,14 +1175,14 @@
       },
       "deleteUser": {
         "title": "刪除該使用者",
-        "desc": "此操作無法撤銷。這將永久刪除使用者帳戶並移除所有相關資料。",
+        "desc": "此操作無法復原。這將永久刪除使用者帳戶並移除所有相關資料。",
         "warn": "你確定要刪除 <strong>{{username}}</strong> 嗎？"
       },
       "passwordSetting": {
         "cannotBeEmpty": "密碼不能為空",
         "doNotMatch": "兩次輸入密碼不匹配",
-        "currentPasswordRequired": "當前密碼為必填",
-        "incorrectCurrentPassword": "當前密碼錯誤",
+        "currentPasswordRequired": "目前密碼為必填",
+        "incorrectCurrentPassword": "目前密碼錯誤",
         "passwordVerificationFailed": "驗證密碼失敗",
         "updatePassword": "更新 {{username}} 的密碼",
         "setPassword": "設定密碼",
@@ -1198,7 +1198,7 @@
           "intro": "為該使用者選擇一個合適的權限組：",
           "admin": "管理員",
           "adminDesc": "完全功能與存取權限。",
-          "viewer": "成員",
+          "viewer": "檢視者",
           "viewerDesc": "僅能夠檢視即時監控面板、審閱、瀏覽和匯出功能。",
           "customDesc": "自訂特定攝影機的存取規則。"
         }
@@ -1207,7 +1207,7 @@
   },
   "roles": {
     "management": {
-      "title": "成員權限組管理",
+      "title": "檢視者權限組管理",
       "desc": "管理此 Frigate 例項的自訂權限組及其攝影機存取權限。"
     },
     "addRole": "新增權限組",
@@ -1224,7 +1224,7 @@
         "createRole": "權限組 {{role}} 建立成功",
         "updateCameras": "已更新攝影機至 {{role}} 權限組",
         "deleteRole": "已刪除 {{role}} 權限組",
-        "userRolesUpdated_other": "已將分配到此權限組的 {{count}} 位使用者更新為 “成員”，該權限組可存取所有攝影機。"
+        "userRolesUpdated_other": "已將分配到此權限組的 {{count}} 位使用者更新為「檢視者」，該權限組可存取所有攝影機。"
       },
       "error": {
         "createRoleFailed": "建立權限組失敗：{{errorMessage}}",
@@ -1244,7 +1244,7 @@
       },
       "deleteRole": {
         "title": "刪除權限組",
-        "desc": "此操作無法撤銷。這將永久刪除該權限組，並將所有擁有此權限組的使用者分配到 “成員” （view）權限組，該權限組將賦予使用者檢視所有攝影機的權限。",
+        "desc": "此操作無法復原。這將永久刪除該權限組，並將所有擁有此權限組的使用者分配到「檢視者」權限組，該權限組將賦予使用者檢視所有攝影機的權限。",
         "warn": "你確定要刪除權限組 <strong>{{role}}</strong> 嗎？",
         "deleting": "刪除中…"
       },
@@ -1281,9 +1281,9 @@
       "desc": "臨時暫停所有已註冊裝置上特定攝影機的通知。"
     },
     "email": {
-      "title": "電子郵箱",
+      "title": "電子信箱",
       "placeholder": "例如：example@email.com",
-      "desc": "需要輸入有效的電子郵件，在推送服務出現問題時，將使用此電子郵件進行通知。"
+      "desc": "需要輸入有效的電子信箱，在推送服務出現問題時，將使用此電子信箱進行通知。"
     },
     "cameras": {
       "title": "攝影機",
@@ -1324,7 +1324,7 @@
     "description": "Frigate+ 是一項訂閱服務，可為你的 Frigate 例項提供額外的功能和能力，包括使用基於你自己的資料訓練的自訂目標偵測模型。你可以在此管理 Frigate+ 的模型設定。",
     "cardTitles": {
       "api": "API",
-      "currentModel": "當前模型",
+      "currentModel": "目前模型",
       "otherModels": "其他模型",
       "configuration": "配置"
     },
@@ -1367,7 +1367,7 @@
         "baseModels": "基礎模型",
         "fineTunedModels": "微調模型"
       },
-      "modelSelect": "您可以在Frigate+上選擇可用的模型。請注意，只能選擇與當前偵測器配置相容的模型。"
+      "modelSelect": "您可以在 Frigate+ 上選擇可用的模型。請注意，只能選擇與目前偵測器配置相容的模型。"
     },
     "changeInDetectorsAndModel": "變更模型",
     "unsavedChanges": "未儲存Frigate+變更設定",
@@ -1495,7 +1495,7 @@
     },
     "knownPlates": {
       "namePlaceholder": "例如：老婆的車",
-      "platePlaceholder": "車牌號或正則表示式"
+      "platePlaceholder": "車牌號或正規表示式"
     },
     "timezone": {
       "defaultOption": "使用瀏覽器時區"
@@ -1535,8 +1535,8 @@
         "preset-rtsp-udp": "RTSP - UDP協議",
         "preset-rtsp-blue-iris": "RTSP - Blue Iris",
         "preset-record-generic": "錄製（通用，無音訊）",
-        "preset-record-generic-audio-copy": "錄製（通用，不轉碼音訊）",
-        "preset-record-generic-audio-aac": "錄製（通用並將音訊轉碼為 AAC）",
+        "preset-record-generic-audio-copy": "錄製（通用，不轉檔音訊）",
+        "preset-record-generic-audio-aac": "錄製（通用並將音訊轉檔為 AAC）",
         "preset-record-mjpeg": "錄製 - MJPEG 流攝影機",
         "preset-record-jpeg": "錄製 - JPEG 流攝影機",
         "preset-record-ubiquiti": "錄製 - 優必飛攝影機"
@@ -1674,7 +1674,7 @@
       "available": "可用模型",
       "useCustom": "使用 \"{{value}}\"",
       "refresh": "重新整理模型清單",
-      "probeFailed": "無法取得模型清單",
+      "probeFailed": "無法取得探測模型清單",
       "fetchedModels": "已成功取得模型清單"
     },
     "liveStreams": {
@@ -1763,14 +1763,14 @@
       "alreadyExists": "已存在使用此 ID 的設定檔"
     },
     "renameProfile": "重新命名設定檔",
-    "renameSuccess": "已將設定檔重新命名為 “{{profile}}”",
+    "renameSuccess": "已將設定檔重新命名為「{{profile}}」",
     "deleteProfile": "刪除設定檔",
-    "deleteProfileConfirm": "確定要為所有攝影機刪除設定檔“{{profile}}”嗎？該步驟無法撤銷。",
-    "deleteSuccess": "設定檔“{{profile}}”已刪除",
-    "createSuccess": "設定檔“{{profile}}”已建立",
+    "deleteProfileConfirm": "確定要為所有攝影機刪除設定檔「{{profile}}」嗎？該步驟無法復原。",
+    "deleteSuccess": "設定檔「{{profile}}」已刪除",
+    "createSuccess": "設定檔「{{profile}}」已建立",
     "removeOverride": "移除設定檔覆蓋",
     "deleteSection": "刪除節點覆蓋",
-    "deleteSectionConfirm": "是否要移除攝像機 {{camera}} 上針對設定檔 {{profile}} 的 {{section}} 覆蓋設定？",
+    "deleteSectionConfirm": "是否要移除攝影機 {{camera}} 上針對設定檔 {{profile}} 的 {{section}} 覆蓋設定？",
     "deleteSectionSuccess": "已移除 {{profile}} 的 {{section}} 覆蓋設定",
     "enableSwitch": "開啟設定檔",
     "enabledDescription": "設定檔功能已啟用。請在下方建立新的設定檔，進入攝影機配置頁面進行修改並儲存，修改即可生效。",
@@ -1778,25 +1778,25 @@
   },
   "unsavedChanges": "您有未儲存的更改",
   "confirmReset": "確認重設",
-  "resetToDefaultDescription": "這將把此部分的所有設定重設為預設值。此操作無法撤銷。",
-  "resetToGlobalDescription": "這將把此部分的設定重設為全域性預設值。此操作無法撤銷。",
+  "resetToDefaultDescription": "這將把此部分的所有設定重設為預設值。此操作無法復原。",
+  "resetToGlobalDescription": "這將把此部分的設定重設為全域性預設值。此操作無法復原。",
   "go2rtcStreams": {
     "title": "go2rtc 影片流",
-    "description": "管理用於攝影機轉流的 go2rtc 流配置。每個影片流包含一個名稱以及一個或多個源地址 URL。",
+    "description": "管理用於攝影機轉流的 go2rtc 串流配置。每個影片串流包含一個名稱以及一個或多個來源 URL。",
     "addStream": "新增影片流",
     "addStreamDesc": "為新的影片流輸入一個名稱，該名稱將用於在攝影機配置中引用該影片流。",
-    "addUrl": "新增 URL 地址",
+    "addUrl": "新增 URL",
     "streamName": "影片流名稱",
     "streamNamePlaceholder": "例如：front_door，此處只能使用英文",
     "streamUrlPlaceholder": "例如：rtsp://user:pass@192.168.1.100/stream",
     "deleteStream": "刪除影片流",
-    "deleteStreamConfirm": "確定要刪除影片流 “{{streamName}}” 嗎？引用該影片流的攝影機可能會停止工作。",
+    "deleteStreamConfirm": "確定要刪除影片串流「{{streamName}}」嗎？引用該影片串流的攝影機可能會停止運作。",
     "noStreams": "未配置任何 go2rtc 流。請新增一個影片流以開始使用。",
     "validation": {
       "nameRequired": "影片流名稱為必填",
       "nameDuplicate": "已存在同名的影片流",
       "nameInvalid": "影片流名稱只能使用字母、數字、下劃線和連字元",
-      "urlRequired": "至少需要填寫一個 URL 地址"
+      "urlRequired": "至少需要填寫一個 URL"
     },
     "renameStream": "重新命名影片流",
     "renameStreamDesc": "為此影片流輸入新名稱。重新命名影片流可能會導致透過名稱引用它的攝影機或其他流無法正常工作。",
@@ -1909,17 +1909,17 @@
       "recordDisabled": "錄製已停用，不會生成審閱記錄項。",
       "detectDisabled": "目標偵測已停用。審閱記錄需要依靠偵測到的目標來對警報和偵測事件進行分類。",
       "allNonAlertDetections": "所有非警報類活動都將被記錄為偵測事件。",
-      "genaiImageSourceRecordingsRecordDisabled": "影像源雖然設定為“錄製”，但錄製功能已關閉。Frigate 將自動降級使用預覽圖片。"
+      "genaiImageSourceRecordingsRecordDisabled": "影像來源雖然設定為「錄製」，但錄製功能已關閉。Frigate 將自動降級使用預覽圖片。"
     },
     "audio": {
-      "noAudioRole": "暫無任何流已開啟音訊（audio）功能（role）。必須在影片流上啟用音訊功能，音訊偵測才能正常工作。"
+      "noAudioRole": "暫無任何串流已開啟音訊（audio）功能（role）。必須在影片串流上啟用音訊功能，音訊偵測才能正常運作。"
     },
     "audioTranscription": {
       "audioDetectionDisabled": "該攝影機未開啟音訊偵測功能。音訊轉錄需要先開啟音訊偵測。"
     },
     "detect": {
       "fpsGreaterThanFive": "不建議設定偵測幀率高於 5，數值設定過高可能引發效能問題，且不會帶來任何增益。",
-      "disabled": "目標偵測已停用。快照、回放條目以及人臉辨識、車牌辨識、生成式 AI 等增強功能都將無法使用。",
+      "disabled": "目標偵測已停用。快照、重播項目以及人臉辨識、車牌辨識、生成式 AI 等增強功能都將無法使用。",
       "resolutionShouldBeMultipleOfFour": "為了獲得最佳效果，偵測的寬度與高度應為 4 的倍數。其他偶數值可能會在偵測串流中產生畫面殘影或輕微失真。",
       "aspectRatioMismatch": "您輸入的寬度與高度與目前的偵測解析度長寬比不符。這可能會導致影像被拉伸或失真。",
       "maxFramesSet": "設定最大影格數將會覆蓋預設行為，並停用靜態物件追蹤。極少有情況需要使用此功能，請謹慎使用。",
@@ -1932,19 +1932,19 @@
     },
     "faceRecognition": {
       "globalDisabled": "必須開啟人臉辨識增強功能，此攝影機的人臉辨識相關功能才能正常使用。",
-      "personNotTracked": "人臉辨識需要偵測到 “人”（person） 後才能工作。請在該攝影機的偵測目標設定中新增“人”。",
+      "personNotTracked": "人臉辨識需要偵測到「人」後才能運作。請在該攝影機的偵測目標設定中新增「人」。",
       "modelSizeLarge": "大型模型需要 GPU 或 NPU 才能執行正常。僅使用 CPU 的裝置請選用小型模型。"
     },
     "lpr": {
       "globalDisabled": "要讓該攝影機的車牌辨識功能正常使用，必須先開啟車牌辨識增強功能。",
-      "vehicleNotTracked": "車牌辨識需要先開啟對 “汽車” 或 “摩托車” 的目標追蹤。請在該攝影機的偵測目標中新增“汽車”或“摩托車”。",
+      "vehicleNotTracked": "車牌辨識需要先開啟對「汽車」或「機車」的目標追蹤。請在該攝影機的偵測目標中新增「汽車」或「機車」。",
       "modelSizeLarge": "大型模型針對多行格式車牌做了最佳化。小型模型的效能優於大型模型，而且只有小型模型才能支援中文車牌。除非你所在地區使用多行車牌格式，否則建議使用小型模型。"
     },
     "record": {
-      "noRecordRole": "暫無任何影片流已配置錄製功能，錄製功能將無法正常工作。"
+      "noRecordRole": "暫無任何影片串流已定義錄製功能，錄製功能將無法正常運作。"
     },
     "birdseye": {
-      "objectsModeDetectDisabled": "鳥瞰圖已設定為 “目標” 模式，但此攝影機未開啟目標偵測。該攝影機將不會顯示在鳥瞰畫面中。"
+      "objectsModeDetectDisabled": "鳥瞰圖已設定為「目標」模式，但此攝影機未開啟目標偵測。攝影機將不會顯示在鳥瞰畫面中。"
     },
     "snapshots": {
       "detectDisabled": "目標偵測已停用。快照是根據追蹤到的目標生成的，因此將不會建立快照。"

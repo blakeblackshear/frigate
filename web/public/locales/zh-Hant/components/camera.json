@@ -1,6 +1,6 @@
 {
   "group": {
-    "label": "鏡頭群組",
+    "label": "攝影機群組",
     "add": "新增鏡頭群組",
     "edit": "編輯鏡頭群組",
     "delete": {
@@ -24,7 +24,7 @@
       "label": "鏡頭",
       "desc": "選擇欲添加至群組的鏡頭。"
     },
-    "icon": "圖標",
+    "icon": "圖示",
     "success": "鏡頭群組（{{name}}）已儲存。",
     "camera": {
       "setting": {

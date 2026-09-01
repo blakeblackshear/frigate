@@ -71,7 +71,7 @@
       "temperature": "偵測器溫度",
       "cpuUsage": "偵測器 CPU 使用率",
       "memoryUsage": "偵測器記憶體使用量",
-      "cpuUsageInformation": "用於準備輸入和輸出數據至/從偵測模型的CPU。此值不衡量推論使用量，即使使用GPU或加速器。"
+      "cpuUsageInformation": "用於準備輸入和輸出資料至/從偵測模型的 CPU。此值不衡量推論使用量，即使使用 GPU 或加速器。"
     },
     "hardwareInfo": {
       "title": "硬體資訊",
@@ -119,8 +119,8 @@
       "processCpuUsage": "行程 CPU 使用率",
       "processMemoryUsage": "行程記憶體使用量",
       "series": {
-        "recording": "记录",
-        "review_segment": "评论部分",
+        "recording": "記錄",
+        "review_segment": "審核部分",
         "embeddings": "嵌入",
         "audio_detector": "音訊偵測器",
         "go2rtc": "go2rtc"
@@ -161,7 +161,7 @@
     "overview": "總覽",
     "info": {
       "aspectRatio": "長寬比",
-      "cameraProbeInfo": "{{camera}} 的詳細資訊",
+      "cameraProbeInfo": "{{camera}} 的攝影機探測詳細資訊",
       "streamDataFromFFPROBE": "串流資料是透過 <code>ffprobe</code> 取得。",
       "fetching": "正在讀取鏡頭資訊",
       "stream": "串流 {{idx}}",
@@ -173,7 +173,7 @@
       "audio": "音訊：",
       "error": "錯誤：{{error}}",
       "tips": {
-        "title": "鏡頭詳細資訊"
+        "title": "攝影機探測詳細資訊"
       },
       "keyframes": {
         "title": "關鍵幀分析",
@@ -184,9 +184,9 @@
         "observedDuration": "觀測持續時間：",
         "gap": "關鍵幀間隔 (最小 / 平均 / 最大)：",
         "segmentLength": "錄影片段長度：",
-        "ok": "每約 {{seconds}} 秒一個關鍵幀，適合錄影與回放。",
+        "ok": "每約 {{seconds}} 秒一個關鍵幀，適合錄影與重播。",
         "warning": "關鍵幀稀疏或不固定（最長間隔約 {{seconds}} 秒），可能使用了智慧編碼（H.264+/H.265+），不建議這樣設定。",
-        "error": "關鍵幀間隔（~{{seconds}} 秒）超過了錄影片段長度（{{segmentTime}} 秒）。某些片段可能沒有關鍵幀，這會導致回放中斷。請停用攝影機上的智慧/+編碼，或縮短其關鍵幀間隔。",
+        "error": "關鍵幀間隔（~{{seconds}} 秒）超過了錄影片段長度（{{segmentTime}} 秒）。某些片段可能沒有關鍵幀，這會導致重播中斷。請停用攝影機上的智慧/+編碼，或縮短其關鍵幀間隔。",
         "unknown": "無法確定關鍵幀間隔。",
         "recordDisabled": "此攝影機已停用錄影功能。"
       }
@@ -211,10 +211,10 @@
     },
     "toast": {
       "success": {
-        "copyToClipboard": "已複製檢測資料至剪貼簿。"
+        "copyToClipboard": "已複製探測資料至剪貼簿。"
       },
       "error": {
-        "unableToProbeCamera": "無法檢測鏡頭：{{errorMessage}}"
+        "unableToProbeCamera": "無法探測攝影機：{{errorMessage}}"
       }
     },
     "noCameras": {
@@ -242,7 +242,7 @@
     "detectIsSlow": "{{detect}} 偵測速度較慢（{{speed}} 毫秒）",
     "detectIsVerySlow": "{{detect}} 偵測速度緩慢（{{speed}} 毫秒）",
     "shmTooLow": "/dev/shm 配置（{{total}} MB）應增加至至少{{min}} MB。",
-    "debugReplayActive": "除錯回放工作階段正在進行"
+    "debugReplayActive": "除錯重播工作階段正在進行"
   },
   "enrichments": {
     "title": "進階功能",

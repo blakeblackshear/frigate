@@ -36,9 +36,9 @@
   },
   "export": {
     "time": {
-      "fromTimeline": "從時間線選擇",
+      "fromTimeline": "從時間軸選擇",
       "lastHour_other": "過去 {{count}} 個小時",
-      "custom": "自定義",
+      "custom": "自定",
       "start": {
         "title": "開始時間",
         "label": "選擇開始時間"
@@ -72,7 +72,7 @@
       "batchQueueFailed": "未能將 {{total}} 個匯出加入佇列。失敗的攝影機：{{failedCameras}}"
     },
     "fromTimeline": {
-      "saveExport": "保存匯出資料",
+      "saveExport": "儲存匯出資料",
       "previewExport": "預覽匯出資料",
       "queueingExport": "正在加入匯出佇列…",
       "useThisRange": "使用此範圍"
@@ -92,7 +92,7 @@
     },
     "multiCamera": {
       "timeRange": "時間範圍",
-      "selectFromTimeline": "從時間線選擇",
+      "selectFromTimeline": "從時間軸選擇",
       "cameraSelection": "攝影機",
       "cameraSelectionHelp": "在此時間範圍內具有追蹤目標的攝影機會被預先選中",
       "checkingActivity": "正在檢查攝影機活動…",
@@ -143,13 +143,13 @@
   "search": {
     "saveSearch": {
       "label": "儲存搜尋",
-      "desc": "替此保存的搜尋命名。",
+      "desc": "替此儲存的搜尋命名。",
       "placeholder": "請輸入搜尋的名稱",
-      "overwrite": "{{searchName}} 已存在。保存將會覆蓋現有資料。",
-      "success": "搜尋 {{searchName}} 已保存。",
+      "overwrite": "{{searchName}} 已存在。儲存將會覆蓋現有資料。",
+      "success": "搜尋 {{searchName}} 已儲存。",
       "button": {
         "save": {
-          "label": "保存此次搜尋"
+          "label": "儲存此次搜尋"
         }
       }
     }
@@ -174,7 +174,7 @@
     "shareTimestamp": {
       "label": "分享該時間片段",
       "title": "分享該時間片段",
-      "description": "分享帶當前錄製播放時間的網址，或選擇自訂時間。請注意這不是公開的分享連結，只有具備 Frigate 及此攝影機存取權限的使用者才能存取。",
+      "description": "分享帶目前錄製播放時間的網址，或選擇自訂時間。請注意這不是公開的分享連結，只有具備 Frigate 及此攝影機存取權限的使用者才能存取。",
       "custom": "自訂時間",
       "button": "分享時間片段網址",
       "shareTitle": "Frigate 審閱時間：{{camera}}"

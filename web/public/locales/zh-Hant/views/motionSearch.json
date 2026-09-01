@@ -21,7 +21,7 @@
     "clearROI": "清除多邊形選區",
     "polygonControls": {
         "points_other": "{{count}} 個點位",
-        "undo": "撤銷上一個點位",
+        "undo": "復原上一個點位",
         "reset": "重設多邊形",
         "drawMode": "繪製",
         "moveMode": "移動"

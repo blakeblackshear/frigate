@@ -15,9 +15,9 @@
     }
   },
   "timeline": {
-    "label": "時間線"
+    "label": "時間軸"
   },
-  "timeline.aria": "選擇時間線",
+  "timeline.aria": "選擇時間軸",
   "events": {
     "label": "事件",
     "aria": "選擇事件",
@@ -50,14 +50,14 @@
   "detail": {
     "label": "詳細資訊",
     "noDataFound": "沒有可供檢視的詳細資訊",
-    "aria": "開關詳細資訊視圖",
+    "aria": "切換詳細資訊",
     "trackedObject_one": "{{count}} 個物件",
     "trackedObject_other": "{{count}} 個物件",
     "noObjectDetailData": "沒有可用物件細節。",
-    "settings": "細節視圖設定",
+    "settings": "詳細資訊檢視設定",
     "alwaysExpandActive": {
       "title": "總是展開",
-      "desc": "在可用時總是展開當前物件的詳細資訊。"
+      "desc": "在可用時總是展開目前物件的詳細資訊。"
     }
   },
   "objectTrack": {

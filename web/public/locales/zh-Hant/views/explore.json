@@ -99,7 +99,7 @@
     "regenerateFromSnapshot": "從截圖重新生成",
     "regenerateFromThumbnails": "從縮圖重新生成",
     "tips": {
-      "descriptionSaved": "成功保存說明",
+      "descriptionSaved": "成功儲存說明",
       "saveDescriptionFailed": "更新說明失敗：{{errorMessage}}"
     },
     "editAttributes": {
@@ -224,8 +224,8 @@
       "aria": "顯示追蹤詳細資訊"
     },
     "debugReplay": {
-      "label": "除錯回放",
-      "aria": "在除錯回放檢視中檢視此被追蹤物件"
+      "label": "除錯重播",
+      "aria": "在除錯重播檢視中檢視此被追蹤物件"
     },
     "more": {
       "aria": "更多"
@@ -259,7 +259,7 @@
     "noImageFound": "沒有找到在此時間點的圖片。",
     "createObjectMask": "建立物件遮罩",
     "adjustAnnotationSettings": "調整標記設定",
-    "scrollViewTips": "點擊查看物件周期的關鍵時間。",
+    "scrollViewTips": "點擊查看物件週期的關鍵時間。",
     "autoTrackingTips": "自動追蹤鏡頭的邊框位置可能不準確。",
     "count": "{{second}}之{{first}}",
     "trackedPoint": "追蹤點",

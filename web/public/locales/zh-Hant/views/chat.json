@@ -34,12 +34,12 @@
     "starting_requests": {
         "show_recent_events": "檢視近期事件",
         "show_camera_status": "顯示攝影機狀態",
-        "recap": "我不在的時候發生了什麼？",
-        "watch_camera": "監控攝影機活動"
+        "recap": "我不在的時候發生了什麼事？",
+        "watch_camera": "監視攝影機活動"
     },
     "starting_requests_prompts": {
         "show_recent_events": "顯示最近一小時的事件",
-        "show_camera_status": "我的攝影機當前狀態如何？",
+        "show_camera_status": "我的攝影機目前狀態如何？",
         "recap": "我不在的時候發生了什麼事？",
         "watch_camera": "監控前門，有人出現就通知我"
     },
