@@ -622,7 +622,11 @@
       "disabled": "Objektide tuvastamine on lülitatud välja. Hetkepildid, läbivaatamisele kuuluvad objektid ja täiendavad funktsioonid, nagu näotuvastus, sõidukite numbrimärkide tuvastus ja generatiivne tehisintellekt, ei tööta."
     },
     "lpr": {
-      "vehicleNotTracked": "Sõidukite numbrimärkide tuvastus eeldab, et auto või mootorratas on jälgitav. Lülita menüüst Objektid sell kaamera jaoks sisse valikud „auto“ või „mootorratas“."
+      "vehicleNotTracked": "Sõidukite numbrimärkide tuvastus eeldab, et sõiduk on jälgitav. Lülita menüüst Objektid selle kaamera jaoks sisse valik „auto“ või muu sõiduki tüüp."
+    },
+    "review": {
+      "recordDisabled": "Salvestamine on lülitatud välja, ülevaatamseks mõeldud objektid jäävad loomata.",
+      "detectDisabled": "Objektide tuvastus on lülitatud välja. Ülevaatamisobjektid vajavad tuvastatud objekte, et hoiatusi ja tuvastusi kategooriatesse jaotada."
     }
   },
   "button": {
@@ -649,6 +653,66 @@
     "value": {
       "label": "Uus väärtus",
       "reset": "Lähtesta"
+    }
+  },
+  "onvif": {
+    "autotracking": {
+      "zooming": {
+        "disabled": "Pole kasutusel",
+        "absolute": "Absoluutne",
+        "relative": "Suhteline"
+      }
+    },
+    "profileAuto": "Automaatne",
+    "profileLoading": "Laadin profiile..."
+  },
+  "modelSize": {
+    "small": "Väike",
+    "large": "Suur"
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "Silumisteated",
+      "info": "Infoteated",
+      "warning": "Hoiatused",
+      "error": "Veateated",
+      "critical": "Kriitilise teated"
+    }
+  },
+  "birdseye": {
+    "cameraOrder": {
+      "reorderHandle": "Järjekorra muutmiseks lohista",
+      "saving": "Salvestan…",
+      "saved": "Salvestatud"
+    }
+  },
+  "retainMode": {
+    "all": "Kõik",
+    "motion": "Liikumine",
+    "active_objects": "Aktiivsed objektid"
+  },
+  "previewQuality": {
+    "very_high": "Väga kõrge",
+    "high": "Kõrge",
+    "medium": "Keskmine",
+    "low": "Madal",
+    "very_low": "Väga madal"
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "Brauser",
+      "12hour": "12 tundi",
+      "24hour": "24 tundi"
+    },
+    "unitSystem": {
+      "metric": "Meetermõõdustik",
+      "imperial": "Inglise mõõdustik"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "Salvestused",
+      "previews": "Eelvaated"
     }
   }
 }
