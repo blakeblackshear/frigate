@@ -50,19 +50,36 @@ async function openRecordingView(frigateApp: FrigateApp) {
   await frigateApp.goto(`/review?timestamp=front_door_${playbackTime}`);
 }
 
-async function selectRangeFromTimeline(frigateApp: FrigateApp) {
-  await frigateApp.page
-    .getByRole("button", { name: /actions/i })
-    .click({ timeout: 15_000 });
-  await frigateApp.page
-    .getByRole("menuitem", { name: /debug replay/i })
-    .click();
+// desktop reaches Debug Replay through the Actions menu, mobile through
+// the settings drawer; both render the same form
+async function openDebugReplayForm(frigateApp: FrigateApp) {
+  if (frigateApp.isMobile) {
+    await frigateApp.page
+      .getByRole("button", { name: /filters/i })
+      .first()
+      .click({ timeout: 15_000 });
+    await frigateApp.page
+      .getByRole("button", { name: /^debug replay$/i })
+      .click();
+  } else {
+    await frigateApp.page
+      .getByRole("button", { name: /actions/i })
+      .click({ timeout: 15_000 });
+    await frigateApp.page
+      .getByRole("menuitem", { name: /debug replay/i })
+      .click();
+  }
 
-  const dialog = frigateApp.page.getByRole("dialog");
-  await expect(dialog).toBeVisible({ timeout: 5_000 });
-  await dialog.getByText("From Timeline").click();
-  await dialog.getByRole("button", { name: "Select", exact: true }).click();
-  await expect(dialog).toBeHidden({ timeout: 5_000 });
+  const form = frigateApp.page.getByRole("dialog");
+  await expect(form).toBeVisible({ timeout: 5_000 });
+  return form;
+}
+
+async function selectRangeFromTimeline(frigateApp: FrigateApp) {
+  const form = await openDebugReplayForm(frigateApp);
+  await form.getByText("From Timeline").click();
+  await form.getByRole("button", { name: "Select", exact: true }).click();
+  await expect(form).toBeHidden({ timeout: 5_000 });
 
   await expect(frigateApp.page.locator(".export-start")).toHaveText(
     /\d{1,2}:\d{2}/,
@@ -87,6 +104,33 @@ async function reselectRange(frigateApp: FrigateApp) {
   await selectRangeFromTimeline(frigateApp);
 }
 
+// the loop flipped this label between the two ranges ~25 times a second
+async function countHandleLabelChanges(frigateApp: FrigateApp) {
+  return frigateApp.page.evaluate(async () => {
+    const handle = document.querySelector(".export-start");
+    if (!handle) {
+      return -1;
+    }
+
+    let changes = 0;
+    let last = handle.textContent;
+    const observer = new MutationObserver(() => {
+      if (handle.textContent !== last) {
+        changes += 1;
+        last = handle.textContent;
+      }
+    });
+    observer.observe(handle, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    observer.disconnect();
+    return changes;
+  });
+}
+
 test.describe("Debug Replay from History @high", () => {
   test("a reselected range lands once and stays put", async ({
     frigateApp,
@@ -103,32 +147,7 @@ test.describe("Debug Replay from History @high", () => {
     await openRecordingView(frigateApp);
     await reselectRange(frigateApp);
 
-    // the loop flipped this label between the two ranges ~25 times a second
-    const changes = await frigateApp.page.evaluate(async () => {
-      const handle = document.querySelector(".export-start");
-      if (!handle) {
-        return -1;
-      }
-
-      let changes = 0;
-      let last = handle.textContent;
-      const observer = new MutationObserver(() => {
-        if (handle.textContent !== last) {
-          changes += 1;
-          last = handle.textContent;
-        }
-      });
-      observer.observe(handle, {
-        subtree: true,
-        childList: true,
-        characterData: true,
-      });
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      observer.disconnect();
-      return changes;
-    });
-
-    expect(changes).toBe(0);
+    expect(await countHandleLabelChanges(frigateApp)).toBe(0);
     expect(
       pageErrors.filter((message) => /Maximum update depth/i.test(message)),
     ).toHaveLength(0);
@@ -161,5 +180,28 @@ test.describe("Debug Replay from History @high", () => {
     await frigateApp.page.mouse.up();
 
     await expect(start).not.toHaveText(before, { timeout: 5_000 });
+  });
+});
+
+test.describe("Debug Replay from History — mobile @high @mobile", () => {
+  test("a reselected range lands once and stays put", async ({
+    frigateApp,
+  }) => {
+    if (!frigateApp.isMobile) {
+      test.skip();
+      return;
+    }
+
+    const pageErrors: string[] = [];
+    frigateApp.page.on("pageerror", (err) => pageErrors.push(err.message));
+
+    await frigateApp.installDefaults();
+    await openRecordingView(frigateApp);
+    await reselectRange(frigateApp);
+
+    expect(await countHandleLabelChanges(frigateApp)).toBe(0);
+    expect(
+      pageErrors.filter((message) => /Maximum update depth/i.test(message)),
+    ).toHaveLength(0);
   });
 });
