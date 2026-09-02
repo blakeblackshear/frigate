@@ -158,6 +158,7 @@ export default function DynamicVideoPlayer({
   const [isLoading, setIsLoading] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const prevCameraRef = useRef(camera);
 
   // Don't set source until recordings load - we need accurate startPosition
   // to avoid hls.js clamping to video end when startPosition exceeds duration
@@ -166,13 +167,34 @@ export default function DynamicVideoPlayer({
   // start at correct time
 
   useEffect(() => {
+    // isLoading/isBuffering only clear on playback progress, which a
+    // paused scrub never reaches. A camera switch is excluded: its old
+    // source still reads as settled while the new one is fetched
+    const scrubExit = prevCameraRef.current === camera;
+    prevCameraRef.current = camera;
+    const settled = () =>
+      sourceLoadedRef.current &&
+      (playerRef.current?.readyState ?? 0) >=
+        HTMLMediaElement.HAVE_CURRENT_DATA;
+
+    if (!isScrubbing && scrubExit && settled()) {
+      setIsLoading(false);
+      setIsBuffering(false);
+    }
+
     if (!isScrubbing) {
       // never overwrite a pending timer: an orphaned one escapes
       // onPlaying's clearTimeout and flashes loading mid-playback
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
       }
-      loadingTimeoutRef.current = setTimeout(() => setIsLoading(true), 1000);
+      loadingTimeoutRef.current = setTimeout(() => {
+        // re-checked here: readyState drops while a seek loads
+        if (scrubExit && settled()) {
+          return;
+        }
+        setIsLoading(true);
+      }, 1000);
     }
 
     return () => {
