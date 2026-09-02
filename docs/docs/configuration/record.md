@@ -291,7 +291,7 @@ For advanced use cases, the [custom export HTTP API](../integrations/api/export-
 POST /export/custom/{camera_name}/start/{start_time}/end/{end_time}
 ```
 
-The request body accepts `ffmpeg_input_args` and `ffmpeg_output_args` to control encoding, frame rate, filters, and other FFmpeg options. If neither is provided, Frigate defaults to time-lapse output settings (25x speed, 30 FPS).
+The request body accepts `ffmpeg_input_args` and `ffmpeg_output_args` to control encoding, frame rate, filters, and other FFmpeg options. If neither is provided, Frigate defaults to time-lapse output settings (25x speed, 30 FPS) with audio removed (`-an`). When providing your own `ffmpeg_input_args`, include `-an` if you want audio stripped from the export.
 
 The following example exports a time-lapse at 60x speed with 25 FPS:
 

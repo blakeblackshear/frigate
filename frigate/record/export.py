@@ -36,8 +36,9 @@ from frigate.util.time import is_current_hour
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_TIME_LAPSE_FFMPEG_INPUT_ARGS = "-an"
 DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
-TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
+TIMELAPSE_DATA_INPUT_ARGS = "-skip_frame nokey"
 
 # Matches the setpts factor used in timelapse exports (e.g. setpts=0.04*PTS).
 # Captures the floating-point factor so we can scale expected duration.
@@ -737,7 +738,7 @@ class RecordingExporter(threading.Thread):
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.ffmpeg_path,
                     hwaccel_args,
-                    f"{self.ffmpeg_input_args} -an {ffmpeg_input}".strip(),
+                    f"{self.ffmpeg_input_args} {ffmpeg_input}".strip(),
                     f"{self.ffmpeg_output_args} -movflags +faststart".strip(),
                     EncodeTypeEnum.timelapse,
                 )
