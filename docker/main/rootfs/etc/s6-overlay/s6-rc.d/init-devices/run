@@ -37,6 +37,7 @@ device_globs=(
     "/dev/nvmap"
     "/dev/nvidia*"
     "/dev/memx*"
+    "/dev/metis*"
 )
 
 IFS=',' read -ra extra_globs <<< "${DEVICE_ACL_PATHS:-}"
