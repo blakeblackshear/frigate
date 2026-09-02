@@ -498,7 +498,7 @@ cameras:
 
 ## Synaptics
 
-Hardware accelerated video de-/encoding is supported on Synpatics SL-series SoC.
+Hardware accelerated video de-/encoding is supported on Synaptics SL-series SoC.
 
 ### Prerequisites
 
