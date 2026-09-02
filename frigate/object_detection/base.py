@@ -371,8 +371,8 @@ class ObjectDetectProcess:
 
         self.detection_start.value = 0.0  # type: ignore[attr-defined]
 
-        # Async path for MemryX
-        if self.detector_config.type == "memryx":
+        # Async path for MemryX and Axelera (send/receive contract)
+        if self.detector_config.type in ("memryx", "axelera"):
             self.detect_process = AsyncDetectorRunner(
                 f"frigate.detector:{self.name}",
                 self.detection_queue,
