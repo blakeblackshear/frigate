@@ -10,10 +10,27 @@ from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import post_process_yolo
+from frigate.util.runtime_deps import Artifact, ArtifactKind, RuntimeManifest
 
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "axengine"
+
+# The AXEngine python package is installed at first start rather than shipped
+# in the image; its native libraries are bind mounted from the host.
+AXENGINE_VERSION = "0.1.3"
+AXENGINE_MANIFEST = RuntimeManifest(
+    name=DETECTOR_KEY,
+    version=AXENGINE_VERSION,
+    artifacts=(
+        Artifact(
+            url=f"https://github.com/AXERA-TECH/pyaxengine/releases/download/{AXENGINE_VERSION}-frigate/axengine-{AXENGINE_VERSION}-py3-none-any.whl",
+            sha256="e995b8a887b067dc3456512aae2fa9c84f70e708c28b11caf184efdc254c64ae",
+            kind=ArtifactKind.wheel,
+        ),
+    ),
+    import_check="axengine",
+)
 
 supported_models = {
     ModelTypeEnum.yologeneric: "frigate-yolov9-.*$",
@@ -34,12 +51,18 @@ class AxengineDetectorConfig(BaseDetectorConfig):
 
 class Axengine(DetectionApi):
     type_key = DETECTOR_KEY
+    runtime_manifest = AXENGINE_MANIFEST
 
     def __init__(self, config: AxengineDetectorConfig):
+        self.activate_dependencies()
+
         try:
             import axengine as axe
         except ModuleNotFoundError:
-            raise ImportError("AXEngine is not installed.") from None
+            raise ImportError(
+                "AXEngine is not installed. Frigate installs it at startup when an "
+                "axengine detector is configured; check the startup log for errors."
+            ) from None
 
         logger.info("__init__ axengine")
         super().__init__(config)

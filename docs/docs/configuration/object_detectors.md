@@ -297,6 +297,12 @@ If no custom model is provided, the Hailo detector downloads a default model fro
 
 :::
 
+:::info
+
+The HailoRT runtime is not part of the Frigate image. It is downloaded and installed into `/config/.local` the first time a Hailo detector is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the files yourself.
+
+:::
+
 ### Configuration {#configuration-hailo}
 
 When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.
@@ -568,6 +574,12 @@ See the [installation docs](../frigate/installation.md#memryx-mx3) for informati
 
 To configure a MemryX detector, simply set the `type` attribute to `memryx` and follow the configuration guide below.
 
+:::info
+
+The MemryX SDK is not part of the Frigate image. It is downloaded and installed into `/config/.local` the first time a MemryX detector is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the files yourself.
+
+:::
+
 ### Configuration {#configuration-memryx}
 
 <ModelConfigDropdown detectorTitle="MemryX" models={objectDetectorsModels.memryx.models} />
@@ -825,6 +837,12 @@ See the [installation docs](../frigate/installation.md#axera) for information on
 :::info
 
 The AXEngine detector downloads its default model from HuggingFace on first startup. Once cached, the model works fully offline. See [Network Requirements](/frigate/network_requirements#hardware-specific-detector-models) for details.
+
+:::
+
+:::info
+
+The AXEngine python package is not part of the Frigate image. It is downloaded and installed into `/config/.local` the first time an AXEngine detector is configured, verified against a pinned checksum, and updated automatically when a Frigate release pins a new version. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the file yourself.
 
 :::
 

@@ -17,6 +17,11 @@ if [[ "$runs_as_root" -eq 0 ]]; then
     export HOME=/config
 fi
 
+# detector runtimes installed at first start (pip install --user) live under
+# $HOME/.local; the dynamic loader only reads LD_LIBRARY_PATH at exec time
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${HOME}/.local/lib"
+export PATH="${PATH}:${HOME}/.local/bin"
+
 # opt out of openvino telemetry
 if [ -e /usr/local/bin/opt_in_out ]; then
   /usr/local/bin/opt_in_out --opt_out > /dev/null 2>&1
