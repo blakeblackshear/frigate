@@ -496,6 +496,11 @@ review:
       - Animals in the garden
     # Optional: Preferred response language (default: English)
     preferred_language: English
+    # Optional: Writing style preset for generated descriptions (default: shown below)
+    # Options: "default", "natural", "concise", "detailed"
+    # Presets adjust the tone and level of detail of the user-facing title,
+    # summary, and scene description; "default" leaves the built-in prompt unchanged.
+    response_style: default
     # Optional: Save thumbnails sent to the GenAI provider for review/debugging purposes (default: shown below)
     debug_save_thumbnails: False
 
