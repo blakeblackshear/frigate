@@ -427,13 +427,15 @@ class HardwareStats:
             if config.lpr.enabled and (config.lpr.device or "AUTO") != "CPU":
                 names.add(gpu)
 
-        # audio transcription runs on CUDA only
-        transcription_configs = [config.audio_transcription] + [
-            camera.audio_transcription for camera in config.cameras.values()
-        ]
+        # audio transcription runs on CUDA only, and the device is global only
+        transcription = config.audio_transcription
+        transcription_enabled = transcription.enabled or any(
+            camera.audio_transcription.enabled for camera in config.cameras.values()
+        )
 
         if (
-            any(c.enabled and c.device == "GPU" for c in transcription_configs)
+            transcription_enabled
+            and transcription.device == "GPU"
             and "onnx:nvidia" in _present_hardware()
             and _gpu_device_nodes_exist("nvidia")
         ):
