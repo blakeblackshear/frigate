@@ -4,7 +4,13 @@ from pydantic import Field, field_validator
 
 from ..base import FrigateBaseModel
 
-__all__ = ["ReviewConfig", "DetectionsConfig", "AlertsConfig", "ImageSourceEnum"]
+__all__ = [
+    "ReviewConfig",
+    "DetectionsConfig",
+    "AlertsConfig",
+    "ImageSourceEnum",
+    "ReviewResponseStyleEnum",
+]
 
 
 class ImageSourceEnum(str, Enum):
@@ -12,6 +18,15 @@ class ImageSourceEnum(str, Enum):
 
     preview = "preview"
     recordings = "recordings"
+
+
+class ReviewResponseStyleEnum(str, Enum):
+    """Writing style presets for GenAI review descriptions."""
+
+    default = "default"
+    natural = "natural"
+    concise = "concise"
+    detailed = "detailed"
 
 
 DEFAULT_ALERT_OBJECTS = ["person", "car"]
@@ -137,6 +152,11 @@ class GenAIReviewConfig(FrigateBaseModel):
         title="Preferred language",
         description="Preferred language to request from the GenAI provider for generated responses.",
         default=None,
+    )
+    response_style: ReviewResponseStyleEnum = Field(
+        default=ReviewResponseStyleEnum.default,
+        title="Response style",
+        description="Writing style preset for generated review descriptions. Presets adjust the tone and level of detail of the user-facing title, summary, and scene description; 'default' leaves the built-in prompt unchanged.",
     )
     activity_context_prompt: str = Field(
         default="""### Normal Activity Indicators (Level 0)

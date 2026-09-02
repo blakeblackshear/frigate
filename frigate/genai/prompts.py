@@ -16,6 +16,48 @@ from frigate.config.ui import UnitSystemEnum
 from frigate.data_processing.post.types import ReviewMetadata
 from frigate.models import Event
 
+# Base guidance per response field. `observations` is a reasoning scaffold,
+# not user-facing, so style presets never override it.
+REVIEW_DESCRIPTION_FIELD_GUIDELINES: dict[str, str] = {
+    "observations": "Include the very start of the activity — for example, a vehicle entering the frame or pulling into the driveway — even if it lasts only a few frames and the rest of the clip is dominated by a longer activity. Include each arrival, departure, object handled, and notable change in position or state. Each item is a single concrete fact written as a complete sentence.",
+    "scene": 'Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name — do not replace them with generic terms. For unnamed objects (e.g., "person", "car"), refer to them naturally with articles (e.g., "a person", "the car"). Your description should align with and support the threat level you assign.',
+    "title": "Name the primary activity across the observations, together with the location. An activity is what is being done with objects, tools, or surfaces; locomotion through the scene qualifies as the activity only when no other interaction is observed. For named subjects, always use their name. For unnamed objects, refer to them naturally with articles.",
+    "shortSummary": "Briefly summarize the primary activity across the observations.",
+    "potential_threat_level": "Must be consistent with your scene description and the activity patterns above.",
+}
+
+# Style presets keyed by ReviewResponseStyleEnum value. Presets replace the
+# base guidance rather than append to it, so the prompt never carries
+# competing style instructions.
+REVIEW_RESPONSE_STYLES: dict[str, dict[str, str]] = {
+    "natural": {
+        "scene": 'Recount what happened the way a person would describe it to a neighbor, in plain everyday language: how the sequence begins, then each significant movement and action in the order it happens. Use flowing sentences that connect related actions, written the way people actually talk rather than like a surveillance report. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name rather than a generic term. Refer to unnamed objects naturally with articles. Stay factual, and keep the description consistent with the threat level you assign.',
+        "title": 'Write the title as a short, sentence-case headline in present tense: the subject, then what they do, phrased the way you would text it to the homeowner. Describe only the action you see; do not assign the person a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. Name the main thing done, not just movement through the scene, unless movement is all that happens. For named subjects, always use their name.',
+        "shortSummary": "Sum up the primary activity in one short, natural sentence, as if mentioning it to someone in passing.",
+    },
+    "concise": {
+        "scene": 'Cover each significant movement and action in order using as few short, direct sentences as possible, omitting environmental and cosmetic detail unless it affects the assessment. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name. For unnamed objects, refer to them naturally with articles. Your description should align with and support the threat level you assign.',
+        "title": 'Write the title as a terse label of two to four words naming the specific activity observed and where it happened. Do not assign a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. For named subjects, always use their name.',
+        "shortSummary": "Summarize the primary activity in one short sentence.",
+    },
+    "detailed": {
+        "scene": 'Describe how the sequence begins, then the progression of events — all significant movements and actions in order, including the specifics that best identify the subjects: colors, clothing, carried items, positions, and paths of movement, plus environmental details like lighting changes when they stand out. Favor the most identifying details over exhaustive coverage, and keep every added detail observational rather than speculative. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name rather than a generic term. For unnamed objects, refer to them naturally with articles. Your description should align with and support the threat level you assign.',
+        "title": 'Write the title as a specific description of who did what and where, in under roughly twelve words, including the most distinguishing visible detail of the subject, such as clothing or vehicle color. Do not assign a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. Name the main thing done, not just movement through the scene, unless movement is all that happens. For named subjects, always use their name.',
+        "shortSummary": "Briefly summarize the primary activity across the observations, including the most identifying visible detail, such as vehicle color or clothing.",
+    },
+}
+
+
+def get_review_field_guidelines(response_style: str = "default") -> dict[str, str]:
+    """Return per-field response guidance with the style preset applied.
+
+    "default" (or an unknown value) applies no overrides.
+    """
+    return {
+        **REVIEW_DESCRIPTION_FIELD_GUIDELINES,
+        **REVIEW_RESPONSE_STYLES.get(response_style, {}),
+    }
+
 
 def build_review_description_prompt(
     review_data: dict[str, Any],
@@ -23,6 +65,7 @@ def build_review_description_prompt(
     concerns: list[str],
     preferred_language: str | None,
     activity_context_prompt: str,
+    response_style: str = "default",
 ) -> str:
     """Build the prompt for review activity description generation."""
 
@@ -48,6 +91,8 @@ def build_review_description_prompt(
             return "\n- " + "\n- ".join(review_data["unified_objects"])
         else:
             return "\n- (No objects detected)"
+
+    fields = get_review_field_guidelines(response_style)
 
     return f"""
 Your task is to analyze a sequence of images taken in chronological order from a security camera.
@@ -75,11 +120,11 @@ When forming your description:
 ## Response Field Guidelines
 
 Respond with a JSON object matching the provided schema. Field-specific guidance:
-- `observations`: Include the very start of the activity — for example, a vehicle entering the frame or pulling into the driveway — even if it lasts only a few frames and the rest of the clip is dominated by a longer activity. Include each arrival, departure, object handled, and notable change in position or state. Each item is a single concrete fact written as a complete sentence.
-- `scene`: Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name — do not replace them with generic terms. For unnamed objects (e.g., "person", "car"), refer to them naturally with articles (e.g., "a person", "the car"). Your description should align with and support the threat level you assign.
-- `title`: Name the primary activity across the observations, together with the location. An activity is what is being done with objects, tools, or surfaces; locomotion through the scene qualifies as the activity only when no other interaction is observed. For named subjects, always use their name. For unnamed objects, refer to them naturally with articles.
-- `shortSummary`: Briefly summarize the primary activity across the observations.
-- `potential_threat_level`: Must be consistent with your scene description and the activity patterns above.
+- `observations`: {fields["observations"]}
+- `scene`: {fields["scene"]}
+- `title`: {fields["title"]}
+- `shortSummary`: {fields["shortSummary"]}
+- `potential_threat_level`: {fields["potential_threat_level"]}
 {get_concern_prompt()}
 
 ## Sequence Details
