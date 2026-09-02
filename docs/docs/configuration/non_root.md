@@ -38,7 +38,7 @@ Try the device grants and `EXTRA_GROUPS` first. The `frigate` service runs the A
 
 A listed service also stops honoring a [custom ffmpeg or go2rtc build](/configuration/advanced/system#custom-dependencies) kept in `/config`, since that directory stays owned by the unprivileged user and a binary there would run as root. `FRIGATE_RUN_AS_ROOT=true` has no such restriction.
 
-Recordings and exports are owned by `PUID`/`PGID` as soon as they're written, even by a root service. Snapshots, thumbnails, and other files under `clips/` are corrected on each restart, so they can show as root-owned from the host until then. A listed service also keeps root's home directory, so library caches go to the container layer instead of `/config`.
+Recordings and exports are owned by `PUID`/`PGID` as soon as they're written, even by a root service. Snapshots, thumbnails, and other files under `clips/` are corrected on each restart, so they can show as root-owned from the host until then. A listed service also keeps root's home directory, so library caches go to the container layer instead of `/config`. The same applies to the [detector runtimes](/frigate/network_requirements#detector-runtimes) Frigate installs at first start (Hailo, MemryX, AXEngine): a root `frigate` service installs them into `/root/.local`, which is lost when the container is recreated, and never loads a copy left behind in `/config/.local`.
 
 Listing all three services is not the same as `FRIGATE_RUN_AS_ROOT=true`. The escape hatch never touches ownership; the list keeps the ownership handling active. A few more details:
 
@@ -303,6 +303,8 @@ Size `/tmp` deliberately. It now carries nginx's config copy and its five proxy 
 
 The self signed certificate is written to `/config/tls`, which stays writable. Certificates you mount at `/etc/letsencrypt/live/frigate` work unchanged and still take precedence.
 
+[Detector runtimes](/frigate/network_requirements#detector-runtimes) that Frigate installs at first start (Hailo, MemryX, AXEngine) are staged in `/tmp` and installed into `/config/.local`, so they work with a read-only root filesystem in the default mode and under `user:`. A root `frigate` service installs into `/root/.local` instead, which a read-only root filesystem prevents; either leave `frigate` out of `FRIGATE_ROOT_SERVICES` or drop `read_only`.
+
 Soak a hardened deployment for 24 hours against real cameras before relying on it. A read-only root filesystem turns an occasional write into a failure that startup won't reveal.
 
 ### Never starting as root
@@ -320,7 +322,7 @@ This mode can also take `cap_drop: [ALL]`, which the default mode cannot: starti
 ### Per-variant exceptions
 
 - **Rockchip** needs `- /sys/:/sys/:ro` alongside its device nodes, in addition to everything above.
-- **MemryX** and **QNAP Container Station** still require `privileged: true` per their own documentation, which gives back most of what this layout removes. MemryX also downloads its models to `/memryx_models` on the root filesystem, so it can't run read-only regardless.
+- **MemryX** and **QNAP Container Station** still require `privileged: true` per their own documentation, which gives back most of what this layout removes. MemryX also downloads its models to `/memryx_models` on the root filesystem, so it can't run read-only regardless. Its SDK is installed into `/config/.local` like the other detector runtimes.
 
 ## Network isolation
 

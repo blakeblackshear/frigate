@@ -69,7 +69,7 @@ def frigate_service_is_granular_root() -> bool:
     return any("".join(entry.split()) == "frigate" for entry in entries)
 
 
-def _is_runtime_user_writable(path: str) -> bool:
+def is_runtime_user_writable(path: str) -> bool:
     """Report whether a path resolves inside a runtime-user-writable tree."""
     resolved = os.path.realpath(path)
     return any(
@@ -104,7 +104,7 @@ def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
     elif path in INCLUDED_FFMPEG_VERSIONS:
         version = path
     else:
-        if not (frigate_service_is_granular_root() and _is_runtime_user_writable(path)):
+        if not (frigate_service_is_granular_root() and is_runtime_user_writable(path)):
             return f"{path}/bin/{binary}"
 
         _warn_ignored_ffmpeg_path(path)
