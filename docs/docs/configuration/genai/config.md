@@ -10,7 +10,7 @@ import FaqItem from "@site/src/components/FaqItem";
 
 ## Configuration
 
-A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 5 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI-Compatible section below.
+A Generative AI provider can be configured in the global config, which will make the Generative AI features available for use. There are currently 6 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI-Compatible section below.
 
 `genai` is a map of named providers. Each key under `genai` is a name you choose, and its value is that provider's settings:
 
@@ -73,13 +73,13 @@ You must use a vision-capable model with Frigate. The following models are recom
 
 The `embeddings` role needs a different kind of model. Text queries are matched against the stored image embeddings, so the model must be trained to place images and text into the same vector space. A chat or description model will still return vectors when asked, but those vectors are not trained for retrieval and text searches will return poor matches with no error to indicate why.
 
-| Model                | Notes                                                                                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl-embedding` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Must be served by llama.cpp started with `--embeddings` and `--mmproj`. |
+| Model                                                                 | Notes                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`Qwen3-VL-Embedding`](https://huggingface.co/Qwen/Qwen3-VL-Embedding-2B) | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). The official Hugging Face model can be served by vLLM. GGUF conversions can be served by llama.cpp with `--embeddings` and `--mmproj`. |
 
 :::info
 
-Each model is available in multiple parameter sizes (3b, 4b, 8b, etc.). Larger sizes are more capable of complex tasks and understanding of situations, but requires more memory and computational resources. It is recommended to try multiple models and experiment to see which performs best.
+Model families may be available in multiple parameter sizes. Larger sizes are generally more capable of complex tasks and understanding situations, but they require more memory and computational resources. Try the sizes that are available for your chosen model family to determine which performs best on your hardware.
 
 :::
 
@@ -141,6 +141,72 @@ genai:
 
 Frigate queries the llama.cpp server for the model's context size at startup and logs it along with the other detected capabilities. If `context_size` is set in `provider_options`, that value is always used instead, even when the server reports its own.
 
+### vLLM
+
+[vLLM](https://docs.vllm.ai/) can serve supported Hugging Face models through an OpenAI-compatible API. Frigate's native vLLM provider supports the chat-formatted multimodal embeddings endpoint required by `Qwen/Qwen3-VL-Embedding-2B`.
+
+Both `base_url` and `model` are required for the native vLLM provider. The base URL must point to the OpenAI API root and end in `/v1`, and the model name must match the model identifier exposed by that server.
+
+Start vLLM 0.14.0 or newer, which includes Qwen3-VL-Embedding support:
+
+```bash
+vllm serve Qwen/Qwen3-VL-Embedding-2B \
+  --runner pooling \
+  --limit-mm-per-prompt '{"image": 1}' \
+  --max-model-len 8192
+```
+
+The model server should run on a GPU host. The 8192 token limit reduces memory use and is sufficient for Frigate's short text queries and event thumbnails. Frigate sends one image per embedding request, so the server must allow at least one image per prompt.
+
+Qwen3-VL-Embedding supports Matryoshka Representation Learning (MRL). Frigate requests 768 output dimensions from vLLM to match its sqlite-vec schema, then validates and normalizes every vector before storage. Quantized checkpoints may require an additional model-specific setting such as `--hf-overrides '{"is_matryoshka": true}'`; follow the checkpoint's model card and verify that a request with `dimensions: 768` succeeds before reindexing.
+
+Wait until the vLLM server is healthy and `/v1/models` responds before starting Frigate with `semantic_search.reindex: True`. A startup reindex begins immediately, so the Frigate embeddings process will restart if the model server is still loading.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
+   - Set **Provider** to `vllm`
+   - Set **Base URL** to the vLLM OpenAI API root, including `/v1` (for example, `http://vllm:8000/v1`)
+   - Set **Model** to `Qwen/Qwen3-VL-Embedding-2B`
+   - Set **Roles** to `embeddings`
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+genai:
+  qwen_embeddings:
+    provider: vllm
+    base_url: http://vllm:8000/v1
+    model: Qwen/Qwen3-VL-Embedding-2B
+    roles:
+      - embeddings
+```
+
+</TabItem>
+</ConfigTabs>
+
+By default, Frigate uses the model's recommended `Represent the user's input.` instruction. This is the safest starting point. The `embedding_instruction` setting is shared by every embedding request, including search queries, event descriptions, thumbnails, and trigger images. Frigate does not support separate query and document instructions, so any override must describe all of these input types consistently.
+
+For example, you can use a neutral instruction when tuning retrieval for your cameras:
+
+```yaml
+genai:
+  qwen_embeddings:
+    provider: vllm
+    base_url: http://vllm:8000/v1
+    model: Qwen/Qwen3-VL-Embedding-2B
+    roles:
+      - embeddings
+    provider_options:
+      embedding_instruction: Represent this camera-related input for semantic retrieval.
+```
+
+Changing this instruction changes the embedding vector space and requires a full reindex.
+
+When vLLM is hosted remotely, semantic search sends tracked-object thumbnails, descriptions, and search query text to that server. Reindexing also sends the historical thumbnails and descriptions being indexed.
+
 ### Ollama
 
 [Ollama](https://ollama.com/) allows you to self-host large language models and keep everything running locally. It is highly recommended to host this server on a machine with an Nvidia graphics card, or on a Apple silicon Mac for best performance.
@@ -188,7 +254,9 @@ genai:
 
 ### OpenAI-Compatible
 
-Frigate supports any provider that implements the OpenAI API standard. This includes self-hosted solutions like [vLLM](https://docs.vllm.ai/), [LocalAI](https://localai.io/), and other OpenAI-compatible servers.
+Frigate supports compatible servers such as [LocalAI](https://localai.io/) and other services that implement the OpenAI API standard. Configure these servers with `provider: openai` for the `chat` and `descriptions` roles.
+
+For Qwen multimodal semantic search embeddings served by vLLM, use the native `provider: vllm` configuration described above. The generic `provider: openai` integration does not enable Frigate's multimodal embeddings path.
 
 :::tip
 

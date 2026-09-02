@@ -34,7 +34,10 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
-from frigate.config.classification import ObjectClassificationType
+from frigate.config.classification import (
+    ObjectClassificationType,
+    SemanticSearchModelEnum,
+)
 from frigate.data_processing.common.license_plate.model import (
     LicensePlateModelRunner,
 )
@@ -73,6 +76,7 @@ from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import SharedMemoryFrameManager
 
 from .embeddings import Embeddings
+from .util import get_semantic_search_model_id
 
 logger = logging.getLogger(__name__)
 
@@ -147,9 +151,15 @@ class EmbeddingMaintainer(threading.Thread):
             # Check if we need to re-index events
             if config.semantic_search.reindex:
                 self.embeddings.reindex()
-
-            # Sync semantic search triggers in db with config
-            self.embeddings.sync_triggers()
+            elif not self.embeddings.index_ready:
+                logger.error(
+                    "Semantic search index is incomplete or belongs to another "
+                    "embedding model. Search and triggers will remain unavailable "
+                    "until a full reindex is requested."
+                )
+            else:
+                # Sync semantic search triggers in db with config
+                self.embeddings.sync_triggers()
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
@@ -367,10 +377,72 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         if topic == "config/genai":
-            self.config.genai = payload
-            self.genai_manager.update_config(self.config)
+            model_config = self.config.semantic_search.model
+            selected_provider_changed = (
+                self.embeddings is not None
+                and not isinstance(model_config, SemanticSearchModelEnum)
+                and self.config.genai.get(str(model_config))
+                != payload.get(str(model_config))
+            )
+            previous_model_id = (
+                get_semantic_search_model_id(self.config)
+                if selected_provider_changed
+                else None
+            )
+            previous_genai_config = self.config.genai
+            previous_index_ready = True
 
-        # Broadcast to all processors — each decides if the topic is relevant
+            if selected_provider_changed:
+                try:
+                    previous_index_ready = (
+                        self.embeddings.mark_embedding_config_update()
+                    )
+                except OSError:
+                    logger.exception(
+                        "Failed to persist semantic search index invalidation; "
+                        "keeping the previous GenAI configuration"
+                    )
+                    return
+
+            try:
+                self.config.genai = payload
+                self.genai_manager.update_config(self.config)
+
+                if selected_provider_changed:
+                    embeddings_client = self.genai_manager.embeddings_client
+                    if embeddings_client is None:
+                        raise ValueError(
+                            "No GenAI embeddings client is configured after config update"
+                        )
+
+                    self.embeddings.update_genai_client(embeddings_client)
+            except Exception:
+                logger.exception(
+                    "Failed to apply GenAI configuration update; keeping the previous configuration"
+                )
+                self.config.genai = previous_genai_config
+                try:
+                    self.genai_manager.update_config(self.config)
+                except Exception:
+                    logger.exception(
+                        "Failed to restore the previous GenAI configuration"
+                    )
+                if selected_provider_changed:
+                    self.embeddings.restore_index_ready(previous_index_ready)
+                return
+
+            if selected_provider_changed:
+                current_model_id = get_semantic_search_model_id(self.config)
+                if current_model_id != previous_model_id or not previous_index_ready:
+                    logger.warning(
+                        "Semantic search embedding configuration changed or its index "
+                        "is unavailable; starting a full reindex"
+                    )
+                    self.embeddings.start_reindex(restart_if_running=True)
+                else:
+                    self.embeddings.restore_index_ready(previous_index_ready)
+
+        # Broadcast to all processors. Each decides if the topic is relevant.
         for processor in self.realtime_processors:
             processor.update_config(topic, payload)
 
@@ -456,8 +528,19 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_requests(self) -> None:
         """Process embeddings requests"""
 
-        def _handle_request(topic: str, data: dict[str, Any]) -> str:
+        def _handle_request(topic: str, data: Any) -> Any:
             try:
+                if topic == EmbeddingsRequestEnum.index_ready.value:
+                    ready = bool(
+                        self.embeddings is not None and self.embeddings.index_ready
+                    )
+                    return {
+                        "ready": ready,
+                        "model_id": (
+                            get_semantic_search_model_id(self.config) if ready else None
+                        ),
+                    }
+
                 # First handle the embedding-specific topics when semantic search is enabled
                 if self.config.semantic_search.enabled:
                     if topic == EmbeddingsRequestEnum.embed_description.value:
@@ -474,6 +557,11 @@ class EmbeddingMaintainer(threading.Thread):
                             pack=False,
                         )
                     elif topic == EmbeddingsRequestEnum.generate_search.value:
+                        if not self.embeddings.index_ready:
+                            logger.debug(
+                                "Skipping semantic search while embeddings are unavailable"
+                            )
+                            return None
                         return serialize(
                             self.embeddings.embed_description("", data, upsert=False),
                             pack=False,
@@ -857,12 +945,12 @@ class EmbeddingMaintainer(threading.Thread):
                             ),
                         )
 
-    def _embed_thumbnail(self, event_id: str, thumbnail: bytes) -> None:
+    def _embed_thumbnail(self, event_id: str, thumbnail: bytes | None) -> None:
         """Embed the thumbnail for an event."""
-        if not self.config.semantic_search.enabled:
+        if not self.config.semantic_search.enabled or not thumbnail:
             return
 
         try:
             self.embeddings.embed_thumbnail(event_id, thumbnail)
-        except ValueError:
-            logger.warning(f"Failed to embed thumbnail for event {event_id}")
+        except (RuntimeError, ValueError):
+            logger.exception("Failed to embed thumbnail for event %s", event_id)

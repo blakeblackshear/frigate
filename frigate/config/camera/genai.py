@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Any
+from typing import Any, Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from ..base import FrigateBaseModel
 from ..env import EnvString
@@ -15,6 +15,7 @@ class GenAIProviderEnum(str, Enum):
     gemini = "gemini"
     ollama = "ollama"
     llamacpp = "llamacpp"
+    vllm = "vllm"
 
 
 class GenAIRoleEnum(str, Enum):
@@ -66,3 +67,17 @@ class GenAIConfig(FrigateBaseModel):
         description="Runtime options passed to the provider for each inference call.",
         json_schema_extra={"additionalProperties": {}},
     )
+
+    @model_validator(mode="after")
+    def validate_vllm_config(self) -> Self:
+        """Validate settings required by the native vLLM provider."""
+        if self.provider != GenAIProviderEnum.vllm:
+            return self
+
+        if not self.base_url or not self.base_url.rstrip("/").endswith("/v1"):
+            raise ValueError("vLLM base_url must end in /v1")
+
+        if not self.model.strip():
+            raise ValueError("vLLM model must not be empty")
+
+        return self

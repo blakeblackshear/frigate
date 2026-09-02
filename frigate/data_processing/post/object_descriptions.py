@@ -362,7 +362,13 @@ class ObjectDescriptionProcessor(PostProcessorApi):
 
         # Embed the description
         if self.config.semantic_search.enabled:
-            self.embeddings.embed_description(str(event.id), description)
+            try:
+                self.embeddings.embed_description(str(event.id), description)
+            except (RuntimeError, ValueError):
+                logger.exception(
+                    "Failed to embed generated description for event %s", event.id
+                )
+                return
 
             # Check semantic trigger for this description
             if self.semantic_trigger_processor is not None:

@@ -57,6 +57,7 @@ from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.config.classification import ObjectClassificationType
 from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
+from frigate.embeddings.util import get_semantic_search_model_id
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
 from frigate.track.object_processing import TrackedObject
 from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
@@ -1981,7 +1982,7 @@ def create_trigger_embedding(
             type=body.type,
             data=body.data,
             threshold=body.threshold,
-            model=request.app.frigate_config.semantic_search.model,
+            model=get_semantic_search_model_id(request.app.frigate_config),
             embedding=np.array(embedding, dtype=np.float32).tobytes(),
             triggering_event_id="",
             last_triggered=None,
@@ -2121,7 +2122,7 @@ def update_trigger_embedding(
 
             Trigger.update(
                 data=body.data,
-                model=request.app.frigate_config.semantic_search.model,
+                model=get_semantic_search_model_id(request.app.frigate_config),
                 embedding=np.array(embedding, dtype=np.float32).tobytes(),
                 threshold=body.threshold,
                 triggering_event_id="",
@@ -2135,7 +2136,7 @@ def update_trigger_embedding(
                 type=body.type,
                 data=body.data,
                 threshold=body.threshold,
-                model=request.app.frigate_config.semantic_search.model,
+                model=get_semantic_search_model_id(request.app.frigate_config),
                 embedding=np.array(embedding, dtype=np.float32).tobytes(),
                 triggering_event_id="",
                 last_triggered=None,

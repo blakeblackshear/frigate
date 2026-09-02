@@ -742,21 +742,25 @@ lpr:
       replacement: "0"
 
 # Optional: Configuration for AI / LLM providers
-# WARNING: Depending on the provider, this will send thumbnails over the internet
-# to Google or OpenAI's LLMs to generate descriptions. GenAI features can be configured at
-# the camera level to enhance privacy for indoor cameras.
+# WARNING: Remote providers receive the images and prompts used by their assigned roles.
+# The embeddings role sends tracked-object thumbnails, descriptions, and search query text,
+# including historical data during a reindex. Description features can be controlled at the
+# camera level, but semantic search is global and applies to every indexed camera.
 # NOTE: genai is a map of named providers. Each key is a name you choose for the provider,
 #       and each role (chat, descriptions, embeddings) may be assigned to exactly one provider.
 genai:
   # Required: name of the provider (chosen by you, used to reference it elsewhere)
   my_provider:
-    # Required: Provider must be one of ollama, openai, azure_openai, gemini, or llamacpp
+    # Required: Provider must be one of ollama, openai, azure_openai, gemini, llamacpp, or vllm
     provider: ollama
-    # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
-    base_url: http://localhost::11434
-    # Required if gemini or openai
+    # Required for ollama, llamacpp, vllm, and azure_openai. May also be used for an
+    # OpenAI API compatible backend with the openai provider.
+    # vLLM URLs must include the /v1 API root. Azure OpenAI URLs must include api-version.
+    base_url: http://localhost:11434
+    # Required if gemini, openai, or azure_openai
     api_key: "{FRIGATE_GENAI_API_KEY}"
-    # Required: The model to use with the provider.
+    # Required: Non-empty model identifier to use with the provider.
+    # For vLLM, this must match the model identifier exposed by the server.
     model: gemini-1.5-flash
     # Optional: Roles this provider handles (default: shown below)
     # Each role (chat, descriptions, embeddings) must be assigned to exactly one provider.

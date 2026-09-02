@@ -8351,6 +8351,7 @@ components:
         - gemini
         - ollama
         - llamacpp
+        - vllm
       title: GenAIProviderEnum
     GenerateObjectExamplesBody:
       properties:

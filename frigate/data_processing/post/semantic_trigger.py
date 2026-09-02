@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 import os
+from json.decoder import JSONDecodeError
 from typing import Any
 
 import cv2
@@ -20,7 +21,7 @@ from frigate.const import CONFIG_DIR
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings.embeddings import Embeddings
-from frigate.embeddings.util import ZScoreNormalization
+from frigate.embeddings.util import ZScoreNormalization, get_semantic_search_model_id
 from frigate.models import Event, Trigger
 from frigate.util.builtin import cosine_distance
 from frigate.util.file import get_event_thumbnail_bytes
@@ -52,19 +53,43 @@ class SemanticTriggerProcessor(PostProcessorApi):
 
         self.thumb_stats = ZScoreNormalization()
         self.desc_stats = ZScoreNormalization()
+        self._stats_model_id = get_semantic_search_model_id(self.config)
 
         # load stats from disk
         try:
             with open(os.path.join(CONFIG_DIR, ".search_stats.json")) as f:
                 data = json.loads(f.read())
-                self.thumb_stats.from_dict(data["thumb_stats"])
-                self.desc_stats.from_dict(data["desc_stats"])
+                if data.get("model_id") == self._stats_model_id:
+                    self.thumb_stats.from_dict(data["thumb_stats"])
+                    self.desc_stats.from_dict(data["desc_stats"])
         except FileNotFoundError:
             pass
+        except (JSONDecodeError, KeyError, TypeError, ValueError):
+            logger.warning("Failed to load semantic trigger score statistics")
+
+    def _ensure_stats_model(self, model_id: str) -> None:
+        """Reset score statistics when the embedding vector space changes."""
+        if self._stats_model_id == model_id:
+            return
+
+        logger.info(
+            "Resetting semantic trigger score statistics for embedding model %s",
+            model_id,
+        )
+        self.thumb_stats = ZScoreNormalization()
+        self.desc_stats = ZScoreNormalization()
+        self._stats_model_id = model_id
 
     def process_data(
         self, data: dict[str, Any], data_type: PostProcessDataEnum
     ) -> None:
+        if not self.embeddings.index_ready:
+            logger.debug("Skipping semantic triggers while embeddings are unavailable")
+            return
+
+        model_id = get_semantic_search_model_id(self.config)
+        self._ensure_stats_model(model_id)
+
         event_id = data["event_id"]
         camera = data["camera"]
         process_type = data["type"]
@@ -80,6 +105,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
                 Trigger.type,
                 Trigger.embedding,
                 Trigger.threshold,
+                Trigger.model,
             )
             .where(Trigger.camera == camera)
             .dicts()
@@ -87,6 +113,13 @@ class SemanticTriggerProcessor(PostProcessorApi):
         )
 
         for trigger in triggers:
+            if trigger["model"] != model_id:
+                logger.debug(
+                    "Skipping semantic trigger %s because its embedding model is stale",
+                    trigger["name"],
+                )
+                continue
+
             if (
                 trigger["name"]
                 not in self.config.cameras[camera].semantic_search.triggers

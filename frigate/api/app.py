@@ -218,10 +218,14 @@ async def genai_probe(request: Request, body: GenAIProbeBody):
 
     # The OpenAI-compatible SDKs accept "timeout" as a constructor kwarg via
     # provider_options; other plugins use GenAIClient.timeout passed below.
-    # Don't inject timeout for Gemini — its HttpOptions interprets the value
+    # Don't inject timeout for Gemini because its HttpOptions interprets the value
     # in milliseconds and would clash with the plugin's own default.
     probe_provider_options: dict[str, Any] = dict(body.provider_options or {})
-    if body.provider in (GenAIProviderEnum.openai, GenAIProviderEnum.azure_openai):
+    if body.provider in (
+        GenAIProviderEnum.openai,
+        GenAIProviderEnum.azure_openai,
+        GenAIProviderEnum.vllm,
+    ):
         probe_provider_options.setdefault("timeout", _PROBE_TIMEOUT_SECONDS)
 
     try:

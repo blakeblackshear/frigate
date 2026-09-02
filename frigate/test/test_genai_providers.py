@@ -14,10 +14,16 @@ crashing message conversion.
 
 import asyncio
 import base64
+import io
 import json
 import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import httpx
+import numpy as np
+from openai import APIConnectionError
+from PIL import Image
 
 from frigate.config import GenAIConfig, GenAIProviderEnum
 from frigate.genai import PROVIDERS, load_providers
@@ -191,6 +197,160 @@ class TestOpenAIProvider(unittest.TestCase):
         # Passing the OpenAI-native multimodal list through must not raise.
         final = _final_message(_collect(client, MULTIMODAL_MESSAGES))
         self.assertEqual(final["content"], "ok")
+
+
+# ---------------------------------------------------------------------------
+# vLLM
+# ---------------------------------------------------------------------------
+class TestVLLMProvider(unittest.TestCase):
+    def _client(self, **cfg_overrides):
+        config = {
+            "model": "Qwen/Qwen3-VL-Embedding-2B",
+            "base_url": "http://localhost:8000/v1",
+            **cfg_overrides,
+        }
+        return _make_client("vllm", **config)
+
+    @staticmethod
+    def _embedding_response(values):
+        return SimpleNamespace(data=[SimpleNamespace(index=0, embedding=values)])
+
+    def test_supports_embeddings(self):
+        self.assertTrue(self._client().supports_embeddings)
+
+    def test_requires_v1_base_url(self):
+        with self.assertRaisesRegex(ValueError, "end in /v1"):
+            self._client(base_url="http://localhost:8000")
+
+    def test_requires_nonempty_model(self):
+        with self.assertRaisesRegex(ValueError, "model must not be empty"):
+            self._client(model="")
+
+    def test_text_embedding_uses_qwen_chat_format(self):
+        client = self._client()
+        client.provider.post = MagicMock(
+            return_value=self._embedding_response([1.0, 2.0, 3.0])
+        )
+
+        embeddings = client.embed(texts=["red car"])
+
+        self.assertEqual(len(embeddings), 1)
+        np.testing.assert_array_equal(
+            embeddings[0], np.array([1.0, 2.0, 3.0], dtype=np.float32)
+        )
+        body = client.provider.post.call_args.kwargs["body"]
+        self.assertEqual(body["model"], "Qwen/Qwen3-VL-Embedding-2B")
+        self.assertEqual(body["dimensions"], 768)
+        self.assertTrue(body["continue_final_message"])
+        self.assertFalse(body["add_special_tokens"])
+        self.assertNotIn("add_generation_prompt", body)
+        self.assertEqual(
+            body["messages"][0]["content"][0]["text"],
+            "Represent the user's input.",
+        )
+        self.assertEqual(body["messages"][1]["content"][0]["text"], "red car")
+        self.assertEqual(body["messages"][2]["role"], "assistant")
+
+    def test_image_embedding_converts_webp_to_jpeg_data_uri(self):
+        client = self._client()
+        client.provider.post = MagicMock(
+            return_value=self._embedding_response([1.0, 0.0])
+        )
+        source = io.BytesIO()
+        Image.new("RGBA", (2, 2), (255, 0, 0, 128)).save(source, format="WEBP")
+
+        client.embed(images=[source.getvalue()])
+
+        body = client.provider.post.call_args.kwargs["body"]
+        image_url = body["messages"][1]["content"][0]["image_url"]["url"]
+        self.assertTrue(image_url.startswith("data:image/jpeg;base64,"))
+        encoded_image = image_url.removeprefix("data:image/jpeg;base64,")
+        with Image.open(io.BytesIO(base64.b64decode(encoded_image))) as converted:
+            self.assertEqual(converted.format, "JPEG")
+            self.assertEqual(converted.mode, "RGB")
+        self.assertEqual(body["messages"][1]["content"][1]["text"], "")
+
+    def test_embedding_instruction_can_be_overridden(self):
+        client = self._client(
+            provider_options={"embedding_instruction": "Retrieve camera events."}
+        )
+        client.provider.post = MagicMock(
+            return_value=self._embedding_response([1.0, 0.0])
+        )
+
+        client.embed(texts=["person"])
+
+        body = client.provider.post.call_args.kwargs["body"]
+        self.assertEqual(
+            body["messages"][0]["content"][0]["text"],
+            "Retrieve camera events.",
+        )
+
+    def test_multiple_inputs_preserve_text_then_image_order(self):
+        client = self._client()
+        client.provider.post = MagicMock(
+            side_effect=[
+                self._embedding_response([1.0, 0.0]),
+                self._embedding_response([0.0, 1.0]),
+            ]
+        )
+        source = io.BytesIO()
+        Image.new("RGB", (1, 1), "red").save(source, format="JPEG")
+
+        embeddings = client.embed(texts=["person"], images=[source.getvalue()])
+
+        self.assertEqual(len(embeddings), 2)
+        first_body = client.provider.post.call_args_list[0].kwargs["body"]
+        second_body = client.provider.post.call_args_list[1].kwargs["body"]
+        self.assertEqual(first_body["messages"][1]["content"][0]["type"], "text")
+        self.assertEqual(second_body["messages"][1]["content"][0]["type"], "image_url")
+
+    def test_api_failure_returns_no_embeddings(self):
+        client = self._client()
+        client.provider.post = MagicMock(
+            side_effect=APIConnectionError(
+                request=httpx.Request("POST", "http://localhost:8000/v1/embeddings")
+            )
+        )
+
+        self.assertEqual(client.embed(texts=["person"]), [])
+
+    def test_multiple_vectors_for_one_request_returns_no_embeddings(self):
+        client = self._client()
+        client.provider.post = MagicMock(
+            return_value=SimpleNamespace(
+                data=[
+                    SimpleNamespace(index=0, embedding=[1.0, 0.0]),
+                    SimpleNamespace(index=1, embedding=[0.0, 1.0]),
+                ]
+            )
+        )
+
+        self.assertEqual(client.embed(texts=["person"]), [])
+
+    def test_invalid_image_returns_no_embeddings(self):
+        client = self._client()
+        client.provider.post = MagicMock()
+
+        self.assertEqual(client.embed(images=[b"not-an-image"]), [])
+        client.provider.post.assert_not_called()
+
+    def test_embedding_instruction_is_not_sent_to_chat_endpoint(self):
+        client = self._client(
+            provider_options={"embedding_instruction": "Retrieve camera events."}
+        )
+        message = SimpleNamespace(content="ok", reasoning_content=None, tool_calls=None)
+        client.provider.chat.completions.create = MagicMock(
+            return_value=SimpleNamespace(
+                choices=[SimpleNamespace(message=message, finish_reason="stop")]
+            )
+        )
+
+        response = client.chat_with_tools(SIMPLE_MESSAGES)
+
+        self.assertEqual(response["content"], "ok")
+        request = client.provider.chat.completions.create.call_args.kwargs
+        self.assertNotIn("embedding_instruction", request)
 
 
 # ---------------------------------------------------------------------------

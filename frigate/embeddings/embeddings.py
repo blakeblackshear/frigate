@@ -2,10 +2,13 @@
 
 import datetime
 import io
+import json
 import logging
 import os
 import threading
 import time
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import numpy as np
 from peewee import DoesNotExist, IntegrityError
@@ -31,8 +34,15 @@ from frigate.util.file import get_event_thumbnail_bytes
 from .genai_embedding import GenAIEmbedding
 from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
 from .onnx.jina_v2_embedding import JinaV2Embedding
+from .util import get_semantic_search_model_id
+
+if TYPE_CHECKING:
+    from frigate.genai import GenAIClient
 
 logger = logging.getLogger(__name__)
+
+EmbeddingInput = list[str] | list[bytes] | list[Image.Image]
+EmbeddingFunction = Callable[[EmbeddingInput], list[np.ndarray]]
 
 
 def get_metadata(event: Event) -> dict:
@@ -91,6 +101,11 @@ class Embeddings:
         self.reindex_lock = threading.Lock()
         self.reindex_thread = None
         self.reindex_running = False
+        self._reindex_restart_requested = False
+        self._embedding_state_lock = threading.Lock()
+        self._embedding_generation = 0
+        self._embedding_model_id = get_semantic_search_model_id(self.config)
+        self._index_ready = False
 
         # Create tables if they don't exist
         self.db.create_embeddings_tables()
@@ -119,13 +134,7 @@ class Embeddings:
                     "no embeddings client is configured. Ensure the GenAI provider "
                     "has 'embeddings' in its roles."
                 )
-            self.embedding = GenAIEmbedding(embeddings_client)
-            self.text_embedding = lambda input_data: self.embedding(
-                input_data, embedding_type="text"
-            )
-            self.vision_embedding = lambda input_data: self.embedding(
-                input_data, embedding_type="vision"
-            )
+            self.update_genai_client(embeddings_client)
         elif model_cfg == SemanticSearchModelEnum.jinav2:
             # Single JinaV2Embedding instance for both text and vision
             self.embedding = JinaV2Embedding(
@@ -152,6 +161,136 @@ class Embeddings:
                 requestor=self.requestor,
                 device=config.semantic_search.device
                 or ("GPU" if config.semantic_search.model_size == "large" else "CPU"),
+            )
+
+        self._index_ready = self._load_index_ready(self._embedding_model_id)
+
+    def _load_index_ready(self, model_id: str) -> bool:
+        """Load persisted readiness for the complete, matching vector index."""
+        state_file = os.path.join(CONFIG_DIR, ".search_index_state.json")
+        try:
+            with open(state_file) as f:
+                state = json.load(f)
+        except FileNotFoundError:
+            # Existing installations predate persistent index state. Preserve
+            # their current behavior and seed the fingerprint so later static
+            # model changes fail closed. vLLM is new in this version, so it
+            # cannot own a valid legacy index and must be explicitly reindexed.
+            legacy_ready = not model_id.startswith("vllm:")
+            try:
+                self._persist_index_state(legacy_ready, model_id)
+            except OSError:
+                logger.warning(
+                    "Unable to persist the legacy semantic search index state"
+                )
+            return legacy_ready
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            logger.warning(
+                "Unable to load semantic search index state; keeping the index unavailable"
+            )
+            try:
+                self._persist_index_state(False, model_id)
+            except OSError:
+                logger.warning(
+                    "Unable to persist the unavailable semantic search index state"
+                )
+            return False
+
+        if not isinstance(state, dict) or state.get("model_id") != model_id:
+            logger.warning(
+                "Semantic search index fingerprint does not match the configured model"
+            )
+            try:
+                self._persist_index_state(False, model_id)
+            except OSError:
+                logger.warning(
+                    "Unable to persist the mismatched semantic search index state"
+                )
+            return False
+
+        return state.get("ready") is True
+
+    def _persist_index_state(self, ready: bool, model_id: str) -> None:
+        """Atomically persist whether the complete index matches a vector space."""
+        state_file = os.path.join(CONFIG_DIR, ".search_index_state.json")
+        temporary_file = f"{state_file}.tmp"
+        with open(temporary_file, "w") as f:
+            json.dump({"ready": ready, "model_id": model_id}, f)
+        os.replace(temporary_file, state_file)
+
+    def update_genai_client(self, client: "GenAIClient") -> None:
+        """Bind semantic search to the current GenAI embeddings client."""
+        embedding = GenAIEmbedding(client)
+
+        def text_embedding(input_data):
+            return embedding(input_data, embedding_type="text")
+
+        def vision_embedding(input_data):
+            return embedding(input_data, embedding_type="vision")
+
+        with self._embedding_state_lock:
+            self.embedding = embedding
+            self.text_embedding = text_embedding
+            self.vision_embedding = vision_embedding
+            self._embedding_model_id = get_semantic_search_model_id(self.config)
+            self._embedding_generation += 1
+
+    def mark_embedding_config_update(self) -> bool:
+        """Invalidate the current embedding generation and return prior readiness."""
+        with self._embedding_state_lock:
+            was_ready = self._index_ready
+            self._persist_index_state(False, self._embedding_model_id)
+            self._index_ready = False
+            self._embedding_generation += 1
+            return was_ready
+
+    def restore_index_ready(self, ready: bool) -> None:
+        """Restore index readiness after a configuration update is rolled back."""
+        with self._embedding_state_lock:
+            self._persist_index_state(ready, self._embedding_model_id)
+            self._index_ready = ready
+
+    @property
+    def index_ready(self) -> bool:
+        """Return whether embeddings and triggers share one complete vector space."""
+        with self._embedding_state_lock:
+            return self._index_ready
+
+    def _get_embedding_snapshot(
+        self,
+    ) -> tuple[int, EmbeddingFunction, EmbeddingFunction, str]:
+        """Capture one immutable embedding generation for a reindex pass."""
+        with self._embedding_state_lock:
+            self._persist_index_state(False, self._embedding_model_id)
+            self._index_ready = False
+            return (
+                self._embedding_generation,
+                self.text_embedding,
+                self.vision_embedding,
+                self._embedding_model_id,
+            )
+
+    def _is_embedding_generation_current(self, generation: int) -> bool:
+        """Return whether a captured embedding generation is still active."""
+        with self._embedding_state_lock:
+            return generation == self._embedding_generation
+
+    def _ensure_incremental_upsert_allowed(
+        self,
+        upsert: bool,
+        embedding_function: EmbeddingFunction | None,
+    ) -> None:
+        """Prevent an unavailable index from being mixed with another model."""
+        if not upsert or embedding_function is not None:
+            return
+
+        with self._embedding_state_lock:
+            index_ready = self._index_ready
+
+        if not index_ready and not self.reindex_running:
+            raise RuntimeError(
+                "Semantic search index is unavailable; complete a full reindex "
+                "before adding incremental embeddings"
             )
 
     def update_stats(self) -> None:
@@ -194,7 +333,11 @@ class Embeddings:
         return models
 
     def embed_thumbnail(
-        self, event_id: str, thumbnail: bytes, upsert: bool = True
+        self,
+        event_id: str,
+        thumbnail: bytes,
+        upsert: bool = True,
+        embedding_function: EmbeddingFunction | None = None,
     ) -> np.ndarray:
         """Embed thumbnail and optionally insert into DB.
 
@@ -202,18 +345,43 @@ class Embeddings:
         @param: thumbnail bytes in jpg format
         @param: upsert If embedding should be upserted into vec DB
         """
+        self._ensure_incremental_upsert_allowed(upsert, embedding_function)
         start = datetime.datetime.now().timestamp()
-        # Convert thumbnail bytes to PIL Image
-        embedding = self.vision_embedding([thumbnail])[0]
+        if embedding_function is not None:
+            embedding = embedding_function([thumbnail])[0]
+            if upsert:
+                self.db.execute_sql(
+                    """
+                    INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
+                    VALUES(?, ?)
+                    """,
+                    (event_id, serialize(embedding)),
+                )
+        else:
+            while True:
+                with self._embedding_state_lock:
+                    generation = self._embedding_generation
+                    embed = self.vision_embedding
 
-        if upsert:
-            self.db.execute_sql(
-                """
-                INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
-                VALUES(?, ?)
-                """,
-                (event_id, serialize(embedding)),
-            )
+                embedding = embed([thumbnail])[0]
+
+                with self._embedding_state_lock:
+                    if generation != self._embedding_generation:
+                        logger.info(
+                            "Embedding configuration changed while processing thumbnail %s; retrying",
+                            event_id,
+                        )
+                        continue
+
+                    if upsert:
+                        self.db.execute_sql(
+                            """
+                            INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
+                            VALUES(?, ?)
+                            """,
+                            (event_id, serialize(embedding)),
+                        )
+                    break
 
         self.image_inference_speed.update(datetime.datetime.now().timestamp() - start)
         self.image_eps.update()
@@ -221,7 +389,10 @@ class Embeddings:
         return embedding
 
     def batch_embed_thumbnail(
-        self, event_thumbs: dict[str, bytes], upsert: bool = True
+        self,
+        event_thumbs: dict[str, bytes],
+        upsert: bool = True,
+        embedding_function: EmbeddingFunction | None = None,
     ) -> list[np.ndarray]:
         """Embed thumbnails and optionally insert into DB.
 
@@ -248,7 +419,8 @@ class Embeddings:
             )
             return []
 
-        embeddings = self.vision_embedding(valid_thumbs)
+        embed = embedding_function or self.vision_embedding
+        embeddings = embed(valid_thumbs)
 
         if upsert:
             items = []
@@ -257,13 +429,14 @@ class Embeddings:
                 items.append(serialize(embeddings[i]))
                 self.image_eps.update()
 
-            self.db.execute_sql(
+            cursor = self.db.execute_sql(
                 """
                 INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
                 VALUES {}
                 """.format(", ".join(["(?, ?)"] * len(valid_ids))),
                 items,
             )
+            _ = cursor.rowcount
 
         duration = datetime.datetime.now().timestamp() - start
         self.image_inference_speed.update(duration / len(valid_ids))
@@ -271,19 +444,49 @@ class Embeddings:
         return embeddings
 
     def embed_description(
-        self, event_id: str, description: str, upsert: bool = True
+        self,
+        event_id: str | None,
+        description: str,
+        upsert: bool = True,
+        embedding_function: EmbeddingFunction | None = None,
     ) -> np.ndarray:
+        self._ensure_incremental_upsert_allowed(upsert, embedding_function)
         start = datetime.datetime.now().timestamp()
-        embedding = self.text_embedding([description])[0]
+        if embedding_function is not None:
+            embedding = embedding_function([description])[0]
+            if upsert:
+                self.db.execute_sql(
+                    """
+                    INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
+                    VALUES(?, ?)
+                    """,
+                    (event_id, serialize(embedding)),
+                )
+        else:
+            while True:
+                with self._embedding_state_lock:
+                    generation = self._embedding_generation
+                    embed = self.text_embedding
 
-        if upsert:
-            self.db.execute_sql(
-                """
-                INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
-                VALUES(?, ?)
-                """,
-                (event_id, serialize(embedding)),
-            )
+                embedding = embed([description])[0]
+
+                with self._embedding_state_lock:
+                    if generation != self._embedding_generation:
+                        logger.info(
+                            "Embedding configuration changed while processing description %s; retrying",
+                            event_id,
+                        )
+                        continue
+
+                    if upsert:
+                        self.db.execute_sql(
+                            """
+                            INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
+                            VALUES(?, ?)
+                            """,
+                            (event_id, serialize(embedding)),
+                        )
+                    break
 
         self.text_inference_speed.update(datetime.datetime.now().timestamp() - start)
         self.text_eps.update()
@@ -291,14 +494,18 @@ class Embeddings:
         return embedding
 
     def batch_embed_description(
-        self, event_descriptions: dict[str, str], upsert: bool = True
-    ) -> np.ndarray:
+        self,
+        event_descriptions: dict[str, str],
+        upsert: bool = True,
+        embedding_function: EmbeddingFunction | None = None,
+    ) -> list[np.ndarray]:
         start = datetime.datetime.now().timestamp()
         # upsert embeddings one by one to avoid token limit
         embeddings = []
+        embed = embedding_function or self.text_embedding
 
         for desc in event_descriptions.values():
-            embeddings.append(self.text_embedding([desc])[0])
+            embeddings.append(embed([desc])[0])
 
         if upsert:
             ids = list(event_descriptions.keys())
@@ -309,20 +516,25 @@ class Embeddings:
                 items.append(serialize(embeddings[i]))
                 self.text_eps.update()
 
-            self.db.execute_sql(
+            cursor = self.db.execute_sql(
                 """
                 INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
                 VALUES {}
                 """.format(", ".join(["(?, ?)"] * len(ids))),
                 items,
             )
+            _ = cursor.rowcount
 
         self.text_inference_speed.update(datetime.datetime.now().timestamp() - start)
 
         return embeddings
 
-    def reindex(self) -> None:
+    def reindex(self) -> bool:
         logger.info("Indexing tracked object embeddings...")
+
+        generation, text_embedding, vision_embedding, model_id = (
+            self._get_embedding_snapshot()
+        )
 
         self.db.drop_embeddings_tables()
         logger.debug("Dropped embeddings tables.")
@@ -334,9 +546,10 @@ class Embeddings:
             os.remove(os.path.join(CONFIG_DIR, ".search_stats.json"))
 
         st = time.time()
+        reindex_cutoff = st
 
         # Get total count of events to process
-        total_events = Event.select().count()
+        total_events = Event.select().where(Event.start_time <= reindex_cutoff).count()
 
         if not isinstance(self.config.semantic_search.model, SemanticSearchModelEnum):
             batch_size = 1
@@ -344,26 +557,39 @@ class Embeddings:
             batch_size = 4
         else:
             batch_size = 32
-        current_page = 1
-
         totals = {
             "thumbnails": 0,
             "descriptions": 0,
-            "processed_objects": total_events - 1 if total_events < batch_size else 0,
+            "processed_objects": 0,
             "total_objects": total_events,
-            "time_remaining": 0 if total_events < batch_size else -1,
+            "time_remaining": 0 if total_events == 0 else -1,
             "status": "indexing",
         }
 
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
 
-        events = (
-            Event.select()
-            .order_by(Event.start_time.desc())
-            .paginate(current_page, batch_size)
-        )
+        last_start_time: float | None = None
+        last_event_id: str | None = None
 
-        while events:
+        while True:
+            events_query = Event.select().where(Event.start_time <= reindex_cutoff)
+            if last_start_time is not None and last_event_id is not None:
+                events_query = events_query.where(
+                    (Event.start_time < last_start_time)
+                    | (
+                        (Event.start_time == last_start_time)
+                        & (Event.id < last_event_id)
+                    )
+                )
+
+            events = list(
+                events_query.order_by(Event.start_time.desc(), Event.id.desc()).limit(
+                    batch_size
+                )
+            )
+            if not events:
+                break
+
             event: Event
             batch_thumbs = {}
             batch_descs = {}
@@ -380,13 +606,19 @@ class Embeddings:
 
             # run batch embedding
             if batch_thumbs:
-                self.batch_embed_thumbnail(batch_thumbs)
+                self.batch_embed_thumbnail(
+                    batch_thumbs, embedding_function=vision_embedding
+                )
 
             if batch_descs:
-                self.batch_embed_description(batch_descs)
+                self.batch_embed_description(
+                    batch_descs, embedding_function=text_embedding
+                )
 
             # report progress every batch so we don't spam the logs
-            progress = (totals["processed_objects"] / total_events) * 100
+            progress_total = max(total_events, totals["processed_objects"])
+            totals["total_objects"] = progress_total
+            progress = (totals["processed_objects"] / progress_total) * 100
             logger.debug(
                 "Processed %d/%d events (%.2f%% complete) | Thumbnails: %d, Descriptions: %d",
                 totals["processed_objects"],
@@ -399,19 +631,15 @@ class Embeddings:
             # Calculate time remaining
             elapsed_time = time.time() - st
             avg_time_per_event = elapsed_time / totals["processed_objects"]
-            remaining_events = total_events - totals["processed_objects"]
+            remaining_events = max(0, progress_total - totals["processed_objects"])
             time_remaining = avg_time_per_event * remaining_events
             totals["time_remaining"] = int(time_remaining)
 
             self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
 
-            # Move to the next page
-            current_page += 1
-            events = (
-                Event.select()
-                .order_by(Event.start_time.desc())
-                .paginate(current_page, batch_size)
-            )
+            last_event = events[-1]
+            last_start_time = last_event.start_time
+            last_event_id = last_event.id
 
         logger.info(
             "Embedded %d thumbnails and %d descriptions in %s seconds",
@@ -419,19 +647,55 @@ class Embeddings:
             totals["descriptions"],
             round(time.time() - st, 1),
         )
-        totals["status"] = "completed"
 
-        self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+        if not self._is_embedding_generation_current(generation):
+            logger.warning(
+                "Embedding provider changed during reindex; restarting with the new configuration"
+            )
+            return False
 
-    def start_reindex(self) -> bool:
-        """Start reindexing in a separate thread if not already running."""
+        self.sync_triggers(
+            text_embedding=text_embedding,
+            vision_embedding=vision_embedding,
+            model_id=model_id,
+            force=True,
+        )
+
+        with self._embedding_state_lock:
+            if generation != self._embedding_generation:
+                logger.warning(
+                    "Embedding provider changed while syncing triggers; restarting reindex"
+                )
+                return False
+
+            self._persist_index_state(True, model_id)
+            self._index_ready = True
+            totals["total_objects"] = totals["processed_objects"]
+            totals["time_remaining"] = 0
+            totals["status"] = "completed"
+            self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+        return True
+
+    def start_reindex(self, restart_if_running: bool = False) -> bool:
+        """Start reindexing, optionally queueing another pass if one is running."""
         with self.reindex_lock:
             if self.reindex_running:
+                if restart_if_running:
+                    self._reindex_restart_requested = True
+                    logger.info(
+                        "Embedding configuration changed; queued another reindex pass"
+                    )
+                    return False
+
                 logger.warning("Reindex embeddings is already running.")
                 return False
 
             # Mark as running and start the thread
+            with self._embedding_state_lock:
+                self._persist_index_state(False, self._embedding_model_id)
+                self._index_ready = False
             self.reindex_running = True
+            self._reindex_restart_requested = False
             self.reindex_thread = threading.Thread(
                 target=self._reindex_wrapper, daemon=True
             )
@@ -440,14 +704,37 @@ class Embeddings:
 
     def _reindex_wrapper(self) -> None:
         """Wrapper to run reindex and reset running flag when done."""
-        try:
-            self.reindex()
-        finally:
-            with self.reindex_lock:
-                self.reindex_running = False
-                self.reindex_thread = None
+        while True:
+            try:
+                completed = self.reindex()
+            except Exception:
+                logger.exception("Embeddings reindex failed")
+                with self.reindex_lock:
+                    if self._reindex_restart_requested:
+                        self._reindex_restart_requested = False
+                        continue
 
-    def sync_triggers(self) -> None:
+                    self.reindex_running = False
+                    self.reindex_thread = None
+                    return
+
+            with self.reindex_lock:
+                if completed and not self._reindex_restart_requested:
+                    self.reindex_running = False
+                    self.reindex_thread = None
+                    return
+
+                self._reindex_restart_requested = False
+
+    def sync_triggers(
+        self,
+        text_embedding: EmbeddingFunction | None = None,
+        vision_embedding: EmbeddingFunction | None = None,
+        model_id: str | None = None,
+        force: bool = False,
+    ) -> None:
+        model_id = model_id or get_semantic_search_model_id(self.config)
+
         for camera in self.config.cameras.values():
             # Get all existing triggers for this camera
             existing_triggers = {
@@ -464,27 +751,32 @@ class Embeddings:
             ).items():
                 if trigger_name in existing_triggers:
                     existing_trigger = existing_triggers[trigger_name]
-                    needs_embedding_update = False
+                    needs_embedding_update = force
                     thumbnail_missing = False
+
+                    if existing_trigger.model != model_id:
+                        existing_trigger.model = model_id
+                        needs_embedding_update = True
 
                     # Check if data has changed or thumbnail is missing for thumbnail type
                     if trigger.type == "thumbnail":
                         thumbnail_path = os.path.join(
                             TRIGGER_DIR, camera.name, f"{trigger.data}.webp"
                         )
-                        try:
-                            event = Event.get(Event.id == trigger.data)
-                            if event.data.get("type") != "object":
-                                logger.warning(
-                                    f"Event {trigger.data} is not a tracked object for {trigger.type} trigger"
-                                )
-                                continue  # Skip if not an object
+                        # The source event may have expired while the trigger's
+                        # saved image remains. Only fetch the event when that
+                        # persisted image needs to be created or refreshed.
+                        if existing_trigger.data != trigger.data or not os.path.exists(
+                            thumbnail_path
+                        ):
+                            try:
+                                event = Event.get(Event.id == trigger.data)
+                                if event.data.get("type") != "object":
+                                    logger.warning(
+                                        f"Event {trigger.data} is not a tracked object for {trigger.type} trigger"
+                                    )
+                                    continue  # Skip if not an object
 
-                            # Check if thumbnail needs to be updated (data changed or missing)
-                            if (
-                                existing_trigger.data != trigger.data
-                                or not os.path.exists(thumbnail_path)
-                            ):
                                 thumbnail = get_event_thumbnail_bytes(event)
                                 if not thumbnail:
                                     logger.warning(
@@ -495,11 +787,11 @@ class Embeddings:
                                     camera.name, trigger.data, thumbnail
                                 )
                                 thumbnail_missing = True
-                        except DoesNotExist:
-                            logger.debug(
-                                f"Event ID {trigger.data} for trigger {trigger_name} does not exist."
-                            )
-                            continue
+                            except DoesNotExist:
+                                logger.debug(
+                                    f"Event ID {trigger.data} for trigger {trigger_name} does not exist."
+                                )
+                                continue
 
                     # Update existing trigger if data has changed
                     if (
@@ -519,7 +811,11 @@ class Embeddings:
                         or thumbnail_missing
                     ):
                         existing_trigger.embedding = self._calculate_trigger_embedding(
-                            trigger, trigger_name, camera.name
+                            trigger,
+                            trigger_name,
+                            camera.name,
+                            text_embedding,
+                            vision_embedding,
                         )
                         needs_embedding_update = True
 
@@ -560,7 +856,11 @@ class Embeddings:
 
                         # Calculate embedding for new trigger
                         embedding = self._calculate_trigger_embedding(
-                            trigger, trigger_name, camera.name
+                            trigger,
+                            trigger_name,
+                            camera.name,
+                            text_embedding,
+                            vision_embedding,
                         )
 
                         Trigger.create(
@@ -569,7 +869,7 @@ class Embeddings:
                             type=trigger.type,
                             data=trigger.data,
                             threshold=trigger.threshold,
-                            model=self.config.semantic_search.model,
+                            model=model_id,
                             embedding=embedding,
                             triggering_event_id="",
                             last_triggered=None,
@@ -622,12 +922,22 @@ class Embeddings:
             )
 
     def _calculate_trigger_embedding(
-        self, trigger, trigger_name: str, camera_name: str
+        self,
+        trigger,
+        trigger_name: str,
+        camera_name: str,
+        text_embedding: EmbeddingFunction | None = None,
+        vision_embedding: EmbeddingFunction | None = None,
     ) -> bytes:
         """Calculate embedding for a trigger based on its type and data."""
         if trigger.type == "description":
             logger.debug(f"Generating embedding for trigger description {trigger_name}")
-            embedding = self.embed_description(None, trigger.data, upsert=False)
+            embedding = self.embed_description(
+                None,
+                trigger.data,
+                upsert=False,
+                embedding_function=text_embedding,
+            )
             return embedding.astype(np.float32).tobytes()
 
         elif trigger.type == "thumbnail":
@@ -661,7 +971,10 @@ class Embeddings:
                     f"Generating embedding for trigger thumbnail {trigger_name} with ID {trigger.data}"
                 )
                 embedding = self.embed_thumbnail(
-                    str(trigger.data), thumbnail, upsert=False
+                    str(trigger.data),
+                    thumbnail,
+                    upsert=False,
+                    embedding_function=vision_embedding,
                 )
                 return embedding.astype(np.float32).tobytes()
 

@@ -82,24 +82,28 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
         self._delete_embeddings("vec_descriptions", event_ids)
 
     def drop_embeddings_tables(self) -> None:
-        self.execute_sql("""
+        cursor = self.execute_sql("""
             DROP TABLE vec_descriptions;
         """)
-        self.execute_sql("""
+        _ = cursor.rowcount
+        cursor = self.execute_sql("""
             DROP TABLE vec_thumbnails;
         """)
+        _ = cursor.rowcount
 
     def create_embeddings_tables(self) -> None:
         """Create vec0 virtual table for embeddings"""
-        self.execute_sql("""
+        cursor = self.execute_sql("""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
                 id TEXT PRIMARY KEY,
                 thumbnail_embedding FLOAT[768] distance_metric=cosine
             );
         """)
-        self.execute_sql("""
+        _ = cursor.rowcount
+        cursor = self.execute_sql("""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_descriptions USING vec0(
                 id TEXT PRIMARY KEY,
                 description_embedding FLOAT[768] distance_metric=cosine
             );
         """)
+        _ = cursor.rowcount

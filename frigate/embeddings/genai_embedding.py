@@ -24,6 +24,10 @@ class GenAIEmbedding:
     """
 
     def __init__(self, client: "GenAIClient") -> None:
+        if not client.supports_embeddings:
+            raise ValueError(
+                f"{client.__class__.__name__} does not support multimodal embeddings"
+            )
         self.client = client
 
     def __call__(
@@ -43,9 +47,13 @@ class GenAIEmbedding:
         if not inputs:
             return []
 
+        if not self.client.ensure_provider():
+            raise RuntimeError("Embeddings provider is unavailable")
+
         if embedding_type == "text":
             texts = [str(x) for x in inputs]
             embeddings = self.client.embed(texts=texts)
+            expected_count = len(texts)
         elif embedding_type == "vision":
             images: list[bytes] = []
             for inp in inputs:
@@ -63,9 +71,16 @@ class GenAIEmbedding:
             if not images:
                 return []
             embeddings = self.client.embed(images=images)
+            expected_count = len(images)
         else:
             raise ValueError(
                 f"Invalid embedding_type '{embedding_type}'. Must be 'text' or 'vision'."
+            )
+
+        if len(embeddings) != expected_count:
+            raise RuntimeError(
+                "Embeddings provider returned "
+                f"{len(embeddings)} vectors for {expected_count} inputs"
             )
 
         result = []
@@ -85,5 +100,12 @@ class GenAIEmbedding:
                         mode="constant",
                         constant_values=0,
                     )
-            result.append(arr)
+            if not np.all(np.isfinite(arr)):
+                raise ValueError("Embeddings provider returned a non-finite vector")
+
+            norm = float(np.linalg.norm(arr.astype(np.float64, copy=False)))
+            if not np.isfinite(norm) or norm == 0:
+                raise ValueError("Embeddings provider returned a zero vector")
+
+            result.append(np.ascontiguousarray(arr / norm, dtype=np.float32))
         return result

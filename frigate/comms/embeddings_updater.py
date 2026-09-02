@@ -1,6 +1,7 @@
 """Facilitates communication between processes."""
 
 import logging
+import threading
 from collections.abc import Callable
 from enum import Enum
 from typing import Any
@@ -27,6 +28,7 @@ class EmbeddingsRequestEnum(Enum):
     embed_description = "embed_description"
     embed_thumbnail = "embed_thumbnail"
     generate_search = "generate_search"
+    index_ready = "index_ready"
     reindex = "reindex"
     # LPR
     reprocess_plate = "reprocess_plate"
@@ -78,14 +80,16 @@ class EmbeddingsRequestor:
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(SOCKET_REP_REQ)
+        self.lock = threading.Lock()
 
     def send_data(self, topic: str, data: Any) -> Any:
         """Sends data and then waits for reply."""
-        try:
-            self.socket.send_json((topic, data))
-            return self.socket.recv_json()
-        except zmq.ZMQError:
-            return ""
+        with self.lock:
+            try:
+                self.socket.send_json((topic, data))
+                return self.socket.recv_json()
+            except zmq.ZMQError:
+                return ""
 
     def stop(self) -> None:
         self.socket.close()

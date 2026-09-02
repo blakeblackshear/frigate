@@ -9,23 +9,25 @@ import NavPath from "@site/src/components/NavPath";
 
 Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one. This feature works by creating _embeddings_, numerical vector representations, for both the images and text descriptions of your tracked objects. By comparing these embeddings, Frigate assesses their similarities to deliver relevant search results.
 
-Frigate uses models from [Jina AI](https://huggingface.co/jinaai) to create and save embeddings to Frigate's database. All of this runs locally.
+By default, Frigate uses local models from [Jina AI](https://huggingface.co/jinaai) to create and save embeddings in Frigate's database. Frigate can also use a configured GenAI provider, with embedding inference running on a separate local or remote model server.
 
 Semantic Search is accessed via the _Explore_ view in the Frigate UI.
 
 :::info
 
-Semantic search requires a one-time internet connection to download embedding models from HuggingFace. Once cached, models work fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+The built-in Jina models require a one-time internet connection to download model files from Hugging Face. Once cached, they work fully offline. GenAI providers have their own model download and network requirements. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
 
 :::
 
 ## Minimum System Requirements
 
-Semantic Search works by running a large AI model locally on your system. Small or underpowered systems like a Raspberry Pi will not run Semantic Search reliably or at all.
+The requirements in this section apply when the built-in Jina model runs on the Frigate host. A GenAI provider such as vLLM can move embedding inference to a separate GPU server.
 
-A minimum of 8GB of RAM is required to use Semantic Search. A CPU with AVX + AVX2 instructions is required to run Semantic Search. A GPU is not strictly required but will provide a significant performance increase over CPU-only systems.
+Small or underpowered systems like a Raspberry Pi will not run the built-in Semantic Search models reliably or at all.
 
-For best performance, 16GB or more of RAM and a dedicated GPU are recommended.
+A minimum of 8GB of RAM is required on the Frigate host when using the built-in Jina models. Those models also require a CPU with AVX + AVX2 instructions. A GPU is not strictly required for the built-in models, but it will provide a significant performance increase over CPU-only systems.
+
+For best performance with the built-in models, 16GB or more of RAM and a dedicated GPU are recommended. When using a GenAI provider, size the model server according to that provider and model instead.
 
 ## Configuration
 
@@ -52,9 +54,9 @@ semantic_search:
 
 :::tip
 
-The embeddings database can be re-indexed from the existing tracked objects in your database by pressing the "Reindex" button in the Enrichments Settings in the UI or by adding `reindex: True` to your `semantic_search` configuration and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may max out your CPU while indexing.
+The embeddings database can be re-indexed from the existing tracked objects in your database by pressing the "Reindex" button in the Enrichments Settings in the UI or by adding `reindex: True` to your `semantic_search` configuration and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may heavily load the selected embedding backend. A reindex through a remote GenAI provider also sends every historical tracked-object thumbnail and description being indexed to that server.
 
-If you are enabling Semantic Search for the first time, be advised that Frigate does not automatically index older tracked objects. You will need to reindex as described above.
+If you are enabling Semantic Search for the first time, Frigate does not automatically index older tracked objects. You will need to reindex as described above. If a reindex is interrupted or fails, Frigate records the incomplete state and keeps search and semantic triggers unavailable after a restart until you request another full reindex.
 
 :::
 
@@ -133,13 +135,16 @@ Switching between V1 and V2 requires reindexing your embeddings. The embeddings 
 
 ### GenAI Provider
 
-Frigate can use a GenAI provider for semantic search embeddings when that provider has the `embeddings` role. Currently, only **llama.cpp** supports multimodal embeddings (both text and images).
+Frigate can use a GenAI provider for semantic search embeddings when that provider has the `embeddings` role. The **llama.cpp** and **vLLM** providers support multimodal embeddings (both text and images).
 
-To use llama.cpp for semantic search:
+To use a provider for semantic search:
 
 1. Configure a GenAI provider with `embeddings` in its `roles`.
-2. Set the semantic search model to the GenAI config key (e.g. `default`).
-3. Start the llama.cpp server with `--embeddings` and `--mmproj` for image support.
+2. Set a non-empty provider `model` that matches the model served by the backend.
+3. Set the semantic search model to the GenAI config key (e.g. `default`).
+4. Start the model server with its multimodal embeddings endpoint enabled.
+
+The provider's `base_url` and `model` are required. For vLLM, `base_url` must point to the OpenAI API root and end in `/v1`.
 
 <ConfigTabs>
 <TabItem value="ui">
@@ -157,28 +162,35 @@ The GenAI provider must also be configured with the `embeddings` role under <Nav
 
 ```yaml
 genai:
-  default:
-    provider: llamacpp
-    base_url: http://localhost:8080
-    model: your-model-name
+  qwen_embeddings:
+    provider: vllm
+    base_url: http://vllm:8000/v1
+    model: Qwen/Qwen3-VL-Embedding-2B
     roles:
       - embeddings
-      - descriptions
-      - chat
 
 semantic_search:
   enabled: True
-  model: default
+  model: qwen_embeddings
+  reindex: True # Set back to False after the initial reindex completes.
 ```
 
 </TabItem>
 </ConfigTabs>
 
-The llama.cpp server must be started with `--embeddings` for the embeddings API, and a multi-modal embeddings model. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for details.
+For the official Hugging Face Qwen model, use vLLM 0.14.0 or newer and start it with `vllm serve Qwen/Qwen3-VL-Embedding-2B --runner pooling --limit-mm-per-prompt '{"image": 1}' --max-model-len 8192`. See the [vLLM embedding documentation](https://docs.vllm.ai/en/latest/models/pooling_models/embed/) for details.
+
+Before starting Frigate with `reindex: True`, wait until vLLM has loaded the model and its `/v1/models` endpoint responds. The startup reindex begins immediately.
+
+Frigate's sqlite-vec tables use 768-dimensional vectors. Qwen3-VL-Embedding-2B supports Matryoshka Representation Learning (MRL), so Frigate requests 768 output dimensions from vLLM and normalizes the resulting vector before storage. The adapter also enforces the expected size as a compatibility safeguard.
+
+For a compatible GGUF model, llama.cpp must be started with `--embeddings` and `--mmproj`. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for details.
+
+When the provider is remote, Frigate sends tracked-object thumbnails, descriptions, and search query text to that server. This includes historical data processed during a reindex. Use the built-in Jina models or a model server on infrastructure you trust if this data must remain on the Frigate host or local network.
 
 :::note
 
-Switching between Jina models and a GenAI provider requires reindexing. Embeddings from different backends are incompatible.
+Embeddings from different models or instructions are incompatible, even when they use the same vector size. When the selected GenAI provider is changed through a runtime config update, Frigate automatically starts a full reindex with the new embedding configuration. If you change the provider, model, or embedding instruction in static YAML and restart Frigate, set `semantic_search.reindex: True` for that startup, then set it back to `False` after the reindex completes. If a persisted index fingerprint does not match, Frigate fails closed instead of searching incompatible vectors.
 
 :::
 
@@ -269,9 +281,9 @@ When a trigger fires, the UI highlights the trigger with a blue dot for 3 second
 
 ### Notes
 
-- Triggers rely on the same Jina AI CLIP models (V1 or V2) used for semantic search. Ensure `semantic_search` is enabled and properly configured.
+- Triggers use the same active embedding backend as semantic search, either a built-in Jina model or a configured GenAI provider. Ensure `semantic_search` is enabled and properly configured.
 - Reindexing embeddings (via the UI or `reindex: True`) does not affect trigger configurations but may update the embeddings used for matching.
-- For optimal performance, use a system with sufficient RAM (8GB minimum, 16GB recommended) and a GPU for `large` model configurations, as described in the Semantic Search requirements.
+- For built-in Jina models, use a Frigate host with sufficient RAM (8GB minimum, 16GB recommended) and a GPU for `large` model configurations. For a GenAI backend, the model server must meet the selected model's resource requirements.
 
 ### FAQ
 

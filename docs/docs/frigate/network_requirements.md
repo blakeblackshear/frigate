@@ -95,7 +95,7 @@ See [Frigate+](/integrations/plus) for details.
 
 ### Generative AI
 
-When a Generative AI provider is configured, Frigate sends images and prompts to the configured provider for event descriptions, chat, and camera monitoring. Available providers:
+When a Generative AI provider role is used, Frigate sends the data needed for that role to the configured provider. Description, chat, and camera monitoring roles send their images and prompts. The semantic search `embeddings` role sends tracked-object thumbnails, descriptions, and search query text. A reindex sends every historical thumbnail and description being indexed, so a remote embeddings provider can receive data from every indexed camera.
 
 | Provider      | Internet Required                                               |
 | ------------- | --------------------------------------------------------------- |
@@ -103,9 +103,10 @@ When a Generative AI provider is configured, Frigate sends images and prompts to
 | Google Gemini | Yes, connects to Google Generative AI API                       |
 | Azure OpenAI  | Yes, connects to your Azure endpoint                            |
 | Ollama        | Depends: typically local (`localhost:11434`), but can be remote |
-| llama.cpp     | No, runs entirely locally                                       |
+| llama.cpp     | Depends: usually local, but the server can be hosted remotely   |
+| vLLM          | Depends: local or remote; model downloads may require internet  |
 
-Disable Generative AI by removing the `genai` configuration from your cameras. See [Generative AI](/configuration/genai/genai_config) for details.
+To stop GenAI traffic, disable the features that use each provider and remove the provider from the top-level `genai` configuration. If `semantic_search.model` references a GenAI provider, first disable semantic search or switch it to a built-in Jina model and run a full reindex. Camera-level GenAI settings only control camera-specific description features; they do not disable global semantic search embeddings. See [Generative AI](/configuration/genai/genai_config) for details.
 
 ### Version Check
 

@@ -1,6 +1,38 @@
 """Z-score normalization for search distance."""
 
+import hashlib
+import json
 import math
+from typing import TYPE_CHECKING
+
+from frigate.config.classification import SemanticSearchModelEnum
+
+if TYPE_CHECKING:
+    from frigate.config import FrigateConfig
+
+
+def get_semantic_search_model_id(config: "FrigateConfig") -> str:
+    """Return a stable identifier for the active embedding vector space."""
+    model_config = config.semantic_search.model
+    if isinstance(model_config, SemanticSearchModelEnum):
+        return model_config.value
+
+    provider_config = config.genai.get(str(model_config))
+    if provider_config is None:
+        return str(model_config)
+
+    identity = json.dumps(
+        {
+            "provider": provider_config.provider.value,
+            "model": provider_config.model,
+            "embedding_instruction": provider_config.provider_options.get(
+                "embedding_instruction"
+            ),
+        },
+        sort_keys=True,
+    )
+    digest = hashlib.sha256(identity.encode()).hexdigest()[:16]
+    return f"{provider_config.provider.value}:{digest}"
 
 
 class ZScoreNormalization:

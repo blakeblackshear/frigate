@@ -69,18 +69,26 @@ class EmbeddingsContext:
         self.db = db
         self.thumb_stats = ZScoreNormalization()
         self.desc_stats = ZScoreNormalization()
+        self._stats_model_id: str | None = None
+        self._stats_lock = threading.Lock()
         self.requestor = EmbeddingsRequestor()
 
         # load stats from disk
         stats_file = os.path.join(CONFIG_DIR, ".search_stats.json")
         try:
             with open(stats_file) as f:
-                data = json.loads(f.read())
-                self.thumb_stats.from_dict(data["thumb_stats"])
-                self.desc_stats.from_dict(data["desc_stats"])
+                data = json.load(f)
+
+                # Statistics are meaningful only within the vector space that
+                # produced them. Legacy files without a fingerprint are ignored.
+                model_id = data.get("model_id")
+                if isinstance(model_id, str) and model_id:
+                    self.thumb_stats.from_dict(data["thumb_stats"])
+                    self.desc_stats.from_dict(data["desc_stats"])
+                    self._stats_model_id = model_id
         except FileNotFoundError:
             pass
-        except JSONDecodeError:
+        except (JSONDecodeError, KeyError, TypeError, ValueError):
             logger.warning("Failed to decode semantic search stats, clearing file")
             try:
                 with open(stats_file, "w") as f:
@@ -90,17 +98,49 @@ class EmbeddingsContext:
 
     def stop(self):
         """Write the stats to disk as JSON on exit."""
-        contents = {
-            "thumb_stats": self.thumb_stats.to_dict(),
-            "desc_stats": self.desc_stats.to_dict(),
-        }
+        with self._stats_lock:
+            contents = {
+                "model_id": self._stats_model_id,
+                "thumb_stats": self.thumb_stats.to_dict(),
+                "desc_stats": self.desc_stats.to_dict(),
+            }
         with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "w") as f:
             json.dump(contents, f)
         self.requestor.stop()
 
+    def _ensure_stats_model(self, model_id: str) -> None:
+        """Reset score statistics when the embedding vector space changes."""
+        with self._stats_lock:
+            if self._stats_model_id == model_id:
+                return
+
+            logger.info(
+                "Resetting semantic search score statistics for embedding model %s",
+                model_id,
+            )
+            self.thumb_stats = ZScoreNormalization()
+            self.desc_stats = ZScoreNormalization()
+            self._stats_model_id = model_id
+
+    def _is_index_ready(self) -> bool:
+        """Return whether the embeddings process has a complete vector index."""
+        state = self.requestor.send_data(EmbeddingsRequestEnum.index_ready.value, {})
+        if not isinstance(state, dict) or state.get("ready") is not True:
+            return False
+
+        model_id = state.get("model_id")
+        if not isinstance(model_id, str) or not model_id:
+            return False
+
+        self._ensure_stats_model(model_id)
+        return True
+
     def search_thumbnail(
         self, query: Event | str, event_ids: list[str] = None
     ) -> list[tuple[str, float]]:
+        if not self._is_index_ready():
+            return []
+
         if query.__class__ == Event:
             cursor = self.db.execute_sql(
                 """
@@ -162,6 +202,9 @@ class EmbeddingsContext:
     def search_description(
         self, query_text: str, event_ids: list[str] = None
     ) -> list[tuple[str, float]]:
+        if not self._is_index_ready():
+            return []
+
         data = self.requestor.send_data(
             EmbeddingsRequestEnum.generate_search.value, query_text
         )

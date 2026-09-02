@@ -38,6 +38,14 @@ class OpenAIClient(GenAIClient):
     provider: OpenAI
     context_size: int | None = None
 
+    def _request_provider_options(self) -> dict[str, Any]:
+        """Return provider options that are valid inference parameters."""
+        return {
+            key: value
+            for key, value in self.genai_config.provider_options.items()
+            if key != "context_size"
+        }
+
     def _init_provider(self) -> OpenAI:
         """Initialize the client.
 
@@ -220,14 +228,7 @@ class OpenAIClient(GenAIClient):
                 if openai_tool_choice is not None:
                     request_params["tool_choice"] = openai_tool_choice
 
-            if isinstance(self.genai_config.provider_options, dict):
-                excluded_options = {"context_size"}
-                provider_opts = {
-                    k: v
-                    for k, v in self.genai_config.provider_options.items()
-                    if k not in excluded_options
-                }
-                request_params.update(provider_opts)
+            request_params.update(self._request_provider_options())
 
             result = self.provider.chat.completions.create(**request_params)
 
@@ -344,14 +345,7 @@ class OpenAIClient(GenAIClient):
                 if openai_tool_choice is not None:
                     request_params["tool_choice"] = openai_tool_choice
 
-            if isinstance(self.genai_config.provider_options, dict):
-                excluded_options = {"context_size"}
-                provider_opts = {
-                    k: v
-                    for k, v in self.genai_config.provider_options.items()
-                    if k not in excluded_options
-                }
-                request_params.update(provider_opts)
+            request_params.update(self._request_provider_options())
 
             # Use streaming API
             content_parts: list[str] = []
