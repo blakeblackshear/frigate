@@ -1038,7 +1038,7 @@ type TimelineProps = {
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   manuallySetCurrentTime: (time: number, force: boolean) => void;
   setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
-  setExportRange: (range: TimeRange) => void;
+  setExportRange: React.Dispatch<React.SetStateAction<TimeRange | undefined>>;
   onAnalysisOpen: (open: boolean) => void;
 };
 function Timeline({
@@ -1131,22 +1131,50 @@ function Timeline({
     },
   ]);
 
-  const [exportStart, setExportStartTime] = useState<number>(0);
-  const [exportEnd, setExportEndTime] = useState<number>(0);
-
-  useEffect(() => {
-    if (exportRange && exportStart != 0 && exportEnd != 0) {
-      if (exportRange.after != exportStart) {
-        setCurrentTime(exportStart);
-      } else if (exportRange?.before != exportEnd) {
-        setCurrentTime(exportEnd);
+  // a local mirror of the range fights a reseed: the position effect
+  // echoes it back and the two rewrite each other forever
+  const setExportStartTime = useCallback(
+    (value: React.SetStateAction<number>) => {
+      if (!exportRange) {
+        return;
       }
 
-      setExportRange({ after: exportStart, before: exportEnd });
-    }
-    // we only want to update when the export parts change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exportStart, exportEnd, setExportRange, setCurrentTime]);
+      const next =
+        typeof value === "function" ? value(exportRange.after) : value;
+
+      // the position effect re-reports the current time on every reposition
+      if (next == exportRange.after) {
+        return;
+      }
+
+      setCurrentTime(next);
+      setExportRange((prev) =>
+        prev ? { after: next, before: prev.before } : prev,
+      );
+    },
+    [exportRange, setExportRange, setCurrentTime],
+  );
+
+  const setExportEndTime = useCallback(
+    (value: React.SetStateAction<number>) => {
+      if (!exportRange) {
+        return;
+      }
+
+      const next =
+        typeof value === "function" ? value(exportRange.before) : value;
+
+      if (next == exportRange.before) {
+        return;
+      }
+
+      setCurrentTime(next);
+      setExportRange((prev) =>
+        prev ? { after: prev.after, before: next } : prev,
+      );
+    },
+    [exportRange, setExportRange, setCurrentTime],
+  );
 
   return (
     <div
