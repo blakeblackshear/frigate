@@ -503,6 +503,41 @@ If you are using `docker run`, add this option to your command `--device /dev/ax
 
 Finally, configure [hardware object detection](/configuration/object_detectors#axera) to complete the setup.
 
+### Axelera Metis
+
+The Axelera Metis AI Accelerator is available in the M.2 and PCIe card form factors and is supported on x86 (Intel/AMD) PCs and Rock 5B class arm64 boards.
+
+The Axelera runtime used inside the container is not part of the Frigate image; Frigate downloads and installs it at first start once an Axelera detector is configured. Containers without internet access can provide the files themselves, see [Detector runtimes](/frigate/network_requirements#detector-runtimes). The host side kernel driver still has to be installed as described below.
+
+#### Installation
+
+Install the Metis PCIe kernel driver and firmware on the **host** following [Axelera's driver installation guide](https://developer.axelera.ai/axelera-documentation/Getting-Started/GettingStartedWithMetis/InstallingAxeleraMetisDriver). The driver creates the `/dev/metis*` device nodes. Reboot after installing it.
+
+#### Setup
+
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
+
+Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
+
+```yaml
+devices:
+  - /dev/dma_heap/system
+  # the exact node is printed by `ls /dev/metis*`, e.g. /dev/metis-0-1-0
+  - /dev/metis-0-1-0
+```
+
+If you are using `docker run`, add `--device /dev/dma_heap/system --device /dev/metis-0-1-0` to your command.
+
+:::warning
+
+DMA-BUF must be available on the host kernel. On Debian/Ubuntu this is provided by the default kernel; on other systems it may need enabling (`CONFIG_DMABUF_HEAPS_SYSTEM`). If Frigate's log reports that no DMA heap can be allocated, check that `/dev/dma_heap/system` exists on the host and is passed into the container.
+
+:::
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#axelera-metis) to complete the setup.
+
 ## Docker
 
 Running through Docker with Docker Compose is the recommended install method.
