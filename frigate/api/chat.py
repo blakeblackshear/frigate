@@ -10,6 +10,7 @@ from functools import reduce
 from typing import Any, Literal
 
 import cv2
+import numpy as np
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
@@ -23,6 +24,7 @@ from frigate.api.chat_util import (
     chunk_content,
     distance_to_score,
     format_events_with_local_time,
+    format_local_time,
     fuse_scores,
     hydrate_event,
     parse_iso_to_timestamp,
@@ -33,28 +35,43 @@ from frigate.api.defs.response.chat_response import (
     ChatCompletionResponse,
     ChatMessageResponse,
     ToolCall,
+    ToolCallInvocation,
 )
 from frigate.api.defs.tags import Tags
 from frigate.api.event import _build_attribute_filter_clause, events
+from frigate.api.export import _build_export_job, _validate_export_source
 from frigate.config import FrigateConfig
 from frigate.config.classification import SemanticSearchModelEnum
 from frigate.genai.prompts import (
     build_chat_system_prompt,
     get_attribute_classifications,
     get_tool_definitions,
+    get_write_tool_names,
+    strip_tool_access,
 )
-from frigate.genai.utils import build_assistant_message_for_conversation
+from frigate.genai.utils import (
+    build_assistant_message_for_conversation,
+    parse_tool_calls_from_message,
+)
+from frigate.jobs.export import ExportQueueFullError, start_export_job
 from frigate.jobs.vlm_watch import (
     get_vlm_watch_job,
     start_vlm_watch_job,
     stop_vlm_watch_job,
 )
-from frigate.models import Event
+from frigate.models import Event, Export, ExportCase
+from frigate.record.export import PlaybackSourceEnum
+from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
 from frigate.util.object_names import get_categorized_object_names
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.chat])
+
+# Tool result recorded for a rejected write tool call. Providers require a
+# result for every requested call; the user's intent is conveyed in a
+# follow-up user message built by _rejection_message.
+TOOL_REJECTED_RESULT: dict[str, str] = {"error": "user_rejected"}
 
 
 class ToolExecuteRequest(BaseModel):
@@ -666,29 +683,39 @@ async def _get_live_frame_image_url(
         frame = frame_processor.get_current_frame(camera, {})
         if frame is None:
             return None
-        height, width = frame.shape[:2]
-        target_height = 480
-        if height > target_height:
-            scale = target_height / height
-            frame = cv2.resize(
-                frame,
-                (int(width * scale), target_height),
-                interpolation=cv2.INTER_AREA,
-            )
-        _, img_encoded = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
-        b64 = base64.b64encode(img_encoded.tobytes()).decode("utf-8")
-        return f"data:image/jpeg;base64,{b64}"
+        return _encode_frame_data_url(frame)
     except Exception as e:
         logger.debug("Failed to get live frame for %s: %s", camera, e)
         return None
+
+
+def _encode_frame_data_url(frame: np.ndarray, target_height: int = 480) -> str:
+    """Downscale a BGR frame and encode it as a JPEG data URL for the model."""
+    height, width = frame.shape[:2]
+    if height > target_height:
+        scale = target_height / height
+        frame = cv2.resize(
+            frame,
+            (int(width * scale), target_height),
+            interpolation=cv2.INTER_AREA,
+        )
+    _, img_encoded = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    b64 = base64.b64encode(img_encoded.tobytes()).decode("utf-8")
+    return f"data:image/jpeg;base64,{b64}"
+
+
+def _request_roles(request: Request) -> list[str]:
+    """Roles from the auth proxy header, split on the configured separator."""
+    separator = request.app.frigate_config.proxy.separator
+    header = request.headers.get("remote-role", "")
+    return [r.strip() for r in header.split(separator) if r.strip()]
 
 
 async def _execute_set_camera_state(
     request: Request,
     arguments: dict[str, Any],
 ) -> dict[str, Any]:
-    role = request.headers.get("remote-role", "")
-    if "admin" not in [r.strip() for r in role.split(",")]:
+    if "admin" not in _request_roles(request):
         return {"error": "Admin privileges required to change camera settings."}
 
     camera = arguments.get("camera", "").strip()
@@ -736,6 +763,189 @@ def _execute_get_categorized_object_names(
         }
 
     return {"names": names}
+
+
+def _execute_get_export_cases(allowed_cameras: list[str]) -> dict[str, Any]:
+    """List export cases with how many accessible exports each one holds."""
+    from peewee import fn
+
+    count_rows = (
+        Export.select(Export.export_case, fn.COUNT(Export.id))
+        .where(Export.camera << allowed_cameras, Export.export_case.is_null(False))
+        .group_by(Export.export_case)
+        .tuples()
+    )
+    counts = {case_id: count for case_id, count in count_rows}
+
+    cases: list[dict[str, Any]] = []
+    for case in ExportCase.select().order_by(ExportCase.created_at.desc()):
+        created_at = case.created_at
+        cases.append(
+            {
+                "id": case.id,
+                "name": case.name,
+                "description": case.description,
+                "created_at_local": format_local_time(created_at.timestamp())
+                if isinstance(created_at, datetime)
+                else str(created_at),
+                "export_count": counts.get(case.id, 0),
+            }
+        )
+
+    if not cases:
+        return {"cases": [], "message": "No export cases exist yet."}
+
+    return {"cases": cases}
+
+
+async def _execute_create_export(
+    request: Request,
+    arguments: dict[str, Any],
+    allowed_cameras: list[str],
+) -> dict[str, Any]:
+    """Queue a recording export, optionally attached to an existing case."""
+    config = request.app.frigate_config
+    camera = (arguments.get("camera") or "").strip()
+    start_time = parse_iso_to_timestamp(arguments.get("start_time"))
+    end_time = parse_iso_to_timestamp(arguments.get("end_time"))
+    name = (arguments.get("name") or "").strip() or None
+
+    if not camera or start_time is None or end_time is None:
+        return {"error": "camera, start_time, and end_time are all required."}
+
+    if camera not in config.cameras:
+        return {"error": f"Camera '{camera}' not found."}
+
+    if camera not in allowed_cameras:
+        return {"error": f"Camera '{camera}' not found or access denied"}
+
+    if end_time <= start_time:
+        return {"error": "end_time must be after start_time."}
+
+    try:
+        playback_source = PlaybackSourceEnum(arguments.get("source") or "recordings")
+    except ValueError:
+        return {"error": "source must be 'recordings' or 'preview'."}
+
+    # Mirror the export API: attaching to an existing case is admin-only
+    # until case-level ACLs exist.
+    export_case_id = (arguments.get("export_case_id") or "").strip() or None
+    if export_case_id is not None:
+        if "admin" not in _request_roles(request):
+            return {"error": "Only admins can attach exports to an existing case."}
+        try:
+            ExportCase.get(ExportCase.id == export_case_id)
+        except ExportCase.DoesNotExist:
+            return {"error": f"Export case '{export_case_id}' not found."}
+
+    source_error = _validate_export_source(
+        camera, start_time, end_time, playback_source
+    )
+    if source_error is not None:
+        return {"error": source_error}
+
+    export_job = _build_export_job(
+        camera,
+        start_time,
+        end_time,
+        name,
+        None,
+        playback_source,
+        export_case_id,
+        chapters=config.cameras[camera].record.export.chapters,
+    )
+    try:
+        start_export_job(config, export_job)
+    except ExportQueueFullError:
+        return {"error": "Export queue is full. Try again once current exports finish."}
+
+    return {
+        "success": True,
+        "export_id": export_job.id,
+        "status": "queued",
+        "camera": camera,
+        "name": name,
+        "source": playback_source.value,
+        "start_time_local": format_local_time(start_time),
+        "end_time_local": format_local_time(end_time),
+        "export_case_id": export_case_id,
+        "message": "Export queued. It will appear on the Export page when finished.",
+    }
+
+
+async def _execute_get_event_image(
+    request: Request,
+    arguments: dict[str, Any],
+    allowed_cameras: list[str],
+) -> dict[str, Any]:
+    """Attach an event's thumbnail or snapshot for a vision model to view."""
+    event_id = (arguments.get("event_id") or "").strip()
+    if not event_id:
+        return {"error": "event_id is required."}
+
+    image_type = arguments.get("image") or "thumbnail"
+    if image_type not in ("thumbnail", "snapshot"):
+        return {"error": "image must be 'thumbnail' or 'snapshot'."}
+
+    try:
+        event = Event.get(Event.id == event_id)
+    except Event.DoesNotExist:
+        return {"error": f"Could not find event {event_id}."}
+
+    if event.camera not in allowed_cameras:
+        return {"error": f"Event {event_id} not found or access denied"}
+
+    chat_client = request.app.genai_manager.chat_client
+    if chat_client is None or not chat_client.supports_vision:
+        return {
+            "error": (
+                "The configured chat model does not support vision, so images "
+                "cannot be viewed."
+            )
+        }
+
+    note = None
+    frame = None
+    if image_type == "snapshot":
+        if event.has_snapshot:
+            frame, _ = load_event_snapshot_image(event)
+        if frame is None:
+            note = "Snapshot not available; returning the thumbnail instead."
+            image_type = "thumbnail"
+
+    if frame is None:
+        thumbnail = get_event_thumbnail_bytes(event)
+        if thumbnail:
+            frame = cv2.imdecode(
+                np.frombuffer(thumbnail, dtype=np.uint8), cv2.IMREAD_COLOR
+            )
+
+    if frame is None:
+        return {"error": f"No image is available for event {event_id}."}
+
+    result: dict[str, Any] = {
+        "id": event.id,
+        "camera": event.camera,
+        "label": event.label,
+        "sub_label": event.sub_label,
+        "zones": event.zones,
+        "start_time_local": format_local_time(event.start_time),
+        "image": image_type,
+    }
+    if event.end_time is not None:
+        result["end_time_local"] = format_local_time(event.end_time)
+    description = (event.data or {}).get("description")
+    if description:
+        result["description"] = description
+    if note:
+        result["note"] = note
+
+    result["_image_url"] = _encode_frame_data_url(frame)
+    result["_image_text"] = (
+        f"Here is the {image_type} for event {event.id} "
+        f"({event.sub_label or event.label} on {event.camera})."
+    )
+    return result
 
 
 async def _execute_tool_internal(
@@ -793,11 +1003,18 @@ async def _execute_tool_internal(
         return _execute_get_profile_status(request)
     elif tool_name == "get_recap":
         return _execute_get_recap(arguments, allowed_cameras)
+    elif tool_name == "get_export_cases":
+        return _execute_get_export_cases(allowed_cameras)
+    elif tool_name == "create_export":
+        return await _execute_create_export(request, arguments, allowed_cameras)
+    elif tool_name == "get_event_image":
+        return await _execute_get_event_image(request, arguments, allowed_cameras)
     else:
         logger.error(
             "Tool call failed: unknown tool %r. Expected one of: search_objects, find_similar_objects, "
             "get_categorized_object_names, get_live_context, start_camera_watch, stop_camera_watch, "
-            "get_profile_status, get_recap. Arguments received: %s",
+            "get_profile_status, get_recap, get_export_cases, create_export, get_event_image. "
+            "Arguments received: %s",
             tool_name,
             json.dumps(arguments),
         )
@@ -1026,13 +1243,73 @@ def _execute_get_recap(
         return {"error": "Failed to fetch recap data."}
 
 
+def _pending_tool_calls_from_tail(
+    conversation: list[dict[str, Any]],
+) -> list[dict[str, Any]] | None:
+    """Return the tool calls of a trailing assistant message, if any.
+
+    A conversation that ends with an assistant message requesting tools is a
+    resume after an approval pause: the client sends the chain back with its
+    decisions and the loop runs those calls before asking the model again.
+    """
+    if not conversation:
+        return None
+    tail = conversation[-1]
+    if tail.get("role") != "assistant" or not tail.get("tool_calls"):
+        return None
+    return parse_tool_calls_from_message(tail)
+
+
+def _tool_calls_awaiting_approval(
+    pending_tool_calls: list[dict[str, Any]],
+    body: ChatCompletionRequest,
+    write_tools: set[str],
+) -> list[dict[str, Any]]:
+    """Return the write tool calls the user still has to decide on."""
+    return [
+        {
+            "id": tc["id"],
+            "name": tc["name"],
+            "arguments": tc.get("arguments") or {},
+        }
+        for tc in pending_tool_calls
+        if tc["name"] in write_tools and tc["id"] not in body.tool_decisions
+    ]
+
+
+def _rejection_message(tool_names: list[str]) -> dict[str, Any]:
+    """User message telling the model a rejected call should not proceed.
+
+    Uses list-form content so the UI, which only renders string user
+    content, does not show it as something the user typed.
+    """
+    names = ", ".join(name.replace("_", " ") for name in tool_names)
+    return {
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": (
+                    f"I do not want to proceed with the {names} call. Ask me for "
+                    "clarification or suggest adjustments instead of running it."
+                ),
+            }
+        ],
+    }
+
+
 async def _execute_pending_tools(
     pending_tool_calls: list[dict[str, Any]],
     request: Request,
     allowed_cameras: list[str],
+    decisions: dict[str, str] | None = None,
 ) -> tuple[list[ToolCall], list[dict[str, Any]], list[dict[str, Any]]]:
     """
     Execute a list of tool calls.
+
+    Calls the user rejected (per `decisions`) are not executed; they get a
+    placeholder result and a user message saying not to proceed is appended
+    after the tool results.
 
     Returns:
         (ToolCall list for API response,
@@ -1042,10 +1319,28 @@ async def _execute_pending_tools(
     tool_calls_out: list[ToolCall] = []
     tool_results: list[dict[str, Any]] = []
     extra_messages: list[dict[str, Any]] = []
+    rejected_tools: list[str] = []
     for tool_call in pending_tool_calls:
         tool_name = tool_call["name"]
         tool_args = tool_call.get("arguments") or {}
         tool_call_id = tool_call["id"]
+        if decisions and decisions.get(tool_call_id) == "reject":
+            logger.debug(
+                "Tool %s (id: %s) was rejected by the user", tool_name, tool_call_id
+            )
+            rejected_tools.append(tool_name)
+            rejected_content = json.dumps(TOOL_REJECTED_RESULT)
+            tool_calls_out.append(
+                ToolCall(name=tool_name, arguments=tool_args, response=rejected_content)
+            )
+            tool_results.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tool_call_id,
+                    "content": rejected_content,
+                }
+            )
+            continue
         logger.debug(
             f"Executing tool: {tool_name} (id: {tool_call_id}) with arguments: {json.dumps(tool_args, indent=2)}"
         )
@@ -1079,17 +1374,21 @@ async def _execute_pending_tools(
                     if isinstance(evt, dict)
                 ]
 
-            # Extract _image_url from get_live_context results — images can
-            # only be sent in user messages, not tool results
+            # Extract _image_url from tool results — images can only be sent
+            # in user messages, not tool results
             if isinstance(tool_result, dict) and "_image_url" in tool_result:
                 image_url = tool_result.pop("_image_url")
+                image_text = tool_result.pop("_image_text", None) or (
+                    "Here is the current live image from camera "
+                    f"'{tool_result.get('camera', 'unknown')}'."
+                )
                 extra_messages.append(
                     {
                         "role": "user",
                         "content": [
                             {
                                 "type": "text",
-                                "text": f"Here is the current live image from camera '{tool_result.get('camera', 'unknown')}'.",
+                                "text": image_text,
                             },
                             {
                                 "type": "image_url",
@@ -1133,6 +1432,8 @@ async def _execute_pending_tools(
                     "content": error_content,
                 }
             )
+    if rejected_tools:
+        extra_messages.append(_rejection_message(rejected_tools))
     return (tool_calls_out, tool_results, extra_messages)
 
 
@@ -1179,6 +1480,8 @@ async def chat_completion(
         attribute_classifications=attribute_classifications,
         embeddings_language=_embeddings_language(config),
     )
+    write_tools = get_write_tool_names(tools)
+    llm_tools = strip_tool_access(tools)
     conversation = []
 
     # Build the system message only when the client hasn't already pinned one.
@@ -1217,6 +1520,10 @@ async def chat_completion(
     tool_calls: list[ToolCall] = []
     max_iterations = body.max_tool_iterations
 
+    # Resume after an approval pause: run the tail's tool calls (honoring the
+    # client's decisions) before asking the model for anything new.
+    resume_pending = _pending_tool_calls_from_tail(conversation)
+
     logger.debug(
         f"Starting chat completion with {len(conversation)} message(s), "
         f"{len(tools)} tool(s) available, max_iterations={max_iterations}"
@@ -1228,93 +1535,64 @@ async def chat_completion(
 
         async def stream_body_llm():
             nonlocal conversation, stream_iterations
+            pending: list[dict[str, Any]] | None = resume_pending
 
-            def _emit_chain(extra: list[dict[str, Any]] | None = None):
+            def _emit(payload: dict[str, Any]) -> bytes:
+                return json.dumps(payload).encode("utf-8") + b"\n"
+
+            def _emit_chain(extra: list[dict[str, Any]] | None = None) -> bytes:
                 # Return the full conversation (including the system message) so
                 # the client persists and replays it verbatim next turn.
-                chain = conversation + (extra or [])
-                return (
-                    json.dumps({"type": "messages", "messages": chain}).encode("utf-8")
-                    + b"\n"
+                return _emit(
+                    {"type": "messages", "messages": conversation + (extra or [])}
                 )
 
             while stream_iterations < max_iterations:
                 if await request.is_disconnected():
                     logger.debug("Client disconnected, stopping chat stream")
                     return
-                logger.debug(
-                    f"Streaming LLM (iteration {stream_iterations + 1}/{max_iterations}) "
-                    f"with {len(conversation)} message(s)"
-                )
-                async for event in genai_client.chat_with_tools_stream(
-                    messages=conversation,
-                    tools=tools if tools else None,
-                    tool_choice="auto",
-                    enable_thinking=body.enable_thinking,
-                ):
-                    if await request.is_disconnected():
-                        logger.debug("Client disconnected, stopping chat stream")
-                        return
-                    kind, value = event
-                    if kind == "content_delta":
-                        yield (
-                            json.dumps({"type": "content", "delta": value}).encode(
-                                "utf-8"
-                            )
-                            + b"\n"
-                        )
-                    elif kind == "reasoning_delta":
-                        yield (
-                            json.dumps({"type": "reasoning", "delta": value}).encode(
-                                "utf-8"
-                            )
-                            + b"\n"
-                        )
-                    elif kind == "stats":
-                        yield (
-                            json.dumps({"type": "stats", **value}).encode("utf-8")
-                            + b"\n"
-                        )
-                    elif kind == "message":
-                        msg = value
-                        if msg.get("finish_reason") == "error":
-                            yield (
-                                json.dumps(
+
+                if pending is None:
+                    logger.debug(
+                        f"Streaming LLM (iteration {stream_iterations + 1}/{max_iterations}) "
+                        f"with {len(conversation)} message(s)"
+                    )
+                    async for event in genai_client.chat_with_tools_stream(
+                        messages=conversation,
+                        tools=llm_tools if llm_tools else None,
+                        tool_choice="auto",
+                        enable_thinking=body.enable_thinking,
+                    ):
+                        if await request.is_disconnected():
+                            logger.debug("Client disconnected, stopping chat stream")
+                            return
+                        kind, value = event
+                        if kind == "content_delta":
+                            yield _emit({"type": "content", "delta": value})
+                        elif kind == "reasoning_delta":
+                            yield _emit({"type": "reasoning", "delta": value})
+                        elif kind == "stats":
+                            yield _emit({"type": "stats", **value})
+                        elif kind == "message":
+                            msg = value
+                            if msg.get("finish_reason") == "error":
+                                yield _emit(
                                     {
                                         "type": "error",
                                         "error": "An error occurred while processing your request.",
                                     }
-                                ).encode("utf-8")
-                                + b"\n"
-                            )
-                            return
-                        pending = msg.get("tool_calls")
-                        if pending:
-                            stream_iterations += 1
-                            conversation.append(
-                                build_assistant_message_for_conversation(
-                                    msg.get("content"), pending
-                                )
-                            )
-                            if await request.is_disconnected():
-                                logger.debug(
-                                    "Client disconnected before tool execution"
                                 )
                                 return
-                            (
-                                _executed_calls,
-                                tool_results,
-                                extra_msgs,
-                            ) = await _execute_pending_tools(
-                                pending, request, allowed_cameras
-                            )
-                            conversation.extend(tool_results)
-                            conversation.extend(extra_msgs)
-                            # Emit the running chain so the client can render tool
-                            # calls live and replay them verbatim next turn.
-                            yield _emit_chain()
-                            break
-                        else:
+                            requested = msg.get("tool_calls")
+                            if requested:
+                                stream_iterations += 1
+                                conversation.append(
+                                    build_assistant_message_for_conversation(
+                                        msg.get("content"), requested
+                                    )
+                                )
+                                pending = requested
+                                break
                             # Streaming never appends the final assistant message
                             # to the conversation, so add it to the chain.
                             yield _emit_chain(
@@ -1325,11 +1603,41 @@ async def chat_completion(
                                     }
                                 ]
                             )
-                            yield (json.dumps({"type": "done"}).encode("utf-8") + b"\n")
+                            yield _emit({"type": "done"})
                             return
-            else:
+                    if pending is None:
+                        # The stream ended without a final message; nothing
+                        # more to run.
+                        break
+
+                awaiting = _tool_calls_awaiting_approval(pending, body, write_tools)
+                if awaiting:
+                    # Pause before running write tools. The client shows the
+                    # calls, collects decisions, and resends the chain.
+                    yield _emit_chain()
+                    yield _emit({"type": "approval_required", "tool_calls": awaiting})
+                    yield _emit({"type": "done"})
+                    return
+
+                if await request.is_disconnected():
+                    logger.debug("Client disconnected before tool execution")
+                    return
+                (
+                    _executed_calls,
+                    tool_results,
+                    extra_msgs,
+                ) = await _execute_pending_tools(
+                    pending, request, allowed_cameras, decisions=body.tool_decisions
+                )
+                conversation.extend(tool_results)
+                conversation.extend(extra_msgs)
+                pending = None
+                # Emit the running chain so the client can render tool
+                # calls live and replay them verbatim next turn.
                 yield _emit_chain()
-                yield json.dumps({"type": "done"}).encode("utf-8") + b"\n"
+
+            yield _emit_chain()
+            yield _emit({"type": "done"})
 
         return StreamingResponse(
             stream_body_llm(),
@@ -1338,102 +1646,129 @@ async def chat_completion(
         )
 
     try:
+        pending_tool_calls = resume_pending
         while tool_iterations < max_iterations:
-            logger.debug(
-                f"Calling LLM (iteration {tool_iterations + 1}/{max_iterations}) "
-                f"with {len(conversation)} message(s) in conversation"
-            )
-            response = genai_client.chat_with_tools(
-                messages=conversation,
-                tools=tools if tools else None,
-                tool_choice="auto",
-                enable_thinking=body.enable_thinking,
-            )
-
-            if response.get("finish_reason") == "error":
-                logger.error("GenAI client returned an error")
-                return JSONResponse(
-                    content={
-                        "error": "An error occurred while processing your request.",
-                    },
-                    status_code=500,
-                )
-
-            conversation.append(
-                build_assistant_message_for_conversation(
-                    response.get("content"), response.get("tool_calls")
-                )
-            )
-
-            pending_tool_calls = response.get("tool_calls")
-            if not pending_tool_calls:
+            if pending_tool_calls is None:
                 logger.debug(
-                    f"Chat completion finished with final answer (iterations: {tool_iterations})"
+                    f"Calling LLM (iteration {tool_iterations + 1}/{max_iterations}) "
+                    f"with {len(conversation)} message(s) in conversation"
                 )
-                final_content = response.get("content") or ""
+                response = genai_client.chat_with_tools(
+                    messages=conversation,
+                    tools=llm_tools if llm_tools else None,
+                    tool_choice="auto",
+                    enable_thinking=body.enable_thinking,
+                )
 
-                if body.stream:
-                    final_reasoning = response.get("reasoning")
+                if response.get("finish_reason") == "error":
+                    logger.error("GenAI client returned an error")
+                    return JSONResponse(
+                        content={
+                            "error": "An error occurred while processing your request.",
+                        },
+                        status_code=500,
+                    )
 
-                    chain = list(conversation)
+                conversation.append(
+                    build_assistant_message_for_conversation(
+                        response.get("content"), response.get("tool_calls")
+                    )
+                )
 
-                    async def stream_body() -> Any:
-                        yield (
-                            json.dumps({"type": "messages", "messages": chain}).encode(
-                                "utf-8"
-                            )
-                            + b"\n"
-                        )
-                        # Emit the full reasoning trace up front when the
-                        # underlying client did not stream it
-                        if final_reasoning:
+                pending_tool_calls = response.get("tool_calls")
+                if not pending_tool_calls:
+                    logger.debug(
+                        f"Chat completion finished with final answer (iterations: {tool_iterations})"
+                    )
+                    final_content = response.get("content") or ""
+
+                    if body.stream:
+                        final_reasoning = response.get("reasoning")
+
+                        chain = list(conversation)
+
+                        async def stream_body() -> Any:
                             yield (
                                 json.dumps(
-                                    {"type": "reasoning", "delta": final_reasoning}
+                                    {"type": "messages", "messages": chain}
                                 ).encode("utf-8")
                                 + b"\n"
                             )
-                        # Stream content in word-sized chunks for smooth UX
-                        for part in chunk_content(final_content):
-                            yield (
-                                json.dumps({"type": "content", "delta": part}).encode(
-                                    "utf-8"
+                            # Emit the full reasoning trace up front when the
+                            # underlying client did not stream it
+                            if final_reasoning:
+                                yield (
+                                    json.dumps(
+                                        {"type": "reasoning", "delta": final_reasoning}
+                                    ).encode("utf-8")
+                                    + b"\n"
                                 )
-                                + b"\n"
-                            )
-                        yield json.dumps({"type": "done"}).encode("utf-8") + b"\n"
+                            # Stream content in word-sized chunks for smooth UX
+                            for part in chunk_content(final_content):
+                                yield (
+                                    json.dumps(
+                                        {"type": "content", "delta": part}
+                                    ).encode("utf-8")
+                                    + b"\n"
+                                )
+                            yield json.dumps({"type": "done"}).encode("utf-8") + b"\n"
 
-                    return StreamingResponse(
-                        stream_body(),
-                        media_type="application/x-ndjson",
+                        return StreamingResponse(
+                            stream_body(),
+                            media_type="application/x-ndjson",
+                        )
+
+                    return JSONResponse(
+                        content=ChatCompletionResponse(
+                            message=ChatMessageResponse(
+                                role="assistant",
+                                content=final_content,
+                                reasoning=response.get("reasoning"),
+                                tool_calls=None,
+                            ),
+                            finish_reason=response.get("finish_reason", "stop"),
+                            tool_iterations=tool_iterations,
+                            tool_calls=tool_calls,
+                            messages=list(conversation),
+                        ).model_dump(),
                     )
 
+                tool_iterations += 1
+                logger.debug(
+                    f"Tool calls detected (iteration {tool_iterations}/{max_iterations}): "
+                    f"{len(pending_tool_calls)} tool(s) to execute"
+                )
+
+            awaiting = _tool_calls_awaiting_approval(
+                pending_tool_calls, body, write_tools
+            )
+            if awaiting:
+                # Pause before running write tools; the client resends the
+                # returned chain with its decisions to continue.
                 return JSONResponse(
                     content=ChatCompletionResponse(
                         message=ChatMessageResponse(
                             role="assistant",
-                            content=final_content,
-                            reasoning=response.get("reasoning"),
-                            tool_calls=None,
+                            content=None,
+                            tool_calls=[ToolCallInvocation(**tc) for tc in awaiting],
                         ),
-                        finish_reason=response.get("finish_reason", "stop"),
+                        finish_reason="approval_required",
                         tool_iterations=tool_iterations,
                         tool_calls=tool_calls,
                         messages=list(conversation),
                     ).model_dump(),
                 )
 
-            tool_iterations += 1
-            logger.debug(
-                f"Tool calls detected (iteration {tool_iterations}/{max_iterations}): "
-                f"{len(pending_tool_calls)} tool(s) to execute"
-            )
             executed_calls, tool_results, extra_msgs = await _execute_pending_tools(
-                pending_tool_calls, request, allowed_cameras
+                pending_tool_calls,
+                request,
+                allowed_cameras,
+                decisions=body.tool_decisions,
             )
             tool_calls.extend(executed_calls)
             conversation.extend(tool_results)
             conversation.extend(extra_msgs)
+            pending_tool_calls = None
             logger.debug(
                 f"Added {len(tool_results)} tool result(s) to conversation. "
                 f"Continuing with next LLM call..."
