@@ -1301,6 +1301,9 @@ async def delete_camera(
             if request.app.dispatcher is not None:
                 request.app.dispatcher.clear_runtime_state_for_camera(camera_name)
 
+            if request.app.notice_registry is not None:
+                request.app.notice_registry.resolve_camera(camera_name)
+
             # Publish removal to stop ffmpeg processes and clean up runtime state
             request.app.config_publisher.publish_update(
                 CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, camera_name),

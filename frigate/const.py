@@ -155,6 +155,7 @@ UPDATE_MODEL_STATE = "update_model_state"
 UPDATE_EMBEDDINGS_REINDEX_PROGRESS = "handle_embeddings_reindex_progress"
 UPDATE_BIRDSEYE_LAYOUT = "update_birdseye_layout"
 UPDATE_JOB_STATE = "update_job_state"
+UPDATE_NOTICE = "update_notice"
 NOTIFICATION_TEST = "notification_test"
 
 # IO Nice Values

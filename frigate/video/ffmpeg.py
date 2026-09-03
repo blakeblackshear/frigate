@@ -29,6 +29,7 @@ from frigate.const import (
     STREAM_TYPE_MAIN,
     STREAM_TYPE_SUB,
     STREAM_TYPE_TO_ROLE,
+    UPDATE_NOTICE,
 )
 from frigate.log import LogPipe
 from frigate.util.builtin import EventsPerSecond, get_record_segment_time
@@ -42,6 +43,11 @@ from frigate.util.process import FrigateProcess
 logger = logging.getLogger(__name__)
 
 RECORD_GRACE_SECONDS = 90
+
+# a camera whose ffmpeg restarts this many times in the trailing hour is in a
+# crash loop; it recovers once the capture thread stays up this long
+CRASH_LOOP_RESTARTS = 5
+CRASH_LOOP_RECOVERY_S = 600
 
 
 def capture_frames(
@@ -140,6 +146,8 @@ class CameraWatchdog(threading.Thread):
         self.stop_event = stop_event
         self.sleeptime = self.config.ffmpeg.retry_interval
         self.reconnect_timestamps = deque()
+        self.crash_loop_raised = False
+        self._crash_loop_sent_restarts = 0
         self.stalls = stalls
         self.reconnects = reconnects
         self.detection_frame = detection_frame
@@ -188,6 +196,53 @@ class CameraWatchdog(threading.Thread):
         self._last_detect_status: str | None = None
         self._last_record_status: dict[str, str] = {}
         self._last_status_update_time: float = 0.0
+
+    def _update_crash_loop_notice(self, now: float) -> None:
+        """Raise the crash loop notice as restarts pile up, resolve once stable.
+
+        Called on every 1 second tick, so raises are sent only when the restart
+        count changes; the registry treats repeats of a state notice as updates.
+        """
+        restarts = len(self.reconnect_timestamps)
+        alive = self.capture_thread is not None and self.capture_thread.is_alive()
+
+        if not alive and restarts >= CRASH_LOOP_RESTARTS:
+            if self.crash_loop_raised and restarts == self._crash_loop_sent_restarts:
+                return
+
+            self.requestor.send_data(
+                UPDATE_NOTICE,
+                {
+                    "action": "raise",
+                    "kind": "ffmpeg_crash_loop",
+                    "scope": self.config.name,
+                    "params": {"restarts": restarts},
+                },
+            )
+            self.crash_loop_raised = True
+            self._crash_loop_sent_restarts = restarts
+        elif (
+            self.crash_loop_raised
+            and alive
+            and (
+                restarts == 0
+                or now - self.reconnect_timestamps[-1] >= CRASH_LOOP_RECOVERY_S
+            )
+        ):
+            self._resolve_crash_loop()
+
+    def _resolve_crash_loop(self) -> None:
+        self.requestor.send_data(
+            UPDATE_NOTICE,
+            {
+                "action": "resolve",
+                "kind": "ffmpeg_crash_loop",
+                "scope": self.config.name,
+                "params": {},
+            },
+        )
+        self.crash_loop_raised = False
+        self._crash_loop_sent_restarts = 0
 
     def _send_detect_status(self, status: str, now: float) -> None:
         """Send detect status only if changed or retry_interval has elapsed."""
@@ -379,6 +434,9 @@ class CameraWatchdog(threading.Thread):
                     # cameras without a sub stream never get a record_sub topic
                     if self.config.record.sub.enabled:
                         self._send_record_status(STREAM_TYPE_SUB, "disabled", now)
+
+                    if self.crash_loop_raised:
+                        self._resolve_crash_loop()
                 self.was_enabled = enabled
                 continue
 
@@ -456,6 +514,7 @@ class CameraWatchdog(threading.Thread):
                 self.logger.error(
                     f"Ffmpeg process crashed unexpectedly for {self.config.name}."
                 )
+                self._update_crash_loop_notice(now)
                 if can_restart:
                     self.reset_capture_thread(terminate=False)
                     last_restart_time = now
@@ -485,6 +544,7 @@ class CameraWatchdog(threading.Thread):
                 # process is running normally
                 self._send_detect_status("online", now)
                 self.fps_overflow_count = 0
+                self._update_crash_loop_notice(now)
 
             for p in self.ffmpeg_other_processes:
                 poll = p["process"].poll()

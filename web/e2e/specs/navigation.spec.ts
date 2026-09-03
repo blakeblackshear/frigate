@@ -130,8 +130,8 @@ test.describe("Navigation — settings menu (desktop) @critical", () => {
 
   const TARGETS = [
     { label: "Settings", url: /\/settings/ },
-    { label: "System metrics", url: /\/system/ },
-    { label: "System logs", url: /\/logs/ },
+    { label: "Health and Metrics", url: /\/system/ },
+    { label: "Logs", url: /\/logs/ },
     { label: "Configuration Editor", url: /\/config/ },
   ];
 
@@ -142,7 +142,7 @@ test.describe("Navigation — settings menu (desktop) @critical", () => {
         .locator("aside .mb-8 div[class*='cursor-pointer']")
         .first();
       await gear.click();
-      await frigateApp.page.getByLabel(target.label).click();
+      await frigateApp.page.getByLabel(target.label, { exact: true }).click();
       await expect(frigateApp.page).toHaveURL(target.url);
     });
   }

@@ -2,7 +2,7 @@
  * FrigateStats factory for E2E tests.
  */
 
-import type { DeepPartial } from "./config";
+import { deepMerge, type DeepPartial } from "./config";
 
 function cameraStats(_name: string) {
   return {
@@ -72,5 +72,5 @@ export function statsFactory(
   overrides?: DeepPartial<typeof BASE_STATS>,
 ): typeof BASE_STATS {
   if (!overrides) return BASE_STATS;
-  return { ...BASE_STATS, ...overrides } as typeof BASE_STATS;
+  return deepMerge(BASE_STATS, overrides) as typeof BASE_STATS;
 }
