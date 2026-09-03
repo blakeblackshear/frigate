@@ -1,1 +1,72 @@
-{}
+{
+	"documentTitle": "채팅 - Frigate",
+	"title": "Frigate 채팅",
+	"subtitle": "카메라 관리 및 인사이트를 위한 AI 어시스턴트",
+	"placeholder": "무엇이든 물어보세요...",
+	"error": "문제가 발생했습니다. 다시 시도해 주세요.",
+	"processing": "처리 중...",
+	"toolsUsed": "사용된 도구: {{tools}}",
+	"showTools": "도구 보기 ({{count}}개)",
+	"hideTools": "도구 숨기기",
+	"call": "호출",
+	"result": "결과",
+	"arguments": "인수:",
+	"response": "응답:",
+	"attachment_chip_label": "{{camera}}의 {{label}}",
+	"attachment_chip_remove": "첨부 파일 제거",
+	"open_in_explore": "탐색에서 열기",
+	"attach_event_aria": "{{eventId}} 이벤트 첨부",
+	"attachment_picker_paste_label": "또는 이벤트 ID 붙여넣기",
+	"attachment_picker_attach": "첨부",
+	"attachment_picker_placeholder": "이벤트 첨부",
+	"quick_reply_find_similar": "유사한 목격 사례 찾기",
+	"quick_reply_tell_me_more": "자세히 알아보기",
+	"quick_reply_when_else": "다른 목격 시점 찾기",
+	"quick_reply_find_similar_text": "이와 유사한 목격 사례를 찾아줘.",
+	"quick_reply_tell_me_more_text": "이 항목에 대해 더 자세히 알려줘.",
+	"quick_reply_when_else_text": "이 대상이 또 언제 목격되었어?",
+	"anchor": "참조",
+	"similarity_score": "유사도",
+	"no_similar_objects_found": "유사한 객체를 찾을 수 없습니다.",
+	"semantic_search_required": "유사한 객체를 찾으려면 시맨틱 검색이 활성화되어 있어야 합니다.",
+	"send": "전송",
+	"suggested_requests": "추천 질문:",
+	"starting_requests": {
+		"show_recent_events": "최근 이벤트 표시",
+		"show_camera_status": "카메라 상태 확인",
+		"recap": "부재 중 발생한 일 요약",
+		"watch_camera": "카메라 활동 모니터링"
+	},
+	"starting_requests_prompts": {
+		"show_recent_events": "지난 1시간 동안 발생한 최근 이벤트를 보여줘",
+		"show_camera_status": "현재 내 카메라 상태가 어때?",
+		"recap": "내가 자리를 비운 동안 무슨 일이 있었어?",
+		"watch_camera": "현관문을 주시하다가 누군가 나타나면 알려줘"
+	},
+	"new_chat": "새 채팅",
+	"settings": {
+		"title": "채팅 설정",
+		"show_stats": {
+			"title": "통계 표시",
+			"desc": "채팅 응답의 생성 속도 및 컨텍스트 크기를 표시합니다.",
+			"while_generating": "생성 중에만",
+			"always": "항상"
+		},
+		"auto_scroll": {
+			"title": "자동 스크롤",
+			"desc": "새 메시지가 도착하면 화면을 자동으로 따라갑니다."
+		}
+	},
+	"stats": {
+		"context": "{{tokens}} 토큰",
+		"tokens_per_second": "{{rate}} t/s"
+	},
+	"reasoning": {
+		"active": "추론 중…",
+		"show": "추론 과정 보기",
+		"hide": "추론 과정 숨기기"
+	},
+	"thinking": {
+		"toggle": "생각 과정 전환"
+	}
+}

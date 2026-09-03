@@ -1,28 +1,73 @@
 {
-  "search": "검색",
-  "savedSearches": "저장된 검색들",
-  "button": {
-    "clear": "검색 초기화",
-    "save": "검색 저장",
-    "filterInformation": "필터 정보",
-    "delete": "저장된 검색 삭제",
-    "filterActive": "필터 활성화됨"
-  },
-  "searchFor": "{{inputValue}} 검색",
-  "trackedObjectId": "추적 객체 ID",
-  "filter": {
-    "label": {
-      "cameras": "카메라",
-      "labels": "레이블",
-      "zones": "구역",
-      "sub_labels": "하위 레이블",
-      "attributes": "속성",
-      "search_type": "검색 유형",
-      "time_range": "시간 범위",
-      "before": "이전",
-      "after": "이후",
-      "min_score": "최소 점수",
-      "max_score": "최대 점수"
-    }
-  }
+	"search": "검색",
+	"savedSearches": "저장된 검색 조건",
+	"searchFor": "'{{inputValue}}' 검색",
+	"button": {
+		"clear": "검색어 지우기",
+		"save": "검색 조건 저장",
+		"delete": "저장된 검색 조건 삭제",
+		"filterInformation": "필터 정보",
+		"filterActive": "필터 적용됨"
+	},
+	"trackedObjectId": "추적 객체 ID",
+	"filter": {
+		"label": {
+			"cameras": "카메라",
+			"labels": "레이블",
+			"zones": "구역",
+			"sub_labels": "하위 레이블",
+			"attributes": "속성",
+			"search_type": "검색 유형",
+			"time_range": "시간 범위",
+			"before": "이전",
+			"after": "이후",
+			"min_score": "최소 점수",
+			"max_score": "최대 점수",
+			"min_speed": "최소 속도",
+			"max_speed": "최대 속도",
+			"recognized_license_plate": "인식된 차량 번호판",
+			"has_clip": "비디오 클립 있음",
+			"has_snapshot": "스냅샷 있음"
+		},
+		"searchType": {
+			"thumbnail": "썸네일",
+			"description": "설명"
+		},
+		"toast": {
+			"error": {
+				"beforeDateBeLaterAfter": "'이전(before)' 날짜는 '이후(after)' 날짜보다 뒤여야 합니다.",
+				"afterDatebeEarlierBefore": "'이후(after)' 날짜는 '이전(before)' 날짜보다 앞서야 합니다.",
+				"minScoreMustBeLessOrEqualMaxScore": "'최소 점수'는 '최대 점수'보다 작거나 같아야 합니다.",
+				"maxScoreMustBeGreaterOrEqualMinScore": "'최대 점수'는 '최소 점수'보다 크거나 같아야 합니다.",
+				"minSpeedMustBeLessOrEqualMaxSpeed": "'최소 속도'는 '최대 속도'보다 작거나 같아야 합니다.",
+				"maxSpeedMustBeGreaterOrEqualMinSpeed": "'최대 속도'는 '최소 속도'보다 크거나 같아야 합니다."
+			}
+		},
+		"tips": {
+			"title": "텍스트 필터 사용 방법",
+			"desc": {
+				"text": "필터를 사용하면 검색 결과를 좁힐 수 있습니다. 입력창에서 다음과 같이 사용하세요:",
+				"step1": "필터 키 이름 뒤에 콜론을 입력합니다 (예: \"cameras:\").",
+				"step2": "추천 목록에서 값을 선택하거나 직접 입력합니다.",
+				"step3": "필터 사이에 공백을 두어 여러 개의 필터를 연속으로 사용할 수 있습니다.",
+				"step4": "날짜 필터(before:, after:)는 {{DateFormat}} 형식을 사용합니다.",
+				"step5": "시간 범위 필터는 {{exampleTime}} 형식을 사용합니다.",
+				"step6": "필터 옆의 'x'를 클릭하여 필터를 제거합니다.",
+				"exampleLabel": "예시:"
+			}
+		},
+		"header": {
+			"currentFilterType": "필터 값",
+			"noFilters": "필터",
+			"activeFilters": "적용된 필터"
+		}
+	},
+	"similaritySearch": {
+		"title": "유사도 검색",
+		"active": "유사도 검색 활성 상태",
+		"clear": "유사도 검색 초기화"
+	},
+	"placeholder": {
+		"search": "검색…"
+	}
 }

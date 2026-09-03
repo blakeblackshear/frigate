@@ -1,1 +1,78 @@
-{}
+{
+	"documentTitle": "움직임 검색 - Frigate",
+	"title": "움직임 검색",
+	"description": "다각형을 그려 관심 영역(ROI)을 지정하고, 해당 영역 내에서 움직임 변화를 검색할 시간 범위를 지정하세요.",
+	"selectCamera": "움직임 검색을 불러오는 중입니다",
+	"startSearch": "검색 시작",
+	"searchStarted": "검색이 시작되었습니다",
+	"searchCancelled": "검색이 취소되었습니다",
+	"cancelSearch": "취소",
+	"searching": "검색 진행 중입니다.",
+	"scanning": "{{time}} 스캔 중",
+	"searchComplete": "검색 완료",
+	"noResultsYet": "선택한 영역의 움직임 변화를 찾으려면 검색을 실행하세요",
+	"noChangesFound": "선택한 영역에서 감지된 픽셀 변화가 없습니다",
+	"changesFound_one": "움직임 변화 {{count}}건 발견",
+	"changesFound_other": "움직임 변화 {{count}}건 발견",
+	"framesProcessed": "{{count}}개 프레임 처리됨",
+	"jumpToTime": "이 시간대로 이동",
+	"results": "결과",
+	"showSegmentHeatmap": "히트맵",
+	"newSearch": "새 검색",
+	"clearResults": "결과 지우기",
+	"clearROI": "다각형 지우기",
+	"polygonControls": {
+		"points_one": "점 {{count}}개",
+		"points_other": "점 {{count}}개",
+		"undo": "마지막 점 취소",
+		"reset": "다각형 초기화",
+		"drawMode": "그리기",
+		"moveMode": "이동"
+	},
+	"motionHeatmapLabel": "움직임 히트맵",
+	"dialog": {
+		"title": "움직임 검색",
+		"cameraLabel": "카메라",
+		"previewAlt": "{{camera}} 카메라 미리보기"
+	},
+	"timeRange": {
+		"title": "검색 범위",
+		"start": "시작 시간",
+		"end": "종료 시간"
+	},
+	"settings": {
+		"title": "검색 설정",
+		"parallelMode": "병렬 모드",
+		"parallelModeDesc": "여러 녹화 구간을 동시에 스캔합니다 (더 빠르지만 디코딩 자원을 더 많이 소모함)",
+		"threshold": "민감도 임계값",
+		"thresholdDesc": "값이 낮을수록 더 미세한 변화를 감지합니다 (1-255)",
+		"minArea": "최소 변화 면적",
+		"minAreaDesc": "단일 움직임 영역의 최소 크기(관심 영역 대비 백분율)",
+		"maxResults": "최대 결과 수",
+		"maxResultsDesc": "일치하는 타임스탬프가 이 개수에 도달하면 검색을 중단합니다"
+	},
+	"errors": {
+		"noCamera": "카메라를 선택해 주세요",
+		"noROI": "관심 영역(ROI)을 그려 주세요",
+		"noTimeRange": "시간 범위를 선택해 주세요",
+		"invalidTimeRange": "종료 시간은 시작 시간 이후여야 합니다",
+		"searchFailed": "검색 실패: {{message}}",
+		"polygonTooSmall": "다각형은 최소 3개 이상의 점이 필요합니다",
+		"unknown": "알 수 없는 오류"
+	},
+	"changePercentage": "{{percentage}}% 변화됨",
+	"metrics": {
+		"title": "검색 지표",
+		"segmentsScanned": "스캔한 세그먼트",
+		"segmentsProcessed": "처리됨",
+		"segmentsSkippedInactive": "건너뜀 (활동 없음)",
+		"segmentsSkippedHeatmap": "건너뜀 (ROI 겹침 없음)",
+		"fallbackFullRange": "전체 범위 폴백 스캔",
+		"framesDecoded": "디코딩된 프레임",
+		"wallTime": "검색 소요 시간",
+		"segmentErrors": "세그먼트 오류",
+		"seconds": "{{seconds}}초",
+		"minutesSeconds": "{{minutes}}분 {{seconds}}초",
+		"scanSummary": "{{segments}}개 세그먼트 · {{time}}"
+	}
+}

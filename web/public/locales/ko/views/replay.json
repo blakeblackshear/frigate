@@ -1,1 +1,60 @@
-{}
+{
+	"title": "디버그 리플레이",
+	"description": "디버깅을 위해 카메라 녹화본을 다시 재생합니다. 객체 목록에는 감지된 객체의 시간 지연 요약이 표시되며, 메시지 탭에는 리플레이 영상에 대한 Frigate 내부 메시지 스트림이 표시됩니다.",
+	"websocket_messages": "메시지",
+	"dialog": {
+		"title": "디버그 리플레이 시작",
+		"description": "객체 감지 및 추적 문제 디버깅을 위해 지난 녹화본을 반복 재생하는 임시 리플레이 카메라를 생성합니다. 리플레이 카메라는 원본 카메라와 동일한 감지 설정을 가집니다. 시작할 시간 범위를 선택하세요.",
+		"camera": "원본 카메라",
+		"timeRange": "시간 범위",
+		"preset": {
+			"1m": "최근 1분",
+			"5m": "최근 5분",
+			"timeline": "타임라인에서 선택",
+			"custom": "사용자 정의"
+		},
+		"startButton": "리플레이 시작",
+		"selectFromTimeline": "선택",
+		"starting": "리플레이 시작 중...",
+		"startLabel": "시작",
+		"endLabel": "종료",
+		"toast": {
+			"error": "디버그 리플레이 시작 실패: {{error}}",
+			"alreadyActive": "이미 활성화된 리플레이 세션이 있습니다",
+			"noRecordings": "선택한 시간 범위에서 녹화본을 찾을 수 없습니다",
+			"stopError": "디버그 리플레이 중지 실패: {{error}}",
+			"goToReplay": "리플레이로 이동"
+		}
+	},
+	"page": {
+		"noSession": "활성화된 디버그 리플레이 세션 없음",
+		"noSessionDesc": "기록(History) 보기 툴바에서 작업(Actions) 버튼을 클릭하고 '디버그 리플레이'를 선택하여 시작하세요.",
+		"goToRecordings": "기록으로 이동",
+		"preparingClip": "클립 준비 중…",
+		"preparingClipDesc": "Frigate이 선택한 시간 범위의 녹화본을 이어 붙이는 중입니다. 긴 시간 범위의 경우 약 1분 정도 소요될 수 있습니다.",
+		"startingCamera": "디버그 리플레이 시작 중…",
+		"startError": {
+			"title": "디버그 리플레이 시작 실패",
+			"back": "기록으로 돌아가기"
+		},
+		"sourceCamera": "원본 카메라",
+		"replayCamera": "리플레이 카메라",
+		"initializingReplay": "디버그 리플레이 초기화 중...",
+		"stoppingReplay": "디버그 리플레이 중지 중...",
+		"stopReplay": "리플레이 중지",
+		"confirmStop": {
+			"title": "디버그 리플레이를 중지하시겠습니까?",
+			"description": "세션이 중지되고 모든 임시 데이터가 정리됩니다. 계속하시겠습니까?",
+			"confirm": "리플레이 중지",
+			"cancel": "취소"
+		},
+		"activity": "활동",
+		"objects": "객체 목록",
+		"audioDetections": "오디오 감지",
+		"noActivity": "감지된 활동 없음",
+		"activeTracking": "활성 추적 중",
+		"noActiveTracking": "활성 추적 없음",
+		"configuration": "설정",
+		"configurationDesc": "디버그 리플레이 카메라의 움직임 감지 및 객체 추적 설정을 미세 조정합니다. Frigate 설정 파일에는 변경 사항이 저장되지 않습니다."
+	}
+}

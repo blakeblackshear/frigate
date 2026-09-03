@@ -1,39 +1,265 @@
 {
-  "documentTitle": "탐색 - Frigate",
-  "generativeAI": "생성형 AI",
-  "exploreMore": "{{label}} 더 많은 감지 대상 탐색하기",
-  "exploreIsUnavailable": {
-    "title": "탐색을 사용할 수 없습니다",
-    "embeddingsReindexing": {
-      "context": "추적된 객체의 임베딩 색인 재구성이 완료된 후 '탐색' 기능을 사용할 수 있습니다.",
-      "startingUp": "시작 중…",
-      "estimatedTime": "예상 남은시간:",
-      "finishingShortly": "곧 완료됩니다",
-      "step": {
-        "thumbnailsEmbedded": "처리된 썸네일: ",
-        "descriptionsEmbedded": "처리된 설명: ",
-        "trackedObjectsProcessed": "처리된 추적 감지: "
-      }
-    },
-    "downloadingModels": {
-      "context": "Frigate가 시맨틱 검색 기능을 지원하기 위해 필요한 임베딩 모델을 다운로드하고 있습니다. 네트워크 연결 속도에 따라 몇 분 정도 소요될 수 있습니다.",
-      "setup": {
-        "visionModel": "비전 모델",
-        "visionModelFeatureExtractor": "비전 모델 특징 추출기",
-        "textModel": "Text model",
-        "textTokenizer": "텍스트 토크나이저"
-      },
-      "tips": {
-        "context": "모델이 다운로드된 후 추적 객체의 임베딩을 색인 재구성하는 것이 좋습니다."
-      },
-      "error": "오류가 발생했습니다. Frigate 로그를 확인하세요."
-    }
-  },
-  "details": {
-    "timestamp": "시간 기록"
-  },
-  "trackedObjectDetails": "추적 객체 세부 정보",
-  "type": {
-    "details": "세부 정보"
-  }
+	"documentTitle": "탐색 - Frigate",
+	"generativeAI": "생성형 AI",
+	"exploreMore": "더 많은 {{label}} 객체 탐색",
+	"exploreIsUnavailable": {
+		"title": "탐색 기능을 사용할 수 없음",
+		"embeddingsReindexing": {
+			"context": "추적 객체 임베딩 재색인이 완료된 후 탐색 기능을 사용할 수 있습니다.",
+			"startingUp": "시작 중…",
+			"estimatedTime": "예상 남은 시간:",
+			"finishingShortly": "곧 완료됩니다",
+			"step": {
+				"thumbnailsEmbedded": "임베딩된 썸네일: ",
+				"descriptionsEmbedded": "임베딩된 설명: ",
+				"trackedObjectsProcessed": "처리된 추적 객체: "
+			}
+		},
+		"downloadingModels": {
+			"context": "Frigate이 시맨틱 검색 기능을 지원하기 위해 필요한 임베딩 모델을 다운로드하고 있습니다. 네트워크 연결 속도에 따라 몇 분 정도 걸릴 수 있습니다.",
+			"setup": {
+				"visionModel": "비전 모델",
+				"visionModelFeatureExtractor": "비전 모델 특징 추출기",
+				"textModel": "텍스트 모델",
+				"textTokenizer": "텍스트 토크나이저"
+			},
+			"tips": {
+				"context": "모델 다운로드가 완료되면 추적 객체의 임베딩을 다시 색인하는 것이 좋습니다."
+			},
+			"error": "오류가 발생했습니다. Frigate 로그를 확인하세요."
+		}
+	},
+	"trackedObjectDetails": "추적 객체 세부 정보",
+	"type": {
+		"details": "세부 정보",
+		"snapshot": "스냅샷",
+		"thumbnail": "썸네일",
+		"video": "동영상",
+		"tracking_details": "추적 세부 정보"
+	},
+	"trackingDetails": {
+		"title": "추적 세부 정보",
+		"noImageFound": "이 타임스탬프의 이미지를 찾을 수 없습니다.",
+		"createObjectMask": "객체 마스크 생성",
+		"adjustAnnotationSettings": "어노테이션 설정 조정",
+		"scrollViewTips": "이 객체 수명주기의 주요 순간을 보려면 클릭하세요.",
+		"autoTrackingTips": "자동 추적 카메라의 경우 바운딩 박스 위치가 부정확할 수 있습니다.",
+		"count": "{{second}}개 중 {{first}}",
+		"trackedPoint": "추적 지점",
+		"lifecycleItemDesc": {
+			"visible": "{{label}} 감지됨",
+			"entered_zone": "{{label}}이(가) {{zones}}에 진입함",
+			"active": "{{label}}이(가) 활동 상태로 전환됨",
+			"stationary": "{{label}}이(가) 정지 상태로 전환됨",
+			"attribute": {
+				"faceOrLicense_plate": "{{label}}의 {{attribute}} 감지됨",
+				"other": "{{label}}이(가) {{attribute}}(으)로 인식됨"
+			},
+			"gone": "{{label}}이(가) 사라짐",
+			"heard": "{{label}} 소리 감지됨",
+			"external": "{{label}} 감지됨",
+			"header": {
+				"zones": "구역",
+				"ratio": "비율",
+				"area": "면적",
+				"score": "점수",
+				"computedScore": "계산된 점수",
+				"topScore": "최고 점수",
+				"toggleAdvancedScores": "고급 점수 전환"
+			}
+		},
+		"annotationSettings": {
+			"title": "어노테이션 설정",
+			"showAllZones": {
+				"title": "모든 구역 표시",
+				"desc": "객체가 특정 구역에 진입한 프레임에서 항상 모든 구역을 표시합니다."
+			},
+			"offset": {
+				"label": "어노테이션 오프셋",
+				"desc": "이 데이터는 카메라의 감지(detect) 피드에서 생성되지만 녹화(record) 피드의 영상 위에 덧씌워집니다. 두 스트림이 완벽히 동기화되지 않을 수 있어 바운딩 박스와 녹화 영상이 정확히 일치하지 않을 수 있습니다. 이 설정을 사용하여 어노테이션을 시간상 앞뒤로 이동해 녹화 영상과의 싱크를 맞출 수 있습니다.",
+				"millisecondsToOffset": "감지 어노테이션을 오프셋할 밀리초(ms) 단위 시간입니다. <em>기본값: 0</em>",
+				"tips": "영상 재생이 박스 및 이동 경로 지점보다 앞서면 값을 낮추고, 영상 재생이 뒤처지면 값을 높이세요. 음수 값도 가능합니다.",
+				"toast": {
+					"success": "{{camera}} 카메라의 어노테이션 오프셋이 설정 파일에 저장되었습니다."
+				}
+			}
+		},
+		"carousel": {
+			"previous": "이전 슬라이드",
+			"next": "다음 슬라이드"
+		}
+	},
+	"details": {
+		"item": {
+			"title": "다시보기 항목 세부 정보",
+			"desc": "다시보기 항목 세부 정보",
+			"button": {
+				"share": "이 다시보기 항목 공유",
+				"viewInExplore": "탐색에서 보기"
+			},
+			"tips": {
+				"mismatch_one": "사용할 수 없는 객체 {{count}}개가 감지되어 이 다시보기 항목에 포함되었습니다. 해당 객체는 알림 또는 감지 기준을 충족하지 못했거나 이미 정리/삭제되었습니다.",
+				"mismatch_other": "사용할 수 없는 객체 {{count}}개가 감지되어 이 다시보기 항목에 포함되었습니다. 해당 객체는 알림 또는 감지 기준을 충족하지 못했거나 이미 정리/삭제되었습니다.",
+				"hasMissingObjects": "다음 레이블에 대해 Frigate이 추적 객체를 저장하도록 하려면 설정을 조정하세요: <em>{{objects}}</em>"
+			},
+			"toast": {
+				"success": {
+					"regenerate": "{{provider}}에 새로운 설명을 요청했습니다. 제공업체의 처리 속도에 따라 새 설명을 다시 생성하는 데 시간이 걸릴 수 있습니다.",
+					"updatedSublabel": "하위 레이블을 성공적으로 업데이트했습니다.",
+					"updatedLPR": "차량 번호판을 성공적으로 업데이트했습니다.",
+					"updatedAttributes": "속성을 성공적으로 업데이트했습니다.",
+					"audioTranscription": "오디오 텍스트 변환을 성공적으로 요청했습니다. Frigate 서버 성능에 따라 변환이 완료되기까지 시간이 걸릴 수 있습니다."
+				},
+				"error": {
+					"regenerate": "{{provider}}에 새 설명 요청 실패: {{errorMessage}}",
+					"updatedSublabelFailed": "하위 레이블 업데이트 실패: {{errorMessage}}",
+					"updatedLPRFailed": "차량 번호판 업데이트 실패: {{errorMessage}}",
+					"updatedAttributesFailed": "속성 업데이트 실패: {{errorMessage}}",
+					"audioTranscription": "오디오 텍스트 변환 요청 실패: {{errorMessage}}"
+				}
+			}
+		},
+		"label": "레이블",
+		"editSubLabel": {
+			"title": "하위 레이블 수정",
+			"desc": "이 {{label}}의 새 하위 레이블 입력",
+			"descNoLabel": "이 추적 객체의 새 하위 레이블 입력"
+		},
+		"editLPR": {
+			"title": "차량 번호판 수정",
+			"desc": "이 {{label}}의 새 번호판 번호 입력",
+			"descNoLabel": "이 추적 객체의 새 번호판 번호 입력"
+		},
+		"editAttributes": {
+			"title": "속성 수정",
+			"desc": "이 {{label}}의 분류 속성 선택"
+		},
+		"snapshotScore": {
+			"label": "스냅샷 점수"
+		},
+		"topScore": {
+			"label": "최고 점수",
+			"info": "최고 점수는 추적 객체의 가장 높은 중간값(median) 점수이므로 검색 결과 썸네일에 표시된 점수와 다를 수 있습니다."
+		},
+		"score": {
+			"label": "신뢰도 점수"
+		},
+		"recognizedLicensePlate": "인식된 차량 번호판",
+		"attributes": "분류 속성",
+		"estimatedSpeed": "예상 속도",
+		"objects": "객체",
+		"camera": "카메라",
+		"zones": "구역",
+		"timestamp": "타임스탬프",
+		"button": {
+			"findSimilar": "유사 항목 찾기",
+			"regenerate": {
+				"title": "다시 생성",
+				"label": "추적 객체 설명 다시 생성"
+			}
+		},
+		"description": {
+			"label": "설명",
+			"placeholder": "추적된 객체에 대한 설명",
+			"aiTips": "Frigate은 추적 객체의 수명주기가 완전히 끝날 때까지 생성형 AI 제공업체에 설명을 요청하지 않습니다."
+		},
+		"expandRegenerationMenu": "설명 재생성 메뉴 펼치기",
+		"regenerateFromSnapshot": "스냅샷 기반으로 다시 생성",
+		"regenerateFromThumbnails": "썸네일 기반으로 다시 생성",
+		"tips": {
+			"descriptionSaved": "설명을 성공적으로 저장했습니다.",
+			"saveDescriptionFailed": "설명 업데이트 실패: {{errorMessage}}"
+		},
+		"title": {
+			"label": "제목"
+		},
+		"scoreInfo": "점수 정보"
+	},
+	"itemMenu": {
+		"downloadVideo": {
+			"label": "동영상 다운로드",
+			"aria": "동영상 다운로드"
+		},
+		"downloadSnapshot": {
+			"label": "스냅샷 다운로드",
+			"aria": "스냅샷 다운로드"
+		},
+		"downloadCleanSnapshot": {
+			"label": "클린 스냅샷(박스 제외) 다운로드",
+			"aria": "클린 스냅샷 다운로드"
+		},
+		"viewTrackingDetails": {
+			"label": "추적 세부 정보 보기",
+			"aria": "추적 세부 정보 표시"
+		},
+		"findSimilar": {
+			"label": "유사 항목 찾기",
+			"aria": "유사한 추적 객체 찾기"
+		},
+		"addTrigger": {
+			"label": "트리거 추가",
+			"aria": "이 추적 객체에 대한 트리거 추가"
+		},
+		"audioTranscription": {
+			"label": "음성 변환",
+			"aria": "오디오 텍스트 변환 요청"
+		},
+		"submitToPlus": {
+			"label": "Frigate+에 제출",
+			"aria": "Frigate Plus에 제출"
+		},
+		"viewInHistory": {
+			"label": "기록에서 보기",
+			"aria": "기록에서 보기"
+		},
+		"deleteTrackedObject": {
+			"label": "이 추적 객체 삭제"
+		},
+		"showObjectDetails": {
+			"label": "객체 이동 경로 표시"
+		},
+		"hideObjectDetails": {
+			"label": "객체 이동 경로 숨기기"
+		},
+		"debugReplay": {
+			"label": "디버그 리플레이",
+			"aria": "디버그 리플레이 보기에서 이 추적 객체 보기"
+		},
+		"more": {
+			"aria": "더보기"
+		}
+	},
+	"dialog": {
+		"confirmDelete": {
+			"title": "삭제 확인",
+			"desc": "이 추적 객체를 삭제하면 스냅샷, 저장된 임베딩 및 연결된 모든 추적 세부 정보 항목이 제거됩니다. 기록 보기의 녹화 영상은 삭제되지 <em>않습니다</em>.<br /><br />정말로 계속 진행하시겠습니까?"
+		},
+		"toast": {
+			"error": "이 추적 객체 삭제 중 오류 발생: {{errorMessage}}"
+		}
+	},
+	"noTrackedObjects": "추적된 객체를 찾을 수 없음",
+	"fetchingTrackedObjectsFailed": "추적 객체 불러오기 오류: {{errorMessage}}",
+	"trackedObjectsCount_one": "추적된 객체 {{count}}개 ",
+	"trackedObjectsCount_other": "추적된 객체 {{count}}개 ",
+	"searchResult": {
+		"tooltip": "{{type}} 기준 {{confidence}}% 일치",
+		"previousTrackedObject": "이전 추적 객체",
+		"nextTrackedObject": "다음 추적 객체",
+		"deleteTrackedObject": {
+			"toast": {
+				"success": "추적 객체가 성공적으로 삭제되었습니다.",
+				"error": "추적 객체 삭제 실패: {{errorMessage}}"
+			}
+		}
+	},
+	"aiAnalysis": {
+		"title": "AI 분석"
+	},
+	"concerns": {
+		"label": "주의 사항"
+	},
+	"objectLifecycle": {
+		"noImageFound": "이 추적 객체에 대한 이미지를 찾을 수 없습니다."
+	}
 }
