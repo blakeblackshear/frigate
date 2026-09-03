@@ -139,6 +139,10 @@ class StatsEmitter(threading.Thread):
 
         latest = self.stats_tracking["latest_frigate_version"]
 
+        # a failed lookup says nothing about whether an update exists
+        if latest == "unknown":
+            return
+
         if is_newer_version(VERSION, latest):
             self.notice_registry.raise_notice(
                 "update_available", params={"version": latest}
@@ -152,7 +156,7 @@ class StatsEmitter(threading.Thread):
         def refresh() -> None:
             latest = get_latest_version(self.config)
 
-            # a failed lookup would otherwise clear a valid update notice for a day
+            # keep the last good value; stats surface it as service.latest_version
             if latest != "unknown":
                 self.stats_tracking["latest_frigate_version"] = latest
 

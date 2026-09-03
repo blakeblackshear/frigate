@@ -53,7 +53,7 @@ class TestUpdateNotice(unittest.TestCase):
         stats_emitter.notice_registry.resolve.assert_not_called()
 
     def test_current_or_disabled_resolves(self):
-        for latest in ("0.18.1", "disabled", "unknown"):
+        for latest in ("0.18.1", "disabled"):
             stats_emitter = self._emitter(latest)
 
             with patch.object(emitter, "VERSION", "0.18.1-abcdef"):
@@ -63,6 +63,15 @@ class TestUpdateNotice(unittest.TestCase):
             stats_emitter.notice_registry.resolve.assert_called_once_with(
                 "update_available"
             )
+
+    def test_a_failed_lookup_leaves_the_notice_alone(self):
+        stats_emitter = self._emitter("unknown")
+
+        with patch.object(emitter, "VERSION", "0.18.1-abcdef"):
+            stats_emitter._check_update_notice()
+
+        stats_emitter.notice_registry.raise_notice.assert_not_called()
+        stats_emitter.notice_registry.resolve.assert_not_called()
 
     def test_refresh_updates_tracking_on_a_thread_then_checks(self):
         stats_emitter = self._emitter("0.18.0")
