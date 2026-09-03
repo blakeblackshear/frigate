@@ -28,6 +28,7 @@ export const supportedLanguageKeys = [
   "nl",
   "nb-NO",
   "sv",
+  "ko",
   "zh-CN",
   "zh-Hant",
   "yue-Hant",
