@@ -7,18 +7,11 @@ import {
 } from "@/components/ui/collapsible";
 import { LuChevronsUpDown } from "react-icons/lu";
 import type { ToolCall } from "@/types/chat";
+import { formatToolName } from "@/utils/chatUtil";
 
 type ToolCallsGroupProps = {
   toolCalls: ToolCall[];
 };
-
-function normalizeName(name: string): string {
-  return name
-    .replace(/_/g, " ")
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-}
 
 export function ToolCallsGroup({ toolCalls }: ToolCallsGroupProps) {
   const grouped = useMemo(() => {
@@ -53,7 +46,7 @@ type ToolCallRowProps = {
 function ToolCallRow({ name, calls }: ToolCallRowProps) {
   const { t } = useTranslation(["views/chat"]);
   const [open, setOpen] = useState(false);
-  const displayName = normalizeName(name);
+  const displayName = formatToolName(name);
   const label =
     calls.length > 1 ? `${displayName} (\u00d7${calls.length})` : displayName;
 

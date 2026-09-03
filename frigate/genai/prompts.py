@@ -311,6 +311,10 @@ def get_tool_definitions(
     Descriptions here stay mechanical: which tool to reach for, and how the
     filters relate to each other, is stated once in the system prompt so the
     guidance is not paid for twice on every request.
+
+    Each definition carries a Frigate-only `access` field ("read" or "write");
+    write tools pause for user approval in the chat loop. Strip it with
+    `strip_tool_access` before sending the list to a provider.
     """
     search_objects_properties: dict[str, Any] = {
         "camera": {
@@ -382,6 +386,7 @@ def get_tool_definitions(
     return [
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "search_objects",
                 "description": search_objects_description,
@@ -394,6 +399,7 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "get_categorized_object_names",
                 "description": (
@@ -411,6 +417,7 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "find_similar_objects",
                 "description": (
@@ -474,6 +481,7 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "write",
             "function": {
                 "name": "set_camera_state",
                 "description": (
@@ -529,6 +537,7 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "get_live_context",
                 "description": (
@@ -553,6 +562,7 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "write",
             "function": {
                 "name": "start_camera_watch",
                 "description": (
@@ -596,6 +606,7 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "write",
             "function": {
                 "name": "stop_camera_watch",
                 "description": "Cancel the currently running watch job.",
@@ -608,6 +619,7 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "get_profile_status",
                 "description": (
@@ -624,6 +636,7 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "get_recap",
                 "description": (
@@ -656,7 +669,118 @@ def get_tool_definitions(
                 },
             },
         },
+        {
+            "type": "function",
+            "access": "read",
+            "function": {
+                "name": "get_export_cases",
+                "description": (
+                    "List the export cases (named groups of exported clips) with "
+                    "their IDs, descriptions, and how many exports each holds. "
+                    "Call this before create_export when the user wants a clip "
+                    "added to an existing case."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "access": "write",
+            "function": {
+                "name": "create_export",
+                "description": (
+                    "Export a camera's recording for a time range to a "
+                    "downloadable file, optionally attached to an existing export "
+                    "case. Only call this when the user explicitly asks to export "
+                    "or save a clip."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "camera": {
+                            "type": "string",
+                            "description": "Camera ID to export from.",
+                        },
+                        "start_time": {
+                            "type": "string",
+                            "description": "Start of the clip in ISO 8601 format (e.g. '2025-03-15T08:00:00').",
+                        },
+                        "end_time": {
+                            "type": "string",
+                            "description": "End of the clip in ISO 8601 format (e.g. '2025-03-15T08:05:00').",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Friendly name for the export (optional).",
+                        },
+                        "source": {
+                            "type": "string",
+                            "enum": ["recordings", "preview"],
+                            "description": (
+                                "'recordings' (default) exports full-quality footage; "
+                                "'preview' builds a low-resolution timelapse."
+                            ),
+                            "default": "recordings",
+                        },
+                        "export_case_id": {
+                            "type": "string",
+                            "description": (
+                                "ID of an existing export case to attach the export "
+                                "to. Use get_export_cases to find it."
+                            ),
+                        },
+                    },
+                    "required": ["camera", "start_time", "end_time"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "access": "read",
+            "function": {
+                "name": "get_event_image",
+                "description": (
+                    "View the thumbnail or snapshot image of a specific tracked "
+                    "object so you can describe what it shows. Use the event id "
+                    "from search_objects, find_similar_objects, or an attached "
+                    "event."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "event_id": {
+                            "type": "string",
+                            "description": "ID of the tracked object to view.",
+                        },
+                        "image": {
+                            "type": "string",
+                            "enum": ["thumbnail", "snapshot"],
+                            "description": (
+                                "'thumbnail' (default) is a small crop of the object; "
+                                "'snapshot' is the full camera frame."
+                            ),
+                            "default": "thumbnail",
+                        },
+                    },
+                    "required": ["event_id"],
+                },
+            },
+        },
     ]
+
+
+def get_write_tool_names(tools: list[dict[str, Any]]) -> set[str]:
+    """Names of the tools whose `access` is "write" (they change state)."""
+    return {tool["function"]["name"] for tool in tools if tool.get("access") == "write"}
+
+
+def strip_tool_access(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Drop the Frigate-only `access` field before handing tools to a provider."""
+    return [{k: v for k, v in tool.items() if k != "access"} for tool in tools]
 
 
 def build_chat_system_prompt(

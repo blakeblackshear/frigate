@@ -26,6 +26,9 @@ type ChatComposerProps = {
 
   isLoading?: boolean;
   onStop?: () => void;
+  /** Blocks input without showing the stop button, e.g. while a tool call
+   * is waiting for the user's approval. */
+  disabled?: boolean;
 
   attachedEventId?: string | null;
   onClearAttachment?: () => void;
@@ -45,6 +48,7 @@ export function ChatComposer({
   setThinkingEnabled,
   isLoading = false,
   onStop,
+  disabled = false,
   attachedEventId,
   onClearAttachment,
   onAttach,
@@ -62,6 +66,7 @@ export function ChatComposer({
 
   const showPaperclip = !!onAttach;
   const showStop = isLoading && !!onStop;
+  const inputBlocked = isLoading || disabled;
 
   return (
     <div className="flex w-full flex-col items-stretch justify-center gap-2 rounded-xl bg-secondary p-3">
@@ -77,7 +82,7 @@ export function ChatComposer({
       {attachedEventId && (
         <ChatQuickReplies
           onSend={(text) => sendMessage(text)}
-          disabled={isLoading}
+          disabled={inputBlocked}
         />
       )}
       <div className="flex w-full flex-row items-center gap-2">
@@ -85,7 +90,7 @@ export function ChatComposer({
           <ChatPaperclipButton
             recentEventIds={recentEventIds ?? []}
             onAttach={onAttach!}
-            disabled={isLoading || attachedEventId != null}
+            disabled={inputBlocked || attachedEventId != null}
           />
         )}
         {supportsThinking && (
@@ -103,7 +108,7 @@ export function ChatComposer({
                     !thinkingEnabled && "text-secondary-foreground",
                   )}
                   onClick={() => setThinkingEnabled(!thinkingEnabled)}
-                  disabled={isLoading}
+                  disabled={inputBlocked}
                 >
                   <LuBrain className="size-4" />
                 </Button>
@@ -122,6 +127,7 @@ export function ChatComposer({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           aria-busy={isLoading}
+          disabled={disabled}
         />
         {showStop ? (
           <Button
@@ -135,7 +141,7 @@ export function ChatComposer({
           <Button
             variant="select"
             className="size-10 shrink-0 rounded-full"
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || inputBlocked}
             onClick={() => sendMessage()}
           >
             <FaArrowUpLong className="size-4" />

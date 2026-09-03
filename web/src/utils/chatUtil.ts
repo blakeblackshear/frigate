@@ -1,4 +1,10 @@
-import type { ChatMessage, ChatStats, ToolCall } from "@/types/chat";
+import type {
+  ChatMessage,
+  ChatStats,
+  PendingToolCall,
+  ToolCall,
+  ToolDecision,
+} from "@/types/chat";
 
 export type StreamChatCallbacks = {
   /** Streamed delta of the assistant's final answer text. */
@@ -11,6 +17,10 @@ export type StreamChatCallbacks = {
   onChain: (chain: ChatMessage[]) => void;
   /** Token/timing stats for the turn. */
   onStats: (stats: ChatStats) => void;
+  /** The backend paused before running state-changing tools; the chain
+   * emitted just before this ends with the assistant message requesting
+   * them. Resend that chain with `toolDecisions` to continue. */
+  onApprovalRequired?: (toolCalls: PendingToolCall[]) => void;
   /** Called when the stream sends an error or fetch fails. */
   onError: (message: string) => void;
   /** Called when the stream finishes (success or error). */
@@ -30,6 +40,7 @@ type StatsChunk = {
 type StreamChunk =
   | { type: "error"; error: string }
   | { type: "messages"; messages: ChatMessage[] }
+  | { type: "approval_required"; tool_calls: PendingToolCall[] }
   | { type: "content"; delta: string }
   | { type: "reasoning"; delta: string }
   | StatsChunk;
@@ -40,6 +51,8 @@ type StreamChunk =
  */
 export type StreamChatOptions = {
   enableThinking?: boolean;
+  /** Decisions for tool calls that paused for approval, keyed by call id. */
+  toolDecisions?: Record<string, ToolDecision>;
 };
 
 export async function streamChatCompletion(
@@ -55,6 +68,7 @@ export async function streamChatCompletion(
     onReasoningDelta,
     onChain,
     onStats,
+    onApprovalRequired,
     onError,
     onDone,
     defaultErrorMessage = "Something went wrong. Please try again.",
@@ -67,6 +81,9 @@ export async function streamChatCompletion(
     };
     if (options.enableThinking !== undefined) {
       body.enable_thinking = options.enableThinking;
+    }
+    if (options.toolDecisions && Object.keys(options.toolDecisions).length) {
+      body.tool_decisions = options.toolDecisions;
     }
     const res = await fetch(url, {
       method: "POST",
@@ -101,6 +118,10 @@ export async function streamChatCompletion(
       }
       if (data.type === "messages") {
         onChain(data.messages ?? []);
+        return "continue";
+      }
+      if (data.type === "approval_required") {
+        onApprovalRequired?.(data.tool_calls ?? []);
         return "continue";
       }
       if (data.type === "content" && data.delta !== undefined) {
@@ -198,6 +219,7 @@ export function toolCallsForMessage(
       }
     }
     return {
+      id: tc.id,
       name: tc.function?.name ?? "",
       arguments: args,
       response: responses.get(tc.id),
@@ -205,28 +227,48 @@ export function toolCallsForMessage(
   });
 }
 
+/** Human-readable tool name: "search_objects" -> "Search Objects". */
+export function formatToolName(name: string): string {
+  return name
+    .replace(/_/g, " ")
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+const hasStringId = (item: unknown): item is { id: string } =>
+  !!item &&
+  typeof item === "object" &&
+  "id" in item &&
+  typeof (item as { id: unknown }).id === "string";
+
 /**
- * Parse search_objects tool call response(s) into event ids for thumbnails.
+ * Collect event ids from tool responses that reference tracked objects:
+ * search_objects returns a list of events and get_event_image a single one.
  */
-export function getEventIdsFromSearchObjectsToolCalls(
+export function getEventIdsFromToolCalls(
   toolCalls: ToolCall[] | undefined,
 ): { id: string }[] {
   if (!toolCalls?.length) return [];
   const results: { id: string }[] = [];
+  const seen = new Set<string>();
+  const push = (item: unknown) => {
+    if (hasStringId(item) && !seen.has(item.id)) {
+      seen.add(item.id);
+      results.push({ id: item.id });
+    }
+  };
   for (const tc of toolCalls) {
-    if (tc.name !== "search_objects" || !tc.response?.trim()) continue;
+    if (!tc.response?.trim()) continue;
+    if (tc.name !== "search_objects" && tc.name !== "get_event_image") {
+      continue;
+    }
     try {
       const parsed = JSON.parse(tc.response) as unknown;
-      if (!Array.isArray(parsed)) continue;
-      for (const item of parsed) {
-        if (
-          item &&
-          typeof item === "object" &&
-          "id" in item &&
-          typeof (item as { id: unknown }).id === "string"
-        ) {
-          results.push({ id: (item as { id: string }).id });
-        }
+      if (Array.isArray(parsed)) {
+        parsed.forEach(push);
+      } else {
+        push(parsed);
       }
     } catch {
       // ignore parse errors
