@@ -20,9 +20,19 @@ export type ChatMessage = {
 };
 
 export type ToolCall = {
+  id?: string;
   name: string;
   arguments?: Record<string, unknown>;
   response?: string;
+};
+
+export type ToolDecision = "approve" | "reject";
+
+/** A state-changing tool call the backend paused on, awaiting the user. */
+export type PendingToolCall = {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
 };
 
 export type StartingRequest = {
