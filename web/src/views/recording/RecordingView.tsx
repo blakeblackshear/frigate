@@ -231,6 +231,14 @@ export function RecordingView({
 
   const [debugReplayMode, setDebugReplayMode] = useState<ExportMode>("none");
   const [debugReplayRange, setDebugReplayRange] = useState<TimeRange>();
+
+  // while the range handles are up the player has to stay put: the
+  // timeline auto-scrolls to follow the playhead once the interaction
+  // timeout lapses, yanking the view out from under the drag
+  const selectingRange =
+    exportMode == "timeline" ||
+    exportMode == "timeline_multi" ||
+    debugReplayMode == "timeline";
   const [shareTimestampOpen, setShareTimestampOpen] = useState(false);
   const [shareTimestampAtOpen, setShareTimestampAtOpen] = useState(
     Math.floor(startTime),
@@ -338,6 +346,19 @@ export function RecordingView({
     updateSelectedSegment,
   ]);
 
+  const wasPlayingBeforeSelectRef = useRef(false);
+
+  useEffect(() => {
+    if (selectingRange) {
+      wasPlayingBeforeSelectRef.current =
+        mainControllerRef.current?.isPlaying() ?? false;
+      mainControllerRef.current?.pause();
+    } else if (wasPlayingBeforeSelectRef.current) {
+      wasPlayingBeforeSelectRef.current = false;
+      mainControllerRef.current?.play();
+    }
+  }, [selectingRange]);
+
   const manuallySetCurrentTime = useCallback(
     (time: number, play: boolean = false) => {
       if (!currentTimeRange) {
@@ -396,7 +417,7 @@ export function RecordingView({
   }, [navigate, recording?.navigationSource]);
 
   useEffect(() => {
-    if (!scrubbing) {
+    if (!scrubbing && !selectingRange) {
       if (Math.abs(currentTime - playerTime) > 10) {
         if (
           currentTimeRange.after <= currentTime &&
@@ -423,9 +444,10 @@ export function RecordingView({
         mainControllerRef.current?.play();
       }
     }
-    // we only want to seek when current time doesn't match the player update time
+    // we only want to seek when current time doesn't match the player update
+    // time, and once more on the way out of a range selection
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTime, scrubbing]);
+  }, [currentTime, scrubbing, selectingRange]);
 
   const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
@@ -737,13 +759,7 @@ export function RecordingView({
                 latestTime={timeRange.before}
                 mode={debugReplayMode}
                 range={debugReplayRange}
-                setRange={(range: TimeRange | undefined) => {
-                  setDebugReplayRange(range);
-
-                  if (range != undefined) {
-                    mainControllerRef.current?.pause();
-                  }
-                }}
+                setRange={setDebugReplayRange}
                 setMode={setDebugReplayMode}
               />
             )}
@@ -756,13 +772,7 @@ export function RecordingView({
                 mode={exportMode}
                 range={exportRange}
                 showPreview={showExportPreview}
-                setRange={(range) => {
-                  setExportRange(range);
-
-                  if (range != undefined) {
-                    mainControllerRef.current?.pause();
-                  }
-                }}
+                setRange={setExportRange}
                 setMode={setExportMode}
                 setShowPreview={setShowExportPreview}
               />
@@ -925,13 +935,7 @@ export function RecordingView({
               debugReplayMode={debugReplayMode}
               debugReplayRange={debugReplayRange}
               setDebugReplayMode={setDebugReplayMode}
-              setDebugReplayRange={(range: TimeRange | undefined) => {
-                setDebugReplayRange(range);
-
-                if (range != undefined) {
-                  mainControllerRef.current?.pause();
-                }
-              }}
+              setDebugReplayRange={setDebugReplayRange}
               onShareTimestamp={onShareReviewLink}
               onMotionSearch={
                 onMotionSearch ? () => onMotionSearch(mainCamera) : undefined
