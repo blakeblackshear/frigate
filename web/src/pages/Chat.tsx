@@ -87,6 +87,7 @@ export default function ChatPage() {
   );
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const loadingRef = useRef(false);
 
   const { data: genaiInfo } = useSWR<GenAIModelsResponse>("genai/models", {
     revalidateOnFocus: false,
@@ -121,7 +122,7 @@ export default function ChatPage() {
       messagesToSend: ChatMessage[],
       resume?: ResumeOptions,
     ) {
-      if (isLoading) return;
+      if (loadingRef.current) return;
       const last = messagesToSend[messagesToSend.length - 1];
       if (!last) return;
       // A normal turn ends with the user's message; a resume after an
@@ -137,6 +138,7 @@ export default function ChatPage() {
       setApprovalDecisions({});
       setMessages(messagesToSend);
       setStreaming({ content: "", reasoning: "", chain: [] });
+      loadingRef.current = true;
       setIsLoading(true);
 
       const baseURL = axios.defaults.baseURL ?? "";
@@ -185,6 +187,7 @@ export default function ChatPage() {
           },
           onDone: () => {
             abortRef.current = null;
+            loadingRef.current = false;
             setIsLoading(false);
             setStreaming(null);
             const lastMsg = chain[chain.length - 1];
@@ -221,7 +224,7 @@ export default function ChatPage() {
         },
       );
     },
-    [isLoading, supportsThinking, t, thinkingEnabled],
+    [supportsThinking, t, thinkingEnabled],
   );
 
   // Resume the paused turn once every pending call has a decision.
@@ -301,6 +304,7 @@ export default function ChatPage() {
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    loadingRef.current = false;
     setIsLoading(false);
     setStreaming(null);
     setPendingApprovals(null);
@@ -310,6 +314,7 @@ export default function ChatPage() {
   const startNewChat = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    loadingRef.current = false;
     setIsLoading(false);
     setStreaming(null);
     setMessages([]);
