@@ -36,7 +36,9 @@ import logging
 import os
 import queue
 import re
+import tempfile
 import threading
+import time
 import zipfile
 from typing import ClassVar, Literal
 
@@ -53,6 +55,13 @@ from frigate.util.runtime_deps import Artifact, ArtifactKind, RuntimeManifest
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "axelera"
+
+# windowed duty cycle of the AIPU, written by the detector process and read
+# by the main process's hardware poller (same tmpfs cache dir as the rest of
+# the runtime's scratch state); "<pct> <monotonic-epoch>" text
+AXELERA_USAGE_PATH = os.path.join(
+    os.environ.get("FRIGATE_TMP", tempfile.gettempdir()), "frigate-axelera-usage"
+)
 
 # The Axelera runtime SDK is installed at first start rather than shipped in
 # the image. The wheels come from Axelera's public Artifactory PyPI index
@@ -407,6 +416,8 @@ class _AxeleraRuntimeInference:
         self._stop = threading.Event()
         self._producer_thread: threading.Thread | None = None
         self._consumer_thread: threading.Thread | None = None
+        self._usage_busy = 0.0
+        self._usage_window_start: float | None = None
 
         if runtime_factory is None:
             try:
@@ -629,12 +640,40 @@ class _AxeleraRuntimeInference:
                 continue
             try:
                 self._preprocess(frame, in_buf)
+                run_t0 = time.monotonic()
                 self._instance.run([in_buf], out_bufs)
+                self._note_run(run_t0, time.monotonic())
                 self._decode_q.put_nowait((connection_id, in_buf, out_bufs))
             except Exception:
                 logger.exception("axelera: inference failed for %s", connection_id)
                 self._pool.put((in_buf, out_bufs))
                 self._push_result(connection_id, np.zeros((MAX_ROWS, 6), np.float32))
+
+    def _note_run(self, t0: float, t1: float) -> None:
+        """Accumulate card busy time and publish a windowed duty cycle.
+
+        ModelInstance.run blocks until the AIPU completes, so busy/wall over a
+        window is the card's true utilization; the runtime exposes no usage
+        counter to read instead. The main stats process reads the file.
+        """
+        now = time.monotonic()
+        self._usage_busy += t1 - t0
+        if self._usage_window_start is None:
+            self._usage_window_start = t0
+        if now - self._usage_window_start < 2.0:
+            return
+        window = now - self._usage_window_start
+        if window > 0:
+            pct = min(100.0, round(100.0 * self._usage_busy / window, 1))
+            try:
+                tmp = AXELERA_USAGE_PATH + ".tmp"
+                with open(tmp, "w") as f:
+                    f.write(f"{pct} {time.time():.3f}")
+                os.replace(tmp, AXELERA_USAGE_PATH)
+            except OSError:
+                pass
+        self._usage_window_start = now
+        self._usage_busy = 0.0
 
     def _consumer(self) -> None:
         """Decode the raw int8 heads (dequant + onnx + NMS) to (20,6) rows."""

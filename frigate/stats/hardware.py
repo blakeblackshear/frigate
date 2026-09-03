@@ -196,16 +196,41 @@ def _poll_axengine(config: FrigateConfig) -> HardwarePollResult:
     return HardwarePollResult(npu={"axengine": npu_usage})
 
 
+def _axelera_board_utilization() -> float | None:
+    """Duty-cycle of the AIPU published by the detector process.
+
+    The detector times each blocking ModelInstance.run and writes
+    busy/wall for the last window to a small file; a stale file means the
+    detector has not run inference recently and no number is reported.
+    """
+    try:
+        from frigate.detectors.plugins.axelera import AXELERA_USAGE_PATH
+
+        with open(AXELERA_USAGE_PATH) as f:
+            pct, stamp = f.read().split()
+        if time.time() - float(stamp) > 10:
+            return None
+        return max(0.0, float(pct))
+    except (OSError, ValueError, ImportError):
+        return None
+
+
 def _poll_axelera(config: FrigateConfig) -> HardwarePollResult:
-    # the Metis card exposes no utilization counter without a broker that
-    # cannot run alongside a live detector; the board controller temperature
-    # is the one honest readout
+    # the runtime exposes no device-side usage counter; the board
+    # controller temperature and the detector process's run-time duty cycle
+    # are the two honest readouts
     board_temp = get_axelera_board_temp()
 
     if board_temp is None:
         return HardwarePollResult(ok=False)
 
-    return HardwarePollResult(npu={"axelera": {"mem": "-%", "temp": board_temp}})
+    entry: dict[str, Any] = {"mem": "-%", "temp": board_temp}
+    util = _axelera_board_utilization()
+
+    if util is not None:
+        entry["npu"] = util
+
+    return HardwarePollResult(npu={"axelera": entry})
 
 
 POLLERS: dict[str, Callable[[FrigateConfig], HardwarePollResult]] = {
