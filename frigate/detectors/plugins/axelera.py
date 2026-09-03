@@ -37,7 +37,6 @@ import os
 import queue
 import re
 import threading
-import urllib.request
 import zipfile
 from typing import ClassVar, Literal
 
@@ -48,6 +47,7 @@ from pydantic import ConfigDict, Field
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from frigate.util.model import xyxy_to_xywh_for_nms
 from frigate.util.runtime_deps import Artifact, ArtifactKind, RuntimeManifest
 
 logger = logging.getLogger(__name__)
@@ -218,7 +218,9 @@ def _resolve_model_json(model_path, model_url, build_root) -> str:
             os.makedirs(cache, exist_ok=True)
             logger.info("axelera: downloading model from %s", model_url)
             try:
-                urllib.request.urlretrieve(_url_with_scheme(model_url), zip_path)
+                from frigate.util.downloader import ModelDownloader
+
+                ModelDownloader.download_from_url(_url_with_scheme(model_url), zip_path)
             except Exception as exc:
                 raise RuntimeError(
                     f"Failed to download model from {model_url}: {exc}"
@@ -284,39 +286,40 @@ def _find_model_json(where: str) -> str:
     )
 
 
-def _nms_xyxy(boxes, scores, iou_threshold: float) -> np.ndarray:
-    """Greedy NMS on xyxy boxes via cv2.dnn.NMSBoxes (C++, GIL-free).
+def _nms_per_class(boxes, scores, class_ids, iou_threshold: float) -> np.ndarray:
+    """Per-class greedy NMS via cv2.dnn.NMSBoxes (C++, GIL-free).
 
-    Returns kept indices in descending score order, same contract as the
-    previous pure-Python loop but without the O(n^2) worst case on dense
-    frames (daytime, multiple motion regions at 48 fps offered).
+    Boxes are xyxy; xyxy_to_xywh_for_nms converts them to the top-left+size
+    format NMSBoxes expects. Running NMS per class keeps a confident car from
+    suppressing an overlapping pedestrian, which class-agnostic NMS does.
+
+    Returns kept indices sorted by descending score.
     """
     if len(boxes) == 0:
         return np.array([], dtype=np.int64)
-    x1 = boxes[:, 0]
-    y1 = boxes[:, 1]
-    xywh = np.stack(
-        [
-            x1,
-            y1,
-            np.maximum(0, boxes[:, 2] - x1),
-            np.maximum(0, boxes[:, 3] - y1),
-        ],
-        axis=1,
-    )
-    indices = cv2.dnn.NMSBoxes(
-        xywh.tolist(),
-        [float(s) for s in scores],
-        # inputs are already filtered above CONF_THRESHOLD by the caller
-        score_threshold=0.0,
-        nms_threshold=float(iou_threshold),
-    )
-    if len(indices) == 0:
+
+    order = np.argsort(-scores)
+    kept: list[int] = []
+    for cls in np.unique(class_ids):
+        idx = order[class_ids[order] == cls]
+        if len(idx) == 0:
+            continue
+        indices = cv2.dnn.NMSBoxes(
+            xyxy_to_xywh_for_nms(boxes[idx]).tolist(),
+            [float(s) for s in scores[idx]],
+            # inputs are already filtered above CONF_THRESHOLD by the caller
+            score_threshold=0.0,
+            nms_threshold=float(iou_threshold),
+        )
+        if isinstance(indices, np.ndarray):
+            kept.extend(idx[indices.reshape(-1)].tolist())
+        elif len(indices) > 0:
+            kept.extend(idx[np.asarray(indices, dtype=np.int64).reshape(-1)].tolist())
+
+    if not kept:
         return np.array([], dtype=np.int64)
-    if isinstance(indices, np.ndarray):
-        return indices.reshape(-1).astype(np.int64)
-    # OpenCV versions that return a (N, 1) list of nested lists
-    return np.asarray(indices, dtype=np.int64).reshape(-1)
+    kept_arr = np.asarray(kept, dtype=np.int64)
+    return kept_arr[np.argsort(-scores[kept_arr])]
 
 
 def _read_model_manifest(model_dir: str) -> dict:
@@ -389,12 +392,16 @@ class _AxeleraRuntimeInference:
         labelmap: dict,
         width: int,
         height: int,
+        pixel_format: str = "bgr",
         runtime_factory=None,
         onnx_factory=None,
     ) -> None:
         self._labels = labels
         self._labelmap = labelmap
         self._width, self._height = int(width), int(height)
+        # the compiled model consumes RGB planes; Frigate delivers BGR when
+        # input_pixel_format is bgr (flip below), RGB when rgb (no flip)
+        self._flip_channels = pixel_format == "bgr"
         self._frame_q: queue.Queue = queue.Queue(maxsize=QUEUE_MAXSIZE)
         self._result_q: queue.Queue = queue.Queue(maxsize=QUEUE_MAXSIZE)
         self._stop = threading.Event()
@@ -585,7 +592,10 @@ class _AxeleraRuntimeInference:
             if t is not None and t.is_alive():
                 t.join(timeout=2)
         try:
-            self._instance.free()
+            # Context.release() releases the context and every object it
+            # created (connection, model, instance); there is no per-object
+            # free() in this runtime API
+            self._ctx.release()
         except Exception:  # noqa: BLE001, S110
             pass
         logger.info("axelera: runtime inference stopped")
@@ -655,9 +665,12 @@ class _AxeleraRuntimeInference:
         y0, y1 = self._pad_t, self._pad_t + self._new_h
         x0, x1 = self._pad_l, self._pad_l + self._new_w
         ct, cl = self._content_top, self._content_left
-        # channels 0..2 = quantized RGB (BGR -> RGB flip as in the SDK examples;
-        # the compiled input expects RGB semantics), channel 3 = alpha-255
-        buf[0, ct + y0 : ct + y1, cl + x0 : cl + x1, 0:3] = q[..., ::-1]
+        # channels 0..2 = quantized RGB: Frigate delivers BGR under the
+        # documented input_pixel_format: bgr, so flip to the RGB semantics the
+        # compiled input expects; with input_pixel_format: rgb the frame
+        # already carries RGB and must pass through untouched
+        src = q[..., ::-1] if self._flip_channels else q
+        buf[0, ct + y0 : ct + y1, cl + x0 : cl + x1, 0:3] = src
         buf[0, ct + y0 : ct + y1, cl + x0 : cl + x1, 3] = 127
 
     def _decode(self, out_bufs) -> np.ndarray:
@@ -708,8 +721,8 @@ class _AxeleraRuntimeInference:
         x1i = np.clip(bx[:, 1], 0, self._width)
         y0i = np.clip(by[:, 0], 0, self._height)
         y1i = np.clip(by[:, 1], 0, self._height)
-        # NMS on the model-space boxes (scale-invariant IoU)
-        keep_nms = _nms_xyxy(boxes, conf, NMS_IOU_THRESHOLD)
+        # NMS on the model-space boxes (scale-invariant IoU), per class
+        keep_nms = _nms_per_class(boxes, conf, cls_idx, NMS_IOU_THRESHOLD)
         rows = []
         for i in keep_nms:
             label = (
@@ -802,6 +815,9 @@ class AxeleraDetector(DetectionApi):
             labelmap=self._labelmap,
             width=self.width,
             height=self.height,
+            pixel_format=str(
+                getattr(model.input_pixel_format, "value", model.input_pixel_format)
+            ),
         )
         logger.info(
             "axelera: runtime model=%s (%dx%d input, frame %dx%d) ready",
