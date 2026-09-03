@@ -1028,6 +1028,10 @@
         "label": "Preferred language",
         "description": "Preferred language to request from the GenAI provider for generated responses."
       },
+      "response_style": {
+        "label": "Response style",
+        "description": "Writing style preset for generated review descriptions. Presets adjust the tone and level of detail of the user-facing title, summary, and scene description; 'default' leaves the built-in prompt unchanged."
+      },
       "activity_context_prompt": {
         "label": "Activity context prompt",
         "description": "Custom prompt describing what is and is not suspicious activity to provide context for GenAI summaries."
