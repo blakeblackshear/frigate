@@ -7,11 +7,21 @@ from pathlib import Path
 import requests
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.const import UPDATE_MODEL_STATE
+from frigate.const import UPDATE_MODEL_STATE, UPDATE_NOTICE
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.file import FileLock
 
 logger = logging.getLogger(__name__)
+
+# target path -> first line of the last download error for it; every existing
+# download function swallows its exceptions, so this is how the downloader
+# thread learns why a file is still missing
+last_download_error: dict[str, str] = {}
+
+
+def _first_line(error: BaseException) -> str:
+    text = str(error).strip().splitlines()
+    return (text[0] if text else type(error).__name__)[:200]
 
 
 class ModelDownloader:
@@ -48,6 +58,28 @@ class ModelDownloader:
         )
         self.download_thread.start()
 
+    def _report_failure(self, file_name: str, error: str) -> None:
+        self.requestor.send_data(
+            UPDATE_NOTICE,
+            {
+                "action": "raise",
+                "kind": "model_download_failed",
+                "scope": self.model_name,
+                "params": {"file": file_name, "error": error},
+            },
+        )
+
+    def _resolve_failure(self) -> None:
+        self.requestor.send_data(
+            UPDATE_NOTICE,
+            {
+                "action": "resolve",
+                "kind": "model_download_failed",
+                "scope": self.model_name,
+                "params": {},
+            },
+        )
+
     def _download_models(self):
         for file_name in self.file_names:
             path = os.path.join(self.download_path, file_name)
@@ -57,7 +89,18 @@ class ModelDownloader:
             if not os.path.exists(path):
                 with lock:
                     if not os.path.exists(path):
-                        self.download_func(path)
+                        try:
+                            self.download_func(path)
+                        except Exception as e:
+                            self._report_failure(file_name, _first_line(e))
+                            raise
+
+                        if not os.path.exists(path):
+                            self._report_failure(
+                                file_name,
+                                last_download_error.pop(path, "download failed"),
+                            )
+                            continue
 
             self.requestor.send_data(
                 UPDATE_MODEL_STATE,
@@ -66,6 +109,12 @@ class ModelDownloader:
                     "state": ModelStatusTypesEnum.downloaded,
                 },
             )
+
+        if all(
+            os.path.exists(os.path.join(self.download_path, file_name))
+            for file_name in self.file_names
+        ):
+            self._resolve_failure()
 
         if self.complete_func:
             self.complete_func()
@@ -93,6 +142,7 @@ class ModelDownloader:
             temporary_filename.rename(save_path)
         except Exception as e:
             logger.error(f"Error downloading model: {str(e)}")
+            last_download_error[save_path] = _first_line(e)
             raise
 
         if not silent:

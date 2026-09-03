@@ -167,3 +167,7 @@ Frigate's object detection relies on a machine learning [model](../frigate/gloss
 - If the false positive is always in the same fixed spot (like a statue or mailbox that reads as a person), add an [object filter mask](../configuration/masks.md#object-filter-masks) over that location.
 
 Filters and masks only hide the incorrect result - they don't teach Frigate what the object actually is. For that, fine-tune your own model or use Frigate+.
+
+### Where do I see problems Frigate has detected?
+
+Open System > Health. The Notices list shows problems the backend has noticed on its own, such as a camera whose ffmpeg keeps crashing, a detector that had to be restarted, a model download that failed, or recordings being deleted before their retention period. Entries that describe a one-time event can be dismissed; entries that describe an ongoing condition clear themselves once it is fixed.

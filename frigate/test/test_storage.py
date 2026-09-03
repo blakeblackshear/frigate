@@ -3,7 +3,7 @@ import logging
 import os
 import tempfile
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from peewee import DoesNotExist
 from peewee_migrate import Router
@@ -555,6 +555,34 @@ class TestHttp(unittest.TestCase):
         assert Recordings.get(Recordings.id == rec_k_id)
         assert Recordings.get(Recordings.id == rec_k2_id)
         assert Recordings.get(Recordings.id == rec_k3_id)
+
+    def test_unmet_retention_raises_notice(self):
+        registry = MagicMock()
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock(), registry)
+        storage.camera_storage_stats = {
+            "front_door": {"needs_refresh": False, "usage": 10, "bandwidth": 10}
+        }
+
+        with patch.object(storage, "expected_hourly_bandwidth", return_value=100.0):
+            storage.reduce_storage_consumption()
+
+        registry.raise_notice.assert_called_once()
+        kind = registry.raise_notice.call_args.args[0]
+        params = registry.raise_notice.call_args.kwargs["params"]
+        self.assertEqual(kind, "retention_unmet")
+        self.assertEqual(params["needed_mb"], 100.0)
+        self.assertEqual(params["cleared_mb"], 0.0)
+
+    def test_clean_run_resolves_notice(self):
+        registry = MagicMock()
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock(), registry)
+
+        with patch.object(storage, "check_storage_needs_cleanup", return_value=False):
+            storage._maintain_once()
+
+        registry.resolve.assert_called_once_with("retention_unmet")
 
 
 def _insert_mock_event(

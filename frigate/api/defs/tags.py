@@ -13,6 +13,7 @@ class Tags(Enum):
     logs = "Logs"
     media = "Media"
     motion_search = "Motion Search"
+    notices = "Notices"
     notifications = "Notifications"
     preview = "Preview"
     recordings = "Recordings"

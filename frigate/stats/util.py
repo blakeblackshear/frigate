@@ -1,6 +1,7 @@
 """Utilities for stats."""
 
 import logging
+import re
 import shutil
 import time
 from json import JSONDecodeError
@@ -43,6 +44,30 @@ def get_latest_version(config: FrigateConfig) -> str:
         return str(response.get("tag_name").replace("v", ""))
     else:
         return "unknown"
+
+
+def _version_tuple(value: str) -> tuple[int, int, int] | None:
+    match = re.match(r"^(\d+)\.(\d+)\.(\d+)", value or "")
+
+    if match is None:
+        return None
+
+    return int(match.group(1)), int(match.group(2)), int(match.group(3))
+
+
+def is_newer_version(current: str, latest: str) -> bool:
+    """Whether latest is a release newer than the running version.
+
+    Build suffixes and prerelease tags after the third number are ignored, and
+    a value that does not parse (disabled, unknown) is never newer.
+    """
+    current_tuple = _version_tuple(current)
+    latest_tuple = _version_tuple(latest)
+
+    if current_tuple is None or latest_tuple is None:
+        return False
+
+    return latest_tuple > current_tuple
 
 
 def stats_init(

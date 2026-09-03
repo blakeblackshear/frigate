@@ -9,10 +9,31 @@
       "go2rtc": "Go2RTC Logs - Frigate",
       "nginx": "Nginx Logs - Frigate",
       "websocket": "Messages Logs - Frigate"
-    }
+    },
+    "health": "Health - Frigate"
   },
   "title": "System",
   "metrics": "System metrics",
+  "health": {
+    "title": "Health",
+    "notices": {
+      "title": "Notices",
+      "empty": "No notices",
+      "dismiss": "Dismiss",
+      "openSettings": "Open settings",
+      "openLink": "Open link",
+      "since": "Since {{time}}",
+      "sinceWithCount": "Since {{time}} · {{times}} times since {{firstSeen}}",
+      "firstSeen": "First seen {{time}} · {{times}} times",
+      "kinds": {
+        "ffmpeg_crash_loop": "ffmpeg has crashed {{restarts}} times in the last hour",
+        "detector_stuck": "Detector {{detector}} was restarted after it stopped responding",
+        "model_download_failed": "Downloading {{file}} failed: {{error}}",
+        "retention_unmet": "Recordings were deleted before their retention period to free space ({{cleared_mb}} of {{needed_mb}} MB needed)",
+        "update_available": "Frigate {{version}} is available"
+      }
+    }
+  },
   "logs": {
     "websocket": {
       "label": "Messages",

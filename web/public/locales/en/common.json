@@ -168,7 +168,7 @@
   },
   "menu": {
     "system": "System",
-    "systemMetrics": "System metrics",
+    "systemMetrics": "System",
     "configuration": "Configuration",
     "systemLogs": "System logs",
     "profiles": "Profiles",

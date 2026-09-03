@@ -11,15 +11,20 @@ from typing import Any
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import FREQUENCY_STATS_POINTS
+from frigate.notices.registry import NoticeRegistry
 from frigate.stats.hardware import HardwareStats
 from frigate.stats.prometheus import update_metrics
-from frigate.stats.util import stats_snapshot
+from frigate.stats.util import get_latest_version, is_newer_version, stats_snapshot
 from frigate.types import StatsTrackingTypes
+from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
 
 
 MAX_STATS_POINTS = 80
+
+# how often to ask GitHub for the latest release
+VERSION_REFRESH_S = 24 * 60 * 60
 
 
 class StatsEmitter(threading.Thread):
@@ -28,11 +33,13 @@ class StatsEmitter(threading.Thread):
         config: FrigateConfig,
         stats_tracking: StatsTrackingTypes,
         stop_event: MpEvent,
+        notice_registry: NoticeRegistry | None = None,
     ):
         super().__init__(name="frigate_stats_emitter")
         self.config = config
         self.stats_tracking = stats_tracking
         self.stop_event = stop_event
+        self.notice_registry = notice_registry
         self.hardware_stats = HardwareStats(config)
         self.stats_history: list[dict[str, Any]] = []
 
@@ -125,13 +132,46 @@ class StatsEmitter(threading.Thread):
         update_metrics(stats)
         return stats
 
+    def _check_update_notice(self) -> None:
+        """Raise or resolve the update notice from the tracked latest version."""
+        if self.notice_registry is None:
+            return
+
+        latest = self.stats_tracking["latest_frigate_version"]
+
+        if is_newer_version(VERSION, latest):
+            self.notice_registry.raise_notice(
+                "update_available", params={"version": latest}
+            )
+        else:
+            self.notice_registry.resolve("update_available")
+
+    def _refresh_latest_version(self) -> None:
+        """Refresh the latest release on a daemon thread so the request never stalls stats."""
+
+        def refresh() -> None:
+            self.stats_tracking["latest_frigate_version"] = get_latest_version(
+                self.config
+            )
+            self._check_update_notice()
+
+        threading.Thread(
+            target=refresh, name="frigate_version_check", daemon=True
+        ).start()
+
     def run(self) -> None:
         time.sleep(10)
+        self._check_update_notice()
+        last_version_check = time.time()
         for counter in itertools.cycle(
             range(int(self.config.mqtt.stats_interval / FREQUENCY_STATS_POINTS))
         ):
             if self.stop_event.wait(FREQUENCY_STATS_POINTS):
                 break
+
+            if time.time() - last_version_check >= VERSION_REFRESH_S:
+                self._refresh_latest_version()
+                last_version_check = time.time()
 
             logger.debug("Starting stats collection")
             stats = stats_snapshot(

@@ -6,7 +6,12 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { isDesktop, isMobile } from "react-device-detect";
 import GeneralMetrics from "@/views/system/GeneralMetrics";
 import StorageMetrics from "@/views/system/StorageMetrics";
-import { LuActivity, LuHardDrive, LuSearchCode } from "react-icons/lu";
+import {
+  LuActivity,
+  LuHardDrive,
+  LuHeartPulse,
+  LuSearchCode,
+} from "react-icons/lu";
 import { FaVideo } from "react-icons/fa";
 import Logo from "@/components/Logo";
 import useOptimisticState from "@/hooks/use-optimistic-state";
@@ -15,9 +20,16 @@ import { useHashState } from "@/hooks/use-overlay-state";
 import { Toaster } from "@/components/ui/sonner";
 import { FrigateConfig } from "@/types/frigateConfig";
 import EnrichmentMetrics from "@/views/system/EnrichmentMetrics";
+import HealthMetrics from "@/views/system/HealthMetrics";
 import { useTranslation } from "react-i18next";
 
-const allMetrics = ["general", "enrichments", "storage", "cameras"] as const;
+const allMetrics = [
+  "health",
+  "general",
+  "enrichments",
+  "storage",
+  "cameras",
+] as const;
 type SystemMetric = (typeof allMetrics)[number];
 
 function System() {
@@ -44,8 +56,9 @@ function System() {
   // stats page
 
   const [page, setPage] = useHashState<SystemMetric>();
+  // useHashState yields "" with no hash, which ?? would not catch
   const [pageToggle, setPageToggle] = useOptimisticState(
-    page ?? "general",
+    page || "health",
     setPage,
     100,
   );
@@ -56,9 +69,7 @@ function System() {
   // Track which tabs have been visited so we can keep them mounted after first visit.
   // Using a ref updated during render avoids extra render cycles from state/effects.
   const visitedTabsRef = useRef(new Set<string>());
-  if (page) {
-    visitedTabsRef.current.add(page);
-  }
+  visitedTabsRef.current.add(pageToggle);
   const visitedTabs = visitedTabsRef.current;
 
   useEffect(() => {
@@ -98,6 +109,7 @@ function System() {
               value={item}
               aria-label={`Select ${item}`}
             >
+              {item == "health" && <LuHeartPulse className="size-4" />}
               {item == "general" && <LuActivity className="size-4" />}
               {item == "enrichments" && <LuSearchCode className="size-4" />}
               {item == "storage" && <LuHardDrive className="size-4" />}
@@ -126,6 +138,11 @@ function System() {
           </div>
         )}
       </div>
+      {visitedTabs.has("health") && (
+        <div className={pageToggle == "health" ? "contents" : "hidden"}>
+          <HealthMetrics />
+        </div>
+      )}
       {visitedTabs.has("general") && (
         <div className={page == "general" ? "contents" : "hidden"}>
           <GeneralMetrics

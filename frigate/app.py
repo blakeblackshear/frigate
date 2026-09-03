@@ -62,6 +62,8 @@ from frigate.log import _stop_logging
 from frigate.models import (
     Event,
     Export,
+    Notice,
+    NoticeStats,
     Previews,
     Recordings,
     RecordingsToDelete,
@@ -71,6 +73,7 @@ from frigate.models import (
     Trigger,
     User,
 )
+from frigate.notices.registry import NoticeRegistry
 from frigate.object_detection.base import ObjectDetectProcess
 from frigate.object_detection.util import detection_frame_size
 from frigate.output.output import OutputProcess
@@ -294,6 +297,8 @@ class FrigateApp:
         models = [
             Event,
             Export,
+            Notice,
+            NoticeStats,
             Previews,
             Recordings,
             RecordingsToDelete,
@@ -304,6 +309,10 @@ class FrigateApp:
             Trigger,
         ]
         self.db.bind(models)
+
+        self.notice_registry = NoticeRegistry()
+        # producers confirm state notices again at startup if they still hold
+        self.notice_registry.mark_state_notices_unconfirmed()
 
     def check_db_data_migrations(self) -> None:
         # check if vacuum needs to be run
@@ -354,6 +363,7 @@ class FrigateApp:
             self.onvif_controller,
             self.ptz_metrics,
             comms,
+            notice_registry=self.notice_registry,
         )
         self.dispatcher.start_communicators()
 
@@ -500,7 +510,9 @@ class FrigateApp:
         self.record_cleanup.start()
 
     def start_storage_maintainer(self) -> None:
-        self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
+        self.storage_maintainer = StorageMaintainer(
+            self.config, self.stop_event, self.notice_registry
+        )
         self.storage_maintainer.start()
 
     def start_stats_emitter(self) -> None:
@@ -514,11 +526,14 @@ class FrigateApp:
                 self.processes,
             ),
             self.stop_event,
+            notice_registry=self.notice_registry,
         )
         self.stats_emitter.start()
 
     def start_watchdog(self) -> None:
-        self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
+        self.frigate_watchdog = FrigateWatchdog(
+            self.detectors, self.stop_event, self.notice_registry
+        )
 
         # (attribute on self, key in self.processes, factory)
         specs: list[tuple[str, str, Callable[[], FrigateProcess]]] = [
@@ -686,6 +701,7 @@ class FrigateApp:
                     self.dispatcher,
                     self.profile_manager,
                     config_holder=self.config_holder,
+                    notice_registry=self.notice_registry,
                 ),
                 host="127.0.0.1",
                 port=5001,

@@ -31,6 +31,7 @@ from frigate.const import (
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_EVENT_DESCRIPTION,
     UPDATE_MODEL_STATE,
+    UPDATE_NOTICE,
     UPDATE_REVIEW_DESCRIPTION,
     UPSERT_REVIEW_SEGMENT,
 )
@@ -56,6 +57,7 @@ _WS_BLOCKED_TOPICS = frozenset(
         UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
         UPDATE_BIRDSEYE_LAYOUT,
         UPDATE_AUDIO_TRANSCRIPTION_STATE,
+        UPDATE_NOTICE,
     }
 )
 
@@ -155,6 +157,16 @@ _WS_GLOBAL_OUTBOUND_TOPICS = frozenset(
 _WS_UNRESTRICTED_ONLY_TOPICS = frozenset(
     {
         "birdseye_layout",
+    }
+)
+
+# Topics only an admin connection may receive. unrestricted_only is not
+# enough: the built-in viewer role has an empty camera allow-list, which the
+# camera policy treats as full access, while the REST side of these topics
+# is admin-only.
+_WS_ADMIN_ONLY_TOPICS = frozenset(
+    {
+        "notices",
     }
 )
 
@@ -280,6 +292,7 @@ def _classify_outbound(
       - "global"             : send to every authenticated client
       - "drop"               : send to nobody (fail-closed for unknowns)
       - "unrestricted_only"  : send only to admin/full-access roles
+      - "admin_only"         : send only to connections with the admin role
       - "camera"             : extra is the owning camera name
       - "payload_camera"     : extra is the JSON key path to the camera name
       - "reshape_by_camera_key"
@@ -288,6 +301,8 @@ def _classify_outbound(
     """
     if topic in _WS_GLOBAL_OUTBOUND_TOPICS:
         return ("global", None)
+    if topic in _WS_ADMIN_ONLY_TOPICS:
+        return ("admin_only", None)
     if topic in _WS_UNRESTRICTED_ONLY_TOPICS:
         return ("unrestricted_only", None)
     if topic in _WS_RESHAPE_BY_CAMERA_KEY_TOPICS:
@@ -390,6 +405,9 @@ def _materialize_for_ws(
 
     if kind == "unrestricted_only":
         return full_message if _ws_is_unrestricted(ws, config) else None
+
+    if kind == "admin_only":
+        return full_message if "admin" in _ws_valid_roles(ws, config) else None
 
     if kind == "camera":
         return full_message if ws_has_camera_access(ws, extra, config) else None
