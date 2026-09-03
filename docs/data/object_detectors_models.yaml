@@ -1220,9 +1220,9 @@ axelera:
         | ---------------------------------------- | ------------------------------------------------------------ |
         | **Custom object detector model path**    | `/config/model_cache/axelera/yolox-s-coco-onnx`              |
         | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                      |
-        | **Object detection model input width**   | `704` (the frame size Frigate sends; boxes map back to it)   |
-        | **Object detection model input height**  | `576`                                                        |
-        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                              |
+        | **Object detection model input width**   | `640` (the compiled input size)                            |
+        | **Object detection model input height**  | `640`                                                      |
+        | **Model Input Pixel Color Format**       | `bgr` (Frigate delivers BGR; the plugin hands RGB planes to the compiled input) |
         | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value)                             |
         | **Model Input D Type**                   | `int` (Frigate's default value)                              |
         | **Object Detection Model Type**          | `yolox`                                                      |
@@ -1232,6 +1232,7 @@ axelera:
               - axelera:PCIe
             path: /config/model_cache/axelera/yolox-s-coco-onnx
             model_type: yolox
-            width: 704
-            height: 576
+            width: 640
+            height: 640
+            input_pixel_format: bgr
             labelmap_path: /labelmap/coco-80.txt

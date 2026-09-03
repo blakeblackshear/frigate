@@ -890,8 +890,9 @@ models:
   - devices:
       - axelera:PCIe
     path: /config/model_cache/axelera/yolox-s-coco-onnx
-    width: 704 # the frame size Frigate sends to the model
-    height: 576
+    width: 640 # the compiled input size; Frigate resizes square regions to it
+    height: 640
+    input_pixel_format: bgr # Frigate delivers BGR; the plugin feeds RGB planes
     model_type: yolox
     labelmap_path: /labelmap/coco-80.txt
 ```
