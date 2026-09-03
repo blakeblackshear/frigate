@@ -20,6 +20,7 @@ import { FaCircleCheck, FaTriangleExclamation } from "react-icons/fa6";
 import { LuX } from "react-icons/lu";
 import { Card, CardContent } from "../../ui/card";
 import { maskUri } from "@/utils/cameraUtil";
+import { ffprobeToTestResult, getStreamIssues } from "@/utils/streamIssues";
 
 type Step4ValidationProps = {
   wizardData: Partial<WizardFormData>;
@@ -74,44 +75,7 @@ export default function Step4Validation({
           timeout: 10000,
         });
 
-        if (response.data?.[0]?.return_code === 0) {
-          const probeData = response.data[0];
-          const streamData = probeData.stdout.streams || [];
-
-          const videoStream = streamData.find(
-            (s: { codec_type?: string; codec_name?: string }) =>
-              s.codec_type === "video" ||
-              s.codec_name?.includes("h264") ||
-              s.codec_name?.includes("h265"),
-          );
-
-          const audioStream = streamData.find(
-            (s: { codec_type?: string; codec_name?: string }) =>
-              s.codec_type === "audio" ||
-              s.codec_name?.includes("aac") ||
-              s.codec_name?.includes("mp3"),
-          );
-
-          const resolution = videoStream
-            ? `${videoStream.width}x${videoStream.height}`
-            : undefined;
-
-          const fps = videoStream?.avg_frame_rate
-            ? parseFloat(videoStream.avg_frame_rate.split("/")[0]) /
-              parseFloat(videoStream.avg_frame_rate.split("/")[1])
-            : undefined;
-
-          return {
-            success: true,
-            resolution,
-            videoCodec: videoStream?.codec_name,
-            audioCodec: audioStream?.codec_name,
-            fps: fps && !isNaN(fps) ? fps : undefined,
-          };
-        } else {
-          const error = response.data?.[0]?.stderr || "Unknown error";
-          return { success: false, error };
-        }
+        return ffprobeToTestResult(response.data?.[0]);
       } catch (error) {
         const axiosError = error as {
           response?: { data?: { message?: string; detail?: string } };
@@ -528,149 +492,21 @@ function StreamIssues({
 }: StreamIssuesProps) {
   const { t } = useTranslation(["views/settings"]);
 
-  const issues = useMemo(() => {
-    const result: Array<{
-      type: "good" | "warning" | "error";
-      message: string;
-    }> = [];
-
-    if (wizardData.brandTemplate === "reolink") {
-      const streamUrl = stream.url.toLowerCase();
-      if (streamUrl.startsWith("rtsp://")) {
-        result.push({
-          type: "warning",
-          message: t("cameraWizard.step4.issues.brands.reolink-rtsp"),
-        });
-      }
-
-      if (streamUrl.startsWith("http://") && !stream.useFfmpeg) {
-        result.push({
-          type: "warning",
-          message: t("cameraWizard.step4.issues.brands.reolink-http"),
-        });
-      }
-    }
-
-    // Video codec check
-    if (stream.testResult?.videoCodec) {
-      const videoCodec = stream.testResult.videoCodec.toLowerCase();
-      if (["h264", "h265", "hevc"].includes(videoCodec)) {
-        result.push({
-          type: "good",
-          message: t("cameraWizard.step4.issues.videoCodecGood", {
-            codec: stream.testResult.videoCodec,
-          }),
-        });
-      }
-    }
-
-    // Audio codec check
-    if (stream.roles.includes("record")) {
-      if (stream.testResult?.audioCodec) {
-        const audioCodec = stream.testResult.audioCodec.toLowerCase();
-        if (audioCodec === "aac") {
-          result.push({
-            type: "good",
-            message: t("cameraWizard.step4.issues.audioCodecGood", {
-              codec: stream.testResult.audioCodec,
-            }),
-          });
-        } else {
-          result.push({
-            type: "error",
-            message: t("cameraWizard.step4.issues.audioCodecRecordError"),
-          });
-        }
-      } else {
-        result.push({
-          type: "warning",
-          message: t("cameraWizard.step4.issues.noAudioWarning"),
-        });
-      }
-    }
-
-    // Audio detection check
-    if (stream.roles.includes("audio")) {
-      if (!stream.testResult?.audioCodec) {
-        result.push({
-          type: "error",
-          message: t("cameraWizard.step4.issues.audioCodecRequired"),
-        });
-      }
-    }
-
-    // Restreaming check
-    if (stream.roles.includes("record")) {
-      if (stream.restream) {
-        result.push({
-          type: "warning",
-          message: t("cameraWizard.step4.issues.restreamingWarning"),
-        });
-      }
-    }
-
-    if (stream.roles.includes("detect") && stream.testResult) {
-      const probedResolution = stream.testResult.resolution;
-      let probedWidth = 0;
-      let probedHeight = 0;
-      if (probedResolution) {
-        const [w, h] = probedResolution.split("x").map(Number);
-        if (!isNaN(w) && !isNaN(h)) {
-          probedWidth = w;
-          probedHeight = h;
-        }
-      }
-
-      if (probedWidth <= 0 || probedHeight <= 0) {
-        result.push({
-          type: "error",
-          message: t("cameraWizard.step4.issues.resolutionUnknown"),
-        });
-      } else {
-        const minDimension = Math.min(probedWidth, probedHeight);
-        const maxDimension = Math.max(probedWidth, probedHeight);
-        if (minDimension > 1080) {
-          result.push({
-            type: "warning",
-            message: t("cameraWizard.step4.issues.resolutionHigh", {
-              resolution: probedResolution,
-            }),
-          });
-        } else if (maxDimension < 640) {
-          result.push({
-            type: "error",
-            message: t("cameraWizard.step4.issues.resolutionLow", {
-              resolution: probedResolution,
-            }),
-          });
-        }
-      }
-    }
-
-    // Substream Check
-    if (
-      wizardData.brandTemplate == "dahua" &&
-      stream.roles.includes("detect") &&
-      stream.url.includes("subtype=1")
-    ) {
-      result.push({
-        type: "warning",
-        message: t("cameraWizard.step4.issues.dahua.substreamWarning"),
-      });
-    }
-    if (
-      wizardData.brandTemplate == "hikvision" &&
-      stream.roles.includes("detect") &&
-      stream.url.includes("/102")
-    ) {
-      result.push({
-        type: "warning",
-        message: t("cameraWizard.step4.issues.hikvision.substreamWarning"),
-      });
-    }
-
-    return result;
-  }, [stream, wizardData, t]);
+  const issues = useMemo(
+    () =>
+      getStreamIssues(
+        {
+          url: stream.url,
+          roles: stream.roles,
+          brand: wizardData.brandTemplate,
+          useFfmpeg: stream.useFfmpeg,
+          restream: stream.restream,
+          testResult: stream.testResult,
+        },
+        t,
+      ),
+    [stream, wizardData, t],
+  );
 
   if (issues.length === 0) {
     return null;

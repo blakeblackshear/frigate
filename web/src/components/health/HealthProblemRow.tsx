@@ -9,6 +9,8 @@ import {
 } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 import type { HealthProblem } from "@/types/health";
 
 type HealthProblemRowProps = {
@@ -16,7 +18,8 @@ type HealthProblemRowProps = {
 };
 
 export default function HealthProblemRow({ problem }: HealthProblemRowProps) {
-  const { t } = useTranslation(["views/system"]);
+  const { t } = useTranslation(["views/system", "common"]);
+  const { getLocaleDocUrl } = useDocDomain();
 
   return (
     <div
@@ -25,12 +28,20 @@ export default function HealthProblemRow({ problem }: HealthProblemRowProps) {
       data-severity={problem.severity}
     >
       <div className="mt-0.5 flex shrink-0">
-        {problem.severity === "error" && <LuX className="size-4 text-danger" />}
-        {problem.severity === "warning" && (
-          <FaTriangleExclamation className="size-4 text-yellow-500" />
-        )}
-        {problem.severity === "info" && (
-          <LuInfo className="size-4 text-selected" />
+        {problem.pending ? (
+          <ActivityIndicator className="" size={16} />
+        ) : (
+          <>
+            {problem.severity === "error" && (
+              <LuX className="size-4 text-danger" />
+            )}
+            {problem.severity === "warning" && (
+              <FaTriangleExclamation className="size-4 text-yellow-500" />
+            )}
+            {problem.severity === "info" && (
+              <LuInfo className="size-4 text-selected" />
+            )}
+          </>
         )}
       </div>
       {problem.scope && (
@@ -70,6 +81,17 @@ export default function HealthProblemRow({ problem }: HealthProblemRowProps) {
           >
             <LuSlidersHorizontal className="size-4" />
           </Link>
+        )}
+        {problem.docLink && (
+          <a
+            href={getLocaleDocUrl(problem.docLink)}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={t("readTheDocumentation", { ns: "common" })}
+            className="hover:text-primary"
+          >
+            <LuExternalLink className="size-4" />
+          </a>
         )}
         {problem.externalLink && (
           <a

@@ -22,6 +22,7 @@ import {
   type ApiMockOverrides,
 } from "../helpers/api-mocker";
 import { WsMocker } from "../helpers/ws-mocker";
+import { statsFactory } from "./mock-data/stats";
 import { installErrorCollector, type ErrorCollector } from "./error-collector";
 import { GLOBAL_ALLOWLIST } from "./error-allowlist";
 
@@ -53,7 +54,7 @@ export class FrigateApp {
       return route.fallback();
     });
 
-    await this.ws.install(this.page);
+    await this.ws.install(this.page, statsFactory(overrides?.stats));
     await this.media.install();
     await this.api.install(overrides);
   }

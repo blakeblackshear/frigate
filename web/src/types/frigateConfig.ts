@@ -28,13 +28,15 @@ export type BirdseyeMode =
 
 export interface FaceRecognitionConfig {
   enabled: boolean;
+  device?: string | null;
   model_size: SearchModelSize;
   unknown_score: number;
   detection_threshold: number;
   recognition_threshold: number;
 }
 
-export type SearchModel = "jinav1" | "jinav2";
+// a GenAI provider name is also accepted by the backend
+export type SearchModel = "jinav1" | "jinav2" | (string & NonNullable<unknown>);
 export type SearchModelSize = "small" | "large";
 
 export interface CameraConfig {
@@ -85,11 +87,11 @@ export interface CameraConfig {
   };
   ffmpeg: {
     global_args: string[];
-    hwaccel_args: string;
+    hwaccel_args: string | string[];
     input_args: string;
     inputs: {
       global_args: string[];
-      hwaccel_args: string[];
+      hwaccel_args: string | string[];
       input_args: string;
       path: string;
       roles: string[];
@@ -448,6 +450,7 @@ export interface FrigateConfig {
 
   audio_transcription: {
     enabled: boolean;
+    device: "GPU" | "CPU";
   };
 
   auth: {
@@ -501,7 +504,7 @@ export interface FrigateConfig {
 
   ffmpeg: {
     global_args: string[];
-    hwaccel_args: string;
+    hwaccel_args: string | string[];
     input_args: string;
     output_args: {
       detect: string[];
@@ -527,6 +530,7 @@ export interface FrigateConfig {
 
   lpr: {
     enabled: boolean;
+    device?: string | null;
   };
 
   logger: {
@@ -615,6 +619,7 @@ export interface FrigateConfig {
 
   semantic_search: {
     enabled: boolean;
+    device?: string | null;
     reindex: boolean;
     model: SearchModel;
     model_size: SearchModelSize;

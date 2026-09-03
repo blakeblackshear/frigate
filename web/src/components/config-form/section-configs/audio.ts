@@ -6,6 +6,7 @@ const audio: SectionConfigOverrides = {
     messages: [
       {
         key: "no-audio-role",
+        health: (ctx) => ctx.fullCameraConfig?.audio?.enabled === true,
         messageKey: "configMessages.audio.noAudioRole",
         severity: "warning",
         condition: (ctx) => {

@@ -9,6 +9,8 @@ export type HealthSeverity = "error" | "warning" | "info";
  */
 export type HealthProblem = {
   id: string;
+  /** which source produced the row; part of the sort order */
+  source: "registry" | "live" | "config" | "stream";
   severity: HealthSeverity;
   /** camera name or other scope shown as a chip before the text */
   scope?: string;
@@ -23,5 +25,7 @@ export type HealthProblem = {
   docLink?: string;
   /** absolute URL rendered as an external link (the update notice's release page) */
   externalLink?: string;
+  /** render with a spinner instead of the severity icon (stream check running) */
+  pending?: boolean;
   onDismiss?: () => void;
 };
