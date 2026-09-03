@@ -18,6 +18,15 @@ class TestIsNewerVersion(unittest.TestCase):
         self.assertFalse(is_newer_version("0.19.1-abcdef", "0.19.0"))
         self.assertFalse(is_newer_version("0.19.0-abcdef", "0.19.0-beta2"))
 
+    def test_prerelease_is_behind_its_final_release(self):
+        self.assertTrue(is_newer_version("0.19.0-beta2", "0.19.0"))
+        self.assertTrue(is_newer_version("0.19.0-rc1", "0.19.0"))
+        self.assertTrue(is_newer_version("0.19.0-RC1", "0.19.0"))
+
+    def test_prerelease_of_a_later_line_is_not_behind(self):
+        self.assertFalse(is_newer_version("0.20.0-beta1", "0.19.0"))
+        self.assertFalse(is_newer_version("0.19.0-beta2", "0.19.0-beta2"))
+
     def test_unparseable_is_never_newer(self):
         self.assertFalse(is_newer_version("0.19.0-abcdef", "disabled"))
         self.assertFalse(is_newer_version("0.19.0-abcdef", "unknown"))

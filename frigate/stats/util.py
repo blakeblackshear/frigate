@@ -55,17 +55,29 @@ def _version_tuple(value: str) -> tuple[int, int, int] | None:
     return int(match.group(1)), int(match.group(2)), int(match.group(3))
 
 
+# a build's git hash suffix is not a prerelease marker
+PRERELEASE_PATTERN = re.compile(r"^\d+\.\d+\.\d+-(?:beta|rc)", re.IGNORECASE)
+
+
+def _is_prerelease(value: str) -> bool:
+    return PRERELEASE_PATTERN.match(value or "") is not None
+
+
 def is_newer_version(current: str, latest: str) -> bool:
     """Whether latest is a release newer than the running version.
 
-    Build suffixes and prerelease tags after the third number are ignored, and
-    a value that does not parse (disabled, unknown) is never newer.
+    Build suffixes after the third number are ignored, and a value that does
+    not parse (disabled, unknown) is never newer. A prerelease is behind the
+    final release of the same number, so 0.19.0-beta2 is behind 0.19.0.
     """
     current_tuple = _version_tuple(current)
     latest_tuple = _version_tuple(latest)
 
     if current_tuple is None or latest_tuple is None:
         return False
+
+    if current_tuple == latest_tuple:
+        return _is_prerelease(current) and not _is_prerelease(latest)
 
     return latest_tuple > current_tuple
 
