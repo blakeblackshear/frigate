@@ -10,7 +10,7 @@ apt-get -qq install --no-install-recommends -y \
     gnupg \
     wget \
     lbzip2 \
-    procps vainfo acl \
+    procps vainfo acl kmod pciutils \
     unzip locales tzdata libxml2 xz-utils \
     python3.11 \
     curl \
