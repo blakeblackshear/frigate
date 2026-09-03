@@ -98,6 +98,23 @@ if [[ -d /dev/bus/usb ]]; then
     done < <(find /dev/bus/usb -type d -print0)
 fi
 
+# The Axelera runtime enumerates Metis cards by the colon-separated node name
+# that the vendor's udev rules create on a host (e.g. /dev/metis-0:1:0, a
+# symlink to the raw /dev/metis-0-1-0). Containers get the raw node only,
+# because docker never copies symlinks and there is no udev here, so recreate
+# the alias the runtime looks for.
+if compgen -G "/dev/metis-*-*-*" > /dev/null; then
+    for node in /dev/metis-*-*-*; do
+        [[ -c "$node" ]] || continue
+        base=${node##*/}
+        suffix=${base#metis-}
+        alias="/dev/metis-${suffix//-/:}"
+        if [[ ! -e "$alias" ]]; then
+            ln -s "$base" "$alias" && echo "[INFO] device access: created Metis alias ${alias}"
+        fi
+    done
+fi
+
 if [[ "$failed" -gt 0 ]]; then
     echo "[INFO] device access: granted ${granted} node(s), ${failed} failed"
 elif [[ "$granted" -gt 0 ]]; then
