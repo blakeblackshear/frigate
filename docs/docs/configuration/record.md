@@ -515,7 +515,7 @@ The storage usage Frigate reports will not exactly match what the operating syst
 
 ### How Frigate measures recording usage
 
-The **Recordings** value on the Storage Metrics page (<NavPath path="System > Storage" />), and the per-camera **Camera Storage** breakdown, is the sum of the recording segment sizes Frigate has written, taken from Frigate's database. It is **not** computed by a scan of the disk. Frigate tracks usage this way by design: repeatedly walking the entire drive to total its size would keep hard drives spun up and add unnecessary I/O.
+The **Recordings** value on the Storage Metrics page (<NavPath path="Health and Metrics > Storage" />), and the per-camera **Camera Storage** breakdown, is the sum of the recording segment sizes Frigate has written, taken from Frigate's database. It is **not** computed by a scan of the disk. Frigate tracks usage this way by design: repeatedly walking the entire drive to total its size would keep hard drives spun up and add unnecessary I/O.
 
 The disk **total** shown beside it, and the free-space figure Frigate uses to decide when to delete recordings, instead come from the operating system's report for the whole filesystem mounted at `/media/frigate`. As a result, the **Unused** value on the page is _total disk capacity minus Frigate's recordings_, not the drive's real free space, which will be lower whenever anything else is stored on the disk.
 

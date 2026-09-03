@@ -168,9 +168,9 @@
   },
   "menu": {
     "system": "System",
-    "systemMetrics": "System",
+    "systemMetrics": "Health and Metrics",
     "configuration": "Configuration",
-    "systemLogs": "System logs",
+    "systemLogs": "Logs",
     "profiles": "Profiles",
     "settings": "Settings",
     "configurationEditor": "Configuration Editor",

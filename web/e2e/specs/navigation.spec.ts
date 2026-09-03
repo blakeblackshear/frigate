@@ -130,8 +130,8 @@ test.describe("Navigation — settings menu (desktop) @critical", () => {
 
   const TARGETS = [
     { label: "Settings", url: /\/settings/ },
-    { label: "System", url: /\/system/ },
-    { label: "System logs", url: /\/logs/ },
+    { label: "Health and Metrics", url: /\/system/ },
+    { label: "Logs", url: /\/logs/ },
     { label: "Configuration Editor", url: /\/config/ },
   ];
 
