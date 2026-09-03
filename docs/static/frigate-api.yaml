@@ -7762,6 +7762,18 @@ components:
           description: Per-request thinking toggle. None means use the provider 
             default. Ignored by providers that do not expose a per-request 
             thinking switch.
+        tool_decisions:
+          additionalProperties:
+            type: string
+            enum:
+              - approve
+              - reject
+          type: object
+          title: Tool Decisions
+          description: Decisions for tool calls that paused for approval, keyed 
+            by tool call ID. Send these with the conversation chain returned 
+            alongside an approval request; rejected calls are reported to the 
+            model as declined instead of being executed.
       type: object
       required:
         - messages

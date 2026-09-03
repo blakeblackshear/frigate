@@ -1,6 +1,6 @@
 """Chat API request models."""
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -57,5 +57,14 @@ class ChatCompletionRequest(BaseModel):
         description=(
             "Per-request thinking toggle. None means use the provider default. "
             "Ignored by providers that do not expose a per-request thinking switch."
+        ),
+    )
+    tool_decisions: dict[str, Literal["approve", "reject"]] = Field(
+        default_factory=dict,
+        description=(
+            "Decisions for tool calls that paused for approval, keyed by tool "
+            "call ID. Send these with the conversation chain returned alongside "
+            "an approval request; rejected calls are reported to the model as "
+            "declined instead of being executed."
         ),
     )

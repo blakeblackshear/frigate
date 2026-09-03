@@ -8,6 +8,7 @@ import { ChatEventThumbnailsRow } from "@/components/chat/ChatEventThumbnailsRow
 import { MessageBubble } from "@/components/chat/ChatMessage";
 import { ReasoningBubble } from "@/components/chat/ReasoningBubble";
 import { ToolCallsGroup } from "@/components/chat/ToolCallsGroup";
+import { ToolApprovalCard } from "@/components/chat/ToolApprovalCard";
 import { ChatStartingState } from "@/components/chat/ChatStartingState";
 import { ChatComposer } from "@/components/chat/ChatComposer";
 import ChatSettings from "@/components/chat/ChatSettings";
@@ -15,11 +16,13 @@ import type {
   ChatMessage,
   ChatStats,
   GenAIModelsResponse,
+  PendingToolCall,
   ShowStatsMode,
+  ToolDecision,
 } from "@/types/chat";
 import { usePersistence } from "@/hooks/use-persistence";
 import {
-  getEventIdsFromSearchObjectsToolCalls,
+  getEventIdsFromToolCalls,
   getFindSimilarObjectsFromToolCalls,
   prependAttachment,
   streamChatCompletion,
@@ -40,6 +43,13 @@ const hasText = (content: unknown): content is string =>
 const toWire = (messages: ChatMessage[]): ChatMessage[] =>
   messages.map(({ reasoning: _r, stats: _s, ...rest }) => rest);
 
+// Stable default so usePersistence does not reload on every render.
+const NO_TOOLS: string[] = [];
+
+type ResumeOptions = {
+  toolDecisions: Record<string, ToolDecision>;
+};
+
 export default function ChatPage() {
   const { t } = useTranslation(["views/chat"]);
   const [input, setInput] = useState("");
@@ -48,6 +58,21 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attachedEventId, setAttachedEventId] = useState<string | null>(null);
+  // Write tool calls the backend paused on, plus the user's decisions so far.
+  const [pendingApprovals, setPendingApprovals] = useState<
+    PendingToolCall[] | null
+  >(null);
+  const [approvalDecisions, setApprovalDecisions] = useState<
+    Record<string, ToolDecision>
+  >({});
+  // Tools the user chose to always allow. Kept only in this browser; the
+  // backend never sees the list, the client just answers for them.
+  const [alwaysAllowTools, setAlwaysAllowTools] = usePersistence<string[]>(
+    "chat-always-allow-tools",
+    NO_TOOLS,
+  );
+  const alwaysAllowRef = useRef<string[]>(NO_TOOLS);
+  alwaysAllowRef.current = alwaysAllowTools ?? NO_TOOLS;
   const [showStats, setShowStats] = usePersistence<ShowStatsMode>(
     "chat-show-stats",
     "while_generating",
@@ -62,6 +87,7 @@ export default function ChatPage() {
   );
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const loadingRef = useRef(false);
 
   const { data: genaiInfo } = useSWR<GenAIModelsResponse>("genai/models", {
     revalidateOnFocus: false,
@@ -92,14 +118,27 @@ export default function ChatPage() {
   }, [messages, streaming, autoScroll]);
 
   const submitConversation = useCallback(
-    async (messagesToSend: ChatMessage[]) => {
-      if (isLoading) return;
+    async function submit(
+      messagesToSend: ChatMessage[],
+      resume?: ResumeOptions,
+    ) {
+      if (loadingRef.current) return;
       const last = messagesToSend[messagesToSend.length - 1];
-      if (!last || last.role !== "user" || !hasText(last.content)) return;
+      if (!last) return;
+      // A normal turn ends with the user's message; a resume after an
+      // approval pause ends with the assistant's pending tool calls.
+      if (resume) {
+        if (last.role !== "assistant" || !last.tool_calls?.length) return;
+      } else if (last.role !== "user" || !hasText(last.content)) {
+        return;
+      }
 
       setError(null);
+      setPendingApprovals(null);
+      setApprovalDecisions({});
       setMessages(messagesToSend);
       setStreaming({ content: "", reasoning: "", chain: [] });
+      loadingRef.current = true;
       setIsLoading(true);
 
       const baseURL = axios.defaults.baseURL ?? "";
@@ -116,6 +155,7 @@ export default function ChatPage() {
       let stats: ChatStats | undefined;
       let reasoning = "";
       let hadError = false;
+      let approvals: PendingToolCall[] | null = null;
 
       await streamChatCompletion(
         url,
@@ -138,32 +178,99 @@ export default function ChatPage() {
             stats = s;
             setStreaming((cur) => (cur ? { ...cur, stats: s } : cur));
           },
+          onApprovalRequired: (toolCalls) => {
+            approvals = toolCalls;
+          },
           onError: (message) => {
             hadError = true;
             setError(message);
           },
           onDone: () => {
             abortRef.current = null;
+            loadingRef.current = false;
             setIsLoading(false);
             setStreaming(null);
             const lastMsg = chain[chain.length - 1];
             if (!hadError && lastMsg?.role === "assistant") {
-              setMessages(
-                chain.map((m, i) =>
-                  i === chain.length - 1
-                    ? { ...m, reasoning: reasoning || undefined, stats }
-                    : m,
-                ),
+              const committed = chain.map((m, i) =>
+                i === chain.length - 1
+                  ? { ...m, reasoning: reasoning || undefined, stats }
+                  : m,
               );
+              setMessages(committed);
+              if (approvals?.length) {
+                // Calls to always-allowed tools are answered here without
+                // prompting; anything else waits for the user.
+                const allowed = alwaysAllowRef.current;
+                const auto: Record<string, ToolDecision> = {};
+                for (const tc of approvals) {
+                  if (allowed.includes(tc.name)) auto[tc.id] = "approve";
+                }
+                if (Object.keys(auto).length === approvals.length) {
+                  submit(committed, { toolDecisions: auto });
+                } else {
+                  setApprovalDecisions(auto);
+                  setPendingApprovals(approvals);
+                }
+              }
             }
           },
           defaultErrorMessage: t("error"),
         },
         controller.signal,
-        supportsThinking ? { enableThinking: !!thinkingEnabled } : {},
+        {
+          ...(supportsThinking ? { enableThinking: !!thinkingEnabled } : {}),
+          toolDecisions: resume?.toolDecisions,
+        },
       );
     },
-    [isLoading, supportsThinking, t, thinkingEnabled],
+    [supportsThinking, t, thinkingEnabled],
+  );
+
+  // Resume the paused turn once every pending call has a decision.
+  const applyDecisions = useCallback(
+    (next: Record<string, ToolDecision>) => {
+      setApprovalDecisions(next);
+      if (!pendingApprovals) return;
+      if (!pendingApprovals.every((tc) => next[tc.id] !== undefined)) return;
+      submitConversation(messages, { toolDecisions: next });
+    },
+    [messages, pendingApprovals, submitConversation],
+  );
+
+  const handleApprove = useCallback(
+    (id: string) => applyDecisions({ ...approvalDecisions, [id]: "approve" }),
+    [applyDecisions, approvalDecisions],
+  );
+
+  const handleReject = useCallback(
+    (id: string) => applyDecisions({ ...approvalDecisions, [id]: "reject" }),
+    [applyDecisions, approvalDecisions],
+  );
+
+  const handleAlwaysAllow = useCallback(
+    (id: string, name: string) => {
+      const current = alwaysAllowTools ?? NO_TOOLS;
+      const allowed = current.includes(name) ? current : [...current, name];
+      setAlwaysAllowTools(allowed);
+      const next = { ...approvalDecisions, [id]: "approve" as const };
+      for (const tc of pendingApprovals ?? []) {
+        if (tc.name === name) next[tc.id] = "approve";
+      }
+      applyDecisions(next);
+    },
+    [
+      alwaysAllowTools,
+      applyDecisions,
+      approvalDecisions,
+      pendingApprovals,
+      setAlwaysAllowTools,
+    ],
+  );
+
+  const clearAlwaysAllowTools = useCallback(
+    () => setAlwaysAllowTools(NO_TOOLS),
+    [setAlwaysAllowTools],
   );
 
   const recentEventIds = useMemo(() => {
@@ -174,7 +281,7 @@ export default function ChatPage() {
       const calls = toolCallsForMessage(msg, responses);
       const similar = getFindSimilarObjectsFromToolCalls(calls);
       if (similar) return similar.results.map((e) => e.id);
-      const events = getEventIdsFromSearchObjectsToolCalls(calls);
+      const events = getEventIdsFromToolCalls(calls);
       if (events.length > 0) return events.map((e) => e.id);
     }
     return [];
@@ -197,19 +304,25 @@ export default function ChatPage() {
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    loadingRef.current = false;
     setIsLoading(false);
     setStreaming(null);
+    setPendingApprovals(null);
+    setApprovalDecisions({});
   }, []);
 
   const startNewChat = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    loadingRef.current = false;
     setIsLoading(false);
     setStreaming(null);
     setMessages([]);
     setInput("");
     setAttachedEventId(null);
     setError(null);
+    setPendingApprovals(null);
+    setApprovalDecisions({});
   }, []);
 
   const handleEditSubmit = useCallback(
@@ -260,7 +373,7 @@ export default function ChatPage() {
     const calls = toolCallsForMessage(msg, responses);
     const contentText = hasText(msg.content) ? msg.content : "";
     const similar = getFindSimilarObjectsFromToolCalls(calls);
-    const events = similar ? [] : getEventIdsFromSearchObjectsToolCalls(calls);
+    const events = similar ? [] : getEventIdsFromToolCalls(calls);
 
     return (
       <div key={i} className="flex flex-col gap-2">
@@ -324,6 +437,8 @@ export default function ChatPage() {
           setShowStats={setShowStats}
           autoScroll={autoScroll ?? true}
           setAutoScroll={setAutoScroll}
+          alwaysAllowTools={alwaysAllowTools ?? NO_TOOLS}
+          clearAlwaysAllowTools={clearAlwaysAllowTools}
         />
       </div>
       <div
@@ -335,6 +450,20 @@ export default function ChatPage() {
             {hasStarted ? (
               <div className="flex w-full flex-1 flex-col gap-3 pb-3">
                 {renderList.map((msg, i) => renderMessage(msg, i))}
+                {pendingApprovals && !streaming && (
+                  <div className="flex flex-col gap-2">
+                    {pendingApprovals.map((tc) => (
+                      <ToolApprovalCard
+                        key={tc.id}
+                        toolCall={tc}
+                        decision={approvalDecisions[tc.id]}
+                        onApprove={handleApprove}
+                        onAlwaysAllow={handleAlwaysAllow}
+                        onReject={handleReject}
+                      />
+                    ))}
+                  </div>
+                )}
                 {streaming &&
                   !finalShown &&
                   (streaming.content || streaming.reasoning ? (
@@ -391,7 +520,12 @@ export default function ChatPage() {
               setInput={setInput}
               sendMessage={sendMessage}
               isLoading={isLoading}
-              placeholder={t("placeholder")}
+              disabled={pendingApprovals != null}
+              placeholder={
+                pendingApprovals != null
+                  ? t("approval.placeholder")
+                  : t("placeholder")
+              }
               attachedEventId={attachedEventId}
               onClearAttachment={handleClearAttachment}
               onAttach={setAttachedEventId}
