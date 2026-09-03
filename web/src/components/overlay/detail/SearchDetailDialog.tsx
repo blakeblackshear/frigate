@@ -1240,10 +1240,14 @@ function ObjectDetailsTab({
     search?.plus_id ? "submitted" : "reviewing",
   );
 
-  useEffect(
-    () => setState(search?.plus_id ? "submitted" : "reviewing"),
-    [search],
-  );
+  // a submission request outlives the object it was made for, so the
+  // response handler needs to know which object is on screen now
+  const displayedIdRef = useRef(search?.id);
+
+  useEffect(() => {
+    displayedIdRef.current = search?.id;
+    setState(search?.plus_id ? "submitted" : "reviewing");
+  }, [search]);
 
   const onSubmitToPlus = useCallback(
     async (falsePositive: boolean) => {
@@ -1251,10 +1255,12 @@ function ObjectDetailsTab({
         return;
       }
 
+      const eventId = search.id;
+
       try {
         const resp = falsePositive
-          ? await axios.put(`events/${search.id}/false_positive`)
-          : await axios.post(`events/${search.id}/plus`, {
+          ? await axios.put(`events/${eventId}/false_positive`)
+          : await axios.post(`events/${eventId}/plus`, {
               include_annotation: 1,
             });
 
@@ -1262,12 +1268,15 @@ function ObjectDetailsTab({
           throw new Error();
         }
 
-        setState("submitted");
+        if (displayedIdRef.current === eventId) {
+          setState("submitted");
+        }
+
         mutate(
           (key) => isEventsKey(key),
           (currentData: SearchResult[][] | SearchResult[] | undefined) =>
             mapSearchResults(currentData, (event) =>
-              event.id === search.id
+              event.id === eventId
                 ? { ...event, plus_id: "new_upload" }
                 : event,
             ),
@@ -1278,7 +1287,12 @@ function ObjectDetailsTab({
           },
         );
       } catch {
-        setState("reviewing");
+        if (displayedIdRef.current === eventId) {
+          setState("reviewing");
+        }
+
+        // the toast is not object specific, so it is always shown to avoid
+        // silently dropping a failed submission
         toast.error(
           t("explore.plus.review.toast.error", { ns: "components/dialog" }),
           { position: "top-center" },
