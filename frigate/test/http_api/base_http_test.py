@@ -144,7 +144,9 @@ class BaseTestHttp(unittest.TestCase):
         except OSError:
             pass
 
-    def create_app(self, stats=None, event_metadata_publisher=None):
+    def create_app(
+        self, stats=None, event_metadata_publisher=None, notice_registry=None
+    ):
         from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 
         app = create_fastapi_app(
@@ -159,6 +161,7 @@ class BaseTestHttp(unittest.TestCase):
             None,
             DebugReplayManager(),
             enforce_default_admin=False,
+            notice_registry=notice_registry,
         )
 
         # Default test mocks for authentication

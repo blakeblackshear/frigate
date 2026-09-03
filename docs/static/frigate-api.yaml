@@ -4108,6 +4108,96 @@ paths:
       security:
         - frigateAdminAuth: []
       x-required-role: admin
+  /notices:
+    get:
+      tags:
+        - Notices
+      summary: Get Notices
+      description: |-
+        **Access:** Admin role required.
+
+        Get the active notices, most severe first.
+
+        Args:
+            include_dismissed: Also return event notices the user has dismissed
+
+        Returns:
+            The active notices
+      operationId: get_notices_notices_get
+      parameters:
+        - name: include_dismissed
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Include Dismissed
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices/stats:
+    get:
+      tags:
+        - Notices
+      summary: Get Notice Stats
+      description: |-
+        **Access:** Admin role required.
+
+        Get lifetime occurrence counts per notice kind.
+      operationId: get_notice_stats_notices_stats_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices/{notice_id}/dismiss:
+    post:
+      tags:
+        - Notices
+      summary: Dismiss Notice
+      description: |-
+        **Access:** Admin role required.
+
+        Hide an event notice until it is raised again.
+      operationId: dismiss_notice_notices__notice_id__dismiss_post
+      parameters:
+        - name: notice_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Notice Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
   /events:
     get:
       tags:

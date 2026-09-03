@@ -48,6 +48,8 @@ export interface ApiMockOverrides {
     available?: { key: string; presets: Record<string, string> }[];
   };
   users?: { username: string; role: string }[];
+  notices?: unknown[];
+  noticeStats?: unknown[];
 }
 
 export class ApiMocker {
@@ -199,6 +201,15 @@ export class ApiMocker {
           ...(overrides?.hwaccel ?? {}),
         },
       }),
+    );
+
+    // Notices. The stats route is registered after the list route so it wins
+    // for /api/notices/stats; the list glob does not match a sub-path anyway.
+    await this.page.route("**/api/notices", (route) =>
+      route.fulfill({ json: overrides?.notices ?? [] }),
+    );
+    await this.page.route("**/api/notices/stats", (route) =>
+      route.fulfill({ json: overrides?.noticeStats ?? [] }),
     );
 
     // Users. GET lists them; POST/PUT (create, password) just succeed, so

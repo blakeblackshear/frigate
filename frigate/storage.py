@@ -20,6 +20,7 @@ from frigate.const import (
     STREAM_TYPE_SUB,
 )
 from frigate.models import Event, Recordings
+from frigate.notices.registry import NoticeRegistry
 from frigate.util.builtin import clear_and_unlink
 
 logger = logging.getLogger(__name__)
@@ -34,10 +35,16 @@ BANDWIDTH_SAMPLE_TARGET = 50
 class StorageMaintainer(threading.Thread):
     """Maintain frigates recording storage."""
 
-    def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
+    def __init__(
+        self,
+        config: FrigateConfig,
+        stop_event: MpEvent,
+        notice_registry: NoticeRegistry | None = None,
+    ) -> None:
         super().__init__(name="storage_maintainer")
         self.config = config
         self.stop_event = stop_event
+        self.notice_registry = notice_registry
         self.camera_storage_stats: dict[str, dict] = {}
         self.config_subscriber = CameraConfigUpdateSubscriber(
             self.config,
@@ -342,8 +349,20 @@ class StorageMaintainer(threading.Thread):
                 except FileNotFoundError:
                     # this file was not found so we must assume no space was cleaned up
                     pass
+
+            if self.notice_registry is not None:
+                self.notice_registry.raise_notice(
+                    "retention_unmet",
+                    params={
+                        "needed_mb": round(float(hourly_bandwidth), 1),
+                        "cleared_mb": round(float(deleted_segments_size), 1),
+                    },
+                )
         else:
             logger.info(f"Cleaned up {deleted_segments_size:.2f} MB of recordings")
+
+            if self.notice_registry is not None:
+                self.notice_registry.resolve("retention_unmet")
 
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
         # delete up to 100,000 at a time
@@ -406,23 +425,28 @@ class StorageMaintainer(threading.Thread):
 
         self.calculate_camera_bandwidth()
         while not self.stop_event.wait(300):
-            updated_topics = self.config_subscriber.check_for_updates()
-
-            for camera in updated_topics.get(CameraConfigUpdateEnum.record.name, []):
-                if camera in self.camera_storage_stats:
-                    self.camera_storage_stats[camera]["needs_refresh"] = True
-
-            if not self.camera_storage_stats or True in [
-                r["needs_refresh"] for r in self.camera_storage_stats.values()
-            ]:
-                self.calculate_camera_bandwidth()
-                logger.debug(f"Default camera bandwidths: {self.camera_storage_stats}.")
-
-            if self.check_storage_needs_cleanup():
-                logger.info(
-                    "Less than 1 hour of recording space left, running storage maintenance..."
-                )
-                self.reduce_storage_consumption()
+            self._maintain_once()
 
         self.config_subscriber.stop()
         logger.info("Exiting storage maintainer...")
+
+    def _maintain_once(self) -> None:
+        updated_topics = self.config_subscriber.check_for_updates()
+
+        for camera in updated_topics.get(CameraConfigUpdateEnum.record.name, []):
+            if camera in self.camera_storage_stats:
+                self.camera_storage_stats[camera]["needs_refresh"] = True
+
+        if not self.camera_storage_stats or True in [
+            r["needs_refresh"] for r in self.camera_storage_stats.values()
+        ]:
+            self.calculate_camera_bandwidth()
+            logger.debug(f"Default camera bandwidths: {self.camera_storage_stats}.")
+
+        if self.check_storage_needs_cleanup():
+            logger.info(
+                "Less than 1 hour of recording space left, running storage maintenance..."
+            )
+            self.reduce_storage_consumption()
+        elif self.notice_registry is not None:
+            self.notice_registry.resolve("retention_unmet")
