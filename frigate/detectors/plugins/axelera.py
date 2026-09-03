@@ -492,8 +492,14 @@ class _AxeleraRuntimeInference:
             raise FileNotFoundError(
                 f"postprocess_graph.onnx not found next to {model_json}"
             )
+        # one frame is in flight through the decoder, so a single intra-op
+        # thread is optimal; extra ORT threads only add context switches
+        sess_opts = onnx_factory.SessionOptions()
+        sess_opts.intra_op_num_threads = 1
         self._pp = onnx_factory.InferenceSession(
-            pp_path, providers=["CPUExecutionProvider"]
+            pp_path,
+            sess_options=sess_opts,
+            providers=["CPUExecutionProvider"],
         )
         pp_inputs = self._pp.get_inputs()
         self._pp_input_names = [i.name for i in pp_inputs]
@@ -541,6 +547,17 @@ class _AxeleraRuntimeInference:
             out_bufs = [np.zeros(shape, np.int8) for shape in out_padded]
             self._pool.put((in_buf, out_bufs))
         self._decode_q: queue.Queue = queue.Queue(maxsize=BUFFER_SETS)
+        # fp32 postprocess feeds, sized to each graph input and reused: the
+        # dequantising copy writes straight into them (copyto fuses the
+        # NHWC->NCHW transpose with the int8->fp32 cast, and the dequant math
+        # then runs in place) so the hot path never allocates
+        self._pp_scratch = {
+            pin.name: np.zeros(
+                tuple(int(x) for x in pin.shape),
+                np.float32,
+            )
+            for pin in pp_inputs
+        }
         # letterbox geometry from the frame coords (width x height) into the
         # model's own workspace (640x640 for the YOLO presets)
         self._scale = min(self._model_w / self._width, self._model_h / self._height)
@@ -549,6 +566,11 @@ class _AxeleraRuntimeInference:
         self._new_w, self._new_h = max(1, new_w), max(1, new_h)
         self._pad_t = (self._model_h - self._new_h) // 2
         self._pad_l = (self._model_w - self._new_w) // 2
+        # per-frame letterbox scratch (producer-thread-owned): the resized
+        # frame, the channel-oriented copy, and the quantized int8
+        self._resize_scratch = np.zeros((self._new_h, self._new_w, 3), np.uint8)
+        self._orient_scratch = np.zeros((self._new_h, self._new_w, 3), np.uint8)
+        self._quant_scratch = np.zeros((self._new_h, self._new_w, 3), np.int8)
 
     # -- public contract used by AxeleraDetector --------------------------
 
@@ -691,39 +713,74 @@ class _AxeleraRuntimeInference:
             self._push_result(connection_id, rows)
 
     def _preprocess(self, frame: np.ndarray, buf: np.ndarray) -> None:
-        """Letterbox the source (H, W, 3) into the padded input buffer."""
-        resized = cv2.resize(
+        """Letterbox the source (H, W, 3) into the padded input buffer.
+
+        All three passes write into preallocated scratch: resize straight into
+        the scratch buffer (cv2 ``dst=``), an in-place channel swap (no strided
+        ``[..., ::-1]`` copy at write time), and an out= subtract for the
+        int8 quantisation. The frame is small enough that a memset of only the
+        padded border strips is cheaper than refilling the whole buffer.
+        """
+        cv2.resize(
             frame,
             (self._new_w, self._new_h),
             interpolation=cv2.INTER_LINEAR,
+            dst=self._resize_scratch,
         )
-        # uint8 - 128 wraps mod 256, then cast to int8 == px - 128 (exactly),
-        # in one pass over the resized frame (no int16/clip intermediates)
-        q = (resized - np.uint8(128)).astype(np.int8)
-        buf.fill(INPUT_Q_ZERO)
+        if self._flip_channels:
+            # BGR -> RGB: Frigate delivers BGR under the documented
+            # input_pixel_format: bgr, while the compiled input expects RGB
+            # semantics; with input_pixel_format: rgb the frame already
+            # carries RGB and is only swapped during quantisation
+            cv2.cvtColor(
+                self._resize_scratch,
+                cv2.COLOR_BGR2RGB,
+                dst=self._orient_scratch,
+            )
+            src_u8 = self._orient_scratch
+        else:
+            src_u8 = self._resize_scratch
+        # uint8 - 128 wraps mod 256, then cast to int8 == px - 128 (exactly);
+        # dtype= on subtract keeps it one pass with no intermediate array
+        np.subtract(
+            src_u8,
+            np.uint8(128),
+            out=self._quant_scratch,
+            dtype=np.int8,
+            casting="unsafe",
+        )
         y0, y1 = self._pad_t, self._pad_t + self._new_h
         x0, x1 = self._pad_l, self._pad_l + self._new_w
         ct, cl = self._content_top, self._content_left
-        # channels 0..2 = quantized RGB: Frigate delivers BGR under the
-        # documented input_pixel_format: bgr, so flip to the RGB semantics the
-        # compiled input expects; with input_pixel_format: rgb the frame
-        # already carries RGB and must pass through untouched
-        src = q[..., ::-1] if self._flip_channels else q
-        buf[0, ct + y0 : ct + y1, cl + x0 : cl + x1, 0:3] = src
-        buf[0, ct + y0 : ct + y1, cl + x0 : cl + x1, 3] = 127
+        # clear only the border strips the previous frame left dirty: rows
+        # outside the content band and, within it, columns outside it
+        top = ct + y0
+        bot = ct + y1
+        buf[0, :top, :, :].fill(INPUT_Q_ZERO)
+        buf[0, bot:, :, :].fill(INPUT_Q_ZERO)
+        buf[0, top:bot, : cl + x0, :].fill(INPUT_Q_ZERO)
+        buf[0, top:bot, cl + x1 :, :].fill(INPUT_Q_ZERO)
+        dst = buf[0, ct + y0 : ct + y1, cl + x0 : cl + x1]
+        dst[..., 0:3] = self._quant_scratch
+        dst[..., 3] = 127
 
     def _decode(self, out_bufs) -> np.ndarray:
         """Dequantise heads + postprocess graph + conf threshold + NMS -> rows."""
         # dequantize + crop to the real channel count + transpose NHWC -> NCHW
+        # without temporaries: copyto casts int8 -> fp32 (lossless) while it
+        # does the strided transpose copy into the reused scratch feed, then
+        # the zp/scale dequant math runs in place on the contiguous NCHW result
         feeds = {}
         for feed_i, name in enumerate(self._pp_input_names):
             idx = self._feed_index[feed_i]
             obuf = out_bufs[idx]
             scale, zp = self._head_dequant[idx]
             real = self._head_real[idx]
-            arr = obuf[..., :real].astype(np.float32)
-            arr = (arr - zp) * scale
-            feeds[name] = np.ascontiguousarray(arr.transpose(0, 3, 1, 2))
+            dst = self._pp_scratch[name]
+            np.copyto(dst, obuf[..., :real].transpose(0, 3, 1, 2), casting="unsafe")
+            np.subtract(dst, zp, out=dst)
+            np.multiply(dst, scale, out=dst)
+            feeds[name] = dst
 
         pp_out = self._pp.run(None, feeds)
         if len(pp_out) == 2:
@@ -731,8 +788,10 @@ class _AxeleraRuntimeInference:
             class_scores, boxes = pp_out
             scores = class_scores[0]  # (8400, 80)
             boxes = boxes[0]
-            conf = scores.max(axis=1)
+            # one argmax pass over the class axis; conf gathers the argmaxed
+            # cells instead of a second full max(axis=1) reduction
             cls_idx = scores.argmax(axis=1).astype(np.int32)
+            conf = scores[np.arange(cls_idx.shape[0]), cls_idx]
         else:
             # one fused output: [cx, cy, w, h, (objectness), C class scores].
             # The SDK DecodeYolo emits CENTER-format boxes (confirmed by the
@@ -747,8 +806,8 @@ class _AxeleraRuntimeInference:
                 cls = raw[:, 5:] * raw[:, 4:5]  # YOLOX: score = obj * cls
             if cls.shape[1] == 0:
                 return np.zeros((MAX_ROWS, 6), np.float32)
-            conf = cls.max(axis=1)
             cls_idx = cls.argmax(axis=1).astype(np.int32)
+            conf = cls[np.arange(cls_idx.shape[0]), cls_idx]
         keep = conf > CONF_THRESHOLD
         boxes, conf, cls_idx = boxes[keep], conf[keep], cls_idx[keep]
         if len(conf) == 0:
