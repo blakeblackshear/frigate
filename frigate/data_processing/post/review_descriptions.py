@@ -601,6 +601,7 @@ def run_analysis(
         genai_config.preferred_language,
         genai_config.debug_save_thumbnails,
         genai_config.activity_context_prompt,
+        genai_config.response_style,
     )
     review_inference_speed.update(datetime.datetime.now().timestamp() - start)
 

@@ -104,6 +104,7 @@ class GenAIClient:
         preferred_language: str | None,
         debug_save: bool,
         activity_context_prompt: str,
+        response_style: str = "default",
     ) -> ReviewMetadata | None:
         """Generate a description for the review item activity."""
         context_prompt = build_review_description_prompt(
@@ -112,6 +113,7 @@ class GenAIClient:
             concerns,
             preferred_language,
             activity_context_prompt,
+            response_style,
         )
 
         logger.debug(

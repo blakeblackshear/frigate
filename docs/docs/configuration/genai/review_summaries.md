@@ -192,6 +192,39 @@ review:
 </TabItem>
 </ConfigTabs>
 
+### Response Style
+
+Different models respond to the built-in prompt with very different writing styles: some produce natural narration while others sound short and mechanical. The `response_style` option selects a writing style preset that rewords the prompt's instructions for the user-facing fields (the title, short summary, and scene description). Presets replace those instructions rather than adding extra ones, so the model never receives competing style directions.
+
+Available presets:
+
+- `default`: The built-in prompt, unchanged. This already reads like a neutral security report.
+- `natural`: Plain, everyday narration with flowing sentences and sentence-style headline titles. Useful when a model's output sounds robotic.
+- `concise`: As brief as possible while still covering each significant action, with terse two-to-four word titles.
+- `detailed`: Thorough descriptions and titles that include the most identifying specifics, like colors, clothing, and carried items.
+
+Style presets only adjust how the user-facing text reads; the model's step-by-step observations and threat level scoring guidance are unaffected. Results vary by model, so it is worth comparing presets against saved debug output using `testing-scripts/genai_review_tester.py` in the Frigate repository.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Review" />.
+
+- Set **GenAI config > Response style** to the desired preset (e.g., `natural`)
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml {4}
+review:
+  genai:
+    enabled: true
+    response_style: natural
+```
+
+</TabItem>
+</ConfigTabs>
+
 ## Review Reports
 
 Along with individual review item summaries, Generative AI can also produce a single report of review items from all cameras marked "suspicious" over a specified time period (for example, a daily summary of suspicious activity while you're on vacation).
