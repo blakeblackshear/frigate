@@ -386,7 +386,9 @@ def events_explore(
     limit: int = 10,
     allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
-    # get distinct labels for all events
+    if not allowed_cameras:
+        return JSONResponse(content=[])
+
     distinct_labels = (
         Event.select(Event.label)
         .where(Event.camera << allowed_cameras)
@@ -396,13 +398,31 @@ def events_explore(
 
     label_counts = {}
 
+    explore_columns = (
+        Event.id,
+        Event.camera,
+        Event.label,
+        Event.sub_label,
+        Event.zones,
+        Event.start_time,
+        Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
+        Event.plus_id,
+        Event.retain_indefinitely,
+        Event.top_score,
+        Event.false_positive,
+        Event.box,
+        Event.data,
+    )
+
     def event_generator():
         for label_obj in distinct_labels.iterator():
             label = label_obj.label
 
             # get most recent events for this label
             label_events = (
-                Event.select()
+                Event.select(*explore_columns)
                 .where((Event.label == label) & (Event.camera << allowed_cameras))
                 .order_by(Event.start_time.desc())
                 .limit(limit)
@@ -484,21 +504,17 @@ async def event_ids(ids: str, request: Request):
             status_code=400,
         )
 
-    for event_id in ids:
-        try:
-            event = Event.get(Event.id == event_id)
-            await require_camera_access(event.camera, request=request)
-        except DoesNotExist:
-            # we should not fail the entire request if an event is not found
-            continue
-
     try:
-        events = Event.select().where(Event.id << ids).dicts().iterator()
-        return JSONResponse(list(events))
+        events = list(Event.select().where(Event.id << ids).dicts().iterator())
     except Exception:
         return JSONResponse(
             content=({"success": False, "message": "Events not found"}), status_code=400
         )
+
+    for event in events:
+        await require_camera_access(event["camera"], request=request)
+
+    return JSONResponse(events)
 
 
 @router.get(
