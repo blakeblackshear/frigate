@@ -81,3 +81,40 @@ class TestUpdateNotice(unittest.TestCase):
             stats_emitter.stats_tracking["latest_frigate_version"], "0.19.0"
         )
         stats_emitter.notice_registry.raise_notice.assert_called_once()
+
+    def test_failed_refresh_keeps_the_last_known_version(self):
+        stats_emitter = self._emitter("0.20.0")
+
+        with (
+            patch.object(emitter, "get_latest_version", return_value="unknown"),
+            patch.object(emitter, "VERSION", "0.19.0-abcdef"),
+            patch.object(emitter.threading, "Thread") as thread,
+        ):
+            stats_emitter._refresh_latest_version()
+            thread.call_args.kwargs["target"]()
+
+        self.assertEqual(
+            stats_emitter.stats_tracking["latest_frigate_version"], "0.20.0"
+        )
+        stats_emitter.notice_registry.raise_notice.assert_called_once_with(
+            "update_available", params={"version": "0.20.0"}
+        )
+        stats_emitter.notice_registry.resolve.assert_not_called()
+
+    def test_disabled_version_check_still_clears_the_notice(self):
+        stats_emitter = self._emitter("0.20.0")
+
+        with (
+            patch.object(emitter, "get_latest_version", return_value="disabled"),
+            patch.object(emitter, "VERSION", "0.19.0-abcdef"),
+            patch.object(emitter.threading, "Thread") as thread,
+        ):
+            stats_emitter._refresh_latest_version()
+            thread.call_args.kwargs["target"]()
+
+        self.assertEqual(
+            stats_emitter.stats_tracking["latest_frigate_version"], "disabled"
+        )
+        stats_emitter.notice_registry.resolve.assert_called_once_with(
+            "update_available"
+        )

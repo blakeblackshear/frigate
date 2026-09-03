@@ -150,9 +150,12 @@ class StatsEmitter(threading.Thread):
         """Refresh the latest release on a daemon thread so the request never stalls stats."""
 
         def refresh() -> None:
-            self.stats_tracking["latest_frigate_version"] = get_latest_version(
-                self.config
-            )
+            latest = get_latest_version(self.config)
+
+            # a failed lookup would otherwise clear a valid update notice for a day
+            if latest != "unknown":
+                self.stats_tracking["latest_frigate_version"] = latest
+
             self._check_update_notice()
 
         threading.Thread(

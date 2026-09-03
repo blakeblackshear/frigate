@@ -58,24 +58,29 @@ class ModelDownloader:
         )
         self.download_thread.start()
 
+    def _notice_scope(self, file_name: str) -> str:
+        # per file: several loaders share one model_name with disjoint files,
+        # so a model wide scope lets one of them clear another's notice
+        return f"{self.model_name}/{file_name}"
+
     def _report_failure(self, file_name: str, error: str) -> None:
         self.requestor.send_data(
             UPDATE_NOTICE,
             {
                 "action": "raise",
                 "kind": "model_download_failed",
-                "scope": self.model_name,
+                "scope": self._notice_scope(file_name),
                 "params": {"file": file_name, "error": error},
             },
         )
 
-    def _resolve_failure(self) -> None:
+    def _resolve_failure(self, file_name: str) -> None:
         self.requestor.send_data(
             UPDATE_NOTICE,
             {
                 "action": "resolve",
                 "kind": "model_download_failed",
-                "scope": self.model_name,
+                "scope": self._notice_scope(file_name),
                 "params": {},
             },
         )
@@ -102,6 +107,7 @@ class ModelDownloader:
                             )
                             continue
 
+            self._resolve_failure(file_name)
             self.requestor.send_data(
                 UPDATE_MODEL_STATE,
                 {
@@ -109,12 +115,6 @@ class ModelDownloader:
                     "state": ModelStatusTypesEnum.downloaded,
                 },
             )
-
-        if all(
-            os.path.exists(os.path.join(self.download_path, file_name))
-            for file_name in self.file_names
-        ):
-            self._resolve_failure()
 
         if self.complete_func:
             self.complete_func()

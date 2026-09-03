@@ -40,7 +40,7 @@ class TestModelDownloadNotice(unittest.TestCase):
         self.assertEqual(len(notices), 1)
         self.assertEqual(notices[0]["action"], "raise")
         self.assertEqual(notices[0]["kind"], "model_download_failed")
-        self.assertEqual(notices[0]["scope"], "facedet")
+        self.assertEqual(notices[0]["scope"], "facedet/facedet.onnx")
         self.assertEqual(
             notices[0]["params"],
             {"file": "facedet.onnx", "error": "HTTP 503 from upstream"},
@@ -79,4 +79,24 @@ class TestModelDownloadNotice(unittest.TestCase):
         notices = self._notice_calls(model_downloader.requestor)
         self.assertEqual(len(notices), 1)
         self.assertEqual(notices[0]["action"], "resolve")
-        self.assertEqual(notices[0]["scope"], "facedet")
+        self.assertEqual(notices[0]["scope"], "facedet/facedet.onnx")
+
+    def test_a_sibling_downloader_only_resolves_its_own_files(self):
+        """PaddleOCR, facedet and jina each spread one model_name over several
+        downloaders, so a resolve must never reach a sibling's file."""
+
+        def succeeding(path: str) -> None:
+            with open(path, "w") as f:
+                f.write("model")
+
+        with patch("frigate.util.downloader.InterProcessRequestor"):
+            sibling = ModelDownloader(
+                "paddleocr-onnx", self.download_path, ["det.onnx"], succeeding
+            )
+
+        sibling._download_models()
+
+        self.assertEqual(
+            [n["scope"] for n in self._notice_calls(sibling.requestor)],
+            ["paddleocr-onnx/det.onnx"],
+        )
