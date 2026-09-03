@@ -71,22 +71,21 @@ export function ToolApprovalCard({
         <div className="flex flex-wrap items-center gap-2">
           <Button
             size="sm"
-            variant="select"
+            variant="secondary"
             onClick={() => onApprove(toolCall.id)}
           >
             {t("approval.approve")}
           </Button>
           <Button
             size="sm"
-            variant="outline"
+            variant="select"
             onClick={() => onAlwaysAllow(toolCall.id, toolCall.name)}
           >
             {t("approval.always_allow")}
           </Button>
           <Button
             size="sm"
-            variant="ghost"
-            className="text-destructive hover:text-destructive"
+            variant="destructive"
             onClick={() => onReject(toolCall.id)}
           >
             {t("approval.reject")}
