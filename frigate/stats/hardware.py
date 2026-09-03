@@ -484,11 +484,5 @@ def get_hardware_temperatures(detector_type: str) -> list[float | None]:
     elif detector_type == "hailo8l":
         hailo_temps = get_hailo_temps()
         return [hailo_temps[name] for name in sorted(hailo_temps.keys())]
-    elif detector_type == "axelera":
-        # Metis reports one board temperature through the SDK's axcmd tool
-        board_temp = get_axelera_board_temp()
-
-        if board_temp is not None:
-            return [board_temp]
 
     return []
