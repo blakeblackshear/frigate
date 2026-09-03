@@ -249,8 +249,9 @@ export class MediaMocker {
       }),
     );
 
-    // Event thumbnails
-    await this.page.route("**/api/events/*/thumbnail.jpg**", (route) =>
+    // Event thumbnails. The explore grid and detail dialog request .webp,
+    // everything else requests .jpg.
+    await this.page.route("**/api/events/*/thumbnail.{jpg,webp}**", (route) =>
       route.fulfill({
         contentType: "image/png",
         body: PLACEHOLDER_PNG,

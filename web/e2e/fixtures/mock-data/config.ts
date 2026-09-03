@@ -52,6 +52,9 @@ function deepMerge<T extends Record<string, unknown>>(
 export const BASE_CONFIG = {
   ...configSnapshot,
   version: "0.15.0-test",
+  // injected by the /config endpoint rather than the Pydantic model, so it
+  // is absent from the snapshot
+  plus: { enabled: false },
   cameras: {
     ...configSnapshot.cameras,
     front_door: {
