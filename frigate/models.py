@@ -183,3 +183,25 @@ class Trigger(Model):
 
     class Meta:
         primary_key = CompositeKey("camera", "name")
+
+
+class Notice(Model):
+    id = CharField(null=False, primary_key=True, max_length=150)
+    kind = CharField(index=True, max_length=50)
+    scope = CharField(max_length=100, null=True)
+    params = JSONField()
+    first_seen = DateTimeField()
+    last_seen = DateTimeField()
+    count = IntegerField(default=1)
+    dismissed_at = DateTimeField(null=True)
+
+
+class NoticeStats(Model):
+    kind = CharField(null=False, primary_key=True, max_length=50)
+    occurrences = IntegerField(default=0)
+    dismissals = IntegerField(default=0)
+    first_seen = DateTimeField()
+    last_seen = DateTimeField()
+    # watermarks for a future analytics reporter; unused until then
+    reported_occurrences = IntegerField(default=0)
+    reported_dismissals = IntegerField(default=0)

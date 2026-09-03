@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 
 from frigate.app import FrigateApp
 from frigate.comms.dispatcher import Dispatcher
+from frigate.comms.mqtt import MqttClient
 from frigate.comms.runtime_state import RuntimeStatePersistence
 from frigate.config import BirdseyeModeEnum
 
@@ -510,3 +511,92 @@ class TestStartupAppliesConfigLayersBeforeWorkersStart(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNoticeWiring(unittest.TestCase):
+    """The dispatcher forwards update_notice requests and publishes the list."""
+
+    def setUp(self) -> None:
+        self.registry = MagicMock()
+        self.registry.active.return_value = [{"id": "retention_unmet"}]
+        config = MagicMock()
+        config.cameras = {}
+
+        with (
+            patch("frigate.comms.dispatcher.CameraActivityManager"),
+            patch("frigate.comms.dispatcher.AudioActivityManager"),
+        ):
+            self.dispatcher = Dispatcher(
+                config,
+                MagicMock(),
+                MagicMock(),
+                {},
+                [],
+                notice_registry=self.registry,
+            )
+
+    def test_registry_listener_is_subscribed(self) -> None:
+        self.registry.subscribe.assert_called_once_with(
+            self.dispatcher._publish_notices
+        )
+
+    def test_raise_request_reaches_registry(self) -> None:
+        self.dispatcher._receive(
+            "update_notice",
+            {
+                "action": "raise",
+                "kind": "ffmpeg_crash_loop",
+                "scope": "front_door",
+                "params": {"restarts": 5},
+            },
+        )
+
+        self.registry.raise_notice.assert_called_once_with(
+            "ffmpeg_crash_loop", scope="front_door", params={"restarts": 5}
+        )
+
+    def test_resolve_request_reaches_registry(self) -> None:
+        self.dispatcher._receive(
+            "update_notice",
+            {"action": "resolve", "kind": "retention_unmet", "scope": None},
+        )
+
+        self.registry.resolve.assert_called_once_with("retention_unmet", None)
+
+    def test_malformed_request_does_not_raise(self) -> None:
+        self.registry.raise_notice.side_effect = RuntimeError("boom")
+
+        self.dispatcher._receive("update_notice", "not a dict")
+        self.dispatcher._receive(
+            "update_notice", {"action": "raise", "kind": "x", "params": {}}
+        )
+
+    def test_publish_local_skips_mqtt(self) -> None:
+        mqtt = MagicMock(spec=MqttClient)
+        other = MagicMock()
+        self.dispatcher.comms = [mqtt, other]
+
+        self.dispatcher.publish_local("notices", "[]")
+
+        mqtt.publish.assert_not_called()
+        other.publish.assert_called_once_with("notices", "[]", False)
+
+    def test_listener_publishes_active_list(self) -> None:
+        self.dispatcher.publish_local = MagicMock()
+
+        self.dispatcher._publish_notices()
+
+        self.dispatcher.publish_local.assert_called_once_with(
+            "notices", '[{"id": "retention_unmet"}]'
+        )
+
+    def test_snapshot_includes_notices(self) -> None:
+        publisher = MagicMock()
+        self.dispatcher._build_camera_activity_snapshot = MagicMock(
+            return_value=({}, {})
+        )
+        self.dispatcher.web_push_client = None
+
+        self.dispatcher.publish_runtime_snapshot(publisher)
+
+        publisher.assert_any_call("notices", '[{"id": "retention_unmet"}]', False)
