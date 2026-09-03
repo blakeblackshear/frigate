@@ -80,7 +80,7 @@ type ExportOption = (typeof EXPORT_OPTIONS)[number];
 export type ExportTab = "export" | "multi";
 
 // length of a range seeded around the current playback time
-const MULTI_CAMERA_RANGE_SECONDS = 3600;
+const MULTI_CAMERA_RANGE_SECONDS = 1800;
 const TIMELINE_SELECTION_SECONDS = 60;
 
 type ExportDialogProps = {
