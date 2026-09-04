@@ -25,7 +25,7 @@ from frigate.track.stationary_classifier import (
 )
 from frigate.util.image import (
     SharedMemoryFrameManager,
-    get_histogram,
+    get_histogram_from_bgr,
     intersection_over_union,
 )
 from frigate.util.object import average_boxes, median_of_boxes
@@ -523,6 +523,19 @@ class NorfairTracker(ObjectTracker):
             yuv_frame = self.frame_manager.get(
                 frame_name, self.camera_config.frame_shape_yuv
             )
+
+        # Convert the frame to BGR once per call for histogram embeddings rather
+        # than once per detection; every detection histograms a region of the
+        # same frame. Skipped when there are no detections, so a frame without
+        # objects costs no conversion at all.
+        bgr_frame: np.ndarray | None = None
+        if (
+            detections
+            and yuv_frame is not None
+            and self.ptz_metrics.autotracker_enabled.value
+        ):
+            bgr_frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2BGR_I420)
+
         for obj in detections:
             label = obj[0]
             if label not in detections_by_type:
@@ -536,9 +549,9 @@ class NorfairTracker(ObjectTracker):
             points = np.array([[obj[2][0], obj[2][1]], [obj[2][2], obj[2][3]]])
 
             embedding = None
-            if self.ptz_metrics.autotracker_enabled.value:
-                embedding = get_histogram(
-                    yuv_frame, obj[2][0], obj[2][1], obj[2][2], obj[2][3]
+            if bgr_frame is not None:
+                embedding = get_histogram_from_bgr(
+                    bgr_frame, obj[2][0], obj[2][1], obj[2][2], obj[2][3]
                 )
 
             detection = Detection(
