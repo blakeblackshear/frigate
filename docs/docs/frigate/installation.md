@@ -381,6 +381,96 @@ If you can't use Docker Compose, you can run the container with something simila
 
 Finally, configure [hardware object detection](/configuration/object_detectors#memryx-mx3) to complete the setup.
 
+### DEEPX NPU
+
+The DEEPX NPU is available in two form factors, and Frigate supports both:
+
+- **DX-M1** in the M.2 2280 form factor (like an NVMe SSD), for x86 (Intel/AMD) PCs, the Raspberry Pi 5, and other ARM SBCs with an exposed PCIe M.2 slot.
+- **DX-M1M** on the [Sixfab AI HAT+](https://docs.sixfab.com/docs/ai-hat-plus-raspberry-pi-5-quickstart), a HAT+ board that connects to the Raspberry Pi 5 over PCIe Gen 3 x1.
+
+Both present the NPU through the same PCIe driver and DX-RT runtime, so the setup below and the detector configuration are identical for either one. Nothing needs to change when moving between them.
+
+DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
+
+#### Versions
+
+A DEEPX install has several separately versioned pieces, and they all have to agree. The driver, the runtime, and the daemon live on the Docker host; Frigate itself carries only the Python bindings, which it downloads on first start:
+
+| Component      | Version  | Installed on | Installed by              |
+| -------------- | -------- | ------------ | ------------------------- |
+| Kernel driver  | `v2.6.0` | Host  | `user_installation.sh`    |
+| DX-RT runtime  | `v3.4.0` | Host  | `user_installation.sh`    |
+| NPU firmware   | `v2.7.4` | The module   | Flashed from the host     |
+| DX-RT bindings | `v3.4.0` | Frigate      | Downloaded at first start |
+
+:::warning
+
+A version mismatch does not produce a startup error. It typically shows up as inference requests that are accepted but never return a result, so detections simply stop appearing while Frigate looks healthy. If that happens after a Frigate upgrade, check every version in the table before anything else.
+
+:::
+
+The installation script installs the DX-RT runtime on the host and enables `dxrt.service`, so the daemon starts at boot and any other program on the host can share the NPU with Frigate. Check the firmware version with `dxrt-cli --status` and update the module if it does not match the table above.
+
+#### Installation
+
+The DEEPX kernel driver must be installed on the host rather than in the container, because containers share the host kernel and cannot load kernel modules. Installing it creates the `/dev/dxrt*` device nodes that are passed through to Frigate. The same script installs the DX-RT runtime and enables `dxrt.service`, the daemon that owns the NPU and hands work to it on behalf of Frigate and anything else on the host.
+
+1. Copy or download [this script](https://github.com/blakeblackshear/frigate/blob/dev/docker/deepx/user_installation.sh).
+2. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
+3. Run the script with `./user_installation.sh`
+4. **Restart your computer** to complete driver installation.
+
+Confirm the NPU is visible before continuing:
+
+```bash
+ls /dev/dxrt*
+```
+
+Then confirm the daemon is running:
+
+```bash
+systemctl is-active dxrt.service
+```
+
+#### Setup
+
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
+
+#### Docker configuration
+
+Frigate needs the NPU device node and the daemon's socket:
+
+```yaml
+services:
+  frigate:
+    devices:
+      - /dev/dxrt0:/dev/dxrt0
+    volumes:
+      - /tmp/dxrt_dynamic_ipc.sock:/tmp/dxrt_dynamic_ipc.sock
+```
+
+If you can't use Docker Compose, add `--device /dev/dxrt0:/dev/dxrt0 -v /tmp/dxrt_dynamic_ipc.sock:/tmp/dxrt_dynamic_ipc.sock` to your `docker run` command.
+
+Add one `--device` per NPU, contiguously from `/dev/dxrt0`, since the client stops enumerating at the first gap.
+
+:::note
+
+Restart `dxrt.service` before starting the container, not after. A bind-mounted socket pins the inode it saw at container start, so recreating the socket afterwards leaves the container holding a deleted one.
+
+:::
+
+The device node is needed as well as the socket, because the client opens the NPU directly even though the daemon arbitrates access. Without it, inference fails with `Device not found`.
+
+`/dev/shm` does not need sharing. The daemon publishes a shared memory segment for device monitoring, which `dxtop` and device status read, but inference does not.
+
+`dxrtd` listens on both an abstract socket and `/tmp/dxrt_dynamic_ipc.sock`. Only the second crosses into a container, so Frigate names it through `DXRT_DYNAMIC_IPC_ENDPOINT` on your behalf. Set that variable yourself only if you moved the socket, in which case set it for the daemon too, through a systemd drop-in.
+
+The DX-RT python bindings are not shipped in the Frigate image. Frigate downloads them on first start when a DEEPX detector is configured, and caches them under `/config`.
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#deepx-npu) to complete the setup.
+
 ### Rockchip platform
 
 Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and necessary drivers (especially rkvdec2 and rknpu). To check, enter the following commands:

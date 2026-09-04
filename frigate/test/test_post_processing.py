@@ -81,9 +81,21 @@ class TestYoloNmsPostProcess(unittest.TestCase):
         self.assertEqual(len(detections), 1)
         np.testing.assert_allclose(detections[0], [0, 0.90, *A_ROW], atol=2e-3)
 
+    def test_honors_caller_supplied_thresholds(self):
+        """A detector with its own thresholds must not be held to the 0.4
+        default, which would drop this 0.3 confidence box."""
+        output = self._single_output([[A_CX, A_CY, A_W, A_H, 0.30, 0.0]])
+
+        self.assertEqual(len(kept(post_process_yolo(output, WIDTH, HEIGHT))), 0)
+
+        detections = kept(post_process_yolo(output, WIDTH, HEIGHT, 0.25, 0.45))
+
+        self.assertEqual(len(detections), 1)
+        np.testing.assert_allclose(detections[0], [0, 0.30, *A_ROW], atol=2e-3)
+
 
 class TestMultipartYoloPostProcess(unittest.TestCase):
-    def _multipart_output(self) -> list[np.ndarray]:
+    def _multipart_output(self, a_conf=0.95, b_conf=0.90) -> list[np.ndarray]:
         """Build a 3-scale anchor-based YOLO output containing boxes A and B,
         both decoded through anchor 0 of the stride-32 scale."""
         outputs = [
@@ -94,8 +106,8 @@ class TestMultipartYoloPostProcess(unittest.TestCase):
         stride, (anchor_w, anchor_h) = 32, (142, 110)
 
         for cx, cy, w, h, conf, class_channel in [
-            (A_CX, A_CY, A_W, A_H, 0.95, 5),  # class 0
-            (B_CX, B_CY, B_W, B_H, 0.90, 6),  # class 1
+            (A_CX, A_CY, A_W, A_H, a_conf, 5),  # class 0
+            (B_CX, B_CY, B_W, B_H, b_conf, 6),  # class 1
         ]:
             cell_x, cell_y = int(cx // stride), int(cy // stride)
             dx = (cx / stride - cell_x + 0.5) / 2
@@ -126,6 +138,19 @@ class TestMultipartYoloPostProcess(unittest.TestCase):
         detections = kept(post_process_yolo(outputs, WIDTH, HEIGHT))
 
         self.assertEqual(len(detections), 0)
+
+    def test_honors_caller_supplied_thresholds(self):
+        """Same as the single-tensor case: the multi-part branch must filter
+        at the caller's threshold, not the 0.4 default."""
+        outputs = self._multipart_output(a_conf=0.35, b_conf=0.30)
+
+        self.assertEqual(len(kept(post_process_yolo(outputs, WIDTH, HEIGHT))), 0)
+
+        detections = kept(post_process_yolo(outputs, WIDTH, HEIGHT, 0.25, 0.45))
+
+        self.assertEqual(len(detections), 2)
+        np.testing.assert_allclose(detections[0], [0, 0.35, *A_ROW], atol=2e-3)
+        np.testing.assert_allclose(detections[1], [1, 0.30, *B_ROW], atol=2e-3)
 
 
 class TestYoloxPostProcess(unittest.TestCase):
