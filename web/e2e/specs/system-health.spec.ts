@@ -110,14 +110,18 @@ test.describe("System — Health tab @medium", () => {
     await expect(
       frigateApp.page.locator("[data-testid^='health-problem-']"),
     ).toHaveCount(0, { timeout: 5_000 });
-    await expect(frigateApp.page.getByText("No notices")).toBeVisible();
+    await expect(
+      frigateApp.page.getByText("Your Frigate installation is healthy"),
+    ).toBeVisible();
   });
 
   test("empty state with no notices", async ({ frigateApp }) => {
     await frigateApp.installDefaults({ stats: QUIET_STATS });
     await frigateApp.goto("/system#health");
 
-    await expect(frigateApp.page.getByText("No notices")).toBeVisible({
+    await expect(
+      frigateApp.page.getByText("Your Frigate installation is healthy"),
+    ).toBeVisible({
       timeout: 15_000,
     });
   });
@@ -592,7 +596,9 @@ test.describe("System — Health notices sources @medium", () => {
     await frigateApp.installDefaults({ stats: QUIET_STATS });
     await frigateApp.goto("/system#health");
 
-    await expect(frigateApp.page.getByText("No notices")).toBeVisible({
+    await expect(
+      frigateApp.page.getByText("Your Frigate installation is healthy"),
+    ).toBeVisible({
       timeout: 15_000,
     });
     await expect(
@@ -774,6 +780,36 @@ test.describe("System — Health notices sources @medium", () => {
     await expect(frigateApp.page.getByText(/^Probed/)).toBeVisible();
     await expect(recheck).toBeEnabled();
     expect(probes.length).toBe(1);
+  });
+
+  test("a camera notice link opens that camera's settings page", async ({
+    frigateApp,
+  }) => {
+    // garage is not the camera Settings would pick on its own, so a wrong
+    // selection here is visible rather than accidentally right
+    await frigateApp.installDefaults({
+      config: {
+        lpr: { enabled: false },
+        cameras: { garage: { lpr: { enabled: true } } },
+      },
+      stats: QUIET_STATS,
+    });
+    await frigateApp.goto("/system#health");
+
+    const row = frigateApp.page.getByTestId(
+      "health-problem-config:lpr:global-disabled:garage",
+    );
+    await expect(row).toBeVisible({ timeout: 15_000 });
+    await expect(
+      row.getByRole("link", { name: "Open settings" }),
+    ).toHaveAttribute("href", "/settings?page=cameraLpr&camera=garage");
+
+    await row.getByRole("link", { name: "Open settings" }).click();
+
+    await expect(frigateApp.page.getByLabel("Select a camera")).toContainText(
+      "Garage",
+      { timeout: 15_000 },
+    );
   });
 
   test("status bar healthy text links to the Health tab", async ({
