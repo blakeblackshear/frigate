@@ -1,8 +1,10 @@
 """DEEPX NPU detector running compiled .dxnn models via the DX-RT runtime."""
 
+import atexit
 import glob
 import logging
 import os
+import subprocess
 from enum import Enum
 from typing import Literal
 
@@ -13,49 +15,144 @@ from pydantic import ConfigDict, Field, field_validator, model_validator
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import post_process_yolo
+from frigate.util.runtime_deps import Artifact, ArtifactKind, RuntimeManifest
 
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "deepx"
 
-DXNN_DEVICES_ENV = "DXNN_DEVICES"
+# Installed at first start rather than shipped in the image. DEEPX's PyPI
+# wheels are byte-identical to the ones libdxrt-bin carries, so the host
+# runtime and the container bindings come from one vendor build.
+DXRT_VERSION = "3.4.0"
 
-# Stands in for "let Frigate pick the devices". A plain empty string would be
-# written back to the config as a deletion, so the no-op needs a real value.
-DEVICE_IDS_AUTO = "auto"
+# Where dxrtd, running on the host, accepts client connections. The abstract
+# socket it also listens on cannot be reached from a container (verified).
+DXRT_IPC_ENDPOINT_ENV = "DXRT_DYNAMIC_IPC_ENDPOINT"
+DXRT_IPC_SOCKET = "/tmp/dxrt_dynamic_ipc.sock"
+
+# DX-RT decides whether dxrtd runs by scanning /proc for a cmdline holding
+# "dxrtd" (checkService, lib/device_pool/service_util.cpp). The daemon lives on
+# the host, and sharing its PID namespace is closed to us because s6-overlay
+# demands PID 1, so a placeholder carrying that name answers the scan while the
+# real work goes to the host over DXRT_IPC_SOCKET.
+_SERVICE_PLACEHOLDER: subprocess.Popen | None = None
+
+
+def service_is_visible() -> bool:
+    """Whether a process named dxrtd is visible in this PID namespace."""
+    for path in glob.glob("/proc/[0-9]*/cmdline"):
+        try:
+            with open(path, "rb") as f:
+                if b"dxrtd" in f.read():
+                    return True
+        except OSError:
+            continue
+
+    return False
+
+
+def satisfy_service_check(socket_path: str) -> None:
+    """Make DX-RT's liveness scan succeed when the daemon runs on the host.
+
+    A no-op when a dxrtd is visible, or when `socket_path` is absent so a
+    genuinely stopped daemon still reports itself.
+    """
+    global _SERVICE_PLACEHOLDER
+
+    if _SERVICE_PLACEHOLDER is not None and _SERVICE_PLACEHOLDER.poll() is None:
+        return
+
+    if service_is_visible():
+        return
+
+    if not os.path.exists(socket_path):
+        logger.warning(
+            "No dxrtd socket at %s. Start dxrt.service on the host and mount "
+            "the socket into the container.",
+            socket_path,
+        )
+        return
+
+    try:
+        _SERVICE_PLACEHOLDER = subprocess.Popen(
+            ["dxrtd", "infinity"],
+            executable="/bin/sleep",
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError as err:
+        logger.error("Could not satisfy the DX-RT service check: %s", err)
+        return
+
+    atexit.register(_stop_service_placeholder)
+    logger.debug(
+        "Standing in for the host dxrtd in this namespace as pid %d",
+        _SERVICE_PLACEHOLDER.pid,
+    )
+
+
+def _stop_service_placeholder() -> None:
+    if _SERVICE_PLACEHOLDER is not None and _SERVICE_PLACEHOLDER.poll() is None:
+        _SERVICE_PLACEHOLDER.terminate()
+
+
+# PyPI paths carry a per-file digest, so each URL is written out in full; a
+# version bump has to replace it, which the manifest tests check for.
+DEEPX_MANIFEST = RuntimeManifest(
+    name=DETECTOR_KEY,
+    version=DXRT_VERSION,
+    artifacts=(
+        Artifact(
+            url=(
+                "https://files.pythonhosted.org/packages/de/45/"
+                "1ca593e1c4ed868618658e07adeffc1fb44b92655d1ba48a6c76942616ee/"
+                "dx_engine-3.4.0-cp311-cp311-manylinux_2_27_aarch64.whl"
+            ),
+            sha256="ec4188e0a598a164bc04312482f70159be1a3d888284dcf52746054138101ec7",
+            kind=ArtifactKind.wheel,
+            machines=("aarch64",),
+        ),
+        Artifact(
+            url=(
+                "https://files.pythonhosted.org/packages/b0/32/"
+                "d52b33d5b85f7d8565e3e2d153f19db6d506cd5504339f31c6553eae06c6/"
+                "dx_engine-3.4.0-cp311-cp311-manylinux_2_27_x86_64.whl"
+            ),
+            sha256="161fde8428fc8aea95c560d878bc68e8d1c657c18a0eb04840de4bd212f3477f",
+            kind=ArtifactKind.wheel,
+            machines=("x86_64",),
+        ),
+    ),
+    import_check="dx_engine",
+)
 
 
 class DeepxModelTypeEnum(str, Enum):
     """The subset of Frigate's model types the DEEPX decoders can read.
 
-    Frigate keeps `model_type` on the root `model` block and ignores a nested
-    one, so it is not selectable per detector in the config UI, and an
-    omitted value silently defaults to `ssd`. Repeating the supported values
-    here as a detector option makes the choice visible in the form; the
-    detector writes it back onto the merged model config at startup so the
-    rest of Frigate agrees with the decoder.
+    Frigate reads `model_type` off the root `model` block, where an omitted
+    value defaults to `ssd`; listing the supported ones here makes the choice
+    visible, and the detector writes it back at startup. `ssd` is left out on
+    purpose: the ModelZoo's SSD models carry Pascal VOC's 20 class names, so it
+    would mean an empty label map, not a config error.
     """
 
     # PPU-compiled models still use yolo-generic; the `ppu` option is what
     # selects the decode path, since there is no PPU-specific model type.
     yologeneric = ModelTypeEnum.yologeneric.value
-    ssd = ModelTypeEnum.ssd.value
     damoyolo = ModelTypeEnum.damoyolo.value
 
 
 class ModelFormatEnum(str, Enum):
-    """How a .dxnn file's output is decoded.
-
-    DX-COM preserves the detection head of the source model, so the exact
-    layout has to be told apart to read it. Values are grouped by which
-    `model_type` they apply to; a model_validator on DeepxDetectorConfig
-    enforces that a given value is only used with its matching type.
+    """How a .dxnn file's output is decoded. DX-COM preserves the source
+    model's head, so the layout has to be named; a model_validator keeps each
+    value with its own `model_type`.
     """
 
-    # "no explicit layout", and the default. model_type=yolo-generic infers
-    # the layout from the output shape; model_type=damo-yolo takes no layout
-    # at all. This is a real enum member rather than None so the config form
-    # always round-trips a value -- a null is written back as a deletion.
+    # The default. yolo-generic infers the layout from the output shape and
+    # damo-yolo takes none. A real member rather than None so the config form
+    # round-trips a value -- a null is written back as a deletion.
     auto = "auto"
     # model_type=yolo-generic: which detection-head tensor layout the .dxnn
     # was compiled with.
@@ -89,13 +186,9 @@ NMS_IN_HEAD_FORMATS = frozenset(
     }
 )
 
-# Anchor table for anchor-based PPU models, keyed by stride.
-PPU_ANCHORS = {
-    8: np.array([[10, 13], [16, 30], [33, 23]], dtype=np.float32),
-    16: np.array([[30, 61], [62, 45], [59, 119]], dtype=np.float32),
-    32: np.array([[116, 90], [156, 198], [373, 326]], dtype=np.float32),
-}
+# The feature-map strides a PPU record's layer index selects between.
 PPU_STRIDES = np.array([8, 16, 32], dtype=np.float32)
+PPU_ANCHOR_LAYERS = len(PPU_STRIDES)
 
 # Byte layout of the fixed-width detection record the PPU emits.
 PPU_RECORD_SIZE = 32
@@ -110,72 +203,89 @@ PPU_LABEL_BYTES = (24, 28)
 DAMOYOLO_STRIDES = (8, 16, 32)
 
 
-def detect_device_count() -> int:
-    """Count the NPU devices visible to this process.
-
-    Falls back from the DX-RT API to a scan of the passed-through device
-    nodes, then to a single device.
-    """
-    try:
-        from dx_engine import get_device_count
-
-        count = get_device_count()
-    except (ImportError, RuntimeError) as err:
-        logger.debug("Could not query DX-RT for a device count: %s", err)
-    else:
-        if count > 0:
-            return count
-
-    devices = glob.glob("/dev/dxrt*")
-
-    return len(devices) if devices else 1
-
-
-def parse_device_ids(value: str) -> list[int]:
-    """Parse a comma-separated list of NPU device indices.
-
-    The `auto` sentinel and an empty value both mean "nothing was picked",
-    which leaves device selection to `resolve_devices`.
-    """
-    if value.strip().lower() == DEVICE_IDS_AUTO:
-        return []
-
-    return [int(part) for part in value.split(",") if part.strip()]
-
-
-def resolve_devices(configured: str) -> list[int]:
-    """Resolve which NPU device indices this detector should bind to."""
-    if configured:
-        # already validated by DeepxDetectorConfig
-        devices = parse_device_ids(configured)
-
-        if devices:
-            return devices
-
-    env_value = os.environ.get(DXNN_DEVICES_ENV)
-
-    if env_value:
-        try:
-            devices = parse_device_ids(env_value)
-        except ValueError:
-            logger.warning(
-                "Ignoring unparsable %s=%s, detecting devices instead",
-                DXNN_DEVICES_ENV,
-                env_value,
-            )
+def _flatten(group):
+    """Yield a nested sequence one level flat, leaving a flat one alone."""
+    for item in group:
+        if isinstance(item, (list, tuple)):
+            yield from item
         else:
-            if devices:
-                return devices
+            yield item
 
-    return list(range(detect_device_count()))
+
+def parse_anchors(value: str) -> dict[int, np.ndarray]:
+    """Parse the anchor table an anchor-based PPU model was trained with.
+
+    One group per layer separated by ";" in PPU_STRIDES order, each a flat run
+    of width,height pairs, keyed by stride the way decode_ppu_anchor reads it.
+    """
+    groups = [group for group in value.split(";") if group.strip()]
+
+    if len(groups) != PPU_ANCHOR_LAYERS:
+        strides = ", ".join(str(int(stride)) for stride in PPU_STRIDES)
+        raise ValueError(
+            f"expected {PPU_ANCHOR_LAYERS} anchor groups separated by ';', one "
+            f"per feature-map layer for strides {strides}, got {len(groups)}"
+        )
+
+    parsed = []
+
+    for group in groups:
+        try:
+            numbers = [float(part) for part in group.split(",") if part.strip()]
+        except ValueError:
+            raise ValueError(
+                f'anchor group "{group.strip()}" is not a comma-separated list '
+                "of numbers"
+            ) from None
+
+        if not numbers or len(numbers) % 2:
+            raise ValueError(
+                f'anchor group "{group.strip()}" is not an even-length list of '
+                "width,height pairs"
+            )
+
+        if any(number <= 0 for number in numbers):
+            raise ValueError(
+                f'anchor group "{group.strip()}" has a width or height that is '
+                "not positive"
+            )
+
+        parsed.append(np.array(numbers, dtype=np.float32).reshape(-1, 2))
+
+    # a record picks its anchor with a bare index and its layer separately, so
+    # that index only means one thing if every layer offers the same count
+    if len({len(anchors) for anchors in parsed}) != 1:
+        counts = ", ".join(str(len(anchors)) for anchors in parsed)
+        raise ValueError(
+            f"every anchor group must hold the same number of pairs, got {counts}"
+        )
+
+    return {
+        int(stride): anchors
+        for stride, anchors in zip(PPU_STRIDES, parsed, strict=True)
+    }
+
+
+def resolve_device(configured: str) -> int:
+    """Resolve the NPU index from the device half of a `deepx:...` string:
+    empty, a bare index, or `PCIe:<index>` as the hardware probe writes it.
+    """
+    if not configured:
+        return 0
+
+    index = configured.rsplit(":", 1)[-1]
+
+    try:
+        return int(index)
+    except ValueError:
+        raise ValueError(
+            f'"{configured}" is not an NPU index; expected a number or "PCIe:<number>"'
+        ) from None
 
 
 def reinterpret(tensor: np.ndarray, byte_range: tuple[int, int], dtype) -> np.ndarray:
-    """Read a byte column range of a uint8 PPU tensor as `dtype`.
-
-    A column slice is not contiguous, and numpy will not reinterpret
-    non-contiguous memory as a differently sized dtype, so it is copied first.
-    """
+    """Read a byte column range of a uint8 PPU tensor as `dtype`, copied
+    first because numpy will not reinterpret non-contiguous memory."""
     lo, hi = byte_range
     return np.ascontiguousarray(tensor[:, lo:hi]).view(dtype)
 
@@ -209,14 +319,9 @@ def _softmax(x: np.ndarray) -> np.ndarray:
 def _split_box_and_class_outputs(
     outputs: list[np.ndarray],
 ) -> tuple[np.ndarray, np.ndarray] | None:
-    """Split a 2-tensor raw output into (box tensor, class tensor) by shape.
-
-    Used for model types where DX-COM's raw output tensor order isn't
-    confirmed. Whichever tensor's shape reads as box-like -- (..., 4), or
-    (..., 4, bins) for a per-side distribution -- is treated as boxes; the
-    other is class scores. Returns None if that can't be told apart, which
-    a class-score tensor with exactly 4 classes would also trigger.
-    """
+    """Split a 2-tensor raw output into (box tensor, class tensor) by shape,
+    for model types where DX-COM's order is not confirmed: a box-like (..., 4)
+    or (..., 4, bins) wins, None when ambiguous as with 4 classes."""
     if len(outputs) != 2:
         return None
 
@@ -277,9 +382,8 @@ def run_nms(
 ) -> np.ndarray:
     """Return the indices surviving NMS, in descending score order."""
     if logger.isEnabledFor(logging.DEBUG):
-        # Separates "the decode produced nothing" from "it produced boxes
-        # whose scores all fell under the threshold", which look identical
-        # from the empty detection array alone.
+        # Separates "the decode produced nothing" from "every score fell under
+        # the threshold", identical from the empty detection array alone.
         logger.debug(
             "NMS input: %d boxes, best score %.4f, %d over threshold %.2f",
             len(scores),
@@ -301,21 +405,17 @@ def run_nms(
 
 def decode_ppu_anchor(
     outputs: list[np.ndarray],
+    anchors: dict[int, np.ndarray],
     width: int,
     height: int,
     score_threshold: float,
     nms_threshold: float,
 ) -> np.ndarray:
-    """Decode PPU output from an anchor-based head.
+    """Decode PPU output from an anchor-based head into Frigate's (20, 6) rows.
 
-    Models compiled with DEEPX's Post-Processing Unit perform candidate
-    selection on the NPU and emit one fixed-width record per surviving
-    detection, so only the anchor decode and NMS are left for the host. This
-    is cheaper than decoding raw feature maps because every sub-threshold
-    anchor has already been discarded.
-
-    Returns detections in Frigate's (20, 6) format of
-    [class_id, score, y_min, x_min, y_max, x_max] with normalized coordinates.
+    The NPU has already dropped sub-threshold candidates, leaving the anchor
+    decode and NMS. A record names its anchor by index, so `anchors` has to be
+    the table the model was trained with.
     """
     records = ppu_records(outputs)
 
@@ -332,16 +432,33 @@ def decode_ppu_anchor(
     anchor_idx = grid[:, 2]
     layer_idx = grid[:, 3]
 
+    # Both indices come off the wire and either could read past the tables
+    # below, so a malformed record skips the frame rather than crashing.
+    anchors_per_layer = len(next(iter(anchors.values())))
+
+    if np.any(layer_idx >= PPU_ANCHOR_LAYERS) or np.any(
+        anchor_idx >= anchors_per_layer
+    ):
+        logger.debug(
+            "PPU record indexes layer %d / anchor %d, outside the %d layers and "
+            "%d anchors per layer configured, skipping frame",
+            layer_idx.max(),
+            anchor_idx.max(),
+            PPU_ANCHOR_LAYERS,
+            anchors_per_layer,
+        )
+        return np.zeros((20, 6), np.float32)
+
     stride = PPU_STRIDES[layer_idx]
     anchor_w = np.zeros(len(boxes), dtype=np.float32)
     anchor_h = np.zeros(len(boxes), dtype=np.float32)
 
-    for layer_stride, anchors in PPU_ANCHORS.items():
+    for layer_stride, layer_anchors in anchors.items():
         mask = stride == layer_stride
 
         if np.any(mask):
-            anchor_w[mask] = anchors[anchor_idx[mask], 0]
-            anchor_h[mask] = anchors[anchor_idx[mask], 1]
+            anchor_w[mask] = layer_anchors[anchor_idx[mask], 0]
+            anchor_h[mask] = layer_anchors[anchor_idx[mask], 1]
 
     # Anchor-based decode: the model emits sigmoid outputs that are rescaled
     # against the grid cell and its anchor to recover pixel geometry.
@@ -375,13 +492,9 @@ def decode_ppu_anchor_free(
     score_threshold: float,
     nms_threshold: float,
 ) -> np.ndarray:
-    """Decode PPU output from an anchor-free head.
-
-    These heads have no anchors and no objectness, so the PPU writes the box
-    directly as (center_x, center_y, width, height) in input pixels. The grid
-    columns an anchor-based record carries are unused here, and applying the
-    anchor formula to them is what produces boxes hundreds of thousands of
-    pixels wide.
+    """Decode PPU output from an anchor-free head: no anchors and no
+    objectness, so the box arrives as (cx, cy, w, h) pixels. Running the
+    anchor formula over the unused grid columns is what yields absurd boxes.
     """
     records = ppu_records(outputs)
 
@@ -419,13 +532,10 @@ def decode_raw_anchor(
     score_threshold: float,
     nms_threshold: float,
 ) -> np.ndarray:
-    """Decode raw output from an anchor-based head.
-
-    The exported head emits (N, 5+C) rows of
-    [center_x, center_y, width, height, objectness, class scores...] already in
-    input pixels. Confidence is objectness times the best class score, which is
-    what separates this layout from the anchor-free one: reading column 4 as a
-    class score there would treat objectness as a class.
+    """Decode raw output from an anchor-based head: (N, 5+C) rows of
+    [cx, cy, w, h, objectness, class scores...] in pixels. Confidence is
+    objectness times the best class score, which is what parts this from the
+    anchor-free layout, where column 4 is already a class.
     """
     tensor = outputs[0]
 
@@ -473,21 +583,14 @@ def decode_raw_anchor_free(
 ) -> np.ndarray:
     """Decode raw output from an anchor-free head, or an unconfirmed layout.
 
-    The exported head emits a single tensor with no objectness column,
-    (4+C, N) channel-major or already transposed to (N, 4+C), and box columns
-    already in input pixels as (center_x, center_y, width, height). This is
-    also what `model_format: auto` falls back to: with only one output
-    tensor there is no objectness column to tell an anchor-based head from
-    an anchor-free one apart, so every column past the box is read as a
-    class score, which is only correct for an anchor-free head -- matching
-    `auto` being "only reliable for anchor-free heads" per its config
-    description.
+    One tensor with no objectness column, (4+C, N) or (N, 4+C), boxes as
+    (cx, cy, w, h) pixels. `model_format: auto` lands here too, reading every
+    column past the box as a class, which only holds for an anchor-free head.
     """
     predictions = outputs[0]
 
     # Drop the batch axis without a blind squeeze, which would also collapse
-    # the box-count axis on the single-candidate frame case. Fold every
-    # leading axis into rows instead.
+    # the box count on a single-candidate frame. Fold leading axes into rows.
     if predictions.ndim == 3 and predictions.shape[0] == 1:
         predictions = predictions[0]
 
@@ -532,11 +635,9 @@ def decode_raw_nms_in_head(
     height: int,
     score_threshold: float,
 ) -> np.ndarray:
-    """Decode raw output from a head that already ran NMS.
-
-    These heads emit (N, 6) rows of [x_min, y_min, x_max, y_max, score, class]
-    in input pixels, sorted by score. Running NMS again would be wasted work,
-    so only the score filter and normalization are applied.
+    """Decode raw output from a head that already ran NMS: (N, 6) rows of
+    [x_min, y_min, x_max, y_max, score, class] in pixels, sorted by score, so
+    only the score filter and normalization are left.
     """
     tensor = outputs[0]
 
@@ -566,105 +667,10 @@ def decode_raw_nms_in_head(
     )
 
 
-def decode_ssd_raw(
-    outputs: list[np.ndarray],
-    width: int,
-    height: int,
-    score_threshold: float,
-    nms_threshold: float,
-) -> np.ndarray:
-    """Decode SSD output: already-decoded boxes plus per-class probabilities.
-
-    DX-COM keeps SSD's postprocessing inside the compiled model. The .dxnn
-    runs the NPU head into a small CPU subgraph that concatenates the
-    per-feature-map outputs, applies softmax to the confidences, and decodes
-    the prior-box regression (center variance 0.1, size variance 0.2, prior
-    table baked in as initializers) all the way to corner-form boxes. That
-    leaves only NMS for the host, which is what DEEPX's own ssdmv1,
-    ssdmv2lite and ssdvgg16 demos do -- their postprocessor has no prior
-    table, no variance constant, and no softmax.
-
-    Expects two output tensors, order-independent: boxes shaped (1, N, 4) as
-    (x_min, y_min, x_max, y_max) normalized to [0, 1], and probabilities
-    shaped (1, N, num_classes + 1) with background at class 0. Background is
-    dropped and surviving labels are 0-indexed, to match a labelmap with no
-    background row. N is whatever the backbone produces (3000 for the
-    MobileNet variants, 8732 for VGG16) and never has to be known ahead of
-    time.
-    """
-    split = _split_box_and_class_outputs(outputs)
-
-    if split is None:
-        logger.debug(
-            "Could not identify SSD box/class outputs in %d tensor(s) with "
-            "shapes %s, skipping frame",
-            len(outputs),
-            _shapes(outputs),
-        )
-        return np.zeros((20, 6), np.float32)
-
-    boxes, confidences = split
-
-    if (
-        boxes.ndim != 3
-        or confidences.ndim != 3
-        or boxes.shape[0] == 0
-        or boxes.shape[1] == 0
-    ):
-        logger.debug(
-            "Unexpected SSD output rank: boxes %s, classes %s, skipping frame",
-            boxes.shape,
-            confidences.shape,
-        )
-        return np.zeros((20, 6), np.float32)
-
-    boxes = boxes[0]
-    confidences = confidences[0]
-
-    if boxes.shape[0] != confidences.shape[0]:
-        logger.debug(
-            "SSD box count %d does not match class count %d, skipping frame",
-            boxes.shape[0],
-            confidences.shape[0],
-        )
-        return np.zeros((20, 6), np.float32)
-
-    # the model already softmaxed these; drop background (class 0) and
-    # relabel 0-indexed to match a labelmap with no background row
-    scores = confidences[:, 1:]
-    labels = np.argmax(scores, axis=1)
-    scores = scores[np.arange(len(labels)), labels]
-
-    # normalized corner form -> input pixels, which is what NMS and
-    # fill_detections work in
-    x_min = boxes[:, 0] * width
-    y_min = boxes[:, 1] * height
-    x_max = boxes[:, 2] * width
-    y_max = boxes[:, 3] * height
-
-    order = run_nms(
-        x_min,
-        y_min,
-        x_max - x_min,
-        y_max - y_min,
-        scores,
-        score_threshold,
-        nms_threshold,
-    )
-
-    return fill_detections(
-        x_min, y_min, x_max, y_max, scores, labels, width, height, order
-    )
-
-
 def _dfl_integral(distribution: np.ndarray) -> np.ndarray:
     """Reduce a DFL distribution to an expected distance via weighted sum.
-
-    Ported from tinyvision/DAMO-YOLO's Integral module (Apache-2.0): each of
-    the 4 box sides is predicted as a probability distribution over
-    `reg_max + 1` discrete distance bins rather than a single regressed
-    value; this recovers one scalar distance per side, in stride units.
-    """
+    From DAMO-YOLO's Integral module (Apache-2.0): each box side spans
+    `reg_max + 1` bins, reduced to one distance in stride units."""
     reg_max = distribution.shape[-1] - 1
     project = np.arange(reg_max + 1, dtype=np.float32)
     return distribution @ project
@@ -673,12 +679,8 @@ def _dfl_integral(distribution: np.ndarray) -> np.ndarray:
 def _damoyolo_center_priors(
     width: int, height: int, strides: tuple[int, ...]
 ) -> np.ndarray:
-    """One (center_x, center_y, stride) row per grid cell across all scales,
-    in pixel space at the model's own input resolution.
-
-    Ported from tinyvision/DAMO-YOLO's
-    ZeroHead.get_single_level_center_priors (Apache-2.0).
-    """
+    """One (center_x, center_y, stride) row per grid cell across all scales, in
+    pixels. From DAMO-YOLO's ZeroHead.get_single_level_center_priors."""
     rows = []
 
     for stride in strides:
@@ -702,23 +704,11 @@ def decode_damoyolo_raw(
 ) -> np.ndarray:
     """Decode DAMO-YOLO's raw output: sigmoid class scores + a DFL box head.
 
-    Ported from tinyvision/DAMO-YOLO's ZeroHead (Apache-2.0). DAMO-YOLO is
-    anchor-free like YOLOv8 and newer, but unlike them its box regression is
-    a per-side Distribution Focal Loss histogram rather than a value already
-    in pixels, so it needs its own decode instead of reusing
-    decode_raw_anchor. Not yet verified against a real compiled model --
-    see the two shape branches below for what DX-COM's export is assumed to
-    produce, and adjust if a real .dxnn's shapes don't match either one.
-
-    Expects two output tensors, order-independent: class scores shaped
-    (1, N, num_classes), already sigmoid-activated, and a box output that is
-    either (1, N, 4, reg_max + 1) -- a raw DFL distribution per side, decoded
-    here via softmax + integral + stride-scaled distance-to-box -- or
-    already (1, N, 4), in case DX-COM's export folds that whole decode in
-    (the reference only ever produces a plain 4-wide box tensor as the
-    *result* of that decode, so this shape is treated as final
-    (x_min, y_min, x_max, y_max) pixel coordinates, not as a second
-    distance representation).
+    From DAMO-YOLO's ZeroHead (Apache-2.0). Anchor-free, but boxes are per-side
+    DFL histograms, not the pixel distances decode_raw_anchor_free expects.
+    Takes two tensors in either order: (1, N, num_classes) sigmoid scores, and
+    boxes as (1, N, 4, reg_max + 1) raw DFL decoded here, or (1, N, 4) pixel
+    corners should DX-COM fold it in. Unverified against a compiled model.
     """
     split = _split_box_and_class_outputs(outputs)
 
@@ -740,9 +730,8 @@ def decode_damoyolo_raw(
     num_priors = cls_scores.shape[0]
 
     if box_output.ndim == 4:
-        # raw per-side DFL distribution: softmax the bins, reduce to an
-        # expected distance (in stride units), then scale by each prior's
-        # own stride and apply it against that prior's center
+        # raw per-side DFL: softmax the bins, reduce to a distance in stride
+        # units, then scale by each prior's stride against its own center
         distances = _dfl_integral(_softmax(box_output[0]))
 
         if distances.shape[0] != num_priors:
@@ -819,13 +808,11 @@ class DeepxDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(title="DEEPX NPU")
 
     type: Literal[DETECTOR_KEY]
-    device_ids: str = Field(
-        default=DEVICE_IDS_AUTO,
-        title="DEEPX device indices",
-        description="Comma-separated NPU device indices this detector should "
-        'bind to, e.g. "0,1". Leave as "auto" to detect them from the '
-        "DXNN_DEVICES environment variable, then the DX-RT device count, then "
-        "a scan of /dev/dxrt*.",
+    device: str = Field(
+        default="",
+        title="DEEPX device",
+        description="Which NPU this detector binds to, as PCIe:<index>. "
+        "Empty selects the first NPU.",
     )
     model_type: DeepxModelTypeEnum = Field(
         default=DeepxModelTypeEnum.yologeneric,
@@ -850,8 +837,18 @@ class DeepxDetectorConfig(BaseDetectorConfig):
         "from the output shape, which cannot tell an anchor-based head from "
         "an anchor-free one and is only reliable for anchor-free heads. "
         "Required when ppu is true, since a PPU record's layout is identical "
-        "for every yolo-generic variant and cannot be inferred. ssd and "
-        "damo-yolo each read one fixed layout and take no value here.",
+        "for every yolo-generic variant and cannot be inferred. damo-yolo "
+        "reads one fixed layout and takes no value here.",
+    )
+    anchors: str = Field(
+        default="",
+        title="Anchor sizes an anchor-based PPU model was trained with",
+        description="The model's own anchor table, as one group of "
+        "comma-separated width,height pairs per feature-map layer, groups "
+        'separated by ";" in stride order 8, 16, 32. Required when ppu is '
+        "true and model_format is anchor, and not used otherwise: a PPU "
+        "record names its anchor by index only, so the table has to come "
+        "from the model. Copy it from the config the model was trained with.",
     )
     score_threshold: float = Field(
         default=0.25,
@@ -862,34 +859,40 @@ class DeepxDetectorConfig(BaseDetectorConfig):
         title="NMS IoU threshold used when decoding detector output",
     )
 
-    @field_validator("device_ids", mode="before")
+    @field_validator("device")
     @classmethod
-    def coerce_device_ids(cls, value):
-        """Accept the yaml list form as well as the comma-separated string
-        the config form writes, since a bare list is the natural thing to
-        hand-write. A blank entry folds back to the auto sentinel."""
-        if isinstance(value, (list, tuple)):
-            value = ",".join(str(item) for item in value)
-        elif isinstance(value, int) and not isinstance(value, bool):
-            value = str(value)
+    def validate_device(cls, value: str) -> str:
+        """Reject an unusable device at startup rather than at first inference."""
+        resolve_device(value)
+        return value
 
-        if value is None or (isinstance(value, str) and not value.strip()):
-            return DEVICE_IDS_AUTO
+    @field_validator("anchors", mode="before")
+    @classmethod
+    def coerce_anchors(cls, value):
+        """Accept the nested list a model's config declares anchors in, flat
+        row or explicit pairs, as well as the string the form writes."""
+        if value is None:
+            return ""
+
+        if isinstance(value, (list, tuple)):
+            return ";".join(
+                ",".join(str(number) for number in _flatten(group)) for group in value
+            )
 
         return value
 
-    @field_validator("device_ids")
+    @field_validator("anchors")
     @classmethod
-    def validate_device_ids(cls, value: str) -> str:
-        """Reject a device list that can't be parsed, so the error surfaces at
-        config load rather than when the detector process starts."""
+    def validate_anchors(cls, value: str) -> str:
+        """Reject an anchor table that can't be read, so the error surfaces at
+        config load rather than on the first frame."""
+        if not value.strip():
+            return ""
+
         try:
-            parse_device_ids(value)
-        except ValueError:
-            raise ValueError(
-                f'device_ids "{value}" is not a comma-separated list of NPU '
-                f'device indices, e.g. "0,1", or "{DEVICE_IDS_AUTO}".'
-            ) from None
+            parse_anchors(value)
+        except ValueError as err:
+            raise ValueError(f"anchors could not be read: {err}") from None
 
         return value
 
@@ -925,14 +928,10 @@ class DeepxDetectorConfig(BaseDetectorConfig):
 
     @model_validator(mode="after")
     def validate_ppu_requires_model_format(self):
-        """Reject an unset model_format when ppu is enabled.
-
-        A PPU record is the same fixed-width layout for every yolo-generic
-        variant, so unlike the raw output path there is no shape to infer
-        the layout from. Leaving model_format unset here used to silently
-        default to the anchor-based decoder, which corrupts detections from
-        anchor-free PPU models instead of failing loudly.
-        """
+        """Reject an unset model_format when ppu is enabled. Every
+        yolo-generic variant shares one PPU record layout, so there is no
+        shape to infer from, and defaulting to the anchor-based decoder
+        corrupts anchor-free detections rather than failing loudly."""
         if self.ppu and self.model_format is ModelFormatEnum.auto:
             raise ValueError(
                 "model_format must be set when ppu is true. The PPU output "
@@ -943,12 +942,35 @@ class DeepxDetectorConfig(BaseDetectorConfig):
         return self
 
     @model_validator(mode="after")
-    def validate_model_format_matches_model_type(self):
-        """Reject a model_format on a model_type that has no layout to pick.
+    def validate_anchors_match_the_decode_path(self):
+        """Require an anchor table for the one decode that reads it, and
+        reject one anywhere else. A record names its anchor by index only and
+        the table behind it differs per model, so a built-in default would
+        silently rescale every box. Refuse to guess."""
+        reads_anchors = self.ppu and self.model_format in ANCHOR_FORMATS
 
-        Only yolo-generic has variants the decoder can't tell apart. SSD and
-        DAMO-YOLO each read one fixed output layout, so any value other than
-        the sentinel is a config mistake rather than a choice."""
+        if reads_anchors and not self.anchors:
+            raise ValueError(
+                "anchors must be set when ppu is true and model_format is "
+                f"'{self.model_format.value}'. Copy the anchor table from the "
+                "config the model was trained with, one group per feature-map "
+                'layer separated by ";", in stride order 8, 16, 32.'
+            )
+
+        if self.anchors and not reads_anchors:
+            raise ValueError(
+                "anchors is only read when ppu is true and model_format is "
+                f"'{ModelFormatEnum.anchor.value}'; every other decode path "
+                "takes its box geometry from the model output. Remove it."
+            )
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_model_format_matches_model_type(self):
+        """Reject a model_format on a model_type that has no layout to pick:
+        only yolo-generic has variants the decoder cannot tell apart, so a
+        value on DAMO-YOLO's one fixed layout is a mistake, not a choice."""
         if self.model_type is DeepxModelTypeEnum.yologeneric:
             return self
 
@@ -962,28 +984,34 @@ class DeepxDetectorConfig(BaseDetectorConfig):
         return self
 
 
-class Deepx(DetectionApi):
+class DeepxDetector(DetectionApi):
     type_key = DETECTOR_KEY
+    runtime_manifest = DEEPX_MANIFEST
 
     def __init__(self, config: DeepxDetectorConfig):
+        self.activate_dependencies()
+
+        # DX-RT tries an abstract socket first, which never crosses a network
+        # namespace, and only falls back after half a second of retries.
+        # Naming the filesystem one up front skips that; dxrtd listens on both.
+        os.environ.setdefault(DXRT_IPC_ENDPOINT_ENV, DXRT_IPC_SOCKET)
+        satisfy_service_check(os.environ[DXRT_IPC_ENDPOINT_ENV])
+
         try:
             from dx_engine import InferenceEngine, InferenceOption
-        except ImportError as err:
+        except ModuleNotFoundError:
             raise ImportError(
-                "The DX-RT runtime is not available. Check that the DEEPX "
-                "kernel driver is loaded on the Docker host and that "
-                "/dev/dxrt* is passed through to this container."
-            ) from err
+                "The DX-RT python bindings are not installed. Frigate installs "
+                "them at startup when a DEEPX detector is configured; check the "
+                "startup log for errors."
+            ) from None
 
         super().__init__(config)
 
-        # Frigate ignores a nested `model` block, so model.model_type carries
-        # the root value -- `ssd` whenever it was left unset. The detector's
-        # own model_type is the one the user actually picked, so it wins, and
-        # is written back for everything downstream that reads the model
-        # config (the events table, /api/config).
-        self.model_type = ModelTypeEnum(config.model_type.value)
-        config.model.model_type = self.model_type
+        # In 0.19 model_type sits on the model, not the detector: a device
+        # string fills only the device field, so DeepxDetectorConfig.model_type
+        # never reflects what the user configured and must not be read here.
+        self.model_type = ModelTypeEnum(config.model.model_type.value)
 
         model_path = config.model.path
 
@@ -994,16 +1022,18 @@ class Deepx(DetectionApi):
                 "model.path at the .dxnn file."
             )
 
-        devices = resolve_devices(config.device_ids)
-        logger.info("Loading DEEPX model %s on device(s) %s", model_path, devices)
+        device = resolve_device(config.device)
+        logger.info("Loading DEEPX model %s on device %s", model_path, device)
 
         options = InferenceOption()
-        options.devices = devices
+        options.devices = [device]
         options.bound_option = InferenceOption.BOUND_OPTION.NPU_ALL
 
         self.session = InferenceEngine(str(model_path), options)
         self.ppu = config.ppu
         self.model_format = config.model_format
+        # validated above, and only non-empty for the decode that reads it
+        self.anchors = parse_anchors(config.anchors) if config.anchors else {}
         self.score_threshold = config.score_threshold
         self.nms_threshold = config.nms_threshold
 
@@ -1021,15 +1051,6 @@ class Deepx(DetectionApi):
     def decode(self, outputs: list[np.ndarray]) -> np.ndarray:
         """Decode raw or PPU output according to the configured model type
         and detection head layout."""
-        if self.model_type == ModelTypeEnum.ssd:
-            return decode_ssd_raw(
-                outputs,
-                self.width,
-                self.height,
-                self.score_threshold,
-                self.nms_threshold,
-            )
-
         if self.model_type == ModelTypeEnum.damoyolo:
             return decode_damoyolo_raw(
                 outputs,
@@ -1041,9 +1062,8 @@ class Deepx(DetectionApi):
 
         # model_type is yolo-generic from here on
         if self.ppu:
-            # Config validation guarantees model_format is set to an anchor
-            # or anchor-free format whenever ppu is true, since PPU records
-            # give no other way to tell the two apart.
+            # Config validation guarantees an anchor or anchor-free format
+            # whenever ppu is true; PPU records give no other way to tell.
             if self.model_format in ANCHOR_FREE_FORMATS:
                 return decode_ppu_anchor_free(
                     outputs,
@@ -1055,6 +1075,7 @@ class Deepx(DetectionApi):
 
             return decode_ppu_anchor(
                 outputs,
+                self.anchors,
                 self.width,
                 self.height,
                 self.score_threshold,
@@ -1066,9 +1087,8 @@ class Deepx(DetectionApi):
                 outputs, self.width, self.height, self.score_threshold
             )
 
-        # Only single-output anchor heads need the dedicated decoder. A
-        # multi-part output is a set of raw feature maps, which the shared
-        # helper already decodes with the same anchor formula.
+        # Only single-output anchor heads need the dedicated decoder; a
+        # multi-part output is feature maps the shared helper already reads.
         if self.model_format in ANCHOR_FORMATS and len(outputs) == 1:
             return decode_raw_anchor(
                 outputs,
@@ -1078,10 +1098,9 @@ class Deepx(DetectionApi):
                 self.nms_threshold,
             )
 
-        # `auto` (the default) and an explicit `anchor_free` both read a
-        # single tensor with no objectness column. Routing these through the
-        # dedicated decoder keeps them honoring this detector's own
-        # score_threshold and nms_threshold
+        # `auto` and an explicit `anchor_free` both read one tensor with no
+        # objectness column, and the dedicated decoder keeps them honoring
+        # this detector's own score_threshold and nms_threshold
         if len(outputs) == 1 and (
             self.model_format in ANCHOR_FREE_FORMATS
             or self.model_format is ModelFormatEnum.auto
@@ -1121,12 +1140,8 @@ class Deepx(DetectionApi):
     def log_layout(self, tensor_input, outputs: list[np.ndarray]) -> None:
         """Log the model's real input and output layout, once per start.
 
-        Every decode path is a guess about the layout DX-COM compiled the
-        detection head into, and a wrong guess returns an empty detection
-        array rather than failing. These shapes and value ranges are the
-        first thing needed to tell those apart, so they go out at info
-        level: waiting to reproduce them with debug logging enabled costs a
-        restart, and this is one line per tensor per detector start.
+        A wrong guess at the compiled layout returns an empty detection array
+        rather than failing, and these shapes are what tell those apart.
         """
         tensors = [("input", tensor_input)]
         tensors += [(f"output[{i}]", out) for i, out in enumerate(outputs)]

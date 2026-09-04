@@ -1,6 +1,9 @@
 """Tests for the DEEPX detector's per-format output decoding."""
 
+import os
+import sys
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 from pydantic import ValidationError
@@ -9,10 +12,14 @@ from frigate.detectors.detector_config import ModelTypeEnum
 from frigate.detectors.plugins.deepx import (
     ANCHOR_FORMATS,
     ANCHOR_FREE_FORMATS,
-    DEVICE_IDS_AUTO,
+    DEEPX_MANIFEST,
+    DXRT_IPC_ENDPOINT_ENV,
+    DXRT_IPC_SOCKET,
+    DXRT_VERSION,
     NMS_IN_HEAD_FORMATS,
-    PPU_ANCHORS,
+    PPU_ANCHOR_LAYERS,
     PPU_RECORD_SIZE,
+    DeepxDetector,
     DeepxDetectorConfig,
     DeepxModelTypeEnum,
     ModelFormatEnum,
@@ -22,10 +29,17 @@ from frigate.detectors.plugins.deepx import (
     decode_raw_anchor,
     decode_raw_anchor_free,
     decode_raw_nms_in_head,
-    decode_ssd_raw,
-    parse_device_ids,
-    resolve_devices,
+    parse_anchors,
+    resolve_device,
+    satisfy_service_check,
+    service_is_visible,
 )
+from frigate.util.runtime_deps import ArtifactKind
+
+# Deliberately not any published model's anchor table: a decoder that fell back
+# to a built-in set instead of reading the configured one would not match these.
+TEST_ANCHOR_STRING = "11,17,23,29,31,37;41,47,53,59,61,67;71,73,79,83,89,97"
+TEST_ANCHORS = parse_anchors(TEST_ANCHOR_STRING)
 
 
 def build_ppu_record(
@@ -61,9 +75,9 @@ class TestDeepxPpuDecode(unittest.TestCase):
             ).reshape(1, 1, PPU_RECORD_SIZE)
         ]
 
-        detections = decode_ppu_anchor(outputs, 640, 640, 0.25, 0.45)
+        detections = decode_ppu_anchor(outputs, TEST_ANCHORS, 640, 640, 0.25, 0.45)
 
-        anchor_w, anchor_h = PPU_ANCHORS[8][0]
+        anchor_w, anchor_h = TEST_ANCHORS[8][0]
         # center = (0.5 * 2 - 0.5 + 10) * 8, size = (0.5 ** 2 * 4) * anchor
         center = (0.5 * 2.0 - 0.5 + 10) * 8
         box_w = 0.5**2 * 4.0 * anchor_w
@@ -93,7 +107,7 @@ class TestDeepxPpuDecode(unittest.TestCase):
                     label=0,
                 ).reshape(1, 1, PPU_RECORD_SIZE)
             ]
-            return decode_ppu_anchor(outputs, 640, 640, 0.25, 0.45)
+            return decode_ppu_anchor(outputs, TEST_ANCHORS, 640, 640, 0.25, 0.45)
 
         small = decode(0)
         large = decode(2)
@@ -116,7 +130,7 @@ class TestDeepxPpuDecode(unittest.TestCase):
             ).reshape(1, 1, PPU_RECORD_SIZE)
         ]
 
-        detections = decode_ppu_anchor(outputs, 640, 640, 0.25, 0.45)
+        detections = decode_ppu_anchor(outputs, TEST_ANCHORS, 640, 640, 0.25, 0.45)
 
         self.assertTrue(np.all(detections == 0))
 
@@ -137,19 +151,150 @@ class TestDeepxPpuDecode(unittest.TestCase):
         )
 
         detections = decode_ppu_anchor(
-            [records.reshape(1, 40, PPU_RECORD_SIZE)], 640, 640, 0.25, 0.45
+            [records.reshape(1, 40, PPU_RECORD_SIZE)],
+            TEST_ANCHORS,
+            640,
+            640,
+            0.25,
+            0.45,
         )
 
         self.assertEqual(detections.shape, (20, 6))
 
     def test_returns_empty_detections_for_no_output(self):
-        self.assertTrue(np.all(decode_ppu_anchor([], 640, 640, 0.25, 0.45) == 0))
+        self.assertTrue(
+            np.all(decode_ppu_anchor([], TEST_ANCHORS, 640, 640, 0.25, 0.45) == 0)
+        )
 
     def test_returns_empty_detections_for_an_unexpected_record_width(self):
         # a non-PPU model would produce a different record width
         outputs = [np.zeros((1, 4, 16), dtype=np.uint8)]
 
-        self.assertTrue(np.all(decode_ppu_anchor(outputs, 640, 640, 0.25, 0.45) == 0))
+        self.assertTrue(
+            np.all(decode_ppu_anchor(outputs, TEST_ANCHORS, 640, 640, 0.25, 0.45) == 0)
+        )
+
+
+class TestDeepxAnchors(unittest.TestCase):
+    """The anchor table comes from the model, not from this file. A PPU record
+    names its anchor by index alone, and that index means different box sizes
+    for different models, so there is nothing safe to default to."""
+
+    def test_parses_a_group_per_stride_keyed_by_stride(self):
+        table = parse_anchors("11,17,23,29;41,47,53,59;71,73,79,83")
+
+        self.assertEqual(sorted(table), [8, 16, 32])
+        np.testing.assert_array_equal(table[8], [[11, 17], [23, 29]])
+        np.testing.assert_array_equal(table[32], [[71, 73], [79, 83]])
+
+    def test_accepts_the_nested_list_a_model_config_declares(self):
+        config = DeepxDetectorConfig(
+            type="deepx",
+            ppu=True,
+            model_format=ModelFormatEnum.anchor,
+            anchors=[[11, 17, 23, 29], [41, 47, 53, 59], [71, 73, 79, 83]],
+        )
+
+        np.testing.assert_array_equal(
+            parse_anchors(config.anchors)[8], [[11, 17], [23, 29]]
+        )
+
+    def test_accepts_explicit_pairs(self):
+        config = DeepxDetectorConfig(
+            type="deepx",
+            ppu=True,
+            model_format=ModelFormatEnum.anchor,
+            anchors=[[[11, 17], [23, 29]], [[41, 47], [53, 59]], [[71, 73], [79, 83]]],
+        )
+
+        np.testing.assert_array_equal(
+            parse_anchors(config.anchors)[8], [[11, 17], [23, 29]]
+        )
+
+    def test_anchor_ppu_without_anchors_is_rejected(self):
+        """Guessing the table silently rescales every box, so refuse to."""
+        with self.assertRaises(ValidationError):
+            DeepxDetectorConfig(
+                type="deepx", ppu=True, model_format=ModelFormatEnum.anchor
+            )
+
+    def test_anchors_on_a_decode_that_ignores_them_is_rejected(self):
+        for kwargs in (
+            dict(ppu=True, model_format=ModelFormatEnum.anchor_free),
+            dict(model_format=ModelFormatEnum.anchor),
+            dict(),
+        ):
+            with self.subTest(**kwargs):
+                with self.assertRaises(ValidationError):
+                    DeepxDetectorConfig(
+                        type="deepx", anchors=TEST_ANCHOR_STRING, **kwargs
+                    )
+
+    def test_a_group_per_stride_is_required(self):
+        with self.assertRaises(ValidationError):
+            DeepxDetectorConfig(
+                type="deepx",
+                ppu=True,
+                model_format=ModelFormatEnum.anchor,
+                anchors="11,17;41,47",
+            )
+
+    def test_groups_must_hold_equal_length_pairs(self):
+        for bad in ("11,17,23;41,47,53;71,73,79", "11,17;41,47,53,59;71,73"):
+            with self.subTest(anchors=bad):
+                with self.assertRaises(ValidationError):
+                    DeepxDetectorConfig(
+                        type="deepx",
+                        ppu=True,
+                        model_format=ModelFormatEnum.anchor,
+                        anchors=bad,
+                    )
+
+    def test_decode_uses_the_supplied_table(self):
+        """Two tables over one record must give two different box sizes."""
+        outputs = [
+            build_ppu_record(
+                box=(0.5, 0.5, 0.5, 0.5),
+                grid_y=10,
+                grid_x=10,
+                anchor_idx=0,
+                layer_idx=0,
+                score=0.9,
+                label=2,
+            ).reshape(1, 1, PPU_RECORD_SIZE)
+        ]
+
+        narrow = decode_ppu_anchor(
+            outputs, parse_anchors("4,4;8,8;16,16"), 640, 640, 0.25, 0.45
+        )
+        wide = decode_ppu_anchor(
+            outputs, parse_anchors("40,40;80,80;160,160"), 640, 640, 0.25, 0.45
+        )
+
+        self.assertGreater(wide[0][5] - wide[0][3], narrow[0][5] - narrow[0][3])
+
+    def test_an_out_of_range_index_skips_the_frame(self):
+        """Both indices come off the wire, and reading past the table would
+        take the detection process down rather than drop one frame."""
+        for anchor_idx, layer_idx in ((9, 0), (0, PPU_ANCHOR_LAYERS)):
+            with self.subTest(anchor_idx=anchor_idx, layer_idx=layer_idx):
+                outputs = [
+                    build_ppu_record(
+                        box=(0.5, 0.5, 0.5, 0.5),
+                        grid_y=10,
+                        grid_x=10,
+                        anchor_idx=anchor_idx,
+                        layer_idx=layer_idx,
+                        score=0.9,
+                        label=2,
+                    ).reshape(1, 1, PPU_RECORD_SIZE)
+                ]
+
+                detections = decode_ppu_anchor(
+                    outputs, TEST_ANCHORS, 640, 640, 0.25, 0.45
+                )
+
+                self.assertTrue(np.all(detections == 0))
 
 
 class TestDeepxModelFormats(unittest.TestCase):
@@ -231,21 +376,6 @@ class TestDeepxDetectorConfig(unittest.TestCase):
                 model_type=DeepxModelTypeEnum.damoyolo,
             )
 
-    def test_ssd_model_type_takes_no_model_format(self):
-        """SSD's layout is fixed: DX-COM keeps the softmax and prior decode
-        inside the .dxnn, so no backbone has to be named."""
-        config = DeepxDetectorConfig(type="deepx", model_type=DeepxModelTypeEnum.ssd)
-
-        self.assertIs(config.model_format, ModelFormatEnum.auto)
-
-    def test_ssd_model_type_rejects_a_model_format(self):
-        with self.assertRaises(ValidationError):
-            DeepxDetectorConfig(
-                type="deepx",
-                model_format=ModelFormatEnum.anchor_free,
-                model_type=DeepxModelTypeEnum.ssd,
-            )
-
     def test_damoyolo_model_type_rejects_a_model_format(self):
         with self.assertRaises(ValidationError):
             DeepxDetectorConfig(
@@ -263,55 +393,66 @@ class TestDeepxDetectorConfig(unittest.TestCase):
         self.assertIs(config.model_format, ModelFormatEnum.auto)
 
 
-class TestDeepxDeviceIds(unittest.TestCase):
-    def test_a_comma_separated_string_is_kept(self):
-        config = DeepxDetectorConfig(type="deepx", device_ids="0,1")
+class TestDeepxDeviceSelection(unittest.TestCase):
+    def test_a_pcie_device_string_resolves_to_its_index(self):
+        self.assertEqual(resolve_device("PCIe:1"), 1)
 
-        self.assertEqual(config.device_ids, "0,1")
-        self.assertEqual(resolve_devices(config.device_ids), [0, 1])
+    def test_a_bare_index_is_accepted(self):
+        self.assertEqual(resolve_device("2"), 2)
 
-    def test_a_yaml_list_is_accepted(self):
-        """A bare list is the natural thing to hand-write, so it is folded
-        into the same comma-separated form the config UI writes."""
-        config = DeepxDetectorConfig(type="deepx", device_ids=[0, 1])
+    def test_an_empty_device_is_the_first_npu(self):
+        self.assertEqual(resolve_device(""), 0)
 
-        self.assertEqual(config.device_ids, "0,1")
-        self.assertEqual(resolve_devices(config.device_ids), [0, 1])
+    def test_a_non_numeric_device_is_rejected(self):
+        with self.assertRaises(ValueError):
+            resolve_device("PCIe:the-fast-one")
 
-    def test_a_single_index_is_accepted(self):
-        config = DeepxDetectorConfig(type="deepx", device_ids=1)
-
-        self.assertEqual(config.device_ids, "1")
-        self.assertEqual(resolve_devices(config.device_ids), [1])
-
-    def test_surrounding_whitespace_is_tolerated(self):
-        config = DeepxDetectorConfig(type="deepx", device_ids=" 0 , 1 ")
-
-        self.assertEqual(resolve_devices(config.device_ids), [0, 1])
-
-    def test_an_unparsable_value_is_rejected_at_config_load(self):
+    def test_a_comma_separated_list_is_no_longer_accepted(self):
         with self.assertRaises(ValidationError):
-            DeepxDetectorConfig(type="deepx", device_ids="gpu0")
+            DeepxDetectorConfig(type="deepx", device="0,1")
 
-    def test_unset_leaves_device_selection_to_auto_detection(self):
-        config = DeepxDetectorConfig(type="deepx")
+    def test_the_old_multi_device_field_is_gone(self):
+        self.assertNotIn("device_ids", DeepxDetectorConfig.model_fields)
 
-        self.assertEqual(config.device_ids, DEVICE_IDS_AUTO)
-        self.assertEqual(parse_device_ids(config.device_ids), [])
+    def test_the_device_string_lands_on_the_device_field(self):
+        # inherited from BaseDetectorConfig; asserted so a rename is caught here
+        self.assertEqual(DeepxDetectorConfig.device_spec_field, "device")
+        self.assertIn("device", DeepxDetectorConfig.model_fields)
 
-    def test_a_blank_entry_folds_to_auto(self):
-        """The config form round-trips a value for every field, so a blank or
-        null entry has to land on the sentinel rather than stay None."""
-        for value in (None, "", "  ", []):
-            with self.subTest(value=value):
-                config = DeepxDetectorConfig(type="deepx", device_ids=value)
 
-                self.assertEqual(config.device_ids, DEVICE_IDS_AUTO)
+class TestDeepxRuntimeManifest(unittest.TestCase):
+    def test_the_detector_declares_a_manifest(self):
+        self.assertIs(DeepxDetector.runtime_manifest, DEEPX_MANIFEST)
 
-    def test_auto_is_case_insensitive(self):
-        config = DeepxDetectorConfig(type="deepx", device_ids="AUTO")
+    def test_one_wheel_per_supported_machine(self):
+        machines = sorted(m for a in DEEPX_MANIFEST.artifacts for m in a.machines)
+        self.assertEqual(machines, ["aarch64", "x86_64"])
 
-        self.assertEqual(parse_device_ids(config.device_ids), [])
+    def test_every_artifact_is_a_pinned_wheel(self):
+        for artifact in DEEPX_MANIFEST.artifacts:
+            with self.subTest(url=artifact.url):
+                self.assertEqual(artifact.kind, ArtifactKind.wheel)
+                self.assertEqual(len(artifact.sha256), 64)
+                self.assertTrue(artifact.url.endswith(".whl"))
+
+    def test_the_wheels_match_the_container_interpreter(self):
+        for artifact in DEEPX_MANIFEST.artifacts:
+            with self.subTest(url=artifact.url):
+                self.assertIn("cp311", artifact.url)
+
+    def test_every_url_carries_the_pinned_version(self):
+        """A PyPI path holds a per-file digest, so a version bump has to rewrite
+        the whole URL rather than only the version constant."""
+        self.assertEqual(DEEPX_MANIFEST.version, DXRT_VERSION)
+
+        for artifact in DEEPX_MANIFEST.artifacts:
+            with self.subTest(url=artifact.url):
+                self.assertIn(f"dx_engine-{DXRT_VERSION}-", artifact.url)
+
+    def test_no_library_preloading_is_needed(self):
+        # the wheel is auditwheel-repaired and resolves its own libs by RPATH
+        self.assertEqual(DEEPX_MANIFEST.preload, ())
+        self.assertFalse(DEEPX_MANIFEST.needs_ld_library_path)
 
 
 class TestDeepxPpuAnchorFreeDecode(unittest.TestCase):
@@ -352,7 +493,7 @@ class TestDeepxPpuAnchorFreeDecode(unittest.TestCase):
         outputs = [record.reshape(1, 1, PPU_RECORD_SIZE)]
 
         anchor_free = decode_ppu_anchor_free(outputs, 640, 640, 0.25, 0.45)
-        anchor = decode_ppu_anchor(outputs, 640, 640, 0.25, 0.45)
+        anchor = decode_ppu_anchor(outputs, TEST_ANCHORS, 640, 640, 0.25, 0.45)
 
         # the anchor decode squares the width, saturating the clip to the frame
         self.assertEqual(anchor[0][5], 1.0)
@@ -480,7 +621,9 @@ class TestDeepxRawAnchorFreeDecode(unittest.TestCase):
     def test_returns_empty_detections_for_no_output(self):
         out = np.zeros((1, 0, 84), dtype=np.float32)
 
-        self.assertTrue(np.all(decode_raw_anchor_free([out], 640, 640, 0.25, 0.45) == 0))
+        self.assertTrue(
+            np.all(decode_raw_anchor_free([out], 640, 640, 0.25, 0.45) == 0)
+        )
 
 
 class TestDeepxRawNmsInHeadDecode(unittest.TestCase):
@@ -524,110 +667,6 @@ class TestDeepxRawNmsInHeadDecode(unittest.TestCase):
         out = np.zeros((1, 0, 6), dtype=np.float32)
 
         self.assertTrue(np.all(decode_raw_nms_in_head([out], 640, 640, 0.25) == 0))
-
-
-class TestDeepxSsdDecode(unittest.TestCase):
-    """The .dxnn emits final boxes and probabilities, so these feed the
-    decoder what a real compiled SSD produces: corner-form boxes normalized
-    to [0, 1] and post-softmax confidences with background at column 0."""
-
-    def build_ssd_output(self, box_index, box, class_id, prob, num_boxes=3000):
-        num_classes = 21  # 20 VOC classes + background
-
-        boxes = np.zeros((1, num_boxes, 4), dtype=np.float32)
-        boxes[0, box_index] = box
-
-        # every other box is background, as the model would report it
-        scores = np.zeros((1, num_boxes, num_classes), dtype=np.float32)
-        scores[0, :, 0] = 1.0
-        scores[0, box_index, 0] = 1.0 - prob
-        scores[0, box_index, class_id] = prob
-
-        return [boxes, scores]
-
-    def test_decodes_an_already_decoded_box(self):
-        outputs = self.build_ssd_output(
-            box_index=7, box=(0.1, 0.2, 0.5, 0.8), class_id=5, prob=0.9
-        )
-
-        detections = decode_ssd_raw(outputs, 300, 300, 0.25, 0.45)
-
-        # boxes pass through untouched apart from the corner reorder, and
-        # the background class is dropped so labels shift down by one
-        self.assertEqual(detections[0][0], 4)
-        self.assertAlmostEqual(float(detections[0][1]), 0.9, places=5)
-        self.assertAlmostEqual(float(detections[0][2]), 0.2, places=5)  # y_min
-        self.assertAlmostEqual(float(detections[0][3]), 0.1, places=5)  # x_min
-        self.assertAlmostEqual(float(detections[0][4]), 0.8, places=5)  # y_max
-        self.assertAlmostEqual(float(detections[0][5]), 0.5, places=5)  # x_max
-
-    def test_confidences_are_not_softmaxed_again(self):
-        """A second softmax over 21 already-normalized probabilities pulls
-        every score toward 1/21, which is what silently dropped every real
-        detection under the default threshold."""
-        outputs = self.build_ssd_output(
-            box_index=0, box=(0.1, 0.1, 0.4, 0.4), class_id=15, prob=0.6
-        )
-
-        detections = decode_ssd_raw(outputs, 300, 300, 0.25, 0.45)
-
-        self.assertAlmostEqual(float(detections[0][1]), 0.6, places=5)
-
-    def test_any_box_count_is_accepted(self):
-        """3000 for the MobileNet backbones, 8732 for VGG16 -- the decoder
-        reads whatever the model emits rather than a per-backbone table."""
-        for num_boxes in (3000, 8732):
-            with self.subTest(num_boxes=num_boxes):
-                outputs = self.build_ssd_output(
-                    box_index=num_boxes - 1,
-                    box=(0.0, 0.0, 1.0, 1.0),
-                    class_id=1,
-                    prob=0.8,
-                    num_boxes=num_boxes,
-                )
-
-                detections = decode_ssd_raw(outputs, 300, 300, 0.25, 0.45)
-
-                self.assertEqual(detections[0][0], 0)
-                self.assertAlmostEqual(float(detections[0][1]), 0.8, places=5)
-
-    def test_output_order_does_not_matter(self):
-        boxes, scores = self.build_ssd_output(
-            box_index=1, box=(0.2, 0.2, 0.6, 0.6), class_id=3, prob=0.7
-        )
-
-        forward = decode_ssd_raw([boxes, scores], 300, 300, 0.25, 0.45)
-        reversed_ = decode_ssd_raw([scores, boxes], 300, 300, 0.25, 0.45)
-
-        np.testing.assert_array_equal(forward, reversed_)
-
-    def test_low_confidence_detection_is_dropped(self):
-        outputs = self.build_ssd_output(
-            box_index=0, box=(0.1, 0.1, 0.4, 0.4), class_id=3, prob=0.05
-        )
-
-        detections = decode_ssd_raw(outputs, 300, 300, 0.5, 0.45)
-
-        self.assertTrue(np.all(detections == 0))
-
-    def test_returns_empty_detections_when_outputs_cannot_be_told_apart(self):
-        # two tensors that both look class-shaped (last dim != 4)
-        outputs = [
-            np.zeros((1, 10, 21), dtype=np.float32),
-            np.zeros((1, 10, 21), dtype=np.float32),
-        ]
-
-        detections = decode_ssd_raw(outputs, 300, 300, 0.25, 0.45)
-
-        self.assertTrue(np.all(detections == 0))
-
-    def test_returns_empty_detections_when_box_and_class_counts_disagree(self):
-        boxes = np.zeros((1, 10, 4), dtype=np.float32)
-        scores = np.zeros((1, 12, 21), dtype=np.float32)
-
-        detections = decode_ssd_raw([boxes, scores], 300, 300, 0.25, 0.45)
-
-        self.assertTrue(np.all(detections == 0))
 
 
 class TestDeepxDamoyoloDecode(unittest.TestCase):
@@ -743,11 +782,18 @@ if __name__ == "__main__":
 
 class TestDeepxModelType(unittest.TestCase):
     def test_model_type_defaults_to_yolo_generic(self):
-        """Frigate's own model_type default is ssd, which silently picked the
-        SSD decoder for anyone who left it unset."""
+        """Frigate's own model_type default is ssd, which this detector has no
+        decoder for, so the detector needs a default of its own."""
         config = DeepxDetectorConfig(type="deepx")
 
         self.assertIs(config.model_type, DeepxModelTypeEnum.yologeneric)
+
+    def test_ssd_is_not_an_accepted_model_type(self):
+        """The ModelZoo's SSD models are Pascal VOC, whose label names none of
+        Frigate's COCO-based object config would ever match, so the type is
+        rejected at config load rather than decoded into a wrong label map."""
+        with self.assertRaises(ValidationError):
+            DeepxDetectorConfig(type="deepx", model_type="ssd")
 
     def test_model_type_values_match_frigate_model_types(self):
         """The detector writes its choice back onto model.model_type, so every
@@ -755,3 +801,67 @@ class TestDeepxModelType(unittest.TestCase):
         for value in DeepxModelTypeEnum:
             with self.subTest(value=value):
                 self.assertEqual(ModelTypeEnum(value.value).value, value.value)
+
+
+class TestDeepxIpcEndpoint(unittest.TestCase):
+    """dxrtd listens on an abstract and a filesystem socket; only the second
+    one is reachable from a container, so the detector names it up front."""
+
+    def _construct(self):
+        # dx_engine is not installed in the test environment, and forcing the
+        # import to fail keeps this test honest on a machine where it is
+        with patch.dict(sys.modules, {"dx_engine": None}):
+            with self.assertRaises(ImportError):
+                DeepxDetector(DeepxDetectorConfig(type="deepx"))
+
+    def test_the_filesystem_socket_is_named_when_nothing_else_is(self):
+        with patch.dict(os.environ):
+            os.environ.pop(DXRT_IPC_ENDPOINT_ENV, None)
+            self._construct()
+            self.assertEqual(os.environ[DXRT_IPC_ENDPOINT_ENV], DXRT_IPC_SOCKET)
+
+    def test_an_operator_supplied_endpoint_is_left_alone(self):
+        with patch.dict(os.environ, {DXRT_IPC_ENDPOINT_ENV: "/run/dxrt/custom.sock"}):
+            self._construct()
+            self.assertEqual(os.environ[DXRT_IPC_ENDPOINT_ENV], "/run/dxrt/custom.sock")
+
+
+class TestDeepxServiceCheck(unittest.TestCase):
+    """DX-RT scans /proc for a dxrtd process to decide the daemon is up, which
+    a container cannot satisfy from the host. See satisfy_service_check."""
+
+    def setUp(self):
+        deepx = sys.modules["frigate.detectors.plugins.deepx"]
+        self.deepx = deepx
+        deepx._SERVICE_PLACEHOLDER = None
+        self.addCleanup(setattr, deepx, "_SERVICE_PLACEHOLDER", None)
+
+    def test_nothing_is_started_when_a_daemon_is_already_visible(self):
+        with patch.object(self.deepx, "service_is_visible", return_value=True):
+            with patch.object(self.deepx.subprocess, "Popen") as popen:
+                satisfy_service_check("/tmp/dxrt_dynamic_ipc.sock")
+
+        popen.assert_not_called()
+
+    def test_nothing_is_started_when_the_socket_is_absent(self):
+        # a genuinely stopped daemon must still report itself
+        with patch.object(self.deepx, "service_is_visible", return_value=False):
+            with patch.object(self.deepx.subprocess, "Popen") as popen:
+                satisfy_service_check("/nonexistent/dxrt.sock")
+
+        popen.assert_not_called()
+
+    def test_a_placeholder_named_dxrtd_is_started_otherwise(self):
+        with patch.object(self.deepx, "service_is_visible", return_value=False):
+            with patch.object(self.deepx.os.path, "exists", return_value=True):
+                with patch.object(self.deepx.subprocess, "Popen") as popen:
+                    popen.return_value.poll.return_value = None
+                    satisfy_service_check("/tmp/dxrt_dynamic_ipc.sock")
+
+        args, kwargs = popen.call_args
+        self.assertEqual(args[0][0], "dxrtd")
+        self.assertEqual(kwargs["executable"], "/bin/sleep")
+
+    def test_the_scan_matches_the_runtime_own_check(self):
+        # our own cmdline does not name dxrtd, so a bare test run sees none
+        self.assertIsInstance(service_is_visible(), bool)

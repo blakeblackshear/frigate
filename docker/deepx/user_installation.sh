@@ -1,44 +1,25 @@
 #!/bin/bash
 
-# Installs the DEEPX NPU kernel driver on the Docker host.
+# Installs the DEEPX NPU kernel driver and the DX-RT runtime on the Docker host,
+# then enables the vendor's dxrt.service. A container cannot load kernel
+# modules, so this runs outside the image; the driver creates the /dev/dxrt*
+# nodes and the daemon multiplexes the NPU across host and container.
 #
-# The driver has to be built and loaded on the host rather than in the Frigate
-# container: containers share the host kernel, so a kernel module cannot be
-# loaded from inside one. Once loaded it exposes the NPU as /dev/dxrt* device
-# nodes, which are passed through to the container (see the DEEPX section of
-# the installation docs).
+# Driver, runtime (v3.4.0) and NPU firmware (v2.7.4) must agree or inference
+# hangs instead of failing at startup; 3.4.0 needs driver 2.5.0, firmware 2.7.0.
 #
-# A DEEPX install has three separately versioned pieces that have to agree:
-#
-#   DX-RT runtime  v3.4.2  the Frigate image, docker/main/install_dxrt.sh
-#   Kernel driver  v2.6.0  this file (provides dxrt_driver and dx_dma)
-#   NPU firmware   v2.7.4  the module itself, flashed from the host
-#
-# DX-RT v3.4.2 requires driver 2.5.0 and firmware 2.7.0 as a minimum, so the
-# versions pinned here sit above that floor. A mismatch is the most common
-# cause of inference requests that are accepted but never complete, and it
-# fails silently rather than at startup. This script only installs the driver:
-# reading or flashing the firmware version requires the DX-RT runtime on the
-# host, which conflicts with the copy Frigate runs in its container, so that is
-# a separate manual step covered in the installation docs.
-#
-# DEEPX NPU support in Frigate is developed and maintained by Sixfab
-# (https://sixfab.com).
+# DEEPX NPU support in Frigate is maintained by Sixfab (https://sixfab.com).
 
 set -euo pipefail
 
 driver_version="v2.6.0"
-# Commit the tag above resolves to, pinned so a later retag or repoint of
-# v2.6.0 upstream can't silently swap in different source between review and
-# build, before it's compiled and installed as root. DEEPX doesn't sign tags
-# or publish checksums for this repo, so an immutable commit is the strongest
-# verification available. Update both together when bumping driver_version:
-#   git ls-remote https://github.com/DEEPX-AI/dx_rt_npu_linux_driver.git "refs/tags/<version>"
+# the commit the tag resolves to, since DEEPX signs neither tags nor releases
+# and this is compiled and installed as root. Update both together
 driver_commit="7074748e7104f470b02f517583abba652b3f05fa"
 firmware_version="v2.7.4"
 
 sudo apt-get update
-sudo apt-get install -y git build-essential "linux-headers-$(uname -r)" pciutils
+sudo apt-get install -y git build-essential "linux-headers-$(uname -r)" pciutils wget
 
 if ! lspci -d 1ff4: | grep -q .; then
     echo "No DEEPX device found on the PCIe bus (lspci -d 1ff4:)."
@@ -46,10 +27,8 @@ if ! lspci -d 1ff4: | grep -q .; then
     exit 1
 fi
 
-# Fetch the pinned commit directly (GitHub allows fetching a public repo by
-# SHA, not just by branch/tag) rather than cloning "${driver_version}", so
-# driver_commit above is what actually determines the source, not a ref that
-# could move after this script was reviewed.
+# fetch the pinned commit rather than cloning the tag, so a retag cannot swap
+# in different source
 mkdir dx_rt_npu_linux_driver
 cd dx_rt_npu_linux_driver
 git init -q
@@ -66,13 +45,11 @@ fi
 
 cd modules
 
-# --reload unloads any running modules and loads the newly built ones, so the
-# NPU is usable without a reboot.
 sudo ./build.sh -c install --reload
 
 sudo depmod -A
 
-# dx_dma is the PCIe transport, dxrt_driver is the NPU driver on top of it.
+# dx_dma is the PCIe transport, dxrt_driver the NPU driver on top of it
 for module in dx_dma dxrt_driver; do
     if ! sudo modprobe "${module}"; then
         echo "Unable to load the ${module} kernel module, common reasons are:"
@@ -88,18 +65,47 @@ if ! compgen -G "/dev/dxrt*" > /dev/null; then
     exit 1
 fi
 
-# dxrtd runs inside the Frigate container and may only run once per system, so
-# a host copy left over from a runtime install has to be disabled.
-if systemctl list-unit-files dxrt.service &> /dev/null; then
-    echo "Disabling the host dxrt.service so the container can run dxrtd."
-    sudo systemctl disable --now dxrt.service
+runtime_version="v3.4.0"
+declare -A runtime_sha256=(
+    [amd64]="736cfef009ce9e974ab1ab610d867239d19d72a426a53e367ddcbd53297b6e20"
+    [arm64]="eb6107f5f02f2ad76ae89f414e8b5f346f34fbc6f0888236136853a26be6f6a0"
+)
+
+runtime_release="${runtime_version#v}"
+deb_arch=$(dpkg --print-architecture)
+deb_file="/tmp/libdxrt-bin_${runtime_release}_${deb_arch}.deb"
+
+wget -qO "${deb_file}" \
+    "https://raw.githubusercontent.com/DEEPX-AI/dx_rt/${runtime_version}/release/${runtime_release}/libdxrt-bin_${runtime_release}_${deb_arch}.deb"
+
+expected_sha256="${runtime_sha256[${deb_arch}]:-}"
+if [[ -z "${expected_sha256}" ]]; then
+    echo "No pinned SHA-256 for architecture ${deb_arch}; refusing to install."
+    exit 1
+fi
+if [[ "$(sha256sum "${deb_file}" | cut -d' ' -f1)" != "${expected_sha256}" ]]; then
+    echo "SHA-256 mismatch for ${deb_file}; refusing to install."
+    exit 1
 fi
 
-echo "DEEPX driver installation complete."
-echo "Driver version: $(modinfo -F version dxrt_driver)"
-echo "Device node(s): $(echo /dev/dxrt*)"
+sudo dpkg -i "${deb_file}"
+sudo ldconfig
+rm -f "${deb_file}"
+
+sudo cp /usr/share/libdxrt-bin/service/dxrt.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now dxrt.service
+
+if ! sudo systemctl is-active --quiet dxrt.service; then
+    echo "dxrt.service did not start. Check: sudo journalctl -u dxrt.service"
+    exit 1
+fi
+
+echo "DEEPX driver and runtime installation complete."
+echo "Driver version:   $(modinfo -F version dxrt_driver) (expected ${driver_version#v})"
+echo "Runtime version:  ${runtime_release}"
+echo "Device node(s):   $(echo /dev/dxrt*)"
 echo
-echo "This driver expects NPU firmware ${firmware_version}. The firmware version"
-echo "can only be read with the DX-RT runtime installed on the host, so check it"
-echo "before starting Frigate, then remove the host runtime: Frigate runs its own"
-echo "copy of dxrtd and only one may run per system."
+echo "This driver expects NPU firmware ${firmware_version}. Check it with:"
+echo "  dxrt-cli --status"
+echo "Update the module if it does not match before starting Frigate."

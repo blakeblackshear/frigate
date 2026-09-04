@@ -324,7 +324,7 @@
     },
     "model_type": {
       "label": "Object Detection Model Type",
-      "description": "Detector model architecture type (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) used by some detectors for optimization."
+      "description": "Detector model architecture type (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine, damo-yolo) used by some detectors for optimization."
     }
   },
   "genai": {
