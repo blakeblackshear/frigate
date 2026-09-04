@@ -131,11 +131,11 @@ DEEPX_MANIFEST = RuntimeManifest(
 class DeepxModelTypeEnum(str, Enum):
     """The subset of Frigate's model types the DEEPX decoders can read.
 
-    Frigate reads `model_type` off the root `model` block, where an omitted
-    value defaults to `ssd`; listing the supported ones here makes the choice
-    visible, and the detector writes it back at startup. `ssd` is left out on
-    purpose: the ModelZoo's SSD models carry Pascal VOC's 20 class names, so it
-    would mean an empty label map, not a config error.
+    `model_type` sits on the root `model` block, where an omitted value
+    defaults to `ssd`; a model validator rejects anything not listed here so a
+    type with no DEEPX decoder fails at startup rather than being decoded as
+    yolo-generic. `ssd` is left out on purpose: DX-COM compiles no SSD head
+    this detector can read.
     """
 
     # PPU-compiled models still use yolo-generic; the `ppu` option is what
@@ -814,13 +814,6 @@ class DeepxDetectorConfig(BaseDetectorConfig):
         description="Which NPU this detector binds to, as PCIe:<index>. "
         "Empty selects the first NPU.",
     )
-    model_type: DeepxModelTypeEnum = Field(
-        default=DeepxModelTypeEnum.yologeneric,
-        title="Detection model architecture",
-        description="Which decoder reads the model's output. Overrides "
-        "model.model_type for this detector, whose default of ssd would "
-        "otherwise apply whenever the root model block leaves it unset.",
-    )
     ppu: bool = Field(
         default=False,
         title="PPU-compiled model",
@@ -905,6 +898,35 @@ class DeepxDetectorConfig(BaseDetectorConfig):
 
         return value
 
+    @property
+    def resolved_model_type(self) -> DeepxModelTypeEnum | None:
+        """The model type the decoders will actually run, read off the root
+        model block. None while the model is still unresolved, which is how a
+        device string is checked on its own before any model is attached."""
+        if self.model is None:
+            return None
+
+        return DeepxModelTypeEnum(self.model.model_type.value)
+
+    @model_validator(mode="after")
+    def validate_model_type_is_supported(self):
+        """Reject a model type no DEEPX decoder reads. Frigate defaults
+        model_type to ssd, which would otherwise fall through to the
+        yolo-generic decode path and return nonsense instead of an error."""
+        if self.model is None:
+            return self
+
+        try:
+            DeepxModelTypeEnum(self.model.model_type.value)
+        except ValueError:
+            supported = ", ".join(member.value for member in DeepxModelTypeEnum)
+            raise ValueError(
+                f"model_type '{self.model.model_type.value}' has no DEEPX "
+                f"decoder. Set model.model_type to one of: {supported}."
+            ) from None
+
+        return self
+
     @model_validator(mode="after")
     def validate_ppu_is_supported(self):
         """Reject a PPU pairing DX-COM cannot produce, or that has no
@@ -919,7 +941,7 @@ class DeepxDetectorConfig(BaseDetectorConfig):
                 "DX-COM. Set ppu to false."
             )
 
-        if self.model_type is DeepxModelTypeEnum.damoyolo:
+        if self.resolved_model_type is DeepxModelTypeEnum.damoyolo:
             raise ValueError(
                 'PPU is not yet supported for model_type "damo-yolo". Set ppu to false.'
             )
@@ -971,13 +993,15 @@ class DeepxDetectorConfig(BaseDetectorConfig):
         """Reject a model_format on a model_type that has no layout to pick:
         only yolo-generic has variants the decoder cannot tell apart, so a
         value on DAMO-YOLO's one fixed layout is a mistake, not a choice."""
-        if self.model_type is DeepxModelTypeEnum.yologeneric:
+        model_type = self.resolved_model_type
+
+        if model_type is None or model_type is DeepxModelTypeEnum.yologeneric:
             return self
 
         if self.model_format is not ModelFormatEnum.auto:
             raise ValueError(
                 "model_format is not used for model_type "
-                f"{self.model_type.value} -- its output layout is fixed. "
+                f"{model_type.value} -- its output layout is fixed. "
                 'Leave it as "auto".'
             )
 
@@ -1008,9 +1032,8 @@ class DeepxDetector(DetectionApi):
 
         super().__init__(config)
 
-        # In 0.19 model_type sits on the model, not the detector: a device
-        # string fills only the device field, so DeepxDetectorConfig.model_type
-        # never reflects what the user configured and must not be read here.
+        # model_type sits on the model, not the detector; a validator has
+        # already rejected any value with no DEEPX decoder behind it.
         self.model_type = ModelTypeEnum(config.model.model_type.value)
 
         model_path = config.model.path

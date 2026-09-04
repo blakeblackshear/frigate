@@ -8,7 +8,7 @@ from unittest.mock import patch
 import numpy as np
 from pydantic import ValidationError
 
-from frigate.detectors.detector_config import ModelTypeEnum
+from frigate.detectors.detector_config import ModelConfig, ModelTypeEnum
 from frigate.detectors.plugins.deepx import (
     ANCHOR_FORMATS,
     ANCHOR_FREE_FORMATS,
@@ -40,6 +40,14 @@ from frigate.util.runtime_deps import ArtifactKind
 # to a built-in set instead of reading the configured one would not match these.
 TEST_ANCHOR_STRING = "11,17,23,29,31,37;41,47,53,59,61,67;71,73,79,83,89,97"
 TEST_ANCHORS = parse_anchors(TEST_ANCHOR_STRING)
+
+
+def model_with_type(model_type) -> ModelConfig:
+    """The root model block a device is validated against. model_type lives
+    here rather than on the detector, so every check that keys off it has to
+    be exercised through a model. The label map is left unset so the test does
+    not depend on the image's /labelmap.txt."""
+    return ModelConfig(model_type=model_type, labelmap_path=None)
 
 
 def build_ppu_record(
@@ -367,27 +375,39 @@ class TestDeepxDetectorConfig(unittest.TestCase):
                 self.assertIs(config.model_format, ModelFormatEnum.auto)
 
     def test_ppu_with_damoyolo_model_type_is_rejected(self):
-        """No confirmed PPU record layout exists for DAMO-YOLO yet."""
+        """No confirmed PPU record layout exists for DAMO-YOLO yet. The type
+        comes off the model block, so the check has to read it from there
+        rather than from a detector field the runtime never uses."""
         with self.assertRaises(ValidationError):
             DeepxDetectorConfig(
                 type="deepx",
+                model=model_with_type(ModelTypeEnum.damoyolo),
                 ppu=True,
                 model_format=ModelFormatEnum.anchor_free,
-                model_type=DeepxModelTypeEnum.damoyolo,
             )
+
+    def test_ppu_with_yolo_generic_model_type_is_accepted(self):
+        config = DeepxDetectorConfig(
+            type="deepx",
+            model=model_with_type(ModelTypeEnum.yologeneric),
+            ppu=True,
+            model_format=ModelFormatEnum.anchor_free,
+        )
+
+        self.assertTrue(config.ppu)
 
     def test_damoyolo_model_type_rejects_a_model_format(self):
         with self.assertRaises(ValidationError):
             DeepxDetectorConfig(
                 type="deepx",
+                model=model_with_type(ModelTypeEnum.damoyolo),
                 model_format=ModelFormatEnum.anchor_free,
-                model_type=DeepxModelTypeEnum.damoyolo,
             )
 
     def test_damoyolo_model_type_without_model_format_is_accepted(self):
         config = DeepxDetectorConfig(
             type="deepx",
-            model_type=DeepxModelTypeEnum.damoyolo,
+            model=model_with_type(ModelTypeEnum.damoyolo),
         )
 
         self.assertIs(config.model_format, ModelFormatEnum.auto)
@@ -781,23 +801,34 @@ if __name__ == "__main__":
 
 
 class TestDeepxModelType(unittest.TestCase):
-    def test_model_type_defaults_to_yolo_generic(self):
-        """Frigate's own model_type default is ssd, which this detector has no
-        decoder for, so the detector needs a default of its own."""
+    def test_a_model_type_with_no_decoder_is_rejected(self):
+        """Frigate defaults model_type to ssd, and every unsupported type
+        would otherwise fall through to the yolo-generic decode path and
+        return nonsense rather than an error."""
+        for model_type in (ModelTypeEnum.ssd, ModelTypeEnum.dfine):
+            with self.subTest(model_type=model_type):
+                with self.assertRaises(ValidationError):
+                    DeepxDetectorConfig(type="deepx", model=model_with_type(model_type))
+
+    def test_supported_model_types_are_accepted(self):
+        for model_type in (ModelTypeEnum.yologeneric, ModelTypeEnum.damoyolo):
+            with self.subTest(model_type=model_type):
+                config = DeepxDetectorConfig(
+                    type="deepx", model=model_with_type(model_type)
+                )
+
+                self.assertEqual(config.resolved_model_type.value, model_type.value)
+
+    def test_an_unresolved_model_defers_the_check(self):
+        """A device string is validated on its own before any model is
+        attached, so an absent model must not fail."""
         config = DeepxDetectorConfig(type="deepx")
 
-        self.assertIs(config.model_type, DeepxModelTypeEnum.yologeneric)
-
-    def test_ssd_is_not_an_accepted_model_type(self):
-        """The ModelZoo's SSD models are Pascal VOC, whose label names none of
-        Frigate's COCO-based object config would ever match, so the type is
-        rejected at config load rather than decoded into a wrong label map."""
-        with self.assertRaises(ValidationError):
-            DeepxDetectorConfig(type="deepx", model_type="ssd")
+        self.assertIsNone(config.resolved_model_type)
 
     def test_model_type_values_match_frigate_model_types(self):
-        """The detector writes its choice back onto model.model_type, so every
-        value has to round-trip through ModelTypeEnum."""
+        """The detector reads model.model_type back as a ModelTypeEnum, so
+        every value has to round-trip."""
         for value in DeepxModelTypeEnum:
             with self.subTest(value=value):
                 self.assertEqual(ModelTypeEnum(value.value).value, value.value)

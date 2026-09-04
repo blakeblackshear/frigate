@@ -657,7 +657,7 @@ The DX-RT Python bindings are not part of the Frigate image. They are downloaded
 
 Frigate does not bundle a model for this detector. Models must be compiled to DEEPX's `.dxnn` format.
 
-The quickest way to get one is the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), which publishes pre-compiled `.dxnn` files for a range of object detection models alongside a JSON file describing how each was compiled: YOLO variants (`model_type: yolo-generic`) and DAMO-YOLO (`model_type: damo-yolo`). Pick a model, download the `.dxnn`, bind-mount it into the container, and point the model's `path` at it. Note which one you picked, since it determines the `model_type` value below.
+The quickest way to get one is the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), which publishes pre-compiled `.dxnn` files for a range of object detection models alongside a JSON file describing how each was compiled: YOLO variants (`model_type: yolo-generic`) and DAMO-YOLO (`model_type: damo-yolo`). Pick a model, download the `.dxnn`, bind-mount it into the container, and point the model's `path` at it. Note which one you picked, since it determines the `model_type` value below. `model_type` has to be set: Frigate defaults it to `ssd`, which no DEEPX decoder reads, so a model that leaves it unset is rejected at startup.
 
 ```yaml
 models:
