@@ -250,6 +250,20 @@ class PlaybackSourceEnum(str, Enum):
     preview = "preview"
 
 
+class ExportStreamEnum(str, Enum):
+    """Which recorded stream an export should be built from.
+
+    ``auto`` keeps the merged timeline: main where it exists, sub filling
+    the gaps main has already aged out of. Pinning to one stream trades
+    that coverage for a uniform source, which is always a plain stream
+    copy since nothing hands off mid-export.
+    """
+
+    auto = "auto"
+    main = STREAM_TYPE_MAIN
+    sub = STREAM_TYPE_SUB
+
+
 EXPORT_FILE_NAME_MAX_BYTES = 255
 
 
@@ -284,6 +298,7 @@ class RecordingExporter(threading.Thread):
         ffmpeg_output_args: str | None = None,
         cpu_fallback: bool = False,
         chapters: ChaptersEnum | None = None,
+        stream: ExportStreamEnum = ExportStreamEnum.auto,
         on_progress: Callable[[str, float], None] | None = None,
     ) -> None:
         super().__init__()
@@ -300,6 +315,7 @@ class RecordingExporter(threading.Thread):
         self.ffmpeg_output_args = ffmpeg_output_args
         self.cpu_fallback = cpu_fallback
         self.chapters = chapters
+        self.stream = stream
         self.on_progress = on_progress
         self.staged_runs: list[str] = []
         self._coverage: tuple[list[list[Any]], set[str], bool] | None = None
@@ -350,6 +366,11 @@ class RecordingExporter(threading.Thread):
 
         return input_duration * factor
 
+    @property
+    def pinned_stream(self) -> str | None:
+        """The stream type this export is pinned to, or None for auto."""
+        return None if self.stream == ExportStreamEnum.auto else self.stream.value
+
     def _resolve_coverage(self) -> tuple[list[list[Any]], set[str], bool]:
         """Resolve the export range into the spans the VOD manifest will serve.
 
@@ -363,7 +384,7 @@ class RecordingExporter(threading.Thread):
         if self._coverage is None:
             intervals = resolve_coverage(self.camera, self.start_time, self.end_time)
             self._coverage = (
-                build_spans(intervals, None),
+                build_spans(intervals, self.pinned_stream),
                 known_video_codecs(intervals),
                 self._audio_is_uniform(stream_media_summary(intervals)),
             )
@@ -405,6 +426,11 @@ class RecordingExporter(threading.Thread):
         single-playlist path byte for byte what it was. Returns False only
         when staging was needed and failed.
         """
+        if self.pinned_stream is not None:
+            # a pinned range is uniform by construction, so there is no
+            # hand-off to stage around
+            return True
+
         spans, codecs, keep_audio = self._resolve_coverage()
         runs = self._stream_runs(spans)
 
@@ -467,11 +493,12 @@ class RecordingExporter(threading.Thread):
 
         return internal_port
 
-    def _vod_url(self, stream_type: str, start: float, end: float) -> str:
-        """A VOD playlist URL pinned to one stream type."""
+    def _vod_url(self, stream_type: str | None, start: float, end: float) -> str:
+        """A VOD playlist URL, pinned to one stream type when given."""
+        pin = f"/{stream_type}" if stream_type else ""
         return (
-            f"http://127.0.0.1:{self._internal_port()}/vod/{self.camera}"
-            f"/{stream_type}/start/{start}/end/{end}/index.m3u8"
+            f"http://127.0.0.1:{self._internal_port()}/vod/{self.camera}{pin}"
+            f"/start/{start}/end/{end}/index.m3u8"
         )
 
     def _staged_run_path(self, index: int) -> str:
@@ -600,7 +627,7 @@ class RecordingExporter(threading.Thread):
                 return False
 
             target = (max(s[0] for s in sizes), max(s[1] for s in sizes))
-            logger.info(
+            logger.debug(
                 "Export %s spans video codecs %s; re-encoding every run to %dx%d",
                 self.export_id,
                 sorted(codecs),
@@ -1077,8 +1104,6 @@ class RecordingExporter(threading.Thread):
     def get_record_export_command(
         self, video_path: str, use_hwaccel: bool = True
     ) -> tuple[list[str], str | list[str]]:
-        internal_port = self._internal_port()
-
         if self.staged_runs:
             # each run was already rendered to a temp file with a common
             # track timescale, so the concat demuxer has nothing left to
@@ -1096,16 +1121,23 @@ class RecordingExporter(threading.Thread):
                 video_path, ffmpeg_input, playlist_lines, recordings, use_hwaccel
             )
 
-        # never mix streams in one playlist; use main when available and
-        # fall back to sub for expired-main history
-        recordings = self._get_recordings_for_range(STREAM_TYPE_MAIN)
+        pin = self.pinned_stream
 
-        if not recordings:
-            recordings = self._get_recordings_for_range(STREAM_TYPE_SUB)
+        if pin is not None:
+            # a pinned export reads that stream and only that stream, so
+            # its own rows are the ones the chapters describe
+            recordings = self._get_recordings_for_range(pin)
+        else:
+            # never mix streams in one playlist; use main when available
+            # and fall back to sub for expired-main history
+            recordings = self._get_recordings_for_range(STREAM_TYPE_MAIN)
+
+            if not recordings:
+                recordings = self._get_recordings_for_range(STREAM_TYPE_SUB)
 
         playlist_lines: list[str] = []
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
-            playlist_url = f"http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
+            playlist_url = self._vod_url(pin, self.start_time, self.end_time)
             ffmpeg_input = (
                 f"-y -protocol_whitelist pipe,file,http,tcp -i {playlist_url}"
             )
@@ -1115,9 +1147,10 @@ class RecordingExporter(threading.Thread):
             page_size = 1000
             for i in range(0, len(recordings), page_size):
                 chunk = recordings[i : i + page_size]
-                playlist_lines.append(
-                    f"file 'http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{float(chunk[0].start_time)}/end/{float(chunk[-1].end_time)}/index.m3u8'"
+                chunk_url = self._vod_url(
+                    pin, float(chunk[0].start_time), float(chunk[-1].end_time)
                 )
+                playlist_lines.append(f"file '{chunk_url}'")
 
             ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"
 

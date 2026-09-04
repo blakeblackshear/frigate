@@ -7,6 +7,7 @@ from frigate.const import MAX_PLAYLIST_SECONDS
 from frigate.models import Export
 from frigate.record.export import (
     EXPORT_TRACK_TIMESCALE,
+    ExportStreamEnum,
     PlaybackSourceEnum,
     RecordingExporter,
     StreamRun,
@@ -250,6 +251,7 @@ def _make_exporter(spans: list, codecs: set) -> RecordingExporter:
     exporter.ffmpeg_input_args = None
     exporter.ffmpeg_output_args = None
     exporter.chapters = None
+    exporter.stream = ExportStreamEnum.auto
     exporter.staged_runs = []
     exporter.staged_transcode = False
     exporter._coverage = (spans, codecs, False)
@@ -485,6 +487,58 @@ class TestAudioUniformity(unittest.TestCase):
                 }
             )
         )
+
+
+class TestPinnedStream(unittest.TestCase):
+    """Pinning trades merged coverage for a uniform, copy-only source."""
+
+    def _pinned(self, stream: ExportStreamEnum) -> RecordingExporter:
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+        exporter.stream = stream
+        return exporter
+
+    def test_auto_reports_no_pin(self) -> None:
+        self.assertIsNone(self._pinned(ExportStreamEnum.auto).pinned_stream)
+
+    def test_pinned_reports_its_stream(self) -> None:
+        self.assertEqual(self._pinned(ExportStreamEnum.sub).pinned_stream, "sub")
+        self.assertEqual(self._pinned(ExportStreamEnum.main).pinned_stream, "main")
+
+    def test_pinned_range_is_never_staged(self) -> None:
+        # nothing hands off inside one stream, so there is nothing to stage
+        exporter = self._pinned(ExportStreamEnum.sub)
+
+        with patch.object(RecordingExporter, "_stage_stream_runs") as stage:
+            self.assertTrue(exporter._prepare_stream_runs())
+
+        stage.assert_not_called()
+        self.assertEqual(exporter.staged_runs, [])
+
+    def test_pinned_playlist_url_carries_the_pin(self) -> None:
+        exporter = self._pinned(ExportStreamEnum.sub)
+        exporter._get_recordings_for_range = lambda _stream: []  # type: ignore[method-assign]
+
+        cmd, _lines = exporter.get_record_export_command("/exports/out.mp4")
+
+        self.assertTrue(
+            any("/vod/front/sub/start/" in token for token in cmd),
+            f"expected a sub-pinned playlist url in {cmd}",
+        )
+
+    def test_auto_playlist_url_stays_merged(self) -> None:
+        exporter = self._pinned(ExportStreamEnum.auto)
+        exporter._get_recordings_for_range = lambda _stream: []  # type: ignore[method-assign]
+
+        cmd, _lines = exporter.get_record_export_command("/exports/out.mp4")
+
+        self.assertTrue(any("/vod/front/start/" in token for token in cmd))
+        self.assertFalse(any("/vod/front/main/" in token for token in cmd))
 
 
 class TestStagingFailure(unittest.TestCase):
