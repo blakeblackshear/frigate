@@ -131,6 +131,7 @@ export type MediaSyncStats = {
   files_checked: number;
   orphans_found: number;
   orphans_deleted: number;
+  bytes_reclaimed: number;
   aborted: boolean;
   error: string | null;
 };
@@ -139,6 +140,7 @@ export type MediaSyncTotals = {
   files_checked: number;
   orphans_found: number;
   orphans_deleted: number;
+  bytes_reclaimed: number;
 };
 
 export type MediaSyncResults = {
@@ -154,4 +156,5 @@ export type Job<TResults = unknown> = {
   start_time?: number;
   end_time?: number;
   error_message?: string;
+  dry_run?: boolean;
 };

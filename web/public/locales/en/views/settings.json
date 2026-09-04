@@ -1469,6 +1469,8 @@
         "filesChecked": "Files Checked",
         "orphansFound": "Orphans Found",
         "orphansDeleted": "Orphans Deleted",
+        "spaceToReclaim": "Space To Reclaim",
+        "spaceReclaimed": "Space Reclaimed",
         "aborted": "Aborted. Deletion would exceed safety threshold.",
         "error": "Error",
         "totals": "Totals"
