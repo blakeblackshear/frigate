@@ -7671,6 +7671,14 @@ components:
             - type: 'null'
           title: New case description
           description: Optional description for a newly created export case
+        stream:
+          $ref: '#/components/schemas/ExportStreamEnum'
+          title: Recorded stream to export
+          description: Which recorded stream every item in the batch is exported
+            from. 'auto' uses the merged timeline, preferring the main stream 
+            and falling back to the sub stream where main has aged out. 'main' 
+            or 'sub' pins the exports to that stream.
+          default: auto
       type: object
       required:
         - items
@@ -8608,6 +8616,14 @@ components:
           title: Chapter mode
           description: Optional chapter metadata to embed in the export. When 
             omitted, the camera's configured export chapter mode is used.
+        stream:
+          $ref: '#/components/schemas/ExportStreamEnum'
+          title: Recorded stream to export
+          description: Which recorded stream to export. 'auto' uses the merged 
+            timeline, preferring the main stream and falling back to the sub 
+            stream where main has aged out. 'main' or 'sub' pins the export to 
+            that stream alone.
+          default: auto
       type: object
       title: ExportRecordingsBody
     ExportRecordingsCustomBody:
@@ -8662,6 +8678,20 @@ components:
       required:
         - name
       title: ExportRenameBody
+    ExportStreamEnum:
+      type: string
+      enum:
+        - auto
+        - main
+        - sub
+      title: ExportStreamEnum
+      description: |-
+        Which recorded stream an export should be built from.
+
+        ``auto`` keeps the merged timeline: main where it exists, sub filling
+        the gaps main has already aged out of. Pinning to one stream trades
+        that coverage for a uniform source, which is always a plain stream
+        copy since nothing hands off mid-export.
     Extension:
       type: string
       enum:
