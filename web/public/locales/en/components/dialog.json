@@ -53,13 +53,13 @@
       "placeholder": "Name the Export"
     },
     "stream": {
-      "label": "Stream",
-      "auto": "Automatic",
-      "main": "Main stream",
-      "sub": "Sub stream",
-      "autoDesc": "Uses the main stream where it is available and falls back to the sub stream for older footage.",
-      "mainDesc": "Exports only main stream footage. Periods where the main stream has been deleted will be missing.",
-      "subDesc": "Exports only sub stream footage, at lower quality."
+      "label": "Quality",
+      "auto": "Auto",
+      "main": "Original",
+      "sub": "Low",
+      "autoDesc": "Uses the main stream and falls back to the lower quality sub stream where main is not available.",
+      "mainDesc": "Exports only the original quality main stream. Time ranges where the main stream is not available will be missing.",
+      "subDesc": "Exports only the lower quality sub stream. Time ranges where the sub stream is not available will be missing."
     },
     "case": {
       "newCaseOption": "Create new case",
