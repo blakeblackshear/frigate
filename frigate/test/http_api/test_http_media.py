@@ -1,8 +1,8 @@
 """Unit tests for recordings/media API endpoints."""
 
 from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from fastapi import Request
 
 from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
@@ -51,16 +51,16 @@ class TestHttpMedia(BaseTestHttp):
         In 2024, DST in America/New_York transitions on March 10, 2024 at 2:00 AM
         Clocks spring forward from 2:00 AM to 3:00 AM (EST to EDT)
         """
-        tz = pytz.timezone("America/New_York")
+        tz = ZoneInfo("America/New_York")
 
         # March 9, 2024 at 12:00 PM EST (before DST)
-        march_9_noon = tz.localize(datetime(2024, 3, 9, 12, 0, 0)).timestamp()
+        march_9_noon = datetime(2024, 3, 9, 12, 0, 0, tzinfo=tz).timestamp()
 
         # March 10, 2024 at 12:00 PM EDT (after DST transition)
-        march_10_noon = tz.localize(datetime(2024, 3, 10, 12, 0, 0)).timestamp()
+        march_10_noon = datetime(2024, 3, 10, 12, 0, 0, tzinfo=tz).timestamp()
 
         # March 11, 2024 at 12:00 PM EDT (after DST)
-        march_11_noon = tz.localize(datetime(2024, 3, 11, 12, 0, 0)).timestamp()
+        march_11_noon = datetime(2024, 3, 11, 12, 0, 0, tzinfo=tz).timestamp()
 
         with AuthTestClient(self.app) as client:
             # Insert recordings for each day
@@ -124,19 +124,16 @@ class TestHttpMedia(BaseTestHttp):
         In 2024, DST in America/New_York transitions on November 3, 2024 at 2:00 AM
         Clocks fall back from 2:00 AM to 1:00 AM (EDT to EST)
         """
-        tz = pytz.timezone("America/New_York")
+        tz = ZoneInfo("America/New_York")
 
         # November 2, 2024 at 12:00 PM EDT (before DST transition)
-        nov_2_noon = tz.localize(datetime(2024, 11, 2, 12, 0, 0)).timestamp()
+        nov_2_noon = datetime(2024, 11, 2, 12, 0, 0, tzinfo=tz).timestamp()
 
         # November 3, 2024 at 12:00 PM EST (after DST transition)
-        # Need to specify is_dst=False to get the time after fall back
-        nov_3_noon = tz.localize(
-            datetime(2024, 11, 3, 12, 0, 0), is_dst=False
-        ).timestamp()
+        nov_3_noon = datetime(2024, 11, 3, 12, 0, 0, tzinfo=tz).timestamp()
 
         # November 4, 2024 at 12:00 PM EST (after DST)
-        nov_4_noon = tz.localize(datetime(2024, 11, 4, 12, 0, 0)).timestamp()
+        nov_4_noon = datetime(2024, 11, 4, 12, 0, 0, tzinfo=tz).timestamp()
 
         with AuthTestClient(self.app) as client:
             # Insert recordings for each day
@@ -197,13 +194,13 @@ class TestHttpMedia(BaseTestHttp):
         """
         Test recordings summary with multiple cameras across DST boundary.
         """
-        tz = pytz.timezone("America/New_York")
+        tz = ZoneInfo("America/New_York")
 
         # March 9, 2024 at 10:00 AM EST (before DST)
-        march_9_morning = tz.localize(datetime(2024, 3, 9, 10, 0, 0)).timestamp()
+        march_9_morning = datetime(2024, 3, 9, 10, 0, 0, tzinfo=tz).timestamp()
 
         # March 10, 2024 at 3:00 PM EDT (after DST transition)
-        march_10_afternoon = tz.localize(datetime(2024, 3, 10, 15, 0, 0)).timestamp()
+        march_10_afternoon = datetime(2024, 3, 10, 15, 0, 0, tzinfo=tz).timestamp()
 
         with AuthTestClient(self.app) as client:
             # Override allowed cameras for this test to include both
@@ -266,15 +263,15 @@ class TestHttpMedia(BaseTestHttp):
         """
         Test recordings that span the exact DST transition time.
         """
-        tz = pytz.timezone("America/New_York")
+        tz = ZoneInfo("America/New_York")
 
         # March 10, 2024 at 1:00 AM EST (1 hour before DST transition)
         # At 2:00 AM, clocks jump to 3:00 AM
-        before_transition = tz.localize(datetime(2024, 3, 10, 1, 0, 0)).timestamp()
+        before_transition = datetime(2024, 3, 10, 1, 0, 0, tzinfo=tz).timestamp()
 
         # Recording that spans the transition (1:00 AM to 3:30 AM EDT)
         # This is 1.5 hours of actual time but spans the "missing" hour
-        after_transition = tz.localize(datetime(2024, 3, 10, 3, 30, 0)).timestamp()
+        after_transition = datetime(2024, 3, 10, 3, 30, 0, tzinfo=tz).timestamp()
 
         with AuthTestClient(self.app) as client:
             Recordings.insert(
@@ -334,7 +331,7 @@ class TestHttpMedia(BaseTestHttp):
 
             # Test with UTC timezone
             response = client.get(
-                "/recordings/summary", params={"timezone": "utc", "cameras": "all"}
+                "/recordings/summary", params={"timezone": "UTC", "cameras": "all"}
             )
 
             assert response.status_code == 200
@@ -365,8 +362,8 @@ class TestHttpMedia(BaseTestHttp):
         """
         Test recordings summary filtered to a single camera.
         """
-        tz = pytz.timezone("America/New_York")
-        march_10_noon = tz.localize(datetime(2024, 3, 10, 12, 0, 0)).timestamp()
+        tz = ZoneInfo("America/New_York")
+        march_10_noon = datetime(2024, 3, 10, 12, 0, 0, tzinfo=tz).timestamp()
 
         with AuthTestClient(self.app) as client:
             # Insert recordings for both cameras

@@ -39,7 +39,7 @@ class EventsQueryParams(BaseModel):
     max_length: float | None = None
     event_id: str | None = None
     sort: str | None = None
-    timezone: str | None = "utc"
+    timezone: str | None = "UTC"
 
 
 class EventsSearchQueryParams(BaseModel):
@@ -66,7 +66,7 @@ class EventsSearchQueryParams(BaseModel):
     has_clip: bool | None = None
     has_snapshot: bool | None = None
     is_submitted: bool | None = None
-    timezone: str | None = "utc"
+    timezone: str | None = "UTC"
     min_score: float | None = None
     max_score: float | None = None
     min_speed: float | None = None
@@ -76,6 +76,6 @@ class EventsSearchQueryParams(BaseModel):
 
 
 class EventsSummaryQueryParams(BaseModel):
-    timezone: str | None = "utc"
+    timezone: str | None = "UTC"
     has_clip: int | None = None
     has_snapshot: int | None = None
