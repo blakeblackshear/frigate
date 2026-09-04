@@ -1136,7 +1136,13 @@ class DeepxDetector(DetectionApi):
                 self.nms_threshold,
             )
 
-        return post_process_yolo(outputs, self.width, self.height)
+        return post_process_yolo(
+            outputs,
+            self.width,
+            self.height,
+            self.score_threshold,
+            self.nms_threshold,
+        )
 
     def detect_raw(self, tensor_input):
         """Run inference and decode the DEEPX model output."""
