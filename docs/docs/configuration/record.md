@@ -499,7 +499,7 @@ Media files (event snapshots, event thumbnails, review thumbnails, previews, exp
 
 Normal operation may leave small numbers of orphaned files until Frigate's scheduled cleanup, but crashes, configuration changes, or upgrades may cause more orphaned files that Frigate does not clean up. This feature checks the file system for media files and removes any that are not referenced in the database.
 
-The Maintenance pane in the Frigate UI or an API endpoint `POST /api/media/sync` can be used to trigger a media sync. When using the API, a job ID is returned and the operation continues on the server. Status can be checked with the `/api/media/sync/status/{job_id}` endpoint.
+The Maintenance pane in the Frigate UI or an API endpoint `POST /api/media/sync` can be used to trigger a media sync. When using the API, a job ID is returned and the operation continues on the server. Status can be checked with the `/api/media/sync/status/{job_id}` endpoint. Results include the disk space reclaimed, or with `dry_run: true`, the space that would be reclaimed.
 
 Setting `verbose: true` writes a detailed report of every orphaned file and database entry to `/config/media_sync/<job_id>.txt`. For recordings, the report separates orphaned database entries (DB records whose files are missing from disk) from orphaned files (files on disk with no corresponding database record).
 
