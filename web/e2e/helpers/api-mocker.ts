@@ -50,7 +50,28 @@ export interface ApiMockOverrides {
   users?: { username: string; role: string }[];
   notices?: unknown[];
   noticeStats?: unknown[];
+  /** camera name to the ffprobe entries returned for `paths=camera:<name>` */
+  ffprobe?: Record<string, unknown[]>;
 }
+
+export const FFPROBE_OK = [
+  {
+    return_code: 0,
+    stderr: "",
+    stdout: {
+      streams: [
+        {
+          codec_type: "video",
+          codec_name: "h264",
+          width: 1920,
+          height: 1080,
+          avg_frame_rate: "15/1",
+        },
+        { codec_type: "audio", codec_name: "aac" },
+      ],
+    },
+  },
+];
 
 export class ApiMocker {
   private page: Page;
@@ -202,6 +223,16 @@ export class ApiMocker {
         },
       }),
     );
+
+    // ffprobe. The Health tab's stream checks probe `camera:<name>`; the
+    // wizard probes raw URLs. Both get a healthy h264 + aac answer by default.
+    await this.page.route("**/api/ffprobe**", (route) => {
+      const url = new URL(route.request().url());
+      const paths = url.searchParams.get("paths") ?? "";
+      const camera = paths.startsWith("camera:") ? paths.slice(7) : undefined;
+      const entries = (camera && overrides?.ffprobe?.[camera]) || FFPROBE_OK;
+      return route.fulfill({ json: entries });
+    });
 
     // Notices. The stats route is registered after the list route so it wins
     // for /api/notices/stats; the list glob does not match a sub-path anyway.

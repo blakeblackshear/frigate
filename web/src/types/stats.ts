@@ -54,6 +54,7 @@ export type EmbeddingsStats = {
   face_embedding_speed: number;
   plate_recognition_speed: number;
   text_embedding_speed: number;
+  devices?: Record<string, string>;
 };
 
 export type ExtraProcessStats = {
@@ -119,8 +120,11 @@ export type CameraStorage = {
   };
 };
 
+export type ProblemSeverity = "error" | "warning" | "info";
+
 export type PotentialProblem = {
   text: string;
+  severity: ProblemSeverity;
   color: string;
   relevantLink?: string;
 };

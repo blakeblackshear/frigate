@@ -52,6 +52,7 @@ const ffmpeg: SectionConfigOverrides = {
       },
       {
         key: "inputs-missing-go2rtc-stream",
+        health: true,
         field: "inputs",
         position: "before",
         messageKey: "configMessages.ffmpeg.inputsMissingGo2rtcStream",

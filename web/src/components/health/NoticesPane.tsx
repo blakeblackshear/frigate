@@ -7,8 +7,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useNotices } from "@/hooks/use-notices";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useTimezone } from "@/hooks/use-date-utils";
+import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
+import { useHealthChecks } from "@/hooks/use-health-checks";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { releaseUrl } from "@/utils/versionUtil";
+import { evaluateConfigHealth } from "@/utils/configHealth";
+import { isStartupWindow } from "@/utils/health";
+import { sortHealthProblems } from "@/utils/healthSort";
+import { streamHealth } from "@/utils/streamHealth";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import type { HealthProblem } from "@/types/health";
 import type { Notice, NoticeKind, NoticeStats } from "@/types/notice";
@@ -75,6 +81,7 @@ function useNoticeProblems(
 
       return {
         id: `notice:${notice.id}`,
+        source: "registry" as const,
         severity: notice.severity,
         scope: notice.scope ?? undefined,
         scopeIsCamera: notice.category === "camera",
@@ -93,19 +100,73 @@ function useNoticeProblems(
 }
 
 export default function NoticesPane() {
-  const { t } = useTranslation(["views/system"]);
+  const { t } = useTranslation(["views/system", "views/settings"]);
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+  const stats = useAutoFrigateStats();
   const { notices, statsByKind, dismiss } = useNotices();
-  const problems = useNoticeProblems(notices, statsByKind, dismiss);
+  const registryProblems = useNoticeProblems(notices, statsByKind, dismiss);
+  const { potentialProblems } = useStats(stats);
+  const {
+    stream: { results },
+  } = useHealthChecks();
+
+  const liveProblems = useMemo<HealthProblem[]>(() => {
+    if (!stats) {
+      return [];
+    }
+
+    if (isStartupWindow(stats)) {
+      return [
+        {
+          id: "live:startup",
+          source: "live",
+          severity: "info",
+          text: t("health.notices.startupWindow"),
+        },
+      ];
+    }
+
+    return potentialProblems.map((problem, index) => ({
+      id: `live:${index}:${problem.text}`,
+      source: "live",
+      severity: problem.severity,
+      text: problem.text,
+      link: problem.relevantLink?.replace(/^(?!\/)/, "/"),
+    }));
+  }, [stats, potentialProblems, t]);
+
+  const configProblems = useMemo<HealthProblem[]>(
+    () => (config ? evaluateConfigHealth(config, t) : []),
+    [config, t],
+  );
+
+  const streamProblems = useMemo<HealthProblem[]>(
+    () => (config ? streamHealth(config, results, t).problems : []),
+    [config, results, t],
+  );
+
+  const problems = useMemo(
+    () =>
+      sortHealthProblems([
+        ...registryProblems,
+        ...liveProblems,
+        ...configProblems,
+        ...streamProblems,
+      ]),
+    [registryProblems, liveProblems, configProblems, streamProblems],
+  );
+
+  const loading = notices === undefined || !config;
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <div className="text-md font-medium text-primary-variant">
-          {t("health.notices.title")}
-        </div>
+      <div className="text-md font-medium text-primary-variant">
+        {t("health.notices.title")}
       </div>
       <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-        {notices === undefined ? (
+        {loading ? (
           <Skeleton className="h-24 w-full" />
         ) : problems.length === 0 ? (
           <div className="flex items-center gap-2 px-1 py-2 text-sm">
