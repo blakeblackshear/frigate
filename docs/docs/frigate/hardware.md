@@ -66,7 +66,7 @@ Frigate supports multiple different detectors that work on different types of ha
   - Runs best with tiny, small, or medium-size models
 
 - <CommunityBadge /> [DEEPX](#deepx-npu): The DEEPX NPU is available in m.2 format and as a HAT+ for the Raspberry Pi 5, allowing for a wide range of compatibility with devices.
-  - [Supports YOLO, SSD, and DAMO-YOLO model architectures](../../configuration/object_detectors#deepx-npu)
+  - [Supports YOLO and DAMO-YOLO model architectures](../../configuration/object_detectors#deepx-npu)
   - Runs best with tiny or small size models
   - Runs efficiently on low power hardware
 
@@ -267,17 +267,34 @@ Frigate supports the DEEPX NPU in both of its form factors: the **DX-M1** M.2 mo
 
 DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
 
-The NPU runs models compiled to the `.dxnn` format with DEEPX's DX-COM compiler. Pre-compiled YOLO, SSD, and DAMO-YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), and YOLO models compiled with Post-Processing Unit (PPU) support move candidate selection onto the NPU, which reduces host CPU usage.
+The NPU runs models compiled to the `.dxnn` format with DEEPX's DX-COM compiler. Pre-compiled YOLO and DAMO-YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), and YOLO models compiled with Post-Processing Unit (PPU) support move candidate selection onto the NPU, which reduces host CPU usage.
 
-The DEEPX kernel driver has to be installed on the Docker host before the NPU can be used. See the [installation docs](installation.md#deepx-npu) for the setup steps.
+The DEEPX kernel driver, the DX-RT runtime, and the `dxrtd` daemon all run on the Docker host rather than inside the Frigate container, and have to be installed there before the NPU can be used. Frigate connects to the daemon over its socket, so the NPU stays available to other programs on the host at the same time. See the [installation docs](installation.md#deepx-npu) for the setup steps.
 
 Detailed information is available [in the detector docs](/configuration/object_detectors#deepx-npu).
 
-| Name    | Input Size | Inference Time |
-| ------- | ---------- | -------------- |
-| YOLOv8s | 640        | ~ 19 ms        |
+The [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo) publishes pre-compiled `.dxnn` files for many YOLO variants as well as the models below:
 
-Inference times were measured on a Raspberry Pi 5. The host platform affects the pre- and post-processing cost rather than the inference itself.
+| Model                  | Input Size | DX-M1 Inference Time |
+| ---------------------- | ---------- | -------------------- |
+| DAMO-YOLO-T            | 640        | ~ 5.0 ms             |
+| DAMO-YOLO TinyNAS-L20T | 640        | ~ 5.1 ms             |
+| DAMO-YOLO-S            | 640        | ~ 6.0 ms             |
+| DAMO-YOLO TinyNAS-L25S | 640        | ~ 6.0 ms             |
+| DAMO-YOLO-M            | 640        | ~ 6.8 ms             |
+| DAMO-YOLO TinyNAS-L20M | 640        | ~ 6.8 ms             |
+| DAMO-YOLO-L            | 640        | ~ 9.0 ms             |
+| SSD (MobileNetV1)      | 300        | ~ 0.5 ms             |
+| SSD (MobileNetV2-Lite) | 300        | ~ 0.6 ms             |
+| SSD (VGG-16)           | 300        | ~ 3.3 ms             |
+
+These are DEEPX's own figures for the DX-M1, derived from the frames per second published in the ModelZoo. They cover the NPU alone and exclude the pre- and post-processing Frigate does on the host, so the inference speed Frigate reports will be higher, and noticeably so on a slower host such as a Raspberry Pi 5.
+
+:::note
+
+The SSD rows describe what the NPU can run, not what Frigate can use. All three SSD models are trained on Pascal VOC rather than COCO, so their labels do not match the object vocabulary used by `objects.track` and the rest of Frigate. The `deepx` detector has no SSD decoder and rejects `model_type: ssd` at startup. Use a DAMO-YOLO or YOLO model instead.
+
+:::
 
 ### Nvidia Jetson
 
