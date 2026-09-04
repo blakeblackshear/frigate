@@ -171,3 +171,5 @@ Filters and masks only hide the incorrect result - they don't teach Frigate what
 ### Where do I see problems Frigate has detected?
 
 Open System > Health. The Notices list shows problems the backend has noticed on its own, such as a camera whose ffmpeg keeps crashing, a detector that had to be restarted, a model download that failed, or recordings being deleted before their retention period. Entries that describe a one-time event can be dismissed; entries that describe an ongoing condition clear themselves once it is fixed.
+
+The Hardware section below the notices shows whether the detection hardware, hardware acceleration, and enrichment devices in your config were found and are being used, so a GPU that silently fell back to the CPU shows up as a warning. Run stream checks to probe every camera's streams for the same problems the camera wizard reports.

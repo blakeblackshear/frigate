@@ -6,6 +6,7 @@ const record: SectionConfigOverrides = {
     messages: [
       {
         key: "no-record-role",
+        health: (ctx) => ctx.fullCameraConfig?.record?.enabled === true,
         messageKey: "configMessages.record.noRecordRole",
         severity: "warning",
         condition: (ctx) => {
@@ -17,6 +18,7 @@ const record: SectionConfigOverrides = {
       },
       {
         key: "no-record-sub-role",
+        health: (ctx) => ctx.fullCameraConfig?.record?.sub?.enabled === true,
         messageKey: "configMessages.record.noRecordSubRole",
         severity: "warning",
         condition: (ctx) => {

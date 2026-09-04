@@ -72,6 +72,9 @@ const objects: SectionConfigOverrides = {
     fieldMessages: [
       {
         key: "genai-no-descriptions-provider",
+        health: (ctx) =>
+          (ctx.formData as { genai?: { enabled?: boolean } })?.genai
+            ?.enabled === true,
         field: "genai.enabled",
         messageKey: "configMessages.objects.genaiNoDescriptionsProvider",
         severity: "warning",

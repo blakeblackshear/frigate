@@ -705,7 +705,9 @@ export default function Settings() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
-  const [selectedCamera, setSelectedCamera] = useState<string>("");
+  const [selectedCamera, setSelectedCamera] = useState<string>(
+    () => searchParams.get("camera") ?? "",
+  );
 
   // Get all camera overrides for the selected camera
   const cameraOverrides = useAllCameraOverrides(config, selectedCamera);
@@ -1164,6 +1166,12 @@ export default function Settings() {
   });
 
   useSearchEffect("camera", (camera: string) => {
+    // the config drives the camera list, so keep the param until it loads
+    // rather than consuming it against an empty list
+    if (cameras.length === 0) {
+      return false;
+    }
+
     const cameraNames = cameras.map((c) => c.name);
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);

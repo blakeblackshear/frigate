@@ -41,6 +41,13 @@ export const BASE_STATS = {
   },
   gpu_usages: {},
   npu_usages: {},
+  embeddings: {
+    image_embedding_speed: 0,
+    face_embedding_speed: 0,
+    plate_recognition_speed: 0,
+    text_embedding_speed: 0,
+    devices: {} as Record<string, string>,
+  },
   processes: {},
   service: {
     last_updated: Date.now() / 1000,
@@ -56,6 +63,13 @@ export const BASE_STATS = {
         total: 1000000000,
         used: 500000000,
         mount_type: "tmpfs",
+      },
+      "/dev/shm": {
+        free: 98,
+        total: 128,
+        used: 30,
+        mount_type: "tmpfs",
+        min_shm: 64,
       },
     },
     uptime: 86400,

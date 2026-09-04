@@ -28,6 +28,13 @@ export type ConditionalMessage = {
   values?: Record<string, unknown>;
   /** Optional documentation path (e.g. "/configuration/object_detectors#model"). */
   docLink?: string;
+  /**
+   * Whether the Health tab evaluates this message against the saved config.
+   * Absent or false: form only. true: shown whenever condition() holds. A
+   * function: shown when both condition(ctx) and health(ctx) hold, for
+   * messages the form deliberately shows even when the feature is off.
+   */
+  health?: boolean | ((ctx: MessageConditionContext) => boolean);
 };
 
 /** Field-level conditional message, adds field targeting */

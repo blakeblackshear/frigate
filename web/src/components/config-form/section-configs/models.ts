@@ -35,6 +35,7 @@ const models: SectionConfigOverrides = {
       },
       {
         key: "model-input-dimensions-not-detect-resolution",
+        health: true,
         field: "height",
         position: "after",
         messageKey: "configMessages.model.inputDimensionsNotDetectResolution",

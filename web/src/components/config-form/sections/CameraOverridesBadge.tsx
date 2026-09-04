@@ -25,24 +25,7 @@ import {
   pathMatchesHiddenPattern,
 } from "@/utils/configUtil";
 import { useOverrideFieldLabel } from "./useOverrideFieldLabel";
-
-const CAMERA_PAGE_BY_SECTION: Record<string, string> = {
-  detect: "cameraDetect",
-  ffmpeg: "cameraFfmpeg",
-  record: "cameraRecording",
-  snapshots: "cameraSnapshots",
-  motion: "cameraMotion",
-  objects: "cameraObjects",
-  review: "cameraReview",
-  audio: "cameraAudioEvents",
-  audio_transcription: "cameraAudioTranscription",
-  notifications: "cameraNotifications",
-  live: "cameraLivePlayback",
-  birdseye: "cameraBirdseye",
-  face_recognition: "cameraFaceRecognition",
-  lpr: "cameraLpr",
-  timestamp_style: "cameraTimestampStyle",
-};
+import { CAMERA_PAGE_BY_SECTION } from "@/components/config-form/sectionPages";
 
 const MAX_FIELDS_PER_CAMERA = 5;
 
