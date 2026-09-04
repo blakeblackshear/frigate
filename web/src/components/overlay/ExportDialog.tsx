@@ -456,26 +456,37 @@ export function ExportContent({
   const cameraMenuRef = useRef<HTMLDivElement>(null);
   // the stream choice is only meaningful where a sub stream is recorded:
   // this camera on the single tab, any selected camera on the multi tab
-  const showStreamSelect = useMemo(() => {
+  const streamOptions = useMemo<ExportStreamSelection[]>(() => {
     if (!config) {
-      return false;
+      return [];
     }
 
     const subEnabled = (cameraId: string) =>
       config.cameras[cameraId]?.record.sub.enabled === true;
+    const cameras = activeTab === "multi" ? selectedCameraIds : [camera];
 
-    return activeTab === "multi"
-      ? selectedCameraIds.some(subEnabled)
-      : subEnabled(camera);
+    // no sub stream anywhere in the selection means there is no choice
+    if (!cameras.some(subEnabled)) {
+      return [];
+    }
+
+    // the pin applies to every item in a batch, so offering "sub" for a
+    // mixed selection would drop the cameras that cannot honor it. Main
+    // and auto are always exportable
+    return cameras.every(subEnabled)
+      ? ["auto", "main", "sub"]
+      : ["auto", "main"];
   }, [activeTab, camera, config, selectedCameraIds]);
 
-  // a pin left over from a camera that has no sub stream would silently
-  // change what the next export contains
+  const showStreamSelect = streamOptions.length > 0;
+
+  // a pin the current selection can no longer honor would silently change
+  // what the next export contains
   useEffect(() => {
-    if (!showStreamSelect && stream !== "auto") {
+    if (stream !== "auto" && !streamOptions.includes(stream)) {
       setStream("auto");
     }
-  }, [showStreamSelect, stream, setStream]);
+  }, [streamOptions, stream, setStream]);
 
   const streamSelect = (
     <div className="space-y-2">
@@ -488,7 +499,7 @@ export function ExportContent({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {(["auto", "main", "sub"] as const).map((option) => (
+          {streamOptions.map((option) => (
             <SelectItem key={option} value={option}>
               {t(`export.stream.${option}`)}
             </SelectItem>

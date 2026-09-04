@@ -1,3 +1,5 @@
+import os
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -539,6 +541,67 @@ class TestPinnedStream(unittest.TestCase):
 
         self.assertTrue(any("/vod/front/start/" in token for token in cmd))
         self.assertFalse(any("/vod/front/main/" in token for token in cmd))
+
+
+class TestStagedFileCleanup(unittest.TestCase):
+    """A staged path must be tracked before ffmpeg can write to it."""
+
+    def _exporter(self, tmpdir: str) -> RecordingExporter:
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+        exporter._staged_run_path = lambda index: os.path.join(  # type: ignore[method-assign]
+            tmpdir, f"export_stage_{index}.mp4"
+        )
+        return exporter
+
+    def test_partial_file_from_a_failed_run_is_removed(self) -> None:
+        # a killed ffmpeg (OOM, container stop) leaves whatever it muxed
+        with tempfile.TemporaryDirectory() as tmpdir:
+            exporter = self._exporter(tmpdir)
+            runs = [
+                StreamRun("main", 1_000, 1_020, "/m1.mp4"),
+                StreamRun("sub", 1_020, 1_040, "/s1.mp4"),
+            ]
+
+            def fake_run(cmd, **kwargs):
+                # ffmpeg opens its output before it fails
+                Path(cmd[-1]).write_bytes(b"partial")
+                return (-9, "Killed")
+
+            with patch(
+                "frigate.record.export.run_ffmpeg_with_progress", side_effect=fake_run
+            ):
+                self.assertFalse(exporter._stage_stream_runs(runs, {"h264"}, False))
+
+            self.assertEqual(os.listdir(tmpdir), [])
+            self.assertEqual(exporter.staged_runs, [])
+
+    def test_partial_file_from_a_later_run_is_removed(self) -> None:
+        """The failing run must not orphan the runs that already succeeded."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            exporter = self._exporter(tmpdir)
+            runs = [
+                StreamRun("main", 1_000, 1_020, "/m1.mp4"),
+                StreamRun("sub", 1_020, 1_040, "/s1.mp4"),
+            ]
+            calls = {"n": 0}
+
+            def fake_run(cmd, **kwargs):
+                Path(cmd[-1]).write_bytes(b"data")
+                calls["n"] += 1
+                return (0, "") if calls["n"] == 1 else (-9, "Killed")
+
+            with patch(
+                "frigate.record.export.run_ffmpeg_with_progress", side_effect=fake_run
+            ):
+                self.assertFalse(exporter._stage_stream_runs(runs, {"h264"}, False))
+
+            self.assertEqual(os.listdir(tmpdir), [])
 
 
 class TestStagingFailure(unittest.TestCase):

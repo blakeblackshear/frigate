@@ -650,6 +650,13 @@ class RecordingExporter(threading.Thread):
             weight = 100.0 * run.duration / total_duration
             base = 100.0 * completed / total_duration
 
+            # claim the path before ffmpeg can write to it. ffmpeg removes
+            # its own output on a clean error exit, but a killed one (OOM,
+            # container stop) leaves whatever it had already muxed, and a
+            # path that was never recorded is a partial file nothing
+            # deletes
+            self.staged_runs.append(dest)
+
             returncode, stderr = run_ffmpeg_with_progress(
                 self._stage_run_command(run, dest, target, keep_audio),
                 expected_duration_seconds=run.duration,
@@ -671,7 +678,6 @@ class RecordingExporter(threading.Thread):
                 self._cleanup_staged_runs()
                 return False
 
-            self.staged_runs.append(dest)
             completed += run.duration
 
         return True
