@@ -61,6 +61,40 @@ function toProblem(
  * resolved config. The rules stay in the section configs, so the settings
  * form and the Health tab can never disagree.
  */
+/**
+ * Whether a camera section still carries the global section's values. Only
+ * keys the global block sets count: the resolved global detect leaves width
+ * and height null while every camera has numbers, so a full JSON comparison
+ * would never match.
+ */
+function inheritsGlobal(
+  cameraSection: Record<string, unknown>,
+  globalSection: Record<string, unknown>,
+): boolean {
+  return Object.entries(globalSection).every(([key, globalValue]) => {
+    if (globalValue === null || globalValue === undefined) {
+      return true;
+    }
+
+    const cameraValue = cameraSection[key];
+
+    if (
+      typeof globalValue === "object" &&
+      !Array.isArray(globalValue) &&
+      typeof cameraValue === "object" &&
+      cameraValue !== null &&
+      !Array.isArray(cameraValue)
+    ) {
+      return inheritsGlobal(
+        cameraValue as Record<string, unknown>,
+        globalValue as Record<string, unknown>,
+      );
+    }
+
+    return JSON.stringify(cameraValue) === JSON.stringify(globalValue);
+  });
+}
+
 export function evaluateConfigHealth(
   config: FrigateConfig,
   t: TFunction,
@@ -115,7 +149,7 @@ export function evaluateConfigHealth(
               idSuffix,
               t,
             );
-            firedGlobally.add(`${section}:${message.key}:${problem.text}`);
+            firedGlobally.add(`${section}:${message.key}`);
             problems.push(problem);
           });
       });
@@ -124,9 +158,18 @@ export function evaluateConfigHealth(
     const cameraMessages = healthMessages(section, "camera");
 
     if (cameraMessages.length > 0) {
+      const globalSection = (record[section] ?? {}) as Record<string, unknown>;
+
       cameras.forEach((camera) => {
         const cameraRecord = camera as unknown as Record<string, unknown>;
         const sectionData = cameraRecord[section] ?? {};
+        // cameras inherit global values, so a problem the global row already
+        // states would repeat once per camera; a camera that overrides the
+        // section keeps its own row and link
+        const inherited = inheritsGlobal(
+          sectionData as Record<string, unknown>,
+          globalSection,
+        );
         const ctx: MessageConditionContext = {
           fullConfig: config,
           fullCameraConfig: camera,
@@ -147,10 +190,8 @@ export function evaluateConfigHealth(
               t,
             );
 
-            // cameras inherit global values, so a problem the global row
-            // already states word for word would repeat once per camera
             if (
-              !firedGlobally.has(`${section}:${message.key}:${problem.text}`)
+              !(inherited && firedGlobally.has(`${section}:${message.key}`))
             ) {
               problems.push(problem);
             }

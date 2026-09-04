@@ -211,20 +211,39 @@ test.describe("System — Health hardware pane @medium", () => {
     await expect(row).toContainText("hailo8l was not found on this system");
   });
 
-  test("detection row is unknown for a device the probe cannot enumerate", async ({
+  test("a generic device the probe cannot enumerate is judged by its runtime", async ({
     frigateApp,
   }) => {
     await frigateApp.installDefaults({
       config: { models: [{ scene: "all", devices: ["openvino:AUTO"] }] },
-      stats: QUIET_STATS,
+      stats: {
+        ...QUIET_STATS,
+        detectors: { "openvino:AUTO": { inference_speed: 12 } },
+      },
     });
     await frigateApp.goto("/system#health");
 
     const row = frigateApp.page.getByTestId("hardware-row-detection:0");
-    await expect(row).toHaveAttribute("data-state", "unknown", {
+    await expect(row).toHaveAttribute("data-state", "ok", {
       timeout: 15_000,
     });
-    await expect(row).toContainText("openvino:AUTO could not be verified");
+    await expect(row).toContainText("12 ms");
+  });
+
+  test("a bare onnx detector with no probed accelerator is not an error", async ({
+    frigateApp,
+  }) => {
+    // the default image runs onnx on the CPU and the probe reports nothing
+    await frigateApp.installDefaults({
+      config: { models: [{ scene: "all", devices: ["onnx"] }] },
+      stats: { ...QUIET_STATS, detectors: { onnx: { inference_speed: 40 } } },
+    });
+    await frigateApp.goto("/system#health");
+
+    const row = frigateApp.page.getByTestId("hardware-row-detection:0");
+    await expect(row).toHaveAttribute("data-state", "ok", {
+      timeout: 15_000,
+    });
   });
 
   test("detection row warns on slow inference", async ({ frigateApp }) => {
@@ -296,6 +315,27 @@ test.describe("System — Health hardware pane @medium", () => {
     await expect(row).toContainText(
       "Running on the CPU although an accelerator is available",
     );
+  });
+
+  test("explicit GPU that loaded on CUDA is ok despite the probe", async ({
+    frigateApp,
+  }) => {
+    // the fixture probes an Intel GPU only; ONNX Runtime still puts a GPU
+    // request on CUDA when that image has it
+    await frigateApp.installDefaults({
+      config: { face_recognition: { enabled: true, device: "GPU" } },
+      stats: {
+        ...QUIET_STATS,
+        embeddings: { devices: { face_recognition: "CUDA" } },
+      },
+    });
+    await frigateApp.goto("/system#health");
+
+    const row = frigateApp.page.getByTestId(
+      "hardware-row-enrichment:face_recognition",
+    );
+    await expect(row).toHaveAttribute("data-state", "ok", { timeout: 15_000 });
+    await expect(row).toContainText("CUDA");
   });
 
   test("explicit GPU falling back to CPU is an error", async ({
@@ -483,6 +523,37 @@ test.describe("System — Health notices sources @medium", () => {
     );
   });
 
+  test("a camera that overrides the global value keeps its own row", async ({
+    frigateApp,
+  }) => {
+    // two cameras inherit the global size and are folded into the global
+    // row; the one that overrides it keeps a row with its own link
+    const size = { width: 2560, height: 1440 };
+    await frigateApp.installDefaults({
+      config: {
+        detect: size,
+        cameras: {
+          front_door: { detect: size },
+          backyard: { detect: size },
+          garage: { detect: { width: 3840, height: 2160 } },
+        },
+      },
+      stats: QUIET_STATS,
+    });
+    await frigateApp.goto("/system#health");
+
+    const rows = frigateApp.page.locator(
+      "[data-testid^='health-problem-config:detect:detect-resolution-high']",
+    );
+    await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+    await expect(rows).toHaveCount(2);
+    await expect(
+      frigateApp.page.getByTestId(
+        "health-problem-config:detect:detect-resolution-high:garage",
+      ),
+    ).toBeVisible();
+  });
+
   test("registry rows sort ahead of live rows and keep Dismiss", async ({
     frigateApp,
   }) => {
@@ -533,6 +604,17 @@ test.describe("System — Health notices sources @medium", () => {
     frigateApp,
   }) => {
     await frigateApp.installDefaults({
+      // the default record preset transcodes to AAC, so the codec only
+      // matters for a camera that copies audio through
+      config: {
+        cameras: {
+          backyard: {
+            ffmpeg: {
+              output_args: { record: "preset-record-generic-audio-copy" },
+            },
+          },
+        },
+      },
       ffprobe: {
         backyard: [
           {
@@ -554,7 +636,11 @@ test.describe("System — Health notices sources @medium", () => {
         garage: [
           {
             return_code: 1,
-            stderr: ["Connection refused", "more"],
+            // the backend sends every line; the tab shows the last one
+            stderr: [
+              "[tcp @ 0x1] Connection to tcp://10.0.0.3:554 failed",
+              "Connection refused",
+            ],
             stdout: "",
           },
         ],
@@ -591,6 +677,79 @@ test.describe("System — Health notices sources @medium", () => {
     ).toBeVisible();
     // axios leaves ":" unescaped in query strings
     expect(requests.filter((u) => u.includes("paths=camera:")).length).toBe(3);
+  });
+
+  test("non-AAC audio is fine when recordings transcode to AAC", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults({
+      ffprobe: {
+        backyard: [
+          {
+            return_code: 0,
+            stderr: "",
+            stdout: {
+              streams: [
+                {
+                  codec_type: "video",
+                  codec_name: "h264",
+                  width: 1920,
+                  height: 1080,
+                },
+                { codec_type: "audio", codec_name: "pcm_mulaw" },
+              ],
+            },
+          },
+        ],
+      },
+      stats: QUIET_STATS,
+    });
+    await frigateApp.goto("/system#health");
+
+    await frigateApp.page
+      .getByRole("button", { name: "Run stream checks" })
+      .click();
+
+    await expect(frigateApp.page.getByText(/^Checked/)).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(
+      frigateApp.page.getByText("The AAC audio codec is required"),
+    ).toHaveCount(0);
+  });
+
+  test("wizard-only Reolink advice stays off the tab", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults({
+      config: {
+        cameras: {
+          front_door: {
+            ffmpeg: {
+              inputs: [
+                {
+                  path: "rtsp://10.0.0.1:554/h264Preview_01_main",
+                  roles: ["detect", "record"],
+                },
+              ],
+            },
+          },
+        },
+      },
+      stats: QUIET_STATS,
+    });
+    await frigateApp.goto("/system#health");
+
+    await frigateApp.page
+      .getByRole("button", { name: "Run stream checks" })
+      .click();
+
+    await expect(frigateApp.page.getByText(/^Checked/)).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(
+      frigateApp.page.getByText("Reolink RTSP is not recommended"),
+    ).toHaveCount(0);
   });
 
   test("re-check re-probes the hardware and dates the probe", async ({

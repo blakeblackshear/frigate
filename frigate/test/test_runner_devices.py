@@ -1,5 +1,6 @@
 """Tests for the device each model runner reports after loading."""
 
+import threading
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -11,6 +12,8 @@ from frigate.detectors.detection_runners import (
     RKNNModelRunner,
     get_optimized_runner,
     loaded_devices,
+    record_loaded_device,
+    snapshot_loaded_devices,
 )
 
 
@@ -91,3 +94,38 @@ class TestLoadRegistry(unittest.TestCase):
 
         self.assertIsInstance(runner, ONNXModelRunner)
         self.assertEqual(loaded_devices["/models/arcface.onnx"], ("arcface", "CPU"))
+
+
+class TestLoadedDeviceSnapshot(unittest.TestCase):
+    def setUp(self):
+        loaded_devices.clear()
+
+    def test_record_and_snapshot_copy(self):
+        record_loaded_device("/m/a.onnx", "arcface", "CUDA")
+
+        snapshot = snapshot_loaded_devices()
+        self.assertEqual(snapshot, {"/m/a.onnx": ("arcface", "CUDA")})
+
+        # a copy, so a load on another thread cannot disturb a fold in progress
+        record_loaded_device("/m/b.onnx", "jina_v1", "CPU")
+        self.assertNotIn("/m/b.onnx", snapshot)
+        self.assertIn("/m/b.onnx", loaded_devices)
+
+    def test_snapshot_survives_concurrent_inserts(self):
+        stop = threading.Event()
+
+        def writer() -> None:
+            i = 0
+            while not stop.is_set():
+                record_loaded_device(f"/m/{i}.onnx", "paddleocr", "CPU")
+                i += 1
+
+        thread = threading.Thread(target=writer, daemon=True)
+        thread.start()
+        try:
+            for _ in range(200):
+                for _entry in snapshot_loaded_devices().values():
+                    pass
+        finally:
+            stop.set()
+            thread.join(timeout=5)

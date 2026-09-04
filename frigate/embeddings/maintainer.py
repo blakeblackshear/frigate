@@ -60,7 +60,7 @@ from frigate.data_processing.real_time.license_plate import (
 )
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.detectors.detection_runners import loaded_devices
+from frigate.detectors.detection_runners import snapshot_loaded_devices
 from frigate.embeddings.types import fold_runtime_devices
 from frigate.events.types import (
     EventStateEnum,
@@ -748,7 +748,9 @@ class EmbeddingMaintainer(threading.Thread):
         Runs every loop iteration, so only changed entries cross the manager
         boundary.
         """
-        for enrichment, device in fold_runtime_devices(loaded_devices).items():
+        for enrichment, device in fold_runtime_devices(
+            snapshot_loaded_devices()
+        ).items():
             if self._published_devices.get(enrichment) != device:
                 self.metrics.runtime_devices[enrichment] = device
                 self._published_devices[enrichment] = device

@@ -33,9 +33,18 @@ export type FfprobeEntry = {
   stderr?: string | string[];
 };
 
-function firstLine(stderr: string | string[] | undefined): string {
-  const text = Array.isArray(stderr) ? stderr[0] : stderr?.split("\n")[0];
+function errorText(stderr: string | string[] | undefined): string {
+  const text = Array.isArray(stderr) ? stderr.join("\n") : stderr;
   return text?.trim() || "Unknown error";
+}
+
+/** The human-readable end of an ffprobe error; the first lines are plumbing. */
+export function lastErrorLine(error: string | undefined): string {
+  const lines = (error ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return lines[lines.length - 1] ?? "";
 }
 
 /** Parse one entry of the ffprobe API response the way the wizard does. */
@@ -43,7 +52,7 @@ export function ffprobeToTestResult(
   entry: FfprobeEntry | undefined,
 ): TestResult {
   if (!entry || entry.return_code !== 0 || typeof entry.stdout !== "object") {
-    return { success: false, error: firstLine(entry?.stderr) };
+    return { success: false, error: errorText(entry?.stderr) };
   }
 
   const streams = entry.stdout?.streams ?? [];

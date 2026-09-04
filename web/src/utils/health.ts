@@ -65,6 +65,9 @@ export const PROBED_DETECTORS = new Set([
   "synaptics",
 ]);
 
+/** detectors that fall back to the CPU when no accelerator is present */
+const CPU_FALLBACK_DETECTORS = new Set(["onnx", "openvino"]);
+
 export type DevicePresence = "present" | "unverified" | "absent";
 
 /**
@@ -89,12 +92,17 @@ export function devicePresence(
   }
 
   const entries = hardware.filter((entry) => entry.detector === detector);
+  const generic = devicePart === "" || devicePart.toUpperCase() === "AUTO";
 
   if (entries.length === 0) {
-    return "absent";
+    // a bare onnx or openvino runs on the CPU when nothing is attached, so
+    // an empty probe is not proof of missing hardware for those
+    return generic && CPU_FALLBACK_DETECTORS.has(detector)
+      ? "unverified"
+      : "absent";
   }
 
-  if (devicePart === "") {
+  if (generic) {
     return "present";
   }
 
@@ -168,22 +176,8 @@ export function detectionRows({
         };
       }
 
-      const unverified = [...presence]
-        .filter(([, state]) => state === "unverified")
-        .map(([device]) => device);
-
-      if (unverified.length > 0) {
-        return {
-          id,
-          state: "unknown",
-          label,
-          detail,
-          message: t("health.hardware.deviceNotVerified", {
-            ns: "views/system",
-            devices: unverified.join(", "),
-          }),
-        };
-      }
+      // unverified devices are skipped by the presence rule; the runtime
+      // rules below still decide the row
     }
 
     if (startup || !stats) {
@@ -489,7 +483,13 @@ export function acceleratorKeysFor(
     return ANY_ACCELERATOR;
   }
 
-  if (/^GPU(\.\d+)?$/.test(upper)) {
+  // ONNX Runtime puts a plain GPU request on whichever GPU it has; only an
+  // indexed GPU.n names OpenVINO specifically
+  if (upper === "GPU") {
+    return ["openvino:GPU", "onnx:nvidia", "onnx:amd"];
+  }
+
+  if (/^GPU\.\d+$/.test(upper)) {
     return ["openvino:GPU"];
   }
 
@@ -645,6 +645,16 @@ export function enrichmentRows({
       }
 
       const present = acceleratorPresent(hardware, keys);
+      const runtime = startup
+        ? undefined
+        : stats?.embeddings?.devices?.[spec.id];
+      const runtimeIsCpu = !!runtime && runtime.toUpperCase().includes("CPU");
+
+      // a model that reports an accelerator is proof enough, whatever the
+      // probe keys say
+      if (runtime && !runtimeIsCpu) {
+        return { id, state: "ok", label, detail: runtime };
+      }
 
       if (
         spec.explicit &&
@@ -667,9 +677,7 @@ export function enrichmentRows({
         return { id, state: "ok", label, detail: spec.requested };
       }
 
-      const runtime = stats?.embeddings?.devices?.[spec.id];
-
-      if (startup || !runtime) {
+      if (!runtime) {
         return {
           id,
           state: "unknown",
@@ -679,8 +687,6 @@ export function enrichmentRows({
           }),
         };
       }
-
-      const runtimeIsCpu = runtime.toUpperCase().includes("CPU");
 
       if (
         runtimeIsCpu &&

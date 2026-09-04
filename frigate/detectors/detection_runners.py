@@ -19,8 +19,26 @@ logger = logging.getLogger(__name__)
 _OPENVINO_LOCK = threading.Lock()
 
 # model file path -> (model type, device the runner actually loaded on); the
-# embeddings maintainer folds this per enrichment for the stats endpoint
+# embeddings maintainer folds this per enrichment for the stats endpoint.
+# Models load on several threads (reindex, lazy first use), so writes and
+# snapshots go through the lock.
 loaded_devices: dict[str, tuple[str, str]] = {}
+_loaded_devices_lock = threading.Lock()
+
+
+def record_loaded_device(model_path: str, model_type: str, device: str) -> None:
+    """Record the device a model loaded on, for the enrichment stats."""
+    with _loaded_devices_lock:
+        loaded_devices[model_path] = (model_type, device)
+
+    logger.info("Loaded %s model on %s", model_type, device)
+
+
+def snapshot_loaded_devices() -> dict[str, tuple[str, str]]:
+    """A copy that is safe to iterate while other threads load models."""
+    with _loaded_devices_lock:
+        return dict(loaded_devices)
+
 
 _PROVIDER_LABELS = {
     "CUDAExecutionProvider": "CUDA",
@@ -644,8 +662,7 @@ def _record_runner(
     model_path: str, model_type: str, runner: BaseModelRunner
 ) -> BaseModelRunner:
     """Record the device a freshly loaded runner ended up on."""
-    loaded_devices[model_path] = (model_type, runner.device_name)
-    logger.info("Loaded %s model on %s", model_type, runner.device_name)
+    record_loaded_device(model_path, model_type, runner.device_name)
     return runner
 
 

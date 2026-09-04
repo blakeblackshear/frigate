@@ -57,7 +57,6 @@
       "probeUnavailable": "Hardware detection is unavailable",
       "justStarted": "Frigate just started",
       "deviceNotFound": "{{devices}} was not found on this system",
-      "deviceNotVerified": "{{devices}} could not be verified against the hardware probe",
       "detectorNotRunning": "Detector process is not running",
       "inferenceVerySlow": "Inference is very slow ({{speed}} ms)",
       "inferenceSlow": "Inference is slow ({{speed}} ms)",
