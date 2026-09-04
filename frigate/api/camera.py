@@ -302,7 +302,9 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
                     stderr_decoded = str(ffprobe.stderr)
 
             stderr_lines = [
-                line.strip() for line in stderr_decoded.split("\n") if line.strip()
+                clean_camera_user_pass(line.strip())
+                for line in stderr_decoded.split("\n")
+                if line.strip()
             ]
 
             result = {

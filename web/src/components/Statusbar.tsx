@@ -187,10 +187,20 @@ export default function Statusbar() {
       </div>
       <div className="no-scrollbar flex h-full max-w-[50%] items-center gap-2 overflow-x-auto">
         {Object.entries(messages).length === 0 ? (
-          <div className="flex items-center gap-2 text-sm">
-            <FaCheck className="size-3 text-green-500" />
-            {t("stats.healthy")}
-          </div>
+          isAdmin ? (
+            <Link
+              to="/system#health"
+              className="flex items-center gap-2 text-sm"
+            >
+              <FaCheck className="size-3 text-green-500" />
+              {t("stats.healthy")}
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2 text-sm">
+              <FaCheck className="size-3 text-green-500" />
+              {t("stats.healthy")}
+            </div>
+          )
         ) : (
           Object.entries(messages).map(([key, messageArray]) => (
             <div key={key} className="flex h-full items-center gap-2">

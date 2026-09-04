@@ -7,6 +7,7 @@ const lpr: SectionConfigOverrides = {
     messages: [
       {
         key: "global-disabled",
+        health: (ctx) => ctx.fullCameraConfig?.lpr?.enabled === true,
         messageKey: "configMessages.lpr.globalDisabled",
         severity: "warning",
         condition: (ctx) => {
@@ -16,6 +17,9 @@ const lpr: SectionConfigOverrides = {
       },
       {
         key: "vehicle-not-tracked",
+        health: (ctx) =>
+          ctx.fullCameraConfig?.lpr?.enabled === true &&
+          ctx.fullConfig.lpr?.enabled === true,
         messageKey: "configMessages.lpr.vehicleNotTracked",
         severity: "info",
         condition: (ctx) => {

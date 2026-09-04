@@ -136,6 +136,86 @@ def get_detector_stats(
     return detector_stats
 
 
+def embeddings_stats(
+    config: FrigateConfig, embeddings_metrics: DataProcessorMetrics | None
+) -> dict[str, Any]:
+    """Enrichment speed metrics plus the device each enrichment loaded on."""
+    stats: dict[str, Any] = {}
+
+    if not embeddings_metrics:
+        return stats
+
+    # Add metrics based on what's enabled
+    if config.semantic_search.enabled:
+        stats.update(
+            {
+                "image_embedding_speed": round(
+                    embeddings_metrics.image_embeddings_speed.value * 1000, 2
+                ),
+                "image_embedding": round(
+                    embeddings_metrics.image_embeddings_eps.value, 2
+                ),
+                "text_embedding_speed": round(
+                    embeddings_metrics.text_embeddings_speed.value * 1000, 2
+                ),
+                "text_embedding": round(
+                    embeddings_metrics.text_embeddings_eps.value, 2
+                ),
+            }
+        )
+
+    if config.face_recognition.enabled:
+        stats["face_recognition_speed"] = round(
+            embeddings_metrics.face_rec_speed.value * 1000, 2
+        )
+        stats["face_recognition"] = round(embeddings_metrics.face_rec_fps.value, 2)
+
+    if config.lpr.enabled:
+        stats["plate_recognition_speed"] = round(
+            embeddings_metrics.alpr_speed.value * 1000, 2
+        )
+        stats["plate_recognition"] = round(embeddings_metrics.alpr_pps.value, 2)
+
+        if embeddings_metrics.yolov9_lpr_pps.value > 0.0:
+            stats["yolov9_plate_detection_speed"] = round(
+                embeddings_metrics.yolov9_lpr_speed.value * 1000, 2
+            )
+            stats["yolov9_plate_detection"] = round(
+                embeddings_metrics.yolov9_lpr_pps.value, 2
+            )
+
+    if embeddings_metrics.review_desc_speed.value > 0.0:
+        stats["review_description_speed"] = round(
+            embeddings_metrics.review_desc_speed.value * 1000, 2
+        )
+        stats["review_description_events_per_second"] = round(
+            embeddings_metrics.review_desc_dps.value, 2
+        )
+
+    if embeddings_metrics.object_desc_speed.value > 0.0:
+        stats["object_description_speed"] = round(
+            embeddings_metrics.object_desc_speed.value * 1000, 2
+        )
+        stats["object_description_events_per_second"] = round(
+            embeddings_metrics.object_desc_dps.value, 2
+        )
+
+    for key in embeddings_metrics.classification_speeds.keys():
+        stats[f"{key}_classification_speed"] = round(
+            embeddings_metrics.classification_speeds[key].value * 1000, 2
+        )
+        stats[f"{key}_classification_events_per_second"] = round(
+            embeddings_metrics.classification_cps[key].value, 2
+        )
+
+    devices = dict(embeddings_metrics.runtime_devices)
+
+    if devices:
+        stats["devices"] = devices
+
+    return stats
+
+
 def stats_snapshot(
     config: FrigateConfig,
     stats_tracking: StatsTrackingTypes,
@@ -209,78 +289,9 @@ def stats_snapshot(
     stats["skipped_fps"] = round(total_skipped_fps, 2)
     stats["detection_fps"] = round(total_detection_fps, 2)
 
-    stats["embeddings"] = {}
-
-    # Get metrics if available
-    embeddings_metrics = stats_tracking.get("embeddings_metrics")
-
-    if embeddings_metrics:
-        # Add metrics based on what's enabled
-        if config.semantic_search.enabled:
-            stats["embeddings"].update(
-                {
-                    "image_embedding_speed": round(
-                        embeddings_metrics.image_embeddings_speed.value * 1000, 2
-                    ),
-                    "image_embedding": round(
-                        embeddings_metrics.image_embeddings_eps.value, 2
-                    ),
-                    "text_embedding_speed": round(
-                        embeddings_metrics.text_embeddings_speed.value * 1000, 2
-                    ),
-                    "text_embedding": round(
-                        embeddings_metrics.text_embeddings_eps.value, 2
-                    ),
-                }
-            )
-
-        if config.face_recognition.enabled:
-            stats["embeddings"]["face_recognition_speed"] = round(
-                embeddings_metrics.face_rec_speed.value * 1000, 2
-            )
-            stats["embeddings"]["face_recognition"] = round(
-                embeddings_metrics.face_rec_fps.value, 2
-            )
-
-        if config.lpr.enabled:
-            stats["embeddings"]["plate_recognition_speed"] = round(
-                embeddings_metrics.alpr_speed.value * 1000, 2
-            )
-            stats["embeddings"]["plate_recognition"] = round(
-                embeddings_metrics.alpr_pps.value, 2
-            )
-
-            if embeddings_metrics.yolov9_lpr_pps.value > 0.0:
-                stats["embeddings"]["yolov9_plate_detection_speed"] = round(
-                    embeddings_metrics.yolov9_lpr_speed.value * 1000, 2
-                )
-                stats["embeddings"]["yolov9_plate_detection"] = round(
-                    embeddings_metrics.yolov9_lpr_pps.value, 2
-                )
-
-        if embeddings_metrics.review_desc_speed.value > 0.0:
-            stats["embeddings"]["review_description_speed"] = round(
-                embeddings_metrics.review_desc_speed.value * 1000, 2
-            )
-            stats["embeddings"]["review_description_events_per_second"] = round(
-                embeddings_metrics.review_desc_dps.value, 2
-            )
-
-        if embeddings_metrics.object_desc_speed.value > 0.0:
-            stats["embeddings"]["object_description_speed"] = round(
-                embeddings_metrics.object_desc_speed.value * 1000, 2
-            )
-            stats["embeddings"]["object_description_events_per_second"] = round(
-                embeddings_metrics.object_desc_dps.value, 2
-            )
-
-        for key in embeddings_metrics.classification_speeds.keys():
-            stats["embeddings"][f"{key}_classification_speed"] = round(
-                embeddings_metrics.classification_speeds[key].value * 1000, 2
-            )
-            stats["embeddings"][f"{key}_classification_events_per_second"] = round(
-                embeddings_metrics.classification_cps[key].value, 2
-            )
+    stats["embeddings"] = embeddings_stats(
+        config, stats_tracking.get("embeddings_metrics")
+    )
 
     hardware_stats.update_stats(stats)
 

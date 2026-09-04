@@ -100,3 +100,58 @@ class TestModelDownloadNotice(unittest.TestCase):
             [n["scope"] for n in self._notice_calls(sibling.requestor)],
             ["paddleocr-onnx/det.onnx"],
         )
+
+
+class TestModelDownloadState(unittest.TestCase):
+    """A failed download marks the model state as error, not stuck downloading."""
+
+    def setUp(self):
+        self.download_path = tempfile.mkdtemp()
+        downloader.last_download_error.clear()
+
+    def _state_calls(self, requestor: MagicMock) -> list[dict]:
+        return [
+            call.args[1]
+            for call in requestor.send_data.call_args_list
+            if call.args[0] == "update_model_state"
+        ]
+
+    def _downloader(self, download_func) -> ModelDownloader:
+        with patch("frigate.util.downloader.InterProcessRequestor"):
+            return ModelDownloader(
+                "facedet", self.download_path, ["facedet.onnx"], download_func
+            )
+
+    def test_raising_download_marks_error(self):
+        def failing(path: str) -> None:
+            raise RuntimeError("boom")
+
+        model_downloader = self._downloader(failing)
+
+        with self.assertRaises(RuntimeError):
+            model_downloader._download_models()
+
+        states = self._state_calls(model_downloader.requestor)
+        self.assertEqual(states[-1]["state"], "error")
+        self.assertEqual(states[-1]["model"], "facedet-facedet.onnx")
+
+    def test_missing_file_marks_error(self):
+        def swallowing(path: str) -> None:
+            pass
+
+        model_downloader = self._downloader(swallowing)
+        model_downloader._download_models()
+
+        states = self._state_calls(model_downloader.requestor)
+        self.assertEqual([s["state"] for s in states], ["error"])
+
+    def test_success_marks_downloaded(self):
+        def succeeding(path: str) -> None:
+            with open(path, "w") as f:
+                f.write("model")
+
+        model_downloader = self._downloader(succeeding)
+        model_downloader._download_models()
+
+        states = self._state_calls(model_downloader.requestor)
+        self.assertEqual([s["state"] for s in states], ["downloaded"])

@@ -85,6 +85,12 @@ class ModelDownloader:
             },
         )
 
+    def _send_state(self, file_name: str, state: ModelStatusTypesEnum) -> None:
+        self.requestor.send_data(
+            UPDATE_MODEL_STATE,
+            {"model": f"{self.model_name}-{file_name}", "state": state},
+        )
+
     def _download_models(self):
         for file_name in self.file_names:
             path = os.path.join(self.download_path, file_name)
@@ -98,6 +104,7 @@ class ModelDownloader:
                             self.download_func(path)
                         except Exception as e:
                             self._report_failure(file_name, _first_line(e))
+                            self._send_state(file_name, ModelStatusTypesEnum.error)
                             raise
 
                         if not os.path.exists(path):
@@ -105,16 +112,11 @@ class ModelDownloader:
                                 file_name,
                                 last_download_error.pop(path, "download failed"),
                             )
+                            self._send_state(file_name, ModelStatusTypesEnum.error)
                             continue
 
             self._resolve_failure(file_name)
-            self.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file_name}",
-                    "state": ModelStatusTypesEnum.downloaded,
-                },
-            )
+            self._send_state(file_name, ModelStatusTypesEnum.downloaded)
 
         if self.complete_func:
             self.complete_func()

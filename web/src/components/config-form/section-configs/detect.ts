@@ -15,6 +15,7 @@ const detect: SectionConfigOverrides = {
     fieldMessages: [
       {
         key: "detect-resolution-not-multiple-of-four",
+        health: true,
         field: "width",
         position: "before",
         messageKey: "configMessages.detect.resolutionShouldBeMultipleOfFour",
@@ -46,6 +47,7 @@ const detect: SectionConfigOverrides = {
       },
       {
         key: "detect-resolution-high",
+        health: true,
         field: "width",
         position: "before",
         messageKey: "configMessages.detect.resolutionHigh",
@@ -61,6 +63,7 @@ const detect: SectionConfigOverrides = {
       },
       {
         key: "detect-square-resolution",
+        health: true,
         field: "width",
         position: "before",
         messageKey: "configMessages.detect.squareResolution",
@@ -112,6 +115,7 @@ const detect: SectionConfigOverrides = {
       },
       {
         key: "detect-scene-without-model",
+        health: true,
         field: "scene",
         position: "after",
         messageKey: "configMessages.detect.sceneWithoutModel",
@@ -127,6 +131,7 @@ const detect: SectionConfigOverrides = {
       },
       {
         key: "fps-greater-than-five",
+        health: true,
         field: "fps",
         messageKey: "configMessages.detect.fpsGreaterThanFive",
         severity: "info",
