@@ -302,7 +302,6 @@ class RecordingExporter(threading.Thread):
         self.chapters = chapters
         self.on_progress = on_progress
         self.staged_runs: list[str] = []
-        self.staged_transcode = False
         self._coverage: tuple[list[list[Any]], set[str], bool] | None = None
 
         # ensure export thumb dir
@@ -398,12 +397,13 @@ class RecordingExporter(threading.Thread):
     def _merged_spans(self) -> list[list[Any]]:
         return self._resolve_coverage()[0]
 
-    def _prepare_stream_runs(self, use_hwaccel: bool = True) -> None:
+    def _prepare_stream_runs(self) -> bool:
         """Stage each stream run to a temp file when the range spans more than one.
 
         Leaves ``staged_runs`` empty for a single-stream range, which is
         the overwhelmingly common case and keeps the existing
-        single-playlist path byte for byte what it was.
+        single-playlist path byte for byte what it was. Returns False only
+        when staging was needed and failed.
         """
         spans, codecs, keep_audio = self._resolve_coverage()
         runs = self._stream_runs(spans)
@@ -411,10 +411,10 @@ class RecordingExporter(threading.Thread):
         # a range one stream covers end to end has nothing to hand off,
         # so it stays on the existing path however long it is
         if len(runs) < 2:
-            return
+            return True
 
         runs = [piece for run in runs for piece in self._split_long_run(run)]
-        self._stage_stream_runs(runs, codecs, keep_audio, use_hwaccel)
+        return self._stage_stream_runs(runs, codecs, keep_audio)
 
     def _stream_runs(self, spans: list[list[Any]]) -> list[StreamRun]:
         """Collapse the merged spans into contiguous runs of one stream type.
@@ -506,7 +506,6 @@ class RecordingExporter(threading.Thread):
         dest: str,
         target: tuple[int, int] | None,
         keep_audio: bool,
-        use_hwaccel: bool,
     ) -> list[str]:
         """Build the ffmpeg command that renders one run to a temp file.
 
@@ -520,7 +519,9 @@ class RecordingExporter(threading.Thread):
             f"-i {self._vod_url(run.stream_type, run.start_time, run.end_time)}"
         )
         # audio only survives when both streams agree on it, otherwise the
-        # copied track breaks at the same hand-off the video used to
+        # copied track breaks at the same hand-off the video used to. These
+        # are output options: "-c:a copy" ahead of -i selects a *decoder*
+        # named copy, which does not exist
         audio_args = "-c:a copy" if keep_audio else "-an"
 
         if target is None:
@@ -538,16 +539,18 @@ class RecordingExporter(threading.Thread):
             f"scale={width}:{height}:force_original_aspect_ratio=decrease,"
             f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,setsar=1"
         )
-        hwaccel_args = (
-            self.config.cameras[self.camera].record.export.hwaccel_args
-            if use_hwaccel
-            else None
-        )
+        # deliberately software-encoded. The vaapi and nvidia encode presets
+        # set -hwaccel_output_format, which leaves decoded frames in GPU
+        # memory where scale/pad cannot reach them; making this pass use the
+        # GPU means per-preset hwdownload/hwupload chains (see the birdseye
+        # vaapi preset). Codec-mixed ranges are rare enough to eat the CPU
+        # cost rather than ship an untested filter graph
         return parse_preset_hardware_acceleration_encode(
             self.config.ffmpeg.ffmpeg_path,
-            hwaccel_args,
-            f"{audio_args} {ffmpeg_input}",
-            f"-vf {scale} -video_track_timescale {EXPORT_TRACK_TIMESCALE} {dest}",
+            None,
+            ffmpeg_input,
+            f"{audio_args} -vf {scale} "
+            f"-video_track_timescale {EXPORT_TRACK_TIMESCALE} {dest}",
             EncodeTypeEnum.timelapse,
         ).split(" ")
 
@@ -556,8 +559,7 @@ class RecordingExporter(threading.Thread):
         runs: list[StreamRun],
         codecs: set[str],
         keep_audio: bool,
-        use_hwaccel: bool = True,
-    ) -> list[str] | None:
+    ) -> bool:
         """Render each run to its own temp file, one stream type at a time.
 
         This is what makes a mixed-resolution export work. Handing the
@@ -572,8 +574,9 @@ class RecordingExporter(threading.Thread):
         sets, and the mp4 muxer writes them in-band at the hand-off, so
         the concatenated result decodes cleanly without re-encoding.
 
-        Returns ``None`` when staging is unnecessary or fails, leaving the
-        caller on the single-playlist path.
+        Returns False when staging failed. The caller must abort rather
+        than fall back to the merged playlist, which is the very thing
+        that produces the broken file.
         """
         target: tuple[int, int] | None = None
 
@@ -590,11 +593,11 @@ class RecordingExporter(threading.Thread):
             if not sizes:
                 logger.error(
                     "Export %s spans video codecs %s but no run could be probed "
-                    "for its resolution; falling back to a single-stream export",
+                    "for its resolution",
                     self.export_id,
                     sorted(codecs),
                 )
-                return None
+                return False
 
             target = (max(s[0] for s in sizes), max(s[1] for s in sizes))
             logger.info(
@@ -613,7 +616,6 @@ class RecordingExporter(threading.Thread):
 
         total_duration = sum(run.duration for run in runs) or 1.0
         step = "encoding" if target is not None else "copying"
-        self.staged_transcode = target is not None
         completed = 0.0
 
         for index, run in enumerate(runs):
@@ -622,7 +624,7 @@ class RecordingExporter(threading.Thread):
             base = 100.0 * completed / total_duration
 
             returncode, stderr = run_ffmpeg_with_progress(
-                self._stage_run_command(run, dest, target, keep_audio, use_hwaccel),
+                self._stage_run_command(run, dest, target, keep_audio),
                 expected_duration_seconds=run.duration,
                 on_progress=lambda percent, base=base, weight=weight: (
                     self._emit_progress(step, base + (percent / 100.0) * weight)
@@ -640,12 +642,12 @@ class RecordingExporter(threading.Thread):
                 )
                 logger.error(stderr)
                 self._cleanup_staged_runs()
-                return None
+                return False
 
             self.staged_runs.append(dest)
             completed += run.duration
 
-        return self.staged_runs
+        return True
 
     def _cleanup_staged_runs(self) -> None:
         """Remove any temp files left behind by staging."""
@@ -1345,10 +1347,25 @@ class RecordingExporter(threading.Thread):
             # survive a failure the way the small chapter file could
             self._cleanup_staged_runs()
 
+    def _discard_failed_export(self, video_path: str, thumb_path: str) -> None:
+        """Drop the partial output and the row that promised it."""
+        Path(video_path).unlink(missing_ok=True)
+        Export.delete().where(Export.id == self.export_id).execute()
+        Path(thumb_path).unlink(missing_ok=True)
+
     def _run_export(self, video_path: str, thumb_path: str) -> None:
         try:
             if self.playback_source == PlaybackSourceEnum.recordings:
-                self._prepare_stream_runs()
+                if not self._prepare_stream_runs():
+                    # the merged playlist is what staging exists to avoid;
+                    # falling back to it would hand the user a file whose
+                    # sub-resolution stretches are frozen
+                    logger.error(
+                        "Failed to stage stream runs for export %s", self.export_id
+                    )
+                    self._discard_failed_export(video_path, thumb_path)
+                    return
+
                 ffmpeg_cmd, playlist_lines = self.get_record_export_command(video_path)
             else:
                 ffmpeg_cmd, playlist_lines = self.get_preview_export_command(video_path)
@@ -1385,10 +1402,9 @@ class RecordingExporter(threading.Thread):
             )
 
             if self.playback_source == PlaybackSourceEnum.recordings:
-                if self.staged_transcode:
-                    self._cleanup_staged_runs()
-                    self._prepare_stream_runs(use_hwaccel=False)
-
+                # staged runs are always software-encoded, so there is no
+                # hwaccel in them to fall back from; only the merge pass
+                # is rebuilt here
                 ffmpeg_cmd, playlist_lines = self.get_record_export_command(
                     video_path, use_hwaccel=False
                 )
@@ -1408,9 +1424,7 @@ class RecordingExporter(threading.Thread):
                 f"Failed to export {self.playback_source.value} for command {' '.join(ffmpeg_cmd)}"
             )
             logger.error(stderr)
-            Path(video_path).unlink(missing_ok=True)
-            Export.delete().where(Export.id == self.export_id).execute()
-            Path(thumb_path).unlink(missing_ok=True)
+            self._discard_failed_export(video_path, thumb_path)
             return
         else:
             chown_to_runtime(video_path)

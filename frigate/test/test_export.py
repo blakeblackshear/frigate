@@ -357,7 +357,7 @@ class TestStageRunCommand(unittest.TestCase):
         # the merged /vod route is exactly what breaks: ffmpeg binds the
         # track's parameter sets from the first init segment only
         exporter = _make_exporter([], {"h264"})
-        cmd = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, False, True)
+        cmd = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, False)
 
         self.assertIn(
             "http://127.0.0.1:5000/vod/front/sub/start/1020.0/end/1040.0/index.m3u8",
@@ -367,7 +367,7 @@ class TestStageRunCommand(unittest.TestCase):
     def test_copy_forces_a_common_track_timescale(self) -> None:
         # without this a 5fps sub run is replayed at the main stream's rate
         exporter = _make_exporter([], {"h264"})
-        cmd = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, False, True)
+        cmd = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, False)
 
         self.assertEqual(
             cmd[cmd.index("-video_track_timescale") + 1], str(EXPORT_TRACK_TIMESCALE)
@@ -378,19 +378,42 @@ class TestStageRunCommand(unittest.TestCase):
     def test_audio_is_dropped_unless_both_streams_agree(self) -> None:
         exporter = _make_exporter([], {"h264"})
 
-        dropped = exporter._stage_run_command(
-            self._run(), "/tmp/s.mp4", None, False, True
-        )
-        kept = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, True, True)
+        dropped = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, False)
+        kept = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, True)
 
         self.assertIn("-an", dropped)
         self.assertNotIn("-an", kept)
         self.assertIn("-c:a", kept)
 
+    def test_audio_codec_is_an_output_option(self) -> None:
+        """ "-c:a copy" ahead of -i selects a decoder named copy, which errors."""
+        exporter = _make_exporter([], {"h264", "h265"})
+
+        for target in (None, (1920, 1080)):
+            cmd = exporter._stage_run_command(self._run(), "/tmp/s.mp4", target, True)
+            self.assertGreater(
+                cmd.index("-c:a"),
+                cmd.index("-i"),
+                f"audio codec placed ahead of -i for target={target}",
+            )
+
+    def test_scaling_pass_does_not_use_hwaccel(self) -> None:
+        # the vaapi/nvidia presets keep frames in GPU memory, out of reach
+        # of the software scale/pad filters this pass relies on
+        exporter = _make_exporter([], {"h264", "h265"})
+        exporter.config.cameras["front"].record.export.hwaccel_args = "preset-vaapi"
+
+        cmd = exporter._stage_run_command(
+            self._run(), "/tmp/s.mp4", (1920, 1080), False
+        )
+
+        self.assertNotIn("-hwaccel", cmd)
+        self.assertIn("libx264", cmd)
+
     def test_target_scales_and_pads_rather_than_stretching(self) -> None:
         exporter = _make_exporter([], {"h264", "h265"})
         cmd = exporter._stage_run_command(
-            self._run(), "/tmp/s.mp4", (1920, 1080), False, False
+            self._run(), "/tmp/s.mp4", (1920, 1080), False
         )
 
         filtergraph = cmd[cmd.index("-vf") + 1]
@@ -462,6 +485,41 @@ class TestAudioUniformity(unittest.TestCase):
                 }
             )
         )
+
+
+class TestStagingFailure(unittest.TestCase):
+    def test_failed_staging_aborts_rather_than_falling_back(self) -> None:
+        """The merged playlist is the thing staging exists to avoid."""
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+
+        with patch.object(RecordingExporter, "_stage_stream_runs", return_value=False):
+            self.assertFalse(exporter._prepare_stream_runs())
+
+    def test_successful_staging_reports_true(self) -> None:
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+
+        with patch.object(RecordingExporter, "_stage_stream_runs", return_value=True):
+            self.assertTrue(exporter._prepare_stream_runs())
+
+    def test_single_stream_range_reports_true_without_staging(self) -> None:
+        exporter = _make_exporter([_span("/m1.mp4", 1_000, 1_020, True)], {"h264"})
+
+        with patch.object(RecordingExporter, "_stage_stream_runs") as stage:
+            self.assertTrue(exporter._prepare_stream_runs())
+
+        stage.assert_not_called()
 
 
 class TestStagedExportCommand(unittest.TestCase):
