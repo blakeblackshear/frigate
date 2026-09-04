@@ -65,6 +65,7 @@ export type ExportJobStep =
   | "copying"
   | "encoding"
   | "encoding_retry"
+  | "merging"
   | "finalizing";
 
 export type ExportJob = {

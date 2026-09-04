@@ -39,6 +39,9 @@ def _make_exporter(
     exporter.ffmpeg_output_args = ffmpeg_output_args
     exporter.cpu_fallback = False
     exporter.on_progress = on_progress
+    exporter.staged_runs = []
+    exporter.staged_transcode = False
+    exporter._coverage = ([], set(), False)
     return exporter
 
 
