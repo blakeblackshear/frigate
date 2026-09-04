@@ -199,15 +199,20 @@ class CudaGraphRunner(BaseModelRunner):
             EnrichmentModelTypeEnum.yolov9_license_plate.value,
         ]
 
+    # ORT performs two regular runs before it starts capturing, but on some
+    # driver / cuDNN combinations the arena still has to extend on the run that
+    # captures, and cudaMalloc is not allowed during capture. Running with
+    # capture disabled first keeps those allocations outside of the capture.
+    GRAPH_FREE_WARMUP_RUNS = 2
+
     def __init__(self, session: ort.InferenceSession, cuda_device_id: int):
         self._session = session
         self._cuda_device_id = cuda_device_id
-        self._captured = False
+        self._prepared = False
         self._io_binding: ort.IOBinding | None = None
         self._input_name: str | None = None
         self._output_names: list[str] | None = None
         self._input_ortvalue: ort.OrtValue | None = None
-        self._output_ortvalues: ort.OrtValue | None = None
 
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""
@@ -217,35 +222,41 @@ class CudaGraphRunner(BaseModelRunner):
         """Get the input width of the model."""
         return self._session.get_inputs()[0].shape[3]
 
+    def _prepare(self, input_name: str, tensor_input: np.ndarray) -> None:
+        """Bind CUDA buffers and warm the session up with capture disabled."""
+        self._io_binding = self._session.io_binding()
+        self._input_name = input_name
+        self._output_names = [o.name for o in self._session.get_outputs()]
+
+        self._input_ortvalue = ort.OrtValue.ortvalue_from_numpy(
+            tensor_input, "cuda", self._cuda_device_id
+        )
+        self._io_binding.bind_ortvalue_input(self._input_name, self._input_ortvalue)
+
+        for name in self._output_names:
+            # Bind outputs to CUDA and allow ORT to allocate appropriately
+            self._io_binding.bind_output(name, "cuda", self._cuda_device_id)
+
+        # gpu_graph_id -1 disables capture and replay for the run
+        warmup_options = ort.RunOptions()
+        warmup_options.add_run_config_entry("gpu_graph_id", "-1")
+
+        for _ in range(self.GRAPH_FREE_WARMUP_RUNS):
+            self._session.run_with_iobinding(self._io_binding, warmup_options)
+
+        self._prepared = True
+
     def run(self, input: dict[str, Any]):
         # Extract the single tensor input (assuming one input)
         input_name = list(input.keys())[0]
-        tensor_input = input[input_name]
-        tensor_input = np.ascontiguousarray(tensor_input)
+        tensor_input = np.ascontiguousarray(input[input_name])
 
-        if not self._captured:
-            # Prepare IOBinding with CUDA buffers and let ORT allocate outputs on device
-            self._io_binding = self._session.io_binding()
-            self._input_name = input_name
-            self._output_names = [o.name for o in self._session.get_outputs()]
+        if not self._prepared:
+            self._prepare(input_name, tensor_input)
+        else:
+            # Replay using updated input
+            self._input_ortvalue.update_inplace(tensor_input)
 
-            self._input_ortvalue = ort.OrtValue.ortvalue_from_numpy(
-                tensor_input, "cuda", self._cuda_device_id
-            )
-            self._io_binding.bind_ortvalue_input(self._input_name, self._input_ortvalue)
-
-            for name in self._output_names:
-                # Bind outputs to CUDA and allow ORT to allocate appropriately
-                self._io_binding.bind_output(name, "cuda", self._cuda_device_id)
-
-            # First IOBinding run to allocate, execute, and capture CUDA Graph
-            ro = ort.RunOptions()
-            self._session.run_with_iobinding(self._io_binding, ro)
-            self._captured = True
-            return self._io_binding.copy_outputs_to_cpu()
-
-        # Replay using updated input, copy results to CPU
-        self._input_ortvalue.update_inplace(tensor_input)
         ro = ort.RunOptions()
         self._session.run_with_iobinding(self._io_binding, ro)
         return self._io_binding.copy_outputs_to_cpu()
