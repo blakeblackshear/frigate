@@ -32,21 +32,14 @@
         "retention_unmet": "Recordings were deleted before their retention period to free space ({{cleared_mb}} of {{needed_mb}} MB needed)",
         "update_available": "Frigate {{version}} is available"
       },
-      "runStreamChecks": "Run stream checks",
-      "lastChecked": "Last checked",
-      "checking": "Checking {{done}} of {{total}}",
-      "checkingCamera": "Checking {{camera}}...",
       "streamPrefix": "Stream {{index}}: {{message}}",
       "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
       "streamProbeFailed": "Stream {{index}} could not be probed: {{error}}",
       "cameraProbeFailed": "Streams could not be probed: {{error}}",
-      "streamSummary": "{{checked}} cameras checked, {{clean}} with no stream problems",
-      "runStreamChecksHint": "Run stream checks to look for camera stream problems",
       "startupWindow": "Frigate started less than two minutes ago, live checks begin after startup"
     },
     "hardware": {
       "title": "Hardware",
-      "recheck": "Re-check hardware",
       "objectDetection": "Object detection",
       "hardwareAcceleration": "Hardware acceleration",
       "enrichments": {
@@ -79,7 +72,21 @@
       "acceleratorMissing": "Configured for {{device}} but no compatible accelerator was found",
       "modelNotRunYet": "Model has not run yet, the device is verified after first use",
       "fellBackToCpu": "Configured for {{device}} but running on the CPU",
-      "cpuDespiteAccelerator": "Running on the CPU although an accelerator is available"
+      "cpuDespiteAccelerator": "Running on the CPU although an accelerator is available",
+      "probed": "Probed",
+      "probing": "Probing...",
+      "recheck": "Re-check hardware",
+      "cameraStreams": "Camera streams",
+      "streamsNotChecked": "Not checked yet",
+      "streamsChecking": "Checking {{done}} of {{total}}",
+      "streamsClean": "No stream problems",
+      "checked": "Checked",
+      "runAgain": "Run again",
+      "runStreamChecks": "Run stream checks",
+      "streamsChecked_one": "{{count}} camera checked",
+      "streamsChecked_other": "{{count}} cameras checked",
+      "streamsFlagged_one": "{{count}} with problems, listed under Notices",
+      "streamsFlagged_other": "{{count}} with problems, listed under Notices"
     }
   },
   "logs": {

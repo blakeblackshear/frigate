@@ -1,6 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
-import axios from "axios";
-import useSWR, { useSWRConfig } from "swr";
+import { useMemo } from "react";
+import useSWR from "swr";
 import { useTranslation } from "react-i18next";
 import type {
   DetectionHardware,
@@ -18,7 +17,6 @@ import {
 
 export function useHardwareHealth() {
   const { t } = useTranslation(["views/system", "views/setup"]);
-  const { mutate } = useSWRConfig();
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -31,18 +29,6 @@ export function useHardwareHealth() {
     { revalidateOnFocus: false },
   );
   const stats = useAutoFrigateStats();
-  const [rechecking, setRechecking] = useState(false);
-
-  const recheck = useCallback(async () => {
-    setRechecking(true);
-    try {
-      await axios.get("hardware/probe", { params: { refresh: true } });
-      await Promise.all([mutate("hardware/probe"), mutate("hardware/hwaccel")]);
-    } finally {
-      setRechecking(false);
-    }
-  }, [mutate]);
-
   const rows = useMemo(() => {
     if (!config) {
       return undefined;
@@ -77,5 +63,5 @@ export function useHardwareHealth() {
     };
   }, [config, hardware, probeError, hwaccel, hwaccelError, stats, t]);
 
-  return { rows, statsLoaded: !!stats, recheck, rechecking };
+  return { rows, statsLoaded: !!stats };
 }

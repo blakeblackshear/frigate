@@ -582,10 +582,39 @@ test.describe("System — Health notices sources @medium", () => {
         "Stream 1 could not be probed: Connection refused",
       ),
     ).toBeVisible();
-    await expect(frigateApp.page.getByText("cameras checked")).toBeVisible();
+    const streams = frigateApp.page.getByTestId("camera-streams");
+    await expect(streams).toContainText("3 cameras checked");
+    await expect(streams).toContainText("2 with problems");
+    await expect(frigateApp.page.getByText(/^Checked/)).toBeVisible();
+    await expect(
+      frigateApp.page.getByRole("button", { name: "Run again" }),
+    ).toBeVisible();
     // axios leaves ":" unescaped in query strings
     expect(requests.filter((u) => u.includes("paths=camera:")).length).toBe(3);
-    await expect(frigateApp.page.getByText("Last checked")).toBeVisible();
+  });
+
+  test("re-check re-probes the hardware and dates the probe", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults({ stats: QUIET_STATS });
+    await frigateApp.goto("/system#health");
+
+    const probes: string[] = [];
+    frigateApp.page.on("request", (req) => {
+      if (req.url().includes("refresh=true")) {
+        probes.push(req.url());
+      }
+    });
+
+    const recheck = frigateApp.page.getByRole("button", {
+      name: "Re-check hardware",
+    });
+    await expect(recheck).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.getByText(/^Probed/)).toHaveCount(0);
+    await recheck.click();
+    await expect(frigateApp.page.getByText(/^Probed/)).toBeVisible();
+    await expect(recheck).toBeEnabled();
+    expect(probes.length).toBe(1);
   });
 
   test("status bar healthy text links to the Health tab", async ({

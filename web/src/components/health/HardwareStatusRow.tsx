@@ -31,7 +31,7 @@ export default function HardwareStatusRow({ row }: { row: HardwareRow }) {
       </div>
       <div className="min-w-0">
         <div>
-          <span className="smart-capitalize">{row.label}</span>
+          <span>{row.label}</span>
           {row.detail && (
             <span className="ml-2 text-muted-foreground">{row.detail}</span>
           )}
