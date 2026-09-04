@@ -488,7 +488,7 @@ class RecordingExporter(threading.Thread):
         internal_port = self.config.networking.listen.internal
 
         # handle case where internal port is a string with ip:port
-        if type(internal_port) is str:
+        if isinstance(internal_port, str):
             return int(internal_port.split(":")[-1])
 
         return internal_port
@@ -526,6 +526,16 @@ class RecordingExporter(threading.Thread):
             return None
 
         return int(width), int(height)
+
+    def _staged_progress(
+        self, step: str, base: float, weight: float
+    ) -> Callable[[float], None]:
+        """Map one run's 0-100 progress onto its slice of the whole pass."""
+
+        def report(percent: float) -> None:
+            self._emit_progress(step, base + (percent / 100.0) * weight)
+
+        return report
 
     def _stage_run_command(
         self,
@@ -660,9 +670,7 @@ class RecordingExporter(threading.Thread):
             returncode, stderr = run_ffmpeg_with_progress(
                 self._stage_run_command(run, dest, target, keep_audio),
                 expected_duration_seconds=run.duration,
-                on_progress=lambda percent, base=base, weight=weight: (
-                    self._emit_progress(step, base + (percent / 100.0) * weight)
-                ),
+                on_progress=self._staged_progress(step, base, weight),
                 use_low_priority=True,
             )
 
@@ -726,9 +734,11 @@ class RecordingExporter(threading.Thread):
                 # where it exists, sub filling the gaps it leaves behind.
                 # Summing one stream alone under-reports a mixed range and
                 # pins progress at 100% for the rest of the export
-                return sum(
-                    max(0.0, span_end - span_start)
-                    for _row, span_start, span_end, _is_main in self._merged_spans()
+                return float(
+                    sum(
+                        max(0.0, span_end - span_start)
+                        for _row, span_start, span_end, _is_main in self._merged_spans()
+                    )
                 )
             else:
                 rows = (
@@ -1119,7 +1129,7 @@ class RecordingExporter(threading.Thread):
                 _ChapterWindow(span_start, span_end)
                 for _row, span_start, span_end, _is_main in self._merged_spans()
             ]
-            playlist_lines = [f"file '{path}'" for path in self.staged_runs]
+            playlist_lines: list[str] = [f"file '{path}'" for path in self.staged_runs]
             ffmpeg_input = (
                 "-y -protocol_whitelist pipe,file -f concat -safe 0 -i /dev/stdin"
             )
@@ -1141,7 +1151,7 @@ class RecordingExporter(threading.Thread):
             if not recordings:
                 recordings = self._get_recordings_for_range(STREAM_TYPE_SUB)
 
-        playlist_lines: list[str] = []
+        playlist_lines = []
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
             playlist_url = self._vod_url(pin, self.start_time, self.end_time)
             ffmpeg_input = (
