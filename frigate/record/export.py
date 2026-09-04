@@ -1,5 +1,6 @@
 """Export recordings to storage."""
 
+import asyncio
 import datetime
 import logging
 import os
@@ -10,6 +11,7 @@ import string
 import subprocess as sp
 import threading
 from collections.abc import Callable
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -36,6 +38,13 @@ from frigate.ffmpeg_presets import (
 from frigate.models import Export, Previews, Recordings, ReviewSegment
 from frigate.util.ffmpeg import run_ffmpeg_with_progress
 from frigate.util.ownership import chown_to_runtime
+from frigate.util.recording_coverage import (
+    build_spans,
+    known_video_codecs,
+    resolve_coverage,
+    stream_media_summary,
+)
+from frigate.util.services import get_video_properties
 from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
@@ -43,6 +52,41 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
+
+# nginx-vod repackages each stream into fMP4 with a timescale derived from
+# that stream's frame rate, and the concat demuxer rescales every input to
+# whatever timebase the first one happens to use. Staging each run with one
+# explicit timescale is what keeps a 5fps sub run from being replayed at the
+# main stream's rate. 90000 is the RTSP clock rate and divides evenly by
+# every common camera frame rate.
+EXPORT_TRACK_TIMESCALE = 90000
+
+
+@dataclass
+class StreamRun:
+    """A contiguous slice of an export served by a single stream type.
+
+    sample_path is one recording from the run, used to probe the stream's
+    resolution when the runs have to be scaled to a common size.
+    """
+
+    stream_type: str
+    start_time: float
+    end_time: float
+    sample_path: str
+
+    @property
+    def duration(self) -> float:
+        return max(0.0, self.end_time - self.start_time)
+
+
+@dataclass
+class _ChapterWindow:
+    """A merged-timeline slice, shaped like the recording rows chapters read."""
+
+    start_time: float
+    end_time: float
+
 
 # Matches the setpts factor used in timelapse exports (e.g. setpts=0.04*PTS).
 # Captures the floating-point factor so we can scale expected duration.
@@ -206,6 +250,20 @@ class PlaybackSourceEnum(str, Enum):
     preview = "preview"
 
 
+class ExportStreamEnum(str, Enum):
+    """Which recorded stream an export should be built from.
+
+    ``auto`` keeps the merged timeline: main where it exists, sub filling
+    the gaps main has already aged out of. Pinning to one stream trades
+    that coverage for a uniform source, which is always a plain stream
+    copy since nothing hands off mid-export.
+    """
+
+    auto = "auto"
+    main = STREAM_TYPE_MAIN
+    sub = STREAM_TYPE_SUB
+
+
 EXPORT_FILE_NAME_MAX_BYTES = 255
 
 
@@ -240,6 +298,7 @@ class RecordingExporter(threading.Thread):
         ffmpeg_output_args: str | None = None,
         cpu_fallback: bool = False,
         chapters: ChaptersEnum | None = None,
+        stream: ExportStreamEnum = ExportStreamEnum.auto,
         on_progress: Callable[[str, float], None] | None = None,
     ) -> None:
         super().__init__()
@@ -256,7 +315,10 @@ class RecordingExporter(threading.Thread):
         self.ffmpeg_output_args = ffmpeg_output_args
         self.cpu_fallback = cpu_fallback
         self.chapters = chapters
+        self.stream = stream
         self.on_progress = on_progress
+        self.staged_runs: list[str] = []
+        self._coverage: tuple[list[list[Any]], set[str], bool] | None = None
 
         # ensure export thumb dir
         Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
@@ -304,6 +366,337 @@ class RecordingExporter(threading.Thread):
 
         return input_duration * factor
 
+    @property
+    def pinned_stream(self) -> str | None:
+        """The stream type this export is pinned to, or None for auto."""
+        return None if self.stream == ExportStreamEnum.auto else self.stream.value
+
+    def _resolve_coverage(self) -> tuple[list[list[Any]], set[str], bool]:
+        """Resolve the export range into the spans the VOD manifest will serve.
+
+        Delegates to the same coverage resolution the manifest builder
+        uses, so what we plan around and what nginx-vod emits agree by
+        construction. Returns the spans (each [row, start, end, is_main]),
+        the known video codecs, and whether audio survives the range.
+        Memoized: several stages of the export ask the same question, and
+        the recordings backing a finished range do not change under us.
+        """
+        if self._coverage is None:
+            intervals = resolve_coverage(self.camera, self.start_time, self.end_time)
+            self._coverage = (
+                build_spans(intervals, self.pinned_stream),
+                known_video_codecs(intervals),
+                self._audio_is_uniform(stream_media_summary(intervals)),
+            )
+
+        return self._coverage
+
+    def _audio_is_uniform(self, summary: dict[str, dict[str, Any]]) -> bool:
+        """Whether every stream in range carries audio with the same signature.
+
+        Stream-copying audio across a hand-off only works when both
+        streams agree, the same rule the merged manifest applies when it
+        decides to serve a mixed range without audio.
+        """
+        # legacy rows report None rather than False, and an unknown
+        # signature is not one we can promise lines up
+        if not summary or any(
+            stream["has_audio"] is not True for stream in summary.values()
+        ):
+            return False
+
+        return (
+            len(
+                {
+                    (stream["audio_codec"], stream["audio_rate"])
+                    for stream in summary.values()
+                }
+            )
+            == 1
+        )
+
+    def _merged_spans(self) -> list[list[Any]]:
+        return self._resolve_coverage()[0]
+
+    def _prepare_stream_runs(self) -> bool:
+        """Stage each stream run to a temp file when the range spans more than one.
+
+        Leaves ``staged_runs`` empty for a single-stream range, which is
+        the overwhelmingly common case and keeps the existing
+        single-playlist path byte for byte what it was. Returns False only
+        when staging was needed and failed.
+        """
+        if self.pinned_stream is not None:
+            # a pinned range is uniform by construction, so there is no
+            # hand-off to stage around
+            return True
+
+        spans, codecs, keep_audio = self._resolve_coverage()
+        runs = self._stream_runs(spans)
+
+        # a range one stream covers end to end has nothing to hand off,
+        # so it stays on the existing path however long it is
+        if len(runs) < 2:
+            return True
+
+        runs = [piece for run in runs for piece in self._split_long_run(run)]
+        return self._stage_stream_runs(runs, codecs, keep_audio)
+
+    def _stream_runs(self, spans: list[list[Any]]) -> list[StreamRun]:
+        """Collapse the merged spans into contiguous runs of one stream type.
+
+        A run is the largest slice of the export that a single stream
+        covers end to end, and is therefore the largest chunk we can hand
+        to ffmpeg without the parameter sets changing underneath it.
+        """
+        runs: list[StreamRun] = []
+
+        for row, span_start, span_end, is_main in spans:
+            stream_type = STREAM_TYPE_MAIN if is_main else STREAM_TYPE_SUB
+
+            if runs and runs[-1].stream_type == stream_type:
+                runs[-1].end_time = span_end
+            else:
+                runs.append(StreamRun(stream_type, span_start, span_end, row.path))
+
+        return runs
+
+    def _split_long_run(self, run: StreamRun) -> list[StreamRun]:
+        """Break a run into playlist-sized pieces.
+
+        Each run is fetched as one pinned VOD playlist, and nginx-vod caps
+        how many clips a single mapping may hold. This is the same bound
+        the unstaged path respects by paging its playlist lines. Splitting
+        is free here: both halves are the same stream, so they share the
+        parameter sets and the timebase.
+        """
+        if run.duration <= MAX_PLAYLIST_SECONDS:
+            return [run]
+
+        pieces: list[StreamRun] = []
+        start = run.start_time
+
+        while start < run.end_time:
+            end = min(start + MAX_PLAYLIST_SECONDS, run.end_time)
+            pieces.append(StreamRun(run.stream_type, start, end, run.sample_path))
+            start = end
+
+        return pieces
+
+    def _internal_port(self) -> int:
+        """The API port to fetch VOD playlists from."""
+        internal_port = self.config.networking.listen.internal
+
+        # handle case where internal port is a string with ip:port
+        if isinstance(internal_port, str):
+            return int(internal_port.split(":")[-1])
+
+        return internal_port
+
+    def _vod_url(self, stream_type: str | None, start: float, end: float) -> str:
+        """A VOD playlist URL, pinned to one stream type when given."""
+        pin = f"/{stream_type}" if stream_type else ""
+        return (
+            f"http://127.0.0.1:{self._internal_port()}/vod/{self.camera}{pin}"
+            f"/start/{start}/end/{end}/index.m3u8"
+        )
+
+    def _staged_run_path(self, index: int) -> str:
+        return os.path.join(CACHE_DIR, f"export_stage_{self.export_id}_{index}.mp4")
+
+    def _probe_stream_resolution(self, run: StreamRun) -> tuple[int, int] | None:
+        """Probe one recording from a run for its resolution.
+
+        Only the scaling path needs this, and one segment per stream is
+        enough: a stream's resolution is fixed for as long as the camera
+        keeps its configuration.
+        """
+        try:
+            properties = asyncio.run(
+                get_video_properties(self.config.ffmpeg, run.sample_path)
+            )
+        except OSError:
+            logger.exception("Failed to probe %s for export sizing", run.sample_path)
+            return None
+
+        width = properties.get("width")
+        height = properties.get("height")
+
+        if not width or not height:
+            return None
+
+        return int(width), int(height)
+
+    def _staged_progress(
+        self, step: str, base: float, weight: float
+    ) -> Callable[[float], None]:
+        """Map one run's 0-100 progress onto its slice of the whole pass."""
+
+        def report(percent: float) -> None:
+            self._emit_progress(step, base + (percent / 100.0) * weight)
+
+        return report
+
+    def _stage_run_command(
+        self,
+        run: StreamRun,
+        dest: str,
+        target: tuple[int, int] | None,
+        keep_audio: bool,
+    ) -> list[str]:
+        """Build the ffmpeg command that renders one run to a temp file.
+
+        Without a target the run is stream-copied, which is all a mixed
+        *resolution* export needs. A target is only set when the runs also
+        disagree on codec, where one mp4 track genuinely cannot hold both
+        and every run has to be re-encoded to match.
+        """
+        ffmpeg_input = (
+            "-y -protocol_whitelist pipe,file,http,tcp "
+            f"-i {self._vod_url(run.stream_type, run.start_time, run.end_time)}"
+        )
+        # audio only survives when both streams agree on it, otherwise the
+        # copied track breaks at the same hand-off the video used to. These
+        # are output options: "-c:a copy" ahead of -i selects a *decoder*
+        # named copy, which does not exist
+        audio_args = "-c:a copy" if keep_audio else "-an"
+
+        if target is None:
+            return (
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} "
+                f"{audio_args} -c:v copy "
+                f"-video_track_timescale {EXPORT_TRACK_TIMESCALE} {dest}"
+            ).split(" ")
+
+        width, height = target
+        # pad rather than stretch: the sub stream is often a different
+        # aspect ratio than the main one, and letterboxing it is honest
+        # where distorting the footage is not
+        scale = (
+            f"scale={width}:{height}:force_original_aspect_ratio=decrease,"
+            f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,setsar=1"
+        )
+        # deliberately software-encoded. The vaapi and nvidia encode presets
+        # set -hwaccel_output_format, which leaves decoded frames in GPU
+        # memory where scale/pad cannot reach them; making this pass use the
+        # GPU means per-preset hwdownload/hwupload chains (see the birdseye
+        # vaapi preset). Codec-mixed ranges are rare enough to eat the CPU
+        # cost rather than ship an untested filter graph
+        return parse_preset_hardware_acceleration_encode(
+            self.config.ffmpeg.ffmpeg_path,
+            None,
+            ffmpeg_input,
+            f"{audio_args} -vf {scale} "
+            f"-video_track_timescale {EXPORT_TRACK_TIMESCALE} {dest}",
+            EncodeTypeEnum.timelapse,
+        ).split(" ")
+
+    def _stage_stream_runs(
+        self,
+        runs: list[StreamRun],
+        codecs: set[str],
+        keep_audio: bool,
+    ) -> bool:
+        """Render each run to its own temp file, one stream type at a time.
+
+        This is what makes a mixed-resolution export work. Handing the
+        merged playlist straight to ffmpeg looks like it should work,
+        since nginx-vod marks the stream change with a discontinuity and a
+        fresh EXT-X-MAP, but ffmpeg's HLS demuxer binds the track's
+        parameter sets from the *first* init segment only. Every sample
+        after the hand-off is then decoded against the wrong SPS, which is
+        what freezes the sub-resolution stretches of the output.
+
+        Demuxing each run on its own gives each one its correct parameter
+        sets, and the mp4 muxer writes them in-band at the hand-off, so
+        the concatenated result decodes cleanly without re-encoding.
+
+        Returns False when staging failed. The caller must abort rather
+        than fall back to the merged playlist, which is the very thing
+        that produces the broken file.
+        """
+        target: tuple[int, int] | None = None
+
+        if len(codecs) > 1:
+            # one mp4 track carries one codec, so a range that mixes them
+            # has to be re-encoded to a common one. Scale up to the
+            # largest stream so the main footage keeps its detail
+            sizes = [
+                size
+                for size in (self._probe_stream_resolution(run) for run in runs)
+                if size is not None
+            ]
+
+            if not sizes:
+                logger.error(
+                    "Export %s spans video codecs %s but no run could be probed "
+                    "for its resolution",
+                    self.export_id,
+                    sorted(codecs),
+                )
+                return False
+
+            target = (max(s[0] for s in sizes), max(s[1] for s in sizes))
+            logger.debug(
+                "Export %s spans video codecs %s; re-encoding every run to %dx%d",
+                self.export_id,
+                sorted(codecs),
+                target[0],
+                target[1],
+            )
+        else:
+            logger.debug(
+                "Export %s spans %d stream runs; staging each one separately",
+                self.export_id,
+                len(runs),
+            )
+
+        total_duration = sum(run.duration for run in runs) or 1.0
+        step = "encoding" if target is not None else "copying"
+        completed = 0.0
+
+        for index, run in enumerate(runs):
+            dest = self._staged_run_path(index)
+            weight = 100.0 * run.duration / total_duration
+            base = 100.0 * completed / total_duration
+
+            # claim the path before ffmpeg can write to it. ffmpeg removes
+            # its own output on a clean error exit, but a killed one (OOM,
+            # container stop) leaves whatever it had already muxed, and a
+            # path that was never recorded is a partial file nothing
+            # deletes
+            self.staged_runs.append(dest)
+
+            returncode, stderr = run_ffmpeg_with_progress(
+                self._stage_run_command(run, dest, target, keep_audio),
+                expected_duration_seconds=run.duration,
+                on_progress=self._staged_progress(step, base, weight),
+                use_low_priority=True,
+            )
+
+            if returncode != 0:
+                logger.error(
+                    "Failed to stage %s stream for export %s between %s and %s",
+                    run.stream_type,
+                    self.export_id,
+                    run.start_time,
+                    run.end_time,
+                )
+                logger.error(stderr)
+                self._cleanup_staged_runs()
+                return False
+
+            completed += run.duration
+
+        return True
+
+    def _cleanup_staged_runs(self) -> None:
+        """Remove any temp files left behind by staging."""
+        for path in self.staged_runs:
+            Path(path).unlink(missing_ok=True)
+
+        self.staged_runs = []
+
     def _get_recordings_for_range(self, stream_type: str) -> list[Any]:
         """Fetch one stream type's recording rows overlapping the export range."""
         return list(
@@ -337,12 +730,16 @@ class RecordingExporter(threading.Thread):
         """
         try:
             if self.playback_source == PlaybackSourceEnum.recordings:
-                # never mix streams in one estimate; use main when available
-                # and fall back to sub for expired-main history
-                rows = self._get_recordings_for_range(STREAM_TYPE_MAIN)
-
-                if not rows:
-                    rows = self._get_recordings_for_range(STREAM_TYPE_SUB)
+                # the merged timeline is what actually gets exported: main
+                # where it exists, sub filling the gaps it leaves behind.
+                # Summing one stream alone under-reports a mixed range and
+                # pins progress at 100% for the rest of the export
+                return float(
+                    sum(
+                        max(0.0, span_end - span_start)
+                        for _row, span_start, span_end, _is_main in self._merged_spans()
+                    )
+                )
             else:
                 rows = (
                     Previews.select(Previews.start_time, Previews.end_time)
@@ -723,21 +1120,40 @@ class RecordingExporter(threading.Thread):
     def get_record_export_command(
         self, video_path: str, use_hwaccel: bool = True
     ) -> tuple[list[str], str | list[str]]:
-        # handle case where internal port is a string with ip:port
-        internal_port = self.config.networking.listen.internal
-        if type(internal_port) is str:
-            internal_port = int(internal_port.split(":")[-1])
+        if self.staged_runs:
+            # each run was already rendered to a temp file with a common
+            # track timescale, so the concat demuxer has nothing left to
+            # reconcile and every chapter offset lines up with the merged
+            # timeline the staged files reproduce
+            recordings = [
+                _ChapterWindow(span_start, span_end)
+                for _row, span_start, span_end, _is_main in self._merged_spans()
+            ]
+            playlist_lines: list[str] = [f"file '{path}'" for path in self.staged_runs]
+            ffmpeg_input = (
+                "-y -protocol_whitelist pipe,file -f concat -safe 0 -i /dev/stdin"
+            )
+            return self._finish_record_export_command(
+                video_path, ffmpeg_input, playlist_lines, recordings, use_hwaccel
+            )
 
-        # never mix streams in one playlist; use main when available and
-        # fall back to sub for expired-main history
-        recordings = self._get_recordings_for_range(STREAM_TYPE_MAIN)
+        pin = self.pinned_stream
 
-        if not recordings:
-            recordings = self._get_recordings_for_range(STREAM_TYPE_SUB)
+        if pin is not None:
+            # a pinned export reads that stream and only that stream, so
+            # its own rows are the ones the chapters describe
+            recordings = self._get_recordings_for_range(pin)
+        else:
+            # never mix streams in one playlist; use main when available
+            # and fall back to sub for expired-main history
+            recordings = self._get_recordings_for_range(STREAM_TYPE_MAIN)
 
-        playlist_lines: list[str] = []
+            if not recordings:
+                recordings = self._get_recordings_for_range(STREAM_TYPE_SUB)
+
+        playlist_lines = []
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
-            playlist_url = f"http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
+            playlist_url = self._vod_url(pin, self.start_time, self.end_time)
             ffmpeg_input = (
                 f"-y -protocol_whitelist pipe,file,http,tcp -i {playlist_url}"
             )
@@ -747,12 +1163,26 @@ class RecordingExporter(threading.Thread):
             page_size = 1000
             for i in range(0, len(recordings), page_size):
                 chunk = recordings[i : i + page_size]
-                playlist_lines.append(
-                    f"file 'http://127.0.0.1:{internal_port}/vod/{self.camera}/start/{float(chunk[0].start_time)}/end/{float(chunk[-1].end_time)}/index.m3u8'"
+                chunk_url = self._vod_url(
+                    pin, float(chunk[0].start_time), float(chunk[-1].end_time)
                 )
+                playlist_lines.append(f"file '{chunk_url}'")
 
             ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"
 
+        return self._finish_record_export_command(
+            video_path, ffmpeg_input, playlist_lines, recordings, use_hwaccel
+        )
+
+    def _finish_record_export_command(
+        self,
+        video_path: str,
+        ffmpeg_input: str,
+        playlist_lines: list[str],
+        recordings: list[Any],
+        use_hwaccel: bool,
+    ) -> tuple[list[str], str | list[str]]:
+        """Apply encoding, chapters, and metadata to a prepared input."""
         if self.ffmpeg_input_args is not None and self.ffmpeg_output_args is not None:
             hwaccel_args = (
                 self.config.cameras[self.camera].record.export.hwaccel_args
@@ -960,7 +1390,31 @@ class RecordingExporter(threading.Thread):
         Export.insert(export_values).execute()
 
         try:
+            self._run_export(video_path, thumb_path)
+        finally:
+            # staged runs hold a full copy of the export, so they must not
+            # survive a failure the way the small chapter file could
+            self._cleanup_staged_runs()
+
+    def _discard_failed_export(self, video_path: str, thumb_path: str) -> None:
+        """Drop the partial output and the row that promised it."""
+        Path(video_path).unlink(missing_ok=True)
+        Export.delete().where(Export.id == self.export_id).execute()
+        Path(thumb_path).unlink(missing_ok=True)
+
+    def _run_export(self, video_path: str, thumb_path: str) -> None:
+        try:
             if self.playback_source == PlaybackSourceEnum.recordings:
+                if not self._prepare_stream_runs():
+                    # the merged playlist is what staging exists to avoid;
+                    # falling back to it would hand the user a file whose
+                    # sub-resolution stretches are frozen
+                    logger.error(
+                        "Failed to stage stream runs for export %s", self.export_id
+                    )
+                    self._discard_failed_export(video_path, thumb_path)
+                    return
+
                 ffmpeg_cmd, playlist_lines = self.get_record_export_command(video_path)
             else:
                 ffmpeg_cmd, playlist_lines = self.get_preview_export_command(video_path)
@@ -976,6 +1430,10 @@ class RecordingExporter(threading.Thread):
             self.ffmpeg_input_args is None and self.ffmpeg_output_args is None
         )
         initial_step = "copying" if is_stream_copy else "encoding"
+
+        if self.staged_runs:
+            # staging already reported a full pass under its own step
+            initial_step = "merging"
 
         returncode, stderr = self._run_ffmpeg_with_progress(
             ffmpeg_cmd, playlist_lines, step=initial_step
@@ -993,6 +1451,9 @@ class RecordingExporter(threading.Thread):
             )
 
             if self.playback_source == PlaybackSourceEnum.recordings:
+                # staged runs are always software-encoded, so there is no
+                # hwaccel in them to fall back from; only the merge pass
+                # is rebuilt here
                 ffmpeg_cmd, playlist_lines = self.get_record_export_command(
                     video_path, use_hwaccel=False
                 )
@@ -1012,9 +1473,7 @@ class RecordingExporter(threading.Thread):
                 f"Failed to export {self.playback_source.value} for command {' '.join(ffmpeg_cmd)}"
             )
             logger.error(stderr)
-            Path(video_path).unlink(missing_ok=True)
-            Export.delete().where(Export.id == self.export_id).execute()
-            Path(thumb_path).unlink(missing_ok=True)
+            self._discard_failed_export(video_path, thumb_path)
             return
         else:
             chown_to_runtime(video_path)

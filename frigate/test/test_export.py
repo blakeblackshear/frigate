@@ -1,9 +1,21 @@
+import os
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from frigate.api.export import _unique_archive_name
+from frigate.const import MAX_PLAYLIST_SECONDS
 from frigate.models import Export
-from frigate.record.export import export_video_path, validate_ffmpeg_args
+from frigate.record.export import (
+    EXPORT_TRACK_TIMESCALE,
+    ExportStreamEnum,
+    PlaybackSourceEnum,
+    RecordingExporter,
+    StreamRun,
+    export_video_path,
+    validate_ffmpeg_args,
+)
 
 
 class TestValidateFfmpegArgs(unittest.TestCase):
@@ -210,3 +222,454 @@ class TestUniqueArchiveName(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class _FakeRow:
+    def __init__(self, path: str) -> None:
+        self.path = path
+
+
+def _span(path: str, start: float, end: float, is_main: bool) -> list:
+    return [_FakeRow(path), start, end, is_main]
+
+
+def _make_exporter(spans: list, codecs: set) -> RecordingExporter:
+    """Build an exporter with coverage resolution stubbed out.
+
+    Bypasses __init__ so no directories are created and no FrigateConfig
+    is required, then pre-seeds the memoized coverage the same shape
+    _resolve_coverage would produce.
+    """
+    exporter = RecordingExporter.__new__(RecordingExporter)
+    exporter.config = MagicMock()
+    exporter.config.ffmpeg.ffmpeg_path = "ffmpeg"
+    exporter.config.networking.listen.internal = 5000
+    exporter.config.cameras = {"front": MagicMock()}
+    exporter.export_id = "front_abc123"
+    exporter.camera = "front"
+    exporter.start_time = 1_000
+    exporter.end_time = 2_000
+    exporter.playback_source = PlaybackSourceEnum.recordings
+    exporter.ffmpeg_input_args = None
+    exporter.ffmpeg_output_args = None
+    exporter.chapters = None
+    exporter.stream = ExportStreamEnum.auto
+    exporter.staged_runs = []
+    exporter.staged_transcode = False
+    exporter._coverage = (spans, codecs, False)
+    return exporter
+
+
+class TestStreamRuns(unittest.TestCase):
+    """Runs are the largest chunk of an export whose parameter sets hold still."""
+
+    def test_consecutive_spans_of_one_stream_collapse(self) -> None:
+        exporter = _make_exporter([], {"h264"})
+        runs = exporter._stream_runs(
+            [
+                _span("/m1.mp4", 1_000, 1_010, True),
+                _span("/m2.mp4", 1_010, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_030, False),
+                _span("/s2.mp4", 1_030, 1_040, False),
+                _span("/m3.mp4", 1_040, 1_050, True),
+            ]
+        )
+
+        self.assertEqual(
+            [(r.stream_type, r.start_time, r.end_time) for r in runs],
+            [("main", 1_000, 1_020), ("sub", 1_020, 1_040), ("main", 1_040, 1_050)],
+        )
+
+    def test_run_keeps_a_sample_path_to_probe(self) -> None:
+        exporter = _make_exporter([], {"h264"})
+        runs = exporter._stream_runs(
+            [
+                _span("/m1.mp4", 1_000, 1_010, True),
+                _span("/m2.mp4", 1_010, 1_020, True),
+            ]
+        )
+
+        self.assertEqual(len(runs), 1)
+        self.assertEqual(runs[0].sample_path, "/m1.mp4")
+
+    def test_long_runs_are_split_to_playlist_size(self) -> None:
+        """One pinned playlist per run still has to fit nginx-vod's clip cap."""
+        exporter = _make_exporter([], {"h264"})
+        runs = exporter._split_long_run(
+            StreamRun("main", 0, MAX_PLAYLIST_SECONDS * 2.5, "/m1.mp4")
+        )
+
+        self.assertEqual(len(runs), 3)
+        self.assertEqual(runs[0].start_time, 0)
+        self.assertEqual(runs[-1].end_time, MAX_PLAYLIST_SECONDS * 2.5)
+        # contiguous, no gaps or overlap between the pieces
+        for earlier, later in zip(runs, runs[1:]):
+            self.assertEqual(earlier.end_time, later.start_time)
+        self.assertTrue(all(r.stream_type == "main" for r in runs))
+
+    def test_a_long_single_stream_range_is_not_staged(self) -> None:
+        """Length alone is not a hand-off; only a stream change is."""
+        exporter = _make_exporter(
+            [_span("/m1.mp4", 0, MAX_PLAYLIST_SECONDS * 3, True)], {"h264"}
+        )
+
+        with patch.object(RecordingExporter, "_stage_stream_runs") as stage:
+            exporter._prepare_stream_runs()
+
+        stage.assert_not_called()
+
+    def test_mixed_range_is_staged(self) -> None:
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+
+        with patch.object(RecordingExporter, "_stage_stream_runs") as stage:
+            exporter._prepare_stream_runs()
+
+        stage.assert_called_once()
+        staged_runs = stage.call_args.args[0]
+        self.assertEqual([r.stream_type for r in staged_runs], ["main", "sub"])
+
+    def test_single_stream_range_is_not_staged(self) -> None:
+        """The common case must stay on the untouched single-playlist path."""
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_010, True),
+                _span("/m2.mp4", 1_010, 1_020, True),
+            ],
+            {"h264"},
+        )
+
+        with patch.object(RecordingExporter, "_stage_stream_runs") as stage:
+            exporter._prepare_stream_runs()
+
+        stage.assert_not_called()
+        self.assertEqual(exporter.staged_runs, [])
+
+
+class TestStageRunCommand(unittest.TestCase):
+    """Each run is rendered on its own so its parameter sets travel with it."""
+
+    def _run(self, stream_type: str = "sub") -> StreamRun:
+        return StreamRun(stream_type, 1_020.0, 1_040.0, "/media/s1.mp4")
+
+    def test_copy_pins_the_playlist_to_one_stream(self) -> None:
+        # the merged /vod route is exactly what breaks: ffmpeg binds the
+        # track's parameter sets from the first init segment only
+        exporter = _make_exporter([], {"h264"})
+        cmd = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, False)
+
+        self.assertIn(
+            "http://127.0.0.1:5000/vod/front/sub/start/1020.0/end/1040.0/index.m3u8",
+            cmd,
+        )
+
+    def test_copy_forces_a_common_track_timescale(self) -> None:
+        # without this a 5fps sub run is replayed at the main stream's rate
+        exporter = _make_exporter([], {"h264"})
+        cmd = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, False)
+
+        self.assertEqual(
+            cmd[cmd.index("-video_track_timescale") + 1], str(EXPORT_TRACK_TIMESCALE)
+        )
+        self.assertIn("copy", cmd)
+        self.assertEqual(cmd[-1], "/tmp/s.mp4")
+
+    def test_audio_is_dropped_unless_both_streams_agree(self) -> None:
+        exporter = _make_exporter([], {"h264"})
+
+        dropped = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, False)
+        kept = exporter._stage_run_command(self._run(), "/tmp/s.mp4", None, True)
+
+        self.assertIn("-an", dropped)
+        self.assertNotIn("-an", kept)
+        self.assertIn("-c:a", kept)
+
+    def test_audio_codec_is_an_output_option(self) -> None:
+        """ "-c:a copy" ahead of -i selects a decoder named copy, which errors."""
+        exporter = _make_exporter([], {"h264", "h265"})
+
+        for target in (None, (1920, 1080)):
+            cmd = exporter._stage_run_command(self._run(), "/tmp/s.mp4", target, True)
+            self.assertGreater(
+                cmd.index("-c:a"),
+                cmd.index("-i"),
+                f"audio codec placed ahead of -i for target={target}",
+            )
+
+    def test_scaling_pass_does_not_use_hwaccel(self) -> None:
+        # the vaapi/nvidia presets keep frames in GPU memory, out of reach
+        # of the software scale/pad filters this pass relies on
+        exporter = _make_exporter([], {"h264", "h265"})
+        exporter.config.cameras["front"].record.export.hwaccel_args = "preset-vaapi"
+
+        cmd = exporter._stage_run_command(
+            self._run(), "/tmp/s.mp4", (1920, 1080), False
+        )
+
+        self.assertNotIn("-hwaccel", cmd)
+        self.assertIn("libx264", cmd)
+
+    def test_target_scales_and_pads_rather_than_stretching(self) -> None:
+        exporter = _make_exporter([], {"h264", "h265"})
+        cmd = exporter._stage_run_command(
+            self._run(), "/tmp/s.mp4", (1920, 1080), False
+        )
+
+        filtergraph = cmd[cmd.index("-vf") + 1]
+        self.assertIn(
+            "scale=1920:1080:force_original_aspect_ratio=decrease", filtergraph
+        )
+        self.assertIn("pad=1920:1080", filtergraph)
+        self.assertIn("setsar=1", filtergraph)
+        self.assertNotIn("copy", cmd)
+
+
+class TestAudioUniformity(unittest.TestCase):
+    """Audio only survives a hand-off when both streams agree on it."""
+
+    def _check(self, summary: dict) -> bool:
+        return _make_exporter([], {"h264"})._audio_is_uniform(summary)
+
+    def test_matching_audio_is_kept(self) -> None:
+        stream = {"has_audio": True, "audio_codec": "aac", "audio_rate": 48000}
+        self.assertTrue(self._check({"main": stream, "sub": dict(stream)}))
+
+    def test_differing_rate_is_dropped(self) -> None:
+        self.assertFalse(
+            self._check(
+                {
+                    "main": {
+                        "has_audio": True,
+                        "audio_codec": "aac",
+                        "audio_rate": 48000,
+                    },
+                    "sub": {
+                        "has_audio": True,
+                        "audio_codec": "aac",
+                        "audio_rate": 16000,
+                    },
+                }
+            )
+        )
+
+    def test_audio_on_only_one_stream_is_dropped(self) -> None:
+        self.assertFalse(
+            self._check(
+                {
+                    "main": {
+                        "has_audio": True,
+                        "audio_codec": "aac",
+                        "audio_rate": 48000,
+                    },
+                    "sub": {
+                        "has_audio": False,
+                        "audio_codec": None,
+                        "audio_rate": None,
+                    },
+                }
+            )
+        )
+
+    def test_unknown_legacy_audio_is_dropped(self) -> None:
+        # NULL means unprobed, not "the same as the other stream"
+        self.assertFalse(
+            self._check(
+                {
+                    "main": {
+                        "has_audio": None,
+                        "audio_codec": None,
+                        "audio_rate": None,
+                    },
+                    "sub": {"has_audio": None, "audio_codec": None, "audio_rate": None},
+                }
+            )
+        )
+
+
+class TestPinnedStream(unittest.TestCase):
+    """Pinning trades merged coverage for a uniform, copy-only source."""
+
+    def _pinned(self, stream: ExportStreamEnum) -> RecordingExporter:
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+        exporter.stream = stream
+        return exporter
+
+    def test_auto_reports_no_pin(self) -> None:
+        self.assertIsNone(self._pinned(ExportStreamEnum.auto).pinned_stream)
+
+    def test_pinned_reports_its_stream(self) -> None:
+        self.assertEqual(self._pinned(ExportStreamEnum.sub).pinned_stream, "sub")
+        self.assertEqual(self._pinned(ExportStreamEnum.main).pinned_stream, "main")
+
+    def test_pinned_range_is_never_staged(self) -> None:
+        # nothing hands off inside one stream, so there is nothing to stage
+        exporter = self._pinned(ExportStreamEnum.sub)
+
+        with patch.object(RecordingExporter, "_stage_stream_runs") as stage:
+            self.assertTrue(exporter._prepare_stream_runs())
+
+        stage.assert_not_called()
+        self.assertEqual(exporter.staged_runs, [])
+
+    def test_pinned_playlist_url_carries_the_pin(self) -> None:
+        exporter = self._pinned(ExportStreamEnum.sub)
+        exporter._get_recordings_for_range = lambda _stream: []  # type: ignore[method-assign]
+
+        cmd, _lines = exporter.get_record_export_command("/exports/out.mp4")
+
+        self.assertTrue(
+            any("/vod/front/sub/start/" in token for token in cmd),
+            f"expected a sub-pinned playlist url in {cmd}",
+        )
+
+    def test_auto_playlist_url_stays_merged(self) -> None:
+        exporter = self._pinned(ExportStreamEnum.auto)
+        exporter._get_recordings_for_range = lambda _stream: []  # type: ignore[method-assign]
+
+        cmd, _lines = exporter.get_record_export_command("/exports/out.mp4")
+
+        self.assertTrue(any("/vod/front/start/" in token for token in cmd))
+        self.assertFalse(any("/vod/front/main/" in token for token in cmd))
+
+
+class TestStagedFileCleanup(unittest.TestCase):
+    """A staged path must be tracked before ffmpeg can write to it."""
+
+    def _exporter(self, tmpdir: str) -> RecordingExporter:
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+        exporter._staged_run_path = lambda index: os.path.join(  # type: ignore[method-assign]
+            tmpdir, f"export_stage_{index}.mp4"
+        )
+        return exporter
+
+    def test_partial_file_from_a_failed_run_is_removed(self) -> None:
+        # a killed ffmpeg (OOM, container stop) leaves whatever it muxed
+        with tempfile.TemporaryDirectory() as tmpdir:
+            exporter = self._exporter(tmpdir)
+            runs = [
+                StreamRun("main", 1_000, 1_020, "/m1.mp4"),
+                StreamRun("sub", 1_020, 1_040, "/s1.mp4"),
+            ]
+
+            def fake_run(cmd, **kwargs):
+                # ffmpeg opens its output before it fails
+                Path(cmd[-1]).write_bytes(b"partial")
+                return (-9, "Killed")
+
+            with patch(
+                "frigate.record.export.run_ffmpeg_with_progress", side_effect=fake_run
+            ):
+                self.assertFalse(exporter._stage_stream_runs(runs, {"h264"}, False))
+
+            self.assertEqual(os.listdir(tmpdir), [])
+            self.assertEqual(exporter.staged_runs, [])
+
+    def test_partial_file_from_a_later_run_is_removed(self) -> None:
+        """The failing run must not orphan the runs that already succeeded."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            exporter = self._exporter(tmpdir)
+            runs = [
+                StreamRun("main", 1_000, 1_020, "/m1.mp4"),
+                StreamRun("sub", 1_020, 1_040, "/s1.mp4"),
+            ]
+            calls = {"n": 0}
+
+            def fake_run(cmd, **kwargs):
+                Path(cmd[-1]).write_bytes(b"data")
+                calls["n"] += 1
+                return (0, "") if calls["n"] == 1 else (-9, "Killed")
+
+            with patch(
+                "frigate.record.export.run_ffmpeg_with_progress", side_effect=fake_run
+            ):
+                self.assertFalse(exporter._stage_stream_runs(runs, {"h264"}, False))
+
+            self.assertEqual(os.listdir(tmpdir), [])
+
+
+class TestStagingFailure(unittest.TestCase):
+    def test_failed_staging_aborts_rather_than_falling_back(self) -> None:
+        """The merged playlist is the thing staging exists to avoid."""
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+
+        with patch.object(RecordingExporter, "_stage_stream_runs", return_value=False):
+            self.assertFalse(exporter._prepare_stream_runs())
+
+    def test_successful_staging_reports_true(self) -> None:
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+
+        with patch.object(RecordingExporter, "_stage_stream_runs", return_value=True):
+            self.assertTrue(exporter._prepare_stream_runs())
+
+    def test_single_stream_range_reports_true_without_staging(self) -> None:
+        exporter = _make_exporter([_span("/m1.mp4", 1_000, 1_020, True)], {"h264"})
+
+        with patch.object(RecordingExporter, "_stage_stream_runs") as stage:
+            self.assertTrue(exporter._prepare_stream_runs())
+
+        stage.assert_not_called()
+
+
+class TestStagedExportCommand(unittest.TestCase):
+    def test_staged_runs_are_concatenated_with_stream_copy(self) -> None:
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+        exporter.staged_runs = ["/cache/stage_0.mp4", "/cache/stage_1.mp4"]
+
+        cmd, playlist_lines = exporter.get_record_export_command("/exports/out.mp4")
+
+        self.assertEqual(
+            playlist_lines,
+            ["file '/cache/stage_0.mp4'", "file '/cache/stage_1.mp4'"],
+        )
+        self.assertIn("concat", cmd)
+        self.assertIn("copy", cmd)
+        # nothing is left pointing at the merged vod route
+        self.assertFalse(any("/vod/front/start/" in token for token in cmd))
+        self.assertEqual(cmd[-1], "/exports/out.mp4")
+
+    def test_expected_duration_sums_the_merged_timeline(self) -> None:
+        """A mixed range must not be measured by one stream alone."""
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_050, False),
+            ],
+            {"h264"},
+        )
+
+        self.assertEqual(exporter._expected_output_duration_seconds(), 50.0)
