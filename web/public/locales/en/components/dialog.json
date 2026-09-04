@@ -52,6 +52,15 @@
     "name": {
       "placeholder": "Name the Export"
     },
+    "stream": {
+      "label": "Quality",
+      "auto": "Auto",
+      "main": "Original",
+      "sub": "Low",
+      "autoDesc": "Uses the main stream and falls back to the lower quality sub stream where main is not available.",
+      "mainDesc": "Exports only the original quality main stream. Time ranges where the main stream is not available will be missing.",
+      "subDesc": "Exports only the lower quality sub stream. Time ranges where the sub stream is not available will be missing."
+    },
     "case": {
       "newCaseOption": "Create new case",
       "newCaseNamePlaceholder": "New case name",

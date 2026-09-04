@@ -24,6 +24,7 @@ import {
   BatchExportResponse,
   CameraActivity,
   ExportCase,
+  ExportStreamSelection,
   StartExportResponse,
 } from "@/types/export";
 import {
@@ -117,6 +118,7 @@ export default function ExportDialog({
   const [newCaseName, setNewCaseName] = useState("");
   const [newCaseDescription, setNewCaseDescription] = useState("");
   const [activeTab, setActiveTab] = useState<ExportTab>("export");
+  const [stream, setStream] = useState<ExportStreamSelection>("auto");
   const [isStartingExport, setIsStartingExport] = useState(false);
   const previousModeRef = useRef<ExportMode>(mode);
   const preTimelineRangeRef = useRef<TimeRange | undefined>(undefined);
@@ -179,6 +181,7 @@ export default function ExportDialog({
           source: "recordings",
           name,
           export_case_id: exportCaseId,
+          stream,
         },
       );
 
@@ -201,6 +204,7 @@ export default function ExportDialog({
       setBatchCaseSelection("new");
       setNewCaseName("");
       setNewCaseDescription("");
+      setStream("auto");
       setRange(undefined);
       setMode("none");
       return true;
@@ -230,6 +234,7 @@ export default function ExportDialog({
     selectedCaseId,
     singleNewCaseDescription,
     singleNewCaseName,
+    stream,
     setMode,
     setRange,
     t,
@@ -249,6 +254,7 @@ export default function ExportDialog({
     setBatchCaseSelection("new");
     setNewCaseName("");
     setNewCaseDescription("");
+    setStream("auto");
     setMode("none");
     setRange(undefined);
     setActiveTab("export");
@@ -334,6 +340,7 @@ export default function ExportDialog({
           }
         >
           <ExportContent
+            camera={camera}
             latestTime={latestTime}
             earliestTime={earliestTime}
             currentTime={currentTime}
@@ -346,9 +353,11 @@ export default function ExportDialog({
             newCaseName={newCaseName}
             newCaseDescription={newCaseDescription}
             activeTab={activeTab}
+            stream={stream}
             isStartingExport={isStartingExport}
             onStartExport={onStartExport}
             setActiveTab={setActiveTab}
+            setStream={setStream}
             setName={setName}
             setSelectedCaseId={setSelectedCaseId}
             setSingleNewCaseName={setSingleNewCaseName}
@@ -368,6 +377,7 @@ export default function ExportDialog({
 }
 
 type ExportContentProps = {
+  camera: string;
   latestTime: number;
   earliestTime: number;
   currentTime: number;
@@ -380,9 +390,11 @@ type ExportContentProps = {
   newCaseName: string;
   newCaseDescription: string;
   activeTab: ExportTab;
+  stream: ExportStreamSelection;
   isStartingExport: boolean;
   onStartExport: () => Promise<boolean>;
   setActiveTab: (tab: ExportTab) => void;
+  setStream: (stream: ExportStreamSelection) => void;
   setName: (name: string) => void;
   setSelectedCaseId: (caseId: string | undefined) => void;
   setSingleNewCaseName: (name: string) => void;
@@ -397,6 +409,7 @@ type ExportContentProps = {
 };
 
 export function ExportContent({
+  camera,
   latestTime,
   earliestTime,
   currentTime,
@@ -409,9 +422,11 @@ export function ExportContent({
   newCaseName,
   newCaseDescription,
   activeTab,
+  stream,
   isStartingExport,
   onStartExport,
   setActiveTab,
+  setStream,
   setName,
   setSelectedCaseId,
   setSingleNewCaseName,
@@ -439,6 +454,64 @@ export function ExportContent({
   const [cameraSearch, setCameraSearch] = useState("");
   const [cameraMenuOpen, setCameraMenuOpen] = useState(false);
   const cameraMenuRef = useRef<HTMLDivElement>(null);
+  // the stream choice is only meaningful where a sub stream is recorded:
+  // this camera on the single tab, any selected camera on the multi tab
+  const streamOptions = useMemo<ExportStreamSelection[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const subEnabled = (cameraId: string) =>
+      config.cameras[cameraId]?.record.sub.enabled === true;
+    const cameras = activeTab === "multi" ? selectedCameraIds : [camera];
+
+    // no sub stream anywhere in the selection means there is no choice
+    if (!cameras.some(subEnabled)) {
+      return [];
+    }
+
+    // the pin applies to every item in a batch, so offering "sub" for a
+    // mixed selection would drop the cameras that cannot honor it. Main
+    // and auto are always exportable
+    return cameras.every(subEnabled)
+      ? ["auto", "main", "sub"]
+      : ["auto", "main"];
+  }, [activeTab, camera, config, selectedCameraIds]);
+
+  const showStreamSelect = streamOptions.length > 0;
+
+  // a pin the current selection can no longer honor would silently change
+  // what the next export contains
+  useEffect(() => {
+    if (stream !== "auto" && !streamOptions.includes(stream)) {
+      setStream("auto");
+    }
+  }, [streamOptions, stream, setStream]);
+
+  const streamSelect = (
+    <div className="space-y-2">
+      <Label className="text-sm text-primary">{t("export.stream.label")}</Label>
+      <Select
+        value={stream}
+        onValueChange={(value) => setStream(value as ExportStreamSelection)}
+      >
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {streamOptions.map((option) => (
+            <SelectItem key={option} value={option}>
+              {t(`export.stream.${option}`)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <p className="text-xs text-secondary-foreground">
+        {t(`export.stream.${stream}Desc`)}
+      </p>
+    </div>
+  );
+
   const multiRangeKey = useMemo(() => {
     if (activeTab !== "multi" || !range) {
       return undefined;
@@ -746,6 +819,7 @@ export function ExportContent({
           ? `${name} - ${resolveCameraName(config, cameraId)}`
           : undefined,
       })),
+      stream,
     };
 
     if (isAdmin && batchCaseSelection !== "none") {
@@ -859,6 +933,7 @@ export function ExportContent({
     newCaseName,
     range,
     selectedCameraIds,
+    stream,
     setActiveTab,
     setBatchCaseSelection,
     setMode,
@@ -960,6 +1035,8 @@ export function ExportContent({
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+
+          {showStreamSelect && streamSelect}
 
           {isAdmin && (
             <div className="space-y-2">
@@ -1251,6 +1328,8 @@ export function ExportContent({
               onChange={(e) => setName(e.target.value)}
             />
           </div>
+
+          {showStreamSelect && streamSelect}
 
           {isAdmin && (
             <div className="space-y-2">
