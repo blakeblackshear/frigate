@@ -273,6 +273,19 @@ def detect_memryx() -> DetectionHardware | None:
     return _hardware("memryx", "memryx", "MemryX MX3", units)
 
 
+def detect_axelera() -> DetectionHardware | None:
+    """Find Axelera Metis accelerators by their device nodes."""
+    nodes = sorted(glob(f"{DEV_ROOT}/metis*"))
+
+    if not nodes:
+        return None
+
+    # the runtime addresses the card through the driver, not per node, so one
+    # unit covers the accelerator
+    units = [HardwareUnit(device="axelera:PCIe", label=os.path.basename(nodes[0]))]
+    return _hardware("axelera", "axelera", "Axelera Metis", units)
+
+
 def detect_rockchip() -> DetectionHardware | None:
     """Find a Rockchip NPU by reading the SoC from the device tree."""
     compatible = _read(f"{PROC_ROOT}/device-tree/compatible")
@@ -319,6 +332,7 @@ PROBES = (
     detect_coral_usb,
     detect_hailo,
     detect_memryx,
+    detect_axelera,
     detect_intel_npu,
     detect_intel_gpu,
     detect_nvidia_gpu,
