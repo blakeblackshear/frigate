@@ -57,10 +57,16 @@ Frigate can utilize most Intel integrated GPUs and Arc GPUs to accelerate video 
 | ------------------ | ------------ | ------------------- | ------------------------------------------- |
 | gen1 - gen5        | i965         | preset-vaapi        | qsv is not supported, may not support H.265 |
 | gen6 - gen7        | iHD          | preset-vaapi        | qsv is not supported                        |
-| gen8 - gen12       | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used        |
+| gen8 - gen12       | iHD          | preset-vaapi        | preset-intel-qsv-\* can also be used, and is recommended over preset-vaapi when running multiple cameras concurrently — see note below |
 | gen13+             | iHD / Xe     | preset-intel-qsv-\* |                                             |
 | Intel Arc A-series | iHD / Xe     | preset-intel-qsv-\* |                                             |
 | Intel Arc B-series | iHD / Xe     | preset-intel-qsv-\* | Requires host kernel 6.12+                  |
+
+:::tip
+
+Generic `preset-vaapi` has a known instability with the `iHD` driver when **multiple cameras** use hardware decode concurrently, surfacing as repeated ffmpeg crashes with errors like `Failed to sync surface` / `hwdownload: Failed to download frame: -5`. This has been reported across several different Intel generations (e.g. [#23319](https://github.com/blakeblackshear/frigate/discussions/23319), [#19177](https://github.com/blakeblackshear/frigate/discussions/19177), [#16828](https://github.com/blakeblackshear/frigate/discussions/16828)). If you see this error pattern with more than one camera on `preset-vaapi`, switching to `preset-intel-qsv-h264` (or `-h265`) is a low-risk change that has resolved it in every reported case so far, using the same underlying hardware via a different ffmpeg code path.
+
+:::
 
 :::note
 
