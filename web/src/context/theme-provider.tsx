@@ -54,7 +54,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 function updateThemeMetaTags(theme: ActiveTheme): void {
   const isDark = theme === "dark";
-  const metaTags = [
+  const metaDefinitions = [
     { name: "theme-color", content: isDark ? "#000000" : "#ffffff" },
     {
       name: "apple-mobile-web-app-status-bar-style",
@@ -62,12 +62,19 @@ function updateThemeMetaTags(theme: ActiveTheme): void {
     },
   ];
 
-  for (const { name, content } of metaTags) {
-    const tag =
-      document.head.querySelector<HTMLMetaElement>(`meta[name="${name}"]`) ??
-      document.head.appendChild(document.createElement("meta"));
-    tag.name = name;
-    tag.content = content;
+  for (const { name, content } of metaDefinitions) {
+    const tags = document.head.querySelectorAll<HTMLMetaElement>(
+      `meta[name="${name}"]`,
+    );
+    const matchingTags =
+      tags.length > 0
+        ? Array.from(tags)
+        : [document.head.appendChild(document.createElement("meta"))];
+
+    for (const tag of matchingTags) {
+      tag.name = name;
+      tag.content = content;
+    }
   }
 }
 
@@ -102,15 +109,21 @@ export function ThemeProvider({
     }
   });
 
-  const systemTheme = useMemo<ActiveTheme | undefined>(() => {
-    if (theme != "system") {
-      return undefined;
-    }
+  const [systemPrefersDark, setSystemPrefersDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
 
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  }, [theme]);
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => setSystemPrefersDark(mediaQuery.matches);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  const systemTheme = useMemo<ActiveTheme | undefined>(() => {
+    if (theme !== "system") return undefined;
+    return systemPrefersDark ? "dark" : "light";
+  }, [theme, systemPrefersDark]);
 
   useEffect(() => {
     //localStorage.removeItem(storageKey);
