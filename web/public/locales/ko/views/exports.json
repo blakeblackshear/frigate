@@ -1,11 +1,11 @@
 {
   "documentTitle": "내보내기 - Frigate",
   "search": "검색",
-  "noExports": "내보내기가 없습니다",
+  "noExports": "내보내기 항목을 찾을 수 없음",
   "deleteExport": {
     "label": "내보내기 삭제"
   },
-  "deleteExport.desc": "{{exportName}}을 지우시겠습니까?",
+  "deleteExport.desc": "정말로 {{exportName}} 항목을 삭제하시겠습니까?",
   "editExport": {
     "title": "내보내기 이름 변경",
     "desc": "이 내보내기의 새 이름을 입력하세요.",
@@ -13,24 +13,116 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "내보내기 이름 변경에 실패했습니다: {{errorMessage}}",
-      "assignCaseFailed": "케이스 할당 업데이트 실패: {{errorMessage}}"
+      "renameExportFailed": "내보내기 이름 변경 실패: {{errorMessage}}",
+      "assignCaseFailed": "케이스 지정 업데이트 실패: {{errorMessage}}",
+      "caseSaveFailed": "케이스 저장 실패: {{errorMessage}}",
+      "caseDeleteFailed": "케이스 삭제 실패: {{errorMessage}}"
     }
   },
   "headings": {
-    "uncategorizedExports": "분류되지 않은 내보내기",
+    "uncategorizedExports": "미분류 내보내기",
     "cases": "케이스"
   },
   "tooltip": {
     "shareExport": "내보내기 공유",
     "downloadVideo": "동영상 다운로드",
-    "editName": "이름 편집",
+    "editName": "이름 수정",
     "deleteExport": "내보내기 삭제",
-    "assignToCase": "케이스에 추가"
+    "assignToCase": "케이스에 추가",
+    "removeFromCase": "케이스에서 지우기"
   },
   "caseDialog": {
     "title": "케이스에 추가",
-    "description": "기존 케이스를 선택하거나 새 케이스를 만드세요.",
-    "selectLabel": "케이스"
+    "description": "기존 케이스를 선택하거나 새 케이스를 생성하세요.",
+    "selectLabel": "케이스",
+    "newCaseOption": "새 케이스 생성",
+    "nameLabel": "케이스 이름",
+    "descriptionLabel": "설명"
+  },
+  "selected_one": "{{count}}개 선택됨",
+  "selected_other": "{{count}}개 선택됨",
+  "toolbar": {
+    "newCase": "새 케이스",
+    "addExport": "내보내기 추가",
+    "editCase": "케이스 수정",
+    "deleteCase": "케이스 지우기"
+  },
+  "deleteCase": {
+    "label": "케이스 삭제",
+    "desc": "정말로 {{caseName}} 케이스를 삭제하시겠습니까?",
+    "descKeepExports": "내보내기 파일들은 미분류 내보내기로 계속 유지됩니다.",
+    "descDeleteExports": "이 케이스에 포함된 모든 내보내기 파일이 영구적으로 삭제됩니다.",
+    "deleteExports": "내보내기 파일도 함께 삭제"
+  },
+  "caseCard": {
+    "emptyCase": "아직 내보내기 항목이 없습니다"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} 내보내기",
+    "queued": "대기 중",
+    "running": "실행 중",
+    "preparing": "준비 중",
+    "copying": "복사 중",
+    "encoding": "인코딩 중",
+    "encodingRetry": "인코딩 재시도 중",
+    "finalizing": "마무리 중"
+  },
+  "caseView": {
+    "noDescription": "설명 없음",
+    "createdAt": "{{value}} 생성됨",
+    "exportCount_one": "내보내기 1건",
+    "exportCount_other": "내보내기 {{count}}건",
+    "cameraCount_one": "카메라 1대",
+    "cameraCount_other": "카메라 {{count}}대",
+    "showMore": "더보기",
+    "showLess": "간략히 보기",
+    "emptyTitle": "이 케이스가 비어 있습니다",
+    "emptyDescription": "케이스를 정리하려면 기존의 미분류 내보내기 항목을 추가하세요.",
+    "emptyDescriptionNoExports": "추가할 수 있는 미분류 내보내기 항목이 아직 없습니다."
+  },
+  "caseEditor": {
+    "createTitle": "케이스 생성",
+    "editTitle": "케이스 수정",
+    "namePlaceholder": "케이스 이름",
+    "descriptionPlaceholder": "이 케이스에 대한 메모나 컨텍스트 추가"
+  },
+  "addExportDialog": {
+    "title": "{{caseName}}에 내보내기 추가",
+    "searchPlaceholder": "미분류 내보내기 검색",
+    "empty": "검색 결과와 일치하는 미분류 내보내기가 없습니다.",
+    "addButton_one": "내보내기 1건 추가",
+    "addButton_other": "내보내기 {{count}}건 추가",
+    "adding": "추가 중..."
+  },
+  "bulkActions": {
+    "addToCase": "케이스에 추가",
+    "moveToCase": "케이스로 이동",
+    "removeFromCase": "케이스에서 제거",
+    "delete": "삭제",
+    "deleteNow": "지금 삭제"
+  },
+  "bulkDelete": {
+    "title": "내보내기 일괄 삭제",
+    "desc_one": "정말로 내보내기 {{count}}건을 삭제하시겠습니까?",
+    "desc_other": "정말로 내보내기 {{count}}건을 삭제하시겠습니까?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "케이스에서 제거",
+    "desc_one": "이 케이스에서 내보내기 {{count}}건을 제거하시겠습니까?",
+    "desc_other": "이 케이스에서 내보내기 {{count}}건을 제거하시겠습니까?",
+    "descKeepExports": "내보내기 파일이 미분류 상태로 이동됩니다.",
+    "descDeleteExports": "내보내기 파일이 영구적으로 삭제됩니다.",
+    "deleteExports": "대신 내보내기 파일 영구 삭제"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "내보내기 항목을 성공적으로 삭제했습니다",
+      "reassign": "케이스 지정을 성공적으로 업데이트했습니다",
+      "remove": "케이스에서 내보내기 항목을 성공적으로 제거했습니다"
+    },
+    "error": {
+      "deleteFailed": "내보내기 삭제 실패: {{errorMessage}}",
+      "reassignFailed": "케이스 지정 업데이트 실패: {{errorMessage}}"
+    }
   }
 }

@@ -1,22 +1,24 @@
 {
-  "documentTitle": "실시간 보기 - Frigate",
-  "documentTitle.withCamera": "{{camera}} - 실시간 보기 - Frigate",
+  "documentTitle": {
+    "default": "실시간 - Frigate"
+  },
+  "documentTitle.withCamera": "{{camera}} - 실시간 - Frigate",
   "lowBandwidthMode": "저대역폭 모드",
   "twoWayTalk": {
-    "enable": "양방향 말하기 활성화",
-    "disable": "양방향 말하기 비활성화"
+    "enable": "양방향 대화 켜기",
+    "disable": "양방향 대화 끄기"
   },
   "cameraAudio": {
-    "enable": "카메라 오디오 활성화",
-    "disable": "카메라 오디오 비활성화"
+    "enable": "카메라 오디오 켜기",
+    "disable": "카메라 오디오 끄기"
   },
   "ptz": {
     "move": {
       "clickMove": {
-        "label": "클릭해서 카메라 중앙 배치",
-        "enable": "클릭해서 움직이기 기능 활성화",
-        "disable": "클릭해서 움직이기 기능 비활성화",
-        "enableWithZoom": "클릭하여 이동 / 드래그하여 확대 활성화"
+        "label": "화면을 클릭하여 카메라 중앙 맞추기",
+        "enable": "클릭 이동 활성화",
+        "disable": "클릭 이동 비활성화",
+        "enableWithZoom": "클릭 이동 / 드래그 줌 활성화"
       },
       "left": {
         "label": "PTZ 카메라 왼쪽으로 이동"
@@ -41,158 +43,162 @@
     },
     "focus": {
       "in": {
-        "label": "PTZ 카메라 포커스 인"
+        "label": "PTZ 카메라 초점 당기기"
       },
       "out": {
-        "label": "PTZ 카메라 포커스 아웃"
+        "label": "PTZ 카메라 초점 밀기"
       }
     },
     "frame": {
       "center": {
-        "label": "클릭해서 PTZ 카메라 중앙 배치"
+        "label": "화면을 클릭하여 PTZ 카메라 중앙 맞추기"
       }
     },
     "presets": "PTZ 카메라 프리셋"
   },
   "camera": {
     "enable": "카메라 활성화",
-    "disable": "카메라 비활성화"
+    "disable": "카메라 비활성화",
+    "turnOn": "카메라 켜기",
+    "turnOff": "카메라 끄기"
   },
   "muteCameras": {
     "enable": "모든 카메라 음소거",
     "disable": "모든 카메라 음소거 해제"
   },
   "detect": {
-    "enable": "감지 활성화",
-    "disable": "감지 비활성화"
+    "enable": "감지(Detect) 켜기",
+    "disable": "감지(Detect) 끄기"
   },
   "recording": {
-    "enable": "녹화 활성화",
-    "disable": "녹화 비활성화"
+    "enable": "녹화 켜기",
+    "disable": "녹화 끄기",
+    "disabledInConfig": "이 카메라의 녹화를 활성화하려면 먼저 설정에서 켜야 합니다."
   },
   "snapshots": {
-    "enable": "스냅샷 활성화",
-    "disable": "스냅샷 비활성화"
+    "enable": "스냅샷 켜기",
+    "disable": "스냅샷 끄기"
   },
   "audioDetect": {
-    "enable": "오디오 감지 활성화",
-    "disable": "오디오 감지 비활성화"
+    "enable": "오디오 감지 켜기",
+    "disable": "오디오 감지 끄기"
   },
   "transcription": {
-    "enable": "실시간 오디오 자막 활성화",
-    "disable": "실시간 오디오 자막 비활성화"
+    "enable": "실시간 음성 전사 켜기",
+    "disable": "실시간 음성 전사 끄기"
   },
   "autotracking": {
-    "enable": "자동 추적 활성화",
-    "disable": "자동 추적 비활성화"
+    "enable": "자동 추적 켜기",
+    "disable": "자동 추적 끄기"
   },
   "streamStats": {
     "enable": "스트림 통계 보기",
     "disable": "스트림 통계 숨기기"
   },
   "manualRecording": {
-    "title": "수동 녹화",
-    "tips": "이 카메라의 녹화 보관 설정에 따라 인스턴트 스냅샷을 다운로드하거나 수동 녹화를 시작할 수 있습니다.",
+    "title": "수동 감지/녹화",
+    "tips": "즉시 스냅샷을 다운로드하거나 이 카메라의 녹화 보관 설정을 기반으로 수동 이벤트를 시작합니다.",
     "playInBackground": {
       "label": "백그라운드에서 재생",
-      "desc": "이 옵션을 활성화하면 플레이어가 숨겨져도 계속 스트리밍됩니다."
+      "desc": "플레이어가 화면에서 가려져 있을 때도 스트리밍을 계속 유지합니다."
     },
     "showStats": {
-      "label": "통계 보기",
-      "desc": "이 옵션을 활성화하면 카메라 피드에 스트림 통계가 나타납니다."
+      "label": "통계 표시",
+      "desc": "카메라 피드 위에 실시간 스트림 통계 정보를 오버레이로 표시합니다."
     },
-    "debugView": "디버그 보기",
+    "debugView": "디버그 뷰",
     "start": "수동 녹화 시작",
-    "started": "수동 녹화 시작되었습니다.",
-    "failedToStart": "수동 녹화 시작이 실패했습니다.",
-    "recordDisabledTips": "이 카메라 설정에서 녹화가 비활성화 되었거나 제한되어 있어 스냅샷만 저장됩니다.",
+    "started": "수동 녹화를 시작했습니다.",
+    "failedToStart": "수동 녹화 시작에 실패했습니다.",
+    "recordDisabledTips": "이 카메라는 설정에서 녹화가 비활성화되었거나 제한되어 있어 스냅샷만 저장됩니다.",
     "end": "수동 녹화 종료",
-    "ended": "수동 녹화가 종료되었습니다.",
-    "failedToEnd": "수동 녹화 종료가 실패했습니다."
+    "ended": "수동 녹화를 종료했습니다.",
+    "failedToEnd": "수동 녹화 종료에 실패했습니다."
   },
   "streamingSettings": "스트리밍 설정",
   "notifications": "알림",
   "audio": "오디오",
   "suspend": {
-    "forTime": "일시정지 시간: "
+    "forTime": "일시 중지 시간: "
   },
   "stream": {
     "title": "스트림",
     "audio": {
-      "available": "이 스트림에서 오디오를 사용할 수 있습니다",
-      "unavailable": "이 스트림에서 오디오를 사용할 수 없습니다",
+      "available": "이 스트림에서 오디오 기능을 사용할 수 있습니다",
+      "unavailable": "이 스트림에서는 오디오 기능을 사용할 수 없습니다",
       "tips": {
-        "title": "이 스트림에서 오디오를 사용하려면 카메라에서 오디오를 출력하고 go2rtc에서 설정해야 합니다."
+        "title": "오디오를 출력하려면 카메라에서 오디오를 지원하고 go2rtc에 해당 스트림이 설정되어 있어야 합니다."
       }
     },
     "debug": {
-      "picker": "디버그 모드에선 스트림 모드를 선택할 수 없습니다. 디버그 뷰에서는 항상 감지(Detect) 역할로 설정한 스트림을 사용합니다."
+      "picker": "디버그 모드에서는 스트림을 선택할 수 없습니다. 디버그 뷰는 항상 detect 역할이 할당된 스트림을 사용합니다."
     },
     "twoWayTalk": {
-      "tips": "양방향 말하기 기능을 사용하려면 기기에서 기능을 지원해야하며 WebRTC를 설정해야합니다.",
-      "available": "이 기기는 양방향 말하기 기능을 사용할 수 있습니다",
-      "unavailable": "이 기기는 양방향 말하기 기능을 사용할 수 없습니다"
+      "tips": "기기에서 해당 기능을 지원해야 하며 양방향 대화를 위해 WebRTC가 설정되어 있어야 합니다.",
+      "available": "이 스트림에서 양방향 대화를 사용할 수 있습니다",
+      "unavailable": "이 스트림에서는 양방향 대화를 사용할 수 없습니다"
     },
     "lowBandwidth": {
-      "tips": "버퍼링 또는 스트림 오류로 실시간 화면을 저대역폭 모드로 변경되었습니다.",
-      "resetStream": "스트림 리셋"
+      "tips": "버퍼링 또는 스트림 오류로 인해 실시간 화면이 저대역폭 모드로 전환되었습니다.",
+      "resetStream": "스트림 초기화"
     },
     "playInBackground": {
       "label": "백그라운드에서 재생",
-      "tips": "이 옵션을 활성화하면 플레이어가 숨겨져도 스트리밍이 지속됩니다."
+      "tips": "플레이어가 화면에서 가려져 있을 때도 스트리밍을 계속 유지합니다."
     }
   },
   "cameraSettings": {
     "title": "{{camera}} 설정",
     "cameraEnabled": "카메라 활성화",
-    "objectDetection": "대상 감지",
+    "objectDetection": "객체 감지",
     "recording": "녹화",
     "snapshots": "스냅샷",
     "audioDetection": "오디오 감지",
-    "transcription": "오디오 자막",
-    "autotracking": "자동 추적"
+    "transcription": "오디오 텍스트 변환",
+    "autotracking": "자동 추적",
+    "camera": "카메라"
   },
   "history": {
-    "label": "이전 영상 보기"
+    "label": "과거 녹화 영상 보기"
   },
   "effectiveRetainMode": {
     "modes": {
       "all": "전체",
-      "motion": "움직임 감지",
-      "active_objects": "활성 대상"
+      "motion": "움직임",
+      "active_objects": "활동 중인 객체"
     },
     "notAllTips": "{{source}} 녹화 보관 설정이 <code>mode: {{effectiveRetainMode}}</code>로 되어 있어, 이 수동 녹화는 {{effectiveRetainModeName}}이(가) 있는 구간만 저장됩니다."
   },
   "editLayout": {
     "label": "레이아웃 편집",
     "group": {
-      "label": "카메라 그룹 편집"
+      "label": "카메라 그룹 수정"
     },
     "exitEdit": "편집 종료"
   },
   "noCameras": {
     "title": "설정된 카메라 없음",
-    "description": "카메라를 연결해 시작하세요.",
+    "description": "Frigate에 카메라를 연결하여 시작하세요.",
     "buttonText": "카메라 추가",
     "restricted": {
-      "title": "연결된 카메라 없음",
-      "description": "이 그룹의 카메라를 볼 권한이 없습니다."
+      "title": "사용 가능한 카메라 없음",
+      "description": "이 그룹의 카메라를 볼 수 있는 권한이 없습니다."
     },
     "default": {
       "title": "설정된 카메라 없음",
-      "description": "카메라를 연결하여 Frigate을 시작하세요.",
+      "description": "Frigate에 카메라를 연결하여 시작하세요.",
       "buttonText": "카메라 추가"
     },
     "group": {
-      "title": "그룹에 카메라 없음",
-      "description": "이 그룹에 할당되거나 활성화된 카메라가 없습니다.",
+      "title": "그룹 내 카메라 없음",
+      "description": "이 카메라 그룹에 할당되거나 활성화된 카메라가 없습니다.",
       "buttonText": "그룹 관리"
     }
   },
   "snapshot": {
-    "takeSnapshot": "인스턴트 스냅샷 다운로드",
-    "noVideoSource": "스냅샷 찍을 비디오 소스가 없습니다.",
-    "captureFailed": "스냅샷 캡쳐를 하지 못했습니다.",
-    "downloadStarted": "스냅샷 다운로드가 시작됐습니다."
+    "takeSnapshot": "즉시 스냅샷 다운로드",
+    "noVideoSource": "스냅샷을 캡처할 비디오 소스가 없습니다.",
+    "captureFailed": "스냅샷 캡처에 실패했습니다.",
+    "downloadStarted": "스냅샷 다운로드가 시작되었습니다."
   }
 }

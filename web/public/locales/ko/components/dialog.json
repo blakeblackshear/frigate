@@ -1,41 +1,44 @@
 {
   "restart": {
-    "title": "Frigate을 정말로 다시 시작할까요?",
+    "title": "Frigate을 정말로 다시 시작하시겠습니까?",
     "button": "재시작",
     "restarting": {
-      "title": "Frigate이 재시작 중입니다",
-      "content": "이 페이지는 {{countdown}} 뒤에 새로 고침 됩니다.",
-      "button": "강제 재시작"
+      "title": "Frigate 재시작 중",
+      "content": "이 페이지는 {{countdown}}초 후에 자동으로 새로고침됩니다.",
+      "button": "지금 즉시 새로고침"
     },
-    "description": "이 작업은 Frigate가 재시작 되는 동안 잠시 작동이 중지됩니다."
+    "description": "재시작하는 동안 Frigate 동작이 일시적으로 중단됩니다."
   },
   "explore": {
     "plus": {
       "submitToPlus": {
         "label": "Frigate+에 등록하기",
-        "desc": "제외하려는 위치에서 감지된 객체는 '오감지(False Positive)'가 아닙니다. 이를 오감지로 제출하면 모델 학습에 혼선을 줄 수 있습니다."
+        "desc": "감지를 제외하려는 위치에 있는 객체는 오감지(False Positive)가 아닙니다. 이를 오감지로 제출하면 모델 학습에 혼선을 줄 수 있습니다."
       },
       "review": {
         "question": {
-          "label": "Frigate +에 이 레이블 등록하기",
-          "ask_a": "이 것은 <code>{{label}}</code> 인가요?",
-          "ask_an": "이 것은 <code>{{label}}</code> 인가요?",
-          "ask_full": "이 것은 <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) 인가요?"
+          "label": "Frigate+용 레이블 확인",
+          "ask_a": "이 객체가 <code>{{label}}</code> 맞습니까?",
+          "ask_an": "이 객체가 <code>{{label}}</code> 맞습니까?",
+          "ask_full": "이 객체가 <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) 맞습니까?"
         },
         "state": {
           "submitted": "제출됨"
+        },
+        "toast": {
+          "error": "Frigate+ 제출에 실패했습니다. 네트워크 연결을 확인하고 다시 시도하세요."
         }
       }
     },
     "video": {
-      "viewInHistory": "히스토리 보기"
+      "viewInHistory": "기록에서 보기"
     }
   },
   "export": {
     "time": {
-      "fromTimeline": "타임라인에서 선택하기",
-      "lastHour_other": "지난 {{count}} 시간­",
-      "custom": "커스텀",
+      "fromTimeline": "타임라인에서 선택",
+      "lastHour_other": "지난 {{count}}시간",
+      "custom": "사용자 지정",
       "start": {
         "title": "시작 시간",
         "label": "시작 시간 선택"
@@ -46,53 +49,105 @@
       }
     },
     "name": {
-      "placeholder": "내보내기 이름"
+      "placeholder": "내보내기 이름 지정"
     },
     "select": "선택",
     "export": "내보내기",
     "selectOrExport": "선택 또는 내보내기",
     "toast": {
-      "success": "내보내기가 성공적으로 시작되었습니다. 내보내기 페이지에서 파일을 보실 수 있습니다.",
+      "success": "내보내기가 성공적으로 시작되었습니다. 내보내기 페이지에서 파일을 확인하세요.",
       "error": {
-        "failed": "내보내기 시작 실패:{{error}}",
-        "endTimeMustAfterStartTime": "종료 시간은 시작 시간보다 뒤에 있어야합니다",
-        "noVaildTimeSelected": "유효한 시간 범위가 선택되지 않았습니다"
+        "failed": "내보내기 대기열 등록 실패: {{error}}",
+        "endTimeMustAfterStartTime": "종료 시간은 시작 시간 이후여야 합니다",
+        "noVaildTimeSelected": "유효한 시간 범위가 선택되지 않았습니다",
+        "noValidTimeSelected": "유효한 시간 범위가 선택되지 않았습니다"
       },
-      "view": "보기"
+      "view": "보기",
+      "queued": "내보내기가 대기열에 등록되었습니다. 진행 상황은 내보내기 페이지에서 확인하세요.",
+      "batchSuccess_other": "내보내기 {{count}}건을 시작했습니다. 케이스를 여는 중입니다.",
+      "batchPartial": "{{total}}건 중 {{successful}}건의 내보내기를 시작했습니다. 실패한 카메라: {{failedCameras}}",
+      "batchFailed": "{{total}}건의 내보내기 시작에 실패했습니다. 실패한 카메라: {{failedCameras}}",
+      "batchQueuedSuccess_other": "내보내기 {{count}}건을 대기열에 추가했습니다.",
+      "batchQueuedPartial": "{{total}}건 중 {{successful}}건의 내보내기를 대기열에 추가했습니다. 실패한 카메라: {{failedCameras}}",
+      "batchQueueFailed": "{{total}}건의 내보내기 대기열 등록에 실패했습니다. 실패한 카메라: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "내보내기 저장",
-      "previewExport": "내보내기 미리보기"
+      "previewExport": "내보내기 미리보기",
+      "queueingExport": "내보내기 대기열 등록 중...",
+      "useThisRange": "이 범위 사용"
     },
     "case": {
-      "label": "유형",
-      "placeholder": "유형 선택"
+      "label": "케이스",
+      "placeholder": "케이스 선택",
+      "newCaseOption": "새 케이스 생성",
+      "newCaseNamePlaceholder": "새 케이스 이름",
+      "newCaseDescriptionPlaceholder": "케이스 설명",
+      "nonAdminHelp": "이 내보내기를 위한 새 케이스가 생성됩니다."
+    },
+    "queueing": "내보내기 대기열 추가 중...",
+    "tabs": {
+      "export": "단일 카메라",
+      "multiCamera": "다중 카메라"
+    },
+    "multiCamera": {
+      "timeRange": "시간 범위",
+      "selectFromTimeline": "타임라인에서 선택",
+      "cameraSelection": "카메라",
+      "cameraSelectionHelp": "해당 시간 범위에 추적된 객체가 있는 카메라가 기본 선택됩니다",
+      "searchOrSelectGroup": "검색 또는 카메라 그룹 선택...",
+      "selectAll": "모든 카메라 선택",
+      "clearSelection": "선택 해제",
+      "selectWithActivity": "추적된 객체가 있는 카메라",
+      "selectGroup": "그룹 선택",
+      "noMatchingCameras": "일치하는 카메라가 없습니다",
+      "selectedCount": "{{selected}} / {{total}}대 선택됨",
+      "checkingActivity": "카메라 활동 확인 중...",
+      "noCameras": "사용 가능한 카메라가 없습니다",
+      "detectionCount_other": "추적된 객체 {{count}}개",
+      "nameLabel": "내보내기 이름",
+      "namePlaceholder": "내보내기에 사용할 기본 이름 (선택 사항)",
+      "queueingButton": "내보내기 대기열 추가 중...",
+      "exportButton_other": "카메라 {{count}}대 내보내기"
+    },
+    "multi": {
+      "title_other": "다시보기 {{count}}건 내보내기",
+      "description": "선택한 각 다시보기를 내보냅니다. 모든 내보내기 항목은 단일 케이스로 묶입니다.",
+      "descriptionNoCase": "선택한 각 다시보기를 내보냅니다.",
+      "caseNamePlaceholder": "다시보기 내보내기 - {{date}}",
+      "exportButton_other": "다시보기 {{count}}건 내보내기",
+      "exportingButton": "내보내는 중...",
+      "toast": {
+        "started_other": "내보내기 {{count}}건을 시작했습니다.",
+        "partial": "{{total}}건 중 {{successful}}건의 내보내기를 시작했습니다. 실패 항목: {{failedItems}}",
+        "failed": "{{total}}건의 내보내기 시작에 실패했습니다. 실패 항목: {{failedItems}}"
+      }
     }
   },
   "streaming": {
     "label": "스트림",
     "restreaming": {
-      "disabled": "이 카메라는 재 스트리밍이 되지 않습니다.",
+      "disabled": "이 카메라는 재스트리밍이 활성화되어 있지 않습니다.",
       "desc": {
-        "title": "이 카메라를 위해 추가적인 라이브 뷰 옵션과 오디오를 go2rtc에서 설정하세요."
+        "title": "추가 라이브 뷰 옵션 및 오디오 기능을 사용하려면 go2rtc 설정을 진행하세요."
       }
     },
     "showStats": {
-      "label": "스트림 통계 보기",
-      "desc": "이 옵션을 활성화하면 스트림 통계가 카메라 피드에 나타납니다."
+      "label": "스트림 통계 표시",
+      "desc": "카메라 피드 위에 실시간 스트림 통계 정보를 오버레이로 표시합니다."
     },
     "debugView": "디버그 뷰"
   },
   "search": {
     "saveSearch": {
-      "label": "검색 저장",
-      "desc": "저장된 검색에 이름을 지정해주세요.",
-      "placeholder": "검색에 이름 입력하기",
-      "overwrite": "{{searchName}} (이/가) 이미 존재합니다. 값을 덮어 씌웁니다.",
-      "success": "{{searchName}} 검색이 저장되었습니다.",
+      "label": "검색 조건 저장",
+      "desc": "저장할 검색 조건의 이름을 입력하세요.",
+      "placeholder": "검색 이름 입력",
+      "overwrite": "'{{searchName}}'이(가) 이미 존재합니다. 저장 시 기존 항목을 덮어씁니다.",
+      "success": "검색 조건({{searchName}})이 저장되었습니다.",
       "button": {
         "save": {
-          "label": "이 검색 저장하기"
+          "label": "이 검색 조건 저장"
         }
       }
     }
@@ -101,26 +156,34 @@
     "confirmDelete": {
       "title": "삭제 확인",
       "desc": {
-        "selected": "이 리뷰 항목과 관련된 모든 녹화된 영상을 삭제하시겠습니까?<br /><br />다음에 이 팝업을 건너뛰려면 <em>Shift</em> 키를 누르고 삭제하세요."
+        "selected": "이 다시보기 항목과 연결된 모든 녹화 영상을 삭제하시겠습니까?<br /><br />이후 확인 창을 건너뛰려면 <em>Shift</em> 키를 누른 상태로 클릭하세요."
       },
       "toast": {
-        "success": "선택한 리뷰 항목과 관련된 동영상 파일이 성공적으로 삭제되었습니다.",
+        "success": "선택한 다시보기 항목과 연결된 영상이 성공적으로 삭제되었습니다.",
         "error": "삭제 실패: {{error}}"
       }
     },
     "button": {
       "export": "내보내기",
       "markAsReviewed": "검토 완료로 표시",
-      "markAsUnreviewed": "검토 안 함 표시",
+      "markAsUnreviewed": "미검토 상태로 표시",
       "deleteNow": "지금 삭제"
+    },
+    "shareTimestamp": {
+      "label": "타임스탬프 공유",
+      "title": "타임스탬프 공유",
+      "description": "현재 재생 위치가 포함된 URL을 공유하거나 특정 타임스탬프를 지정합니다. 이 URL은 공개 링크가 아니며 Frigate 및 해당 카메라 접근 권한이 있는 사용자만 접근할 수 있습니다.",
+      "custom": "사용자 지정 타임스탬프",
+      "button": "타임스탬프 URL 공유",
+      "shareTitle": "Frigate 다시보기 타임스탬프: {{camera}}"
     }
   },
   "imagePicker": {
     "selectImage": "추적된 객체의 썸네일을 선택하세요",
     "unknownLabel": "저장된 트리거 이미지",
     "search": {
-      "placeholder": "레이블 또는 서브 레이블로 검색..."
+      "placeholder": "레이블 또는 하위 레이블로 검색..."
     },
-    "noImages": "표시할 썸네일이 없습니다"
+    "noImages": "이 카메라에 등록된 썸네일이 없습니다"
   }
 }

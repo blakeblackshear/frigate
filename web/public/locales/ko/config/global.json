@@ -1,32 +1,33 @@
 {
     "version": {
         "label": "현재 설정 버전",
-        "description": "마이그레이션 및 데이터 형식 변경 확인을 위한 현재 설정의 버전 정보(숫자 또는 문자열)입니다."
+        "description": "마이그레이션 또는 형식 변경을 감지하기 위한 현재 활성 설정의 버전(숫자 또는 문자열)입니다."
     },
     "safe_mode": {
         "label": "안전 모드",
-        "description": "활성화하면 문제 해결을 위해 기능이 제한된 안전 모드로 Frigate를 시작합니다."
+        "description": "활성화하면 문제 해결을 위해 기능을 축소한 안전 모드로 Frigate를 시작합니다."
     },
     "environment_vars": {
         "label": "환경 변수",
-        "description": "Home Assistant OS에서 Frigate 프로세스에 설정할 환경 변수의 키/값 쌍입니다. HAOS가 아닌 사용자는 대신 Docker 환경 변수 설정을 사용해야 합니다."
+        "description": "Home Assistant OS에서 Frigate 프로세스에 적용할 환경 변수의 키/값 쌍입니다. 비-HAOS 사용자는 Docker 환경 변수 설정을 사용해야 합니다."
     },
     "logger": {
         "label": "로깅",
-        "description": "기본 로그 상세 수준 및 구성 요소별 로그 수준 재정의를 제어합니다.",
+        "description": "기본 로그 상세도 및 구성 요소별 로그 수준 재정의를 제어합니다.",
         "default": {
             "label": "로그 수준",
-            "description": "기본 전역 로그 상세 수준(debug, info, warning, error)입니다."
+            "description": "전역 기본 로그 수준(debug, info, warning, error)입니다."
         },
         "logs": {
             "label": "프로세스별 로그 수준",
-            "description": "특정 모듈의 상세 수준을 높이거나 낮추기 위한 구성 요소별 로그 수준 재정의입니다."
+            "description": "특정 모듈의 로그 상세도를 높이거나 낮추기 위한 구성 요소별 로그 수준 재정의입니다."
         }
     },
     "audio": {
-        "label": "오디오 이벤트",
+        "label": "오디오 감지",
         "enabled": {
-            "label": "오디오 감지 활성화"
+            "label": "오디오 감지 활성화",
+            "description": "모든 카메라의 오디오 이벤트 감지를 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
         },
         "max_not_heard": {
             "label": "종료 타임아웃",
@@ -34,19 +35,29 @@
         },
         "min_volume": {
             "label": "최소 볼륨",
-            "description": "오디오 감지를 실행하는 데 필요한 최소 RMS 볼륨 임계값으로, 낮을수록 민감도가 높아집니다(예: 200 높음, 500 보통, 1000 낮음)."
+            "description": "오디오 감지를 실행하는 데 필요한 최소 RMS 볼륨 임계값입니다. 낮을수록 민감도가 높아집니다 (예: 200 높음, 500 보통, 1000 낮음)."
         },
         "listen": {
-            "label": "청취 유형",
-            "description": "감지할 오디오 이벤트 유형 목록입니다(예: bark, fire_alarm, scream, speech, yell)."
+            "label": "감지 대상 소리",
+            "description": "감지할 오디오 이벤트 유형 목록입니다 (예: bark, fire_alarm, speech, yell)."
         },
         "filters": {
             "label": "오디오 필터",
-            "description": "오탐지를 줄이기 위해 사용되는 신뢰도 임계값과 같은 오디오 유형별 필터 설정입니다."
+            "description": "오감지를 줄이기 위한 신뢰도 임계값 등 오디오 유형별 필터 설정입니다.",
+            "threshold": {
+                "label": "최소 오디오 신뢰도",
+                "description": "오디오 이벤트로 카운트되기 위한 최소 신뢰도 임계값입니다."
+            }
         },
         "enabled_in_config": {
-            "label": "원래 오디오 상태"
-        }
+            "label": "초기 오디오 상태",
+            "description": "정적 설정 파일에서 오디오 감지가 기본 활성화되어 있었는지 여부를 나타냅니다."
+        },
+        "num_threads": {
+            "label": "감지 스레드 수",
+            "description": "오디오 감지 처리에 사용할 스레드 수입니다."
+        },
+        "description": "모든 카메라에 대한 오디오 기반 이벤트 감지 설정입니다. 카메라별로 재정의할 수 있습니다."
     },
     "auth": {
         "label": "인증",
@@ -56,7 +67,7 @@
             "description": "Frigate UI에 대한 기본 인증을 활성화합니다."
         },
         "reset_admin_password": {
-            "label": "관리자 비밀번호 재설정",
+            "label": "관리자 비밀번호 초기화",
             "description": "true로 설정하면 시작 시 관리자 비밀번호를 재설정하고 새 비밀번호를 로그에 출력합니다."
         },
         "cookie_name": {
@@ -64,41 +75,41 @@
             "description": "자체 인증용 JWT 토큰을 저장할 쿠키 이름입니다."
         },
         "cookie_secure": {
-            "label": "보안 쿠키 설정",
-            "description": "인증 쿠키에 보안 플래그를 설정합니다. TLS를 사용하는 경우 'True'로 설정해야 합니다."
+            "label": "보안 쿠키 플래그",
+            "description": "인증 쿠키에 보안 플래그를 설정합니다. TLS 사용 시 true여야 합니다."
         },
         "session_length": {
-            "label": "세션 길이",
-            "description": "JWT 기반 세션의 유지 시간(초)입니다."
+            "label": "세션 유지 시간",
+            "description": "JWT 기반 세션의 지속 시간(초)입니다."
         },
         "refresh_time": {
             "label": "세션 갱신 주기",
-            "description": "세션 만료까지 남은 시간이 몇 초 남지 않을 경우, 세션 시간을 다시 최대로 연장합니다."
+            "description": "세션 만료까지 남은 시간이 이 값(초) 이내일 때 세션을 전체 시간으로 다시 갱신합니다."
         },
         "failed_login_rate_limit": {
             "label": "로그인 실패 제한",
-            "description": "무차별 대입 공격을 줄이기 위해 로그인 시도 실패 횟수를 제한하는 규칙을 적용합니다."
+            "description": "무차별 대입 공격을 완화하기 위한 로그인 실패 속도 제한 규칙입니다."
         },
         "trusted_proxies": {
             "label": "신뢰할 수 있는 프록시",
-            "description": "속도 제한을 위해 클라이언트 IP를 결정할 때 사용되는 신뢰할 수 있는 프록시 IP 목록입니다."
+            "description": "속도 제한을 위해 클라이언트 IP를 결정할 때 참조하는 신뢰할 수 있는 프록시 IP 목록입니다."
         },
         "hash_iterations": {
             "label": "해시 반복 횟수",
-            "description": "사용자 암호를 해싱할 때 사용할 PBKDF2-SHA256 반복 횟수입니다."
+            "description": "사용자 비밀번호를 해싱할 때 사용할 PBKDF2-SHA256 반복 횟수입니다."
         },
         "roles": {
-            "label": "역할 할당",
-            "description": "역할별로 접근 가능한 카메라 목록을 매핑합니다. 목록이 비어 있으면 해당 역할에 모든 카메라 접근 권한을 부여합니다."
+            "label": "역할 매핑",
+            "description": "역할별로 접근 가능한 카메라 목록을 매핑합니다. 빈 목록은 해당 역할에 모든 카메라 접근을 허용함을 의미합니다."
         },
         "admin_first_time_login": {
-            "label": "관리자 초기 로그인 설정",
-            "description": "활성화 시, 관리자 비밀번호 초기화 후 로그인 방법 안내 링크가 로그인 페이지에 표시됩니다. "
+            "label": "관리자 초기 로그인 플래그",
+            "description": "true일 경우 관리자 비밀번호 재설정 후 로그인 페이지에 접속 안내 링크를 표시합니다. "
         }
     },
     "database": {
         "label": "데이터베이스",
-        "description": "추적된 객체 및 녹화 메타데이터를 저장하는 SQLite 데이터베이스 설정입니다.",
+        "description": "추적 객체 및 녹화 메타데이터를 저장하는 Frigate의 SQLite 데이터베이스 설정입니다.",
         "path": {
             "label": "데이터베이스 경로",
             "description": "Frigate SQLite 데이터베이스 파일이 저장될 파일 시스템 경로입니다."
@@ -106,14 +117,14 @@
     },
     "go2rtc": {
         "label": "go2rtc",
-        "description": "라이브 스트림 중계 및 번역에 사용되는 통합 go2rtc 리스트리밍 서비스 설정입니다."
+        "description": "실시간 스트림 중계 및 트랜스코딩에 사용되는 통합 go2rtc 재스트리밍 서비스 설정입니다."
     },
     "mqtt": {
         "label": "MQTT",
-        "description": "MQTT 브로커에 원격 측정 데이터, 스냅샷 및 이벤트 세부 정보를 연결하고 게시하기 위한 설정입니다.",
+        "description": "MQTT 브로커에 텔레메트리 데이터, 스냅샷 및 이벤트 세부 정보를 전송하기 위한 연결 설정입니다.",
         "enabled": {
             "label": "MQTT 활성화",
-            "description": "상태, 이벤트 및 스냅샷에 대한 MQTT 통합을 활성화 또는 비활성화합니다."
+            "description": "상태, 이벤트 및 스냅샷에 대한 MQTT 통합을 활성화하거나 비활성화합니다."
         },
         "host": {
             "label": "MQTT 호스트",
@@ -121,35 +132,35 @@
         },
         "port": {
             "label": "MQTT 포트",
-            "description": "MQTT 브로커의 포트 번호입니다 (일반적인 포트는 1883입니다)."
+            "description": "MQTT 브로커 포트 번호입니다 (일반 텍스트의 경우 기본값 1883)."
         },
         "topic_prefix": {
             "label": "토픽 접두사",
-            "description": "Frigate의 모든 MQTT 메시지에 사용할 접두사입니다. 여러 대의 Frigate를 실행하는 경우 각각 고유한 이름을 사용해야 합니다."
+            "description": "Frigate의 모든 토픽에 사용할 기본 접두사입니다. 다중 인스턴스 실행 시 고유해야 합니다."
         },
         "client_id": {
             "label": "클라이언트 ID",
-            "description": "MQTT 브로커 연결 시 사용하는 클라이언트 식별자입니다. 인스턴스마다 고유한 이름을 사용해야 합니다."
+            "description": "MQTT 브로커 연결 시 사용할 클라이언트 식별자입니다. 인스턴스별로 고유해야 합니다."
         },
         "stats_interval": {
-            "label": "통계 간격",
-            "description": "시스템 및 카메라 통계 정보를 MQTT로 전송하는 간격(초)입니다."
+            "label": "통계 전송 간격",
+            "description": "시스템 및 카메라 통계를 MQTT로 발행하는 주기(초)입니다."
         },
         "user": {
             "label": "MQTT 사용자 이름",
-            "description": "MQTT 사용자 이름(선택 사항)입니다. 환경 변수나 비밀 값(Secrets)을 통해 입력할 수 있습니다."
+            "description": "선택적 MQTT 사용자 이름입니다. 환경 변수나 Secret을 통해 전달할 수 있습니다."
         },
         "password": {
             "label": "MQTT 비밀번호",
-            "description": "MQTT 비밀번호(선택 사항)입니다. 환경 변수나 비밀 값(Secrets)을 통해 입력할 수 있습니다."
+            "description": "선택적 MQTT 비밀번호입니다. 환경 변수나 Secret을 통해 전달할 수 있습니다."
         },
         "tls_ca_certs": {
             "label": "TLS CA 인증서",
-            "description": "브로커와의 TLS 연결에 사용할 CA 인증서 경로(자체 서명 인증서의 경우)."
+            "description": "브로커와의 TLS 연결에 사용할 CA 인증서 경로(자체 서명 인증서 등)입니다."
         },
         "tls_client_cert": {
             "label": "클라이언트 인증서",
-            "description": "TLS 상호 인증을 위한 클라이언트 인증서 경로입니다. 클라이언트 인증서를 사용할 때는 사용자 이름/암호를 설정하지 마십시오."
+            "description": "TLS 상호 인증(mTLS)을 위한 클라이언트 인증서 경로입니다. 사용 시 사용자 이름/비밀번호를 설정하지 마세요."
         },
         "tls_client_key": {
             "label": "클라이언트 키",
@@ -157,43 +168,1447 @@
         },
         "tls_insecure": {
             "label": "TLS 비보안 모드",
-            "description": "호스트 이름 확인을 건너뛰어 안전하지 않은 TLS 연결을 허용합니다(권장하지 않음)."
+            "description": "호스트 이름 확인을 건너뛰어 안전하지 않은 TLS 연결을 허용합니다 (권장되지 않음)."
         },
         "qos": {
             "label": "MQTT QoS",
-            "description": "MQTT 메시지 전송 및 구독에 대한 서비스 품질(QoS) 등급입니다 (0, 1, 2 중 선택)."
+            "description": "MQTT 발행/구독에 사용할 서비스 품질(QoS) 등급 (0, 1, 2)입니다."
         }
     },
     "notifications": {
         "label": "알림",
-        "description": "모든 카메라에 대한 알림을 활성화하고 제어하는 설정입니다. 카메라별로 설정을 재정의할 수 있습니다.",
+        "description": "모든 카메라에 대한 알림을 활성화하고 제어하기 위한 설정입니다. 카메라별로 재정의할 수 있습니다.",
         "enabled": {
             "label": "알림 활성화",
-            "description": "모든 카메라에 대한 알림을 활성화 또는 비활성화할 수 있으며, 카메라별로 설정을 재정의할 수 있습니다."
+            "description": "모든 카메라의 알림을 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
         },
         "email": {
-            "label": "알림 이메일",
+            "label": "알림 수신 이메일",
             "description": "푸시 알림에 사용되거나 특정 알림 제공업체에서 요구하는 이메일 주소입니다."
         },
         "cooldown": {
             "label": "알림 재발송 대기 시간",
-            "description": "수신자에게 스팸 메일을 보내는 것을 방지하기 위해 알림 재발송 대기시간(초)을 설정합니다."
+            "description": "수신자에게 알림이 연속 도배되는 것을 방지하기 위한 대기 시간(초)입니다."
         },
         "enabled_in_config": {
-            "label": "초기 알림 활성 상태",
-            "description": "초기 구성에서 알림이 활성화되었는지 여부를 나타냅니다."
+            "label": "초기 알림 상태",
+            "description": "초기 정적 구성에서 알림이 활성화되어 있었는지 여부를 나타냅니다."
         }
     },
     "networking": {
         "label": "네트워킹",
-        "description": "Frigate 엔드포인트에 대한 IPv6 활성화와 같은 네트워크 관련 설정입니다.",
+        "description": "Frigate 엔드포인트의 IPv6 활성화 등 네트워크 관련 설정입니다.",
         "ipv6": {
             "label": "IPv6 구성",
-            "description": "Frigate 네트워크 서비스에 대한 IPv6 관련 설정입니다.",
+            "description": "Frigate 네트워크 서비스의 IPv6 관련 설정입니다.",
             "enabled": {
                 "label": "IPv6 활성화",
-                "description": "Frigate 서비스(API 및 UI)에 IPv6 지원이 필요한 경우 활성화하십시오."
+                "description": "지원 가능한 Frigate 서비스(API 및 UI)에 IPv6 지원을 활성화합니다."
             }
+        },
+        "listen": {
+            "label": "리스닝 포트 구성",
+            "description": "내부 및 외부 리스닝 포트 설정입니다. 고급 사용자용 기능이며, 일반적인 환경에서는 Docker Compose의 포트 설정을 변경하는 것을 권장합니다.",
+            "internal": {
+                "label": "내부 포트",
+                "description": "Frigate의 내부 리스닝 포트입니다 (기본값: 5000)."
+            },
+            "external": {
+                "label": "외부 포트",
+                "description": "Frigate의 외부 리스닝 포트입니다 (기본값: 8971)."
+            }
+        }
+    },
+    "audio_transcription": {
+        "label": "오디오 텍스트 변환 (STT)",
+        "description": "이벤트 및 실시간 자막 처리에 사용되는 실시간 음성 전사 설정입니다.",
+        "live_enabled": {
+            "label": "실시간 텍스트 변환",
+            "description": "수신되는 오디오에 대한 실시간 스트리밍 텍스트 변환을 활성화합니다."
+        },
+        "enabled": {
+            "label": "오디오 텍스트 변환 활성화",
+            "description": "모든 카메라의 자동 오디오 텍스트 변환을 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+        },
+        "language": {
+            "label": "변환 언어",
+            "description": "텍스트 변환/번역에 사용할 언어 코드입니다 (예: 한국어는 'ko', 영어는 'en')."
+        },
+        "device": {
+            "label": "변환 디바이스",
+            "description": "텍스트 변환 모델을 실행할 디바이스 키(CPU/GPU)입니다. 현재 NVIDIA CUDA GPU만 지원됩니다."
+        },
+        "model_size": {
+            "label": "모델 크기",
+            "description": "오프라인 오디오 이벤트 텍스트 변환에 사용할 모델 크기입니다."
+        }
+    },
+    "birdseye": {
+        "label": "버드아이 (Birdseye)",
+        "description": "여러 카메라 피드를 단일 레이아웃으로 합성하는 버드아이 뷰 설정입니다.",
+        "enabled": {
+            "label": "버드아이 활성화",
+            "description": "버드아이 뷰 기능을 활성화하거나 비활성화합니다."
+        },
+        "mode": {
+            "label": "추적 모드",
+            "description": "카메라를 버드아이에 포함하는 기준 모드: 'objects', 'motion', 또는 'continuous'."
+        },
+        "order": {
+            "label": "표시 순서",
+            "description": "버드아이 레이아웃 내에서 카메라 배치 순서를 제어하는 숫자입니다."
+        },
+        "restream": {
+            "label": "RTSP 재스트리밍",
+            "description": "버드아이 출력을 RTSP 피드로 재스트리밍합니다. 활성화하면 버드아이가 백그라운드에서 상시 실행됩니다."
+        },
+        "width": {
+            "label": "너비",
+            "description": "합성된 버드아이 프레임의 출력 너비(픽셀)입니다."
+        },
+        "height": {
+            "label": "높이",
+            "description": "합성된 버드아이 프레임의 출력 높이(픽셀)입니다."
+        },
+        "quality": {
+            "label": "인코딩 품질",
+            "description": "버드아이 mpeg1 피드의 인코딩 품질입니다 (1 최고 품질, 31 최저 품질)."
+        },
+        "inactivity_threshold": {
+            "label": "비활성 대기 시간",
+            "description": "카메라에 움직임이나 객체가 감지되지 않을 때 버드아이에서 숨기기까지 대기할 시간(초)입니다."
+        },
+        "layout": {
+            "label": "레이아웃",
+            "description": "버드아이 합성 화면의 레이아웃 옵션입니다.",
+            "scaling_factor": {
+                "label": "크기 조절 비율",
+                "description": "레이아웃 계산 시 사용하는 크기 조정 비율입니다 (범위: 1.0 ~ 5.0)."
+            },
+            "max_cameras": {
+                "label": "최대 카메라 수",
+                "description": "버드아이에 한 번에 표시할 최대 카메라 수입니다. 가장 최근 활동이 발생한 카메라를 우선 표시합니다."
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "유휴 하트비트 FPS",
+            "description": "유휴 상태일 때 마지막으로 합성된 버드아이 프레임을 재전송할 초당 프레임 수입니다 (0은 비활성화)."
+        }
+    },
+    "detect": {
+        "label": "객체 감지",
+        "description": "객체 감지를 실행하고 트래커를 초기화하는 데 사용되는 detect 역할 설정입니다.",
+        "enabled": {
+            "label": "객체 감지 활성화",
+            "description": "모든 카메라의 객체 감지를 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+        },
+        "height": {
+            "label": "감지 높이",
+            "description": "감지 스트림에 사용할 프레임 높이(픽셀)입니다. 비워 두면 원본 스트림 해상도를 사용합니다."
+        },
+        "width": {
+            "label": "감지 너비",
+            "description": "감지 스트림에 사용할 프레임 너비(픽셀)입니다. 비워 두면 원본 스트림 해상도를 사용합니다."
+        },
+        "fps": {
+            "label": "감지 FPS",
+            "description": "감지를 실행할 목표 초당 프레임 수입니다. 낮을수록 CPU 사용량이 감소합니다 (권장값은 5이며, 매우 빠른 물체를 추적할 때만 최대 10까지 권장)."
+        },
+        "min_initialized": {
+            "label": "최소 초기화 프레임",
+            "description": "추적 객체를 생성하기 전 연속 감지되어야 하는 프레임 수입니다. 값을 높이면 오탐 초기화를 줄일 수 있습니다 (기본값: fps / 2)."
+        },
+        "max_disappeared": {
+            "label": "최대 사라짐 프레임",
+            "description": "추적 중인 객체가 시야에서 완전히 사라진 것으로 판단하기까지 감지되지 않는 프레임 수입니다."
+        },
+        "stationary": {
+            "label": "정지 객체 설정",
+            "description": "일정 시간 정지해 있는 객체를 감지하고 관리하기 위한 설정입니다.",
+            "interval": {
+                "label": "정지 확인 주기",
+                "description": "정지 객체임을 재확인하기 위해 감지 검사를 실행하는 간격(프레임 단위)입니다."
+            },
+            "threshold": {
+                "label": "정지 임계값",
+                "description": "객체를 정지 상태로 분류하기 위해 위치 이동이 없어야 하는 프레임 수입니다."
+            },
+            "max_frames": {
+                "label": "최대 추적 프레임",
+                "description": "정지 객체를 폐기하기 전까지 추적할 최대 프레임 한도입니다.",
+                "default": {
+                    "label": "기본 최대 프레임",
+                    "description": "추적을 중단하기 전 정지 객체를 추적할 기본 최대 프레임 수입니다."
+                },
+                "objects": {
+                    "label": "객체별 최대 프레임",
+                    "description": "정지 객체를 추적할 객체 유형별 최대 프레임 수 재정의 설정입니다."
+                }
+            },
+            "classifier": {
+                "label": "시각적 분류기 활성화",
+                "description": "바운딩 박스가 미세하게 흔들려도 시각적 분류기를 사용해 실제로 정지된 객체인지 확인합니다."
+            }
+        },
+        "annotation_offset": {
+            "label": "어노테이션 오프셋",
+            "description": "녹화 영상과 타임라인 바운딩 박스의 싱크를 맞추기 위해 감지 어노테이션을 전후로 이동할 밀리초(ms) 단위 시간입니다 (양수 또는 음수 가능)."
+        }
+    },
+    "face_recognition": {
+        "label": "얼굴 인식",
+        "enabled": {
+            "label": "얼굴 인식 활성화",
+            "description": "모든 카메라의 얼굴 인식을 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+        },
+        "min_area": {
+            "label": "최소 얼굴 크기",
+            "description": "인식을 시도하기 위해 필요한 감지된 얼굴 박스의 최소 면적(픽셀)입니다."
+        },
+        "description": "모든 카메라에 대한 얼굴 감지 및 인식 설정입니다. 카메라별로 재정의할 수 있습니다.",
+        "model_size": {
+            "label": "모델 크기",
+            "description": "얼굴 임베딩에 사용할 모델 크기(small/large)입니다. 큰 모델은 GPU가 필요할 수 있습니다."
+        },
+        "unknown_score": {
+            "label": "미확인 점수 임계값",
+            "description": "얼굴이 일치 후보로 인정받기 위한 거리 임계값입니다 (값이 클수록 엄격함)."
+        },
+        "detection_threshold": {
+            "label": "감지 임계값",
+            "description": "얼굴 감지가 유효하다고 판단하기 위한 최소 감지 신뢰도입니다."
+        },
+        "recognition_threshold": {
+            "label": "인식 임계값",
+            "description": "두 얼굴이 일치한다고 판단하기 위한 얼굴 임베딩 거리 임계값입니다."
+        },
+        "min_faces": {
+            "label": "최소 얼굴 수",
+            "description": "사람에게 인식된 하위 레이블을 부여하기 전 요구되는 최소 얼굴 인식 횟수입니다."
+        },
+        "save_attempts": {
+            "label": "시도 기록 저장 수",
+            "description": "최근 얼굴 인식 UI에 유지할 얼굴 인식 시도 횟수입니다."
+        },
+        "blur_confidence_filter": {
+            "label": "흐림 신뢰도 필터",
+            "description": "저품질 얼굴의 오탐을 줄이기 위해 이미지 흐림 정도에 따라 신뢰도 점수를 조정합니다."
+        },
+        "device": {
+            "label": "디바이스",
+            "description": "특정 디바이스를 지정하기 위한 재정의 옵션입니다. 자세한 내용은 https://onnxruntime.ai/docs/execution-providers/를 참고하세요"
+        }
+    },
+    "ffmpeg": {
+        "path": {
+            "label": "FFmpeg 경로",
+            "description": "사용할 FFmpeg 바이너리 경로 또는 버전 별칭(\"7.0\" 또는 \"8.0\")입니다."
+        },
+        "global_args": {
+            "label": "FFmpeg 글로벌 인수",
+            "description": "FFmpeg 프로세스 전역에 전달할 공통 인수입니다."
+        },
+        "hwaccel_args": {
+            "label": "하드웨어 가속 인수",
+            "description": "FFmpeg 하드웨어 가속 인수입니다. 하드웨어 환경에 맞는 프리셋 사용을 권장합니다."
+        },
+        "input_args": {
+            "label": "입력 인수",
+            "description": "FFmpeg 입력 스트림에 적용할 인수입니다."
+        },
+        "output_args": {
+            "label": "출력 인수",
+            "description": "detect, record 등 서로 다른 FFmpeg 역할에 사용할 기본 출력 인수입니다.",
+            "detect": {
+                "label": "감지(detect) 출력 인수",
+                "description": "detect 역할 스트림에 적용할 기본 출력 인수입니다."
+            },
+            "record": {
+                "label": "녹화(record) 출력 인수",
+                "description": "record 역할 스트림에 적용할 기본 출력 인수입니다."
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg 재연결 대기 시간",
+            "description": "카메라 스트림 연결 실패 시 재연결을 시도하기까지 대기할 시간(초)입니다 (기본값: 10)."
+        },
+        "apple_compatibility": {
+            "label": "Apple 호환성",
+            "description": "H.265 녹화 시 Apple 기기 플레이어와의 호환성을 위해 HEVC 태깅을 활성화합니다."
+        },
+        "gpu": {
+            "label": "GPU 인덱스",
+            "description": "하드웨어 가속에 사용할 기본 GPU 번호(인덱스)입니다."
+        },
+        "inputs": {
+            "label": "카메라 입력 스트림",
+            "description": "이 카메라에 설정된 입력 스트림 정의(경로 및 역할) 목록입니다.",
+            "path": {
+                "label": "입력 경로",
+                "description": "카메라 입력 스트림 URL 또는 디바이스 경로입니다."
+            },
+            "roles": {
+                "label": "입력 역할",
+                "description": "이 입력 스트림에 할당할 역할입니다."
+            },
+            "global_args": {
+                "label": "FFmpeg 글로벌 인수",
+                "description": "이 입력 스트림에만 적용할 FFmpeg 글로벌 인수입니다."
+            },
+            "hwaccel_args": {
+                "label": "하드웨어 가속 인수",
+                "description": "이 입력 스트림에만 적용할 하드웨어 가속 인수입니다."
+            },
+            "input_args": {
+                "label": "입력 인수",
+                "description": "이 스트림에만 개별 적용할 입력 인수입니다."
+            }
+        },
+        "label": "FFmpeg",
+        "description": "바이너리 경로, 인수, 하드웨어 가속 옵션 및 역할별 출력 인수를 포함한 FFmpeg 설정입니다."
+    },
+    "live": {
+        "label": "실시간 재생",
+        "streams": {
+            "label": "실시간 스트림 이름",
+            "description": "실시간 재생에 사용할 restream/go2rtc 이름과 설정된 스트림 이름의 매핑입니다."
+        },
+        "height": {
+            "label": "실시간 재생 높이",
+            "description": "웹 UI에서 jsmpeg 실시간 스트림을 렌더링할 높이(픽셀)입니다 (감지 스트림 높이 이하)."
+        },
+        "quality": {
+            "label": "실시간 품질",
+            "description": "jsmpeg 스트림의 인코딩 품질입니다 (1 최고 품질, 31 최저 품질)."
+        },
+        "description": "jsmpeg 실시간 스트림의 해상도 및 품질을 제어하는 설정입니다. go2rtc를 사용하는 재스트리밍 카메라에는 영향을 미치지 않습니다."
+    },
+    "lpr": {
+        "label": "차량 번호판 인식",
+        "description": "감지 임계값, 포맷, 등록된 번호판 등을 포함한 차량 번호판 인식 설정입니다.",
+        "enabled": {
+            "label": "LPR 활성화",
+            "description": "모든 카메라의 번호판 인식을 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+        },
+        "expire_time": {
+            "label": "만료 시간(초)",
+            "description": "시야에서 사라진 번호판이 트래커에서 만료되기까지의 시간(초)입니다 (전용 LPR 카메라 전용)."
+        },
+        "min_area": {
+            "label": "최소 번호판 크기",
+            "description": "인식을 시도하기 위해 필요한 최소 번호판 면적(픽셀)입니다."
+        },
+        "enhancement": {
+            "label": "이미지 보정 레벨",
+            "description": "OCR 수행 전 번호판 크롭 이미지에 적용할 보정 강도(0~10)입니다 (값이 높다고 항상 인식률이 좋아지지는 않으며, 5 초과는 야간 전용이므로 주의해야 합니다)."
+        },
+        "model_size": {
+            "label": "모델 크기",
+            "description": "텍스트 감지/인식에 사용할 모델 크기입니다. 대부분 'small' 사용을 권장합니다."
+        },
+        "detection_threshold": {
+            "label": "감지 임계값",
+            "description": "번호판 의심 영역에 OCR을 시작하기 위한 감지 신뢰도 임계값입니다."
+        },
+        "recognition_threshold": {
+            "label": "인식 임계값",
+            "description": "인식된 번호판 텍스트를 하위 레이블로 등록하기 위해 요구되는 신뢰도 임계값입니다."
+        },
+        "min_plate_length": {
+            "label": "최소 번호판 길이",
+            "description": "인식된 번호판이 유효하다고 인정되기 위해 포함해야 하는 최소 문자 수입니다."
+        },
+        "format": {
+            "label": "번호판 정규식 포맷",
+            "description": "인식된 번호판 문자열을 예상 형식과 비교 검증하기 위한 선택적 정규표현식입니다."
+        },
+        "match_distance": {
+            "label": "일치 오차 허용치",
+            "description": "감지된 번호판과 등록된 번호판을 비교할 때 허용할 수 있는 불일치 문자 수입니다."
+        },
+        "known_plates": {
+            "label": "등록된 번호판",
+            "description": "특별히 추적하거나 알림을 보낼 번호판 문자열 또는 정규식 목록입니다."
+        },
+        "debug_save_plates": {
+            "label": "디버그 번호판 저장",
+            "description": "LPR 성능 디버깅을 위해 번호판 크롭 이미지를 저장합니다."
+        },
+        "device": {
+            "label": "디바이스",
+            "description": "특정 디바이스를 지정하기 위한 재정의 옵션입니다. 자세한 내용은 https://onnxruntime.ai/docs/execution-providers/를 참고하세요"
+        },
+        "replace_rules": {
+            "label": "치환 규칙",
+            "description": "매칭 전 감지된 번호판 문자열을 정규화하는 데 사용되는 정규식 치환 규칙입니다.",
+            "pattern": {
+                "label": "정규식 패턴"
+            },
+            "replacement": {
+                "label": "치환 문자열"
+            }
+        }
+    },
+    "motion": {
+        "label": "움직임 감지",
+        "enabled": {
+            "label": "움직임 감지 활성화",
+            "description": "모든 카메라의 움직임 감지를 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+        },
+        "threshold": {
+            "label": "움직임 임계값",
+            "description": "움직임 감지기가 사용하는 픽셀 차이 임계값입니다. 값이 클수록 민감도가 낮아집니다 (범위: 1~255)."
+        },
+        "lightning_threshold": {
+            "label": "번개/빛 변화 임계값",
+            "description": "순간적인 조명 변화나 번개를 감지하여 무시하기 위한 임계값입니다 (낮을수록 민감하며 0.3~1.0 사이 값). 움직임 감지 자체를 완전히 끄는 것이 아니라 임계값을 초과할 때 추가 프레임 분석을 일시 중단하는 것이며, 이 동안에도 움직임 기반 녹화는 정상 생성됩니다."
+        },
+        "skip_motion_threshold": {
+            "label": "움직임 건너뛰기 임계값",
+            "description": "0.0~1.0 사이로 설정 시 단일 프레임에서 이 비율 이상의 화면이 바뀌면 움직임 박스를 생성하지 않고 즉시 재보정합니다. 폭풍이나 번개 시 CPU를 절약하고 오탐을 줄일 수 있지만, PTZ 카메라 자동 추적과 같은 실제 이벤트를 놓칠 수 있습니다. 사용하지 않으려면 설정하지 마세요(None)."
+        },
+        "improve_contrast": {
+            "label": "대비 향상",
+            "description": "움직임 분석 전 프레임 대비를 향상하여 감지 성능을 보조합니다."
+        },
+        "contour_area": {
+            "label": "윤곽선 면적",
+            "description": "움직임 윤곽선으로 인정되기 위한 최소 픽셀 면적입니다."
+        },
+        "delta_alpha": {
+            "label": "델타 알파",
+            "description": "움직임 계산 시 프레임 차분화에 사용할 알파 블렌딩 계수입니다."
+        },
+        "frame_alpha": {
+            "label": "프레임 알파",
+            "description": "움직임 전처리용 프레임 블렌딩에 사용할 알파 값입니다."
+        },
+        "frame_height": {
+            "label": "프레임 높이",
+            "description": "움직임 연산 시 프레임을 리사이즈할 높이(픽셀)입니다."
+        },
+        "mask": {
+            "label": "마스크 좌표",
+            "description": "움직임 감지 영역을 포함하거나 제외하기 위해 다각형을 정의하는 정렬된 x,y 좌표입니다."
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT 꺼짐 지연",
+            "description": "마지막 움직임이 감지된 후 MQTT에 'off' 상태를 발행하기까지 대기할 시간(초)입니다."
+        },
+        "enabled_in_config": {
+            "label": "초기 움직임 상태",
+            "description": "초기 정적 설정 파일에서 움직임 감지가 활성화되어 있었는지 여부를 나타냅니다."
+        },
+        "raw_mask": {
+            "label": "원시 마스크"
+        },
+        "description": "카메라별로 재정의하지 않는 한 모든 카메라에 공통 적용되는 기본 움직임 감지 설정입니다."
+    },
+    "objects": {
+        "label": "객체",
+        "description": "추적할 레이블 목록과 객체별 필터를 포함한 기본 객체 추적 설정입니다.",
+        "track": {
+            "label": "추적 대상 객체",
+            "description": "모든 카메라에서 추적할 객체 레이블 목록입니다. 카메라별로 재정의할 수 있습니다."
+        },
+        "filters": {
+            "label": "객체 필터",
+            "description": "오탐지를 줄이기 위해 감지된 객체에 적용할 필터 설정(면적, 비율, 신뢰도)입니다.",
+            "min_area": {
+                "label": "최소 객체 면적",
+                "description": "이 객체 유형에 필요한 최소 바운딩 박스 면적입니다. 픽셀 수(정수) 또는 비율(0.000001~0.99 사이의 실수)로 지정할 수 있습니다."
+            },
+            "max_area": {
+                "label": "최대 객체 면적",
+                "description": "이 객체 유형에 허용되는 최대 바운딩 박스 면적입니다. 픽셀 수(정수) 또는 비율(0.000001~0.99 사이의 실수)로 지정할 수 있습니다."
+            },
+            "min_ratio": {
+                "label": "최소 가로세로 비율",
+                "description": "바운딩 박스에 요구되는 최소 너비/높이 비율입니다."
+            },
+            "max_ratio": {
+                "label": "최대 가로세로 비율",
+                "description": "바운딩 박스에 허용되는 최대 너비/높이 비율입니다."
+            },
+            "threshold": {
+                "label": "신뢰도 임계값",
+                "description": "객체를 실제 탐지로 인정하기 위해 요구되는 평균 감지 신뢰도 임계값입니다."
+            },
+            "min_score": {
+                "label": "최소 신뢰도",
+                "description": "객체로 카운트되기 위해 필요한 단일 프레임 최소 감지 신뢰도입니다."
+            },
+            "mask": {
+                "label": "필터 마스크",
+                "description": "프레임 내에서 이 필터가 적용될 다각형 좌표입니다."
+            },
+            "raw_mask": {
+                "label": "원시 마스크"
+            }
+        },
+        "mask": {
+            "label": "객체 마스크",
+            "description": "지정된 영역에서 객체 감지를 방지하기 위한 마스크 다각형입니다."
+        },
+        "raw_mask": {
+            "label": "원시 마스크"
+        },
+        "genai": {
+            "label": "생성형 AI (GenAI) 객체 설정",
+            "description": "추적된 객체를 설명하고 분석용 프레임을 전송하기 위한 GenAI 옵션입니다.",
+            "enabled": {
+                "label": "GenAI 활성화",
+                "description": "기본적으로 추적된 객체에 대한 GenAI 설명 생성을 활성화합니다."
+            },
+            "use_snapshot": {
+                "label": "스냅샷 사용",
+                "description": "GenAI 설명 생성 시 썸네일 대신 객체 스냅샷을 사용합니다."
+            },
+            "prompt": {
+                "label": "캡션 프롬프트",
+                "description": "GenAI로 설명을 생성할 때 사용할 기본 프롬프트 템플릿입니다."
+            },
+            "object_prompts": {
+                "label": "객체별 프롬프트",
+                "description": "특정 레이블에 대한 GenAI 결과를 맞춤화하기 위한 객체별 개별 프롬프트입니다."
+            },
+            "objects": {
+                "label": "GenAI 대상 객체",
+                "description": "기본적으로 GenAI로 전송할 객체 레이블 목록입니다."
+            },
+            "required_zones": {
+                "label": "필수 구역",
+                "description": "GenAI 설명 생성 대상이 되기 위해 객체가 반드시 진입해야 하는 구역입니다."
+            },
+            "debug_save_thumbnails": {
+                "label": "썸네일 저장",
+                "description": "디버깅 및 검토를 위해 GenAI로 전송된 썸네일을 저장합니다."
+            },
+            "send_triggers": {
+                "label": "GenAI 전송 트리거",
+                "description": "프레임을 GenAI로 전송할 시점(추적 종료 시, 주요 업데이트 후 등)을 정의합니다.",
+                "tracked_object_end": {
+                    "label": "종료 시 전송",
+                    "description": "추적 객체의 동작이 종료되었을 때 GenAI에 요청을 보냅니다."
+                },
+                "after_significant_updates": {
+                    "label": "조기 GenAI 트리거",
+                    "description": "추적 객체에 지정된 횟수만큼 주요 변화가 발생한 후 조기에 GenAI 요청을 보냅니다."
+                }
+            },
+            "enabled_in_config": {
+                "label": "초기 GenAI 상태",
+                "description": "초기 정적 설정에서 GenAI가 활성화되었는지 여부를 나타냅니다."
+            }
+        },
+        "filters_attribute": {
+            "label": "속성 필터",
+            "description": "오탐지를 줄이기 위해 감지된 속성에 적용할 필터 설정(면적, 비율, 신뢰도)입니다.",
+            "min_area": {
+                "label": "최소 속성 면적",
+                "description": "이 속성에 필요한 최소 바운딩 박스 면적입니다. 픽셀 수(정수) 또는 비율(0.000001~0.99 사이의 실수)로 지정할 수 있습니다."
+            },
+            "max_area": {
+                "label": "최대 속성 면적",
+                "description": "이 속성에 허용되는 최대 바운딩 박스 면적입니다. 픽셀 수(정수) 또는 비율(0.000001~0.99 사이의 실수)로 지정할 수 있습니다."
+            },
+            "min_ratio": {
+                "label": "최소 가로세로 비율",
+                "description": "바운딩 박스에 요구되는 최소 너비/높이 비율입니다."
+            },
+            "max_ratio": {
+                "label": "최대 가로세로 비율",
+                "description": "바운딩 박스에 허용되는 최대 너비/높이 비율입니다."
+            },
+            "threshold": {
+                "label": "신뢰도 임계값",
+                "description": "속성을 실제 탐지로 인정하기 위해 요구되는 평균 감지 신뢰도 임계값입니다."
+            },
+            "min_score": {
+                "label": "최소 신뢰도",
+                "description": "이 속성을 상위 객체와 연결하기 위해 필요한 단일 프레임 최소 감지 신뢰도입니다."
+            },
+            "mask": {
+                "label": "필터 마스크",
+                "description": "프레임 내에서 이 필터가 적용될 다각형 좌표입니다."
+            },
+            "raw_mask": {
+                "label": "원시 마스크"
+            }
+        }
+    },
+    "record": {
+        "label": "녹화",
+        "enabled": {
+            "label": "녹화 활성화",
+            "description": "모든 카메라의 녹화를 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+        },
+        "expire_interval": {
+            "label": "녹화 파일 정리 주기",
+            "description": "만료된 녹화 세그먼트를 삭제하는 정리 작업 간격(분)입니다."
+        },
+        "continuous": {
+            "label": "상시 녹화 보관",
+            "description": "객체 추적이나 움직임 여부와 상관없이 녹화본을 보관할 일수입니다. 알림이나 감지 이벤트만 보관하려면 0으로 설정하세요.",
+            "days": {
+                "label": "보관 일수",
+                "description": "녹화본 보관 일수입니다."
+            }
+        },
+        "motion": {
+            "label": "움직임 녹화 보관",
+            "description": "추적 객체가 없더라도 움직임에 의해 트리거된 녹화본을 보관할 일수입니다. 알림이나 감지 이벤트만 보관하려면 0으로 설정하세요.",
+            "days": {
+                "label": "보관 일수",
+                "description": "녹화본 보관 일수입니다."
+            }
+        },
+        "detections": {
+            "label": "감지 녹화 보관",
+            "description": "이벤트 전/후 버퍼 캡처 시간을 포함한 감지 이벤트의 녹화 보관 설정입니다.",
+            "pre_capture": {
+                "label": "사전 캡처 시간",
+                "description": "감지 이벤트 시작 전 녹화에 포함할 시간(초)입니다."
+            },
+            "post_capture": {
+                "label": "사후 캡처 시간",
+                "description": "감지 이벤트 종료 후 녹화에 포함할 시간(초)입니다."
+            },
+            "retain": {
+                "label": "이벤트 보관",
+                "description": "감지 이벤트 녹화본의 보관 설정입니다.",
+                "days": {
+                    "label": "보관 일수",
+                    "description": "감지 이벤트 녹화본을 보관할 일수입니다."
+                },
+                "mode": {
+                    "label": "보관 모드",
+                    "description": "보관 모드: all(모든 구간 저장), motion(움직임이 있는 구간 저장), active_objects(활동 중인 객체가 있는 구간 저장)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "알림 녹화 보관",
+            "description": "이벤트 전/후 버퍼 캡처 시간을 포함한 알림 이벤트의 녹화 보관 설정입니다.",
+            "pre_capture": {
+                "label": "사전 캡처 시간",
+                "description": "알림 이벤트 시작 전 녹화에 포함할 시간(초)입니다."
+            },
+            "post_capture": {
+                "label": "사후 캡처 시간",
+                "description": "알림 이벤트 종료 후 녹화에 포함할 시간(초)입니다."
+            },
+            "retain": {
+                "label": "이벤트 보관",
+                "description": "알림 이벤트 녹화본의 보관 설정입니다.",
+                "days": {
+                    "label": "보관 일수",
+                    "description": "알림 이벤트 녹화본을 보관할 일수입니다."
+                },
+                "mode": {
+                    "label": "보관 모드",
+                    "description": "보관 모드: all(모든 구간 저장), motion(움직임이 있는 구간 저장), active_objects(활동 중인 객체가 있는 구간 저장)."
+                }
+            }
+        },
+        "export": {
+            "label": "내보내기 설정",
+            "description": "타임랩스 및 하드웨어 가속 등 녹화본 내보내기 시 적용할 설정입니다.",
+            "hwaccel_args": {
+                "label": "내보내기 하드웨어 가속 인수",
+                "description": "내보내기 및 트랜스코딩 작업에 사용할 하드웨어 가속 인수입니다."
+            },
+            "max_concurrent": {
+                "label": "최대 동시 내보내기 수",
+                "description": "동시에 처리할 수 있는 최대 내보내기 작업 수입니다."
+            },
+            "chapters": {
+                "label": "내보낸 녹화 영상에 삽입할 챕터 메타데이터"
+            }
+        },
+        "preview": {
+            "label": "미리보기 설정",
+            "description": "UI에 표시되는 녹화 미리보기의 화질을 제어하는 설정입니다.",
+            "quality": {
+                "label": "미리보기 화질",
+                "description": "미리보기 화질 레벨 (very_low, low, medium, high, very_high)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "초기 녹화 상태",
+            "description": "초기 정적 구성에서 녹화가 활성화되어 있었는지 여부를 나타냅니다."
+        },
+        "description": "카메라별로 재정의하지 않는 한 모든 카메라에 적용되는 녹화 및 보관 설정입니다."
+    },
+    "review": {
+        "label": "다시보기",
+        "alerts": {
+            "label": "알림 설정",
+            "description": "어떤 추적 객체가 알림을 생성하고 알림을 어떻게 보관할지 결정하는 설정입니다.",
+            "enabled": {
+                "label": "알림 활성화",
+                "description": "모든 카메라의 알림 생성을 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+            },
+            "labels": {
+                "label": "알림 대상 레이블",
+                "description": "알림을 트리거할 객체 레이블 목록입니다 (예: car, person)."
+            },
+            "required_zones": {
+                "label": "필수 구역",
+                "description": "알림으로 분류되기 위해 객체가 진입해야 하는 구역입니다. 모든 구역을 허용하려면 비워 두세요."
+            },
+            "enabled_in_config": {
+                "label": "초기 알림 상태",
+                "description": "정적 설정에서 알림이 원래 활성화되어 있었는지 여부를 추적합니다."
+            },
+            "cutoff_time": {
+                "label": "알림 종료 대기 시간",
+                "description": "알림 유발 활동이 멈춘 후 알림을 공식 종료하기까지 대기할 시간(초)입니다."
+            }
+        },
+        "detections": {
+            "label": "감지 이벤트 설정",
+            "description": "어떤 추적 객체가 일반 감지(알림 제외) 이벤트를 생성하고 어떻게 보관할지 결정하는 설정입니다.",
+            "enabled": {
+                "label": "감지 이벤트 활성화",
+                "description": "모든 카메라의 감지 이벤트를 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+            },
+            "labels": {
+                "label": "감지 대상 레이블",
+                "description": "일반 감지 이벤트로 인정할 객체 레이블 목록입니다."
+            },
+            "required_zones": {
+                "label": "필수 구역",
+                "description": "감지 이벤트로 처리되기 위해 객체가 진입해야 하는 구역입니다. 모든 구역을 허용하려면 비워 두세요."
+            },
+            "cutoff_time": {
+                "label": "감지 종료 대기 시간",
+                "description": "감지 유발 활동이 멈춘 후 이벤트를 공식 종료하기까지 대기할 시간(초)입니다."
+            },
+            "enabled_in_config": {
+                "label": "초기 감지 상태",
+                "description": "정적 설정에서 감지 이벤트가 원래 활성화되어 있었는지 여부를 추적합니다."
+            }
+        },
+        "genai": {
+            "label": "GenAI 다시보기 설정",
+            "description": "다시보기 항목의 설명과 요약을 생성하기 위한 생성형 AI 사용을 제어합니다.",
+            "enabled": {
+                "label": "GenAI 설명 활성화",
+                "description": "다시보기 항목에 대한 GenAI 기반 설명 및 요약 생성을 활성화하거나 비활성화합니다."
+            },
+            "alerts": {
+                "label": "알림에 GenAI 활성화",
+                "description": "알림 항목에 대해 GenAI로 설명을 생성합니다."
+            },
+            "detections": {
+                "label": "감지에 GenAI 활성화",
+                "description": "감지 항목에 대해 GenAI로 설명을 생성합니다."
+            },
+            "image_source": {
+                "label": "다시보기 이미지 소스",
+                "description": "GenAI로 전송할 이미지 소스 ('preview' 또는 'recordings'). 'recordings'는 화질이 더 높지만 토큰 사용량이 증가합니다."
+            },
+            "additional_concerns": {
+                "label": "추가 주의 사항",
+                "description": "이 카메라의 활동을 평가할 때 GenAI가 고려해야 할 추가 주의 사항이나 참고 사항 목록입니다."
+            },
+            "debug_save_thumbnails": {
+                "label": "썸네일 저장",
+                "description": "디버깅 및 검토를 위해 GenAI 제공업체로 전송된 썸네일을 저장합니다."
+            },
+            "enabled_in_config": {
+                "label": "초기 GenAI 상태",
+                "description": "정적 설정에서 GenAI 다시보기가 원래 활성화되어 있었는지 여부를 추적합니다."
+            },
+            "preferred_language": {
+                "label": "선호 언어",
+                "description": "GenAI가 생성할 응답에 요청할 선호 언어입니다."
+            },
+            "activity_context_prompt": {
+                "label": "활동 맥락 프롬프트",
+                "description": "GenAI 요약에 맥락을 제공하기 위해 어떤 활동이 의심스럽거나 정상적인지 설명하는 커스텀 프롬프트입니다."
+            }
+        },
+        "description": "UI 및 저장소에서 사용하는 알림, 감지 및 GenAI 요약을 제어하는 설정입니다."
+    },
+    "semantic_search": {
+        "label": "시맨틱(의미 기반) 검색",
+        "triggers": {
+            "label": "트리거",
+            "description": "카메라별 시맨틱 검색 트리거를 위한 동작 및 매칭 기준입니다.",
+            "friendly_name": {
+                "label": "트리거 별칭",
+                "description": "UI에 표시될 이 트리거의 친숙한 이름(선택 사항)입니다."
+            },
+            "enabled": {
+                "label": "트리거 활성화",
+                "description": "이 시맨틱 검색 트리거를 활성화하거나 비활성화합니다."
+            },
+            "type": {
+                "label": "트리거 유형",
+                "description": "트리거 유형: 'thumbnail'(이미지 비교) 또는 'description'(텍스트 비교)."
+            },
+            "data": {
+                "label": "트리거 내용",
+                "description": "추적 객체와 매칭할 텍스트 문구 또는 썸네일 ID입니다."
+            },
+            "threshold": {
+                "label": "트리거 임계값",
+                "description": "이 트리거를 작동시키기 위해 요구되는 최소 유사도 점수(0~1)입니다."
+            },
+            "actions": {
+                "label": "트리거 동작",
+                "description": "트리거가 매칭되었을 때 실행할 동작 목록입니다 (notification, sub_label, attribute)."
+            }
+        },
+        "description": "유사한 항목을 찾기 위해 객체 임베딩을 구축하고 쿼리하는 시맨틱 검색 설정입니다.",
+        "enabled": {
+            "label": "시맨틱 검색 활성화",
+            "description": "시맨틱 검색 기능을 활성화하거나 비활성화합니다."
+        },
+        "reindex": {
+            "label": "시작 시 재색인",
+            "description": "시작 시 과거 추적 객체 전체를 임베딩 데이터베이스로 다시 색인하도록 트리거합니다."
+        },
+        "model": {
+            "label": "시맨틱 검색 모델 또는 GenAI 제공업체 이름",
+            "description": "시맨틱 검색에 사용할 임베딩 모델(예: 'jinav1') 또는 embeddings 역할을 가진 GenAI 제공업체 이름입니다."
+        },
+        "model_size": {
+            "label": "모델 크기",
+            "description": "모델 크기 선택입니다 ('small'은 CPU에서 실행 가능하며, 'large'는 일반적으로 GPU가 필요함)."
+        },
+        "device": {
+            "label": "디바이스",
+            "description": "특정 디바이스를 지정하기 위한 재정의 옵션입니다. 자세한 내용은 https://onnxruntime.ai/docs/execution-providers/를 참고하세요"
+        }
+    },
+    "snapshots": {
+        "label": "스냅샷",
+        "enabled": {
+            "label": "스냅샷 활성화",
+            "description": "모든 카메라의 스냅샷 저장을 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+        },
+        "timestamp": {
+            "label": "타임스탬프 오버레이",
+            "description": "API 스냅샷에 타임스탬프를 덧씌워 표시합니다."
+        },
+        "bounding_box": {
+            "label": "바운딩 박스 오버레이",
+            "description": "API 스냅샷에 추적 객체의 바운딩 박스를 그립니다."
+        },
+        "crop": {
+            "label": "스냅샷 크롭",
+            "description": "API 스냅샷을 감지된 객체의 바운딩 박스 크기로 잘라냅니다."
+        },
+        "required_zones": {
+            "label": "필수 구역",
+            "description": "스냅샷을 저장하기 위해 객체가 반드시 진입해야 하는 구역입니다."
+        },
+        "height": {
+            "label": "스냅샷 높이",
+            "description": "API 스냅샷을 리사이즈할 높이(픽셀)입니다. 비워 두면 원본 크기를 유지합니다."
+        },
+        "retain": {
+            "label": "스냅샷 보관",
+            "description": "기본 보관 일수 및 객체별 재정의를 포함한 스냅샷 보관 설정입니다.",
+            "default": {
+                "label": "기본 보관 일수",
+                "description": "스냅샷을 보관할 기본 일수입니다."
+            },
+            "objects": {
+                "label": "객체별 보관 일수",
+                "description": "스냅샷 보관 일수를 객체 유형별로 개별 재정의합니다."
+            }
+        },
+        "quality": {
+            "label": "스냅샷 화질",
+            "description": "저장할 스냅샷의 인코딩 품질입니다 (0~100)."
+        },
+        "description": "모든 카메라에서 API로 생성되는 추적 객체 스냅샷 설정입니다. 카메라별로 재정의할 수 있습니다."
+    },
+    "timestamp_style": {
+        "label": "타임스탬프 스타일",
+        "position": {
+            "label": "타임스탬프 위치",
+            "description": "이미지 내 타임스탬프 위치 (tl: 좌상단, tr: 우상단, bl: 좌하단, br: 우하단)."
+        },
+        "format": {
+            "label": "타임스탬프 형식",
+            "description": "타임스탬프 표시에 사용할 날짜/시간 형식 문자열입니다 (Python datetime 포맷 코드)."
+        },
+        "color": {
+            "label": "타임스탬프 색상",
+            "description": "타임스탬프 텍스트의 RGB 색상값입니다 (모든 값은 0~255).",
+            "red": {
+                "label": "빨강 (Red)",
+                "description": "타임스탬프 색상의 빨간색 성분 (0-255)."
+            },
+            "green": {
+                "label": "초록 (Green)",
+                "description": "타임스탬프 색상의 초록색 성분 (0-255)."
+            },
+            "blue": {
+                "label": "파랑 (Blue)",
+                "description": "타임스탬프 색상의 파란색 성분 (0-255)."
+            }
+        },
+        "thickness": {
+            "label": "타임스탬프 두께",
+            "description": "타임스탬프 글자의 선 두께입니다."
+        },
+        "effect": {
+            "label": "타임스탬프 효과",
+            "description": "타임스탬프 텍스트에 적용할 시각 효과입니다 (none, solid, shadow)."
+        },
+        "description": "디버그 뷰 및 스냅샷 피드에 적용되는 타임스탬프 텍스트 스타일 옵션입니다."
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "이 카메라의 ONVIF 연결 및 PTZ 자동 추적 설정입니다.",
+        "host": {
+            "label": "ONVIF 호스트",
+            "description": "이 카메라의 ONVIF 서비스 호스트 주소(및 선택적 프로토콜 스키마)입니다."
+        },
+        "port": {
+            "label": "ONVIF 포트",
+            "description": "ONVIF 서비스 포트 번호입니다."
+        },
+        "user": {
+            "label": "ONVIF 사용자 이름",
+            "description": "ONVIF 인증에 사용할 사용자 이름입니다 (일부 기기는 관리자 계정이 필요함)."
+        },
+        "password": {
+            "label": "ONVIF 비밀번호",
+            "description": "ONVIF 인증 비밀번호입니다."
+        },
+        "tls_insecure": {
+            "label": "TLS 검증 비활성화",
+            "description": "ONVIF 통신 시 TLS 인증서 검증을 건너뛰고 Digest 인증을 끕니다 (안전하지 않으므로 신뢰할 수 있는 네트워크에서만 사용하세요)."
+        },
+        "profile": {
+            "label": "ONVIF 프로필",
+            "description": "PTZ 제어에 사용할 특정 ONVIF 미디어 프로필의 토큰 또는 이름입니다. 지정하지 않으면 유효한 PTZ 구성이 있는 첫 번째 프로필이 자동 선택됩니다."
+        },
+        "autotracking": {
+            "label": "자동 추적 (Autotracking)",
+            "description": "PTZ 카메라를 움직여 움직이는 객체를 프레임 중앙에 자동으로 추적하고 유지합니다.",
+            "enabled": {
+                "label": "자동 추적 활성화",
+                "description": "감지된 객체에 대한 PTZ 카메라의 자동 추적을 활성화하거나 비활성화합니다."
+            },
+            "calibrate_on_startup": {
+                "label": "시작 시 모터 캘리브레이션",
+                "description": "추적 정확도를 향상하기 위해 부팅 시 PTZ 모터 속도를 측정합니다. 보정 완료 후 Frigate가 movement_weights 값을 자동으로 업데이트합니다."
+            },
+            "zooming": {
+                "label": "줌 모드",
+                "description": "줌 동작 제어: disabled(팬/틸트만 사용), absolute(가장 안정적인 호환성), relative(팬/틸트/줌 동시 작동)."
+            },
+            "zoom_factor": {
+                "label": "줌 배율",
+                "description": "추적 중인 객체의 확대 수준을 제어합니다. 값이 낮으면 주변 시야를 넓게 유지하고, 높으면 대상을 가깝게 확대하지만 추적을 놓칠 위험이 있습니다 (0.1~0.75 사이 값)."
+            },
+            "track": {
+                "label": "추적 대상 객체",
+                "description": "자동 추적을 작동시킬 객체 유형 목록입니다."
+            },
+            "required_zones": {
+                "label": "필수 구역",
+                "description": "자동 추적이 시작되기 위해 객체가 먼저 진입해야 하는 구역입니다."
+            },
+            "return_preset": {
+                "label": "복귀 프리셋",
+                "description": "추적이 끝난 후 카메라가 돌아갈 펌웨어상의 ONVIF 프리셋 이름입니다."
+            },
+            "timeout": {
+                "label": "복귀 대기 시간",
+                "description": "객체를 놓친 후 카메라가 프리셋 위치로 복귀하기까지 대기할 시간(초)입니다."
+            },
+            "movement_weights": {
+                "label": "이동 가중치",
+                "description": "카메라 캘리브레이션을 통해 자동 생성된 보정값입니다. 수동으로 수정하지 마세요."
+            },
+            "enabled_in_config": {
+                "label": "초기 자동 추적 상태",
+                "description": "설정에서 자동 추적이 활성화되어 있었는지 여부를 추적하는 내부 필드입니다."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "시간 불일치 무시",
+            "description": "ONVIF 통신 시 카메라와 Frigate 서버 간의 시간 동기화 차이를 무시합니다."
+        }
+    },
+    "profiles": {
+        "label": "프로필",
+        "description": "친숙한 이름을 가진 프로필 정의입니다. 카메라 프로필은 여기에 정의된 이름을 참조해야 합니다.",
+        "friendly_name": {
+            "label": "별칭",
+            "description": "UI에 표시될 이 프로필의 표시 이름입니다."
+        }
+    },
+    "proxy": {
+        "label": "프록시",
+        "description": "인증된 사용자 헤더를 전달하는 역방향 프록시(Reverse Proxy) 뒤에 Frigate를 연동하기 위한 설정입니다.",
+        "header_map": {
+            "label": "헤더 매핑",
+            "description": "프록시 기반 인증을 위해 수신된 프록시 헤더를 Frigate의 사용자 및 역할 필드에 매핑합니다.",
+            "user": {
+                "label": "사용자 헤더",
+                "description": "업스트림 프록시가 제공하는 인증된 사용자 이름이 포함된 헤더입니다."
+            },
+            "role": {
+                "label": "역할 헤더",
+                "description": "업스트림 프록시가 제공하는 인증된 사용자의 역할 또는 그룹 정보가 포함된 헤더입니다."
+            },
+            "role_map": {
+                "label": "역할 매핑",
+                "description": "업스트림 그룹 값을 Frigate 역할에 매핑합니다 (예: 관리자 그룹을 admin 역할에 매핑)."
+            }
+        },
+        "logout_url": {
+            "label": "로그아웃 URL",
+            "description": "프록시를 통해 로그아웃할 때 사용자를 리다이렉트할 URL입니다."
+        },
+        "auth_secret": {
+            "label": "프록시 시크릿",
+            "description": "신뢰할 수 있는 프록시인지 검증하기 위해 X-Proxy-Secret 헤더와 비교할 선택적 Secret 값입니다."
+        },
+        "default_role": {
+            "label": "기본 역할",
+            "description": "일치하는 역할 매핑이 없을 때 프록시 인증 사용자에게 할당할 기본 역할입니다."
+        },
+        "separator": {
+            "label": "구분자 문자",
+            "description": "프록시 헤더에 제공된 다중 값을 분리하는 데 사용되는 구분 기호입니다."
+        }
+    },
+    "telemetry": {
+        "label": "원격 측정 (Telemetry)",
+        "description": "GPU 및 네트워크 대역폭 모니터링을 포함한 시스템 텔레메트리 및 통계 옵션입니다.",
+        "network_interfaces": {
+            "label": "네트워크 인터페이스",
+            "description": "대역폭 통계를 모니터링할 네트워크 인터페이스 이름 접두사 목록입니다."
+        },
+        "stats": {
+            "label": "시스템 통계",
+            "description": "다양한 시스템 및 GPU 통계 수집을 활성화하거나 비활성화하는 옵션입니다.",
+            "amd_gpu_stats": {
+                "label": "AMD GPU 통계",
+                "description": "AMD GPU가 장착된 경우 통계 수집을 활성화합니다."
+            },
+            "intel_gpu_stats": {
+                "label": "Intel GPU 통계",
+                "description": "Intel GPU가 장착된 경우 통계 수집을 활성화합니다."
+            },
+            "network_bandwidth": {
+                "label": "네트워크 대역폭",
+                "description": "카메라 FFmpeg 프로세스 및 감지기에 대한 프로세스별 네트워크 대역폭 모니터링을 활성화합니다 (권한 필요)."
+            },
+            "intel_gpu_device": {
+                "label": "Intel GPU 디바이스",
+                "description": "여러 대의 GPU가 있을 때 통계를 특정 장치에 고정하기 위한 PCI 버스 주소 또는 DRM 디바이스 경로(예: /dev/dri/card1)입니다."
+            }
+        },
+        "version_check": {
+            "label": "버전 확인",
+            "description": "최신 Frigate 버전이 출시되었는지 확인하는 아웃바운드 검사를 활성화합니다."
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "Frigate 웹 엔드포인트(포트 8971)에 대한 TLS 보안 설정입니다.",
+        "enabled": {
+            "label": "TLS 활성화",
+            "description": "설정된 TLS 포트에서 Frigate 웹 UI 및 API에 대한 TLS 연결을 활성화합니다."
+        }
+    },
+    "ui": {
+        "label": "UI",
+        "description": "시간대, 시간/날짜 형식, 단위 등 사용자 인터페이스 기본 설정입니다.",
+        "timezone": {
+            "label": "시간대",
+            "description": "UI 전반에 표시할 시간대입니다 (설정하지 않으면 브라우저 로컬 시간 사용)."
+        },
+        "time_format": {
+            "label": "시간 표기 형식",
+            "description": "UI에서 사용할 시간 표기 형식입니다 (browser, 12hour, 또는 24hour)."
+        },
+        "unit_system": {
+            "label": "단위 체계",
+            "description": "UI 및 MQTT에 표시할 단위 체계입니다 (metric: 미터법, imperial: 야드파운드법)."
+        }
+    },
+    "detectors": {
+        "label": "감지기 하드웨어",
+        "description": "객체 감지기(CPU, GPU, ONNX 백엔드) 및 감지기별 모델 설정입니다.",
+        "type": {
+            "label": "유형"
+        },
+        "model": {
+            "label": "감지기 전용 모델 설정",
+            "description": "감지기별 모델 설정 옵션(경로, 입력 크기 등)입니다.",
+            "path": {
+                "label": "커스텀 감지 모델 경로",
+                "description": "사용자 지정 감지 모델 파일의 경로(또는 Frigate+ 모델용 plus://<model_id>)입니다."
+            },
+            "labelmap_path": {
+                "label": "커스텀 감지기 레이블 맵",
+                "description": "감지기용 숫자 클래스를 문자열 레이블로 매핑하는 labelmap 파일 경로입니다."
+            },
+            "width": {
+                "label": "모델 입력 너비",
+                "description": "모델 입력 텐서의 너비(픽셀)입니다."
+            },
+            "height": {
+                "label": "모델 입력 높이",
+                "description": "모델 입력 텐서의 높이(픽셀)입니다."
+            },
+            "labelmap": {
+                "label": "레이블 맵 사용자 정의",
+                "description": "표준 레이블 맵에 병합할 재정의 또는 리매핑 항목입니다."
+            },
+            "attributes_map": {
+                "label": "객체 레이블과 속성 레이블 매핑",
+                "description": "메타데이터를 첨부하기 위한 객체 레이블과 속성 레이블 간의 매핑입니다 (예: 'car' -> ['license_plate'])."
+            },
+            "input_tensor": {
+                "label": "모델 입력 텐서 형태",
+                "description": "모델이 요구하는 텐서 형식입니다: 'nhwc' 또는 'nchw'."
+            },
+            "input_pixel_format": {
+                "label": "모델 입력 색상 포맷",
+                "description": "모델이 요구하는 픽셀 색상 공간입니다: 'rgb', 'bgr', 또는 'yuv'."
+            },
+            "input_dtype": {
+                "label": "모델 입력 데이터 타입",
+                "description": "모델 입력 텐서의 데이터 타입입니다 (예: 'float32')."
+            },
+            "model_type": {
+                "label": "객체 감지 모델 유형",
+                "description": "일부 감지기에서 최적화에 사용하는 감지기 아키텍처 유형(ssd, yolox, yolonas, yolo-generic, rfdetr, dfine)입니다."
+            }
+        },
+        "model_path": {
+            "label": "감지기 전용 모델 경로",
+            "description": "선택한 감지기에서 요구하는 감지 모델 바이너리의 파일 경로입니다."
+        },
+        "axengine": {
+            "label": "AXEngine NPU",
+            "description": "AXEngine 런타임을 통해 컴파일된 .axmodel 파일을 실행하는 AXERA AX650N/AX8850N NPU 감지기입니다."
+        },
+        "cpu": {
+            "label": "CPU",
+            "description": "하드웨어 가속 없이 호스트 CPU에서 TensorFlow Lite 모델을 실행하는 CPU TFLite 감지기입니다 (권장되지 않음).",
+            "num_threads": {
+                "label": "감지 스레드 수",
+                "description": "CPU 기반 추론 처리에 사용할 스레드 수입니다."
+            }
+        },
+        "deepstack": {
+            "label": "DeepStack",
+            "description": "원격 DeepStack HTTP API로 이미지를 전송하여 추론하는 DeepStack/CodeProject.AI 감지기입니다 (권장되지 않음).",
+            "api_url": {
+                "label": "DeepStack API URL",
+                "description": "DeepStack API의 엔드포인트 URL입니다."
+            },
+            "api_timeout": {
+                "label": "DeepStack API 제한 시간(초)",
+                "description": "DeepStack API 요청에 허용되는 최대 시간입니다."
+            },
+            "api_key": {
+                "label": "DeepStack API 키",
+                "description": "인증이 필요한 DeepStack 서비스에 전달할 선택적 API 키입니다."
+            }
+        },
+        "edgetpu": {
+            "label": "EdgeTPU",
+            "description": "EdgeTPU 델리게이트를 사용하여 Coral EdgeTPU용으로 컴파일된 TensorFlow Lite 모델을 실행하는 감지기입니다.",
+            "device": {
+                "label": "디바이스 유형",
+                "description": "EdgeTPU 추론에 사용할 디바이스입니다 (예: 'usb', 'pci')."
+            }
+        },
+        "hailo8l": {
+            "label": "Hailo-8/Hailo-8L",
+            "description": "Hailo 하드웨어 추론을 위해 HEF 모델과 HailoRT SDK를 사용하는 Hailo-8/Hailo-8L 감지기입니다.",
+            "device": {
+                "label": "디바이스 유형",
+                "description": "Hailo 추론에 사용할 디바이스입니다 (예: 'PCIe', 'M.2')."
+            }
+        },
+        "memryx": {
+            "label": "MemryX",
+            "description": "MemryX 가속기에서 컴파일된 DFP 모델을 실행하는 MemryX MX3 감지기입니다.",
+            "device": {
+                "label": "디바이스 경로",
+                "description": "MemryX 추론에 사용할 디바이스 경로입니다 (예: 'PCIe')."
+            }
+        },
+        "onnx": {
+            "label": "ONNX",
+            "description": "ONNX 모델을 실행하는 감지기입니다. 사용 가능한 가속 백엔드(CUDA/ROCm/OpenVINO)가 있을 경우 자동으로 활용합니다.",
+            "device": {
+                "label": "디바이스 유형",
+                "description": "ONNX 추론에 사용할 디바이스입니다 (예: 'AUTO', 'CPU', 'GPU')."
+            }
+        },
+        "openvino": {
+            "label": "OpenVINO",
+            "description": "AMD 및 Intel CPU, Intel GPU 및 Intel VPU 하드웨어를 지원하는 OpenVINO 감지기입니다.",
+            "device": {
+                "label": "디바이스 유형",
+                "description": "OpenVINO 추론에 사용할 디바이스입니다 (예: 'CPU', 'GPU', 'NPU')."
+            }
+        },
+        "rknn": {
+            "label": "RKNN",
+            "description": "Rockchip NPU용 RKNN 감지기입니다. Rockchip 하드웨어에서 컴파일된 RKNN 모델을 실행합니다.",
+            "num_cores": {
+                "label": "사용할 NPU 코어 수.",
+                "description": "추론에 사용할 NPU 코어 수입니다 (0은 자동)."
+            }
+        },
+        "synaptics": {
+            "label": "Synaptics",
+            "description": "Synaptics 하드웨어에서 Synap SDK를 사용하여 .synap 형식의 모델을 실행하는 Synaptics NPU 감지기입니다."
+        },
+        "teflon_tfl": {
+            "label": "Teflon",
+            "description": "지원되는 GPU에서 추론을 가속하기 위해 Mesa Teflon 델리게이트 라이브러리를 사용하는 TFLite 감지기입니다."
+        },
+        "tensorrt": {
+            "label": "TensorRT",
+            "description": "직렬화된 TensorRT 엔진을 사용하여 Nvidia Jetson 기기에서 가속 추론을 수행하는 TensorRT 감지기입니다.",
+            "device": {
+                "label": "GPU 디바이스 인덱스",
+                "description": "추론에 사용할 GPU 디바이스 인덱스입니다."
+            }
+        },
+        "zmq": {
+            "label": "ZMQ IPC",
+            "description": "ZeroMQ IPC 엔드포인트를 통해 외부 프로세스로 추론을 위임하는 ZMQ IPC 감지기입니다.",
+            "endpoint": {
+                "label": "ZMQ IPC 엔드포인트",
+                "description": "연결할 ZMQ 엔드포인트 주소입니다."
+            },
+            "request_timeout_ms": {
+                "label": "ZMQ 요청 제한 시간(밀리초)",
+                "description": "ZMQ 요청의 만료 시간(ms)입니다."
+            },
+            "linger_ms": {
+                "label": "ZMQ 소켓 린거(밀리초)",
+                "description": "소켓 종료 시 대기할 린거 기간(ms)입니다."
+            }
+        }
+    },
+    "model": {
+        "label": "감지 모델",
+        "description": "커스텀 객체 감지 모델 및 입력 형태를 구성하기 위한 설정입니다.",
+        "path": {
+            "label": "커스텀 감지 모델 경로",
+            "description": "사용자 지정 감지 모델 파일의 경로(또는 Frigate+ 모델용 plus://<model_id>)입니다."
+        },
+        "labelmap_path": {
+            "label": "커스텀 감지기 레이블 맵",
+            "description": "감지기용 숫자 클래스를 문자열 레이블로 매핑하는 labelmap 파일 경로입니다."
+        },
+        "width": {
+            "label": "모델 입력 너비",
+            "description": "모델 입력 텐서의 너비(픽셀)입니다."
+        },
+        "height": {
+            "label": "모델 입력 높이",
+            "description": "모델 입력 텐서의 높이(픽셀)입니다."
+        },
+        "labelmap": {
+            "label": "레이블 맵 사용자 정의",
+            "description": "표준 레이블 맵에 병합할 재정의 또는 리매핑 항목입니다."
+        },
+        "attributes_map": {
+            "label": "객체 레이블과 속성 레이블 매핑",
+            "description": "메타데이터를 첨부하기 위한 객체 레이블과 속성 레이블 간의 매핑입니다 (예: 'car' -> ['license_plate'])."
+        },
+        "input_tensor": {
+            "label": "모델 입력 텐서 형태",
+            "description": "모델이 요구하는 텐서 형식입니다: 'nhwc' 또는 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "모델 입력 색상 포맷",
+            "description": "모델이 요구하는 픽셀 색상 공간입니다: 'rgb', 'bgr', 또는 'yuv'."
+        },
+        "input_dtype": {
+            "label": "모델 입력 데이터 타입",
+            "description": "모델 입력 텐서의 데이터 타입입니다 (예: 'float32')."
+        },
+        "model_type": {
+            "label": "객체 감지 모델 유형",
+            "description": "일부 감지기에서 최적화에 사용하는 감지기 아키텍처 유형(ssd, yolox, yolonas, yolo-generic, rfdetr, dfine)입니다."
+        }
+    },
+    "genai": {
+        "label": "생성형 AI (GenAI) 구성",
+        "description": "객체 설명 및 다시보기 요약 생성에 사용되는 통합 생성형 AI 제공업체 설정입니다.",
+        "api_key": {
+            "label": "API 키",
+            "description": "제공업체에서 요구하는 API 키입니다 (환경 변수로도 설정 가능)."
+        },
+        "base_url": {
+            "label": "기본 URL",
+            "description": "자체 호스팅 또는 호환 제공업체(예: Ollama 인스턴스)의 기본 URL입니다."
+        },
+        "model": {
+            "label": "모델",
+            "description": "설명 또는 요약 생성에 사용할 제공업체의 모델 이름입니다."
+        },
+        "provider": {
+            "label": "제공업체",
+            "description": "사용할 GenAI 제공업체입니다 (예: ollama, gemini, openai)."
+        },
+        "roles": {
+            "label": "역할",
+            "description": "GenAI 역할 분담(chat, descriptions, embeddings)입니다. 역할당 하나의 제공업체가 매핑됩니다."
+        },
+        "provider_options": {
+            "label": "제공업체 옵션",
+            "description": "GenAI 클라이언트에 전달할 추가 제공업체별 옵션입니다."
+        },
+        "runtime_options": {
+            "label": "런타임 옵션",
+            "description": "각 추론 호출마다 제공업체에 전달되는 런타임 옵션입니다."
+        }
+    },
+    "classification": {
+        "label": "객체 분류",
+        "description": "객체 레이블 세분화 또는 상태 분류에 사용되는 분류 모델 설정입니다.",
+        "bird": {
+            "label": "조류 분류 설정",
+            "description": "조류(새) 분류 모델 전용 설정입니다.",
+            "enabled": {
+                "label": "조류 분류 활성화",
+                "description": "조류 분류 기능을 활성화하거나 비활성화합니다."
+            },
+            "threshold": {
+                "label": "최소 점수",
+                "description": "조류 분류 결과를 인정하기 위해 필요한 최소 분류 점수입니다."
+            }
+        },
+        "custom": {
+            "label": "커스텀 분류 모델",
+            "description": "객체 또는 상태 감지에 사용하는 커스텀 분류 모델 설정입니다.",
+            "enabled": {
+                "label": "모델 활성화",
+                "description": "커스텀 분류 모델을 활성화하거나 비활성화합니다."
+            },
+            "name": {
+                "label": "모델 이름",
+                "description": "사용할 커스텀 분류 모델의 식별자입니다."
+            },
+            "threshold": {
+                "label": "점수 임계값",
+                "description": "분류 상태를 변경하는 데 사용되는 점수 임계값입니다."
+            },
+            "save_attempts": {
+                "label": "시도 기록 저장 수",
+                "description": "최근 분류 UI에 저장해 둘 분류 시도 횟수입니다."
+            },
+            "object_config": {
+                "objects": {
+                    "label": "분류 대상 객체",
+                    "description": "객체 분류를 수행할 객체 유형 목록입니다."
+                },
+                "classification_type": {
+                    "label": "분류 유형",
+                    "description": "적용할 분류 유형: 'sub_label'(하위 레이블 추가) 또는 기타 지원 유형."
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "분류 대상 카메라",
+                    "description": "상태 분류를 실행하기 위한 카메라별 크롭 영역 및 설정입니다.",
+                    "crop": {
+                        "label": "분류 크롭 좌표",
+                        "description": "이 카메라에서 분류를 실행할 크롭 영역 좌표입니다."
+                    }
+                },
+                "motion": {
+                    "label": "움직임 시 실행",
+                    "description": "true일 경우 지정된 크롭 영역 내에서 움직임이 감지될 때 분류를 실행합니다."
+                },
+                "interval": {
+                    "label": "분류 주기",
+                    "description": "상태 분류를 주기적으로 실행할 간격(초)입니다."
+                }
+            }
+        }
+    },
+    "camera_groups": {
+        "label": "카메라 그룹",
+        "description": "UI에서 카메라를 체계적으로 구성하기 위한 명명된 카메라 그룹 설정입니다.",
+        "cameras": {
+            "label": "카메라 목록",
+            "description": "이 그룹에 포함된 카메라 이름 배열입니다."
+        },
+        "icon": {
+            "label": "그룹 아이콘",
+            "description": "UI에서 카메라 그룹을 나타내는 데 사용되는 아이콘입니다."
+        },
+        "order": {
+            "label": "정렬 순서",
+            "description": "UI에서 카메라 그룹을 정렬하는 데 사용되는 숫자 순서입니다 (큰 숫자일수록 뒤에 표시됨)."
+        }
+    },
+    "active_profile": {
+        "label": "활성 프로필",
+        "description": "현재 활성화된 프로필 이름입니다. 런타임 전용이며 YAML에 저장되지 않습니다."
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "MQTT 이미지 발행 설정입니다.",
+        "enabled": {
+            "label": "이미지 전송",
+            "description": "이 카메라의 객체 이미지 스냅샷을 MQTT 토픽으로 발행하도록 활성화합니다."
+        },
+        "timestamp": {
+            "label": "타임스탬프 추가",
+            "description": "MQTT로 발행되는 이미지에 타임스탬프를 덧씌웁니다."
+        },
+        "bounding_box": {
+            "label": "바운딩 박스 추가",
+            "description": "MQTT로 발행되는 이미지에 바운딩 박스를 그립니다."
+        },
+        "crop": {
+            "label": "이미지 크롭",
+            "description": "MQTT로 발행되는 이미지를 감지된 객체의 바운딩 박스 크기로 잘라냅니다."
+        },
+        "height": {
+            "label": "이미지 높이",
+            "description": "MQTT로 발행되는 이미지를 리사이즈할 높이(픽셀)입니다."
+        },
+        "required_zones": {
+            "label": "필수 구역",
+            "description": "MQTT 이미지가 발행되기 위해 객체가 진입해야 하는 구역입니다."
+        },
+        "quality": {
+            "label": "JPEG 품질",
+            "description": "MQTT로 발행되는 이미지의 JPEG 압축 품질입니다 (0~100)."
+        }
+    },
+    "camera_ui": {
+        "label": "카메라 UI",
+        "description": "UI에서 이 카메라의 표시 순서와 가시성을 제어합니다. 순서는 기본 대시보드에 영향을 미칩니다. 더 세부적인 설정은 카메라 그룹을 사용하세요.",
+        "order": {
+            "label": "UI 순서",
+            "description": "기본 대시보드 및 목록에서 카메라를 정렬하는 데 사용되는 숫자 순서입니다 (큰 숫자일수록 뒤에 표시됨)."
+        },
+        "dashboard": {
+            "label": "실시간 대시보드에 표시",
+            "description": "기본 '모든 카메라' 실시간 대시보드에 이 카메라를 표시할지 여부를 전환합니다. 비활성화해도 카메라 그룹이나 설정 등 UI의 다른 곳에서는 계속 접근할 수 있습니다."
+        },
+        "review": {
+            "label": "다시보기에 표시",
+            "description": "다시보기 페이지(카메라 필터, 모션 검토 및 기록 뷰 포함)에서 이 카메라를 표시할지 여부를 전환합니다."
         }
     }
 }
