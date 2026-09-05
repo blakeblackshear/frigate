@@ -2,39 +2,39 @@
   "readTheDocumentation": "문서 읽기",
   "time": {
     "untilForTime": "{{time}}까지",
-    "untilForRestart": "Frigate가 재시작될 때 까지.",
+    "untilForRestart": "Frigate가 재시작될 때까지.",
     "10minutes": "10분",
     "12hours": "12시간",
     "1hour": "1시간",
     "24hours": "24시간",
     "30minutes": "30분",
     "5minutes": "5분",
-    "untilRestart": "재시작 될 때까지",
+    "untilRestart": "재시작될 때까지",
     "ago": "{{timeAgo}} 전",
-    "justNow": "방금",
+    "justNow": "방금 전",
     "today": "오늘",
     "yesterday": "어제",
     "last7": "최근 7일",
     "last14": "최근 14일",
     "last30": "최근 30일",
     "thisWeek": "이번 주",
-    "lastWeek": "저번 주",
+    "lastWeek": "지난 주",
     "thisMonth": "이번 달",
-    "lastMonth": "저번 달",
+    "lastMonth": "지난 달",
     "pm": "오후",
     "am": "오전",
     "yr": "{{time}}년",
-    "year_other": "{{time}} 년",
-    "mo": "{{time}}월",
-    "month_other": "{{time}} 월",
+    "year_other": "{{time}}년",
+    "mo": "{{time}}개월",
+    "month_other": "{{time}}개월",
     "d": "{{time}}일",
-    "day_other": "{{time}} 일",
-    "h": "{{time}}시",
-    "hour_other": "{{time}} 시",
+    "day_other": "{{time}}일",
+    "h": "{{time}}시간",
+    "hour_other": "{{time}}시간",
     "m": "{{time}}분",
-    "minute_other": "{{time}} 분",
+    "minute_other": "{{time}}분",
     "s": "{{time}}초",
-    "second_other": "{{time}} 초",
+    "second_other": "{{time}}초",
     "formattedTimestamp": {
       "12hour": "MMM d, h:mm:ss aaa",
       "24hour": "MMM d, HH:mm:ss"
@@ -68,7 +68,7 @@
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
     },
-    "never": "한 번도 없음",
+    "never": "안 함",
     "inProgress": "진행 중",
     "invalidStartTime": "잘못된 시작 시간",
     "invalidEndTime": "잘못된 종료 시간"
@@ -76,25 +76,25 @@
   "notFound": {
     "title": "404",
     "documentTitle": "찾을 수 없음 - Frigate",
-    "desc": "페이지 찾을 수 없음"
+    "desc": "페이지를 찾을 수 없습니다"
   },
   "accessDenied": {
     "title": "접근 거부",
     "documentTitle": "접근 거부 - Frigate",
-    "desc": "이 페이지 접근 권한이 없습니다."
+    "desc": "이 페이지를 볼 수 있는 권한이 없습니다."
   },
   "menu": {
     "user": {
       "account": "계정",
       "title": "사용자",
-      "current": "현재 사용자:{{user}}",
+      "current": "현재 사용자: {{user}}",
       "anonymous": "익명",
       "logout": "로그아웃",
       "setPassword": "비밀번호 설정"
     },
     "system": "시스템",
     "systemMetrics": "시스템 지표",
-    "configuration": "설정",
+    "configuration": "설정 구성",
     "systemLogs": "시스템 로그",
     "settings": "설정",
     "configurationEditor": "설정 편집기",
@@ -103,7 +103,7 @@
       "en": "English (영어)",
       "es": "Español (스페인어)",
       "zhCN": "简体中文 (중국어 간체)",
-      "hi": "हिन्दी (힌두어)",
+      "hi": "हिन्दी (힌디어)",
       "fr": "Français (프랑스어)",
       "ar": "العربية (아랍어)",
       "pt": "Português (포르투갈어)",
@@ -117,7 +117,7 @@
       "sv": "Svenska (스웨덴어)",
       "cs": "Čeština (체코어)",
       "nb": "Norsk Bokmål (노르웨이어 보크몰)",
-      "ko": "한국어",
+      "ko": "한국어 (Korean)",
       "vi": "Tiếng Việt (베트남어)",
       "fa": "فارسی (페르시아어)",
       "pl": "Polski (폴란드어)",
@@ -126,7 +126,7 @@
       "el": "Ελληνικά (그리스어)",
       "ro": "Română (루마니아어)",
       "hu": "Magyar (헝가리어)",
-      "fi": "Suomi (Finnish)",
+      "fi": "Suomi (핀란드어)",
       "da": "Dansk (덴마크어)",
       "sk": "Slovenčina (슬로바키아어)",
       "yue": "粵語 (광둥어)",
@@ -140,9 +140,12 @@
       "id": "Bahasa Indonesia (인도네시아어)",
       "ur": "اردو (우르두어)",
       "withSystem": {
-        "label": "시스템 설정 언어 사용"
+        "label": "시스템 언어 설정 사용"
       },
-      "hr": "Hrvatski (크로아티아어)"
+      "hr": "Hrvatski (크로아티아어)",
+      "zhHant": "繁體中文 (중국어 번체)",
+      "be": "Беларуская (벨라루스어)",
+      "bs": "Bosanski (보스니아어)"
     },
     "appearance": "화면 설정",
     "darkMode": {
@@ -150,17 +153,17 @@
       "light": "라이트",
       "dark": "다크",
       "withSystem": {
-        "label": "시스템 설정에 따라 설정"
+        "label": "시스템 설정에 따라 라이트/다크 모드 전환"
       }
     },
     "withSystem": "시스템",
     "theme": {
       "label": "테마",
       "blue": "파랑",
-      "green": "녹색",
+      "green": "초록",
       "nord": "노드 (Nord)",
       "red": "빨강",
-      "highcontrast": "고 대비",
+      "highcontrast": "고대비",
       "default": "기본값"
     },
     "help": "도움말",
@@ -174,17 +177,17 @@
       "allCameras": "모든 카메라",
       "cameras": {
         "title": "카메라",
-        "count_other": "{{count}} 카메라"
+        "count_other": "{{count}}대 카메라"
       }
     },
     "review": "다시보기",
     "explore": "탐색",
     "export": "내보내기",
-    "uiPlayground": "UI 실험실",
+    "uiPlayground": "UI 플레이그라운드",
     "faceLibrary": "얼굴 라이브러리",
     "classification": "분류",
     "chat": "채팅",
-    "actions": "작업",
+    "actions": "동작",
     "profiles": "프로필",
     "features": "기능"
   },
@@ -210,14 +213,14 @@
     "back": "뒤로",
     "hide": "{{item}} 숨기기",
     "show": "{{item}} 표시",
-    "ID": "아이디",
+    "ID": "ID",
     "none": "없음",
     "all": "전체",
-    "other": "그 외"
+    "other": "기타"
   },
   "button": {
     "apply": "적용",
-    "reset": "리셋",
+    "reset": "재설정",
     "done": "완료",
     "enabled": "활성화됨",
     "enable": "활성화",
@@ -229,38 +232,38 @@
     "close": "닫기",
     "copy": "복사",
     "back": "뒤로",
-    "history": "히스토리",
+    "history": "기록",
     "fullscreen": "전체화면",
-    "exitFullscreen": "전체화면 나가기",
-    "pictureInPicture": "화면 속 화면",
-    "twoWayTalk": "양방향 말하기",
+    "exitFullscreen": "전체화면 종료",
+    "pictureInPicture": "화면 속 화면 (PIP)",
+    "twoWayTalk": "양방향 대화",
     "cameraAudio": "카메라 오디오",
-    "on": "켜기",
-    "off": "끄기",
-    "edit": "편집",
-    "copyCoordinates": "코디네이트 복사",
+    "on": "켜짐",
+    "off": "꺼짐",
+    "edit": "수정",
+    "copyCoordinates": "좌표 복사",
     "delete": "삭제",
     "yes": "예",
     "no": "아니오",
     "download": "다운로드",
     "info": "정보",
-    "suspended": "일시 정지됨",
+    "suspended": "일시 중지됨",
     "unsuspended": "재개",
     "play": "재생",
     "unselect": "선택 해제",
     "export": "내보내기",
-    "deleteNow": "바로 삭제하기",
+    "deleteNow": "지금 삭제",
     "next": "다음",
     "add": "추가",
     "undo": "실행 취소",
-    "copiedToClipboard": "클립보드에 복사",
-    "continue": "계속하기",
+    "copiedToClipboard": "클립보드에 복사됨",
+    "continue": "계속",
     "modified": "수정됨",
     "overridden": "재정의됨",
-    "resetToGlobal": "글로벌 설정으로 재설정",
-    "resetToDefault": "기본값으로 재설정",
+    "resetToGlobal": "전역 설정으로 초기화",
+    "resetToDefault": "기본값으로 초기화",
     "saveAll": "모두 저장",
-    "savingAll": "모두 저장 중. …",
+    "savingAll": "모두 저장 중…",
     "undoAll": "모두 실행 취소",
     "applying": "적용 중…",
     "retry": "재시도"
@@ -270,8 +273,8 @@
     "save": {
       "title": "저장",
       "error": {
-        "title": "설정 저장 실패: {{errorMessage}}",
-        "noMessage": "설정 저장이 실패했습니다"
+        "title": "설정 변경 저장 실패: {{errorMessage}}",
+        "noMessage": "설정 변경 저장에 실패했습니다"
       },
       "success": "설정 변경이 성공적으로 저장되었습니다."
     }
@@ -279,34 +282,37 @@
   "role": {
     "title": "역할",
     "admin": "관리자",
-    "viewer": "감시자",
-    "desc": "관리자는 Frigate UI에 모든 접근 권한이 있습니다. 감시자는 카메라 감시, 돌아보기, 과거 영상 조회만 가능합니다."
+    "viewer": "뷰어",
+    "desc": "관리자는 Frigate UI의 모든 기능에 대한 전체 접근 권한을 가집니다. 뷰어는 카메라 실시간 화면, 다시보기 항목, 이전 녹화 영상 조회만 가능합니다."
   },
   "pagination": {
-    "label": "페이지 번호",
+    "label": "페이지 매김",
     "previous": {
       "title": "이전",
-      "label": "이전 페이지"
+      "label": "이전 페이지로 이동"
     },
     "next": {
       "title": "다음",
-      "label": "다음 페이지"
+      "label": "다음 페이지로 이동"
     },
-    "more": "더 많은 페이지"
+    "more": "페이지 더보기"
   },
   "selectItem": "{{item}} 선택",
   "information": {
     "pixels": "{{area}}px"
   },
   "list": {
-    "two": "{{0}}과 {{1}}",
-    "many": "{{items}} 그리고 {{last}}",
+    "two": "{{0}} 및 {{1}}",
+    "many": "{{items}} 및 {{last}}",
     "separatorWithSpace": ", "
   },
   "field": {
-    "optional": "선택",
-    "internalID": "Frigate 내부 ID는 구성 및 데이터베이스에서 사용됩니다"
+    "optional": "선택 사항",
+    "internalID": "Frigate 설정 및 데이터베이스에서 사용되는 내부 ID"
   },
-  "no_items": "내역 없음",
-  "validation_errors": "검증 오류"
+  "no_items": "항목 없음",
+  "validation_errors": "유효성 검사 오류",
+  "credentialField": {
+    "savedPlaceholder": "저장됨 — 현재 값을 유지하려면 비워 두세요"
+  }
 }

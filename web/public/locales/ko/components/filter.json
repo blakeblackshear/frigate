@@ -1,7 +1,7 @@
 {
   "filter": "필터",
   "labels": {
-    "label": "레이블",
+    "label": "레이블 (Labels)",
     "all": {
       "title": "모든 레이블",
       "short": "레이블"
@@ -10,34 +10,131 @@
     "count_other": "레이블 {{count}}개"
   },
   "zones": {
-    "label": "구역",
+    "label": "구역 (Zones)",
     "all": {
       "title": "모든 구역",
       "short": "구역"
     }
   },
   "dates": {
-    "selectPreset": "프리셋 선택…",
+    "selectPreset": "사전 설정 선택…",
     "all": {
       "title": "모든 날짜",
       "short": "날짜"
     }
   },
-  "timeRange": "시간 구역",
+  "timeRange": "시간 범위",
   "subLabels": {
-    "label": "서브 레이블",
-    "all": "모든 서브 레이블"
+    "label": "하위 레이블",
+    "all": "모든 하위 레이블"
   },
-  "more": "더 많은 필터",
+  "more": "추가 필터",
   "classes": {
-    "label": "분류",
+    "label": "분류 (Classes)",
     "all": {
       "title": "모든 분류"
     },
-    "count_one": "{{count}}개 클래스",
-    "count_other": "{{count}}개 클래스"
+    "count_one": "분류 {{count}}개",
+    "count_other": "분류 {{count}}개"
   },
   "reset": {
-    "label": "기본값으로 필터 초기화"
+    "label": "필터를 기본값으로 초기화"
+  },
+  "attributes": {
+    "label": "분류 속성",
+    "all": "모든 속성"
+  },
+  "score": "신뢰도 점수",
+  "estimatedSpeed": "예상 속도 ({{unit}})",
+  "features": {
+    "label": "특징",
+    "hasSnapshot": "스냅샷 있음",
+    "hasVideoClip": "비디오 클립 있음",
+    "submittedToFrigatePlus": {
+      "label": "Frigate+에 제출됨",
+      "tips": "먼저 스냅샷이 있는 추적 객체로 필터링해야 합니다.<br /><br />스냅샷이 없는 추적 객체는 Frigate+에 제출할 수 없습니다."
+    }
+  },
+  "sort": {
+    "label": "정렬",
+    "dateAsc": "날짜 (오름차순)",
+    "dateDesc": "날짜 (내림차순)",
+    "scoreAsc": "객체 점수 (오름차순)",
+    "scoreDesc": "객체 점수 (내림차순)",
+    "speedAsc": "예상 속도 (오름차순)",
+    "speedDesc": "예상 속도 (내림차순)",
+    "relevance": "관련성"
+  },
+  "cameras": {
+    "label": "카메라 필터",
+    "all": {
+      "title": "모든 카메라",
+      "short": "카메라"
+    }
+  },
+  "review": {
+    "showReviewed": "검토 완료된 항목 표시"
+  },
+  "motion": {
+    "showMotionOnly": "움직임만 표시"
+  },
+  "explore": {
+    "settings": {
+      "title": "설정",
+      "defaultView": {
+        "title": "기본 보기",
+        "desc": "선택된 필터가 없을 때 레이블별 가장 최근 추적 객체의 요약을 표시하거나 필터링되지 않은 격자(Grid)로 표시합니다.",
+        "summary": "요약 보기",
+        "unfilteredGrid": "전체 격자 보기"
+      },
+      "gridColumns": {
+        "title": "격자 열 개수",
+        "desc": "격자 보기에서 표시할 열(Column) 개수를 선택하세요."
+      },
+      "searchSource": {
+        "label": "검색 대상",
+        "desc": "추적된 객체의 썸네일 이미지로 검색할지 설명 텍스트로 검색할지 선택하세요.",
+        "options": {
+          "thumbnailImage": "썸네일 이미지",
+          "description": "설명"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "필터링할 날짜 선택"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "로그 레벨 필터",
+    "filterBySeverity": "심각도별 로그 필터링",
+    "loading": {
+      "title": "로딩 중",
+      "desc": "로그 창을 맨 아래로 스크롤하면 새로운 로그가 추가될 때 자동으로 스트리밍됩니다."
+    },
+    "disableLogStreaming": "로그 스트리밍 비활성화",
+    "allLogs": "모든 로그"
+  },
+  "trackedObjectDelete": {
+    "title": "삭제 확인",
+    "desc": "이 {{objectLength}}개의 추적 객체를 삭제하면 스냅샷, 저장된 임베딩 및 연결된 모든 객체 수명주기 항목이 제거됩니다. 기록 보기의 녹화 영상은 삭제되지 <em>않습니다</em>.<br /><br />정말로 계속 진행하시겠습니까?<br /><br />이후 확인 창을 건너뛰려면 <em>Shift</em> 키를 누른 상태로 클릭하세요.",
+    "toast": {
+      "success": "추적 객체가 성공적으로 삭제되었습니다.",
+      "error": "추적 객체 삭제 실패: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "구역 마스크별 필터"
+  },
+  "recognizedLicensePlates": {
+    "title": "인식된 차량 번호판",
+    "loadFailed": "인식된 번호판 목록을 불러오지 못했습니다.",
+    "loading": "인식된 번호판 목록 불러오는 중…",
+    "placeholder": "번호판 검색어 입력…",
+    "noLicensePlatesFound": "발견된 번호판이 없습니다.",
+    "selectPlatesFromList": "목록에서 하나 이상의 번호판을 선택하세요.",
+    "selectAll": "모두 선택",
+    "clearAll": "모두 지우기"
   }
 }

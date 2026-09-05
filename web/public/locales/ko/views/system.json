@@ -1,198 +1,247 @@
 {
   "documentTitle": {
     "cameras": "카메라 통계 - Frigate",
-    "storage": "저장소 통계 - Frigate",
-    "general": "기본 통계 - Frigate",
-    "enrichments": "데이터 보강 통계 - Frigate",
+    "storage": "저장 공간 통계 - Frigate",
+    "general": "일반 통계 - Frigate",
+    "enrichments": "확장 기능 통계 - Frigate",
     "logs": {
-      "frigate": "Frigate 로그 -Frigate",
+      "frigate": "Frigate 로그 - Frigate",
       "go2rtc": "Go2RTC 로그 - Frigate",
       "nginx": "Nginx 로그 - Frigate",
-      "websocket": "메세지 로그 - Frigate"
+      "websocket": "메시지 로그 - Frigate"
     }
   },
   "title": "시스템",
-  "metrics": "시스템 통계",
+  "metrics": "시스템 지표",
   "logs": {
     "download": {
-      "label": "다운로드 로그"
+      "label": "로그 다운로드"
     },
     "copy": {
-      "label": "클립보드에 복사하기",
-      "success": "클립보드에 로그가 복사되었습니다",
-      "error": "클립보드에 로그를 저장할 수 없습니다"
+      "label": "클립보드에 복사",
+      "success": "로그를 클립보드에 복사했습니다",
+      "error": "로그를 클립보드에 복사할 수 없습니다"
     },
     "type": {
-      "label": "타입",
-      "timestamp": "시간 기록",
+      "label": "유형",
+      "timestamp": "타임스탬프",
       "tag": "태그",
       "message": "메시지"
     },
-    "tips": "서버에서 로그 스트리밍 중",
+    "tips": "서버에서 로그가 실시간 스트리밍 중입니다",
     "toast": {
       "error": {
         "fetchingLogsFailed": "로그 가져오기 오류: {{errorMessage}}",
-        "whileStreamingLogs": "스크리밍 로그 중 오류: {{errorMessage}}"
+        "whileStreamingLogs": "로그 스트리밍 중 오류 발생: {{errorMessage}}"
       }
     },
     "websocket": {
-      "label": "메세지",
-      "pause": "일시중지",
-      "resume": "재개",
-      "clear": "비우기",
+      "label": "메시지",
+      "pause": "일시 중지",
+      "resume": "다시 시작",
+      "clear": "지우기",
       "filter": {
-        "all": "전체 항목",
-        "topics": "항목",
+        "all": "모든 토픽",
+        "topics": "토픽",
         "events": "이벤트",
-        "reviews": "리뷰",
+        "reviews": "다시보기",
         "classification": "분류",
         "face_recognition": "얼굴 인식",
-        "lpr": "번호판 인식",
+        "lpr": "차량 번호판 인식 (LPR)",
         "system": "시스템",
         "camera": "카메라",
         "all_cameras": "모든 카메라",
-        "cameras_count_one": "{{count}} 카메라",
-        "cameras_count_other": "{{count}} 카메라"
+        "cameras_count_one": "카메라 {{count}}대",
+        "cameras_count_other": "카메라 {{count}}대",
+        "camera_activity": "카메라 활동"
       },
-      "empty": "수신된 메시지 없음",
-      "count_one": "{{count}} 메세지",
-      "count_other": "{{count}} 메세지"
+      "empty": "수집된 메시지가 아직 없습니다",
+      "count_one": "메시지 {{count}}개",
+      "count_other": "메시지 {{count}}개",
+      "expanded": {
+        "payload": "페이로드"
+      }
     }
   },
   "general": {
-    "title": "기본",
+    "title": "일반",
     "detector": {
       "title": "감지기",
-      "inferenceSpeed": "감지 추론 속도",
+      "inferenceSpeed": "감지기 추론 속도",
       "temperature": "감지기 온도",
-      "cpuUsage": "감지기 CPU 사용률",
-      "memoryUsage": "감지기 메모리 사용률",
-      "cpuUsageInformation": "감지 모델로 데이터를 입력/출력하기 위한 전처리 과정에서 사용되는 CPU 사용량입니다. GPU나 가속기를 사용하는 경우에도 추론 자체의 사용량은 포함되지 않습니다."
+      "cpuUsage": "감지기 CPU 사용량",
+      "memoryUsage": "감지기 메모리 사용량",
+      "cpuUsageInformation": "감지 모델과의 입출력 데이터를 준비하는 데 사용된 CPU 리소스입니다. GPU 또는 전용 가속기를 사용하더라도 추론 연산 자체의 사용량은 측정되지 않습니다."
     },
     "hardwareInfo": {
       "title": "하드웨어 정보",
-      "gpuUsage": "GPU 사용률",
+      "gpuUsage": "GPU 사용량",
       "gpuMemory": "GPU 메모리",
       "gpuEncoder": "GPU 인코더",
       "gpuDecoder": "GPU 디코더",
       "gpuInfo": {
         "vainfoOutput": {
-          "title": "Vainfo 출력",
+          "title": "Vainfo 출력 결과",
           "processOutput": "프로세스 출력:",
           "processError": "프로세스 오류:",
-          "returnCode": "리턴 코드:{{code}}"
+          "returnCode": "반환 코드: {{code}}"
         },
         "nvidiaSMIOutput": {
-          "title": "Nvidia SMI 출력",
-          "name": "이름:{{name}}",
-          "driver": "드라이버:{{driver}}",
-          "cudaComputerCapability": "CUDA Compute Capability:{{cuda_compute}}",
-          "vbios": "VBios Info: {{vbios}}"
+          "title": "Nvidia SMI 출력 결과",
+          "name": "이름: {{name}}",
+          "driver": "드라이버: {{driver}}",
+          "cudaComputerCapability": "CUDA 연산 능력: {{cuda_compute}}",
+          "vbios": "VBIOS 정보: {{vbios}}"
         },
         "copyInfo": {
           "label": "GPU 정보 복사"
         },
         "toast": {
-          "success": "GPU 정보가 클립보드에 복사되었습니다"
+          "success": "GPU 정보를 클립보드에 복사했습니다"
         },
         "closeInfo": {
           "label": "GPU 정보 닫기"
         }
       },
-      "npuUsage": "NPU 사용률",
-      "npuMemory": "NPU 메모리"
+      "npuUsage": "NPU 사용량",
+      "npuMemory": "NPU 메모리",
+      "gpuCompute": "GPU 연산 / 인코딩",
+      "gpuTemperature": "GPU 온도",
+      "npuTemperature": "NPU 온도"
     },
     "otherProcesses": {
-      "title": "다른 프로세스들",
-      "processCpuUsage": "사용중인 CPU 사용률",
-      "processMemoryUsage": "사용중인 메모리 사용률"
+      "title": "기타 프로세스",
+      "processCpuUsage": "프로세스 CPU 사용량",
+      "processMemoryUsage": "프로세스 메모리 사용량",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "녹화",
+        "review_segment": "다시보기 세그먼트",
+        "embeddings": "임베딩",
+        "audio_detector": "오디오 감지기"
+      }
     }
   },
   "storage": {
-    "title": "스토리지",
-    "overview": "전체 현황",
+    "title": "저장 공간",
+    "overview": "개요",
     "recordings": {
-      "title": "녹화",
-      "tips": "이 값은 Frigate 데이터베이스의 녹화 영상이 사용 중인 전체 저장 공간입니다. Frigate는 디스크 내 다른 파일들의 저장 공간은 추적하지 않습니다.",
-      "earliestRecording": "가장 오래된 녹화 영상:"
+      "title": "녹화 파일",
+      "tips": "이 수치는 Frigate 데이터베이스에 기록된 녹화 파일이 사용하는 총 저장 공간을 나타냅니다. Frigate은 디스크 상의 모든 파일에 대한 사용량을 추적하지는 않습니다.",
+      "earliestRecording": "가장 오래된 녹화 시점:"
     },
     "cameraStorage": {
-      "title": "카메라 저장소",
+      "title": "카메라별 저장 공간",
       "camera": "카메라",
-      "unusedStorageInformation": "미사용 저장소 정보",
-      "storageUsed": "용량",
-      "percentageOfTotalUsed": "전체 대비 비율",
+      "unusedStorageInformation": "여유 공간 정보",
+      "storageUsed": "저장 공간",
+      "percentageOfTotalUsed": "전체 대비 사용 비율",
       "bandwidth": "대역폭",
       "unused": {
-        "title": "미사용",
-        "tips": "드라이브에 Frigate 녹화 영상 외에 다른 파일이 저장되어 있는 경우, 이 값은 Frigate에서 실제 사용 가능한 여유 공간을 정확히 나타내지 않을 수 있습니다. Frigate는 녹화 영상 외의 저장 공간 사용량을 추적하지 않습니다."
+        "title": "여유 공간",
+        "tips": "드라이브에 Frigate 녹화본 외에 다른 파일이 저장되어 있는 경우 이 수치가 Frigate에서 사용 가능한 실제 여유 공간과 정확히 일치하지 않을 수 있습니다. Frigate은 자체 녹화본 외부의 저장 공간 사용량을 추적하지 않습니다."
       }
     },
     "shm": {
-      "title": "SHM (공유 메모리) 할당량",
-      "warning": "현재 SHM 사이즈가 {{total}}MB로 너무 적습니다. 최소 {{min_shm}}MB 이상 올려주세요."
+      "title": "공유 메모리 (SHM) 할당",
+      "warning": "현재 공유 메모리 크기({{total}}MB)가 너무 작습니다. 최소 {{min_shm}}MB 이상으로 늘려주세요.",
+      "frameLifetime": {
+        "title": "프레임 유지 시간",
+        "description": "각 카메라는 공유 메모리에 {{frames}}개의 프레임 슬롯을 가집니다. 가장 빠른 카메라의 프레임 속도를 기준으로, 각 프레임은 덮어쓰기 전까지 약 {{lifetime}}초 동안 유지됩니다."
+      }
     }
   },
   "cameras": {
     "title": "카메라",
-    "overview": "전체 현황",
+    "overview": "개요",
     "info": {
-      "aspectRatio": "종횡비",
-      "fetching": "카메라 데이터 수집 중",
+      "aspectRatio": "화면비",
+      "fetching": "카메라 데이터 가져오는 중",
       "stream": "스트림 {{idx}}",
-      "streamDataFromFFPROBE": "스트림 데이터는 <code>ffprobe</code>에서 받습니다.",
+      "streamDataFromFFPROBE": "스트림 데이터는 <code>ffprobe</code>를 통해 가져옵니다.",
       "video": "비디오:",
       "codec": "코덱:",
       "resolution": "해상도:",
       "fps": "FPS:",
       "unknown": "알 수 없음",
       "audio": "오디오:",
-      "error": "오류:{{error}}",
-      "cameraProbeInfo": "{{camera}} 카메라 장치 정보",
+      "error": "오류: {{error}}",
+      "cameraProbeInfo": "{{camera}} 카메라 탐색 정보",
       "tips": {
-        "title": "카메라 장치 정보"
+        "title": "카메라 탐색 정보"
+      },
+      "keyframes": {
+        "title": "키프레임 분석",
+        "analyzing": "키프레임 분석 중... {{seconds}}초 남음",
+        "stillAnalyzing": "키프레임을 계속 분석하고 있습니다...",
+        "recordStream": "녹화 스트림:",
+        "keyframeCount": "감지된 키프레임 수:",
+        "observedDuration": "측정 기간:",
+        "gap": "키프레임 간격 (최소 / 평균 / 최대):",
+        "segmentLength": "녹화 세그먼트 길이:",
+        "ok": "키프레임이 약 {{seconds}}초마다 배치되어 녹화 및 재생에 적합합니다.",
+        "warning": "키프레임 간격이 불규칙하거나 멉니다(최대 간격 약 {{seconds}}초). 스마트 코덱(H.264+/H.265+)일 가능성이 높으며 권장되지 않습니다.",
+        "error": "키프레임 간격(약 {{seconds}}초)이 녹화 세그먼트 길이({{segmentTime}}초)를 초과합니다. 일부 세그먼트에 키프레임이 없어 재생에 문제가 발생할 수 있습니다. 카메라에서 스마트/+ 코덱을 끄거나 키프레임 간격을 줄이세요.",
+        "unknown": "키프레임 간격을 확인할 수 없습니다.",
+        "recordDisabled": "이 카메라의 녹화 기능이 비활성화되어 있습니다."
       }
     },
-    "framesAndDetections": "프레임 / 감지 (Detections)",
+    "framesAndDetections": "프레임 / 감지",
     "label": {
       "camera": "카메라",
       "detect": "감지",
       "skipped": "건너뜀",
       "ffmpeg": "FFmpeg",
-      "capture": "캡쳐",
-      "overallFramesPerSecond": "전체 초당 프레임",
-      "overallDetectionsPerSecond": "전체 초당 감지",
-      "overallSkippedDetectionsPerSecond": "전체 초당 건너뛴 감지",
+      "capture": "캡처",
+      "overallFramesPerSecond": "전체 초당 프레임 수",
+      "overallDetectionsPerSecond": "전체 초당 감지 수",
+      "overallSkippedDetectionsPerSecond": "전체 초당 건너뛴 감지 수",
       "cameraFfmpeg": "{{camName}} FFmpeg",
-      "cameraCapture": "{{camName}} 캡쳐",
+      "cameraCapture": "{{camName}} 캡처",
       "cameraDetect": "{{camName}} 감지",
-      "cameraFramesPerSecond": "{{camName}} 초당 프레임",
-      "cameraDetectionsPerSecond": "{{camName}} 초당 감지",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} 초당 건너뛴 감지"
+      "cameraFramesPerSecond": "{{camName}} 초당 프레임 수",
+      "cameraDetectionsPerSecond": "{{camName}} 초당 감지 수",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} 초당 건너뛴 감지 수",
+      "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
       "success": {
-        "copyToClipboard": "데이터 정보가 클립보드에 복사되었습니다."
+        "copyToClipboard": "탐색 데이터를 클립보드에 복사했습니다."
       },
       "error": {
-        "unableToProbeCamera": "카메라 정보 알 수 없음: {{errorMessage}}"
+        "unableToProbeCamera": "카메라를 탐색할 수 없음: {{errorMessage}}"
       }
+    },
+    "noCameras": {
+      "title": "발견된 카메라 없음"
+    },
+    "connectionQuality": {
+      "title": "연결 상태",
+      "excellent": "매우 좋음",
+      "fair": "보통",
+      "poor": "불안정",
+      "unusable": "사용 불가",
+      "fps": "FPS",
+      "expectedFps": "예상 FPS",
+      "reconnectsLastHour": "재연결 횟수 (최근 1시간)",
+      "stallsLastHour": "지연/끊김 횟수 (최근 1시간)"
     }
   },
-  "lastRefreshed": "마지막 새로고침: ",
+  "lastRefreshed": "마지막 갱신: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} FFmpeg CPU 사용량이 높습니다 ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} 감지 CPU 사용량이 높습니다 ({{detectAvg}}%)",
-    "healthy": "시스템 정상",
-    "reindexingEmbeddings": "검색 데이터 재정리 중 ({{processed}}% 완료)",
-    "cameraIsOffline": "{{camera}} 오프라인입니다",
-    "detectIsSlow": "{{detect}} (이/가) 느립니다 ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} (이/가) 매우 느립니다 ({{speed}} ms)",
-    "shmTooLow": "/dev/shm 할당량을 ({{total}} MB) 최소 {{min}} MB 이상 증가시켜야합니다."
+    "ffmpegHighCpuUsage": "{{camera}} 카메라의 FFmpeg CPU 사용량이 높습니다 ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} 카메라의 감지(detect) CPU 사용량이 높습니다 ({{detectAvg}}%)",
+    "healthy": "시스템 상태가 양호합니다",
+    "reindexingEmbeddings": "임베딩 재색인 중 ({{processed}}% 완료)",
+    "cameraIsOffline": "{{camera}} 카메라가 오프라인 상태입니다",
+    "detectIsSlow": "{{detect}} 처리가 느립니다 ({{speed}}ms)",
+    "detectIsVerySlow": "{{detect}} 처리가 매우 느립니다 ({{speed}}ms)",
+    "shmTooLow": "/dev/shm 할당량({{total}}MB)을 최소 {{min}}MB 이상으로 늘려야 합니다.",
+    "debugReplayActive": "디버그 리플레이 세션이 실행 중입니다"
   },
   "enrichments": {
-    "title": "데이터 보강",
-    "infPerSecond": "초당 추론 속도",
+    "title": "확장 기능",
+    "infPerSecond": "초당 추론 횟수",
     "embeddings": {
       "image_embedding": "이미지 임베딩",
       "text_embedding": "텍스트 임베딩",
@@ -203,8 +252,18 @@
       "face_recognition_speed": "얼굴 인식 속도",
       "plate_recognition_speed": "번호판 인식 속도",
       "text_embedding_speed": "텍스트 임베딩 속도",
-      "yolov9_plate_detection_speed": "YOLOv9 플레이트 감지 속도",
-      "yolov9_plate_detection": "YOLOv9 플레이트 감지"
-    }
+      "yolov9_plate_detection_speed": "YOLOv9 번호판 감지 속도",
+      "yolov9_plate_detection": "YOLOv9 번호판 감지",
+      "review_description": "다시보기 설명",
+      "review_description_speed": "다시보기 설명 생성 속도",
+      "review_description_events_per_second": "다시보기 설명",
+      "object_description": "객체 설명",
+      "object_description_speed": "객체 설명 생성 속도",
+      "object_description_events_per_second": "객체 설명",
+      "classification": "{{name}} 분류",
+      "classification_speed": "{{name}} 분류 속도",
+      "classification_events_per_second": "{{name}} 초당 분류 이벤트 수"
+    },
+    "averageInf": "평균 추론 시간"
   }
 }
