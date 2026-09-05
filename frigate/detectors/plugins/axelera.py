@@ -436,10 +436,20 @@ class _AxeleraRuntimeInference:
         model_dir = os.path.dirname(model_json)
         self._ctx = runtime_factory()
         model = self._ctx.load_model(model_json)
+        # enumerate and connect to the DeviceInfo explicitly rather than
+        # letting the runtime pick: it surfaces the lspci/device-node
+        # mismatch as an empty list instead of a late connect failure
+        devices = self._ctx.list_devices()
+        if not devices:
+            raise RuntimeError(
+                "axelera: no Metis device enumerated; check that the "
+                "/dev/metis-<bus>:<dev>:<fn> node (colon form) is passed "
+                "into the container and the metis driver is loaded"
+            )
         # hold the device connection on self: the runtime releases the device
         # when the connection object is garbage collected, so it must outlive
         # init for as long as the model instance uses it
-        self._conn = self._ctx.device_connect(None, num_sub_devices=1)
+        self._conn = self._ctx.device_connect(devices[0], num_sub_devices=1)
         self._instance = self._conn.load_model_instance(
             model, num_sub_devices=1, aipu_cores=1
         )
