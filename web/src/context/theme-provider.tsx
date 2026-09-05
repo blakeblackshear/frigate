@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
+type ActiveTheme = Exclude<Theme, "system">;
 type ColorScheme =
   | "theme-blue"
   | "theme-green"
@@ -51,6 +52,25 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+function updateThemeMetaTags(theme: ActiveTheme): void {
+  const isDark = theme === "dark";
+  const metaTags = [
+    { name: "theme-color", content: isDark ? "#000000" : "#ffffff" },
+    {
+      name: "apple-mobile-web-app-status-bar-style",
+      content: isDark ? "black" : "default",
+    },
+  ];
+
+  for (const { name, content } of metaTags) {
+    const tag =
+      document.head.querySelector<HTMLMetaElement>(`meta[name="${name}"]`) ??
+      document.head.appendChild(document.createElement("meta"));
+    tag.name = name;
+    tag.content = content;
+  }
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -82,7 +102,7 @@ export function ThemeProvider({
     }
   });
 
-  const systemTheme = useMemo<Theme | undefined>(() => {
+  const systemTheme = useMemo<ActiveTheme | undefined>(() => {
     if (theme != "system") {
       return undefined;
     }
@@ -100,6 +120,8 @@ export function ThemeProvider({
     root.classList.remove("light", "dark", "system", ...colorSchemes);
 
     root.classList.add(theme, colorScheme);
+
+    updateThemeMetaTags(systemTheme ?? (theme === "system" ? "light" : theme));
 
     if (systemTheme) {
       root.classList.add(systemTheme);
