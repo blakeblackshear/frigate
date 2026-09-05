@@ -36,7 +36,6 @@ import logging
 import os
 import queue
 import re
-import tempfile
 import threading
 import time
 import zipfile
@@ -56,12 +55,9 @@ logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "axelera"
 
-# windowed duty cycle of the AIPU, written by the detector process and read
-# by the main process's hardware poller (same tmpfs cache dir as the rest of
-# the runtime's scratch state); "<pct> <monotonic-epoch>" text
-AXELERA_USAGE_PATH = os.path.join(
-    os.environ.get("FRIGATE_TMP", tempfile.gettempdir()), "frigate-axelera-usage"
-)
+# window length over which the producer thread averages ModelInstance.run
+# time before publishing the run duty cycle to the shared stats Value
+USAGE_WINDOW_SECONDS = 2.0
 
 # The Axelera runtime SDK is installed at first start rather than shipped in
 # the image. The wheels come from Axelera's public Artifactory PyPI index
@@ -417,7 +413,10 @@ class _AxeleraRuntimeInference:
         self._producer_thread: threading.Thread | None = None
         self._consumer_thread: threading.Thread | None = None
         self._usage_busy = 0.0
-        self._usage_window_start: float | None = None
+        self._usage_window_start = time.monotonic()
+        # multiprocessing.Value("d") handed in via set_duty_value; None means
+        # nobody reads the duty cycle (tests, standalone use)
+        self._duty_value = None
 
         if runtime_factory is None:
             try:
@@ -653,6 +652,8 @@ class _AxeleraRuntimeInference:
             try:
                 connection_id, frame = self._frame_q.get(timeout=0.25)
             except queue.Empty:
+                # keep the duty cycle window turning while the card idles
+                self._publish_duty(time.monotonic())
                 continue
             try:
                 in_buf, out_bufs = self._pool.get(timeout=1.0)
@@ -672,28 +673,25 @@ class _AxeleraRuntimeInference:
                 self._push_result(connection_id, np.zeros((MAX_ROWS, 6), np.float32))
 
     def _note_run(self, t0: float, t1: float) -> None:
-        """Accumulate card busy time and publish a windowed duty cycle.
+        """Accumulate run time and publish a windowed duty cycle.
 
-        ModelInstance.run blocks until the AIPU completes, so busy/wall over a
-        window is the card's true utilization; the runtime exposes no usage
-        counter to read instead. The main stats process reads the file.
+        ModelInstance.run blocks until the AIPU completes, so busy/wall over
+        a window is the detector thread's run duty cycle: host-side occupancy
+        of the blocking call (including DMA and driver time), which the
+        runtime exposes no device-side counter to read instead. The value
+        rides a multiprocessing.Value to the main process's stats poller.
         """
-        now = time.monotonic()
         self._usage_busy += t1 - t0
-        if self._usage_window_start is None:
-            self._usage_window_start = t0
-        if now - self._usage_window_start < 2.0:
+        self._publish_duty(time.monotonic())
+
+    def _publish_duty(self, now: float) -> None:
+        if now - self._usage_window_start < USAGE_WINDOW_SECONDS:
             return
         window = now - self._usage_window_start
-        if window > 0:
-            pct = min(100.0, round(100.0 * self._usage_busy / window, 1))
-            try:
-                tmp = AXELERA_USAGE_PATH + ".tmp"
-                with open(tmp, "w") as f:
-                    f.write(f"{pct} {time.time():.3f}")
-                os.replace(tmp, AXELERA_USAGE_PATH)
-            except OSError:
-                pass
+        if window > 0 and self._duty_value is not None:
+            self._duty_value.value = min(
+                100.0, round(100.0 * self._usage_busy / window, 1)
+            )
         self._usage_window_start = now
         self._usage_busy = 0.0
 
@@ -950,6 +948,10 @@ class AxeleraDetector(DetectionApi):
     def receive_output(self):
         """Return (connection_id, rows) for the next completed inference."""
         return self._inference.collect()
+
+    def set_duty_value(self, duty_value) -> None:
+        """Hand the shared stats Value to the producer thread's duty meter."""
+        self._inference._duty_value = duty_value
 
     def shutdown(self) -> None:
         """Gracefully shut down the runtime and release the Metis device."""
