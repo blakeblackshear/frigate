@@ -82,10 +82,20 @@
     },
     "case": {
       "newCaseOption": "Criar um novo caso",
-      "newCaseNamePlaceholder": "Nome do novo caso"
+      "newCaseNamePlaceholder": "Nome do novo caso",
+      "newCaseDescriptionPlaceholder": "Descrição do caso",
+      "label": "Caso",
+      "nonAdminHelp": "Será criado um novo caso para estas exportações.",
+      "placeholder": "Selecionar um caso"
     },
     "multiCamera": {
-      "selectFromTimeline": "Selecionar da Timeline"
+      "selectFromTimeline": "Selecionar da Timeline",
+      "timeRange": "Intervalo de tempo"
+    },
+    "queueing": "A colocar na fila de exportação...",
+    "tabs": {
+      "export": "Câmara única",
+      "multiCamera": "Múltiplas câmaras"
     }
   },
   "streaming": {
