@@ -426,10 +426,11 @@ Confirm the NPU is visible before continuing:
 ls /dev/dxrt*
 ```
 
-Then confirm the daemon is running:
+Then confirm the daemon is running and listening in `/run/dxrt`:
 
 ```bash
 systemctl is-active dxrt.service
+ls /run/dxrt/
 ```
 
 #### Setup
@@ -438,7 +439,7 @@ To set up Frigate, follow the default installation instructions, for example: `g
 
 #### Docker configuration
 
-Frigate needs the NPU device node and the daemon's socket:
+Frigate needs the NPU device node and the directory holding the daemon's socket:
 
 ```yaml
 services:
@@ -446,24 +447,26 @@ services:
     devices:
       - /dev/dxrt0:/dev/dxrt0
     volumes:
-      - /tmp/dxrt_dynamic_ipc.sock:/tmp/dxrt_dynamic_ipc.sock
+      - /run/dxrt:/run/dxrt
 ```
 
-If you can't use Docker Compose, add `--device /dev/dxrt0:/dev/dxrt0 -v /tmp/dxrt_dynamic_ipc.sock:/tmp/dxrt_dynamic_ipc.sock` to your `docker run` command.
+If you can't use Docker Compose, add `--device /dev/dxrt0:/dev/dxrt0 -v /run/dxrt:/run/dxrt` to your `docker run` command.
 
 Add one `--device` per NPU, contiguously from `/dev/dxrt0`, since the client stops enumerating at the first gap.
 
+The installation script configures `dxrt.service` to place its socket in `/run/dxrt` through a systemd drop-in. Mounting the directory rather than the socket file means the container sees the new socket after `dxrt.service` is restarted, rather than holding on to a deleted one.
+
+`dxrtd` listens on an abstract socket as well, but that one does not cross into a container, so Frigate names the filesystem socket through `DXRT_DYNAMIC_IPC_ENDPOINT` on your behalf. Set that variable on the container yourself only if the daemon listens somewhere else, which means you also set it for `dxrtd` through its own systemd drop-in. The script writes `/etc/systemd/system/dxrt.service.d/frigate.conf` and `/etc/profile.d/dxrt.sh` for exactly that, the second so the host's own `dxrt-cli` and `dxtop` look in the same place.
+
 :::note
 
-Restart `dxrt.service` before starting the container, not after. A bind-mounted socket pins the inode it saw at container start, so recreating the socket afterwards leaves the container holding a deleted one.
+The DX-RT client exits when `dxrt.service` stops, so restart the Frigate container after restarting `dxrt.service`.
 
 :::
 
 The device node is needed as well as the socket, because the client opens the NPU directly even though the daemon arbitrates access. Without it, inference fails with `Device not found`.
 
-`/dev/shm` does not need sharing. The daemon publishes a shared memory segment for device monitoring, which `dxtop` and device status read, but inference does not.
-
-`dxrtd` listens on both an abstract socket and `/tmp/dxrt_dynamic_ipc.sock`. Only the second crosses into a container, so Frigate names it through `DXRT_DYNAMIC_IPC_ENDPOINT` on your behalf. Set that variable yourself only if you moved the socket, in which case set it for the daemon too, through a systemd drop-in.
+`/dev/shm` does not need sharing.
 
 The DX-RT python bindings are not shipped in the Frigate image. Frigate downloads them on first start when a DEEPX detector is configured, and caches them under `/config`.
 

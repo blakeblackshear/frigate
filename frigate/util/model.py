@@ -134,8 +134,6 @@ def __post_process_multipart_yolo(
     output_list,
     width,
     height,
-    score_threshold=0.4,
-    nms_threshold=0.4,
 ):
     anchors = [
         [(12, 16), (19, 36), (40, 28)],
@@ -168,7 +166,7 @@ def __post_process_multipart_yolo(
                     class_conf = class_probs[class_id]
                     conf = class_conf * pred[4]
 
-                    if conf < score_threshold:
+                    if conf < 0.4:
                         continue
 
                     dx = pred[0]
@@ -193,8 +191,8 @@ def __post_process_multipart_yolo(
     indices = cv2.dnn.NMSBoxes(
         bboxes=xyxy_to_xywh_for_nms(all_boxes),
         scores=all_scores,
-        score_threshold=score_threshold,
-        nms_threshold=nms_threshold,
+        score_threshold=0.4,
+        nms_threshold=0.4,
     )
 
     results = np.zeros((20, 6), np.float32)
@@ -216,13 +214,7 @@ def __post_process_multipart_yolo(
     return results
 
 
-def __post_process_nms_yolo(
-    predictions: np.ndarray,
-    width,
-    height,
-    score_threshold=0.4,
-    nms_threshold=0.4,
-) -> np.ndarray:
+def __post_process_nms_yolo(predictions: np.ndarray, width, height) -> np.ndarray:
     predictions = np.squeeze(predictions)
 
     # transpose the output so it has order (inferences, class_ids)
@@ -230,8 +222,8 @@ def __post_process_nms_yolo(
         predictions = predictions.T
 
     scores = np.max(predictions[:, 4:], axis=1)
-    predictions = predictions[scores > score_threshold, :]
-    scores = scores[scores > score_threshold]
+    predictions = predictions[scores > 0.4, :]
+    scores = scores[scores > 0.4]
     class_ids = np.argmax(predictions[:, 4:], axis=1)
 
     # Rescale box
@@ -245,10 +237,7 @@ def __post_process_nms_yolo(
 
     # run NMS
     indices = cv2.dnn.NMSBoxes(
-        xyxy_to_xywh_for_nms(boxes),
-        scores,
-        score_threshold=score_threshold,
-        nms_threshold=nms_threshold,
+        xyxy_to_xywh_for_nms(boxes), scores, score_threshold=0.4, nms_threshold=0.4
     )
     detections = np.zeros((20, 6), np.float32)
     for i, (bbox, confidence, class_id) in enumerate(
@@ -269,21 +258,11 @@ def __post_process_nms_yolo(
     return detections
 
 
-def post_process_yolo(
-    output: list[np.ndarray],
-    width: int,
-    height: int,
-    score_threshold: float = 0.4,
-    nms_threshold: float = 0.4,
-) -> np.ndarray:
+def post_process_yolo(output: list[np.ndarray], width: int, height: int) -> np.ndarray:
     if len(output) > 1:
-        return __post_process_multipart_yolo(
-            output, width, height, score_threshold, nms_threshold
-        )
+        return __post_process_multipart_yolo(output, width, height)
     else:
-        return __post_process_nms_yolo(
-            output[0], width, height, score_threshold, nms_threshold
-        )
+        return __post_process_nms_yolo(output[0], width, height)
 
 
 def post_process_yolox(
