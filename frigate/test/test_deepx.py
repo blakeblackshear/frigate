@@ -707,9 +707,8 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         self.assertTrue(np.all(first == 0) and np.all(second == 0))
         self.assertEqual(len([r for r in logs.records if r.levelname == "ERROR"]), 1)
 
-    def test_the_ppu_head_is_settled_once_and_kept(self):
-        """Which head a PPU model was compiled from is a property of the
-        model. A later frame whose boxes all happen to fall under 1.0 must not
+    def test_anchor_free_is_kept_once_proven(self):
+        """A later frame whose boxes all happen to fall within 1.0 must not
         re-open the question and start dropping detections."""
         detector, _ = self._detector(
             ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
@@ -720,7 +719,7 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         ]
 
         first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        self.assertFalse(detector.ppu_anchor_based)
+        self.assertTrue(detector.ppu_anchor_free)
 
         detector.session.run.return_value = [build_ppu_record((0.6, 0.4, 0.3, 0.7))]
         second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
@@ -730,11 +729,33 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         # decoded as pixels, which is a sub-pixel box in the corner
         self.assertAlmostEqual(second[0][1], 0.9, places=5)
 
-    def test_an_empty_or_all_zero_ppu_frame_leaves_the_head_undecided(self):
+    def test_an_anchor_based_verdict_is_not_kept(self):
+        """An anchor-free model whose first record is a sub-pixel box in the
+        corner looks anchor-based for that frame only; the next normal box
+        decodes and settles the head."""
+        detector, _ = self._detector(
+            ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
+        )
+        detector.width, detector.height = 640, 640
+
+        detector.session.run.return_value = [build_ppu_record((0.6, 0.4, 0.3, 0.7))]
+        with self.assertLogs("frigate.detectors.plugins.deepx", level="ERROR"):
+            first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertTrue(np.all(first == 0))
+        self.assertFalse(detector.ppu_anchor_free)
+
+        detector.session.run.return_value = [
+            build_ppu_record((320.0, 160.0, 64.0, 32.0), label=3)
+        ]
+        second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+
+        self.assertEqual(second[0][0], 3)
+        self.assertTrue(detector.ppu_anchor_free)
+
+    def test_an_empty_or_all_zero_ppu_frame_proves_nothing(self):
         """Only a box value above 1 (anchor-free) or a frame of values
         strictly inside 0..1 (anchor-based) is evidence; an empty frame or a
-        degenerate all-zero record is neither and must not freeze the model
-        as anchor-based."""
+        degenerate all-zero record is neither."""
         detector, _ = self._detector(
             ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
         )
@@ -748,15 +769,8 @@ class TestDeepxDetectorLayout(unittest.TestCase):
             detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
 
             self.assertTrue(np.all(detections == 0))
-            self.assertIsNone(detector.ppu_anchor_based)
-
-        detector.session.run.return_value = [
-            build_ppu_record((320.0, 160.0, 64.0, 32.0), label=3)
-        ]
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-
-        self.assertFalse(detector.ppu_anchor_based)
-        self.assertEqual(detections[0][0], 3)
+            self.assertFalse(detector.ppu_anchor_free)
+            self.assertFalse(detector.ppu_anchor_based_reported)
 
     def test_damoyolo_is_checked_against_the_model_at_load(self):
         """A YOLO model or a wrong label map under damo-yolo fails at load

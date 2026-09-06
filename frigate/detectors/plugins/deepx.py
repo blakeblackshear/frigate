@@ -684,8 +684,8 @@ class DeepxDetector(DetectionApi):
         self.session = InferenceEngine(str(model_path), options)
         self.output = self.inspect_model(config)
         self.logged_layout = False
-        # settled on the first frame that carries a record, then kept
-        self.ppu_anchor_based: bool | None = None
+        # set once a frame proves the PPU head anchor-free, then kept
+        self.ppu_anchor_free = False
         self.ppu_anchor_based_reported = False
         self.damoyolo_outputs_reported = False
 
@@ -757,12 +757,16 @@ class DeepxDetector(DetectionApi):
                 return post_process_yolo(outputs, self.width, self.height)
 
     def decode_ppu(self, outputs: list[np.ndarray]) -> np.ndarray:
-        """Decode PPU records, settling the head on the first conclusive
-        frame."""
-        if self.ppu_anchor_based is None:
-            self.ppu_anchor_based = ppu_layout_is_anchor_based(outputs)
+        """Decode PPU records. A box value above 1 proves the head is
+        anchor-free and that is kept; the anchor-based verdict is re-read on
+        every frame, so a sub-pixel box cannot lock the model out."""
+        if self.ppu_anchor_free:
+            anchor_based = False
+        else:
+            anchor_based = ppu_layout_is_anchor_based(outputs)
+            self.ppu_anchor_free = anchor_based is False
 
-        if self.ppu_anchor_based:
+        if anchor_based:
             if not self.ppu_anchor_based_reported:
                 self.ppu_anchor_based_reported = True
                 logger.error(
@@ -773,15 +777,15 @@ class DeepxDetector(DetectionApi):
 
             return np.zeros((20, 6), np.float32)
 
-        # None here means no frame has carried a record yet, which leaves the
-        # heuristic to run again on the next one
+        # None here means nothing conclusive in this frame, and no pixel
+        # box to draw either
         return decode_ppu(
             outputs,
             self.width,
             self.height,
             SCORE_THRESHOLD,
             NMS_THRESHOLD,
-            anchor_based=self.ppu_anchor_based,
+            anchor_based=anchor_based,
         )
 
     def decode_damoyolo(self, outputs: list[np.ndarray]) -> np.ndarray:
