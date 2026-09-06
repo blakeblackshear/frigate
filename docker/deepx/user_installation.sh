@@ -5,8 +5,10 @@
 # modules, so this runs outside the image; the driver creates the /dev/dxrt*
 # nodes and the daemon multiplexes the NPU across host and container.
 #
-# Driver, runtime (v3.4.0) and NPU firmware (v2.7.4) must agree or inference
-# hangs instead of failing at startup; 3.4.0 needs driver 2.5.0, firmware 2.7.0.
+# Driver, runtime and firmware versions must agree or inference hangs instead
+# of failing at startup. The set this script installs is pinned in
+# driver_version, runtime_version and firmware_version below; move them
+# together, never one at a time.
 #
 # DEEPX NPU support in Frigate is maintained by Sixfab (https://sixfab.com).
 
@@ -28,11 +30,13 @@ if ! lspci -d 1ff4: | grep -q .; then
 fi
 
 # fetch the pinned commit rather than cloning the tag, so a retag cannot swap
-# in different source
-mkdir dx_rt_npu_linux_driver
+# in different source. The build directory is reused so a second run after a
+# failure does not stop on the directory already being there
+mkdir -p dx_rt_npu_linux_driver
 cd dx_rt_npu_linux_driver
 git init -q
-git remote add origin https://github.com/DEEPX-AI/dx_rt_npu_linux_driver.git
+git remote get-url origin > /dev/null 2>&1 ||
+    git remote add origin https://github.com/DEEPX-AI/dx_rt_npu_linux_driver.git
 git fetch --depth 1 origin "${driver_commit}"
 git checkout -q FETCH_HEAD
 
@@ -93,8 +97,24 @@ sudo ldconfig
 rm -f "${deb_file}"
 
 sudo cp /usr/share/libdxrt-bin/service/dxrt.service /etc/systemd/system/
+
+# With an endpoint set, dxrtd binds that path only, so the socket goes in a
+# directory Frigate can mount (kept across restarts so the mount stays valid)
+# and a symlink at the default /tmp path keeps host tools that do not set the
+# variable working through their own fallback.
+sudo mkdir -p /etc/systemd/system/dxrt.service.d
+sudo tee /etc/systemd/system/dxrt.service.d/frigate.conf > /dev/null <<'UNIT'
+[Service]
+RuntimeDirectory=dxrt
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
+Environment=DXRT_DYNAMIC_IPC_ENDPOINT=/run/dxrt/dxrt_dynamic_ipc.sock
+ExecStartPost=/bin/ln -sfn /run/dxrt/dxrt_dynamic_ipc.sock /tmp/dxrt_dynamic_ipc.sock
+UNIT
+
 sudo systemctl daemon-reload
-sudo systemctl enable --now dxrt.service
+sudo systemctl enable dxrt.service
+sudo systemctl restart dxrt.service
 
 if ! sudo systemctl is-active --quiet dxrt.service; then
     echo "dxrt.service did not start. Check: sudo journalctl -u dxrt.service"
