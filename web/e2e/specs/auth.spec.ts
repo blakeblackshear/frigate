@@ -9,6 +9,55 @@
 import { test, expect } from "../fixtures/frigate-test";
 import { viewerProfile } from "../fixtures/mock-data/profile";
 
+test.describe("Auth — native login redirect @high", () => {
+  for (const { name, startPath, expectedPath } of [
+    {
+      name: "returns to the requested same-origin URL",
+      startPath: "/explore?cameras=driveway&labels=person",
+      expectedPath: "/explore?cameras=driveway&labels=person",
+    },
+    {
+      name: "rejects an external redirect URL",
+      startPath: "/login?redirect=https://example.com/explore",
+      expectedPath: "/",
+    },
+  ]) {
+    test(name, async ({ page }) => {
+      let authenticated = false;
+
+      await page.route("**/api/profile", (route) =>
+        route.fulfill(
+          authenticated
+            ? {
+                json: {
+                  username: "admin",
+                  role: "admin",
+                  allowed_cameras: [],
+                },
+              }
+            : { status: 401, json: {} },
+        ),
+      );
+      await page.route("**/api/login", async (route) => {
+        authenticated = true;
+        await route.fulfill({ json: {} });
+      });
+      await page.route("**/api/auth/first_time_login", (route) =>
+        route.fulfill({ json: { admin_first_time_login: false } }),
+      );
+
+      await page.goto(startPath);
+      await page.locator('input[name="user"]').fill("admin");
+      await page.locator('input[name="password"]').fill("password");
+      await page.getByRole("button", { name: /login/i }).click();
+
+      await expect(page).toHaveURL(
+        (url) => `${url.pathname}${url.search}` === expectedPath,
+      );
+    });
+  }
+});
+
 test.describe("Auth — admin access @high", () => {
   test("admin /system renders general tab", async ({ frigateApp }) => {
     await frigateApp.goto("/system");

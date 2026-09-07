@@ -29,6 +29,23 @@ import { Card, CardContent } from "@/components/ui/card";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
+function getLoginRedirect(): string {
+  const redirect = new URLSearchParams(window.location.search).get("redirect");
+
+  if (!redirect) {
+    return baseUrl;
+  }
+
+  try {
+    const redirectUrl = new URL(redirect, baseUrl);
+    return redirectUrl.origin === window.location.origin
+      ? redirectUrl.href
+      : baseUrl;
+  } catch {
+    return baseUrl;
+  }
+}
+
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const { t } = useTranslation(["components/auth", "common"]);
   const { getLocaleDocUrl } = useDocDomain();
@@ -69,7 +86,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         username: profileRes.data.username,
         role: profileRes.data.role || "viewer",
       });
-      window.location.href = baseUrl;
+      window.location.href = getLoginRedirect();
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const err = error as AxiosError;
