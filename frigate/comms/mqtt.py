@@ -334,7 +334,16 @@ class MqttClient(Communicator):
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
         )
 
-        if self.mqtt_config.tls_ca_certs is not None:
+        # any tls_* option turns TLS on. tls_ca_certs is passed through as-is
+        # so that leaving it unset means "use the system trust store" instead
+        # of skipping TLS entirely
+        tls_enabled = (
+            self.mqtt_config.tls_ca_certs is not None
+            or self.mqtt_config.tls_client_cert is not None
+            or self.mqtt_config.tls_insecure is not None
+        )
+
+        if tls_enabled:
             if (
                 self.mqtt_config.tls_client_cert is not None
                 and self.mqtt_config.tls_client_key is not None
@@ -346,8 +355,10 @@ class MqttClient(Communicator):
                 )
             else:
                 self.client.tls_set(self.mqtt_config.tls_ca_certs)
-        if self.mqtt_config.tls_insecure is not None:
-            self.client.tls_insecure_set(self.mqtt_config.tls_insecure)
+
+            # must come after tls_set, which is what creates the ssl context
+            if self.mqtt_config.tls_insecure is not None:
+                self.client.tls_insecure_set(self.mqtt_config.tls_insecure)
         if self.mqtt_config.user is not None:
             self.client.username_pw_set(
                 self.mqtt_config.user, password=self.mqtt_config.password
