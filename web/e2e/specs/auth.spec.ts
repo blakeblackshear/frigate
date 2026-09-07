@@ -9,7 +9,7 @@
 import { test, expect } from "../fixtures/frigate-test";
 import { viewerProfile } from "../fixtures/mock-data/profile";
 
-test.describe("Auth — native login redirect @high", () => {
+test.describe("Auth: native login redirect @high", () => {
   for (const { name, startPath, expectedPath } of [
     {
       name: "returns to the requested same-origin URL",
