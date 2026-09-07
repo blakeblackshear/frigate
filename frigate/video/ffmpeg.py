@@ -75,7 +75,15 @@ def capture_frames(
             frame_name = f"{config.name}_frame{frame_index}"
             frame_buffer = frame_manager.write(frame_name)
             try:
-                frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
+                # read directly into shared memory to avoid allocating and then
+                # copying a full frame out of the ffmpeg pipe every frame. stdout
+                # is buffered, so readinto returns a full frame unless the pipe
+                # closed mid-frame.
+                if (
+                    ffmpeg_process.stdout.readinto(frame_buffer[:frame_size])
+                    != frame_size
+                ):
+                    raise EOFError("did not read a full frame from ffmpeg")
             except Exception:
                 # shutdown has been initiated
                 if stop_event.is_set():
