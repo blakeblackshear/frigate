@@ -222,7 +222,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 daemon=True,
                 args=(review_id,),
             ).start()
-            return None
+            return "started"
         elif topic == EmbeddingsRequestEnum.summarize_review.value:
             start_ts = request_data["start_ts"]
             end_ts = request_data["end_ts"]
