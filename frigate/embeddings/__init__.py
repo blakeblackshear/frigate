@@ -334,3 +334,9 @@ class EmbeddingsContext:
             EmbeddingsRequestEnum.summarize_review.value,
             {"start_ts": start_ts, "end_ts": end_ts},
         )
+
+    def regenerate_review_description(self, review_id: str) -> None:
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.regenerate_review_description.value,
+            {"review_id": review_id},
+        )
