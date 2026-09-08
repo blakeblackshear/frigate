@@ -734,6 +734,73 @@ async def get_review(request: Request, review_id: str):
         )
 
 
+@router.put(
+    "/review/{review_id}/regenerate_description",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Generate a review item description",
+    description="""Re-runs a review item through the GenAI descriptions process.
+    Frames are always taken from recordings, and both alerts and detections are
+    accepted regardless of the camera's GenAI alerts/detections toggles.
+    """,
+)
+async def regenerate_review_description(request: Request, review_id: str):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == review_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Review " + review_id + " not found",
+            },
+            status_code=404,
+        )
+
+    await require_camera_access(review.camera, request=request)
+
+    if review.end_time is None:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Review " + review_id + " has not ended yet",
+            },
+            status_code=400,
+        )
+
+    camera_config = request.app.frigate_config.cameras.get(review.camera)
+
+    if camera_config is None or not camera_config.review.genai.enabled:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "GenAI descriptions must be enabled for this camera",
+            },
+            status_code=400,
+        )
+
+    if request.app.genai_manager.description_client is None:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "A GenAI provider with the descriptions role must be configured",
+            },
+            status_code=400,
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    context.regenerate_review_description(review_id)
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": "Review "
+            + review_id
+            + " description generation has been requested",
+        },
+        status_code=202,
+    )
+
+
 @router.delete(
     "/review/{review_id}/viewed",
     response_model=GenericResponse,

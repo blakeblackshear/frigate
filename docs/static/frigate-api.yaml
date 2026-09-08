@@ -2283,6 +2283,42 @@ paths:
         - frigateUserAuth: []
       x-required-role: camera
       description: '**Access:** Authenticated user with access to the referenced camera.'
+  /review/{review_id}/regenerate_description:
+    put:
+      tags:
+        - Review
+      summary: Generate a review item description
+      description: |-
+        **Access:** Admin role required.
+
+        Re-runs a review item through the GenAI descriptions process.
+            Frames are always taken from recordings, and both alerts and detections are
+            accepted regardless of the camera's GenAI alerts/detections toggles.
+      operationId: 
+        regenerate_review_description_review__review_id__regenerate_description_put
+      parameters:
+        - name: review_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Review Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
   /review/{review_id}/viewed:
     delete:
       tags:
@@ -2473,6 +2509,25 @@ paths:
 
         Returns available models for each configured GenAI provider.
       operationId: genai_models_genai_models_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /genai/roles:
+    get:
+      tags:
+        - App
+      summary: Get the model assigned to each GenAI role
+      description: |-
+        **Access:** Admin role required.
+
+        Returns the selected model and its context size for each configured GenAI role. Reads only what the client saved when it initialized, so the provider is not queried for its model list.
+      operationId: genai_roles_genai_roles_get
       responses:
         '200':
           description: Successful Response
