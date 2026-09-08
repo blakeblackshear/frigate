@@ -311,6 +311,7 @@
   "lastRefreshed": "Last refreshed: ",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} has high FFmpeg CPU usage ({{ffmpegAvg}}%)",
+    "cameraSkippedDetections": "{{camera}} has skipped detections ({{fps}}).",
     "detectHighCpuUsage": "{{camera}} has high detect CPU usage ({{detectAvg}}%)",
     "healthy": "System is healthy",
     "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)",
