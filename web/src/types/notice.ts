@@ -8,7 +8,6 @@ export type NoticeCategory =
   | "system";
 export type NoticeKind =
   | "ffmpeg_crash_loop"
-  | "camera_skipped_detections"
   | "detector_stuck"
   | "model_download_failed"
   | "retention_unmet"

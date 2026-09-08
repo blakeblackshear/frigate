@@ -48,7 +48,6 @@ RECORD_GRACE_SECONDS = 90
 # crash loop; it recovers once the capture thread stays up this long
 CRASH_LOOP_RESTARTS = 5
 CRASH_LOOP_RECOVERY_S = 600
-SKIPPED_DETECTIONS_THRESHOLD = 1.0
 
 
 def capture_frames(
@@ -192,8 +191,6 @@ class CameraWatchdog(threading.Thread):
         # Stall tracking (based on last processed frame)
         self._stall_timestamps: deque[float] = deque()
         self._stall_active: bool = False
-        self.skipped_detections_raised = False
-        self._last_skipped_fps_notice: float | None = None
 
         # Status caching to reduce message volume
         self._last_detect_status: str | None = None
@@ -246,41 +243,6 @@ class CameraWatchdog(threading.Thread):
         )
         self.crash_loop_raised = False
         self._crash_loop_sent_restarts = 0
-
-    def _update_skipped_detections_notice(self) -> None:
-        """Raise or resolve the notice for a sustained skipped detection rate."""
-        skipped_fps = round(float(self.skipped_fps.value), 2)
-
-        if skipped_fps > SKIPPED_DETECTIONS_THRESHOLD:
-            if (
-                self.skipped_detections_raised
-                and skipped_fps == self._last_skipped_fps_notice
-            ):
-                return
-
-            self.requestor.send_data(
-                UPDATE_NOTICE,
-                {
-                    "action": "raise",
-                    "kind": "camera_skipped_detections",
-                    "scope": self.config.name,
-                    "params": {"fps": skipped_fps},
-                },
-            )
-            self.skipped_detections_raised = True
-            self._last_skipped_fps_notice = skipped_fps
-        elif self.skipped_detections_raised:
-            self.requestor.send_data(
-                UPDATE_NOTICE,
-                {
-                    "action": "resolve",
-                    "kind": "camera_skipped_detections",
-                    "scope": self.config.name,
-                    "params": {},
-                },
-            )
-            self.skipped_detections_raised = False
-            self._last_skipped_fps_notice = None
 
     def _send_detect_status(self, status: str, now: float) -> None:
         """Send detect status only if changed or retry_interval has elapsed."""
@@ -475,7 +437,6 @@ class CameraWatchdog(threading.Thread):
 
                     if self.crash_loop_raised:
                         self._resolve_crash_loop()
-                    self._update_skipped_detections_notice()
                 self.was_enabled = enabled
                 continue
 
@@ -542,7 +503,6 @@ class CameraWatchdog(threading.Thread):
                         )
 
             now = datetime.now().timestamp()
-            self._update_skipped_detections_notice()
 
             # Check if enough time has passed to allow ffmpeg restart (backoff pacing)
             time_since_last_restart = now - last_restart_time

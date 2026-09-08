@@ -47,9 +47,6 @@ SCOPED_CATEGORIES = frozenset({"camera", "detector", "model"})
 
 _KINDS = (
     NoticeKind("ffmpeg_crash_loop", NoticeMode.state, NoticeSeverity.error, "camera"),
-    NoticeKind(
-        "camera_skipped_detections", NoticeMode.state, NoticeSeverity.warning, "camera"
-    ),
     NoticeKind("detector_stuck", NoticeMode.event, NoticeSeverity.warning, "detector"),
     NoticeKind(
         "model_download_failed", NoticeMode.event, NoticeSeverity.error, "model"

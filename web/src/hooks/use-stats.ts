@@ -144,6 +144,19 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       const cameraName = config?.cameras?.[name]?.friendly_name ?? name;
 
+      if (config?.cameras?.[name]?.enabled && cam["skipped_fps"] > 1) {
+        problems.push(
+          problem(
+            "warning",
+            t("stats.cameraSkippedDetections", {
+              camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
+              fps: cam["skipped_fps"],
+            }),
+            "/system#cameras",
+          ),
+        );
+      }
+
       if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push(
           problem(
