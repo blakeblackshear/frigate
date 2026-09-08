@@ -190,6 +190,20 @@ def genai_models(request: Request):
     return JSONResponse(content=request.app.genai_manager.list_models())
 
 
+@router.get(
+    "/genai/roles",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get the model assigned to each GenAI role",
+    description=(
+        "Returns the selected model and its context size for each configured "
+        "GenAI role. Reads only what the client saved when it initialized, so "
+        "the provider is not queried for its model list."
+    ),
+)
+def genai_roles(request: Request):
+    return JSONResponse(content=request.app.genai_manager.role_info())
+
+
 @router.post(
     "/genai/probe",
     dependencies=[Depends(require_role(["admin"]))],

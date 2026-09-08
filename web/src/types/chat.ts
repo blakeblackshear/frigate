@@ -1,3 +1,4 @@
+import { GenAIRole } from "@/types/frigateConfig";
 export type ToolCallFunction = {
   name: string;
   arguments: string;
@@ -57,3 +58,11 @@ export type GenAIProviderInfo = {
 };
 
 export type GenAIModelsResponse = Record<string, GenAIProviderInfo>;
+
+export type GenAIRoleInfo = {
+  name: string;
+  model: string;
+  context_size: number;
+};
+
+export type GenAIRolesResponse = Partial<Record<GenAIRole, GenAIRoleInfo>>;
