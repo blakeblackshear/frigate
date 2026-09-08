@@ -99,10 +99,14 @@ def capture_frames(
             try:
                 # add to the queue
                 frame_queue.put((frame_name, current_frame.value), False)
-                frame_manager.close(frame_name)
             except queue.Full:
                 # if the queue is full, skip this frame
                 skipped_eps.update()
+            finally:
+                # release our handle either way. on the skip path the frame is
+                # never handed to a consumer, so nothing else will close it and
+                # the mapping stays open until this ring slot comes back around.
+                frame_manager.close(frame_name)
 
             frame_index = 0 if frame_index == shm_frame_count - 1 else frame_index + 1
     finally:
