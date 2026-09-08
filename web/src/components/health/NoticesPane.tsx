@@ -23,6 +23,7 @@ const SETTINGS_LINK_BY_KIND: Partial<
   Record<NoticeKind, (scope: string | null) => string>
 > = {
   ffmpeg_crash_loop: (scope) => `/settings?page=cameraFfmpeg&camera=${scope}`,
+  camera_skipped_detections: () => `/system#cameras`,
   retention_unmet: () => "/system#storage",
   detector_stuck: () => "/system#general",
 };

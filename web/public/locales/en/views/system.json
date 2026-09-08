@@ -27,6 +27,7 @@
       "firstSeen": "First seen {{time}} · {{times}} times",
       "kinds": {
         "ffmpeg_crash_loop": "ffmpeg has crashed {{restarts}} times in the last hour",
+        "camera_skipped_detections": "Camera has skipped detections ({{fps}}). Tune motion detection, reduce detect fps, or use a lighter detection model.",
         "detector_stuck": "Detector {{detector}} was restarted after it stopped responding",
         "model_download_failed": "Downloading {{file}} failed: {{error}}",
         "retention_unmet": "Recordings were deleted before their retention period to free space ({{cleared_mb}} of {{needed_mb}} MB needed)",

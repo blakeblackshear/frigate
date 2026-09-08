@@ -300,3 +300,51 @@ class TestCameraWatchdogCrashLoop(unittest.TestCase):
         payloads = self._notice_payloads(watchdog)
         self.assertEqual(payloads[-1]["action"], "resolve")
         self.assertFalse(watchdog.crash_loop_raised)
+
+
+class TestCameraWatchdogSkippedDetections(unittest.TestCase):
+    def _build_watchdog(self) -> CameraWatchdog:
+        return build_watchdog()
+
+    def _notice_payloads(self, watchdog: CameraWatchdog) -> list[dict]:
+        return [
+            call.args[1]
+            for call in watchdog.requestor.send_data.call_args_list
+            if call.args[0] == "update_notice"
+        ]
+
+    def test_high_skipped_detection_rate_raises_notice(self):
+        watchdog = self._build_watchdog()
+        watchdog.skipped_fps.value = 1.25
+
+        watchdog._update_skipped_detections_notice()
+
+        self.assertEqual(
+            self._notice_payloads(watchdog),
+            [
+                {
+                    "action": "raise",
+                    "kind": "camera_skipped_detections",
+                    "scope": "front_door",
+                    "params": {"fps": 1.25},
+                }
+            ],
+        )
+
+    def test_notice_resolves_when_skipped_detection_rate_recovers(self):
+        watchdog = self._build_watchdog()
+        watchdog.skipped_fps.value = 1.25
+        watchdog._update_skipped_detections_notice()
+
+        watchdog.skipped_fps.value = 1.0
+        watchdog._update_skipped_detections_notice()
+
+        self.assertEqual(self._notice_payloads(watchdog)[-1]["action"], "resolve")
+
+    def test_unchanged_high_rate_does_not_repeat_notice(self):
+        watchdog = self._build_watchdog()
+        watchdog.skipped_fps.value = 1.25
+
+        watchdog._update_skipped_detections_notice()
+        watchdog._update_skipped_detections_notice()
+        self.assertEqual(len(self._notice_payloads(watchdog)), 1)
