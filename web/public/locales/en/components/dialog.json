@@ -191,7 +191,14 @@
       "export": "Export",
       "markAsReviewed": "Mark as reviewed",
       "markAsUnreviewed": "Mark as unreviewed",
-      "deleteNow": "Delete Now"
+      "deleteNow": "Delete Now",
+      "generateDescription": "Generate description"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "A GenAI description has been requested for this review item.",
+        "error": "Failed to request description: {{error}}"
+      }
     }
   },
   "imagePicker": {

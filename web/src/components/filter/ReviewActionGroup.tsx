@@ -21,7 +21,9 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useReviewDescriptions } from "@/hooks/use-review-descriptions";
 import MultiExportDialog from "../overlay/MultiExportDialog";
+import { MdAutoAwesome } from "react-icons/md";
 
 type ReviewActionGroupProps = {
   selectedReviews: ReviewSegment[];
@@ -44,6 +46,13 @@ export default function ReviewActionGroup({
   const allReviewed = selectedReviews.every(
     (review) => review.has_been_reviewed,
   );
+
+  const { canGenerateDescription, generateDescription } =
+    useReviewDescriptions();
+
+  // only a single item can be sent through the descriptions process at a time
+  const showGenerateDescription =
+    selectedReviews.length == 1 && canGenerateDescription(selectedReviews[0]);
 
   const onToggleReviewed = useCallback(async () => {
     const ids = selectedReviews.map((review) => review.id);
@@ -162,6 +171,24 @@ export default function ReviewActionGroup({
               {isDesktop && (
                 <div className="text-primary">
                   {t("recording.button.export")}
+                </div>
+              )}
+            </Button>
+          )}
+          {showGenerateDescription && (
+            <Button
+              className="flex items-center gap-2 p-2"
+              aria-label={t("recording.button.generateDescription")}
+              size="sm"
+              onClick={() => {
+                generateDescription(selectedReviews[0]);
+                onClearSelected();
+              }}
+            >
+              <MdAutoAwesome className="text-secondary-foreground" />
+              {isDesktop && (
+                <div className="text-primary">
+                  {t("recording.button.generateDescription")}
                 </div>
               )}
             </Button>
