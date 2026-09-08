@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import numpy as np
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 
 import frigate.detectors as detectors
 import frigate.object_detection.base
@@ -19,8 +19,8 @@ class TestLocalObjectDetector(unittest.TestCase):
                     "frigate.detectors.api_types",
                     {det_type: Mock() for det_type in DetectorTypeEnum},
                 ):
-                    test_cfg = parse_obj_as(
-                        DetectorConfig, ({"type": det_type, "model": {}})
+                    test_cfg = TypeAdapter(DetectorConfig).validate_python(
+                        {"type": det_type, "model": {}}
                     )
                     test_cfg.model.path = "/test/modelpath"
                     test_obj = frigate.object_detection.base.LocalObjectDetector(
@@ -44,7 +44,9 @@ class TestLocalObjectDetector(unittest.TestCase):
         TEST_DATA = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         TEST_DETECT_RESULT = np.ndarray([1, 2, 4, 8, 16, 32])
         test_obj_detect = frigate.object_detection.base.LocalObjectDetector(
-            detector_config=parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
+            detector_config=TypeAdapter(DetectorConfig).validate_python(
+                {"type": "cpu", "model": {}}
+            )
         )
 
         mock_det_api = mock_cputfl.return_value
@@ -67,7 +69,9 @@ class TestLocalObjectDetector(unittest.TestCase):
         TEST_DATA = np.zeros((1, 32, 32, 3), np.uint8)
         TEST_DETECT_RESULT = np.ndarray([1, 2, 4, 8, 16, 32])
 
-        test_cfg = parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
+        test_cfg = TypeAdapter(DetectorConfig).validate_python(
+            {"type": "cpu", "model": {}}
+        )
         test_cfg.model.input_tensor = InputTensorEnum.nchw
 
         test_obj_detect = frigate.object_detection.base.LocalObjectDetector(
@@ -116,7 +120,9 @@ class TestLocalObjectDetector(unittest.TestCase):
             "label-5",
         ]
 
-        test_cfg = parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
+        test_cfg = TypeAdapter(DetectorConfig).validate_python(
+            {"type": "cpu", "model": {}}
+        )
         test_cfg.model = ModelConfig()
         test_obj_detect = frigate.object_detection.base.LocalObjectDetector(
             detector_config=test_cfg,
