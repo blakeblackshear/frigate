@@ -271,28 +271,24 @@ The NPU runs models compiled to the `.dxnn` format with DEEPX's DX-COM compiler.
 
 The DEEPX kernel driver, the DX-RT runtime, and the `dxrtd` daemon all run on the Docker host rather than inside the Frigate container, and have to be installed there before the NPU can be used. Frigate connects to the daemon over its socket, so the NPU stays available to other programs on the host at the same time. See the [installation docs](installation.md#deepx-npu) for the setup steps.
 
-Detailed information is available [in the detector docs](/configuration/object_detectors#deepx-npu).
-
-The [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo) publishes pre-compiled `.dxnn` files for many YOLO variants as well as the models below:
-
+The DEEPX ModelZoo publishes pre-compiled `.dxnn` files for many YOLO variants as well as the models below:
 | Model                  | Input Size | DX-M1 Inference Time |
 | ---------------------- | ---------- | -------------------- |
-| DAMO-YOLO-T            | 640        | ~ 5.0 ms             |
-| DAMO-YOLO TinyNAS-L20T | 640        | ~ 5.1 ms             |
-| DAMO-YOLO-S            | 640        | ~ 6.0 ms             |
-| DAMO-YOLO TinyNAS-L25S | 640        | ~ 6.0 ms             |
-| DAMO-YOLO-M            | 640        | ~ 6.8 ms             |
-| DAMO-YOLO TinyNAS-L20M | 640        | ~ 6.8 ms             |
-| DAMO-YOLO-L            | 640        | ~ 9.0 ms             |
-| SSD (MobileNetV1)      | 300        | ~ 0.5 ms             |
-| SSD (MobileNetV2-Lite) | 300        | ~ 0.6 ms             |
-| SSD (VGG-16)           | 300        | ~ 3.3 ms             |
+| DAMO-YOLO-T            | 640        | ~ 47 ms             |
+| DAMO-YOLO TinyNAS-L20T | 640        | ~ 48 ms             |
+| DAMO-YOLO-S            | 640        | ~ 48 ms             |
+| DAMO-YOLO TinyNAS-L25S | 640        | ~ 48 ms             |
+| DAMO-YOLO-M            | 640        | ~ 56 ms             |
+| DAMO-YOLO TinyNAS-L20M | 640        | ~ 55 ms             |
+| DAMO-YOLO-L            | 640        | ~ 57 ms             |
+| YOLOv9s                | 640        | ~ 51 ms              |
 
 These are DEEPX's own figures for the DX-M1, derived from the frames per second published in the ModelZoo. They cover the NPU alone and exclude the pre- and post-processing Frigate does on the host, so the inference speed Frigate reports will be higher, and noticeably so on a slower host such as a Raspberry Pi 5.
 
-:::note
+Besides the DAMO-YOLO family shown above, other models from the wider YOLO family published in the ModelZoo are also supported by the `deepx` detector, though inference-time measurements have not been carried out as thoroughly across all of them as for the models in the table. These YOLO models can be run in Frigate by setting `model_type: yolo-generic`.
 
-The SSD rows describe what the NPU can run, not what Frigate can use. All three SSD models are trained on Pascal VOC rather than COCO, so their labels do not match the object vocabulary used by `objects.track` and the rest of Frigate. The `deepx` detector has no SSD decoder and rejects `model_type: ssd` at startup. Use a DAMO-YOLO or YOLO model instead.
+:::note
+SSD models in the ModelZoo, trained on Pascal VOC rather than COCO, so their labels do not match the object vocabulary used by `objects.track` and the rest of Frigate. The `deepx` detector has no SSD decoder and rejects `model_type: ssd` at startup. Use a DAMO-YOLO or YOLO model instead.
 
 :::
 
