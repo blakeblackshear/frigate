@@ -362,17 +362,16 @@ class TestDeepxPpuDecode(unittest.TestCase):
         self.assertAlmostEqual(detections[0][4], 0.137188, places=5)
         self.assertAlmostEqual(detections[0][5], 0.125750, places=5)
 
-    def test_a_grid_cell_past_the_coarser_layout_proves_a_third_scale(self):
-        """A layer-0 cell at column 40 of a 640 input needs stride 8, so the
-        head has three scales even though no layer-2 record has shown up;
-        the layer-1 record in the same frame must then read against the
-        three-scale table, not the two-scale one its layer index alone
-        would suggest."""
+    def test_a_frame_of_only_the_finer_layers_still_reads_as_three_scales(self):
+        """Layers 0 and 1 near the origin look the same from a two-scale
+        head and from the finer two thirds of a three-scale one, so with no
+        scale_count given the frame reads against the three-scale table,
+        never the two-scale one its highest layer index alone suggests."""
         detections = decode_ppu(
             [
                 build_ppu_records(
                     build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1)),
-                    build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 40, 1, 0)),
+                    build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0)),
                 )
             ],
             640,
@@ -388,6 +387,10 @@ class TestDeepxPpuDecode(unittest.TestCase):
         self.assertAlmostEqual(layer_one[0][2], 0.057, places=5)
         self.assertAlmostEqual(layer_one[0][4], 0.118, places=5)
         self.assertAlmostEqual(layer_one[0][5], 0.1275, places=5)
+        # layer 0 of 3 is stride 8 and box 1 is the 16x30 anchor
+        layer_zero = detections[np.isclose(detections[:, 3], 0.116750)]
+        self.assertEqual(len(layer_zero), 1)
+        self.assertAlmostEqual(layer_zero[0][2], 0.045313, places=5)
 
     def test_scale_count_lower_bound_reads_layer_and_grid_position(self):
         """Every record proves at least one scale past its layer, and a
@@ -1221,12 +1224,11 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         self.assertEqual(second[0][0], 3)
         self.assertTrue(detector.ppu_anchor_free)
 
-    def test_ppu_scale_count_is_kept_once_a_coarser_layer_is_seen(self):
-        """A frame that only shows layer 0 cannot tell a two-scale head from
-        a three-scale one and falls back to three; once a frame proves
-        layer 1 exists, two scales is the best-evidenced count and every
-        later layer-0-only frame must use the two-scale table, until some
-        record proves a third scale."""
+    def test_ppu_scale_count_without_a_layout_never_drops_below_three(self):
+        """With no layout to read, a three-scale head whose first frames
+        only hold layers 0 and 1 near the origin must not be read as a
+        two-scale head: those records are exactly what a three-scale head
+        emits too, so every frame keeps the three-scale table."""
         detector, _ = self._detector(
             ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
         )
@@ -1236,31 +1238,29 @@ class TestDeepxDetectorLayout(unittest.TestCase):
             build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))
         ]
         first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        # layer 0 read against the three-scale default: stride 8, anchor 16x30
+        # layer 0 of 3: stride 8, anchor 16x30
         self.assertAlmostEqual(first[0][3], 0.116750, places=5)
+        self.assertEqual(detector.ppu_scale_count, 3)
 
         detector.session.run.return_value = [
             build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1))
         ]
         second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        # layer 1 of 2 is stride 32 and box 0 is the 81x82 anchor
-        self.assertAlmostEqual(second[0][3], 0.1845, places=5)
-        self.assertEqual(detector.ppu_scale_count, 2)
+        # layer 1 of 3: stride 16, anchor 30x61, not layer 1 of 2
+        self.assertAlmostEqual(second[0][3], 0.0975, places=5)
+        self.assertEqual(detector.ppu_scale_count, 3)
 
         detector.session.run.return_value = [
             build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))
         ]
         third = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        # the same layer-0 record as the first frame, now read against the
-        # two-scale table proven by the second frame: stride 16, anchor 23x27
-        self.assertAlmostEqual(third[0][3], 0.236031, places=5)
+        self.assertAlmostEqual(third[0][3], 0.116750, places=5)
 
-    def test_ppu_scale_count_grows_when_a_grid_cell_proves_a_third_scale(self):
-        """A three-scale head whose early frames only ever hold layers 0
-        and 1 near the origin reads as two scales; a later layer-0 record
-        at column 40 of 640 needs stride 8, which proves the third scale
-        without a layer-2 record ever appearing, and every frame after
-        that must read against the three-scale table."""
+    def test_ppu_scale_count_grows_when_a_grid_cell_proves_a_fourth_scale(self):
+        """A layer-0 record at column 80 of 640 needs stride 4, which proves
+        a fourth scale with no layer-3 record ever appearing; there is no
+        table for that, so it is reported once and every frame after that
+        stays unplaced rather than reading against the three-scale table."""
         detector, _ = self._detector(
             ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
         )
@@ -1269,20 +1269,19 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         layer_one = build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1))
         detector.session.run.return_value = [layer_one]
         first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        # read as layer 1 of 2: stride 32, anchor 81x82
-        self.assertAlmostEqual(first[0][3], 0.1845, places=5)
-        self.assertEqual(detector.ppu_scale_count, 2)
+        self.assertAlmostEqual(first[0][3], 0.0975, places=5)
 
         detector.session.run.return_value = [
-            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 40, 1, 0))
+            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 80, 1, 0))
         ]
-        detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        self.assertEqual(detector.ppu_scale_count, 3)
+        with self.assertLogs("frigate.detectors.plugins.deepx", level="ERROR") as logs:
+            second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+            detector.session.run.return_value = [layer_one]
+            third = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
 
-        detector.session.run.return_value = [layer_one]
-        third = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        # the same record, now layer 1 of 3: stride 16, anchor 30x61
-        self.assertAlmostEqual(third[0][3], 0.0975, places=5)
+        self.assertEqual(detector.ppu_scale_count, 4)
+        self.assertTrue(np.all(second == 0) and np.all(third == 0))
+        self.assertEqual(len([r for r in logs.records if r.levelname == "ERROR"]), 1)
 
     def _ppu_detector_for(self, ppu, layers):
         """A PPU detector loaded from a model file that describes its head."""
