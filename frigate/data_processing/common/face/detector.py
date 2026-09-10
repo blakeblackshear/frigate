@@ -135,7 +135,7 @@ class FaceDetector:
         """Whether both the detection and landmark models are loaded."""
         return self.detector is not None and self.landmark_detector is not None
 
-    @redirect_output_to_logger(logger, logging.DEBUG)  # type: ignore[untyped-decorator]
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def __init_landmark_detector(self) -> None:
         landmark_model = os.path.join(FACE_DET_DIR, "landmarkdet.yaml")
 
