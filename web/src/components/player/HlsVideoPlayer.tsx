@@ -210,7 +210,18 @@ export default function HlsVideoPlayer({
       }
 
       if (play) {
-        videoRef.current.play();
+        const video = videoRef.current;
+
+        // Same fallback as MsePlayer: an unmuted play() with no prior user
+        // interaction is rejected by the autoplay policy, so retry muted
+        // instead of leaving the player paused with no indication of why.
+        video.play().catch((er: { name: string }) => {
+          if (er.name === "NotAllowedError" && !video.muted) {
+            setTemporaryMuted(true);
+            video.muted = true;
+            video.play().catch(() => {});
+          }
+        });
       } else {
         videoRef.current.pause();
       }
@@ -243,7 +254,13 @@ export default function HlsVideoPlayer({
     height: number;
   }>({ width: 0, height: 0 });
 
-  const muted = persistedMuted || temporaryMuted;
+  // `persistedMuted` is undefined until auth resolves and the stored preference
+  // is read back, and `undefined || false` reaches the DOM as an unmuted video.
+  // An unmuted `<video autoPlay>` is refused by the browser's autoplay policy
+  // before the user has interacted with the page, which leaves the recording
+  // paused on its first frame with nothing surfaced. Fall back to the default
+  // the hook already declares so the element stays muted while unknown.
+  const muted = (persistedMuted ?? true) || temporaryMuted;
 
   const onSetMuted = useCallback(
     (muted: boolean) => {
