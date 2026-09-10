@@ -1,6 +1,7 @@
 from enum import Enum
+from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import AfterValidator, BaseModel, Field
 
 from ..base import FrigateBaseModel
 
@@ -9,6 +10,7 @@ __all__ = [
     "BirdseyeConfig",
     "BirdseyeLayoutConfig",
     "BirdseyeModeEnum",
+    "BirdseyeModes",
 ]
 
 
@@ -24,6 +26,27 @@ class BirdseyeModeEnum(str, Enum):
     @classmethod
     def get(cls, index):
         return list(cls)[index]
+
+
+def _validate_modes(
+    value: BirdseyeModeEnum | list[BirdseyeModeEnum],
+) -> BirdseyeModeEnum | list[BirdseyeModeEnum]:
+    if isinstance(value, list) and not value:
+        raise ValueError("birdseye mode list must contain at least one mode")
+
+    return value
+
+
+# a single mode, or a list of modes that are OR'd together
+BirdseyeModes = Annotated[
+    BirdseyeModeEnum | list[BirdseyeModeEnum], AfterValidator(_validate_modes)
+]
+
+MODE_DESCRIPTION = (
+    "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'. "
+    "A list of modes may be given, in which case the camera is included when any "
+    "of them applies."
+)
 
 
 class BirdseyeLayoutConfig(FrigateBaseModel):
@@ -47,10 +70,10 @@ class BirdseyeConfig(FrigateBaseModel):
         title="Enable Birdseye",
         description="Enable or disable the Birdseye view feature.",
     )
-    mode: BirdseyeModeEnum = Field(
+    mode: BirdseyeModes = Field(
         default=BirdseyeModeEnum.objects,
         title="Tracking mode",
-        description="Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'.",
+        description=MODE_DESCRIPTION,
     )
 
     restream: bool = Field(
@@ -102,10 +125,10 @@ class BirdseyeCameraConfig(BaseModel):
         title="Enable Birdseye",
         description="Enable or disable the Birdseye view feature.",
     )
-    mode: BirdseyeModeEnum = Field(
+    mode: BirdseyeModes = Field(
         default=BirdseyeModeEnum.objects,
         title="Tracking mode",
-        description="Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'.",
+        description=MODE_DESCRIPTION,
     )
 
     order: int = Field(

@@ -10,10 +10,13 @@ export interface UiConfig {
   unit_system?: "metric" | "imperial";
 }
 
+export type BirdseyeMode = "objects" | "continuous" | "motion";
+
 export interface BirdseyeConfig {
   enabled: boolean;
   height: number;
-  mode: "objects" | "continuous" | "motion";
+  // a single mode, or a list of modes that are OR'd together
+  mode: BirdseyeMode | BirdseyeMode[];
   quality: number;
   restream: boolean;
   width: number;
@@ -49,7 +52,8 @@ export interface CameraConfig {
   best_image_timeout: number;
   birdseye: {
     enabled: boolean;
-    mode: "objects" | "continuous" | "motion";
+    // a single mode, or a list of modes that are OR'd together
+    mode: BirdseyeMode | BirdseyeMode[];
     order: number;
   };
   detect: {

@@ -255,6 +255,11 @@ birdseye:
   #   objects - cameras are included if they have had a tracked object within the last 30 seconds
   #   motion - cameras are included if motion was detected in the last 30 seconds
   #   continuous - all cameras are included always
+  # A list of modes may also be given, in which case a camera is included when any
+  # of the listed modes applies, for example:
+  #   mode:
+  #     - motion
+  #     - objects
   mode: objects
   # Optional: Threshold for camera activity to stop showing camera (default: shown below)
   inactivity_threshold: 30

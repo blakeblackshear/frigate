@@ -1,4 +1,14 @@
+import type { FormContext } from "../theme/widgets/SwitchesWidget";
 import type { SectionConfigOverrides } from "./types";
+
+const BIRDSEYE_MODES = ["continuous", "motion", "objects"];
+
+const getModeLabel = (mode: string, context?: FormContext) =>
+  context?.t?.(`birdseye.trackingMode.${mode}`, { ns: "views/settings" }) ?? mode;
+
+// mode is a single mode or a list of modes that are OR'd together
+const hasMode = (mode: unknown, wanted: string) =>
+  Array.isArray(mode) ? mode.includes(wanted) : mode === wanted;
 
 const birdseye: SectionConfigOverrides = {
   base: {
@@ -11,7 +21,7 @@ const birdseye: SectionConfigOverrides = {
         condition: (ctx) => {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
           return (
-            ctx.formData?.mode === "objects" &&
+            hasMode(ctx.formData?.mode, "objects") &&
             ctx.fullCameraConfig.detect?.enabled === false
           );
         },
@@ -23,10 +33,14 @@ const birdseye: SectionConfigOverrides = {
     advancedFields: [],
     overrideFields: ["enabled", "mode"],
     uiSchema: {
+      // more than one mode can be selected, so the field is a switch per mode
+      // rather than a select
       mode: {
-        "ui:size": "xs",
+        "ui:widget": "switches",
         "ui:options": {
-          enumI18nPrefix: "birdseye.trackingMode",
+          getEntities: () => BIRDSEYE_MODES,
+          getDisplayLabel: getModeLabel,
+          i18nKey: "birdseyeModes",
         },
       },
     },
@@ -55,7 +69,6 @@ const birdseye: SectionConfigOverrides = {
     ],
     uiSchema: {
       mode: {
-        "ui:size": "xs",
         "ui:after": { render: "BirdseyeCameraReorder" },
       },
     },

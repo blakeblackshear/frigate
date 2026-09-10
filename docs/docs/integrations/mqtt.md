@@ -566,9 +566,13 @@ the camera to be removed from the view._
 | `MOTION`     | Show when detected motion within the last 30 seconds are included |
 | `OBJECTS`    | Shown if an active object tracked within the last 30 seconds      |
 
+Multiple modes can be combined by sending them as a comma separated list, for
+example `MOTION,OBJECTS`. The camera is then included when any of the listed
+modes applies.
+
 ### `frigate/<camera_name>/birdseye_mode/state`
 
-Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `OBJECTS`.
+Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `OBJECTS`, or a comma separated combination of them such as `MOTION,OBJECTS`.
 
 ### `frigate/<camera_name>/notifications/set`
 

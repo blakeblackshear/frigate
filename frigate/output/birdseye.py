@@ -411,13 +411,16 @@ class BirdsEyeFrameManager:
     def camera_active(
         self, mode: Any, object_box_count: int, motion_box_count: int
     ) -> bool:
-        if mode == BirdseyeModeEnum.continuous:
+        # mode is a single mode or a list of modes that are OR'd together
+        modes = mode if isinstance(mode, list) else [mode]
+
+        if BirdseyeModeEnum.continuous in modes:
             return True
 
-        if mode == BirdseyeModeEnum.motion and motion_box_count > 0:
+        if BirdseyeModeEnum.motion in modes and motion_box_count > 0:
             return True
 
-        if mode == BirdseyeModeEnum.objects and object_box_count > 0:
+        if BirdseyeModeEnum.objects in modes and object_box_count > 0:
             return True
 
         return False

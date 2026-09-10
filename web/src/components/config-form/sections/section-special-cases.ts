@@ -39,6 +39,8 @@ export function isSpecialCaseSection(
  * - detectors: Strip the "default" field to prevent RJSF from merging the
  *   default {"cpu": {"type": "cpu"}} with stored detector keys.
  * - genai: Inject a default provider value on the additionalProperties shape.
+ * - birdseye: Flatten the `mode` union so RJSF renders one widget instead of
+ *   an anyOf type selector.
  * - objects: Promote tracked attribute labels (face, license_plate, courier
  *   logos) from `filters.additionalProperties` to explicit
  *   `filters.properties.<attr>` entries with a restricted FilterConfig
@@ -57,6 +59,10 @@ export function modifySchemaForSection(
 
   if (sectionPath === "objects") {
     return modifyObjectsSchema(schema, ctx);
+  }
+
+  if (sectionPath === "birdseye") {
+    return modifyBirdseyeSchema(schema);
   }
 
   if (!isSpecialCaseSection(sectionPath, level)) {
@@ -141,6 +147,50 @@ function buildAttributeFilterSchema(
       max_area: flattenToNumber(props && props.max_area),
     },
     additionalProperties: false,
+  } as RJSFSchema;
+}
+
+/**
+ * birdseye: `mode` is `BirdseyeModeEnum | list[BirdseyeModeEnum]` in Pydantic,
+ * which emits as `anyOf` in JSON schema. RJSF renders a type selector for that,
+ * so we flatten it to the list branch and let the switches widget drive it.
+ * A config that stores a single mode still renders correctly because the widget
+ * normalizes a bare string to a one entry list, and the default is normalized
+ * here so an untouched field isn't reported as modified.
+ */
+function modifyBirdseyeSchema(schema: RJSFSchema): RJSFSchema {
+  const props = (schema as { properties?: unknown }).properties;
+  if (!isJsonObject(props)) {
+    return schema;
+  }
+
+  const mode = props.mode;
+  if (!isJsonObject(mode) || !Array.isArray(mode.anyOf)) {
+    return schema;
+  }
+
+  const listBranch = mode.anyOf.find(
+    (branch) => isJsonObject(branch) && branch.type === "array",
+  );
+  if (!isJsonObject(listBranch)) {
+    return schema;
+  }
+
+  const { anyOf: _anyOf, default: modeDefault, ...rest } = mode;
+
+  return {
+    ...schema,
+    properties: {
+      ...props,
+      mode: {
+        ...rest,
+        ...listBranch,
+        default:
+          modeDefault === undefined || Array.isArray(modeDefault)
+            ? modeDefault
+            : [modeDefault],
+      },
+    },
   } as RJSFSchema;
 }
 

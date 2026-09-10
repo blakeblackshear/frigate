@@ -3,7 +3,7 @@
 import multiprocessing as mp
 import unittest
 
-from frigate.config import FrigateConfig
+from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.output.birdseye import BirdsEyeFrameManager, get_canvas_shape
 
 
@@ -114,3 +114,52 @@ class TestBirdseyeCameraOrder(unittest.TestCase):
 
         assert not layout_changed
         assert self.layout_order() == ["back", "front", "side"]
+
+
+class TestBirdseyeCameraActive(unittest.TestCase):
+    """Test which modes include a camera in the birdseye view."""
+
+    def setUp(self):
+        config = {
+            "mqtt": {"enabled": False},
+            "birdseye": {"enabled": True, "mode": "continuous"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                }
+            },
+        }
+        self.manager = BirdsEyeFrameManager(FrigateConfig(**config), mp.Event())
+
+    def test_single_mode_ignores_the_other_activity(self):
+        """Test a single mode only reacts to the activity it tracks."""
+        assert self.manager.camera_active(BirdseyeModeEnum.motion, 0, 1)
+        assert not self.manager.camera_active(BirdseyeModeEnum.motion, 1, 0)
+
+        assert self.manager.camera_active(BirdseyeModeEnum.objects, 1, 0)
+        assert not self.manager.camera_active(BirdseyeModeEnum.objects, 0, 1)
+
+    def test_mode_list_matches_any_of_its_modes(self):
+        """Test a list of modes includes the camera when any one of them applies."""
+        modes = [BirdseyeModeEnum.motion, BirdseyeModeEnum.objects]
+
+        assert self.manager.camera_active(modes, 0, 1)
+        assert self.manager.camera_active(modes, 1, 0)
+        assert self.manager.camera_active(modes, 1, 1)
+        assert not self.manager.camera_active(modes, 0, 0)
+
+    def test_continuous_in_a_list_is_always_active(self):
+        """Test continuous still applies when it is combined with another mode."""
+        modes = [BirdseyeModeEnum.continuous, BirdseyeModeEnum.motion]
+
+        assert self.manager.camera_active(modes, 0, 0)
+
+    def test_single_entry_list_matches_the_bare_mode(self):
+        """Test a one entry list behaves the same as that mode on its own."""
+        assert self.manager.camera_active([BirdseyeModeEnum.motion], 0, 1)
+        assert not self.manager.camera_active([BirdseyeModeEnum.motion], 1, 0)

@@ -72,7 +72,7 @@
     },
     "mode": {
       "label": "Tracking mode",
-      "description": "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'."
+      "description": "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'. A list of modes may be given, in which case the camera is included when any of them applies."
     },
     "order": {
       "label": "Position",

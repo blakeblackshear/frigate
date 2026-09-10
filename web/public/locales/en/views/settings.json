@@ -1630,6 +1630,10 @@
       "summary": "{{count}} audio labels selected",
       "empty": "No audio labels available"
     },
+    "birdseyeModes": {
+      "summary": "{{count}} tracking modes selected",
+      "empty": "No tracking modes available"
+    },
     "objectLabels": {
       "summary": "{{count}} object types selected",
       "empty": "No object labels available"

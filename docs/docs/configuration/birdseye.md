@@ -26,6 +26,18 @@ Birdseye offers different modes to customize which cameras show under which circ
 - **motion:** Cameras that have detected motion within the last 30 seconds are included
 - **objects:** Cameras that have tracked an active object within the last 30 seconds are included
 
+Modes can also be combined by giving a list instead of a single mode. A camera is
+then included when any of the listed modes applies, so the example below includes
+a camera when it has seen either motion or a tracked object:
+
+```yaml
+birdseye:
+  enabled: True
+  mode:
+    - motion
+    - objects
+```
+
 ### Custom Birdseye Icon
 
 A custom icon can be added to the birdseye background by providing a 180x180 image named `custom.png` inside of the Frigate `media` folder. The file must be a png with the icon as transparent, any non-transparent pixels will be white when displayed in the birdseye view.
@@ -44,7 +56,7 @@ To include a camera in Birdseye view only for specific circumstances, or exclude
 | Field               | Description                                                   |
 | ------------------- | ------------------------------------------------------------- |
 | **Enable Birdseye** | Whether this camera appears in Birdseye view                  |
-| **Tracking mode**   | When to show the camera: `continuous`, `motion`, or `objects` |
+| **Tracking mode**   | When to show the camera: `continuous`, `motion`, or `objects`. More than one may be selected, in which case the camera is shown when any of them applies |
 
 </TabItem>
 <TabItem value="yaml">

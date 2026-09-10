@@ -241,6 +241,82 @@ class TestConfig(unittest.TestCase):
             frigate_config.cameras["back"].birdseye.mode is BirdseyeModeEnum.continuous
         )
 
+    def test_birdseye_mode_list(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "birdseye": {"enabled": True, "mode": ["motion", "objects"]},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        expected = [BirdseyeModeEnum.motion, BirdseyeModeEnum.objects]
+        assert frigate_config.birdseye.mode == expected
+        # a list inherits down to the camera the same way a single mode does
+        assert frigate_config.cameras["back"].birdseye.mode == expected
+
+    def test_override_birdseye_mode_list(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "birdseye": {"enabled": True, "mode": "continuous"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "birdseye": {"mode": ["motion", "objects"]},
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        # the camera list replaces the global mode rather than extending it
+        assert frigate_config.cameras["back"].birdseye.mode == [
+            BirdseyeModeEnum.motion,
+            BirdseyeModeEnum.objects,
+        ]
+
+    def test_birdseye_empty_mode_list_is_invalid(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "birdseye": {"enabled": True, "mode": []},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        self.assertRaises(ValidationError, lambda: FrigateConfig(**config))
+
     def test_override_tracked_objects(self):
         config = {
             "mqtt": {"host": "mqtt"},
