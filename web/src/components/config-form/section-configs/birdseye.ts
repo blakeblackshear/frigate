@@ -4,7 +4,8 @@ import type { SectionConfigOverrides } from "./types";
 const BIRDSEYE_MODES = ["continuous", "motion", "objects"];
 
 const getModeLabel = (mode: string, context?: FormContext) =>
-  context?.t?.(`birdseye.trackingMode.${mode}`, { ns: "views/settings" }) ?? mode;
+  context?.t?.(`birdseye.trackingMode.${mode}`, { ns: "views/settings" }) ??
+  mode;
 
 // mode is a single mode or a list of modes that are OR'd together
 const hasMode = (mode: unknown, wanted: string) =>

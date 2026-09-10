@@ -1631,7 +1631,8 @@
       "empty": "No audio labels available"
     },
     "birdseyeModes": {
-      "summary": "{{count}} tracking modes selected",
+      "summary_one": "{{count}} tracking mode selected",
+      "summary_other": "{{count}} tracking modes selected",
       "empty": "No tracking modes available"
     },
     "objectLabels": {
