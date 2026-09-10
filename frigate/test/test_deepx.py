@@ -49,6 +49,12 @@ def build_ppu_record(box, score=0.9, label=0, grid=(7, 9, 2, 2)) -> np.ndarray:
     return record.reshape(1, 1, PPU_RECORD_SIZE)
 
 
+def build_ppu_records(*records: np.ndarray) -> np.ndarray:
+    """Several single records, as build_ppu_record makes them, stacked into
+    one (1, N, 32) output."""
+    return np.concatenate(records, axis=1)
+
+
 class TestDeepxPpuDecode(unittest.TestCase):
     def test_reads_anchor_free_box_bytes_as_pixel_geometry(self):
         """The grid columns carry no meaning for an anchor-free head and must
@@ -69,12 +75,149 @@ class TestDeepxPpuDecode(unittest.TestCase):
         self.assertAlmostEqual(detections[0][4], 176 / 640, places=5)
         self.assertAlmostEqual(detections[0][5], 352 / 640, places=5)
 
-    def test_anchor_based_records_are_reported_not_misdecoded(self):
-        """An anchor-based head leaves raw sigmoids in the box fields; read
-        as pixels they would give a sub-pixel box in the top-left corner."""
-        self.assertIsNone(
-            decode_ppu([build_ppu_record((0.6, 0.4, 0.3, 0.7))], 640, 640, 0.25, 0.45)
+    def test_reads_anchor_based_box_bytes_through_the_grid_and_anchors(self):
+        """An anchor-based head leaves ratios in the box fields, which the
+        grid columns and the anchor table turn back into pixels."""
+        detections = decode_ppu(
+            [build_ppu_record((0.6, 0.4, 0.3, 0.7), label=5)], 640, 640, 0.25, 0.45
         )
+
+        # layer 2 is stride 32 and box 2 is the 373x326 anchor, so the centre
+        # is (9.7, 7.3) cells out and the box is 134.28 x 638.96
+        self.assertEqual(detections[0][0], 5)
+        self.assertAlmostEqual(detections[0][2], 0.0, places=5)
+        self.assertAlmostEqual(detections[0][3], 0.380094, places=5)
+        self.assertAlmostEqual(detections[0][4], 0.864187, places=5)
+        self.assertAlmostEqual(detections[0][5], 0.589906, places=5)
+
+    def test_reads_anchor_free_grid_regression_bytes_through_the_grid_and_stride(
+        self,
+    ):
+        """YOLOX's classic anchor-free head leaves its box regression
+        relative to the grid cell it was predicted at, unlike anchor-based
+        heads, which the PPU decodes to pixels outright; more than
+        one layer present in the frame is what tells the two apart. A
+        second, low-scoring record on another layer is what proves that."""
+        detections = decode_ppu(
+            [
+                build_ppu_records(
+                    build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 2), label=7),
+                    build_ppu_record(
+                        (0.2, 0.3, 0.1, 0.4), grid=(3, 4, 0, 0), score=0.1
+                    ),
+                )
+            ],
+            640,
+            640,
+            0.25,
+            0.45,
+        )
+
+        # layer 2 of 3 is stride 32: centre (10+1.2, 9+0.5)*32 = (358.4, 304),
+        # size exp(1.0)*32 x exp(0.5)*32 = 86.985 x 52.759
+        self.assertEqual(detections[0][0], 7)
+        self.assertAlmostEqual(detections[0][1], 0.9, places=5)
+        self.assertAlmostEqual(detections[0][2], 0.433782, places=5)
+        self.assertAlmostEqual(detections[0][3], 0.492043, places=5)
+        self.assertAlmostEqual(detections[0][4], 0.516218, places=5)
+        self.assertAlmostEqual(detections[0][5], 0.627957, places=5)
+
+    def test_a_single_layer_anchor_free_frame_still_reads_as_pixel_geometry(self):
+        """A frame that only ever shows one layer cannot prove the grid and
+        layer fields are meaningful, so it falls back to the pixel-geometry
+        reading, same as an actual pixel-decoded head would need."""
+        detections = decode_ppu(
+            [build_ppu_record((320.0, 160.0, 64.0, 32.0), grid=(7, 9, 0, 1))],
+            640,
+            640,
+            0.25,
+            0.45,
+        )
+
+        self.assertAlmostEqual(detections[0][2], 144 / 640, places=5)
+        self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
+
+    def test_drops_records_the_anchor_table_cannot_place(self):
+        """A record naming a level or box the table does not carry is left
+        out rather than decoded against the wrong anchor."""
+        detections = decode_ppu(
+            [build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 2, 5))],
+            640,
+            640,
+            0.25,
+            0.45,
+        )
+
+        self.assertTrue(np.all(detections == 0))
+
+    def test_a_two_scale_head_reads_the_tiny_anchor_table_and_stride(self):
+        """A head with only two scales numbers its layers 0
+        and 1, but layer 0 is stride 16 there, not stride 8 as it would be
+        in a three-scale head; scale_count picks the matching table."""
+        detections = decode_ppu(
+            [build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))],
+            640,
+            640,
+            0.25,
+            0.45,
+            scale_count=2,
+        )
+
+        # layer 0 of 2 is stride 16 and box 1 is the 37x58 anchor, so the
+        # centre is (9.7, 7.3) cells out and the box is 13.32 x 113.68
+        self.assertAlmostEqual(detections[0][2], 0.093688, places=5)
+        self.assertAlmostEqual(detections[0][3], 0.232094, places=5)
+        self.assertAlmostEqual(detections[0][4], 0.271313, places=5)
+        self.assertAlmostEqual(detections[0][5], 0.252906, places=5)
+
+    def test_scale_count_defaults_to_the_three_scale_table(self):
+        """With no scale_count given, a frame that only ever shows layer 0
+        cannot tell a two-scale head from the first layer of a three-scale
+        one, so it falls back to the three-scale table."""
+        detections = decode_ppu(
+            [build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))],
+            640,
+            640,
+            0.25,
+            0.45,
+        )
+
+        # layer 0 of 3 is stride 8 and box 1 is the 16x30 anchor, so the
+        # centre is (9.7, 7.3) cells out and the box is 5.76 x 58.8
+        self.assertAlmostEqual(detections[0][2], 0.045313, places=5)
+        self.assertAlmostEqual(detections[0][3], 0.116750, places=5)
+        self.assertAlmostEqual(detections[0][4], 0.137188, places=5)
+        self.assertAlmostEqual(detections[0][5], 0.125750, places=5)
+
+    def test_anchor_based_records_with_an_unsupported_scale_count_are_dropped(self):
+        """A scale_count with no anchor table must drop the records rather
+        than guess against the wrong table."""
+        detections = decode_ppu(
+            [build_ppu_record((0.6, 0.4, 0.3, 0.7))],
+            640,
+            640,
+            0.25,
+            0.45,
+            scale_count=4,
+        )
+
+        self.assertTrue(np.all(detections == 0))
+
+    def test_needs_grid_decode_true_is_kept_for_a_single_layer_frame(self):
+        """A caller that already proved the head needs grid decoding must
+        not have that overridden by a frame that, alone, looks ambiguous."""
+        detections = decode_ppu(
+            [build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 2))],
+            640,
+            640,
+            0.25,
+            0.45,
+            needs_grid_decode=True,
+        )
+
+        # layer 2 of 3 is stride 32: centre (10+1.2, 9+0.5)*32 = (358.4, 304),
+        # size exp(1.0)*32 x exp(0.5)*32 = 86.985 x 52.759
+        self.assertAlmostEqual(detections[0][3], 0.492043, places=5)
 
     def test_drops_records_below_the_score_threshold(self):
         detections = decode_ppu(
@@ -693,19 +836,20 @@ class TestDeepxDetectorLayout(unittest.TestCase):
 
         self.assertIs(detector.output.layout, YoloLayout.ppu)
 
-    def test_an_anchor_based_ppu_model_is_reported_once(self):
+    def test_an_anchor_based_ppu_model_decodes(self):
         detector, _ = self._detector(
             ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
         )
-        detector.session.run.return_value = [build_ppu_record((0.6, 0.4, 0.3, 0.7))]
+        detector.session.run.return_value = [
+            build_ppu_record((0.6, 0.4, 0.3, 0.7), label=5)
+        ]
         detector.width, detector.height = 640, 640
 
-        with self.assertLogs("frigate.detectors.plugins.deepx", level="ERROR") as logs:
-            first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-            second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
 
-        self.assertTrue(np.all(first == 0) and np.all(second == 0))
-        self.assertEqual(len([r for r in logs.records if r.levelname == "ERROR"]), 1)
+        self.assertEqual(detections[0][0], 5)
+        self.assertAlmostEqual(detections[0][3], 0.380094, places=5)
+        self.assertAlmostEqual(detections[0][5], 0.589906, places=5)
 
     def test_anchor_free_is_kept_once_proven(self):
         """A later frame whose boxes all happen to fall within 1.0 must not
@@ -725,8 +869,7 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
 
         self.assertEqual(first[0][0], 3)
-        self.assertFalse(detector.ppu_anchor_based_reported)
-        # decoded as pixels, which is a sub-pixel box in the corner
+        # still read as pixels, which is a sub-pixel box in the corner
         self.assertAlmostEqual(second[0][1], 0.9, places=5)
 
     def test_an_anchor_based_verdict_is_not_kept(self):
@@ -739,9 +882,8 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         detector.width, detector.height = 640, 640
 
         detector.session.run.return_value = [build_ppu_record((0.6, 0.4, 0.3, 0.7))]
-        with self.assertLogs("frigate.detectors.plugins.deepx", level="ERROR"):
-            first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        self.assertTrue(np.all(first == 0))
+        first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertAlmostEqual(first[0][3], 0.380094, places=5)
         self.assertFalse(detector.ppu_anchor_free)
 
         detector.session.run.return_value = [
@@ -751,6 +893,84 @@ class TestDeepxDetectorLayout(unittest.TestCase):
 
         self.assertEqual(second[0][0], 3)
         self.assertTrue(detector.ppu_anchor_free)
+
+    def test_ppu_scale_count_is_kept_once_a_coarser_layer_is_seen(self):
+        """A frame that only shows layer 0 cannot tell a two-scale head from
+        a three-scale one and falls back to three; once a frame proves
+        layer 1 exists, that head has only two scales and every later
+        layer-0-only frame must use the two-scale table instead."""
+        detector, _ = self._detector(
+            ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
+        )
+        detector.width, detector.height = 640, 640
+
+        detector.session.run.return_value = [
+            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))
+        ]
+        first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        # layer 0 read against the three-scale default: stride 8, anchor 16x30
+        self.assertAlmostEqual(first[0][3], 0.116750, places=5)
+
+        detector.session.run.return_value = [
+            build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1))
+        ]
+        second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        # layer 1 of 2 is stride 32 and box 0 is the 81x82 anchor
+        self.assertAlmostEqual(second[0][3], 0.1845, places=5)
+        self.assertEqual(detector.ppu_scale_count, 2)
+
+        detector.session.run.return_value = [
+            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))
+        ]
+        third = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        # the same layer-0 record as the first frame, now read against the
+        # two-scale table proven by the second frame: stride 16, anchor 37x58
+        self.assertAlmostEqual(third[0][3], 0.232094, places=5)
+
+    def test_needs_grid_decode_is_kept_once_proven(self):
+        """A frame proving a YOLOX-style grid-relative head must not fall
+        back to reading raw pixels just because a later frame holds only
+        one detection at one layer."""
+        detector, _ = self._detector(
+            ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
+        )
+        detector.width, detector.height = 640, 640
+
+        detector.session.run.return_value = [
+            build_ppu_records(
+                build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 2), label=7),
+                build_ppu_record((0.2, 0.3, 0.1, 0.4), grid=(3, 4, 0, 0), score=0.1),
+            )
+        ]
+        first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertAlmostEqual(first[0][3], 0.492043, places=5)
+        self.assertTrue(detector.ppu_needs_grid_decode)
+
+        detector.session.run.return_value = [
+            build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 2), label=7)
+        ]
+        second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+
+        # still decoded through the grid and stride, not as raw pixels
+        self.assertAlmostEqual(second[0][3], 0.492043, places=5)
+
+    def test_an_unsupported_ppu_scale_count_is_reported_once(self):
+        """An anchor-based head with a scale count Frigate has no anchor
+        table for logs once and drops the frame instead of guessing."""
+        detector, _ = self._detector(
+            ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
+        )
+        detector.width, detector.height = 640, 640
+        detector.session.run.return_value = [
+            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 2, 3))
+        ]
+
+        with self.assertLogs("frigate.detectors.plugins.deepx", level="ERROR") as logs:
+            first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+            second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+
+        self.assertTrue(np.all(first == 0) and np.all(second == 0))
+        self.assertEqual(len([r for r in logs.records if r.levelname == "ERROR"]), 1)
 
     def test_an_empty_or_all_zero_ppu_frame_proves_nothing(self):
         """Only a box value above 1 (anchor-free) or a frame of values
@@ -770,7 +990,6 @@ class TestDeepxDetectorLayout(unittest.TestCase):
 
             self.assertTrue(np.all(detections == 0))
             self.assertFalse(detector.ppu_anchor_free)
-            self.assertFalse(detector.ppu_anchor_based_reported)
 
     def test_damoyolo_is_checked_against_the_model_at_load(self):
         """A YOLO model or a wrong label map under damo-yolo fails at load
