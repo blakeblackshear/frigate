@@ -24,6 +24,7 @@ from frigate.detectors.plugins.deepx import (
     decode_raw_anchor,
     decode_raw_nms_in_head,
     infer_yolo_layout,
+    ppu_scale_count_lower_bound,
     resolve_device,
     rows_with_columns,
     validate_damoyolo_outputs,
@@ -188,6 +189,73 @@ class TestDeepxPpuDecode(unittest.TestCase):
         self.assertAlmostEqual(detections[0][3], 0.116750, places=5)
         self.assertAlmostEqual(detections[0][4], 0.137188, places=5)
         self.assertAlmostEqual(detections[0][5], 0.125750, places=5)
+
+    def test_a_grid_cell_past_the_coarser_layout_proves_a_third_scale(self):
+        """A layer-0 cell at column 40 of a 640 input needs stride 8, so the
+        head has three scales even though no layer-2 record has shown up;
+        the layer-1 record in the same frame must then read against the
+        three-scale table, not the two-scale one its layer index alone
+        would suggest."""
+        detections = decode_ppu(
+            [
+                build_ppu_records(
+                    build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1)),
+                    build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 40, 1, 0)),
+                )
+            ],
+            640,
+            640,
+            0.25,
+            0.45,
+        )
+
+        # layer 1 of 3 is stride 16 and box 0 is the 30x61 anchor, so the
+        # centre is (4.5, 3.5) cells out and the box is 19.2 x 39.04
+        layer_one = detections[np.isclose(detections[:, 3], 0.0975)]
+        self.assertEqual(len(layer_one), 1)
+        self.assertAlmostEqual(layer_one[0][2], 0.057, places=5)
+        self.assertAlmostEqual(layer_one[0][4], 0.118, places=5)
+        self.assertAlmostEqual(layer_one[0][5], 0.1275, places=5)
+
+    def test_scale_count_lower_bound_reads_layer_and_grid_position(self):
+        """Every record proves at least one scale past its layer, and a
+        grid cell that does not fit a coarser stride proves more: a cell
+        index g at layer L needs stride * g < input, and the stride of
+        layer L in an S-scale head is 32 >> (S - 1 - L)."""
+        cases = (
+            # layer 0 cell 19 fits stride 32 (20 cells), so one scale suffices
+            ((7, 19, 0, 0), 640, 640, 1),
+            # cell 20 needs stride 16, which is layer 0 of a two-scale head
+            ((7, 20, 0, 0), 640, 640, 2),
+            # cell 39 still fits stride 16 (40 cells)
+            ((7, 39, 0, 0), 640, 640, 2),
+            # cell 40 needs stride 8, which is layer 0 of a three-scale head
+            ((7, 40, 0, 0), 640, 640, 3),
+            # layer 1 near the origin proves only two scales
+            ((3, 4, 0, 1), 640, 640, 2),
+            # layer 1 at cell 20 needs stride 16, so three scales
+            ((3, 20, 0, 1), 640, 640, 3),
+            # rows count against the height, here 416: cell 26 needs stride 8
+            ((26, 0, 0, 0), 640, 416, 3),
+            # layer 2 alone proves three scales without any grid evidence
+            ((0, 0, 0, 2), 640, 640, 3),
+        )
+        for grid, width, height, expected in cases:
+            with self.subTest(grid=grid, width=width, height=height):
+                records = build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=grid)[0]
+                self.assertEqual(
+                    ppu_scale_count_lower_bound(records, width, height), expected
+                )
+
+    def test_scale_count_lower_bound_takes_the_strongest_record(self):
+        """Records that prove different counts settle on the largest."""
+        records = build_ppu_records(
+            build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1)),
+            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 40, 1, 0)),
+            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(1, 1, 0, 0)),
+        )[0]
+
+        self.assertEqual(ppu_scale_count_lower_bound(records, 640, 640), 3)
 
     def test_anchor_based_records_with_an_unsupported_scale_count_are_dropped(self):
         """A scale_count with no anchor table must drop the records rather
@@ -897,8 +965,9 @@ class TestDeepxDetectorLayout(unittest.TestCase):
     def test_ppu_scale_count_is_kept_once_a_coarser_layer_is_seen(self):
         """A frame that only shows layer 0 cannot tell a two-scale head from
         a three-scale one and falls back to three; once a frame proves
-        layer 1 exists, that head has only two scales and every later
-        layer-0-only frame must use the two-scale table instead."""
+        layer 1 exists, two scales is the best-evidenced count and every
+        later layer-0-only frame must use the two-scale table, until some
+        record proves a third scale."""
         detector, _ = self._detector(
             ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
         )
@@ -926,6 +995,35 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         # the same layer-0 record as the first frame, now read against the
         # two-scale table proven by the second frame: stride 16, anchor 37x58
         self.assertAlmostEqual(third[0][3], 0.232094, places=5)
+
+    def test_ppu_scale_count_grows_when_a_grid_cell_proves_a_third_scale(self):
+        """A three-scale head whose early frames only ever hold layers 0
+        and 1 near the origin reads as two scales; a later layer-0 record
+        at column 40 of 640 needs stride 8, which proves the third scale
+        without a layer-2 record ever appearing, and every frame after
+        that must read against the three-scale table."""
+        detector, _ = self._detector(
+            ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
+        )
+        detector.width, detector.height = 640, 640
+
+        layer_one = build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1))
+        detector.session.run.return_value = [layer_one]
+        first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        # read as layer 1 of 2: stride 32, anchor 81x82
+        self.assertAlmostEqual(first[0][3], 0.1845, places=5)
+        self.assertEqual(detector.ppu_scale_count, 2)
+
+        detector.session.run.return_value = [
+            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 40, 1, 0))
+        ]
+        detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertEqual(detector.ppu_scale_count, 3)
+
+        detector.session.run.return_value = [layer_one]
+        third = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        # the same record, now layer 1 of 3: stride 16, anchor 30x61
+        self.assertAlmostEqual(third[0][3], 0.0975, places=5)
 
     def test_needs_grid_decode_is_kept_once_proven(self):
         """A frame proving a YOLOX-style grid-relative head must not fall

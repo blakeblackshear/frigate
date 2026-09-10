@@ -63,9 +63,9 @@ PPU_ANCHORS_BY_SCALES = {
 }
 
 PPU_MAX_STRIDE = 32
-# the largest scale count we have a table for; below this, a resolved
-# scale_count is under-evidenced rather than disproven, so it still gets
-# the biggest table as a best guess
+# the largest scale count we have a table for; a count below this with no
+# table of its own is under-evidenced rather than disproven, so it still
+# gets the biggest table as a best guess
 PPU_MAX_KNOWN_SCALES = max(PPU_ANCHORS_BY_SCALES)
 
 # A nms-in-head output is (N, 6) rows of x_min, y_min, x_max, y_max, score,
@@ -429,15 +429,39 @@ def ppu_needs_grid_decode(records: np.ndarray) -> bool:
     return len(np.unique(layer_idx)) > 1
 
 
-def resolve_scale_count(records: np.ndarray, scale_count: int | None) -> int:
-    """`scale_count` if given, else the layer count this frame alone proves,
-    defaulting to 3 when the frame has no records to read it from."""
+def ppu_scale_count_lower_bound(records: np.ndarray, width: int, height: int) -> int:
+    """The fewest detection scales these records can come from. Each proves
+    one past its layer index, and its grid cell can prove more: cell g of
+    layer L only exists if that layer's stride keeps stride * g < input,
+    and the stride is PPU_MAX_STRIDE >> (scales - 1 - L), so a cell too
+    far right or down for a coarse stride forces finer strides below it.
+    Only a lower bound: nothing in a record rules out scales above it."""
+    grid = reinterpret(records, PPU_GRID_BYTES, np.uint8)
+    grid_y = grid[:, 0].astype(np.int64)
+    grid_x = grid[:, 1].astype(np.int64)
+    layer_idx = grid[:, 3].astype(np.int64)
+
+    # strides from the coarsest down; each one a cell overflows is one more
+    # halving the layer needs, i.e. one more scale below it
+    strides = PPU_MAX_STRIDE >> np.arange(PPU_MAX_STRIDE.bit_length())
+    overflow_x = (strides[None, :] * grid_x[:, None] >= width).sum(axis=1)
+    overflow_y = (strides[None, :] * grid_y[:, None] >= height).sum(axis=1)
+
+    return int((layer_idx + 1 + np.maximum(overflow_x, overflow_y)).max())
+
+
+def resolve_scale_count(
+    records: np.ndarray, scale_count: int | None, width: int, height: int
+) -> int:
+    """`scale_count` if given, else the fewest scales this frame alone
+    proves, defaulting to 3 when the frame has no records to read."""
     if scale_count is not None:
         return scale_count
 
-    layer_idx = reinterpret(records, PPU_GRID_BYTES, np.uint8)[:, 3]
+    if len(records) == 0:
+        return 3
 
-    return int(layer_idx.max()) + 1 if len(layer_idx) else 3
+    return ppu_scale_count_lower_bound(records, width, height)
 
 
 def ppu_grid_regression_geometry(
@@ -538,7 +562,7 @@ def decode_ppu(
     labels = reinterpret(records, PPU_LABEL_BYTES, np.uint32).flatten()
 
     if anchor_based:
-        scale_count = resolve_scale_count(records, scale_count)
+        scale_count = resolve_scale_count(records, scale_count, width, height)
         centre_x, centre_y, box_w, box_h, known = ppu_anchor_geometry(
             records, boxes, scale_count
         )
@@ -549,7 +573,7 @@ def decode_ppu(
             needs_grid_decode = ppu_needs_grid_decode(records)
 
         if needs_grid_decode:
-            scale_count = resolve_scale_count(records, scale_count)
+            scale_count = resolve_scale_count(records, scale_count, width, height)
             centre_x, centre_y, box_w, box_h, known = ppu_grid_regression_geometry(
                 records, boxes, scale_count
             )
@@ -891,7 +915,11 @@ class DeepxDetector(DetectionApi):
     def decode_ppu(self, outputs: list[np.ndarray]) -> np.ndarray:
         """Decode PPU records, keeping each heuristic once a frame settles
         it: anchor-free, needs-grid-decode, and scale count all only
-        move toward more certainty, never back."""
+        move toward more certainty, never back. The scale count is the
+        largest lower bound any frame has proven, so a three-scale head
+        whose frames so far only held its finer layers near the origin
+        reads against the two-scale table until a record lands far enough
+        right or down, or on the coarsest layer, to prove the third."""
         if self.ppu_anchor_free:
             anchor_based = False
         else:
@@ -900,8 +928,10 @@ class DeepxDetector(DetectionApi):
 
         records = ppu_records(outputs)
         if records is not None and len(records):
-            layer_idx = reinterpret(records, PPU_GRID_BYTES, np.uint8)[:, 3]
-            self.ppu_scale_count = max(self.ppu_scale_count, int(layer_idx.max()) + 1)
+            self.ppu_scale_count = max(
+                self.ppu_scale_count,
+                ppu_scale_count_lower_bound(records, self.width, self.height),
+            )
 
             if not anchor_based and not self.ppu_needs_grid_decode:
                 self.ppu_needs_grid_decode = ppu_needs_grid_decode(records)
