@@ -2,6 +2,7 @@
 
 import logging
 import os
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -75,6 +76,11 @@ class FaceDetector:
         self.detector: cv2.FaceDetectorYN | None = None
         self.landmark_detector: cv2.face.Facemark | None = None
         self.on_ready = on_ready
+
+        # both models hold internal state across a call, and the recognizer
+        # builds its class means on a background thread while frames are
+        # still being processed, so calls into them are serialized
+        self.lock = threading.Lock()
 
         GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
 
@@ -163,8 +169,9 @@ class FaceDetector:
         else:
             scale_factor = 1
 
-        self.detector.setInputSize((input.shape[1], input.shape[0]))
-        faces = self.detector.detect(input)
+        with self.lock:
+            self.detector.setInputSize((input.shape[1], input.shape[0]))
+            faces = self.detector.detect(input)
 
         if faces is None or faces[1] is None:
             return None  # type: ignore[unreachable]
@@ -245,9 +252,10 @@ class FaceDetector:
         gray = cv2.cvtColor(input, cv2.COLOR_BGR2GRAY) if input.ndim == 3 else input
 
         try:
-            success, faces = self.landmark_detector.fit(
-                gray, np.array([(0, 0, gray.shape[1], gray.shape[0])])
-            )
+            with self.lock:
+                success, faces = self.landmark_detector.fit(
+                    gray, np.array([(0, 0, gray.shape[1], gray.shape[0])])
+                )
         except cv2.error:
             logger.debug("Failed to fit landmarks")
             return None

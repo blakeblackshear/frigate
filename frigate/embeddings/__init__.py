@@ -24,7 +24,6 @@ from frigate.util.classification import kickoff_model_training
 from frigate.util.path import safe_join
 from frigate.util.process import FrigateProcess
 
-from .maintainer import EmbeddingMaintainer
 from .util import ZScoreNormalization
 
 logger = logging.getLogger(__name__)
@@ -47,6 +46,10 @@ class EmbeddingProcess(FrigateProcess):
         self.metrics = metrics
 
     def run(self) -> None:
+        # imported here so that importing this package does not pull in the
+        # processors, which import back into it and form a cycle
+        from .maintainer import EmbeddingMaintainer
+
         self.pre_run_setup(self.config.logger)
         maintainer = EmbeddingMaintainer(
             self.config,
