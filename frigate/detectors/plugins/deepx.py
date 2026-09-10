@@ -77,9 +77,6 @@ PPU_ANCHORS_BY_SCALES = {
 }
 
 PPU_MAX_STRIDE = 32
-# the largest scale count we have a table for; a count below this with no
-# table of its own is under-evidenced rather than disproven, so it still
-# gets the biggest table as a best guess
 PPU_MAX_KNOWN_SCALES = max(PPU_ANCHORS_BY_SCALES)
 
 # .dxnn: "DXNN", a 4-byte LE version, then a JSON index padded to
@@ -627,15 +624,18 @@ def ppu_scale_count_lower_bound(records: np.ndarray, width: int, height: int) ->
 def resolve_scale_count(
     records: np.ndarray, scale_count: int | None, width: int, height: int
 ) -> int:
-    """`scale_count` if given, else the fewest scales this frame alone
-    proves, defaulting to 3 when the frame has no records to read."""
+    """`scale_count` if given, else PPU_MAX_KNOWN_SCALES unless this frame
+    proves more; a frame showing only the finer layers near the origin is
+    what a bigger head looks like too, so it never argues for fewer."""
     if scale_count is not None:
         return scale_count
 
     if len(records) == 0:
-        return 3
+        return PPU_MAX_KNOWN_SCALES
 
-    return ppu_scale_count_lower_bound(records, width, height)
+    return max(
+        PPU_MAX_KNOWN_SCALES, ppu_scale_count_lower_bound(records, width, height)
+    )
 
 
 def ppu_grid_regression_geometry(
@@ -1047,10 +1047,11 @@ class DeepxDetector(DetectionApi):
 
         if layout is None:
             logger.warning(
-                "Could not read the PPU head layout from %s; inferring its "
-                "scale count from the detections instead, which can misplace "
-                "boxes until a record proves every scale",
+                "Could not read the PPU head layout from %s; assuming a "
+                "%d-scale head, so a head with fewer scales will decode to "
+                "misplaced boxes",
                 model_path,
+                PPU_MAX_KNOWN_SCALES,
             )
             return None
 
@@ -1182,7 +1183,9 @@ class DeepxDetector(DetectionApi):
     def decode_ppu(self, outputs: list[np.ndarray]) -> np.ndarray:
         """Decode PPU records. The head layout read from the model fixes
         the kind, scale count and grid decode from the first frame; without
-        it, each is settled from the records and kept once proven."""
+        it, the kind and grid decode are settled from the records and kept
+        once proven, and the scale count is PPU_MAX_KNOWN_SCALES unless a
+        record proves more (a partial frame never argues for fewer)."""
         records = ppu_records(outputs)
         boxes = None
         if records is not None and len(records):
@@ -1201,6 +1204,7 @@ class DeepxDetector(DetectionApi):
         if boxes is not None:
             if self.ppu_layout is None:
                 self.ppu_scale_count = max(
+                    PPU_MAX_KNOWN_SCALES,
                     self.ppu_scale_count,
                     ppu_scale_count_lower_bound(records, self.width, self.height),
                 )
