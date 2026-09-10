@@ -18,6 +18,42 @@ MAX_DETECTION_HEIGHT = 1080
 
 FACE_DET_DIR = os.path.join(MODEL_CACHE_DIR, "facedet")
 
+# 5 point template the arcface models are trained on, defined against a 112x112
+# crop and scaled to whatever size the embedding model takes
+FACE_TEMPLATE_SIZE = 112
+FACE_TEMPLATE = np.array(
+    [
+        [38.2946, 51.6963],
+        [73.5318, 51.5014],
+        [56.0252, 71.7366],
+        [41.5493, 92.3655],
+        [70.7299, 92.2041],
+    ],
+    dtype=np.float32,
+)
+
+
+# landmarks further than this from a plausible face shape are not trusted. on a
+# sample of camera face crops every set that failed a basic eye, nose, and mouth
+# ordering check scored above 9.5 and every set that passed scored below 9.2
+MAX_LANDMARK_FIT_ERROR = 9.0
+
+
+def landmark_fit_error(landmarks: tuple[tuple[float, float], ...]) -> float:
+    """Mean distance in template pixels once landmarks are fit to the template.
+
+    Scale, rotation, and position are fit out, so this measures only how far
+    the landmarks are from a plausible face shape.
+    """
+    src = np.array(landmarks, dtype=np.float32)
+    matrix, _ = cv2.estimateAffinePartial2D(src, FACE_TEMPLATE, method=cv2.LMEDS)
+
+    if matrix is None:
+        return float("inf")  # type: ignore[unreachable]
+
+    fit = src @ matrix[:, :2].T + matrix[:, 2]
+    return float(np.linalg.norm(fit - FACE_TEMPLATE, axis=1).mean())
+
 
 @dataclass
 class DetectionResult:
@@ -182,12 +218,21 @@ class FaceDetector:
         """
         detection = self.detect(input, threshold)
 
-        if detection is not None:
+        if (
+            detection is not None
+            and landmark_fit_error(detection.landmarks) <= MAX_LANDMARK_FIT_ERROR
+        ):
             return detection.landmarks
 
-        # detection can fail on a crop that is already tight around the face,
-        # the landmark model is given the whole crop as the face instead
-        return self.__fit_landmarks(input)
+        # detection either failed, which is common on a crop that is already
+        # tight around the face, or returned landmarks that are not shaped like
+        # a face, so the landmark model is given the whole crop as the face
+        landmarks = self.__fit_landmarks(input)
+
+        if landmarks is None or landmark_fit_error(landmarks) > MAX_LANDMARK_FIT_ERROR:
+            return None
+
+        return landmarks
 
     def __fit_landmarks(
         self, input: np.ndarray

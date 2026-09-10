@@ -10,7 +10,11 @@ from scipy import stats
 
 from frigate.config import FrigateConfig
 from frigate.const import FACE_DIR
-from frigate.data_processing.common.face.detector import FaceDetector
+from frigate.data_processing.common.face.detector import (
+    FACE_TEMPLATE,
+    FACE_TEMPLATE_SIZE,
+    FaceDetector,
+)
 from frigate.embeddings.onnx.face_embedding import (
     ARCFACE_INPUT_SIZE,
     FACENET_INPUT_SIZE,
@@ -19,20 +23,6 @@ from frigate.embeddings.onnx.face_embedding import (
 )
 
 logger = logging.getLogger(__name__)
-
-# 5 point template the arcface models are trained on, defined against a 112x112
-# crop and scaled to whatever size the embedding model takes
-FACE_TEMPLATE_SIZE = 112
-FACE_TEMPLATE = np.array(
-    [
-        [38.2946, 51.6963],
-        [73.5318, 51.5014],
-        [56.0252, 71.7366],
-        [41.5493, 92.3655],
-        [70.7299, 92.2041],
-    ],
-    dtype=np.float32,
-)
 
 
 class FaceRecognizer(ABC):
