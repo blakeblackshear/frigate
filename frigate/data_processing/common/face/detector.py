@@ -3,6 +3,7 @@
 import logging
 import os
 from collections.abc import Callable
+from dataclasses import dataclass
 
 import cv2
 import numpy as np
@@ -15,6 +16,19 @@ logger = logging.getLogger(__name__)
 MAX_DETECTION_HEIGHT = 1080
 
 FACE_DET_DIR = os.path.join(MODEL_CACHE_DIR, "facedet")
+
+
+@dataclass
+class DetectionResult:
+    """A face detected by the face detector."""
+
+    # (x1, y1, x2, y2)
+    face: tuple[int, int, int, int]
+
+    # eyes, nose tip, and mouth corners as (x, y) pairs, each pair ordered left
+    # to right in image coordinates to match the arcface template. kept as
+    # floats for sub pixel alignment accuracy
+    landmarks: tuple[tuple[float, float], ...]
 
 
 class FaceDetector:
@@ -71,9 +85,7 @@ class FaceDetector:
         if self.on_ready is not None:
             self.on_ready()
 
-    def detect(
-        self, input: np.ndarray, threshold: float
-    ) -> tuple[int, int, int, int] | None:
+    def detect(self, input: np.ndarray, threshold: float) -> DetectionResult | None:
         """Detect the largest face in the input image.
 
         Args:
@@ -81,17 +93,19 @@ class FaceDetector:
             threshold: Minimum detection confidence to accept a face
 
         Returns:
-            The bounding box of the largest detected face, or None
+            The largest detected face with its landmarks, or None
         """
         if not self.detector:
             return None
 
+        height, width = input.shape[:2]
+
         # YN face detector fails at extreme definitions
         # this rescales to a size that can properly detect faces
         # still retaining plenty of detail
-        if input.shape[0] > MAX_DETECTION_HEIGHT:
-            scale_factor = MAX_DETECTION_HEIGHT / input.shape[0]
-            new_width = int(scale_factor * input.shape[1])
+        if height > MAX_DETECTION_HEIGHT:
+            scale_factor = MAX_DETECTION_HEIGHT / height
+            new_width = int(scale_factor * width)
             input = cv2.resize(input, (new_width, MAX_DETECTION_HEIGHT))
         else:
             scale_factor = 1
@@ -102,20 +116,37 @@ class FaceDetector:
         if faces is None or faces[1] is None:
             return None  # type: ignore[unreachable]
 
-        face = None
+        best: DetectionResult | None = None
+        best_area = 0
 
-        for _, potential_face in enumerate(faces[1]):
+        for potential_face in faces[1]:
             if potential_face[-1] < threshold:
                 continue
 
-            raw_bbox = potential_face[0:4].astype(np.uint16)
-            x: int = int(max(raw_bbox[0], 0) / scale_factor)
-            y: int = int(max(raw_bbox[1], 0) / scale_factor)
-            w: int = int(raw_bbox[2] / scale_factor)
-            h: int = int(raw_bbox[3] / scale_factor)
-            bbox = (x, y, x + w, y + h)
+            # YuNet reports floats outside of the image for cut off faces, the
+            # far edges are derived before clamping so they don't move with the
+            # clamped near edges
+            raw_x = float(potential_face[0]) / scale_factor
+            raw_y = float(potential_face[1]) / scale_factor
+            bbox = (
+                max(int(raw_x), 0),
+                max(int(raw_y), 0),
+                min(int(raw_x + float(potential_face[2]) / scale_factor), width),
+                min(int(raw_y + float(potential_face[3]) / scale_factor), height),
+            )
+            bbox_area = area(bbox)
 
-            if face is None or area(bbox) > area(face):  # type: ignore[unreachable]
-                face = bbox
+            if bbox_area <= best_area:
+                continue
 
-        return face
+            # landmarks are left unclamped for a more accurate alignment fit
+            best = DetectionResult(
+                face=bbox,
+                landmarks=tuple(
+                    (float(x) / scale_factor, float(y) / scale_factor)
+                    for x, y in potential_face[4:14].reshape(5, 2)
+                ),
+            )
+            best_area = bbox_area
+
+        return best

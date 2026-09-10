@@ -135,6 +135,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 return
 
         face: dict[str, Any] | None = None
+        face_box: tuple[int, int, int, int]
 
         if self.requires_face_detection:
             logger.debug("Running manual face detection.")
@@ -148,14 +149,15 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             left, top, right, bottom = person_box
             person = bgr[top:bottom, left:right]
-            face_box = self.face_detector.detect(
+            detection = self.face_detector.detect(
                 person, self.face_config.detection_threshold
             )
 
-            if not face_box:
+            if detection is None:
                 logger.debug("Detected no faces for person object.")
                 return
 
+            face_box = detection.face
             face_frame = person[
                 max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
                 max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
@@ -187,16 +189,18 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 logger.debug(f"No face attributes found for {id}")
                 return
 
-            face_box = face.get("box")
+            attr_box = face.get("box")
 
             # check that face is valid
             if (
-                not face_box
-                or area(face_box)
+                not attr_box
+                or area(attr_box)
                 < self.config.cameras[camera].face_recognition.min_area
             ):
                 logger.debug(f"Invalid face box {face}")
                 return
+
+            face_box = attr_box
 
             face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
@@ -280,11 +284,12 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             # detect faces with lower confidence since we expect the face
             # to be visible in uploaded images
-            face_box = self.face_detector.detect(img, 0.5)
+            detection = self.face_detector.detect(img, 0.5)
 
-            if not face_box:
+            if detection is None:
                 return {"message": "No face was detected.", "success": False}
 
+            face_box = detection.face
             face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
             res = self.recognizer.classify(face)
 
@@ -312,14 +317,15 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
                 # detect faces with lower confidence since we expect the face
                 # to be visible in uploaded images
-                face_box = self.face_detector.detect(img, 0.5)
+                detection = self.face_detector.detect(img, 0.5)
 
-                if not face_box:
+                if detection is None:
                     return {
                         "message": "No face was detected.",
                         "success": False,
                     }
 
+                face_box = detection.face
                 face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
                 _, thumbnail = cv2.imencode(
                     ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
