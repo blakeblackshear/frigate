@@ -988,9 +988,37 @@ memryx:
 deepx:
   title: DEEPX NPU
   models:
+    - key: yolo
+      label: YOLO
+      recommended: true
+      download: No model is bundled with Frigate. Download a pre-compiled YOLO `.dxnn` model from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo) or compile your own with DX-COM, then bind-mount it into the container and point the model's `path` at it. The output layout is read from the compiled model, so anchor-based, anchor-free, NMS-in-head and PPU models (anchor-based or anchor-free) all need no extra configuration.
+      ui: |-
+        Navigate to **Settings > System > Detection models** and select **DEEPX NPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
+
+        | Field                                    | Value                                  |
+        | ---------------------------------------- | -------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/deepx/model.dxnn` |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                |
+        | **Object detection model input width**   | `640`                                  |
+        | **Object detection model input height**  | `640`                                  |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)        |
+        | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value)       |
+        | **Model Input D Type**                   | `int` (Frigate's default value)        |
+        | **Object Detection Model Type**          | `yolo-generic`                         |
+
+        The width and height must match the resolution the `.dxnn` file was compiled for. Quantization is baked into the compiled model, so no normalization is applied on the host and the input defaults do not need to be overridden.
+      yaml: |-
+        models:
+          - devices:
+              - deepx:PCIe:0
+            path: /config/model_cache/deepx/model.dxnn
+            labelmap_path: /labelmap/coco-80.txt
+            model_type: yolo-generic
+            width: 640
+            height: 640
     - key: damoyolo
       label: DAMO-YOLO (TinyNAS-L20T / S / M / L)
-      recommended: true
+      recommended: false
       download: No model is bundled with Frigate. Download a pre-compiled DAMO-YOLO `.dxnn` model (TinyNAS-L20T, S, M, or L size) from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), then bind-mount it into the container and point the model's `path` at it. All four sizes share one detection head, so nothing else has to be told apart.
       ui: |-
         Navigate to **Settings > System > Detection models** and select **DEEPX NPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
@@ -1014,34 +1042,6 @@ deepx:
             path: /config/model_cache/deepx/model.dxnn
             labelmap_path: /labelmap/coco-80.txt
             model_type: damo-yolo
-            width: 640
-            height: 640
-    - key: yolo
-      label: YOLO
-      recommended: false
-      download: No model is bundled with Frigate. Download a pre-compiled YOLO `.dxnn` model from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo) or compile your own with DX-COM, then bind-mount it into the container and point the model's `path` at it. The output layout is read from the compiled model, so anchor-based, anchor-free, NMS-in-head and anchor-free PPU models need no extra configuration. PPU models compiled from an anchor-based head are not supported.
-      ui: |-
-        Navigate to **Settings > System > Detection models** and select **DEEPX NPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
-
-        | Field                                    | Value                                  |
-        | ---------------------------------------- | -------------------------------------- |
-        | **Custom object detector model path**    | `/config/model_cache/deepx/model.dxnn` |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                |
-        | **Object detection model input width**   | `640`                                  |
-        | **Object detection model input height**  | `640`                                  |
-        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)        |
-        | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value)       |
-        | **Model Input D Type**                   | `int` (Frigate's default value)        |
-        | **Object Detection Model Type**          | `yolo-generic`                         |
-
-        The width and height must match the resolution the `.dxnn` file was compiled for. Quantization is baked into the compiled model, so no normalization is applied on the host and the input defaults do not need to be overridden.
-      yaml: |-
-        models:
-          - devices:
-              - deepx:PCIe:0
-            path: /config/model_cache/deepx/model.dxnn
-            labelmap_path: /labelmap/coco-80.txt
-            model_type: yolo-generic
             width: 640
             height: 640
 tensorrt:

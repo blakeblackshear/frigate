@@ -40,8 +40,33 @@ SUPPORTED_MODEL_TYPES = (ModelTypeEnum.yologeneric, ModelTypeEnum.damoyolo)
 # (uint8), score (float32), label (uint32), 4 bytes of padding.
 PPU_RECORD_SIZE = 32
 PPU_BOX_BYTES = (0, 16)
+PPU_GRID_BYTES = (16, 20)
 PPU_SCORE_BYTES = (20, 24)
 PPU_LABEL_BYTES = (24, 28)
+
+PPU_ANCHORS_BY_SCALES = {
+    2: np.array(
+        [
+            [[23, 27], [37, 58], [81, 82]],
+            [[81, 82], [135, 169], [344, 319]],
+        ],
+        dtype=np.float32,
+    ),
+    3: np.array(
+        [
+            [[10, 13], [16, 30], [33, 23]],
+            [[30, 61], [62, 45], [59, 119]],
+            [[116, 90], [156, 198], [373, 326]],
+        ],
+        dtype=np.float32,
+    ),
+}
+
+PPU_MAX_STRIDE = 32
+# the largest scale count we have a table for; below this, a resolved
+# scale_count is under-evidenced rather than disproven, so it still gets
+# the biggest table as a best guess
+PPU_MAX_KNOWN_SCALES = max(PPU_ANCHORS_BY_SCALES)
 
 # A nms-in-head output is (N, 6) rows of x_min, y_min, x_max, y_max, score,
 # class, with N decided per frame and capped in the head (300 for the
@@ -368,9 +393,9 @@ def ppu_records(outputs: list[np.ndarray]) -> np.ndarray | None:
 
 
 def ppu_boxes_are_anchor_based(boxes: np.ndarray) -> bool | None:
-    """An anchor-based head leaves raw sigmoids in the box fields, an
-    anchor-free head pixels. A value above 1 settles anchor-free, a frame
-    strictly inside 0..1 settles anchor-based, anything else is None."""
+    """A value above 1 settles anchor-free (raw sigmoids stay inside 0..1),
+    a frame strictly inside 0..1 settles anchor-based, anything else is
+    None."""
     if len(boxes) == 0:
         return None
 
@@ -396,6 +421,88 @@ def ppu_layout_is_anchor_based(outputs: list[np.ndarray]) -> bool | None:
     return ppu_boxes_are_anchor_based(boxes)
 
 
+def ppu_needs_grid_decode(records: np.ndarray) -> bool:
+    """Whether the layer field is real pyramid-level info (YOLOX-style,
+    still grid-relative) rather than a constant, unused value."""
+    layer_idx = reinterpret(records, PPU_GRID_BYTES, np.uint8)[:, 3]
+
+    return len(np.unique(layer_idx)) > 1
+
+
+def resolve_scale_count(records: np.ndarray, scale_count: int | None) -> int:
+    """`scale_count` if given, else the layer count this frame alone proves,
+    defaulting to 3 when the frame has no records to read it from."""
+    if scale_count is not None:
+        return scale_count
+
+    layer_idx = reinterpret(records, PPU_GRID_BYTES, np.uint8)[:, 3]
+
+    return int(layer_idx.max()) + 1 if len(layer_idx) else 3
+
+
+def ppu_grid_regression_geometry(
+    records: np.ndarray, boxes: np.ndarray, scale_count: int
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Pixel centre and size for a YOLOX-style grid-relative box: centre
+    offset from the grid cell, size a log-scale multiple of the stride.
+    `scale_count` picks the stride each layer_idx was measured in."""
+    grid = reinterpret(records, PPU_GRID_BYTES, np.uint8)
+    grid_y = grid[:, 0].astype(np.float32)
+    grid_x = grid[:, 1].astype(np.float32)
+    layer_idx = grid[:, 3].astype(np.int32)
+
+    known = layer_idx < scale_count
+    layer = np.where(known, layer_idx, 0)
+    stride = (PPU_MAX_STRIDE >> (scale_count - 1 - layer)).astype(np.float32)
+
+    centre_x = (boxes[:, 0] + grid_x) * stride
+    centre_y = (boxes[:, 1] + grid_y) * stride
+    box_w = np.exp(boxes[:, 2]) * stride
+    box_h = np.exp(boxes[:, 3]) * stride
+
+    return centre_x, centre_y, box_w, box_h, known
+
+
+def ppu_anchor_geometry(
+    records: np.ndarray, boxes: np.ndarray, scale_count: int
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Pixel centre and size for anchor-based PPU records, with the mask of
+    records the anchor table covers. `scale_count` picks the table and
+    stride; below the largest table it is under-evidenced, not disproven,
+    so it still gets that table as a best guess, but above it every record
+    is left unplaced instead of guessing at the wrong table."""
+    grid = reinterpret(records, PPU_GRID_BYTES, np.uint8)
+    grid_y = grid[:, 0].astype(np.float32)
+    grid_x = grid[:, 1].astype(np.float32)
+    box_idx = grid[:, 2].astype(np.int32)
+    layer_idx = grid[:, 3].astype(np.int32)
+
+    anchor_table = PPU_ANCHORS_BY_SCALES.get(scale_count)
+    if anchor_table is None:
+        if scale_count > PPU_MAX_KNOWN_SCALES:
+            # a real head proven to have more scales than any table covers
+            zeros = np.zeros(len(layer_idx), np.float32)
+            return zeros, zeros, zeros, zeros, np.zeros(len(layer_idx), dtype=bool)
+
+        anchor_table = PPU_ANCHORS_BY_SCALES[PPU_MAX_KNOWN_SCALES]
+
+    levels, per_level = anchor_table.shape[:2]
+    known = (layer_idx < levels) & (box_idx < per_level)
+
+    # index the table with the out-of-range rows folded onto a real entry,
+    # then let the mask drop them rather than raising here
+    layer = np.where(known, layer_idx, 0)
+    anchors = anchor_table[layer, np.where(known, box_idx, 0)]
+    stride = (PPU_MAX_STRIDE >> (levels - 1 - layer)).astype(np.float32)
+
+    centre_x = (boxes[:, 0] * 2.0 - 0.5 + grid_x) * stride
+    centre_y = (boxes[:, 1] * 2.0 - 0.5 + grid_y) * stride
+    box_w = (boxes[:, 2] * 2.0) ** 2 * anchors[:, 0]
+    box_h = (boxes[:, 3] * 2.0) ** 2 * anchors[:, 1]
+
+    return centre_x, centre_y, box_w, box_h, known
+
+
 def decode_ppu(
     outputs: list[np.ndarray],
     width: int,
@@ -403,11 +510,17 @@ def decode_ppu(
     score_threshold: float,
     nms_threshold: float,
     anchor_based: bool | None = None,
-) -> np.ndarray | None:
-    """Decode anchor-free PPU records (pixel cx, cy, w, h, score, label),
-    leaving only NMS. None for anchor-based records, whose anchor table is
-    not in the model; `anchor_based` skips the heuristic once settled."""
-    records = ppu_records(outputs)
+    scale_count: int | None = None,
+    needs_grid_decode: bool | None = None,
+    records: np.ndarray | None = None,
+) -> np.ndarray:
+    """Decode PPU records, leaving only NMS. `anchor_based` and
+    `needs_grid_decode` skip their heuristics once settled by a caller
+    tracking them across frames; `scale_count` picks the anchor table or
+    stride, defaulting to what this frame alone shows; `records` reuses an
+    already-parsed buffer instead of re-parsing `outputs`."""
+    if records is None:
+        records = ppu_records(outputs)
 
     if records is None:
         return np.zeros((20, 6), np.float32)
@@ -417,9 +530,6 @@ def decode_ppu(
     if anchor_based is None:
         anchor_based = ppu_boxes_are_anchor_based(boxes)
 
-    if anchor_based:
-        return None
-
     if anchor_based is None:
         # nothing conclusive in this frame; no pixel box to draw either
         return np.zeros((20, 6), np.float32)
@@ -427,10 +537,29 @@ def decode_ppu(
     scores = reinterpret(records, PPU_SCORE_BYTES, np.float32).flatten()
     labels = reinterpret(records, PPU_LABEL_BYTES, np.uint32).flatten()
 
-    box_w = boxes[:, 2]
-    box_h = boxes[:, 3]
-    x_min = boxes[:, 0] - box_w * 0.5
-    y_min = boxes[:, 1] - box_h * 0.5
+    if anchor_based:
+        scale_count = resolve_scale_count(records, scale_count)
+        centre_x, centre_y, box_w, box_h, known = ppu_anchor_geometry(
+            records, boxes, scale_count
+        )
+        # a record the table cannot place is dropped by the score filter
+        scores = np.where(known, scores, 0.0)
+    else:
+        if needs_grid_decode is None:
+            needs_grid_decode = ppu_needs_grid_decode(records)
+
+        if needs_grid_decode:
+            scale_count = resolve_scale_count(records, scale_count)
+            centre_x, centre_y, box_w, box_h, known = ppu_grid_regression_geometry(
+                records, boxes, scale_count
+            )
+            scores = np.where(known, scores, 0.0)
+        else:
+            centre_x, centre_y = boxes[:, 0], boxes[:, 1]
+            box_w, box_h = boxes[:, 2], boxes[:, 3]
+
+    x_min = centre_x - box_w * 0.5
+    y_min = centre_y - box_h * 0.5
 
     order = run_nms(x_min, y_min, box_w, box_h, scores, score_threshold, nms_threshold)
 
@@ -686,7 +815,10 @@ class DeepxDetector(DetectionApi):
         self.logged_layout = False
         # set once a frame proves the PPU head anchor-free, then kept
         self.ppu_anchor_free = False
-        self.ppu_anchor_based_reported = False
+        # set once proven needed, then kept
+        self.ppu_needs_grid_decode = False
+        self.ppu_scale_count = 0
+        self.ppu_unsupported_scale_reported = False
         self.damoyolo_outputs_reported = False
 
     def inspect_model(self, config: DeepxDetectorConfig) -> YoloOutput | None:
@@ -757,28 +889,40 @@ class DeepxDetector(DetectionApi):
                 return post_process_yolo(outputs, self.width, self.height)
 
     def decode_ppu(self, outputs: list[np.ndarray]) -> np.ndarray:
-        """Decode PPU records. A box value above 1 proves the head is
-        anchor-free and that is kept; the anchor-based verdict is re-read on
-        every frame, so a sub-pixel box cannot lock the model out."""
+        """Decode PPU records, keeping each heuristic once a frame settles
+        it: anchor-free, needs-grid-decode, and scale count all only
+        move toward more certainty, never back."""
         if self.ppu_anchor_free:
             anchor_based = False
         else:
             anchor_based = ppu_layout_is_anchor_based(outputs)
             self.ppu_anchor_free = anchor_based is False
 
-        if anchor_based:
-            if not self.ppu_anchor_based_reported:
-                self.ppu_anchor_based_reported = True
-                logger.error(
-                    "This PPU model was compiled from an anchor-based head, whose "
-                    "records cannot be decoded without the model's anchor table. "
-                    "Compile it without PPU support, or use an anchor-free model"
-                )
+        records = ppu_records(outputs)
+        if records is not None and len(records):
+            layer_idx = reinterpret(records, PPU_GRID_BYTES, np.uint8)[:, 3]
+            self.ppu_scale_count = max(self.ppu_scale_count, int(layer_idx.max()) + 1)
 
-            return np.zeros((20, 6), np.float32)
+            if not anchor_based and not self.ppu_needs_grid_decode:
+                self.ppu_needs_grid_decode = ppu_needs_grid_decode(records)
 
-        # None here means nothing conclusive in this frame, and no pixel
-        # box to draw either
+        if (
+            anchor_based
+            and self.ppu_scale_count
+            and self.ppu_scale_count not in PPU_ANCHORS_BY_SCALES
+            and not self.ppu_unsupported_scale_reported
+        ):
+            self.ppu_unsupported_scale_reported = True
+            logger.error(
+                "This PPU model's anchor-based head reports %d detection "
+                "scales, which Frigate has no anchor table for (supported: "
+                "%s); its detections cannot be decoded",
+                self.ppu_scale_count,
+                ", ".join(str(n) for n in sorted(PPU_ANCHORS_BY_SCALES)),
+            )
+
+        # None here means nothing conclusive in this frame, and no box to
+        # draw either
         return decode_ppu(
             outputs,
             self.width,
@@ -786,6 +930,9 @@ class DeepxDetector(DetectionApi):
             SCORE_THRESHOLD,
             NMS_THRESHOLD,
             anchor_based=anchor_based,
+            scale_count=self.ppu_scale_count or None,
+            needs_grid_decode=True if self.ppu_needs_grid_decode else None,
+            records=records,
         )
 
     def decode_damoyolo(self, outputs: list[np.ndarray]) -> np.ndarray:
