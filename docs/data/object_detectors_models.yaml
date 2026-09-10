@@ -991,29 +991,57 @@ deepx:
     - key: yolo
       label: YOLO
       recommended: true
-      download: No model is bundled with Frigate. Download a pre-compiled YOLO `.dxnn` model from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo) or compile your own with DX-COM, then bind-mount it into the container and point the model's `path` at it. The output layout is read from the compiled model, so anchor-based, anchor-free, NMS-in-head and PPU models (anchor-based or anchor-free) all need no extra configuration.
+      download: No model is bundled with Frigate. Download a pre-compiled YOLO `.dxnn` model from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo) or compile your own with DX-COM, then bind-mount it into the container and point the model's `path` at it. The recommended model is `yolox-s_640x640_ppu.dxnn`. Its Post-Processing Unit (PPU) compile moves candidate selection onto the NPU, which makes it the fastest ModelZoo model measured through Frigate (about 13 ms on a DX-M1). The output layout is read from the compiled model, so anchor-based, anchor-free, NMS-in-head and PPU models (anchor-based or anchor-free) all need no extra configuration; prefer a `PPU` variant whenever the ModelZoo offers one.
       ui: |-
         Navigate to **Settings > System > Detection models** and select **DEEPX NPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
 
-        | Field                                    | Value                                  |
-        | ---------------------------------------- | -------------------------------------- |
-        | **Custom object detector model path**    | `/config/model_cache/deepx/model.dxnn` |
-        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                |
-        | **Object detection model input width**   | `640`                                  |
-        | **Object detection model input height**  | `640`                                  |
-        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)        |
-        | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value)       |
-        | **Model Input D Type**                   | `int` (Frigate's default value)        |
-        | **Object Detection Model Type**          | `yolo-generic`                         |
+        | Field                                    | Value                                                |
+        | ---------------------------------------- | ---------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/deepx/yolox-s_640x640_ppu.dxnn` |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                              |
+        | **Object detection model input width**   | `640`                                                |
+        | **Object detection model input height**  | `640`                                                |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                      |
+        | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value)                     |
+        | **Model Input D Type**                   | `int` (Frigate's default value)                      |
+        | **Object Detection Model Type**          | `yolo-generic`                                       |
 
-        The width and height must match the resolution the `.dxnn` file was compiled for. Quantization is baked into the compiled model, so no normalization is applied on the host and the input defaults do not need to be overridden.
+        Quantization is baked into the compiled model, so no normalization is applied on the host and the input defaults do not need to be overridden.
       yaml: |-
         models:
           - devices:
               - deepx:PCIe:0
-            path: /config/model_cache/deepx/model.dxnn
+            path: /config/model_cache/deepx/yolox-s_640x640_ppu.dxnn
             labelmap_path: /labelmap/coco-80.txt
             model_type: yolo-generic
+            width: 640
+            height: 640
+    - key: yolox
+      label: YOLOX
+      recommended: false
+      download: No model is bundled with Frigate. Download a pre-compiled YOLOX `.dxnn` model from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), then bind-mount it into the container and point the model's `path` at it. The `_ppu` variant is faster and also works with the `yolo-generic` model type; the plain export needs `yolox` so its raw head is decoded.
+      ui: |-
+        Navigate to **Settings > System > Detection models** and select **DEEPX NPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
+
+        | Field                                    | Value                                    |
+        | ---------------------------------------- | ---------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/deepx/yolox-s_640x640.dxnn`|
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                  |
+        | **Object detection model input width**   | `640`                                    |
+        | **Object detection model input height**  | `640`                                    |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)          |
+        | **Model Input Tensor Shape**             | `nhwc` (Frigate's default value)         |
+        | **Model Input D Type**                   | `int` (Frigate's default value)          |
+        | **Object Detection Model Type**          | `yolox`                                  |
+
+        The width and height must match the resolution the `.dxnn` file was compiled for.
+      yaml: |-
+        models:
+          - devices:
+              - deepx:PCIe:0
+            path: /config/model_cache/deepx/yolox-s_640x640.dxnn
+            labelmap_path: /labelmap/coco-80.txt
+            model_type: yolox
             width: 640
             height: 640
     - key: damoyolo

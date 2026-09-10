@@ -1,7 +1,10 @@
 """DEEPX NPU detector running compiled .dxnn models via the DX-RT runtime."""
 
+import json
 import logging
 import os
+import re
+import struct
 from dataclasses import dataclass
 from enum import Enum
 from typing import Literal
@@ -12,7 +15,7 @@ from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
-from frigate.util.model import post_process_yolo
+from frigate.util.model import post_process_yolo, post_process_yolox
 from frigate.util.runtime_deps import Artifact, ArtifactKind, RuntimeManifest
 
 logger = logging.getLogger(__name__)
@@ -33,7 +36,14 @@ DXRT_IPC_SOCKET = "/run/dxrt/dxrt_dynamic_ipc.sock"
 SCORE_THRESHOLD = 0.4
 NMS_THRESHOLD = 0.4
 
-SUPPORTED_MODEL_TYPES = (ModelTypeEnum.yologeneric, ModelTypeEnum.damoyolo)
+SUPPORTED_MODEL_TYPES = (
+    ModelTypeEnum.yologeneric,
+    ModelTypeEnum.yolox,
+    ModelTypeEnum.damoyolo,
+)
+
+# YOLOX's raw head concatenates one cell per position of its three strides
+YOLOX_STRIDES = (8, 16, 32)
 
 # Fixed-width record the PPU emits, DeviceBoundingBox_t in DX-RT's
 # datatype.h: x, y, w, h (float32), grid_y, grid_x, box_idx, layer_idx
@@ -44,10 +54,14 @@ PPU_GRID_BYTES = (16, 20)
 PPU_SCORE_BYTES = (20, 24)
 PPU_LABEL_BYTES = (24, 28)
 
+# Anchor sizes are not in the PPU record or the .dxnn, so an anchor-based
+# head is read against the table for its scale count: DEEPX's own reference
+# decoder's tables, shared by every three- or two-scale model it ships
+# except YOLOv7, whose anchors differ.
 PPU_ANCHORS_BY_SCALES = {
     2: np.array(
         [
-            [[23, 27], [37, 58], [81, 82]],
+            [[10, 14], [23, 27], [37, 58]],
             [[81, 82], [135, 169], [344, 319]],
         ],
         dtype=np.float32,
@@ -67,6 +81,18 @@ PPU_MAX_STRIDE = 32
 # table of its own is under-evidenced rather than disproven, so it still
 # gets the biggest table as a best guess
 PPU_MAX_KNOWN_SCALES = max(PPU_ANCHORS_BY_SCALES)
+
+# .dxnn: "DXNN", a 4-byte LE version, then a JSON index padded to
+# DXNN_HEADER_SIZE; every offset in the index counts from there.
+DXNN_MAGIC = b"DXNN"
+DXNN_HEADER_SIZE = 8192
+# compile_config's ppu.type for the heads decoded as bounding boxes
+PPU_TYPE_ANCHOR_BASED = 0
+PPU_TYPE_ANCHOR_FREE = 1
+# The PPU tensor table, ppu_info_header_t then one ppu_info_t per output
+# tensor, as DX-RT's ppu_binary_parser.h defines them.
+PPU_TABLE_HEADER = struct.Struct("<BBBB")
+PPU_TABLE_ENTRY = struct.Struct("<HHfBBBBBBBB")
 
 # A nms-in-head output is (N, 6) rows of x_min, y_min, x_max, y_max, score,
 # class, with N decided per frame and capped in the head (300 for the
@@ -218,6 +244,7 @@ class YoloLayout(str, Enum):
     model's head, so the head decides and the model is what gets asked."""
 
     ppu = "ppu"  # fixed-width records from the NPU's post-processing unit
+    yolox = "yolox"  # (N, 5+C) grid-relative offsets and log sizes, model_type yolox
     anchor = "anchor"  # (N, 5+C) with an objectness column, pixel boxes
     anchor_free = "anchor_free"  # (N, 4+C) or (4+C, N), no objectness
     nms_in_head = "nms_in_head"  # (N, 6) final corner boxes
@@ -363,6 +390,31 @@ def validate_damoyolo_outputs(shapes: list[tuple[int, ...]], num_classes: int) -
     )
 
 
+def validate_yolox_outputs(
+    shapes: list[tuple[int, ...]], num_classes: int, width: int, height: int
+) -> int:
+    """Fail unless the shapes are YOLOX's raw (1, N, 5+C) head for this
+    input size; returns the row width to orient a channel-major export."""
+    columns = 5 + num_classes
+    cells = sum((height // s) * (width // s) for s in YOLOX_STRIDES)
+    dims = [_significant_dims(shape) for shape in shapes]
+
+    if (
+        len(dims) == 1
+        and len(dims[0]) == 2
+        and sorted(dims[0]) == sorted((cells, columns))
+    ):
+        return columns
+
+    raise ValueError(
+        f"output shapes {[tuple(shape) for shape in shapes]} are not YOLOX's "
+        f"(1, {cells}, {columns}) raw head for a {width}x{height} input. Check "
+        "that width and height match the compiled model, that labelmap_path "
+        "matches it, usually /labelmap/coco-80.txt, and that model_type "
+        "matches it; any other YOLO head needs model_type yolo-generic."
+    )
+
+
 def rows_with_columns(tensor: np.ndarray, columns: int) -> np.ndarray:
     """(N, columns) rows, transposing a channel-major export first."""
     if tensor.ndim >= 2 and tensor.shape[-1] != columns and tensor.shape[-2] == columns:
@@ -408,17 +460,11 @@ def ppu_boxes_are_anchor_based(boxes: np.ndarray) -> bool | None:
     return None
 
 
-def ppu_layout_is_anchor_based(outputs: list[np.ndarray]) -> bool | None:
-    """Whether this PPU model's records are anchor-based, or None when the
-    frame cannot tell; the caller keeps the first conclusive answer."""
-    records = ppu_records(outputs)
-
-    if records is None:
-        return None
-
-    boxes = reinterpret(records, PPU_BOX_BYTES, np.float32).reshape(-1, 4)
-
-    return ppu_boxes_are_anchor_based(boxes)
+def ppu_boxes_are_centres(boxes: np.ndarray) -> bool:
+    """Whether these pixel boxes hold a centre and size rather than two
+    corners: a corner box always runs x1<=x2, y1<=y2, so only a centre box
+    can show a width below its x or a height below its y."""
+    return bool(np.any(boxes[:, 2] < boxes[:, 0]) or np.any(boxes[:, 3] < boxes[:, 1]))
 
 
 def ppu_needs_grid_decode(records: np.ndarray) -> bool:
@@ -427,6 +473,134 @@ def ppu_needs_grid_decode(records: np.ndarray) -> bool:
     layer_idx = reinterpret(records, PPU_GRID_BYTES, np.uint8)[:, 3]
 
     return len(np.unique(layer_idx)) > 1
+
+
+@dataclass(frozen=True)
+class PpuLayout:
+    """The PPU head's kind (None if unnamed) and each scale's grid, finest
+    first, as the compiled model states them."""
+
+    anchor_based: bool | None
+    grids: tuple[tuple[int, int], ...]
+
+    @property
+    def scale_count(self) -> int:
+        return len(self.grids)
+
+
+def read_ppu_layout(path: str) -> PpuLayout | None:
+    """Read the PPU head layout the compiler wrote into a .dxnn, or None
+    when there is none to read; only the index and metadata are read."""
+    try:
+        with open(path, "rb") as model:
+            header = model.read(DXNN_HEADER_SIZE)
+            if header[:4] != DXNN_MAGIC:
+                return None
+
+            index = json.JSONDecoder().raw_decode(
+                header[8:].decode("utf-8", "replace")
+            )[0]
+            data = index["data"]
+
+            def section(entry: dict) -> bytes:
+                model.seek(DXNN_HEADER_SIZE + int(entry["offset"]))
+                return model.read(int(entry["size"]))
+
+            anchor_based = None
+            ppu = None
+            if data.get("compile_config"):
+                ppu = json.loads(section(data["compile_config"])).get("ppu")
+                if ppu is None:
+                    return None
+
+                anchor_based = {
+                    PPU_TYPE_ANCHOR_BASED: True,
+                    PPU_TYPE_ANCHOR_FREE: False,
+                }.get(ppu.get("type"))
+
+            for chip in data.get("compiled_data", {}).values():
+                for npu in chip.values():
+                    # v8 has a PPU table; v7's output tensor shapes hold the same grids
+                    if npu.get("ppu", {}).get("size"):
+                        grids = _ppu_grids_from_table(section(npu["ppu"]))
+                    elif npu.get("rmap_info", {}).get("size"):
+                        outputs = json.loads(section(npu["rmap_info"])).get(
+                            "outputs", []
+                        )
+                        grids = _ppu_grids_from_outputs(outputs, ppu)
+                        if grids and anchor_based is None:
+                            anchor_based = _ppu_outputs_are_anchor_based(outputs, ppu)
+                    else:
+                        continue
+
+                    if grids:
+                        return PpuLayout(
+                            anchor_based, tuple(grids[k] for k in sorted(grids))
+                        )
+
+            return None
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, struct.error):
+        return None
+
+
+def _ppu_grids_from_table(table: bytes) -> dict[int, tuple[int, int]]:
+    """Grid per scale index from the PPU table: field 3 is the scale,
+    fields 8 and 9 its grid, shared by every anchor of that scale."""
+    _, tensor_count, _, _ = PPU_TABLE_HEADER.unpack_from(table)
+    if len(table) < PPU_TABLE_HEADER.size + tensor_count * PPU_TABLE_ENTRY.size:
+        raise ValueError("PPU table shorter than its tensor count")
+
+    grids: dict[int, tuple[int, int]] = {}
+    for i in range(tensor_count):
+        fields = PPU_TABLE_ENTRY.unpack_from(
+            table, PPU_TABLE_HEADER.size + i * PPU_TABLE_ENTRY.size
+        )
+        grids.setdefault(fields[3], (fields[8], fields[9]))
+
+    return grids
+
+
+def _ppu_output_scale(name: str, ppu: dict | None) -> int | None:
+    """Which scale a PPU output tensor belongs to, from ppu.outputs by
+    name or else the name's own PPU_..._Output_<scale>[_anchor_<n>] form."""
+    entry = ((ppu or {}).get("outputs") or {}).get(name)
+    if isinstance(entry, dict) and "conv_idx" in entry:
+        return int(entry["conv_idx"])
+
+    match = re.fullmatch(r"PPU_\w*?Output_(\d+)(?:_anchor_\d+)?", name)
+    return int(match.group(1)) if match else None
+
+
+def _ppu_grids_from_outputs(
+    outputs: list[dict], ppu: dict | None
+) -> dict[int, tuple[int, int]]:
+    """Grid per scale index from rmap_info's output tensor shapes."""
+    grids: dict[int, tuple[int, int]] = {}
+    for output in outputs:
+        scale = _ppu_output_scale(str(output.get("name", "")), ppu)
+        shape = output.get("shape") or []
+        if scale is None or len(shape) not in (3, 4):
+            continue
+
+        grid = (int(shape[2]), int(shape[1])) if len(shape) == 4 else (int(shape[1]), 1)
+        grids.setdefault(scale, grid)
+
+    return grids
+
+
+def _ppu_outputs_are_anchor_based(outputs: list[dict], ppu: dict | None) -> bool | None:
+    """Anchor-based when the PPU outputs are split per anchor; None when
+    nothing says either way."""
+    mapping = (ppu or {}).get("outputs") or {}
+    if any(
+        isinstance(entry, dict) and "anchor_idx" in entry for entry in mapping.values()
+    ):
+        return True
+
+    if any("_anchor_" in str(output.get("name", "")) for output in outputs):
+        return True
+
+    return None
 
 
 def ppu_scale_count_lower_bound(records: np.ndarray, width: int, height: int) -> int:
@@ -537,19 +711,21 @@ def decode_ppu(
     scale_count: int | None = None,
     needs_grid_decode: bool | None = None,
     records: np.ndarray | None = None,
+    centre_boxes: bool | None = None,
+    boxes: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Decode PPU records, leaving only NMS. `anchor_based` and
-    `needs_grid_decode` skip their heuristics once settled by a caller
-    tracking them across frames; `scale_count` picks the anchor table or
-    stride, defaulting to what this frame alone shows; `records` reuses an
-    already-parsed buffer instead of re-parsing `outputs`."""
+    """Decode PPU records, leaving only NMS. `anchor_based`,
+    `needs_grid_decode` and `centre_boxes` skip their heuristics once a
+    caller settles them; `records` and `boxes` reuse an already-parsed
+    buffer instead of re-parsing `outputs`."""
     if records is None:
         records = ppu_records(outputs)
 
     if records is None:
         return np.zeros((20, 6), np.float32)
 
-    boxes = reinterpret(records, PPU_BOX_BYTES, np.float32).reshape(-1, 4)
+    if boxes is None:
+        boxes = reinterpret(records, PPU_BOX_BYTES, np.float32).reshape(-1, 4)
 
     if anchor_based is None:
         anchor_based = ppu_boxes_are_anchor_based(boxes)
@@ -579,8 +755,17 @@ def decode_ppu(
             )
             scores = np.where(known, scores, 0.0)
         else:
-            centre_x, centre_y = boxes[:, 0], boxes[:, 1]
-            box_w, box_h = boxes[:, 2], boxes[:, 3]
+            if centre_boxes is None:
+                centre_boxes = ppu_boxes_are_centres(boxes)
+
+            if centre_boxes:
+                centre_x, centre_y = boxes[:, 0], boxes[:, 1]
+                box_w, box_h = boxes[:, 2], boxes[:, 3]
+            else:
+                box_w = boxes[:, 2] - boxes[:, 0]
+                box_h = boxes[:, 3] - boxes[:, 1]
+                centre_x = boxes[:, 0] + box_w * 0.5
+                centre_y = boxes[:, 1] + box_h * 0.5
 
     x_min = centre_x - box_w * 0.5
     y_min = centre_y - box_h * 0.5
@@ -836,14 +1021,76 @@ class DeepxDetector(DetectionApi):
 
         self.session = InferenceEngine(str(model_path), options)
         self.output = self.inspect_model(config)
+        if self.output is not None and self.output.layout is YoloLayout.yolox:
+            # the shared YOLOX decoder's cell grids and strides for this input
+            self.calculate_grids_strides()
         self.logged_layout = False
         # set once a frame proves the PPU head anchor-free, then kept
         self.ppu_anchor_free = False
         # set once proven needed, then kept
         self.ppu_needs_grid_decode = False
         self.ppu_scale_count = 0
+        # set once proven; a corner-format head never produces such a record
+        self.ppu_centre_boxes = False
         self.ppu_unsupported_scale_reported = False
         self.damoyolo_outputs_reported = False
+
+        # the model's own head layout; None falls back to the fields above
+        self.ppu_layout = None
+        if self.output is not None and self.output.layout is YoloLayout.ppu:
+            self.ppu_layout = self.inspect_ppu_head(model_path)
+
+    def inspect_ppu_head(self, model_path: str) -> PpuLayout | None:
+        """Settle the PPU head from the model file, so the anchor table and
+        strides are right from the first frame."""
+        layout = read_ppu_layout(model_path)
+
+        if layout is None:
+            logger.warning(
+                "Could not read the PPU head layout from %s; inferring its "
+                "scale count from the detections instead, which can misplace "
+                "boxes until a record proves every scale",
+                model_path,
+            )
+            return None
+
+        self.ppu_scale_count = layout.scale_count
+        if layout.anchor_based is not None:
+            self.ppu_anchor_free = not layout.anchor_based
+            # only a grid-relative head keeps one tensor per scale
+            self.ppu_needs_grid_decode = layout.anchor_based is False and (
+                layout.scale_count > 1
+            )
+
+        # a head laid out differently than the decoders assume would
+        # decode to wrong positions, so say so once here
+        if layout.anchor_based or layout.scale_count > 1:
+            strides = [
+                PPU_MAX_STRIDE >> (layout.scale_count - 1 - i)
+                for i in range(layout.scale_count)
+            ]
+            expected = tuple(
+                (-(-self.width // s), -(-self.height // s)) for s in strides
+            )
+            if layout.grids != expected:
+                logger.warning(
+                    "PPU head grids %s do not match the %d-scale layout Frigate "
+                    "decodes (%s for %dx%d input); boxes may be misplaced",
+                    layout.grids,
+                    layout.scale_count,
+                    expected,
+                    self.width,
+                    self.height,
+                )
+
+        logger.info(
+            "DEEPX PPU head from the model: %s, %d scale(s)",
+            {True: "anchor-based", False: "anchor-free"}.get(
+                layout.anchor_based, "unknown kind"
+            ),
+            layout.scale_count,
+        )
+        return layout
 
     def inspect_model(self, config: DeepxDetectorConfig) -> YoloOutput | None:
         """Pick the decoder from what the runtime reports, failing here
@@ -864,19 +1111,27 @@ class DeepxDetector(DetectionApi):
                 validate_damoyolo_outputs(shapes, num_classes)
                 return None
 
-            output = infer_yolo_layout(
-                shapes,
-                num_classes,
-                self.session.is_ppu(),
-                self.session.has_dynamic_output(),
-            )
+            if self.model_type == ModelTypeEnum.yolox and not self.session.is_ppu():
+                # a YOLOX compiled with PPU support is read as PPU below
+                columns = validate_yolox_outputs(
+                    shapes, num_classes, self.width, self.height
+                )
+                output = YoloOutput(YoloLayout.yolox, columns)
+            else:
+                output = infer_yolo_layout(
+                    shapes,
+                    num_classes,
+                    self.session.is_ppu(),
+                    self.session.has_dynamic_output(),
+                )
         except ValueError as err:
             raise ValueError(
                 f"Cannot decode DEEPX model '{config.model.path}': {err}"
             ) from None
 
         logger.info(
-            "DEEPX decoding yolo-generic output as %s with %d classes",
+            "DEEPX decoding %s output as %s with %d classes",
+            self.model_type.value,
             output.layout.value,
             num_classes,
         )
@@ -890,6 +1145,8 @@ class DeepxDetector(DetectionApi):
         match self.output.layout:
             case YoloLayout.ppu:
                 return self.decode_ppu(outputs)
+            case YoloLayout.yolox:
+                return self.decode_yolox(outputs)
             case YoloLayout.anchor:
                 return decode_raw_anchor(
                     outputs,
@@ -912,29 +1169,54 @@ class DeepxDetector(DetectionApi):
                 # per-scale feature maps, same thresholds as above
                 return post_process_yolo(outputs, self.width, self.height)
 
+    def decode_yolox(self, outputs: list[np.ndarray]) -> np.ndarray:
+        """Decode YOLOX's raw head with Frigate's shared decoder; it writes
+        into its input, so a float copy is oriented as (1, N, 5+C) first."""
+        rows = rows_with_columns(outputs[0], self.output.columns)
+        predictions = np.array(rows, dtype=np.float32).reshape(1, -1, rows.shape[-1])
+
+        return post_process_yolox(
+            predictions, self.width, self.height, self.grids, self.expanded_strides
+        )
+
     def decode_ppu(self, outputs: list[np.ndarray]) -> np.ndarray:
-        """Decode PPU records, keeping each heuristic once a frame settles
-        it: anchor-free, needs-grid-decode, and scale count all only
-        move toward more certainty, never back. The scale count is the
-        largest lower bound any frame has proven, so a three-scale head
-        whose frames so far only held its finer layers near the origin
-        reads against the two-scale table until a record lands far enough
-        right or down, or on the coarsest layer, to prove the third."""
-        if self.ppu_anchor_free:
+        """Decode PPU records. The head layout read from the model fixes
+        the kind, scale count and grid decode from the first frame; without
+        it, each is settled from the records and kept once proven."""
+        records = ppu_records(outputs)
+        boxes = None
+        if records is not None and len(records):
+            boxes = reinterpret(records, PPU_BOX_BYTES, np.float32).reshape(-1, 4)
+
+        if self.ppu_layout is not None and self.ppu_layout.anchor_based is not None:
+            anchor_based = self.ppu_layout.anchor_based
+        elif self.ppu_anchor_free:
             anchor_based = False
         else:
-            anchor_based = ppu_layout_is_anchor_based(outputs)
+            anchor_based = (
+                ppu_boxes_are_anchor_based(boxes) if boxes is not None else None
+            )
             self.ppu_anchor_free = anchor_based is False
 
-        records = ppu_records(outputs)
-        if records is not None and len(records):
-            self.ppu_scale_count = max(
-                self.ppu_scale_count,
-                ppu_scale_count_lower_bound(records, self.width, self.height),
-            )
+        if boxes is not None:
+            if self.ppu_layout is None:
+                self.ppu_scale_count = max(
+                    self.ppu_scale_count,
+                    ppu_scale_count_lower_bound(records, self.width, self.height),
+                )
 
             if not anchor_based and not self.ppu_needs_grid_decode:
-                self.ppu_needs_grid_decode = ppu_needs_grid_decode(records)
+                if self.ppu_layout is None:
+                    self.ppu_needs_grid_decode = ppu_needs_grid_decode(records)
+                else:
+                    self.ppu_needs_grid_decode = self.ppu_layout.scale_count > 1
+
+            if (
+                anchor_based is False
+                and not self.ppu_needs_grid_decode
+                and not self.ppu_centre_boxes
+            ):
+                self.ppu_centre_boxes = ppu_boxes_are_centres(boxes)
 
         if (
             anchor_based
@@ -951,8 +1233,13 @@ class DeepxDetector(DetectionApi):
                 ", ".join(str(n) for n in sorted(PPU_ANCHORS_BY_SCALES)),
             )
 
-        # None here means nothing conclusive in this frame, and no box to
-        # draw either
+        if self.ppu_layout is not None:
+            needs_grid_decode = self.ppu_needs_grid_decode
+        else:
+            # None leaves it to the frame; only a proven True is kept
+            needs_grid_decode = True if self.ppu_needs_grid_decode else None
+
+        # anchor_based None here means nothing conclusive; no box to draw
         return decode_ppu(
             outputs,
             self.width,
@@ -961,8 +1248,11 @@ class DeepxDetector(DetectionApi):
             NMS_THRESHOLD,
             anchor_based=anchor_based,
             scale_count=self.ppu_scale_count or None,
-            needs_grid_decode=True if self.ppu_needs_grid_decode else None,
+            needs_grid_decode=needs_grid_decode,
             records=records,
+            # None leaves it to the frame; only a proven True is kept
+            centre_boxes=True if self.ppu_centre_boxes else None,
+            boxes=boxes,
         )
 
     def decode_damoyolo(self, outputs: list[np.ndarray]) -> np.ndarray:

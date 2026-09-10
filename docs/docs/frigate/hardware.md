@@ -267,9 +267,9 @@ Frigate supports the DEEPX NPU in both of its form factors: the **DX-M1** M.2 mo
 
 DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
 
-The NPU runs models compiled to the `.dxnn` format with DEEPX's DX-COM compiler. Pre-compiled YOLO and DAMO-YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo). Models compiled with Post-Processing Unit (PPU) support move candidate selection onto the NPU, which reduces host CPU usage; both anchor-based and anchor-free PPU heads are supported.
+The NPU runs models compiled to the `.dxnn` format with DEEPX's DX-COM compiler. Pre-compiled YOLO and DAMO-YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo). Models compiled with Post-Processing Unit (PPU) support move candidate selection onto the NPU, which reduces host CPU usage; both anchor-based and anchor-free PPU heads are supported. Frigate reads the PPU head's kind and number of detection scales from the `.dxnn` file when the model loads, so no configuration is needed for either.
 
-Exception: **YOLOv7 PPU models are not supported**. A PPU record has no anchor sizes, only a grid position, so Frigate decodes anchor-based PPU heads against a fixed anchor table; YOLOv7's anchors differ, so it decodes to wrong box sizes. Non-PPU YOLOv7 is unaffected (its raw head already outputs pixel-space boxes).
+Exception: **YOLOv7 and YOLOv7-x PPU models are not supported**. A PPU record has no anchor sizes, only a grid position, and the `.dxnn` does not carry them either, so Frigate decodes anchor-based PPU heads against a fixed anchor table per scale count: the usual COCO anchor set for three-scale heads (the one DEEPX's own reference decoder uses for every other three-scale model it ships) and the usual tiny set for two-scale heads. YOLOv7's anchors differ and nothing in the model tells them apart, so it decodes to wrong box sizes. Non-PPU YOLOv7 is unaffected (its raw head already outputs pixel-space boxes). An end-to-end PPU head that emits corner boxes rather than a centre and size is told apart from the records themselves. **Face and pose PPU models (SCRFD and the pose export) are not supported**: their records carry landmarks or keypoints in a different layout, and Frigate only decodes object detection records.
 
 The DEEPX kernel driver, the DX-RT runtime, and the `dxrtd` daemon all run on the Docker host rather than inside the Frigate container, and have to be installed there before the NPU can be used. Frigate connects to the daemon over its socket, so the NPU stays available to other programs on the host at the same time. See the [installation docs](installation.md#deepx-npu) for the setup steps.
 
@@ -287,7 +287,7 @@ The DEEPX ModelZoo publishes pre-compiled `.dxnn` files for many YOLO variants a
 
 These are DEEPX's own figures for the DX-M1, derived from the frames per second published in the ModelZoo. They cover the NPU alone and exclude the pre- and post-processing Frigate does on the host, so the inference speed Frigate reports will be higher, and noticeably so on a slower host such as a Raspberry Pi 5.
 
-Besides the DAMO-YOLO family shown above, other models from the wider YOLO family published in the ModelZoo are also supported by the `deepx` detector by setting `model_type: yolo-generic`. Inference times for these, measured through Frigate's own stats API on a DX-M1 rather than taken from DEEPX's published figures, are below:
+Besides the DAMO-YOLO family shown above, other models from the wider YOLO family published in the ModelZoo are also supported by the `deepx` detector by setting `model_type: yolo-generic`. A YOLOX model compiled without PPU support is the one exception: its raw head needs `model_type: yolox` (the PPU variant works with either). Inference times for these, measured through Frigate's own stats API on a DX-M1 rather than taken from DEEPX's published figures, are below:
 
 | Model             | Input Size | DX-M1 Inference Time (via Frigate) |
 | ------------------ | ---------- | ----------------------------------- |

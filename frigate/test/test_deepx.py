@@ -1,7 +1,10 @@
 """Tests for the DEEPX detector."""
 
+import json
 import os
+import struct
 import sys
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -17,6 +20,7 @@ from frigate.detectors.plugins.deepx import (
     PPU_RECORD_SIZE,
     DeepxDetector,
     DeepxDetectorConfig,
+    PpuLayout,
     YoloLayout,
     class_count,
     decode_damoyolo_raw,
@@ -25,9 +29,11 @@ from frigate.detectors.plugins.deepx import (
     decode_raw_nms_in_head,
     infer_yolo_layout,
     ppu_scale_count_lower_bound,
+    read_ppu_layout,
     resolve_device,
     rows_with_columns,
     validate_damoyolo_outputs,
+    validate_yolox_outputs,
 )
 from frigate.util.runtime_deps import ArtifactKind
 
@@ -54,6 +60,172 @@ def build_ppu_records(*records: np.ndarray) -> np.ndarray:
     """Several single records, as build_ppu_record makes them, stacked into
     one (1, N, 32) output."""
     return np.concatenate(records, axis=1)
+
+
+# compile_config.ppu as DX-COM writes it for the two head kinds; the layer
+# names inside are irrelevant to the reader, only the type is
+ANCHOR_BASED_PPU = {"type": 0, "num_classes": 80, "activation": "Sigmoid"}
+ANCHOR_FREE_PPU = {"type": 1, "num_classes": 80}
+
+
+def write_dxnn(directory, ppu, layers, name="model.dxnn", table=True) -> str:
+    """A minimal .dxnn as DX-RT's parsers read it: the container header, a
+    compile_config carrying `ppu`, and either the PPU tensor table with one
+    entry per (layer, anchor) as a v8 file has, or with `table` False only
+    the rmap_info listing of the PPU output tensors, as a v7 file has.
+    `layers` is (grid_w, grid_h, entries) per scale, finest first; an
+    anchor-free scale has one entry, and grid_h 1 means a flattened
+    (1, cells, channels) tensor."""
+    compile_config = json.dumps({"compile_version": "2.4.0", "ppu": ppu}).encode()
+
+    if table:
+        part = bytearray(struct.pack("<BBBB", 1, sum(n for _, _, n in layers), 0, 0))
+        for conv, (grid_w, grid_h, entries) in enumerate(layers):
+            for anchor in range(entries):
+                part += struct.pack(
+                    "<HHfBBBBBBBB",
+                    128,
+                    80,
+                    0.001,
+                    conv,
+                    anchor,
+                    0,
+                    1,
+                    0,
+                    grid_w,
+                    grid_h,
+                    0,
+                )
+    else:
+        outputs = []
+        for conv, (grid_w, grid_h, entries) in enumerate(layers):
+            for anchor in range(entries):
+                name_ = f"PPU_Transpose_Output_{conv}"
+                if entries > 1:
+                    name_ += f"_anchor_{anchor}"
+                shape = [1, grid_w, 127] if grid_h == 1 else [1, grid_h, grid_w, 128]
+                outputs.append({"name": name_, "shape": shape, "layout": "PPU_YOLO"})
+        part = json.dumps({"inputs": [], "outputs": outputs}).encode()
+
+    index = json.dumps(
+        {
+            "version": 8 if table else 7,
+            "signature": "DXNN",
+            "size": 8192,
+            "data": {
+                "compile_config": {
+                    "type": "str",
+                    "offset": 0,
+                    "size": len(compile_config),
+                },
+                "compiled_data": {
+                    "M1A_4K": {
+                        "npu_0": {
+                            "rmap": {"type": "bytes", "offset": 0, "size": 0},
+                            "ppu" if table else "rmap_info": {
+                                "type": "bytes" if table else "str",
+                                "offset": len(compile_config),
+                                "size": len(part),
+                            },
+                        }
+                    }
+                },
+            },
+        }
+    ).encode()
+
+    path = os.path.join(directory, name)
+    with open(path, "wb") as model:
+        model.write(b"DXNN" + struct.pack("<I", 8))
+        model.write(index.ljust(8192 - 8, b"\0"))
+        model.write(compile_config + part)
+
+    return path
+
+
+class TestDeepxPpuLayoutFile(unittest.TestCase):
+    """The PPU head's kind and scale count are written into the .dxnn by
+    DX-COM, so they are read from there rather than guessed from records."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def test_reads_the_head_kind_and_one_grid_per_scale(self):
+        # anchor-based: three anchors per scale collapse to one grid each
+        path = write_dxnn(
+            self.tmp.name, ANCHOR_BASED_PPU, [(80, 80, 3), (40, 40, 3), (20, 20, 3)]
+        )
+        self.assertEqual(
+            read_ppu_layout(path),
+            PpuLayout(anchor_based=True, grids=((80, 80), (40, 40), (20, 20))),
+        )
+
+        # anchor-free with every scale flattened into one tensor
+        path = write_dxnn(self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)])
+        self.assertEqual(
+            read_ppu_layout(path), PpuLayout(anchor_based=False, grids=((100, 84),))
+        )
+
+        # a head kind the compiler does not name leaves the kind open but
+        # still yields the scales
+        path = write_dxnn(self.tmp.name, {"type": 7}, [(80, 80, 3), (40, 40, 3)])
+        self.assertEqual(
+            read_ppu_layout(path),
+            PpuLayout(anchor_based=None, grids=((80, 80), (40, 40))),
+        )
+
+    def test_a_file_without_the_ppu_table_reads_its_output_tensors_instead(self):
+        """A v7-era compile lists its PPU output tensors in rmap_info but
+        has no PPU table; their shapes hold the grids and their names the
+        scale, and a per-anchor split says anchor-based when compile_config
+        names no kind."""
+        path = write_dxnn(
+            self.tmp.name,
+            {"num_classes": 80},
+            [(80, 80, 3), (40, 40, 3), (20, 20, 3)],
+            table=False,
+        )
+        self.assertEqual(
+            read_ppu_layout(path),
+            PpuLayout(anchor_based=True, grids=((80, 80), (40, 40), (20, 20))),
+        )
+
+        # compile_config's own output map places the scales ahead of the names
+        outputs = {f"PPU_Transpose_Output_{i}": {"conv_idx": 2 - i} for i in range(3)}
+        path = write_dxnn(
+            self.tmp.name,
+            {"type": 1, "outputs": outputs},
+            [(20, 20, 1), (40, 40, 1), (80, 80, 1)],
+            table=False,
+        )
+        self.assertEqual(
+            read_ppu_layout(path),
+            PpuLayout(anchor_based=False, grids=((80, 80), (40, 40), (20, 20))),
+        )
+
+        # every scale flattened into one (1, cells, channels) tensor
+        path = write_dxnn(self.tmp.name, ANCHOR_FREE_PPU, [(8400, 1, 1)], table=False)
+        self.assertEqual(
+            read_ppu_layout(path), PpuLayout(anchor_based=False, grids=((8400, 1),))
+        )
+
+    def test_nothing_is_read_from_a_model_without_ppu_metadata(self):
+        self.assertIsNone(read_ppu_layout(os.path.join(self.tmp.name, "missing")))
+
+        # a non-PPU compile
+        path = write_dxnn(self.tmp.name, None, [(80, 80, 3)])
+        self.assertIsNone(read_ppu_layout(path))
+
+        # not a .dxnn at all
+        with open(path, "wb") as model:
+            model.write(b"ONNX" + b"\0" * 100)
+        self.assertIsNone(read_ppu_layout(path))
+
+        # a table cut short of the entries it announces
+        path = write_dxnn(self.tmp.name, ANCHOR_BASED_PPU, [(80, 80, 3), (40, 40, 3)])
+        os.truncate(path, os.path.getsize(path) - 40)
+        self.assertIsNone(read_ppu_layout(path))
 
 
 class TestDeepxPpuDecode(unittest.TestCase):
@@ -164,12 +336,12 @@ class TestDeepxPpuDecode(unittest.TestCase):
             scale_count=2,
         )
 
-        # layer 0 of 2 is stride 16 and box 1 is the 37x58 anchor, so the
-        # centre is (9.7, 7.3) cells out and the box is 13.32 x 113.68
-        self.assertAlmostEqual(detections[0][2], 0.093688, places=5)
-        self.assertAlmostEqual(detections[0][3], 0.232094, places=5)
-        self.assertAlmostEqual(detections[0][4], 0.271313, places=5)
-        self.assertAlmostEqual(detections[0][5], 0.252906, places=5)
+        # layer 0 of 2 is stride 16 and box 1 is the 23x27 anchor, so the
+        # centre is (9.7, 7.3) cells out and the box is 8.28 x 52.92
+        self.assertAlmostEqual(detections[0][2], 0.141156, places=5)
+        self.assertAlmostEqual(detections[0][3], 0.236031, places=5)
+        self.assertAlmostEqual(detections[0][4], 0.223844, places=5)
+        self.assertAlmostEqual(detections[0][5], 0.248969, places=5)
 
     def test_scale_count_defaults_to_the_three_scale_table(self):
         """With no scale_count given, a frame that only ever shows layer 0
@@ -270,6 +442,56 @@ class TestDeepxPpuDecode(unittest.TestCase):
         )
 
         self.assertTrue(np.all(detections == 0))
+
+    def test_corner_boxes_are_read_as_corners_until_a_record_rules_them_out(self):
+        """A decode-in-head PPU record holds either a centre and size or,
+        for a corner-format head, the two corners in the same four fields.
+        Corners always run x1 <= x2 and y1 <= y2, so a frame is read as
+        corners unless one of its records has a width below its x or a
+        height below its y, which only a centre box can."""
+        detections = decode_ppu(
+            [build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)],
+            640,
+            640,
+            0.25,
+            0.45,
+        )
+        self.assertEqual(detections[0][0], 2)
+        self.assertAlmostEqual(detections[0][2], 50 / 640, places=5)
+        self.assertAlmostEqual(detections[0][3], 100 / 640, places=5)
+        self.assertAlmostEqual(detections[0][4], 250 / 640, places=5)
+        self.assertAlmostEqual(detections[0][5], 300 / 640, places=5)
+
+        # the same record beside one only a centre box could be
+        detections = decode_ppu(
+            [
+                build_ppu_records(
+                    build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2),
+                    build_ppu_record((320.0, 160.0, 64.0, 32.0), label=3, score=0.5),
+                )
+            ],
+            640,
+            640,
+            0.25,
+            0.45,
+        )
+        self.assertEqual(detections[0][0], 2)
+        # centre (100, 50), size 300 x 250, clipped at the frame edge
+        self.assertAlmostEqual(detections[0][2], 0.0, places=5)
+        self.assertAlmostEqual(detections[0][3], 0.0, places=5)
+        self.assertAlmostEqual(detections[0][4], 175 / 640, places=5)
+        self.assertAlmostEqual(detections[0][5], 250 / 640, places=5)
+
+        # and told centres outright, no record is read as corners
+        detections = decode_ppu(
+            [build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)],
+            640,
+            640,
+            0.25,
+            0.45,
+            centre_boxes=True,
+        )
+        self.assertAlmostEqual(detections[0][5], 250 / 640, places=5)
 
     def test_needs_grid_decode_true_is_kept_for_a_single_layer_frame(self):
         """A caller that already proved the head needs grid decoding must
@@ -424,6 +646,28 @@ class TestDeepxDamoyoloValidation(unittest.TestCase):
     def test_mismatched_row_counts_are_refused(self):
         with self.assertRaises(ValueError):
             validate_damoyolo_outputs([(1, 8400, 80), (1, 8000, 4)], 80)
+
+
+class TestDeepxYoloxValidation(unittest.TestCase):
+    """model_type yolox takes the raw YOLOX head: one (1, N, 5+C) tensor with
+    N the cells of strides 8, 16 and 32 for the configured input."""
+
+    def test_the_raw_head_passes_in_either_orientation(self):
+        self.assertEqual(validate_yolox_outputs([(1, 8400, 85)], 80, 640, 640), 85)
+        self.assertEqual(validate_yolox_outputs([(1, 85, 8400)], 80, 640, 640), 85)
+        # 52*52 + 26*26 + 13*13 cells at 416
+        self.assertEqual(validate_yolox_outputs([(1, 3549, 85)], 80, 416, 416), 85)
+
+    def test_the_wrong_input_size_or_label_map_is_named(self):
+        with self.assertRaisesRegex(ValueError, "width and height"):
+            validate_yolox_outputs([(1, 8400, 85)], 80, 416, 416)
+
+        with self.assertRaisesRegex(ValueError, "labelmap_path"):
+            validate_yolox_outputs([(1, 8400, 85)], 91, 640, 640)
+
+    def test_another_head_names_yolo_generic(self):
+        with self.assertRaisesRegex(ValueError, "yolo-generic"):
+            validate_yolox_outputs([(1, 8400, 80), (1, 8400, 4)], 80, 640, 640)
 
 
 class TestDeepxClassCount(unittest.TestCase):
@@ -743,7 +987,11 @@ class TestDeepxModelType(unittest.TestCase):
                 DeepxDetectorConfig(type="deepx", model=model_with_type(model_type))
 
     def test_supported_model_types_are_accepted(self):
-        for model_type in (ModelTypeEnum.yologeneric, ModelTypeEnum.damoyolo):
+        for model_type in (
+            ModelTypeEnum.yologeneric,
+            ModelTypeEnum.yolox,
+            ModelTypeEnum.damoyolo,
+        ):
             with self.subTest(model_type=model_type):
                 config = DeepxDetectorConfig(
                     type="deepx", model=model_with_type(model_type)
@@ -865,7 +1113,14 @@ class TestDeepxDetectorLayout(unittest.TestCase):
     """The detector asks the runtime about the loaded model and keeps the
     answer; the per-frame decode only dispatches on it."""
 
-    def _detector(self, model_type, outputs_info, ppu=False, dynamic=False):
+    def _detector(
+        self,
+        model_type,
+        outputs_info,
+        ppu=False,
+        dynamic=False,
+        model_path="/nonexistent/model.dxnn",
+    ):
         dx_engine = MagicMock()
         dx_engine.Configuration.ITEM.SERVICE = object()
         session = dx_engine.InferenceEngine.return_value
@@ -876,10 +1131,14 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         config = DeepxDetectorConfig(
             type="deepx",
             model=ModelConfig(
-                model_type=model_type, labelmap_path=None, labelmap={79: "toothbrush"}
+                model_type=model_type,
+                labelmap_path=None,
+                labelmap={79: "toothbrush"},
+                width=640,
+                height=640,
             ),
         )
-        config.model.path = "/nonexistent/model.dxnn"
+        config.model.path = model_path
 
         with (
             patch.dict(sys.modules, {"dx_engine": dx_engine}),
@@ -993,8 +1252,8 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         ]
         third = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
         # the same layer-0 record as the first frame, now read against the
-        # two-scale table proven by the second frame: stride 16, anchor 37x58
-        self.assertAlmostEqual(third[0][3], 0.232094, places=5)
+        # two-scale table proven by the second frame: stride 16, anchor 23x27
+        self.assertAlmostEqual(third[0][3], 0.236031, places=5)
 
     def test_ppu_scale_count_grows_when_a_grid_cell_proves_a_third_scale(self):
         """A three-scale head whose early frames only ever hold layers 0
@@ -1024,6 +1283,107 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         third = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
         # the same record, now layer 1 of 3: stride 16, anchor 30x61
         self.assertAlmostEqual(third[0][3], 0.0975, places=5)
+
+    def _ppu_detector_for(self, ppu, layers):
+        """A PPU detector loaded from a model file that describes its head."""
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        path = write_dxnn(tmp.name, ppu, layers)
+
+        detector, _ = self._detector(
+            ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True, model_path=path
+        )
+        detector.width, detector.height = 640, 640
+        return detector
+
+    def test_the_ppu_scale_count_is_read_from_the_model_at_load(self):
+        """A three-scale head reads against the three-scale table from its
+        first frame. A layer-0 record near the origin followed by a layer-1
+        one is exactly what record evidence alone would call a two-scale
+        head; the model file says otherwise and the count never moves."""
+        detector = self._ppu_detector_for(
+            ANCHOR_BASED_PPU, [(80, 80, 3), (40, 40, 3), (20, 20, 3)]
+        )
+        self.assertEqual(detector.ppu_scale_count, 3)
+
+        detector.session.run.return_value = [
+            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))
+        ]
+        first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        # layer 0 of 3: stride 8, anchor 16x30
+        self.assertAlmostEqual(first[0][3], 0.116750, places=5)
+
+        detector.session.run.return_value = [
+            build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1))
+        ]
+        second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        # layer 1 of 3: stride 16, anchor 30x61, not layer 1 of 2
+        self.assertAlmostEqual(second[0][3], 0.0975, places=5)
+        self.assertEqual(detector.ppu_scale_count, 3)
+
+    def test_an_anchor_free_model_settles_the_head_at_load(self):
+        """With the head kind in the file, a sub-pixel box in the corner,
+        which the per-frame heuristic would take for an anchor-based
+        record, is read as the pixels it is; and a YOLOX-style head is
+        grid-decoded from a first frame holding one record at one layer."""
+        detector = self._ppu_detector_for(ANCHOR_FREE_PPU, [(100, 84, 1)])
+        self.assertTrue(detector.ppu_anchor_free)
+        self.assertFalse(detector.ppu_needs_grid_decode)
+
+        detector.session.run.return_value = [build_ppu_record((0.6, 0.4, 0.3, 0.7))]
+        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertAlmostEqual(detections[0][3], 0.45 / 640, places=6)
+
+        detector = self._ppu_detector_for(
+            ANCHOR_FREE_PPU, [(80, 80, 1), (40, 40, 1), (20, 20, 1)]
+        )
+        self.assertTrue(detector.ppu_needs_grid_decode)
+
+        detector.session.run.return_value = [
+            build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 2), label=7)
+        ]
+        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertAlmostEqual(detections[0][3], 0.492043, places=5)
+
+    def test_an_unreadable_model_file_falls_back_to_record_evidence(self):
+        with self.assertLogs(
+            "frigate.detectors.plugins.deepx", level="WARNING"
+        ) as logs:
+            detector, _ = self._detector(
+                ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True
+            )
+
+        self.assertTrue(any("PPU" in r.getMessage() for r in logs.records))
+        self.assertIsNone(detector.ppu_layout)
+        self.assertEqual(detector.ppu_scale_count, 0)
+
+    def test_centre_boxes_are_kept_once_a_record_proves_them(self):
+        """A centre-format head is settled by its first record with a width
+        below its x, and a later frame whose boxes all happen to sit far
+        enough left and down to pass for corners is still read as centres.
+        A corner-format head never produces such a record and stays corners."""
+        detector = self._ppu_detector_for(ANCHOR_FREE_PPU, [(100, 84, 1)])
+
+        detector.session.run.return_value = [
+            build_ppu_record((320.0, 160.0, 64.0, 32.0), label=3)
+        ]
+        detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertTrue(detector.ppu_centre_boxes)
+
+        detector.session.run.return_value = [
+            build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)
+        ]
+        second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        # centre (100, 50), size 300 x 250: the right edge lands at 250
+        self.assertAlmostEqual(second[0][5], 250 / 640, places=5)
+
+        detector = self._ppu_detector_for(ANCHOR_FREE_PPU, [(100, 84, 1)])
+        detector.session.run.return_value = [
+            build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)
+        ]
+        first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertFalse(detector.ppu_centre_boxes)
+        self.assertAlmostEqual(first[0][5], 300 / 640, places=5)
 
     def test_needs_grid_decode_is_kept_once_proven(self):
         """A frame proving a YOLOX-style grid-relative head must not fall
@@ -1088,6 +1448,43 @@ class TestDeepxDetectorLayout(unittest.TestCase):
 
             self.assertTrue(np.all(detections == 0))
             self.assertFalse(detector.ppu_anchor_free)
+
+    def test_a_yolox_raw_head_is_decoded_through_the_grid(self):
+        """model_type yolox reads the raw head: a cell's x, y offsets are
+        added to its grid position and scaled by the stride, its w, h are
+        exp'd and scaled the same way, and confidence is objectness times
+        the best class score."""
+        detector, _ = self._detector(ModelTypeEnum.yolox, [{"shape": [1, 8400, 85]}])
+        self.assertIs(detector.output.layout, YoloLayout.yolox)
+
+        # cell (x 10, y 5) of the stride-8 grid is row 5 * 80 + 10
+        tensor = np.zeros((1, 8400, 85), np.float32)
+        tensor[0, 410, :5] = [0.5, 0.5, np.log(4.0), np.log(2.0), 0.9]
+        tensor[0, 410, 5 + 7] = 0.8
+        detector.session.run.return_value = [tensor]
+        detector.width, detector.height = 640, 640
+
+        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+
+        # centre (84, 44), size 32 x 16
+        self.assertEqual(detections[0][0], 7)
+        self.assertAlmostEqual(detections[0][1], 0.72, places=5)
+        self.assertAlmostEqual(detections[0][2], 36 / 640, places=5)
+        self.assertAlmostEqual(detections[0][3], 68 / 640, places=5)
+        self.assertAlmostEqual(detections[0][4], 52 / 640, places=5)
+        self.assertAlmostEqual(detections[0][5], 100 / 640, places=5)
+
+        # a channel-major export is oriented first
+        detector, _ = self._detector(ModelTypeEnum.yolox, [{"shape": [1, 85, 8400]}])
+        detector.session.run.return_value = [np.swapaxes(tensor, 1, 2)]
+        detector.width, detector.height = 640, 640
+        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertAlmostEqual(detections[0][5], 100 / 640, places=5)
+
+    def test_a_yolox_compiled_with_ppu_support_is_read_as_ppu(self):
+        detector, _ = self._detector(ModelTypeEnum.yolox, [{"shape": [8400]}], ppu=True)
+
+        self.assertIs(detector.output.layout, YoloLayout.ppu)
 
     def test_damoyolo_is_checked_against_the_model_at_load(self):
         """A YOLO model or a wrong label map under damo-yolo fails at load

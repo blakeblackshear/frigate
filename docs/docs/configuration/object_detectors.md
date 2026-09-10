@@ -655,25 +655,26 @@ The DX-RT Python bindings are not part of the Frigate image. They are downloaded
 
 <ModelConfigDropdown detectorTitle="DEEPX" models={objectDetectorsModels.deepx.models} />
 
-Frigate does not bundle a model for this detector. Models must be compiled to DEEPX's `.dxnn` format. Two model types are supported:
+Frigate does not bundle a model for this detector. Models must be compiled to DEEPX's `.dxnn` format. Three model types are supported:
 
 - `yolo-generic` for YOLO object detection models, the recommended default. The detector reads the model's output layout from the compiled file, so anchor-based, anchor-free and NMS-in-head models all work with the same configuration, as do models compiled with DEEPX's Post-Processing Unit (PPU) support.
+- `yolox` for YOLOX models compiled without PPU support, whose raw head needs Frigate's YOLOX decoder. A YOLOX model compiled with PPU support works under either `yolox` or `yolo-generic`.
 - `damo-yolo` for DAMO-YOLO models. All four sizes (TinyNAS-L20T, S, M, L) are supported.
 
-The quickest way to get one is the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), which publishes pre-compiled `.dxnn` files for a range of YOLO and DAMO-YOLO object detection models. Download the `.dxnn`, bind-mount it into the container, and point the model's `path` at it. Alternatively, compile your own model with the DX-COM compiler.
+The quickest way to get one is the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), which publishes pre-compiled `.dxnn` files for a range of YOLO and DAMO-YOLO object detection models. Download the `.dxnn`, bind-mount it into the container, and point the model's `path` at it. Alternatively, compile your own model with the DX-COM compiler. The recommended starting point is `yolox-s_640x640_ppu.dxnn`, the fastest ModelZoo model measured through Frigate:
 
 ```yaml
 models:
   - devices:
       - deepx:PCIe:0
-    path: /config/model_cache/deepx/model.dxnn
+    path: /config/model_cache/deepx/yolox-s_640x640_ppu.dxnn
     labelmap_path: /labelmap/coco-80.txt
     model_type: yolo-generic
     width: 640
     height: 640
 ```
 
-`model_type` must be set to `yolo-generic` or `damo-yolo` to match the model; `yolo-generic` is the recommended default unless the model is specifically a DAMO-YOLO export. Frigate defaults it to `ssd`, which this detector does not support, so a model that leaves it unset is rejected at startup.
+`model_type` must be set to `yolo-generic`, `yolox` or `damo-yolo` to match the model; `yolo-generic` is the recommended default unless the model is a raw YOLOX or DAMO-YOLO export. Frigate defaults it to `ssd`, which this detector does not support, so a model that leaves it unset is rejected at startup.
 
 `width` and `height` must match the resolution the model was compiled for. Quantization parameters are baked into the `.dxnn` file at compile time, so no normalization is applied on the host and Frigate's default `input_tensor`, `input_pixel_format`, and `input_dtype` values do not need to be overridden.
 
