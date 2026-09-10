@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 
 from frigate.const import MODEL_CACHE_DIR
+from frigate.log import redirect_output_to_logger
 from frigate.util.image import area
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ class FaceDetector:
 
     def __init__(self, on_ready: Callable[[], None] | None = None) -> None:
         self.detector: cv2.FaceDetectorYN | None = None
+        self.landmark_detector: cv2.face.Facemark | None = None
         self.on_ready = on_ready
 
         GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
@@ -81,9 +83,24 @@ class FaceDetector:
             score_threshold=0.5,
             nms_threshold=0.3,
         )
+        self.__init_landmark_detector()
 
         if self.on_ready is not None:
             self.on_ready()
+
+    @property
+    def is_ready(self) -> bool:
+        """Whether both the detection and landmark models are loaded."""
+        return self.detector is not None and self.landmark_detector is not None
+
+    @redirect_output_to_logger(logger, logging.DEBUG)  # type: ignore[untyped-decorator]
+    def __init_landmark_detector(self) -> None:
+        landmark_model = os.path.join(FACE_DET_DIR, "landmarkdet.yaml")
+
+        if os.path.exists(landmark_model):
+            landmark_detector = cv2.face.createFacemarkLBF()
+            landmark_detector.loadModel(landmark_model)
+            self.landmark_detector = landmark_detector
 
     def detect(self, input: np.ndarray, threshold: float) -> DetectionResult | None:
         """Detect the largest face in the input image.
@@ -150,3 +167,59 @@ class FaceDetector:
             best_area = bbox_area
 
         return best
+
+    def get_face_landmarks(
+        self, input: np.ndarray, threshold: float = 0.5
+    ) -> tuple[tuple[float, float], ...] | None:
+        """Get the alignment landmarks for an image that is already a face crop.
+
+        Args:
+            input: The face crop to get landmarks for
+            threshold: Minimum detection confidence to accept a face
+
+        Returns:
+            Eye, nose, and mouth landmarks, or None
+        """
+        detection = self.detect(input, threshold)
+
+        if detection is not None:
+            return detection.landmarks
+
+        # detection can fail on a crop that is already tight around the face,
+        # the landmark model is given the whole crop as the face instead
+        return self.__fit_landmarks(input)
+
+    def __fit_landmarks(
+        self, input: np.ndarray
+    ) -> tuple[tuple[float, float], ...] | None:
+        """Derive the 5 alignment landmarks from the 68 point landmark model."""
+        if self.landmark_detector is None:
+            return None
+
+        # the landmark model runs on grayscale
+        gray = cv2.cvtColor(input, cv2.COLOR_BGR2GRAY) if input.ndim == 3 else input
+
+        try:
+            success, faces = self.landmark_detector.fit(
+                gray, np.array([(0, 0, gray.shape[1], gray.shape[0])])
+            )
+        except cv2.error:
+            logger.debug("Failed to fit landmarks")
+            return None
+
+        if not success or not len(faces):
+            return None
+
+        points = faces[0][0]
+
+        # each eye is the mean of the 6 points around it
+        return tuple(
+            (float(p[0]), float(p[1]))
+            for p in (
+                points[36:42].mean(axis=0),
+                points[42:48].mean(axis=0),
+                points[30],
+                points[48],
+                points[54],
+            )
+        )

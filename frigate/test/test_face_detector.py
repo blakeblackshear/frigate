@@ -115,3 +115,75 @@ class TestFaceDetectorResults(unittest.TestCase):
         image = np.zeros((200, 200, 3), dtype=np.uint8)
 
         self.assertIsNone(detector.detect(image, 0.5))
+
+
+class TestGetFaceLandmarks(unittest.TestCase):
+    def _make_detector(self, rows, landmarks=None) -> FaceDetector:
+        detector = FaceDetector.__new__(FaceDetector)
+        detector.detector = MagicMock()
+        detector.detector.detect.return_value = (
+            1,
+            None if rows is None else np.array(rows, dtype=np.float32),
+        )
+
+        if landmarks is None:
+            detector.landmark_detector = None
+        else:
+            detector.landmark_detector = MagicMock()
+            detector.landmark_detector.fit.return_value = (
+                True,
+                [np.array([landmarks], dtype=np.float32)],
+            )
+
+        return detector
+
+    def test_detected_face_landmarks_are_used(self):
+        detector = self._make_detector(
+            [_yunet_row(10, 20, 40, 50)], landmarks=np.zeros((68, 2), np.float32)
+        )
+        image = np.zeros((200, 200, 3), dtype=np.uint8)
+
+        result = detector.get_face_landmarks(image)
+
+        assert result is not None
+        self.assertEqual(result[0], (22.0, 37.5))
+        detector.landmark_detector.fit.assert_not_called()
+
+    def test_falls_back_to_landmark_model(self):
+        """A tight face crop can fail detection but still fit landmarks."""
+        # 68 points, only the ones the 5 point mapping reads have to be real
+        points = np.zeros((68, 2), dtype=np.float32)
+        points[36:42] = [10.0, 20.0]
+        points[42:48] = [30.0, 20.0]
+        points[30] = [20.0, 30.0]
+        points[48] = [12.0, 40.0]
+        points[54] = [28.0, 40.0]
+
+        detector = self._make_detector(None, landmarks=points)
+        image = np.zeros((60, 50, 3), dtype=np.uint8)
+
+        result = detector.get_face_landmarks(image)
+
+        self.assertEqual(
+            result,
+            (
+                (10.0, 20.0),  # image left eye, mean of points 36 to 41
+                (30.0, 20.0),  # image right eye, mean of points 42 to 47
+                (20.0, 30.0),  # nose tip
+                (12.0, 40.0),  # image left mouth corner
+                (28.0, 40.0),  # image right mouth corner
+            ),
+        )
+
+    def test_returns_none_when_both_fail(self):
+        detector = self._make_detector(None)
+        image = np.zeros((60, 50, 3), dtype=np.uint8)
+
+        self.assertIsNone(detector.get_face_landmarks(image))
+
+    def test_landmark_fit_failure_returns_none(self):
+        detector = self._make_detector(None, landmarks=np.zeros((68, 2), np.float32))
+        detector.landmark_detector.fit.return_value = (False, [])
+        image = np.zeros((60, 50, 3), dtype=np.uint8)
+
+        self.assertIsNone(detector.get_face_landmarks(image))

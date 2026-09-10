@@ -9,20 +9,38 @@ import numpy as np
 from scipy import stats
 
 from frigate.config import FrigateConfig
-from frigate.const import FACE_DIR, MODEL_CACHE_DIR
-from frigate.embeddings.onnx.face_embedding import ArcfaceEmbedding, FaceNetEmbedding
-from frigate.log import redirect_output_to_logger
+from frigate.const import FACE_DIR
+from frigate.data_processing.common.face.detector import FaceDetector
+from frigate.embeddings.onnx.face_embedding import (
+    ARCFACE_INPUT_SIZE,
+    FACENET_INPUT_SIZE,
+    ArcfaceEmbedding,
+    FaceNetEmbedding,
+)
 
 logger = logging.getLogger(__name__)
+
+# 5 point template the arcface models are trained on, defined against a 112x112
+# crop and scaled to whatever size the embedding model takes
+FACE_TEMPLATE_SIZE = 112
+FACE_TEMPLATE = np.array(
+    [
+        [38.2946, 51.6963],
+        [73.5318, 51.5014],
+        [56.0252, 71.7366],
+        [41.5493, 92.3655],
+        [70.7299, 92.2041],
+    ],
+    dtype=np.float32,
+)
 
 
 class FaceRecognizer(ABC):
     """Face recognition runner."""
 
-    def __init__(self, config: FrigateConfig) -> None:
+    def __init__(self, config: FrigateConfig, detector: FaceDetector) -> None:
         self.config = config
-        self.landmark_detector: cv2.face.Facemark | None = None
-        self.init_landmark_detector()
+        self.detector = detector
 
     @abstractmethod
     def build(self) -> None:
@@ -38,79 +56,38 @@ class FaceRecognizer(ABC):
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         pass
 
-    @redirect_output_to_logger(logger, logging.DEBUG)  # type: ignore[misc]
-    def init_landmark_detector(self) -> None:
-        landmark_model = os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
+    def align_face(self, image: np.ndarray, output_size: int) -> np.ndarray | None:
+        """Warp a face onto the template the embedding model was trained on.
 
-        if os.path.exists(landmark_model):
-            landmark_detector = cv2.face.createFacemarkLBF()
-            landmark_detector.loadModel(landmark_model)
-            self.landmark_detector = landmark_detector
+        Args:
+            image: The face crop to align
+            output_size: Width and height of the model input
 
-    def align_face(
-        self,
-        image: np.ndarray,
-        output_width: int,
-        output_height: int,
-    ) -> np.ndarray:
-        if not self.landmark_detector:
-            raise ValueError("Landmark detector not initialized")
+        Returns:
+            The aligned face, or None if it could not be aligned
+        """
+        landmarks = self.detector.get_face_landmarks(image)
 
-        # landmark is run on grayscale images
-        if image.ndim == 3:
-            land_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        else:
-            land_image = image
+        if landmarks is None:
+            return None
 
-        _, lands = self.landmark_detector.fit(
-            land_image, np.array([(0, 0, land_image.shape[1], land_image.shape[0])])
+        # fitting all 5 points constrains rotation, scale, and position, an eye
+        # line alone leaves them free to slip on the small faces from a camera
+        matrix, _ = cv2.estimateAffinePartial2D(
+            np.array(landmarks, dtype=np.float32),
+            FACE_TEMPLATE * (output_size / FACE_TEMPLATE_SIZE),
+            method=cv2.LMEDS,
         )
-        landmarks: np.ndarray = lands[0][0]
 
-        # get landmarks for eyes
-        leftEyePts = landmarks[42:48]
-        rightEyePts = landmarks[36:42]
+        # the fit fails on degenerate landmarks even though the stub says
+        # otherwise, for example when every point collapses onto one pixel
+        if matrix is None:
+            return None  # type: ignore[unreachable]
 
-        # compute the center of mass for each eye
-        leftEyeCenter = leftEyePts.mean(axis=0).astype("int")
-        rightEyeCenter = rightEyePts.mean(axis=0).astype("int")
-
-        # compute the angle between the eye centroids
-        dY = rightEyeCenter[1] - leftEyeCenter[1]
-        dX = rightEyeCenter[0] - leftEyeCenter[0]
-        angle = np.degrees(np.arctan2(dY, dX)) - 180
-
-        # compute the desired right eye x-coordinate based on the
-        # desired x-coordinate of the left eye
-        desiredRightEyeX = 1.0 - 0.35
-
-        # determine the scale of the new resulting image by taking
-        # the ratio of the distance between eyes in the *current*
-        # image to the ratio of distance between eyes in the
-        # *desired* image
-        dist = np.sqrt((dX**2) + (dY**2))
-        desiredDist = desiredRightEyeX - 0.35
-        desiredDist *= output_width
-        scale = desiredDist / dist
-
-        # compute center (x, y)-coordinates (i.e., the median point)
-        # between the two eyes in the input image
-        # grab the rotation matrix for rotating and scaling the face
-        eyesCenter = (
-            int((leftEyeCenter[0] + rightEyeCenter[0]) // 2),
-            int((leftEyeCenter[1] + rightEyeCenter[1]) // 2),
-        )
-        M = cv2.getRotationMatrix2D(eyesCenter, angle, scale)
-
-        # update the translation component of the matrix
-        tX = output_width * 0.5
-        tY = output_height * 0.35
-        M[0, 2] += tX - eyesCenter[0]
-        M[1, 2] += tY - eyesCenter[1]
-
-        # apply the affine transformation
+        # the output is already the model input size, so the embedder's resize
+        # and letterbox padding are a no op
         return cv2.warpAffine(
-            image, M, (output_width, output_height), flags=cv2.INTER_CUBIC
+            image, matrix, (output_size, output_size), flags=cv2.INTER_CUBIC
         )
 
     def get_blur_confidence_reduction(self, input: np.ndarray) -> float:
@@ -217,8 +194,8 @@ def similarity_to_confidence(
 
 
 class FaceNetRecognizer(FaceRecognizer):
-    def __init__(self, config: FrigateConfig):
-        super().__init__(config)
+    def __init__(self, config: FrigateConfig, detector: FaceDetector):
+        super().__init__(config, detector)
         self.mean_embs: dict[str, np.ndarray] = {}
         self.face_embedder: FaceNetEmbedding = FaceNetEmbedding()
         self.model_builder_queue: queue.Queue | None = None
@@ -250,8 +227,12 @@ class FaceNetRecognizer(FaceRecognizer):
                     if img is None:
                         continue  # type: ignore[unreachable]
 
-                    img = self.align_face(img, img.shape[1], img.shape[0])
-                    emb = self.face_embedder([img])[0].squeeze()
+                    aligned = self.align_face(img, FACENET_INPUT_SIZE)
+
+                    if aligned is None:
+                        continue
+
+                    emb = self.face_embedder([aligned])[0].squeeze()
                     face_embeddings_map[name].append(emb)
 
                 idx += 1
@@ -263,8 +244,7 @@ class FaceNetRecognizer(FaceRecognizer):
         thread.start()
 
     def build(self) -> None:
-        if not self.landmark_detector:
-            self.init_landmark_detector()
+        if not self.detector.is_ready:
             return None
 
         if self.model_builder_queue is not None:
@@ -289,7 +269,7 @@ class FaceNetRecognizer(FaceRecognizer):
         logger.debug("Finished building ArcFace model")
 
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
-        if not self.landmark_detector:
+        if not self.detector.is_ready:
             return None
 
         if not self.mean_embs:
@@ -304,7 +284,11 @@ class FaceNetRecognizer(FaceRecognizer):
         blur_reduction = self.get_blur_confidence_reduction(face_image)
 
         # align face and run recognition
-        img = self.align_face(face_image, face_image.shape[1], face_image.shape[0])
+        img = self.align_face(face_image, FACENET_INPUT_SIZE)
+
+        if img is None:
+            return None
+
         embedding = self.face_embedder([img])[0].squeeze()
 
         score: float = 0
@@ -328,8 +312,8 @@ class FaceNetRecognizer(FaceRecognizer):
 
 
 class ArcFaceRecognizer(FaceRecognizer):
-    def __init__(self, config: FrigateConfig):
-        super().__init__(config)
+    def __init__(self, config: FrigateConfig, detector: FaceDetector):
+        super().__init__(config, detector)
         self.mean_embs: dict[str, np.ndarray] = {}
         self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding(config.face_recognition)
         self.model_builder_queue: queue.Queue | None = None
@@ -361,8 +345,12 @@ class ArcFaceRecognizer(FaceRecognizer):
                     if img is None:
                         continue  # type: ignore[unreachable]
 
-                    img = self.align_face(img, img.shape[1], img.shape[0])
-                    emb = self.face_embedder([img])[0].squeeze()  # type: ignore[arg-type]
+                    aligned = self.align_face(img, ARCFACE_INPUT_SIZE)
+
+                    if aligned is None:
+                        continue
+
+                    emb = self.face_embedder([aligned])[0].squeeze()  # type: ignore[arg-type]
                     face_embeddings_map[name].append(emb)
 
                 idx += 1
@@ -374,8 +362,7 @@ class ArcFaceRecognizer(FaceRecognizer):
         thread.start()
 
     def build(self) -> None:
-        if not self.landmark_detector:
-            self.init_landmark_detector()
+        if not self.detector.is_ready:
             return None
 
         if self.model_builder_queue is not None:
@@ -400,7 +387,7 @@ class ArcFaceRecognizer(FaceRecognizer):
         logger.debug("Finished building ArcFace model")
 
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
-        if not self.landmark_detector:
+        if not self.detector.is_ready:
             return None
 
         if not self.mean_embs:
@@ -415,7 +402,11 @@ class ArcFaceRecognizer(FaceRecognizer):
         blur_reduction = self.get_blur_confidence_reduction(face_image)
 
         # align face and run recognition
-        img = self.align_face(face_image, face_image.shape[1], face_image.shape[0])
+        img = self.align_face(face_image, ARCFACE_INPUT_SIZE)
+
+        if img is None:
+            return None
+
         embedding = self.face_embedder([img])[0].squeeze()  # type: ignore[arg-type]
 
         score: float = 0

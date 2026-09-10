@@ -65,9 +65,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.label_map: dict[int, str] = {}
 
         if self.face_config.model_size == "small":
-            self.recognizer = FaceNetRecognizer(self.config)
+            self.recognizer = FaceNetRecognizer(self.config, self.face_detector)
         else:
-            self.recognizer = ArcFaceRecognizer(self.config)
+            self.recognizer = ArcFaceRecognizer(self.config, self.face_detector)
 
         self.recognizer.build()
 
