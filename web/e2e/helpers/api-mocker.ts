@@ -49,7 +49,7 @@ export interface ApiMockOverrides {
   };
   users?: { username: string; role: string }[];
   notices?: unknown[];
-  noticeStats?: unknown[];
+  dismissedChecks?: unknown[];
   /** camera name to the ffprobe entries returned for `paths=camera:<name>` */
   ffprobe?: Record<string, unknown[]>;
 }
@@ -234,13 +234,12 @@ export class ApiMocker {
       return route.fulfill({ json: entries });
     });
 
-    // Notices. The stats route is registered after the list route so it wins
-    // for /api/notices/stats; the list glob does not match a sub-path anyway.
+    // Notices
     await this.page.route("**/api/notices", (route) =>
       route.fulfill({ json: overrides?.notices ?? [] }),
     );
-    await this.page.route("**/api/notices/stats", (route) =>
-      route.fulfill({ json: overrides?.noticeStats ?? [] }),
+    await this.page.route("**/api/notices/dismissed_checks", (route) =>
+      route.fulfill({ json: overrides?.dismissedChecks ?? [] }),
     );
 
     // Users. GET lists them; POST/PUT (create, password) just succeed, so

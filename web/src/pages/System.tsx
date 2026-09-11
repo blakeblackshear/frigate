@@ -21,6 +21,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { FrigateConfig } from "@/types/frigateConfig";
 import EnrichmentMetrics from "@/views/system/EnrichmentMetrics";
 import HealthMetrics from "@/views/system/HealthMetrics";
+import NoticeFilterButton from "@/components/health/NoticeFilterButton";
+import { DEFAULT_NOTICE_FILTER, NoticeFilter } from "@/types/health";
 import { useTranslation } from "react-i18next";
 
 const allMetrics = [
@@ -64,6 +66,9 @@ function System() {
   );
   const [lastUpdated, setLastUpdated] = useState<number>(
     Math.floor(Date.now() / 1000),
+  );
+  const [noticeFilter, setNoticeFilter] = useState<NoticeFilter>(
+    DEFAULT_NOTICE_FILTER,
   );
 
   // Track which tabs have been visited so we can keep them mounted after first visit.
@@ -122,6 +127,12 @@ function System() {
         </ToggleGroup>
 
         <div className="flex h-full items-center">
+          {pageToggle == "health" && (
+            <NoticeFilterButton
+              filter={noticeFilter}
+              onFilterChange={setNoticeFilter}
+            />
+          )}
           {lastUpdated && pageToggle != "health" && (
             <div className="h-full content-center text-sm text-muted-foreground">
               {t("lastRefreshed")}
@@ -140,7 +151,7 @@ function System() {
       </div>
       {visitedTabs.has("health") && (
         <div className={pageToggle == "health" ? "contents" : "hidden"}>
-          <HealthMetrics />
+          <HealthMetrics noticeFilter={noticeFilter} />
         </div>
       )}
       {visitedTabs.has("general") && (

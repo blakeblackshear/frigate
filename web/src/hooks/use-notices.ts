@@ -1,20 +1,20 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import axios from "axios";
 import useSWR from "swr";
 import { useWs } from "@/api/ws";
-import type { Notice, NoticeStats } from "@/types/notice";
+import type { Notice } from "@/types/notice";
 
 /**
- * Active notices: a REST snapshot, replaced by every `notices` websocket
- * payload after that. Stats are fetched separately and only change on
- * dismiss or a new occurrence, so they revalidate after each dismiss.
+ * Active notices come from a REST snapshot, then from every `notices`
+ * websocket payload. Dismissed notices are fetched only while the history is
+ * shown, and again whenever the active list changes.
  */
-export function useNotices() {
+export function useNotices(showDismissed: boolean) {
   const { data: initial, mutate } = useSWR<Notice[]>("notices", {
     revalidateOnFocus: false,
   });
-  const { data: stats, mutate: mutateStats } = useSWR<NoticeStats[]>(
-    "notices/stats",
+  const { data: history, mutate: mutateHistory } = useSWR<Notice[]>(
+    showDismissed ? ["notices", { include_dismissed: true }] : null,
     { revalidateOnFocus: false },
   );
   const {
@@ -33,22 +33,27 @@ export function useNotices() {
   // still shows up because the registry publishes a new frame after it
   const notices = live ?? initial;
 
-  const statsByKind = useMemo(() => {
-    const byKind: Partial<Record<Notice["kind"], NoticeStats>> = {};
-    (stats ?? []).forEach((entry) => {
-      byKind[entry.kind] = entry;
-    });
-    return byKind;
-  }, [stats]);
+  // refetch the history whenever the active list changes; SWR ignores the
+  // call while the history is hidden
+  useEffect(() => {
+    mutateHistory();
+  }, [live, mutateHistory]);
+
+  const dismissed = useMemo(
+    () =>
+      history
+        ?.filter((notice) => notice.dismissed_at !== null)
+        .sort((a, b) => (b.dismissed_at ?? 0) - (a.dismissed_at ?? 0)),
+    [history],
+  );
 
   const dismiss = useCallback(
     async (id: string) => {
       await axios.post(`notices/${id}/dismiss`);
       mutate();
-      mutateStats();
     },
-    [mutate, mutateStats],
+    [mutate],
   );
 
-  return { notices, statsByKind, dismiss };
+  return { notices, dismissed, dismiss, mutateDismissed: mutateHistory };
 }

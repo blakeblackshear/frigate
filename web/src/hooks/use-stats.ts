@@ -31,6 +31,9 @@ function problem(
   return { text, severity, color: SEVERITY_COLOR[severity], relevantLink };
 }
 
+// matches SKIPPED_DETECTIONS_PCT in frigate/stats/emitter.py
+const SKIPPED_DETECTIONS_PCT = 5;
+
 export default function useStats(stats: FrigateStats | undefined) {
   const { t } = useTranslation(["views/system"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -61,18 +64,9 @@ export default function useStats(stats: FrigateStats | undefined) {
       return problems;
     }
 
-    // check shm level
-    const shm = memoizedStats.service.storage["/dev/shm"];
-    if (shm?.total && shm?.min_shm && shm.total < shm.min_shm) {
+    if (memoizedStats.service.retention_unmet) {
       problems.push(
-        problem(
-          "error",
-          t("stats.shmTooLow", {
-            total: shm.total,
-            min: shm.min_shm,
-          }),
-          "/system#storage",
-        ),
+        problem("error", t("stats.retentionUnmet"), "/system#storage"),
       );
     }
 
@@ -144,13 +138,16 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       const cameraName = config?.cameras?.[name]?.friendly_name ?? name;
 
-      if (config?.cameras?.[name]?.enabled && cam["skipped_fps"] > 1) {
+      if (
+        config?.cameras?.[name]?.enabled &&
+        cam["skipped_pct"] >= SKIPPED_DETECTIONS_PCT
+      ) {
         problems.push(
           problem(
             "warning",
             t("stats.cameraSkippedDetections", {
               camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
-              fps: cam["skipped_fps"],
+              pct: cam["skipped_pct"],
             }),
             "/system#cameras",
           ),
