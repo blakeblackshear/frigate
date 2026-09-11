@@ -6,7 +6,6 @@ import json
 import logging
 import os
 import shutil
-from pathlib import Path
 from typing import Any
 
 import cv2
@@ -28,6 +27,7 @@ from frigate.data_processing.common.face.recognizer import (
 )
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
+from frigate.util.file import trim_oldest_files
 from frigate.util.image import area
 from frigate.util.path import safe_join, sanitize_path_component
 
@@ -489,13 +489,4 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             )
             os.makedirs(folder, exist_ok=True)
             cv2.imwrite(file, frame)
-
-            files = sorted(
-                filter(lambda f: f.endswith(".webp"), os.listdir(folder)),
-                key=lambda f: os.path.getctime(os.path.join(folder, f)),
-                reverse=True,
-            )
-
-            # delete oldest face image if maximum is reached
-            if len(files) > self.config.face_recognition.save_attempts:
-                Path(os.path.join(folder, files[-1])).unlink(missing_ok=True)
+            trim_oldest_files(folder, self.config.face_recognition.save_attempts)
