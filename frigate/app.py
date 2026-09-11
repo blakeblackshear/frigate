@@ -73,6 +73,7 @@ from frigate.models import (
     Trigger,
     User,
 )
+from frigate.notices import install_registry
 from frigate.notices.registry import NoticeRegistry
 from frigate.object_detection.base import ObjectDetectProcess
 from frigate.object_detection.util import detection_frame_size
@@ -310,10 +311,6 @@ class FrigateApp:
         ]
         self.db.bind(models)
 
-        self.notice_registry = NoticeRegistry()
-        # producers confirm state notices again at startup if they still hold
-        self.notice_registry.mark_state_notices_unconfirmed()
-
     def check_db_data_migrations(self) -> None:
         # check if vacuum needs to be run
         if not os.path.exists(f"{CONFIG_DIR}/.exports"):
@@ -324,6 +321,10 @@ class FrigateApp:
                 logger.error("Unable to write to /config to save export state")
 
             migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
+
+    def install_notice_registry(self) -> None:
+        self.notice_registry = NoticeRegistry()
+        install_registry(self.notice_registry)
 
     def init_embeddings_client(self) -> None:
         # Create a client for other processes to use
@@ -510,9 +511,7 @@ class FrigateApp:
         self.record_cleanup.start()
 
     def start_storage_maintainer(self) -> None:
-        self.storage_maintainer = StorageMaintainer(
-            self.config, self.stop_event, self.notice_registry
-        )
+        self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
         self.storage_maintainer.start()
 
     def start_stats_emitter(self) -> None:
@@ -524,16 +523,14 @@ class FrigateApp:
                 self.embeddings_metrics,
                 self.detectors,
                 self.processes,
+                self.storage_maintainer,
             ),
             self.stop_event,
-            notice_registry=self.notice_registry,
         )
         self.stats_emitter.start()
 
     def start_watchdog(self) -> None:
-        self.frigate_watchdog = FrigateWatchdog(
-            self.detectors, self.stop_event, self.notice_registry
-        )
+        self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
 
         # (attribute on self, key in self.processes, factory)
         specs: list[tuple[str, str, Callable[[], FrigateProcess]]] = [
@@ -644,6 +641,7 @@ class FrigateApp:
         self.init_embeddings_manager()
         self.bind_database()
         self.check_db_data_migrations()
+        self.install_notice_registry()
 
         # Clean up any stale replay camera artifacts (filesystem + DB)
         cleanup_replay_cameras()

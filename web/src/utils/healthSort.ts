@@ -1,7 +1,7 @@
 import type { HealthProblem } from "@/types/health";
 
 const SEVERITY_ORDER = { error: 0, warning: 1, info: 2 } as const;
-const SOURCE_ORDER = { registry: 0, live: 1, config: 2, stream: 3 } as const;
+const SOURCE_ORDER = { registry: 0, config: 1, stream: 2 } as const;
 
 /** errors first, then warnings, then info; within a severity by source, then scope */
 export function sortHealthProblems(problems: HealthProblem[]): HealthProblem[] {

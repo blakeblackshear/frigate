@@ -6,7 +6,7 @@ import shutil
 import time
 from json import JSONDecodeError
 from multiprocessing.managers import DictProxy
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import requests
 from requests.exceptions import RequestException
@@ -23,6 +23,9 @@ from frigate.util.services import (
     get_fs_type,
 )
 from frigate.version import VERSION
+
+if TYPE_CHECKING:
+    from frigate.storage import StorageMaintainer
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +91,7 @@ def stats_init(
     embeddings_metrics: DataProcessorMetrics,
     detectors: dict[str, ObjectDetectProcess],
     processes: dict[str, int],
+    storage_maintainer: "StorageMaintainer | None" = None,
 ) -> StatsTrackingTypes:
     stats_tracking: StatsTrackingTypes = {
         "camera_metrics": camera_metrics,
@@ -97,6 +101,7 @@ def stats_init(
         "latest_frigate_version": get_latest_version(config),
         "last_updated": int(time.time()),
         "processes": processes,
+        "storage_maintainer": storage_maintainer,
     }
     return stats_tracking
 
@@ -216,6 +221,18 @@ def embeddings_stats(
     return stats
 
 
+def skipped_percent(skipped_fps: float, camera_fps: float, enabled: bool) -> float:
+    """Percent of a camera's frames dropped before detection.
+
+    camera_fps counts the dropped frames too. A disabled camera keeps its last
+    readings, so it reports zero.
+    """
+    if not enabled or camera_fps <= 0:
+        return 0.0
+
+    return round(skipped_fps / camera_fps * 100, 1)
+
+
 def stats_snapshot(
     config: FrigateConfig,
     stats_tracking: StatsTrackingTypes,
@@ -273,6 +290,11 @@ def stats_snapshot(
             "camera_fps": round(camera_stats.camera_fps.value, 2),
             "process_fps": round(camera_stats.process_fps.value, 2),
             "skipped_fps": round(camera_stats.skipped_fps.value, 2),
+            "skipped_pct": skipped_percent(
+                camera_stats.skipped_fps.value,
+                current_fps,
+                config.cameras[name].enabled,
+            ),
             "detection_fps": round(camera_stats.detection_fps.value, 2),
             "detection_enabled": config.cameras[name].detect.enabled,
             "pid": pid,
@@ -301,12 +323,17 @@ def stats_snapshot(
         if bandwidth_stats:
             stats["bandwidth_usages"] = bandwidth_stats
 
+    storage_maintainer = stats_tracking.get("storage_maintainer")
+
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
         "version": VERSION,
         "latest_version": stats_tracking["latest_frigate_version"],
         "storage": {},
         "last_updated": int(time.time()),
+        "retention_unmet": bool(
+            storage_maintainer and storage_maintainer.retention_unmet
+        ),
     }
 
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:

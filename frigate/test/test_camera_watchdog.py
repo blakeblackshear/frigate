@@ -6,11 +6,7 @@ from unittest.mock import MagicMock, patch
 
 from frigate.config import FrigateConfig
 from frigate.const import STREAM_TYPE_MAIN, STREAM_TYPE_SUB
-from frigate.video.ffmpeg import (
-    CRASH_LOOP_RECOVERY_S,
-    CRASH_LOOP_RESTARTS,
-    CameraWatchdog,
-)
+from frigate.video.ffmpeg import CameraWatchdog
 
 
 def build_watchdog(
@@ -228,75 +224,3 @@ class TestCameraWatchdogStreamHealth(unittest.TestCase):
 
         assert watchdog.record_stale_threshold[STREAM_TYPE_MAIN] == 120
         assert watchdog.record_stale_threshold[STREAM_TYPE_SUB] == 150
-
-
-class TestCameraWatchdogCrashLoop(unittest.TestCase):
-    """The crash loop notice follows restarts in the trailing hour."""
-
-    def _build_watchdog(self) -> CameraWatchdog:
-        return build_watchdog()
-
-    def _notice_payloads(self, watchdog: CameraWatchdog) -> list[dict]:
-        return [
-            call.args[1]
-            for call in watchdog.requestor.send_data.call_args_list
-            if call.args[0] == "update_notice"
-        ]
-
-    def test_below_threshold_raises_nothing(self):
-        watchdog = self._build_watchdog()
-        now = datetime.now().timestamp()
-        watchdog.reconnect_timestamps.extend([now] * (CRASH_LOOP_RESTARTS - 1))
-        watchdog.capture_thread = MagicMock()
-        watchdog.capture_thread.is_alive.return_value = False
-
-        watchdog._update_crash_loop_notice(now)
-
-        self.assertEqual(self._notice_payloads(watchdog), [])
-
-    def test_threshold_raises_once_per_restart_count(self):
-        watchdog = self._build_watchdog()
-        now = datetime.now().timestamp()
-        watchdog.reconnect_timestamps.extend([now] * CRASH_LOOP_RESTARTS)
-        watchdog.capture_thread = MagicMock()
-        watchdog.capture_thread.is_alive.return_value = False
-
-        watchdog._update_crash_loop_notice(now)
-        watchdog._update_crash_loop_notice(now)
-
-        payloads = self._notice_payloads(watchdog)
-        self.assertEqual(len(payloads), 1)
-        self.assertEqual(payloads[0]["action"], "raise")
-        self.assertEqual(payloads[0]["kind"], "ffmpeg_crash_loop")
-        self.assertEqual(payloads[0]["scope"], "front_door")
-        self.assertEqual(payloads[0]["params"], {"restarts": CRASH_LOOP_RESTARTS})
-
-    def test_recovery_window_resolves(self):
-        watchdog = self._build_watchdog()
-        now = datetime.now().timestamp()
-        # the last restart is at `now`, so recovery is measured from there
-        watchdog.reconnect_timestamps.extend([now] * CRASH_LOOP_RESTARTS)
-        watchdog.capture_thread = MagicMock()
-        watchdog.capture_thread.is_alive.return_value = False
-        watchdog._update_crash_loop_notice(now)
-
-        watchdog.capture_thread.is_alive.return_value = True
-        watchdog._update_crash_loop_notice(now + CRASH_LOOP_RECOVERY_S - 1)
-        self.assertEqual(len(self._notice_payloads(watchdog)), 1)
-
-        watchdog._update_crash_loop_notice(now + CRASH_LOOP_RECOVERY_S + 1)
-
-        payloads = self._notice_payloads(watchdog)
-        self.assertEqual(len(payloads), 2)
-        self.assertEqual(payloads[1]["action"], "resolve")
-        self.assertFalse(watchdog.crash_loop_raised)
-
-    def test_disable_resolves(self):
-        watchdog = self._build_watchdog()
-        watchdog.crash_loop_raised = True
-
-        watchdog._resolve_crash_loop()
-
-        payloads = self._notice_payloads(watchdog)
-        self.assertEqual(payloads[-1]["action"], "resolve")
-        self.assertFalse(watchdog.crash_loop_raised)

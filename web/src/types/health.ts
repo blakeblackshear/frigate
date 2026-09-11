@@ -3,14 +3,14 @@ import type { ReactNode } from "react";
 export type HealthSeverity = "error" | "warning" | "info";
 
 /**
- * One row in the Health tab's Notices list. Every source (registry notices
- * now, live stats, config checks, and stream checks in PR 2) maps into this
- * shape so the row component never needs to know where a problem came from.
+ * One row in the Health tab's Notices list. Registry notices, config checks,
+ * and stream checks all map into this shape so the row component never needs
+ * to know where a problem came from.
  */
 export type HealthProblem = {
   id: string;
   /** which source produced the row; part of the sort order */
-  source: "registry" | "live" | "config" | "stream";
+  source: "registry" | "config" | "stream";
   severity: HealthSeverity;
   /** camera name or other scope shown as a chip before the text */
   scope?: string;
@@ -28,4 +28,15 @@ export type HealthProblem = {
   /** render with a spinner instead of the severity icon (stream check running) */
   pending?: boolean;
   onDismiss?: () => void;
+};
+
+/** What the Health tab's filter shows. */
+export type NoticeFilter = {
+  showDismissed: boolean;
+  severities: HealthSeverity[];
+};
+
+export const DEFAULT_NOTICE_FILTER: NoticeFilter = {
+  showDismissed: false,
+  severities: ["error", "warning", "info"],
 };

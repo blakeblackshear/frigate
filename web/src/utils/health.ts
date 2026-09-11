@@ -8,8 +8,8 @@ import type {
   DetectionModelConfig,
   FrigateConfig,
 } from "@/types/frigateConfig";
-import type { FrigateStats, GpuVendor } from "@/types/stats";
-import { InferenceThreshold } from "@/types/graph";
+import type { EmbeddingsStats, FrigateStats, GpuVendor } from "@/types/stats";
+import { EmbeddingThreshold, InferenceThreshold } from "@/types/graph";
 import { summarizeDevices } from "@/utils/detectionHardware";
 import { isReplayCamera } from "@/utils/cameraUtil";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
@@ -527,6 +527,26 @@ type EnrichmentSpec = {
   presenceOnly: boolean;
 };
 
+type SpeedKey = Exclude<keyof EmbeddingsStats, "devices">;
+
+// the stats that time each enrichment's inference
+const SPEED_KEYS: Record<EnrichmentSpec["id"], SpeedKey[]> = {
+  semantic_search: ["image_embedding_speed", "text_embedding_speed"],
+  face_recognition: ["face_recognition_speed"],
+  lpr: ["plate_recognition_speed", "yolov9_plate_detection_speed"],
+  audio_transcription: [],
+};
+
+/** Whether an enrichment's inference is past the warning line its chart draws. */
+function inferenceIsSlow(
+  stats: FrigateStats | undefined,
+  id: EnrichmentSpec["id"],
+): boolean {
+  return SPEED_KEYS[id].some(
+    (key) => (stats?.embeddings?.[key] ?? 0) > EmbeddingThreshold.warning,
+  );
+}
+
 function enrichmentSpecs(config: FrigateConfig): EnrichmentSpec[] {
   const ss = config.semantic_search;
   const anyCameraTranscribes = Object.values(config.cameras).some(
@@ -682,9 +702,10 @@ export function enrichmentRows({
           id,
           state: "unknown",
           label,
-          message: t("health.hardware.modelNotRunYet", {
-            ns: "views/system",
-          }),
+          message:
+            startup || !stats
+              ? t("health.hardware.justStarted", { ns: "views/system" })
+              : t("health.hardware.modelNotRunYet", { ns: "views/system" }),
         };
       }
 
@@ -706,7 +727,8 @@ export function enrichmentRows({
         };
       }
 
-      if (runtimeIsCpu && present) {
+      // a model that keeps up on the CPU needs no accelerator
+      if (runtimeIsCpu && present && inferenceIsSlow(stats, spec.id)) {
         return {
           id,
           state: "warning",

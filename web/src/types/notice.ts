@@ -1,36 +1,23 @@
-export type NoticeMode = "state" | "event";
 export type NoticeSeverity = "error" | "warning" | "info";
-export type NoticeCategory =
-  | "camera"
-  | "detector"
-  | "storage"
-  | "model"
-  | "system";
-export type NoticeKind =
-  | "ffmpeg_crash_loop"
-  | "detector_stuck"
-  | "model_download_failed"
-  | "retention_unmet"
-  | "update_available";
+export type NoticeCategory = "camera" | "detector" | "model" | "system";
 
 export type Notice = {
   id: string;
-  kind: NoticeKind;
-  mode: NoticeMode;
+  kind: string;
   severity: NoticeSeverity;
   category: NoticeCategory;
   scope: string | null;
   params: Record<string, string | number | boolean>;
+  /** app route or absolute URL */
+  link: string | null;
   first_seen: number;
   last_seen: number;
   count: number;
   dismissed_at: number | null;
 };
 
-export type NoticeStats = {
-  kind: NoticeKind;
-  occurrences: number;
-  dismissals: number;
-  first_seen: number;
-  last_seen: number;
+/** a config or stream check row an admin dismissed */
+export type DismissedCheck = {
+  id: string;
+  dismissed_at: number;
 };
