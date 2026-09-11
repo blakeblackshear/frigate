@@ -16,6 +16,7 @@ from frigate.config.classification import CustomClassificationConfig
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.log import suppress_stderr_during
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
+from frigate.util.file import trim_oldest_files
 from frigate.util.image import calculate_region
 from frigate.util.object import box_overlaps
 
@@ -729,16 +730,4 @@ def write_classification_attempt(
     file = os.path.join(folder, f"{event_id}-{timestamp}-{label}-{score}.webp")
     os.makedirs(folder, exist_ok=True)
     cv2.imwrite(file, frame)
-
-    # delete oldest face image if maximum is reached
-    try:
-        files = sorted(
-            filter(lambda f: f.endswith(".webp"), os.listdir(folder)),
-            key=lambda f: os.path.getctime(os.path.join(folder, f)),
-            reverse=True,
-        )
-
-        if len(files) > max_files:
-            os.unlink(os.path.join(folder, files[-1]))
-    except (FileNotFoundError, OSError):
-        pass
+    trim_oldest_files(folder, max_files)
