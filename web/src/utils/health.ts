@@ -702,9 +702,10 @@ export function enrichmentRows({
           id,
           state: "unknown",
           label,
-          message: t("health.hardware.modelNotRunYet", {
-            ns: "views/system",
-          }),
+          message:
+            startup || !stats
+              ? t("health.hardware.justStarted", { ns: "views/system" })
+              : t("health.hardware.modelNotRunYet", { ns: "views/system" }),
         };
       }
 
