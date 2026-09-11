@@ -2,11 +2,12 @@
 
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from frigate.api.auth import (
     FAILED_LOGIN_BURST_GAP_S,
     MAX_NOTICE_USERNAME,
+    MAX_OPEN_BURSTS,
     FailedLoginTracker,
     hash_password,
 )
@@ -78,13 +79,11 @@ class TestFailedLoginNotices(BaseTestHttp):
 
     def test_unknown_user_is_recorded(self):
         self.assertEqual(self._login("ghost", "irrelevant"), 401)
-        self.failed_logins.record.assert_called_once()
-        self.assertEqual(self.failed_logins.record.call_args.args[0], "ghost")
+        self.failed_logins.record.assert_called_once_with("ghost", ANY)
 
-    def test_bad_password_is_recorded(self):
+    def test_bad_password_is_recorded_as_known(self):
         self.assertEqual(self._login("admin", "wrong"), 401)
-        self.failed_logins.record.assert_called_once()
-        self.assertEqual(self.failed_logins.record.call_args.args[0], "admin")
+        self.failed_logins.record.assert_called_once_with("admin", ANY, known=True)
 
     def test_success_is_not_recorded(self):
         self.assertEqual(self._login("admin", "correct-horse-battery"), 200)
@@ -100,6 +99,10 @@ class TestFailedLoginTracker(unittest.TestCase):
 
     def _scopes(self) -> list[str]:
         return [call.kwargs["scope"] for call in self.raise_notice.call_args_list]
+
+    def _fill(self, now: float) -> None:
+        for index in range(MAX_OPEN_BURSTS):
+            self.tracker.record(f"ghost{index}", now)
 
     def test_attempts_inside_the_gap_share_a_burst(self):
         for now in (1000.0, 1010.0, 1299.0):
@@ -140,3 +143,23 @@ class TestFailedLoginTracker(unittest.TestCase):
 
         user = self.raise_notice.call_args.kwargs["params"]["user"]
         self.assertEqual(len(user), MAX_NOTICE_USERNAME)
+
+    def test_unknown_users_past_the_cap_get_no_notice(self):
+        self._fill(1000.0)
+        self.tracker.record("one-too-many", 1001.0)
+        self.tracker.record("ghost0", 1002.0)
+
+        self.assertEqual(self.raise_notice.call_count, MAX_OPEN_BURSTS + 1)
+        self.assertEqual(self._scopes()[-1], "ghost0:1000")
+
+    def test_known_users_skip_the_cap(self):
+        self._fill(1000.0)
+        self.tracker.record("admin", 1001.0, known=True)
+
+        self.assertEqual(self._scopes()[-1], "admin:1001")
+
+    def test_quiet_bursts_free_their_slots(self):
+        self._fill(1000.0)
+        self.tracker.record("late", 1000.0 + FAILED_LOGIN_BURST_GAP_S)
+
+        self.assertEqual(self._scopes()[-1], "late:1300")

@@ -6,7 +6,7 @@ from frigate.models import Notice, NoticeStats
 from frigate.notices.registry import NoticeRegistry
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
-CONFIG_CHECK = "config:detect:fps-greater-than-five:garage"
+CONFIG_CHECK = "config:detect:fps-greater-than-five:camera.garage"
 
 
 class TestHttpNotices(BaseTestHttp):

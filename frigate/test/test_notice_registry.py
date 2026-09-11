@@ -240,7 +240,7 @@ class TestNoticeRegistry(RegistryTestCase):
     def test_resolve_camera_drops_that_cameras_check_dismissals(self):
         for check_id in (
             "stream:front_door:0:probe",
-            "config:detect:fps-greater-than-five:front_door",
+            "config:detect:fps-greater-than-five:camera.front_door",
             "config:detect:fps-greater-than-five:global",
             "stream:garage:0:probe",
         ):
@@ -254,11 +254,20 @@ class TestNoticeRegistry(RegistryTestCase):
             ["config:detect:fps-greater-than-five:global", "stream:garage:0:probe"],
         )
 
+    def test_camera_named_global_keeps_global_check_dismissals(self):
+        self.registry.dismiss("config:detect:fps-greater-than-five:global")
+        self.registry.dismiss("config:detect:fps-greater-than-five:camera.global")
+
+        self.registry.resolve_camera("global")
+
+        ids = [check["id"] for check in self.registry.dismissed_checks()]
+        self.assertEqual(ids, ["config:detect:fps-greater-than-five:global"])
+
     def test_purge_dismissed_keeps_active_notices_and_counts(self):
         self.registry.raise_notice("detector_stuck", scope="ov", params={})
         self.registry.raise_notice("skipped_detections", scope="garage", params={})
         self.registry.dismiss("detector_stuck:ov")
-        self.registry.dismiss("config:detect:fps-greater-than-five:garage")
+        self.registry.dismiss("config:detect:fps-greater-than-five:camera.garage")
 
         self.assertEqual(self.registry.purge_dismissed(), 2)
 

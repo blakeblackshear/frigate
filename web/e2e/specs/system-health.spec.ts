@@ -675,7 +675,7 @@ test.describe("System — Health notices sources @medium", () => {
       ),
     ).toBeVisible({ timeout: 15_000 });
     const fpsRow = frigateApp.page.getByTestId(
-      "health-problem-config:detect:fps-greater-than-five:garage",
+      "health-problem-config:detect:fps-greater-than-five:camera.garage",
     );
     await expect(fpsRow).toHaveAttribute("data-severity", "info");
     await expect(
@@ -806,7 +806,7 @@ test.describe("System — Health notices sources @medium", () => {
     await expect(rows).toHaveCount(2);
     await expect(
       frigateApp.page.getByTestId(
-        "health-problem-config:detect:detect-resolution-high:garage",
+        "health-problem-config:detect:detect-resolution-high:camera.garage",
       ),
     ).toBeVisible();
   });
@@ -1018,7 +1018,7 @@ test.describe("System — Health notices sources @medium", () => {
     await frigateApp.goto("/system#health");
 
     const row = frigateApp.page.getByTestId(
-      "health-problem-config:lpr:global-disabled:garage",
+      "health-problem-config:lpr:global-disabled:camera.garage",
     );
     await expect(row).toBeVisible({ timeout: 15_000 });
     await expect(
@@ -1090,7 +1090,7 @@ test.describe("System — Health notices sources @medium", () => {
   });
 
   test("a config row can be dismissed", async ({ frigateApp }) => {
-    const id = "config:detect:fps-greater-than-five:garage";
+    const id = "config:detect:fps-greater-than-five:camera.garage";
     await frigateApp.installDefaults({
       config: {
         cameras: {
@@ -1126,7 +1126,7 @@ test.describe("System — Health notices sources @medium", () => {
   test("dismissed config rows move to the dismissed list", async ({
     frigateApp,
   }) => {
-    const id = "config:detect:fps-greater-than-five:garage";
+    const id = "config:detect:fps-greater-than-five:camera.garage";
     await frigateApp.installDefaults({
       config: {
         cameras: {

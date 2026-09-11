@@ -261,6 +261,10 @@ FAILED_LOGIN_BURST_GAP_S = 300
 # the username comes from the request, so it is cut before it reaches a notice
 MAX_NOTICE_USERNAME = 64
 
+# unknown usernames are unbounded, so past this many open bursts a new one only
+# reaches the log
+MAX_OPEN_BURSTS = 100
+
 
 class FailedLoginTracker:
     """Groups each user's failed logins into bursts, one notice per burst."""
@@ -271,12 +275,15 @@ class FailedLoginTracker:
         # user -> (burst start, last attempt), stalest attempt first
         self._bursts: dict[str, tuple[int, float]] = {}
 
-    def record(self, user: str, now: float) -> None:
-        """Count a failed login toward the user's open burst, or open a new one."""
+    def record(self, user: str, now: float, *, known: bool = False) -> None:
+        """Count a failed login toward the user's open burst, or open a new one.
+
+        Once MAX_OPEN_BURSTS are open, only a known user opens another.
+        """
         user = user[:MAX_NOTICE_USERNAME]
 
         with self._lock:
-            # bursts that went quiet are over; forgetting them bounds the map
+            # bursts that went quiet are over
             while self._bursts:
                 stalest = next(iter(self._bursts))
 
@@ -284,6 +291,13 @@ class FailedLoginTracker:
                     break
 
                 del self._bursts[stalest]
+
+            if (
+                not known
+                and user not in self._bursts
+                and len(self._bursts) >= MAX_OPEN_BURSTS
+            ):
+                return
 
             start, _ = self._bursts.pop(user, (int(now), now))
             self._bursts[user] = (start, now)
@@ -952,7 +966,7 @@ def login(request: Request, body: AppPostLoginBody):
     logger.warning(
         f"Login failed for user '{user}' (invalid password) from {remote_addr}"
     )
-    failed_logins.record(user, time.time())
+    failed_logins.record(user, time.time(), known=True)
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 

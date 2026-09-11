@@ -180,13 +180,15 @@ export function evaluateConfigHealth(
         cameraMessages
           .filter((message) => isActive(message, ctx))
           .forEach((message) => {
+            // camera names have no dots, so the backend can tell this suffix
+            // from global and modelN when the camera is deleted
             const problem = toProblem(
               message,
               section,
               ctx,
               camera.name,
               true,
-              camera.name,
+              `camera.${camera.name}`,
               t,
             );
 

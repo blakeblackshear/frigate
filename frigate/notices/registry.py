@@ -192,12 +192,13 @@ class NoticeRegistry:
                 .execute()
             )
 
-            # a check id names its camera first for streams and last for config
+            # a stream id names its camera first; a config id ends with camera.<name>
             for check in self.dismissed_checks():
                 check_id = check["id"]
 
                 if check_id.startswith(f"stream:{camera}:") or (
-                    check_id.startswith("config:") and check_id.endswith(f":{camera}")
+                    check_id.startswith("config:")
+                    and check_id.endswith(f":camera.{camera}")
                 ):
                     Notice.delete_by_id(check_id)
 

@@ -7,7 +7,9 @@ import type { Notice } from "@/types/notice";
 /**
  * Active notices come from a REST snapshot, then from every `notices`
  * websocket payload. Dismissed notices are fetched only while the history is
- * shown, and again whenever the active list changes.
+ * shown, and again when the active list changes or the tab regains focus. A
+ * purge in another tab leaves the active list unchanged, so only focus
+ * catches it.
  */
 export function useNotices(showDismissed: boolean) {
   const { data: initial, mutate } = useSWR<Notice[]>("notices", {
@@ -15,7 +17,6 @@ export function useNotices(showDismissed: boolean) {
   });
   const { data: history, mutate: mutateHistory } = useSWR<Notice[]>(
     showDismissed ? ["notices", { include_dismissed: true }] : null,
-    { revalidateOnFocus: false },
   );
   const {
     value: { payload },
