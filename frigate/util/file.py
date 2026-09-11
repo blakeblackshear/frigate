@@ -269,6 +269,41 @@ def delete_event_thumbnail(event: Event) -> bool:
         return True
 
 
+### Training Images
+
+TRAINING_IMAGE_EXTENSIONS = (".webp", ".png", ".jpg", ".jpeg")
+
+
+def trim_oldest_files(folder: str, max_files: int) -> None:
+    """Delete the oldest training images until at most max_files remain."""
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        return
+
+    files: list[tuple[float, str]] = []
+
+    for name in names:
+        if not name.lower().endswith(TRAINING_IMAGE_EXTENSIONS):
+            continue
+
+        path = os.path.join(folder, name)
+
+        # the UI can move or delete an image between listdir and stat
+        try:
+            files.append((os.path.getctime(path), path))
+        except OSError:
+            continue
+
+    files.sort(reverse=True)
+
+    for _, path in files[max_files:]:
+        try:
+            os.unlink(path)
+        except OSError:
+            logger.debug("Unable to delete training image %s", path)
+
+
 ### File Locking
 
 
