@@ -7,7 +7,8 @@ from pathlib import Path
 import requests
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.const import UPDATE_MODEL_STATE, UPDATE_NOTICE
+from frigate.const import UPDATE_MODEL_STATE
+from frigate.notices import raise_notice, resolve_notice
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.file import FileLock
 
@@ -64,26 +65,14 @@ class ModelDownloader:
         return f"{self.model_name}/{file_name}"
 
     def _report_failure(self, file_name: str, error: str) -> None:
-        self.requestor.send_data(
-            UPDATE_NOTICE,
-            {
-                "action": "raise",
-                "kind": "model_download_failed",
-                "scope": self._notice_scope(file_name),
-                "params": {"file": file_name, "error": error},
-            },
+        raise_notice(
+            "model_download_failed",
+            scope=self._notice_scope(file_name),
+            params={"file": file_name, "model": self.model_name, "error": error},
         )
 
     def _resolve_failure(self, file_name: str) -> None:
-        self.requestor.send_data(
-            UPDATE_NOTICE,
-            {
-                "action": "resolve",
-                "kind": "model_download_failed",
-                "scope": self._notice_scope(file_name),
-                "params": {},
-            },
-        )
+        resolve_notice("model_download_failed", self._notice_scope(file_name))
 
     def _send_state(self, file_name: str, state: ModelStatusTypesEnum) -> None:
         self.requestor.send_data(

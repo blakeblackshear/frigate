@@ -1,164 +1,49 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCircleCheck } from "react-icons/fa6";
-import useSWR from "swr";
 import HealthProblemRow from "@/components/health/HealthProblemRow";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useNotices } from "@/hooks/use-notices";
-import { useDateLocale } from "@/hooks/use-date-locale";
-import { useTimezone } from "@/hooks/use-date-utils";
-import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
-import { useHealthChecks } from "@/hooks/use-health-checks";
-import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import { releaseUrl } from "@/utils/versionUtil";
-import { evaluateConfigHealth } from "@/utils/configHealth";
-import { isStartupWindow } from "@/utils/health";
-import { sortHealthProblems } from "@/utils/healthSort";
-import { streamHealth } from "@/utils/streamHealth";
-import type { FrigateConfig } from "@/types/frigateConfig";
-import type { HealthProblem } from "@/types/health";
-import type { Notice, NoticeKind, NoticeStats } from "@/types/notice";
+import { useHealthProblems } from "@/hooks/use-health-problems";
+import type { NoticeFilter } from "@/types/health";
 
-const SETTINGS_LINK_BY_KIND: Partial<
-  Record<NoticeKind, (scope: string | null) => string>
-> = {
-  ffmpeg_crash_loop: (scope) => `/settings?page=cameraFfmpeg&camera=${scope}`,
-  retention_unmet: () => "/system#storage",
-  detector_stuck: () => "/system#general",
+type NoticesPaneProps = {
+  filter: NoticeFilter;
 };
 
-const EXTERNAL_LINK_BY_KIND: Partial<
-  Record<NoticeKind, (params: Notice["params"]) => string | undefined>
-> = {
-  update_available: (params) =>
-    typeof params.version === "string" ? releaseUrl(params.version) : undefined,
-};
-
-function useNoticeProblems(
-  notices: Notice[] | undefined,
-  statsByKind: Partial<Record<NoticeKind, NoticeStats>>,
-  dismiss: (id: string) => Promise<void>,
-): HealthProblem[] {
-  const { t } = useTranslation(["views/system"]);
-  const { data: config } = useSWR<FrigateConfig>("config");
-  const timezone = useTimezone(config);
-  const locale = useDateLocale();
-
-  return useMemo(() => {
-    if (!notices) {
-      return [];
-    }
-
-    const formatTime = (timestamp: number, date_format: string) =>
-      formatUnixTimestampToDateTime(timestamp, {
-        timezone,
-        date_format,
-        locale,
-      });
-
-    return notices.map((notice) => {
-      const stats = statsByKind[notice.kind];
-      const seen = formatTime(notice.first_seen, "MMM d, h:mm a");
-      let meta: string;
-
-      if (notice.mode === "event") {
-        meta = t("health.notices.firstSeen", {
-          time: seen,
-          times: notice.count,
-        });
-      } else if (stats && stats.occurrences > 1) {
-        meta = t("health.notices.sinceWithCount", {
-          time: seen,
-          times: stats.occurrences,
-          firstSeen: formatTime(stats.first_seen, "MMM d"),
-        });
-      } else {
-        meta = t("health.notices.since", { time: seen });
-      }
-
-      const link = SETTINGS_LINK_BY_KIND[notice.kind];
-      const external = EXTERNAL_LINK_BY_KIND[notice.kind];
-
-      return {
-        id: `notice:${notice.id}`,
-        source: "registry" as const,
-        severity: notice.severity,
-        scope: notice.scope ?? undefined,
-        scopeIsCamera: notice.category === "camera",
-        // replace keeps backend params out of i18next's own option names
-        text: t(`health.notices.kinds.${notice.kind}`, {
-          replace: notice.params,
-        }),
-        meta,
-        link: link ? link(notice.scope) : undefined,
-        externalLink: external ? external(notice.params) : undefined,
-        onDismiss:
-          notice.mode === "event" ? () => dismiss(notice.id) : undefined,
-      };
-    });
-  }, [notices, statsByKind, dismiss, t, timezone, locale]);
-}
-
-export default function NoticesPane() {
-  const { t } = useTranslation(["views/system", "views/settings"]);
-  const { data: config } = useSWR<FrigateConfig>("config", {
-    revalidateOnFocus: false,
-  });
-  const stats = useAutoFrigateStats();
-  const { notices, statsByKind, dismiss } = useNotices();
-  const registryProblems = useNoticeProblems(notices, statsByKind, dismiss);
-  const { potentialProblems } = useStats(stats);
-  const {
-    stream: { results },
-  } = useHealthChecks();
-
-  const liveProblems = useMemo<HealthProblem[]>(() => {
-    if (!stats) {
-      return [];
-    }
-
-    if (isStartupWindow(stats)) {
-      return [
-        {
-          id: "live:startup",
-          source: "live",
-          severity: "info",
-          text: t("health.notices.startupWindow"),
-        },
-      ];
-    }
-
-    return potentialProblems.map((problem, index) => ({
-      id: `live:${index}:${problem.text}`,
-      source: "live",
-      severity: problem.severity,
-      text: problem.text,
-      link: problem.relevantLink?.replace(/^(?!\/)/, "/"),
-    }));
-  }, [stats, potentialProblems, t]);
-
-  const configProblems = useMemo<HealthProblem[]>(
-    () => (config ? evaluateConfigHealth(config, t) : []),
-    [config, t],
+export default function NoticesPane({ filter }: NoticesPaneProps) {
+  const { t } = useTranslation(["views/system", "views/settings", "common"]);
+  const { problems, dismissed, loading, clearDismissed } = useHealthProblems(
+    t,
+    filter.showDismissed,
   );
+  const [confirmClear, setConfirmClear] = useState(false);
 
-  const streamProblems = useMemo<HealthProblem[]>(
-    () => (config ? streamHealth(config, results, t).problems : []),
-    [config, results, t],
-  );
-
-  const problems = useMemo(
+  const shown = useMemo(
     () =>
-      sortHealthProblems([
-        ...registryProblems,
-        ...liveProblems,
-        ...configProblems,
-        ...streamProblems,
-      ]),
-    [registryProblems, liveProblems, configProblems, streamProblems],
+      problems.filter((problem) =>
+        filter.severities.includes(problem.severity),
+      ),
+    [problems, filter.severities],
   );
 
-  const loading = notices === undefined || !config;
+  const shownDismissed = useMemo(
+    () =>
+      dismissed?.filter((problem) =>
+        filter.severities.includes(problem.severity),
+      ),
+    [dismissed, filter.severities],
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -173,14 +58,74 @@ export default function NoticesPane() {
             <FaCircleCheck className="size-4 text-success" />
             <span>{t("health.notices.empty")}</span>
           </div>
+        ) : shown.length === 0 ? (
+          <div className="px-1 py-2 text-sm text-muted-foreground">
+            {t("health.notices.noMatches")}
+          </div>
         ) : (
           <div className="flex flex-col">
-            {problems.map((problem) => (
+            {shown.map((problem) => (
               <HealthProblemRow key={problem.id} problem={problem} />
             ))}
           </div>
         )}
       </div>
+      {filter.showDismissed && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-sm text-muted-foreground">
+              {t("health.notices.dismissedTitle")}
+            </div>
+            {dismissed && dismissed.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfirmClear(true)}
+              >
+                {t("health.notices.clearDismissed")}
+              </Button>
+            )}
+          </div>
+          <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+            {shownDismissed === undefined ? (
+              <Skeleton className="h-10 w-full" />
+            ) : shownDismissed.length === 0 ? (
+              <div className="px-1 py-2 text-sm text-muted-foreground">
+                {t("health.notices.noneDismissed")}
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                {shownDismissed.map((problem) => (
+                  <HealthProblemRow key={problem.id} problem={problem} />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      <AlertDialog open={confirmClear} onOpenChange={setConfirmClear}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("health.notices.clearDismissedTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("health.notices.clearDismissedDesc")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={clearDismissed}
+            >
+              {t("health.notices.clearDismissed")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

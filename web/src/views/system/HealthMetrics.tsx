@@ -1,10 +1,15 @@
 import HardwarePane from "@/components/health/HardwarePane";
 import NoticesPane from "@/components/health/NoticesPane";
+import type { NoticeFilter } from "@/types/health";
 
-export default function HealthMetrics() {
+type HealthMetricsProps = {
+  noticeFilter: NoticeFilter;
+};
+
+export default function HealthMetrics({ noticeFilter }: HealthMetricsProps) {
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col gap-4 overflow-y-auto">
-      <NoticesPane />
+      <NoticesPane filter={noticeFilter} />
       <HardwarePane />
     </div>
   );

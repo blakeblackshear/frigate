@@ -20,7 +20,6 @@ from frigate.const import (
     STREAM_TYPE_SUB,
 )
 from frigate.models import Event, Recordings
-from frigate.notices.registry import NoticeRegistry
 from frigate.util.builtin import clear_and_unlink
 
 logger = logging.getLogger(__name__)
@@ -35,17 +34,14 @@ BANDWIDTH_SAMPLE_TARGET = 50
 class StorageMaintainer(threading.Thread):
     """Maintain frigates recording storage."""
 
-    def __init__(
-        self,
-        config: FrigateConfig,
-        stop_event: MpEvent,
-        notice_registry: NoticeRegistry | None = None,
-    ) -> None:
+    def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
         super().__init__(name="storage_maintainer")
         self.config = config
         self.stop_event = stop_event
-        self.notice_registry = notice_registry
         self.camera_storage_stats: dict[str, dict] = {}
+
+        # read by stats; true while maintenance has to delete retained recordings
+        self.retention_unmet = False
         self.config_subscriber = CameraConfigUpdateSubscriber(
             self.config,
             self.config.cameras,
@@ -350,19 +346,10 @@ class StorageMaintainer(threading.Thread):
                     # this file was not found so we must assume no space was cleaned up
                     pass
 
-            if self.notice_registry is not None:
-                self.notice_registry.raise_notice(
-                    "retention_unmet",
-                    params={
-                        "needed_mb": round(float(hourly_bandwidth), 1),
-                        "cleared_mb": round(float(deleted_segments_size), 1),
-                    },
-                )
+            self.retention_unmet = True
         else:
             logger.info(f"Cleaned up {deleted_segments_size:.2f} MB of recordings")
-
-            if self.notice_registry is not None:
-                self.notice_registry.resolve("retention_unmet")
+            self.retention_unmet = False
 
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
         # delete up to 100,000 at a time
@@ -448,5 +435,5 @@ class StorageMaintainer(threading.Thread):
                 "Less than 1 hour of recording space left, running storage maintenance..."
             )
             self.reduce_storage_consumption()
-        elif self.notice_registry is not None:
-            self.notice_registry.resolve("retention_unmet")
+        else:
+            self.retention_unmet = False

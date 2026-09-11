@@ -34,44 +34,46 @@ class TestIsNewerVersion(unittest.TestCase):
 
 
 class TestUpdateNotice(unittest.TestCase):
+    def setUp(self):
+        raise_patch = patch.object(emitter, "raise_notice")
+        resolve_patch = patch.object(emitter, "resolve_kind")
+        self.raise_notice = raise_patch.start()
+        self.resolve_kind = resolve_patch.start()
+        self.addCleanup(raise_patch.stop)
+        self.addCleanup(resolve_patch.stop)
+
     def _emitter(self, latest: str) -> emitter.StatsEmitter:
         stats_emitter = emitter.StatsEmitter.__new__(emitter.StatsEmitter)
         stats_emitter.config = MagicMock()
         stats_emitter.stats_tracking = {"latest_frigate_version": latest}
-        stats_emitter.notice_registry = MagicMock()
         return stats_emitter
 
     def test_newer_release_raises(self):
-        stats_emitter = self._emitter("0.19.0")
-
         with patch.object(emitter, "VERSION", "0.18.1-abcdef"):
-            stats_emitter._check_update_notice()
+            self._emitter("0.19.0")._check_update_notice()
 
-        stats_emitter.notice_registry.raise_notice.assert_called_once_with(
-            "update_available", params={"version": "0.19.0"}
+        self.raise_notice.assert_called_once_with(
+            "update_available", scope="0.19.0", params={"version": "0.19.0"}
         )
-        stats_emitter.notice_registry.resolve.assert_not_called()
+        self.resolve_kind.assert_not_called()
 
     def test_current_or_disabled_resolves(self):
         for latest in ("0.18.1", "disabled"):
-            stats_emitter = self._emitter(latest)
+            with self.subTest(latest=latest):
+                self.resolve_kind.reset_mock()
 
-            with patch.object(emitter, "VERSION", "0.18.1-abcdef"):
-                stats_emitter._check_update_notice()
+                with patch.object(emitter, "VERSION", "0.18.1-abcdef"):
+                    self._emitter(latest)._check_update_notice()
 
-            stats_emitter.notice_registry.raise_notice.assert_not_called()
-            stats_emitter.notice_registry.resolve.assert_called_once_with(
-                "update_available"
-            )
+                self.raise_notice.assert_not_called()
+                self.resolve_kind.assert_called_once_with("update_available")
 
     def test_a_failed_lookup_leaves_the_notice_alone(self):
-        stats_emitter = self._emitter("unknown")
-
         with patch.object(emitter, "VERSION", "0.18.1-abcdef"):
-            stats_emitter._check_update_notice()
+            self._emitter("unknown")._check_update_notice()
 
-        stats_emitter.notice_registry.raise_notice.assert_not_called()
-        stats_emitter.notice_registry.resolve.assert_not_called()
+        self.raise_notice.assert_not_called()
+        self.resolve_kind.assert_not_called()
 
     def test_refresh_updates_tracking_on_a_thread_then_checks(self):
         stats_emitter = self._emitter("0.18.0")
@@ -89,7 +91,7 @@ class TestUpdateNotice(unittest.TestCase):
         self.assertEqual(
             stats_emitter.stats_tracking["latest_frigate_version"], "0.19.0"
         )
-        stats_emitter.notice_registry.raise_notice.assert_called_once()
+        self.raise_notice.assert_called_once()
 
     def test_failed_refresh_keeps_the_last_known_version(self):
         stats_emitter = self._emitter("0.20.0")
@@ -105,10 +107,10 @@ class TestUpdateNotice(unittest.TestCase):
         self.assertEqual(
             stats_emitter.stats_tracking["latest_frigate_version"], "0.20.0"
         )
-        stats_emitter.notice_registry.raise_notice.assert_called_once_with(
-            "update_available", params={"version": "0.20.0"}
+        self.raise_notice.assert_called_once_with(
+            "update_available", scope="0.20.0", params={"version": "0.20.0"}
         )
-        stats_emitter.notice_registry.resolve.assert_not_called()
+        self.resolve_kind.assert_not_called()
 
     def test_disabled_version_check_still_clears_the_notice(self):
         stats_emitter = self._emitter("0.20.0")
@@ -124,6 +126,4 @@ class TestUpdateNotice(unittest.TestCase):
         self.assertEqual(
             stats_emitter.stats_tracking["latest_frigate_version"], "disabled"
         )
-        stats_emitter.notice_registry.resolve.assert_called_once_with(
-            "update_available"
-        )
+        self.resolve_kind.assert_called_once_with("update_available")

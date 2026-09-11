@@ -22,21 +22,35 @@
       "dismiss": "Dismiss",
       "openSettings": "Open settings",
       "openLink": "Open link",
-      "since": "Since {{time}}",
-      "sinceWithCount": "Since {{time}} · {{times}} times since {{firstSeen}}",
-      "firstSeen": "First seen {{time}} · {{times}} times",
+      "noMatches": "No notices match the filter",
+      "dismissedTitle": "Dismissed",
+      "noneDismissed": "No dismissed notices",
+      "clearDismissed": "Clear dismissed",
+      "clearDismissedTitle": "Clear dismissed notices?",
+      "clearDismissedDesc": "Every dismissed notice is deleted. Config and stream checks show again right away, and other notices return the next time they happen.",
+      "firstSeen_one": "First seen {{time}}",
+      "firstSeen_other": "First seen {{time}} · {{count}} times",
+      "dismissedAt": "Dismissed {{time}}",
+      "filter": {
+        "showDismissed": "Show dismissed",
+        "severity": "Severity",
+        "error": "Error",
+        "warning": "Warning",
+        "info": "Info"
+      },
       "kinds": {
-        "ffmpeg_crash_loop": "ffmpeg has crashed {{restarts}} times in the last hour",
         "detector_stuck": "Detector {{detector}} was restarted after it stopped responding",
-        "model_download_failed": "Downloading {{file}} failed: {{error}}",
-        "retention_unmet": "Recordings were deleted before their retention period to free space ({{cleared_mb}} of {{needed_mb}} MB needed)",
+        "model_download_failed": "Downloading {{file}} for {{model}} failed: {{error}}",
+        "skipped_detections": "Detection could not keep up and skipped {{pct}}% of frames for over a minute",
+        "shm_too_low": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB",
+        "failed_login_one": "Failed login attempt for {{user}}",
+        "failed_login_other": "Failed login attempts for {{user}}",
         "update_available": "Frigate {{version}} is available"
       },
       "streamPrefix": "Stream {{index}}: {{message}}",
       "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
       "streamProbeFailed": "Stream {{index}} could not be probed: {{error}}",
-      "cameraProbeFailed": "Streams could not be probed: {{error}}",
-      "startupWindow": "Frigate started less than two minutes ago, live checks begin after startup"
+      "cameraProbeFailed": "Streams could not be probed: {{error}}"
     },
     "hardware": {
       "title": "Hardware",
@@ -311,14 +325,16 @@
   "lastRefreshed": "Last refreshed: ",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} has high FFmpeg CPU usage ({{ffmpegAvg}}%)",
-    "cameraSkippedDetections": "{{camera}} has skipped detections ({{fps}}).",
+    "cameraSkippedDetections": "{{camera}} is skipping detection on {{pct}}% of frames",
     "detectHighCpuUsage": "{{camera}} has high detect CPU usage ({{detectAvg}}%)",
     "healthy": "System is healthy",
+    "systemNotices_one": "{{count}} system notice",
+    "systemNotices_other": "{{count}} system notices",
     "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)",
     "cameraIsOffline": "{{camera}} is offline",
     "detectIsSlow": "{{detect}} is slow ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)",
-    "shmTooLow": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB.",
+    "retentionUnmet": "Recordings are being deleted before their retention period ends to free space",
     "debugReplayActive": "Debug replay session is active"
   },
   "enrichments": {
