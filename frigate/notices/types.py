@@ -1,14 +1,8 @@
-"""Notice kinds and the definitions that fix their mode, severity, and category."""
+"""Notice kinds and the definitions that fix their severity and category."""
 
 from dataclasses import dataclass
 from enum import Enum
-
-
-class NoticeMode(str, Enum):
-    """Whether a producer resolves the notice itself or the user dismisses it."""
-
-    state = "state"
-    event = "event"
+from typing import Any
 
 
 class NoticeSeverity(str, Enum):
@@ -30,32 +24,76 @@ class NoticeKind:
 
     Attributes:
         key: Stable machine-readable name, also the translation key suffix
-        mode: state notices are resolved by their producer, event notices by the user
         severity: error, warning, or info
-        category: what the scope names: camera, detector, and model kinds carry a scope
+        category: camera, detector, model, or system; a camera scope is a
+            camera name, and the UI shows it
+        link: app route or absolute URL for the row, filled in from params
+        counts_repeats: whether raising an existing notice counts another occurrence
+        batch_repeats: whether repeats wait in memory for the next flush
+        reopen_at_count: count at which a dismissed notice shows again
+        keep_latest: rows of this kind to keep; a new row drops the oldest
         reportable: whether a future analytics reporter may send this kind's counts
     """
 
     key: str
-    mode: NoticeMode
     severity: NoticeSeverity
     category: str
+    link: str | None = None
+    counts_repeats: bool = True
+    batch_repeats: bool = False
+    reopen_at_count: int | None = None
+    keep_latest: int | None = None
     reportable: bool = True
 
+    def link_for(self, params: dict[str, Any]) -> str | None:
+        """The link with params filled in, or None if a param is missing."""
+        if self.link is None:
+            return None
 
-SCOPED_CATEGORIES = frozenset({"camera", "detector", "model"})
+        try:
+            return self.link.format(**params)
+        except (KeyError, IndexError, TypeError, ValueError):
+            return None
+
 
 _KINDS = (
-    NoticeKind("ffmpeg_crash_loop", NoticeMode.state, NoticeSeverity.error, "camera"),
-    NoticeKind("detector_stuck", NoticeMode.event, NoticeSeverity.warning, "detector"),
     NoticeKind(
-        "model_download_failed", NoticeMode.event, NoticeSeverity.error, "model"
+        "detector_stuck", NoticeSeverity.warning, "detector", link="/system#general"
     ),
-    NoticeKind("retention_unmet", NoticeMode.state, NoticeSeverity.error, "storage"),
-    NoticeKind("update_available", NoticeMode.state, NoticeSeverity.info, "system"),
+    NoticeKind("model_download_failed", NoticeSeverity.error, "model"),
+    NoticeKind(
+        "skipped_detections",
+        NoticeSeverity.warning,
+        "camera",
+        link="/system#cameras",
+    ),
+    NoticeKind("shm_too_low", NoticeSeverity.warning, "system", link="/system#storage"),
+    # one row per user per burst; the login log lines carry the address
+    NoticeKind(
+        "failed_login",
+        NoticeSeverity.warning,
+        "system",
+        link="/logs",
+        batch_repeats=True,
+        reopen_at_count=5,
+        keep_latest=100,
+    ),
+    # one row per release, so a dismissal lasts until the next release
+    NoticeKind(
+        "update_available",
+        NoticeSeverity.info,
+        "system",
+        link="https://github.com/blakeblackshear/frigate/releases/tag/v{version}",
+        counts_repeats=False,
+        keep_latest=1,
+    ),
 )
 
 NOTICE_KINDS: dict[str, NoticeKind] = {kind.key: kind for kind in _KINDS}
+
+# the Health tab builds config and stream check rows in the browser, so a notice
+# row of these kinds only records a dismissal; its other fields are placeholders
+CHECK_KINDS = frozenset({"config", "stream"})
 
 
 def notice_id(kind: str, scope: str | None) -> str:

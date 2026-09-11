@@ -8,6 +8,7 @@ import logging
 import os
 import re
 import secrets
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
@@ -34,6 +35,7 @@ from frigate.api.media_auth import (
 from frigate.config import AuthConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
+from frigate.notices import raise_notice
 
 logger = logging.getLogger(__name__)
 
@@ -252,6 +254,58 @@ class RateLimiter:
 
 
 rateLimiter = RateLimiter()
+
+# a failed login this long after the user's previous one opens a new burst
+FAILED_LOGIN_BURST_GAP_S = 300
+
+# the username comes from the request, so it is cut before it reaches a notice
+MAX_NOTICE_USERNAME = 64
+
+# unknown usernames are unbounded, so past this many open bursts a new one only
+# reaches the log
+MAX_OPEN_BURSTS = 100
+
+
+class FailedLoginTracker:
+    """Groups each user's failed logins into bursts, one notice per burst."""
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+
+        # user -> (burst start, last attempt), stalest attempt first
+        self._bursts: dict[str, tuple[int, float]] = {}
+
+    def record(self, user: str, now: float, *, known: bool = False) -> None:
+        """Count a failed login toward the user's open burst, or open a new one.
+
+        Once MAX_OPEN_BURSTS are open, only a known user opens another.
+        """
+        user = user[:MAX_NOTICE_USERNAME]
+
+        with self._lock:
+            # bursts that went quiet are over
+            while self._bursts:
+                stalest = next(iter(self._bursts))
+
+                if now - self._bursts[stalest][1] < FAILED_LOGIN_BURST_GAP_S:
+                    break
+
+                del self._bursts[stalest]
+
+            if (
+                not known
+                and user not in self._bursts
+                and len(self._bursts) >= MAX_OPEN_BURSTS
+            ):
+                return
+
+            start, _ = self._bursts.pop(user, (int(now), now))
+            self._bursts[user] = (start, now)
+
+        raise_notice("failed_login", scope=f"{user}:{start}", params={"user": user})
+
+
+failed_logins = FailedLoginTracker()
 
 
 def get_remote_addr(request: Request):
@@ -880,6 +934,7 @@ def login(request: Request, body: AppPostLoginBody):
         db_user: User = User.get_by_id(user)
     except DoesNotExist:
         logger.warning(f"Login failed for unknown user '{user}' from {remote_addr}")
+        failed_logins.record(user, time.time())
         return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
     password_hash = db_user.password_hash
@@ -911,6 +966,7 @@ def login(request: Request, body: AppPostLoginBody):
     logger.warning(
         f"Login failed for user '{user}' (invalid password) from {remote_addr}"
     )
+    failed_logins.record(user, time.time(), known=True)
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
 

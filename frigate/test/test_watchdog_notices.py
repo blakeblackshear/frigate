@@ -14,25 +14,27 @@ class TestDetectorStuckNotice(unittest.TestCase):
         return detector
 
     def test_stuck_restart_raises_notice(self):
-        registry = MagicMock()
         detector = self._stuck_detector()
-        watchdog = FrigateWatchdog({"ov": detector}, MagicMock(), registry)
+        watchdog = FrigateWatchdog({"ov": detector}, MagicMock())
 
-        with patch("frigate.watchdog.datetime") as mock_datetime:
+        with (
+            patch("frigate.watchdog.datetime") as mock_datetime,
+            patch("frigate.watchdog.raise_notice") as raise_notice,
+        ):
             mock_datetime.datetime.now.return_value.timestamp.return_value = 100.0
             watchdog._check_detectors()
 
         detector.start_or_restart.assert_called_once()
-        registry.raise_notice.assert_called_once_with(
+        raise_notice.assert_called_once_with(
             "detector_stuck", scope="ov", params={"detector": "ov"}
         )
 
     def test_healthy_detector_raises_nothing(self):
-        registry = MagicMock()
         detector = self._stuck_detector()
         detector.detection_start.value = 0.0
-        watchdog = FrigateWatchdog({"ov": detector}, MagicMock(), registry)
+        watchdog = FrigateWatchdog({"ov": detector}, MagicMock())
 
-        watchdog._check_detectors()
+        with patch("frigate.watchdog.raise_notice") as raise_notice:
+            watchdog._check_detectors()
 
-        registry.raise_notice.assert_not_called()
+        raise_notice.assert_not_called()

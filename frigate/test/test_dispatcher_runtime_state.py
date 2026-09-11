@@ -518,7 +518,7 @@ class TestNoticeWiring(unittest.TestCase):
 
     def setUp(self) -> None:
         self.registry = MagicMock()
-        self.registry.active.return_value = [{"id": "retention_unmet"}]
+        self.registry.active.return_value = [{"id": "detector_stuck:ov"}]
         config = MagicMock()
         config.cameras = {}
 
@@ -540,36 +540,27 @@ class TestNoticeWiring(unittest.TestCase):
             self.dispatcher._publish_notices
         )
 
-    def test_raise_request_reaches_registry(self) -> None:
-        self.dispatcher._receive(
-            "update_notice",
-            {
-                "action": "raise",
-                "kind": "ffmpeg_crash_loop",
-                "scope": "front_door",
-                "params": {"restarts": 5},
-            },
-        )
+    def test_update_request_reaches_registry(self) -> None:
+        update = {
+            "action": "raise",
+            "kind": "model_download_failed",
+            "scope": "yolo/model.onnx",
+            "params": {"file": "model.onnx", "error": "timeout"},
+        }
 
-        self.registry.raise_notice.assert_called_once_with(
-            "ffmpeg_crash_loop", scope="front_door", params={"restarts": 5}
-        )
+        self.dispatcher._receive("update_notice", update)
 
-    def test_resolve_request_reaches_registry(self) -> None:
-        self.dispatcher._receive(
-            "update_notice",
-            {"action": "resolve", "kind": "retention_unmet", "scope": None},
-        )
-
-        self.registry.resolve.assert_called_once_with("retention_unmet", None)
+        self.registry.apply.assert_called_once_with(update)
 
     def test_malformed_request_does_not_raise(self) -> None:
-        self.registry.raise_notice.side_effect = RuntimeError("boom")
+        self.registry.apply.side_effect = RuntimeError("boom")
 
         self.dispatcher._receive("update_notice", "not a dict")
         self.dispatcher._receive(
             "update_notice", {"action": "raise", "kind": "x", "params": {}}
         )
+
+        self.registry.apply.assert_called_once()
 
     def test_publish_local_skips_mqtt(self) -> None:
         mqtt = MagicMock(spec=MqttClient)
@@ -587,7 +578,7 @@ class TestNoticeWiring(unittest.TestCase):
         self.dispatcher._publish_notices()
 
         self.dispatcher.publish_local.assert_called_once_with(
-            "notices", '[{"id": "retention_unmet"}]'
+            "notices", '[{"id": "detector_stuck:ov"}]'
         )
 
     def test_snapshot_includes_notices(self) -> None:
@@ -599,4 +590,4 @@ class TestNoticeWiring(unittest.TestCase):
 
         self.dispatcher.publish_runtime_snapshot(publisher)
 
-        publisher.assert_any_call("notices", '[{"id": "retention_unmet"}]', False)
+        publisher.assert_any_call("notices", '[{"id": "detector_stuck:ov"}]', False)

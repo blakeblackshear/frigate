@@ -357,20 +357,7 @@ class Dispatcher:
                 return
 
             try:
-                action = payload.get("action")
-                kind = payload.get("kind")
-                scope = payload.get("scope")
-
-                if not isinstance(kind, str):
-                    logger.warning("Ignoring notice update without a kind")
-                elif action == "raise":
-                    self.notice_registry.raise_notice(
-                        kind, scope=scope, params=payload.get("params") or {}
-                    )
-                elif action == "resolve":
-                    self.notice_registry.resolve(kind, scope)
-                else:
-                    logger.warning("Ignoring notice update with action %s", action)
+                self.notice_registry.apply(payload)
             except Exception:
                 # a raise here would kill the REP thread for every process
                 logger.exception("Failed to apply notice update")

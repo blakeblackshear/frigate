@@ -4171,13 +4171,13 @@ paths:
       description: |-
         **Access:** Admin role required.
 
-        Get the active notices, most severe first.
+        Get notices, most severe first.
 
         Args:
-            include_dismissed: Also return event notices the user has dismissed
+            include_dismissed: Also return dismissed notices, for the history view
 
         Returns:
-            The active notices
+            The notices
       operationId: get_notices_notices_get
       parameters:
         - name: include_dismissed
@@ -4221,6 +4221,44 @@ paths:
       security:
         - frigateAdminAuth: []
       x-required-role: admin
+  /notices/dismissed_checks:
+    get:
+      tags:
+        - Notices
+      summary: Get Dismissed Checks
+      description: |-
+        **Access:** Admin role required.
+
+        Get the dismissed config and stream check rows, newest first.
+      operationId: get_dismissed_checks_notices_dismissed_checks_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices/dismissed:
+    delete:
+      tags:
+        - Notices
+      summary: Purge Dismissed
+      description: |-
+        **Access:** Admin role required.
+
+        Delete every dismissed notice and check row so each can show again.
+      operationId: purge_dismissed_notices_dismissed_delete
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
   /notices/{notice_id}/dismiss:
     post:
       tags:
@@ -4229,7 +4267,9 @@ paths:
       description: |-
         **Access:** Admin role required.
 
-        Hide an event notice until it is raised again.
+        Hide a notice or a config or stream check row.
+
+        It stays hidden if the same problem happens again.
       operationId: dismiss_notice_notices__notice_id__dismiss_post
       parameters:
         - name: notice_id

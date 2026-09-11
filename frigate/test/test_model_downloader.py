@@ -13,13 +13,12 @@ class TestModelDownloadNotice(unittest.TestCase):
     def setUp(self):
         self.download_path = tempfile.mkdtemp()
         downloader.last_download_error.clear()
-
-    def _notice_calls(self, requestor: MagicMock) -> list[dict]:
-        return [
-            call.args[1]
-            for call in requestor.send_data.call_args_list
-            if call.args[0] == "update_notice"
-        ]
+        raise_patch = patch("frigate.util.downloader.raise_notice")
+        resolve_patch = patch("frigate.util.downloader.resolve_notice")
+        self.raise_notice = raise_patch.start()
+        self.resolve_notice = resolve_patch.start()
+        self.addCleanup(raise_patch.stop)
+        self.addCleanup(resolve_patch.stop)
 
     def _downloader(self, download_func) -> ModelDownloader:
         with patch("frigate.util.downloader.InterProcessRequestor"):
@@ -36,15 +35,16 @@ class TestModelDownloadNotice(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             model_downloader._download_models()
 
-        notices = self._notice_calls(model_downloader.requestor)
-        self.assertEqual(len(notices), 1)
-        self.assertEqual(notices[0]["action"], "raise")
-        self.assertEqual(notices[0]["kind"], "model_download_failed")
-        self.assertEqual(notices[0]["scope"], "facedet/facedet.onnx")
-        self.assertEqual(
-            notices[0]["params"],
-            {"file": "facedet.onnx", "error": "HTTP 503 from upstream"},
+        self.raise_notice.assert_called_once_with(
+            "model_download_failed",
+            scope="facedet/facedet.onnx",
+            params={
+                "file": "facedet.onnx",
+                "model": "facedet",
+                "error": "HTTP 503 from upstream",
+            },
         )
+        self.resolve_notice.assert_not_called()
 
     def test_swallowing_download_that_leaves_no_file_reports(self):
         target = os.path.join(self.download_path, "facedet.onnx")
@@ -62,10 +62,11 @@ class TestModelDownloadNotice(unittest.TestCase):
         model_downloader = self._downloader(swallowing)
         model_downloader._download_models()
 
-        notices = self._notice_calls(model_downloader.requestor)
-        self.assertEqual(len(notices), 1)
-        self.assertEqual(notices[0]["action"], "raise")
-        self.assertEqual(notices[0]["params"], {"file": "facedet.onnx", "error": "dns"})
+        self.raise_notice.assert_called_once()
+        self.assertEqual(
+            self.raise_notice.call_args.kwargs["params"],
+            {"file": "facedet.onnx", "model": "facedet", "error": "dns"},
+        )
         self.assertFalse(os.path.exists(target))
 
     def test_success_resolves(self):
@@ -76,10 +77,10 @@ class TestModelDownloadNotice(unittest.TestCase):
         model_downloader = self._downloader(succeeding)
         model_downloader._download_models()
 
-        notices = self._notice_calls(model_downloader.requestor)
-        self.assertEqual(len(notices), 1)
-        self.assertEqual(notices[0]["action"], "resolve")
-        self.assertEqual(notices[0]["scope"], "facedet/facedet.onnx")
+        self.raise_notice.assert_not_called()
+        self.resolve_notice.assert_called_once_with(
+            "model_download_failed", "facedet/facedet.onnx"
+        )
 
     def test_a_sibling_downloader_only_resolves_its_own_files(self):
         """PaddleOCR, facedet and jina each spread one model_name over several
@@ -96,9 +97,8 @@ class TestModelDownloadNotice(unittest.TestCase):
 
         sibling._download_models()
 
-        self.assertEqual(
-            [n["scope"] for n in self._notice_calls(sibling.requestor)],
-            ["paddleocr-onnx/det.onnx"],
+        self.resolve_notice.assert_called_once_with(
+            "model_download_failed", "paddleocr-onnx/det.onnx"
         )
 
 
