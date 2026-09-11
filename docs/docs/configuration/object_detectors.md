@@ -674,6 +674,8 @@ models:
     height: 640
 ```
 
+For PPU models, use a `.dxnn` compiled with DX-COM 2.4.0 or later. Frigate reads the PPU head layout the compiler writes into the file and refuses to load a PPU model without it.
+
 `model_type` must be set to `yolo-generic`, `yolox` or `damo-yolo` to match the model; `yolo-generic` is the recommended default unless the model is a raw YOLOX or DAMO-YOLO export. Frigate defaults it to `ssd`, which this detector does not support, so a model that leaves it unset is rejected at startup.
 
 `width` and `height` must match the resolution the model was compiled for. Quantization parameters are baked into the `.dxnn` file at compile time, so no normalization is applied on the host and Frigate's default `input_tensor`, `input_pixel_format`, and `input_dtype` values do not need to be overridden.
