@@ -107,12 +107,7 @@
       },
       "npuUsage": "Penggunaan NPU",
       "npuMemory": "Memori NPU",
-      "npuTemperature": "Suhu NPU",
-      "intelGpuWarning": {
-        "title": "Peringatan Statistik GPU Intel",
-        "message": "Statistik GPU tidak tersedia",
-        "description": "Ini adalah bug yang sudah diketahui pada alat pelaporan statistik GPU Intel (intel_gpu_top) yang dapat rusak dan berulang kali mengembalikan penggunaan GPU sebesar 0% bahkan ketika akselerasi perangkat keras dan deteksi objek berjalan dengan benar pada (i)GPU. Ini bukan bug Frigate. Anda dapat memulai ulang host untuk memperbaiki masalah ini sementara dan memastikan GPU berfungsi dengan benar. Ini tidak memengaruhi kinerja."
-      }
+      "npuTemperature": "Suhu NPU"
     },
     "otherProcesses": {
       "title": "Proses Lainnya",
@@ -226,7 +221,6 @@
     "cameraIsOffline": "{{camera}} sedang offline",
     "detectIsSlow": "{{detect}} lambat ({{speed}} md)",
     "detectIsVerySlow": "{{detect}} sangat lambat ({{speed}} md)",
-    "shmTooLow": "Alokasi /dev/shm ({{total}} MB) harus ditingkatkan menjadi setidaknya {{min}} MB.",
     "debugReplayActive": "Sesi pemutaran ulang debug sedang aktif"
   },
   "enrichments": {
