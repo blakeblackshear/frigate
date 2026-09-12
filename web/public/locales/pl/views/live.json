@@ -98,14 +98,12 @@
     "title": "Strumień",
     "audio": {
       "tips": {
-        "title": "Dźwięk musi być wysyłany z kamery i skonfigurowany w go2rtc dla tego strumienia.",
-        "documentation": "Przeczytaj dokumentację "
+        "title": "Dźwięk musi być wysyłany z kamery i skonfigurowany w go2rtc dla tego strumienia."
       },
       "available": "Dźwięk jest dostępny dla tego strumienia",
       "unavailable": "Dźwięk nie jest dostępny dla tego strumienia"
     },
     "twoWayTalk": {
-      "tips.documentation": "Przeczytaj dokumentację ",
       "tips": "Twoje urządzenie musi obsługiwać tę funkcję, a WebRTC musi być skonfigurowany dla komunikacji dwukierunkowej.",
       "unavailable": "Komunikacja dwukierunkowa jest niedostępna dla tego strumienia",
       "available": "Komunikacja dwukierunkowa jest dostępna dla tego strumienia"
@@ -124,7 +122,6 @@
   },
   "cameraSettings": {
     "title": "Ustawienia {{camera}}",
-    "cameraEnabled": "Kamera włączona",
     "objectDetection": "Wykrywanie obiektów",
     "recording": "Nagrywanie",
     "snapshots": "Zrzuty ekranu",
@@ -138,8 +135,7 @@
       "all": "Wszystkie",
       "active_objects": "Aktywne obiekty",
       "motion": "Ruch"
-    },
-    "notAllTips": "Twoja konfiguracja przechowywania nagrań {{source}} jest ustawiona na <code>tryb: {{effectiveRetainMode}}</code>, więc to nagrywanie na żądanie zachowa tylko segmenty z {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Edytuj układ",
@@ -153,8 +149,6 @@
     "disable": "Wyłącz wyciszenie wszystkich kamer"
   },
   "camera": {
-    "disable": "Wyłącz kamerę",
-    "enable": "Włącz kamerę",
     "turnOn": "Włącz kamerę",
     "turnOff": "Wyłącz kamerę"
   },
