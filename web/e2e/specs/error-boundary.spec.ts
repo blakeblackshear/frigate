@@ -21,8 +21,17 @@ async function breakExportsPage(app: FrigateApp) {
   });
 }
 
-/** The status bar resolves the active profile with `profiles.find(...)`. */
+/**
+ * `useStats` runs `Object.entries(stats.detectors)` and only the status bar
+ * and bottom bar call it, so null detectors throw in one chrome component.
+ */
 async function breakStatusbar(app: FrigateApp) {
+  await app.installDefaults({ stats: { detectors: null } });
+  await app.goto("/");
+}
+
+/** GeneralSettings and the status bar both read profiles, so both throw. */
+async function breakAllDesktopChrome(app: FrigateApp) {
   await app.page.route("**/api/profiles**", (route) =>
     route.fulfill({
       json: { profiles: { broken: true }, active_profile: "default" },
@@ -118,7 +127,7 @@ test.describe("Error boundaries - chrome failure @high", () => {
     ],
   });
 
-  test("a thrown status bar leaves the sidebar and page content alone", async ({
+  test("a thrown status bar leaves the sidebar usable", async ({
     frigateApp,
   }) => {
     test.skip(frigateApp.isMobile, "The status bar is desktop chrome");
@@ -126,13 +135,27 @@ test.describe("Error boundaries - chrome failure @high", () => {
 
     const strip = frigateApp.page.getByTestId("error-strip");
     await expect(strip).toBeVisible({ timeout: 10_000 });
-    await expect(strip.getByRole("button", { name: "Reload" })).toBeVisible();
     await expect(strip).toHaveCount(1);
+    await expect(strip.getByRole("button", { name: "Reload" })).toBeVisible();
 
-    // Each chrome component owns its boundary, so the sidebar survives a
-    // status bar failure and the user can still navigate out.
+    // Each chrome component owns a boundary, so the sidebar outlives the
+    // status bar and the user can still navigate out.
     await expect(frigateApp.page.locator("aside")).toBeVisible();
-    await expect(frigateApp.page.locator('a[href="/review"]')).toBeVisible();
+    await expect(
+      frigateApp.page.locator('a[href="/review"]').first(),
+    ).toBeVisible();
+    await expect(frigateApp.page.getByTestId("error-panel")).toHaveCount(0);
+  });
+
+  test("chrome failures never reach the page content", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Desktop chrome");
+    await breakAllDesktopChrome(frigateApp);
+
+    await expect(
+      frigateApp.page.getByTestId("error-strip").first(),
+    ).toBeVisible({ timeout: 10_000 });
     await expect(frigateApp.page.getByTestId("error-panel")).toHaveCount(0);
     await expect(
       frigateApp.page.locator("[data-camera='front_door']"),
