@@ -75,7 +75,6 @@
       "error": {
         "failed": "Eksportimise järjekorda lisamine ei õnnestunud: {{error}}",
         "endTimeMustAfterStartTime": "Ajavahemiku lõpp peab olema peale algust",
-        "noVaildTimeSelected": "Ühtegi kehtivat ajavahemikku pole valitud",
         "noValidTimeSelected": "Ühtegi korrektset ajavahemikku pole valitud"
       },
       "queued": "Eksport on järjekorda lisatud. Vaata progressi eksportide lehelt.",
@@ -141,8 +140,6 @@
       "toast": {
         "started_one": "Alustasin ühte eksportimist.",
         "started_other": "Alustasin {{count}} eksportimisega.",
-        "startedNoCase_one": "Alustasin 1 ekspordiga.",
-        "startedNoCase_other": "Alustasin {{count}} ekspordiga.",
         "partial": "Alustasin {{successful}}/{{total}} ekspordiga. Ebaõnnestusid: {{failedItems}}",
         "failed": "{{total}} ekspordi algatamine ebaõnnestus. Ebaõnnestunud: {{failedItems}}"
       }
