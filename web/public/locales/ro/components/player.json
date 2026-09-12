@@ -12,7 +12,6 @@
     "title": "Stream Offline",
     "desc": "Nici un cadru nu a fost receptionat de la streamul {{cameraName}} <code>detect</code>, verifica logurile de eroare"
   },
-  "cameraDisabled": "Camera este dezactivata",
   "stats": {
     "streamType": {
       "title": "Tip Stream:",
