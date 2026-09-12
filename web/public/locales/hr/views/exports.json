@@ -14,7 +14,6 @@
     "deleteExport": "Obriši izvoz"
   },
   "noExports": "Izvozi nisu pronađeni",
-  "deleteExport": "Obriši izvoz",
   "toast": {
     "error": {
       "renameExportFailed": "Neuspjeh preimenovanja izvoza: {{errorMessage}}"
