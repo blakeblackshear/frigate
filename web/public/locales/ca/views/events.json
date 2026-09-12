@@ -43,8 +43,6 @@
   "camera": "Càmera",
   "selected_one": "{{count}} seleccionats",
   "selected_other": "{{count}} seleccionats",
-  "suspiciousActivity": "Activitat sospitosa",
-  "threateningActivity": "Activitat amenaçadora",
   "detail": {
     "noDataFound": "No hi ha dades detallades a revisar",
     "trackedObject_one": "{{count}} objecte",
