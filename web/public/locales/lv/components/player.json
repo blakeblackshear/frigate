@@ -12,7 +12,6 @@
     "title": "Bezsaistes straume",
     "desc": "No kameras {{cameraName}} <code>detect</code> straumes netika saņemti kadri, pārbaudiet kļūdu žurnālus"
   },
-  "cameraDisabled": "Kamera ir izslēgta",
   "stats": {
     "streamType": {
       "title": "Straumes veids:",
