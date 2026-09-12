@@ -333,5 +333,27 @@
   "validation_errors": "Validation Errors",
   "credentialField": {
     "savedPlaceholder": "Saved — leave blank to keep current"
+  },
+  "commandMenu": {
+    "title": "Command menu",
+    "description": "Search pages, cameras, settings, and actions",
+    "placeholder": "Search pages, cameras, settings, and actions",
+    "empty": "No matches",
+    "hint": "{{key}} or / to open, Enter to run",
+    "section": {
+      "recent": "Recent",
+      "pages": "Pages",
+      "cameras": "Cameras",
+      "cameraGroups": "Camera groups",
+      "settings": "Settings",
+      "actions": "Actions"
+    },
+    "camera": {
+      "live": "Live",
+      "review": "Review"
+    },
+    "action": {
+      "toggleTheme": "Toggle light and dark mode"
+    }
   }
 }
