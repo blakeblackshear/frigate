@@ -60,7 +60,6 @@
       "success": "Exportació inciada amb èxit. Pots veure l'arxiu a la pàgina d'exportacions.",
       "error": {
         "endTimeMustAfterStartTime": "L'hora de finalització ha de ser posterior a l'hora d'inici",
-        "noVaildTimeSelected": "No s'ha seleccionat un rang de temps vàlid",
         "failed": "No s'ha pogut inciar l'exportació: {{error}}",
         "noValidTimeSelected": "No s'ha seleccionat cap interval de temps vàlid"
       },
@@ -135,9 +134,6 @@
         "started_one": "S'ha iniciat l'exportació 1.",
         "started_many": "S'han iniciat {{count}} exportacions.",
         "started_other": "S'han iniciat {{count}} exportacions.",
-        "startedNoCase_one": "S'ha iniciat l'exportació 1.",
-        "startedNoCase_many": "S'han iniciat {{count}} exportacions.",
-        "startedNoCase_other": "S'han iniciat {{count}} exportacions.",
         "partial": "S'han iniciat {{successful}} de {{total}} exportacions. Ha fallat: {{failedItems}}",
         "failed": "No s'han pogut iniciar {{total}} exportacions. Ha fallat: {{failedItems}}"
       }
@@ -148,8 +144,7 @@
     "restreaming": {
       "disabled": "La retransmissió no està habilitada per a aquesta càmera.",
       "desc": {
-        "title": "Configurar go2rtc per a àudio i opcions addicionals de visualització en directe per a aquesta càmera.",
-        "readTheDocumentation": "Llegir la documentació"
+        "title": "Configurar go2rtc per a àudio i opcions addicionals de visualització en directe per a aquesta càmera."
       }
     },
     "showStats": {

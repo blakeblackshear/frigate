@@ -70,10 +70,6 @@
             "label": "Habilita Birdseye",
             "description": "Activa o desactiva la funció de vista Birdseye."
         },
-        "mode": {
-            "label": "Mode de seguiment",
-            "description": "Mode per a incloure càmeres en Birdseye: 'objectes', 'motion' o 'continuous'."
-        },
         "order": {
             "label": "Posició",
             "description": "Posició numèrica que controla l'ordenació de la càmera en la disposició Birdseye."
@@ -642,10 +638,6 @@
             "label": "Habilita les instantànies",
             "description": "Activa o desactiva el desament de les instantànies d'aquesta càmera."
         },
-        "clean_copy": {
-            "label": "Desa la còpia neta",
-            "description": "Desa una còpia neta no anotada de les instantànies a més de les anotades."
-        },
         "timestamp": {
             "label": "Superposició de marca horària",
             "description": "Superposa una marca horària a les instantànies de l'API."
@@ -672,10 +664,6 @@
             "default": {
                 "label": "Retenció predeterminada",
                 "description": "Nombre predeterminat de dies per a retenir les instantànies."
-            },
-            "mode": {
-                "label": "Mode de retenció",
-                "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
             },
             "objects": {
                 "label": "Retenció d'objectes",

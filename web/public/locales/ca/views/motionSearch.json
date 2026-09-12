@@ -49,8 +49,6 @@
         "thresholdDesc": "Els valors més baixos detecten canvis més petits (1-255)",
         "minArea": "Àrea de canvi mínim",
         "minAreaDesc": "Mida mínima d'una sola regió en moviment, com a percentatge de la regió d'interès",
-        "frameSkip": "Omet el fotograma",
-        "frameSkipDesc": "Processa cada N fotograma. Establiu això a la velocitat de fotogrames de la càmera per processar un fotograma per segon (p. ex. 5 per a una càmera de 5 FPS, 30 per a una càmera de 30 FPS). Els valors més alts seran més ràpids, però poden perdre els esdeveniments de curt moviment.",
         "maxResults": "Resultats màxims",
         "maxResultsDesc": "Atura després d'aquestes quantes marques horàries coincidents"
     },

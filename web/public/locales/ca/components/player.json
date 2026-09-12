@@ -40,7 +40,6 @@
     "title": "Transmissió desconnectada",
     "desc": "No s’han rebut imatges a la transmissió <code>detect</code> de la càmera {{cameraName}}. Comprova els registres d’errors"
   },
-  "cameraDisabled": "La càmera està desactivada",
   "toast": {
     "success": {
       "submittedFrigatePlus": "Fotograma enviat correctament a Frigate+"
