@@ -41,7 +41,6 @@
     }
   },
   "noRecordingsFoundForThisTime": "Bu zaman aralığı için kayıt bulunamadı",
-  "cameraDisabled": "Kamera devre dışı bırakıldı",
   "noPreviewFoundFor": "{{cameraName}} için Önizleme Bulunamadı",
   "livePlayerRequiredIOSVersion": "Bu canlı yayın türü için iOS 17.1 veya daha yeni sürüm gereklidir.",
   "submitFrigatePlus": {

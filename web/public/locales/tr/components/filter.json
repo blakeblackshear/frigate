@@ -5,7 +5,6 @@
       "title": "Bütün Etiketler",
       "short": "Etiketler"
     },
-    "count": "{{count}} Etiket",
     "count_one": "{{count}} Etiket",
     "count_other": "{{count}} Etiket"
   },
