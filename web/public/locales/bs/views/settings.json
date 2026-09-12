@@ -46,8 +46,6 @@
     "systemTelemetry": "Telemetrija",
     "systemBirdseye": "Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorHardware": "Hardver detektora",
-    "systemDetectionModel": "Model detekcije",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "go2rtc streams",
     "integrationSemanticSearch": "Semantička pretraga",
@@ -468,17 +466,7 @@
     "backToSettings": "Povratak na postavke kamere",
     "streams": {
       "title": "Omogući / Onemogući kamere",
-      "enableLabel": "Omogućene kamere",
-      "enableDesc": "Privremeno onemogući omogućenu kameru dok Frigate ne ponovo započne. Onemogućavanje kamere potpuno zaustavlja obradu tokova ove kamere od strane Frigate. Detekcija, snimanje i praćenje nedostat će.<br /> <em>Napomena: Ovo ne onemogućava restreamove go2rtc.</em>",
-      "disableLabel": "Onemogućene kamere",
-      "disableDesc": "Omogući kameru koja trenutno nije vidljiva u UI-ju i onemogućena u konfiguraciji. Potrebno je ponovno pokrenuti Frigate nakon omogućavanja.",
-      "enableSuccess": "Omogućena {{cameraName}} u konfiguraciji. Ponovno pokrenite Frigate da biste primijenili promjene.",
-      "friendlyName": {
-        "edit": "Uredi prikazano ime kamere",
-        "title": "Uredi prikazano ime",
-        "description": "Postavite prijateljsko ime koje će se prikazivati za ovu kameru kroz cijeli Frigate UI. Ostavite prazno da biste koristili ID kamere.",
-        "rename": "Preimenuj"
-      }
+      "enableSuccess": "Omogućena {{cameraName}} u konfiguraciji. Ponovno pokrenite Frigate da biste primijenili promjene."
     },
     "cameraConfig": {
       "add": "Dodaj kameru",
@@ -513,9 +501,7 @@
       "title": "Prekrižavanja kamere profila",
       "selectLabel": "Odaberi profil",
       "description": "Konfigurirajte koje kamere su omogućene ili onemogućene kada je profil aktiviran. Kamere postavljene na \"Naslijeđivanje\" očuvaju svoje osnovno stanje omogućeno.",
-      "inherit": "Naslijeđivanje",
-      "enabled": "Omogućeno",
-      "disabled": "Onemogućeno"
+      "inherit": "Naslijeđivanje"
     },
     "cameraType": {
       "title": "Tip kamere",
@@ -1146,15 +1132,6 @@
       "error": "Nije uspješno sačuvana promjena konfiguracije: {{errorMessage}}"
     }
   },
-  "detectionModel": {
-    "plusActive": {
-      "title": "Upravljanje modelima Frigate+",
-      "label": "Trenutni izvor modela",
-      "description": "Ova instanca pokreće model Frigate+. Odaberite ili promijenite svoj model u postavkama Frigate+.",
-      "goToFrigatePlus": "Idi na postavke Frigate+",
-      "showModelForm": "Ručno konfigurirajte model"
-    }
-  },
   "triggers": {
     "documentTitle": "Pokretači",
     "semanticSearch": {
@@ -1445,16 +1422,6 @@
     "detect": {
       "title": "Postavke detekcije"
     },
-    "detectors": {
-      "title": "Postavke detektora",
-      "singleType": "Dozvoljen je samo jedan {{type}} detektor.",
-      "keyRequired": "Ime detektora je obavezno.",
-      "keyDuplicate": "Ime detektora već postoji.",
-      "noSchema": "Nema dostupnih šema detektora.",
-      "none": "Nema konfiguriranih instanci detektora.",
-      "add": "Dodaj detektor",
-      "addCustomKey": "Dodaj prilagođeni ključ"
-    },
     "record": {
       "title": "Postavke snimanja"
     },
@@ -1497,9 +1464,7 @@
     },
     "genaiRoles": {
       "options": {
-        "embeddings": "Ugrađivanje",
-        "vision": "Vizija",
-        "tools": "Alati"
+        "embeddings": "Ugrađivanje"
       }
     },
     "semanticSearchModel": {
@@ -1684,15 +1649,8 @@
     "record": {
       "noRecordRole": "Nema streamova koji imaju definisanu ulogu snimanja. Snimanje neće funkcionišati."
     },
-    "birdseye": {
-      "objectsModeDetectDisabled": "Birdseye je postavljen na režim 'objekti', ali je detekcija objekata onemogućena za ovu kameru. Kamera neće biti prikazana u Birdseye."
-    },
     "snapshots": {
       "detectDisabled": "Detekcija objekata je onemogućena. Snimci se generišu iz praćenih objekata i neće biti kreirani."
-    },
-    "detectors": {
-      "mixedTypes": "Svi detektori moraju koristiti isti tip. Uklonite postojet će detektore da biste koristili drugi tip.",
-      "mixedTypesSuggestion": "Svi detektori moraju koristiti isti tip. Uklonite postojet će detektore ili izaberite {{type}}."
     }
   }
 }
