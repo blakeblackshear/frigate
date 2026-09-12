@@ -11,11 +11,7 @@
   },
   "details": {
     "unknown": "Tuntematon",
-    "faceDesc": "Lisätiedot kohteesta, josta tämä kasvokuva tallennettiin",
-    "person": "Henkilö",
     "timestamp": "Aikaleima",
-    "subLabelScore": "Alinimikkeen pisteet",
-    "face": "Kasvojen yksityiskohdat",
     "scoreInfo": "Alatunnisteen pistemäärä on kaikkien tunnistettujen kasvojen varmuustasojen painotettu keskiarvo, joten se voi poiketa tilannekuvassa näkyvästä pistemäärästä."
   },
   "documentTitle": "Kasvokirjasto - Frigate",
@@ -31,7 +27,6 @@
       "uploadedImage": "Kuva ladattu onnistuneesti."
     }
   },
-  "selectItem": "Valitse {{item}}",
   "train": {
     "empty": "Ei viimeaikaisia kasvojentunnistusyrityksiä",
     "title": "Koulutus",
@@ -47,12 +42,9 @@
     }
   },
   "createFaceLibrary": {
-    "title": "Luo kokoelma",
-    "desc": "Luo uusi kokoelma",
     "new": "Luo uusi kasvo",
     "nextSteps": "Hyvän perustan luomiseksi huomioitavaa:<li>Käytä koulutus-välilehteä valitaksesi opetukseen kuvia kustakin tunnistetusta henkilöstä</li><li>Panosta mahdollisimman suoraan otettuihin kuviin; vältä kouluttamista kulmassa kuvatuilla kuvilla.</li></ul>"
   },
-  "selectFace": "Valitse kasvo",
   "deleteFaceLibrary": {
     "title": "Poista nimi",
     "desc": "Haluatko varmasti poistaa kokoelman {{name}}? Tämä poistaa pysyvästi kaikki liitetyt kasvot."
@@ -78,6 +70,5 @@
     "maxSize": "Maksimikoko: {{size}}MB"
   },
   "nofaces": "Kasvoja ei ole saatavilla",
-  "pixels": "{{area}}px",
   "trainFace": "Kouluta kasvot"
 }
