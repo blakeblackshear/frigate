@@ -100,7 +100,7 @@
     "use-long-press": "^3.2.0",
     "vaul": "^1.1.2",
     "vite-plugin-monaco-editor": "^1.1.0",
-    "zod": "^3.23.8"
+    "zod": "^4.4.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
