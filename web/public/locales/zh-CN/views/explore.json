@@ -23,8 +23,7 @@
         "textTokenizer": "文本分词器"
       },
       "tips": {
-        "context": "模型下载完成后，您可能需要重新索引追踪目标的嵌入。",
-        "documentation": "阅读文档"
+        "context": "模型下载完成后，您可能需要重新索引追踪目标的嵌入。"
       },
       "error": "发生错误。请检查Frigate日志。"
     }
@@ -34,58 +33,11 @@
     "details": "详情",
     "snapshot": "快照",
     "video": "视频",
-    "object_lifecycle": "目标全周期",
     "thumbnail": "缩略图",
     "tracking_details": "追踪详情"
   },
   "objectLifecycle": {
-    "title": "目标全周期",
-    "noImageFound": "未找到此时间戳的图像。",
-    "createObjectMask": "创建目标/物体遮罩",
-    "adjustAnnotationSettings": "调整标注设置",
-    "scrollViewTips": "滚动查看此目标全周期的关键节点。",
-    "autoTrackingTips": "自动跟踪摄像头的边界框位置可能不准确。",
-    "lifecycleItemDesc": {
-      "visible": "检测到 {{label}}",
-      "entered_zone": "{{label}} 进入 {{zones}}",
-      "active": "{{label}} 变为活动状态",
-      "stationary": "{{label}} 变为静止状态",
-      "attribute": {
-        "faceOrLicense_plate": "检测到 {{label}} 的 {{attribute}}",
-        "other": "{{label}} 识别为 {{attribute}}"
-      },
-      "gone": "{{label}} 离开",
-      "heard": "听到 {{label}}",
-      "external": "检测到 {{label}}",
-      "header": {
-        "ratio": "得分",
-        "zones": "区域",
-        "area": "坐标区域"
-      }
-    },
-    "annotationSettings": {
-      "title": "标注设置",
-      "showAllZones": {
-        "title": "显示所有区域",
-        "desc": "始终在目标进入区域的帧上显示区域标记。"
-      },
-      "offset": {
-        "label": "标注偏移",
-        "desc": "这些数据来自摄像头的检测源，但是叠加在录制源的图像上。这两个流不太可能完全同步。因此，边界框和录像不会完全对齐。但是，可以使用 <code>annotation_offset</code> 字段来调整这个问题。",
-        "documentation": "阅读文档 ",
-        "millisecondsToOffset": "检测标注的偏移毫秒数。<em>默认值：0</em>",
-        "tips": "提示：假设有一个人从左向右走的事件片段。如果事件时间线上的边界框始终在人的左侧，则应该减小该值。同样，如果一个人从左向右走，而边界框始终在人的前面，则应该增加该值。",
-        "toast": {
-          "success": "{{camera}} 的标注偏移量已成功保存至配置文件。请重启Frigate生效。"
-        }
-      }
-    },
-    "carousel": {
-      "previous": "上一张",
-      "next": "下一张"
-    },
-    "count": "第 {{first}} 个，共 {{second}} 个",
-    "trackedPoint": "追踪点"
+    "noImageFound": "未找到此时间戳的图像。"
   },
   "details": {
     "item": {
@@ -180,10 +132,6 @@
     "downloadSnapshot": {
       "label": "下载快照",
       "aria": "下载快照"
-    },
-    "viewObjectLifecycle": {
-      "label": "查看目标全周期",
-      "aria": "显示目标的全周期"
     },
     "findSimilar": {
       "label": "查找相似项",
