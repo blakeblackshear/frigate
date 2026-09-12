@@ -58,8 +58,7 @@
       "success": "Izvoz se je uspešno začel. Datoteko si lahko ogledaš na strani z izvozi.",
       "error": {
         "failed": "Napaka pri izvozu: {{error}}",
-        "endTimeMustAfterStartTime": "Čas konca mora biti po času začetka",
-        "noVaildTimeSelected": "Ni izbranega veljavnega časovnega obdobja"
+        "endTimeMustAfterStartTime": "Čas konca mora biti po času začetka"
       },
       "view": "Poglej"
     },
@@ -77,8 +76,7 @@
     "restreaming": {
       "disabled": "Ponovno pretakanje za to kamero ni omogočeno.",
       "desc": {
-        "title": "Nastavi go2rtc za dodatne možnosti ogleda v živo in zvok za to kamero.",
-        "readTheDocumentation": "Preberi dokumentacijo"
+        "title": "Nastavi go2rtc za dodatne možnosti ogleda v živo in zvok za to kamero."
       }
     },
     "showStats": {
