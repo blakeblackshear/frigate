@@ -16,18 +16,6 @@
         "desc": "Gli oggetti in posizioni che si desidera evitare non sono falsi positivi. Inviarli come falsi positivi confonderà il modello."
       },
       "review": {
-        "false": {
-          "label": "Non confermare questa etichetta per Frigate Plus",
-          "false_one": "Questo non è un {{label}}",
-          "false_many": "Questi non sono un {{label}}",
-          "false_other": "Questi non sono un {{label}}"
-        },
-        "true": {
-          "label": "Conferma questa etichetta per Frigate Plus",
-          "true_one": "Questo è un {{label}}",
-          "true_many": "Questi sono {{label}}",
-          "true_other": "Questi sono {{label}}"
-        },
         "state": {
           "submitted": "Inviato"
         },
@@ -69,7 +57,6 @@
       "error": {
         "failed": "Impossibile mettere in coda l'esportazione: {{error}}",
         "endTimeMustAfterStartTime": "L'ora di fine deve essere successiva all'ora di inizio",
-        "noVaildTimeSelected": "Nessun intervallo di tempo valido selezionato",
         "noValidTimeSelected": "Nessun intervallo temporale valido selezionato"
       },
       "view": "Visualizzazione",
@@ -147,9 +134,6 @@
         "started_one": "Avviata 1 esportazione. Apertura del caso in corso.",
         "started_many": "Avviate {{count}} esportazioni. Apertura del caso in corso.",
         "started_other": "Avviate {{count}} esportazioni. Apertura del caso in corso.",
-        "startedNoCase_one": "Avviata 1 esportazione.",
-        "startedNoCase_many": "Avviate {{count}} esportazioni.",
-        "startedNoCase_other": "Avviate {{count}} esportazioni.",
         "partial": "Avviate {{successful}} esportazioni su un totale di {{total}}. Fallite: {{failedItems}}",
         "failed": "Impossibile avviare {{total}} esportazioni. Errori: {{failedItems}}"
       }
@@ -165,8 +149,7 @@
     "restreaming": {
       "disabled": "La ritrasmissione non è abilitata per questa telecamera.",
       "desc": {
-        "title": "Imposta go2rtc per opzioni aggiuntive di visualizzazione dal vivo e audio per questa telecamera.",
-        "readTheDocumentation": "Leggi la documentazione"
+        "title": "Imposta go2rtc per opzioni aggiuntive di visualizzazione dal vivo e audio per questa telecamera."
       }
     }
   },
