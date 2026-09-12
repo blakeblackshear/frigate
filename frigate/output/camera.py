@@ -122,17 +122,19 @@ class BroadcastThread(threading.Thread):
                     ws_iter = iter(websockets.values())
 
                 for ws in ws_iter:
-                    if (
-                        not ws.terminated
-                        and ws.environ["PATH_INFO"] == f"/{self.camera}"
-                        and ws_has_camera_access(ws, self.camera, self.config)
-                    ):
-                        try:
-                            ws.send(buf, binary=True)
-                        except ValueError:
-                            pass
-                        except (BrokenPipeError, ConnectionResetError) as e:
-                            logger.debug(f"Websocket unexpectedly closed {e}")
+                    try:
+                        if (
+                            ws.terminated
+                            or ws.environ["PATH_INFO"] != f"/{self.camera}"
+                            or not ws_has_camera_access(ws, self.camera, self.config)
+                        ):
+                            continue
+
+                        ws.send(buf, binary=True)
+                    except Exception as e:
+                        # ws4py tears the client down on another thread, so the
+                        # exception type depends on timing; don't stop the loop.
+                        logger.debug(f"Websocket unexpectedly closed {e}")
             elif self.converter.process.poll() is not None:
                 break
 
