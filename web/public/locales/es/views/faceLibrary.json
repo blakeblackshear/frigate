@@ -6,12 +6,7 @@
     "nameCannotContainHash": "El nombre no puede contener #."
   },
   "details": {
-    "person": "Persona",
-    "confidence": "Confianza",
-    "face": "Detalles del rostro",
-    "faceDesc": "Detalles del objeto rastreado que generó este rostro",
     "timestamp": "Marca de tiempo",
-    "subLabelScore": "Puntuación de Etiqueta Secundaria",
     "scoreInfo": "La puntuación de etiqueta secundaria es la puntuación ponderada de todas las confidencias de rostros reconocidos, por lo que puede diferir de la puntuación mostrada en la instantánea.",
     "unknown": "Desconocido"
   },
@@ -21,8 +16,6 @@
     "desc": "Sube una imagen para escanear rostros e incluirla en {{pageToggle}}"
   },
   "createFaceLibrary": {
-    "title": "Crear colección",
-    "desc": "Crear una nueva colección",
     "new": "Crear nuevo rostro",
     "nextSteps": "Para construir una base sólida: <li>Usa la pestaña Reconocimientos Recientes para seleccionar y entrenar con imágenes de cada persona detectada.</li> <li>Céntrate en imágenes frontales para obtener los mejores resultados; evita entrenar con imágenes que capturen rostros de perfil.</li>"
   },
@@ -36,8 +29,6 @@
       "description": "Debes añadir al menos una cara a la biblioteca para que el reconocimiento facial funcione."
     }
   },
-  "selectItem": "Seleccionar {{item}}",
-  "selectFace": "Seleccionar rostro",
   "deleteFaceLibrary": {
     "title": "Eliminar nombre",
     "desc": "¿Estás seguro de que quieres eliminar la colección {{name}}? Esto eliminará permanentemente todos los rostros asociados."
@@ -84,7 +75,6 @@
       "reclassifyFailed": "Error al reclasificar el rostro: {{errorMessage}}"
     }
   },
-  "readTheDocs": "Leer la documentación",
   "trainFaceAs": "Entrenar rostro como:",
   "trainFace": "Entrenar rostro",
   "steps": {
@@ -107,7 +97,6 @@
   },
   "collections": "Colecciones",
   "nofaces": "No hay rostros disponibles",
-  "pixels": "{{area}}px",
   "reclassifyFace": "Reclasificar rostro",
   "reclassifyFaceAs": "Reclasificar rostro como:"
 }
