@@ -49,8 +49,6 @@
         "thresholdDesc": "Valorile mai mici detectează schimbări mai mici (1-255)",
         "minArea": "Arie minimă de schimbare",
         "minAreaDesc": "Dimensiunea minimă a unei singure regiuni în mișcare, ca procent din regiunea de interes",
-        "frameSkip": "Omitere cadre",
-        "frameSkipDesc": "Procesează fiecare al N-lea cadru. Setează asta la rata de cadre a camerei tale pentru a procesa un cadru pe secundă (ex. 5 pentru o cameră de 5 FPS, 30 pentru o cameră de 30 FPS). Valorile mai mari vor fi mai rapide, dar pot rata evenimente scurte de mișcare.",
         "maxResults": "Rezultate maxime",
         "maxResultsDesc": "Oprește-te după acest număr de marcaje de timp potrivite"
     },
