@@ -1,5 +1,4 @@
 {
-  "documentTitle": "V živo - Frigate",
   "documentTitle.withCamera": "{{camera}} - V živo - Frigate",
   "lowBandwidthMode": "Način nizke pasovne širine",
   "twoWayTalk": {
@@ -52,10 +51,6 @@
   "cameraAudio": {
     "enable": "Omogoči zvok kamere",
     "disable": "Onemogoči zvok kamere"
-  },
-  "camera": {
-    "enable": "Omogoči kamero",
-    "disable": "Onemogoči kamero"
   },
   "muteCameras": {
     "enable": "Utihni vse kamere",
@@ -119,15 +114,13 @@
     "title": "Pretok",
     "audio": {
       "tips": {
-        "title": "Zvok mora priti iz tvoje kamere in biti nastavljen v go2rtc za ta pretok.",
-        "documentation": "Preberi Dokumentacijo "
+        "title": "Zvok mora priti iz tvoje kamere in biti nastavljen v go2rtc za ta pretok."
       },
       "available": "Zvok je na voljo za ta pretok",
       "unavailable": "Zvok ni na voljo za ta pretok"
     },
     "twoWayTalk": {
       "tips": "Tvoja naprava mora podpirati to funkcijo, WebRTC pa mora biti nastavljen za dvosmerni pogovor.",
-      "tips.documentation": "Preberi dokumentacijo ",
       "available": "Dvosmerni pogovor je na voljo za ta pretok",
       "unavailable": "Dvosmerni pogovor ni na voljo za ta pretok"
     },
@@ -145,7 +138,6 @@
   },
   "cameraSettings": {
     "title": "Nastavitve kamere {{camera}}",
-    "cameraEnabled": "Kamera omogočena",
     "objectDetection": "Zaznavanje objektov",
     "recording": "Snemanje",
     "snapshots": "Posnetki",
@@ -161,8 +153,7 @@
       "all": "Vse",
       "motion": "Gibanje",
       "active_objects": "Aktivni objekti"
-    },
-    "notAllTips": "Vaša konfiguracija hranjenja posnetkov {{source}} je nastavljena na način <code>: {{effectiveRetainMode}}</code>, zato bo ta posnetek na zahtevo hranil samo segmente z {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Uredi postavitev",
