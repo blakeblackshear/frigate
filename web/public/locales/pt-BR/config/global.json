@@ -90,7 +90,11 @@
             "label": "Transcrição em tempo real",
             "description": "Ative a transcrição ao vivo por streaming para o áudio à medida que ele é recebido."
         },
-        "description": "Configurações de transcrição de áudio e voz ao vivo para eventos e legendas em tempo real."
+        "description": "Configurações de transcrição de áudio e voz ao vivo para eventos e legendas em tempo real.",
+        "enabled": {
+            "label": "Habilitar a transcrição de áudio",
+            "description": "Ativar ou desativar a transcrição automática de áudio para todas as câmeras; pode ser configurado individualmente por câmera."
+        }
     },
     "detect": {
         "enabled": {
@@ -228,19 +232,15 @@
         }
     },
     "birdseye": {
-        "mode": {
-            "label": "Modo de rastreamento",
-            "description": "Modo de inclusão de câmeras no Birdseye: 'objetos', 'movimento' ou 'contínuo'."
-        },
         "order": {
             "label": "Posição",
             "description": "Posição numérica que controla a ordem da câmera no layout de vista aérea (Birdseye)."
         },
-        "label": "Birdseye",
-        "description": "Configurações para a visualização composta \"Birdseye\", que combina múltiplas transmissões de câmera em um único layout.",
+        "label": "Visão Panorâmica",
+        "description": "Configurações para a visualização composta \"Panorâmica\", que combina múltiplas transmissões de câmera em um único layout.",
         "enabled": {
-            "label": "Ativar Birdseye",
-            "description": "Habilita ou desabilita a função Birdseye."
+            "label": "Ativar Visão Panorâmica",
+            "description": "Habilita ou desabilita a função Panorâmica."
         }
     },
     "live": {
@@ -702,7 +702,11 @@
             "label": "Estado original de notificações",
             "description": "Indica se as notificações foram habilitadas na configuração estática original."
         },
-        "label": "Notificações"
+        "label": "Notificações",
+        "cooldown": {
+            "label": "Intervalo de espera",
+            "description": "Intervalo (em segundos) entre notificações para evitar o envio excessivo de mensagens aos destinatários."
+        }
     },
     "onvif": {
         "label": "ONVIF",
@@ -743,8 +747,41 @@
                 "description": "Meça as velocidades do motor PTZ na inicialização para melhorar a precisão do rastreamento. O Frigate atualizará a configuração com movement_weights após a calibração."
             },
             "zooming": {
-                "label": "Modo de zoom"
+                "label": "Modo de zoom",
+                "description": "Comportamento do controle de zoom: desabilitado (somente pan/tilt), absoluto (mais compatível), ou relativo (pan/tilt/zoom concorrentes)."
+            },
+            "required_zones": {
+                "description": "Objetos devem entrar uma dessas zonas antes que o rastreamento automático inicie.",
+                "label": "Zonas obrigatórias"
+            },
+            "return_preset": {
+                "label": "Retornar à posição padrao",
+                "description": "Nome ONVIF configurado no firmware da câmera para retorno de posição após o fim do rastreamento."
+            },
+            "timeout": {
+                "description": "Aguardar esses segundos após perder o rastreamento para voltar a câmera à posição padrão.",
+                "label": "Limite de tempo para retorno"
+            },
+            "track": {
+                "description": "Lista de tipos de objetos que devem disparar o rastreamento automático.",
+                "label": "Objetos rastreados"
+            },
+            "zoom_factor": {
+                "label": "Fator de zoom",
+                "description": "Controle do nível de zoom nos objetos rastreados. Valores baixos mantem mais cena na visão; Valores mais altos fecham no objeto mas podem perder o rastreamento. Valores entre 0.1 e 0.75."
+            },
+            "movement_weights": {
+                "label": "Sensibilidade de movimento",
+                "description": "Valores de calibragem gerados automaticamente pela calibragem da câmera. Não altere manualmente."
+            },
+            "enabled_in_config": {
+                "label": "Status original do rastreamento automático",
+                "description": "Campo interno que determina se o rastreamento automático estava habilitado na configuração."
             }
+        },
+        "ignore_time_mismatch": {
+            "label": "Ignorar diferença de tempo",
+            "description": "Ignorar diferenças de horário na sincronização entre câmera e servidor Frigate nas comunicações ONVIF."
         }
     },
     "timestamp_style": {
@@ -784,5 +821,8 @@
     },
     "mqtt": {
         "label": "MQTT"
+    },
+    "profiles": {
+        "label": "Perfis"
     }
 }

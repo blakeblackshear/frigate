@@ -204,19 +204,15 @@
         }
     },
     "birdseye": {
-        "mode": {
-            "label": "Modo de rastreamento",
-            "description": "Modo de inclusão de câmeras no Birdseye: 'objetos', 'movimento' ou 'contínuo'."
-        },
         "order": {
             "label": "Posição",
             "description": "Posição numérica que controla a ordem da câmera no layout de vista aérea (Birdseye)."
         },
-        "label": "Birdseye",
-        "description": "Configurações para a visualização composta \"Birdseye\", que combina múltiplas transmissões de câmera em um único layout.",
+        "label": "Visão Panorâmica",
+        "description": "Configurações para a visualização composta \"Panorâmica\", que combina múltiplas transmissões de câmera em um único layout.",
         "enabled": {
-            "label": "Ativar Birdseye",
-            "description": "Habilita ou desabilita a função Birdseye."
+            "label": "Ativar Visão Panorâmica",
+            "description": "Habilita ou desabilita a função Panorâmica."
         }
     },
     "live": {
@@ -693,7 +689,11 @@
             "description": "Indica se as notificações foram habilitadas na configuração estática original."
         },
         "label": "Notificações",
-        "description": "Configurações para ativar e controlar notificações para esta câmera."
+        "description": "Configurações para ativar e controlar notificações para esta câmera.",
+        "cooldown": {
+            "label": "Intervalo de espera",
+            "description": "Intervalo (em segundos) entre notificações para evitar o envio excessivo de mensagens aos destinatários."
+        }
     },
     "onvif": {
         "label": "ONVIF",
@@ -734,8 +734,41 @@
                 "description": "Meça as velocidades do motor PTZ na inicialização para melhorar a precisão do rastreamento. O Frigate atualizará a configuração com movement_weights após a calibração."
             },
             "zooming": {
-                "label": "Modo de zoom"
+                "label": "Modo de zoom",
+                "description": "Comportamento do controle de zoom: desabilitado (somente pan/tilt), absoluto (mais compatível), ou relativo (pan/tilt/zoom concorrentes)."
+            },
+            "required_zones": {
+                "description": "Objetos devem entrar uma dessas zonas antes que o rastreamento automático inicie.",
+                "label": "Zonas obrigatórias"
+            },
+            "return_preset": {
+                "label": "Retornar à posição padrao",
+                "description": "Nome ONVIF configurado no firmware da câmera para retorno de posição após o fim do rastreamento."
+            },
+            "timeout": {
+                "description": "Aguardar esses segundos após perder o rastreamento para voltar a câmera à posição padrão.",
+                "label": "Limite de tempo para retorno"
+            },
+            "track": {
+                "description": "Lista de tipos de objetos que devem disparar o rastreamento automático.",
+                "label": "Objetos rastreados"
+            },
+            "zoom_factor": {
+                "label": "Fator de zoom",
+                "description": "Controle do nível de zoom nos objetos rastreados. Valores baixos mantem mais cena na visão; Valores mais altos fecham no objeto mas podem perder o rastreamento. Valores entre 0.1 e 0.75."
+            },
+            "movement_weights": {
+                "label": "Sensibilidade de movimento",
+                "description": "Valores de calibragem gerados automaticamente pela calibragem da câmera. Não altere manualmente."
+            },
+            "enabled_in_config": {
+                "label": "Status original do rastreamento automático",
+                "description": "Campo interno que determina se o rastreamento automático estava habilitado na configuração."
             }
+        },
+        "ignore_time_mismatch": {
+            "label": "Ignorar diferença de tempo",
+            "description": "Ignorar diferenças de horário na sincronização entre câmera e servidor Frigate nas comunicações ONVIF."
         }
     },
     "timestamp_style": {
@@ -809,5 +842,111 @@
     "best_image_timeout": {
         "label": "Tempo limite para a imagem ideal",
         "description": "Quanto tempo aguardar pela imagem com a maior pontuação de confiança."
+    },
+    "type": {
+        "label": "Tipo de câmera",
+        "description": "Tipo de Câmera"
+    },
+    "ui": {
+        "label": "Interface da Câmera",
+        "description": "Mostra ordenação e visibilidade para essa câmera na interface do usuário. Ordenação afeta o painel padrão. Para controle mais granular, usar grupos de câmeras.",
+        "order": {
+            "label": "Ordem na Interface de Usuário",
+            "description": "Número usado para ordenar a câmera na interface do usuário (painel padrão e listas); Números maiores aparecem no final."
+        },
+        "dashboard": {
+            "label": "Mostrar no Painel ao Vivo",
+            "description": "Alternar se esta câmera é visível no painel ao vivo de Todas as câmeras padrão. A câmera permanece disponível em qualquer lugar na interface do usuário, incluindo grupos de câmera e configurações."
+        },
+        "review": {
+            "label": "Mostrar em revisão",
+            "description": "Alternar se esta câmera é visível em revisão (a página de revisão e seu filtro de câmera, revisão de movimento e a visão do histórico)."
+        }
+    },
+    "webui_url": {
+        "label": "URL da câmera",
+        "description": "URL para visitar a câmera diretamente da página do sistema"
+    },
+    "profiles": {
+        "label": "Perfis",
+        "description": "Perfis de configuração nomeados com sobreposições parciais que podem ser ativados no tempo de execução."
+    },
+    "zones": {
+        "label": "Zonas",
+        "description": "Zonas permitem que você defina uma área específica do quadro para que você possa determinar se um objeto está ou não em uma área em particular.",
+        "friendly_name": {
+            "label": "Nome da zona",
+            "description": "Um nome amigável para a zona, exibido na interface do usuário. Se não estiver definido, será utilizada uma versão formatada do nome da zona."
+        },
+        "enabled": {
+            "label": "Habilitado",
+            "description": "Ativar ou desativar esta zona. As zonas desabilitadas são ignoradas no tempo de execução."
+        },
+        "enabled_in_config": {
+            "label": "Acompanhar o estado original da zona."
+        },
+        "filters": {
+            "label": "Filtros de zona",
+            "description": "Filtros para aplicar a objetos dentro desta zona. Usado para reduzir falsos positivos ou restringir quais objetos são considerados presentes na zona.",
+            "min_area": {
+                "label": "Área mínima do objeto",
+                "description": "Área mínima da caixa delimitadora (em pixels ou porcentagem) necessária para este tipo de objeto. Pode ser especificada em pixels (inteiro) ou porcentagem (valor de ponto flutuante entre 0,000001 e 0,99)."
+            },
+            "max_area": {
+                "label": "Área máxima do objeto",
+                "description": "Área máxima da caixa delimitadora (pixels ou porcentagem) permitida para este tipo de objeto. Pode ser pixels (int) ou porcentagem (float entre 0,000001 e 0,99)."
+            },
+            "min_ratio": {
+                "label": "Razão de aspecto mínimo",
+                "description": "Razão mínima entre largura e altura necessária para que a caixa delimitadora se qualifique."
+            },
+            "max_ratio": {
+                "label": "Razão de aspecto máxima",
+                "description": "Razão máxima entre largura e altura permitida para que a caixa delimitadora qualifique."
+            },
+            "threshold": {
+                "label": "Limiar de confiança",
+                "description": "Limiar médio de confiança de detecção necessário para que o objeto seja considerado um verdadeiro positivo."
+            },
+            "min_score": {
+                "label": "Confiança mínima",
+                "description": "Confiança mínima de detecção em um único quadro necessária para que o objeto seja contabilizado."
+            },
+            "mask": {
+                "label": "Máscara com filtro",
+                "description": "Coordenadas do polígono que definem onde este filtro é aplicado dentro do quadro."
+            },
+            "raw_mask": {
+                "label": "Máscara Bruta"
+            }
+        },
+        "coordinates": {
+            "label": "Coordenadas",
+            "description": "Coordenadas de polígono que definem a zona. Pode ser uma string separada por vírgula ou uma lista de strings de coordenadas. As coordenadas devem ser relativas (0-1) ou absoluta (legado)."
+        },
+        "distances": {
+            "label": "Distâncias do mundo real",
+            "description": "Distâncias do mundo real opcionais para cada lado da zona quadrilateral, usado para cálculos de velocidade ou distância. Deve ter exatamente 4 valores se definido."
+        },
+        "inertia": {
+            "label": "Quadros de inércia",
+            "description": "O número de quadros consecutivos de um objeto deve ser detectado na zona antes de ser considerado presente. Ajuda a filtrar deteções transitórias."
+        },
+        "loitering_time": {
+            "label": "Segundos para Vadiagem",
+            "description": "Número de segundos que um objeto deve permanecer na zona para ser considerado vadiagem. Configurar 0 para desabilitar detecção de vadiagem."
+        },
+        "speed_threshold": {
+            "label": "Velocidade mínima",
+            "description": "Velocidade mínima (em unidades da vida real se as distancias estiverem configuradas) necessário para um objeto ser considerado presente na zona. Usado para zonas com gatilhos de velocidade."
+        },
+        "objects": {
+            "label": "Gatilhos de objetos",
+            "description": "Lista de tipos de objetos (do mapa de titulos) que podem disparar esta zona. Pode ser uma string ou uma lista de strings. Se vazio, todos os objetos são considerados."
+        }
+    },
+    "enabled_in_config": {
+        "label": "Estado da câmera original",
+        "description": "Acompanhar o status original da camera."
     }
 }

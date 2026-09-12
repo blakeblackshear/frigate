@@ -41,8 +41,6 @@
   "selected_other": "{{count}} selecionado(s)",
   "camera": "Câmera",
   "detected": "detectado",
-  "suspiciousActivity": "Atividade Suspeita",
-  "threateningActivity": "Atividade de Ameaça",
   "detail": {
     "noDataFound": "Nenhum dado de detalhe para revisar",
     "aria": "Alternar visualização de detalhe",

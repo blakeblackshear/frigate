@@ -12,7 +12,6 @@
     "title": "Stream Offiline",
     "desc": "Nenhum quadro foi recebido na stream {{cameraName}}<code>detect</code>, checar registros de erros"
   },
-  "cameraDisabled": "A câmera está desativada",
   "stats": {
     "streamType": {
       "title": "Tipo de fluxo:",
