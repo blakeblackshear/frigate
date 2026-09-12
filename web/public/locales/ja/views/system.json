@@ -105,11 +105,6 @@
       },
       "npuUsage": "NPU 使用率",
       "npuMemory": "NPU メモリ",
-      "intelGpuWarning": {
-        "title": "Intel GPU 統計情報の警告",
-        "message": "GPU の統計情報を取得できません",
-        "description": "これは Intel の GPU 統計取得ツール（intel_gpu_top）における既知の不具合です。ハードウェアアクセラレーションやオブジェクト検知が (i)GPU 上で正しく動作している場合でも、GPU 使用率が 0% と繰り返し表示されることがあります。これは Frigate の不具合ではありません。ホストを再起動することで一時的に解消し、GPU が正常に動作していることを確認できます。本問題はパフォーマンスには影響しません。"
-      },
       "gpuCompute": "GPU 演算 / エンコード",
       "gpuTemperature": "GPU 温度",
       "npuTemperature": "NPU 温度"
@@ -185,8 +180,6 @@
         "gap": "キーフレームの間隔（最小／平均／最大）：",
         "segmentLength": "録画セグメントの長さ：",
         "ok": "キーフレーム間隔は約 {{seconds}} 秒で、録画および再生に適しています。",
-        "warning": "キーフレームがまばら、または変動的（最長間隔 ~{{seconds}}秒）で、スマートコーデック（H.264+/H.265+）である可能性が高いです。これは推奨されません。",
-        "error": "キーフレーム間隔（約{{seconds}}秒）が録画セグメントの長さ（{{segmentTime}}秒）を超えています。一部のセグメントにキーフレームが含まれない場合があり、再生に支障をきたす可能性があります。カメラでスマート/+コーデックを無効にするか、キーフレーム間隔を短縮してください。",
         "unknown": "キーフレーム間隔を特定できませんでした。",
         "recordDisabled": "このカメラでは録画が無効になっています。"
       }
@@ -241,7 +234,6 @@
     "cameraIsOffline": "{{camera}} はオフラインです",
     "detectIsSlow": "{{detect}} が遅い（{{speed}} ms）",
     "detectIsVerySlow": "{{detect}} が非常に遅い（{{speed}} ms）",
-    "shmTooLow": "/dev/shm の割り当て（{{total}} MB）は少なくとも {{min}} MB に増やす必要があります。",
     "debugReplayActive": "デバッグリプレイセッションが実行中です"
   },
   "enrichments": {
