@@ -180,8 +180,6 @@
         "gap": "키프레임 간격 (최소 / 평균 / 최대):",
         "segmentLength": "녹화 세그먼트 길이:",
         "ok": "키프레임이 약 {{seconds}}초마다 배치되어 녹화 및 재생에 적합합니다.",
-        "warning": "키프레임 간격이 불규칙하거나 멉니다(최대 간격 약 {{seconds}}초). 스마트 코덱(H.264+/H.265+)일 가능성이 높으며 권장되지 않습니다.",
-        "error": "키프레임 간격(약 {{seconds}}초)이 녹화 세그먼트 길이({{segmentTime}}초)를 초과합니다. 일부 세그먼트에 키프레임이 없어 재생에 문제가 발생할 수 있습니다. 카메라에서 스마트/+ 코덱을 끄거나 키프레임 간격을 줄이세요.",
         "unknown": "키프레임 간격을 확인할 수 없습니다.",
         "recordDisabled": "이 카메라의 녹화 기능이 비활성화되어 있습니다."
       }
@@ -236,7 +234,6 @@
     "cameraIsOffline": "{{camera}} 카메라가 오프라인 상태입니다",
     "detectIsSlow": "{{detect}} 처리가 느립니다 ({{speed}}ms)",
     "detectIsVerySlow": "{{detect}} 처리가 매우 느립니다 ({{speed}}ms)",
-    "shmTooLow": "/dev/shm 할당량({{total}}MB)을 최소 {{min}}MB 이상으로 늘려야 합니다.",
     "debugReplayActive": "디버그 리플레이 세션이 실행 중입니다"
   },
   "enrichments": {
