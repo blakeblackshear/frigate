@@ -57,6 +57,12 @@ import {
   type SectionStatus,
 } from "@/views/settings/SingleSectionPage";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
+import {
+  allSettingsViews,
+  settingsViewGroups,
+  ALLOWED_VIEWS_FOR_VIEWER,
+  type SettingsType,
+} from "@/types/settings";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -116,70 +122,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
-
-const allSettingsViews = [
-  "uiSettings",
-  "profiles",
-  "globalDetect",
-  "globalRecording",
-  "globalSnapshots",
-  "globalFfmpeg",
-  "globalMotion",
-  "globalObjects",
-  "globalReview",
-  "globalAudioEvents",
-  "globalLivePlayback",
-  "globalTimestampStyle",
-  "systemDatabase",
-  "systemTls",
-  "systemAuthentication",
-  "systemNetworking",
-  "systemProxy",
-  "systemUi",
-  "systemLogging",
-  "systemEnvironmentVariables",
-  "systemTelemetry",
-  "systemBirdseye",
-  "systemDetectorsAndModel",
-  "systemMqtt",
-  "systemGo2rtcStreams",
-  "integrationSemanticSearch",
-  "integrationGenerativeAi",
-  "integrationFaceRecognition",
-  "integrationLpr",
-  "integrationObjectClassification",
-  "integrationAudioTranscription",
-  "cameraDetect",
-  "cameraFfmpeg",
-  "cameraRecording",
-  "cameraSnapshots",
-  "cameraMotion",
-  "cameraObjects",
-  "cameraReview",
-  "cameraAudioEvents",
-  "cameraAudioTranscription",
-  "cameraNotifications",
-  "cameraLivePlayback",
-  "cameraBirdseye",
-  "cameraFaceRecognition",
-  "cameraLpr",
-  "cameraMqttConfig",
-  "cameraOnvif",
-  "cameraTimestampStyle",
-  "cameraManagement",
-  "masksAndZones",
-  "motionTuner",
-  "enrichments",
-  "triggers",
-  "debug",
-  "users",
-  "roles",
-  "notifications",
-  "frigateplus",
-  "mediaSync",
-  "regionGrid",
-] as const;
-type SettingsType = (typeof allSettingsViews)[number];
 
 const parsePendingDataKey = (pendingDataKey: string) => {
   if (pendingDataKey.includes("::")) {
@@ -300,153 +242,75 @@ const CameraTimestampStyleSettingsPage = createSectionPage(
   "camera",
 );
 
-const settingsGroups = [
-  {
-    label: "general",
-    items: [{ key: "uiSettings", component: UiSettingsView }],
-  },
-  {
-    label: "globalConfig",
-    items: [
-      { key: "profiles", component: ProfilesView },
-      { key: "cameraManagement", component: CameraManagementView },
-      { key: "globalDetect", component: GlobalDetectSettingsPage },
-      { key: "globalObjects", component: GlobalObjectsSettingsPage },
-      { key: "globalMotion", component: GlobalMotionSettingsPage },
-      { key: "globalFfmpeg", component: GlobalFfmpegSettingsPage },
-      { key: "globalRecording", component: GlobalRecordingSettingsPage },
-      { key: "globalSnapshots", component: GlobalSnapshotsSettingsPage },
-      { key: "globalReview", component: GlobalReviewSettingsPage },
-      { key: "globalAudioEvents", component: GlobalAudioEventsSettingsPage },
-      {
-        key: "globalLivePlayback",
-        component: GlobalLivePlaybackSettingsPage,
-      },
-      {
-        key: "globalTimestampStyle",
-        component: GlobalTimestampStyleSettingsPage,
-      },
-    ],
-  },
-  {
-    label: "cameras",
-    items: [
-      { key: "cameraDetect", component: CameraDetectSettingsPage },
-      { key: "cameraObjects", component: CameraObjectsSettingsPage },
-      { key: "cameraMotion", component: CameraMotionSettingsPage },
-      { key: "motionTuner", component: MotionTunerView },
-      { key: "cameraFfmpeg", component: CameraFfmpegSettingsPage },
-      { key: "cameraRecording", component: CameraRecordingSettingsPage },
-      { key: "cameraSnapshots", component: CameraSnapshotsSettingsPage },
-      { key: "masksAndZones", component: MasksAndZonesView },
-      { key: "cameraReview", component: CameraReviewSettingsPage },
-      { key: "cameraAudioEvents", component: CameraAudioEventsSettingsPage },
-      {
-        key: "cameraAudioTranscription",
-        component: CameraAudioTranscriptionSettingsPage,
-      },
-      { key: "cameraBirdseye", component: CameraBirdseyeSettingsPage },
-      {
-        key: "cameraLivePlayback",
-        component: CameraLivePlaybackSettingsPage,
-      },
-      {
-        key: "cameraNotifications",
-        component: CameraNotificationsSettingsPage,
-      },
-      {
-        key: "cameraFaceRecognition",
-        component: CameraFaceRecognitionSettingsPage,
-      },
-      { key: "cameraLpr", component: CameraLprSettingsPage },
-      { key: "cameraOnvif", component: CameraOnvifSettingsPage },
-      { key: "cameraMqttConfig", component: CameraMqttConfigSettingsPage },
-      {
-        key: "cameraTimestampStyle",
-        component: CameraTimestampStyleSettingsPage,
-      },
-    ],
-  },
-  {
-    label: "enrichments",
-    items: [
-      {
-        key: "integrationSemanticSearch",
-        component: IntegrationSemanticSearchSettingsPage,
-      },
-      {
-        key: "integrationGenerativeAi",
-        component: IntegrationGenerativeAiSettingsPage,
-      },
-      {
-        key: "integrationFaceRecognition",
-        component: IntegrationFaceRecognitionSettingsPage,
-      },
-      { key: "integrationLpr", component: IntegrationLprSettingsPage },
-      {
-        key: "integrationObjectClassification",
-        component: IntegrationObjectClassificationSettingsPage,
-      },
-      { key: "triggers", component: TriggerView },
-      {
-        key: "integrationAudioTranscription",
-        component: IntegrationAudioTranscriptionSettingsPage,
-      },
-    ],
-  },
-  {
-    label: "system",
-    items: [
-      {
-        key: "systemGo2rtcStreams",
-        component: Go2RtcStreamsSettingsView,
-      },
-      {
-        key: "systemDetectorsAndModel",
-        component: SystemDetectionModelsPage,
-      },
-      { key: "systemDatabase", component: SystemDatabaseSettingsPage },
-      { key: "systemMqtt", component: SystemMqttSettingsPage },
-      { key: "systemBirdseye", component: SystemBirdseyeSettingsPage },
-      { key: "systemTls", component: SystemTlsSettingsPage },
-      {
-        key: "systemAuthentication",
-        component: SystemAuthenticationSettingsPage,
-      },
-      { key: "systemNetworking", component: SystemNetworkingSettingsPage },
-      { key: "systemProxy", component: SystemProxySettingsPage },
-      { key: "systemUi", component: SystemUiSettingsPage },
-      { key: "systemLogging", component: SystemLoggingSettingsPage },
-      {
-        key: "systemEnvironmentVariables",
-        component: SystemEnvironmentVariablesSettingsPage,
-      },
-      { key: "systemTelemetry", component: SystemTelemetrySettingsPage },
-    ],
-  },
-  {
-    label: "users",
-    items: [
-      { key: "users", component: UsersView },
-      { key: "roles", component: RolesView },
-    ],
-  },
-  {
-    label: "notifications",
-    items: [{ key: "notifications", component: NotificationsSettingsPage }],
-  },
-  {
-    label: "frigateplus",
-    items: [{ key: "frigateplus", component: FrigatePlusSettingsView }],
-  },
-  {
-    label: "maintenance",
-    items: [
-      { key: "mediaSync", component: MediaSyncSettingsView },
-      { key: "regionGrid", component: RegionGridSettingsView },
-    ],
-  },
-];
+// Every section key in `settingsViewGroups` maps to the view that renders it.
+const SECTION_VIEWS = {
+  uiSettings: UiSettingsView,
+  profiles: ProfilesView,
+  cameraManagement: CameraManagementView,
+  globalDetect: GlobalDetectSettingsPage,
+  globalObjects: GlobalObjectsSettingsPage,
+  globalMotion: GlobalMotionSettingsPage,
+  globalFfmpeg: GlobalFfmpegSettingsPage,
+  globalRecording: GlobalRecordingSettingsPage,
+  globalSnapshots: GlobalSnapshotsSettingsPage,
+  globalReview: GlobalReviewSettingsPage,
+  globalAudioEvents: GlobalAudioEventsSettingsPage,
+  globalLivePlayback: GlobalLivePlaybackSettingsPage,
+  globalTimestampStyle: GlobalTimestampStyleSettingsPage,
+  cameraDetect: CameraDetectSettingsPage,
+  cameraObjects: CameraObjectsSettingsPage,
+  cameraMotion: CameraMotionSettingsPage,
+  motionTuner: MotionTunerView,
+  cameraFfmpeg: CameraFfmpegSettingsPage,
+  cameraRecording: CameraRecordingSettingsPage,
+  cameraSnapshots: CameraSnapshotsSettingsPage,
+  masksAndZones: MasksAndZonesView,
+  cameraReview: CameraReviewSettingsPage,
+  cameraAudioEvents: CameraAudioEventsSettingsPage,
+  cameraAudioTranscription: CameraAudioTranscriptionSettingsPage,
+  cameraBirdseye: CameraBirdseyeSettingsPage,
+  cameraLivePlayback: CameraLivePlaybackSettingsPage,
+  cameraNotifications: CameraNotificationsSettingsPage,
+  cameraFaceRecognition: CameraFaceRecognitionSettingsPage,
+  cameraLpr: CameraLprSettingsPage,
+  cameraOnvif: CameraOnvifSettingsPage,
+  cameraMqttConfig: CameraMqttConfigSettingsPage,
+  cameraTimestampStyle: CameraTimestampStyleSettingsPage,
+  integrationSemanticSearch: IntegrationSemanticSearchSettingsPage,
+  integrationGenerativeAi: IntegrationGenerativeAiSettingsPage,
+  integrationFaceRecognition: IntegrationFaceRecognitionSettingsPage,
+  integrationLpr: IntegrationLprSettingsPage,
+  integrationObjectClassification: IntegrationObjectClassificationSettingsPage,
+  triggers: TriggerView,
+  integrationAudioTranscription: IntegrationAudioTranscriptionSettingsPage,
+  systemGo2rtcStreams: Go2RtcStreamsSettingsView,
+  systemDetectorsAndModel: SystemDetectionModelsPage,
+  systemDatabase: SystemDatabaseSettingsPage,
+  systemMqtt: SystemMqttSettingsPage,
+  systemBirdseye: SystemBirdseyeSettingsPage,
+  systemTls: SystemTlsSettingsPage,
+  systemAuthentication: SystemAuthenticationSettingsPage,
+  systemNetworking: SystemNetworkingSettingsPage,
+  systemProxy: SystemProxySettingsPage,
+  systemUi: SystemUiSettingsPage,
+  systemLogging: SystemLoggingSettingsPage,
+  systemEnvironmentVariables: SystemEnvironmentVariablesSettingsPage,
+  systemTelemetry: SystemTelemetrySettingsPage,
+  users: UsersView,
+  roles: RolesView,
+  notifications: NotificationsSettingsPage,
+  frigateplus: FrigatePlusSettingsView,
+  mediaSync: MediaSyncSettingsView,
+  regionGrid: RegionGridSettingsView,
+};
+
+const settingsGroups = settingsViewGroups.map((group) => ({
+  label: group.label,
+  items: group.views.map((key) => ({
+    key,
+    component: SECTION_VIEWS[key],
+  })),
+}));
 
 const CAMERA_SELECT_BUTTON_PAGES = [
   "debug",
@@ -472,8 +336,6 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "triggers",
   "regionGrid",
 ];
-
-const ALLOWED_VIEWS_FOR_VIEWER = ["uiSettings", "notifications"];
 
 // keys for camera sections
 const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {

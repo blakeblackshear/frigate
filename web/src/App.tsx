@@ -2,6 +2,7 @@ import Providers from "@/context/providers";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Wrapper from "@/components/Wrapper";
 import Sidebar from "@/components/navigation/Sidebar";
+import CommandMenu from "@/components/menu/CommandMenu";
 
 import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
@@ -110,6 +111,7 @@ function DefaultAppView() {
     <div className="size-full overflow-hidden">
       <ChromeErrorBoundary>{isDesktop && <Sidebar />}</ChromeErrorBoundary>
       <ChromeErrorBoundary>{isDesktop && <Statusbar />}</ChromeErrorBoundary>
+      <ChromeErrorBoundary>{isDesktop && <CommandMenu />}</ChromeErrorBoundary>
       <ChromeErrorBoundary>{isMobile && <Bottombar />}</ChromeErrorBoundary>
       <div
         id="pageRoot"
