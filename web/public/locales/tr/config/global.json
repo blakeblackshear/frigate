@@ -121,10 +121,6 @@
             "label": "Kuşbakışı'nı etkinleştir",
             "description": "Kuşbakışı görünüm özelliğini etkinleştirir veya devre dışı bırakır."
         },
-        "mode": {
-            "label": "İzleme modu",
-            "description": "Kameraların Kuşbakışı'na dahil edilme modu: 'nesneler', 'hareket' veya 'sürekli'."
-        },
         "order": {
             "label": "Konum",
             "description": "Kameranın Kuşbakışı düzenindeki sıralamasını belirleyen sayısal konum."
