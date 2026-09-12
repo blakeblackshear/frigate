@@ -144,9 +144,11 @@ jobs:
             done'
       - name: Assert device access grants
         run: |
-          # a fake accelerator node created after boot, then the oneshot re-run
+          # a fake accelerator node created after boot, then the oneshot re-run.
+          # /command is on PATH only for s6-supervised services, and the
+          # with-contenv shebang resolves its execline helpers through PATH
           docker exec frigate mknod /dev/apex_9 c 120 99
-          docker exec frigate /etc/s6-overlay/s6-rc.d/init-devices/run
+          docker exec frigate sh -c 'export PATH=/command:$PATH; exec /etc/s6-overlay/s6-rc.d/init-devices/run'
           acl=$(docker exec frigate getfacl -p /dev/apex_9)
           echo "$acl"
           echo "$acl" | grep -q "user:frigate:rw-"
@@ -154,7 +156,7 @@ jobs:
           # the usb tree gets recursive grants plus a default ACL that
           # newly created nodes inherit (the Coral re-enumeration path)
           docker exec frigate sh -c 'mkdir -p /dev/bus/usb/001 && mknod /dev/bus/usb/001/002 c 189 1'
-          docker exec frigate /etc/s6-overlay/s6-rc.d/init-devices/run
+          docker exec frigate sh -c 'export PATH=/command:$PATH; exec /etc/s6-overlay/s6-rc.d/init-devices/run'
           docker exec frigate getfacl -p /dev/bus/usb/001 | grep -q "user:frigate:rwx"
           docker exec frigate sh -c 'mknod /dev/bus/usb/001/099 c 189 98 && chmod 664 /dev/bus/usb/001/099'
           inherited=$(docker exec frigate getfacl -p /dev/bus/usb/001/099)
@@ -171,7 +173,7 @@ jobs:
           # hardware that is absent must stay silent: the literal table entries
           # are not globs, so nullglob does not drop them and only an existence
           # check keeps them from warning on every boot
-          out=$(docker exec frigate /etc/s6-overlay/s6-rc.d/init-devices/run)
+          out=$(docker exec frigate sh -c 'export PATH=/command:$PATH; exec /etc/s6-overlay/s6-rc.d/init-devices/run')
           echo "$out"
           if echo "$out" | grep -q "WARN"; then
             echo "grant warned about device nodes that do not exist"; exit 1
@@ -395,7 +397,7 @@ jobs:
           # setfacl under a read-only rootfs, which nothing else covers:
           # init-devices exits early under --user, so that path is never reached
           docker exec frigate-rod mknod /dev/apex_9 c 120 99
-          docker exec frigate-rod /etc/s6-overlay/s6-rc.d/init-devices/run
+          docker exec frigate-rod sh -c 'export PATH=/command:$PATH; exec /etc/s6-overlay/s6-rc.d/init-devices/run'
           docker exec frigate-rod getfacl -p /dev/apex_9 | grep -q "user:frigate:rw-"
           docker rm -f frigate-rod
       - name: "Assert switching that install to user: still starts"
