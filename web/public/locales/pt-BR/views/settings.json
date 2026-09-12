@@ -2,7 +2,6 @@
   "documentTitle": {
     "default": "Configurações - Frigate",
     "authentication": "Configurações de Autenticação - Frigate",
-    "camera": "Configurações de Câmera - Frigate",
     "enrichments": "Configurações de Enriquecimento - Frigate",
     "masksAndZones": "Editor de Máscara e Zona - Frigate",
     "motionTuner": "Ajuste de Movimento - Frigate",
@@ -158,7 +157,6 @@
     "semanticSearch": {
       "title": "Busca Semântica",
       "desc": "A Busca Semântica no Frigate permite você encontrar objetos rastreados dentro dos seus itens revisados, usando ou a imagem em si, uma descrição de texto definida pelo usuário ou uma gerada automaticamente.",
-      "readTheDocumentation": "Leia a Documentação",
       "reindexNow": {
         "label": "Reindexar Agora",
         "desc": "A reindexação irá regenerar os embeddings para todos os objetos rastreados. Esse processo roda em segundo plano e pode demandar 100% da CPU e levar um tempo considerável dependendo do número de objetos rastreados que você possui.",
@@ -185,7 +183,6 @@
     "faceRecognition": {
       "title": "Reconhecimento Facial",
       "desc": "O reconhecimento facial permite que pessoas sejam associadas a nomes e quando seus rostos forem reconhecidos, o Frigate associará o nome da pessoa como um sub-rótulo. Essa informação é inclusa na UI, filtros e notificações.",
-      "readTheDocumentation": "Leia a Documentação",
       "modelSize": {
         "label": "Tamanho do Modelo",
         "desc": "O tamanho do modelo usado para reconhecimento facial.",
@@ -201,85 +198,12 @@
     },
     "licensePlateRecognition": {
       "title": "Reconhecimento de Placa de Identificação",
-      "desc": "O Frigate pode reconhecer placas de identificação em veículos e automáticamente adicionar os caracteres detectados ao campo placas_de_identificação_reconhecidas ou um nome conhecido como um sub-rótulo a objetos que são do tipo carro. Um uso típico é ler a placa de carros entrando em uma garagem ou carros passando pela rua.",
-      "readTheDocumentation": "Leia a Documentação"
+      "desc": "O Frigate pode reconhecer placas de identificação em veículos e automáticamente adicionar os caracteres detectados ao campo placas_de_identificação_reconhecidas ou um nome conhecido como um sub-rótulo a objetos que são do tipo carro. Um uso típico é ler a placa de carros entrando em uma garagem ou carros passando pela rua."
     },
     "restart_required": "Necessário reiniciar (configurações de enriquecimento foram alteradas)",
     "toast": {
       "success": "As regras de enriquecimento foram salvas. Reinicie o Frigate para aplicar as alterações.",
       "error": "Falha ao salvar alterações de configurações: {{errorMessage}}"
-    }
-  },
-  "camera": {
-    "title": "Configurações de Câmera",
-    "streams": {
-      "title": "Transmissões",
-      "desc": "Temporáriamente desativa a câmera até o Frigate reiniciar. Desativar a câmera completamente impede o processamento da transmissão dessa câmera pelo Frigate. Detecções, gravações e depuração estarão indisponíveis.<br /><em>Nota: Isso não desativa as retransmissões do go2rtc.</em>"
-    },
-    "review": {
-      "title": "Revisar",
-      "desc": "Temporariamente habilita/desabilita alertas e detecções para essa câmera até o Frigate reiniciar. Quando desabilitado, nenhum novo item de revisão será gerado. ",
-      "alerts": "Alertas ",
-      "detections": "Detecções "
-    },
-    "reviewClassification": {
-      "title": "Classificação de Revisões",
-      "desc": "O Frigate categoriza itens de revisão como Alertas e Detecções. Por padrão, todas as <em>pessoas</em> e <em>carros</em> são considerados alertas. Você pode refinar a categorização dos seus itens revisados configurando as zonas requeridas para eles.",
-      "readTheDocumentation": "Leia a Documentação",
-      "noDefinedZones": "Nenhuma zona definida para essa câmera.",
-      "selectAlertsZones": "Selecionar as zonas para Alertas",
-      "selectDetectionsZones": "Selecionar as zonas para Detecções",
-      "objectAlertsTips": "Todos os objetos {{alertsLabels}} em {{cameraName}} serão exibidos como Alertas.",
-      "zoneObjectAlertsTips": "Todos os {{alertsLabels}} objetos detectados em {{zone}} em {{cameraName}} serão exibidos como Alertas.",
-      "objectDetectionsTips": "Todos os objetos {{detectionsLabels}} não categorizados em {{cameraName}} serão exibidos como Detecções independente de qual zona eles estiverem.",
-      "zoneObjectDetectionsTips": {
-        "text": "Todos os objetos de {{detectionsLabels}} não categorizados em {{zone}} em {{cameraName}} serão exibidos como Detecções.",
-        "notSelectDetections": "Todos os objetos {{detectionsLabels}} detectados em {{zone}} em {{cameraName}} não categorizados como Alertas serão exibidos como Detecções independente da zona em que estiverem.",
-        "regardlessOfZoneObjectDetectionsTips": "Todos os objetos {{detectionsLabels}} não categorizados em {{cameraName}} serão exibidos como Detecções independente de quais zonas estiverem."
-      },
-      "unsavedChanges": "Configurações de Classificação de Revisões Não Salvas para {{camera}}",
-      "limitDetections": "Limitar detecções a zonas específicas",
-      "toast": {
-        "success": "A configuração de Revisão de Classificação foi salva. Reinicie o Frigate para aplicar as mudanças."
-      }
-    },
-    "object_descriptions": {
-      "title": "Descrições de Objeto por IA Generativa",
-      "desc": "Habilitar descrições por IA Generativa temporariamente para essa câmera. Quando desativada, as descrições geradas por IA não serão requisitadas para objetos rastreados para essa câmera."
-    },
-    "review_descriptions": {
-      "title": "Revisar Descrições de IA Generativa",
-      "desc": "Habilitar/desabilitar temporariamente descrições de revisão de IA Generativa para essa câmera. Quando desativada, as descrições de IA Generativa não serão solicitadas para revisão para essa câmera."
-    },
-    "addCamera": "Adicionar Câmera Nova",
-    "editCamera": "Editar Câmera:",
-    "selectCamera": "Selecione uma Câmera",
-    "backToSettings": "Voltar para as Configurções de Câmera",
-    "cameraConfig": {
-      "add": "Adicionar Câmera",
-      "edit": "Editar Câmera",
-      "description": "Configure as opções da câmera incluindo as de transmissão e papéis.",
-      "name": "Nome da Câmera",
-      "nameRequired": "Nome para a câmera é requerido",
-      "nameInvalid": "O nome da câmera deve contar apenas letras, números, sublinhado ou hífens",
-      "namePlaceholder": "ex: porta_da_frente",
-      "enabled": "Habilitado",
-      "ffmpeg": {
-        "inputs": "Transmissões de Entrada",
-        "path": "Caminho da Transmissão",
-        "pathRequired": "Um caminho para a transmissão é requerido",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "Regras",
-        "rolesRequired": "Ao menos um papel é requerido",
-        "rolesUnique": "Cada papel (áudio, detecção, gravação) pode ser atribuído a uma única transmissão",
-        "addInput": "Adicionar Transmissão de Entrada",
-        "removeInput": "Remover Transmissão de Entrada",
-        "inputsRequired": "Ao menos uma transmissão de entrada é requerida"
-      },
-      "toast": {
-        "success": "Câmera {{cameraName}} salva com sucesso"
-      },
-      "nameLength": "O nome da câmera deve ter ao menos 24 caracteres."
     }
   },
   "masksAndZones": {
@@ -381,7 +305,6 @@
       "speedEstimation": {
         "title": "Estimativa de Velocidade",
         "desc": "Habilitar estimativa de velocidade para objetos nesta zona. A zona deve ter exatamente 4 pontos.",
-        "docs": "Leia a documentação",
         "lineADistance": "Distância da linha A ({{unit}})",
         "lineBDistance": "Distância da Linha B ({{unit}})",
         "lineCDistance": "Distância da linha C ({{unit}})",
@@ -437,8 +360,7 @@
       "add": "Nova Máscara de Movimento",
       "edit": "Editar Máscara de Movimento",
       "context": {
-        "title": "Máscaras de movimento são usadas para prevenir tipos de movimento não desejados de ativarem uma detecção (exemplo: galhos de árvores, timestamps de câmeras). Máscaras de movimento devem ser usadas <em>com moderação</em>. Excesso de mascaramento tornará o rastreamento de objetos mais difícil.",
-        "documentation": "Leia a documentação"
+        "title": "Máscaras de movimento são usadas para prevenir tipos de movimento não desejados de ativarem uma detecção (exemplo: galhos de árvores, timestamps de câmeras). Máscaras de movimento devem ser usadas <em>com moderação</em>. Excesso de mascaramento tornará o rastreamento de objetos mais difícil."
       },
       "point_one": "{{count}} ponto",
       "point_many": "{{count}} pontos",
@@ -446,8 +368,7 @@
       "clickDrawPolygon": "Clique para desenhar um polígono na imagem.",
       "polygonAreaTooLarge": {
         "title": "A máscara de movimento está cobrindo {{polygonArea}}% do quadro da câmera. Máscaras de movimento grandes não são recomendadas.",
-        "tips": "Máscaras de movimento não previnem objetos de serem detectados. Em vez disso você deve usar uma zona obrigatória.",
-        "documentation": "Leia a documentação"
+        "tips": "Máscaras de movimento não previnem objetos de serem detectados. Em vez disso você deve usar uma zona obrigatória."
       },
       "toast": {
         "success": {
@@ -515,7 +436,6 @@
     "objectShapeFilterDrawing": {
       "desc": "Desenhe um retângulo na imagem para ver os detalhes da área e proporções",
       "tips": "Habilite essa opção para desenhar um retângulo na imagem da camera para mostrar a sua área e proporção. Esses valores podem ser usados para estabelecer parâmetros de filtro de formato de objetos na sua configuração.",
-      "document": "Leia a documentação ",
       "score": "Pontuação",
       "ratio": "Proporção",
       "area": "Área",
@@ -662,13 +582,11 @@
     "title": "Notificações",
     "notificationSettings": {
       "title": "Configurações de Notificação",
-      "desc": "O Frigate pode enviar notificações push nativamente ao seu dispositivo quando estiver sendo executado no navegador ou instalado como um PWA.",
-      "documentation": "Leia a Documentação"
+      "desc": "O Frigate pode enviar notificações push nativamente ao seu dispositivo quando estiver sendo executado no navegador ou instalado como um PWA."
     },
     "notificationUnavailable": {
       "title": "Notificações Indisponíveis",
-      "desc": "Notificações push da Web exigem um contexto seguro (<code>https://…</code>). Essa é uma limitação do navegador. Acesse o Frigate com seguraça para usar as notificações.",
-      "documentation": "Leia a Documentação"
+      "desc": "Notificações push da Web exigem um contexto seguro (<code>https://…</code>). Essa é uma limitação do navegador. Acesse o Frigate com seguraça para usar as notificações."
     },
     "globalSettings": {
       "title": "Configurações Globais",
@@ -722,12 +640,10 @@
     "snapshotConfig": {
       "title": "Configuração de Captura de Imagem",
       "desc": "Envios ao Frigate+ requerem tanto a captura de imagem normais quanto a captura de imagem <code>clean_copy</code> estarem habilitadas na sua configuração.",
-      "documentation": "Leia a documentação",
       "cleanCopyWarning": "Algumas câmeras estão com os snapshots desativados",
       "table": {
         "camera": "Câmera",
-        "snapshots": "Capturas de Imagem",
-        "cleanCopySnapshots": "Capturas de Imagem <code>clean_copy</code>"
+        "snapshots": "Capturas de Imagem"
       }
     },
     "unsavedChanges": "Alterações de configurações do Frigate+ não salvas",
@@ -760,7 +676,6 @@
       "description": "Descrição"
     },
     "actions": {
-      "alert": "Marcar como Alerta",
       "notification": "Enviar Notificação"
     },
     "dialog": {
@@ -816,11 +731,6 @@
           "error": {
             "min": "Ao menos uma ação deve ser selecionada."
           }
-        },
-        "friendly_name": {
-          "title": "Nome Amigável",
-          "placeholder": "Nomeie ou descreva esse gatilho",
-          "description": "Um nome amigável ou descritivo opcional para esse gatilho."
         }
       }
     },
@@ -942,23 +852,12 @@
       "brandInformation": "Informação da marca",
       "brandUrlFormat": "Para câmeras com o formato de URL RTSP como: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://nomedeusuario:senha@host:porta/caminho",
-      "testConnection": "Testar Conexão",
-      "testSuccess": "Teste de conexão bem sucedido!",
-      "testFailed": "Teste de conexão falhou. Favor verifique os dados e tente novamente.",
-      "streamDetails": "Detalhes do Stream",
-      "warnings": {
-        "noSnapshot": "Não foi possível adquirir uma captura de imagem do stream configurado."
-      },
       "errors": {
         "brandOrCustomUrlRequired": "Selecione a marca da câmera com o host/IP or selecione 'Outro' com uma URL customizada",
         "nameRequired": "Nome para a câmera requerido",
         "nameLength": "O nome da câmera deve ter 64 caracteres ou menos",
         "invalidCharacters": "Nome da câmera contém caracteres inválidos",
         "nameExists": "Nome da câmera já existe"
-      },
-      "testing": {
-        "probingMetadata": "Inferindo o metadata da câmera...",
-        "fetchingSnapshot": "Buscando a captura de imagem da câmera..."
       }
     }
   },

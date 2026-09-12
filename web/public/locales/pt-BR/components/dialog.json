@@ -61,7 +61,6 @@
       "error": {
         "failed": "Falha ao iniciar exportação: {{error}}",
         "endTimeMustAfterStartTime": "Tempo de finalização deve ser após tempo de início",
-        "noVaildTimeSelected": "Nenhuma faixa de tempo válida selecionada",
         "noValidTimeSelected": "Intervalo de tempo selecionado inválido"
       },
       "view": "Ver",
@@ -136,10 +135,7 @@
         "started_many": "Iniciadas {{count}} exportações. Abrindo o caso agora.",
         "started_other": "Iniciadas {{count}} exportações. Abrindo o caso agora.",
         "failed": "Falha ao iniciar {{total}} exportações. Falhas: {{failedItems}}",
-        "partial": "Iniciadas {{successful}} de {{total}} exportações. Falhas: {{failedItems}}",
-        "startedNoCase_one": "1 exportação iniciada.",
-        "startedNoCase_many": "{{count}} exportações iniciadas.",
-        "startedNoCase_other": "{{count}} exportações iniciadas."
+        "partial": "Iniciadas {{successful}} de {{total}} exportações. Falhas: {{failedItems}}"
       }
     }
   },
@@ -148,8 +144,7 @@
     "restreaming": {
       "disabled": "A retransmissão não está habilitada para essa câmera.",
       "desc": {
-        "title": "Configurar o go2rtc para opções de visualização ao vivo e audio adicional para essa câmera.",
-        "readTheDocumentation": "Leia a documentação"
+        "title": "Configurar o go2rtc para opções de visualização ao vivo e audio adicional para essa câmera."
       }
     },
     "showStats": {
