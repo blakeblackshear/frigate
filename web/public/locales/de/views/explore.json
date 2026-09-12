@@ -108,8 +108,7 @@
         "textTokenizer": "Text Tokenizer"
       },
       "tips": {
-        "context": "Sie sollten eine Re-Indexierung der verfolgten Objekte durchführen, sobald die Modelle heruntergeladen sind.",
-        "documentation": "Lesen Sie die Dokumentation"
+        "context": "Sie sollten eine Re-Indexierung der verfolgten Objekte durchführen, sobald die Modelle heruntergeladen sind."
       },
       "error": "Ein Fehler ist aufgetreten. Bitte prüfen Sie die Frigate Logs.",
       "context": "Frigate lädt derzeit benötigte Modelle für den Support des \"Semantic Search\"-Features. Je nach der Geschwindigkeit der Netzwerkverbindung kann dies einige Minuten in Anspruch nehmen."
@@ -117,58 +116,11 @@
   },
   "trackedObjectDetails": "Details zu verfolgtem Objekt",
   "objectLifecycle": {
-    "noImageFound": "Kein Bild für diesen Zeitstempel gefunden.",
-    "createObjectMask": "Objekt-Maske erstellen",
-    "lifecycleItemDesc": {
-      "entered_zone": "{{label}} hat {{zones}} betreten",
-      "visible": "{{label}} erkannt",
-      "attribute": {
-        "other": "{{label}} erkannt als {{attribute}}",
-        "faceOrLicense_plate": "{{attribute}} erkannt für {{label}}"
-      },
-      "external": "{{label}} erkannt",
-      "active": "{{label}} wurde aktiv",
-      "gone": "{{label}} hat verlassen",
-      "stationary": "{{label}} wurde stationär",
-      "heard": "{{label}} gehört",
-      "header": {
-        "ratio": "Verhältnis",
-        "area": "Bereich",
-        "zones": "Zonen"
-      }
-    },
-    "annotationSettings": {
-      "offset": {
-        "documentation": "Lesen Sie die Dokumentation ",
-        "label": "Anmerkungen Versatz",
-        "desc": "Diese Daten stammen aus dem Erkennungs-Feed der Kamera, werden aber mit Bildern aus dem Aufnahme-Feed überlagert. Es ist unwahrscheinlich, dass die beiden Streams perfekt synchronisiert sind. Daher stimmen die Bounding Box und das Filmmaterial nicht perfekt überein. Das Feld <code>annotation_offset</code> kann jedoch verwendet werden, um dies anzupassen.",
-        "millisecondsToOffset": "Millisekunden, um die Erkennungen verschoben werden soll. <em>Standard: 0</em>",
-        "tips": "TIPP: Stelle dir einen Ereignisclip vor, in dem eine Person von links nach rechts läuft. Wenn die Bounding Box der Ereigniszeitleiste durchgehend links von der Person liegt, sollte der Wert verringert werden. Ähnlich verhält es sich, wenn eine Person von links nach rechts geht und die Bounding Box durchgängig vor der Person liegt, dann sollte der Wert erhöht werden.",
-        "toast": {
-          "success": "Versatz für {{camera}} wurde in der Konfigurationsdatei gespeichert. Starten Sie Frigate neu, um Ihre Änderungen zu übernehmen."
-        }
-      },
-      "showAllZones": {
-        "title": "Zeige alle Zonen",
-        "desc": "Immer Zonen auf Rahmen anzeigen, in die Objekte eingetreten sind."
-      },
-      "title": "Anmerkungseinstellungen"
-    },
-    "adjustAnnotationSettings": "Anmerkungseinstellungen anpassen",
-    "title": "Objekt-Lebenszyklus",
-    "carousel": {
-      "next": "Nächste Anzeige",
-      "previous": "Vorherige Anzeige"
-    },
-    "scrollViewTips": "Scrolle um die wichtigsten Momente dieses Objekts anzuzeigen.",
-    "autoTrackingTips": "Die Positionen der Bounding Box sind bei Kameras mit automatischer Verfolgung ungenau.",
-    "count": "{{first}} von {{second}}",
-    "trackedPoint": "Verfolgter Punkt"
+    "noImageFound": "Kein Bild für diesen Zeitstempel gefunden."
   },
   "type": {
     "details": "Details",
     "video": "Video",
-    "object_lifecycle": "Objekt-Lebenszyklus",
     "snapshot": "Snapshot",
     "thumbnail": "Vorschaubild",
     "tracking_details": "Nachverfolgungs-Details"
@@ -181,10 +133,6 @@
     "downloadVideo": {
       "label": "Video herunterladen",
       "aria": "Video herunterladen"
-    },
-    "viewObjectLifecycle": {
-      "label": "Lebenszyklus von Objekten anzeigen",
-      "aria": "Den Lebenszyklus des Objekts anzeigen"
     },
     "findSimilar": {
       "label": "Ähnliches finden",
