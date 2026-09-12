@@ -94,11 +94,6 @@
       "gpuMemory": "Memoria GPU",
       "npuUsage": "Utilizzo NPU",
       "npuMemory": "Memoria NPU",
-      "intelGpuWarning": {
-        "title": "Avviso statistiche GPU Intel",
-        "message": "Statistiche GPU non disponibili",
-        "description": "Si tratta di un problema noto negli strumenti di reportistica delle statistiche GPU di Intel (intel_gpu_top), che si interrompe e restituisce ripetutamente un utilizzo della GPU pari a 0% anche nei casi in cui l'accelerazione hardware e il rilevamento degli oggetti funzionano correttamente sulla (i)GPU. Non si tratta di un problema di Frigate. È possibile riavviare il sistema per risolvere temporaneamente il problema e verificare che la GPU funzioni correttamente. Ciò non influisce sulle prestazioni."
-      },
       "gpuTemperature": "Temperatura GPU",
       "npuTemperature": "Temperatura NPU",
       "gpuCompute": "Calcolo / Codifica GPU"
@@ -179,8 +174,6 @@
         "gap": "Intervallo fotogramma chiave (min / media / max):",
         "segmentLength": "Lunghezza segmento di registrazione:",
         "ok": "Fotogramma chiave ogni ~{{seconds}}s, ottimale per registrazione e riproduzione.",
-        "warning": "Fotogrammi chiave radi o variabili (intervallo massimo ~{{seconds}}s), probabile uso di codec intelligenti (H.264+/H.265+); configurazione non consigliata.",
-        "error": "L'intervallo tra i fotogrammi chiave (~{{seconds}}s) supera la lunghezza del segmento di registrazione ({{segmentTime}}s). Alcuni segmenti potrebbero non contenere fotogrammi chiave, compromettendo la riproduzione. Disabilita il codec intelligente/+ sulla telecamera o riduci l'intervallo dei fotogrammi chiave.",
         "unknown": "Impossibile determinare la spaziatura dei fotogrammi chiave.",
         "recordDisabled": "La registrazione è disabilitata per questa telecamera."
       }
@@ -236,7 +229,6 @@
     "cameraIsOffline": "{{camera}} è disconnessa",
     "detectIsSlow": "{{detect}} è lento ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} è molto lento ({{speed}} ms)",
-    "shmTooLow": "L'allocazione /dev/shm ({{total}} MB) dovrebbe essere aumentata almeno a {{min}} MB.",
     "debugReplayActive": "La sessione di riproduzione delle correzioni è attiva"
   },
   "title": "Sistema",
@@ -264,7 +256,6 @@
     "shm": {
       "title": "Allocazione SHM (memoria condivisa)",
       "warning": "La dimensione SHM attuale di {{total}} MB è troppo piccola. Aumentarla ad almeno {{min_shm}} MB.",
-      "readTheDocumentation": "Leggi la documentazione",
       "frameLifetime": {
         "title": "Durata del fotogramma",
         "description": "Ogni telecamera dispone di {{frames}} posti per i fotogrammi nella memoria condivisa. Alla frequenza di fotogrammi più elevata della telecamera, ogni fotogramma è disponibile per circa {{lifetime}} secondi prima di essere sovrascritto."

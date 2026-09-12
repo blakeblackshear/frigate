@@ -36,7 +36,6 @@
     "snapshots": "Istantanee",
     "autotracking": "Tracciamento automatico",
     "title": "Impostazioni di {{camera}}",
-    "cameraEnabled": "Telecamera abilitata",
     "objectDetection": "Rilevamento oggetti",
     "recording": "Registrazione",
     "audioDetection": "Rilevamento audio",
@@ -98,8 +97,6 @@
     }
   },
   "camera": {
-    "enable": "Abilita telecamera",
-    "disable": "Disabilita telecamera",
     "turnOn": "Attiva la telecamera",
     "turnOff": "Disattiva la telecamera"
   },
@@ -135,15 +132,13 @@
     "title": "Trasmissione",
     "audio": {
       "tips": {
-        "title": "L'audio deve essere trasmesso dalla tua telecamera e configurato in go2rtc per questo flusso.",
-        "documentation": "Leggi la documentazione "
+        "title": "L'audio deve essere trasmesso dalla tua telecamera e configurato in go2rtc per questo flusso."
       },
       "unavailable": "L'audio non è disponibile per questo flusso",
       "available": "L'audio è disponibile per questo flusso"
     },
     "twoWayTalk": {
       "tips": "Il dispositivo deve supportare la funzionalità e WebRTC deve essere configurato per la comunicazione bidirezionale.",
-      "tips.documentation": "Leggi la documentazione ",
       "unavailable": "La comunicazione bidirezionale non è disponibile per questo flusso",
       "available": "La comunicazione bidirezionale è disponibile per questo flusso"
     },
@@ -164,8 +159,7 @@
       "all": "Tutti",
       "motion": "Movimento",
       "active_objects": "Oggetti attivi"
-    },
-    "notAllTips": "La configurazione di conservazione della registrazione di {{source}} è impostata su <code>mode: {{effectiveRetainMode}}</code>, quindi questa registrazione su richiesta conserverà solo i segmenti con {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Modifica formato",
