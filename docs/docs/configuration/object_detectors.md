@@ -362,7 +362,7 @@ Intel NPUs cannot be used under Home Assistant OS, which does not include the NP
 
 :::warning
 
-The network-based detectors (Deepstack and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
+The Apple Silicon detector client is being reworked. Its extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now, and `request_timeout_ms` and `linger_ms` are ignored. Anything else is dropped when your config is migrated.
 
 :::
 
@@ -539,30 +539,6 @@ A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and 
 <ModelConfigDropdown detectorTitle="CPU" models={objectDetectorsModels.cpu.models} />
 
 When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
-
-## Deepstack / CodeProject.AI Server Detector
-
-:::warning
-
-The network-based detectors (Deepstack and the Apple Silicon client) are being reworked. Their extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now: Deepstack ignores `api_key` and `api_timeout`, and the Apple Silicon client ignores `request_timeout_ms` and `linger_ms`. Anything else is dropped when your config is migrated.
-
-:::
-
-The Deepstack / CodeProject.AI Server detector for Frigate allows you to integrate Deepstack and CodeProject.AI object detection capabilities into Frigate. CodeProject.AI and DeepStack are open-source AI platforms that can be run on various devices such as the Raspberry Pi, Nvidia Jetson, and other compatible hardware. It is important to note that the integration is performed over the network, so the inference times may not be as fast as native Frigate detectors, but it still provides an efficient and reliable solution for object detection and tracking.
-
-### Setup {#setup-deepstack}
-
-To get started with CodeProject.AI, visit their [official website](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) to follow the instructions to download and install the AI server on your preferred device. Detailed setup instructions for CodeProject.AI are outside the scope of the Frigate documentation.
-
-To integrate CodeProject.AI into Frigate, configure the detector as follows:
-
-### Configuration {#configuration-deepstack}
-
-<ModelConfigDropdown detectorTitle="DeepStack" models={objectDetectorsModels.deepstack.models} />
-
-Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and port of your CodeProject.AI server.
-
-To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.
 
 # Community Supported Detectors
 

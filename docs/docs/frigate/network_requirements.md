@@ -142,10 +142,6 @@ When [notifications](/configuration/notifications) are enabled and users have re
 
 If an [MQTT broker](/integrations/mqtt) is configured, Frigate maintains a connection to the broker's host and port. This is typically a local network connection, but will require internet if you use a cloud-hosted MQTT broker.
 
-### DeepStack / CodeProject.AI
-
-When using the [DeepStack detector plugin](/configuration/object_detectors), Frigate sends images to the configured API endpoint for inference. This is typically local but depends on where the service is hosted.
-
 ## WebRTC (STUN)
 
 For [WebRTC live streaming](/configuration/live), Frigate uses STUN for NAT traversal:

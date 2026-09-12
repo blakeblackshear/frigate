@@ -824,24 +824,6 @@ cpu:
         models:
           - devices:
               - cpu:3
-deepstack:
-  title: DeepStack / CodeProject.AI
-  models:
-    - key: yolo
-      label: YOLO
-      recommended: true
-      download: This detector runs object detection over the network against a CodeProject.AI or DeepStack server, so no model is downloaded into Frigate itself. Visit the [CodeProject.AI official website](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) to download and install the AI server on your preferred device (e.g. Raspberry Pi, Nvidia Jetson, or other compatible hardware) before configuring the detector.
-      ui: |-
-        Navigate to **Settings > System > Detection models** and add a model. The CodeProject.AI server is not reported by the hardware probe, so set `devices` to `deepstack:http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection` in YAML.
-
-        | Field         | Value                                                                  |
-        | ------------- | ---------------------------------------------------------------------- |
-        | **API URL**   | `http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection`    |
-        | **API Timeout** | `0.1` (seconds)                                                      |
-      yaml: |-
-        models:
-          - devices:
-              - deepstack:http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection
 memryx:
   title: MemryX
   models:
