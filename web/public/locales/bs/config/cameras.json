@@ -140,10 +140,6 @@
             "label": "Omogući Birdseye",
             "description": "Omogući ili onemogući funkciju prikaza Birdseye."
         },
-        "mode": {
-            "label": "Način praćenja",
-            "description": "Način uključivanja kamera u Birdseye: 'objekti', 'kretanje' ili 'kontinuirano'."
-        },
         "order": {
             "label": "Pozicija",
             "description": "Numerička pozicija koja kontroliše redoslijed kamera u rasporedu Birdseye."
@@ -735,10 +731,6 @@
             "default": {
                 "label": "Zadano zadržavanje",
                 "description": "Zadani broj dana za zadržavanje snimki."
-            },
-            "mode": {
-                "label": "Način zadržavanja",
-                "description": "Način zadržavanja: sve (sačuvati sve segmente), pokret (sačuvati segmente s pokretom), ili aktivni_objekti (sačuvati segmente s aktivnim objektima)."
             },
             "objects": {
                 "label": "Zadržavanje objekata",

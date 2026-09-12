@@ -12,7 +12,6 @@
     "title": "Prijenos je offline",
     "desc": "Nisu primljeni okviri na {{cameraName}} <code>detect</code> prijenos, provjerite zapise o greškama"
   },
-  "cameraDisabled": "Kamera je onemogućena",
   "stats": {
     "streamType": {
       "title": "Tip prijenosa:",
